@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
@@ -18,7 +19,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(ProcessDasNexusLog)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ProcessDasNexusLog::ProcessDasNexusLog() : Algorithm(), DeprecatedAlgorithm() {}

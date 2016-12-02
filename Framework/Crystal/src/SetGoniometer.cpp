@@ -1,5 +1,6 @@
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -18,7 +19,6 @@ using namespace Mantid::API;
 /// How many axes (max) to define
 const size_t NUM_AXES = 6;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SetGoniometer::init() {
@@ -45,7 +45,6 @@ void SetGoniometer::init() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SetGoniometer::exec() {

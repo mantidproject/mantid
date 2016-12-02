@@ -1,6 +1,7 @@
 from GeneralData import GeneralData
 import AbinsConstants
 
+
 class SData(GeneralData):
     """
     Class for storing S(Q, omega)
@@ -13,12 +14,12 @@ class SData(GeneralData):
             raise ValueError("Invalid value of temperature.")
         self._temperature = float(temperature)
 
-        if sample_form in AbinsConstants.all_sample_forms:
+        if sample_form in AbinsConstants.ALL_SAMPLE_FORMS:
             self._sample_form = sample_form
         else:
-            raise ValueError("Invalid sample form %s"%sample_form)
+            raise ValueError("Invalid sample form %s" % sample_form)
 
-        self._data = None # dictionary which stores dynamical structure factor for all atoms
+        self._data = None  # dictionary which stores dynamical structure factor for all atoms
 
     def set(self, items=None):
         """
@@ -32,10 +33,10 @@ class SData(GeneralData):
             if not isinstance(items[item], dict):
                 raise ValueError("New value of item from S data should have a form of dictionary.")
 
-            if sorted(items[item].keys()) != sorted(AbinsConstants.all_keywords_atoms_s_data):
+            if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
                 raise ValueError("Invalid structure of the dictionary.")
 
-            if not items[item]["symbol"] in AbinsConstants.all_symbols:
+            if not items[item]["symbol"] in AbinsConstants.ALL_SYMBOLS:
                 raise ValueError("Invalid symbol of element.")
 
         self._data = items

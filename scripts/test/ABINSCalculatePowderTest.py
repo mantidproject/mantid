@@ -37,8 +37,8 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
         filename = self.Si2 + ".phonon"
 
-        _castep_reader = LoadCASTEP(input_DFT_filename=filename)
-        _good_data = _castep_reader.readPhononFile()
+        _castep_reader = LoadCASTEP(input_dft_filename=filename)
+        _good_data = _castep_reader.read_phonon_file()
 
         # wrong filename
         with self.assertRaises(ValueError):
@@ -61,7 +61,7 @@ class ABINSCalculatePowderTest(unittest.TestCase):
         _good_data = self._get_good_data(filename=name)
 
         _good_tester = CalculatePowder(filename=name + ".phonon", abins_data=_good_data["DFT"])
-        calculated_data = _good_tester.calculateData().extract()
+        calculated_data = _good_tester.calculate_data().extract()
 
         # check if evaluated powder data  is correct
         for key in _good_data["powder"]:
@@ -70,27 +70,27 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
         # check if loading powder data is correct
         new_tester = CalculatePowder(filename=name + ".phonon", abins_data=_good_data["DFT"])
-        loaded_data = new_tester.loadData().extract()
+        loaded_data = new_tester.load_data().extract()
         for key in _good_data["powder"]:
             self.assertEqual(True, np.allclose(calculated_data[key], loaded_data[key]))
 
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename + ".phonon")
+        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
         _powder = self._prepare_data(filename=filename + "_powder.txt")
 
-        return {"DFT":_CASTEP_reader.readPhononFile(), "powder": _powder}
+        return {"DFT": _CASTEP_reader.read_phonon_file(), "powder": _powder}
 
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
         correct_data = None
         with open(filename) as data_file:
-            correct_data = json.loads(data_file.read().replace("\\n"    , " ").
-                                                       replace("array" , "").
-                                                       replace("(["    , "[").
-                                                       replace("])"    , "]").
-                                                       replace("'"     , '"').
-                                                       replace("0. "   ,"0.0"))
+            correct_data = json.loads(data_file.read().replace("\\n",    " ").
+                                      replace("array",  "").
+                                      replace("([",     "[").
+                                      replace("])",     "]").
+                                      replace("'",      '"').
+                                      replace("0. ",    "0.0"))
 
         for key in correct_data.keys():
             correct_data[key] = np.asarray(correct_data[key])

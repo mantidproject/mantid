@@ -27,7 +27,7 @@ filter is used:
 3. There is NO upper boundary of the filter wall if ``wall[1]`` is
    ZERO;``
 
-More information is found in :ref:`_EventFiltering`.
+More information is found in :ref:`EventFiltering`.
 
 Calibration, grouping, and masking
 ##################################

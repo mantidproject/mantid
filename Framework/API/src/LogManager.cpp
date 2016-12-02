@@ -4,13 +4,7 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/PropertyNexus.h"
 
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-#include <nexus/NeXusFile.hpp>
-
-#include <algorithm>
 
 namespace Mantid {
 namespace API {
@@ -30,18 +24,6 @@ bool convertSingleValue(const Property *property, double &value) {
   } else {
     return false;
   }
-}
-
-/// Converts numeric property to double
-bool convertSingleValue(const Property *property, double &value) {
-  // The first one to succeed short-circuits and the value is returned.
-  // If all fail, returns false.
-  return convertSingleValue<double>(property, value) ||
-         convertSingleValue<int32_t>(property, value) ||
-         convertSingleValue<int64_t>(property, value) ||
-         convertSingleValue<float>(property, value) ||
-         convertSingleValue<uint32_t>(property, value) ||
-         convertSingleValue<uint64_t>(property, value);
 }
 
 /// Templated method to convert time series property to single double
@@ -80,23 +62,26 @@ bool convertTimeSeriesToDouble(const Property *property, double &value,
   }
 }
 
-/// Converts time series property to single double
-bool convertTimeSeriesToDouble(const Property *property, double &value,
-                               const Math::StatisticType &function) {
-  // Double first - can use filterByStatistic in this case
-  if (auto seriesDouble =
-          dynamic_cast<const TimeSeriesProperty<double> *>(property)) {
-    value = Mantid::Kernel::filterByStatistic(seriesDouble, function);
-    return true;
-  } else {
-    // Try other types, first to succeed short-circuits and returns.
-    // If none succeed, return false.
-    return convertTimeSeriesToDouble<int32_t>(property, value, function) ||
-           convertTimeSeriesToDouble<int64_t>(property, value, function) ||
-           convertTimeSeriesToDouble<float>(property, value, function) ||
-           convertTimeSeriesToDouble<uint32_t>(property, value, function) ||
-           convertTimeSeriesToDouble<uint64_t>(property, value, function);
-  }
+/// Templated method to convert a property to a single double
+template <typename T>
+bool convertPropertyToDouble(const Property *property, double &value,
+                             const Math::StatisticType &function) {
+  return convertSingleValue<T>(property, value) ||
+         convertTimeSeriesToDouble<T>(property, value, function);
+}
+
+/// Converts a property to a single double
+bool convertPropertyToDouble(const Property *property, double &value,
+                             const Math::StatisticType &function) {
+  // Order these with double and int first, and less likely options later.
+  // The first one to succeed short-circuits and the value is returned.
+  // If all fail, returns false.
+  return convertPropertyToDouble<double>(property, value, function) ||
+         convertPropertyToDouble<int32_t>(property, value, function) ||
+         convertPropertyToDouble<int64_t>(property, value, function) ||
+         convertPropertyToDouble<uint32_t>(property, value, function) ||
+         convertPropertyToDouble<uint64_t>(property, value, function) ||
+         convertPropertyToDouble<float>(property, value, function);
 }
 }
 
@@ -346,27 +331,53 @@ double LogManager::getPropertyAsSingleValue(
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache.getCache(key, singleValue)) {
     const Property *log = getProperty(name);
-    if (convertSingleValue(log, singleValue) ||
-        convertTimeSeriesToDouble(log, singleValue, statistic)) {
-      return singleValue;
-    } else if (const auto stringLog =
-                   dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
-      // Try to lexically cast string to a double
-      try {
-        return std::stod(stringLog->value());
-      } catch (const std::invalid_argument &) {
+    if (!convertPropertyToDouble(log, singleValue, statistic)) {
+      if (const auto stringLog =
+              dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
+        // Try to lexically cast string to a double
+        try {
+          singleValue = std::stod(stringLog->value());
+        } catch (const std::invalid_argument &) {
+          throw std::invalid_argument(
+              "Run::getPropertyAsSingleValue - Property \"" + name +
+              "\" cannot be converted to a numeric value.");
+        }
+      } else {
         throw std::invalid_argument(
             "Run::getPropertyAsSingleValue - Property \"" + name +
-            "\" cannot be converted to a numeric value.");
+            "\" is not a single numeric value or numeric time series.");
       }
-    } else {
-      throw std::invalid_argument(
-          "Run::getPropertyAsSingleValue - Property \"" + name +
-          "\" is not a single numeric value or numeric time series.");
     }
     // Put it in the cache
     m_singleValueCache.setCache(key, singleValue);
   }
+  return singleValue;
+}
+
+/**
+ * Returns a property as a n integer, if the underlying value is an integer.
+ * Throws otherwise.
+ * @param name :: The name of the property
+ * @return A single integer value
+ * @throws std::invalid_argument if property is not an integer type
+ */
+int LogManager::getPropertyAsIntegerValue(const std::string &name) const {
+  int singleValue(0);
+  double discard(0);
+
+  Property *prop = getProperty(name);
+
+  if (convertSingleValue<int32_t>(prop, discard) ||
+      convertSingleValue<int64_t>(prop, discard) ||
+      convertSingleValue<uint32_t>(prop, discard) ||
+      convertSingleValue<uint64_t>(prop, discard)) {
+    singleValue = std::stoi(prop->value());
+  } else {
+    throw std::invalid_argument("Run::getPropertyAsIntegerValue - Property \"" +
+                                name +
+                                "\" cannot be converted to an integer value.");
+  }
+
   return singleValue;
 }
 

@@ -49,12 +49,16 @@ void MantidHelpInterface::showFitFunction(const QString &name) {
   UNUSED_ARG(name);
 }
 
-void MantidHelpInterface::showCustomInterface(const std::string &name) {
+void MantidHelpInterface::showCustomInterface(const std::string &name,
+                                              const std::string &section) {
   UNUSED_ARG(name);
+  UNUSED_ARG(section);
 }
 
-void MantidHelpInterface::showCustomInterface(const QString &name) {
+void MantidHelpInterface::showCustomInterface(const QString &name,
+                                              const QString &section) {
   UNUSED_ARG(name);
+  UNUSED_ARG(section);
 }
 
 void MantidHelpInterface::shutdown() {}

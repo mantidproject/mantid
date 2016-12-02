@@ -81,5 +81,7 @@ Output
 
 .. testoutput:: ExGenerated
 
-.. categories:: Algorithms Inelastic
+.. categories::
+
+.. sourcelink::
 

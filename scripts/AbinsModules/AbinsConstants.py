@@ -6,22 +6,22 @@ from scipy import constants
 # Parameters in this bloc shouldn't be changed by a user. They should be treated as constants.
 # Changing these parameters may lead to non-functional ABINS.
 
-# power expansion in terms of fundamentals and overtones
+# power expansion in terms of FUNDAMENTALS and overtones
 # S(Q, n * omega) \simeq (Q^2 * U^2)^n / n! exp(-Q^2 * U^2)
 # n = 1, 2, 3.....
 
 
-fundamentals = 1  # value of fundamental parameter  (n = 1)
-first_overtone = 1 + fundamentals  # value of first overtone (n = 2)
-first_optical_phonon = 3  # index of the first optical phonon
-fundamentals_dim = 1
+FUNDAMENTALS = 1  # value of fundamental parameter  (n = 1)
+FIRST_OVERTONE = 1 + FUNDAMENTALS  # value of first overtone (n = 2)
+FIRST_OPTICAL_PHONON = 3  # index of the first optical phonon
+FUNDAMENTALS_DIM = 1
 
-#  in Python first element starts at 0-th index. This is a shift to index which has to be included
+# In Python first element starts at 0-th index. This is a shift to index which has to be included
 # in array index calculation to write data in the proper position of array
-python_index_shift = 1
+PYTHON_INDEX_SHIFT = 1
 
 # symbols of all elements
-all_symbols = ["Ac", "Ag", "Al", "Am", "Ar", "As", "At", "Au", "B", "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C", "Ca",
+ALL_SYMBOLS = ["Ac", "Ag", "Al", "Am", "Ar", "As", "At", "Au", "B", "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C", "Ca",
                "Cd", "Ce", "Cf", "Cl", "Cm", "Cn", "Co", "Cr", "Cs", "Cu", "Db", "Ds", "Dy", "Er", "Es", "Eu", "F",
                "Fe", "Fl", "Fm", "Fr", "Ga", "Gd", "Ge", "H", "He", "Hf", "Hg", "Ho", "Hs", "I", "In", "Ir", "K",
                "Kr", "La", "Li", "Lr", "Lu", "Lv", "Md", "Mg", "Mn", "Mo", "Mt", "N", "Na", "Nb", "Nd", "Ne", "Ni",
@@ -30,69 +30,71 @@ all_symbols = ["Ac", "Ag", "Al", "Am", "Ar", "As", "At", "Au", "B", "Ba", "Be", 
                "Th", "Ti", "Tl", "Tm", "U", "Uuo", "Uup", "Uus", "Uut", "V", "W", "Xe", "Y", "Yb", "Zn", "Zr",
                ]
 
-small_k = 1.0e-7  # norm of k vector below this value is considered zero
+SMALL_K = 1.0e-7  # norm of k vector below this value is considered zero
 
-k_2_hartree = constants.codata.value("kelvin-hartree relationship")  # K * k_2_hartree =  Hartree
+K_2_HARTREE = constants.codata.value("kelvin-hartree relationship")  # K * K_2_HARTREE =  Hartree
 
 # here we have to multiply by 100 because frequency is expressed in cm^-1
-cm1_2_hartree = constants.codata.value("inverse meter-hartree relationship") * 100.0  # cm-1 * cm1_2_hartree =  Hartree
+CM1_2_HARTREE = constants.codata.value("inverse meter-hartree relationship") * 100.0  # cm-1 * CM1_2_HARTREE =  Hartree
 
-atomic_length_2_angstrom = constants.codata.value(
+ATOMIC_LENGTH_2_ANGSTROM = constants.codata.value(
     "atomic unit of length") / constants.angstrom  # 1 a.u. = 0.52917721067 Angstrom
 
-m_2_hartree = constants.codata.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
+M_2_HARTREE = constants.codata.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
 
-all_instruments = ["None", "TOSCA"]  # supported instruments
+ALL_INSTRUMENTS = ["TwoDMap", "TOSCA"]  # supported instruments
 
-all_sample_forms = ["SingleCrystal", "Powder"]  # valid forms of samples
+ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 
 # keywords which define data structure of KpointsData
-all_keywords_k_data = ["weights", "k_vectors", "frequencies", "atomic_displacements"]
+ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements"]
 
 # keywords which define data structure of AtomsData
-all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]
+ALL_KEYWORDS_ATOMS_DATA = ["symbol", "fract_coord", "atom", "sort", "mass"]
 
 # keywords which define data structure for PowderData
-all_keywords_powder_data = ["b_tensors", "a_tensors"]
+ALL_KEYWORDS_POWDER_DATA = ["b_tensors", "a_tensors"]
 
 # keywords which define data structure for SData
-all_keywords_s_data = ["data"]
-all_keywords_atoms_s_data = ["sort", "symbol", "s", "frequencies"]
+ALL_KEYWORDS_S_DATA = ["data"]
+ALL_KEYWORDS_ATOMS_S_DATA = ["sort", "symbol", "s", "frequencies"]
 
-float_id = np.dtype(np.float64).num
-float_type = np.dtype(np.float64)
+FLOAT_ID = np.dtype(np.float64).num
+FLOAT_TYPE = np.dtype(np.float64)
 
-complex_id = np.dtype(np.complex).num
-complex_type = np.dtype(np.complex)
+COMPLEX_ID = np.dtype(np.complex).num
+COMPLEX_TYPE = np.dtype(np.complex)
 
-int_id = np.dtype(np.uint16).num
-int_type = np.dtype(np.uint16)
+INT_ID = np.dtype(np.uint16).num
+INT_TYPE = np.dtype(np.uint16)
 
 # maximum number of entries in the workspace
-total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0))
-higher_order_quantum_events = 3  # number of quantum order effects taken into account
-higher_order_quantum_events_dim = higher_order_quantum_events
+TOTAL_WORKSPACE_SIZE = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0))
+HIGHER_ORDER_QUANTUM_EVENTS = 3  # number of quantum order effects taken into account
+HIGHER_ORDER_QUANTUM_EVENTS_DIM = HIGHER_ORDER_QUANTUM_EVENTS
+MAX_ARRAY_SIZE = 1000000  # maximum size for storing frequencies for each quantum order
+
 
 # constant to be used when iterating with range() over all considered quantum effects
 # (range() is exclusive with respect to the last element)
-s_last_index = 1
+S_LAST_INDEX = 1
 
 
 # construction of aCLIMAX constant which is used to evaluate mean square displacement (u)
-h_bar = constants.codata.value("Planck constant over 2 pi")  # h_bar =  1.0545718e-34 [J s] = [kg m^2 / s ]
-h_bar_decomposition = math.frexp(h_bar)
+H_BAR = constants.codata.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+H_BAR_DECOMPOSITION = math.frexp(H_BAR)
 
-m2_to_angstrom2 = 1.0 / constants.angstrom**2  # m^2 = 10^20 A^2
-m2_to_angstrom2_decomposition = math.frexp(m2_to_angstrom2)
+M2_TO_ANGSTROM2 = 1.0 / constants.angstrom ** 2  # m^2 = 10^20 A^2
+M2_TO_ANGSTROM2_DECOMPOSITION = math.frexp(M2_TO_ANGSTROM2)
 
-kg2amu = constants.codata.value("kilogram-atomic mass unit relationship")  # kg = 6.022140857e+26 amu
-kg2amu_decomposition = math.frexp(kg2amu)
+KG2AMU = constants.codata.value("kilogram-atomic mass unit relationship")  # kg = 6.022140857e+26 amu
+KG2AMU_DECOMPOSITION = math.frexp(KG2AMU)
 
 # here we divide by 100 because we need relation between hertz and inverse cm
-hz2inv_cm = constants.codata.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
-hz2inv_cm_decomposition = math.frexp(hz2inv_cm)
+HZ2INV_CM = constants.codata.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
+HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
 #
-# u = h_bar [J s ]/ ( 2 m [kg] omega [s^-1]) = aCLIMAX_constant / ( m [amu] nu [cm^-1])
+# u = H_BAR [J s ]/ ( 2 m [kg] omega [s^-1]) = ACLIMAX_CONSTANT / ( m [amu] nu [cm^-1])
 #
 # omega -- angular frequency
 # nu -- wavenumber
@@ -102,26 +104,25 @@ hz2inv_cm_decomposition = math.frexp(hz2inv_cm)
 # omega = 2 pi nu
 #
 
-aCLIMAX_constant = h_bar_decomposition[0] * m2_to_angstrom2_decomposition[0] * \
-                   kg2amu_decomposition[0] * hz2inv_cm_decomposition[0] / math.pi
-aCLIMAX_constant *= 2 ** (h_bar_decomposition[1] + m2_to_angstrom2_decomposition[1] + kg2amu_decomposition[1] +
-                          hz2inv_cm_decomposition[1] - 2)
+ACLIMAX_CONSTANT = H_BAR_DECOMPOSITION[0] * M2_TO_ANGSTROM2_DECOMPOSITION[0] * \
+                   KG2AMU_DECOMPOSITION[0] * HZ2INV_CM_DECOMPOSITION[0] / math.pi
+ACLIMAX_CONSTANT *= 2 ** (H_BAR_DECOMPOSITION[1] + M2_TO_ANGSTROM2_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] +
+                          HZ2INV_CM_DECOMPOSITION[1] - 2)
 
-
-aCLIMAX_constant_decomposition = math.frexp(aCLIMAX_constant)
-m_n_decomposition = math.frexp(constants.m_n)
+ACLIMAX_CONSTANT_DECOMPOSITION = math.frexp(ACLIMAX_CONSTANT)
+M_N_DECOMPOSITION = math.frexp(constants.m_n)
 
 # constant used to evaluate Q^2 for TOSCA.
-TOSCA_constant = m_n_decomposition[0] * kg2amu_decomposition[0] / aCLIMAX_constant_decomposition[0]
-TOSCA_constant *= 2 ** (m_n_decomposition[1] + kg2amu_decomposition[1] - aCLIMAX_constant_decomposition[1])
+TOSCA_constant = M_N_DECOMPOSITION[0] * KG2AMU_DECOMPOSITION[0] / ACLIMAX_CONSTANT_DECOMPOSITION[0]
+TOSCA_constant *= 2 ** (M_N_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] - ACLIMAX_CONSTANT_DECOMPOSITION[1])
 
 # constants which represent quantum order effects
-quantum_order_one = 1
-quantum_order_two = 2
-quantum_order_three = 3
-quantum_order_four = 4
+QUANTUM_ORDER_ONE = 1
+QUANTUM_ORDER_TWO = 2
+QUANTUM_ORDER_THREE = 3
+QUANTUM_ORDER_FOUR = 4
 
 large_size = 10000000  # if resulting S is bigger than that switch to processing in loop to save memory
 
-
-
+# values of S below that are considered to be zero
+S_THRESHOLD = 10e-8

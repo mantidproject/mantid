@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -133,28 +131,23 @@ void ModeratorTzeroLinear::exec() {
   // do the shift in X
   const size_t numHists = inputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;
     size_t wsIndex = static_cast<size_t>(i);
     calculateTfLi(inputWS, wsIndex, t_f, L_i);
+
+    outputWS->setHistogram(i, inputWS->histogram(i));
     // shift the time of flights
     if (t_f >= 0) // t_f < 0 when no detector info is available
     {
       const double scaling = L_i / (L_i + m_gradient);
       const double offset = (1 - scaling) * t_f - scaling * m_intercept;
-      const MantidVec &inbins = inputWS->readX(i);
-      MantidVec &outbins = outputWS->dataX(i);
-      for (unsigned int j = 0; j < inbins.size(); j++) {
-        outbins[j] = scaling * inbins[j] + offset;
-      }
-    } else {
-      outputWS->dataX(i) = inputWS->readX(i);
+      auto &outbins = outputWS->mutableX(i);
+      outbins *= scaling;
+      outbins += offset;
     }
-    // Copy y and e data
-    outputWS->dataY(i) = inputWS->readY(i);
-    outputWS->dataE(i) = inputWS->readE(i);
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -193,7 +186,7 @@ void ModeratorTzeroLinear::execEvent() {
   // Loop over the spectra
   const size_t numHists = outputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     size_t wsIndex = static_cast<size_t>(i);
     PARALLEL_START_INTERUPT_REGION

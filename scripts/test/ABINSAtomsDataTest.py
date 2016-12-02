@@ -10,9 +10,11 @@ except ImportError:
 
 from AbinsModules import AtomsDaTa
 
+
 class AtomsDataTest(unittest.TestCase):
-    _good_data = [{'sort': 0, 'symbol': 'Si', 'fract_coord': np.asarray([ 0.,  0.,  0.]), 'atom': 0, 'mass':28.085500},
-                  {'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([ 0.25,  0.25,  0.25]), 'atom': 1, 'mass':28.085500}]
+    _good_data = [{'sort': 0, 'symbol': 'Si', 'fract_coord': np.asarray([0.,  0.,  0.]), 'atom': 0, 'mass':28.085500},
+                  {'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([0.25,  0.25,  0.25]), 'atom': 1,
+                   'mass':28.085500}]
 
     def setUp(self):
         self.tester = AtomsDaTa(num_atoms=2)
@@ -29,13 +31,13 @@ class AtomsDataTest(unittest.TestCase):
         wrong_data = {"sort": 3,
                       "symbol": self._good_data[0]["symbol"],
                       "fract_coord": self._good_data[0]["fract_coord"],
-                      "atom":self._good_data[0]["atom"],
-                      "mass":self._good_data[0]["mass"]
+                      "atom": self._good_data[0]["atom"],
+                      "mass": self._good_data[0]["mass"]
                       }
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
-        wrong_data["sort"] = 2 # we count from zero so 2 is also to large
+        wrong_data["sort"] = 2  # we count from zero so 2 is also to large
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
@@ -51,78 +53,73 @@ class AtomsDataTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
-
     def test_wrong_symbol(self):
         wrong_data = {"sort": self._good_data[0]["sort"],
-                      "symbol": "CA", # valid is Ca not CA
+                      "symbol": "CA",  # valid is Ca not CA
                       "fract_coord": self._good_data[0]["fract_coord"],
-                      "atom":self._good_data[0]["atom"],
-                      "mass":self._good_data[0]["mass"]
+                      "atom": self._good_data[0]["atom"],
+                      "mass": self._good_data[0]["mass"]
                       }
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
-
 
     def test_wrong_fract_coord(self):
         wrong_data = {"sort": self._good_data[0]["sort"],
                       "symbol": self._good_data[0]["symbol"],
                       "fract_coord": "wrong",
-                      "atom":self._good_data[0]["atom"],
-                      "mass":self._good_data[0]["mass"]
+                      "atom": self._good_data[0]["atom"],
+                      "mass": self._good_data[0]["mass"]
                       }
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
-        wrong_data["fract_coord"] = np.asarray([[1,2],[4]])
+        wrong_data["fract_coord"] = np.asarray([[1, 2], [4]])
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
-        wrong_data["fract_coord"] = np.asarray([1,2])
+        wrong_data["fract_coord"] = np.asarray([1, 2])
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
+    def test_wrong_atom(self):
+        wrong_data = {"sort": self._good_data[0]["sort"],
+                      "symbol": self._good_data[0]["symbol"],
+                      "fract_coord": self._good_data[0]["fract_coord"],
+                      "atom": -1,
+                      "mass": self._good_data[0]["mass"]}
 
-    def  test_wrong_atom(self):
-         wrong_data = {"sort": self._good_data[0]["sort"],
-                       "symbol": self._good_data[0]["symbol"],
-                       "fract_coord": self._good_data[0]["fract_coord"],
-                       "atom":-1,
-                       "mass":self._good_data[0]["mass"]
-                       }
-         with self.assertRaises(ValueError):
-             self.tester._append(item=wrong_data)
+        with self.assertRaises(ValueError):
+            self.tester._append(item=wrong_data)
 
-         wrong_data["atom"] = 2
-         with self.assertRaises(ValueError):
-             self.tester._append(item=wrong_data)
+        wrong_data["atom"] = 2
+        with self.assertRaises(ValueError):
+            self.tester._append(item=wrong_data)
 
-         wrong_data["atom"] = 3
-         with self.assertRaises(ValueError):
-             self.tester._append(item=wrong_data)
-
+        wrong_data["atom"] = 3
+        with self.assertRaises(ValueError):
+            self.tester._append(item=wrong_data)
 
     def test_wrong_mass(self):
 
         wrong_data = {"sort": self._good_data[0]["sort"],
                       "symbol": self._good_data[0]["symbol"],
                       "fract_coord": self._good_data[0]["fract_coord"],
-                      "atom":self._good_data[0]["atom"],
-                      "mass":-1.0,
+                      "atom": self._good_data[0]["atom"],
+                      "mass": -1.0,
                       }
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
-        wrong_data["mass"] =  28 # int instead of float
+        wrong_data["mass"] = 28  # int instead of float
         with self.assertRaises(ValueError):
             self.tester._append(item=wrong_data)
 
     # set
     def test_wrong_list(self):
 
-        items = self._good_data[0] # dict instead of list
+        items = self._good_data[0]  # dict instead of list
         with self.assertRaises(ValueError):
             self.tester.set(items=items)
-
 
     # extract
     def wrong_size_of_data(self):

@@ -1,9 +1,12 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 import math
 import numpy
+
 
 class USANSSimulation(PythonAlgorithm):
 
@@ -18,8 +21,8 @@ class USANSSimulation(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("TwoTheta", 0.01, "Scattering angle in degrees")
-        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.72, 0.9, 1.2, 1.8, 3.6],\
-                             direction=Direction.Input), "Wavelength peaks out of the monochromator")
+        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.72, 0.9, 1.2, 1.8, 3.6],
+                                                direction=Direction.Input), "Wavelength peaks out of the monochromator")
         self.declareProperty("CountTime", 1000.0, "Fake count time")
 
         # Model parameters
@@ -48,7 +51,7 @@ class USANSSimulation(PythonAlgorithm):
         mon_e = mon_ws.dataE(0)
 
         # Number of pixels for the main detector
-        n_pixels = out_ws.getNumberHistograms()/2
+        n_pixels = int(out_ws.getNumberHistograms()/2)
         # Clean up the workspace
         for j in range(n_pixels):
             data_y = out_ws.dataY(j)

@@ -98,7 +98,7 @@ public:
     MatrixWorkspace_const_sptr outWS =
         boost::dynamic_pointer_cast<const MatrixWorkspace>(out);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outWS->readY(0)[0], 300);
+    TS_ASSERT_EQUALS(outWS->y(0)[0], 300);
   }
 
   void test_double_property_with_number_of_bins_only() {
@@ -186,7 +186,7 @@ public:
   }
 
   SumEventsByLogValueTestPerformance() {
-    ws = WorkspaceCreationHelper::CreateEventWorkspace(1000, 1, 10000);
+    ws = WorkspaceCreationHelper::CreateEventWorkspace(100, 100, 1000);
     // Add a bunch of logs
     std::vector<DateAndTime> times;
     std::vector<int> index;

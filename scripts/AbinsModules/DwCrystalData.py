@@ -1,4 +1,4 @@
-import  numpy as np
+import numpy as np
 
 # ABINS modules
 from GeneralData import GeneralData
@@ -26,8 +26,7 @@ class DwCrystalData(GeneralData):
         else:
             raise ValueError("Improper number of atoms.")
 
-        self._data = np.zeros((self._num_atoms, 3, 3), dtype=AbinsConstants.float_type)
-
+        self._data = np.zeros((self._num_atoms, 3, 3), dtype=AbinsConstants.FLOAT_TYPE)
 
     def _append(self, item=None, num_atom=None):
         """
@@ -39,8 +38,7 @@ class DwCrystalData(GeneralData):
         """
 
         self._check_item(data=item, atom=num_atom)
-        self._data[num_atom,:,:] = item
-
+        self._data[num_atom, :, :] = item
 
     def set(self, items=None):
         """
@@ -51,7 +49,6 @@ class DwCrystalData(GeneralData):
         self._check_items(items=items)
         self._data = items
 
-
     def extract(self):
 
         # dimensions of the data
@@ -60,7 +57,6 @@ class DwCrystalData(GeneralData):
         # i, j = 1, 2, 3 define 3x3 matrix which is created from outer product of atomic displacements.
 
         return self._data
-
 
     def _check_item(self, data=None, atom=None):
         """
@@ -75,12 +71,11 @@ class DwCrystalData(GeneralData):
 
         if not isinstance(data, np.ndarray):
             raise ValueError("Debye-Waller factor should have a form of a numpy array.")
-        if data.shape != (3,3):
+        if data.shape != (3, 3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if data.dtype.num != AbinsConstants.float_id:
+        if data.dtype.num != AbinsConstants.FLOAT_ID:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")
-
 
     def _check_items(self, items=None):
         """
@@ -94,5 +89,5 @@ class DwCrystalData(GeneralData):
         if items.shape != (self._num_atoms, 3, 3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if items.dtype.num != AbinsConstants.float_id:
+        if items.dtype.num != AbinsConstants.FLOAT_ID:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")

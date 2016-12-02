@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
@@ -61,7 +62,8 @@ class MatrixWSDataSource;
 
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView
     : public QMainWindow,
-      public MantidQt::API::WorkspaceObserver {
+      public MantidQt::API::WorkspaceObserver,
+      public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -74,6 +76,12 @@ public:
     return m_spectrumDisplay;
   }
   bool isTrackingOn() const;
+  /// Load the state of the spectrum viewer from a Mantid project file
+  static API::IProjectSerialisable *loadFromProject(const std::string &lines,
+                                                    ApplicationWindow *app,
+                                                    const int fileVersion);
+  /// Save the state of the spectrum viewer to a Mantid project file
+  virtual std::string saveToProject(ApplicationWindow *app) override;
 
 signals:
   void spectrumDisplayChanged(SpectrumDisplay *);

@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>
@@ -17,8 +19,6 @@ using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name
 const std::string ConvertAxesToRealSpace::name() const {
@@ -39,7 +39,6 @@ const std::string ConvertAxesToRealSpace::summary() const {
          "the data in the process";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertAxesToRealSpace::init() {
@@ -75,7 +74,6 @@ void ConvertAxesToRealSpace::init() {
       "The number of bins along the horizontal axis.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertAxesToRealSpace::exec() {
@@ -114,12 +112,12 @@ void ConvertAxesToRealSpace::exec() {
 
   int failedCount = 0;
 
+  const auto &spectrumInfo = summedWs->spectrumInfo();
   // for each spectra
-  PARALLEL_FOR2(summedWs, outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*summedWs, *outputWs))
   for (int i = 0; i < nHist; ++i) {
     try {
-      Mantid::Geometry::IDetector_const_sptr det = summedWs->getDetector(i);
-      V3D pos = det->getPos();
+      V3D pos = spectrumInfo.position(i);
       double r, theta, phi;
       pos.getSpherical(r, theta, phi);
 
@@ -142,9 +140,9 @@ void ConvertAxesToRealSpace::exec() {
         } else if (axisSelection == "phi") {
           axisValue = phi;
         } else if (axisSelection == "2theta") {
-          axisValue = inputWs->detectorTwoTheta(*det);
+          axisValue = spectrumInfo.twoTheta(i);
         } else if (axisSelection == "signed2theta") {
-          axisValue = inputWs->detectorSignedTwoTheta(*det);
+          axisValue = spectrumInfo.signedTwoTheta(i);
         }
 
         if (axisIndex == 0) {
@@ -159,7 +157,7 @@ void ConvertAxesToRealSpace::exec() {
         if (axisValue < axisVector[axisIndex].min)
           axisVector[axisIndex].min = axisValue;
       }
-    } catch (Exception::NotFoundError) {
+    } catch (const Exception::NotFoundError &) {
       g_log.debug() << "Could not find detector for workspace index " << i
                     << '\n';
       failedCount++;
@@ -230,7 +228,7 @@ void ConvertAxesToRealSpace::exec() {
 
   // set all the X arrays - share the same vector
   int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     outputWs->setPoints(i, x);
   }
@@ -257,7 +255,7 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   // loop over the data and sqrt the errors to complete the error calculation
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     auto &errorVec = outputWs->mutableE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),

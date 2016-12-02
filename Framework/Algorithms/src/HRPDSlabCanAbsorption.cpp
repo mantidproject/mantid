@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Component.h"

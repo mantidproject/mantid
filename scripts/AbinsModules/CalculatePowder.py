@@ -34,7 +34,7 @@ class CalculatePowder(IOmodule):
         # look for index of Gamma point
         num_k = k_data["k_vectors"].shape[0]
         for k in range(num_k):
-            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.small_k:
+            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.SMALL_K:
                 gamma_pkt_index = k
                 break
         if gamma_pkt_index == -1:
@@ -58,7 +58,10 @@ class CalculatePowder(IOmodule):
         displacements = k_data["atomic_displacements"]
         num_atoms = displacements.shape[0]
         atoms_data = data["atoms_data"]
-        frequencies = k_data["frequencies"][AbinsConstants.first_optical_phonon:]
+
+        freq_hartree = k_data["frequencies"][AbinsConstants.FIRST_OPTICAL_PHONON:]  # frequencies in Hartree units
+
+        frequencies = freq_hartree / AbinsConstants.CM1_2_HARTREE  # convert frequencies to cm^1
 
         powder = PowderData(num_atoms=num_atoms)
 
@@ -71,10 +74,10 @@ class CalculatePowder(IOmodule):
         masses = np.asarray([([atom["mass"]] * frequencies.size) for atom in atoms_data])
 
         # disp[num_atoms, num_freq, dim]
-        disp = displacements[:, AbinsConstants.first_optical_phonon:]
+        disp = displacements[:, AbinsConstants.FIRST_OPTICAL_PHONON:]
 
         # factor[num_atoms, num_freq]
-        factor = np.einsum('ij,j->ij', masses, AbinsConstants.aCLIMAX_constant / frequencies)
+        factor = np.einsum('ij,j->ij', masses, AbinsConstants.ACLIMAX_CONSTANT / frequencies)
 
         # b_tensors[num_atoms, num_freq, dim, dim]
         b_tensors = np.einsum('ijkl,ij->ijkl', np.einsum('lki, lkj->lkij', disp, disp).real, factor)
@@ -87,20 +90,20 @@ class CalculatePowder(IOmodule):
 
         return powder
 
-    def calculateData(self):
+    def calculate_data(self):
         """
         Calculates mean square displacements and Debye-Waller factors.  Saves both MSD and DW  to an hdf file.
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
 
         data = self._calculate_powder()
-        self.addFileAttributes()
-        self.addData("powder_data", data.extract())
+        self.add_file_attributes()
+        self.add_data("powder_data", data.extract())
         self.save()
 
         return data
 
-    def loadData(self):
+    def load_data(self):
         """
         Loads mean square displacements and Debye-Waller factors from an hdf file.
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.

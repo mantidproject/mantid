@@ -35,12 +35,16 @@ Kernel::Logger g_log("ThreeSliceView");
 }
 
 ThreeSliceView::ThreeSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager)
+                               RebinnedSourcesManager *rebinnedSourcesManager,
+                               bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui() {
   this->m_ui.setupUi(this);
-  this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
-                                            QString("OrthographicSliceView"));
-  pqActiveObjects::instance().setActiveView(this->m_mainView);
+
+  if (createRenderProxy) {
+    this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
+                                              QString("OrthographicSliceView"));
+    pqActiveObjects::instance().setActiveView(this->m_mainView);
+  }
 }
 
 ThreeSliceView::~ThreeSliceView() {}
@@ -92,12 +96,18 @@ void ThreeSliceView::renderAll() { this->m_mainView->render(); }
 
 void ThreeSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
-/*
-void ThreeSliceView::correctVisibility()
-{
-  //this->correctColorScaleRange();
+void ThreeSliceView::setView(pqRenderView *view) {
+  clearRenderLayout(this->m_ui.mainRenderFrame);
+  this->m_mainView = view;
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.mainRenderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_mainView->widget());
 }
-*/
+
+ModeControlWidget::Views ThreeSliceView::getViewType() {
+  return ModeControlWidget::Views::THREESLICE;
+}
+
 void ThreeSliceView::correctColorScaleRange() {
   QPair<double, double> range =
       this->origRep->getLookupTable()->getScalarRange();

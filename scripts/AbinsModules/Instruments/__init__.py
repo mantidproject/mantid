@@ -1,3 +1,3 @@
 from ToscaInstrument import  ToscaInstrument
-from NoneInstrument import  NoneInstrument
+from TwoDMap import  TwoDMap
 from Instrument import  Instrument

@@ -30,30 +30,31 @@ class CalculateCrystal(IOmodule):
     def _calculate_crystal(self):
 
         _dw_crystal = CalculateDWCrystal(temperature=self._temperature, abins_data=self._abins_data)
-        _dw_crystal_data = _dw_crystal.calculateData()
+        _dw_crystal_data = _dw_crystal.calculate_data()
         _crystal_data = CrystalData()
         _crystal_data.set(abins_data=self._abins_data, dw_crystal_data=_dw_crystal_data)
 
         return _crystal_data
 
-    def calculateData(self):
+    def calculate_data(self):
         """
-        Calculates data needed for calculation of S(Q, omega) in case experimental sample is in  the form
-        of single crystal.
+        Calculates data needed for calculation of S(Q, omega) in case experimental sample is in
+        the form of single crystal.
         Saves calculated data to an hdf file.
         @return:  object of type CrystalData
         """
 
         data = self._calculate_crystal()
-        self.addFileAttributes()
+        self.add_file_attributes()
+
         # AbinsData is already stored in an hdf file so only data for DW factors should be stored.
-        self.addData("dw", data.extract()["dw_crystal_data"])
+        self.add_data("dw", data.extract()["dw_crystal_data"])
 
         self.save()
 
         return data
 
-    def loadData(self):
+    def load_data(self):
 
         _data = self.load(list_of_datasets=["dw"])
         _num_atoms = _data["datasets"]["dw"].shape[0]

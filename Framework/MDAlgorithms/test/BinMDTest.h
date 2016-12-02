@@ -20,7 +20,7 @@
 #include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <cxxtest/TestSuite.h>
 
@@ -185,7 +185,7 @@ public:
         TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
       } else if (functionXML != "NO_FUNCTION") {
         // All NAN cause of implicit function
-        TS_ASSERT(boost::math::isnan(out->getSignalAt(i))); // The implicit
+        TS_ASSERT(std::isnan(out->getSignalAt(i))); // The implicit
         // function should
         // have ensured that
         // no bins were

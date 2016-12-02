@@ -49,7 +49,7 @@ class ABINSTest(unittest.TestCase):
         self._sum_contributions = True
 
         # this is a string; once it is read it is converted internally to  integer
-        self._quantum_order_events_number = str(AbinsConstants.fundamentals)
+        self._quantum_order_events_number = str(AbinsConstants.FUNDAMENTALS)
 
         self._cross_section_factor = "Incoherent"
         self._workspace_name = "output_workspace"

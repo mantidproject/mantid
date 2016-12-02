@@ -5,6 +5,7 @@ from mantid.api import *
 
 import EnggUtils
 
+
 class EnggFocus(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
 
@@ -23,7 +24,6 @@ class EnggFocus(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              "A workspace with focussed data")
-
 
         self.declareProperty(ITableWorkspaceProperty('DetectorPositions', '', Direction.Input,
                                                      PropertyMode.Optional),
@@ -136,11 +136,11 @@ class EnggFocus(PythonAlgorithm):
         vanCurvesWS = self.getProperty('VanCurvesWorkspace').value
         EnggUtils.applyVanadiumCorrections(self, wks, indices, vanWS, vanIntegWS, vanCurvesWS)
 
-    	# Apply calibration
+        # Apply calibration
         if detPos:
             self._applyCalibration(wks, detPos)
 
-    	# Convert to dSpacing
+        # Convert to dSpacing
         wks = EnggUtils.convertToDSpacing(self, wks)
 
         prog.report('Summing spectra')
@@ -155,8 +155,8 @@ class EnggFocus(PythonAlgorithm):
         if self.getProperty('NormaliseByCurrent').value:
             self._normalize_by_current(wks)
 
-    	# OpenGenie displays distributions instead of pure counts (this is done implicitly when
-    	# converting units), so I guess that's what users will expect
+        # OpenGenie displays distributions instead of pure counts (this is done implicitly when
+        # converting units), so I guess that's what users will expect
         self._convertToDistr(wks)
 
         self.setProperty("OutputWorkspace", wks)
@@ -202,7 +202,7 @@ class EnggFocus(PythonAlgorithm):
 
         @param wks :: workspace to apply the calibration (on its instrument)
         @param detPos :: detector positions (as a table of positions, one row per detector)
-    	"""
+        """
         alg = self.createChildAlgorithm('ApplyCalibration')
         alg.setProperty('Workspace', wks)
         alg.setProperty('PositionTable', detPos)
@@ -213,7 +213,7 @@ class EnggFocus(PythonAlgorithm):
         Convert workspace to distribution
 
         @param wks :: workspace, which is modified/converted in place
-    	"""
+        """
         alg = self.createChildAlgorithm('ConvertToDistribution')
         alg.setProperty('Workspace', wks)
         alg.execute()

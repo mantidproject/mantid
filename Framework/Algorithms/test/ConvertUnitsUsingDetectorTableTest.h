@@ -86,6 +86,64 @@ public:
     TS_ASSERT_DELTA(outWS->x(0)[9], 0.000323676, 0.000001);
 
     AnalysisDataService::Instance().remove(workspaceName);
+  };
+
+  void testDeltaEFailDoesNotAlterInPlaceWorkspace() {
+
+    std::string wsName = "ConvertUnitsUsingDetectorTable_"
+                         "testDeltaEFailDoesNotAlterInPlaceWorkspace";
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 200,
+                                                                     false);
+    // set to a distribution
+    ws->setDistribution(true);
+    AnalysisDataService::Instance().add(wsName, ws);
+
+    // get a copy of some original values
+    auto originalUnit = ws->getAxis(0)->unit();
+    auto originalEMode = ws->getEMode();
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    auto originalYdata = ws->readY(0);
+
+    // Create TableWorkspace with values in it
+    ITableWorkspace_sptr pars =
+        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    pars->addColumn("int", "spectra");
+    pars->addColumn("double", "l1");
+    pars->addColumn("double", "l2");
+    pars->addColumn("double", "twotheta");
+    pars->addColumn("double", "efixed");
+    pars->addColumn("int", "emode");
+
+    // do not set emode to a valid number - this will cause a failure
+    // do not set efixed either
+    API::TableRow row0 = pars->appendRow();
+    row0 << 1 << 100.0 << 10.0 << 90.0 << 7.0 << 0;
+
+    API::TableRow row1 = pars->appendRow();
+    row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
+
+    ConvertUnitsUsingDetectorTable conv;
+    conv.initialize();
+    conv.setPropertyValue("InputWorkspace", wsName);
+    // in place conversion
+    conv.setPropertyValue("OutputWorkspace", wsName);
+    conv.setPropertyValue("Target", "DeltaE");
+    conv.setProperty("DetectorParameters", pars);
+
+    conv.execute();
+
+    TSM_ASSERT("Expected ConvertUnitsUsingDetectorTable to throw on deltaE "
+               "conversion without valid"
+               "eMode",
+               !conv.isExecuted());
+
+    TS_ASSERT_EQUALS(originalUnit, ws->getAxis(0)->unit());
+    TS_ASSERT_EQUALS(originalEMode, ws->getEMode());
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    TS_ASSERT_EQUALS(originalYdata, ws->readY(0));
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 };
 

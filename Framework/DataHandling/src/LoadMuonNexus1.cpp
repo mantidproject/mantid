@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus1.h"
 
 #include "MantidAPI/Axis.h"
@@ -20,6 +17,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"

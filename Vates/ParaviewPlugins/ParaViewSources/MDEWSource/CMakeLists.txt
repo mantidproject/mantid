@@ -13,7 +13,9 @@ ${MANTID_SUBPROJECT_LIBS}
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${vtkjsoncpp_LIBRARIES}
-${QWT_LIBRARIES})
+${QWT_LIBRARIES}
+Qt4::QtCore
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewMDEWSourceSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")

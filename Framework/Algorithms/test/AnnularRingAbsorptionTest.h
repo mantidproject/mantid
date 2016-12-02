@@ -45,9 +45,9 @@ public:
 
     const double delta(1e-08);
     const size_t middle_index = 4;
-    TS_ASSERT_DELTA(0.98887724, outWS->readY(0).front(), delta);
-    TS_ASSERT_DELTA(0.92954551, outWS->readY(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.86377145, outWS->readY(0).back(), delta);
+    TS_ASSERT_DELTA(0.97773712, outWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.83720057, outWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.72020602, outWS->readY(0).back(), delta);
   }
 
   //-------------------- Failure cases --------------------------------

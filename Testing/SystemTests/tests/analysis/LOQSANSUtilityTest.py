@@ -6,6 +6,7 @@ import SANSadd2 as add
 
 import os
 
+
 def unixLikePathFromWorkspace(ws):
     return su.getFilePathFromWorkspace(ws).replace('\\','/')
 
@@ -25,4 +26,3 @@ class SANSUtilityTest(stresstesting.MantidStressTest):
         file_path = file_path.replace('-ADD','-add') # MAC seems to report that the file is LOQ54432-ADD.nxs
         self.assertTrue('LOQ54432-add' in file_path)
         os.remove(file_path)
-

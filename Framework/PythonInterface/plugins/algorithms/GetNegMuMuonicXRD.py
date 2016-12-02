@@ -4,6 +4,8 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 
 #pylint: disable=no-init
+
+
 class GetNegMuMuonicXRD(PythonAlgorithm):
     #Dictionary of <element>:<peaks> easily extendible by user.
     muonic_xr ={'Au' :[8135.2,8090.6,8105.4,8069.4,5764.89,5594.97,3360.2,

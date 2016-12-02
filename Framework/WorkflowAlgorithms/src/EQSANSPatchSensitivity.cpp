@@ -127,12 +127,6 @@ void EQSANSPatchSensitivity::exec() {
       }
     }
   }
-  /*
-  This rebuild request call, gives the workspace the opportunity to rebuild the
-  nearest neighbours map
-  and therefore pick up any detectors newly masked with this algorithm.
-  */
-  inputWS->rebuildNearestNeighbours();
 
   // Call Calculate efficiency to renormalize
   progress(0.91, "Renormalizing");

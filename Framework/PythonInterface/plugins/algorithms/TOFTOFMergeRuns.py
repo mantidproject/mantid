@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import Direction, StringArrayProperty, StringArrayLengthValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, WorkspaceGroup
 import mantid.simpleapi as api
@@ -78,7 +80,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         result = api.CompareSampleLogs(wsnames, self.mandatory_properties[1:], 0.01)
         if len(result) > 0:
             raise RuntimeError("Sample logs " + result + " do not match!")
-            
+
         # chopper_speed can vary about 10 and for some reason it is string (will be corrected in the future)
         cstable = api.CreateLogPropertyTable(wsnames, 'chopper_speed')
         chopper_speeds = [int(val) for val in cstable.column(0)]

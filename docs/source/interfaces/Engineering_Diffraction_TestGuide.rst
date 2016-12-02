@@ -69,7 +69,7 @@ Negative Testing Ideas
 
 - Using files which aren't calibration files \- Mantid shouldn't crash
 
-- Using data from non calibration runs (i.e. any other run from that instrument) \- Mantid shouldn't crash
+- Using data from non calibration runs (i.e. any other run from that instrument) \- The calibration should stop
 
 
 .. _focus-Engineering_Diffraction_test-ref:
@@ -180,4 +180,4 @@ Settings
     it defaults to `C:\\EnginX_Mantid\\Focus` or `~/EnginX_Mantid/Focus` but can be changed to 
     suit the users needs.
 
-
+.. categories:: Interfaces Diffraction

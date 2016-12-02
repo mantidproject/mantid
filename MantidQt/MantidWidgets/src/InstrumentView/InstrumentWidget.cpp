@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -11,6 +12,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtMantidWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtMantidWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtMantidWidgets/InstrumentView/SimpleWidget.h"
@@ -24,7 +26,6 @@
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
-#include <QDesktopServices>
 #include <QDoubleValidator>
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -677,7 +678,7 @@ void InstrumentWidget::saveImage(QString filename) {
 QString InstrumentWidget::getSaveGroupingFilename() {
   QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
       this, "Save grouping file", m_savedialog_dir,
-      "Grouping (*.xml);;All files (*.*)");
+      "Grouping (*.xml);;All files (*)");
 
   // If its empty, they cancelled the dialog
   if (!filename.isEmpty()) {
@@ -722,7 +723,7 @@ void InstrumentWidget::saveSettings() {
 }
 
 void InstrumentWidget::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/MantidPlot:_Instrument_View"));
 }
 

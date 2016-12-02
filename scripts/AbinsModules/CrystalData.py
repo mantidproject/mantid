@@ -2,6 +2,7 @@ from GeneralData import GeneralData
 from DwCrystalData import DwCrystalData
 from AbinsData import AbinsData
 
+
 class CrystalData(GeneralData):
     """
     Class for storing the data in case sample has a form of single crystal.
@@ -12,7 +13,6 @@ class CrystalData(GeneralData):
         super(CrystalData, self).__init__()
         self._dw_crystal_data = None
         self._abins_data = None
-
 
     def set(self, abins_data=None, dw_crystal_data=None):
 
@@ -33,15 +33,14 @@ class CrystalData(GeneralData):
 
         self._data = {"abins_data": self._abins_data.extract(), "dw_crystal_data": self._dw_crystal_data.extract()}
 
-
     def extract(self):
 
-        if self._data["abins_data"]["k_points_data"]["atomic_displacements"].shape[1] == self._data["dw_crystal_data"].shape[0]:
+        if (self._data["abins_data"]["k_points_data"]["atomic_displacements"].shape[1] ==
+                self._data["dw_crystal_data"].shape[0]):
+
             return self._data
         else:
             raise ValueError("Object fo type CrystalData is inconsistent.")
 
-
     def __str__(self):
         return "Crystal data"
-

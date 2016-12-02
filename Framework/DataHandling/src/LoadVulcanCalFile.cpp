@@ -2,6 +2,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -35,7 +36,6 @@ const size_t NUMBERDETECTORPERMODULE = 1232;
 // Number of reserved detectors per module/bank
 const size_t NUMBERRESERVEDPERMODULE = 1250;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadVulcanCalFile::init() {
@@ -85,7 +85,6 @@ void LoadVulcanCalFile::init() {
       "It serves as a verifying tool, and will be removed after test. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadVulcanCalFile::exec() {
@@ -106,7 +105,6 @@ void LoadVulcanCalFile::exec() {
     setProperty("EventWorkspace", m_eventWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process input and output
   */
 void LoadVulcanCalFile::processInOutProperites() {
@@ -202,7 +200,6 @@ void LoadVulcanCalFile::processInOutProperites() {
     m_doAlignEventWS = false;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up grouping workspace
   */
 void LoadVulcanCalFile::setupGroupingWorkspace() {
@@ -253,7 +250,6 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
   setProperty("OutputGroupingWorkspace", m_groupWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up masking workspace
   */
 void LoadVulcanCalFile::setupMaskWorkspace() {
@@ -303,7 +299,6 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
   g_log.information(msg.str());
 }
 
-//----------------------------------------------------------------------------------------------
 /** Generate offset workspace
   */
 void LoadVulcanCalFile::generateOffsetsWorkspace() {
@@ -323,7 +318,6 @@ void LoadVulcanCalFile::generateOffsetsWorkspace() {
   convertOffsets();
 }
 
-//----------------------------------------------------------------------------------------------
 /** Read VULCAN's offset file
   */
 void LoadVulcanCalFile::readOffsetFile(
@@ -348,7 +342,6 @@ void LoadVulcanCalFile::readOffsetFile(
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process offsets by generating maps
   * Output: Offset workspace : 10^(xi_0 + xi_1 + xi_2)
   */
@@ -476,7 +469,6 @@ void LoadVulcanCalFile::processOffsets(
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Align the input EventWorkspace
   */
 void LoadVulcanCalFile::alignEventWorkspace() {
@@ -501,7 +493,6 @@ void LoadVulcanCalFile::alignEventWorkspace() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-//----------------------------------------------------------------------------------------------
 /** Translate the VULCAN's offset to Mantid
   * Input Offset workspace : 10^(xi_0 + xi_1 + xi_2)
   *
@@ -573,7 +564,6 @@ void LoadVulcanCalFile::convertOffsets() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Get a pointer to an instrument in one of 3 ways: InputWorkspace,
  * InstrumentName, InstrumentFilename
   */
@@ -596,7 +586,6 @@ Geometry::Instrument_const_sptr LoadVulcanCalFile::getInstrument() {
   return inst;
 }
 
-//-----------------------------------------------------------------------
 /** Reads the calibration file.
  *
  * @param calFileName :: path to the old .cal file

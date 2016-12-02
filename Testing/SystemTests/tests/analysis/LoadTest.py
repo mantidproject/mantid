@@ -13,6 +13,7 @@ import unittest
 
 DIFF_PLACES = 8
 
+
 class LoadTest(stresstesting.MantidStressTest):
 
     _success = False
@@ -37,6 +38,8 @@ class LoadTest(stresstesting.MantidStressTest):
 
 #------------------------------------------------------------------------------
 # work horse
+
+
 class LoadTests(unittest.TestCase):
 
     wsname = "__LoadTest"
@@ -196,7 +199,6 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(9.0, data.readX(2)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(35640.0, data.readY(2)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(188.78559267062727, data.readE(2)[1], places = DIFF_PLACES)
-
 
     def test_plus_operator_for_input_groups(self):
         summed_data = Load("OFFSPEC10791+10792.raw", OutputWorkspace = self.wsname)

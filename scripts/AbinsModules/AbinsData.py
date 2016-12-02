@@ -1,8 +1,10 @@
 
 # ABINS modules
-from GeneralData import  GeneralData
-from KpointsData import  KpointsData
-from AtomsData import  AtomsDaTa
+from GeneralData import GeneralData
+from KpointsData import KpointsData
+from AtomsData import AtomsDaTa
+
+
 
 class AbinsData(GeneralData):
     """
@@ -13,7 +15,7 @@ class AbinsData(GeneralData):
         super(AbinsData, self).__init__()
         self._atoms_data = None
         self._kpoints_data = None
-
+        self._data = None
 
     def set(self, k_points_data=None, atoms_data=None):
         """
@@ -32,23 +34,19 @@ class AbinsData(GeneralData):
         else:
             raise ValueError("Invalid type of atoms data.")
 
-        self._data = {"k_points_data":k_points_data.extract(), "atoms_data":atoms_data.extract()}
+        self._data = {"k_points_data": k_points_data.extract(), "atoms_data": atoms_data.extract()}
 
+    def get_kpoints_data(self):
+            return self._kpoints_data
 
-    def getKpointsData(self):
-        return self._kpoints_data
-
-
-    def getAtomsData(self):
-        return self._atoms_data
-
+    def get_atoms_data(self):
+            return self._atoms_data
 
     def extract(self):
         if self._data["k_points_data"]["atomic_displacements"].shape[1] != len(self._data["atoms_data"]):
             raise ValueError("Abins data is inconsistent.")
 
         return self._data
-
 
     def __str__(self):
         return "DFT data"

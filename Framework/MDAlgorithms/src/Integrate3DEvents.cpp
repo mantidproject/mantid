@@ -143,7 +143,7 @@ Integrate3DEvents::ellipseIntegrateEvents(
 
   bool invalid_peak = false;
   for (int i = 0; i < 3; i++) {
-    if ((boost::math::isnan)(sigmas[i])) {
+    if ((std::isnan)(sigmas[i])) {
       invalid_peak = true;
     } else if (sigmas[i] <= 0) {
       invalid_peak = true;

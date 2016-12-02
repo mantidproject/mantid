@@ -144,7 +144,7 @@ template <typename T> int sectionMCNPX(std::string &A, T &out);
 MANTID_KERNEL_DLL void writeMCNPX(const std::string &Line, std::ostream &OX);
 
 /// Split tring into spc deliminated components
-MANTID_KERNEL_DLL std::vector<std::string> StrParts(std::string Ln);
+MANTID_KERNEL_DLL std::vector<std::string> StrParts(const std::string &Ln);
 
 /// Splits a string into key value pairs
 MANTID_KERNEL_DLL std::map<std::string, std::string>

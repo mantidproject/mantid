@@ -29,14 +29,14 @@
 #ifndef MdiSubWindow_H
 #define MdiSubWindow_H
 
-#include "WindowFactory.h"
 #include "MantidKernel/RegistrationHelper.h"
-#include "Mantid/IProjectSerialisable.h"
-#include <QMdiSubWindow>
+#include "MantidQtAPI/IProjectSerialisable.h"
+#include "WindowFactory.h"
 #include <QDockWidget>
-#include <QVBoxLayout>
-#include <QMainWindow>
 #include <QFrame>
+#include <QMainWindow>
+#include <QMdiSubWindow>
+#include <QVBoxLayout>
 
 #include <stdexcept>
 
@@ -112,7 +112,7 @@ protected:
  * \sa Folder, ApplicationWindow
  */
 class MdiSubWindow : public MdiSubWindowParent_t,
-                     public Mantid::IProjectSerialisable {
+                     public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -277,9 +277,9 @@ public: // non-slot methods
   /// Set the label property on the widget
   void setLabel(const QString &label);
   /// Loads the given lines from the project file and applies them.
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   /// Serialises to a string that can be saved to a project file.
   std::string saveToProject(ApplicationWindow *app) override;
 signals:

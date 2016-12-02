@@ -179,7 +179,7 @@ void Rebin::exec() {
       Progress prog(this, 0.0, 1.0, histnumber);
 
       // Go through all the histograms and set the data
-      PARALLEL_FOR3(inputWS, eventInputWS, outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
       for (int i = 0; i < histnumber; ++i) {
         PARALLEL_START_INTERUPT_REGION
 
@@ -247,7 +247,7 @@ void Rebin::exec() {
       outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
     Progress prog(this, 0.0, 1.0, histnumber);
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERUPT_REGION
       // get const references to input Workspace arrays (no copying)

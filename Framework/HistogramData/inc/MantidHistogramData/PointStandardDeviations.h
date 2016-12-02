@@ -8,7 +8,6 @@
 namespace Mantid {
 namespace HistogramData {
 
-class BinEdgeStandardDeviations;
 class PointVariances;
 
 /** PointStandardDeviations
@@ -64,10 +63,6 @@ public:
   operator=(const PointStandardDeviations &)& = default;
   /// Move assignment.
   PointStandardDeviations &operator=(PointStandardDeviations &&)& = default;
-
-  /// Constructs PointStandardDeviations from BinEdgeStandardDeviations, where
-  /// each point is a bin center.
-  PointStandardDeviations(const BinEdgeStandardDeviations &edges);
 };
 
 } // namespace HistogramData

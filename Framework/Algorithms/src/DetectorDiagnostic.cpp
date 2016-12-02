@@ -9,12 +9,12 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/iterator/counting_iterator.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <gsl/gsl_statistics.h>
 
+#include <algorithm>
 #include <cfloat>
 
 namespace Mantid {
@@ -533,10 +533,10 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
 }
 
 std::vector<std::vector<size_t>>
-DetectorDiagnostic::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
+DetectorDiagnostic::makeInstrumentMap(const API::MatrixWorkspace &countsWS) {
   return {
       {boost::counting_iterator<std::size_t>(0),
-       boost::counting_iterator<std::size_t>(countsWS->getNumberHistograms())}};
+       boost::counting_iterator<std::size_t>(countsWS.getNumberHistograms())}};
 }
 /** This function will check how to group spectra when calculating median
  *
@@ -548,11 +548,11 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
 
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (m_parents == 0) {
-    return makeInstrumentMap(countsWS);
+    return makeInstrumentMap(*countsWS);
   }
   if (!instrument) {
     g_log.warning("Workspace has no instrument. LevelsUP is ignored");
-    return makeInstrumentMap(countsWS);
+    return makeInstrumentMap(*countsWS);
   }
 
   // check if not grouped. If grouped, it will throw
@@ -563,36 +563,27 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
 
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
     detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
-    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
-        instrument->getDetector(d)->getAncestors();
-    // std::vector<boost::shared_ptr<const IComponent> >
-    // anc=(*(countsWS->getSpectrum(i)->getDetectorIDs().begin())).getAncestors();
+    auto anc = instrument->getDetector(d)->getAncestors();
     if (anc.size() < static_cast<size_t>(m_parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");
       m_parents = 0;
-      return makeInstrumentMap(countsWS);
+      return makeInstrumentMap(*countsWS);
     }
     mymap.emplace(anc[m_parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;
-  std::vector<size_t> speclistsingle;
 
   std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it, s_it;
-
   for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
-    Mantid::Geometry::ComponentID theKey = (*m_it).first;
-
-    std::pair<std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator,
-              std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator>
-        keyRange = mymap.equal_range(theKey);
-
+    Mantid::Geometry::ComponentID theKey = m_it->first;
+    auto keyRange = mymap.equal_range(theKey);
     // Iterate over all map elements with key == theKey
-    speclistsingle.clear();
+    std::vector<size_t> speclistsingle;
     for (s_it = keyRange.first; s_it != keyRange.second; ++s_it) {
-      speclistsingle.push_back((*s_it).second);
+      speclistsingle.push_back(s_it->second);
     }
-    speclist.push_back(speclistsingle);
+    speclist.push_back(std::move(speclistsingle));
   }
 
   return speclist;
@@ -611,45 +602,44 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
  * to it
  * @throw out_of_range if a value is negative
  */
-std::vector<double>
-DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
-                                    bool excludeZeroes,
-                                    std::vector<std::vector<size_t>> indexmap) {
+std::vector<double> DetectorDiagnostic::calculateMedian(
+    const API::MatrixWorkspace &input, bool excludeZeroes,
+    const std::vector<std::vector<size_t>> &indexmap) {
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
-  for (auto hists : indexmap) {
+  for (const auto &hists : indexmap) {
     std::vector<double> medianInput;
     const int nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
 
     bool checkForMask = false;
-    Geometry::Instrument_const_sptr instrument = input->getInstrument();
+    Geometry::Instrument_const_sptr instrument = input.getInstrument();
     if (instrument != nullptr) {
       checkForMask = ((instrument->getSource() != nullptr) &&
                       (instrument->getSample() != nullptr));
     }
 
-    PARALLEL_FOR1(input)
-    for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
+    PARALLEL_FOR_IF(Kernel::threadSafe(input))
+    for (int i = 0; i < nhists; ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
 
       if (checkForMask) {
         const std::set<detid_t> &detids =
-            input->getSpectrum(hists[i]).getDetectorIDs();
+            input.getSpectrum(hists[i]).getDetectorIDs();
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
           continue;
       }
 
-      const double yValue = input->readY(hists[i])[0];
+      const double yValue = input.readY(hists[i])[0];
       if (yValue < 0.0) {
         throw std::out_of_range("Negative number of counts found, could be "
                                 "corrupted raw counts or solid angle data");
       }
-      if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
+      if (!std::isfinite(yValue) ||
           (excludeZeroes && yValue < DBL_EPSILON)) // NaNs/Infs
       {
         continue;
@@ -669,10 +659,9 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
       medianInput.push_back(0.);
     }
 
-    // We need a sorted array to calculate the median
-    std::sort(medianInput.begin(), medianInput.end());
-    double median = gsl_stats_median_from_sorted_data(&medianInput[0], 1,
-                                                      medianInput.size());
+    Kernel::Statistics stats =
+        Kernel::getStatistics(medianInput, StatOptions::Median);
+    double median = stats.median;
 
     if (median < 0 || median > DBL_MAX / 10.0) {
       throw std::out_of_range("The calculated value for the median was either "

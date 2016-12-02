@@ -2,7 +2,8 @@ import numpy as np
 
 # ABINS modules
 import AbinsConstants
-from GeneralData import  GeneralData
+from GeneralData import GeneralData
+
 
 class KpointsData(GeneralData):
     """
@@ -24,7 +25,8 @@ class KpointsData(GeneralData):
 
     "frequencies" - frequencies for all k-points; frequencies.shape == (self._num_k, self._num_freq)
 
-    "atomic_displacements - atomic displacements for all k-points; atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, 3)
+    "atomic_displacements - atomic displacements for all k-points;
+                            atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, 3)
 
 
     """
@@ -35,7 +37,7 @@ class KpointsData(GeneralData):
         @param num_atoms: total number of atoms in the unit cell (int)
         """
         super(KpointsData, self).__init__()
-        dim = 3 # number of coordinates
+        dim = 3  # number of coordinates
 
         if isinstance(num_k, int) and num_k > 0:
             self._num_k = num_k
@@ -53,31 +55,30 @@ class KpointsData(GeneralData):
     def set(self, items=None):
 
         if not isinstance(items, dict):
-           raise ValueError("New value of KpointsData should be a dictionary.")
+            raise ValueError("New value of KpointsData should be a dictionary.")
 
-        if not sorted(items.keys()) == sorted(AbinsConstants.all_keywords_k_data):
-           raise ValueError("Invalid structure of the dictionary.")
-
+        if not sorted(items.keys()) == sorted(AbinsConstants.ALL_KEYWORDS_K_DATA):
+            raise ValueError("Invalid structure of the dictionary.")
 
         dim = 3
         #  "weights"
         weights = items["weights"]
 
         if (isinstance(weights, np.ndarray) and
-            weights.shape == (self._num_k,) and
-            weights.dtype.num == AbinsConstants.float_id and
-            np.allclose(weights, weights[weights>=0])):
+           weights.shape == (self._num_k,) and
+           weights.dtype.num == AbinsConstants.FLOAT_ID and
+           np.allclose(weights, weights[weights >= 0])):
 
             self._data["weights"] = weights
         else:
-           raise ValueError("Invalid value of weights.")
+            raise ValueError("Invalid value of weights.")
 
         #  "k_vectors"
         k_vectors = items["k_vectors"]
 
-        if  (isinstance(k_vectors, np.ndarray) and
-             k_vectors.shape == (self._num_k, dim) and
-             k_vectors.dtype.num == AbinsConstants.float_id):
+        if (isinstance(k_vectors, np.ndarray) and
+           k_vectors.shape == (self._num_k, dim) and
+           k_vectors.dtype.num == AbinsConstants.FLOAT_ID):
 
             self._data["k_vectors"] = k_vectors
         else:
@@ -86,9 +87,9 @@ class KpointsData(GeneralData):
         #  "frequencies"
         frequencies = items["frequencies"]
 
-        if  (isinstance(frequencies, np.ndarray) and
-             frequencies.shape == (self._num_k, self._num_freq) and
-             frequencies.dtype.num == AbinsConstants.float_id):
+        if (isinstance(frequencies, np.ndarray) and
+           frequencies.shape == (self._num_k, self._num_freq) and
+           frequencies.dtype.num == AbinsConstants.FLOAT_ID):
 
             self._data["frequencies"] = frequencies
         else:
@@ -97,19 +98,17 @@ class KpointsData(GeneralData):
         #  "atomic_displacements"
         atomic_displacements = items["atomic_displacements"]
 
-        if  (isinstance(atomic_displacements, np.ndarray) and
-             atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, dim) and
-             atomic_displacements.dtype.num == AbinsConstants.complex_id):
+        if (isinstance(atomic_displacements, np.ndarray) and
+           atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, dim) and
+           atomic_displacements.dtype.num == AbinsConstants.COMPLEX_ID):
 
             self._data["atomic_displacements"] = atomic_displacements
         else:
             raise ValueError("Invalid value of atomic_displacements.")
 
-
     def extract(self):
 
         return self._data
-
 
     def __str__(self):
         return "K-points data"

@@ -35,8 +35,10 @@ public:
   void showConcept(const QString &name) override;
   void showFitFunction(const std::string &name = std::string()) override;
   void showFitFunction(const QString &name) override;
-  void showCustomInterface(const std::string &name = std::string()) override;
-  void showCustomInterface(const QString &name) override;
+  void showCustomInterface(const std::string &name = std::string(),
+                           const std::string &section = std::string()) override;
+  void showCustomInterface(const QString &name,
+                           const QString &section = QString()) override;
 
 private:
   void showHelp(const QString &url);

@@ -2,6 +2,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
@@ -30,7 +31,6 @@ SpectrumView::SpectrumView(QWidget *parent)
     : QMainWindow(parent), WorkspaceObserver(), m_ui(new Ui::SpectrumViewer()),
       m_sliderHandler(NULL), m_rangeHandler(NULL), m_emodeHandler(NULL) {
   m_ui->setupUi(this);
-  // m_ui->x_min_input->setValidator(new QDoubleValidator(this));
   connect(m_ui->imageTabs, SIGNAL(currentChanged(int)), this,
           SLOT(changeSpectrumDisplay(int)));
   connect(m_ui->imageTabs, SIGNAL(tabCloseRequested(int)), this,
@@ -47,6 +47,18 @@ SpectrumView::SpectrumView(QWidget *parent)
   observeADSClear();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Interface", "SpectrumView", false);
+
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  // Note: Qt::Tool cannot have both a max and min button on OSX
+  auto flags = windowFlags();
+  flags |= Qt::Tool;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
+#endif
 }
 
 SpectrumView::~SpectrumView() {
@@ -89,7 +101,6 @@ void SpectrumView::renderWorkspace(
 
   // Connect WorkspaceObserver signals
   connect(this, SIGNAL(needToClose()), this, SLOT(closeWindow()));
-  // connect(this, SIGNAL(needToUpdate()), this, SLOT(updateWorkspace()));
 
   // Set the window title
   std::string windowTitle = "SpectrumView (" + wksp->getTitle() + ")";
@@ -238,6 +249,143 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
  */
 bool SpectrumView::isTrackingOn() const {
   return m_ui->tracking_always_on->isChecked();
+}
+
+API::IProjectSerialisable *
+SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
+  UNUSED_ARG(app);
+  UNUSED_ARG(fileVersion);
+  API::TSVSerialiser tsv(lines);
+
+  double min, max, step, efixed;
+  int emode, intensity, graphMax;
+  bool cursorTracking;
+  QRect geometry;
+
+  tsv.selectLine("geometry");
+  tsv >> geometry;
+
+  std::vector<std::string> workspaceNames;
+  tsv.selectLine("Workspaces");
+  tsv >> workspaceNames;
+
+  auto viewer = new SpectrumView(nullptr);
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  for (auto &name : workspaceNames) {
+    auto ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    if (ws)
+      viewer->renderWorkspace(ws);
+  }
+
+  tsv.selectLine("Range");
+  tsv >> min >> max >> step;
+  tsv.selectLine("Intensity");
+  tsv >> intensity;
+  tsv.selectLine("GraphMax");
+  tsv >> graphMax;
+  tsv.selectLine("CursorTracking");
+  tsv >> cursorTracking;
+  tsv.selectLine("EMode");
+  tsv >> emode;
+  tsv.selectLine("EFixed");
+  tsv >> efixed;
+
+  if (tsv.selectLine("ColorMapFileName")) {
+    QString fileName;
+    tsv >> fileName;
+    viewer->m_svConnections->loadColorMap(fileName);
+  } else if (tsv.selectLine("ColorScales")) {
+    int positive, negative;
+    tsv >> positive >> negative;
+    auto posScale = static_cast<ColorMaps::ColorScale>(positive);
+    auto negScale = static_cast<ColorMaps::ColorScale>(negative);
+    viewer->m_svConnections->setColorScale(posScale, negScale);
+  }
+
+  int index = viewer->m_ui->imageTabs->currentIndex();
+  auto display = viewer->m_spectrumDisplay.at(index);
+
+  double x, y;
+  tsv.selectLine("SelectedPoint");
+  tsv >> x >> y;
+
+  display->setPointedAtXY(x, y);
+
+  QPoint hPoint, vPoint;
+  tsv.selectLine("HorizontalPoint");
+  tsv >> hPoint;
+  tsv.selectLine("VerticalPoint");
+  tsv >> vPoint;
+
+  bool hScroll, vScroll;
+  tsv.selectLine("Scrolling");
+  tsv >> hScroll >> vScroll;
+
+  viewer->m_rangeHandler->setRange(min, max, step);
+  viewer->m_ui->intensity_slider->setValue(intensity);
+  viewer->m_ui->graph_max_slider->setValue(graphMax);
+  viewer->m_ui->tracking_always_on->setChecked(cursorTracking);
+  viewer->m_emodeHandler->setEMode(emode);
+  viewer->m_emodeHandler->setEFixed(efixed);
+  viewer->m_hGraph->setPointedAtPoint(hPoint);
+  viewer->m_vGraph->setPointedAtPoint(vPoint);
+
+  viewer->setGeometry(geometry);
+  viewer->show(); // important! show before drawing/updating
+  display->updateImage();
+
+  viewer->m_ui->action_Vscroll->setChecked(vScroll);
+  viewer->m_ui->action_Hscroll->setChecked(hScroll);
+
+  return viewer;
+}
+
+std::string SpectrumView::saveToProject(ApplicationWindow *app) {
+  UNUSED_ARG(app);
+  API::TSVSerialiser tsv, spec;
+  spec.writeLine("geometry") << geometry();
+
+  double min, max, step;
+  m_rangeHandler->getRange(min, max, step);
+  spec.writeLine("Range") << min << max << step;
+  spec.writeLine("Intensity") << m_ui->intensity_slider->value();
+  spec.writeLine("GraphMax") << m_ui->graph_max_slider->value();
+  spec.writeLine("CursorTracking") << m_ui->tracking_always_on->isChecked();
+  spec.writeLine("EMode") << m_emodeHandler->getEMode();
+  spec.writeLine("EFixed") << m_ui->efixed_control->text();
+
+  auto colorScales = m_svConnections->getColorScales();
+  spec.writeLine("ColorScales");
+  spec << static_cast<int>(colorScales.first);
+  spec << static_cast<int>(colorScales.second);
+
+  auto colorMapFileName = m_svConnections->getColorMapFileName();
+  if (!colorMapFileName.isEmpty())
+    spec.writeLine("ColorMapFileName") << colorMapFileName;
+
+  spec.writeLine("Workspaces");
+  for (auto source : m_dataSource) {
+    spec << source->getWorkspace()->name();
+  }
+
+  int index = m_ui->imageTabs->currentIndex();
+  auto display = m_spectrumDisplay.at(index);
+  spec.writeLine("SelectedPoint");
+  spec << display->getPointedAtX();
+  spec << display->getPointedAtY();
+
+  auto hPoint = m_hGraph->getPointedAtPoint();
+  auto vPoint = m_vGraph->getPointedAtPoint();
+  spec.writeLine("HorizontalPoint") << hPoint;
+  spec.writeLine("VerticalPoint") << vPoint;
+
+  auto vScroll = m_ui->action_Vscroll->isChecked();
+  auto hScroll = m_ui->action_Hscroll->isChecked();
+  spec.writeLine("Scrolling") << hScroll << vScroll;
+
+  tsv.writeSection("spectrumviewer", spec.outputLines());
+  return tsv.outputLines();
 }
 
 void SpectrumView::changeTracking(bool on) {

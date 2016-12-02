@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/DateAndTime.h"

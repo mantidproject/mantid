@@ -22,6 +22,7 @@
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/PreviewPlot.h"
 #include "MantidQtMantidWidgets/DisplayCurveFit.h"
+#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/LogValueSelector.h"
 
 /**
@@ -154,6 +155,10 @@ DECLARE_WIDGET_PLUGIN(PreviewPlotPlugin, MantidQt::MantidWidgets::PreviewPlot,
 DECLARE_WIDGET_PLUGIN(DisplayCurveFitPlugin,
                       MantidQt::MantidWidgets::DisplayCurveFit,
                       "Curve plots for workspace spectra");
+
+DECLARE_WIDGET_PLUGIN(MuonFitDataSelectorPlugin,
+                      MantidQt::MantidWidgets::MuonFitDataSelector,
+                      "Data selection for muon fits");
 
 DECLARE_WIDGET_PLUGIN(LogValueSelectorPlugin,
                       MantidQt::MantidWidgets::LogValueSelector,

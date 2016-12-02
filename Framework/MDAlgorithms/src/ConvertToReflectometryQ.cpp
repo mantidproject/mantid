@@ -4,6 +4,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/Progress.h"
 

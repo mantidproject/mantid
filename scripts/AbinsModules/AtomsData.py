@@ -2,6 +2,7 @@ import numpy as np
 from GeneralData import GeneralData
 import AbinsConstants
 
+
 class AtomsDaTa(GeneralData):
 
     def __init__(self, num_atoms=None):
@@ -12,7 +13,6 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Number of atoms cannot be negative.")
         self._num_atoms = num_atoms
 
-
     def _append(self, item=None):
         """
         Adds one elements to the collection of atoms data.
@@ -22,11 +22,11 @@ class AtomsDaTa(GeneralData):
         if not isinstance(item, dict):
             raise ValueError("Every element of AtomsData has  a form of the dictionary.")
 
-        if not sorted(item.keys()) == sorted(AbinsConstants.all_keywords_atoms_data):
+        if not sorted(item.keys()) == sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_DATA):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if not item["symbol"] in AbinsConstants.all_symbols:
+        if not item["symbol"] in AbinsConstants.ALL_SYMBOLS:
             raise ValueError("Invalid value of symbol.")
 
         # "fract_coord"
@@ -37,7 +37,7 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if fract_coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if fract_coord.dtype.num != AbinsConstants.float_id:
+        if fract_coord.dtype.num != AbinsConstants.FLOAT_ID:
             raise ValueError("All coordinates should be real numbers.")
 
         # "atom"
@@ -67,9 +67,7 @@ class AtomsDaTa(GeneralData):
 
         self._data.append(item)
 
-
     def set(self, items=None):
-
 
         if len(items) != self._num_atoms:
             raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)" %
@@ -80,13 +78,11 @@ class AtomsDaTa(GeneralData):
             for item in items:
                 self._append(item=item)
 
-
     def extract(self):
         if len(self._data) == self._num_atoms:
             return self._data
         else:
             raise ValueError("Size of AtomsData and number of atoms is inconsistent.")
-
 
     def __str__(self):
         return "Atoms data"

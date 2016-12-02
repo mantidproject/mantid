@@ -54,9 +54,9 @@ public:
     const size_t npts = ySpOutputWs->blocksize();
 
     // Test a few y-Space values
-    const auto &ySpOutX = ySpOutputWs->readX(0);
-    const auto &ySpOutY = ySpOutputWs->readY(0);
-    const auto &ySpOutE = ySpOutputWs->readE(0);
+    const auto &ySpOutX = ySpOutputWs->x(0);
+    const auto &ySpOutY = ySpOutputWs->y(0);
+    const auto &ySpOutE = ySpOutputWs->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.71348856, ySpOutX.front(), 1e-08);
@@ -72,9 +72,9 @@ public:
     TS_ASSERT_DELTA(138.38603736, ySpOutE.back(), 1e-08);
 
     // Test a few q-Space values
-    const auto &qSpOutX = qSpOutputWs->readX(0);
-    const auto &qSpOutY = qSpOutputWs->readY(0);
-    const auto &qSpOutE = qSpOutputWs->readE(0);
+    const auto &qSpOutX = qSpOutputWs->x(0);
+    const auto &qSpOutY = qSpOutputWs->y(0);
+    const auto &qSpOutE = qSpOutputWs->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.71348856, qSpOutX.front(), 1e-08);

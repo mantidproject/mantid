@@ -21,15 +21,14 @@ except ImportError:
 
 from AbinsModules import PowderData
 
-class ABINSPowderDataTest(unittest.TestCase):
 
+class ABINSPowderDataTest(unittest.TestCase):
 
     def test_input(self):
 
         # wrong number of atoms
         with self.assertRaises(ValueError):
             poor_tester = PowderData(num_atoms=-2)
-
 
     def test_set(self):
 
@@ -46,10 +45,6 @@ class ABINSPowderDataTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             poor_tester.set(items=bad_items)
 
-
-
-
-
     def test_good_case(self):
 
         # hypothetical data for two atoms
@@ -57,9 +52,9 @@ class ABINSPowderDataTest(unittest.TestCase):
                                                 [0.01, 0.02, 0.03],
                                                [0.01, 0.02, 0.03]],
 
-                                              [[0.01, 0.02, 0.03],
-                                               [0.01, 0.02, 0.03],
-                                              [0.01, 0.02, 0.03]]]),
+                                               [[0.01, 0.02, 0.03],
+                                                [0.01, 0.02, 0.03],
+                                                [0.01, 0.02, 0.03]]]),
 
                        "b_tensors": np.asarray([[[0.01, 0.02, 0.03],
                                                  [0.01, 0.02, 0.03],

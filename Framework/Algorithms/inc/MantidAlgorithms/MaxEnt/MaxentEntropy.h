@@ -42,7 +42,7 @@ public:
                                          double background) = 0;
   // Second derivative of the entropy
   virtual std::vector<double>
-  secondDerivative(const std::vector<double> &value) = 0;
+  secondDerivative(const std::vector<double> &values, double background) = 0;
   // Corrects an invalid value
   virtual std::vector<double> correctValues(const std::vector<double> &value,
                                             double newValue) = 0;

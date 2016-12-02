@@ -14,11 +14,11 @@ from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters, AbinsConstants
 class ABINS(PythonAlgorithm):
 
     _dft_program = None
-    _phononFile = None
-    _experimentalFile = None
+    _phonon_file = None
+    _experimental_file = None
     _temperature = None
     _scale = None
-    _sampleForm = None
+    _sample_form = None
     _instrument = None
     _atoms = None
     _sum_contributions = None
@@ -71,13 +71,13 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name="SampleForm",
                              direction=Direction.Input,
                              defaultValue="Powder",
-                             validator=StringListValidator(["SingleCrystal", "Powder"]),
+                             validator=StringListValidator(AbinsConstants.ALL_SAMPLE_FORMS),
                              doc="Form of the sample: SingleCrystal or Powder.")
 
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
-                             validator=StringListValidator(["None", "TOSCA"]),
+                             validator=StringListValidator(AbinsConstants.ALL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -94,8 +94,8 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name="QuantumOrderEventsNumber", defaultValue='1',
                              validator=StringListValidator(['1', '2', '3', '4']),
                              doc="Number of quantum order effects included in the calculation "
-                                 "(1 -> fundamentals, 2-> first overtone + fundamentals + "
-                                 "2nd order combinations, 3-> fundamentals + first overtone + second overtone + 2nd "
+                                 "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + "
+                                 "2nd order combinations, 3-> FUNDAMENTALS + first overtone + second overtone + 2nd "
                                  "order combinations + 3rd order combinations etc...)")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
@@ -159,27 +159,27 @@ class ABINS(PythonAlgorithm):
 
         if self._dft_program == "CASTEP":
 
-            dft_reader = LoadCASTEP(input_DFT_filename=self._phononFile)
+            dft_reader = LoadCASTEP(input_dft_filename=self._phonon_file)
 
         else:
 
             raise RuntimeError("Currently only output files from CASTEP are supported.")
 
-        dft_data = dft_reader.getData()
+        dft_data = dft_reader.get_data()
 
         prog_reporter.report("Phonon data has been read.")
 
         # 3) calculate S
-        s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
-                                  sample_form=self._sampleForm, abins_data=dft_data, instrument_name=self._instrument,
+        s_calculator = CalculateS(filename=self._phonon_file, temperature=self._temperature,
+                                  sample_form=self._sample_form, abins_data=dft_data, instrument_name=self._instrument,
                                   quantum_order_num=self._num_quantum_order_events)
 
-        s_data = s_calculator.getData()
+        s_data = s_calculator.get_data()
 
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
-        _data = dft_data.getAtomsData().extract()
+        _data = dft_data.get_atoms_data().extract()
         all_atoms_symbols = set([atom["symbol"] for atom in _data])
 
         if len(self._atoms) == 0:  # case: all atoms
@@ -197,7 +197,7 @@ class ABINS(PythonAlgorithm):
         # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
         workspaces = []
-        if self._sampleForm == "Powder":
+        if self._sample_form == "Powder":
             workspaces.extend(self._create_partial_s_per_type_workspaces(atoms_symbols=atoms_symbol, s_data=s_data))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
@@ -213,7 +213,7 @@ class ABINS(PythonAlgorithm):
             prog_reporter.report("Workspace with total S  has been constructed.")
 
         # 7) add experimental data if available to the collection of workspaces
-        if self._experimentalFile != "":
+        if self._experimental_file != "":
             workspaces.insert(0, self._create_experimental_data_workspace().getName())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
@@ -242,9 +242,9 @@ class ABINS(PythonAlgorithm):
         s_data_extracted = s_data.extract()
         first_atom = 0
         freq_dic = s_data_extracted["atom_%s" % first_atom]["frequencies"]
-        max_size = freq_dic["order_%s" % AbinsConstants.fundamentals].size
+        max_size = freq_dic["order_%s" % AbinsConstants.FUNDAMENTALS].size
         items = freq_dic.keys()
-        items.remove("order_%s" % AbinsConstants.fundamentals)
+        items.remove("order_%s" % AbinsConstants.FUNDAMENTALS)
         for item in items:
             if max_size < freq_dic[item].size:
                 max_size = freq_dic[item].size
@@ -265,10 +265,10 @@ class ABINS(PythonAlgorithm):
             for atom in range(num_atoms):
                 if atoms_data["atom_%s" % atom]["symbol"] == atom_symbol:
                     temp_s_atom_data.fill(0)
-                    for order in range(AbinsConstants.fundamentals,
-                                       self._num_quantum_order_events + AbinsConstants.s_last_index):
+                    for order in range(AbinsConstants.FUNDAMENTALS,
+                                       self._num_quantum_order_events + AbinsConstants.S_LAST_INDEX):
 
-                        order_indx = order - AbinsConstants.python_index_shift
+                        order_indx = order - AbinsConstants.PYTHON_INDEX_SHIFT
 
                         if not constructed_freq:
                             temp_freq_order = atoms_data["atom_%s" % atom]["frequencies"]["order_%s" % order]
@@ -312,7 +312,7 @@ class ABINS(PythonAlgorithm):
         @param workspace:  workspace to be filled with S
         """
 
-        # only fundamentals
+        # only FUNDAMENTALS
         if s_points.shape[0] == 1:
 
             temp_freq, temp_s = self._rearrange_freq(freq=freq[0], s_array=s_points[0])
@@ -340,7 +340,7 @@ class ABINS(PythonAlgorithm):
             # Set correct units on workspace
             self._set_workspace_units(wrk=workspace)
 
-        # quantum order events (fundamentals + overtones + combinations for the given order)
+        # quantum order events (FUNDAMENTALS + overtones + combinations for the given order)
         else:
 
             dim = s_points.shape[0]
@@ -382,8 +382,8 @@ class ABINS(PythonAlgorithm):
 
         if len(local_partial_workspaces) > 1:
 
-            freq = np.zeros(AbinsConstants.total_workspace_size, dtype=AbinsConstants.float_type)
-            s_atoms = np.zeros(AbinsConstants.total_workspace_size, dtype=AbinsConstants.float_type)
+            freq = np.zeros(AbinsConstants.TOTAL_WORKSPACE_SIZE, dtype=AbinsConstants.FLOAT_TYPE)
+            s_atoms = np.zeros(AbinsConstants.TOTAL_WORKSPACE_SIZE, dtype=AbinsConstants.FLOAT_TYPE)
             ws_x = mtd[local_partial_workspaces[0]].dataX(0)  # all total workspaces have the same x values
             freq[:ws_x.size] = ws_x
             for partial_ws in local_partial_workspaces:
@@ -462,7 +462,7 @@ class ABINS(PythonAlgorithm):
         Loads experimental data into workspaces.
         @return: workspace with experimental data
         """
-        experimental_wrk = Load(self._experimentalFile)
+        experimental_wrk = Load(self._experimental_file)
         self._set_workspace_units(wrk=experimental_wrk.getName())
 
         return experimental_wrk
@@ -697,18 +697,18 @@ class ABINS(PythonAlgorithm):
         """
 
         self._dft_program = self.getProperty("DFTprogram").value
-        self._phononFile = self.getProperty("PhononFile").value
-        self._experimentalFile = self.getProperty("ExperimentalFile").value
+        self._phonon_file = self.getProperty("PhononFile").value
+        self._experimental_file = self.getProperty("ExperimentalFile").value
         self._temperature = self.getProperty("Temperature").value
         self._scale = self.getProperty("Scale").value
-        self._sampleForm = self.getProperty("SampleForm").value
+        self._sample_form = self.getProperty("SampleForm").value
         self._instrument = self.getProperty("Instrument").value
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
 
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
-        self._evaluate_combinations = self._num_quantum_order_events > AbinsConstants.quantum_order_one
+        self._evaluate_combinations = self._num_quantum_order_events > AbinsConstants.QUANTUM_ORDER_ONE
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
 

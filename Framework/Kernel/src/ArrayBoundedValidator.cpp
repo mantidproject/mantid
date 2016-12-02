@@ -1,5 +1,8 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 
+#include <boost/make_shared.hpp>
+#include <sstream>
+
 namespace Mantid {
 namespace Kernel {
 

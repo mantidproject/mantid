@@ -44,12 +44,17 @@ Other Useful Methods
 
 .. autofunction:: tube.readPeakFile
 
+.. autofunction:: tube.saveCalibration
+
+.. autofunction:: tube.readCalibrationFile
+
 """
 
 import numpy
 import os
 import re
 
+from mantid.kernel import V3D
 from mantid.api import (MatrixWorkspace, ITableWorkspace)
 from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace, config)
 from tube_spec import TubeSpec
@@ -378,7 +383,6 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
                   "that arguments are case sensitive" % key
             raise RuntimeError(msg)
 
-
     # check parameter ws: if it was given as string, transform it in
     # mantid object
     if isinstance(ws, str):
@@ -435,7 +439,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     # not given, it will create a FITPAR 'guessing' the centre positions,
     # and allowing the find peaks calibration methods to adjust the parameter
     # for the peaks automatically
-    if kwargs.has_key(FITPAR):
+    if FITPAR in kwargs:
         fitPar = kwargs[FITPAR]
         # fitPar must be a TubeCalibFitParams
         if not isinstance(fitPar, TubeCalibFitParams):
@@ -462,9 +466,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # guess positions given by centre_pixel
         fitPar.setAutomatic(True)
 
-
     # check the MARGIN paramter (optional)
-    if kwargs.has_key(MARGIN):
+    if MARGIN in kwargs:
         try:
             margin = float(kwargs[MARGIN])
         except:
@@ -472,7 +475,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         fitPar.setMargin(margin)
 
     # deal with RANGELIST parameter
-    if kwargs.has_key(RANGELIST):
+    if RANGELIST in kwargs:
         rangeList = kwargs[RANGELIST]
         if isinstance(rangeList, int):
             rangeList = [rangeList]
@@ -486,7 +489,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         rangeList = range(tubeSet.getNumTubes())
 
     # check if the user passed the option calibTable
-    if kwargs.has_key(CALIBTABLE):
+    if CALIBTABLE in kwargs:
         calibTable = kwargs[CALIBTABLE]
         # ensure the correct type is passed
         # if a string was passed, transform it in mantid object
@@ -512,9 +515,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # "Detector Position" column required by ApplyCalibration
         calibTable.addColumn(type="V3D", name="Detector Position")
 
-
     # deal with plotTube option
-    if kwargs.has_key(PLOTTUBE):
+    if PLOTTUBE in kwargs:
         plotTube = kwargs[PLOTTUBE]
         if isinstance(plotTube, int):
             plotTube = [plotTube]
@@ -526,7 +528,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         plotTube = []
 
     # deal with minimun tubes sizes
-    if kwargs.has_key(EXCLUDESHORT):
+    if EXCLUDESHORT in kwargs:
         excludeShortTubes = kwargs[EXCLUDESHORT]
         try:
             excludeShortTubes = float(excludeShortTubes)
@@ -538,7 +540,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         excludeShortTubes = 0.0
 
     # deal with OVERRIDEPEAKS parameters
-    if kwargs.has_key(OVERRIDEPEAKS):
+    if OVERRIDEPEAKS in kwargs:
         overridePeaks = kwargs[OVERRIDEPEAKS]
         try:
             nPeaks = len(idealTube.getArray())
@@ -559,9 +561,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     else:
         overridePeaks = dict()
 
-
     # deal with FITPOLIN parameter
-    if kwargs.has_key(FITPOLIN):
+    if FITPOLIN in kwargs:
         polinFit = kwargs[FITPOLIN]
         if polinFit not in [1, 2, 3]:
             raise RuntimeError(
@@ -572,7 +573,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
     # deal with OUTPUT PEAK
     deletePeakTableAfter = False
-    if kwargs.has_key(OUTPUTPEAK):
+    if OUTPUTPEAK in kwargs:
         outputPeak = kwargs[OUTPUTPEAK]
     else:
         outputPeak = False
@@ -590,7 +591,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         for i in range(len(idealTube.getArray())):
             outputPeak.addColumn(type='float', name='Peak%d' % (i + 1))
 
-    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak, \
+    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak,
                    overridePeaks, excludeShortTubes, plotTube, rangeList, polinFit)
 
     if deletePeakTableAfter:
@@ -665,11 +666,6 @@ def readPeakFile(file_name):
 
     """
     loaded_file = []
-    # split the entries to the main values:
-    # For example:
-    # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
-    # Will be splited as:
-    # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
     pattern = re.compile(r'[\[\],\s\r]')
     saveDirectory = config['defaultsave.directory']
     pfile = os.path.join(saveDirectory, file_name)
@@ -685,8 +681,71 @@ def readPeakFile(file_name):
         try:
             f_values = [float(v) for v in line_vals[1:] if v != '']
         except ValueError:
-            # print 'Wrong format: we expected only numbers, but receive this line ',str(line_vals[1:])
+            # print 'Wrong format: we expected only numbers,
+            # but receive this line ',str(line_vals[1:])
             continue
 
         loaded_file.append((id_, f_values))
     return loaded_file
+
+
+def saveCalibration(table_name, out_path):
+    """Save the calibration table to file
+
+    This creates a CSV file for the calibration TableWorkspace. The first
+    column is the detector number and the second column is the detector position
+
+    Example of usage:
+
+    .. code-block:: python
+
+       saveCalibration('CalibTable','/tmp/myCalibTable.txt')
+
+    :param table_name: name of the TableWorkspace to save
+    :param out_path: location to save the file
+
+    """
+    DET = 'Detector ID'
+    POS = 'Detector Position'
+    with open(out_path, 'w') as file_p:
+        table = mtd[table_name]
+        for row in table:
+            row_data = [row[DET], row[POS]]
+            line = ','.join(map(str, row_data)) + '\n'
+            file_p.write(line)
+
+
+def readCalibrationFile(table_name, in_path):
+    """Read a calibration table from file
+
+    This loads a calibration TableWorkspace from a CSV file.
+
+    Example of usage:
+
+    .. code-block:: python
+
+       saveCalibration('CalibTable','/tmp/myCalibTable.txt')
+
+    :param table_name: name to call the TableWorkspace
+    :param in_path: the path to the calibration file
+
+    """
+    DET = 'Detector ID'
+    POS = 'Detector Position'
+    re_float = re.compile(r"[+-]? *(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+    calibTable = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+    calibTable.addColumn(type='int', name=DET)
+    calibTable.addColumn(type='V3D', name=POS)
+
+    with open(in_path, 'r') as file_p:
+        for line in file_p:
+            values = re.findall(re_float, line)
+            if len(values) != 4:
+                continue
+
+            nextRow = {
+                DET: int(values[0]),
+                POS: V3D(float(values[1]), float(values[2]), float(values[3]))
+            }
+
+            calibTable.addRow(nextRow)

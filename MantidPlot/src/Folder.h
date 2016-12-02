@@ -34,8 +34,8 @@
 #include <QEvent>
 #include <QTreeWidget>
 
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
-#include "Mantid/IProjectSerialisable.h"
 
 class FolderListItem;
 class Table;

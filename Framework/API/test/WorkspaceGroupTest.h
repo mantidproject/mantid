@@ -2,6 +2,7 @@
 #define MANTID_API_WORKSPACEGROUPTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"

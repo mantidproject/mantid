@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWCentre.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -17,6 +14,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -82,6 +80,10 @@ void SofQWCentre::createInputProperties(API::Algorithm &alg) {
                       "The value of fixed energy: :math:`E_i` (EMode=Direct) "
                       "or :math:`E_f` (EMode=Indirect) (meV).\nMust be set "
                       "here if not available in the instrument definition.");
+  alg.declareProperty("ReplaceNaNs", false,
+                      "If true, replaces all NaNs in output workspace with "
+                      "zeroes.",
+                      Direction::Input);
 }
 
 void SofQWCentre::exec() {
@@ -162,11 +164,11 @@ void SofQWCentre::exec() {
       }
 
       const size_t numDets = detectors.size();
-      const double numDets_d = static_cast<double>(
-          numDets); // cache to reduce number of static casts
-      const MantidVec &Y = inputWorkspace->readY(i);
-      const MantidVec &E = inputWorkspace->readE(i);
-      const MantidVec &X = inputWorkspace->readX(i);
+      // cache to reduce number of static casts
+      const double numDets_d = static_cast<double>(numDets);
+      const auto &Y = inputWorkspace->y(i);
+      const auto &E = inputWorkspace->e(i);
+      const auto &X = inputWorkspace->x(i);
 
       // Loop over the detectors and for each bin calculate Q
       for (size_t idet = 0; idet < numDets; ++idet) {
@@ -229,10 +231,10 @@ void SofQWCentre::exec() {
 
           // And add the data and it's error to that bin, taking into account
           // the number of detectors contributing to this bin
-          outputWorkspace->dataY(qIndex)[j] += Y[j] / numDets_d;
+          outputWorkspace->mutableY(qIndex)[j] += Y[j] / numDets_d;
           // Standard error on the average
-          outputWorkspace->dataE(qIndex)[j] =
-              sqrt((pow(outputWorkspace->readE(qIndex)[j], 2) + pow(E[j], 2)) /
+          outputWorkspace->mutableE(qIndex)[j] =
+              sqrt((pow(outputWorkspace->e(qIndex)[j], 2) + pow(E[j], 2)) /
                    numDets_d);
         }
       }
@@ -253,6 +255,19 @@ void SofQWCentre::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWorkspace->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  if (this->getProperty("ReplaceNaNs")) {
+    auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+    replaceNans->setChild(true);
+    replaceNans->initialize();
+    replaceNans->setProperty("InputWorkspace", outputWorkspace);
+    replaceNans->setProperty("OutputWorkspace", outputWorkspace);
+    replaceNans->setProperty("NaNValue", 0.0);
+    replaceNans->setProperty("InfinityValue", 0.0);
+    replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+    replaceNans->execute();
+  }
 }
 
 /** Creates the output workspace, setting the axes according to the input
@@ -267,7 +282,7 @@ API::MatrixWorkspace_sptr SofQWCentre::setUpOutputWorkspace(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
+  HistogramData::BinEdges xAxis(inputWorkspace->sharedX(0));
   const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
@@ -310,8 +325,8 @@ void SofQWCentre::makeDistribution(API::MatrixWorkspace_sptr outputWS,
 
   const size_t numQBins = outputWS->getNumberHistograms();
   for (size_t i = 0; i < numQBins; ++i) {
-    MantidVec &Y = outputWS->dataY(i);
-    MantidVec &E = outputWS->dataE(i);
+    auto &Y = outputWS->mutableY(i);
+    auto &E = outputWS->mutableE(i);
     std::transform(Y.begin(), Y.end(), Y.begin(),
                    std::bind2nd(std::divides<double>(), widths[i + 1]));
     std::transform(E.begin(), E.end(), E.begin(),

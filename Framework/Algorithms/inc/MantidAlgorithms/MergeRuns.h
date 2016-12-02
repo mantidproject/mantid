@@ -7,13 +7,20 @@
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
+#include <boost/shared_ptr.hpp>
+#include <list>
+#include <vector>
 
 namespace Mantid {
 namespace API {
 class WorkspaceGroup;
+}
+namespace HistogramData {
+class HistogramX;
 }
 namespace Algorithms {
 /** Combines the data contained in an arbitrary number of input workspaces.
@@ -63,8 +70,6 @@ namespace Algorithms {
 */
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
-  MergeRuns();
-  ~MergeRuns() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MergeRuns"; }
   /// Summary of algorithms purpose
@@ -134,24 +139,29 @@ private:
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
                             const API::MatrixWorkspace_const_sptr &ws2,
                             std::vector<double> &params) const;
-  void noOverlapParams(const MantidVec &X1, const MantidVec &X2,
+  void noOverlapParams(const HistogramData::HistogramX &X1,
+                       const HistogramData::HistogramX &X2,
                        std::vector<double> &params) const;
-  void intersectionParams(const MantidVec &X1, int64_t &i, const MantidVec &X2,
+  void intersectionParams(const HistogramData::HistogramX &X1, int64_t &i,
+                          const HistogramData::HistogramX &X2,
                           std::vector<double> &params) const;
-  void inclusionParams(const MantidVec &X1, int64_t &i, const MantidVec &X2,
+  void inclusionParams(const HistogramData::HistogramX &X1, int64_t &i,
+                       const HistogramData::HistogramX &X2,
                        std::vector<double> &params) const;
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 
   /// List of input EVENT workspaces
   std::vector<Mantid::DataObjects::EventWorkspace_sptr> m_inEventWS;
   /// List of input matrix workspace
   std::list<API::MatrixWorkspace_sptr> m_inMatrixWS;
   /// Addition tables for event workspaces
-  std::vector<boost::shared_ptr<AdditionTable>> m_tables;
+  std::vector<AdditionTable> m_tables;
+  /// Total number of histograms in the output workspace
+  size_t m_outputSize = 0;
 };
 
 } // namespace Algorithm

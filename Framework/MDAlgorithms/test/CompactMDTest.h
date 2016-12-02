@@ -216,7 +216,8 @@ public:
                       outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
   }
-  void test_compact_md_throws_when_loading_empty_workspace() {
+
+  void test_compact_md_does_not_throw_when_loading_empty_workspace() {
     using namespace Mantid::DataObjects;
     const size_t numDims = 1;
     const double signal = 0.0;

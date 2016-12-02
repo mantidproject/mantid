@@ -33,7 +33,8 @@ For this reason, it is recomended to use the default when no prior knowledge is 
 
 The entropy is defined on the image :math:`\{x_j\}` as:
 
-.. math:: S = \sum_j \left(x_j/A\right) \sinh^{-1} \left(x_j/A\right)
+.. math:: S = \sum_j \left[ \sqrt{x_j^2 + A^2} - x_j \sinh^{-1}\left(\frac{x_j}{A}\right) \right]
+
 
 or
 
@@ -147,7 +148,7 @@ and the reconstructed image, i.e. Fourier transform (right).
        E.append(0.001)
 
    # Fill in five Fourier coefficients
-   # The input signal must be symmetric
+   # The input signal must be symmetric to get a real image
    Y[5] = Y[195] = 0.85
    Y[10] = Y[190] = 0.85
    Y[20] = Y[180] = 0.85
@@ -166,11 +167,11 @@ Output:
 
 .. testoutput:: ExFourierCoeffs
 
-   First  reconstructed coefficient: 0.849
-   Second reconstructed coefficient: 0.847
-   Third  reconstructed coefficient: 0.848
-   Fourth reconstructed coefficient: 0.901
-   Fifth  reconstructed coefficient: 0.899
+   First  reconstructed coefficient: 0.847
+   Second reconstructed coefficient: 0.846
+   Third  reconstructed coefficient: 0.846
+   Fourth reconstructed coefficient: 0.896
+   Fifth  reconstructed coefficient: 0.896
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -200,9 +201,9 @@ Output:
 
 .. testoutput:: ExMUSR00022725
 
-   Image at -1.359: 0.102
-   Image at 0.000: 0.010
-   Image at 1.359: 0.102
+   Image at -1.359: 0.100
+   Image at 0.000: 0.009
+   Image at 1.359: 0.100
 
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
@@ -316,20 +317,20 @@ image in order to obtain smooth results).
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=1, PositiveImage=False)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=False)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
 
    print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102])
-   print "Image at %.3f:  %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
+   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
    print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102])
 
 Output:
 
 .. testoutput:: ExRealPosImage
 
-   Image at 0.318: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
-   Image at 0.477:  5.843 (PositiveImage=False), 5.842 (PositiveImage=True)
-   Image at 0.637: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Image at 0.477: 5.842 (PositiveImage=False), 5.842 (PositiveImage=True)
+   Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
@@ -366,15 +367,15 @@ the reconstructed data is twice the size of the original (experimental) data.
    evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
    evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, ResolutionFactor=2)
 
-   print "Image at %.3f:  %.3f (ResolutionFactor=1)" % (image1.readX(0)[103], image1.readY(0)[103])
-   print "Image at %.3f: %.3f (ResolutionFactor=2)" % (image2.readX(0)[258], image2.readY(0)[258])
+   print "Image at %.3f: %.3f (ResolutionFactor=1)" % (image1.readX(0)[135], image1.readY(0)[135])
+   print "Image at %.3f: %.3f (ResolutionFactor=2)" % (image2.readX(0)[270], image2.readY(0)[270])
 
 Output:
 
 .. testoutput:: ExResolutionFactor
 
-   Image at -7.407:  0.000 (ResolutionFactor=1)
-   Image at -1.389: -0.081 (ResolutionFactor=2)
+   Image at 0.000: 0.015 (ResolutionFactor=1)
+   Image at 0.000: 0.079 (ResolutionFactor=2)
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
@@ -402,8 +403,6 @@ References
 [1] Anders Johannes Markvardsen, (2000). Polarised neutron diffraction measurements of PrBa2Cu3O6+x and the Bayesian statistical analysis of such data. DPhil. University of Oxford (http://ora.ox.ac.uk/objects/uuid:bef0c991-4e1c-4b07-952a-a0fe7e4943f7)
 
 [2] Skilling & Bryan, (1984). Maximum entropy image reconstruction: general algorithm. Mon. Not. R. astr. Soc. 211, 111-124.
-
-[3] Smith & Player, (1990). Deconvolution of bipolar ultrasonic signals using a modified maximum entropy method. J. Phys. D: Appl. Phys. 24, 1714-1721.
 
 .. categories::
 

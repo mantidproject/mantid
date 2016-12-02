@@ -3,6 +3,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -33,7 +35,6 @@ using namespace Mantid::Geometry;
 
 DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 
-//----------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
@@ -65,7 +66,6 @@ void ConvertCWSDMDtoHKL::init() {
                   "Name of file for HKL.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Exec
  */
 void ConvertCWSDMDtoHKL::exec() {

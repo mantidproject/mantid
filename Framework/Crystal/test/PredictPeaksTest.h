@@ -12,6 +12,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/Sample.h"
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

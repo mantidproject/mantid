@@ -17,8 +17,8 @@ class MockEntropy : public MaxentEntropy {
 public:
   MOCK_METHOD2(derivative,
                std::vector<double>(const std::vector<double> &, double));
-  MOCK_METHOD1(secondDerivative,
-               std::vector<double>(const std::vector<double> &));
+  MOCK_METHOD2(secondDerivative,
+               std::vector<double>(const std::vector<double> &, double));
   MOCK_METHOD2(correctValues,
                std::vector<double>(const std::vector<double> &, double));
 };
@@ -99,7 +99,7 @@ public:
     EXPECT_CALL(*transform, imageToData(vec2)).Times(1).WillOnce(Return(vec2));
     EXPECT_CALL(*transform, dataToImage(vec2)).Times(0);
     EXPECT_CALL(*entropy, derivative(vec2, 1)).Times(0);
-    EXPECT_CALL(*entropy, secondDerivative(vec2)).Times(0);
+    EXPECT_CALL(*entropy, secondDerivative(vec2, bkg)).Times(0);
     TS_ASSERT_THROWS(calculator.iterate(vec1, vec1, vec2, bkg),
                      std::runtime_error);
 
@@ -136,7 +136,7 @@ public:
         .WillRepeatedly(Return(vec1));
     EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(vec2));
     EXPECT_CALL(*entropy, derivative(vec2, 1)).Times(1).WillOnce(Return(vec2));
-    EXPECT_CALL(*entropy, secondDerivative(vec2))
+    EXPECT_CALL(*entropy, secondDerivative(vec2, bkg))
         .Times(1)
         .WillOnce(Return(vec2));
     TS_ASSERT_THROWS_NOTHING(calculator.iterate(vec1, vec1, vec2, bkg));
@@ -176,7 +176,7 @@ public:
         .WillRepeatedly(Return(vec1));
     EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(vec2));
     EXPECT_CALL(*entropy, derivative(vec2, 1)).Times(1).WillOnce(Return(vec2));
-    EXPECT_CALL(*entropy, secondDerivative(vec2))
+    EXPECT_CALL(*entropy, secondDerivative(vec2, bkg))
         .Times(1)
         .WillOnce(Return(vec2));
     // This is OK: data.size() = N * image.size()
@@ -190,7 +190,7 @@ public:
         .WillRepeatedly(Return(vec1));
     EXPECT_CALL(*transform, dataToImage(_)).Times(0);
     EXPECT_CALL(*entropy, derivative(_, _)).Times(0);
-    EXPECT_CALL(*entropy, secondDerivative(_)).Times(0);
+    EXPECT_CALL(*entropy, secondDerivative(_, _)).Times(0);
     // But this is not: N * data.size() = image.size()
     TS_ASSERT_THROWS(calculator.iterate(vec2, vec2, vec1, bkg),
                      std::runtime_error);
@@ -240,7 +240,9 @@ public:
         .WillRepeatedly(Return(datC));
     EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(img));
     EXPECT_CALL(*entropy, derivative(img, bkg)).Times(1).WillOnce(Return(img));
-    EXPECT_CALL(*entropy, secondDerivative(img)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, secondDerivative(img, bkg))
+        .Times(1)
+        .WillOnce(Return(img));
 
     TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg));
     TS_ASSERT_EQUALS(calculator.getChisq(), 2);
@@ -274,7 +276,9 @@ public:
         .WillRepeatedly(Return(datC));
     EXPECT_CALL(*transform, dataToImage(_)).Times(1).WillOnce(Return(img));
     EXPECT_CALL(*entropy, derivative(img, bkg)).Times(1).WillOnce(Return(img));
-    EXPECT_CALL(*entropy, secondDerivative(img)).Times(1).WillOnce(Return(img));
+    EXPECT_CALL(*entropy, secondDerivative(img, bkg))
+        .Times(1)
+        .WillOnce(Return(img));
 
     TS_ASSERT_THROWS_NOTHING(calculator.iterate(dat, err, img, bkg));
 

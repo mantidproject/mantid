@@ -8,9 +8,11 @@ from six.moves import range #pylint: disable=redefined-builtin
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
+
 class CreateLeBailFitInput(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
     """
+
     def category(self):
         """
         """
@@ -27,30 +29,30 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(FileProperty("ReflectionsFile","", FileAction.OptionalLoad, ['.hkl']),\
-                "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
+        self.declareProperty(FileProperty("ReflectionsFile","", FileAction.OptionalLoad, ['.hkl']),
+                             "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
 
-        self.declareProperty(FileProperty("FullprofParameterFile", "", FileAction.Load, ['.irf']),\
-                "Fullprof's .irf file containing the peak parameters.")
+        self.declareProperty(FileProperty("FullprofParameterFile", "", FileAction.Load, ['.irf']),
+                             "Fullprof's .irf file containing the peak parameters.")
 
-        self.declareProperty("GenerateBraggReflections", False,\
-                "Generate Bragg reflections other than reading a Fullprof .irf file. ")
+        self.declareProperty("GenerateBraggReflections", False,
+                             "Generate Bragg reflections other than reading a Fullprof .irf file. ")
 
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
-        self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator,\
-            direction=Direction.Input), "Maximum reflection (HKL) to generate")
+        self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator,
+                                              direction=Direction.Input), "Maximum reflection (HKL) to generate")
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
         self.declareProperty("LatticeConstant", -0.0, validator=FloatBoundedValidator(lower=1.0E-9),
                              doc="Lattice constant for cubic crystal.")
 
-        self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output),\
-                "Name of Table Workspace Containing Peak Parameters From .irf File.")
+        self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output),
+                             "Name of Table Workspace Containing Peak Parameters From .irf File.")
 
-        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output),\
-                "Name of Table Workspace Containing Peaks' Miller Indices From .prf File.")
+        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output),
+                             "Name of Table Workspace Containing Peaks' Miller Indices From .prf File.")
 
         return
 
@@ -89,10 +91,10 @@ class CreateLeBailFitInput(PythonAlgorithm):
         dummywsname = "Foo%d" % (rand)
         hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
 
-        api.LoadFullprofFile(\
-                Filename=hklfilename,\
-                PeakParameterWorkspace = hklwsname,\
-                OutputWorkspace = dummywsname)
+        api.LoadFullprofFile(
+            Filename=hklfilename,
+            PeakParameterWorkspace = hklwsname,
+            OutputWorkspace = dummywsname)
 
         hklws = AnalysisDataService.retrieve(hklwsname)
         if hklws is None:
@@ -101,7 +103,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
         api.DeleteWorkspace(Workspace=dummywsname)
 
         return hklws
-
 
     def createPeakParameterWorkspace(self, irffilename):
         """ Create TableWorkspace by importing Fullprof .irf file
@@ -147,7 +148,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
         api.DeleteWorkspace(Workspace=irfwsname)
 
         return tablews
-
 
     def generateBraggReflections(self, hklmax):
         """ Generate Bragg reflections from (0, 0, 0) to (HKL)_max

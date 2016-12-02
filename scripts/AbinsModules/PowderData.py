@@ -1,7 +1,8 @@
 import numpy as np
 
-from GeneralData import  GeneralData
-import  AbinsConstants
+from GeneralData import GeneralData
+import AbinsConstants
+
 
 class PowderData(GeneralData):
     """
@@ -22,31 +23,30 @@ class PowderData(GeneralData):
         self._check_items(items=items)
         self._data = items
 
-
     def extract(self):
         self._check_items(items=self._data)
         return self._data
 
-
     def _check_items(self, items=None):
 
-         if not isinstance(items, dict):
-             raise ValueError("Invalid value. Dictionary with the following entries : %s" % AbinsConstants.all_keywords_powder_data + " was expected")
+        if not isinstance(items, dict):
+            raise ValueError("Invalid value. Dictionary with the following entries : %s" %
+                             AbinsConstants.ALL_KEYWORDS_POWDER_DATA + " was expected.")
 
-         if sorted(items.keys()) != sorted(AbinsConstants.all_keywords_powder_data):
+        if sorted(items.keys()) != sorted(AbinsConstants.ALL_KEYWORDS_POWDER_DATA):
             raise ValueError("Invalid structure of the dictionary.")
 
-         if not isinstance(items["a_tensors"], np.ndarray):
+        if not isinstance(items["a_tensors"], np.ndarray):
             raise ValueError("New value of a_tensor should be a numpy array.")
 
-         if not isinstance(items["b_tensors"], np.ndarray):
+        if not isinstance(items["b_tensors"], np.ndarray):
             raise ValueError("New value of Debye-Waller factors should be a numpy array.")
 
-         if items["a_tensors"].shape[0] != self._num_atoms:
+        if items["a_tensors"].shape[0] != self._num_atoms:
             raise ValueError("Invalid dimension of a_tensors.")
 
-         if items["b_tensors"].shape[0] != self._num_atoms:
-             raise ValueError("Invalid dimension of b_tensors.")
+        if items["b_tensors"].shape[0] != self._num_atoms:
+            raise ValueError("Invalid dimension of b_tensors.")
 
     def __str__(self):
         return "Powder data"

@@ -11,7 +11,7 @@ Mantid::Kernel::Logger g_log("Stretch");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent) {
+Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent), m_save(false) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -57,6 +57,10 @@ Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent) {
           SLOT(handleSampleInputReady(const QString &)));
   connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot,
           SLOT(setEnabled(bool)));
+
+  // Connect the plot and save push buttons
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
 }
 
 void Stretch::setup() {}
@@ -110,7 +114,6 @@ void Stretch::run() {
 
   // Obtain save and plot state
   m_plotType = m_uiForm.cbPlot->currentText().toStdString();
-  m_save = m_uiForm.chkSave->isChecked();
 
   // Collect input from options section
   const auto background = m_uiForm.cbBackground->currentText().toStdString();
@@ -151,11 +154,14 @@ void Stretch::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
+
+  m_uiForm.cbPlot->setEnabled(true);
+  m_plotType = m_uiForm.cbPlot->currentText().toStdString();
 }
 
 /**
- * Handles the saving and plotting of workspaces after execution
- */
+* Handles the saving and plotting of workspaces after execution
+*/
 void Stretch::algorithmComplete(const bool &error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
@@ -163,49 +169,24 @@ void Stretch::algorithmComplete(const bool &error) {
   if (error)
     return;
 
-  // Obtain workspace pointers
-  WorkspaceGroup_sptr fitWorkspace;
-  WorkspaceGroup_sptr contourWorkspace;
-  try {
-    fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        m_fitWorkspaceName);
-    contourWorkspace =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            m_contourWorkspaceName);
-  } catch (std::runtime_error) {
-    if (m_save || !m_plotType.compare("None")) {
-      g_log.error("Plotting and Saving could not be executed as the Output "
-                  "Workspaces could not be found.");
-    }
-  }
-
-  // Handle saving
-  if (m_save)
-    saveWorkspaces(QString::fromStdString(fitWorkspace->getName()),
-                   QString::fromStdString(contourWorkspace->getName()));
-
-  // Handle plotting
-  if (m_plotType.compare("None") != 0) {
-    auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
-    auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
-    if (sigma.right(5).compare("Sigma") == 0) {
-      if (beta.right(4).compare("Beta") == 0) {
-        plotWorkspaces(beta, sigma);
-      }
-    } else {
-      g_log.error(
-          "Beta and Sigma workspace were not found and could not be plotted.");
-    }
-  }
+  // Enables plot and save
+  m_uiForm.cbPlot->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
  * Handles the saving of workspaces post alogrithm completion
- * @param fitWorkspace		:: The name of the fit workspace to save
- * @param contourWorkspace	:: The name of the contour workspace to save
+ * when save button is clicked
  */
-void Stretch::saveWorkspaces(const QString &fitWorkspace,
-                             const QString &contourWorkspace) {
+void Stretch::saveWorkspaces() {
+
+  auto fitWorkspace = QString::fromStdString(m_fitWorkspaceName);
+  auto contourWorkspace = QString::fromStdString(m_contourWorkspaceName);
+  // Check workspaces exist
+  IndirectTab::checkADSForPlotSaveWorkspace(m_fitWorkspaceName, false);
+  IndirectTab::checkADSForPlotSaveWorkspace(m_contourWorkspaceName, false);
+
   auto saveDir = QString::fromStdString(
       Mantid::Kernel::ConfigService::Instance().getString(
           "defaultsave.directory"));
@@ -219,24 +200,38 @@ void Stretch::saveWorkspaces(const QString &fitWorkspace,
 
 /**
  * Handles the plotting of workspace post algorithm completion
- * @param betaWorkspace		:: The name of the beta workspace to plot
- * @param sigmaWorkspace	:: The name of the sigma workspace to plot
  */
-void Stretch::plotWorkspaces(const QString &betaWorkspace,
-                             const QString &sigmaWorkspace) {
-  QString pyInput = "from mantidplot import plot2D\n";
-  if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
-    pyInput += "importMatrixWorkspace('";
-    pyInput += betaWorkspace;
-    pyInput += "').plotGraph2D()\n";
-  }
-  if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
-    pyInput += "importMatrixWorkspace('";
-    pyInput += sigmaWorkspace;
-    pyInput += "').plotGraph2D()\n";
-  }
+void Stretch::plotWorkspaces() {
 
-  m_pythonRunner.runPythonCode(pyInput);
+  WorkspaceGroup_sptr fitWorkspace;
+  fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      m_fitWorkspaceName);
+
+  auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
+  auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
+  // Check Sigma and Beta workspaces exist
+  if (sigma.right(5).compare("Sigma") == 0) {
+    if (beta.right(4).compare("Beta") == 0) {
+
+      // Plot Beta workspace
+      QString pyInput = "from mantidplot import plot2D\n";
+      if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
+        pyInput += "importMatrixWorkspace('";
+        pyInput += beta;
+        pyInput += "').plotGraph2D()\n";
+      }
+      // Plot Sigma workspace
+      if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
+        pyInput += "importMatrixWorkspace('";
+        pyInput += sigma;
+        pyInput += "').plotGraph2D()\n";
+      }
+      m_pythonRunner.runPythonCode(pyInput);
+    }
+  } else {
+    g_log.error(
+        "Beta and Sigma workspace were not found and could not be plotted.");
+  }
 }
 
 /**

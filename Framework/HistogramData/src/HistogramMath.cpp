@@ -54,9 +54,12 @@ Histogram operator/(Histogram histogram, const double factor) {
 }
 
 namespace {
-void checkSameXYMode(const Histogram &hist1, const Histogram &hist2) {
+void checkSameXMode(const Histogram &hist1, const Histogram &hist2) {
   if (hist1.xMode() != hist2.xMode())
     throw std::runtime_error("Invalid operation: Histogram::XModes must match");
+}
+
+void checkSameYMode(const Histogram &hist1, const Histogram &hist2) {
   if (hist1.yMode() != hist2.yMode())
     throw std::runtime_error("Invalid operation: Histogram::YModes must match");
 }
@@ -70,7 +73,8 @@ void checkSameX(const Histogram &hist1, const Histogram &hist2) {
 
 /// Adds data in other Histogram to this Histogram, propagating uncertainties.
 Histogram &operator+=(Histogram &histogram, const Histogram &other) {
-  checkSameXYMode(histogram, other);
+  checkSameXMode(histogram, other);
+  checkSameYMode(histogram, other);
   checkSameX(histogram, other);
   histogram.mutableY() += other.y();
   std::transform(histogram.e().cbegin(), histogram.e().cend(),
@@ -83,13 +87,63 @@ Histogram &operator+=(Histogram &histogram, const Histogram &other) {
 /// Subtracts data in other Histogram from this Histogram, propagating
 /// uncertainties.
 Histogram &operator-=(Histogram &histogram, const Histogram &other) {
-  checkSameXYMode(histogram, other);
+  checkSameXMode(histogram, other);
+  checkSameYMode(histogram, other);
   checkSameX(histogram, other);
   histogram.mutableY() -= other.y();
   std::transform(histogram.e().cbegin(), histogram.e().cend(),
                  other.e().begin(), histogram.mutableE().begin(),
                  [](const double &lhs, const double &rhs)
                      -> double { return std::sqrt(lhs * lhs + rhs * rhs); });
+  return histogram;
+}
+
+/// Multiplies data in other Histogram with this Histogram, propagating
+/// uncertainties.
+Histogram &operator*=(Histogram &histogram, const Histogram &other) {
+  if (histogram.yMode() == Histogram::YMode::Counts &&
+      other.yMode() == Histogram::YMode::Counts)
+    throw std::runtime_error("Invalid operation: Cannot multiply two "
+                             "histograms with YMode::Counts. Convert (one of "
+                             "them) to a distribution (YMode::Frequencies).");
+  checkSameXMode(histogram, other);
+  checkSameX(histogram, other);
+
+  auto &y1 = histogram.mutableY();
+  auto &e1 = histogram.mutableE();
+  const auto &y2 = other.y();
+  const auto &e2 = other.e();
+  for (size_t i = 0; i < y1.size(); ++i)
+    e1[i] = sqrt(pow(e1[i] * y2[i], 2) + pow(e2[i] * y1[i], 2));
+  y1 *= y2;
+  if (other.yMode() == Histogram::YMode::Counts)
+    histogram.setYMode(Histogram::YMode::Counts);
+  return histogram;
+}
+
+/// Divides data in this Histogram by other Histogram, propagating
+/// uncertainties.
+Histogram &operator/=(Histogram &histogram, const Histogram &other) {
+  if (histogram.yMode() == Histogram::YMode::Frequencies &&
+      other.yMode() == Histogram::YMode::Counts)
+    throw std::runtime_error(
+        "Invalid operation: Cannot divide histogram with YMode::Frequencies by "
+        "histogram with YMode::Counts. Convert numerator to YMode::Counts or "
+        "denominator to a distribution (YMode::Frequencies).");
+  checkSameXMode(histogram, other);
+  checkSameX(histogram, other);
+
+  auto &y1 = histogram.mutableY();
+  auto &e1 = histogram.mutableE();
+  const auto &y2 = other.y();
+  const auto &e2 = other.e();
+  for (size_t i = 0; i < y1.size(); ++i) {
+    auto inv_y2 = 1.0 / y2[i];
+    e1[i] = sqrt(pow(e1[i], 2) + pow(e2[i] * y1[i] * inv_y2, 2)) * fabs(inv_y2);
+    y1[i] *= inv_y2;
+  }
+  if (histogram.yMode() == other.yMode())
+    histogram.setYMode(Histogram::YMode::Frequencies);
   return histogram;
 }
 
@@ -101,6 +155,16 @@ Histogram operator+(Histogram histogram, const Histogram &other) {
 /// Subtracts data from two Histograms, propagating uncertainties.
 Histogram operator-(Histogram histogram, const Histogram &other) {
   return histogram -= other;
+}
+
+/// Multiplies data from two Histograms, propagating uncertainties.
+Histogram operator*(Histogram histogram, const Histogram &other) {
+  return histogram *= other;
+}
+
+/// Divides data from two Histograms, propagating uncertainties.
+Histogram operator/(Histogram histogram, const Histogram &other) {
+  return histogram /= other;
 }
 
 } // namespace HistogramData

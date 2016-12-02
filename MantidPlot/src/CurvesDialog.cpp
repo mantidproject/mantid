@@ -28,31 +28,33 @@
  *                                                                         *
  ***************************************************************************/
 #include "CurvesDialog.h"
-#include "Graph.h"
-#include "Table.h"
-#include "Matrix.h"
-#include "FunctionCurve.h"
-#include "PlotCurve.h"
 #include "ApplicationWindow.h"
 #include "Folder.h"
-#include "pixmaps.h"
+#include "FunctionCurve.h"
+#include "Graph.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "Matrix.h"
+#include "PlotCurve.h"
+#include "Table.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QPushButton>
-#include <QLabel>
-#include <QComboBox>
 #include <QCheckBox>
 #include <QCloseEvent>
+#include <QComboBox>
 #include <QContextMenuEvent>
+#include <QGroupBox>
+#include <QKeySequence>
+#include <QLabel>
 #include <QLayout>
 #include <QListWidget>
-#include <QGroupBox>
-#include <QPixmap>
-#include <QShortcut>
-#include <QKeySequence>
 #include <QMenu>
+#include <QPixmap>
+#include <QPushButton>
+#include <QShortcut>
 
 #include <QMessageBox>
+
+using namespace MantidQt::API;
 
 CurvesDialog::CurvesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl)
     : QDialog(g, fl), d_app(app), d_graph(g) {
@@ -206,7 +208,7 @@ void CurvesDialog::showCurveBtn(int) {
   }
 
   PlotCurve *c = dynamic_cast<PlotCurve *>(it);
-  if (c && c->type() == Graph::Function) {
+  if (c && c->type() == GraphOptions::Function) {
     btnEditFunction->setEnabled(true);
     btnAssociations->setEnabled(false);
     btnRange->setEnabled(false);
@@ -216,7 +218,7 @@ void CurvesDialog::showCurveBtn(int) {
   btnAssociations->setEnabled(true);
 
   btnRange->setEnabled(true);
-  if (c && c->type() == Graph::ErrorBars)
+  if (c && c->type() == GraphOptions::ErrorBars)
     btnRange->setEnabled(false);
 }
 
@@ -289,25 +291,25 @@ void CurvesDialog::init() {
   }
 
   int style = d_app->defaultCurveStyle;
-  if (style == Graph::Line)
+  if (style == GraphOptions::Line)
     boxStyle->setCurrentIndex(0);
-  else if (style == Graph::Scatter)
+  else if (style == GraphOptions::Scatter)
     boxStyle->setCurrentIndex(1);
-  else if (style == Graph::LineSymbols)
+  else if (style == GraphOptions::LineSymbols)
     boxStyle->setCurrentIndex(2);
-  else if (style == Graph::VerticalDropLines)
+  else if (style == GraphOptions::VerticalDropLines)
     boxStyle->setCurrentIndex(3);
-  else if (style == Graph::Spline)
+  else if (style == GraphOptions::Spline)
     boxStyle->setCurrentIndex(4);
-  else if (style == Graph::VerticalSteps)
+  else if (style == GraphOptions::VerticalSteps)
     boxStyle->setCurrentIndex(5);
-  else if (style == Graph::HorizontalSteps)
+  else if (style == GraphOptions::HorizontalSteps)
     boxStyle->setCurrentIndex(6);
-  else if (style == Graph::Area)
+  else if (style == GraphOptions::Area)
     boxStyle->setCurrentIndex(7);
-  else if (style == Graph::VerticalBars)
+  else if (style == GraphOptions::VerticalBars)
     boxStyle->setCurrentIndex(8);
-  else if (style == Graph::HorizontalBars)
+  else if (style == GraphOptions::HorizontalBars)
     boxStyle->setCurrentIndex(9);
 
   QList<MdiSubWindow *> wList = d_app->windowsList();
@@ -372,13 +374,13 @@ bool CurvesDialog::addCurve(const QString &name) {
 
     switch (boxMatrixStyle->currentIndex()) {
     case 0:
-      d_graph->plotSpectrogram(m, Graph::ColorMap);
+      d_graph->plotSpectrogram(m, GraphOptions::ColorMap);
       break;
     case 1:
-      d_graph->plotSpectrogram(m, Graph::Contour);
+      d_graph->plotSpectrogram(m, GraphOptions::Contour);
       break;
     case 2:
-      d_graph->plotSpectrogram(m, Graph::GrayScale);
+      d_graph->plotSpectrogram(m, GraphOptions::GrayScale);
       break;
     case 3:
       d_graph->addHistogram(m);
@@ -404,23 +406,25 @@ bool CurvesDialog::addCurve(const QString &name) {
     cl.sSize = d_app->defaultSymbolSize;
     cl.sType = symbol;
 
-    if (style == Graph::Line)
+    if (style == GraphOptions::Line)
       cl.sType = 0;
-    else if (style == Graph::VerticalBars || style == Graph::HorizontalBars) {
+    else if (style == GraphOptions::VerticalBars ||
+             style == GraphOptions::HorizontalBars) {
       cl.filledArea = 1;
       cl.lCol = 0;
       cl.aCol = color;
       cl.sType = 0;
-    } else if (style == Graph::Area) {
+    } else if (style == GraphOptions::Area) {
       cl.filledArea = 1;
       cl.aCol = color;
       cl.sType = 0;
-    } else if (style == Graph::VerticalDropLines)
+    } else if (style == GraphOptions::VerticalDropLines)
       cl.connectType = 2;
-    else if (style == Graph::VerticalSteps || style == Graph::HorizontalSteps) {
+    else if (style == GraphOptions::VerticalSteps ||
+             style == GraphOptions::HorizontalSteps) {
       cl.connectType = 3;
       cl.sType = 0;
-    } else if (style == Graph::Spline)
+    } else if (style == GraphOptions::Spline)
       cl.connectType = 5;
 
     d_graph->updateCurveLayout(c, &cl);
@@ -493,34 +497,34 @@ int CurvesDialog::curveStyle() {
   int style = 0;
   switch (boxStyle->currentIndex()) {
   case 0:
-    style = Graph::Line;
+    style = GraphOptions::Line;
     break;
   case 1:
-    style = Graph::Scatter;
+    style = GraphOptions::Scatter;
     break;
   case 2:
-    style = Graph::LineSymbols;
+    style = GraphOptions::LineSymbols;
     break;
   case 3:
-    style = Graph::VerticalDropLines;
+    style = GraphOptions::VerticalDropLines;
     break;
   case 4:
-    style = Graph::Spline;
+    style = GraphOptions::Spline;
     break;
   case 5:
-    style = Graph::VerticalSteps;
+    style = GraphOptions::VerticalSteps;
     break;
   case 6:
-    style = Graph::HorizontalSteps;
+    style = GraphOptions::HorizontalSteps;
     break;
   case 7:
-    style = Graph::Area;
+    style = GraphOptions::Area;
     break;
   case 8:
-    style = Graph::VerticalBars;
+    style = GraphOptions::VerticalBars;
     break;
   case 9:
-    style = Graph::HorizontalBars;
+    style = GraphOptions::HorizontalBars;
     break;
   }
   return style;
@@ -537,7 +541,7 @@ void CurvesDialog::showCurveRange(bool on) {
         continue;
 
       auto plotCurve = dynamic_cast<PlotCurve *>(it);
-      if (plotCurve && plotCurve->type() != Graph::Function) {
+      if (plotCurve && plotCurve->type() != GraphOptions::Function) {
         if (DataCurve *c = dynamic_cast<DataCurve *>(it)) {
           lst << c->title().text() + "[" + QString::number(c->startRow() + 1) +
                      ":" + QString::number(c->endRow() + 1) + "]";

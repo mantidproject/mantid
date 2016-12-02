@@ -38,14 +38,21 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
 
         # wrong previous array
         with self.assertRaises(ValueError):
+<<<<<<< HEAD
             self.simple_freq_generator.construct_freq_combinations(fundamentals_array=f_array,
                                                                    fundamentals_coefficients=f_coeff,
                                                                    previous_array=[1, 2], 
                                                                    quantum_order=q_order)
+=======
+            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=np.asarray([1, 2]),
+                                                                   previous_array=[1, 2],
+                                                                   quantum_order=AbinsConstants.FIRST_OVERTONE)
+>>>>>>> master
 
-        # wrong fundamentals
+        # wrong FUNDAMENTALS
         with self.assertRaises(ValueError):
             self.simple_freq_generator.construct_freq_combinations(fundamentals_array=[1, 2],
+<<<<<<< HEAD
                                                                    fundamentals_coefficients=f_coeff,
                                                                    previous_array=p_array,
                                                                    quantum_order=q_order)
@@ -56,6 +63,10 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
                                                                    fundamentals_coefficients=[0, 1],
                                                                    previous_array=p_array,
                                                                    quantum_order=q_order)
+=======
+                                                                   previous_array=np.asarray([1, 2]),
+                                                                   quantum_order=AbinsConstants.FUNDAMENTALS)
+>>>>>>> master
 
         # wrong quantum order event
         with self.assertRaises(ValueError):
@@ -64,6 +75,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
                                                                    previous_array=p_array,
                                                                    quantum_order=-1)
 
+<<<<<<< HEAD
         # wrong previous coefficients
         with self.assertRaises(ValueError):
             self.simple_freq_generator.construct_freq_combinations(fundamentals_array=f_array,
@@ -76,12 +88,17 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         array = np.arange(AbinsParameters.bin_width, 10.0 * AbinsParameters.bin_width, AbinsParameters.bin_width)
         array_coeff = np.arange(array.size, dtype=AbinsConstants.int_type)
         correct_coefficients = np.arange(array.size, dtype=AbinsConstants.int_type)
+=======
+        # use case: quantum order event 1 (FUNDAMENTALS)
+        array = np.arange(AbinsParameters.bin_width, 10.0 * AbinsParameters.bin_width, AbinsParameters.bin_width)
+        correct_coefficients = np.arange(array.size, dtype=AbinsConstants.INT_TYPE)
+>>>>>>> master
 
         generated_array, generated_coefficients = \
             self.simple_freq_generator.construct_freq_combinations(fundamentals_array=array,
                                                                    fundamentals_coefficients=array_coeff,
                                                                    previous_array=array,
-                                                                   quantum_order=AbinsConstants.fundamentals)  # n = 1
+                                                                   quantum_order=AbinsConstants.FUNDAMENTALS)  # n = 1
 
         # generated_array = [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.]
         # generated_coefficients =  [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -93,7 +110,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         array_1 = array
         array_1_coeff = np.arange(array_1.size,dtype=AbinsConstants.int_type)
         array_1_size = array_1.size
-        coefficients_1 = np.arange(array.size, dtype=AbinsConstants.int_type)
+        coefficients_1 = np.arange(array.size, dtype=AbinsConstants.INT_TYPE)
 
         # array_1 = [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.]
         # coefficients_1 = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -103,7 +120,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
                                                                    fundamentals_coefficients=array_1_coeff,
                                                                    previous_array=array_1,
                                                                    previous_coefficients=coefficients_1,
-                                                                   quantum_order=AbinsConstants.first_overtone)  # n = 2
+                                                                   quantum_order=AbinsConstants.FIRST_OVERTONE)  # n = 2
 
         correct_array_1 = np.tile(array_1, array_1_size)
         correct_coefficients_1 = np.asarray(list(product(range(array_1_size), range(array_1_size))))

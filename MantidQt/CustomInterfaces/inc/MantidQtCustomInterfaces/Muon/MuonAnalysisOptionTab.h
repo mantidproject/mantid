@@ -83,12 +83,18 @@ public:
   /// Return currently selected new plot policy
   NewPlotPolicy newPlotPolicy();
 
+  /// Return multiple fitting mode on/off selection
+  Muon::MultiFitState getMultiFitState() const;
+
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
 
   /// Emitted when plot style parameters has changed.
   void plotStyleChanged();
+
+  /// Emitted when multi fitting mode is turned on/off
+  void multiFitStateChanged(int state);
 
 private:
   /// Default widget values

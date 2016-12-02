@@ -1,6 +1,3 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -25,7 +22,7 @@ NearestNeighbours::NearestNeighbours(
     boost::shared_ptr<const Instrument> instrument,
     const ISpectrumDetectorMapping &spectraMap, bool ignoreMaskedDetectors)
     : m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8),
-      m_cutoff(-DBL_MAX), m_scale(), m_radius(0),
+      m_cutoff(-DBL_MAX), m_radius(0),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);
 }
@@ -42,7 +39,7 @@ NearestNeighbours::NearestNeighbours(
     int nNeighbours, boost::shared_ptr<const Instrument> instrument,
     const ISpectrumDetectorMapping &spectraMap, bool ignoreMaskedDetectors)
     : m_instrument(instrument), m_spectraMap(spectraMap),
-      m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_scale(), m_radius(0),
+      m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_radius(0),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);
 }
@@ -145,7 +142,7 @@ void NearestNeighbours::build(const int noNeighbours) {
   // at this
   IDetector_const_sptr firstDet = (*spectraDets.begin()).second;
   firstDet->getBoundingBox(bbox);
-  m_scale.reset(new V3D(bbox.width()));
+  m_scale = V3D(bbox.width());
   ANNpointArray dataPoints = annAllocPts(nspectra, 3);
   MapIV pointNoToVertex;
 
@@ -154,7 +151,7 @@ void NearestNeighbours::build(const int noNeighbours) {
   for (detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt) {
     IDetector_const_sptr detector = detIt->second;
     const specnum_t spectrum = detIt->first;
-    V3D pos = detector->getPos() / (*m_scale);
+    V3D pos = detector->getPos() / m_scale;
     dataPoints[pointNo][0] = pos.X();
     dataPoints[pointNo][1] = pos.Y();
     dataPoints[pointNo][2] = pos.Z();
@@ -180,12 +177,12 @@ void NearestNeighbours::build(const int noNeighbours) {
                         );
     // The distances that are returned are in our scaled coordinate
     // system. We store the real space ones.
-    V3D realPos = V3D(scaledPos[0], scaledPos[1], scaledPos[2]) * (*m_scale);
+    V3D realPos = V3D(scaledPos[0], scaledPos[1], scaledPos[2]) * m_scale;
     for (int i = 0; i < m_noNeighbours; i++) {
       ANNidx index = nnIndexList[i];
       V3D neighbour = V3D(dataPoints[index][0], dataPoints[index][1],
                           dataPoints[index][2]) *
-                      (*m_scale);
+                      m_scale;
       V3D distance = neighbour - realPos;
       double separation = distance.norm();
       boost::add_edge(m_specToVertex[detIt->first], // from
@@ -256,7 +253,7 @@ NearestNeighbours::getSpectraDetectors(
     const std::vector<detid_t> detIDs(citr->second.begin(), citr->second.end());
     IDetector_const_sptr det = instrument->getDetectorG(detIDs);
     // Always ignore monitors and ignore masked detectors if requested.
-    bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
+    bool heedMasking = m_bIgnoreMaskedDetectors && det->isMasked();
     if (!det->isMonitor() && !heedMasking) {
       spectra.emplace(citr->first, det);
     }

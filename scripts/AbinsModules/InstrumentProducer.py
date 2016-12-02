@@ -1,17 +1,16 @@
-from Instruments import ToscaInstrument, NoneInstrument
+from Instruments import ToscaInstrument, TwoDMap
 from AbinsModules import AbinsConstants
+
 
 class InstrumentProducer(object):
     def __init__(self):
         pass
 
-    def produceInstrument(self, name=None):
+    def produce_instrument(self, name=None):
 
-        if not name in AbinsConstants.all_instruments:
-            raise ValueError("Unknown instrument: %s"%name)
+        if name not in AbinsConstants.ALL_INSTRUMENTS:
+            raise ValueError("Unknown instrument: %s" % name)
         elif name == "TOSCA":
             return ToscaInstrument("TOSCA")
-        elif name == "None":
-            return NoneInstrument("None")
-
-
+        elif name == "TwoDMap":
+            return TwoDMap("TwoDMap")

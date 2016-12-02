@@ -45,9 +45,9 @@ const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
  *
  * @returns workspace index corresponding to the given detector ID
  */
-size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
+size_t getIndexFromDetectorID(const MatrixWorkspace &ws, detid_t detid) {
   const std::vector<detid_t> input = {detid};
-  std::vector<size_t> result = ws->getIndicesFromDetectorIDs(input);
+  std::vector<size_t> result = ws.getIndicesFromDetectorIDs(input);
   if (result.empty())
     throw std::invalid_argument(
         "Could not find the spectra corresponding to detector ID " +
@@ -161,7 +161,7 @@ void CalculateTransmission::exec() {
   std::vector<size_t> transmissionIndices;
   if (usingMonitor) {
     const size_t transmissionMonitorIndex =
-        getIndexFromDetectorID(sampleWS, transMonitorID);
+        getIndexFromDetectorID(*sampleWS, transMonitorID);
     transmissionIndices.push_back(transmissionMonitorIndex);
     logIfNotMonitor(sampleWS, directWS, transmissionMonitorIndex);
   } else if (usingROI) {
@@ -182,7 +182,7 @@ void CalculateTransmission::exec() {
   const bool normaliseToMonitor = !isEmpty(beamMonitorID);
   size_t beamMonitorIndex = 0;
   if (normaliseToMonitor) {
-    beamMonitorIndex = getIndexFromDetectorID(sampleWS, beamMonitorID);
+    beamMonitorIndex = getIndexFromDetectorID(*sampleWS, beamMonitorID);
     logIfNotMonitor(sampleWS, directWS, beamMonitorIndex);
 
     BOOST_FOREACH (size_t transmissionIndex, transmissionIndices)
@@ -296,7 +296,7 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
 */
 API::MatrixWorkspace_sptr
 CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
-                           std::vector<double> rebinParams,
+                           const std::vector<double> &rebinParams,
                            const std::string fitMethod) {
   MatrixWorkspace_sptr output =
       this->extractSpectra(raw, std::vector<size_t>(1, 0));
@@ -466,7 +466,7 @@ CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order,
 *  @throw runtime_error if the rebin algorithm fails during execution
 */
 API::MatrixWorkspace_sptr
-CalculateTransmission::rebin(std::vector<double> &binParams,
+CalculateTransmission::rebin(const std::vector<double> &binParams,
                              API::MatrixWorkspace_sptr ws) {
   double start = m_done;
   IAlgorithm_sptr childAlg =

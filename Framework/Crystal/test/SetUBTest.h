@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidAPI/Sample.h"
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

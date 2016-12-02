@@ -134,6 +134,11 @@ void export_ConfigService() {
            (arg("self"), arg("path")),
            "Append a directory to the current list of data search paths")
 
+      .def("appendDataSearchSubDir", &ConfigServiceImpl::appendDataSearchSubDir,
+           (arg("self"), arg("subdir")),
+           "Appends a sub-directory to each data search directory "
+           "and appends the new paths back to datasearch directories")
+
       .def("setDataSearchDirs",
            (void (ConfigServiceImpl::*)(const std::string &)) &
                ConfigServiceImpl::setDataSearchDirs,

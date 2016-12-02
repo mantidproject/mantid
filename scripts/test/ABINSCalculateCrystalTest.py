@@ -36,8 +36,8 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
 
         filename = self.Si2 + ".phonon"
 
-        _castep_reader = LoadCASTEP(input_DFT_filename=filename)
-        _good_data = _castep_reader.readPhononFile()
+        _castep_reader = LoadCASTEP(input_dft_filename=filename)
+        _good_data = _castep_reader.read_phonon_file()
 
         # wrong filename
         with self.assertRaises(ValueError):
@@ -63,42 +63,67 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
         # calculation of crystal data
         _good_data = self._get_good_data(filename=name)
 
+<<<<<<< HEAD
         _good_tester = CalculateCrystal(filename=name + ".phonon", temperature=self._temperature,
                                         abins_data=_good_data["DFT"])
         calculated_data = _good_tester.calculateData().extract()
+=======
+        _good_tester = CalculateCrystal(filename=name + ".phonon",
+                                        temperature=self._temperature,
+                                        abins_data=_good_data["DFT"])
+        calculated_data = _good_tester.calculate_data().extract()
+>>>>>>> master
 
         # check if evaluated crystal data  is correct
         self.assertEqual(True, np.allclose(_good_data["dw_crystal_data"], calculated_data["dw_crystal_data"]))
 
         # check if loading crystal data is correct
+<<<<<<< HEAD
         new_tester = CalculateCrystal(filename=name + ".phonon", temperature=self._temperature,
                                       abins_data=_good_data["DFT"])
         loaded_data = new_tester.loadData().extract()
+=======
+        new_tester = CalculateCrystal(filename=name + ".phonon",
+                                      temperature=self._temperature,
+                                      abins_data=_good_data["DFT"])
+        loaded_data = new_tester.load_data().extract()
+>>>>>>> master
 
         self.assertEqual(True, np.allclose(calculated_data["dw_crystal_data"], loaded_data["dw_crystal_data"]))
 
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename + ".phonon")
+        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
         _crystal = self._prepare_data(filename=filename + "_crystal_DW.txt")
 
+<<<<<<< HEAD
         return {"DFT": _CASTEP_reader.readPhononFile(), "dw_crystal_data": _crystal}
+=======
+        return {"DFT": _CASTEP_reader.read_phonon_file(), "dw_crystal_data": _crystal}
+>>>>>>> master
 
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
         correct_data = None
         with open(filename) as data_file:
+<<<<<<< HEAD
             # noinspection PyPep8
             correct_data = json.loads(data_file.read().replace("\n"    , " ").
                                       replace("array" , "").
                                       replace("(["    , "[").
                                       replace("])"    , "]").
                                       replace("'"     , '"'))
+=======
+            correct_data = json.loads(data_file.read().replace("\n", " ").
+                                      replace("array", "").
+                                      replace("([",    "[").
+                                      replace("])",    "]").
+                                      replace("'",     '"'))
+>>>>>>> master
 
         correct_data = np.asarray(correct_data)
 
         return correct_data
-
 
 if __name__ == '__main__':
     unittest.main()

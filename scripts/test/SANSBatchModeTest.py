@@ -1,4 +1,5 @@
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import re
 # Need to import mantid before we import SANSUtility

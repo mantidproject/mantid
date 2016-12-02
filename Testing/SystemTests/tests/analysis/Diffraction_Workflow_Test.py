@@ -9,6 +9,7 @@ import os
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 
+
 class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -33,7 +34,6 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
         # determine where to save
         savedir = os.path.abspath(os.path.curdir)
-
 
         # Basic parameters  for  Triphylite Crystal
         #Name of the workspaces to create
@@ -84,7 +84,6 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         # Save for SHELX
         SaveHKL(InputWorkspace=ws+'_peaksFFT', Filename=savedir+'/'+ws+'FFT.hkl')
 
-
         # Copy the UB matrix back to the original workspace
         CopySample(InputWorkspace=ws+'_peaksFFT',OutputWorkspace=ws,
                    CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
@@ -95,7 +94,6 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         # Bin to a regular grid
         BinMD(InputWorkspace=ws+'_HKL',AlignedDim0="[H,0,0], -20, 20, 800",AlignedDim1="[0,K,0], -5, 5, 50",
               AlignedDim2="[0,0,L], -10, 10,  800",OutputWorkspace=ws+'_binned')
-
 
         originalUB = numpy.array(mtd["TOPAZ_3132"].sample().getOrientedLattice().getUB())
         w = mtd["TOPAZ_3132"]
@@ -112,7 +110,6 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132',OutputWorkspace='TOPAZ_3132_HKL',
                                         OutputDimensions='HKL',LorentzCorrection='1',SplitInto='2',SplitThreshold='150')
 
-
         # Bin to a line (H=0 to 6, L=3, K=3)
         BinMD(InputWorkspace='TOPAZ_3132_HKL',AxisAligned='0',
               BasisVector0='X,units,1,0,0',BasisVector1='Y,units,6.12323e-17,1,0',BasisVector2='2,units,-0,0,1',
@@ -127,7 +124,6 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         self.assertDelta( w.signalAt(30),  26.53, 1, "Peak 3") #self.assertDelta( w.signalAt(30),  195.548, 10, "Peak 3")
 
         # Now do the same peak finding with Q in the sample frame
-
 
         ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132',OutputWorkspace='TOPAZ_3132_QSample',
                                         OutputDimensions='Q (sample frame)',LorentzCorrection='1',SplitInto='2',SplitThreshold='150')
@@ -160,7 +156,7 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         for c in xrange(3):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:,c]) :
-                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s"\
+                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s"
                                 % (originalUB, newUB) )
 
         # load output hkl file and the golden one

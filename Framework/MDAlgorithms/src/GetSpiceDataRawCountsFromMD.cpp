@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
@@ -17,7 +18,6 @@ using namespace Mantid::Kernel;
 
 DECLARE_ALGORITHM(GetSpiceDataRawCountsFromMD)
 
-//----------------------------------------------------------------------------------------------
 /** Initialization
  * @brief GetSpiceDataRawCountsFromMD::init
  */
@@ -77,7 +77,6 @@ void GetSpiceDataRawCountsFromMD::init() {
                   "be normalized by their monitor counts. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execution body
  * @brief GetSpiceDataRawCountsFromMD::exec
  */
