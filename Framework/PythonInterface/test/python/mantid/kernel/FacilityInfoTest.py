@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.kernel import FacilityInfo, InstrumentInfo, ConfigService
 
+
 class FacilityInfoTest(unittest.TestCase):
 
     def test_construction_raies_an_error(self):
@@ -24,5 +25,7 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertTrue(len(test_facility.instruments("Neutron Diffraction"))> 10)
         self.assertTrue(isinstance(test_facility.instrument("WISH"), InstrumentInfo))
 
+
 if __name__ == '__main__':
     unittest.main()
+
