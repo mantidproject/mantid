@@ -65,11 +65,13 @@ public:
     -------------------*/
   void setAttribute(const std::string &attName,
                     const Mantid::API::IFunction::Attribute &attValue) override;
-  void setMatrixWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+      size_t wi, double startX, double endX) override;
 
 private:
-  std::vector<double> extractQValues(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace);
+  std::vector<double> extractQValues(
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace);
   // list of Q values associated to the spectra
   std::vector<double> m_vQ;
 
@@ -80,4 +82,3 @@ private:
 } // namespace Mantid
 
 #endif /*MANTID_CURVEFITTING_FUNCTIONQDEPENDS_H_*/
-

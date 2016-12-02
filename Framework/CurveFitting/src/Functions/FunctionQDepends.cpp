@@ -16,7 +16,7 @@
 using Attr = Mantid::API::IFunction::Attribute;
 
 namespace {
-  Mantid::Kernel::Logger g_log("FunctionQDepends");
+Mantid::Kernel::Logger g_log("FunctionQDepends");
 }
 
 namespace Mantid {
@@ -27,19 +27,23 @@ namespace Functions {
    Public
    ===========*/
 
-
 FunctionQDepends::FunctionQDepends() {
   this->declareAttribute("Q", Attr(EMPTY_DBL()));
   this->declareAttribute("WorkspaceIndex", Attr(EMPTY_INT()));
 }
 
 /**
- * @brief Update attributes WorkspaceIndex and Q according to certain precedence rules.
+ * @brief Update attributes WorkspaceIndex and Q according to certain precedence
+ *rules.
  *
- * There are two ways to update Q: (i) loading the value from the spectrum, and (ii) manual
- * input from the user. Therefore, rules of precedence must be set to prevent conflict. The
- * priority is to accept Q from the spectrum, if a Q value can be derived from such. In
- * this case the existing Q value will be overwritten, irrespective of the mannier in which
+ * There are two ways to update Q: (i) loading the value from the spectrum, and
+ *(ii) manual
+ * input from the user. Therefore, rules of precedence must be set to prevent
+ *conflict. The
+ * priority is to accept Q from the spectrum, if a Q value can be derived from
+ *such. In
+ * this case the existing Q value will be overwritten, irrespective of the
+ *mannier in which
  * the old Q value was set.
  *
  * @param attName name of the attribute
@@ -49,64 +53,68 @@ void FunctionQDepends::setAttribute(const std::string &attName,
                                     const Attr &attValue) {
   // Q value is tied to WorkspaceIndex if we have a list of Q values
   if (attName == "WorkspaceIndex") {
-    size_t wi{static_cast<size_t>(attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
-    if(!m_vQ.empty() && wi <= m_vQ.size()) {
+    size_t wi{static_cast<size_t>(
+        attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
+    if (!m_vQ.empty() && wi <= m_vQ.size()) {
       Mantid::API::IFunction::setAttribute(attName, attValue);
       Mantid::API::IFunction::setAttribute("Q", Attribute(m_vQ.at(wi)));
     }
   }
   // Q can be manually changed by user only if list of Q values is empty
-  else if(attName == "Q") {
-    if(m_vQ.empty()) {
+  else if (attName == "Q") {
+    if (m_vQ.empty()) {
       Mantid::API::IFunction::setAttribute(attName, attValue);
     }
-  }
-  else {
+  } else {
     Mantid::API::IFunction::setAttribute(attName, attValue);
   }
 }
 
 /**
- * @brief Learn the Q values from the workspace, if possible, and update attribute Q accordingly.
+ * @brief Learn the Q values from the workspace, if possible, and update
+ * attribute Q accordingly.
  * @param workspace Matrix workspace
  * @param wi selected spectrum to initialize attributes
  * @param startX unused
  * @param endX unused
  */
-void FunctionQDepends::setMatrixWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
-                                          size_t wi, double startX, double endX) {
+void FunctionQDepends::setMatrixWorkspace(
+    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);
   // reset attributes if new workspace is passed
-  if(!m_vQ.empty()) {
+  if (!m_vQ.empty()) {
     Mantid::API::IFunction::setAttribute("WorkspaceIndex", Attr(EMPTY_INT()));
     Mantid::API::IFunction::setAttribute("Q", Attr(EMPTY_DBL()));
   }
-  // Obtain Q values from the passed workspace, if possible. m_vQ will be cleared if unsuccessful.
+  // Obtain Q values from the passed workspace, if possible. m_vQ will be
+  // cleared if unsuccessful.
   m_vQ = this->extractQValues(workspace);
-  if(!m_vQ.empty()) {
+  if (!m_vQ.empty()) {
     this->setAttribute("WorkspaceIndex", Attr(static_cast<int>(wi)));
   }
 }
-
 
 /* ===========
    Private
    ===========*/
 
-
 /**
- * @brief Extract Q values from vertical dimension of the workspace, or compute them.
+ * @brief Extract Q values from vertical dimension of the workspace, or compute
+ * them.
  * @param workspace workspace possibly containing Q values.
  */
 std::vector<double> FunctionQDepends::extractQValues(
-  boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace) {
+    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace) {
   std::vector<double> qs;
-  // Check if the vertical axis has units of momentum transfer, then extract Q values...
-  auto axis_ptr = dynamic_cast<Mantid::API::NumericAxis*>(workspace->getAxis(1));
-  if(axis_ptr) {
+  // Check if the vertical axis has units of momentum transfer, then extract Q
+  // values...
+  auto axis_ptr =
+      dynamic_cast<Mantid::API::NumericAxis *>(workspace->getAxis(1));
+  if (axis_ptr) {
     const boost::shared_ptr<Kernel::Unit> &unit_ptr = axis_ptr->unit();
-    if(unit_ptr->unitID() == "MomentumTransfer") {
+    if (unit_ptr->unitID() == "MomentumTransfer") {
       qs = axis_ptr->getValues();
     }
   }

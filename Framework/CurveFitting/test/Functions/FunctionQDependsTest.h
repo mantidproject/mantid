@@ -22,15 +22,16 @@
 using Attr = Mantid::API::IFunction::Attribute;
 
 namespace {
-class ImplementsFunctionQDepends : public Mantid::CurveFitting::Functions::FunctionQDepends {
+class ImplementsFunctionQDepends
+    : public Mantid::CurveFitting::Functions::FunctionQDepends {
 
 public:
-
   std::string name() const override { return "ImplementsFunctionQDepends"; }
 
-  void function1D(double *out, const double *xValues, const size_t nData) const override {
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override {
     double Q = this->getAttribute("Q").asDouble();
-    for(size_t i=0; i<nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
       out[i] = Q * xValues[i];
     }
   }
@@ -41,7 +42,9 @@ class FunctionQDependsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FunctionQDependsTest *createSuite() { return new FunctionQDependsTest(); }
+  static FunctionQDependsTest *createSuite() {
+    return new FunctionQDependsTest();
+  }
   static void destroySuite(FunctionQDependsTest *suite) { delete suite; }
 
   void testConstruction() {
@@ -52,13 +55,17 @@ public:
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
     // test with an non matrix workspace
-    TS_ASSERT_THROWS_NOTHING(f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX));
+    TS_ASSERT_THROWS_NOTHING(
+        f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX));
     // test with a non-suitable matrix workspace
-    TS_ASSERT_THROWS_NOTHING(f.setMatrixWorkspace(this->withoutQ(), 0, startX, endX));
+    TS_ASSERT_THROWS_NOTHING(
+        f.setMatrixWorkspace(this->withoutQ(), 0, startX, endX));
     // test with a workspace containing Q values in the vertical axis
-    TS_ASSERT_THROWS_NOTHING(f.setMatrixWorkspace(this->withQonVerticalAxis(), 0, startX, endX));
+    TS_ASSERT_THROWS_NOTHING(
+        f.setMatrixWorkspace(this->withQonVerticalAxis(), 0, startX, endX));
     // test with a workspace containing detectors for calculation of Q values
-    TS_ASSERT_THROWS_NOTHING(f.setMatrixWorkspace(this->withDetectors(), 0, startX, endX));
+    TS_ASSERT_THROWS_NOTHING(
+        f.setMatrixWorkspace(this->withDetectors(), 0, startX, endX));
   }
 
   void testQAttribute() {
@@ -75,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.18);
     // test assigning Q when a workspace has been set
     f.setMatrixWorkspace(this->withQonVerticalAxis(), 1, startX, endX);
-    TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.5);  // Q overwritten
+    TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.5); // Q overwritten
     f.setAttribute("Q", Attr(0.18));
     TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.5); // Q not overwritten
   }
@@ -91,63 +98,66 @@ public:
     TS_ASSERT_EQUALS(wi, Mantid::EMPTY_INT());
     // test assigning wi when no matrix workspace has been set
     f.setAttribute("WorkspaceIndex", Attr(1));
-    TS_ASSERT_EQUALS(f.getAttribute("WorkspaceIndex").asInt(), Mantid::EMPTY_INT());  // not overwritten
+    TS_ASSERT_EQUALS(f.getAttribute("WorkspaceIndex").asInt(),
+                     Mantid::EMPTY_INT()); // not overwritten
     // test assigning wi when a workspace has been set
     f.setMatrixWorkspace(this->withQonVerticalAxis(), 1, startX, endX);
     TS_ASSERT_EQUALS(f.getAttribute("WorkspaceIndex").asInt(), 1);
     f.setAttribute("WorkspaceIndex", Attr(0));
-    TS_ASSERT_EQUALS(f.getAttribute("WorkspaceIndex").asInt(), 0); // WorkspaceIndex overwritten
+    TS_ASSERT_EQUALS(f.getAttribute("WorkspaceIndex").asInt(),
+                     0); // WorkspaceIndex overwritten
   }
 
   void testWorkspaceIndexTiesQ() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
     f.setMatrixWorkspace(this->withQonVerticalAxis(), 1, startX, endX);
-    TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.5);  // Q overwritten
+    TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.5); // Q overwritten
     f.setAttribute("WorkspaceIndex", Attr(0));
-    TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.3);  // Q overwritten
+    TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.3); // Q overwritten
     f.setMatrixWorkspace(this->withDetectors(), 9, startX, endX);
-    TS_ASSERT_DELTA(f.getAttribute("Q").asDouble(), 1.82, 0.01);  // Q overwritten
+    TS_ASSERT_DELTA(f.getAttribute("Q").asDouble(), 1.82,
+                    0.01); // Q overwritten
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
 private:
   // return a MatrixWorkspace with Q values on the vertical axis
-  Mantid::DataObjects::Workspace2D_sptr withQonVerticalAxis(){
+  Mantid::DataObjects::Workspace2D_sptr withQonVerticalAxis() {
     int nhist{4}, nbins{9};
     // create an axis of Q-values
-    std::vector<double> qvalues{0.3, 0.5, 0.5, 0.9}; // as many elements as the value of variable nhist
+    std::vector<double> qvalues{
+        0.3, 0.5, 0.5, 0.9}; // as many elements as the value of variable nhist
     auto momenta = new Mantid::API::NumericAxis(qvalues);
     momenta->setUnit("MomentumTransfer");
     // create the matrix workspace
-    auto ws= WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins);
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins);
     ws->replaceAxis(1, momenta);
     return ws;
   }
 
   // return a MatrixWorkspace with detectors allowing computations of Q values
-  Mantid::API::MatrixWorkspace_sptr withDetectors(){
+  Mantid::API::MatrixWorkspace_sptr withDetectors() {
     Mantid::DataHandling::LoadNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "irs26173_graphite002_red");
     loader.setPropertyValue("OutputWorkspace", "irs26173");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
-    return Mantid::API::AnalysisDataService::Instance().
-        retrieveWS<Mantid::API::MatrixWorkspace>("irs26173");
+    return Mantid::API::AnalysisDataService::Instance()
+        .retrieveWS<Mantid::API::MatrixWorkspace>("irs26173");
   }
 
   // return a MatrixWorkspace without Q values
-  Mantid::DataObjects::Workspace2D_sptr withoutQ(){
+  Mantid::DataObjects::Workspace2D_sptr withoutQ() {
     int nhist{3}, nbins{9};
     return WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins);
   }
 
   // return a Workspace not of MatrixWorkspace type
-  Mantid::DataObjects::EventWorkspace_sptr unsuitableWS(){
+  Mantid::DataObjects::EventWorkspace_sptr unsuitableWS() {
     return WorkspaceCreationHelper::CreateEventWorkspace();
   }
-
 };
 
 #endif /* MANTID_API_FUNCTIONQDEPENDSTEST_H */
