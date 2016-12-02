@@ -10,9 +10,7 @@
 // Mantid headers from other projects
 // N/A
 // 3rd party library headers
-#ifndef Q_MOC_RUN
-#include <boost/weak_ptr.hpp>
-#endif
+// N/A
 // Standard library
 // N/A
 
