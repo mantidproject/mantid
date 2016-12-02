@@ -38,6 +38,7 @@ int LoadILLTOF::confidence(Kernel::NexusDescriptor &descriptor) const {
 }
 
 LoadILLTOF::LoadILLTOF() : API::IFileLoader<Kernel::NexusDescriptor>() {
+  useAlgorithm("LoadILLTOF", 2);
   m_instrumentName = "";
   m_wavelength = 0;
   m_channelWidth = 0;

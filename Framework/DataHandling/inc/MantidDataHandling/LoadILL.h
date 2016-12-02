@@ -4,7 +4,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataHandling/LoadILLTOF.h"
 
 namespace Mantid {
@@ -33,14 +32,12 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILL : public LoadILLTOF, public API::DeprecatedAlgorithm {
+class DLLExport LoadILL : public LoadILLTOF {
 public:
   /// Constructor
   LoadILL();
   /// Algorithm's name
   const std::string name() const override { return "LoadILL"; }
-  /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 };
 
 } // namespace DataHandling
