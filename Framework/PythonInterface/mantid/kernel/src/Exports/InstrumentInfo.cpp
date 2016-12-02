@@ -69,7 +69,7 @@ void export_InstrumentInfo() {
            (arg("self"), arg("name") = ""),
            return_value_policy<copy_const_reference>(),
            "Returns a LiveListenerInfo instance for this instrument. If "
-            "no connection name is specified, the default is used.")
+           "no connection name is specified, the default is used.")
 
       .def("hasLiveListenerInfo", &InstrumentInfo::hasLiveListenerInfo,
            arg("self"),
