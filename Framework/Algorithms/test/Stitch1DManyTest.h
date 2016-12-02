@@ -651,6 +651,52 @@ public:
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
+
+  void test_three_workspaces_scale_LHS_workspace() {
+    // Three matrix workspaces with two spectra each
+
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
+    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
+    // The algorithm needs the workspaces to be in the ADS
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2, ws3");
+    alg.setProperty("Params", "0.1");
+    alg.setPropertyValue("ScaleRHSWorkspace", "0");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.execute();
+
+    // Test output ws
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->readY(0)[0], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[10], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[18], 1.5, 0.00001);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->readY(1)[0], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[10], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[18], 2.5, 0.00001);
+
+    // Test out sclae factors
+    std::vector<double> scales = alg.getProperty("OutScaleFactors");
+    TS_ASSERT_EQUALS(scales.size(), 2);
+    TS_ASSERT_DELTA(scales.front(), 1.0999, 0.0001);
+    TS_ASSERT_DELTA(scales.back(), 1.3636, 0.0001);
+
+    // Remove workspaces from ADS
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
+    AnalysisDataService::Instance().remove("ws3");
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_STITCH1DMANYTEST_H_ */
