@@ -21,7 +21,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.params = {'Tolerance':1e-4,
+        self.params = {'Tolerance':1e-3,
                        'CheckInstrument':False}
 
     def tearDown(self):

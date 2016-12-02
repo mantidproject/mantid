@@ -140,7 +140,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.test_unmirror_6_7()
 
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
 
         self.disableChecking = ['Instrument']
 
