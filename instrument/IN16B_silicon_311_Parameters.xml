@@ -16,11 +16,11 @@
     </parameter>
 
     <parameter name="Efixed">
-      <value val="2.082" />
+      <value val="7.63" />
     </parameter>
 
     <parameter name="resolution">
-      <value val="0.00075" />
+      <value val="0.002" />
     </parameter>
 
   </component-link>
