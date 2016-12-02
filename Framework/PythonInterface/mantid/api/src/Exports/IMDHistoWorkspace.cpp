@@ -262,7 +262,7 @@ void export_IMDHistoWorkspace() {
            &IMDHistoWorkspace::setDisplayNormalization,
            (arg("self"), arg("normalization")),
            "Sets the visual normalization of"
-           " the workspace.")   ;
+           " the workspace.");
 
   //-------------------------------------------------------------------------------------------------
 
