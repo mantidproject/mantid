@@ -157,7 +157,7 @@ class Pearl(AbstractInst):
                                                            run_details=run_details, focus_mode=self._focus_mode,
                                                            perform_attenuation=attenuate)
 
-    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
+    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, return_units):
         out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=self._create_van_tof_binning,
                                                 return_units=return_units)
 

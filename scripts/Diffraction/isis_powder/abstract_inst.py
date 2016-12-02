@@ -150,7 +150,7 @@ class AbstractInst(object):
     def pearl_focus_tof_rebinning(self, input_workspace):
         return input_workspace
 
-    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
+    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, return_units):
         return vanadium_ws
 
     def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):

@@ -17,8 +17,7 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
     corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws, empty_sample_ws_string=empty,
                                                     instrument=instrument)
 
-    corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
-                                                                       tof_rebin_pass=1, return_units="TOF")
+    corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws, return_units="TOF")
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration)
@@ -34,8 +33,7 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
                                                    GroupingFileName=run_details.grouping)
 
     # Optional
-    focused_van_file = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=focused_van_file,
-                                                                       tof_rebin_pass=2, return_units="dSpacing")
+    focused_van_file = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=focused_van_file, return_units="dSpacing")
 
     common.remove_intermediate_workspace(corrected_van_ws)
 
@@ -72,6 +70,8 @@ def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_abs
     # PEARL rebins whilst POLARIS does not as some of the older absorption files have different number of bins
     corrected_van_ws = instrument.pearl_rebin_to_workspace(ws_to_rebin=corrected_van_ws, ws_to_match=absorb_ws)
     corrected_van_ws = mantid.Divide(LHSWorkspace=corrected_van_ws, RHSWorkspace=absorb_ws)
+    corrected_van_ws = instrument.pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
+                                                                      return_units="Wavelength")
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="dSpacing")
     common.remove_intermediate_workspace(absorb_ws)
     return corrected_van_ws
