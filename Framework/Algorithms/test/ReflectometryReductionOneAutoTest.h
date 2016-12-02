@@ -252,7 +252,7 @@ public:
     auto tempInst = m_TOF->getInstrument();
     m_TOF->setInstrument(m_dataWorkspace->getInstrument());
     alg->setProperty("InputWorkspace", m_TOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     m_TOF->setInstrument(tempInst);
   }
   void

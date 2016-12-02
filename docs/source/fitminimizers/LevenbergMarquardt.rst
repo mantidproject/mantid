@@ -1,4 +1,4 @@
-.. _LevenbergMarquardt
+.. _LevenbergMarquardt:
 
 Levenberg-Marquardt Minimizer
 =============================

@@ -71,6 +71,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/NormalDistribution.cpp
 	src/NullValidator.cpp
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
@@ -229,6 +230,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
+	inc/MantidKernel/NormalDistribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -376,6 +378,7 @@ set ( TEST_FILES
 	NDRandomNumberGeneratorTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
+	NormalDistributionTest.h
 	NullValidatorTest.h
 	OptionalBoolTest.h
 	ProgressBaseTest.h

@@ -3,10 +3,9 @@ from isis_powder.abstract_inst import AbstractInst
 
 class MockInstrument(AbstractInst):
 
-    def __init__(self, user_name, calibration_dir, raw_data_dir, output_dir, default_ext="", tt_mode=None):
+    def __init__(self, user_name, calibration_dir, output_dir, default_ext=""):
         super(MockInstrument, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
-                                             raw_data_dir=raw_data_dir, output_dir=output_dir,
-                                             default_input_ext=default_ext, tt_mode=tt_mode)
+                                             output_dir=output_dir, default_input_ext=default_ext)
         self.generate_cycle_dir_flag = False
 
     def _get_lambda_range(self):
@@ -21,7 +20,7 @@ class MockInstrument(AbstractInst):
     def _get_default_group_names(self):
         return None
 
-    def _get_calibration_full_paths(self, cycle):
+    def _get_run_details(self, run_number):
         # This is here to help remind people of the dict that is expected
         calibration_details = {"calibration": "cal",
                                "grouping": "group",
@@ -38,7 +37,7 @@ class MockInstrument(AbstractInst):
         return None
 
     @staticmethod
-    def _get_cycle_information(run_number):
+    def _get_label_information(run_number):
         # This is here to help remind people of the dict format
         cycle_information = {"cycle" : "123",
                              "instrument_version": "test_v1"}

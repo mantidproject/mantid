@@ -1,4 +1,4 @@
-.. _Simplex
+.. _Simplex:
 
 Simplex Minimizer
 =================

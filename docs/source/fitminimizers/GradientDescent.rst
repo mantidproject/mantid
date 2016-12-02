@@ -1,4 +1,4 @@
-.. _GradientDescent
+.. _GradientDescent:
 
 Steepest Descent Minimizer
 ==========================
