@@ -689,12 +689,13 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
     case 5:
     case 6:
     case 7:
-    case 8:
       event_ended = (c & 0xC0) != 0xC0;
       if (!event_ended)
         c &= 0x3F;
-
-      dt |= (c & 0xFF) << (5 + 6 * (state - 3)); // set bit 6...
+      // avoid shifting by > 32 bits
+      // identical to dt |= 0
+      if (state != 8)
+        dt |= (c & 0xFF) << (5 + 6 * (state - 3)); // set bit 6...
       break;
     }
     state++;

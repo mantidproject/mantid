@@ -34,6 +34,8 @@ set ( TEST_PY_FILES
       test/DirectEnergyConversionTest.py
       test/ISISDirecInelasticConfigTest.py
       test/IndirectCommonTests.py
+      test/ISIS_Powder_AbstractInstTest.py
+      test/ISIS_Powder_PearlTest.py
       test/PyChopTest.py
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py
@@ -46,6 +48,7 @@ set ( TEST_PY_FILES
       test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
       test/SANSIsisInstrumentTest.py
+      test/SANSReducerTest.py
       test/SANSReductionStepsUserFileTest.py
       test/SettingsTest.py
       test/VesuvioBackgroundTest.py

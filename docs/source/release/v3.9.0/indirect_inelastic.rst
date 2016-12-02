@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- :ref:`EnergyWindowScan <algm-EnergyWindowScan>` and :ref:`IndirectEnergyWindowScan <algm-IndirectEnergyWindowScan>` have been added
+  to perform a quick run of *EnergyTransfer*, *Elwin* and optional *MSDFit*
 - A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
 
 Data Reduction
@@ -18,12 +20,11 @@ Data Reduction
 
 - Q-values in :ref:`BASISReduction <algm-BASISReduction>` output are now point data so that their values display correctly when plotted
 
-
 Data Analysis
 #############
 
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
-
+- :ref:`GetQsInQENSData <algm-GetQsInQENSData>` Extracts or computes Q values from a MatrixWorkspace.
 
 Improvements
 ------------
@@ -39,7 +40,7 @@ CalculatePaalmanPings
 - Option to calculate number density from mass density
 
 Absorption
-~~~~~~~~~~~
+~~~~~~~~~~
 
 - Option to calculate number density from mass density
 
@@ -57,8 +58,7 @@ Transmission
 Improvements
 ------------
 
- - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
-
+- Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
 
 Bugfixes
 --------
