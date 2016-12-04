@@ -18,7 +18,6 @@ algorithms and data objects that are:
 """
 
 
-
 from IOmodule import IOmodule
 
 # Frequency generator
