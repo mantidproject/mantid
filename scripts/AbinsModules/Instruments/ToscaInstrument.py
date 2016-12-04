@@ -21,8 +21,8 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        k2_i = (frequencies + AbinsParameters.tosca_final_neutron_energy) * AbinsConstants.TOSCA_constant
-        k2_f = AbinsParameters.tosca_final_neutron_energy * AbinsConstants.TOSCA_constant
+        k2_i = (frequencies + AbinsParameters.tosca_final_neutron_energy) * AbinsConstants.TOSCA_CONSTANT
+        k2_f = AbinsParameters.tosca_final_neutron_energy * AbinsConstants.TOSCA_CONSTANT
         result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.tosca_cos_scattering_angle
         return result
 

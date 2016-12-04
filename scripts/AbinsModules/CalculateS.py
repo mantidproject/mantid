@@ -1,5 +1,4 @@
 import numpy as np
-from copy import copy
 from pathos.multiprocessing import ProcessingPool
 from IOmodule import IOmodule
 from AbinsData import AbinsData
@@ -8,7 +7,6 @@ from CalculatePowder import CalculatePowder
 from CrystalData import CrystalData
 from PowderData import PowderData
 from SData import SData
-from Instruments import Instrument
 from AbinsModules import FrequencyPowderGenerator
 
 import AbinsParameters
@@ -144,7 +142,6 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         if not isinstance(powder_data, PowderData):
             raise ValueError("Input parameter 'powder_data' should be of type PowderData.")
 
-        atom_items = {}
         self._powder_atoms_data = powder_data.extract()
         num_atoms = self._powder_atoms_data["a_tensors"].shape[0]
         self._a_traces = np.trace(a=self._powder_atoms_data["a_tensors"], axis1=1, axis2=2)
@@ -189,22 +186,14 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         s = {}
         s_frequencies = {}
 
-#<<<<<<< HEAD
-        rebined_broad_freq = None
-        rebined_broad_spectrum = None
-
         local_freq = np.copy(self._fundamentals_freq)
         local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=AbinsConstants.INT_TYPE)
         fund_coeff = np.copy(local_coeff)
-# =======
-#         local_freq = np.copy(fundamentals_freq)
-#         local_coeff = np.arange(fundamentals_freq.size, dtype=AbinsConstants.INT_TYPE)
-# >>>>>>> master
 
         for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
             # in case there is large number of transitions chop it into chunks and process chunk by chunk
-            if local_freq.size * self._fundamentals_freq.size > AbinsConstants.large_size:
+            if local_freq.size * self._fundamentals_freq.size > AbinsConstants.LARGE_SIZE:
 
                 fund_size = self._fundamentals_freq.size
                 l_size = local_freq.size
@@ -234,15 +223,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                     s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
                     s_frequencies["order_%s" % lg_order] = rebined_broad_freq
 
-#<<<<<<< HEAD
                 for fund_chunk, fund_coeff_chunk in zip(new_fundamentals, new_fundamentals_coeff):
-#=======
-#            # neglect S below S_THRESHOLD
-#            indices = value_dft > AbinsConstants.S_THRESHOLD
-#            value_dft = value_dft[indices]
-#            local_freq = local_freq[indices]
-#            local_coeff = local_coeff[indices]
-#>>>>>>> master
 
                     part_local_freq = np.copy(local_freq)
                     part_local_coeff = np.copy(local_coeff)

@@ -113,8 +113,8 @@ ACLIMAX_CONSTANT_DECOMPOSITION = math.frexp(ACLIMAX_CONSTANT)
 M_N_DECOMPOSITION = math.frexp(constants.m_n)
 
 # constant used to evaluate Q^2 for TOSCA.
-TOSCA_constant = M_N_DECOMPOSITION[0] * KG2AMU_DECOMPOSITION[0] / ACLIMAX_CONSTANT_DECOMPOSITION[0]
-TOSCA_constant *= 2 ** (M_N_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] - ACLIMAX_CONSTANT_DECOMPOSITION[1])
+TOSCA_CONSTANT = M_N_DECOMPOSITION[0] * KG2AMU_DECOMPOSITION[0] / ACLIMAX_CONSTANT_DECOMPOSITION[0]
+TOSCA_CONSTANT *= 2 ** (M_N_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] - ACLIMAX_CONSTANT_DECOMPOSITION[1])
 
 # constants which represent quantum order effects
 QUANTUM_ORDER_ONE = 1
@@ -122,7 +122,7 @@ QUANTUM_ORDER_TWO = 2
 QUANTUM_ORDER_THREE = 3
 QUANTUM_ORDER_FOUR = 4
 
-large_size = 10000000  # if resulting S is bigger than that switch to processing in loop to save memory
+LARGE_SIZE = 10000000  # if resulting S is bigger than that switch to processing in loop to save memory
 
 # values of S below that are considered to be zero
 S_THRESHOLD = 10e-8

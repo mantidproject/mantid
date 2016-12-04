@@ -58,10 +58,7 @@ class CalculatePowder(IOmodule):
         displacements = k_data["atomic_displacements"]
         num_atoms = displacements.shape[0]
         atoms_data = data["atoms_data"]
-
-        freq_hartree = k_data["frequencies"][AbinsConstants.FIRST_OPTICAL_PHONON:]  # frequencies in Hartree units
-
-        frequencies = freq_hartree / AbinsConstants.CM1_2_HARTREE  # convert frequencies to cm^1
+        frequencies = k_data["frequencies"][AbinsConstants.FIRST_OPTICAL_PHONON:]  # frequencies in cm^-1
 
         powder = PowderData(num_atoms=num_atoms)
 

@@ -1,4 +1,3 @@
-import numpy as np
 from mantid.kernel import logger
 
 # ABINS modules
@@ -143,7 +142,7 @@ class GeneralDFTProgram(IOmodule):
         This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
         It converts atomic displacements from atomic units to Angstroms
 
-        @param k_data: dictionary with the data to rearrange
+        @param data: dictionary with the data to rearrange
         @return: Returns an object of type AbinsData
         """
 
@@ -155,7 +154,6 @@ class GeneralDFTProgram(IOmodule):
                       "k_vectors": data["k_vectors"],
                       # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
                       "frequencies": data["frequencies"],
-
                       # 4D array [k][atom_n][freq][3] (one entry corresponds to
                       # one coordinate for atom atom_n, frequency  freq and k-point k )
                       "atomic_displacements": data["atomic_displacements"] * AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM})

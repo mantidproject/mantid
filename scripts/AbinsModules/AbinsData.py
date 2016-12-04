@@ -5,7 +5,6 @@ from KpointsData import KpointsData
 from AtomsData import AtomsDaTa
 
 
-
 class AbinsData(GeneralData):
     """
     Class for storing input DFT data.

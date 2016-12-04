@@ -1,6 +1,5 @@
 import AbinsParameters
 import AbinsConstants
-import math
 import numpy as np
 
 
@@ -47,7 +46,10 @@ class FrequencyPowderGenerator(object):
 
         # frequencies for fundamentals
         if quantum_order == AbinsConstants.FUNDAMENTALS:
-            return fundamentals_array, np.arange(fundamentals_array.size)
+            return fundamentals_array, np.arange(start=0,
+                                                 step=1,
+                                                 stop=fundamentals_array.size,
+                                                 dtype=AbinsConstants.INT_TYPE)
 
         # higher order quantum events
         else:
@@ -60,7 +62,8 @@ class FrequencyPowderGenerator(object):
             if not (isinstance(previous_coefficients, np.ndarray) and
                     len(previous_coefficients.shape) == min(2, quantum_order - 1) and
                     previous_coefficients.dtype.num == AbinsConstants.INT_ID):
-                raise ValueError("Numpy array is expected.")
+                raise ValueError("Numpy array is expected. (%s)" % previous_coefficients, type(previous_coefficients),
+                                 previous_coefficients.dtype)
 
             # generate indices
             fundamentals_size = fundamentals_array.size

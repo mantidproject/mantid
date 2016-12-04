@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>453</width>
+    <height>590</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Resolution Calculator</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="calcButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>171</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Calculate Flux and Resolution</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="incidentEnergyValue">
+    <property name="geometry">
+     <rect>
+      <x>22</x>
+      <y>40</y>
+      <width>171</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string extracomment="5"/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>10</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Incident energy (meV)</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="list">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>100</y>
+      <width>401</width>
+      <height>421</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Plot">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>10</y>
+      <width>131</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Plot </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="OverPlot">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>40</y>
+      <width>131</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>OverPlot </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ClearFlux">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>70</y>
+      <width>131</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string comment="Clear the text in the calculated flux and resolution window">Clear the text in the calculated flux and resolution window, printed there earlier</string>
+    </property>
+    <property name="text">
+     <string>Clear Flux Text Box</string>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="Instrument">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>453</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="whatsThis">
+    <string extracomment="S"/>
+   </property>
+   <widget class="QMenu" name="InstrumentSelectionMenu">
+    <property name="title">
+     <string>Instrument</string>
+    </property>
+    <addaction name="actionLET"/>
+    <addaction name="actionMARI"/>
+    <addaction name="actionMAPS"/>
+    <addaction name="actionMERLIN"/>
+   </widget>
+   <addaction name="InstrumentSelectionMenu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionLET">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>LET</string>
+   </property>
+   <property name="toolTip">
+    <string>Select LET</string>
+   </property>
+  </action>
+  <action name="actionMARI">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MARI</string>
+   </property>
+   <property name="toolTip">
+    <string>Select MARI</string>
+   </property>
+  </action>
+  <action name="actionMAPS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MAPS</string>
+   </property>
+   <property name="toolTip">
+    <string>Select MAPS</string>
+   </property>
+  </action>
+  <action name="actionMERLIN">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MERLIN</string>
+   </property>
+   <property name="toolTip">
+    <string>Select MERLIN</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

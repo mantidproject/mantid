@@ -23,7 +23,6 @@ class IOmodule(object):
                 logger.error(str(err))
 
             # extract name of file from its path.
-            begin = 0
             while input_filename.find("/") != -1:
                 begin = input_filename.find("/") + 1
                 input_filename = input_filename[begin:]
@@ -103,8 +102,6 @@ class IOmodule(object):
         Method to obtain data
         @return: obtained data
         """
-        _data = None
-
         try:
 
             self.check_previous_data()
@@ -126,7 +123,7 @@ class IOmodule(object):
         """
 
         with h5py.File(self._hdf_filename, 'w') as hdf_file:
-            pass
+            hdf_file.close()
 
     def add_attribute(self, name=None, value=None):
         """
@@ -362,6 +359,7 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the dataset!")
 
+        # noinspection PyUnresolvedReferences
         if isinstance(_hdf_group, h5py._hl.dataset.Dataset):
             return _hdf_group.value
         elif all([self._get_subgrp_name(path=_hdf_group[el].name).isdigit() for el in _hdf_group.keys()]):
@@ -388,6 +386,7 @@ class IOmodule(object):
         """
         ans = {}
         for key, item in hdf_file[path].items():
+            # noinspection PyUnresolvedReferences,PyUnresolvedReferences
             if isinstance(item, h5py._hl.dataset.Dataset):
                 ans[key] = item.value
             elif isinstance(item, h5py._hl.group.Group):
