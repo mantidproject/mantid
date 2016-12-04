@@ -152,7 +152,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         abins_data_extracted = self._abins_data.extract()
         self._atoms_data = abins_data_extracted["atoms_data"]
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
-        self._fundamentals_freq = k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:]
+        self._fundamentals_freq = k_points_data["frequencies"][0][AbinsConstants.FIRST_OPTICAL_PHONON:]
 
         atoms_items = dict()
         atoms = range(num_atoms)
@@ -194,7 +194,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         rebined_broad_spectrum = None
 
         local_freq = np.copy(self._fundamentals_freq)
-        local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=AbinsConstants.int_type)
+        local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=AbinsConstants.INT_TYPE)
         fund_coeff = np.copy(local_coeff)
 # =======
 #         local_freq = np.copy(fundamentals_freq)
@@ -213,8 +213,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 chunk_size = max(1.0, np.floor(opt_size / l_size))
                 chunk_num = int(np.ceil(float(fund_size) / chunk_size))
                 new_dim = int(chunk_num * chunk_size)
-                new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsConstants.float_type)
-                new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsConstants.int_type)
+                new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsConstants.FLOAT_TYPE)
+                new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsConstants.INT_TYPE)
                 new_fundamentals[:fund_size] = self._fundamentals_freq
                 new_fundamentals_coeff[:fund_size] = fund_coeff
 
@@ -228,10 +228,10 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 rebined_broad_freq = np.arange(start=AbinsParameters.min_wavenumber,
                                                stop=AbinsParameters.max_wavenumber,
                                                step=AbinsParameters.bin_width,
-                                               dtype=AbinsConstants.float_type)
+                                               dtype=AbinsConstants.FLOAT_TYPE)
 
-                for lg_order in range(order, self._quantum_order_num + AbinsConstants.s_last_index):
-                    s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.float_type)
+                for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+                    s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
                     s_frequencies["order_%s" % lg_order] = rebined_broad_freq
 
 #<<<<<<< HEAD
@@ -248,7 +248,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                     part_local_coeff = np.copy(local_coeff)
 
                     # number of transitions can only go up
-                    for lg_order in range(order, self._quantum_order_num + AbinsConstants.s_last_index):
+                    for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
                         part_local_freq, part_local_coeff = \
                             self.construct_freq_combinations(previous_array=part_local_freq,
@@ -459,7 +459,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         bins = np.arange(start=AbinsParameters.min_wavenumber,
                          stop=AbinsParameters.max_wavenumber,
                          step=AbinsParameters.bin_width,
-                         dtype=AbinsConstants.float_type)
+                         dtype=AbinsConstants.FLOAT_TYPE)
         if bins.size > array_x.size:
             return array_x, array_y
         else:

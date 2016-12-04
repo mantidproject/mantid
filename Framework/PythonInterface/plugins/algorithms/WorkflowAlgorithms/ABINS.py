@@ -512,32 +512,32 @@ class ABINS(PythonAlgorithm):
 
         # check TOSCA parameters
         # TOSCA final energy in cm^-1
-        final_energy = AbinsParameters.TOSCA_final_neutron_energy
+        final_energy = AbinsParameters.tosca_final_neutron_energy
         if not (isinstance(final_energy, float) and final_energy > 0.0):
             raise RuntimeError("Invalid value of final_neutron_energy for TOSCA" + message_end)
 
-        angle = AbinsParameters.TOSCA_cos_scattering_angle
+        angle = AbinsParameters.tosca_cos_scattering_angle
         if not isinstance(angle, float):
             raise RuntimeError("Invalid value of cosines scattering angle for TOSCA" + message_end)
 
-        resolution_const_a = AbinsParameters.TOSCA_A
+        resolution_const_a = AbinsParameters.tosca_a
         if not isinstance(resolution_const_a, float):
             raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)" +
                                message_end)
 
-        resolution_const_b = AbinsParameters.TOSCA_B
+        resolution_const_b = AbinsParameters.tosca_b
         if not isinstance(resolution_const_b, float):
             raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)" +
                                message_end)
 
-        resolution_const_c = AbinsParameters.TOSCA_C
+        resolution_const_c = AbinsParameters.tosca_c
         if not isinstance(resolution_const_c, float):
             raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)" +
                                message_end)
 
         # check folders names
         folder_names = []
-        dft_group = AbinsParameters.DFT_group
+        dft_group = AbinsParameters.dft_group
         if not isinstance(dft_group, str) or dft_group == "":
             raise RuntimeError("Invalid name for folder in which the DFT data should be stored.")
         folder_names.append(dft_group)

@@ -33,7 +33,7 @@ class FrequencyPowderGenerator(object):
 
         if not (isinstance(fundamentals_coefficients, np.ndarray) and
                 len(fundamentals_coefficients.shape) == 1 and
-                fundamentals_coefficients.dtype.num == AbinsConstants.int_id):
+                fundamentals_coefficients.dtype.num == AbinsConstants.INT_ID):
             raise ValueError("Coefficients of fundamentals in the form of one dimentional array are expected.")
 
         if fundamentals_coefficients.size != fundamentals_array.size:
@@ -59,19 +59,19 @@ class FrequencyPowderGenerator(object):
 
             if not (isinstance(previous_coefficients, np.ndarray) and
                     len(previous_coefficients.shape) == min(2, quantum_order - 1) and
-                    previous_coefficients.dtype.num == AbinsConstants.int_id):
+                    previous_coefficients.dtype.num == AbinsConstants.INT_ID):
                 raise ValueError("Numpy array is expected.")
 
             # generate indices
             fundamentals_size = fundamentals_array.size
             previous_size = previous_array.size
-            prev_indices = np.arange(start=0, step=1, stop=previous_size, dtype=AbinsConstants.int_type)
+            prev_indices = np.arange(start=0, step=1, stop=previous_size, dtype=AbinsConstants.INT_TYPE)
 
             # indices in fundamentals array. Not necessarily the same as fundamentals_coefficients!!!
             # This will be the same in case full array with transitions is processed
             # but in case array of transitions is huge and we proceed chunk by chunk then
             # fundamentals_ind differ from fundamentals_coefficients
-            fundamentals_ind = np.arange(start=0, step=1, stop=fundamentals_size, dtype=AbinsConstants.int_type)
+            fundamentals_ind = np.arange(start=0, step=1, stop=fundamentals_size, dtype=AbinsConstants.INT_TYPE)
 
             n = fundamentals_size * previous_size
             num_of_arrays = 2
