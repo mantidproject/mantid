@@ -1,10 +1,8 @@
 import numpy as np
-import math
 
 from Instrument import Instrument
 from AbinsModules import AbinsParameters
 from AbinsModules import AbinsConstants
-from AbinsModules.KpointsData import KpointsData
 from AbinsModules.FrequencyPowderGenerator import FrequencyPowderGenerator
 
 
@@ -26,7 +24,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.tosca_cos_scattering_angle
         return result
 
-    def collect_K_data(self, k_points_data=None):
+    def collect_k_data(self, k_points_data=None):
         """
         Collect k-points data from DFT calculations.
         @param k_points_data: object of type KpointsData with data from DFT calculations

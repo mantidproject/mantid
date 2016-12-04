@@ -17,6 +17,7 @@ algorithms and data objects that are:
 
 """
 
+# noqa: F401
 
 from IOmodule import IOmodule
 

@@ -3,7 +3,6 @@ import re
 
 # ABINS modules
 from GeneralDFTProgram import GeneralDFTProgram
-from AbinsData import AbinsData
 import AbinsConstants
 
 
@@ -162,6 +161,7 @@ class LoadCASTEP(GeneralDFTProgram):
         header_sum = re.compile(header_str_sum)
 
         header_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        # noinspection PyUnusedLocal
         header = re.compile(header_str)
 
         with open(self._input_filename, "rU") as f:

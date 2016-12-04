@@ -1,5 +1,5 @@
 import h5py
-import numpy as np 
+import numpy as np
 import subprocess
 import shutil
 import hashlib
@@ -23,6 +23,7 @@ class IOmodule(object):
                 logger.error(str(err))
 
             # extract name of file from its path.
+            # noinspection PyUnusedLocal
             begin = 0
             while input_filename.find("/") != -1:
                 begin = input_filename.find("/") + 1
@@ -103,6 +104,7 @@ class IOmodule(object):
         Method to obtain data
         @return: obtained data
         """
+        # noinspection PyUnusedLocal
         _data = None
 
         try:
@@ -125,6 +127,7 @@ class IOmodule(object):
         Erases content of hdf file.
         """
 
+        # noinspection PyUnusedLocal
         with h5py.File(self._hdf_filename, 'w') as hdf_file:
             pass
 

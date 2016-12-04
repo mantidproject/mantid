@@ -10,7 +10,6 @@ from CalculatePowder import CalculatePowder
 from CrystalData import CrystalData
 from PowderData import PowderData
 from SData import SData
-from Instruments import Instrument
 from AbinsModules import FrequencyPowderGenerator
 
 import AbinsParameters

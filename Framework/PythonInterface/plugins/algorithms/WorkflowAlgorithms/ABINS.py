@@ -1,10 +1,9 @@
-import multiprocessing
 import numpy as np
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
 from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, \
-                             DeleteWorkspace, Rebin, Load, SaveAscii
+                             Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
 from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters, AbinsConstants
@@ -212,7 +211,7 @@ class ABINS(PythonAlgorithm):
 
         # 7) add experimental data if available to the collection of workspaces
         if self._experimental_file != "":
-            workspaces.insert(0, self._create_experimental_data_workspace().getName())
+            workspaces.insert(0, self._create_experimental_data_workspace().get_name())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
         group = ','.join(workspaces)
@@ -222,7 +221,7 @@ class ABINS(PythonAlgorithm):
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=wrk, Filename=wrk.getName() + ".dat", Separator="Space", WriteSpectrumID=False)
+            SaveAscii(InputWorkspace=wrk, Filename=wrk.get_name() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -292,8 +291,8 @@ class ABINS(PythonAlgorithm):
     def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
         """
         Creates workspaces for all types of atoms. Each workspace stores quantum order events for S for the given
-        type of atom. It also stores total workspace for the given type of atom. 
-         
+        type of atom. It also stores total workspace for the given type of atom.
+
         @param atoms_symbols: list of atom types for which quantum order events of S  should be calculated
         @param s_data: dynamical factor data of type SData
         @return: workspaces for list of atoms types, each workspace contains  quantum order events of
@@ -423,7 +422,7 @@ class ABINS(PythonAlgorithm):
             gr_wrk = mtd[ws_name]
             num_wrk = gr_wrk.getNumberOfEntries()
             for n in range(num_wrk):
-                self._scale_workspace(atom_name=atom_name, ws_name=gr_wrk.getItem(n).getName())
+                self._scale_workspace(atom_name=atom_name, ws_name=gr_wrk.getItem(n).get_name())
 
         return ws_name
 
@@ -461,7 +460,7 @@ class ABINS(PythonAlgorithm):
         @return: workspace with experimental data
         """
         experimental_wrk = Load(self._experimental_file)
-        self._set_workspace_units(wrk=experimental_wrk.getName())
+        self._set_workspace_units(wrk=experimental_wrk.get_name())
 
         return experimental_wrk
 

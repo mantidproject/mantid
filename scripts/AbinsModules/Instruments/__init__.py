@@ -1,3 +1,4 @@
-from ToscaInstrument import  ToscaInstrument
-from TwoDMap import  TwoDMap
-from Instrument import  Instrument
+# noqa: F401
+from ToscaInstrument import ToscaInstrument
+from TwoDMap import TwoDMap
+from Instrument import Instrument

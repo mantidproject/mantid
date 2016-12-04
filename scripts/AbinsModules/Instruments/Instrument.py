@@ -1,5 +1,8 @@
-# noinspection PyPep8Naming
+
 class Instrument(object):
+    """
+    Interface for instrument.
+    """
 
     _name = None
 
@@ -14,7 +17,7 @@ class Instrument(object):
         ""
         return None
 
-    def collect_K_data(self, k_points_data=None):
+    def collect_k_data(self, k_points_data=None):
         """
         Collects k-points data from DFT calculations.
         @param k_points_data: object of type KpointsData with data from DFT calculations
@@ -34,5 +37,5 @@ class Instrument(object):
     def __str__(self):
         return self._name
 
-    def getName(self):
+    def get_name(self):
         return self._name

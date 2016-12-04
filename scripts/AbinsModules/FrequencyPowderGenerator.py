@@ -1,6 +1,5 @@
 import AbinsParameters
 import AbinsConstants
-import math
 import numpy as np
 
 

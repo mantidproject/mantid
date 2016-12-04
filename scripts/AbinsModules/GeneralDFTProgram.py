@@ -1,4 +1,3 @@
-import numpy as np
 from mantid.kernel import logger
 
 # ABINS modules
@@ -35,7 +34,8 @@ class GeneralDFTProgram(IOmodule):
           2) Method should read from a phonon file an information about frequencies, atomic displacements,
           k-point vectors, weights of k-points and ions.
 
-          3) Method should reconstruct data for symmetry equivalent k-points (protected method _recover_symmetry_points).
+          3) Method should reconstruct data for symmetry equivalent k-points (protected method
+             _recover_symmetry_points).
 
              **Notice: this step is not implemented now. At the moment only Gamma point calculations are supported.**
 
@@ -66,7 +66,7 @@ class GeneralDFTProgram(IOmodule):
                                           the moment only Gamma point calculations are supported**
 
                         "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
-                        
+
                         "unit_cell"      -   numpy array with unit cell vectors
 
               The following structured datasets should be also defined:

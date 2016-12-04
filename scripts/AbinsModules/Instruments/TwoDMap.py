@@ -13,7 +13,7 @@ class TwoDMap(Instrument):
         self._sigma = AbinsParameters.delta_width
         super(TwoDMap, self).__init__()
 
-    def collect_K_data(self, k_points_data=None):
+    def collect_k_data(self, k_points_data=None):
         """
         Collect k-points data from DFT calculations.
         @param k_points_data: object of type KpointsData with data from DFT calculations
