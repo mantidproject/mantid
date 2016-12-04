@@ -85,55 +85,46 @@ private:
   const unsigned char *InputCellGhostArray;
 };
 
-void ComputeScalarRange(vtkStructuredGrid *grid, double *cellRange) {
-  auto cga = grid->GetCellGhostArray();
-  CellVisibility isCellVisible(cga ? cga->GetPointer(0) : nullptr);
-  vtkDataArray *cellScalars = grid->GetCellData()->GetScalars();
-  double minvalue = VTK_DOUBLE_MAX;
-  double maxvalue = VTK_DOUBLE_MIN;
-  int num = boost::numeric_cast<int>(grid->GetNumberOfCells());
-#if defined(_OPENMP) && _OPENMP >= 200805
-  PRAGMA_OMP(parallel for reduction(min : minvalue) reduction(max : maxvalue))
-#endif
-  for (int id = 0; id < num; id++) {
-    if (isCellVisible(id)) {
-      double s = cellScalars->GetComponent(id, 0);
-      minvalue = std::min(minvalue, s);
-      maxvalue = std::max(maxvalue, s);
+struct MinAndMax {
+  double m_minimum = VTK_DOUBLE_MAX;
+  double m_maximum = VTK_DOUBLE_MIN;
+  vtkDataArray *m_cellScalars;
+  CellVisibility m_isCellVisible;
+  MinAndMax(vtkDataArray *cellScalars, const unsigned char *cellGhostArray)
+      : m_cellScalars(cellScalars), m_isCellVisible(cellGhostArray) {}
+  MinAndMax(MinAndMax &rhs, tbb::split)
+      : m_cellScalars(rhs.m_cellScalars), m_isCellVisible(rhs.m_isCellVisible) {
+  }
+  void operator()(const tbb::blocked_range<int> &r) {
+    for (int id = r.begin(); id != r.end(); ++id) {
+      if (m_isCellVisible(id)) {
+        {
+          double s = m_cellScalars->GetComponent(id, 0);
+          m_minimum = std::min(m_minimum, s);
+          m_maximum = std::max(m_maximum, s);
+        }
+      }
     }
   }
+  void join(MinAndMax &rhs) {
+    m_minimum = std::min(m_minimum, rhs.m_minimum);
+    m_maximum = std::max(m_maximum, rhs.m_maximum);
+  }
+};
 
-  auto minimum = tbb::parallel_reduce(
-      tbb::blocked_range<int>(0, num), VTK_DOUBLE_MAX,
-      [&isCellVisible, cellScalars](tbb::blocked_range<int> &r,
-                                    double current_min) -> double {
-        for (int id = r.begin(); id != r.end(); ++id) {
-          double s = cellScalars->GetComponent(id, 0);
-          current_min = std::min(current_min, s);
-        }
-        return current_min;
-      },
-      [](double s1, double s2) { return std::min(s1, s2); });
+void ComputeScalarRange(vtkStructuredGrid *grid, double *cellRange) {
+  vtkDataArray *cellScalars = grid->GetCellData()->GetScalars();
+  auto cga = grid->GetCellGhostArray();
+  MinAndMax minandmax(cellScalars, cga ? cga->GetPointer(0) : nullptr);
 
-  auto maximum = tbb::parallel_reduce(
-      tbb::blocked_range<int>(0, num), VTK_DOUBLE_MIN,
-      [&isCellVisible, cellScalars](tbb::blocked_range<int> &r,
-                                    double current_max) -> double {
-        for (int id = r.begin(); id != r.end(); ++id) {
-          double s = cellScalars->GetComponent(id, 0);
-          current_max = std::max(current_max, s);
-        }
-        return current_max;
-      },
-      [](double s1, double s2) { return std::max(s1, s2); });
+  int num = boost::numeric_cast<int>(grid->GetNumberOfCells());
+  tbb::parallel_reduce(tbb::blocked_range<int>(0, num), minandmax);
 
-  std::cout << minvalue << " " << minimum << std::endl;
-  std::cout << maxvalue << " " << maximum << std::endl;
-
-  cellRange[0] = minvalue;
-  cellRange[1] = maxvalue;
+  cellRange[0] = minandmax.m_minimum;
+  cellRange[1] = minandmax.m_maximum;
 }
 }
+
 /*
 Executes the underlying algorithm to create the MVP model.
 @param factory : visualisation factory to use.
