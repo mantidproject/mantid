@@ -160,10 +160,6 @@ class LoadCASTEP(GeneralDFTProgram):
                          r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
         header_sum = re.compile(header_str_sum)
 
-        header_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
-        # noinspection PyUnusedLocal
-        header = re.compile(header_str)
-
         with open(self._input_filename, "rU") as f:
             found = False
             for line in f:  # iterate over the file one line at a time(memory efficient)

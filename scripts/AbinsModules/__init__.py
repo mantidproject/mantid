@@ -17,7 +17,7 @@ algorithms and data objects that are:
 
 """
 
-# noqa: F401
+# flake8: noqa
 
 from IOmodule import IOmodule
 

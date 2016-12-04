@@ -10,7 +10,7 @@ class CalculateDWCrystal(object):
     """
     Class for calculating Debye-Waller factors for single crystals (sample form is SingleCrystal).
     """
-    
+
     def __init__(self, temperature=None, abins_data=None):
         """
         @param temperature: temperature in K for which Debye-Waller factors should be calculated

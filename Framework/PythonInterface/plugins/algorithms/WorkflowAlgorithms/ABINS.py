@@ -211,7 +211,7 @@ class ABINS(PythonAlgorithm):
 
         # 7) add experimental data if available to the collection of workspaces
         if self._experimental_file != "":
-            workspaces.insert(0, self._create_experimental_data_workspace().get_name())
+            workspaces.insert(0, self._create_experimental_data_workspace().getName())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
         group = ','.join(workspaces)
@@ -221,7 +221,7 @@ class ABINS(PythonAlgorithm):
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=wrk, Filename=wrk.get_name() + ".dat", Separator="Space", WriteSpectrumID=False)
+            SaveAscii(InputWorkspace=wrk, Filename=wrk.getName() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -422,7 +422,7 @@ class ABINS(PythonAlgorithm):
             gr_wrk = mtd[ws_name]
             num_wrk = gr_wrk.getNumberOfEntries()
             for n in range(num_wrk):
-                self._scale_workspace(atom_name=atom_name, ws_name=gr_wrk.getItem(n).get_name())
+                self._scale_workspace(atom_name=atom_name, ws_name=gr_wrk.getItem(n).getName())
 
         return ws_name
 
@@ -460,7 +460,7 @@ class ABINS(PythonAlgorithm):
         @return: workspace with experimental data
         """
         experimental_wrk = Load(self._experimental_file)
-        self._set_workspace_units(wrk=experimental_wrk.get_name())
+        self._set_workspace_units(wrk=experimental_wrk.getName())
 
         return experimental_wrk
 

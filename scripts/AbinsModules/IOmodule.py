@@ -129,7 +129,7 @@ class IOmodule(object):
 
         # noinspection PyUnusedLocal
         with h5py.File(self._hdf_filename, 'w') as hdf_file:
-            pass
+            hdf_file.close()
 
     def add_attribute(self, name=None, value=None):
         """
