@@ -3,6 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
+from scipy.constants import physical_constants
 
 # Import mantid to setup the python paths to the bundled scripts
 import mantid
@@ -94,14 +95,14 @@ class CrystalFieldTests(unittest.TestCase):
         for i in range(9):
             self.assertAlmostEqual(expectedEigenvalues[i], en[i], 1)
         # Now test the eigenvectors by computing the dipole transition matrix elements. Use the magnetic field
-        #   terms but divide by gJ*uB (gJ=0.8 for U4+/Pr3+ and uB=0.6715)
+        #   terms but divide by gJ*uB (gJ=0.8 for U4+/Pr3+ and uB=0.05788 meV/T)
         _, _, hx = energies(2, BextX=1.0)
         _, _, hy = energies(2, BextY=1.0)
         _, _, hz = energies(2, BextZ=1.0)
         ix = np.dot(np.conj(np.transpose(wf)), np.dot(hx, wf))
         iy = np.dot(np.conj(np.transpose(wf)), np.dot(hy, wf))
         iz = np.dot(np.conj(np.transpose(wf)), np.dot(hz, wf))
-        gJuB = 0.53716
+        gJuB = 0.8 * physical_constants['Bohr magneton in eV/T'][0] * 1000.
         trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
         # For some reason, in the paper I also divided the matrix elements by a factor of 4. (not sure why)
         trans = trans / (gJuB ** 2) / 4

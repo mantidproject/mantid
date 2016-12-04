@@ -51,8 +51,8 @@ const double me = 9.109389754;  // x 10**(-31) kg, electron mass
 //       10*ee/kb =: fmevkelvin = 11.6047...
 //       this means 1 meV is nearly 11.6 K
 const double c_fmevkelvin = 10 * ee / kb;
-//  magneton of Bohr in kelvin per tesla
-const double c_myb = hq / me / 2 * c_fmevkelvin;
+//  magneton of Bohr in meV per tesla
+const double c_myb = hq / me / 2;
 
 //--------------------------------
 // define the delta function
@@ -335,7 +335,7 @@ double binom(int n, int k) {
 
 //--------------------------------------------------------
 //              (k)
-// calculates  D    (a,b,c)
+// calculates  D    (a,b,c)   [ The Wigner D-matrix ]
 //              ms m
 //
 // see Lindner A, 'Drehimpulse in der Quantenmechanik',
@@ -636,7 +636,22 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
     }
   }
   //-------------------------------------------------------------------
-  // Rotate the crystal field (?)
+  // Rotate the crystal field quantisation axis by the specified
+  // Euler angles. In some cases the number of CF parameters can be
+  // reduced by chosing the quantisation axis along a high symmetry
+  // rotation axis, rather than along a crystallographic axis.
+  // The eigenvalues should remain the same, but the eigenvectors will
+  // change. 
+  // The rotation is done using a Wigner D-matrix. As noted by 
+  // Buckmaster, the Stevens operators cannot be rotated as is, because
+  // the have an inconsistent normalisation between differen k, q terms
+  // Thus they have to be converted to and from the "Wybourne" 
+  // normalisation using the epsilon / omega values.
+  // There was a bug in the original FOCUS code. Multiplying by 
+  // omega*epsilon converts Wybourne parameters to Stevens parameters.
+  // Thus to convert the original dkq_star(k,qs) from Steven to Wybourn 
+  // we should divide by epsilon(k,qs)*omega(k,qs) and then multiply by
+  // the new dkq_star(k,q) by epsilon(k,q)*omega(k,q).
   //-------------------------------------------------------------------
   ComplexFortranMatrix rdkq_star(1, 6, -6, 6);
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
@@ -645,8 +660,8 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
       for (int qs = -k; qs <= k; ++qs) { // do qs=-k,k
         rdkq_star(k, q) =
             rdkq_star(k, q) +
-            dkq_star(k, qs) * epsilon(k, qs) / epsilon(k, q) * omega(k, qs) /
-                omega(k, q) *
+            dkq_star(k, qs) * epsilon(k, q) / epsilon(k, qs) * omega(k, q) /
+                omega(k, qs) *
                 ddrot(k, q, qs, alpha_euler, beta_euler, gamma_euler);
       }
     }
@@ -731,13 +746,14 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
       // add the molecular field
       //  f*J*B = f*( 1/2*(J+ * B-  +  J- * B+) + Jz*Bz )
       hamiltonian(m, n) =
-          hamiltonian(m, n) +
-          0.5 * facmol * bmolm * delta(mj, nj + 1, j) * jp(nj, j) +
-          0.5 * facmol * bmolp * delta(mj, nj - 1, j) * jm(nj, j) +
-          facmol * bmolz * delta(mj, nj, j) * nj +
+          // negative signs because the Zeeman field acts opposite to the CF
+          hamiltonian(m, n) -
+          0.5 * facmol * bmolm * delta(mj, nj + 1, j) * jp(nj, j) -
+          0.5 * facmol * bmolp * delta(mj, nj - 1, j) * jm(nj, j) -
+          facmol * bmolz * delta(mj, nj, j) * nj -
           // c add an external magnetic field
-          0.5 * facext * bextm * delta(mj, nj + 1, j) * jp(nj, j) +
-          0.5 * facext * bextp * delta(mj, nj - 1, j) * jm(nj, j) +
+          0.5 * facext * bextm * delta(mj, nj + 1, j) * jp(nj, j) -
+          0.5 * facext * bextp * delta(mj, nj - 1, j) * jm(nj, j) -
           facext * bextz * delta(mj, nj, j) * nj;
       hamiltonian(n, m) = conjg(hamiltonian(m, n));
     }
