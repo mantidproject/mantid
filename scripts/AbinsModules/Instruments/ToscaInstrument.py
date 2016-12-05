@@ -1,10 +1,8 @@
 import numpy as np
-import math
 
 from Instrument import Instrument
 from AbinsModules import AbinsParameters
 from AbinsModules import AbinsConstants
-from AbinsModules.KpointsData import KpointsData
 from AbinsModules.FrequencyPowderGenerator import FrequencyPowderGenerator
 
 
@@ -93,7 +91,6 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         return points_freq, broadened_spectrum
 
     def _gaussian(self, sigma=None, points=None, center=None):
-
         """
         @param sigma: sigma defines width of Gaussian
         @param points: points for which Gaussian should be evaluated
