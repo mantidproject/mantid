@@ -46,7 +46,7 @@ frequency           double       0
 wavelength          double       0
 bank                integer      1
 vanadium            integerarray [0]     NormRun
-vanadium_bankground integerarray [0]     NormBackRun
+vanadium_background integerarray [0]     NormBackRun
 container           integerarray [0]     BackRun
 empty_environment   integerarray [0]     EmptyEnv
 empty_instrument    integerarray [0]     EmptyInstr

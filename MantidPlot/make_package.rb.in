@@ -295,7 +295,7 @@ end
 #Copy over python libraries not included with OSX. 
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile"]
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
 end
@@ -347,7 +347,7 @@ end
 copyOptionalFile("#{path}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
-`cp /usr/local/bin/ipython Contents/MacOS/bin/`
+`cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`
 
 #Lastly check for any libraries in the package linking against homebrew libraries.
 search_patterns.each do |pattern|
