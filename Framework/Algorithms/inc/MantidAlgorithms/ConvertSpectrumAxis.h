@@ -75,7 +75,7 @@ private:
   /// Execution code
   void exec() override;
   /// Getting Efixed
-  double getEfixed(const Mantid::Geometry::IDetector &detector,
+  double getEfixed(Geometry::IDetector_const_sptr detector,
                    API::MatrixWorkspace_const_sptr inputWS, int emode) const;
 };
 

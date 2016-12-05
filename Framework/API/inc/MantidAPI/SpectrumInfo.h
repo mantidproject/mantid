@@ -7,7 +7,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include <vector>
-#include <set>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -87,7 +86,6 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  const std::set<detid_t> getValidDetectorIDs(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
   getDetectorVector(const size_t index) const;
 

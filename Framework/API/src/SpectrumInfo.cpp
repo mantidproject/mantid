@@ -188,15 +188,8 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     // Else need to construct a DetectorGroup and use that
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &id : dets) {
-      try {
-        const auto detIndex = m_detectorInfo.indexOf(id);
-        det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
-      } catch (std::out_of_range &) {
-        // Workspaces can contain invalid detector IDs. Those IDs will be
-        // silently ignored here until this is fixed. Some valid IDs will exist
-        // if hasDetectors or hasUniqueDetectors has returned true, but there
-        // could still be invalid IDs.
-      }
+      const auto detIndex = m_detectorInfo.indexOf(id);
+      det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);

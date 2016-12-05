@@ -391,34 +391,4 @@ public:
   }
 };
 
-class ConvertSpectrumAxis2TestPerformance : public CxxTest::TestSuite {
-public:
-  static ConvertSpectrumAxis2TestPerformance *createSuite() {
-    return new ConvertSpectrumAxis2TestPerformance();
-  }
-  static void destroySuite(ConvertSpectrumAxis2TestPerformance *suite) {
-    delete suite;
-  }
-
-  ConvertSpectrumAxis2TestPerformance() {}
-
-  void test_conversion_to_signed_theta_with_many_entries() {
-    std::string inputWSName("inputWS");
-    std::string outputWSName("outputWS");
-
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        20000, 20000);
-
-    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
-
-    conv.initialize();
-    conv.setChild(true);
-    conv.setProperty("InputWorkspace", testWS);
-    conv.setPropertyValue("OutputWorkspace", outputWSName);
-    conv.setPropertyValue("Target", "SignedTheta");
-    conv.setPropertyValue("EFixed", "10.0");
-    conv.execute();
-  }
-};
-
 #endif /*CONVERTSPECTRUMAXIS2TEST_H_*/

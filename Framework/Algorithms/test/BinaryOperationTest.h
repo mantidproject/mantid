@@ -7,7 +7,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -175,14 +174,18 @@ public:
     TS_ASSERT(output);
 
     for (int i = 0; i < nHist; ++i) {
-      auto spectrumInfo = output->spectrumInfo();
+      IDetector_const_sptr det;
+      try {
+        det = output->getDetector(i);
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      }
 
-      TSM_ASSERT("Detector was not found", spectrumInfo.hasDetectors(i));
-      if (spectrumInfo.hasDetectors(i)) {
+      TSM_ASSERT("Detector was found", det);
+      if (det) {
         if (masking.count(i) == 0) {
-          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
+          TS_ASSERT_EQUALS(det->isMasked(), false);
         } else {
-          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
+          TS_ASSERT_EQUALS(det->isMasked(), true);
         }
       }
     }

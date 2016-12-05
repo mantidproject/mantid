@@ -1,13 +1,13 @@
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Timer.h"
 
@@ -432,25 +432,31 @@ std::string BinaryOperation::checkSizeCompatibility(
  * Checks if the spectra at the given index of either input workspace is masked.
  * If so then the output spectra has zeroed data
  * and is also masked.
- * @param lhsSpectrumInfo :: The LHS spectrum info object
- * @param rhsSpectrumInfo :: The RHS spectrum info object
+ * @param lhs :: A pointer to the left-hand operand
+ * @param rhs :: A pointer to the right-hand operand
  * @param index :: The workspace index to check
  * @param out :: A pointer to the output workspace
  * @returns True if further processing is not required on the spectra, false if
  * the binary operation should be performed.
  */
-bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
-                                           const SpectrumInfo &rhsSpectrumInfo,
-                                           const int64_t index,
-                                           API::MatrixWorkspace &out) {
+bool BinaryOperation::propagateSpectraMask(
+    const API::MatrixWorkspace_const_sptr lhs,
+    const API::MatrixWorkspace_const_sptr rhs, const int64_t index,
+    API::MatrixWorkspace_sptr out) {
   bool continueOp(true);
-
-  if ((lhsSpectrumInfo.hasDetectors(index) &&
-       lhsSpectrumInfo.isMasked(index)) ||
-      (rhsSpectrumInfo.hasDetectors(index) &&
-       rhsSpectrumInfo.isMasked(index))) {
+  IDetector_const_sptr det_lhs, det_rhs;
+  try {
+    det_lhs = lhs->getDetector(index);
+    det_rhs = rhs->getDetector(index);
+  } catch (std::runtime_error &) {
+  } catch (std::domain_error &) {
+    // try statement will throw a domain_error when the axis is not a spectra
+    // axis.
+    return continueOp;
+  }
+  if ((det_lhs && det_lhs->isMasked()) || (det_rhs && det_rhs->isMasked())) {
     continueOp = false;
-    out.maskWorkspaceIndex(index);
+    out->maskWorkspaceIndex(index);
   }
   return continueOp;
 }
@@ -516,8 +522,6 @@ void BinaryOperation::doSingleColumn() {
   // value from each m_rhs 'spectrum'
   // and then calling the virtual function
   const int64_t numHists = m_lhs->getNumberHistograms();
-  auto lhsSpectrumInfo = m_lhs->spectrumInfo();
-  auto rhsSpectrumInfo = m_rhs->spectrumInfo();
   if (m_eout) {
     // ---- The output is an EventWorkspace ------
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
@@ -527,7 +531,7 @@ void BinaryOperation::doSingleColumn() {
       const double rhsE = m_rhs->readE(i)[0];
 
       // m_out->setX(i, m_lhs->refX(i)); //unnecessary - that was copied before.
-      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out)) {
+      if (propagateSpectraMask(m_lhs, m_rhs, i, m_out)) {
         performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       }
       m_progress->report(this->name());
@@ -543,7 +547,7 @@ void BinaryOperation::doSingleColumn() {
       const double rhsE = m_rhs->readE(i)[0];
 
       m_out->setX(i, m_lhs->refX(i));
-      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out)) {
+      if (propagateSpectraMask(m_lhs, m_rhs, i, m_out)) {
         // Get reference to output vectors here to break any sharing outside the
         // function call below
         // where the order of argument evaluation is not guaranteed (if it's
@@ -667,9 +671,6 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
   // TODO: Check if this works for event workspaces...
   propagateBinMasks(m_rhs, m_out);
 
-  auto lhsSpectrumInfo = m_lhs->spectrumInfo();
-  auto rhsSpectrumInfo = m_rhs->spectrumInfo();
-
   if (m_eout) {
     // ----------- The output is an EventWorkspace -------------
 
@@ -689,8 +690,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i,
-                                    *m_out))
+          if (!propagateSpectraMask(m_lhs, m_rhs, i, m_out))
             continue;
         }
         // Reach here? Do the division
@@ -722,8 +722,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i,
-                                    *m_out))
+          if (!propagateSpectraMask(m_lhs, m_rhs, i, m_out))
             continue;
         }
 
@@ -761,7 +760,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
           continue;
       } else {
         // Check for masking except when mismatched sizes
-        if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out))
+        if (!propagateSpectraMask(m_lhs, m_rhs, i, m_out))
           continue;
       }
       // Reach here? Do the division
