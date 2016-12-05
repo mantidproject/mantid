@@ -147,7 +147,7 @@
          </sizepolicy>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="pgAbsCorFlatPlate">
          <layout class="QGridLayout" name="loFlatPlate">
@@ -424,7 +424,7 @@
           <item row="0" column="2">
            <widget class="QLabel" name="lbCylSampleHeight">
             <property name="text">
-             <string>Sample Height</string>
+             <string>Sample Height:</string>
             </property>
            </widget>
           </item>
@@ -457,7 +457,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Beam Height</string>
+         <string>Beam Height:</string>
         </property>
        </widget>
       </item>
@@ -841,8 +841,8 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>436</x>
-     <y>160</y>
+     <x>782</x>
+     <y>158</y>
     </hint>
     <hint type="destinationlabel">
      <x>296</x>
@@ -857,12 +857,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>91</y>
+     <x>549</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
-     <x>436</x>
-     <y>92</y>
+     <x>783</x>
+     <y>509</y>
     </hint>
    </hints>
   </connection>
@@ -873,12 +873,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>91</y>
+     <x>549</x>
+     <y>533</y>
     </hint>
     <hint type="destinationlabel">
-     <x>436</x>
-     <y>92</y>
+     <x>783</x>
+     <y>535</y>
     </hint>
    </hints>
   </connection>
@@ -889,12 +889,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>65</y>
+     <x>175</x>
+     <y>87</y>
     </hint>
     <hint type="destinationlabel">
-     <x>436</x>
-     <y>65</y>
+     <x>783</x>
+     <y>78</y>
     </hint>
    </hints>
   </connection>
@@ -905,12 +905,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>65</y>
+     <x>175</x>
+     <y>87</y>
     </hint>
     <hint type="destinationlabel">
-     <x>296</x>
-     <y>327</y>
+     <x>305</x>
+     <y>571</y>
     </hint>
    </hints>
   </connection>
@@ -921,12 +921,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>447</y>
+     <x>175</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
-     <x>436</x>
-     <y>528</y>
+     <x>783</x>
+     <y>561</y>
     </hint>
    </hints>
   </connection>
@@ -937,12 +937,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>447</y>
+     <x>175</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
-     <x>436</x>
-     <y>501</y>
+     <x>386</x>
+     <y>561</y>
     </hint>
    </hints>
   </connection>
@@ -953,12 +953,76 @@
    <slot>setValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>238</x>
-     <y>212</y>
+     <x>65</x>
+     <y>195</y>
     </hint>
     <hint type="destinationlabel">
-     <x>514</x>
-     <y>212</y>
+     <x>118</x>
+     <y>195</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBeamSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbBeamHeight</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>53</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>50</x>
+     <y>306</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBeamSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spBeamHeight</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>179</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>245</x>
+     <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBeamSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbBeamWidth</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>457</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBeamSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spBeamWidth</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>197</x>
+     <y>284</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>633</x>
+     <y>301</y>
     </hint>
    </hints>
   </connection>
