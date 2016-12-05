@@ -1265,6 +1265,44 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.fit()
         self.assertTrue(cf.chi2 < 100.0)
 
+    def test_normalisation(self):
+        from CrystalField.normalisation import split2range
+        ranges = split2range(Ion='Pr', EnergySplitting=10,
+                             Parameters=['B20', 'B22', 'B40', 'B42', 'B44', 'B60', 'B62', 'B64', 'B66'])
+        self.assertAlmostEqual(ranges['B44'], 0.013099063718959822, 7)
+        self.assertAlmostEqual(ranges['B60'], 0.00010601965319487525, 7)
+        self.assertAlmostEqual(ranges['B40'], 0.0022141458870077678, 7)
+        self.assertAlmostEqual(ranges['B42'], 0.009901961430901874, 7)
+        self.assertAlmostEqual(ranges['B64'], 0.00084150490931686321, 7)
+        self.assertAlmostEqual(ranges['B22'], 0.19554806997215959, 7)
+        self.assertAlmostEqual(ranges['B20'], 0.11289973083793813, 7)
+        self.assertAlmostEqual(ranges['B66'], 0.0011394030334966495, 7)
+        self.assertAlmostEqual(ranges['B62'], 0.00076818536847364201, 7)
+
+    def test_estimate_parameters(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
+                                constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45',
+                                Type='Cross Entropy', NSamples=100)
+        # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
 
 if __name__ == "__main__":
     unittest.main()

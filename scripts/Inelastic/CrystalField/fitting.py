@@ -877,6 +877,14 @@ class CrystalFieldFit(object):
         else:
             self._monte_carlo_single(**kwargs)
 
+    def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
+        from CrystalField.normalisation import split2range
+        ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
+                             Parameters=Parameters)
+        constraints = [('%s<%s<%s' % (-bound, parName, bound)) for parName, bound in ranges.items()]
+        self.model.constraints(*constraints)
+        self.monte_carlo(**kwargs)
+
     def _monte_carlo_single(self, **kwargs):
         from mantid.api import AlgorithmManager
         fun = self.model.makeSpectrumFunction()
