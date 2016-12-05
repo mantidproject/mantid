@@ -621,8 +621,8 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
           SLOT(readWorkerStdErr(QString)));
 
   // remove the user confirmation for running recon, if the recon has finished
-  connect(m_workerThread.get(), SIGNAL(workerFinished(int)), this,
-          SLOT(workerFinished(int)));
+  connect(m_workerThread.get(), SIGNAL(workerFinished(qint64, int)), this,
+          SLOT(workerFinished(qint64, int)));
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
 
@@ -633,9 +633,9 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
 
 /** Simply reset the switch that tracks if a recon is running
 */
-void TomographyIfacePresenter::workerFinished(const int exitCode) {
+void TomographyIfacePresenter::workerFinished(const qint64 pid, const int exitCode) {
   m_reconRunning = false;
-  m_model->updateProcessInJobList(m_runningProcessPID, exitCode);
+  m_model->updateProcessInJobList(pid, exitCode);
   processRefreshJobs();
 }
 
@@ -647,11 +647,11 @@ void TomographyIfacePresenter::reconProcessFailedToStart() {
 
 void TomographyIfacePresenter::addProcessToJobList() {
   auto *worker = qobject_cast<TomographyProcess *>(sender());
-  qint64 pid = worker->getPID();
-  auto runnable = worker->getRunnable();
-  auto args = worker->getArgs();
+  const qint64 pid = worker->getPID();
+  const auto runnable = worker->getRunnable();
+  const auto args = worker->getArgs();
 
-  m_runningProcessPID = pid;
+  m_workerThread->setProcessPID(pid);
 
   m_model->addJobToStatus(pid, runnable, args);
   processRefreshJobs();
@@ -670,13 +670,6 @@ bool TomographyIfacePresenter::isLocalResourceSelected() const {
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
-  // No need to be logged in, there can be local processes
-  if (m_model->loggedIn().empty()) {
-    m_model->doRefreshJobsInfo("Local");
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
-                                  m_model->jobsStatusLocal());
-    return;
-  }
 
   m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
@@ -845,6 +838,12 @@ void TomographyIfacePresenter::processViewImg() {
 }
 
 void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
+	// DEBUG :: remove, try and find why mantid keeps crashing here
+	//period = 5;
+	// TODO this crashes here, put a boolean check for timer as we dont
+	// wanna check the keepAliveTimer
+	//return;
+	std::cout << "\nDEBUG >> TRYING TO START TIMER\n";
   if (period <= 0) {
     m_model->logMsg("Tomography GUI: not starting the keep-alive mechanism. "
                     "You might be logged out by the remote compute resource "
@@ -855,8 +854,11 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
 
   // timer is already running, so return
   if (m_keepAliveTimer || m_keepAliveThread) {
-    return;
+	  std::cout << "\nDEBUG >> TIMER IS RUNNING, ABORT\n";
+	  return;
   }
+
+  std::cout << "\nDEBUG >> STARTING TIMER\n";
 
   m_model->logMsg(
       "Tomography GUI: starting mechanism to periodically query the "

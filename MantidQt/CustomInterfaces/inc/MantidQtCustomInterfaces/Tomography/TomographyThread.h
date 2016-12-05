@@ -36,6 +36,7 @@ public:
       : QThread(parent), m_worker(worker) {
     // interactions between the thread and the worker are defined here
     connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
+	connect(this, SIGNAL(started()), this, SLOT(startWorker()));
 
     connect(worker, SIGNAL(readyReadStandardOutput()), this,
             SLOT(readWorkerStdOut()));
@@ -56,17 +57,31 @@ public:
     // thus not allowing to have multiple reconstructions running at the same
     // time
     emit terminated();
+
+	// this causes segfault in processRefreshJobs if the check isnt here
+	if(m_workerRunning || !m_worker){
     // emit that the worker has been forcefully closed, exit with error code 1
-    emit workerFinished(1);
+		// this is bad, find a way to notify without an explicit emit on thread destroy
+		emit workerFinished(m_workerPID, 1);
+	}
+  }
+
+  void setProcessPID(const qint64 pid) {
+	  m_workerPID = pid;
+  }
+
+  qint64 getProcessPID() const {
+	  return m_workerPID;
   }
 
 public slots:
   void finished(const int exitCode) {
     // queue up object deletion
     m_worker->deleteLater();
-
+	m_workerRunning = false;
     // emit the exit code to the presenter so the process info can be updated
-    emit workerFinished(exitCode);
+    emit workerFinished(m_workerPID, exitCode);
+	
   }
 
   void readWorkerStdOut() const {
@@ -84,12 +99,19 @@ public slots:
       emit stdErrReady(out.trimmed());
   }
 
+  void startWorker() {
+	  m_workerRunning = true;
+  }
+
 signals:
-  void workerFinished(int);
+  void workerFinished(const qint64, const int);
   void stdOutReady(const QString &s) const;
   void stdErrReady(const QString &s) const;
 
 private:
+	bool m_workerRunning = false;
+	/// Holder for the current running process' PID
+	qint64 m_workerPID;
   TomographyProcess *const m_worker;
 };
 } // CustomInterfaces

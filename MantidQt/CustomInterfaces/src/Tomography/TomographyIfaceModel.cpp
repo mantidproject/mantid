@@ -367,6 +367,7 @@ void TomographyIfaceModel::prepareSubmissionArguments(
     // external interpreter fails if remote we just want to append all of the
     // options, the script path is already appended
     args.emplace_back(local ? trailingCommands : longOpt);
+	allOpts = constructSingleStringFromVector(args);
     return;
   }
 

@@ -37,7 +37,7 @@ public:
   TomographyProcess() : QProcess(nullptr) {}
 
   // intentionally copy the vector
-  void setup(const std::string runnable, const std::vector<std::string> &args,
+  void setup(const std::string &runnable, const std::vector<std::string> &args,
              const std::string &allOpts) {
     m_allArgs = allOpts;
     m_runnable = QString::fromStdString(runnable);
@@ -49,6 +49,12 @@ public:
 
   qint64 getPID() const {
     auto pid = this->pid();
+
+	// qt connect could sometimes try to read the terminated process' PID
+	if (!pid) {
+		return 0;
+	}
+
 #ifdef _WIN32
     // windows gets a struct object with more info
     auto actualpid = static_cast<qint64>(pid->dwProcessId);
