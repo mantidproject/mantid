@@ -37,21 +37,27 @@ The pulse interval, :math:`T_{pulse}` in seconds, is then given by,
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Load a regular histogram NeXus file:**
 
-.. code-block:: python
+.. testcode:: ExLoad
 
     # Regular data file.
-    dataRegular = 'ILLIN6_151460.nxs'
+    dataRegular = 'ILL/IN5/104007.nxs'
 
     # Load ILL dataset
     ws = Load(dataRegular)
 
-    print("This workspace has {0} dimensions and has {1} histograms.".format(ws.getNumDims(), ws.getNumberHistograms()))
+    numDimensions = ws.getNumDims()
+    numHistograms = ws.getNumberHistograms()
+    print('This workspace has {0} dimensions and {1} histograms.'.format(numDimensions, numHistograms))
 
 Output:
 
-    This workspace has 2 dimensions and has 340 histograms.
+.. testoutput:: ExLoad
+
+    This workspace has 2 dimensions and 98305 histograms.
 
 .. categories::
 
