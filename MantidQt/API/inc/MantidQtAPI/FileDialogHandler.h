@@ -43,32 +43,25 @@ namespace API {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace FileDialogHandler {
-/** The MacOS's native save dialog crashes when running a 10.6 package on
- * 10.8 so this function, which takes the same arguments as the Qt function,
- * ensures a nonnative object is used on the Mac when necessary. If compiled
- * on 10.8 the native will be used
- *
+/**
  * @param parent :: the dialog will be shown centered over this parent
  * widget
- * @param caption :: The dialog's caption
- * @param dir :: The file dialog's working directory will be set to dir.
- * If dir includes a file name, the file will be selected
- * @param filter :: extensions of files to look for
- * @param selectedFilter :: pass a pointer an existing string that will be
- * filled with the extension the user selected
+ * @param baseProp :: The property that the dialog parameters will be extracted
+ * from.
  * @param options :: The options argument holds various options about how
  * to run the dialog
   */
 DLLExport QString getSaveFileName(QWidget *parent = 0,
-                                  const QString &caption = QString(),
-                                  const QString &dir = QString(),
-                                  const QString &filter = QString(),
-                                  QString *selectedFilter = 0,
-                                  QFileDialog::Options options = 0);
-
-DLLExport QString getSaveFileName(QWidget *parent = 0,
                                   const Mantid::Kernel::Property *baseProp = 0,
                                   QFileDialog::Options options = 0);
+
+/**
+ * For file dialogs. This will add the selected extension if an extension
+ * doesn't
+ * already exist.
+ */
+DLLExport QString addExtension(const QString &filename,
+                               const QString &selectedFilter);
 
 DLLExport QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp);
 

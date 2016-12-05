@@ -2,6 +2,27 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include <boost/regex.hpp>
+
+namespace { // anonymous namespace
+const boost::regex FILE_EXT_REG_EXP{"^.+\\s+\\(\\*(\\S+).+"};
+
+QString getExtension(const QString &selectedFilter) {
+  if (selectedFilter.isEmpty()) {
+    return QString("");
+  }
+
+  boost::smatch result;
+  if (boost::regex_search(selectedFilter.toStdString(), result,
+                          FILE_EXT_REG_EXP) &&
+      result.size() == 2) {
+    return QString::fromStdString(result[1]);
+  } else {
+    // failure returns empty string
+    return QString("");
+  }
+}
+} // anonymous namespace
 
 namespace MantidQt {
 namespace API {
@@ -32,13 +53,6 @@ namespace FileDialogHandler {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-QString getSaveFileName(QWidget *parent, const QString &caption,
-                        const QString &dir, const QString &filter,
-                        QString *selectedFilter, QFileDialog::Options options) {
-  return QFileDialog::getSaveFileName(parent, caption, dir, filter,
-                                      selectedFilter, options);
-}
-
 QString getSaveFileName(QWidget *parent,
                         const Mantid::Kernel::Property *baseProp,
                         QFileDialog::Options options) {
@@ -55,36 +69,29 @@ QString getSaveFileName(QWidget *parent,
   QString selectedFilter;
 
   // create the file browser
-  QString filename =
-      getSaveFileName(parent, dialogTitle,
-                      AlgorithmInputHistory::Instance().getPreviousDirectory(),
-                      filter, &selectedFilter, options);
+  QString filename = QFileDialog::getSaveFileName(
+      parent, dialogTitle,
+      AlgorithmInputHistory::Instance().getPreviousDirectory(), filter,
+      &selectedFilter, options);
 
+  return addExtension(filename, selectedFilter);
+}
+
+QString addExtension(const QString &filename, const QString &selectedFilter) {
   // just return an empty string if that is what was given
   if (filename.isEmpty())
     return filename;
 
   // Check the filename and append the selected filter if necessary
   if (QFileInfo(filename).completeSuffix().isEmpty()) {
-    // Hack off the first star that the filter returns
-    QString ext(selectedFilter);
-
-    if (selectedFilter.startsWith("*.")) {
-      // 1 character from the start
-      ext = ext.remove(0, 1);
-    } else {
-      ext = "";
-    }
-
+    auto ext = getExtension(selectedFilter);
     if (filename.endsWith(".") && ext.startsWith(".")) {
       ext = ext.remove(0, 1);
     }
-
-    // Construct the full file name
-    filename += ext;
+    return filename + ext;
+  } else {
+    return filename;
   }
-
-  return filename;
 }
 
 QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp) {
