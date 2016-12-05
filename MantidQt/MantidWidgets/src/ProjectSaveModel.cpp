@@ -14,6 +14,11 @@ ProjectSaveModel::ProjectSaveModel(
     std::vector<IProjectSerialisable *> windows) {
   auto workspaces = getWorkspaces();
   for (auto &ws : workspaces) {
+    // Currently we don't support saving workspace groups.
+    // so, here just skip any and just include the other workspaces
+    if(ws->id() == "WorkspaceGroup")
+      continue;
+
     std::pair<std::string, std::vector<IProjectSerialisable *>> item(
         ws->name(), std::vector<IProjectSerialisable *>());
     m_workspaceWindows.insert(item);
@@ -102,7 +107,8 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
   WorkspaceIcons icons;
   std::vector<WorkspaceInfo> wsInfo;
 
-  for (auto ws : getWorkspaces()) {
+  for (auto item : m_workspaceWindows) {
+    auto ws = AnalysisDataService::Instance().retrieve(item.first);
     WorkspaceInfo info;
     auto id = ws->id();
 

@@ -429,8 +429,6 @@ QString ProjectSerialiser::saveWorkspaces() {
   wsNames = "<mantidworkspaces>\n";
   wsNames += "WorkspaceNames";
 
-  emit setProgressBarText(QString("Saving Workspaces"));
-
   int count = 0;
   auto workspaceItems = AnalysisDataService::Instance().getObjectNames();
   for (auto &itemIter : workspaceItems) {

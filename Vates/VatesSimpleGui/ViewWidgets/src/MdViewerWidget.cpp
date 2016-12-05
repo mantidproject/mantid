@@ -1116,7 +1116,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
 std::vector<std::string> MdViewerWidget::getWorkspaceNames()
 {
   auto server = pqActiveObjects::instance().activeServer();
-  auto model = pqApplicationCore::instance().getServerManagerModel();
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
   const auto sources = model->findItems<pqPipelineSource *>(server);
 
   std::vector<std::string> workspaceNames;
@@ -1135,7 +1135,12 @@ std::vector<std::string> MdViewerWidget::getWorkspaceNames()
 
 std::string MdViewerWidget::getWindowName()
 {
-  return m_widgetName;
+  return m_widgetName.toStdString();
+}
+
+
+std::string MdViewerWidget::getWindowType() {
+  return "VSIWindow";
 }
 
 /**

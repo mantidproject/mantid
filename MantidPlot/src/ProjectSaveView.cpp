@@ -243,9 +243,8 @@ void ProjectSaveView::connectSignals()
           m_ui.saveProgressBar, SLOT(setRange(int, int)));
   connect(&m_serialiser, SIGNAL(setProgressBarValue(int)),
           m_ui.saveProgressBar, SLOT(setValue(int)));
-  connect(&m_serialiser, SIGNAL(setProgressBarText(QString)),
-          m_ui.saveProgressBar, SLOT(setText(QString)));
 }
+
 
 }
 }
