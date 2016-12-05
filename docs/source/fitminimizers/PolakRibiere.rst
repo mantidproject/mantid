@@ -1,4 +1,4 @@
-.. _PolakRiberiere
+.. _PolakRiberiere:
 
 Conjugate Gradient Minimizer (Polak-Ribiere imp.)
 =================================================

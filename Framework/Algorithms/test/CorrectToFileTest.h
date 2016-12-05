@@ -36,7 +36,7 @@ public:
   void testExec2D() {
     // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 102, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 102, 1.5);
     testInput->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
@@ -63,7 +63,7 @@ public:
   void testExecEvent() {
     // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 102, 100, 1.5);
+        WorkspaceCreationHelper::createEventWorkspace(10, 102, 100, 1.5);
     testInput->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
@@ -89,7 +89,7 @@ public:
 
   void testSpectraDivide() { // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
     MatrixWorkspace_sptr data =
         executeAlgorithm(testInput, "SpectrumNumber", "Divide");
@@ -114,7 +114,7 @@ public:
 
   void testSpectraMultip() { // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
     MatrixWorkspace_sptr data =
         executeAlgorithm(testInput, "SpectrumNumber", "Multiply", false);

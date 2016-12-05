@@ -254,12 +254,10 @@ class AlignComponents(PythonAlgorithm):
         calWS = api.SortTableWorkspace(calWS, Columns='detid')
         maskWS = self.getProperty("MaskWorkspace").value
 
+        difc = calWS.column('difc')
         if maskWS is not None:
             self._masking = True
             mask = maskWS.extractY().flatten()
-
-        difc = calWS.column('difc')
-        if self._masking:
             difc = np.ma.masked_array(difc, mask)
 
         detID = calWS.column('detid')
@@ -303,18 +301,11 @@ class AlignComponents(PythonAlgorithm):
                 # Set up x0 and bounds lists
                 x0List = []
                 boundsList = []
-                if self._optionsDict["Xposition"]:
-                    x0List.append(self._initialPos[0])
-                    boundsList.append((self._initialPos[0] + self.getProperty("MinXposition").value,
-                                       self._initialPos[0] + self.getProperty("MaxXposition").value))
-                if self._optionsDict["Yposition"]:
-                    x0List.append(self._initialPos[1])
-                    boundsList.append((self._initialPos[1] + self.getProperty("MinYposition").value,
-                                       self._initialPos[1] + self.getProperty("MaxYposition").value))
-                if self._optionsDict["Zposition"]:
-                    x0List.append(self._initialPos[2])
-                    boundsList.append((self._initialPos[2] + self.getProperty("MinZposition").value,
-                                       self._initialPos[2] + self.getProperty("MaxZposition").value))
+                for iopt,opt in enumerate(self._optionsList[:3]):
+                    if self._optionsDict[opt]:
+                        x0List.append(self._initialPos[iopt])
+                        boundsList.append((self._initialPos[iopt] + self.getProperty("Min"+opt).value,
+                                           self._initialPos[iopt] + self.getProperty("Max"+opt).value))
 
                 results = minimize(self._minimisation_func, x0=x0List,
                                    method='L-BFGS-B',
@@ -347,11 +338,9 @@ class AlignComponents(PythonAlgorithm):
         for opt in self._optionsList:
             self._optionsDict[opt] = self.getProperty(opt).value
 
-        if self._optionsDict["Xposition"] or self._optionsDict["Yposition"] or self._optionsDict["Zposition"]:
-            self._move = True
+        self._move = (self._optionsDict["Xposition"] or self._optionsDict["Yposition"] or self._optionsDict["Zposition"])
 
-        if self._optionsDict["AlphaRotation"] or self._optionsDict["BetaRotation"] or self._optionsDict["GammaRotation"]:
-            self._rotate = True
+        self._rotate = (self._optionsDict["AlphaRotation"] or self._optionsDict["BetaRotation"] or self._optionsDict["GammaRotation"])
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
         for component in components:
@@ -383,30 +372,11 @@ class AlignComponents(PythonAlgorithm):
             else:
                 mask_out = None
 
-            if self._optionsDict["Xposition"]:
-                x0List.append(self._initialPos[0])
-                boundsList.append((self._initialPos[0] + self.getProperty("MinXposition").value,
-                                   self._initialPos[0] + self.getProperty("MaxXposition").value))
-            if self._optionsDict["Yposition"]:
-                x0List.append(self._initialPos[1])
-                boundsList.append((self._initialPos[1] + self.getProperty("MinYposition").value,
-                                   self._initialPos[1] + self.getProperty("MaxYposition").value))
-            if self._optionsDict["Zposition"]:
-                x0List.append(self._initialPos[2])
-                boundsList.append((self._initialPos[2] + self.getProperty("MinZposition").value,
-                                   self._initialPos[2] + self.getProperty("MaxZposition").value))
-            if self._optionsDict["AlphaRotation"]:
-                x0List.append(self._initialPos[3])
-                boundsList.append((self._initialPos[3] + self.getProperty("MinAlphaRotation").value,
-                                   self._initialPos[3] + self.getProperty("MaxAlphaRotation").value))
-            if self._optionsDict["BetaRotation"]:
-                x0List.append(self._initialPos[4])
-                boundsList.append((self._initialPos[4] + self.getProperty("MinBetaRotation").value,
-                                   self._initialPos[4] + self.getProperty("MaxBetaRotation").value))
-            if self._optionsDict["GammaRotation"]:
-                x0List.append(self._initialPos[5])
-                boundsList.append((self._initialPos[5] + self.getProperty("MinGammaRotation").value,
-                                   self._initialPos[5] + self.getProperty("MaxGammaRotation").value))
+            for iopt,opt in enumerate(self._optionsList):
+                if self._optionsDict[opt]:
+                    x0List.append(self._initialPos[iopt])
+                    boundsList.append((self._initialPos[iopt] + self.getProperty("Min"+opt).value,
+                                       self._initialPos[iopt] + self.getProperty("Max"+opt).value))
 
             results = minimize(self._minimisation_func, x0=x0List,
                                method='L-BFGS-B',

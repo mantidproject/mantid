@@ -1,4 +1,5 @@
 #include "MantidRemoteAlgorithms/QueryAllRemoteJobs.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"

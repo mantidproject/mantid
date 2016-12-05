@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::CurveFitting::Algorithms::SplineInterpolation;
 using namespace Mantid::API;
@@ -36,10 +37,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 0.1, false);
 
     SplineInterpolation alg;
@@ -52,10 +53,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 1, true);
 
     SplineInterpolation alg;
@@ -68,10 +69,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 1, true);
 
     SplineInterpolation alg;
@@ -84,10 +85,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 1, true);
 
     // Add an axis
@@ -171,11 +172,11 @@ public:
     constexpr int xStepVal(1);
 
     MatrixWorkspace_sptr matWs =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, xStartVal, xEndVal, xStepVal, false);
 
     MatrixWorkspace_sptr inWs =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, xStartVal, xEndVal, (xStepVal * 0.1), false);
 
     inputWs = inWs;

@@ -281,7 +281,7 @@ public:
   }
 
   void test_passWorkspaceIndexToFunction() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -308,7 +308,7 @@ public:
   }
 
   void test_dont_passWorkspaceIndexToFunction() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -337,7 +337,7 @@ public:
   }
 
   void test_passWorkspaceIndexToFunction_composit_function_case() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -366,7 +366,7 @@ public:
   }
 
   void test_createOutputOption() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -623,7 +623,7 @@ private:
     AnalysisDataService::Instance().add("PlotPeakGroup", m_wsg);
     const int N = 3;
     for (int iWS = 0; iWS < N; ++iWS) {
-      auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+      auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
           PlotPeak_Expression(iWS), 3, 0, 10, 0.005, hist);
       for (int i = 0; i < 3; ++i) {
         ws->getSpectrum(i).setSpectrumNo(0);

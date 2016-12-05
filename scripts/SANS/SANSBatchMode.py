@@ -140,8 +140,8 @@ def get_transmission_properties(workspace):
     return transmission_properties
 
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,  # noqa
-                centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):  # noqa
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
+                centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.

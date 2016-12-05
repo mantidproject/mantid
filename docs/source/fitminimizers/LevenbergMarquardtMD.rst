@@ -1,4 +1,4 @@
-.. _LevenbergMarquardtMD
+.. _LevenbergMarquardtMD:
 
 Levenberg-Marquardt MD Minimizer
 ================================
