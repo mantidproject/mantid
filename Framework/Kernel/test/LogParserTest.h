@@ -10,6 +10,8 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/lexical_cast.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <Poco/File.h>
 
@@ -694,9 +696,8 @@ private:
     const auto *prop_with_value =
         dynamic_cast<PropertyWithValue<int> *>(prop.get());
 
-    int value;
     TS_ASSERT(prop_with_value != NULL);
-    Mantid::Kernel::toValue<int>(prop_with_value->value(), value);
+    int value = boost::lexical_cast<int>(prop_with_value->value());
     TS_ASSERT_EQUALS(expected_period, value);
   }
 

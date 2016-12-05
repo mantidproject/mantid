@@ -18,6 +18,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>

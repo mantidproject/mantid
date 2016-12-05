@@ -2,6 +2,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Workspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

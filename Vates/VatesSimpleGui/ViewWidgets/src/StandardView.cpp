@@ -205,15 +205,11 @@ void StandardView::render() {
   if (!this->isPeaksWorkspace(this->origSrc)) {
     vtkSMPVRepresentationProxy::SetScalarColoring(
         drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
-    // drep->getProxy()->UpdateVTKObjects();
-    // vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
-    //                                                               "signal",
-    //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
-  this->resetDisplay();
   emit this->triggerAccept();
+  this->resetDisplay();
 }
 
 void StandardView::onCutButtonClicked() {

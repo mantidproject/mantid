@@ -3,6 +3,7 @@
 
 #include "Graph3D.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidMatrix.h"
 #include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 

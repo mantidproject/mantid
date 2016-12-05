@@ -418,7 +418,7 @@ private:
   MatrixWorkspace_sptr buildUngroupedWS(const std::string &WS_Name) {
     const int NHIST = 3;
 
-    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST, 10, 1.0);
+    inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
 
     for (int j = 0; j < NHIST; ++j) {
       // Just set the spectrum number to match the index
@@ -450,7 +450,7 @@ private:
         ComponentCreationHelper::createRingOfCylindricalDetectors(4, 5, 4));
     const size_t NDET = pDet->nDets();
 
-    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 1.0);
+    inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
 
     boost::shared_ptr<Geometry::Instrument> spInst(
         new Geometry::Instrument("basic_ring"));
