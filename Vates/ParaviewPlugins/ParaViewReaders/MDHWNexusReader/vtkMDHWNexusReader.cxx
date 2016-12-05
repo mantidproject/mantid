@@ -125,7 +125,8 @@ int vtkMDHWNexusReader::RequestData(
   try {
     auto workspaceProvider = Mantid::Kernel::make_unique<
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-    m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
+    m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
+                                   &drawingProgressAction);
   } catch (std::invalid_argument &e) {
     std::string error = e.what();
     vtkDebugMacro(<< "Workspace does not have correct information to "
