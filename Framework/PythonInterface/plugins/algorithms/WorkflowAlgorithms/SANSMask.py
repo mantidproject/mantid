@@ -170,8 +170,8 @@ class SANSMask(PythonAlgorithm):
             if component.type() == 'RectangularDetector':
                 # id's at the bottom on every pixel
                 ids_at_the_bottom = list(range(side_to_mask * component.idstep() + component.idstart(),
-                                          component.idstart() + component.idstep() * component.nelements(),
-                                          component.idstep() * 2))
+                                               component.idstart() + component.idstep() * component.nelements(),
+                                               component.idstep() * 2))
                 ids = [list(range(i, i + component.idstep())) for i in ids_at_the_bottom]
                 ids = [item for sublist in ids for item in sublist]  # flat list
             elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':

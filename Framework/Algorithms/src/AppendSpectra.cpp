@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -135,11 +137,34 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1,
     return;
 
   auto indexInfo = output.indexInfo();
-  // change the axis by adding the maximum existing spectrum number to the
-  // current value
   indexInfo.setSpectrumNumbers(
       makeRange(0, static_cast<specnum_t>(output.getNumberHistograms() - 1)));
   output.setIndexInfo(indexInfo);
+
+  const int yAxisNum = 1;
+  const auto yAxisWS1 = ws1.getAxis(yAxisNum);
+  const auto yAxisWS2 = ws2.getAxis(yAxisNum);
+  auto outputYAxis = output.getAxis(yAxisNum);
+  const auto ws1len = ws1.getNumberHistograms();
+
+  const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
+  const bool isNumericAxis = yAxisWS1->isNumeric() && yAxisWS2->isNumeric();
+
+  auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
+  for (size_t i = 0; i < output.getNumberHistograms(); ++i) {
+    if (isTextAxis) {
+      // check if we're outside the spectra of the first workspace
+      const std::string inputLabel =
+          i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
+      outputTextAxis->setLabel(i, (inputLabel.size() > 0) ? inputLabel : "");
+
+    } else if (isNumericAxis) {
+      // check if we're outside the spectra of the first workspace
+      const double inputVal =
+          i < ws1len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1len);
+      outputYAxis->setValue(i, inputVal);
+    }
+  }
 }
 
 void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,

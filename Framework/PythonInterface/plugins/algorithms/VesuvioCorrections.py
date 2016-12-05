@@ -11,6 +11,7 @@ import math
 
 #----------------------------------------------------------------------------------------
 
+
 def create_cuboid_xml(height, width, depth):
     """
     Create the XML string to describe a cuboid of the given dimensions
@@ -21,19 +22,20 @@ def create_cuboid_xml(height, width, depth):
     """
     half_height, half_width, half_thick = 0.5*height, 0.5*width, 0.5*depth
     xml_str = \
-      " <cuboid id=\"sample-shape\"> " \
-      + "<left-front-bottom-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, half_thick) \
-      + "<left-front-top-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, half_height, half_thick) \
-      + "<left-back-bottom-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, -half_thick) \
-      + "<right-front-bottom-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (-half_width, -half_height, half_thick) \
-      + "</cuboid>"
+        " <cuboid id=\"sample-shape\"> " \
+        + "<left-front-bottom-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, half_thick) \
+        + "<left-front-top-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, half_height, half_thick) \
+        + "<left-back-bottom-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, -half_thick) \
+        + "<right-front-bottom-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (-half_width, -half_height, half_thick) \
+        + "</cuboid>"
     return xml_str
 
 #----------------------------------------------------------------------------------------
+
 
 class VesuvioCorrections(VesuvioBase):
 

@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -36,8 +37,8 @@ using namespace testing;
 /// Mock data selector widget
 class MockDataSelector : public IMuonFitDataSelector {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD0(getFilenames, QStringList());
-  MOCK_CONST_METHOD0(getWorkspaceIndex, unsigned int());
   MOCK_CONST_METHOD0(getStartTime, double());
   MOCK_CONST_METHOD0(getEndTime, double());
   MOCK_METHOD1(setNumPeriods, void(size_t));
@@ -47,7 +48,6 @@ public:
   MOCK_METHOD1(setAvailableGroups, void(const QStringList &));
   MOCK_CONST_METHOD0(getChosenGroups, QStringList());
   MOCK_METHOD1(setChosenGroup, void(const QString &));
-  MOCK_METHOD1(setWorkspaceIndex, void(unsigned int));
   MOCK_METHOD1(setStartTime, void(double));
   MOCK_METHOD1(setEndTime, void(double));
   MOCK_METHOD1(setStartTimeQuietly, void(double));
@@ -61,11 +61,13 @@ public:
   MOCK_METHOD1(setDatasetNames, void(const QStringList &));
   MOCK_CONST_METHOD0(getDatasetName, QString());
   MOCK_METHOD0(askUserWhetherToOverwrite, bool());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 /// Mock fit property browser
 class MockFitBrowser : public IWorkspaceFitControl {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setWorkspaceName, void(const QString &));
   MOCK_METHOD1(setStartX, void(double));
   MOCK_METHOD1(setEndX, void(double));
@@ -76,6 +78,7 @@ public:
   MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
   MOCK_METHOD1(userChangedDataset, void(int));
   MOCK_CONST_METHOD0(rawData, bool());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {
@@ -124,7 +127,6 @@ public:
   }
 
   void test_handleDataPropertiesChanged() {
-    ON_CALL(*m_dataSelector, getWorkspaceIndex()).WillByDefault(Return(0));
     ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.3));
     ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(9.9));
     EXPECT_CALL(*m_fitBrowser, setWorkspaceIndex(0)).Times(1);
@@ -173,7 +175,6 @@ public:
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189"),
                                                      QString("MUSR"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     m_presenter->setAssignedFirstRun(wsName);
   }
 
@@ -182,7 +183,6 @@ public:
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
                                                      QString("MUSR"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
     m_presenter->setAssignedFirstRun(wsName);
@@ -194,7 +194,6 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91, 15193"),
                                     QString("MUSR"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
     m_presenter->setAssignedFirstRun(wsName);
@@ -205,7 +204,6 @@ public:
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     m_presenter->setAssignedFirstRun(wsName);
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _)).Times(0);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(_)).Times(0);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(_)).Times(0);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(0);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(0);
@@ -623,7 +621,6 @@ public:
     // Expect it will update the UI from workspace details
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
                                                      QString("MUSR"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
 

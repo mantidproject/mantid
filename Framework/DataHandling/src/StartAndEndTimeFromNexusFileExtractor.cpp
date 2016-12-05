@@ -139,7 +139,7 @@ Mantid::Kernel::DateAndTime extractDateAndTime(TimeType type,
  * @return the start time
  * @throws if the the start time cannot be extracted
  */
-Mantid::Kernel::DateAndTime extractStartTime(std::string filename) {
+Mantid::Kernel::DateAndTime extractStartTime(const std::string &filename) {
   return extractDateAndTime(TimeType::StartTime, filename);
 }
 
@@ -149,7 +149,7 @@ Mantid::Kernel::DateAndTime extractStartTime(std::string filename) {
  * @return the start time
  * @throws if the the start time cannot be extracted
  */
-Mantid::Kernel::DateAndTime extractEndTime(std::string filename) {
+Mantid::Kernel::DateAndTime extractEndTime(const std::string &filename) {
   return extractDateAndTime(TimeType::EndTime, filename);
 }
 

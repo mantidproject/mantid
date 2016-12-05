@@ -13,6 +13,7 @@ _DIFF_MODES = ("double", "single")
 # Fitting modes
 _FIT_MODES = ("bank", "spectrum")
 
+
 class VesuvioTOFFit(VesuvioBase):
 
     def summary(self):

@@ -73,6 +73,11 @@ void SaveMDWorkspaceToVTK::init() {
   declareProperty("RecursionDepth", 5, mustBePositive,
                   "The recursion depth is only required for MDEvent workspaces "
                   "and determines to which level data should be displayed.");
+
+  declareProperty("CompressorType", "NONE",
+                  boost::make_shared<Mantid::Kernel::StringListValidator>(
+                      std::vector<std::string>{"NONE", "ZLIB"}),
+                  "Select which compression library to use");
 }
 
 void SaveMDWorkspaceToVTK::exec() {
@@ -92,9 +97,11 @@ void SaveMDWorkspaceToVTK::exec() {
 
   int recursionDepth = this->getProperty("RecursionDepth");
 
+  std::string compressorType = this->getProperty("CompressorType");
+
   // Save workspace into file
   saver->saveMDWorkspace(inputWS, filename, normalization, thresholdRange,
-                         recursionDepth);
+                         recursionDepth, compressorType);
 }
 
 std::map<std::string, std::string> SaveMDWorkspaceToVTK::validateInputs() {

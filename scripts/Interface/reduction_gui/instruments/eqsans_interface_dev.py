@@ -19,11 +19,12 @@ from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
 
 class EQSANSInterface(InstrumentInterface):
     """

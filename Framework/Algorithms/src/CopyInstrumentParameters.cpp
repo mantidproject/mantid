@@ -45,7 +45,7 @@ void CopyInstrumentParameters::exec() {
   this->checkProperties();
 
   // Get parameters
-  Geometry::ParameterMap &givParams = m_givingWorkspace->instrumentParameters();
+  const auto &givParams = m_givingWorkspace->constInstrumentParameters();
 
   if (m_different_instrument_sp) {
     Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();

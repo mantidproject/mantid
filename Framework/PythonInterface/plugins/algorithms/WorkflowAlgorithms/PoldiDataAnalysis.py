@@ -210,7 +210,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         return AnalysisDataService.retrieve(refinedPeaksName), AnalysisDataService.retrieve(plotNames)
 
-
     def runIndex(self, peaks):
         indexedPeaksName = self.baseName + "_indexed"
 

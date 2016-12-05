@@ -263,7 +263,7 @@ using namespace CxxTest;
 
 class VesuvioCalculateGammaBackgroundTestPerformance : public TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     double x0(50.0), x1(300.0), dx(0.5);
     constexpr int nhist = 1;
 

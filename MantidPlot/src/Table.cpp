@@ -30,35 +30,35 @@
  *                                                                         *
  ***************************************************************************/
 #include "Table.h"
-#include "SortDialog.h"
-#include "ImportASCIIDialog.h"
-#include "muParserScript.h"
 #include "ApplicationWindow.h"
-#include "pixmaps.h"
+#include "ImportASCIIDialog.h"
 #include "MantidQtAPI/TSVSerialiser.h"
+#include "SortDialog.h"
+#include "muParserScript.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QContextMenuEvent>
-#include <QMessageBox>
-#include <QDateTime>
-#include <QTextStream>
-#include <QClipboard>
 #include <QApplication>
-#include <QPainter>
+#include <QClipboard>
+#include <QContextMenuEvent>
+#include <QDateTime>
 #include <QEvent>
-#include <QLayout>
-#include <QPrintDialog>
-#include <QLocale>
-#include <QShortcut>
-#include <QProgressDialog>
 #include <QFile>
 #include <QHeaderView>
+#include <QLayout>
+#include <QLocale>
+#include <QMessageBox>
 #include <QModelIndex>
+#include <QPainter>
+#include <QPrintDialog>
+#include <QProgressDialog>
+#include <QShortcut>
+#include <QTextStream>
 
 #include <QVector>
 
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_vector.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -70,6 +70,7 @@
 DECLARE_WINDOW(Table)
 
 using namespace Mantid;
+using namespace MantidQt::API;
 
 Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
              QWidget *parent, const QString &name, Qt::WFlags f)

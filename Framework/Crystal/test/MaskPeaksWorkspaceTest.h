@@ -146,7 +146,7 @@ public:
 
 class MaskPeaksWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     EventWorkspace_sptr inputWS = Mantid::DataObjects::MDEventsTestHelper::
         createDiffractionEventWorkspace(1000, 10000, 16000);
     AnalysisDataService::Instance().addOrReplace(inputWSName, inputWS);
@@ -162,7 +162,9 @@ public:
 
   void testPerformance() { mpwAlg.execute(); }
 
-  void tearDown() { AnalysisDataService::Instance().remove(inputWSName); }
+  void tearDown() override {
+    AnalysisDataService::Instance().remove(inputWSName);
+  }
 
 private:
   MaskPeaksWorkspace mpwAlg;

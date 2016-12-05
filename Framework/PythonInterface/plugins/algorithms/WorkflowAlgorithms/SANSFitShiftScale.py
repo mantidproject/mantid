@@ -7,6 +7,7 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Property
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
+
 class Mode(object):
     class ShiftOnly(object):
         pass
@@ -19,6 +20,7 @@ class Mode(object):
 
     class NoneFit(object):
         pass
+
 
 class SANSFitShiftScale(DataProcessorAlgorithm):
     def _make_mode_map(self):
@@ -176,16 +178,14 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         # 2. Shift in x direction
         # 3. Scaling in x direction
         # 4. Shift in y direction
-        row0 = list(param.row(0).items())
-        row3 = list(param.row(3).items())
 
-        scale = row0[1][1]
+        scale = param.row(0)['Value']
 
         if scale == 0.0:
             raise RuntimeError('Fit scaling as part of stitching evaluated to zero')
 
         # In order to determine the shift, we need to remove the scale factor
-        shift = row3[1][1] / scale
+        shift = param.row(3)['Value'] / scale
 
         return (shift, scale)
 
@@ -232,6 +232,7 @@ class ErrorTransferFromModelToData(object):
     Handles the error transfer from the model workspace to the
     data workspace
     '''
+
     def __init__(self):
         super(ErrorTransferFromModelToData, self).__init__()
 

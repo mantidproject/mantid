@@ -7,6 +7,7 @@ from mantid.kernel import Direction
 from mantid.simpleapi import *
 import datetime
 
+
 class ViewBOA(PythonAlgorithm):
     def category(self):
         return 'SINQ'

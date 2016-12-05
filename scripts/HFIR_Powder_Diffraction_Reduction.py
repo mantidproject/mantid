@@ -7,6 +7,7 @@ import sys
 from HFIRPowderReduction import HfirPDReductionGUI
 from PyQt4 import QtGui
 
+
 def qapp():
     if QtGui.QApplication.instance():
         _app = QtGui.QApplication.instance()

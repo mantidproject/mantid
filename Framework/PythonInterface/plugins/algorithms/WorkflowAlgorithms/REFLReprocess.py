@@ -9,13 +9,17 @@ import math
 import sys
 
 #pylint: disable=too-few-public-methods
+
+
 class REFLOptions(object):
     def __init__(self):
         from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
         from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
         self._state = DataSeries(data_class=REFLDataSets)
+
     def get_state(self):
         return self._state
+
 
 class REFLReprocess(PythonAlgorithm):
     """
@@ -97,7 +101,6 @@ class REFLReprocess(PythonAlgorithm):
                 (_name,_ts) = basename.split('_#')
                 CloneWorkspace(InputWorkspace=basename, OutputWorkspace=_name)
 
-
     def stitch_data(self, input_file, output_dir, q_min, q_step):
         from LargeScaleStructures.data_stitching import DataSet, Stitcher#, RangeSelector
         # Identify the data sets to stitch and order them
@@ -111,8 +114,7 @@ class REFLReprocess(PythonAlgorithm):
                 _list_name.append(item)
                 _list_ts.append(_ts)
 
-        _name_ts = list(zip(_list_ts, _list_name))
-        _name_ts.sort()
+        _name_ts = sorted(zip(_list_ts, _list_name))
         _ts_sorted, workspace_list = list(zip(*_name_ts))
 
         # Stitch the data
@@ -136,13 +138,12 @@ class REFLReprocess(PythonAlgorithm):
                   Operation="Multiply", Factor=data.get_scale())
             SaveAscii(InputWorkspace=str(data), Filename=os.path.join(output_dir, '%s.txt' % str(data)))
 
-
         output_file = input_file.replace('.xml', '_reprocessed.txt')
         Logger("REFLReprocess").notice("Saving to %s" % output_file)
 
-
         output_ws = _average_y_of_same_x_(q_min, q_step, q_max)
         SaveAscii(InputWorkspace=output_ws, Filename=output_file)
+
 
 def weightedMean(data_array, error_array):
     """
@@ -190,7 +191,6 @@ def _average_y_of_same_x_(q_min, q_step, q_max=2):
     for ws in ws_list:
         if ws.endswith("_scaled"):
             scaled_ws_list.append(ws)
-
 
     # get binning parameters
     #_from_q = str(state.data_sets[0].q_min)

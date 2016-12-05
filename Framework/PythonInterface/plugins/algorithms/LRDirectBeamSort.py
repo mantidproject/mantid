@@ -1,9 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import mantid
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+
 
 class CompareTwoNXSDataForSFcalculator(object):
     """
@@ -70,6 +70,7 @@ class CompareTwoNXSDataForSFcalculator(object):
     def result(self):
         return self.resultComparison
 
+
 def sorter_function(r1, r2):
     """
         Sorter function used by with the 'sorted' call to sort the direct beams.
@@ -103,6 +104,8 @@ class LRDirectBeamSort(PythonAlgorithm):
         self.declareProperty("TOFSteps", 200.0, doc="TOF bin width")
         self.declareProperty("WavelengthOffset", 0.0, doc="Wavelength offset used for TOF range determination")
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
+        self.declareProperty("OrderDirectBeamsByRunNumber", False,
+                             "Force the sequence of direct beam files to be ordered by run number")
         self.declareProperty(FileProperty("ScalingFactorFile","",
                                           action=FileAction.OptionalSave,
                                           extensions=['cfg']),
@@ -126,7 +129,11 @@ class LRDirectBeamSort(PythonAlgorithm):
             for ws in ws_list:
                 lr_data.append(mtd[ws])
 
-        lr_data_sorted = sorted(lr_data, cmp=sorter_function)
+        sort_by_runs = self.getProperty("OrderDirectBeamsByRunNumber").value
+        if sort_by_runs is True:
+            lr_data_sorted = sorted(lr_data, key=lambda r: r.getRunNumber())
+        else:
+            lr_data_sorted = sorted(lr_data, cmp=sorter_function)
 
         # Set the output properties
         run_numbers = [r.getRunNumber() for r in lr_data_sorted]

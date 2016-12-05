@@ -617,7 +617,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
                       (instrument->getSample() != nullptr));
     }
 
-    PARALLEL_FOR1((&input))
+    PARALLEL_FOR_IF(Kernel::threadSafe(input))
     for (int i = 0; i < nhists; ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
 

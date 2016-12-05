@@ -97,13 +97,6 @@ public:
   /// Returns the storage mode of the Y data (Counts or Frequencies).
   YMode yMode() const noexcept { return m_yMode; }
 
-  /// Returns the size of the histogram, i.e., the number of Y data points.
-  size_t size() const {
-    if (xMode() == XMode::BinEdges)
-      return m_x->size() - 1;
-    return m_x->size();
-  }
-
   BinEdges binEdges() const;
   Points points() const;
   PointVariances pointVariances() const;
@@ -143,6 +136,13 @@ public:
   void setSharedY(const Kernel::cow_ptr<HistogramY> &y) & ;
   void setSharedE(const Kernel::cow_ptr<HistogramE> &e) & ;
   void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & ;
+
+  /// Returns the size of the histogram, i.e., the number of Y data points.
+  size_t size() const {
+    if (xMode() == XMode::BinEdges)
+      return m_x->size() - 1;
+    return m_x->size();
+  }
 
   void resize(size_t n);
 

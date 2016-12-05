@@ -8,6 +8,7 @@ import mantid.simpleapi as api
 class TOFTOFCropWorkspace(PythonAlgorithm):
     """ Crop empty time channels
     """
+
     def __init__(self):
         PythonAlgorithm.__init__(self)
 

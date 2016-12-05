@@ -8,6 +8,7 @@ direct geometry time-of-flight inelastic neutron spectrometers.
 from .ISISFermi import ISISFermi
 from .ISISDisk import ISISDisk
 
+
 class PyChop2:
     """
     PyChop2 is a class to calculate the energy resolution of direct geometry time-of-flight spectrometers
@@ -185,7 +186,7 @@ class PyChop2:
         ! The results are returned as tuple: (resolution, flux)
         """
         if len(args) > 0:
-            if type(args[0]) is not str:
+            if not isinstance(args[0], str):
                 raise ValueError('The first argument must be the instrument name')
             instname = args[0].upper()
         elif 'inst' in kwargs.keys():
@@ -200,15 +201,17 @@ class PyChop2:
             for ind in range(1, lna):
                 argdict[argname[ind]] = args[ind]
             for ind in kwargs.keys():
-                if ind in argname: argdict[ind] = kwargs[ind]
+                if ind in argname:
+                    argdict[ind] = kwargs[ind]
             for ind in range(1, 4):
                 if argname[ind] not in argdict:
                     raise RuntimeError('Parameter ''%s'' must be specified' % (argname[ind]))
             obj.setChopper(argdict['chtyp'], argdict['freq'])
             obj.setEi(argdict['ei'])
         else:
-            if 'variant' in kwargs.keys(): argdict['variant'] = kwargs['variant']
-            if len(args) > 1 and type(args[1]) is str:
+            if 'variant' in kwargs.keys():
+                argdict['variant'] = kwargs['variant']
+            if len(args) > 1 and isinstance(args[1], str):
                 argname = ['inst', 'variant', 'freq', 'ei', 'etrans']
             else:
                 argname = ['inst', 'freq', 'ei', 'etrans']
@@ -216,7 +219,8 @@ class PyChop2:
             for ind in range(1, lna):
                 argdict[argname[ind]] = args[ind]
             for ind in kwargs.keys():
-                if ind in argname: argdict[ind] = kwargs[ind]
+                if ind in argname:
+                    argdict[ind] = kwargs[ind]
             if 'variant' in argdict.keys():
                 obj.setChopper(argdict['variant'])
             if 'freq' not in argdict.keys() or 'ei' not in argdict.keys():

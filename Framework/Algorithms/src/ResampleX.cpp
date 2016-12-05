@@ -342,7 +342,7 @@ void ResampleX::exec() {
         Progress prog(this, 0.0, 1.0, numSpectra);
 
         // do the rebinning
-        PARALLEL_FOR2(inputEventWS, outputWS)
+        PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERUPT_REGION
           BinEdges xValues(0);
@@ -370,7 +370,7 @@ void ResampleX::exec() {
       Progress prog(this, 0.0, 1.0, numSpectra);
 
       // Go through all the histograms and set the data
-      PARALLEL_FOR2(inputEventWS, outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
       for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
         PARALLEL_START_INTERUPT_REGION
 
@@ -440,7 +440,7 @@ void ResampleX::exec() {
       outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
     Progress prog(this, 0.0, 1.0, numSpectra);
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
       PARALLEL_START_INTERUPT_REGION
       // get const references to input Workspace arrays (no copying)

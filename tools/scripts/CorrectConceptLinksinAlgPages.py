@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
-import os,  re
-import urllib2
+import os
+import re
+from mantid.api import AlgorithmFactory
 
 concepts = ['Algorithm',
             'Analysis_Data_Service',
@@ -67,12 +68,11 @@ for alg in algs:
             algText = algRst.read()
         for concept in concepts:
             regex = conceptsPattern[concept]
-            while regex.search(algText) != None:
+            while regex.search(algText) is not None:
                 outputError(alg, algVersion, "found", concept)
                 algText = regex.sub(r":ref:`\1 <\2>`",algText)
                 with open (filename, "w") as algRst:
                     algRst.write(algText)
 
-    if fileFound==False:
+    if not fileFound:
         outputError(alg, algVersion, "File not found")
-

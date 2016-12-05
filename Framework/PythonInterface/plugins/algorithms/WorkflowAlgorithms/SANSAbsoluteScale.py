@@ -6,6 +6,7 @@ from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_data
 
+
 class SANSAbsoluteScale(PythonAlgorithm):
     """
         Normalise detector counts by the sample thickness
@@ -167,9 +168,9 @@ class SANSAbsoluteScale(PythonAlgorithm):
         Logger("SANSAbsoluteScale").information("Using beamstop diameter: %g" % beam_diameter)
         det_count = 1
         cylXML = '<infinite-cylinder id="asbsolute_scale">' + \
-                   '<centre x="0.0" y="0.0" z="0.0" />' + \
-                   '<axis x="0.0" y="0.0" z="1.0" />' + \
-                   '<radius val="%12.10f" />' % (beam_diameter/2000.0) + \
+            '<centre x="0.0" y="0.0" z="0.0" />' + \
+            '<axis x="0.0" y="0.0" z="1.0" />' + \
+            '<radius val="%12.10f" />' % (beam_diameter/2000.0) + \
                  '</infinite-cylinder>\n'
 
         alg = AlgorithmManager.create("FindDetectorsInShape")

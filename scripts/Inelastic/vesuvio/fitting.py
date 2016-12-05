@@ -44,6 +44,7 @@ def parse_fit_options(mass_values, profile_strs, background_str="", constraints_
 # FittingOptions - Used internally
 # --------------------------------------------------------------------------------
 
+
 class FittingOptions(object):
     """Holds all of the parameters for the fitting that are not related to the domain"""
 
@@ -200,4 +201,3 @@ class FittingOptions(object):
         """Returns a string representation of the object
         """
         self.generate_function_str()
-

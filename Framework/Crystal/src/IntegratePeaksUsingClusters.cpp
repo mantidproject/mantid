@@ -150,7 +150,7 @@ void IntegratePeaksUsingClusters::exec() {
   progress.doReport("Performing Peak Integration");
   g_log.information("Starting Integration");
   progress.resetNumSteps(peakWS->getNumberPeaks(), 0.9, 1);
-  PARALLEL_FOR1(peakWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
     PARALLEL_START_INTERUPT_REGION
     Geometry::IPeak &peak = peakWS->getPeak(i);

@@ -34,7 +34,11 @@ struct DatasetParams {
   std::string periods;
   size_t version;
 };
+
+/// Whether multiple fitting is enabled or disabled
+enum class MultiFitState { Enabled, Disabled };
 }
+
 namespace MuonAnalysisHelper {
 
 /// Sets double validator for specified field

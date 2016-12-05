@@ -2,6 +2,7 @@
 import numpy as np
 import mantid
 
+
 def calculateCenter(ws):
     intensities=ws.extractY()[:,0]
     detector_table=mantid.simpleapi.PreprocessDetectorsToMD(ws,GetMaskState="1")

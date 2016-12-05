@@ -5,6 +5,7 @@ from reduction_workflow.instruments.sans.sns_command_interface import *
 from mantid.api import *
 import os
 
+
 class EQSANSNormalisationNoFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
@@ -32,6 +33,7 @@ class EQSANSNormalisationNoFlux(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
 
         return "eqsans_no_flux", 'EQSANSNormalisation_NoFlux.nxs'
+
 
 class EQSANSNormalisationDefault(stresstesting.MantidStressTest):
     """
@@ -69,6 +71,7 @@ class EQSANSNormalisationDefault(stresstesting.MantidStressTest):
 
         return "eqsans_default_flux", 'EQSANSNormalisation_DefaultFlux.nxs'
 
+
 class EQSANSNormalisationInputFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
@@ -99,12 +102,14 @@ class EQSANSNormalisationInputFlux(stresstesting.MantidStressTest):
 
         return "eqsans_input_flux", 'EQSANSNormalisation_InputFlux.nxs'
 
+
 class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
     """
     data_ws=""
     prop_mng=""
+
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
@@ -149,4 +154,3 @@ class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
             return False
 
         return True
-

@@ -5,7 +5,8 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 
 class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
@@ -45,7 +46,6 @@ class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
         self.checkICATDownload.setChecked(def_icat_download)
         self.checkGroupTOFWorkspaces.setChecked(def_group_tof_workspaces)
         self.checkScaleRight.setChecked(def_stitch_right)
-
 
         # connect update signals to functions
         self.dspinFrequency.valueChanged.connect(self.__update_frequency)

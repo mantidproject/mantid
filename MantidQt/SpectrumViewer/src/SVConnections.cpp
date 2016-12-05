@@ -1,7 +1,5 @@
 #include <qwt_plot_canvas.h>
 
-#include <QDesktopServices>
-
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidColorMap.h"
 

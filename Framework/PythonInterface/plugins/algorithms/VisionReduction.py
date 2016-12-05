@@ -15,6 +15,7 @@ from string import ascii_letters, digits # pylint: disable=deprecated-module
 # Remove artifacts such as prompt pulse
 ######################################################################
 
+
 def RemoveArtifact(WS,Xmin,Xmax,Xa,Delta):
 
     CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux0',XMin=str(Xmin),XMax=str(Xa))
@@ -30,7 +31,6 @@ def RemoveArtifact(WS,Xmin,Xmax,Xa,Delta):
     Plus(LHSWorkspace='__aux0',RHSWorkspace='__aux1',OutputWorkspace=WS)
     Plus(LHSWorkspace=WS,RHSWorkspace='__aux2',OutputWorkspace=WS)
     Plus(LHSWorkspace=WS,RHSWorkspace='__aux3',OutputWorkspace=WS)
-
 
 
 class VisionReduction(PythonAlgorithm):
@@ -106,7 +106,6 @@ class VisionReduction(PythonAlgorithm):
         mask = allPixels.difference(toKeep)
         MaskPX = list(mask)
 
-
         # Read calibration table
         CalTab = [[0 for _ in range(2)] for _ in range(1024*14)]
         tab = list(csv.reader(open(self.__CalFile,'r')))
@@ -137,7 +136,6 @@ class VisionReduction(PythonAlgorithm):
 
         NormaliseByCurrent(InputWorkspace='__IED_T',OutputWorkspace='__IED_T')
         RemoveArtifact('__IED_T',10,33333,16660,240)
-
 
         LoadNexusProcessed(Filename=self.__MonFile,OutputWorkspace='__DBM_L',LoadHistory=False)
 

@@ -5,6 +5,7 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 
+
 class NormaliseByThickness(PythonAlgorithm):
     """
         Normalise detector counts by the sample thickness

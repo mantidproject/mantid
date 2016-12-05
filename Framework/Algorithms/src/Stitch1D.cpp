@@ -60,7 +60,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
                                           MatrixWorkspace_sptr &source) {
   MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR2(source, product)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the bin boundaries
@@ -97,7 +97,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
  */
 void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr source) {
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR1(source)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
@@ -143,9 +143,10 @@ void Stitch1D::init() {
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
-  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
-                                                       true, Direction::Input),
-                  "Scaling either with respect to workspace 1 or workspace 2");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
+                                           Direction::Input),
+      "Scaling either with respect to LHS workspace or RHS workspace");
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
                                                        false, Direction::Input),
                   "True to use a provided value for the scale factor.");
@@ -280,7 +281,7 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_sptr &lhsWS,
   return result;
 }
 
-/**Runs the Rebin Algorithm as a child
+/**Runs the Rebin Algorithm as a child and replaces special values
  @param input :: The input workspace
  @param params :: a vector<double> containing rebinning parameters
  @return A shared pointer to the resulting MatrixWorkspace
@@ -300,7 +301,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
 
   // Record special values and then mask them out as zeros. Special values are
   // remembered and then replaced post processing.
-  PARALLEL_FOR1(outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outWS))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
@@ -360,52 +361,6 @@ MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input,
   return outWS;
 }
 
-/**Runs the MultiplyRange Algorithm as a child defining an end bin
- @param input :: The input workspace
- @param startBin :: The first bin int eh range to multiply
- @param endBin :: The last bin in the range to multiply
- @param factor :: The multiplication factor
- @return A shared pointer to the resulting MatrixWorkspace
- */
-MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
-                                             const int &startBin,
-                                             const int &endBin,
-                                             const double &factor) {
-  auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
-  multiplyRange->setProperty("InputWorkspace", input);
-  multiplyRange->setProperty("StartBin", startBin);
-  multiplyRange->setProperty("EndBin", endBin);
-  multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
-  g_log.information("MultiplyRange EndBin: " + std::to_string(endBin));
-  g_log.information("MultiplyRange Factor: " +
-                    boost::lexical_cast<std::string>(factor));
-  multiplyRange->execute();
-  MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
-  return outWS;
-}
-
-/**Runs the MultiplyRange Algorithm as a child
- @param input :: The input workspace
- @param startBin :: The first bin int eh range to multiply
- @param factor :: The multiplication factor
- @return A shared pointer to the resulting MatrixWorkspace
- */
-MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
-                                             const int &startBin,
-                                             const double &factor) {
-  auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
-  multiplyRange->setProperty("InputWorkspace", input);
-  multiplyRange->setProperty("StartBin", startBin);
-  multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
-  g_log.information("MultiplyRange Factor: " +
-                    boost::lexical_cast<std::string>(factor));
-  multiplyRange->execute();
-  MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
-  return outWS;
-}
-
 /**Runs the WeightedMean Algorithm as a child
  @param inOne :: The first input workspace
  @param inTwo :: The second input workspace
@@ -461,7 +416,7 @@ Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
 bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
   int64_t ws_size = static_cast<int64_t>(ws->getNumberHistograms());
   bool hasNonZeroErrors = false;
-  PARALLEL_FOR1(ws)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < ws_size; ++i) {
     PARALLEL_START_INTERUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
@@ -625,7 +580,7 @@ void Stitch1D::exec() {
  */
 void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
   int histogramCount = static_cast<int>(ws->getNumberHistograms());
-  PARALLEL_FOR1(ws)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data

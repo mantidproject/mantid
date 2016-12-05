@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 
+
 class MergeCalFiles(PythonAlgorithm):
 
     def category(self):
@@ -22,11 +23,11 @@ class MergeCalFiles(PythonAlgorithm):
         self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']),
                              doc="The file to contain the results")
 
-        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged "+\
+        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged "+
                              "to the master file. Default: False")
-        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged "+\
+        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged "+
                              "to the master file. Default: False")
-        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to "+\
+        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to "+
                              "the master file. Default: False")
 
     #pylint: disable=too-many-branches
@@ -38,7 +39,6 @@ class MergeCalFiles(PythonAlgorithm):
         updateFileName = self.getPropertyValue("UpdateFile")
         masterFileName = self.getPropertyValue("MasterFile")
         outputFileName = self.getPropertyValue("OutputFile")
-
 
         if masterFileName == outputFileName :
             raise RuntimeError('The output file must be different to the master file.')
@@ -63,7 +63,6 @@ class MergeCalFiles(PythonAlgorithm):
 
         updateFile.close()
         self.log().information(str(len(updateDict)) + " updates found in " + updateFileName)
-
 
         masterFile = open(masterFileName,"r")
         outputFile = open(outputFileName,"w")

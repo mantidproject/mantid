@@ -209,8 +209,8 @@ void LoadSQW::readEvents(
 
   size_t maxNPix = ~size_t(0);
   if (m_nDataPoints > maxNPix) {
-    throw new std::runtime_error("Not possible to address all datapoints in "
-                                 "memory using this architecture ");
+    throw std::runtime_error("Not possible to address all datapoints in "
+                             "memory using this architecture ");
   }
 
   const size_t ncolumns = 9; // qx, qy, qz, en, s, err, irunid, idetid, ien

@@ -7,8 +7,10 @@ from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
 from mantid.api import mtd, AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.simpleapi import *
 
+
 def evaluateEbin(Emin, Emax, Ei, strn):
     return [eval(estr) for estr in strn.split(',')]
+
 
 def evaluateQRange(Qmin, Qmax, strn):
     return [eval(qstr) for qstr in strn.split(',')]
@@ -42,13 +44,15 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         return 'ComputeIncoherentDOS'
 
     def summary(self):
-        return 'Calculates the neutron weighted generalised phonon density of states in the incoherent approximation from a measured powder INS MatrixWorkspace'
+        return 'Calculates the neutron weighted generalised phonon density of states '+\
+               'in the incoherent approximation from a measured powder INS MatrixWorkspace'
 
     def PyInit(self):
         validators = CompositeValidator()
         validators.add(HistogramValidator(True))
         validators.add(CommonBinsValidator())
-        self.declareProperty(MatrixWorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input, validator=validators),
+        self.declareProperty(MatrixWorkspaceProperty(name='InputWorkspace', defaultValue='',
+                                                     direction=Direction.Input, validator=validators),
                              doc='Input MatrixWorkspace containing the reduced inelastic neutron spectrum in (Q,E) space.')
         self.declareProperty(name='Temperature', defaultValue=300., validator=FloatBoundedValidator(lower=0),
                              doc='Sample temperature in Kelvin.')
@@ -162,7 +166,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         ylabel = 'g^{neutron}(E) (arb. units)'
         if absunits:
             if len(atoms) != 1:
-                self.log().warning('Sample material information not set, or sample is not a pure element. Ignoring StatesPerEnergy property.')
+                self.log().warning('Sample material information not set, or sample is not a pure element. '
+                                   'Ignoring StatesPerEnergy property.')
                 absunits = False
             else:
                 if cm:

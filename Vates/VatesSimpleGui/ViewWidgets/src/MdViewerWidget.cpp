@@ -14,6 +14,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/TSVSerialiser.h"
@@ -111,7 +112,6 @@
 #endif
 
 #include <QAction>
-#include <QDesktopServices>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QHBoxLayout>
@@ -1404,8 +1404,8 @@ void MdViewerWidget::onRotationPoint() {
  * browser.
  */
 void MdViewerWidget::onWikiHelp() {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "VatesSimpleInterface_v2"));
+  MantidDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+                                      "VatesSimpleInterface_v2"));
 }
 
 /**

@@ -640,7 +640,7 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     HistogramX x1(1000, LinearGenerator(0, 0.02));
     HistogramX x2(1000, LinearGenerator(19, 0.02));
     HistogramY y1(999, 1);

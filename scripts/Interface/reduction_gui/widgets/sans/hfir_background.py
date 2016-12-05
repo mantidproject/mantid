@@ -1,12 +1,11 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
-import os
 from reduction_gui.reduction.sans.hfir_background_script import Background
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from hfir_sample_data import BeamSpreader, DirectBeam
 import ui.sans.ui_hfir_background
+
 
 class BckDirectBeam(DirectBeam):
 
@@ -42,7 +41,6 @@ class BckBeamSpreader(BeamSpreader):
         super(BckBeamSpreader, self).set_state(state)
 
 
-
 class BackgroundWidget(BaseWidget):
     """
         Widget that presents the transmission options to the user
@@ -76,7 +74,6 @@ class BackgroundWidget(BaseWidget):
 
         self._last_direct_state = None
         self._last_spreader_state = None
-
 
     def initialize_content(self):
         """
@@ -152,7 +149,6 @@ class BackgroundWidget(BaseWidget):
             self._content.theta_dep_chk.setChecked(state.theta_dependent)
             self._content.trans_dark_current_edit.setText(str(state.trans_dark_current))
             self._calculate_clicked(state.calculate_transmission)
-
 
     def get_state(self):
         """
@@ -266,4 +262,3 @@ class BackgroundWidget(BaseWidget):
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
             if dataproxy.wavelength_spread is not None:
                 self._content.wavelength_spread_edit.setText(str(dataproxy.wavelength_spread))
-

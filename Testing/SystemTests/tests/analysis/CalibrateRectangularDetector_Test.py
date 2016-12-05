@@ -3,6 +3,7 @@ import stresstesting
 import os
 from mantid.simpleapi import *
 
+
 def _skip_test():
     """Helper function to determine if we run the test"""
     import platform
@@ -12,6 +13,7 @@ def _skip_test():
         return True
     # run on any other linux
     return "Linux" not in platform.platform()
+
 
 class PG3Calibration(stresstesting.MantidStressTest):
     def cleanup(self):
@@ -59,6 +61,7 @@ class PG3Calibration(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = 2.0e-4
         return ('PG3_2538_offsets','PG3_2538_golden_offsets')
+
 
 class PG3CCCalibration(stresstesting.MantidStressTest):
     def cleanup(self):

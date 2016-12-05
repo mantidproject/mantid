@@ -60,7 +60,7 @@ public:
 class SplineBackgroundTestPerformance : public CxxTest::TestSuite {
 
 public:
-  void setUp() {
+  void setUp() override {
     constexpr size_t nspec = 1;
     constexpr double xRangeStart = 0.1;
     constexpr double xRangeEnd = 2500.1;
@@ -96,7 +96,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(SplineBackgroundAlg->execute());
   }
 
-  void tearDown() {
+  void tearDown() override {
     WorkspaceCreationHelper::removeWS(inputWsName);
     WorkspaceCreationHelper::removeWS(outputWsName);
   }

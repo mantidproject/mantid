@@ -125,7 +125,7 @@ QString UserSubWindow::openFileDialog(const bool save,
     }
     filter = filter.trimmed();
   }
-  filter.append(";;All Files (*.*)");
+  filter.append(";;All Files (*)");
 
   QString filename;
   if (save) {

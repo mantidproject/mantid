@@ -3,12 +3,14 @@ import stresstesting
 from mantid.simpleapi import *
 from mantid import config
 
+
 def create_file_name(base_name):
     temp_save_dir = config['defaultsave.directory']
     if temp_save_dir == '':
         temp_save_dir = os.getcwd()
     filename = os.path.join(temp_save_dir, base_name + '.nxs')
     return filename
+
 
 class SaveLoadNexusProcessedTest(stresstesting.MantidStressTest):
 

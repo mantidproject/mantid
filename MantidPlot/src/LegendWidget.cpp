@@ -27,23 +27,23 @@
  *                                                                         *
  ***************************************************************************/
 #include "LegendWidget.h"
-#include "QwtPieCurve.h"
-#include "VectorCurve.h"
-#include "SelectionMoveResizer.h"
 #include "ApplicationWindow.h"
+#include "QwtPieCurve.h"
+#include "SelectionMoveResizer.h"
+#include "VectorCurve.h"
 
-#include <QPainter>
-#include <QPaintEvent>
-#include <QPolygon>
-#include <QMessageBox>
 #include <QApplication>
+#include <QMessageBox>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QPolygon>
 
-#include <qwt_plot.h>
-#include <qwt_scale_widget.h>
-#include <qwt_painter.h>
-#include <qwt_plot_layout.h>
-#include <qwt_plot_canvas.h>
 #include <qwt_layout_metrics.h>
+#include <qwt_painter.h>
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_layout.h>
+#include <qwt_scale_widget.h>
 #include <qwt_symbol.h>
 
 LegendWidget::LegendWidget(Plot *plot)
@@ -231,12 +231,13 @@ void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x,
   if (!c || c->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
     return;
 
-  if (c->type() == Graph::VectXYXY || c->type() == Graph::VectXYAM) {
+  if (c->type() == GraphOptions::VectXYXY ||
+      c->type() == GraphOptions::VectXYAM) {
     drawVector(c, p, x, y, l);
     return;
   }
 
-  if (c->type() == Graph::Pie) {
+  if (c->type() == GraphOptions::Pie) {
     QwtPieCurve *pie = dynamic_cast<QwtPieCurve *>(c);
     if (!pie)
       return;
@@ -257,7 +258,7 @@ void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x,
   p->save();
   if (c->style() != 0) {
     p->setPen(pen);
-    if (br.style() != Qt::NoBrush || c->type() == Graph::Box) {
+    if (br.style() != Qt::NoBrush || c->type() == GraphOptions::Box) {
       QRect lr = QRect(x, y - 4, l, 10);
       p->setBrush(br);
       QwtPainter::drawRect(p, lr);
@@ -520,7 +521,7 @@ int LegendWidget::symbolsMaxWidth() {
 
       int point = 0;
       PlotCurve *c = getCurve(s.mid(pos1 + 1, pos2 - pos1 - 1), point);
-      if (c && c->type() == Graph::Pie) {
+      if (c && c->type() == GraphOptions::Pie) {
         maxL = 2 * d_text->font().pointSize(); // 10;
         line_length = 0;
         s = s.right(s.length() - pos2 - 1);
@@ -528,9 +529,11 @@ int LegendWidget::symbolsMaxWidth() {
       }
 
       if (c && c->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) {
-        if (c->type() == Graph::Pie || c->type() == Graph::VerticalBars ||
-            c->type() == Graph::HorizontalBars ||
-            c->type() == Graph::Histogram || c->type() == Graph::Box) {
+        if (c->type() == GraphOptions::Pie ||
+            c->type() == GraphOptions::VerticalBars ||
+            c->type() == GraphOptions::HorizontalBars ||
+            c->type() == GraphOptions::Histogram ||
+            c->type() == GraphOptions::Box) {
           maxL = 2 * d_text->font().pointSize(); // 10;
           line_length = 0;
         } else {
@@ -574,7 +577,7 @@ QString LegendWidget::parse(const QString &str) {
         if (c) {
           if (lst.count() == 1)
             s = s.replace(pos, pos2 - pos + 1, c->title().text());
-          else if (lst.count() == 3 && c->type() == Graph::Pie) {
+          else if (lst.count() == 3 && c->type() == GraphOptions::Pie) {
             if (auto dc = dynamic_cast<DataCurve *>(c)) {
               Table *t = dc->table();
               int col = t->colIndex(c->title().text());

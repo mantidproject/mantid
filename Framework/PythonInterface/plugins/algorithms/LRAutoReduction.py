@@ -68,7 +68,8 @@ class LRAutoReduction(PythonAlgorithm):
                              "Read the run sequence information from the file, not the title")
         self.declareProperty("ForceSequenceNumber", 0,
                              "Force the sequence number value if it's not available")
-
+        self.declareProperty("OrderDirectBeamsByRunNumber", False,
+                             "Force the sequence of direct beam files to be ordered by run number")
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
@@ -102,9 +103,9 @@ class LRAutoReduction(PythonAlgorithm):
         # Look for meta data information, available with the new DAS
         # If it's not available, parse the title.
         elif read_sequence_from_file is True \
-            and meta_data_run.hasProperty("sequence_number") \
-            and meta_data_run.hasProperty("sequence_id") \
-            and meta_data_run.hasProperty("data_type"):
+                and meta_data_run.hasProperty("sequence_number") \
+                and meta_data_run.hasProperty("sequence_id") \
+                and meta_data_run.hasProperty("data_type"):
             sequence_number = meta_data_run.getProperty("sequence_number").value[0]
             first_run_of_set = meta_data_run.getProperty("sequence_id").value[0]
             data_type = meta_data_run.getProperty("data_type").value[0]
@@ -121,7 +122,6 @@ class LRAutoReduction(PythonAlgorithm):
         self.setProperty("SequenceInfo",
                          [int(run_number), int(first_run_of_set), int(sequence_number)])
         return run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam
-
 
     def _parse_title(self, meta_data_run, run_number):
         """
@@ -173,7 +173,6 @@ class LRAutoReduction(PythonAlgorithm):
 
         return first_run_of_set, sequence_number, is_direct_beam
 
-
     def _find_peaks(self, event_data):
         """
             Find reflectivity peak and low-resolution peak for a workspace
@@ -201,7 +200,6 @@ class LRAutoReduction(PythonAlgorithm):
 
         return [int(x) for x in peak], [int(x) for x in low_res]
 
-
     def _read_template(self, sequence_number):
         """
             Read template from file.
@@ -223,7 +221,6 @@ class LRAutoReduction(PythonAlgorithm):
         self.data_series_template = s
 
         return data_set
-
 
     def _get_template(self, run_number, first_run_of_set, sequence_number):
         """
@@ -271,7 +268,6 @@ class LRAutoReduction(PythonAlgorithm):
             data_set.data_x_range = self.low_res
 
         return data_set, incident_medium
-
 
     def _read_property(self, meta_data_run, key, default, is_string=False):
         """
@@ -391,7 +387,6 @@ class LRAutoReduction(PythonAlgorithm):
 
         return data_set
 
-
     def _get_tof_range(self):
         """
             Determine TOF range from the data
@@ -411,7 +406,6 @@ class LRAutoReduction(PythonAlgorithm):
         tof_min = cst * (wl + wl_offset * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
         tof_max = cst * (wl + wl_offset * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
         return [tof_min, tof_max]
-
 
     def _get_direct_beam(self, meta_data_run, data_set):
         """
@@ -463,11 +457,9 @@ class LRAutoReduction(PythonAlgorithm):
         data_set.NormBackgroundFlag = True
         data_set.norm_x_range = low_res
 
-
     def _get_output_template_path(self, first_run_of_set):
         output_dir = self.getProperty("OutputDirectory").value
         return os.path.join(output_dir, "REF_L_%s_auto_template.xml" % first_run_of_set)
-
 
     def _write_template(self, data_set, run_number, first_run_of_set, sequence_number):
         """
@@ -491,7 +483,7 @@ class LRAutoReduction(PythonAlgorithm):
         for i in range(int(run_number) - int(first_run_of_set) + 1):
             if i >= len(self.data_series_template.data_sets):
                 logger.warning("Sequence is corrupted: run=%s, first run of set=%s" % (str(run_number),
-                                                                                      str(first_run_of_set)))
+                                                                                       str(first_run_of_set)))
                 break
             d = self.data_series_template.data_sets[i]
             d.data_files = [int(first_run_of_set) + i]
@@ -506,7 +498,6 @@ class LRAutoReduction(PythonAlgorithm):
         template_file = open(self._get_output_template_path(first_run_of_set), 'w')
         template_file.write(xml_str)
         template_file.close()
-
 
     def _save_partial_output(self, data_set, first_run_of_set, sequence_number, run_number):
         """
@@ -613,6 +604,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
             sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
+            order_by_runs = self.getProperty("OrderDirectBeamsByRunNumber").value
 
             # The medium for these direct beam runs may not be what was set in the template,
             # so either use the medium in the data file or a default name
@@ -625,6 +617,7 @@ class LRAutoReduction(PythonAlgorithm):
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              SlitTolerance=slit_tolerance,
+                             OrderDirectBeamsByRunNumber=order_by_runs,
                              ScalingFactorFile=os.path.join(output_dir, "sf_%s_%s_auto.cfg" % (first_run_of_set, file_id)))
             return
         elif not do_reduction:

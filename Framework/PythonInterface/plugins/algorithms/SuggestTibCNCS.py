@@ -5,12 +5,16 @@ from mantid.kernel import FloatBoundedValidator,Direction
 import numpy as np
 
 #pylint: disable=too-few-public-methods
+
+
 class Interval(object):
     """Simple class that provides check for overlapping intervals
     """
+
     def __init__(self,minv,maxv):
         self.min=minv
         self.max=maxv
+
     def overlap(self, other):
         if other.max >self.min and other.max <self.max:
             return True
@@ -20,9 +24,11 @@ class Interval(object):
             return True
         return False
 
+
 class SuggestTibCNCS(PythonAlgorithm):
     """ Check if certain sample logs exists on a workspace
     """
+
     def category(self):
         """ Return category
         """

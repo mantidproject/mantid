@@ -29,7 +29,6 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
@@ -101,10 +100,13 @@ private:
 //===================================================================================================================
 class WorkspaceTester : public MatrixWorkspace {
 public:
-  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory *nnFactory)
-      : MatrixWorkspace(nnFactory), spec(0) {}
   WorkspaceTester() : MatrixWorkspace(), spec(0) {}
   ~WorkspaceTester() override {}
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<WorkspaceTester> clone() const {
+    return std::unique_ptr<WorkspaceTester>(doClone());
+  }
 
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return spec; }
@@ -158,7 +160,7 @@ public:
 
 private:
   WorkspaceTester *doClone() const override {
-    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+    return new WorkspaceTester(*this);
   }
   WorkspaceTester *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");

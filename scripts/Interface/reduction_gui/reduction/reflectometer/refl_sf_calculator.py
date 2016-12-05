@@ -9,10 +9,11 @@ import sys
 
 # Check whether Mantid is available
 try:
-    import mantidplot
+    import mantidplot # noqa
     HAS_MANTID = True
 except:
     HAS_MANTID = False
+
 
 class REFLSFCalculatorScripter(BaseReductionScripter):
     """
@@ -195,8 +196,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                             item.state().update()
                         except:
                             pass
-                raise RuntimeError, sys.exc_value
+                raise RuntimeError(sys.exc_value)
         else:
-            raise RuntimeError, "SF calculation could not be executed: Mantid could not be imported"
-
-
+            raise RuntimeError("SF calculation could not be executed: Mantid could not be imported")

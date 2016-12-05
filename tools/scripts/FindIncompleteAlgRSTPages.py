@@ -1,6 +1,9 @@
 #pylint: disable=invalid-name
-import os,  re
+import os
+import re
 import urllib2
+from mantid.api import AlgorithmFactory
+
 
 def readWebPage(url):
     proxy = urllib2.ProxyHandler({'http': 'wwwcache.rl.ac.uk:8080'})
@@ -9,6 +12,7 @@ def readWebPage(url):
     aResp =urllib2.urlopen(url)
     web_pg = aResp.read()
     return web_pg
+
 
 def ticketExists(alg, ticketHash):
     retVal = ""
@@ -19,6 +23,7 @@ def ticketExists(alg, ticketHash):
             retVal = str(ticket)
             break
     return retVal
+
 
 def outputError(alg, algVersion, description, notes=""):
     print "%s, %i, %s, %s" % (alg, algVersion, description, notes)
@@ -31,7 +36,8 @@ for ticket in ticketList:
     ticketHash[ticket] = readWebPage( r"http://trac.mantidproject.org/mantid/ticket/" + str(ticket))
 
 usagePattern = re.compile('Usage', re.IGNORECASE)
-excusesPattern = re.compile('(rarely called directly|designed to work with other algorithms|only used for testing|deprecated)', re.IGNORECASE)
+excusesPattern = re.compile('(rarely called directly|designed to work with other algorithms|only used for testing|deprecated)',
+                            re.IGNORECASE)
 
 
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
@@ -43,9 +49,9 @@ for alg in algs:
         with open (filename, "r") as algRst:
             fileFound = True
             algText = algRst.read()
-            if (usagePattern.search(algText) == None) and (excusesPattern.search(algText) == None):
+            if (usagePattern.search(algText) is None) and (excusesPattern.search(algText) is None):
                 #check if already in a ticket
                 usageTicket = ticketExists(alg,ticketHash)
                 outputError(alg, algVersion, "No usage section", usageTicket)
-    if fileFound==False:
+    if not fileFound:
         outputError(alg, algVersion, "File not found")

@@ -5,6 +5,7 @@ import os
 from mantid.kernel import ConfigService, Logger
 from mantid.api import FileFinder
 
+
 def find_file(filename=None, startswith=None, data_dir=None):
     """
         Returns a list of file paths for the search criteria.
@@ -52,6 +53,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
 
     return files_found
 
+
 def find_data(file, instrument='', allow_multiple=False):
     """
         Finds a file path for the specified data set, which can either be:
@@ -87,7 +89,8 @@ def find_data(file, instrument='', allow_multiple=False):
                 # Mantid returns its own list object type, so make a real list out if it
                 if len(f)==n_files:
                     return [i for i in f]
-            else: return f[0]
+            else:
+                return f[0]
     except:
         # FileFinder couldn't make sense of the the supplied information
         pass
@@ -100,7 +103,8 @@ def find_data(file, instrument='', allow_multiple=False):
                 # Mantid returns its own list object type, so make a real list out if it
                 if len(f)==n_files:
                     return [i for i in f]
-            else: return f[0]
+            else:
+                return f[0]
     except:
         # FileFinder couldn't make sense of the the supplied information
         pass
