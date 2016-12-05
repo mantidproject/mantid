@@ -6,6 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::API;

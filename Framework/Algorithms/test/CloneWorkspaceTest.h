@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument.h"

@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class GroupWorkspacesTest : public CxxTest::TestSuite {

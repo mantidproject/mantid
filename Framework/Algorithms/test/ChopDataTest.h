@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;

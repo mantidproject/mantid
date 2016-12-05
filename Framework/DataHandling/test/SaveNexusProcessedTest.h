@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"

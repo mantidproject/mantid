@@ -8,6 +8,7 @@
 #include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/FrameworkManager.h>
+#include <MantidAPI/WorkspaceGroup.h>
 #include <MantidTestHelpers/WorkspaceCreationHelper.h>
 
 #include <algorithm>

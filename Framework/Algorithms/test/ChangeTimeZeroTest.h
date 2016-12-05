@@ -12,6 +12,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateTimeValidator.h"
 
 using namespace Mantid::Kernel;

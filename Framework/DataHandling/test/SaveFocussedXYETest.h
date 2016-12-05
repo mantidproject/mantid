@@ -7,6 +7,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
