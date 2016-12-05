@@ -156,9 +156,9 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
   // Until this is addressed in VTK, we are better of doing the calculation
   // ourselves.
   // 600x600x600 vtkStructuredGrid, every other cell blank
-  // structuredGrid->GetScalarRange(range) : 2.36625s
-  // structuredGrid->GetCellData()->GetScalars()->GetRange(range) : 1.01453s
-  // ComputeScalarRange(structuredGrid,range): 0.086104s
+  // structuredGrid->GetScalarRange(range) : 2.267s
+  // structuredGrid->GetCellData()->GetScalars()->GetRange(range) : 1.023s
+  // ComputeScalarRange(structuredGrid,range): 0.075s
   double range[2];
   if (auto structuredGrid = vtkStructuredGrid::SafeDownCast(visualDataSet)) {
     ComputeScalarRange(structuredGrid, range);
