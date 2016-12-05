@@ -11,7 +11,7 @@ from isis_powder import polaris
 DIRS = config['datasearch.directories'].split(';')
 
 
-class isis_powder_PolarisVanadiumCalTest(stresstesting.MantidStressTest):
+class VanadiumCalibrationTest(stresstesting.MantidStressTest):
 
     calibration_results = None
     existing_config = config['datasearch.directories']
@@ -23,7 +23,7 @@ class isis_powder_PolarisVanadiumCalTest(stresstesting.MantidStressTest):
         self.calibration_results = _run_vanadium_calibration()
 
     def validate(self):
-        return _calibration_validation(self, self.calibration_results)  # First element is WS Group
+        return _calibration_validation(self, self.calibration_results)
 
     def cleanup(self):
         # TODO clean up reference files properly
@@ -31,7 +31,7 @@ class isis_powder_PolarisVanadiumCalTest(stresstesting.MantidStressTest):
         # _clean_up()
 
 
-class isis_powder_PolarisFocusTest(stresstesting.MantidStressTest):
+class FocusTest(stresstesting.MantidStressTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -79,7 +79,8 @@ def _run_focus():
 def _calibration_validation(cls, results):
     _validation_setup(cls)
     results_name = results[0].getName()
-    reference_file_name = "ISIS_Powder-PEARL78338_Van_Cal.nxs"
+    # TODO this name is completely wrong
+    reference_file_name = "ISIS_Powder-POLARIS78338_Van_Cal.nxs"
     return results_name, reference_file_name
 
 

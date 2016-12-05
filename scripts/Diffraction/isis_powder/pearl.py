@@ -46,10 +46,10 @@ class Pearl(AbstractInst):
                                     do_absorb_corrections=True, gen_absorb_correction=False):
         self._spline_coeff = num_of_splines
 
-        self._create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
-                                          output_file_name=output_file_name,
-                                          do_absorb_corrections=do_absorb_corrections,
-                                          gen_absorb_correction=gen_absorb_correction)
+        return self._create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
+                                                 output_file_name=output_file_name,
+                                                 do_absorb_corrections=do_absorb_corrections,
+                                                 gen_absorb_correction=gen_absorb_correction)
 
     def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
         pearl_calibration_algs.create_calibration(self, calibration_runs=calibration_runs,

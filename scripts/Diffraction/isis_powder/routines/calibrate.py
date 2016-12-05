@@ -39,23 +39,18 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
                                             focused_vanadium_ws=focused_van_file)
     common.remove_intermediate_workspace(corrected_van_ws)
 
-    splined_ws_list = instrument.spline_vanadium_ws(focused_van_file, run_details.instrument_version)
-    if output_van_file_name:
-        # The user has manually specified the output file
-        out_spline_van_file_path = os.path.join(instrument.calibration_dir, output_van_file_name)
-    elif run_details.splined_vanadium:
-        out_spline_van_file_path = run_details.splined_vanadium
-    else:
-        raise ValueError("The output name must be manually specified for this instrument/run")
+    _create_vanadium_splines(focused_van_file, instrument, run_details)
+    return focused_output
 
+
+def _create_vanadium_splines(focused_van_file, instrument, run_details):
+    splined_ws_list = instrument.spline_vanadium_ws(focused_van_file, run_details.instrument_version)
+    out_spline_van_file_path = run_details.splined_vanadium
     append = False
     for ws in splined_ws_list:
         mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=ws, Append=append)
-        common.remove_intermediate_workspace(ws)
         append = True
-
-    output_ws = mantid.LoadNexus(Filename=out_spline_van_file_path, OutputWorkspace="Van_spline_data")
-    return output_ws
+    mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace="Van_spline_data")
 
 
 def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_absorb):
