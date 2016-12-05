@@ -8,6 +8,12 @@
 #include <sys/sysctl.h>
 #endif
 
+namespace Mantid {
+namespace Kernel {
+class Property;
+}
+}
+
 namespace MantidQt {
 namespace API {
 /**
@@ -37,25 +43,6 @@ namespace API {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace FileDialogHandler {
-DLLExport QString
-getExistingDirectory(QWidget *parent = 0, const QString &caption = QString(),
-                     const QString &dir = QString(),
-                     QFileDialog::Options options = QFileDialog::ShowDirsOnly);
-
-DLLExport QString getOpenFileName(QWidget *parent = 0,
-                                  const QString &caption = QString(),
-                                  const QString &dir = QString(),
-                                  const QString &filter = QString(),
-                                  QString *selectedFilter = 0,
-                                  QFileDialog::Options options = 0);
-
-DLLExport QStringList getOpenFileNames(QWidget *parent = 0,
-                                       const QString &caption = QString(),
-                                       const QString &dir = QString(),
-                                       const QString &filter = QString(),
-                                       QString *selectedFilter = 0,
-                                       QFileDialog::Options options = 0);
-
 /** The MacOS's native save dialog crashes when running a 10.6 package on
  * 10.8 so this function, which takes the same arguments as the Qt function,
  * ensures a nonnative object is used on the Mac when necessary. If compiled
@@ -78,6 +65,17 @@ DLLExport QString getSaveFileName(QWidget *parent = 0,
                                   const QString &filter = QString(),
                                   QString *selectedFilter = 0,
                                   QFileDialog::Options options = 0);
+
+DLLExport QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp);
+
+/** For file dialogs
+ *
+ * @param exts :: vector of extensions
+ * @param defaultExt :: default extension to use
+ * @return a string that filters files by extenstions
+ */
+DLLExport QString getFileDialogFilter(const std::vector<std::string> &exts,
+                                      const std::string &defaultExt);
 }
 }
 }

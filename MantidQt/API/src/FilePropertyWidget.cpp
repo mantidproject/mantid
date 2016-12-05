@@ -77,38 +77,6 @@ void FilePropertyWidget::browseClicked() {
   }
 }
 
-//-------------------------------------------------------------------------------------------------
-/** For file dialogs
- *
- * @param exts :: vector of extensions
- * @param defaultExt :: default extension to use
- * @return a string that filters files by extenstions
- */
-QString getFileDialogFilter(const std::vector<std::string> &exts,
-                            const std::string &defaultExt) {
-  QString filter("");
-
-  if (!defaultExt.empty()) {
-    filter.append(QString::fromStdString(defaultExt) + " (*" +
-                  QString::fromStdString(defaultExt) + ");;");
-  }
-
-  if (!exts.empty()) {
-    // --------- Load a File -------------
-    auto iend = exts.end();
-    // Push a wild-card onto the front of each file suffix
-    for (auto itr = exts.begin(); itr != iend; ++itr) {
-      if ((*itr) != defaultExt) {
-        filter.append(QString::fromStdString(*itr) + " (*" +
-                      QString::fromStdString(*itr) + ");;");
-      }
-    }
-    filter = filter.trimmed();
-  }
-  filter.append("All Files (*)");
-  return filter;
-}
-
 //----------------------------------------------------------------------------------------------
 /** Open the file dialog for a given property
  *
@@ -121,9 +89,7 @@ QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
   if (!prop)
     return "";
 
-  // The allowed values in this context are file extensions
-  std::vector<std::string> exts = prop->allowedValues();
-  std::string defaultExt = prop->getDefaultExt();
+  QString filter = FileDialogHandler::getFileDialogFilter(baseProp);
 
   /* MG 20/07/09: Static functions such as these that use native Windows and MAC
      dialogs
@@ -133,27 +99,10 @@ QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
   */
   QString filename;
   if (prop->isLoadProperty()) {
-    QString filter = getFileDialogFilter(exts, defaultExt);
     filename = QFileDialog::getOpenFileName(
         NULL, "Open file",
         AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   } else if (prop->isSaveProperty()) {
-    // --------- Save a File -------------
-    // Have each filter on a separate line with the default as the first
-    QString filter;
-    if (!defaultExt.empty()) {
-      filter = "*" + QString::fromStdString(defaultExt) + ";;";
-    }
-    auto iend = exts.end();
-    for (auto itr = exts.begin(); itr != iend; ++itr) {
-      if ((*itr) != defaultExt) {
-        filter.append("*" + QString::fromStdString(*itr) + ";;");
-      }
-    }
-    // Remove last two semi-colons or else we get an extra empty option in the
-    // box
-    filter.chop(2);
-    // Prepend the default filter
     QString selectedFilter;
     filename = MantidQt::API::FileDialogHandler::getSaveFileName(
         NULL, "Save file",
@@ -211,7 +160,7 @@ FilePropertyWidget::openMultipleFileDialog(Mantid::Kernel::Property *baseProp) {
   if (!prop)
     return QStringList();
 
-  QString filter = getFileDialogFilter(prop->getExts(), prop->getDefaultExt());
+  QString filter = FileDialogHandler::getFileDialogFilter(baseProp);
   QStringList files = QFileDialog::getOpenFileNames(
       NULL, "Open Multiple Files",
       AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
