@@ -286,14 +286,12 @@ class MatchPeaks(PythonAlgorithm):
         # Direct deletion causes problems when running in parallel for too many workspaces
 
         try:
-            if mtd['EPPfit_Parameters']:
-                DeleteWorkspace('EPPfit_Parameters')
+            DeleteWorkspace('EPPfit_Parameters')
         except ValueError:
             logger.debug('Fit parameters workspace already deleted')
 
         try:
-            if mtd['EPPfit_NormalisedCovarianceMatrix']:
-                DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+            DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
         except ValueError:
             logger.debug('Fit covariance matrix already deleted')
 
