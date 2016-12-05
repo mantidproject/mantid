@@ -326,6 +326,41 @@ public:
     m_workspace.getSpectrum(1).setDetectorID(2);
   }
 
+  void test_setMasked() {
+    auto &spectrumInfo = m_workspace.mutableSpectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    spectrumInfo.setMasked(0, false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
+    spectrumInfo.setMasked(0, true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    // Make sure no other detectors are affected
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
+  void test_grouped_setMasked() {
+    auto &spectrumInfo = m_grouped.mutableSpectrumInfo();
+    spectrumInfo.setMasked(4, false);
+    // 4 includes all detectors so all other spectra are affected
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+    spectrumInfo.setMasked(0, true);
+    // Partial masking => false
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+    // Restore initial state
+    spectrumInfo.setMasked(4, false);
+    spectrumInfo.setMasked(2, true);
+  }
+
   void test_detector() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
