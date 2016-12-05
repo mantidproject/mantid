@@ -22,12 +22,11 @@ elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
 endif()
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
+set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -Wshadow -fno-common" )
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
 # -Wno-write-strings: Do not warn about deprecated conversions of char*->const char*
-# -Wno-unused-result: Do not warn about unused return values in some C functions
 set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
 
 # Check if we have a new enough version for this flag
