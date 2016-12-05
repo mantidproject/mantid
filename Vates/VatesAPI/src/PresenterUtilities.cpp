@@ -56,7 +56,8 @@ void applyCOBMatrixSettingsToVtkDataSet(
     Mantid::VATES::MDLoadingPresenter *presenter, vtkDataSet *dataSet,
     std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider) {
   try {
-    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider));
+    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider),
+                                 nullptr);
   } catch (std::invalid_argument &e) {
     std::string error = e.what();
     g_log_presenter_utilities.warning()
