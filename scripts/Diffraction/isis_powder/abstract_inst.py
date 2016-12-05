@@ -144,27 +144,22 @@ class AbstractInst(object):
     def normalise_ws(self, ws_to_correct, run_details=None):
         return None
 
-    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, output_mode=None, attenuate=False):
         return None
 
     def pearl_focus_tof_rebinning(self, input_workspace):
         return input_workspace
 
-    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, return_units):
+    def crop_data_tail(self, ws_to_crop):
+        return ws_to_crop
+
+    def vanadium_calibration_rebinning(self, vanadium_ws):
         return vanadium_ws
 
     def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         return ws_to_rebin
 
     def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
-        return None
-
-    # Support for old API - can be removed when Pearl_routines is removed
-
-    def _old_api_pearl_filename_is_full_path(self):
-        return False
-
-    def _old_api_pearl_setup_input_dirs(self, run_number):
         return None
 
 

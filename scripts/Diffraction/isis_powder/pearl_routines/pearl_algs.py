@@ -18,11 +18,11 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
     return pearl_attenuated_ws
 
 
-def apply_tof_rebinning(ws_to_rebin, tof_params, return_units=None):
-    rebinned_ws = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF")
-    rebinned_ws = mantid.Rebin(InputWorkspace=rebinned_ws, Params=tof_params)
-    if return_units:
-        rebinned_ws = mantid.ConvertUnits(InputWorkspace=rebinned_ws, Target=return_units)
+def apply_tof_rebinning(ws_to_rebin, tof_params):
+    previous_units = ws_to_rebin.getAxis(0).getUnit().unitID()
+    ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
+    rebinned_ws = mantid.Rebin(InputWorkspace=ws_to_rebin, Params=tof_params, OutputWorkspace=ws_to_rebin)
+    rebinned_ws = mantid.ConvertUnits(InputWorkspace=rebinned_ws, Target=previous_units, OutputWorkspace=rebinned_ws)
     return rebinned_ws
 
 

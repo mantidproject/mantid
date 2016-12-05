@@ -152,15 +152,22 @@ class Pearl(AbstractInst):
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
 
-    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, output_mode=None, attenuate=False):
+        if not output_mode:
+            output_mode = self._focus_mode
+
         return pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
-                                                           run_details=run_details, focus_mode=self._focus_mode,
+                                                           run_details=run_details, focus_mode=output_mode,
                                                            perform_attenuation=attenuate)
 
-    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, return_units):
-        out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=self._create_van_tof_binning,
-                                                return_units=return_units)
+    def vanadium_calibration_rebinning(self, vanadium_ws):
+        out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=self._create_van_tof_binning)
 
+        return out_ws
+
+    def crop_data_tail(self, ws_to_crop):
+        # TODO move this param into advanced config
+        out_ws = mantid.CropWorkspace(XMax="19900", InputWorkspace=ws_to_crop, OutputWorkspace=ws_to_crop)
         return out_ws
 
     def generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
@@ -213,12 +220,8 @@ def get_monitor_spectra(run_number, focus_mode):
 def generate_file_name(run_number):
     digit = len(str(run_number))
 
-    if run_number < 71009:
-        number_of_digits = 5
-        filename = "PRL"
-    else:
-        number_of_digits = 8
-        filename = "PEARL"
+    number_of_digits = 8
+    filename = "PEARL"
 
     for i in range(0, number_of_digits - digit):
         filename += "0"

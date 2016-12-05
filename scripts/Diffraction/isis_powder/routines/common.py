@@ -133,7 +133,6 @@ def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument,
 
 def _load_raw_files(run_number_string, instrument):
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
-    instrument._old_api_pearl_setup_input_dirs(run_number=run_number_list[0])
     load_raw_ws = _load_list_of_files(run_number_list, instrument)
     return load_raw_ws
 
@@ -155,7 +154,12 @@ def _sum_ws_range(ws_list):
     # Sum all workspaces
     out_ws_name = "summed_" + ws_list[0].name() + '_' + ws_list[-1].name()
 
-    summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
+    summed_ws = mantid.CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace=out_ws_name)
+
+    for ws in ws_list[1:]:
+        summed_ws = mantid.Plus(LHSWorkspace=summed_ws, RHSWorkspace=ws, OutputWorkspace=out_ws_name)
+
+    # summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
     return summed_ws
 
 
