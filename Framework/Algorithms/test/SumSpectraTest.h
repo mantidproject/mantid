@@ -465,42 +465,41 @@ public:
   }
 
   void testRemoveSpecialValuesOff() {
-	  constexpr size_t numOfHistos = 2;
-	  auto inWs =
-		  WorkspaceCreationHelper::Create2DWorkspace123(numOfHistos, 3, true);
-	  auto &yVals = inWs->mutableY(1);
+    constexpr size_t numOfHistos = 2;
+    auto inWs =
+        WorkspaceCreationHelper::Create2DWorkspace123(numOfHistos, 3, true);
+    auto &yVals = inWs->mutableY(1);
 
-	  yVals[0] = std::numeric_limits<double>::infinity();
-	  yVals[1] = NAN;
+    yVals[0] = std::numeric_limits<double>::infinity();
+    yVals[1] = NAN;
 
-	  Mantid::Algorithms::SumSpectra sumSpectraAlg;
-	  sumSpectraAlg.initialize();
-	  sumSpectraAlg.setRethrows(true);
+    Mantid::Algorithms::SumSpectra sumSpectraAlg;
+    sumSpectraAlg.initialize();
+    sumSpectraAlg.setRethrows(true);
 
-	  sumSpectraAlg.setProperty("InputWorkspace", inWs);
-	  const std::string outWsName = "testSpecialVals";
-	  sumSpectraAlg.setPropertyValue("OutputWorkspace", outWsName);
-	  sumSpectraAlg.setProperty("RemoveSpecialValues", false);
+    sumSpectraAlg.setProperty("InputWorkspace", inWs);
+    const std::string outWsName = "testSpecialVals";
+    sumSpectraAlg.setPropertyValue("OutputWorkspace", outWsName);
+    sumSpectraAlg.setProperty("RemoveSpecialValues", false);
 
-	  TS_ASSERT_THROWS_NOTHING(sumSpectraAlg.execute());
-	  TS_ASSERT(sumSpectraAlg.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(sumSpectraAlg.execute());
+    TS_ASSERT(sumSpectraAlg.isExecuted());
 
-	  Workspace_sptr output;
-	  TS_ASSERT_THROWS_NOTHING(
-		  output = AnalysisDataService::Instance().retrieve(outWsName));
-	  Workspace2D_const_sptr output2D =
-		  boost::dynamic_pointer_cast<const Workspace2D>(output);
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieve(outWsName));
+    Workspace2D_const_sptr output2D =
+        boost::dynamic_pointer_cast<const Workspace2D>(output);
 
-	  auto outYVals = output2D->y(0);
-	  // We expect a NaN and an Inf to propagate here
-	  TS_ASSERT_EQUALS(std::isnormal(outYVals[0]), false);
-	  TS_ASSERT_EQUALS(std::isnormal(outYVals[1]), false);
-	  // Should get the correct amount now
-	  TS_ASSERT_EQUALS(outYVals[2], 4.);
+    auto outYVals = output2D->y(0);
+    // We expect a NaN and an Inf to propagate here
+    TS_ASSERT_EQUALS(std::isnormal(outYVals[0]), false);
+    TS_ASSERT_EQUALS(std::isnormal(outYVals[1]), false);
+    // Should get the correct amount now
+    TS_ASSERT_EQUALS(outYVals[2], 4.);
 
-	  AnalysisDataService::Instance().remove(outWsName);
+    AnalysisDataService::Instance().remove(outWsName);
   }
-
 
 private:
   int nTestHist;
