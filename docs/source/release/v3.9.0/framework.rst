@@ -23,7 +23,6 @@ Improved
 - :ref: All algorithms using `AsciiPointBase` now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects `SaveReflCustomAscii <algm-SaveReflCustomAscii>`, `SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, `SaveANSTOAscii <algm-SaveANSTOAscii>` and `SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` has a working progress bar.
->>>>>>> origin/master
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` gained a new option: `Interpolation`.
   This controls the method used for interpolation. Availabile options are: `Linear` & `CSpline`.
 
