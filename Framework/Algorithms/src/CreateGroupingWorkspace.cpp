@@ -44,11 +44,11 @@ const std::string CreateGroupingWorkspace::category() const {
  */
 void CreateGroupingWorkspace::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      make_unique<WorkspaceProperty<> >("InputWorkspace", "", Direction::Input,
+                                        PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(make_unique<PropertyWithValue<std::string> >(
                       "InstrumentName", "", Direction::Input),
                   "Optional: Name of the instrument to base the "
                   "GroupingWorkspace on which to base the GroupingWorkspace.");
@@ -70,22 +70,24 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping{"", "All", "Group", "Column", "bank"};
+  std::vector<std::string> grouping{ "",            "All",    "Group",
+                                     "2_4Grouping", "Column", "bank" };
   declareProperty(
       "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
-      "(East,West for SNAP), Columns for SNAP, detector banks");
+      "(East,West for SNAP), 2_4Grouping for SNAP, Columns for SNAP, detector "
+      "banks");
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
   declareProperty("FixedGroupCount", 0,
-                  boost::make_shared<BoundedValidator<int>>(0, INT_MAX),
+                  boost::make_shared<BoundedValidator<int> >(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
   declareProperty("ComponentName", "", "Specify the instrument component to "
                                        "group into a fixed number of groups");
 
-  declareProperty(make_unique<WorkspaceProperty<GroupingWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<GroupingWorkspace> >(
                       "OutputWorkspace", "", Direction::Output),
                   "An output GroupingWorkspace.");
 
@@ -248,7 +250,7 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
     typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
     typedef boost::shared_ptr<const Geometry::IComponent> sptr_IComp;
     typedef boost::shared_ptr<const Geometry::IDetector> sptr_IDet;
-    std::queue<std::pair<sptr_ICompAss, int>> assemblies;
+    std::queue<std::pair<sptr_ICompAss, int> > assemblies;
     sptr_ICompAss current =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
     sptr_IDet currentDet;
@@ -360,6 +362,9 @@ void CreateGroupingWorkspace::exec() {
     } else if (inst->getName().compare("SNAP") == 0 &&
                grouping.compare("Group") == 0) {
       GroupNames = "East,West";
+    } else if (inst->getName().compare("SNAP") == 0 &&
+               grouping.compare("2_4Grouping") == 0) {
+      GroupNames = "Column1,Column2,Column3,Column4,Column5,Column6,";
     } else {
       sortnames = true;
       GroupNames = "";
@@ -391,9 +396,20 @@ void CreateGroupingWorkspace::exec() {
 
   Progress prog(this, 0.2, 1.0, outWS->getNumberHistograms());
   // Make the grouping one of three ways:
-  if (!GroupNames.empty())
+  if (!GroupNames.empty()) {
     detIDtoGroup = makeGroupingByNames(GroupNames, inst, prog, sortnames);
-  else if (!OldCalFilename.empty())
+    if (grouping.compare("2_4Grouping") == 0) {
+      std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
+      std::map<detid_t, int>::const_iterator it;
+      for (it = detIDtoGroup.begin(); it != it_end; ++it) {
+        if (it->second < 5)
+          detIDtoGroup[it->first] = 1;
+        else
+          detIDtoGroup[it->first] = 2;
+      }
+    }
+
+  } else if (!OldCalFilename.empty())
     detIDtoGroup = readGroupingFile(OldCalFilename, prog);
   else if ((numGroups > 0) && !componentName.empty())
     detIDtoGroup =
@@ -420,7 +436,8 @@ void CreateGroupingWorkspace::exec() {
       groupCount.insert(group);
       try {
         outWS->setValue(detID, double(group));
-      } catch (std::invalid_argument &) {
+      }
+      catch (std::invalid_argument &) {
         numNotFound++;
       }
     }
