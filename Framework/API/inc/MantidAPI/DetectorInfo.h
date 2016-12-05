@@ -63,6 +63,8 @@ public:
   DetectorInfo(boost::shared_ptr<const Geometry::Instrument> instrument,
                Geometry::ParameterMap *pmap = nullptr);
 
+  size_t size() const;
+
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   double l2(const size_t index) const;

@@ -32,6 +32,10 @@ DetectorInfo::DetectorInfo(
     m_detIDToIndex[m_detectorIDs[i]] = i;
 }
 
+/// Returns the size of the DetectorInfo, i.e., the number of detectors in the
+/// instrument.
+size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
+
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   return getDetector(index).isMonitor();

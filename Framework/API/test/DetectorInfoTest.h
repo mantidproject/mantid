@@ -43,6 +43,8 @@ public:
                                  numberOfBins - 1);
   }
 
+  void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
+
   void test_sourcePosition() {
     TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(),
                      V3D(0.0, 0.0, -20.0));
