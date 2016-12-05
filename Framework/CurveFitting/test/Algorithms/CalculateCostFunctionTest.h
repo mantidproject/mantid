@@ -32,7 +32,7 @@ public:
   void test_calculate() {
     CalculateCostFunction alg;
     alg.initialize();
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double, int) { return 0.0; }, 1, 0.0, 1.0, 0.1);
     alg.setPropertyValue("Function", "name=UserFunction,Formula=a*x,a=1");
     alg.setProperty("InputWorkspace", ws);
@@ -47,7 +47,7 @@ public:
   void test_calculate_weighted() {
     CalculateCostFunction alg;
     alg.initialize();
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double, int) { return 0.0; }, 1, 0.0, 1.0, 0.1);
     double w = 0.0;
     std::generate(ws->dataE(0).begin(), ws->dataE(0).end(), [&w] {
@@ -71,7 +71,7 @@ public:
   void test_calculate_weighted_unweighted() {
     CalculateCostFunction alg;
     alg.initialize();
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double, int) { return 1.0; }, 1, 0.0, 1.0, 0.1);
     double w = 0.0;
     std::generate(ws->dataE(0).begin(), ws->dataE(0).end(), [&w] {
