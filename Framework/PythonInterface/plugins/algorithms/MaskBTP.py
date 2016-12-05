@@ -52,9 +52,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         tubeString = self.getProperty("Tube").value
         pixelString = self.getProperty("Pixel").value
 
-        if self.instname == "" and ws is None:
-            raise ValueError("No workspace or instrument were selected" )
-
         if ws is not None:
             self.instrument = ws.getInstrument()
             self.instname = self.instrument.getName()
@@ -77,12 +74,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         try:
             instrumentList.index(self.instname)
         except:
-            raise ValueError("Instrument "+self.instname+" not in the allowed list")
+            raise ValueError("Instrument '"+self.instname+"' not in the allowed list")
 
         if self.instrument is None:
             IDF=mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
-            if mantid.mtd.doesExist(self.instname+"MaskBTP"):
-                mantid.simpleapi.DeleteWorkspace(self.instname+"MaskBTP")
             ws=mantid.simpleapi.LoadEmptyInstrument(IDF,OutputWorkspace=self.instname+"MaskBTP")
             self.instrument=ws.getInstrument()
 
@@ -169,15 +164,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 return self.instrument.getComponentByName("T row")[banknum-78][0]
             else:
                 raise ValueError("Out of range index for ARCS instrument bank numbers")
-        elif self.instname=="CORELLI":
-            if self.bankmin[self.instname]<=banknum<= 29:
-                return self.instrument.getComponentByName("A row")[banknum-1][0]
-            elif 30<=banknum<=62:
-                return self.instrument.getComponentByName("B row")[banknum-30][0]
-            elif 63<=banknum<=self.bankmax[self.instname]:
-                return self.instrument.getComponentByName("C row")[banknum-63][0]
-            else:
-                raise ValueError("Out of range index for CORELLI instrument bank numbers")
         elif self.instname=="SEQUOIA":
             if self.bankmin[self.instname]<=banknum<= 74:
                 return self.instrument.getComponentByName("B row")[banknum-38][0]
@@ -187,7 +173,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 return self.instrument.getComponentByName("D row")[banknum-114][0]
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers")
-        elif self.instname=="CNCS" or self.instname=="HYSPEC":
+        elif self.instname in ["CNCS", "CORELLI","HYSPEC"]:
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))[0]
             else:
