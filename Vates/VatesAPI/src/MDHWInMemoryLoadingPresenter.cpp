@@ -97,11 +97,9 @@ struct MinAndMax {
   void operator()(const tbb::blocked_range<int> &r) {
     for (int id = r.begin(); id != r.end(); ++id) {
       if (m_isCellVisible(id)) {
-        {
-          double s = m_cellScalars->GetComponent(id, 0);
-          m_minimum = std::min(m_minimum, s);
-          m_maximum = std::max(m_maximum, s);
-        }
+        double s = m_cellScalars->GetComponent(id, 0);
+        m_minimum = std::min(m_minimum, s);
+        m_maximum = std::max(m_maximum, s);
       }
     }
   }
