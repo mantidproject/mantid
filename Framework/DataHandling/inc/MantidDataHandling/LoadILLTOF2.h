@@ -1,14 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADILLTOF2_H_
 #define MANTID_DATAHANDLING_LOADILLTOF2_H_
 
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidAPI/Progress.h"
 
 namespace Mantid {
 namespace DataHandling {
