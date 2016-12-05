@@ -338,7 +338,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             default = False
             raise ValueError("Instrument has no default beam size; will use inputs")
 
-        if default:)
+        if default:
             self._beam_height = float(inst.getStringParameter('Workflow.beam-height')[0])
             self._beam_width = float(inst.getStringParameter('Workflow.beam-width')[0])
 
