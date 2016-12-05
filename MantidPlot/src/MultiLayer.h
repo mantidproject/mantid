@@ -113,7 +113,6 @@ public:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
-  std::string getWindowName() override;
   std::vector<std::string> getWorkspaceNames() override;
 
   void setCommonAxisScales();

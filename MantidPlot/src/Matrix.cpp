@@ -1705,11 +1705,6 @@ std::string Matrix::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::string Matrix::getWindowName()
-{
-  return objectName().toStdString();
-}
-
 std::vector<std::string> Matrix::getWorkspaceNames()
 {
   return {};

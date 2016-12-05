@@ -91,6 +91,7 @@ void MdiSubWindow::init(QWidget *parent, const QString &label,
             SLOT(changeToFloating(MdiSubWindow *)));
   }
 }
+
 void MdiSubWindow::updateCaption() {
   switch (d_caption_policy) {
   case Name:
@@ -144,8 +145,14 @@ std::vector<std::string> MdiSubWindow::getWorkspaceNames()
 
 std::string MdiSubWindow::getWindowName()
 {
-  return "";
+  return objectName().toStdString();
 }
+
+std::string MdiSubWindow::getWindowType()
+{
+  return metaObject()->className();
+}
+
 
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {
   emit resizedWindow(this);

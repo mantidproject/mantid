@@ -402,6 +402,11 @@ std::vector<std::string> SpectrumView::getWorkspaceNames()
   return names;
 }
 
+std::string SpectrumView::getWindowType()
+{
+  return "SpectrumView";
+}
+
 void SpectrumView::changeTracking(bool on) {
   if (m_spectrumDisplay.isEmpty()) {
     return;

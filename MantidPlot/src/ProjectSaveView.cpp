@@ -1,6 +1,8 @@
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtMantidWidgets/ProjectSavePresenter.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/WindowIcons.h"
+
 #include "ProjectSaveView.h"
 
 using namespace MantidQt::API;
@@ -21,14 +23,9 @@ ProjectSaveView::ProjectSaveView(const QString& projectName,
   if(!checkIfNewProject(projectName))
     m_ui.projectPath->setText(projectName);
 
-  //Connect signal to listen for when workspaces are changed (checked/unchecked)
-  connect(m_ui.workspaceList,
-          SIGNAL(itemChanged(QTreeWidgetItem *, int)), this,
-          SLOT(workspaceItemChanged(QTreeWidgetItem*, int)));
+  m_ui.saveProgressBar->setValue(0);
 
-  connect(m_ui.btnBrowseFilePath, SIGNAL(clicked(bool)), this, SLOT(findFilePath()));
-  connect(m_ui.btnSave, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
-  connect(m_ui.btnCancel, SIGNAL(clicked(bool)), this, SLOT(close()));
+  connectSignals();
 }
 
 // IProjectSaveView interface implementations
@@ -59,28 +56,34 @@ void ProjectSaveView::setProjectPath(const QString &path)
  m_ui.projectPath->setText(path);
 }
 
-void ProjectSaveView::updateWorkspacesList(const std::vector<std::string> &workspaces)
+void ProjectSaveView::updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces)
 {
   m_ui.workspaceList->clear();
-  for (auto name : workspaces) {
-    addWorkspaceItem(name);
+  for (auto info : workspaces) {
+    addWorkspaceItem(info);
   }
+
+  resizeWidgetColumns(m_ui.workspaceList);
 }
 
-void ProjectSaveView::updateIncludedWindowsList(const std::vector<std::string> &windows)
+void ProjectSaveView::updateIncludedWindowsList(const std::vector<WindowInfo> &windows)
 {
   m_ui.includedWindows->clear();
-  for (auto name : windows) {
-    addWindowItem(m_ui.includedWindows, name);
+  for (auto info : windows) {
+    addWindowItem(m_ui.includedWindows, info);
   }
+
+  resizeWidgetColumns(m_ui.includedWindows);
 }
 
-void ProjectSaveView::updateExcludedWindowsList(const std::vector<std::string> &windows)
+void ProjectSaveView::updateExcludedWindowsList(const std::vector<WindowInfo> &windows)
 {
   m_ui.excludedWindows->clear();
-  for (auto name : windows) {
-    addWindowItem(m_ui.excludedWindows, name);
+  for (auto info: windows) {
+    addWindowItem(m_ui.excludedWindows, info);
   }
+
+  resizeWidgetColumns(m_ui.excludedWindows);
 }
 
 void ProjectSaveView::removeFromIncludedWindowsList(const std::vector<std::string> &windows)
@@ -126,6 +129,13 @@ std::vector<std::string> ProjectSaveView::getItemsWithCheckState(const Qt::Check
 void ProjectSaveView::save(bool checked)
 {
   UNUSED_ARG(checked);
+
+  if(m_ui.projectPath->text().isEmpty()) {
+    QMessageBox::warning(this, "Project Save",
+                         "Please choose a valid file path", QMessageBox::Ok);
+    return;
+  }
+
   m_presenter->notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
   auto wsNames = getCheckedWorkspaceNames();
   auto windowNames = getIncludedWindowNames();
@@ -133,6 +143,8 @@ void ProjectSaveView::save(bool checked)
   auto compress = filePath.endsWith(".gz");
 
   m_serialiser.save(filePath, wsNames, windowNames, compress);
+  emit projectSaved();
+
   close();
 }
 
@@ -173,18 +185,30 @@ void ProjectSaveView::removeItem(QTreeWidget *widget, const std::string &name)
   }
 }
 
-void ProjectSaveView::addWindowItem(QTreeWidget *widget, const std::string &name)
+void ProjectSaveView::addWindowItem(QTreeWidget *widget, const WindowInfo &info)
 {
-  auto it = new QTreeWidgetItem(widget);
-  it->setText(0, QString::fromStdString(name));
-  widget->addTopLevelItem(it);
+  QStringList lst;
+  WindowIcons icons;
+  lst << QString::fromStdString(info.name);
+  lst << QString::fromStdString(info.type);
+
+  auto item = new QTreeWidgetItem(lst);
+  if(!info.icon_id.empty())
+    item->setIcon(0, icons.getIcon(info.type));
+  widget->addTopLevelItem(item);
 }
 
-void ProjectSaveView::addWorkspaceItem(const std::string &name)
+void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info)
 {
-  QStringList lst(QString::fromStdString(name));
-  lst.append("0");
-  QTreeWidgetItem *item = new QTreeWidgetItem(lst);
+  QStringList lst;
+  lst << QString::fromStdString(info.name);
+  lst << QString::fromStdString(info.type);
+  lst << QString::fromStdString(info.size);
+  lst << QString::number(info.numWindows);
+
+  auto item = new QTreeWidgetItem(lst);
+  if(!info.icon_id.empty())
+    item->setIcon(0, getQPixmap(info.icon_id));
   item->setCheckState(0, Qt::CheckState::Checked);
   m_ui.workspaceList->addTopLevelItem(item);
 }
@@ -195,7 +219,32 @@ bool ProjectSaveView::checkIfNewProject(const QString &projectName) const
       projectName.endsWith(".opj", Qt::CaseInsensitive) ||
       projectName.endsWith(".ogm", Qt::CaseInsensitive) ||
       projectName.endsWith(".ogw", Qt::CaseInsensitive) ||
-      projectName.endsWith(".ogg", Qt::CaseInsensitive));
+           projectName.endsWith(".ogg", Qt::CaseInsensitive));
+}
+
+void ProjectSaveView::resizeWidgetColumns(QTreeWidget *widget)
+{
+  for (int i = 0; i < widget->topLevelItemCount(); ++i)
+    widget->resizeColumnToContents(i);
+}
+
+void ProjectSaveView::connectSignals()
+{
+  //Connect signal to listen for when workspaces are changed (checked/unchecked)
+  connect(m_ui.workspaceList,
+          SIGNAL(itemChanged(QTreeWidgetItem *, int)), this,
+          SLOT(workspaceItemChanged(QTreeWidgetItem*, int)));
+
+  connect(m_ui.btnBrowseFilePath, SIGNAL(clicked(bool)), this, SLOT(findFilePath()));
+  connect(m_ui.btnSave, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
+  connect(m_ui.btnCancel, SIGNAL(clicked(bool)), this, SLOT(close()));
+
+  connect(&m_serialiser, SIGNAL(setProgressBarRange(int, int)),
+          m_ui.saveProgressBar, SLOT(setRange(int, int)));
+  connect(&m_serialiser, SIGNAL(setProgressBarValue(int)),
+          m_ui.saveProgressBar, SLOT(setValue(int)));
+  connect(&m_serialiser, SIGNAL(setProgressBarText(QString)),
+          m_ui.saveProgressBar, SLOT(setText(QString)));
 }
 
 }

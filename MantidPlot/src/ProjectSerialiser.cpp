@@ -46,6 +46,10 @@ void ProjectSerialiser::save(const QString &projectName,
   QFileInfo fileInfo(projectName);
   window->workingDir = fileInfo.absoluteDir().absolutePath();
 
+  // update any listening progress bars
+  emit setProgressBarRange(0, static_cast<int>(wsNames.size()));
+  emit setProgressBarValue(0);
+
   save(m_currentFolder, projectName, compress);
 }
 
@@ -425,6 +429,9 @@ QString ProjectSerialiser::saveWorkspaces() {
   wsNames = "<mantidworkspaces>\n";
   wsNames += "WorkspaceNames";
 
+  emit setProgressBarText(QString("Saving Workspaces"));
+
+  int count = 0;
   auto workspaceItems = AnalysisDataService::Instance().getObjectNames();
   for (auto &itemIter : workspaceItems) {
     QString wsName = QString::fromStdString(itemIter);
@@ -457,6 +464,9 @@ QString ProjectSerialiser::saveWorkspaces() {
       std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
       window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
     }
+
+    // update listening progress bars
+    emit setProgressBarValue(++count);
   }
   wsNames += "\n</mantidworkspaces>\n";
   return wsNames;

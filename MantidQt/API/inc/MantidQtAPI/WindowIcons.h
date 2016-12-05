@@ -3,7 +3,7 @@
 
 #include "DllOption.h"
 #include <QMap>
-#include <QPixmap>
+#include <QIcon>
 
 namespace MantidQt {
 namespace API {
@@ -16,13 +16,15 @@ public:
   WindowIcons();
 
   /// Returns an icon for the given ID
-  QPixmap getIcon(const std::string &windowID) const;
+  QIcon getIcon(const std::string &windowID) const;
   /// Returns an icon ID for the given window ID
   std::string getIconID(const std::string &windowID) const;
 
 private:
   /// Defines the mapping between ID & pixmap name
   void initInternalLookup();
+  /// Build a icon object from an image file
+  QIcon makeIconFromFile(const std::string &path) const;
 
   /// Internal map instance
   QMap<std::string, std::string> m_idToPixmapName;

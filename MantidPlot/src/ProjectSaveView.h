@@ -58,9 +58,9 @@ public:
   QString getProjectPath() override;
   void setProjectPath(const QString& path) override;
 
-  void updateWorkspacesList(const std::vector<std::string>& workspaces) override;
-  void updateIncludedWindowsList(const std::vector<std::string>& windows) override;
-  void updateExcludedWindowsList(const std::vector<std::string>& windows) override;
+  void updateWorkspacesList(const std::vector<WorkspaceInfo>& workspaces) override;
+  void updateIncludedWindowsList(const std::vector<WindowInfo>& windows) override;
+  void updateExcludedWindowsList(const std::vector<WindowInfo>& windows) override;
   void removeFromIncludedWindowsList(const std::vector<std::string>& windows) override;
   void removeFromExcludedWindowsList(const std::vector<std::string>& windows) override;
 
@@ -76,13 +76,15 @@ private:
     std::vector<std::string> getIncludedWindowNames() const;
     std::vector<std::string> getItemsWithCheckState(const Qt::CheckState state) const;
     void removeItem(QTreeWidget* widget, const std::string &name);
-    void addWindowItem(QTreeWidget* widget, const std::string &name);
-    void addWorkspaceItem(const std::string &name);
+    void addWindowItem(QTreeWidget* widget, const WindowInfo &info);
+    void addWorkspaceItem(const WorkspaceInfo &info);
     bool checkIfNewProject(const QString& projectName) const;
+    void resizeWidgetColumns(QTreeWidget* widget);
+    void connectSignals();
 
     std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;
     std::unique_ptr<ProjectSavePresenter> m_presenter;
-    MantidQt::API::ProjectSerialiser  m_serialiser;
+    MantidQt::API::ProjectSerialiser&  m_serialiser;
     Ui::ProjectSave m_ui;
 };
 }

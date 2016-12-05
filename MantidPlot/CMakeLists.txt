@@ -537,6 +537,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/PolynomFitDialog.h
                         src/PolynomialFit.h
                         src/ProjectSaveView.h
+                        src/ProjectSerialiser.h
                         src/PythonScript.h
                         src/PythonScripting.h
                         src/QwtPieCurve.h

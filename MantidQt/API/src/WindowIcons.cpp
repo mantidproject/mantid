@@ -19,8 +19,13 @@ WindowIcons::WindowIcons() : m_idToPixmapName() { initInternalLookup(); }
  * @param windowID A string giving the ID for a window
  * @throws std::runtime_error if no icon can be found
  */
-QPixmap WindowIcons::getIcon(const std::string &windowID) const {
-  return getQPixmap(m_idToPixmapName.value(windowID));
+QIcon WindowIcons::getIcon(const std::string &windowID) const {
+  auto value = m_idToPixmapName.value(windowID);
+  if(QString::fromStdString(value).endsWith(".png")) {
+    return makeIconFromFile(value);
+  } else {
+    return getQPixmap(value);
+  }
 }
 
 /**
@@ -43,12 +48,24 @@ std::string WindowIcons::getIconID(const std::string &windowID) const
  */
 void WindowIcons::initInternalLookup() {
   m_idToPixmapName.clear();
-  m_idToPixmapName["Matrix"] = "mantid_matrix_xpm";
+  m_idToPixmapName["Matrix"] = "matrix_xpm";
+  m_idToPixmapName["MantidMatrix"] = "mantid_matrix_xpm";
   m_idToPixmapName["Table"] = "worksheet_xpm";
   m_idToPixmapName["Note"] = "note_xpm";
-  m_idToPixmapName["Graph"] = "graph_xpm";
-  m_idToPixmapName["3D Graph"] = "trajectory_xpm";
+  m_idToPixmapName["MultiLayer"] = "graph_xpm";
+  m_idToPixmapName["Graph3D"] = "trajectory_xpm";
   m_idToPixmapName["Workspace"] = "mantid_matrix_xpm";
+  m_idToPixmapName["SliceViewer"] = ":/SliceViewer/icons/SliceViewerWindow_icon.png";
+  m_idToPixmapName["VSIWindow"] = ":/VatesSimpleGuiViewWidgets/icons/pvIcon.png";
+}
+
+QIcon WindowIcons::makeIconFromFile(const std::string &path) const
+{
+    QIcon icon;
+    icon.addFile(
+        QString::fromStdString(path),
+        QSize(), QIcon::Normal, QIcon::Off);
+    return icon;
 }
 }
 }

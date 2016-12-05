@@ -396,8 +396,6 @@ public slots:
                   const int fileVersion);
   /// Returns a list of workspace names that are used by this window
   std::vector<std::string> getWorkspaceNames() override;
-  /// Returns the user friendly name of the window
-  std::string getWindowName() override;
 
   void restore(const QStringList &lst) override;
 

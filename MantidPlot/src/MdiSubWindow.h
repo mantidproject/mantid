@@ -145,6 +145,7 @@ public:
   ApplicationWindow *applicationWindow() { return d_app; }
   /// Get the pointer to Folder
   Folder *folder() { return d_folder; }
+
 public slots:
 
   //! Return the window label
@@ -286,6 +287,8 @@ public: // non-slot methods
   std::vector<std::string> getWorkspaceNames() override;
   /// Returns the user friendly name of the window
   std::string getWindowName() override;
+  /// Get the window type as a string
+  std::string getWindowType() override;
 
 signals:
   //! Emitted when the window was closed

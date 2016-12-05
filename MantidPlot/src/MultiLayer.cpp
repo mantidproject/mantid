@@ -1869,11 +1869,6 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::string MultiLayer::getWindowName()
-{
-  return objectName().toStdString();
-}
-
 std::vector<std::string> MultiLayer::getWorkspaceNames()
 {
   std::vector<std::string> names;

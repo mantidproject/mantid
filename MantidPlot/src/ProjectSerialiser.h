@@ -49,7 +49,8 @@ class ApplicationWindow;
 namespace MantidQt {
 namespace API {
 
-class ProjectSerialiser {
+class ProjectSerialiser : public QObject {
+  Q_OBJECT
 public:
   /// Create a new serialiser with the current application window
   explicit ProjectSerialiser(ApplicationWindow *window);
@@ -65,6 +66,14 @@ public:
             const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
+
+signals:
+  /// Set the curret progress of serialisation
+  void setProgressBarRange(int min, int max);
+  /// Set the forcasted range of things to do when saving
+  void setProgressBarValue(int value);
+  /// Set what is currently happening to listening progress bars
+  void setProgressBarText(QString text);
 
 private:
   // Instance Variables

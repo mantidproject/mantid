@@ -537,12 +537,17 @@ std::string SliceViewerWindow::saveToProject(ApplicationWindow *app) {
 
 std::string SliceViewerWindow::getWindowName()
 {
-  return "SliceViewer";
+  return "Slice Viewer (" + m_wsName + ")";
 }
 
 std::vector<std::string> SliceViewerWindow::getWorkspaceNames()
 {
   return { m_ws->name() };
+}
+
+std::string SliceViewerWindow::getWindowType()
+{
+  return "SliceViewer";
 }
 
 } // namespace SliceViewer

@@ -6050,8 +6050,8 @@ void ApplicationWindow::prepareSaveProject()
       windows.push_back(win);
   }
 
-  ProjectSerialiser serialiser(this, currentFolder());
-  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(projectname, serialiser, windows, this);
+  auto serialiser = new ProjectSerialiser(this, currentFolder());
+  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(projectname, *serialiser, windows, this);
   connect(m_projectSaveView, SIGNAL(projectSaved()), this, SLOT(postSaveProject()));
   m_projectSaveView->show();
 }
