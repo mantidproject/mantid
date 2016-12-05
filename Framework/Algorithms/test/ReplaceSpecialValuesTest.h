@@ -273,7 +273,7 @@ public:
 
   MatrixWorkspace_sptr createWorkspace() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(4, 4, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
     // put some infinities and NaNs in there
     double inf = std::numeric_limits<double>::infinity();
     inputWS->dataY(0)[2] = inf;
@@ -286,7 +286,7 @@ public:
   }
 
   void testEvents() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_rep", evin);

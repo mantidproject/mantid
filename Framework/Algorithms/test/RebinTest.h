@@ -191,7 +191,7 @@ public:
                               bool PreserveEvents, bool expectOutputEvent) {
     // Two events per bin
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateEventWorkspace2(50, 100);
+        WorkspaceCreationHelper::createEventWorkspace2(50, 100);
     test_in->switchEventType(eventType);
 
     std::string inName("test_inEvent");
@@ -556,7 +556,7 @@ public:
   static void destroySuite(RebinTestPerformance *suite) { delete suite; }
 
   RebinTestPerformance() {
-    ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(5000, 20000);
+    ws = WorkspaceCreationHelper::create2DWorkspaceBinned(5000, 20000);
   }
 
   void test_rebin() {

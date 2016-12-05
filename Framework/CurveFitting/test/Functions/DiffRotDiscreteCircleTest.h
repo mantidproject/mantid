@@ -431,7 +431,7 @@ private:
     const size_t M = xView.size();
     // create temporaray workspace.
     auto temp_ws =
-        WorkspaceCreationHelper::Create2DWorkspace(1, static_cast<int>(M));
+        WorkspaceCreationHelper::create2DWorkspace(1, static_cast<int>(M));
     for (size_t i = 0; i < M; i++) {
       temp_ws->dataX(0)[i] = xView[i];
       temp_ws->dataY(0)[i] = dataYvalues.getCalculated(i);
@@ -484,7 +484,7 @@ private:
       dataX[i] = (static_cast<double>(i) - M / 2) * dw;
 
     // create the workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
     double fractional_error = 0.01; // error taken as a percent of the signal
     for (size_t i = 0; i < M; i++) {
       double bin_boundary =
@@ -541,7 +541,7 @@ private:
     fitalg_function->function(dataXview, dataYvalues);
 
     // Create the workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
 
     // Create the instrument
     boost::shared_ptr<Instrument> inst =

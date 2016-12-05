@@ -66,7 +66,7 @@ public:
     // Create and input event workspace
     const int eventsPerPixel(25);
     const int numPixels(10);
-    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, 50, eventsPerPixel, 0.0, 1.0, 1 /*EventPattern=1*/);
     TS_ASSERT(eventWS);
     const int wsIndex(4);

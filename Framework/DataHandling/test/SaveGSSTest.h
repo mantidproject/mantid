@@ -274,7 +274,7 @@ private:
     */
   API::MatrixWorkspace_sptr generateNoInstrumentWorkspace() {
     MatrixWorkspace_sptr dataws =
-        WorkspaceCreationHelper::Create2DWorkspace(2, 100);
+        WorkspaceCreationHelper::create2DWorkspace(2, 100);
     dataws->getAxis(0)->setUnit("TOF");
 
     // Set data with logarithm bin
