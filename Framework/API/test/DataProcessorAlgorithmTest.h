@@ -10,7 +10,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
-using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 class DataProcessorAlgorithmTest : public CxxTest::TestSuite {

@@ -19,6 +19,7 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class WorkspaceGroupTest_WorkspaceGroupObserver {
   Poco::NObserver<WorkspaceGroupTest_WorkspaceGroupObserver,
