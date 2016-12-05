@@ -50,10 +50,10 @@ public:
   qint64 getPID() const {
     auto pid = this->pid();
 
-	// qt connect could sometimes try to read the terminated process' PID
-	if (!pid) {
-		return 0;
-	}
+    // qt connect could sometimes try to read the terminated process' PID
+    if (!pid) {
+      return 0;
+    }
 
 #ifdef _WIN32
     // windows gets a struct object with more info
