@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
@@ -63,7 +64,7 @@ private:
   void initWorkSpace(NeXus::NXEntry &entry,
                      const std::vector<std::vector<int>> &);
   void initInstrumentSpecific();
-  void addAllNexusFieldsAsProperties(std::string filename);
+  void addAllNexusFieldsAsProperties(const std::string &filename);
   void addEnergyToRun();
   void addFacility();
   void addPulseInterval();
@@ -72,8 +73,8 @@ private:
   void
   loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
                            const std::vector<std::vector<int>> &);
-  void loadSpectra(size_t &spec, size_t numberOfMonitors, size_t numberOfTubes,
-                   std::vector<Mantid::detid_t> &detectorIDs, NeXus::NXInt data,
+  void loadSpectra(size_t &spec, const size_t numberOfMonitors, const size_t numberOfTubes,
+                   const std::vector<Mantid::detid_t> &detectorIDs, NeXus::NXInt data,
                    Mantid::API::Progress progress);
 
   void runLoadInstrument();

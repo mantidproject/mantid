@@ -69,7 +69,7 @@ void LoadILLTOF2::init() {
  */
 void LoadILLTOF2::exec() {
   // Retrieve filename
-  std::string filenameData = getPropertyValue("Filename");
+  const std::string filenameData = getPropertyValue("Filename");
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -78,7 +78,7 @@ void LoadILLTOF2::exec() {
   loadInstrumentDetails(dataFirstEntry);
   loadTimeDetails(dataFirstEntry);
 
-  std::vector<std::vector<int>> monitors = getMonitorInfo(dataFirstEntry);
+  const auto monitors = getMonitorInfo(dataFirstEntry);
 
   initWorkSpace(dataFirstEntry, monitors);
 
@@ -176,7 +176,7 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
   m_numberOfChannels = static_cast<size_t>(data.dim2());
-  size_t numberOfMonitors = monitors.size();
+  const size_t numberOfMonitors = monitors.size();
 
   /**
    * IN4 : Rosace detector is in a different field.
@@ -250,7 +250,7 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
  *
  * @param filename The NeXus file
  */
-void LoadILLTOF2::addAllNexusFieldsAsProperties(std::string filename) {
+void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
@@ -275,7 +275,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(std::string filename) {
 void LoadILLTOF2::addEnergyToRun() {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  double ei = m_loader.calculateEnergy(m_wavelength);
+  const double ei = m_loader.calculateEnergy(m_wavelength);
   runDetails.addProperty<double>("Ei", ei, true); // overwrite
 }
 
@@ -292,16 +292,15 @@ void LoadILLTOF2::addFacility() {
  */
 void LoadILLTOF2::addPulseInterval() {
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  double pulseInterval;
-  double n_pulses;
-  double fermiChopperSpeed;
+  double n_pulses = -1;
+  double fermiChopperSpeed = -1;
 
   if (m_instrumentName == "IN4") {
     fermiChopperSpeed =
         runDetails.getPropertyAsSingleValue("FC.rotation_speed");
-    double bkgChopper1Speed =
+    const double bkgChopper1Speed =
         runDetails.getPropertyAsSingleValue("BC1.rotation_speed");
-    double bkgChopper2Speed =
+    const double bkgChopper2Speed =
         runDetails.getPropertyAsSingleValue("BC2.rotation_speed");
 
     if (std::abs(bkgChopper1Speed - bkgChopper2Speed) > 1) {
@@ -313,7 +312,7 @@ void LoadILLTOF2::addPulseInterval() {
   } else if (m_instrumentName == "IN6") {
     fermiChopperSpeed =
         runDetails.getPropertyAsSingleValue("Fermi.rotation_speed");
-    double suppressorSpeed =
+    const double suppressorSpeed =
         runDetails.getPropertyAsSingleValue("Suppressor.rotation_speed");
 
     n_pulses = fermiChopperSpeed / suppressorSpeed;
@@ -321,7 +320,7 @@ void LoadILLTOF2::addPulseInterval() {
     return;
   }
 
-  pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n_pulses;
+  const double pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n_pulses;
   runDetails.addProperty<double>("pulse_interval", pulseInterval);
 }
 
@@ -356,7 +355,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 
   auto const &instrument = m_localWorkspace->getInstrument();
 
-  std::vector<detid_t> monitorIDs = instrument->getMonitors();
+  const auto monitorIDs = instrument->getMonitors();
 
   for (const auto &monitor : monitors) {
     m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0),
@@ -365,8 +364,8 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
     spec++;
   }
 
-  std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-  size_t numberOfMonitors = monitors.size();
+  const std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
+  const size_t numberOfMonitors = monitors.size();
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 
@@ -407,9 +406,9 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
  * @param data The NeXus data to load into the workspace
  * @param progress The progress monitor
  */
-void LoadILLTOF2::loadSpectra(size_t &spec, size_t numberOfMonitors,
-                             size_t numberOfTubes,
-                             std::vector<detid_t> &detectorIDs, NXInt data,
+void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfMonitors,
+                             const size_t numberOfTubes,
+                             const std::vector<detid_t> &detectorIDs, NXInt data,
                              Progress progress) {
   for (size_t i = 0; i < numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
