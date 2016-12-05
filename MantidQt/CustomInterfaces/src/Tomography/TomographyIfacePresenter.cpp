@@ -44,8 +44,8 @@ const std::string TomographyIfacePresenter::g_defOutPathRemote =
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()),
-      m_statusMutex(new QMutex()), m_keepAliveTimer(NULL),
-      m_keepAliveThread(NULL) {
+      m_statusMutex(new QMutex()), m_keepAliveTimer(nullptr),
+      m_keepAliveThread(nullptr) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
@@ -54,16 +54,23 @@ TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
 }
 
 TomographyIfacePresenter::~TomographyIfacePresenter() {
-  cleanup();
+	cleanup();
 
-  if (m_keepAliveThread)
-    delete m_keepAliveThread;
+  if (m_keepAliveThread){
+	// this also stops the timer
+	m_keepAliveThread->terminate();
+	delete m_keepAliveThread;
+  }
 
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
 
   if (m_statusMutex)
     delete m_statusMutex;
+
+  if (m_workerThread){
+	  m_workerThread.reset();
+  }
 }
 
 /**
@@ -71,7 +78,7 @@ TomographyIfacePresenter::~TomographyIfacePresenter() {
  * graceful window close/destruct
  */
 void TomographyIfacePresenter::cleanup() {
-  killKeepAliveMechanism();
+  //killKeepAliveMechanism();
   m_model->cleanup();
 }
 
@@ -674,6 +681,7 @@ void TomographyIfacePresenter::processRefreshJobs() {
   m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
   {
+	  // BUG :: still crash here if closed during running process
     // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
@@ -838,12 +846,6 @@ void TomographyIfacePresenter::processViewImg() {
 }
 
 void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
-	// DEBUG :: remove, try and find why mantid keeps crashing here
-	//period = 5;
-	// TODO this crashes here, put a boolean check for timer as we dont
-	// wanna check the keepAliveTimer
-	//return;
-	std::cout << "\nDEBUG >> TRYING TO START TIMER\n";
   if (period <= 0) {
     m_model->logMsg("Tomography GUI: not starting the keep-alive mechanism. "
                     "You might be logged out by the remote compute resource "
@@ -854,11 +856,8 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
 
   // timer is already running, so return
   if (m_keepAliveTimer || m_keepAliveThread) {
-	  std::cout << "\nDEBUG >> TIMER IS RUNNING, ABORT\n";
 	  return;
   }
-
-  std::cout << "\nDEBUG >> STARTING TIMER\n";
 
   m_model->logMsg(
       "Tomography GUI: starting mechanism to periodically query the "
@@ -871,7 +870,7 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
 
   if (m_keepAliveThread)
     delete m_keepAliveThread;
-  QThread *m_keepAliveThread = new QThread();
+  m_keepAliveThread = new QThread();
 
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
@@ -883,11 +882,13 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
   // remove previous connections
   m_keepAliveTimer->disconnect();
   m_keepAliveThread->disconnect();
-  // direct connection from the thread
-  connect(m_keepAliveTimer, SIGNAL(timeout()), SLOT(processRefreshJobs()),
-          Qt::DirectConnection);
-  QObject::connect(m_keepAliveThread, SIGNAL(started()), m_keepAliveTimer,
+  
+  connect(m_keepAliveTimer, SIGNAL(timeout()), this, SLOT(processRefreshJobs()));
+  //connect(this, SIGNAL(terminated()), m_keepAliveThread, SLOT(terminate()));
+  connect(m_keepAliveThread, SIGNAL(started()), m_keepAliveTimer,
                    SLOT(start()));
+  connect(m_keepAliveThread, SIGNAL(terminated()), m_keepAliveTimer, SLOT(stop()));
+
   m_keepAliveThread->start();
 }
 

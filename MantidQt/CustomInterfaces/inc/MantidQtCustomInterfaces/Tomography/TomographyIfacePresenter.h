@@ -98,6 +98,8 @@ protected:
   void killKeepAliveMechanism();
 
   bool isLocalResourceSelected() const;
+signals:
+  void terminated();
 
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
