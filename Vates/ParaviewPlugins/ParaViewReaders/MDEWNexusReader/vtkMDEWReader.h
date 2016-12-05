@@ -44,7 +44,7 @@ protected:
                   vtkInformationVector *);
   int Canreadfile(const char *fname);
   /// Handle time variation.
-  vtkMTimeType GetMTime() override;
+  unsigned long GetMTime();
 
 private:
   vtkMDEWNexusReader(const vtkMDEWNexusReader &);

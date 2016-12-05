@@ -63,7 +63,7 @@ Presenter_sptr ADSAdapter::lockPresenter() {
   if (psptr == nullptr)
     throw std::runtime_error("Unable to obtain reference to presenter");
 
-  return psptr;
+  return std::move(psptr);
 }
 
 std::string ADSAdapter::getOldName() const { return m_oldName; }

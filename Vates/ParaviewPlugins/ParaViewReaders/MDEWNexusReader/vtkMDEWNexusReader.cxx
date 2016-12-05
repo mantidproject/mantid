@@ -169,7 +169,7 @@ int vtkMDEWNexusReader::CanReadFile(const char *fname) {
   return temp.canReadFile();
 }
 
-vtkMTimeType vtkMDEWNexusReader::GetMTime() { return Superclass::GetMTime(); }
+unsigned long vtkMDEWNexusReader::GetMTime() { return Superclass::GetMTime(); }
 
 /**
   Update/Set the progress.

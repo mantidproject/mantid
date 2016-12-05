@@ -148,7 +148,7 @@ private:
   size_t m_nruns;     // number of runs per spectrum
   size_t m_nevents;   // number of single events per run
 
-  std::unique_ptr<API::Progress> m_progress;
+  API::Progress *m_progress;
   API::MatrixWorkspace_sptr m_inputWS;
 };
 

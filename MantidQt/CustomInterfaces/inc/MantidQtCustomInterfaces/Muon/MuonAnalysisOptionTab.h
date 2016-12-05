@@ -83,8 +83,8 @@ public:
   /// Return currently selected new plot policy
   NewPlotPolicy newPlotPolicy();
 
-  /// Return multiple fitting mode on/off selection
-  Muon::MultiFitState getMultiFitState() const;
+  /// Return compatibility mode on/off selection
+  bool getCompatibilityMode() const;
 
 signals:
   /// Update the plot because something has changed.
@@ -93,8 +93,8 @@ signals:
   /// Emitted when plot style parameters has changed.
   void plotStyleChanged();
 
-  /// Emitted when multi fitting mode is turned on/off
-  void multiFitStateChanged(int state);
+  /// Emitted when compatibility mode is turned on/off
+  void compatibilityModeChanged(int state);
 
 private:
   /// Default widget values

@@ -246,10 +246,16 @@ private:
 
     siFn->function(xValues, yValues);
 
-    ws->mutableX(0) = xValues.toVector();
-    ws->mutableY(0) = yValues.toVector();
-    ws->mutableY(0) += bg;
-    ws->mutableE(0) = eValues;
+    std::vector<double> &xData = ws->dataX(0);
+    std::vector<double> &yData = ws->dataY(0);
+    std::vector<double> &eData = ws->dataE(0);
+
+    for (size_t i = 0; i < n; ++i) {
+      xData[i] = xValues[i];
+      yData[i] = yValues[i] + bg;
+      eData[i] = eValues[i];
+    }
+
     WorkspaceCreationHelper::addNoise(ws, 0, -0.5, 0.5);
 
     ws->getAxis(0)->setUnit(unit);

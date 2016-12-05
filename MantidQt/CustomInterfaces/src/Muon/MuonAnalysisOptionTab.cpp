@@ -70,7 +70,7 @@ void MuonAnalysisOptionTab::initLayout() {
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
   m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 1);
-  m_autoSaver.registerWidget(m_uiForm.chkEnableMultiFit, "enableMultiFit",
+  m_autoSaver.registerWidget(m_uiForm.chkCompatibilityMode, "compatibilityMode",
                              false);
   m_autoSaver.endGroup();
 
@@ -132,8 +132,8 @@ void MuonAnalysisOptionTab::initLayout() {
           SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this,
           SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.chkEnableMultiFit, SIGNAL(stateChanged(int)), this,
-          SIGNAL(multiFitStateChanged(int)));
+  connect(m_uiForm.chkCompatibilityMode, SIGNAL(stateChanged(int)), this,
+          SIGNAL(compatibilityModeChanged(int)));
 }
 
 /**
@@ -384,15 +384,11 @@ MuonAnalysisOptionTab::NewPlotPolicy MuonAnalysisOptionTab::newPlotPolicy() {
 }
 
 /**
- * Returns whether or not "enable multiple fitting" is set.
+ * Returns whether or not "compatibility mode" is set.
  * @returns whether the checkbox is ticked
  */
-Muon::MultiFitState MuonAnalysisOptionTab::getMultiFitState() const {
-  if (m_uiForm.chkEnableMultiFit->isChecked()) {
-    return Muon::MultiFitState::Enabled;
-  } else {
-    return Muon::MultiFitState::Disabled;
-  }
+bool MuonAnalysisOptionTab::getCompatibilityMode() const {
+  return m_uiForm.chkCompatibilityMode->isChecked();
 }
 }
 }

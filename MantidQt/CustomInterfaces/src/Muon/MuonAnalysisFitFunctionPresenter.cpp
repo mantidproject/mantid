@@ -19,7 +19,7 @@ MuonAnalysisFitFunctionPresenter::MuonAnalysisFitFunctionPresenter(
     QObject *parent, IMuonFitFunctionControl *fitBrowser,
     IFunctionBrowser *funcBrowser)
     : QObject(parent), m_fitBrowser(fitBrowser), m_funcBrowser(funcBrowser),
-      m_multiFitState(Muon::MultiFitState::Disabled) {
+      m_compatibilityMode(false) {
   doConnect();
 }
 
@@ -94,15 +94,14 @@ void MuonAnalysisFitFunctionPresenter::updateFunction() {
 /**
  * Called when a fit is requested.
  * Queries function browser and updates function in fit property browser.
- * (No update if multiple fitting mode is disabled, as then there is no function
- * browser).
+ * (No update if compatibility mode is enabled).
  * Then calls fit or sequential fit as controlled by argument.
  * @param sequential :: [input] Whether a regular or sequential fit was
  * requested.
  */
 void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
-  // Update function, if there is a function browser
-  if (m_multiFitState == Muon::MultiFitState::Enabled) {
+  // Update function
+  if (!m_compatibilityMode) {
     updateFunction();
   }
   // Run fit
@@ -118,14 +117,14 @@ void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
  * Updates parameters displayed in function browser from the fit results.
  * In the case of "fit undone", this has the effect of resetting them, and also
  * removing the errors.
- * (No update is performed if multiple fitting is not enabled, as function
- * browser is hidden).
+ * (No update is performed in "compatibility mode" as function browser is
+ * hidden).
  * @param wsName :: [input] workspace name - empty if fit undone
  */
 void MuonAnalysisFitFunctionPresenter::handleFitFinished(
     const QString &wsName) {
   // Don't update if the function browser is hidden
-  if (m_multiFitState == Muon::MultiFitState::Enabled) {
+  if (!m_compatibilityMode) {
     const auto function = m_fitBrowser->getFunction();
     // We are updating function browser from fit browser, so turn off updates to
     // fit browser when function browser is updated...
@@ -242,15 +241,14 @@ void MuonAnalysisFitFunctionPresenter::handleDatasetIndexChanged(int index) {
 }
 
 /**
- * Turn multiple fitting mode on/off.
- * Turning it off hides the function browser and data selector so that
+ * Turn compatibility mode on/off.
+ * "Compatibility mode" hides the function browser and data selector so that
  * the fitting works as it used to pre-Mantid 3.8.
- * @param state :: [input] On/off for multiple fitting mode.
+ * @param enabled :: [input] On/off for compatibility mode.
  */
-void MuonAnalysisFitFunctionPresenter::setMultiFitState(
-    Muon::MultiFitState state) {
-  m_fitBrowser->setMultiFittingMode(state == Muon::MultiFitState::Enabled);
-  m_multiFitState = state;
+void MuonAnalysisFitFunctionPresenter::setCompatibilityMode(bool enabled) {
+  m_fitBrowser->setCompatibilityMode(enabled);
+  m_compatibilityMode = enabled;
 }
 
 } // namespace CustomInterfaces

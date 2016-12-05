@@ -182,7 +182,11 @@ int vtkPeaksReader::CanReadFile(const char* fname)
   }
 }
 
-vtkMTimeType vtkPeaksReader::GetMTime() { return this->Superclass::GetMTime(); }
+unsigned long vtkPeaksReader::GetMTime()
+{
+  unsigned long mTime = this->Superclass::GetMTime();
+  return mTime;
+}
 
 /**
   Update/Set the progress.

@@ -225,12 +225,12 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
 * @param showWaterfallOpt If true, show the waterfall option on the dialog
 * @param showPlotAll :: [input] If true, show the "Plot All" button on the
 * dialog
-* @param showTiledOpt :: [input] If true, show the "Tiled" option on the dialog
 * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
 * options
 */
-MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
-    bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt) const {
+MantidWSIndexWidget::UserInput
+MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
+                                             bool showPlotAll) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
@@ -257,13 +257,12 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
     MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
     selections.waterfall = false;
-    selections.tiled = false;
     return selections;
   }
 
   // Else, one or more workspaces
   auto dio = m_mantidUI->createWorkspaceIndexDialog(
-      0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll, showTiledOpt);
+      0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
   dio->exec();
   return dio->getSelections();
 }

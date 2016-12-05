@@ -44,7 +44,7 @@ protected:
   int RequestData(vtkInformation *, vtkInformationVector **,
                   vtkInformationVector *) override;
   /// Handle time variation.
-  vtkMTimeType GetMTime() override;
+  unsigned long GetMTime() override;
 
 private:
   void setTimeRange(vtkInformationVector *outputVector);

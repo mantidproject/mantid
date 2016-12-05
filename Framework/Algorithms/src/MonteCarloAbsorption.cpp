@@ -22,13 +22,11 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "MantidHistogramData/HistogramX.h"
-#include "MantidHistogramData/Interpolate.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::interpolateLinearInplace;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -162,9 +160,13 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    auto &outE = outputWS->mutableE(i);
+    auto xvalues = outputWS->points(i);
+    auto &signal = outputWS->mutableY(i);
+    auto &errors = outputWS->mutableE(i);
     // The input was cloned so clear the errors out
-    outE = 0.0;
+    // Y values are all overwritten later
+    errors = 0.0;
+
     // Final detector position
     IDetector_const_sptr detector;
     try {
@@ -177,12 +179,10 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     const double lambdaFixed = toWavelength(efixed.value(detector));
     MersenneTwister rng(seed);
 
-    auto &outY = outputWS->mutableY(i);
-    const auto lambdas = outputWS->points(i);
     // Simulation for each requested wavelength point
     for (int j = 0; j < nbins; j += lambdaStepSize) {
       prog.report(reportMsg);
-      const double lambdaStep = lambdas[j];
+      const double lambdaStep = xvalues[j];
       double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
       if (efixed.emode() == DeltaEMode::Direct) {
         lambdaIn = lambdaFixed;
@@ -191,7 +191,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
       } else {
         // elastic case already initialized
       }
-      std::tie(outY[j], std::ignore) =
+      std::tie(signal[j], std::ignore) =
           strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
 
       // Ensure we have the last point for the interpolation
@@ -202,9 +202,8 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
     // Interpolate through points not simulated
     if (lambdaStepSize > 1) {
-      auto histnew = outputWS->histogram(i);
-      interpolateLinearInplace(histnew, lambdaStepSize);
-      outputWS->setHistogram(i, histnew);
+      Kernel::VectorHelper::linearlyInterpolateY(
+          xvalues.rawData(), outputWS->dataY(i), lambdaStepSize);
     }
 
     PARALLEL_END_INTERUPT_REGION

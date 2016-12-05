@@ -87,7 +87,6 @@ public:
   static const std::string &rotx();
   static const std::string &roty();
   static const std::string &rotz();
-  static const std::string &eFixed();
   static const std::string &pDouble(); // p prefix to avoid name clash
   static const std::string &pInt();
   static const std::string &pBool();

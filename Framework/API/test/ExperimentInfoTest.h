@@ -354,10 +354,10 @@ public:
   }
 
   void test_getEFixed_throws_exception_if_detID_does_not_exist() {
-    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
-    addInstrumentWithIndirectEmodeParameter(exptInfo);
+    ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
 
-    TS_ASSERT_THROWS(exptInfo->getEFixed(1), std::runtime_error &);
+    TS_ASSERT_THROWS(exptInfo->getEFixed(1),
+                     Mantid::Kernel::Exception::NotFoundError);
   }
 
   void test_correct_efixed_value_is_returned_for_direct_run() {

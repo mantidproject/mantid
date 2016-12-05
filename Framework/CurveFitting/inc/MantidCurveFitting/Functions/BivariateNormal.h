@@ -1,17 +1,17 @@
 #ifndef MANTID_CURVEFITTING_BIVARIATENORMAL_H_
 #define MANTID_CURVEFITTING_BIVARIATENORMAL_H_
 
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/ParamFunction.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 namespace Mantid {
-namespace HistogramData {
-class HistogramY;
-}
 namespace CurveFitting {
 namespace Functions {
 
@@ -156,12 +156,10 @@ protected:
   /// common values
 
   // Returns penalty.
-  double initCoeff(const HistogramData::HistogramY &D,
-                   const HistogramData::HistogramY &X,
-                   const HistogramData::HistogramY &Y, double &coefNorm,
-                   double &expCoeffx2, double &expCoeffy2, double &expCoeffxy,
-                   int &NCells, double &Varxx, double &Varxy,
-                   double &Varyy) const;
+  double initCoeff(const MantidVec &D, const MantidVec &X, const MantidVec &Y,
+                   double &coefNorm, double &expCoeffx2, double &expCoeffy2,
+                   double &expCoeffxy, int &NCells, double &Varxx,
+                   double &Varxy, double &Varyy) const;
 
   double mIx, mx, mIy, my;                //< For calculating variances
   double SIxx, SIyy, SIxy, Sxx, Syy, Sxy; //< For calculating variances

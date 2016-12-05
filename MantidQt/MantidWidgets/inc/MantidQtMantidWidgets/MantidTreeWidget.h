@@ -29,8 +29,7 @@ public:
   QStringList getSelectedWorkspaceNames() const;
   MantidWSIndexWidget::UserInput
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
-                             bool showPlotAll = true,
-                             bool showTiledOpt = true) const;
+                             bool showPlotAll = true) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;

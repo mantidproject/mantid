@@ -70,7 +70,6 @@ public:
   double signedTwoTheta(const size_t index) const;
   Kernel::V3D position(const size_t index) const;
   Kernel::Quat rotation(const size_t index) const;
-  double eFixed(const size_t index) const;
 
   void setPosition(const size_t index, const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);

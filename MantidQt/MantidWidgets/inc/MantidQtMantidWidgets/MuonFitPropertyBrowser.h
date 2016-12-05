@@ -74,8 +74,8 @@ public:
   void userChangedDataset(int index) override {
     emit userChangedDatasetIndex(index);
   }
-  /// Set multiple fitting mode on or off
-  void setMultiFittingMode(bool enabled) override;
+  /// Set "compatibility mode" on or off
+  void setCompatibilityMode(bool enabled) override;
 
 public slots:
   /// Perform the fit algorithm

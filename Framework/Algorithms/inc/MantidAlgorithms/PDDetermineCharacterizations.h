@@ -53,8 +53,7 @@ public:
 
 private:
   double getLogValue(API::Run &run, const std::string &propName);
-  void getInformationFromTable(const double frequency, const double wavelength,
-                               const std::string &canName);
+  void getInformationFromTable(const double frequency, const double wavelength);
   void setDefaultsInPropManager();
   void overrideRunNumProperty(const std::string &inputName,
                               const std::string &propName);

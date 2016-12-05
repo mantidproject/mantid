@@ -3,8 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 
@@ -37,17 +35,13 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
-    MatrixWorkspace_sptr ws;
+    Workspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
-
-    // Checks that the instrument name and deltaE-mode is correct
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "IRIS");
-    TS_ASSERT_EQUALS(ws->getEMode(), Kernel::DeltaEMode::Indirect);
 
     AnalysisDataService::Instance().remove(outWSName);
   }
