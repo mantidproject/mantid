@@ -56,11 +56,13 @@ TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
 TomographyIfacePresenter::~TomographyIfacePresenter() {
 	cleanup();
 
-  if (m_keepAliveThread){
-	// this also stops the timer
-	m_keepAliveThread->terminate();
-	delete m_keepAliveThread;
-  }
+//  if (m_keepAliveThread){
+//	  std::cout<<"\nDEBUG :: TRYING TO QUIT THREAD AND STOP TIMER\n";
+//	// this also stops the timer
+//	m_keepAliveThread->quit();
+//	delete m_keepAliveThread;
+//  }
+  std::cout<<"\nDEBUG :: THREAD AND TIMER DESTROYED\n";
 
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
@@ -78,7 +80,7 @@ TomographyIfacePresenter::~TomographyIfacePresenter() {
  * graceful window close/destruct
  */
 void TomographyIfacePresenter::cleanup() {
-  //killKeepAliveMechanism();
+  killKeepAliveMechanism();
   m_model->cleanup();
 }
 
@@ -638,8 +640,9 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
   m_reconRunning = true;
 }
 
-/** Simply reset the switch that tracks if a recon is running
-*/
+/** Simply reset the switch that tracks if a recon is running and
+ * update the process job in the reconstruction list
+ */
 void TomographyIfacePresenter::workerFinished(const qint64 pid, const int exitCode) {
   m_reconRunning = false;
   m_model->updateProcessInJobList(pid, exitCode);
@@ -677,6 +680,7 @@ bool TomographyIfacePresenter::isLocalResourceSelected() const {
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
+	std::cout<<"\n DEBUG :: TRYING TO REFRESH JOBS\n";
 
   m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
@@ -868,28 +872,24 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
       "also expected to keep sessions on remote compute resources "
       "alive after logging in.");
 
-  if (m_keepAliveThread)
-    delete m_keepAliveThread;
-  m_keepAliveThread = new QThread();
+//  if (m_keepAliveThread)
+//    delete m_keepAliveThread;
+//  m_keepAliveThread = new QThread();
 
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
-  m_keepAliveTimer = new QTimer(NULL); // no-parent so it can be moveToThread
+  m_keepAliveTimer = new QTimer(this); // no-parent so it can be moveToThread
 
   m_keepAliveTimer->setInterval(1000 * period); // interval in ms
-  m_keepAliveTimer->moveToThread(m_keepAliveThread);
+//  m_keepAliveTimer->moveToThread(m_keepAliveThread);
 
   // remove previous connections
   m_keepAliveTimer->disconnect();
-  m_keepAliveThread->disconnect();
+//  m_keepAliveThread->disconnect();
   
   connect(m_keepAliveTimer, SIGNAL(timeout()), this, SLOT(processRefreshJobs()));
-  //connect(this, SIGNAL(terminated()), m_keepAliveThread, SLOT(terminate()));
-  connect(m_keepAliveThread, SIGNAL(started()), m_keepAliveTimer,
-                   SLOT(start()));
-  connect(m_keepAliveThread, SIGNAL(terminated()), m_keepAliveTimer, SLOT(stop()));
 
-  m_keepAliveThread->start();
+  m_keepAliveTimer->start();
 }
 
 void TomographyIfacePresenter::killKeepAliveMechanism() {
