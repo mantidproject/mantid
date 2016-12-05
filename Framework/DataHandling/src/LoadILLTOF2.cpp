@@ -19,7 +19,8 @@ using namespace HistogramData;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
 
 /// A vector containing the supported instrument names
-const std::vector<std::string> LoadILLTOF2::SUPPORTED_INSTRUMENTS = {"IN4", "IN5", "IN6"};
+const std::vector<std::string> LoadILLTOF2::SUPPORTED_INSTRUMENTS = {
+    "IN4", "IN5", "IN6"};
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -48,8 +49,7 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
   }
 }
 
-LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusDescriptor>() {
-}
+LoadILLTOF2::LoadILLTOF2() : API::IFileLoader<Kernel::NexusDescriptor>() {}
 
 /**
  * Initialises the algorithm
@@ -167,7 +167,7 @@ void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
  * @param monitors List of monitor data
  */
 void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
-                               const std::vector<std::vector<int>> &monitors) {
+                                const std::vector<std::vector<int>> &monitors) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -343,11 +343,8 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    X0[i] = m_timeOfFlightDelay +
-            m_channelWidth *
-                static_cast<double>(i) -
-            m_channelWidth /
-                2; // to make sure the bin centre is correct
+    X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
+            m_channelWidth / 2; // to make sure the bin centre is correct
   }
 
   // The binning for monitors is considered the same as for detectors
@@ -407,9 +404,9 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
  * @param progress The progress monitor
  */
 void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfMonitors,
-                             const size_t numberOfTubes,
-                             const std::vector<detid_t> &detectorIDs, NXInt data,
-                             Progress progress) {
+                              const size_t numberOfTubes,
+                              const std::vector<detid_t> &detectorIDs,
+                              NXInt data, Progress progress) {
   for (size_t i = 0; i < numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);

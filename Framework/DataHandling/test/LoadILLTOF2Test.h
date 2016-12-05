@@ -20,19 +20,19 @@ public:
 
   void testName() {
     LoadILLTOF2 loader;
-    TS_ASSERT_EQUALS( loader.name(), "LoadILLTOF" )
+    TS_ASSERT_EQUALS(loader.name(), "LoadILLTOF")
   }
 
   void testVersion() {
     LoadILLTOF2 loader;
-    TS_ASSERT_EQUALS( loader.version(), 2 )
+    TS_ASSERT_EQUALS(loader.version(), 2)
   }
 
   void testInit() {
     LoadILLTOF2 loader;
     loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING( loader.initialize() )
-    TS_ASSERT( loader.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
   }
 
   /*
@@ -40,48 +40,57 @@ public:
    * The elastic peak is obtained on the fly from the sample data.
    */
   MatrixWorkspace_sptr loadDataFile(const std::string dataFile,
-                                    const size_t numberOfHistograms, const size_t numberOfChannels, const double tofDelay, const double tofChannelWidth) {
+                                    const size_t numberOfHistograms,
+                                    const size_t numberOfChannels,
+                                    const double tofDelay,
+                                    const double tofChannelWidth) {
     LoadILLTOF2 loader;
     loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING( loader.initialize() )
-    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("Filename", dataFile) )
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", dataFile))
 
     std::string outputSpace = "LoadILLTOFTest_out";
-    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("OutputWorkspace", outputSpace) )
-    TS_ASSERT_THROWS_NOTHING( loader.execute() )
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outputSpace))
+    TS_ASSERT_THROWS_NOTHING(loader.execute())
 
     MatrixWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace);
 
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), numberOfHistograms )
-    for (size_t wsIndex = 0; wsIndex != output->getNumberHistograms(); ++wsIndex) {
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), numberOfHistograms)
+    for (size_t wsIndex = 0; wsIndex != output->getNumberHistograms();
+         ++wsIndex) {
       const auto histogram = output->histogram(wsIndex);
-      TS_ASSERT_EQUALS( histogram.xMode(), Mantid::HistogramData::Histogram::XMode::BinEdges )
-      TS_ASSERT_EQUALS( histogram.yMode(), Mantid::HistogramData::Histogram::YMode::Counts )
-      TS_ASSERT_EQUALS( histogram.size(), numberOfChannels )
+      TS_ASSERT_EQUALS(histogram.xMode(),
+                       Mantid::HistogramData::Histogram::XMode::BinEdges)
+      TS_ASSERT_EQUALS(histogram.yMode(),
+                       Mantid::HistogramData::Histogram::YMode::Counts)
+      TS_ASSERT_EQUALS(histogram.size(), numberOfChannels)
       const auto &xs = histogram.x();
       for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
-        const double binEdge = tofDelay + static_cast<double>(channelIndex) * tofChannelWidth - tofChannelWidth / 2;
-        TS_ASSERT_DELTA( xs[channelIndex], binEdge, 1e-3 )
+        const double binEdge =
+            tofDelay + static_cast<double>(channelIndex) * tofChannelWidth -
+            tofChannelWidth / 2;
+        TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3)
       }
       const auto &ys = histogram.y();
       const auto &es = histogram.e();
       for (size_t channelIndex = 0; channelIndex != es.size(); ++channelIndex) {
-        TS_ASSERT_EQUALS( es[channelIndex], std::sqrt(ys[channelIndex]) )
+        TS_ASSERT_EQUALS(es[channelIndex], std::sqrt(ys[channelIndex]))
       }
     }
 
     // Check all detectors have a defined detector ID >= 0
     Mantid::detid2index_map detectorMap;
-    TS_ASSERT_THROWS_NOTHING(
-        detectorMap = output->getDetectorIDToWorkspaceIndexMap(true) )
+    TS_ASSERT_THROWS_NOTHING(detectorMap =
+                                 output->getDetectorIDToWorkspaceIndexMap(true))
 
     // Check all detectors have a unique detector ID
-    TS_ASSERT_EQUALS( detectorMap.size(), output->getNumberHistograms() )
+    TS_ASSERT_EQUALS(detectorMap.size(), output->getNumberHistograms())
 
     for (const auto value : detectorMap) {
-      TS_ASSERT( value.first >= 0 )
+      TS_ASSERT(value.first >= 0)
     }
 
     return output;
@@ -93,10 +102,13 @@ public:
     const double tofChannelWidth = 5.85;
     const size_t channelCount = 512;
     const size_t histogramCount = 397;
-    MatrixWorkspace_sptr ws = loadDataFile("ILL/IN4/084446.nxs", histogramCount, channelCount, tofDelay, tofChannelWidth);
+    MatrixWorkspace_sptr ws =
+        loadDataFile("ILL/IN4/084446.nxs", histogramCount, channelCount,
+                     tofDelay, tofChannelWidth);
 
-    const double pulseInterval = ws->run().getLogAsSingleValue("pulse_interval");
-    TS_ASSERT_DELTA( 0.003, pulseInterval, 1e-10 )
+    const double pulseInterval =
+        ws->run().getLogAsSingleValue("pulse_interval");
+    TS_ASSERT_DELTA(0.003, pulseInterval, 1e-10)
   }
 
   void test_IN5_load() {
@@ -105,7 +117,8 @@ public:
     const double tofChannelWidth = 14.6349;
     const size_t channelCount = 512;
     const size_t histogramCount = 98305;
-    loadDataFile("ILL/IN5/104007.nxs", histogramCount, channelCount, tofDelay, tofChannelWidth);
+    loadDataFile("ILL/IN5/104007.nxs", histogramCount, channelCount, tofDelay,
+                 tofChannelWidth);
   }
 
   void test_IN6_load() {
@@ -114,10 +127,13 @@ public:
     const double tofChannelWidth = 5.8;
     const size_t channelCount = 1024;
     const size_t histogramCount = 340;
-    MatrixWorkspace_sptr ws = loadDataFile("ILL/IN6/164192.nxs", histogramCount, channelCount, tofDelay, tofChannelWidth);
+    MatrixWorkspace_sptr ws =
+        loadDataFile("ILL/IN6/164192.nxs", histogramCount, channelCount,
+                     tofDelay, tofChannelWidth);
 
-    const double pulseInterval = ws->run().getLogAsSingleValue("pulse_interval");
-    TS_ASSERT_DELTA( 0.0060337892, pulseInterval, 1e-10 )
+    const double pulseInterval =
+        ws->run().getLogAsSingleValue("pulse_interval");
+    TS_ASSERT_DELTA(0.0060337892, pulseInterval, 1e-10)
   }
 };
 
@@ -132,11 +148,11 @@ public:
   void testDefaultLoad() {
     Mantid::DataHandling::LoadILLTOF2 loader;
     loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING( loader.initialize() )
-    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("Filename", m_dataFile) )
-    TS_ASSERT_THROWS_NOTHING( loader.setPropertyValue("OutputWorkspace", "ws") )
-    TS_ASSERT_THROWS_NOTHING( loader.execute() )
-    TS_ASSERT( loader.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_dataFile))
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(loader.execute())
+    TS_ASSERT(loader.isExecuted())
   }
 
 private:

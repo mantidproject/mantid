@@ -32,7 +32,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
  * be used
  */
 int LoadILLTOF::confidence(Kernel::NexusDescriptor &descriptor) const {
-  UNUSED_ARG( descriptor )
+  UNUSED_ARG(descriptor)
   // This loader is deprecated.
   return 0;
 }
