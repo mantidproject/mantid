@@ -34,12 +34,8 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             _bad_castep_reader.read_phonon_file()
 
         with self.assertRaises(ValueError):
-<<<<<<< HEAD
-            # noinspection PyPep8Naming
-            poor_CASTEP_reader = LoadCASTEP(input_DFT_filename=1)
-=======
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
->>>>>>> master
+
 
     #  *************************** USE CASES ********************************************
     _core = "../ExternalData/Testing/Data/UnitTest/"
@@ -95,11 +91,8 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self._check_reader_data(correct_data=_correct_data, data=_data)
 
         # check loaded data
-<<<<<<< HEAD
-        self._check_loader_data(correct_data=_correct_data, input_DFT_filename=input_filename)
-=======
+
         self._check_loader_data(correct_data=_correct_data, input_dft_filename=input_filename)
->>>>>>> master
 
     def _read_DFT(self, filename=None):
         """
@@ -129,21 +122,12 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         k = len(correct_data["datasets"]["k_points_data"]["weights"])
         atoms = len(correct_data["datasets"]["atoms_data"])
         array = array.reshape(k, atoms, atoms * 3, 3)
-<<<<<<< HEAD
-
-        correct_data["datasets"]["k_points_data"]["weights"] = np.asarray(correct_data["datasets"]
-                                                                          ["k_points_data"]["weights"])
-        correct_data["datasets"]["k_points_data"]["frequencies"] = np.asarray(correct_data["datasets"]
-                                                                              ["k_points_data"]["frequencies"])
-=======
-
         correct_data["datasets"]["k_points_data"]["weights"] = \
             np.asarray(correct_data["datasets"]["k_points_data"]["weights"])
 
         correct_data["datasets"]["k_points_data"]["frequencies"] = \
             np.asarray(correct_data["datasets"]["k_points_data"]["frequencies"])
 
->>>>>>> master
         correct_data["datasets"]["k_points_data"].update({"atomic_displacements": array})
         correct_data["datasets"].update({"atomic_displacements": array})
 
@@ -196,20 +180,11 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]),
                                                _atoms[item]["fract_coord"]))
 
-<<<<<<< HEAD
-    # noinspection PyPep8Naming
-    def _check_loader_data(self, correct_data=None, input_DFT_filename=None):
-
-        loader = LoadCASTEP(input_DFT_filename=input_DFT_filename)
-        _loaded_data = loader.loadData().extract()
-
-=======
     def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
         loader = LoadCASTEP(input_dft_filename=input_dft_filename)
         _loaded_data = loader.load_data().extract()
 
->>>>>>> master
         # k points
         _correct_items = correct_data["datasets"]["k_points_data"]
         num_k = len(_correct_items)

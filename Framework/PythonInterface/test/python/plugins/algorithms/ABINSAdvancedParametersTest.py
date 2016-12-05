@@ -30,12 +30,12 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
         # before each test set AbinsParameters to default values
         AbinsParameters.fwhm = 3.0
         AbinsParameters.delta_width = 0.0005
-        AbinsParameters.TOSCA_final_neutron_energy = 32.0
-        AbinsParameters.TOSCA_cos_scattering_angle = -0.7069
-        AbinsParameters.TOSCA_A = 0.0000001
-        AbinsParameters.TOSCA_B = 0.005
-        AbinsParameters.TOSCA_C = 2.5
-        AbinsParameters.DFT_group = "PhononAB"
+        AbinsParameters.tosca_final_neutron_energy = 32.0
+        AbinsParameters.tosca_cos_scattering_angle = -0.7069
+        AbinsParameters.tosca_a = 0.0000001
+        AbinsParameters.tosca_b = 0.005
+        AbinsParameters.tosca_c = 2.5
+        AbinsParameters.dft_group = "PhononAB"
         AbinsParameters.powder_data_group = "Powder"
         AbinsParameters.crystal_data_group = "Crystal"
         AbinsParameters.s_data_group = "S"
@@ -95,48 +95,48 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
     def test_wrong_tosca_final_energy(self):
 
         # final energy should be a float not str
-        AbinsParameters.TOSCA_final_neutron_energy = "0"
+        AbinsParameters.tosca_final_neutron_energy = "0"
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
         # final energy should be of float type not integer
-        AbinsParameters.TOSCA_final_neutron_energy = 1
+        AbinsParameters.tosca_final_neutron_energy = 1
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
         # final energy should be positive
-        AbinsParameters.TOSCA_final_neutron_energy = -1.0
+        AbinsParameters.tosca_final_neutron_energy = -1.0
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_cos_scattering_angle(self):
 
         # cosines of scattering angle is float
-        AbinsParameters.TOSCA_cos_scattering_angle = "0.0334"
+        AbinsParameters.tosca_cos_scattering_angle = "0.0334"
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
         # TOSCA_cos_scattering_angle cannot be integer
-        AbinsParameters.TOSCA_cos_scattering_angle = 1
+        AbinsParameters.tosca_cos_scattering_angle = 1
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_resolution_constant_A(self):
         # TOSCA constant should be float
-        AbinsParameters.TOSCA_A = "wrong"
+        AbinsParameters.tosca_a = "wrong"
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_resolution_constant_B(self):
-        AbinsParameters.TOSCA_B = "wrong"
+        AbinsParameters.tosca_b = "wrong"
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_tosca_resolution_constant_C(self):
-        AbinsParameters.TOSCA_C = "wrong"
+        AbinsParameters.tosca_c = "wrong"
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     # tests for folders
     def test_wrong_DFT_group(self):
         # name should be of type str
-        AbinsParameters.DFT_group = 2
+        AbinsParameters.dft_group = 2
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
         # name of group cannot be an empty string
-        AbinsParameters.DFT_group = ""
+        AbinsParameters.dft_group = ""
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_powder_data_group(self):
@@ -168,7 +168,7 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
 
     def test_doubled_name(self):
         # Wrong scenario: two groups with the same name
-        AbinsParameters.DFT_group = "NiceName"
+        AbinsParameters.dft_group = "NiceName"
         AbinsParameters.powder_data_group = "NiceName"
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
