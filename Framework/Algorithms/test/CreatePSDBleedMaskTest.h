@@ -97,7 +97,7 @@ private:
     // YLength = nTubes * nPixelsPerTube
     const int nSpectra(nTubes * nPixelsPerTube);
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nSpectra, nBins);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nSpectra, nBins);
     testWS->setInstrument(createTestInstrument(nTubes, nPixelsPerTube));
     // Set a spectra to have high count such that the fail the test
     const int failedTube(1);

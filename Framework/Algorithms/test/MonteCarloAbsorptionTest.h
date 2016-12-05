@@ -209,7 +209,7 @@ public:
 
     auto mcAbsorb = createAlgorithm();
     // Create a simple test workspace that has no instrument
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
     TS_ASSERT_THROWS(mcAbsorb->setProperty("InputWorkspace", testWS),
                      std::invalid_argument);

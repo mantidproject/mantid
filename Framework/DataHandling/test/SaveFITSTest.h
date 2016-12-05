@@ -71,7 +71,7 @@ public:
   void test_exec_fails_units() {
     const std::string filename = "./savefits_wont_work.fits";
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(2, 2);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(2, 2);
 
     SaveFITS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -103,7 +103,7 @@ public:
     const std::string filename = "./savefits_simple_test.fits";
 
     // create with appropriate units
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(2, 2);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(2, 2);
     auto lbl = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         Mantid::Kernel::UnitFactory::Instance().create("Label"));
     lbl->setLabel("width", "cm");

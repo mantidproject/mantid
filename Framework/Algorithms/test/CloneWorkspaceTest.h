@@ -85,7 +85,7 @@ public:
   void testExecEvent() {
     // First make the algorithm
     EventWorkspace_sptr ew =
-        WorkspaceCreationHelper::CreateEventWorkspace(100, 60, 50);
+        WorkspaceCreationHelper::createEventWorkspace(100, 60, 50);
     AnalysisDataService::Instance().addOrReplace("in_event", ew);
 
     Mantid::Algorithms::CloneWorkspace alg;
@@ -148,7 +148,7 @@ public:
 
   void test_group() {
     WorkspaceGroup_const_sptr ingroup =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(3, 1, 1, "grouptoclone");
+        WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 1, "grouptoclone");
     Mantid::Algorithms::CloneWorkspace alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "grouptoclone");

@@ -249,7 +249,7 @@ public:
     groups[4].push_back(50);
 
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0,
+        WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0,
                                                              1.0);
     WS->getSpectrum(3).clear(false);
     // Switch the event type
@@ -402,7 +402,7 @@ public:
     const int nBins = 1;
     const std::string stem = "test_group_ws";
     Mantid::API::WorkspaceGroup_sptr group_ws =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(nEntries, nHist, nBins,
+        WorkspaceCreationHelper::createWorkspaceGroup(nEntries, nHist, nBins,
                                                       stem);
 
     SaveNexusProcessed alg;

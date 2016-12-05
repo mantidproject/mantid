@@ -731,7 +731,7 @@ public:
     numHist = 100 * 100;
     size_t nEvents = 1000;
     inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(nEvents, numHist,
+        WorkspaceCreationHelper::createRandomEventWorkspace(nEvents, numHist,
                                                             0.1));
     inWsEv->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(int(numHist)));

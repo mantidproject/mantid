@@ -66,7 +66,7 @@ private:
     const int nSpectra = 1;
     const double deltaX = 10;
     const double startX = 0;
-    auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX,
+    auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX,
                                              deltaX); // Creates histogram data
     workspace->mutableY(0) = 1.0;
     workspace->mutableE(0) = 1.0;

@@ -412,7 +412,7 @@ public:
 
   void testConvertQuicklyCommonBins() {
     Workspace2D_sptr input =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     input->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     AnalysisDataService::Instance().add("quickIn", input);
@@ -456,7 +456,7 @@ public:
     // the scaling of Y and E for the distribution case is not testable.
     double deltax = 0.123;
     Workspace2D_sptr input =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 10, x0, deltax);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10, x0, deltax);
     input->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     // Y must have units, otherwise ConvertUnits does not treat data as
@@ -528,7 +528,7 @@ public:
 
   void testDeltaE() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 2663, 5, 7.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     Instrument_sptr testInst(new Instrument);

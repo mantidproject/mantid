@@ -265,7 +265,7 @@ public:
 
   MatrixWorkspace_sptr createWorkspace() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(4, 4, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
     return inputWS;
   }
 

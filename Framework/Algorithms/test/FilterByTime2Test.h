@@ -44,7 +44,7 @@ public:
    */
   void NtestTooManyParams() {
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 1);
+        WorkspaceCreationHelper::createEventWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
 
     // Do the filtering now.
