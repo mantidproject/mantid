@@ -146,7 +146,10 @@ void CalculateFlatBackground::exec() {
 
   std::vector<int> wsInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
-  getWsInds(wsInds, numHists);
+  if (wsInds.empty()) {
+    wsInds.resize(numHists);
+    std::iota(wsInds.begin(), wsInds.end(), 0);
+  }
 
   // Are we removing the background?
   const bool removeBackground =
@@ -219,31 +222,36 @@ void CalculateFlatBackground::exec() {
       } else {
         g_log.warning() << " The output background has been set to zero.\n";
       }
-      background = 0;
-      variance = 0;
+    } else {
+      backgroundTotal += background;
     }
-    backgroundTotal += background;
     HistogramData::Histogram outHistogram(histogram);
     auto &ys = outHistogram.mutableY();
     auto &es = outHistogram.mutableE();
     if (removeBackground) {
-      for (size_t j = 0; j < ys.size(); ++j) {
-        double val = ys[j] - background;
-        double err = std::sqrt(es[j] * es[j] + variance);
-        if (nullifyNegative && val < 0) {
-          val = 0;
-          // The error estimate must go up in this nonideal situation and the
-          // value of background is a good estimate for it. However, don't
-          // reduce the error if it was already more than that
-          err = es[j] > background ? es[j] : background;
+      // When subtracting backgrounds, act only if background is positive.
+      if (background >= 0) {
+        for (size_t j = 0; j < ys.size(); ++j) {
+          double val = ys[j] - background;
+          double err = std::sqrt(es[j] * es[j] + variance);
+          if (nullifyNegative && (val < 0)) {
+            val = 0;
+            // The error estimate must go up in this nonideal situation and the
+            // value of background is a good estimate for it. However, don't
+            // reduce the error if it was already more than that
+            err = es[j] > background ? es[j] : background;
+          }
+          ys[j] = val;
+          es[j] = err;
         }
-        ys[j] = val;
-        es[j] = err;
       }
     } else {
       for (size_t j = 0; j < ys.size(); ++j) {
-        const double originalVal = inputWS->y(i)[j];
-        if (nullifyNegative && background > originalVal) {
+        const double originalVal = histogram.y()[j];
+        if (background < 0) {
+          ys[j] = 0;
+          es[j] = 0;
+        } else if (nullifyNegative && (background > originalVal)) {
           ys[j] = originalVal;
           es[j] = es[j] > background ? es[j] : background;
         } else {
@@ -289,23 +297,6 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
 }
 
 /**
-* Checks if the array is empty and if so fills it with all the index numbers
-* in the workspace. Non-empty arrays are left untouched.
-* @param output the array to be checked
-* @param workspaceTotal required to be the total number of spectra in the
-* workspace
-*/
-void CalculateFlatBackground::getWsInds(std::vector<int> &output,
-                                        const size_t workspaceTotal) {
-  if (!output.empty()) {
-    return;
-  }
-
-  output.resize(workspaceTotal);
-  std::iota(output.begin(), output.end(), 0);
-}
-
-/**
 * Gets the mean number of counts in each bin the background region and the
 * variance (error^2) of that number.
 * @param histogram the histogram to operate on
@@ -329,7 +320,7 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
   const auto &ES = histogram.e();
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
-  if (endX > XS.back() || startX < XS.front()) {
+  if ((endX > XS.back()) || (startX < XS.front())) {
     throw std::out_of_range("Either the property startX or endX is outside the "
                             "range of X-values present in one of the specified "
                             "spectra");
