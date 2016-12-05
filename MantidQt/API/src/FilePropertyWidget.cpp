@@ -89,8 +89,6 @@ QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
   if (!prop)
     return "";
 
-  QString filter = FileDialogHandler::getFileDialogFilter(baseProp);
-
   /* MG 20/07/09: Static functions such as these that use native Windows and MAC
      dialogs
      in those environments are alot faster. This is unforunately at the expense
@@ -99,35 +97,12 @@ QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
   */
   QString filename;
   if (prop->isLoadProperty()) {
+    QString filter = FileDialogHandler::getFileDialogFilter(baseProp);
     filename = QFileDialog::getOpenFileName(
         NULL, "Open file",
         AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   } else if (prop->isSaveProperty()) {
-    QString selectedFilter;
-    filename = MantidQt::API::FileDialogHandler::getSaveFileName(
-        NULL, "Save file",
-        AlgorithmInputHistory::Instance().getPreviousDirectory(), filter,
-        &selectedFilter);
-
-    // Check the filename and append the selected filter if necessary
-    if (QFileInfo(filename).completeSuffix().isEmpty()) {
-      // Hack off the first star that the filter returns
-      QString ext = selectedFilter;
-
-      if (selectedFilter.startsWith("*.")) {
-        // 1 character from the start
-        ext = ext.remove(0, 1);
-      } else {
-        ext = "";
-      }
-
-      if (filename.endsWith(".") && ext.startsWith(".")) {
-        ext = ext.remove(0, 1);
-      }
-
-      // Construct the full file name
-      filename += ext;
-    }
+    filename = FileDialogHandler::getSaveFileName(NULL, prop);
   } else if (prop->isDirectoryProperty()) {
     filename = QFileDialog::getExistingDirectory(
         NULL, "Choose a Directory",

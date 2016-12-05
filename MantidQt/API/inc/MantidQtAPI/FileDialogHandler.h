@@ -66,6 +66,10 @@ DLLExport QString getSaveFileName(QWidget *parent = 0,
                                   QString *selectedFilter = 0,
                                   QFileDialog::Options options = 0);
 
+DLLExport QString getSaveFileName(QWidget *parent = 0,
+                                  const Mantid::Kernel::Property *baseProp = 0,
+                                  QFileDialog::Options options = 0);
+
 DLLExport QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp);
 
 /** For file dialogs
