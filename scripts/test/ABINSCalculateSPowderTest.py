@@ -5,7 +5,7 @@ import numpy as np
 from AbinsModules import AbinsConstants
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of CalculateSPowderTest because simplejson is unavailable.")
     exit(1)

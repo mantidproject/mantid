@@ -6,7 +6,7 @@ from mantid.simpleapi import *
 from os import path
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of CalculateQTest because simplejson is unavailable.")
     exit(1)

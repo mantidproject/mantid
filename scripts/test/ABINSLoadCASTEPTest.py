@@ -5,7 +5,7 @@ import numpy as np
 
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of LoadCASTEPTest because simplejson is unavailable.")
     exit(1)
