@@ -2,7 +2,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
