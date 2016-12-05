@@ -236,7 +236,6 @@ class MatchPeaks(PythonAlgorithm):
 
         # Initialisation
         peak_bin = np.ones(mtd[self._input_ws].getNumberHistograms()) * mid_bin
-        peak_plus_error = np.zeros(mtd[self._input_ws].getNumberHistograms())
 
         # Bin range: difference between mid bin and peak bin should be in this range
         tolerance = int(mid_bin / 2)
@@ -244,42 +243,64 @@ class MatchPeaks(PythonAlgorithm):
         x_values = mtd[self._input_ws].readX(0)
 
         for i in range(mtd[self._input_ws].getNumberHistograms()):
+
             fit = fit_table.row(i)
 
             # Bin number, where Y has its maximum
             y_values = mtd[self._input_ws].readY(i)
 
-            peak_pos_error = fit["PeakCentreError"] + fit["PeakCentre"]
+            max_pos = np.argmax(y_values)
 
-            if peak_pos_error >= x_values[0]:
-                if peak_pos_error <= x_values[-1]:
-                    if fit["FitStatus"] == 'success':
-                        peak_plus_error[i] = mtd[self._input_ws].binIndexOf(peak_pos_error)
-                        if abs(peak_plus_error[i] - mid_bin) < tolerance:
-                            peak_bin[i] = mtd[self._input_ws].binIndexOf(fit["PeakCentre"])
-                            logger.debug('Fit success, peak inside tolerance')
-                        else:
-                            logger.debug('Peak outside tolerance, do not shift spectrum')
-                    elif abs(np.argmax(y_values) - mid_bin) < tolerance:
-                        peak_bin[i] = np.argmax(y_values)
-                        logger.debug('Take maximum peak position {0}'.format(peak_bin[i]))
-                    else:
-                        logger.debug('Fit failed and peak outside tolerance, do not shift spectrum')
+            peak_plus_error = abs(fit["PeakCentreError"]) + abs(fit["PeakCentre"])
+
+            if peak_plus_error > x_values[0] and peak_plus_error < x_values[-1]:
+
+                peak_plus_error_bin = mtd[self._input_ws].binIndexOf(peak_plus_error)
+
+                if abs(peak_plus_error_bin - mid_bin) < tolerance and fit["FitStatus"] == 'success':
+                    # fit succeeded, and fitted peak is within acceptance range, take it
+                    peak_bin[i] = mtd[self._input_ws].binIndexOf(fit["PeakCentre"])
+                    logger.debug('Fit successfull, peak inside tolerance')
+                elif abs(max_pos - mid_bin) < tolerance:
+                    # fit not reliable, take the maximum if within acceptance
+                    peak_bin[i] = max_pos
+                    logger.debug('Fit outside the trusted range, take the maximum position')
                 else:
-                    logger.debug('Peak x-value {0} > x-end {1}, do not shift spectrum'.format(peak_pos_error,
-                                                                                              x_values[-1]))
+                    # do not shift
+                    logger.debug('Both the fit and the max are outside the trusted range. '
+                                 'Do not shift the spectrum.')
+
+            elif abs(max_pos - mid_bin) < tolerance:
+                # fit not reliable, take the maximum if within acceptance
+                peak_bin[i] = max_pos
+                logger.debug('Fit outside the x-range, take the maximum position')
+
             else:
-                logger.debug('Peak x-value {0} < x-begin {1}, do not shift spectrum'.format(peak_pos_error,
-                                                                                            x_values[0]))
+                # do not shift
+                logger.debug('Both the fit and the max are outside the trusted range. '
+                             'Do not shift the spectrum.')
 
-        # Clean-up unused TableWorkspaces
-        if mtd['EPPfit_Parameters']:
-            DeleteWorkspace('EPPfit_Parameters')
+            logger.debug('Spectrum {0} will be shifted to bin {1}'.format(i,peak_bin[i]))
 
-        if mtd['EPPfit_NormalisedCovarianceMatrix']:
-            DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+        # Clean-up unused TableWorkspaces in try-catch
+        # Direct deletion causes problems when running in parallel for too many workspaces
 
-        DeleteWorkspace(fit_table)
+        try:
+            if mtd['EPPfit_Parameters']:
+                DeleteWorkspace('EPPfit_Parameters')
+        except ValueError:
+            logger.debug('Fit parameters workspace already deleted')
+
+        try:
+            if mtd['EPPfit_NormalisedCovarianceMatrix']:
+                DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+        except ValueError:
+            logger.debug('Fit covariance matrix already deleted')
+
+        try:
+            DeleteWorkspace(fit_table)
+        except ValueError:
+            logger.debug('Fit table already deleted')
 
         return peak_bin
 
