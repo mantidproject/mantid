@@ -590,7 +590,7 @@ void createInputWorkspaces(int start, int end,
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   wave = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wavNorm));
-  pixels = WorkspaceCreationHelper::Create2DWorkspaceBinned(29, 1);
+  pixels = WorkspaceCreationHelper::create2DWorkspaceBinned(29, 1);
   for (int i = 0; i < 29; ++i) {
     pixels->mutableY(i)[0] = flat_cell061Ys[i];
     pixels->mutableE(i)[0] = flat_cell061Es[i];

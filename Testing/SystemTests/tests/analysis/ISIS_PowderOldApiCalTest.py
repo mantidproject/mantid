@@ -13,7 +13,9 @@ DIFF_PLACES = 8
 DIRS = config['datasearch.directories'].split(';')
 
 
-class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest):
+class PowderDiffOldApiCalibrateTest(stresstesting.MantidStressTest):
+    _existing_config = None
+
     def requiredFiles(self):
         filenames = []
 
@@ -49,6 +51,7 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
 
     def runTest(self):
         self._success = False
+        self._existing_config = config['datasearch.directories']
 
         pearl_routines.PEARL_startup("Calib", "15_3")
 
@@ -177,10 +180,9 @@ class LoadCalibTests(unittest.TestCase):
         vanadium_tt_35_dir = os.path.join(vanadium_base_dir, tt_35_file)
         van_tt35_data = LoadNexusProcessed(Filename=vanadium_tt_35_dir)
         self.matrix_workspaces_test(van_tt35_data, 'tt35')
-
-        self.assertAlmostEquals(-5.2637392907314393e-06, van_tt35_data[1].readY(0)[2], places=DIFF_PLACES)
-        self.assertAlmostEquals(1.46103398829e-05, van_tt35_data[5].readY(0)[4545], places=DIFF_PLACES)
-        self.assertAlmostEquals(5.20516790953e-06, van_tt35_data[8].readY(0)[7553], places=DIFF_PLACES)
+        self.assertAlmostEquals(-5.59125571e-06, van_tt35_data[1].readY(0)[2], places=DIFF_PLACES)
+        self.assertAlmostEquals(1.45223820e-05, van_tt35_data[5].readY(0)[4545], places=DIFF_PLACES)
+        self.assertAlmostEquals(5.16652141e-06, van_tt35_data[8].readY(0)[7553], places=DIFF_PLACES)
         self.assertAlmostEquals(2.30071459205e-08, van_tt35_data[4].readE(0)[17], places=DIFF_PLACES)
         self.assertAlmostEquals(177.218826007, van_tt35_data[13].readX(0)[278], places=DIFF_PLACES)
 
@@ -190,9 +192,9 @@ class LoadCalibTests(unittest.TestCase):
                                            OutputWorkspace=tt_70_file)
         self.matrix_workspaces_test(van_tt70_data, 'tt70')
 
-        self.assertAlmostEquals(-9.63683468044e-06, van_tt70_data[1].readY(0)[2], places=DIFF_PLACES)
-        self.assertAlmostEquals(3.05213907891e-05, van_tt70_data[5].readY(0)[4545], places=DIFF_PLACES)
-        self.assertAlmostEquals(1.05450348217e-05, van_tt70_data[8].readY(0)[7553], places=DIFF_PLACES)
+        self.assertAlmostEquals(-1.00937319e-05, van_tt70_data[1].readY(0)[2], places=DIFF_PLACES)
+        self.assertAlmostEquals(3.03206351e-05, van_tt70_data[5].readY(0)[4545], places=DIFF_PLACES)
+        self.assertAlmostEquals(1.04670371e-05, van_tt70_data[8].readY(0)[7553], places=DIFF_PLACES)
         self.assertAlmostEquals(3.2808780582e-08, van_tt70_data[4].readE(0)[17], places=DIFF_PLACES)
         self.assertAlmostEquals(177.218826007, van_tt70_data[13].readX(0)[278], places=DIFF_PLACES)
 
@@ -202,10 +204,10 @@ class LoadCalibTests(unittest.TestCase):
                                            OutputWorkspace=tt_88_file)
         self.matrix_workspaces_test(van_tt88_data, 'tt88')
 
-        self.assertAlmostEquals(-1.20275831674e-05, van_tt88_data[1].readY(0)[2], places=DIFF_PLACES)
-        self.assertAlmostEquals(3.64097322294e-05, van_tt88_data[5].readY(0)[4545], places=DIFF_PLACES)
-        self.assertAlmostEquals(1.28680957601e-05, van_tt88_data[8].readY(0)[7553], places=DIFF_PLACES)
-        self.assertAlmostEquals(2.6326912352e-08, van_tt88_data[4].readE(0)[17], places=DIFF_PLACES)
+        self.assertAlmostEquals(-1.15778020e-05, van_tt88_data[1].readY(0)[2], places=DIFF_PLACES)
+        self.assertAlmostEquals(3.61722568e-05, van_tt88_data[5].readY(0)[4545], places=DIFF_PLACES)
+        self.assertAlmostEquals(1.27747701e-05, van_tt88_data[8].readY(0)[7553], places=DIFF_PLACES)
+        self.assertAlmostEquals(3.21810924e-08, van_tt88_data[4].readE(0)[17], places=DIFF_PLACES)
         self.assertAlmostEquals(177.218826007, van_tt88_data[13].readX(0)[278], places=DIFF_PLACES)
 
     def matrix_workspaces_test(self, vanadium_tt_file, tt_mode='tt35'):

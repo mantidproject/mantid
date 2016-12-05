@@ -129,7 +129,7 @@ public:
 private:
   MatrixWorkspace_sptr makeWorkspace(int nhist = 3, int nx = 10) {
     auto testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nx, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nx, 1.0);
     // Fill workspace with increasing counter to properly check saving
     for (int i = 0; i < nhist; ++i) {
       auto &outY = testWS->dataY(i);

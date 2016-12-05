@@ -183,7 +183,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter(6), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter(7), 1.0);
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         TestFunction(), 1, 0.0, 10.0, 0.1);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     WorkspaceCreationHelper::storeWS("mfun", ws);

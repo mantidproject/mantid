@@ -177,8 +177,8 @@ void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
  */
 void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string& message)
 {
-  this->SetProgress(progress);
   this->SetProgressText(message.c_str());
+  this->UpdateProgress(progress);
 }
 
 /**

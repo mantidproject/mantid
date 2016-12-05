@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -61,8 +62,8 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
-    : FitPropertyBrowser(parent, mantidui), m_additionalLayout(nullptr),
-      m_widgetSplitter(nullptr) {}
+    : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
+      m_mainSplitter(nullptr) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -156,20 +157,28 @@ void MuonFitPropertyBrowser::init() {
   // Initialise the layout.
   initLayout(w);
 
-  // Create an empty layout that can hold extra widgets
-  // and add it after the buttons but before the browser
-  m_additionalLayout = new QVBoxLayout();
-  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
-  if (parentLayout) {
-    const int index = parentLayout->count() - 2;
-    constexpr int stretchFactor = 10; // so these widgets get any extra space
-    parentLayout->insertLayout(index, m_additionalLayout, stretchFactor);
-  }
-  m_widgetSplitter = new QSplitter(w);
-  m_widgetSplitter->setOrientation(Qt::Vertical);
+  // Create an empty splitter that can hold extra widgets
+  m_widgetSplitter = new QSplitter(Qt::Vertical, w);
   m_widgetSplitter->setSizePolicy(QSizePolicy::Policy::Expanding,
                                   QSizePolicy::Policy::Expanding);
-  m_additionalLayout->addWidget(m_widgetSplitter);
+
+  // This splitter separates the "extra widgets" region from the browser
+  m_mainSplitter = new QSplitter(Qt::Vertical, w);
+  m_mainSplitter->insertWidget(0, m_widgetSplitter);
+  m_mainSplitter->insertWidget(1, m_browser);
+  m_mainSplitter->setStretchFactor(0, 1);
+  m_mainSplitter->setStretchFactor(1, 0);
+
+  // Insert after the buttons
+  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
+  if (parentLayout) {
+    const int index = parentLayout->count() - 1;
+    constexpr int stretchFactor = 10; // so these widgets get any extra space
+    parentLayout->insertWidget(index, m_mainSplitter, stretchFactor);
+    parentLayout->setSpacing(0);
+    parentLayout->setMargin(0);
+    parentLayout->setContentsMargins(0, 0, 0, 0);
+  }
 }
 
 /**
@@ -503,7 +512,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
   widget->setSizePolicy(QSizePolicy::Policy::Expanding,
                         QSizePolicy::Policy::Expanding);
-  if (m_additionalLayout && m_widgetSplitter) {
+  if (m_widgetSplitter) {
     m_widgetSplitter->addWidget(widget);
   }
 }
@@ -566,10 +575,24 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   m_browser->setItemVisible(m_settingsGroup, !enabled);
 
   // Show or hide additional widgets
-  for (int i = 0; i < m_additionalLayout->count(); ++i) {
-    if (auto *widget = m_additionalLayout->itemAt(i)->widget()) {
+  for (int i = 0; i < m_widgetSplitter->count(); ++i) {
+    if (auto *widget = m_widgetSplitter->widget(i)) {
       widget->setVisible(enabled);
     }
+  }
+}
+
+/**
+ * Returns whether or not a guess is plotted
+ * @returns :: True if a plot guess is plotted, false if not.
+ */
+bool MuonFitPropertyBrowser::hasGuess() const {
+  auto *handler = getHandler();
+  if (handler) {
+    const bool hasPlot = handler->hasPlot(); // don't allow caller to modify
+    return hasPlot;
+  } else {
+    return false;
   }
 }
 

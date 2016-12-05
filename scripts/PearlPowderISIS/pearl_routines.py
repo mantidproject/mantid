@@ -22,8 +22,7 @@ g_pearl_obj = None
 def _pearl_obj_singleton():
     global g_pearl_obj
     if g_pearl_obj is None:
-        g_pearl_obj = Pearl(user_name="NotSet", calibration_dir="NotSet",
-                            raw_data_dir="NotSet", output_dir="NotSet",
+        g_pearl_obj = Pearl(user_name="NotSet", calibration_dir="NotSet", output_dir="NotSet",
                             input_file_ext=".raw", tt_mode="NotSet")
     return g_pearl_obj
 
@@ -100,7 +99,7 @@ def PEARL_getmonitorspectrum(runno):
 
 def PEARL_getcycle(number):
     pearl_obj = _pearl_obj_singleton()
-    cycle_information = pearl_obj._get_cycle_information(number)
+    cycle_information = pearl_obj._get_label_information(number)
     datadir = pearl_obj.output_dir
     updated_vals = {"cycle"   : cycle_information["cycle"],
                     "instver" : cycle_information["instrument_version"],
@@ -124,15 +123,8 @@ def PEARL_getcalibfiles():
     pearl_obj._old_api_set_tt_mode(g_oldParams["tt_mode"])
     pearl_obj._old_api_set_calib_dir(g_oldParams["pearl_file_dir"])
 
-    cal_dict = pearl_obj._get_calibration_full_paths(cycle=cycle)
     print ("Setting calibration for cycle", cycle)
 
-    updated_vals = {"calfile"     : cal_dict["calibration"],
-                    "groupfile"   : cal_dict["grouping"],
-                    "vabsorbfile" : cal_dict["vanadium_absorption"],
-                    "vanfile"     : cal_dict["vanadium"]}
-
-    _merge_dict_into_global(updated_vals)
     return
 
 
@@ -216,8 +208,9 @@ def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van
 
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
+    pearl_obj._old_api_set_ext(ext)
     pearl_obj.set_debug_mode(debug)
-    return pearl_obj.focus(run_number=number, focus_mode=fmode, input_ext=ext, do_attenuation=atten,
+    return pearl_obj.focus(run_number=number, focus_mode=fmode, do_attenuation=atten,
                            do_van_normalisation=van_norm)
 
 
@@ -227,8 +220,9 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
+    pearl_obj._old_api_set_ext(ext)
     pearl_obj.set_debug_mode(debug)
-    return pearl_obj.focus(run_number=number, focus_mode=fmode, input_ext=ext, do_attenuation=atten,
+    return pearl_obj.focus(run_number=number, focus_mode=fmode, do_attenuation=atten,
                            do_van_normalisation=van_norm)
 
 

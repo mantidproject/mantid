@@ -52,7 +52,7 @@ public:
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(
-            Return(MeasurementItem("a", "s_a", "l", "t", 0, "111")));
+            Return(MeasurementItem("a", "s_a", "l", "t", 0, "111", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -95,9 +95,12 @@ public:
     // id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111")))
-        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "122")))
-        .WillOnce(Return(MeasurementItem("m2", "s2", "l1", "t1", 0.2, "123")));
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s2", "l1", "t1", 0.2, "122", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m2", "s2", "l1", "t1", 0.2, "123", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -132,10 +135,14 @@ public:
     TSM_ASSERT_EQUALS("Group should be the same for first two rows",
                       successfulRuns[0][ReflTableSchema::GROUP],
                       successfulRuns[1][ReflTableSchema::GROUP]);
+    TSM_ASSERT_EQUALS("Group should be '0 - title' for first two rows",
+                      successfulRuns[0][ReflTableSchema::GROUP], "0 - title");
 
     TSM_ASSERT_DIFFERS("Group should be different for last rows",
                        successfulRuns[0][ReflTableSchema::GROUP],
                        successfulRuns[2][ReflTableSchema::GROUP]);
+    TSM_ASSERT_EQUALS("Group should be '1 - title' for third row",
+                      successfulRuns[2][ReflTableSchema::GROUP], "1 - title");
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
@@ -158,9 +165,12 @@ public:
     // We have 2 with valid measurement ids and 1 with no measurement id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111")))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122")))
-        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123")));
+        .WillOnce(
+             Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -219,9 +229,12 @@ public:
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111")))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122")))
-        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123")));
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -257,6 +270,8 @@ public:
       TSM_ASSERT_EQUALS("All should have the same group",
                         successfulRuns[0][ReflTableSchema::GROUP],
                         successfulRuns[i][ReflTableSchema::GROUP]);
+      TSM_ASSERT_EQUALS("Group should be '0 - title'",
+                        successfulRuns[i][ReflTableSchema::GROUP], "0 - title");
     }
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
@@ -283,11 +298,14 @@ public:
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14913")))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14914")))
-        .WillOnce(Return(MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14915")))
-        .WillOnce(
-            Return(MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14916")));
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14913", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14914", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14915", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14916", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -319,6 +337,67 @@ public:
                       "14913+14914", successfulRuns[0][ReflTableSchema::RUNS]);
     TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
                       "14915+14916", successfulRuns[1][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("Group should be '0 - title'",
+                      successfulRuns[0][ReflTableSchema::GROUP], "0 - title");
+    TSM_ASSERT_EQUALS("Group should be '1 - title'",
+                      successfulRuns[1][ReflTableSchema::GROUP], "1 - title");
+
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
+  }
+
+  void test_same_id_but_different_title() {
+
+    SearchResultMap data;
+    data.insert(
+        std::make_pair<std::string, SearchResult>("14913", SearchResult()));
+    data.insert(
+        std::make_pair<std::string, SearchResult>("14914", SearchResult()));
+
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
+
+    // Same measurment id but different title
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14913",
+                                         "Sample 1 H=0.10")))
+        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.1, "14914",
+                                         "Sample 1 H=0.09")));
+
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
+    // We expect that every location will be translated/transformed to make it
+    // os specific
+    EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillRepeatedly(Return(std::string()));
+
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
+    // Make the transfer stragegy
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
+
+    // Do the transfer
+    auto transferResult = strategy.transferRuns(data, progress);
+    auto successfulRuns = transferResult.getTransferRuns();
+
+    // Check the transfer entries
+    TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
+    TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("Group should be '0 - Sample 1 H=0.10'",
+                      successfulRuns[0][ReflTableSchema::GROUP],
+                      "0 - Sample 1 H=0.10");
+    TSM_ASSERT_EQUALS("Group should be '0 - Sample 1 H=0.10'",
+                      successfulRuns[1][ReflTableSchema::GROUP],
+                      "0 - Sample 1 H=0.10");
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));

@@ -86,7 +86,7 @@ public:
   }
 
   void test_Setting_Material_Alone_Only_Overwrites_Material() {
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
     sampleShape->setID("mysample");
     inputWS->mutableSample().setShape(*sampleShape);
@@ -108,7 +108,7 @@ public:
     using Mantid::Kernel::Material;
     using Mantid::PhysicalConstants::getNeutronAtom;
 
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
     sampleShape->setID("mysample");
     Material alum("Al", getNeutronAtom(13), 2.6989);
@@ -133,7 +133,7 @@ public:
     using Mantid::Kernel::ConfigService;
     using Mantid::Geometry::SampleEnvironment;
 
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     testInst->setName(m_instName);
     inputWS->setInstrument(testInst);
@@ -165,7 +165,7 @@ public:
     using Mantid::Kernel::ConfigService;
     using Mantid::Geometry::SampleEnvironment;
 
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     testInst->setName(m_instName);
     inputWS->setInstrument(testInst);
@@ -200,7 +200,7 @@ public:
 
   void test_Setting_Geometry_As_FlatPlate() {
     using Mantid::Kernel::V3D;
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -220,7 +220,7 @@ public:
 
   void test_Setting_Geometry_As_Cylinder() {
     using Mantid::Kernel::V3D;
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -242,7 +242,7 @@ public:
 
   void test_Setting_Geometry_As_HollowCylinder() {
     using Mantid::Kernel::V3D;
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -266,7 +266,7 @@ public:
   void test_Environment_Args_Without_Name_Invalid() {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -281,7 +281,7 @@ public:
   void test_Environment_Args_Without_Container_Invalid() {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -296,7 +296,7 @@ public:
   void test_Environment_Args_With_Empty_Strings_Invalid() {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -399,7 +399,7 @@ private:
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
-    using IntProperty = PropertyWithValue<long>;
+    using IntProperty = PropertyWithValue<int64_t>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
@@ -422,7 +422,7 @@ private:
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
-    using IntProperty = PropertyWithValue<long>;
+    using IntProperty = PropertyWithValue<int64_t>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();

@@ -114,7 +114,7 @@ void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
 void Gaussian::fixIntensity() {
   std::string formula =
       std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
-  tie("Height", formula);
+  tie("Height", formula, true);
 }
 
 void Gaussian::unfixIntensity() { removeTie("Height"); }
