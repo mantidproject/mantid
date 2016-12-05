@@ -60,6 +60,8 @@ public:
   virtual std::vector<std::string> getWorkspaceNames() = 0;
   /// Returns the user friendly name of the window
   virtual std::string getWindowName() = 0;
+  /// Returns the type of the window
+  virtual std::string getWindowType() = 0;
 };
 
 } // namespace API

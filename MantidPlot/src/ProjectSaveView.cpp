@@ -27,7 +27,6 @@ ProjectSaveView::ProjectSaveView(const QString& projectName,
           SLOT(workspaceItemChanged(QTreeWidgetItem*, int)));
 
   connect(m_ui.btnBrowseFilePath, SIGNAL(clicked(bool)), this, SLOT(findFilePath()));
-  //Connect signals to listen for when the save/saveAll button is clicked
   connect(m_ui.btnSave, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
   connect(m_ui.btnCancel, SIGNAL(clicked(bool)), this, SLOT(close()));
 }

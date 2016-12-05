@@ -70,7 +70,6 @@ signals:
 private slots:
   void findFilePath();
   void save(bool checked);
-  void saveAll(bool checked);
   void workspaceItemChanged(QTreeWidgetItem* item, int column);
 
 private:

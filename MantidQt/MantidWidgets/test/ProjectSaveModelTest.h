@@ -161,6 +161,52 @@ public:
     TS_ASSERT_EQUALS(windowsSubset[1], &win3);
   }
 
+  void testGetWorkspaceInformation() {
+    ProjectSaveModel model({});
+    auto wsInfo = model.getWorkspaceInformation();
+
+    TS_ASSERT_EQUALS(wsInfo.size(), 2);
+
+    TS_ASSERT_EQUALS(wsInfo[0].name, "ws1");
+    TS_ASSERT_EQUALS(wsInfo[0].type, "Workspace2D");
+    TS_ASSERT_EQUALS(wsInfo[0].size, "0 kB");
+    TS_ASSERT_EQUALS(wsInfo[0].icon_id, "mantid_matrix_xpm");
+    TS_ASSERT_EQUALS(wsInfo[0].numWindows, 0);
+
+    TS_ASSERT_EQUALS(wsInfo[1].name, "ws2");
+    TS_ASSERT_EQUALS(wsInfo[1].type, "Workspace2D");
+    TS_ASSERT_EQUALS(wsInfo[1].size, "0 kB");
+    TS_ASSERT_EQUALS(wsInfo[1].icon_id, "mantid_matrix_xpm");
+    TS_ASSERT_EQUALS(wsInfo[1].numWindows, 0);
+  }
+
+  void testGetWindowInformation() {
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+
+    WindowStub win1("window1", {"ws1"});
+    WindowStub win2("window2", {"ws2"});
+    WindowStub win3("window3", {"ws1", "ws2"});
+    WindowStub win4("window4", {});
+    windows.push_back(&win1);
+    windows.push_back(&win2);
+    windows.push_back(&win3);
+    windows.push_back(&win4);
+
+    ProjectSaveModel model(windows);
+
+    auto winInfo = model.getWindowInformation({"ws1"});
+
+    TS_ASSERT_EQUALS(winInfo.size(), 2);
+
+    TS_ASSERT_EQUALS(winInfo[0].name, "window1");
+    TS_ASSERT_EQUALS(winInfo[0].type, "Matrix");
+    TS_ASSERT_EQUALS(winInfo[0].icon_id, "mantid_matrix_xpm");
+
+    TS_ASSERT_EQUALS(winInfo[1].name, "window3");
+    TS_ASSERT_EQUALS(winInfo[1].type, "Matrix");
+    TS_ASSERT_EQUALS(winInfo[1].icon_id, "mantid_matrix_xpm");
+  }
+
 
 };
 

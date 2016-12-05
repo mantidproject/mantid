@@ -49,6 +49,7 @@
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
         src/WidgetScrollbarDecorator.cpp
+  src/WindowIcons.cpp
 	src/WorkspaceObserver.cpp
 	src/WorkspaceIcons.cpp
 )
@@ -123,7 +124,8 @@ set ( INC_FILES
   inc/MantidQtAPI/TSVSerialiser.h
 	inc/MantidQtAPI/qwt_compat.h
         inc/MantidQtAPI/WidgetScrollbarDecorator.h
-		inc/MantidQtAPI/WorkspaceIcons.h
+  inc/MantidQtAPI/WindowIcons.h
+  inc/MantidQtAPI/WorkspaceIcons.h
 )
 
 set ( UI_FILES

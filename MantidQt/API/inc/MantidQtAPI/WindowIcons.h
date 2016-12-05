@@ -1,5 +1,5 @@
-#ifndef MANTIDQT_API_WORKSPACEICONS_H_
-#define MANTIDQT_API_WORKSPACEICONS_H_
+#ifndef MANTIDQT_API_WINDOWICONS_H_
+#define MANTIDQT_API_WINDOWICONS_H_
 
 #include "DllOption.h"
 #include <QMap>
@@ -11,14 +11,14 @@ namespace API {
  * Defines a mapping between a workspace ID and a pixmap
  * to use for an icon.
  */
-class EXPORT_OPT_MANTIDQT_API WorkspaceIcons {
+class EXPORT_OPT_MANTIDQT_API WindowIcons {
 public:
-  WorkspaceIcons();
+  WindowIcons();
 
   /// Returns an icon for the given ID
-  QPixmap getIcon(const std::string &workspaceID) const;
-  /// Returns an icon ID for the given workspace ID
-  std::string getIconID(const std::string &workspaceID) const;
+  QPixmap getIcon(const std::string &windowID) const;
+  /// Returns an icon ID for the given window ID
+  std::string getIconID(const std::string &windowID) const;
 
 private:
   /// Defines the mapping between ID & pixmap name
@@ -29,4 +29,4 @@ private:
 };
 }
 }
-#endif // MANTIDQT_API_WORKSPACEICONS_H_
+#endif // MANTIDQT_API_WINDOWICONS_H_

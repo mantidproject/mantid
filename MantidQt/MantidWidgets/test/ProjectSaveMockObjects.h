@@ -49,6 +49,10 @@ public:
   std::string getWindowName() override {
     return m_name;
   }
+
+  std::string getWindowType() override {
+   return "Matrix";
+  }
 };
 
 
