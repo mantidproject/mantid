@@ -21,6 +21,7 @@ ISIS Reflectometry (Polref)
 - New 'Save ASCII' tab added, similar in function and purpose to the 'Save Workspaces' window accessible from Interfaces->ISIS Reflectometry->File->Save Workspaces.
 - When runs are transferred to the processing table groups are now labeled according to run title.
 - Column :literal:`dQ/Q` is used as the rebin parameter to stitch workspaces.
+- The interface is now arranged in two different groups.
 - Documentation regarding the interface has been updated accordingly.
 
 ISIS Reflectometry
