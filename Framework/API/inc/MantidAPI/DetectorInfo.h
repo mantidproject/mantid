@@ -71,6 +71,8 @@ public:
   Kernel::V3D position(const size_t index) const;
   Kernel::Quat rotation(const size_t index) const;
 
+  void setMasked(const size_t index, bool masked);
+
   void setPosition(const size_t index, const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
 

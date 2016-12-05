@@ -176,6 +176,20 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
   }
 
+  void test_setMasked() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    detectorInfo.setMasked(0, false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), false);
+    detectorInfo.setMasked(0, true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    // Make sure no other detectors are affected
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(4), false);
+  }
+
   void test_setRotation() {
     V3D e3{0, 0, 1};
     Quat r3(90.0, e3);

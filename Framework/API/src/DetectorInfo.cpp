@@ -93,6 +93,11 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
   return getDetector(index).getRotation();
 }
 
+/// Set the mask flag of the detector with given index.
+void DetectorInfo::setMasked(const size_t index, bool masked) {
+  m_pmap->addBool(&getDetector(index), "masked", masked);
+}
+
 /// Set the absolute position of the detector with given index.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
