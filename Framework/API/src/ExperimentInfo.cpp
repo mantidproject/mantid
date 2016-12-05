@@ -605,27 +605,14 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
 }
 
 /**
- * Easy access to the efixed value for this run & detector ID
+ * Easy access to the efixed value for this run and detector ID.
  * @param detID :: The detector ID to ask for the efixed mode (ignored in Direct
- * & Elastic mode). The
- * detector with ID matching that given is pulled from the instrument with this
- * method and it will
- * throw a Exception::NotFoundError if the ID is unknown.
+ * & Elastic mode). The detector with ID matching that given is pulled from the
+ * instrument with this method and it will throw a std::out_of_range error if
+ * the ID is unknown.
  * @return The current EFixed value
  */
 double ExperimentInfo::getEFixed(const detid_t detID) const {
-  IDetector_const_sptr det = getInstrument()->getDetector(detID);
-  return getEFixed(det);
-}
-
-/**
- * Easy access to the efixed value for this run & detector
- * @param detector :: The detector object to ask for the efixed mode. Only
- * required for Indirect mode
- * @return The current efixed value
- */
-double
-ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
   Kernel::DeltaEMode::Type emode = getEMode();
   if (emode == Kernel::DeltaEMode::Direct) {
     try {
@@ -635,35 +622,43 @@ ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
           "Experiment logs do not contain an Ei value. Have you run GetEi?");
     }
   } else if (emode == Kernel::DeltaEMode::Indirect) {
-    if (!detector)
-      throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode "
-                               "efixed requested without a valid detector.");
-    Parameter_sptr par =
-        constInstrumentParameters().getRecursive(detector.get(), "Efixed");
-    if (par) {
-      return par->value<double>();
+    const auto detectorIndex = detectorInfo().indexOf(detID);
+    double eFixed = detectorInfo().eFixed(detectorIndex);
+    if (eFixed != 0.0) {
+      return eFixed;
     } else {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
-      if (efixedVec.empty()) {
-        int detid = detector->getID();
-        IDetector_const_sptr detectorSingle =
-            getInstrument()->getDetector(detid);
-        efixedVec = detectorSingle->getNumberParameter("Efixed");
-      }
-      if (!efixedVec.empty()) {
-        return efixedVec.at(0);
-      } else {
-        std::ostringstream os;
-        os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
-              "detector has no Efixed parameter attached. ID="
-           << detector->getID();
-        throw std::runtime_error(os.str());
-      }
+      std::ostringstream os;
+      os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
+            "detector has no Efixed parameter attached. ID=" << detID;
+      throw std::runtime_error(os.str());
     }
   } else {
     throw std::runtime_error("ExperimentInfo::getEFixed - EFixed requested for "
                              "elastic mode, don't know what to do!");
   }
+}
+
+/**
+ * Easy access to the efixed value for this run and detector
+ * @param detector :: The detector object to ask for the efixed mode. Only
+ * required for Indirect mode, will throw a std::runtime_error if the detector
+ * is invalid. This can be null for direct or elastic modes.
+ * @return The current efixed value
+ */
+double
+ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
+  detid_t detectorID(0);
+
+  if (getEMode() == Kernel::DeltaEMode::Indirect) {
+    if (detector) {
+      detectorID = detector->getID();
+    } else {
+      throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode "
+                               "efixed requested without a valid detector.");
+    }
+  }
+
+  return getEFixed(detectorID);
 }
 
 void ExperimentInfo::setEFixed(const detid_t detID, const double value) {

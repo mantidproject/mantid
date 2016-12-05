@@ -91,7 +91,7 @@ private:
               const double startX, const double endX) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX,
                    double endX);
-  double movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex,
+  double MovingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex,
                        size_t windowWidth) const;
 
   /// variable bin width raw count data must be converted to distributions first

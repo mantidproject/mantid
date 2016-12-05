@@ -101,6 +101,18 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
   return newPos / static_cast<double>(dets.size());
 }
 
+/// Returns the eFixed value of the spectrum with given index.
+double SpectrumInfo::eFixed(const size_t index) const {
+  double eFixed(0);
+  const auto &dets = getDetectorVector(index);
+  for (const auto &det : dets) {
+    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    eFixed += m_detectorInfo.eFixed(detIndex);
+  }
+  return eFixed / static_cast<double>(dets.size());
+}
+
 /// Returns true if the spectrum is associated with detectors in the instrument.
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently

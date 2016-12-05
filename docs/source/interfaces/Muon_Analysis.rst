@@ -266,12 +266,33 @@ Data Analysis
 This tab is designed for the user to make a fit against the data just plotted.
 Since Mantid 3.8, this tab has been enhanced to include fits of multiple datasets at once.
 
+Default: multiple fitting disabled
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. image::  ../images/MuonAnalysisDataAnalysis.png
+   :align: right
+
+By default, multiple dataset fitting is not enabled and the interface will look just as it did pre-Mantid 3.8.
+
+In this case, the only thing that this tab will contain is a specialised version of the
+`Fit Property Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fitting>`_.
+When the tab is open, this fit property browser is used by default within MantidPlot.
+
+Note that, in this mode, simultaneous fits are not possible.
+The intention is that this mode could be useful for users who are accustomed to the existing UI, or if a bug is found in the new UI.
+
+Multiple fitting enabled
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The new multiple fitting functionality can be enabled by checking the "Enable multiple fitting" checkbox on the Settings_ tab.
+When this is activated, the tab is divided into three sections vertically.
+
 .. image::  ../images/MuonAnalysisDataAnalysis3.8.png
    :align: right
 
 Fit Function
 ^^^^^^^^^^^^
-The tab is divided into three sections vertically. The uppermost of these is the *Fit Function* section, which is a
+The uppermost of the three vertical sections is the *Fit Function* section, which is a
 FunctionBrowser just like in the *General/Multi dataset fitting* interface (and numerous other places in Mantid).
 Functions can be added by right-clicking. If more space is needed, this section can be expanded by dragging its lower edge downwards.
 
@@ -356,21 +377,6 @@ Options
 The bottom of the tab contains selected fit options that can be adjusted, just as elsewhere in Mantid.
 The only option specific to the Muon Analysis interface is *Fit To Raw Data*.
 When this option is set to *True*, the fitting process is done using the raw (unbinned) data, even if the DataBinning_ is set.
-
-Compatibility mode
-^^^^^^^^^^^^^^^^^^
-
-.. image::  ../images/MuonAnalysisDataAnalysis.png
-   :align: right
-
-To revert to the interface as it was pre-Mantid 3.8, use the checkbox for "Compatibility mode" on the Settings_ tab.
-
-In this case, the only thing that this tab will contain is a specialised version of the
-`Fit Property Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fitting>`_.
-When the tab is open, this fit property browser is used by default within MantidPlot.
-
-Note that, in "Compatibility mode", simultaneous fits are not possible.
-The intention is that this mode could be useful for users who are accustomed to the existing UI, or if a bug is found in the new UI.
 
 Sequential fitting
 ^^^^^^^^^^^^^^^^^^
@@ -576,37 +582,41 @@ General
 .. image:: ../images/MuonAnalysisSettingsGeneral.png
   :align: center
 
-+-------+------------------------+---------------------------------------------------------------------+
-| **1** | **Plot Creation**      | - **Auto-Update**. When settings are changed on the interface,      |
-|       |                        |   the new plot is created automatically.                            |
-|       |                        |                                                                     |
-|       |                        | - **Overwrite**. When plotting, if the plot of the same type        |
-|       |                        |   exists already, it is overwritten instead of creating a new       |
-|       |                        |   one.                                                              |
-|       |                        |                                                                     |
-|       |                        | - **Auto-Update + Overwrite**. Both above settings at the same time |
-|       |                        |                                                                     |
-|       |                        | - **None**. None of the settings                                    |
-|       |                        |                                                                     |
-+-------+------------------------+---------------------------------------------------------------------+
-| **2** | **New plot policy**    | - **Use previous window**. Each new plot will be drawn in the       |
-|       |                        |   same window. By default, the previous fit curve will remain       |
-|       |                        |   on the graph when the run is changed - the number of curves       |
-|       |                        |   to keep can be adjusted here (set to 0 to always clear            |
-|       |                        |   previous fits). The "clear fit curves" option on the Data         |
-|       |                        |   Analysis tab will clear any fit curves present.                   |
-|       |                        |                                                                     |
-|       |                        | - **Create new window**. When plotting a new run, it is             |
-|       |                        |   plotted in a new window each time.                                |
-|       |                        |                                                                     |
-+-------+------------------------+---------------------------------------------------------------------+
-| **3** | **Hide Toolbars**      | If enabled, opening the interface up hides the MantidPlot           |
-|       |                        | toolbars. This is useful on smaller screens.                        |
-+-------+------------------------+---------------------------------------------------------------------+
-| **4** | **Compatibility mode** | If enabled, the DataAnalysis_ tab will be reverted to the UI it had |
-|       |                        | in previous versions of Mantid (pre-3.8). Note that simultaneous    |
-|       |                        | fits are not possible in this mode.                                 |
-+-------+------------------------+---------------------------------------------------------------------+
++-------+-----------------------------+---------------------------------------------------------------------+
+| **1** | **Plot Creation**           | - **Auto-Update**. When settings are changed on the interface,      |
+|       |                             |   the new plot is created automatically.                            |
+|       |                             |                                                                     |
+|       |                             | - **Overwrite**. When plotting, if the plot of the same type        |
+|       |                             |   exists already, it is overwritten instead of creating a new       |
+|       |                             |   one.                                                              |
+|       |                             |                                                                     |
+|       |                             | - **Auto-Update + Overwrite**. Both above settings at the same time |
+|       |                             |                                                                     |
+|       |                             | - **None**. None of the settings                                    |
+|       |                             |                                                                     |
++-------+-----------------------------+---------------------------------------------------------------------+
+| **2** | **New plot policy**         | - **Use previous window**. Each new plot will be drawn in the       |
+|       |                             |   same window. By default, the previous fit curve will remain       |
+|       |                             |   on the graph when the run is changed - the number of curves       |
+|       |                             |   to keep can be adjusted here (set to 0 to always clear            |
+|       |                             |   previous fits). The "clear fit curves" option on the Data         |
+|       |                             |   Analysis tab will clear any fit curves present.                   |
+|       |                             |                                                                     |
+|       |                             | - **Create new window**. When plotting a new run, it is             |
+|       |                             |   plotted in a new window each time.                                |
+|       |                             |                                                                     |
++-------+-----------------------------+---------------------------------------------------------------------+
+| **3** | **Hide Toolbars**           | If enabled, opening the interface up hides the MantidPlot           |
+|       |                             | toolbars. This is useful on smaller screens.                        |
++-------+-----------------------------+---------------------------------------------------------------------+
+| **4** | **Enable multiple fitting** | By default, this option is disabled and the DataAnalysis_ tab will  |
+|       |                             | look the same as it did in previous versions of Mantid (pre-3.8).   |
+|       |                             | Note that simultaneous fits are not possible in this case.          |
+|       |                             |                                                                     |
+|       |                             | Enabling the option will change the UI of the DataAnalysis_ tab to  |
+|       |                             | the new one described above, enabling fits of multiple datasets to  |
+|       |                             | be made.
++-------+-----------------------------+---------------------------------------------------------------------+
 
 Feedback & Comments
 -------------------

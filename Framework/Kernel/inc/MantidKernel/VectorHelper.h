@@ -96,11 +96,7 @@ splitStringIntoVector(std::string listString);
 
 MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins,
                                   const double value);
-// Linearly interpolate between a set of Y values. Assumes the values are set
-// for the calculated nodes
-MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> &x,
-                                            std::vector<double> &y,
-                                            const double stepSize);
+
 // Do running average of input vector within specified range, considering
 // heterogeneous bin-boundaries
 // if such boundaries are provided
