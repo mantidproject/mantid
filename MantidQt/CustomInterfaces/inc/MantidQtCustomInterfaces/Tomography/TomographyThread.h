@@ -64,7 +64,6 @@ public:
 
 	// this causes segfault in processRefreshJobs if the check isnt here
 	if(m_workerRunning || !m_worker){
-		std::cout <<"\n DEBUG :: EMITTING WORKER FINISHED\n";
     // emit that the worker has been forcefully closed, exit with error code 1
 		// this is bad, find a way to notify without an explicit emit on thread destroy
 		emit workerFinished(m_workerPID, 1);

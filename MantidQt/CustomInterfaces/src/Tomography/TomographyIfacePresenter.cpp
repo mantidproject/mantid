@@ -44,8 +44,7 @@ const std::string TomographyIfacePresenter::g_defOutPathRemote =
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()),
-      m_statusMutex(new QMutex()), m_keepAliveTimer(nullptr),
-      m_keepAliveThread(nullptr) {
+      m_statusMutex(new QMutex()), m_keepAliveTimer(nullptr) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
@@ -54,25 +53,13 @@ TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
 }
 
 TomographyIfacePresenter::~TomographyIfacePresenter() {
-	cleanup();
-
-//  if (m_keepAliveThread){
-//	  std::cout<<"\nDEBUG :: TRYING TO QUIT THREAD AND STOP TIMER\n";
-//	// this also stops the timer
-//	m_keepAliveThread->quit();
-//	delete m_keepAliveThread;
-//  }
-  std::cout<<"\nDEBUG :: THREAD AND TIMER DESTROYED\n";
+  cleanup();
 
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
 
   if (m_statusMutex)
     delete m_statusMutex;
-
-  if (m_workerThread){
-	  m_workerThread.reset();
-  }
 }
 
 /**
@@ -643,7 +630,8 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
 /** Simply reset the switch that tracks if a recon is running and
  * update the process job in the reconstruction list
  */
-void TomographyIfacePresenter::workerFinished(const qint64 pid, const int exitCode) {
+void TomographyIfacePresenter::workerFinished(const qint64 pid,
+                                              const int exitCode) {
   m_reconRunning = false;
   m_model->updateProcessInJobList(pid, exitCode);
   processRefreshJobs();
@@ -680,12 +668,10 @@ bool TomographyIfacePresenter::isLocalResourceSelected() const {
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
-	std::cout<<"\n DEBUG :: TRYING TO REFRESH JOBS\n";
-
   m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
   {
-	  // BUG :: still crash here if closed during running process
+    // BUG :: still crash here if closed during running process
     // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
@@ -859,8 +845,8 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
   }
 
   // timer is already running, so return
-  if (m_keepAliveTimer || m_keepAliveThread) {
-	  return;
+  if (m_keepAliveTimer) {
+    return;
   }
 
   m_model->logMsg(
@@ -872,22 +858,17 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
       "also expected to keep sessions on remote compute resources "
       "alive after logging in.");
 
-//  if (m_keepAliveThread)
-//    delete m_keepAliveThread;
-//  m_keepAliveThread = new QThread();
-
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
   m_keepAliveTimer = new QTimer(this); // no-parent so it can be moveToThread
 
   m_keepAliveTimer->setInterval(1000 * period); // interval in ms
-//  m_keepAliveTimer->moveToThread(m_keepAliveThread);
 
   // remove previous connections
   m_keepAliveTimer->disconnect();
-//  m_keepAliveThread->disconnect();
-  
-  connect(m_keepAliveTimer, SIGNAL(timeout()), this, SLOT(processRefreshJobs()));
+
+  connect(m_keepAliveTimer, SIGNAL(timeout()), this,
+          SLOT(processRefreshJobs()));
 
   m_keepAliveTimer->start();
 }
