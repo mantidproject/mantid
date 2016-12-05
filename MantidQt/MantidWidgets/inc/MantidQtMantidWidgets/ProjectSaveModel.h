@@ -17,12 +17,20 @@ struct WorkspaceInfo {
   std::string size;
   std::string icon_id;
   size_t numWindows;
+
+  bool operator ==(const WorkspaceInfo &b) const {
+    return name == b.name;
+  }
 };
 
 struct WindowInfo {
   std::string name;
   std::string type;
   std::string icon_id;
+
+  bool operator ==(const WindowInfo &b) const {
+    return name == b.name;
+  }
 };
 
 

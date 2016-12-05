@@ -14,6 +14,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class ProjectSavePresenter;
+struct WindowInfo;
+struct WorkspaceInfo;
 
 /** @class IProjectSaveView
 
@@ -48,9 +50,9 @@ public:
   virtual std::vector<std::string> getUncheckedWorkspaceNames() = 0;
   virtual QString getProjectPath() = 0;
   virtual void setProjectPath(const QString& path) = 0;
-  virtual void updateWorkspacesList(const std::vector<std::string>& workspaces) = 0;
-  virtual void updateIncludedWindowsList(const std::vector<std::string>& windows) = 0;
-  virtual void updateExcludedWindowsList(const std::vector<std::string>& windows) = 0;
+  virtual void updateWorkspacesList(const std::vector<WorkspaceInfo>& workspaces) = 0;
+  virtual void updateIncludedWindowsList(const std::vector<WindowInfo>& windows) = 0;
+  virtual void updateExcludedWindowsList(const std::vector<WindowInfo>& windows) = 0;
   virtual void removeFromIncludedWindowsList(const std::vector<std::string>& windows) = 0;
   virtual void removeFromExcludedWindowsList(const std::vector<std::string>& windows) = 0;
 };

@@ -15,9 +15,10 @@ using namespace Mantid::API;
 ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
     : m_view(view), m_model(m_view->getWindows()) {
   auto workspaceNames = m_model.getWorkspaceNames();
-  auto names = m_model.getWindowNames(workspaceNames);
-  m_view->updateIncludedWindowsList(names);
-  m_view->updateWorkspacesList(workspaceNames);
+  auto info = m_model.getWorkspaceInformation();
+  auto winInfo = m_model.getWindowInformation(workspaceNames);
+  m_view->updateIncludedWindowsList(winInfo);
+  m_view->updateWorkspacesList(info);
 }
 
 void ProjectSavePresenter::notify(Notification notification) {
@@ -36,14 +37,16 @@ void ProjectSavePresenter::notify(Notification notification) {
 void ProjectSavePresenter::includeWindowsForCheckedWorkspace() {
   auto wsNames = m_view->getCheckedWorkspaceNames();
   auto names = m_model.getWindowNames(wsNames);
-  m_view->updateIncludedWindowsList(names);
+  auto info = m_model.getWindowInformation(wsNames);
+  m_view->updateIncludedWindowsList(info);
   m_view->removeFromExcludedWindowsList(names);
 }
 
 void ProjectSavePresenter::excludeWindowsForUncheckedWorkspace() {
   auto wsNames = m_view->getUncheckedWorkspaceNames();
   auto names = m_model.getWindowNames(wsNames);
-  m_view->updateExcludedWindowsList(names);
+  auto info = m_model.getWindowInformation(wsNames);
+  m_view->updateExcludedWindowsList(info);
   m_view->removeFromIncludedWindowsList(names);
 }
 
