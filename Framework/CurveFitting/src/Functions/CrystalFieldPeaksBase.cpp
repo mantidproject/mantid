@@ -320,9 +320,13 @@ CrystalFieldPeaksBase::CrystalFieldPeaksBase()
 /// Calculate the crystal field eigensystem
 /// @param en :: Output eigenvalues.
 /// @param wf :: Output eigenvectors.
+/// @param ham :: Output crystal field hamiltonian (without external field)
+/// @param hz :: Output Zeeman hamiltonian (external field term)
 /// @param nre :: Output ion code.
 void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
                                                  ComplexFortranMatrix &wf,
+                                                 ComplexFortranMatrix &ham,
+                                                 ComplexFortranMatrix &hz,
                                                  int &nre) const {
 
   auto ion = getAttribute("Ion").asString();
@@ -342,6 +346,9 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
   bmol(2) = getParameter("BmolY");
   bmol(3) = getParameter("BmolZ");
 
+  // For CrystalFieldSusceptibility and CrystalFieldMagnetisation we need
+  //   to be able to override the external field set here, since in these
+  //   measurements, a different external field is applied.
   DoubleFortranVector bext(1, 3);
   bext(1) = getParameter("BextX");
   bext(2) = getParameter("BextY");
@@ -393,8 +400,7 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
   bkq(6, 5) = ComplexType(B65, IB65);
   bkq(6, 6) = ComplexType(B66, IB66);
 
-  ComplexFortranMatrix ham;
-  calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
+  calculateEigensystem(en, wf, ham, hz, nre, bmol, bext, bkq);
   // MaxPeakCount is a read-only "mutable" attribute.
   const_cast<CrystalFieldPeaksBase *>(this)
       ->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));

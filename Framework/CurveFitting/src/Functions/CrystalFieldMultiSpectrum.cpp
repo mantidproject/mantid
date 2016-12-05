@@ -3,6 +3,7 @@
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
+#include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -118,9 +119,12 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
 
   DoubleFortranVector en;
   ComplexFortranMatrix wf;
+  ComplexFortranMatrix ham;
+  ComplexFortranMatrix hz;
   int nre = 0;
   auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
-  peakCalculator.calculateEigenSystem(en, wf, nre);
+  peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
+  ham += hz;
 
   // Get the temperatures from the attribute
   auto temperatures = getAttribute("Temperatures").asVector();
@@ -167,7 +171,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   for (size_t i = 0; i < nSpec; ++i) {
     if (m_physprops[i] > 0) {
       // This "spectrum" is actually a physical properties dataset.
-      fun->addFunction(buildPhysprop(nre, en, wf, i));
+      fun->addFunction(buildPhysprop(nre, en, wf, ham, i));
     } else {
       if (m_fwhmX[i].empty()) {
         auto suffix = std::to_string(i);
@@ -238,12 +242,18 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
 
 API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    size_t iSpec) const {
+    const ComplexFortranMatrix &ham, size_t iSpec) const {
   switch(m_physprops[iSpec]) {
-    case 1: // Heat capacity
+    case 1: { // Heat capacity
       auto spectrum = new CrystalFieldHeatCapacity;
       spectrum->set_eigensystem(en, wf, nre);
       return IFunction_sptr(spectrum);
+    }
+    case 3: { // Magnetisation
+      auto spectrum = new CrystalFieldMagnetisation;
+      spectrum->set_hamiltonian(ham, nre);
+      return IFunction_sptr(spectrum);
+    }
   }
   throw std::runtime_error("Physical property type not understood");
 }
@@ -258,25 +268,34 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 
   DoubleFortranVector en;
   ComplexFortranMatrix wf;
+  ComplexFortranMatrix ham;
+  ComplexFortranMatrix hz;
   int nre = 0;
   auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
-  peakCalculator.calculateEigenSystem(en, wf, nre);
+  peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
+  ham += hz;
 
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   auto temperatures = getAttribute("Temperatures").asVector();
   for (size_t i = 0; i < temperatures.size(); ++i) {
-    updateSpectrum(*fun.getFunction(i), nre, en, wf, temperatures[i], i);
+    updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i], i);
   }
 }
 
 /// Update a function for a single spectrum.
 void CrystalFieldMultiSpectrum::updateSpectrum(
     API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
-    const ComplexFortranMatrix &wf, double temperature, size_t iSpec) const {
+    const ComplexFortranMatrix &wf, const ComplexFortranMatrix &ham, 
+    double temperature, size_t iSpec) const {
   switch(m_physprops[iSpec]) {
     case 1: {
       auto &heatcap = dynamic_cast<CrystalFieldHeatCapacity &>(spectrum);
       heatcap.set_eigensystem(en, wf, nre);
+      break;
+    }
+    case 3: {
+      auto &magnetisation = dynamic_cast<CrystalFieldMagnetisation &>(spectrum);
+      magnetisation.set_hamiltonian(ham, nre);
       break;
     }
     default:

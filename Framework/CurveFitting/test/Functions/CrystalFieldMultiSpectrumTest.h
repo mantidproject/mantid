@@ -160,9 +160,9 @@ public:
 
   void test_evaluate_physprops() {
     auto funStr = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
-                  "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+                  "50, 1),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
                   "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
-                  "PhysicalProperties=(0,1),"
+                  "PhysicalProperties=(0,1,3)," // Spectrum, Cp, M(H)
                   "IntensityScaling0=2.0,"
                   "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3";
     auto ws = createWorkspace();
@@ -171,6 +171,7 @@ public:
     alg->setPropertyValue("Function", funStr);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("InputWorkspace_1", ws);
+    alg->setProperty("InputWorkspace_2", ws);
     alg->setProperty("OutputWorkspace", "out");
     alg->execute();
 
@@ -188,6 +189,13 @@ public:
     TS_ASSERT_DELTA(out->readY(1)[50], 0.006, 0.001);
     TS_ASSERT_DELTA(out->readY(1)[60], 0.032, 0.001);
     TS_ASSERT_DELTA(out->readY(1)[70], 0.103, 0.001);
+    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_2");
+    TS_ASSERT(out);
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.00765, 0.0001);
+    TS_ASSERT_DELTA(out->readY(1)[10], 0.07318, 0.0001);
+    TS_ASSERT_DELTA(out->readY(1)[20], 0.13111, 0.0001);
     AnalysisDataService::Instance().clear();
   }
 

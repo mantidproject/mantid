@@ -569,8 +569,8 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 //--------------------------------------
 // calculation of the zeeman hamiltonian
 //--------------------------------------
-ComplexFortranMatrix zeeman(const int nre, const DoubleFortranVector &bext, 
-                            const DoubleFortranVector &bmol) {
+void zeeman(ComplexFortranMatrix &hamiltonian, const int nre, 
+            const DoubleFortranVector &bext, const DoubleFortranVector &bmol) {
   auto i = ComplexType(0.0, 1.0);
   auto bmolp = bmol(1) + i * bmol(2);
   auto bmolm = bmol(1) - i * bmol(2);
@@ -584,7 +584,8 @@ ComplexFortranMatrix zeeman(const int nre, const DoubleFortranVector &bext,
   auto dimj = ddimj[nre - 1];
   auto j = 0.5 * (dimj - 1.0);
   int dim = static_cast<int>(dimj);
-  ComplexFortranMatrix hamiltonian(1, dim, 1, dim);
+  hamiltonian.allocate(1, dim, 1, dim);
+  hamiltonian.zero();
   //-------------------------------------------------------------------
   //       define only the lower triangle of h(m,n)
   //-------------------------------------------------------------------
@@ -606,7 +607,6 @@ ComplexFortranMatrix zeeman(const int nre, const DoubleFortranVector &bext,
       hamiltonian(n, m) = conjg(hamiltonian(m, n));
     }
   }
-  return hamiltonian;
 }
 
 //---------------------------------------
@@ -641,13 +641,41 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian,
 
 } // anonymous namespace
 
+/// Calculates the eigenvalues/vectors of a crystal field Hamiltonian in a
+/// specified external magnetic field.
+/// @param eigenvalues :: Output. The eigenvalues in ascending order. The
+/// smallest value is subtracted from all eigenvalues so they always
+/// start with 0.
+/// @param eigenvectors :: Output. The matrix of eigenvectors. The eigenvectors
+///    are in columns with indices corresponding to the indices of eigenvalues.
+/// @param hamiltonian  :: The crystal field hamiltonian in meV.
+/// @param nre :: A number denoting the type of ion.
+///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
+/// @param bext :: The external field in Cartesians (Hx, Hy, Hz) in Tesla
+///    The z-axis is parallel to the crystal field quantisation axis.
+void calculateZeemanEigensystem(DoubleFortranVector &eigenvalues,
+                                ComplexFortranMatrix &eigenvectors,
+                                const ComplexFortranMatrix &hamiltonian,
+                                int nre, const DoubleFortranVector &bext) {
+  ComplexFortranMatrix h = hamiltonian;
+  DoubleFortranVector bmol(1, 3);
+  bmol.zero();
+  // Adds the external and molecular fields
+  ComplexFortranMatrix hz; 
+  zeeman(hz, nre, bext, bmol);
+  h -= hz;
+  // Now run the actual diagonalisation
+  diagonalise(h, eigenvalues, eigenvectors);
+}
+       
 /// Calculate eigenvalues and eigenvectors of the crystal field hamiltonian.
 /// @param eigenvalues :: Output. The eigenvalues in ascending order. The
 /// smallest value is subtracted from all eigenvalues so they always
 /// start with 0.
 /// @param eigenvectors :: Output. The matrix of eigenvectors. The eigenvectors
 ///    are in columns with indices corresponding to the indices of eigenvalues.
-/// @param hamiltonian  :: Output. The hamiltonian.
+/// @param hamiltonian  :: Output. The crystal field hamiltonian.
+/// @param hzeeman  :: Output. The zeeman hamiltonian.
 /// @param nre :: A number denoting the type of ion.
 ///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
 /// @param bmol :: The molecular field in Cartesian (Bx, By, Bz) in Tesla
@@ -659,7 +687,8 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian,
 /// @param gamma_euler :: The gamma Euler angle in radians
 void calculateEigensystem(DoubleFortranVector &eigenvalues,
                           ComplexFortranMatrix &eigenvectors,
-                          ComplexFortranMatrix &hamiltonian, int nre,
+                          ComplexFortranMatrix &hamiltonian,
+                          ComplexFortranMatrix &hzeeman, int nre,
                           const DoubleFortranVector &bmol,
                           const DoubleFortranVector &bext,
                           const ComplexFortranMatrix &bkq, double alpha_euler,
@@ -794,7 +823,8 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
   }
 
   // Adds the external and molecular fields
-  hamiltonian -= zeeman(nre, rbext, bmol);
+  zeeman(hzeeman, nre, rbext, bmol);
+  hamiltonian -= hzeeman;
 
   // Now run the actual diagonalisation
   diagonalise(hamiltonian, eigenvalues, eigenvectors);
@@ -1010,6 +1040,28 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
     i_excitations.allocate(nex);
   }
 }
+
+/// Calculate the diagonal matrix elements of the magnetic moment operator
+/// in a particular eigenvector basis. 
+/// @param eigenvector :: Input. The eigenvector basis.
+/// @param hdir :: Input. Cartesian direction of the magnetic moment operator
+/// @param nre :: Input. The ion number to calculate for.
+/// @param gj :: Output. The Lande g-factor of this ion.
+/// @param moment :: Output the diagonal elements of the magnetic moment matrix
+void calculateMagneticMoment(const ComplexFortranMatrix &ev,
+                             const DoubleFortranVector &Hdir,
+                             const int nre,
+                             double &gj,
+                             DoubleFortranVector &moment) {
+  int dim = (int)ddimj[nre - 1];
+  gj = ggj[nre - 1];
+  moment.allocate(dim);
+  for (auto i = 1; i <= dim; ++i) {
+    moment(i) = real(matjx(ev, i, i, dim))*Hdir(1) +  // <ev|jx|ev>
+                real(matjy(ev, i, i, dim))*Hdir(2) +  // <ev|jy|ev>
+                real(matjz(ev, i, i, dim))*Hdir(3);   // <ev|jz|ev>
+  }
+} 
 
 } // namespace Functions
 } // namespace CurveFitting

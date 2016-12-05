@@ -62,6 +62,7 @@ set ( SRC_FILES
 	src/Functions/CrystalFieldPeakUtils.cpp
 	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CrystalFieldHeatCapacity.cpp
+	src/Functions/CrystalFieldMagnetisation.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
@@ -214,6 +215,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/CrystalFieldPeakUtils.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMagnetisation.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
