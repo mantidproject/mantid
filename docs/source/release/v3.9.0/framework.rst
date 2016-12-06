@@ -40,6 +40,12 @@ Performance
 CurveFitting
 ------------
 
+New
+###
+
+- Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
+- Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates initial values of a fiting function in given intervals.
+
 Improved
 ########
 
@@ -60,6 +66,8 @@ Bug Fixes
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` should no longer leak memory when the execution is cancelled.
 - :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` will now load the stored workspace names from a processed Nexus file in the case of multiperiod data.
 - If a run is aborted and restarted, the ``running`` log in the workspace will correctly reflect this. (``running`` will be false at all times before the abort.)
+- Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.
+- Issues with :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` sometimes returning bogus values when the **Return Background** option was used were fixed.
 
 Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`__

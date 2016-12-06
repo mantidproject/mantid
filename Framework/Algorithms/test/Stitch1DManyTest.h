@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
 #include <math.h>
 

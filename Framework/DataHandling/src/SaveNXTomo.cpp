@@ -4,6 +4,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 

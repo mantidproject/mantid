@@ -3,7 +3,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/VectorHelper.h"
@@ -318,10 +317,6 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 
 } // namespace DataObjects
 } // NamespaceMantid
-
-///\cond TEMPLATE
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid {
 namespace Kernel {

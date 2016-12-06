@@ -11,6 +11,8 @@
 #include <Poco/NObserver.h>
 #include <Poco/Void.h>
 
+#include <deque>
+
 namespace MantidQt {
 namespace API {
 /**

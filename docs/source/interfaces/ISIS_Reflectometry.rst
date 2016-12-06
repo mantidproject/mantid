@@ -61,9 +61,7 @@ In addition the table workspace should be opened as well and the processing tabl
 
 Let's process the first group, which consists of the first two rows of the
 table (13460 and 13462). The simplest way to do this is simply to select the
-two rows we want to process, and then click on **Process**. Note that for the reduction
-to be successful, at least the bin size must be specified to :ref:`Stitch1DMany <algm-Stitch1DMany>`,
-in the options tab (e.g. Params="-0.04").
+two rows we want to process, and then click on **Process**.
 
 .. tip::
   If you receive an error, consult the `Troubleshooting`_ section of this document for guidance on fixing it.
@@ -528,10 +526,12 @@ When I try to process I get an error: "Error encountered while stitching group .
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This occurs when Mantid is unable to stitch a group. Please check that at you have
-specified at least the bin width in the *Stitch1DMany* text box. To specify the bin width please
-use the *Params* input property like this: ``Params="-0.03"``  (you may want to replace
-``0.03`` with a bin size suitable for your reduction). Note that the "-" sign will produce
-a logarithmic binning in the stitched workspace. For linear binning, use ``Params="0.03"``.
+specified at least the bin width. This can be done either by setting a value in column
+**dQ/Q** before processing the data, or by using the *Stitch1DMany* text
+box in the **Settings** tab to provide the *Params* input property like this:
+``Params="-0.03"`` (you may want to replace ``0.03`` with a bin size suitable for
+your reduction). Note that the "-" sign in this case will produce a logarithmic binning in the
+stitched workspace. For linear binning, use ``Params="0.03"``.
 
 When I try to process I get an error: "Invalid key value pair, '...'"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

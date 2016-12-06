@@ -27,7 +27,7 @@ private:
 
   void makeFakeEventWorkspace(std::string wsName) {
     // Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace(
         NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
     // Fake a d-spacing unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
