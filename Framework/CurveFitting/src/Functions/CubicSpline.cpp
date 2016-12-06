@@ -132,29 +132,17 @@ void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
  */
 void CubicSpline::calculateSpline(double *out, const double *xValues,
                                   const size_t nData) const {
+  int errorCode = 0;
   // calculate spline for given input set
-  double y(0);
   for (size_t i = 0; i < nData; ++i) {
     // calculate the y value
-    y = splineEval(xValues[i]);
-    out[i] = y;
+    out[i] = gsl_spline_eval(m_spline.get(), xValues[i], m_acc.get());
+
+    errorCode = gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &out[i]);
+
+    // check if GSL function returned an error
+    checkGSLError(errorCode, GSL_EDOM);
   }
-}
-
-/**Evaluate a point on the spline. Includes basic error handling
- *
- * @param x :: Point to evaluate
- * @return :: the value of the spline at the given point
- */
-double CubicSpline::splineEval(const double x) const {
-  // calculate the y value
-  double y = gsl_spline_eval(m_spline.get(), x, m_acc.get());
-  int errorCode = gsl_spline_eval_e(m_spline.get(), x, m_acc.get(), &y);
-
-  // check if GSL function returned an error
-  checkGSLError(errorCode, GSL_EDOM);
-
-  return y;
 }
 
 /** Calculate the derivatives of each of the supplied points

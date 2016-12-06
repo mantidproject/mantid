@@ -5,10 +5,8 @@
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
-using Mantid::CurveFitting::Functions::CubicSpline;
+using namespace Mantid::CurveFitting::Functions;
 
-typedef boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_sptr;
-//typedef const boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_const_sptr;
 
 class CubicSplineTest : public CxxTest::TestSuite {
 public:

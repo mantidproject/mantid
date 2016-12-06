@@ -11,10 +11,8 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SplineInterpolation)
 
-using namespace API;
+
 using namespace Kernel;
-using Functions::CubicSpline;
-using Functions::Linear;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -153,7 +151,7 @@ void SplineInterpolation::exec() {
 
     // check if we want derivatives
     derivs[i] = WorkspaceFactory::Instance().create(mws, order);
-    auto vAxis = new API::NumericAxis(order);
+    auto vAxis = new NumericAxis(order);
 
     // calculate the derivatives for each order chosen
     for (int j = 0; j < order; ++j) {
@@ -193,9 +191,9 @@ void SplineInterpolation::exec() {
  * @param iws :: The input workspace to interpolate
  * @return The pointer to the newly created workspace
  */
-API::MatrixWorkspace_sptr
-SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
-                                          API::MatrixWorkspace_sptr iws) const {
+MatrixWorkspace_sptr
+SplineInterpolation::setupOutputWorkspace(MatrixWorkspace_sptr mws,
+                                          MatrixWorkspace_sptr iws) const {
   size_t numSpec = iws->getNumberHistograms();
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(mws, numSpec);
@@ -280,8 +278,8 @@ void SplineInterpolation::setInterpolationPoints(
  * @param order :: The order of derivatives to calculate
  */
 void SplineInterpolation::calculateDerivatives(
-    API::MatrixWorkspace_const_sptr inputWorkspace,
-    API::MatrixWorkspace_sptr outputWorkspace, int order) const {
+    MatrixWorkspace_const_sptr inputWorkspace,
+    MatrixWorkspace_sptr outputWorkspace, int order) const {
   // get x and y parameters from workspaces
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
