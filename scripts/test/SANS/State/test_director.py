@@ -2,7 +2,7 @@
 from sans.state.state import get_state_builder
 from sans.state.data import get_data_builder
 from sans.state.move import get_move_builder
-from sans.state.reduction_mode import get_reduction_builder
+from sans.state.reduction_mode import get_reduction_mode_builder
 from sans.state.slice_event import get_slice_event_builder
 from sans.state.mask import get_mask_builder
 from sans.state.wavelength import get_wavelength_builder
@@ -54,8 +54,8 @@ class TestDirector(object):
         # Build the SANSStateData
         if self.data_state is None:
             data_builder = get_data_builder(facility)
-            data_builder.set_sample_scatter("sansD00022024")
-            data_builder.set_can_scatter("sansD00022024")
+            data_builder.set_sample_scatter("SANSD00022024")
+            data_builder.set_can_scatter("SANSD00022024")
             self.data_state = data_builder.build()
 
         # Build the SANSStateMove

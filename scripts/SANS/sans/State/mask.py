@@ -6,7 +6,7 @@ import json
 import copy
 from sans.state.state_base import (StateBase, BoolParameter, StringListParameter, StringParameter,
                                    PositiveFloatParameter, FloatParameter, FloatListParameter,
-                                   DictParameter, PositiveIntegerListParameter, sans_debug_parameters)
+                                   DictParameter, PositiveIntegerListParameter, rename_descriptor_names)
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.constants import SANSConstants
@@ -60,7 +60,7 @@ def range_check(start, stop, invalid_dict, start_name, stop_name, general_name=N
 # ------------------------------------------------
 # StateData
 # ------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateMaskDetector(StateBase):
     # Vertical strip masks
     single_vertical_strip_mask = PositiveIntegerListParameter()
@@ -136,7 +136,7 @@ class StateMaskDetector(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateMask(StateBase):
     # Radius Mask
     radius_min = FloatParameter()

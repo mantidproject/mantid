@@ -8,7 +8,7 @@ import inspect
 import copy
 from sans.common.sans_type import SANSInstrument
 from sans.state.state_base import (StateBase, TypedParameter,
-                                   sans_debug_parameters, validator_sub_state)
+                                   rename_descriptor_names, validator_sub_state)
 from sans.state.data import StateData
 from sans.state.move import StateMove
 from sans.state.reduction_mode import StateReductionMode
@@ -25,7 +25,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class State(StateBase):
     data = TypedParameter(StateData, validator_sub_state)
     move = TypedParameter(StateMove, validator_sub_state)

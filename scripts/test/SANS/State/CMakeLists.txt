@@ -3,6 +3,7 @@
 ##
 
 set ( TEST_PY_FILES
+   adjustment_test.py
    calculate_transmission_test.py
    convert_to_q_test.py
    data_test.py
@@ -16,13 +17,10 @@ set ( TEST_PY_FILES
    state_base_test.py
    state_functions_test.py
    state_test.py
-   wavelength_test.py
    wavelength_and_pixel_adjustment_test.py
-#   SANSStateAdjustmentTest.py
-#   SANSStateAdjustmentBuilderTest.py
-
+   wavelength_test.py
 )
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
-# Prefix for test name=PythonAlgorithms
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAlgorithmsSANS ${TEST_PY_FILES} )
+# Prefix for test name=Python
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonSANS ${TEST_PY_FILES} )

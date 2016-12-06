@@ -4,7 +4,7 @@
 
 import json
 import copy
-from sans.state.state_base import (StateBase, sans_debug_parameters, PositiveIntegerParameter, BoolParameter,
+from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
                                    PositiveFloatParameter, ClassTypeParameter, FloatParameter, DictParameter,
                                    StringListParameter, PositiveFloatWithNoneParameter)
 from sans.common.sans_type import (RebinType, RangeStepType, FitType, DataType, convert_reduction_data_type_to_string)
@@ -20,7 +20,7 @@ from sans.common.sans_type import SANSInstrument
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateTransmissionFit(StateBase):
     fit_type = ClassTypeParameter(FitType)
     polynomial_order = PositiveIntegerParameter()
@@ -59,7 +59,7 @@ class StateTransmissionFit(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateCalculateTransmission(StateBase):
     # -----------------------
     # Transmission

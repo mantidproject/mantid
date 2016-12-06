@@ -4,7 +4,7 @@
 
 import json
 import copy
-from sans.state.state_base import (StateBase, TypedParameter, sans_debug_parameters, BoolParameter,
+from sans.state.state_base import (StateBase, TypedParameter, rename_descriptor_names, BoolParameter,
                                    validator_sub_state)
 from sans.state.calculate_transmission import StateCalculateTransmission
 from sans.state.normalize_to_monitor import StateNormalizeToMonitor
@@ -16,7 +16,7 @@ from sans.common.sans_type import SANSInstrument
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateAdjustment(StateBase):
     calculate_transmission = TypedParameter(StateCalculateTransmission, validator_sub_state)
     normalize_to_monitor = TypedParameter(StateNormalizeToMonitor, validator_sub_state)

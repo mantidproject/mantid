@@ -4,7 +4,7 @@
 
 import json
 import copy
-from sans.state.state_base import (StateBase, sans_debug_parameters, PositiveIntegerParameter,
+from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
                                    PositiveFloatParameter, FloatParameter, ClassTypeParameter, DictParameter,
                                    PositiveFloatWithNoneParameter)
 from sans.state.automatic_setters import (automatic_setters)
@@ -18,7 +18,7 @@ from sans.common.file_information import (get_instrument_paths_for_sans_file)
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateNormalizeToMonitor(StateBase):
     prompt_peak_correction_min = PositiveFloatWithNoneParameter()
     prompt_peak_correction_max = PositiveFloatWithNoneParameter()
@@ -139,7 +139,7 @@ class StateNormalizeToMonitor(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateNormalizeToMonitorLOQ(StateNormalizeToMonitor):
     def __init__(self):
         super(StateNormalizeToMonitorLOQ, self).__init__()

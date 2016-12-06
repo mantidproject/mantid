@@ -1,7 +1,7 @@
 import unittest
 import mantid
 from mantid.api import AlgorithmManager
-from SANS2.Common.SANSLogTagger import (has_tag, set_tag, get_tag, has_hash, set_hash)
+from sans.common.log_tagger import (has_tag, set_tag, get_tag, has_hash, set_hash)
 
 
 class SANSLogTaggerTest(unittest.TestCase):

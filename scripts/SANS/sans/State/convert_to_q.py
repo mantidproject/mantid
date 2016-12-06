@@ -4,7 +4,7 @@
 
 import json
 import copy
-from sans.state.state_base import (StateBase, sans_debug_parameters, BoolParameter, PositiveFloatParameter,
+from sans.state.state_base import (StateBase, rename_descriptor_names, BoolParameter, PositiveFloatParameter,
                                   ClassTypeParameter, StringParameter)
 from sans.common.sans_type import (ReductionDimensionality, RangeStepType, SANSInstrument)
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
@@ -15,7 +15,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateConvertToQ(StateBase):
     reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
     use_gravity = BoolParameter()

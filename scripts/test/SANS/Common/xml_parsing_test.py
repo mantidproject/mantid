@@ -1,8 +1,8 @@
 import unittest
 import mantid
 
-from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)
-from SANS2.Common.XMLParsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file)
+from sans.common.file_information import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)
+from sans.common.xml_parsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file)
 
 
 class XMLParsingTest(unittest.TestCase):

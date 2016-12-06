@@ -285,7 +285,7 @@ class StateBase(object):
         pass
 
 
-def sans_debug_parameters(cls):
+def rename_descriptor_names(cls):
     """
     Class decorator which changes the names of TypedParameters in a class instance in order to make it more readable.
 

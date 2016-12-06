@@ -1,8 +1,8 @@
 import unittest
 import mantid
 
-from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, SANSFileInformation, SANSFileType,
-                                        SANSInstrument, get_instrument_paths_for_sans_file)
+from sans.common.file_information import (SANSFileInformationFactory, SANSFileInformation, SANSFileType,
+                                          SANSInstrument, get_instrument_paths_for_sans_file)
 from mantid.kernel import DateAndTime
 
 

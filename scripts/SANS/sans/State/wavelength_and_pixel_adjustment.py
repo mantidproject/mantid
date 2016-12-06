@@ -4,7 +4,7 @@
 
 import json
 import copy
-from sans.state.state_base import (StateBase, sans_debug_parameters, StringParameter,
+from sans.state.state_base import (StateBase, rename_descriptor_names, StringParameter,
                                    ClassTypeParameter, PositiveFloatParameter, DictParameter)
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 from sans.common.sans_type import (RangeStepType, DetectorType, convert_detector_type_to_string, SANSInstrument)
@@ -14,7 +14,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateAdjustmentFiles(StateBase):
     pixel_adjustment_file = StringParameter()
     wavelength_adjustment_file = StringParameter()
@@ -31,7 +31,7 @@ class StateAdjustmentFiles(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateWavelengthAndPixelAdjustment(StateBase):
     wavelength_low = PositiveFloatParameter()
     wavelength_high = PositiveFloatParameter()

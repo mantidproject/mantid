@@ -8,7 +8,7 @@ from sans.state.state_base import (StringParameter, BoolParameter, FloatParamete
                                    PositiveIntegerParameter, DictParameter, ClassTypeParameter,
                                    FloatWithNoneParameter, PositiveFloatWithNoneParameter, FloatListParameter,
                                    StringListParameter, PositiveIntegerListParameter, ClassTypeListParameter,
-                                   StateBase, sans_debug_parameters, TypedParameter, validator_sub_state,
+                                   StateBase, rename_descriptor_names, TypedParameter, validator_sub_state,
                                    create_deserialized_sans_state_from_property_manager)
 from sans.common.sans_type import sans_type
 
@@ -23,7 +23,7 @@ class TestType(object):
 # Test the typed parameters
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateBaseTestClass(StateBase):
     string_parameter = StringParameter()
     bool_parameter = BoolParameter()
@@ -111,7 +111,7 @@ class TypedParameterTest(unittest.TestCase):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class SANSParameterTest(unittest.TestCase):
-    @sans_debug_parameters
+    @rename_descriptor_names
     class SANSParameterTestClass(object):
         my_string_parameter = StringParameter()
         my_bool_parameter = BoolParameter()
@@ -147,7 +147,7 @@ class SANSParameterTest(unittest.TestCase):
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 
-@sans_debug_parameters
+@rename_descriptor_names
 class VerySimpleState(StateBase):
     string_parameter = StringParameter()
 
@@ -159,7 +159,7 @@ class VerySimpleState(StateBase):
         pass
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class SimpleState(StateBase):
     string_parameter = StringParameter()
     bool_parameter = BoolParameter()
@@ -198,7 +198,7 @@ class SimpleState(StateBase):
         pass
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class ComplexState(StateBase):
     float_parameter = FloatParameter()
     positive_float_with_none_parameter = PositiveFloatWithNoneParameter()

@@ -3,7 +3,7 @@
 import json
 import copy
 
-from sans.state.state_base import (StateBase, PositiveFloatParameter, ClassTypeParameter, sans_debug_parameters)
+from sans.state.state_base import (StateBase, PositiveFloatParameter, ClassTypeParameter, rename_descriptor_names)
 from sans.common.sans_type import (RebinType, RangeStepType, SANSInstrument)
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 from sans.state.automatic_setters import (automatic_setters)
@@ -12,7 +12,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateWavelength(StateBase):
     rebin_type = ClassTypeParameter(RebinType)
     wavelength_low = PositiveFloatParameter()

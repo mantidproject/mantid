@@ -7,7 +7,6 @@ from sans.state.calculate_transmission import StateCalculateTransmission
 from sans.state.normalize_to_monitor import StateNormalizeToMonitor
 from sans.state.wavelength_and_pixel_adjustment import StateWavelengthAndPixelAdjustment
 from sans.common.sans_type import (SANSFacility, SANSInstrument, FitType)
-from test_director import TestDirector
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -74,19 +73,13 @@ class StateAdjustmentBuilderTest(unittest.TestCase):
         data_builder.set_sample_scatter("LOQ74044")
         data_info = data_builder.build()
 
-        test_director = TestDirector()
-        sample_state = test_director.construct()
-        calculate_transmission_state = sample_state.adjustment.calculate_transmission
-        normalize_to_monitor_state = sample_state.adjustment.normalize_to_monitor
-        wavelength_and_pixel_adjustment_state = sample_state.adjustment.wavelength_and_pixel_adjustment
-
         # Act
         builder = get_adjustment_builder(data_info)
         self.assertTrue(builder)
 
-        builder.set_calculate_transmission(calculate_transmission_state)
-        builder.set_normalize_to_monitor(normalize_to_monitor_state)
-        builder.set_wavelength_and_pixel_adjustment(wavelength_and_pixel_adjustment_state)
+        builder.set_calculate_transmission(MockStateCalculateTransmission())
+        builder.set_normalize_to_monitor(MockStateNormalizeToMonitor())
+        builder.set_wavelength_and_pixel_adjustment(MockStateWavelengthAndPixelAdjustment())
         builder.set_wide_angle_correction(False)
         state = builder.build()
 
@@ -99,6 +92,7 @@ class StateAdjustmentBuilderTest(unittest.TestCase):
         except ValueError:
             is_valid = False
         self.assertTrue(is_valid)
+
 
 if __name__ == '__main__':
     unittest.main()

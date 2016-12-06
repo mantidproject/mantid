@@ -6,7 +6,7 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter,
-                                       ClassTypeParameter, sans_debug_parameters)
+                                       ClassTypeParameter, rename_descriptor_names)
 from sans.common.sans_type import (SANSInstrument, SANSFacility)
 from sans.common.constants import SANSConstants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
@@ -17,7 +17,7 @@ from sans.state.automatic_setters import automatic_setters
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateData(StateBase):
     ALL_PERIODS = SANSConstants.ALL_PERIODS
     sample_scatter = StringParameter()

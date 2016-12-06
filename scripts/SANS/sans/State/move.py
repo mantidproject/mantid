@@ -6,7 +6,7 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
-                                   StringParameter, sans_debug_parameters)
+                                   StringParameter, rename_descriptor_names)
 from sans.common.constants import (SANSConstants)
 from sans.common.sans_type import (Coordinates, CanonicalCoordinates, SANSInstrument)
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
@@ -17,7 +17,7 @@ from sans.state.state_functions import (validation_message, set_detector_names, 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-@sans_debug_parameters
+@rename_descriptor_names
 class StateMoveDetector(StateBase):
     x_translation_correction = FloatParameter()
     y_translation_correction = FloatParameter()
@@ -74,7 +74,7 @@ class StateMoveDetector(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateMove(StateBase):
     sample_offset = FloatParameter()
     sample_offset_direction = ClassTypeParameter(Coordinates)
@@ -99,7 +99,7 @@ class StateMove(StateBase):
             self.detectors[key].validate()
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateMoveLOQ(StateMove):
     monitor_names = DictParameter()
     center_position = FloatParameter()
@@ -117,7 +117,7 @@ class StateMoveLOQ(StateMove):
         super(StateMoveLOQ, self).validate()
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateMoveSANS2D(StateMove):
     monitor_names = DictParameter()
 
@@ -161,7 +161,7 @@ class StateMoveSANS2D(StateMove):
         super(StateMoveSANS2D, self).validate()
 
 
-@sans_debug_parameters
+@rename_descriptor_names
 class StateMoveLARMOR(StateMove):
     monitor_names = DictParameter()
     bench_rotation = FloatParameter()

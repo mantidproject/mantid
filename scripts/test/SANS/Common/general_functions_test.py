@@ -2,7 +2,7 @@ import unittest
 import mantid
 
 from mantid.kernel import (V3D, Quat)
-from SANS2.Common.SANSFunctions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log)
+from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log)
 
 
 class SANSFunctionsTest(unittest.TestCase):
