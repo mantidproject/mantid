@@ -13,7 +13,7 @@ import os
 import numpy as np
 
 
-class SNAP_Reduce(DataProcessorAlgorithm):
+class SNAPReduce(DataProcessorAlgorithm):
     IPTS_dir = None
 
     def get_IPTS_Local(self, run):
@@ -466,4 +466,4 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                 propertyName, wksp, Direction.Output))
             self.setProperty(propertyName, wksp)
 
-AlgorithmFactory.subscribe(SNAP_Reduce)
+AlgorithmFactory.subscribe(SNAPReduce)
