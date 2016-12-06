@@ -400,25 +400,24 @@ public:
     delete suite;
   }
 
-  ConvertSpectrumAxis2TestPerformance() {}
+  ConvertSpectrumAxis2TestPerformance() {
+    m_testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        20000, 20000);
+  }
 
   void test_conversion_to_signed_theta_with_many_entries() {
-    std::string inputWSName("inputWS");
-    std::string outputWSName("outputWS");
-
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        20000, 20000);
-
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
-
     conv.initialize();
     conv.setChild(true);
-    conv.setProperty("InputWorkspace", testWS);
-    conv.setPropertyValue("OutputWorkspace", outputWSName);
+    conv.setProperty("InputWorkspace", m_testWS);
+    conv.setPropertyValue("OutputWorkspace", "outputWS");
     conv.setPropertyValue("Target", "SignedTheta");
     conv.setPropertyValue("EFixed", "10.0");
     conv.execute();
   }
+
+private:
+  MatrixWorkspace_sptr m_testWS;
 };
 
 #endif /*CONVERTSPECTRUMAXIS2TEST_H_*/
