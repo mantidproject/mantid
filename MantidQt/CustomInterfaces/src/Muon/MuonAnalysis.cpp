@@ -2209,7 +2209,20 @@ void MuonAnalysis::changeRun(int amountToChange) {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
   if ((currentFile.isEmpty()))
-    currentFile = m_previousFilenames[0];
+    if (m_previousFilenames.isEmpty())
+    {
+      //not a valid file, and no previous valid files
+      int ret = QMessageBox::warning(this, tr("Muon Analysis"),
+        tr("Unable to open the file.\n"
+          "and no previous valid files available."),
+        QMessageBox::Ok,
+        QMessageBox::Ok);
+      allowLoading(true);
+      return;
+    } else {
+      //blank box - use previous run
+      currentFile = m_previousFilenames[0];
+    }
 
   QString run("");
   int runSize(-1);
