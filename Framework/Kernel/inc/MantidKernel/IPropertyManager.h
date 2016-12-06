@@ -1,12 +1,16 @@
 #ifndef MANTID_KERNEL_IPROPERTYMANAGER_H_
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
+
+#ifndef Q_MOC_RUN
+#include <boost/make_shared.hpp>
+#include <boost/type_traits.hpp>
+#endif
+
 #include <vector>
 #include <unordered_set>
 
@@ -139,10 +143,7 @@ public:
    */
   template <typename T>
   IPropertyManager *setProperty(const std::string &name, const T &value) {
-    setTypedProperty(name, value,
-                     boost::is_convertible<T, boost::shared_ptr<DataItem>>());
-    this->afterPropertySet(name);
-    return this;
+    return doSetProperty(name, value);
   }
 
   /** Specialised version of setProperty template method to handle const char *
@@ -426,6 +427,45 @@ public:
   virtual Property *getPointerToProperty(const std::string &name) const = 0;
 
 private:
+  /** Helper method to set the value of a PropertyWithValue
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *doSetProperty(const std::string &name, const T &value) {
+    setTypedProperty(name, value,
+                     boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+    this->afterPropertySet(name);
+    return this;
+  }
+
+  /** Helper method to set the value of a PropertyWithValue, variant for
+   * shared_ptr types. This variant is required to enforce checks for complete
+   * types, do not remove it.
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *doSetProperty(const std::string &name,
+                                  const boost::shared_ptr<T> &value) {
+    // CAREFUL: is_convertible has undefined behavior for incomplete types. If T
+    // is forward-declared in the calling code, e.g., an algorithm that calls
+    // setProperty, compilation and linking do work. However, the BEHAVIOR IS
+    // UNDEFINED and the compiler will not complain, but things crash or go
+    // wrong badly. To circumvent this we call `sizeof` here to force a compiler
+    // error if T is an incomplete type.
+    static_cast<void>(sizeof(T)); // DO NOT REMOVE, enforces complete type
+    setTypedProperty(name, value, boost::is_convertible<T *, DataItem *>());
+    this->afterPropertySet(name);
+    return this;
+  }
+
   /**
    * Set a property value that is not convertible to a DataItem_sptr
    *  @param name :: The name of the property (case insensitive)

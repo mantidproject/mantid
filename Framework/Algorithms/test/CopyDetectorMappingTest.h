@@ -22,7 +22,7 @@ public:
     Mantid::Algorithms::CopyDetectorMapping copyMapping;
     TS_ASSERT_THROWS_NOTHING(copyMapping.initialize())
 
-    auto toMatch = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto toMatch = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     // Set the detector map for a spectra in the to match workspace
     std::set<detid_t> detIDs;
@@ -35,7 +35,7 @@ public:
     // Add workspaces to ADS
     AnalysisDataService::Instance().add("to_match", toMatch);
     AnalysisDataService::Instance().add(
-        "to_remap", WorkspaceCreationHelper::Create2DWorkspace(10, 10));
+        "to_remap", WorkspaceCreationHelper::create2DWorkspace(10, 10));
 
     // Run algorithm
     TS_ASSERT_THROWS_NOTHING(
@@ -66,9 +66,9 @@ public:
 
     // Add workspaces to ADS
     AnalysisDataService::Instance().add(
-        "to_match", WorkspaceCreationHelper::Create2DWorkspace(10, 10));
+        "to_match", WorkspaceCreationHelper::create2DWorkspace(10, 10));
     AnalysisDataService::Instance().add(
-        "to_remap", WorkspaceCreationHelper::Create2DWorkspace(20, 10));
+        "to_remap", WorkspaceCreationHelper::create2DWorkspace(20, 10));
 
     // Run algorithm
     TS_ASSERT_THROWS_NOTHING(

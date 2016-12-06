@@ -48,9 +48,9 @@ public:
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
 
     performTest(work_in1, work_in2);
   }
@@ -59,9 +59,9 @@ public:
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(nHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(nHist, nBins);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(nHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(nHist, nBins);
 
     performTest(work_in1, work_in2);
   }

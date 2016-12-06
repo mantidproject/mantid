@@ -156,7 +156,7 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantid
                   OUTPUT_QUIET ERROR_QUIET )
 
 # Package version
-set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-5.1" )
+set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
 if ( MAKE_VATES )
   set ( PARAVIEW_PYTHON_PATHS ":${EXTRA_LDPATH}:${EXTRA_LDPATH}/site-packages:${EXTRA_LDPATH}/site-packages/vtk" )
 else ()

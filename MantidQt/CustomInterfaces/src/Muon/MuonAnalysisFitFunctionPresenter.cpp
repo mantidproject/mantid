@@ -19,7 +19,7 @@ MuonAnalysisFitFunctionPresenter::MuonAnalysisFitFunctionPresenter(
     QObject *parent, IMuonFitFunctionControl *fitBrowser,
     IFunctionBrowser *funcBrowser)
     : QObject(parent), m_fitBrowser(fitBrowser), m_funcBrowser(funcBrowser),
-      m_compatibilityMode(false) {
+      m_multiFitState(Muon::MultiFitState::Disabled) {
   doConnect();
 }
 
@@ -88,20 +88,21 @@ void MuonAnalysisFitFunctionPresenter::updateFunction() {
   const Mantid::API::IFunction_sptr function =
       funcString.isEmpty() ? nullptr // last function has been removed
                            : m_funcBrowser->getGlobalFunction();
-  m_fitBrowser->setFunction(function);
+  setFunctionInModel(function);
 }
 
 /**
  * Called when a fit is requested.
  * Queries function browser and updates function in fit property browser.
- * (No update if compatibility mode is enabled).
+ * (No update if multiple fitting mode is disabled, as then there is no function
+ * browser).
  * Then calls fit or sequential fit as controlled by argument.
  * @param sequential :: [input] Whether a regular or sequential fit was
  * requested.
  */
 void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
-  // Update function
-  if (!m_compatibilityMode) {
+  // Update function, if there is a function browser
+  if (m_multiFitState == Muon::MultiFitState::Enabled) {
     updateFunction();
   }
   // Run fit
@@ -117,14 +118,14 @@ void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
  * Updates parameters displayed in function browser from the fit results.
  * In the case of "fit undone", this has the effect of resetting them, and also
  * removing the errors.
- * (No update is performed in "compatibility mode" as function browser is
- * hidden).
+ * (No update is performed if multiple fitting is not enabled, as function
+ * browser is hidden).
  * @param wsName :: [input] workspace name - empty if fit undone
  */
 void MuonAnalysisFitFunctionPresenter::handleFitFinished(
     const QString &wsName) {
   // Don't update if the function browser is hidden
-  if (!m_compatibilityMode) {
+  if (m_multiFitState == Muon::MultiFitState::Enabled) {
     const auto function = m_fitBrowser->getFunction();
     // We are updating function browser from fit browser, so turn off updates to
     // fit browser when function browser is updated...
@@ -241,14 +242,41 @@ void MuonAnalysisFitFunctionPresenter::handleDatasetIndexChanged(int index) {
 }
 
 /**
- * Turn compatibility mode on/off.
- * "Compatibility mode" hides the function browser and data selector so that
+ * Turn multiple fitting mode on/off.
+ * Turning it off hides the function browser and data selector so that
  * the fitting works as it used to pre-Mantid 3.8.
- * @param enabled :: [input] On/off for compatibility mode.
+ * @param state :: [input] On/off for multiple fitting mode.
  */
-void MuonAnalysisFitFunctionPresenter::setCompatibilityMode(bool enabled) {
-  m_fitBrowser->setCompatibilityMode(enabled);
-  m_compatibilityMode = enabled;
+void MuonAnalysisFitFunctionPresenter::setMultiFitState(
+    Muon::MultiFitState state) {
+  m_fitBrowser->setMultiFittingMode(state == Muon::MultiFitState::Enabled);
+  m_multiFitState = state;
+}
+
+/**
+ * Set the given function in the model (fit property browser).
+ *
+ * If and only if multi fit mode is enabled, need to deal with plot guess too.
+ * Remove the guess (if one is plotted) before updating the function, then
+ * replot if necessary afterwards.
+ * This ensures the guess is updated and prevents stale guesses in the plot.
+ *
+ * If multi fit mode is off, the user sets the function in the model directly so
+ * it works fine as is - no need to update the guess as it already happens.
+ *
+ * @param function :: [input] Function to set in the model
+ */
+void MuonAnalysisFitFunctionPresenter::setFunctionInModel(
+    const Mantid::API::IFunction_sptr &function) {
+  const bool updateGuess = m_multiFitState == Muon::MultiFitState::Enabled &&
+                           m_fitBrowser->hasGuess();
+  if (updateGuess) {
+    m_fitBrowser->doRemoveGuess();
+  }
+  m_fitBrowser->setFunction(function);
+  if (updateGuess) {
+    m_fitBrowser->doPlotGuess();
+  }
 }
 
 } // namespace CustomInterfaces

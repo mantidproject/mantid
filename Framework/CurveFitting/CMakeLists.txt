@@ -1,8 +1,10 @@
 set ( SRC_FILES
 	src/Algorithms/CalculateChiSquared.cpp
+	src/Algorithms/CalculateCostFunction.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
+	src/Algorithms/EstimateFitParameters.cpp
 	src/Algorithms/EstimatePeakErrors.cpp
 	src/Algorithms/EvaluateFunction.cpp
 	src/Algorithms/Fit.cpp
@@ -147,9 +149,11 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
+	inc/MantidCurveFitting/Algorithms/CalculateCostFunction.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
+	inc/MantidCurveFitting/Algorithms/EstimateFitParameters.h
 	inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
 	inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
 	inc/MantidCurveFitting/Algorithms/Fit.h
@@ -302,8 +306,10 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	Algorithms/CalculateChiSquaredTest.h
+	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
+	Algorithms/EstimateFitParametersTest.h
 	Algorithms/EstimatePeakErrorsTest.h
 	Algorithms/EvaluateFunctionTest.h
 	Algorithms/FitPowderDiffPeaksTest.h

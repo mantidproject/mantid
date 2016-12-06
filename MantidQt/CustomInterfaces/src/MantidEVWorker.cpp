@@ -5,6 +5,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -56,9 +57,19 @@ std::string MantidEVWorker::workspaceType(const std::string &ws_name) {
   if (!ADS.doesExist(ws_name))
     return std::string("");
 
-  Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(ws_name);
+  WorkspaceGroup_const_sptr wsgroup = ADS.retrieveWS<WorkspaceGroup>(ws_name);
+  if (wsgroup) {
 
-  return outWS->id();
+    std::vector<std::string> group = wsgroup->getNames();
+    Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(group[0]);
+
+    return outWS->id();
+  } else {
+
+    Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(ws_name);
+
+    return outWS->id();
+  }
 }
 
 /**

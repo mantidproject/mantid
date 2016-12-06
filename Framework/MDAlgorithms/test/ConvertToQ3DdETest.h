@@ -39,7 +39,7 @@ public:
 
   void testExecThrow() {
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceCreationHelper::CreateGroupedWorkspace2DWithRingsAndBoxes();
+        WorkspaceCreationHelper::createGroupedWorkspace2DWithRingsAndBoxes();
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 

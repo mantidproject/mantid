@@ -104,7 +104,7 @@ public:
 
   void test_Input_Workspace_Not_In_TOF_Throws_Error() {
     auto alg = createAlgorithm();
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace123(1, 10);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     testWS->getAxis(0)->setUnit("Wavelength");
 
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
@@ -113,7 +113,7 @@ public:
 
   void test_Input_Workspace_In_TOF_Without_Instrument_Throws_Error() {
     auto alg = createAlgorithm();
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace123(1, 10);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     testWS->getAxis(0)->setUnit("TOF");
 
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
