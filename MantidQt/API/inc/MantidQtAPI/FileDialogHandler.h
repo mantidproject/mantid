@@ -60,8 +60,8 @@ DLLExport QString getSaveFileName(QWidget *parent = 0,
  * doesn't
  * already exist.
  */
-DLLExport QString addExtension(const QString &filename,
-                               const QString &selectedFilter);
+DLLExport QString
+addExtension(const QString &filename, const QString &selectedFilter);
 
 DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
 
@@ -71,11 +71,11 @@ DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
  * @param defaultExt :: default extension to use
  * @return a string that filters files by extenstions
  */
-DLLExport QString getFilter(const std::vector<std::string> &exts,
-                            const std::string &defaultExt);
+DLLExport QString
+getFilter(const std::vector<std::string> &exts, const std::string &defaultExt);
 
-DLLExport QString getCaption(const std::string &dialogName,
-                             const Mantid::Kernel::Property *prop);
+DLLExport QString
+getCaption(const std::string &dialogName, const Mantid::Kernel::Property *prop);
 }
 }
 }
