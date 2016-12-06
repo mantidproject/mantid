@@ -337,6 +337,19 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
 namespace MantidQt {
 namespace API {
 
+size_t
+getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
+                            size_t dimX, size_t dimY) {
+  for (size_t i = 0; i < workspace->getNumDims(); ++i) {
+    auto dimension = workspace->getDimension(i);
+    const auto &frame = dimension->getMDFrame();
+    if ((frame.name() == Mantid::Geometry::HKL::HKLName) && (i != dimX) &&
+        (i != dimY)) {
+      return i;
+    }
+  }
+}
+
 void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
                        Mantid::API::IMDWorkspace_const_sptr workspace) {
   if (Mantid::API::IMDEventWorkspace_const_sptr eventWorkspace =
@@ -394,16 +407,32 @@ void transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
 }
 /**
 Explanation of index mapping
+lookPoint[0] is H
+lookPoint[1] is K
+lookPoint[2] is L
+eg
+Have matrix (from xyz -> hkl) and X, K, Z
+H = M11 . X + M12Y + M13Z
+K = M24X + M22Y + M23Z
+L = M31X + M32Y + M33Z
 
 */
 void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
                                         const Mantid::coord_t skewMatrix[9],
-                                        const size_t &dimX,
-                                        const size_t &dimY) {
+                                        const size_t &dimX, const size_t &dimY,
+                                        const size_t &dimSlice) {
+
+  auto sliceDimResult =
+      (lookPoint[dimSlice] - skewMatrix[3 * dimSlice + dimX] * lookPoint[dimX] -
+       skewMatrix[3 * dimSlice + dimY] * lookPoint[dimY]) /
+      skewMatrix[3 * dimSlice + dimSlice];
+
+  lookPoint[dimSlice] = sliceDimResult;
 
   auto v1 = lookPoint[0];
   auto v2 = lookPoint[1];
   auto v3 = lookPoint[2];
+
   lookPoint[dimX] = v1 * skewMatrix[0 + 3 * dimX] +
                     v2 * skewMatrix[1 + 3 * dimX] +
                     v3 * skewMatrix[2 + 3 * dimX];

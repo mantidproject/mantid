@@ -832,7 +832,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Enable peaks overlays according to the dimensionality and the displayed
   // dimensions.
   enablePeakOverlaysIfAppropriate();
-
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -1572,8 +1571,6 @@ void SliceViewer::updateDisplay(bool resetAxes) {
   size_t oldX = m_dimX;
   size_t oldY = m_dimY;
 
-  m_dimX = 0;
-  m_dimY = 1;
   std::vector<coord_t> slicePoint;
 
   for (size_t d = 0; d < m_ws->getNumDims(); d++) {
@@ -1604,7 +1601,6 @@ void SliceViewer::updateDisplay(bool resetAxes) {
     // The dimensionality has changed. It might no longer be possible to plot
     // peaks.
     enablePeakOverlaysIfAppropriate();
-
     // Transform the peak overlays according to the new plotting.
     m_peaksPresenter->changeShownDim();
 

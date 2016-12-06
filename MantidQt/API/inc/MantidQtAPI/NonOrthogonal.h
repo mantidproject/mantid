@@ -21,6 +21,10 @@ bool EXPORT_OPT_MANTIDQT_API
 isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX,
                 size_t dimY);
 
+size_t EXPORT_OPT_MANTIDQT_API
+getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
+                            size_t dimX, size_t dimY);
+
 void EXPORT_OPT_MANTIDQT_API
 transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
                             Mantid::coord_t skewMatrixCoord[9]);
@@ -28,7 +32,8 @@ transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
 void EXPORT_OPT_MANTIDQT_API
 transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
                                    const Mantid::coord_t skewMatrix[9],
-                                   const size_t &dimX, const size_t &dimY);
+                                   const size_t &dimX, const size_t &dimY,
+                                   const size_t &dimSlice);
 
 template <typename T>
 void transformLookpointToWorkspaceCoordGeneric(T &lookPoint,

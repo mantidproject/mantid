@@ -26,6 +26,7 @@ public:
                       std::vector<Mantid::coord_t> &slicePoint) override;
   Mantid::coord_t *m_lookPoint;
   Mantid::coord_t m_skewMatrix[9];
+  size_t m_missingHKLdim;
 
 protected:
   void copyFrom(const QwtRasterDataMDNonOrthogonal &source,
