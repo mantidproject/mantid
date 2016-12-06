@@ -40,7 +40,7 @@ class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacity
     : public CrystalFieldPeaksBase, public API::IFunction1D {
 public:
   CrystalFieldHeatCapacity();
-  std::string name() const override { return "CrystalHeatCapacity"; }
+  std::string name() const override { return "CrystalFieldHeatCapacity"; }
   const std::string category() const override { return "General"; }
   void set_eigensystem(const DoubleFortranVector &en_in, 
       const ComplexFortranMatrix &wf_in, const int nre_in);

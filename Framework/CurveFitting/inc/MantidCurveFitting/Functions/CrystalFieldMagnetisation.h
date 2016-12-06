@@ -10,9 +10,10 @@ namespace CurveFitting {
 namespace Functions {
 
 /**
-  CrystalFieldHeatCapacity is a function that calculates the molar magnetic 
-  heat capacity (in J/K/mol) due to the splitting of electronic energy levels
-  due to the crystal field.
+  CrystalFieldMagnetisation is a function that calculates the induced
+  magnetic moment (in bohr magnetons per ion) as a function of applied 
+  external magnetic field (in Tesla), for a particular crystal field
+  splitting.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

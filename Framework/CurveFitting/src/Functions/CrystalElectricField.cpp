@@ -795,9 +795,9 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
     }
   }
   DoubleFortranVector rbext(1, 3);
-  rbext(1) = real((ComplexType)(rbex(1, -1))) * M_SQRT2;
-  rbext(2) = imag((ComplexType)(rbex(1, -1))) * M_SQRT2;
-  rbext(3) = real((ComplexType)rbex(1, 0));
+  rbext(1) = real(static_cast<ComplexType>(rbex(1, -1))) * M_SQRT2;
+  rbext(2) = imag(static_cast<ComplexType>(rbex(1, -1))) * M_SQRT2;
+  rbext(3) = real(static_cast<ComplexType>(rbex(1, 0)));
 
   int dim = static_cast<int>(dimj);
   hamiltonian.allocate(1, dim, 1, dim);

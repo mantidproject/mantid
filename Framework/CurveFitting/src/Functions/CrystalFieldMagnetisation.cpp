@@ -12,6 +12,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <cmath>
 #include <iostream>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -19,10 +20,11 @@ namespace Functions {
 
 namespace {
 
-// Does the actual calculation of the heat capacity
+// Does the actual calculation of the magnetisation
 void calculate(double *out, const double *xValues, const size_t nData,
                const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector Hmag, const double T) {
+               const DoubleFortranVector Hmag, const double T,
+               const double convfact) {
   const double beta = 1 / (PhysicalConstants::BoltzmannConstant * T);
   // x-data is the applied field magnitude. We need to recalculate
   // the Zeeman term and diagonalise the Hamiltonian at each x-point.
@@ -45,7 +47,7 @@ void calculate(double *out, const double *xValues, const size_t nData,
       Z += expfact;
       M += moment(iE) * expfact;
     }
-    out[iH] = gJ * M / Z;
+    out[iH] = convfact * gJ * M / Z;
   }
 }
 
@@ -57,6 +59,7 @@ CrystalFieldMagnetisation::CrystalFieldMagnetisation()
     : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Temperature", Attribute(1.0));
+  declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
 }
 
 // Sets the base crystal field Hamiltonian matrix
@@ -78,6 +81,13 @@ void CrystalFieldMagnetisation::function1D(double *out,
   for (auto i = 0; i < 3; i++) {
     H(i+1) = Hdir[i] / Hnorm;
   }
+  auto unit = getAttribute("Unit").asString();
+  const double NAMUB = 5.5849397;  // N_A*mu_B - J/T/mol
+  // Converts to different units - SI is in J/T/mol or Am^2/mol. cgs in emu/mol.
+  // NB. Atomic ("bohr") units gives magnetisation in uB/ion, but other units
+  // give the molar magnetisation.
+  double convfact = boost::iequals(unit, "SI") ? NAMUB : 
+                    (boost::iequals(unit, "cgs") ? NAMUB*1000. : 1.);
   if (!setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
@@ -88,11 +98,11 @@ void CrystalFieldMagnetisation::function1D(double *out,
     int nre_ = 0; 
     calculateEigenSystem(en_, wf_, ham_, hz_, nre_);
     ham_ += hz_;
-    calculate(out, xValues, nData, ham_, nre_, H, T);
+    calculate(out, xValues, nData, ham_, nre_, H, T, convfact);
   }
   else {
     // Use stored values
-    calculate(out, xValues, nData, ham, nre, H, T);
+    calculate(out, xValues, nData, ham, nre, H, T, convfact);
   }
 }
 

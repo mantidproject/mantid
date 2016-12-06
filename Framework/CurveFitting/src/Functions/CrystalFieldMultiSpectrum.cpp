@@ -106,6 +106,20 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
       declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
     }
   }
+  if (name == "PhysicalProperties") {
+    auto physpropId = attr.asVector();
+    auto nSpec = physpropId.size();
+    for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
+      auto suffix = std::to_string(iSpec);
+      switch(static_cast<int>(physpropId[iSpec])) {
+        case 3:
+        case 4:
+          declareAttribute("Unit" + suffix, Attribute("bohr"));
+          declareAttribute("Hdir" + suffix, Attribute(std::vector<double>{0., 0., 1.}));
+          break;
+      }
+    }
+  }
   FunctionGenerator::setAttribute(name, attr);
 }
 
@@ -171,7 +185,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   for (size_t i = 0; i < nSpec; ++i) {
     if (m_physprops[i] > 0) {
       // This "spectrum" is actually a physical properties dataset.
-      fun->addFunction(buildPhysprop(nre, en, wf, ham, i));
+      fun->addFunction(buildPhysprop(nre, en, wf, ham, temperatures[i], i));
     } else {
       if (m_fwhmX[i].empty()) {
         auto suffix = std::to_string(i);
@@ -242,7 +256,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
 
 API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    const ComplexFortranMatrix &ham, size_t iSpec) const {
+    const ComplexFortranMatrix &ham, double temperature, size_t iSpec) const {
   switch(m_physprops[iSpec]) {
     case 1: { // Heat capacity
       auto spectrum = new CrystalFieldHeatCapacity;
@@ -252,6 +266,12 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     case 3: { // Magnetisation
       auto spectrum = new CrystalFieldMagnetisation;
       spectrum->set_hamiltonian(ham, nre);
+      spectrum->setAttribute("Temperature", Attribute(temperature));
+      auto suffix = std::to_string(iSpec);
+      auto unit = getAttribute("Unit" + suffix).asString();
+      spectrum->setAttribute("Unit", Attribute(unit));
+      auto hdir = getAttribute("Hdir" + suffix).asVector();
+      spectrum->setAttribute("Hdir", Attribute(hdir));
       return IFunction_sptr(spectrum);
     }
   }

@@ -54,7 +54,7 @@ private:
   API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en, 
                                     const ComplexFortranMatrix &wf,
                                     const ComplexFortranMatrix &ham,
-                                    size_t iSpec) const;
+                                    double temperature, size_t iSpec) const;
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
