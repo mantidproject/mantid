@@ -82,25 +82,23 @@ protected:
 
 /// Tolerance for determining the smallest significant value on the peak
 const double PEAK_TOLERANCE = 1e-14;
+/// "Infinite" value for the peak radius
+const int MAX_PEAK_RADIUS = std::numeric_limits<int>::max();
 
 } // namespace
 
-/// "Infinite" value for the peak radius
-const int IPeakFunction::g_maxPeakRadius = std::numeric_limits<int>::max();
 
 /**
   * Constructor.
   * @param peakRadius :: The peak radius for this instance.
   */
-IPeakFunction::IPeakFunction(int peakRadius) : m_peakRadius(peakRadius) {}
+IPeakFunction::IPeakFunction() : m_peakRadius(MAX_PEAK_RADIUS) {}
 
 void IPeakFunction::function(const FunctionDomain &domain,
                              FunctionValues &values) const {
   auto peakRadius =
       dynamic_cast<const FunctionDomain1D &>(domain).getPeakRadius();
-  if (peakRadius < m_peakRadius) {
-    setPeakRadius(peakRadius);
-  }
+  setPeakRadius(peakRadius);
   IFunction1D::function(domain, values);
 }
 
@@ -172,12 +170,9 @@ void IPeakFunction::setPeakRadius(int r) const {
   if (r > 0) {
     m_peakRadius = r;
   } else if (r == 0) {
-    m_peakRadius = g_maxPeakRadius;
+    m_peakRadius = MAX_PEAK_RADIUS;
   }
 }
-
-/// Get the peak radius
-int IPeakFunction::getPeakRadius() const { return m_peakRadius; }
 
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
@@ -271,9 +266,6 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
   right = findBound(w);
   return std::make_pair(left, right);
 }
-
-/// Return a peak radius large enough to be practically infinite
-int IPeakFunction::maxPeakRadius() { return g_maxPeakRadius; }
 
 } // namespace API
 } // namespace Mantid

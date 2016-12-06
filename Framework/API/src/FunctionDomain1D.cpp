@@ -2,14 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/IPeakFunction.h"
 
 namespace Mantid {
 namespace API {
 
 /// The constructor
 FunctionDomain1D::FunctionDomain1D(const double *x, size_t n)
-    : m_data(x), m_n(n), m_peakRadius(IPeakFunction::maxPeakRadius()) {}
+    : m_data(x), m_n(n), m_peakRadius(0) {}
 
 /// Convert to a vector
 std::vector<double> FunctionDomain1D::toVector() const {

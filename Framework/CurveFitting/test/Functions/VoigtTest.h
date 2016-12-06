@@ -273,8 +273,6 @@ private:
     boost::shared_ptr<IFunction> voigtFn = boost::make_shared<Voigt>();
     auto peakFn =
         boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
-    // Set a fairly wide radius for simple tests
-    peakFn->setPeakRadius(10);
     voigtFn->initialize();
 
     voigtFn->setParameter("LorentzAmp", a_L);
