@@ -93,8 +93,8 @@ void ProjectSaveView::updateWorkspacesList(
   for (auto info : workspaces) {
     addWorkspaceItem(info);
   }
-
-  resizeWidgetColumns(m_ui.workspaceList);
+  // pad the header for longish workspace names
+  m_ui.workspaceList->header()->resizeSection(0, 300);
 }
 
 /**
@@ -167,6 +167,20 @@ void ProjectSaveView::removeFromExcludedWindowsList(
  * @param column :: column that was modified
  */
 void ProjectSaveView::workspaceItemChanged(QTreeWidgetItem *item, int column) {
+  blockSignals(true);
+  // update child check state
+  auto checkState = item->checkState(0);
+  for(int i = 0; i < item->childCount(); ++i)
+  {
+    item->child(i)->setCheckState(0, checkState);
+  }
+
+  auto parent = item->parent();
+  if(parent && checkState == Qt::CheckState::Unchecked)
+    parent->setCheckState(0, checkState);
+
+  blockSignals(false);
+
   if (item->checkState(column) == Qt::CheckState::Checked) {
     m_presenter->notify(ProjectSavePresenter::Notification::CheckWorkspace);
   } else if (item->checkState(column) == Qt::CheckState::Unchecked) {
@@ -240,6 +254,14 @@ ProjectSaveView::getItemsWithCheckState(const Qt::CheckState state) const {
       auto name = item->text(0).toStdString();
       names.push_back(name);
     }
+
+    for(int i = 0; i < item->childCount(); ++i) {
+      auto child = item->child(i);
+      if (child->checkState(0) == state) {
+        auto childName = child->text(0).toStdString();
+        names.push_back(childName);
+      }
+    }
   }
   return names;
 }
@@ -307,6 +329,21 @@ void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info) {
   if (!info.icon_id.empty())
     item->setIcon(0, getQPixmap(info.icon_id));
   item->setCheckState(0, Qt::CheckState::Checked);
+
+  for(auto subInfo : info.subWorkspaces) {
+    QStringList subItem;
+    subItem << QString::fromStdString(subInfo.name);
+    subItem << QString::fromStdString(subInfo.type);
+    subItem << QString::fromStdString(subInfo.size);
+    subItem << QString::number(subInfo.numWindows);
+
+    auto subWidgetItem = new QTreeWidgetItem(subItem);
+    if (!info.icon_id.empty())
+      subWidgetItem->setIcon(0, getQPixmap(subInfo.icon_id));
+    subWidgetItem->setCheckState(0, Qt::CheckState::Checked);
+    item->addChild(subWidgetItem);
+  }
+
   m_ui.workspaceList->addTopLevelItem(item);
 }
 

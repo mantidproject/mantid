@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/ProjectSaveModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtAPI/WindowIcons.h"
 #include "MantidQtAPI/WorkspaceIcons.h"
 
@@ -18,11 +19,6 @@ ProjectSaveModel::ProjectSaveModel(
     std::vector<IProjectSerialisable *> windows) {
   auto workspaces = getWorkspaces();
   for (auto &ws : workspaces) {
-    // Currently we don't support saving workspace groups.
-    // so, here just skip any and just include the other workspaces
-    if (ws->id() == "WorkspaceGroup")
-      continue;
-
     std::pair<std::string, std::vector<IProjectSerialisable *>> item(
         ws->name(), std::vector<IProjectSerialisable *>());
     m_workspaceWindows.insert(item);
@@ -132,19 +128,20 @@ std::vector<WindowInfo> ProjectSaveModel::getWindowInformation(
  * @return vector of workspace info objects for all workspaces
  */
 std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
-  WorkspaceIcons icons;
   std::vector<WorkspaceInfo> wsInfo;
 
-  for (auto item : m_workspaceWindows) {
-    auto ws = AnalysisDataService::Instance().retrieve(item.first);
-    WorkspaceInfo info;
-    auto id = ws->id();
+  auto items = AnalysisDataService::Instance().topLevelItems();
+  for (auto item : items) {
+    auto ws = item.second;
+    auto info = makeWorkspaceInfoObject(ws);
 
-    info.name = ws->name();
-    info.numWindows = getWindows(ws->name()).size();
-    info.size = ws->getMemorySizeAsStr();
-    info.icon_id = icons.getIconID(id);
-    info.type = id;
+    if(ws->id() == "WorkspaceGroup") {
+      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      for(int i =0; i < group->getNumberOfEntries(); ++i) {
+        auto subInfo = makeWorkspaceInfoObject(group->getItem(i));
+        info.subWorkspaces.push_back(subInfo);
+      }
+    }
 
     wsInfo.push_back(info);
   }
@@ -159,6 +156,18 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
 std::vector<Workspace_sptr> ProjectSaveModel::getWorkspaces() const {
   auto &ads = AnalysisDataService::Instance();
   return ads.getObjects();
+}
+
+WorkspaceInfo ProjectSaveModel::makeWorkspaceInfoObject(Workspace_const_sptr ws) const
+{
+    WorkspaceIcons icons;
+    WorkspaceInfo info;
+    info.name = ws->name();
+    info.numWindows = getWindows(ws->name()).size();
+    info.size = ws->getMemorySizeAsStr();
+    info.icon_id = icons.getIconID(ws->id());
+    info.type = ws->id();
+    return info;
 }
 
 /**

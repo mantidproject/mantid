@@ -433,10 +433,6 @@ QString ProjectSerialiser::saveWorkspaces() {
   for (auto &itemIter : workspaceItems) {
     QString wsName = QString::fromStdString(itemIter);
 
-    // check whether the user wants to save this workspace
-    if (!m_saveAll && !contains(m_workspaceNames, wsName.toStdString()))
-      continue;
-
     auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
         wsName.toStdString());
     auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
@@ -449,12 +445,21 @@ QString ProjectSerialiser::saveWorkspaces() {
       wsNames += wsName;
       std::vector<std::string> secondLevelItems = group->getNames();
       for (size_t j = 0; j < secondLevelItems.size(); j++) {
+
+        // check whether the user wants to save this workspace
+        if (!m_saveAll && !contains(m_workspaceNames, secondLevelItems[j]))
+          continue;
+
         wsNames += ",";
         wsNames += QString::fromStdString(secondLevelItems[j]);
         std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
         window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
       }
     } else {
+      // check whether the user wants to save this workspace
+      if (!m_saveAll && !contains(m_workspaceNames, wsName.toStdString()))
+        continue;
+
       wsNames += "\t";
       wsNames += wsName;
 

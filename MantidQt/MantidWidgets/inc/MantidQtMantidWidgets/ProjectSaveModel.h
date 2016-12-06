@@ -20,6 +20,7 @@ struct WorkspaceInfo {
   std::string size;
   std::string icon_id;
   size_t numWindows;
+  std::vector<WorkspaceInfo> subWorkspaces;
 
   bool operator==(const WorkspaceInfo &b) const { return name == b.name; }
 };
@@ -62,6 +63,9 @@ public:
   std::vector<Mantid::API::Workspace_sptr> getWorkspaces() const;
 
 private:
+  /// Create a workspace info object for this workspace
+  WorkspaceInfo makeWorkspaceInfoObject(Mantid::API::Workspace_const_sptr ws) const;
+
   // Instance variables
 
   /// Map to hold which windows are associated with a workspace
