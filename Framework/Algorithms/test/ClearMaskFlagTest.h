@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ClearMaskFlag.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -57,9 +58,9 @@ public:
     space2D->setInstrument(instr);
 
     // set the mask on a bunch of spectra
-    Mantid::Geometry::ParameterMap &pmap = space2D->instrumentParameters();
+    auto &detectorInfo = space2D->mutableDetectorInfo();
     for (int j = 0; j < nummask; ++j) {
-      pmap.addBool(instr->getDetector(j)->getComponentID(), "masked", true);
+      detectorInfo.setMasked(j, true);
     }
 
     // register the workspace in the data service
