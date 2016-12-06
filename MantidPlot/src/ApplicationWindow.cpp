@@ -6090,8 +6090,7 @@ void ApplicationWindow::loadDataFileByName(QString fn) {
   } else if (fnInfo.suffix() == "mantid") {
     // We have a mantid project file, pass on to project loading
     open(fn);
-  }
-  else if (mantidUI) {
+  } else if (mantidUI) {
     // Run Load algorithm on file
     QHash<QString, QString> params;
     params["Filename"] = fn;
