@@ -553,7 +553,7 @@ public:
       : m_sortType(sortType), m_WS(WS), prog(prog) {}
 
   // Execute the sort as specified.
-  void operator()(const tbb::blocked_range<size_t> &range) {
+  void operator()(const tbb::blocked_range<size_t> &range) const {
     for (size_t wi = range.begin(); wi < range.end(); ++wi) {
       m_WS->getSpectrum(wi).sort(m_sortType);
     }
