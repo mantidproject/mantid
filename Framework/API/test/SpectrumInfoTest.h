@@ -386,15 +386,16 @@ private:
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
     ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
-      if (i % 2 == 0)
-        pmap.addBool(det->getComponentID(), "masked", true);
     }
+    auto &detectorInfo = ws->mutableDetectorInfo();
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
+      if (i % 2 == 0)
+        detectorInfo.setMasked(i, true);
     return std::move(ws);
   }
 
@@ -410,13 +411,9 @@ private:
         ws, includeMonitors, startYNegative, instrumentName);
 
     std::set<int64_t> toMask{0, 3};
-    ParameterMap &pmap = ws.instrumentParameters();
-    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      if (toMask.find(i) != toMask.end()) {
-        IDetector_const_sptr det = ws.getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
-      }
-    }
+    auto &detectorInfo = ws.mutableDetectorInfo();
+    for (const auto &i : toMask)
+      detectorInfo.setMasked(i, true);
     return ws;
   }
 };
