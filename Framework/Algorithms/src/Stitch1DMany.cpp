@@ -120,7 +120,8 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
           inputWorkspaces.push_back(
               AnalysisDataService::Instance().retrieveWS<Workspace>(wsName));
         } else {
-          throw std::invalid_argument(groupWSName + " is not a valid workspace.");
+          throw std::invalid_argument(groupWSName +
+                                      " is not a valid workspace.");
         }
       }
 

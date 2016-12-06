@@ -34,9 +34,9 @@ private:
   * @oaram outWSName :: output workspace name used if running CreateWorkspace
   */
   MatrixWorkspace_sptr createUniformWorkspace(double xstart, double deltax,
-    double value1, double value2,
-    bool runAlg = false,
-    std::string outWSName = "") {
+                                              double value1, double value2,
+                                              bool runAlg = false,
+                                              std::string outWSName = "") {
 
     const int nbins = 10;
     std::vector<double> xData1(nbins + 1);
@@ -63,7 +63,7 @@ private:
 
     if (!runAlg) {
       ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nbins + 1,
-        nbins);
+                                               nbins);
       ws->dataX(0) = xData1;
       ws->dataX(1) = xData2;
       ws->dataY(0) = yData1;
@@ -71,8 +71,7 @@ private:
       ws->dataE(0) = eData1;
       ws->dataE(1) = eData2;
       ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    }
-    else {
+    } else {
       // Concatenate data vectors into one vector
       xData1.insert(xData1.end(), xData2.begin(), xData2.end());
       yData1.insert(yData1.end(), yData2.begin(), yData2.end());
@@ -89,7 +88,7 @@ private:
       cw.execute();
 
       ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outWSName);
+          outWSName);
     }
 
     return ws;
@@ -100,7 +99,8 @@ private:
   * @param inputWSNames :: input workspaces names
   * @param outputWSName :: output workspace name
   */
-  WorkspaceGroup_sptr doGroupWorkspaces(std::string inputWSNames, std::string outWSName) {
+  WorkspaceGroup_sptr doGroupWorkspaces(std::string inputWSNames,
+                                        std::string outWSName) {
     GroupWorkspaces gw;
     gw.initialize();
     gw.setProperty("InputWorkspaces", inputWSNames);
@@ -108,7 +108,7 @@ private:
     gw.execute();
 
     WorkspaceGroup_sptr ws =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
     return ws;
   }
 
@@ -489,7 +489,7 @@ public:
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1);
     auto stitched =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -564,7 +564,7 @@ public:
 
     // First item in the output group
     auto stitched =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -611,7 +611,7 @@ public:
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001); // 1.0/1.1
     TS_ASSERT_DELTA(scales.back(), 0.9375, 0.0001);  // 1.5/1.6
 
-                                                     // Clear the ADS
+    // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
 
@@ -662,7 +662,7 @@ public:
 
     // First item in the output group
     auto stitched =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -768,7 +768,7 @@ public:
 
     // First item in the output group
     auto stitched =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -847,7 +847,7 @@ public:
 
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     auto stitched =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
 
     // Test the algorithm histories
     std::vector<std::string> histNames;
@@ -891,12 +891,13 @@ public:
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
+    auto group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
     auto stitched =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     // Test the algorithm histories
     std::vector<std::string> histNames;
@@ -949,9 +950,10 @@ public:
 
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
-    auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
+    auto group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     auto stitched =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     // Test the algorithm histories
     std::vector<std::string> histNames;
