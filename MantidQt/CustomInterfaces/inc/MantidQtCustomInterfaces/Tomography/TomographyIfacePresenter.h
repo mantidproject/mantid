@@ -110,7 +110,7 @@ protected slots:
   void addProcessToJobList();
   void reconProcessFailedToStart();
   void workerFinished(const qint64 pid, const int exitCode);
-  void emitExternalProcessOutput();
+  void emitExternalProcessOutput(const qint64 pid, const int exitCode);
 
 private:
   /// Asks the user for permission to cancel the running reconstruction

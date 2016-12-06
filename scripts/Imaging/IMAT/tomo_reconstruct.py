@@ -63,6 +63,7 @@ import pydevd
 pydevd.settrace(
     'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
 
+
 def setup_cmd_options():
     """
     Build an argument parser
@@ -87,12 +88,7 @@ def setup_cmd_options():
         type=str,
         help="Where to write the output slice images (reconstructred volume)")
 
-    grp_req.add_argument(
-        "-c",
-        "--cor",
-        required=False,
-        type=float,
-        help="2")
+    grp_req.add_argument("-c", "--cor", required=False, type=float, help="2")
 
     grp_req.add_argument(
         "-f",

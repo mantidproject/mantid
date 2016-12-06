@@ -1,4 +1,3 @@
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -8,6 +7,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
@@ -21,6 +21,24 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
+
+#include <intrin.h>
+
+#if defined(_DEBUG) && defined(_WIN32)
+#ifndef DBREAK
+#define DBREAK __debugbreak();
+#define MDBREAK(msg)                                                           \
+  std::cout << msg << '\n';                                                    \
+  DBREAK
+#endif
+#elif
+#ifndef DBREAK
+#define DBREAK __builtin_trap();
+#define MDBREAK(msg)                                                           \
+  std::cout << msg << '\n';                                                    \
+  DBREAK
+#endif
+#endif
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -151,14 +169,17 @@ void TomographyIfacePresenter::notify(
 }
 
 void TomographyIfacePresenter::processRunExternalProcess() {
+  // TODO unify with processRunRecon()
   // read the cached variables in view
-  std::string cachedExec = m_view->getCachedExecutable();
-  std::vector<std::string> cachedArgs = m_view->getCachedArguments();
+  const std::string &cachedExec = m_view->getCachedExecutable();
+  const std::vector<std::string> &cachedArgs = m_view->getCachedArguments();
 
   std::string runnable;
   std::vector<std::string> args;
   std::string allOpts;
-  m_model->prepareSubmissionArguments(true, runnable, args, allOpts);
+  // still prepare submission arguments to get the defaults
+  const bool local = true;
+  m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
 
   // append the additional args for now
   for (const auto &arg : cachedArgs) {
@@ -166,15 +187,9 @@ void TomographyIfacePresenter::processRunExternalProcess() {
     allOpts += arg;
   }
 
-  // do run local external process
-  // will need to refactor doLocalRunReconstructionJob
-  // TODO create a custom method?, or provide a title for the process?
   // if no external provided, use the default one from settings
   setupAndRunLocalExternalProcess(!cachedExec.empty() ? cachedExec : runnable,
                                   args, allOpts);
-
-  // after we make sure that the output is given back, try reading it back to
-  // ROI
 }
 
 void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
@@ -208,8 +223,8 @@ void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
           SLOT(readWorkerStdErr(QString)));
 
   // remove the user confirmation for running recon, if the recon has finished
-  connect(m_workerThread.get(), SIGNAL(workerFinished()), this,
-          SLOT(emitExternalProcessOutput()));
+  connect(m_workerThread.get(), SIGNAL(workerFinished(qint64, int)), this,
+          SLOT(emitExternalProcessOutput(qint64, int)));
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
 
@@ -218,7 +233,9 @@ void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
   m_reconRunning = true;
 }
 
-void TomographyIfacePresenter::emitExternalProcessOutput() {
+void TomographyIfacePresenter::emitExternalProcessOutput(const qint64 pid,
+                                                         const int exitCode) {
+  m_model->updateProcessInJobList(pid, exitCode);
   m_view->externalProcessFinished(m_workerOutputCache);
 }
 
