@@ -125,7 +125,6 @@ void StepScan::startLiveListener() {
         "This interface requires event data.\nThe live data for " +
             QString::fromStdString(m_instrument) + " is in histogram form");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
-    m_uiForm.mWRunFiles->liveButtonSetEnabled(false);
     return;
   }
 
