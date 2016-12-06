@@ -96,7 +96,7 @@ void ConvertSpectrumAxis::exec() {
       emode = 2;
     const double delta = 0.0;
     double efixed;
-    auto spectrumInfo = inputWS->spectrumInfo();
+    auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
       double twoTheta, l1val, l2;

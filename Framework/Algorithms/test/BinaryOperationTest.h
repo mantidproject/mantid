@@ -175,7 +175,7 @@ public:
     TS_ASSERT(output);
 
     for (int i = 0; i < nHist; ++i) {
-      auto spectrumInfo = output->spectrumInfo();
+      auto &spectrumInfo = output->spectrumInfo();
 
       TSM_ASSERT("Detector was not found", spectrumInfo.hasDetectors(i));
       if (spectrumInfo.hasDetectors(i)) {

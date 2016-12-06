@@ -151,7 +151,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
   else if (emodeStr == "Indirect")
     emode = 2;
 
-  auto spectrumInfo = inputWS->spectrumInfo();
+  auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
     double twoTheta(0.0), efixed(0.0);
     if (!spectrumInfo.isMonitor(i)) {

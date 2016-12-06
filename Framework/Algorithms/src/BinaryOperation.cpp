@@ -516,8 +516,8 @@ void BinaryOperation::doSingleColumn() {
   // value from each m_rhs 'spectrum'
   // and then calling the virtual function
   const int64_t numHists = m_lhs->getNumberHistograms();
-  auto lhsSpectrumInfo = m_lhs->spectrumInfo();
-  auto rhsSpectrumInfo = m_rhs->spectrumInfo();
+  auto &lhsSpectrumInfo = m_lhs->spectrumInfo();
+  auto &rhsSpectrumInfo = m_rhs->spectrumInfo();
   if (m_eout) {
     // ---- The output is an EventWorkspace ------
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
@@ -667,8 +667,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
   // TODO: Check if this works for event workspaces...
   propagateBinMasks(m_rhs, m_out);
 
-  auto lhsSpectrumInfo = m_lhs->spectrumInfo();
-  auto rhsSpectrumInfo = m_rhs->spectrumInfo();
+  auto &lhsSpectrumInfo = m_lhs->spectrumInfo();
+  auto &rhsSpectrumInfo = m_rhs->spectrumInfo();
 
   if (m_eout) {
     // ----------- The output is an EventWorkspace -------------
