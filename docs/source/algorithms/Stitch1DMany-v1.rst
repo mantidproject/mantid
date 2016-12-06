@@ -41,7 +41,7 @@ Usage
       """Creates a gaussian peak centered on mu and with width sigma."""
       return (1/ sigma * np.sqrt(2 * np.pi)) * np.exp( - (x-mu)**2  / (2*sigma**2))
 
-    #create two histograms with a single peak in each one
+    # Create three histograms with a single peak in each one
     x1 = np.arange(-1, 1, 0.02)
     x2 = np.arange(0.4, 1.6, 0.02)
     x3 = np.arange(1.3, 3, 0.02)
@@ -49,7 +49,7 @@ Usage
     ws2 = CreateWorkspace(UnitX="1/q", DataX=x2, DataY=gaussian(x2[:-1], 1, 0.05)+1)
     ws3 = CreateWorkspace(UnitX="1/q", DataX=x3, DataY=gaussian(x3[:-1], 2, 0.08)+1)
 
-    #stitch the histograms together
+    # Stitch the histograms together
     workspaces = ws1.name() + "," + ws2.name() + "," + ws3.name()
     stitched, scale = Stitch1DMany(InputWorkspaces=workspaces, StartOverlaps=[0.4, 1.2], EndOverlaps=[0.6, 1.4], Params=[0.02])
 
@@ -70,7 +70,7 @@ Output:
       """Creates a gaussian peak centered on mu and with width sigma."""
       return (1/ sigma * np.sqrt(2 * np.pi)) * np.exp( - (x-mu)**2  / (2*sigma**2))
 
-    # create six histograms with a single peak in each one
+    # Create six histograms with a single peak in each one
     x1 = np.arange(-1, 1, 0.02)
     x3 = np.arange(0.3, 1.8, 0.02)
     x5 = np.arange(1.4, 2.8, 0.02)

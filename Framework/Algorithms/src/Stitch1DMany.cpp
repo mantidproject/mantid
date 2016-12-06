@@ -120,15 +120,15 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
           inputWorkspaces.push_back(
               AnalysisDataService::Instance().retrieveWS<Workspace>(wsName));
         } else {
-          throw std::runtime_error(groupWSName + " is not a valid workspace.");
+          throw std::invalid_argument(groupWSName + " is not a valid workspace.");
         }
       }
 
       m_inputWSMatrix.push_back(inputWorkspaces);
       m_inputWSGroups.push_back(groupWS);
     } else {
-      throw std::runtime_error(groupWSName +
-                               " is not a valid workspace group.");
+      throw std::invalid_argument(groupWSName +
+                                  " is not a valid workspace group.");
     }
   }
 
@@ -232,6 +232,8 @@ void Stitch1DMany::exec() {
   }
   m_outputWorkspace = lhsWS;
 
+  m_outputWorkspace->history().printSelf(std::cout);
+
   // Save output
   this->setProperty("OutputWorkspace", m_outputWorkspace);
   this->setProperty("OutScaleFactors", m_scaleFactors);
@@ -251,10 +253,11 @@ void Stitch1DMany::exec() {
  * @param outScaleFactor :: Actual value used for scale factor
  */
 void Stitch1DMany::doStitch1D(
-    MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS, size_t wsIndex,
-    std::vector<double> startOverlaps, std::vector<double> endOverlaps,
-    std::vector<double> params, bool scaleRhsWS, bool useManualScaleFactor,
-    double manualScaleFactor, MatrixWorkspace_sptr &outWS,
+    MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS,
+    const size_t wsIndex, const std::vector<double> &startOverlaps,
+    const std::vector<double> &endOverlaps, const std::vector<double> &params,
+    const bool scaleRhsWS, const bool useManualScaleFactor,
+    const double manualScaleFactor, MatrixWorkspace_sptr &outWS,
     double &outScaleFactor) {
 
   IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
@@ -272,18 +275,19 @@ void Stitch1DMany::doStitch1D(
     alg->setProperty("ManualScaleFactor", manualScaleFactor);
   alg->execute();
 
+  outWS = alg->getProperty("OutputWorkspace");
+  outScaleFactor = alg->getProperty("OutScaleFactor");
+
   if (!isChild()) {
     // Copy each input workspace's history into our output workspace's history
-    for (auto &inputWS : m_inputWSMatrix[0])
-      lhsWS->history().addHistory(inputWS->getHistory());
+    for (auto &inputWS : m_inputWSMatrix[0]) {
+      outWS->history().addHistory(inputWS->getHistory());
+    }
   }
   // We're a child algorithm, but we're recording history anyway
   else if (isRecordingHistoryForChild() && m_parentHistory) {
     m_parentHistory->addChildHistory(m_history);
   }
-
-  outWS = alg->getProperty("OutputWorkspace");
-  outScaleFactor = alg->getProperty("OutScaleFactor");
 }
 
 /** Performs the Stitch1DMany algorithm at a specific period
@@ -300,11 +304,12 @@ void Stitch1DMany::doStitch1D(
  * @param outScaleFactors :: Actual values used for scale factors
  */
 void Stitch1DMany::doStitch1DMany(
-    std::vector<WorkspaceGroup_sptr> inputWSGroups, size_t period,
-    bool storeInADS, std::vector<double> startOverlaps,
-    std::vector<double> endOverlaps, std::vector<double> params,
-    bool scaleRhsWS, bool useManualScaleFactor, double manualScaleFactor,
-    std::string &outName, std::vector<double> &outScaleFactors) {
+    std::vector<WorkspaceGroup_sptr> inputWSGroups, const size_t period,
+    const bool storeInADS, const std::vector<double> &startOverlaps,
+    const std::vector<double> &endOverlaps, const std::vector<double> &params,
+    const bool scaleRhsWS, const bool useManualScaleFactor,
+    const double manualScaleFactor, std::string &outName,
+    std::vector<double> &outScaleFactors) {
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
@@ -329,7 +334,13 @@ void Stitch1DMany::doStitch1DMany(
     alg->setProperty("ManualScaleFactor", manualScaleFactor);
   alg->execute();
 
-  outName = (std::string)alg->getProperty("OutputWorkspace");
+  std::cout << "\nThe history: \n"; 
+  outName = alg->getPropertyValue("OutputWorkspace");
+  if (storeInADS) {
+    Workspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace>(outName);
+    outWS->history().printSelf(std::cout);
+  }
+
   outScaleFactors = alg->getProperty("OutScaleFactors");
 }
 
