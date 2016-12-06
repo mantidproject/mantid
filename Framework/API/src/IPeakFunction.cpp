@@ -87,7 +87,6 @@ const int MAX_PEAK_RADIUS = std::numeric_limits<int>::max();
 
 } // namespace
 
-
 /**
   * Constructor.
   * @param peakRadius :: The peak radius for this instance.
