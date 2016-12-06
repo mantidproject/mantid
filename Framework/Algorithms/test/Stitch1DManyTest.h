@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidKernel/UnitFactory.h"
 #include <math.h>
 
@@ -18,50 +19,110 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::Stitch1DMany;
 using Mantid::Algorithms::CreateWorkspace;
+using Mantid::Algorithms::GroupWorkspaces;
 
 class Stitch1DManyTest : public CxxTest::TestSuite {
 private:
-  /** Create a histogram workspace with two spectra and 10 bins
+  /** Create a histogram workspace with two spectra and 10 bins. This can also
+  * be run using the CreateWorkspace algorithm which leaves the output workspace
+  * in the ADS as well.
   * @param xstart :: the first X value (common to both spectra)
   * @param deltax :: the bin width
   * @param value1 :: the Y counts in the first spectrum (constant for all X)
   * @param value2 :: the Y counts in the second spectrum (constant for all X)
+  * @param runAlg :: set true to run the CreateWorkspace algorithm
+  * @oaram outWSName :: output workspace name used if running CreateWorkspace
   */
   MatrixWorkspace_sptr createUniformWorkspace(double xstart, double deltax,
-                                              double value1, double value2) {
+    double value1, double value2,
+    bool runAlg = false,
+    std::string outWSName = "") {
 
     const int nbins = 10;
-    std::vector<double> xData(2 * (nbins + 1));
-    std::vector<double> yData(2 * nbins);
-    std::vector<double> eData(2 * nbins);
+    std::vector<double> xData1(nbins + 1);
+    std::vector<double> yData1(nbins);
+    std::vector<double> eData1(nbins);
+    std::vector<double> xData2(nbins + 1);
+    std::vector<double> yData2(nbins);
+    std::vector<double> eData2(nbins);
 
     for (int i = 0; i < nbins; i++) {
       // First spectrum
-      xData[i] = xstart + i * deltax;
-      yData[i] = value1;
-      eData[i] = std::sqrt(value1);
+      xData1[i] = xstart + i * deltax;
+      yData1[i] = value1;
+      eData1[i] = std::sqrt(value1);
       // Second spectrum
-      xData[nbins + i + 1] = xstart + i * deltax;
-      yData[nbins + i] = value2;
-      eData[nbins + i] = std::sqrt(value2);
+      xData2[i] = xstart + i * deltax;
+      yData2[i] = value2;
+      eData2[i] = std::sqrt(value2);
     }
-    xData[nbins] = xData[nbins - 1] + deltax;
-    xData[2 * nbins + 1] = xData[2 * nbins] + deltax;
+    xData1[nbins] = xData1[nbins - 1] + deltax;
+    xData2[nbins] = xData2[nbins - 1] + deltax;
 
-    CreateWorkspace cw;
-    cw.initialize();
-    cw.setProperty("DataX", xData);
-    cw.setProperty("DataY", yData);
-    cw.setProperty("DataE", eData);
-    cw.setProperty("NSpec", 2);
-    cw.setProperty("UnitX", "Wavelength");
-    cw.setPropertyValue("OutputWorkspace", "outWS");
-    cw.execute();
+    MatrixWorkspace_sptr ws;
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    AnalysisDataService::Instance().remove("outWS");
+    if (!runAlg) {
+      ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nbins + 1,
+        nbins);
+      ws->dataX(0) = xData1;
+      ws->dataX(1) = xData2;
+      ws->dataY(0) = yData1;
+      ws->dataY(1) = yData2;
+      ws->dataE(0) = eData1;
+      ws->dataE(1) = eData2;
+      ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+    }
+    else {
+      // Concatenate data vectors into one vector
+      xData1.insert(xData1.end(), xData2.begin(), xData2.end());
+      yData1.insert(yData1.end(), yData2.begin(), yData2.end());
+      eData1.insert(eData1.end(), eData2.begin(), eData2.end());
+
+      CreateWorkspace cw;
+      cw.initialize();
+      cw.setProperty("DataX", xData1);
+      cw.setProperty("DataY", yData1);
+      cw.setProperty("DataE", eData1);
+      cw.setProperty("NSpec", 2);
+      cw.setProperty("UnitX", "Wavelength");
+      cw.setPropertyValue("OutputWorkspace", outWSName);
+      cw.execute();
+
+      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outWSName);
+    }
 
     return ws;
+  }
+
+  /** Groups workspaces using GroupWorkspaces algorithm. The output workpace is
+  * left in the ADS as well.
+  * @param inputWSNames :: input workspaces names
+  * @param outputWSName :: output workspace name
+  */
+  WorkspaceGroup_sptr doGroupWorkspaces(std::string inputWSNames, std::string outWSName) {
+    GroupWorkspaces gw;
+    gw.initialize();
+    gw.setProperty("InputWorkspaces", inputWSNames);
+    gw.setProperty("OutputWorkspace", outWSName);
+    gw.execute();
+
+    WorkspaceGroup_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
+    return ws;
+  }
+
+  /** Obtain all algorithm histories from a workspace
+  * @param inputWS :: the input workspace
+  * @return vector of names of algorithm histories
+  */
+  std::vector<std::string> getHistory(MatrixWorkspace_sptr inputWS) {
+    std::vector<std::string> histNames;
+    auto histories = inputWS->history().getAlgorithmHistories();
+    for (auto &hist : histories) {
+      histNames.push_back(hist->name());
+    }
+    return histNames;
   }
 
 public:
@@ -428,7 +489,7 @@ public:
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1);
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -503,7 +564,7 @@ public:
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -550,7 +611,7 @@ public:
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001); // 1.0/1.1
     TS_ASSERT_DELTA(scales.back(), 0.9375, 0.0001);  // 1.5/1.6
 
-    // Clear the ADS
+                                                     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
 
@@ -601,7 +662,7 @@ public:
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -707,7 +768,7 @@ public:
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -769,13 +830,11 @@ public:
   }
 
   void test_two_workspaces_history() {
-    // Two matrix workspaces with two spectra each
+    // This test is functionally similar to test_two_workspaces
 
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    // Two matrix workspaces with two spectra each
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
+    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws2");
 
     Stitch1DMany alg;
     alg.initialize();
@@ -786,84 +845,43 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
 
-    // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     auto stitched =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
 
-    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(stitched->blocksize(), 17);
-    TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(0)[9], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(0)[16], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[0], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[9], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[16], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[9], 0.77919, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[16], 1.24316, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[9], 1.10982, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[16], 1.79063, 0.00001);
-
-    // Test out scale factors
-    std::vector<double> scales = alg.getProperty("OutScaleFactors");
-    TS_ASSERT_EQUALS(scales.size(), 1);
-    // Only scale factor for first spectrum is returned
-    TS_ASSERT_DELTA(scales.front(), 0.90909, 0.00001);
-
+    // Test the algorithm histories
+    std::vector<std::string> histNames;
     auto histories = stitched->history().getAlgorithmHistories();
-    size_t histIndex = 0;
     for (auto &hist : histories) {
-      std::cout << "HistIndex = " << histIndex++ << "\n";
-      hist->printSelf(std::cout);
+      histNames.push_back(hist->name());
     }
 
-    /*
-    TS_ASSERT_EQUALS(hist->getPropertyValue("InputWorkspaces"), "ws1,ws2");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("OutputWorkspace"), "outws");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("Params"), "0.1,0.1,1.8");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("StartOverlaps"), "0.8");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("EndOverlaps"), "1.1");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("ScaleRHSWorkspace"), "1");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("UseManualScaleFactor"), "0");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("ManualScaleFactor"), "1");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("OutScaleFactors"), "0.909091");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("ScaleFactorFromPeriod"), "0");*/
+    TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[2], "Stitch1DMany");
 
     // Remove workspaces from ADS
-    AnalysisDataService::Instance().remove("ws1");
-    AnalysisDataService::Instance().remove("ws2");
-    AnalysisDataService::Instance().remove("outws");
+    AnalysisDataService::Instance().clear();
   }
 
   void test_two_groups_history() {
+    // This test is functionally similar to
+    // test_two_groups_with_two_workspaces_each
+
     // Two groups with two matrix workspaces each.
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
+    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
+    WorkspaceGroup_sptr group1 = doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    group2->addWorkspace(ws4);
-
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-
-    // ws1 will be stitched with ws3
-    // ws2 will be stitched with ws4
+    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
+    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
+    WorkspaceGroup_sptr group2 = doGroupWorkspaces("ws3, ws4", "group2");
 
     Stitch1DMany alg;
     alg.initialize();
-    alg.enableHistoryRecordingForChild(true);
     alg.setProperty("InputWorkspaces", "group1, group2");
     alg.setProperty("Params", "0.1");
     alg.setProperty("StartOverlaps", "0.8");
@@ -880,67 +898,42 @@ public:
     auto stitched =
       boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
-    // Test out scale factors
-    std::vector<double> scales = alg.getProperty("OutScaleFactors");
-    TS_ASSERT_EQUALS(scales.size(), 2);
-    TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001); // 1.0/1.1
-    TS_ASSERT_DELTA(scales.back(), 0.9375, 0.0001);  // 1.5/1.6
-
+    // Test the algorithm histories
+    std::vector<std::string> histNames;
     auto histories = stitched->history().getAlgorithmHistories();
-    size_t histIndex = 0;
     for (auto &hist : histories) {
-      std::cout << "HistIndex = " << histIndex++ << "\n";
-      hist->printSelf(std::cout);
+      histNames.push_back(hist->name());
     }
 
-    /*
-    TS_ASSERT_EQUALS(hist->getPropertyValue("InputWorkspaces"), "ws1,ws2");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("OutputWorkspace"), "outws");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("Params"), "0.1,0.1,1.8");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("StartOverlaps"), "0.8");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("EndOverlaps"), "1.1");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("ScaleRHSWorkspace"), "1");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("UseManualScaleFactor"), "0");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("ManualScaleFactor"), "1");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("OutScaleFactors"), "0.909091");
-    TS_ASSERT_EQUALS(hist->getPropertyValue("ScaleFactorFromPeriod"), "0");*/
+    TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[4], "Stitch1DMany");
 
     // Remove workspaces from ADS
-    AnalysisDataService::Instance().remove("ws1");
-    AnalysisDataService::Instance().remove("ws2");
-    AnalysisDataService::Instance().remove("outws");
+    AnalysisDataService::Instance().clear();
   }
 
   void test_two_groups_scale_factor_from_period_history() {
+    // This test is functionally similar to
+    // test_two_groups_with_three_workspaces_scale_factor_from_period
+
     // Three groups with two matrix workspaces each.
     // Each matrix workspace has two spectra.
 
     // First group
-    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
-    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
-    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
-    group1->addWorkspace(ws1);
-    group1->addWorkspace(ws2);
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2., true, "ws1");
+    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5, true, "ws2");
+    WorkspaceGroup_sptr group1 = doGroupWorkspaces("ws1, ws2", "group1");
     // Second group
-    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
-    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
-    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
-    group2->addWorkspace(ws3);
-    group2->addWorkspace(ws4);
+    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1, true, "ws3");
+    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6, true, "ws4");
+    WorkspaceGroup_sptr group2 = doGroupWorkspaces("ws3, ws4", "group2");
     // Third group
-    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
-    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0);
-    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
-    group3->addWorkspace(ws5);
-    group3->addWorkspace(ws6);
-
-    // The algorithm needs the workspaces to be in the ADS
-    AnalysisDataService::Instance().addOrReplace("group1", group1);
-    AnalysisDataService::Instance().addOrReplace("group2", group2);
-    AnalysisDataService::Instance().addOrReplace("group3", group3);
-
-    // ws1 will be stitched with ws3 and ws5
-    // ws2 will be stitched with ws4 and ws6
+    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5, true, "ws5");
+    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0, true, "ws6");
+    WorkspaceGroup_sptr group3 = doGroupWorkspaces("ws5, ws6", "group3");
 
     Stitch1DMany alg;
     alg.initialize();
@@ -954,23 +947,22 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
 
-    // By setting ManualScaleFactor to 1.0 (default value) it allows workspaces
-    // in other periods to be scaled by scale factors from a specific period.
-    // Periods 0 and 2 workspaces will be scaled by scale factors from period 1.
-
     // Test output ws
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     auto stitched =
       boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
-    const auto histories = stitched->history().getAlgorithmHistories();
-    std::cout << "history size = " << histories.size() << "\n";
-    size_t histIndex = 0;
+    // Test the algorithm histories
+    std::vector<std::string> histNames;
+    auto histories = stitched->history().getAlgorithmHistories();
     for (auto &hist : histories) {
-      std::cout << "HistIndex = " << histIndex++ << "\n";
-      hist->printSelf(std::cout);
+      histNames.push_back(hist->name());
     }
+
+    TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();
