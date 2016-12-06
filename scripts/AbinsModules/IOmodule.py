@@ -242,7 +242,7 @@ class IOmodule(object):
         try:
             subprocess.check_call(["h5repack", "-i%s" % self._hdf_filename, "-otemphgfrt.hdf5"])
             shutil.move("temphgfrt.hdf5", self._hdf_filename)
-        except OSError:
+        except (OSError, IOError, RuntimeError):
             pass  # repacking failed: no h5repack installed in the system... but we proceed
 
     def _list_of_str(self, list_str=None):

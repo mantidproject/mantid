@@ -31,7 +31,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _order_event = AbinsConstants.FUNDAMENTALS
 
     # data
-    core = os.path.normcase("../ExternalData/Testing/Data/UnitTest/")
+    core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")
 
     squaricn = "squaricn_sum_CalculateSPowder"
     Si2 = "Si2-sc_CalculateSPowder"
