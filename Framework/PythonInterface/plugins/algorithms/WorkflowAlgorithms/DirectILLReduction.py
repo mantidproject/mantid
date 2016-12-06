@@ -126,6 +126,75 @@ class NameSource:
     def withSuffix(self, suffix):
         return self._prefix + '_' + suffix
 
+class Report:
+    '''
+    Logger for final report generation.
+    '''
+    _LEVEL_NOTICE = 0
+    _LEVEL_WARNING = 1
+    _LEVEL_ERROR = 2
+
+    class _Entry:
+        '''
+        Private class for report entries.
+        '''
+        def __init__(self, text, loggingLevel):
+            '''
+            Initializes an entry.
+            '''
+            self._text = text
+            self._loggingLevel = loggingLevel
+
+        def contents(self):
+            '''
+            Returns the contents of this entry.
+            '''
+            return self._text
+
+        def level(self):
+            '''
+            Returns the logging level of this entry.
+            '''
+            return self._loggingLevel
+
+    def __init__(self):
+        '''
+        Initializes a report.
+        '''
+        self._entries = list()
+
+    def error(self, text):
+        '''
+        Adds an error entry to this report.
+        '''
+        self._entries.append(Report._Entry(text, Report._LEVEL_ERROR))
+
+    def notice(self, text):
+        '''
+        Adds an information entry to this report.
+        '''
+        self._entries.append(Report._Entry(text, Report._LEVEL_NOTICE))
+
+    def warning(self, text):
+        '''
+        Adds a warning entry to this report.
+        '''
+        self._entries.append(Report._Entry(text, Report._LEVEL_WARNING))
+
+    def toLog(self, log):
+        '''
+        Writes this report to a log.
+        '''
+        for entry in self._entries:
+            loggingLevel = entry.level()
+            if loggingLevel == Report._LEVEL_NOTICE:
+                log.notice(entry.contents())
+            elif loggingLevel == Report._LEVEL_WARNING:
+                log.warning(entry.contents())
+            elif loggingLevel == Report._LEVEL_ERROR:
+                log.error(entry.contents())
+
+
 def setAsBad(ws, index):
     ws.dataY(index)[0] += 1
 
@@ -308,11 +377,14 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEP
         log.error('Instrument ' + instrument + ' not supported for incident energy calibration')
     return eiWorkspace
 
-def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames):
+def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report):
     '''
     Updates incident energy and wavelength in the sample logs.
     '''
+    originalEnergy = ws.getRun().getLogData('Ei').value
+    originalWavelength = ws.getRun().getLogData('wavelength').value
     energy = eiWS.readY(0)[0]
+    wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
     if wsType == WS_CONTENT_DETECTORS:
         calibratedWSName = wsNames.withSuffix('incident_energy_calibrated_detectors')
     elif wsType == WS_CONTENT_MONITORS:
@@ -327,13 +399,15 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames):
                  LogType='Number',
                  NumberType='Double',
                  LogUnit='meV')
-    wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
     AddSampleLog(Workspace=calibratedWS,
                  Logname='wavelength',
                  LogText=str(wavelength),
                  LogType='Number',
                  NumberType='Double',
                  LogUnit='Ångström')
+    report.notice("Applied Ei calibration to '" + str(ws) + "'.")
+    report.notice('Original Ei: {} new Ei: {}.'.format(originalEnergy, energy))
+    report.notice('Original wavelength: {} new wavelength {}.'.format(originalWavelength, wavelength))
     return calibratedWS
 
 def _normalizeToMonitor(ws, monWS, monEPPWS, monIndex, wsNames, wsCleanup):
@@ -400,7 +474,6 @@ def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup):
                       cdSubtractedWS,
                       correctedCdSubtractedWS)
     return ecSubtractedWS
-
 
 def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup):
     '''
@@ -487,6 +560,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return 1
 
     def PyExec(self):
+        report = Report()
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
         wsNamePrefix = self.getProperty(PROP_OUTPUT_WORKSPACE).valueAsStr
         cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
@@ -621,14 +695,16 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 eiCalibratedDetWS = _applyIncidentEnergyCalibration(mainWS,
                                                                     WS_CONTENT_DETECTORS,
                                                                     eiCalibrationWS,
-                                                                    wsNames)
+                                                                    wsNames,
+                                                                    report)
                 wsCleanup.cleanup(mainWS)
                 mainWS = eiCalibratedDetWS
                 del(eiCalibratedDetWS)
                 eiCalibratedMonWS = _applyIncidentEnergyCalibration(monitorWorkspace,
                                                                     WS_CONTENT_MONITORS,
                                                                     eiCalibrationWS,
-                                                                    wsNames)
+                                                                    wsNames,
+                                                                    report)
                 wsCleanup.cleanup(monitorWorkspace)
                 monitorWorkspace = eiCalibratedMonWS
                 del(eiCalibratedMonWS)
@@ -659,7 +735,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Reduction for empty can and cadmium ends here.
         if reductionType == REDUCTION_TYPE_CD or reductionType == REDUCTION_TYPE_EC:
-            self._finalize(mainWS, wsCleanup)
+            self._finalize(mainWS, wsCleanup, report)
             return
 
         # Continuing with vanadium and sample reductions.
@@ -697,7 +773,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             mainWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
                                                   EPPTable=detectorEPPWS,
                                                   OutputWorkspace=outWS)
-            self._finalize(mainWS, wsCleanup)
+            self._finalize(mainWS, wsCleanup, report)
             return
 
         # Continuing with sample reduction.
@@ -743,7 +819,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # TODO Self-shielding corrections
 
-        self._finalize(mainWS, wsCleanup)
+        self._finalize(mainWS, wsCleanup, report)
 
     def PyInit(self):
         # TODO Property validation.
@@ -918,8 +994,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                     return j
             raise RuntimeError('No workspace index found for detector id {0}'.format(i))
 
-    def _finalize(self, outWS, wsCleanup):
+    def _finalize(self, outWS, wsCleanup, report):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outWS)
         wsCleanup.finalCleanup()
+        report.toLog(self.log())
 
 AlgorithmFactory.subscribe(DirectILLReduction)
