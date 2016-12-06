@@ -6,6 +6,7 @@
 
 namespace { // anonymous namespace
 const boost::regex FILE_EXT_REG_EXP{"^.+\\s+\\((\\S+)\\)$"};
+const QString ALL_FILES("All Files (*)");
 
 QString getExtensionFromFilter(const QString &selectedFilter) {
   // empty returns empty
@@ -105,7 +106,7 @@ QString addExtension(const QString &filename, const QString &selectedFilter) {
 
 QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp) {
   if (!baseProp)
-    return QString("All Files (*)");
+    return ALL_FILES;
 
   // multiple file version
   const auto *multiProp =
@@ -123,7 +124,7 @@ QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp) {
                                singleProp->getDefaultExt());
 
   // otherwise only the all files exists
-  return QString("All Files (*)");
+  return ALL_FILES;
 }
 
 /** For file dialogs. Have each filter on a separate line with the default as
@@ -154,7 +155,7 @@ QString getFileDialogFilter(const std::vector<std::string> &exts,
     }
     filter = filter.trimmed();
   }
-  filter.append("All Files (*)");
+  filter.append(ALL_FILES);
   return filter;
 }
 }
