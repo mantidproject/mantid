@@ -1,4 +1,4 @@
-add_subdirectory(Common)
-add_subdirectory(State)
+add_subdirectory(common)
+add_subdirectory(state)
 
 

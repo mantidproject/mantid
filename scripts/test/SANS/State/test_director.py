@@ -54,8 +54,8 @@ class TestDirector(object):
         # Build the SANSStateData
         if self.data_state is None:
             data_builder = get_data_builder(facility)
-            data_builder.set_sample_scatter("SANSD00022024")
-            data_builder.set_can_scatter("SANSD00022024")
+            data_builder.set_sample_scatter("SANS2D00022024")
+            data_builder.set_can_scatter("SANS2D00022024")
             self.data_state = data_builder.build()
 
         # Build the SANSStateMove
@@ -67,7 +67,7 @@ class TestDirector(object):
 
         # Build the SANSStateReduction
         if self.reduction_state is None:
-            reduction_builder = get_reduction_builder(self.data_state)
+            reduction_builder = get_reduction_mode_builder(self.data_state)
             reduction_builder.set_reduction_mode(ISISReductionMode.Merged)
             reduction_builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
             reduction_builder.set_merge_fit_mode(FitModeForMerge.Both)
