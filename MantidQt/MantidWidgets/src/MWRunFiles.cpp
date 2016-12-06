@@ -974,13 +974,13 @@ QString MWRunFiles::openFileDialog() {
     if (!file.isEmpty())
       filenames.append(file);
   } else if (m_allowMultipleFiles) {
-    filenames =
-        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, 0,
-                                      QFileDialog::DontResolveSymlinks);
+    filenames = QFileDialog::getOpenFileNames(this, "Open file", dir,
+                                              m_fileFilter, nullptr,
+                                              QFileDialog::DontResolveSymlinks);
   } else {
     QString file =
-        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, 0,
-                                     QFileDialog::DontResolveSymlinks);
+        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter,
+                                     nullptr, QFileDialog::DontResolveSymlinks);
     if (!file.isEmpty())
       filenames.append(file);
   }
