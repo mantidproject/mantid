@@ -75,7 +75,7 @@ void CreateGroupingWorkspace::init() {
   declareProperty(
       "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
-      "(East,West for SNAP), 2_4Grouping for SNAP, Columns for SNAP, detector "
+      "(Group or East,West for SNAP), 2_4Grouping (SNAP), Columns, detector "
       "banks");
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
