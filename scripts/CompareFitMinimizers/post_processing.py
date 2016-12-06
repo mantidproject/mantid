@@ -19,6 +19,7 @@
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 import numpy as np
+from scipy import stats  # older version of numpy does not support nanmean and nanmedian
 
 
 def calc_summary_table(minimizers, group_results):
@@ -91,27 +92,24 @@ def calc_norm_summary_tables(accuracy_tbl, time_tbl):
     others get the ratio resulting from dividing by the performance of
     the best.
     """
-    # Min across all alternative solutions/minimizers
+    # Min across all minimizers, i.e. for each fit problem what is the lowest chi-squared and the lowest time
     min_sum_err_sq = np.nanmin(accuracy_tbl, 1)
     min_runtime = np.nanmin(time_tbl, 1)
 
+    # create normalised tables
     norm_acc_rankings = accuracy_tbl / min_sum_err_sq[:, None]
     norm_runtimes = time_tbl / min_runtime[:, None]
 
     summary_cells_acc = np.array([np.nanmin(norm_acc_rankings, 0),
                                   np.nanmax(norm_acc_rankings, 0),
-                                  np.nanmean(norm_acc_rankings, 0),
-                                  np.nanmedian(norm_acc_rankings, 0),
-                                  np.nanpercentile(norm_acc_rankings, 25, axis=0),
-                                  np.nanpercentile(norm_acc_rankings, 75, axis=0)
+                                  stats.nanmean(norm_acc_rankings, 0),
+                                  stats.nanmedian(norm_acc_rankings, 0)
                                   ])
 
     summary_cells_runtime = np.array([np.nanmin(norm_runtimes, 0),
                                       np.nanmax(norm_runtimes, 0),
-                                      np.nanmean(norm_runtimes, 0),
-                                      np.nanmedian(norm_runtimes, 0),
-                                      np.nanpercentile(norm_runtimes, 25, axis=0),
-                                      np.nanpercentile(norm_runtimes, 75, axis=0)
+                                      stats.nanmean(norm_runtimes, 0),
+                                      stats.nanmedian(norm_runtimes, 0)
                                       ])
 
     return norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime

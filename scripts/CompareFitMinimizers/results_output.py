@@ -25,6 +25,7 @@ formats such as RST and plain text.
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
+from scipy import stats  # older version of numpy does not support nanmean and nanmedian
 import post_processing as postproc
 
 # Some naming conventions for the output files
@@ -36,7 +37,8 @@ FILENAME_SUFFIX_RUNTIME = 'runtime'
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
                                simple_text=True, rst=False, save_to_file=False, color_scale=None):
     """
-    Prints in possibly several alternative formats.
+    Prints out results for a group of fit problems in accuracy and runtime tables, in a summary
+    format and both as simple text, rst format and/or to file depending on input arguments
 
     @param minimizers :: list of minimizer names
     @param results_per_test :: result objects
@@ -63,6 +65,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, runtime_tbl, norm_acc_rankings)
 
     if rst:
+        # print out accuracy table for this group of fit problems
         tbl_acc_indiv = build_rst_table(minimizers, linked_problems, norm_acc_rankings,
                                         comparison_type='accuracy', comparison_dim='',
                                         using_errors=use_errors, color_scale=color_scale)
@@ -72,6 +75,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         print(header)
         print (tbl_acc_indiv)
 
+        # optionally save the above table to file
         if save_to_file:
             fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
                      format(weighted=weighted_suffix_string(use_errors),
@@ -79,9 +83,9 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
             with open(fname, 'w') as tbl_file:
                 print(tbl_acc_indiv, file=tbl_file)
 
-        # extended summary
+        # print out accuracy summary table for this group of fit problems
         ext_summary_cols = minimizers
-        ext_summary_rows = ['Best ranking', 'Worst ranking', 'Average', 'Median', 'First quartile', 'Third quartile']
+        ext_summary_rows = ['Best ranking', 'Worst ranking', 'Average', 'Median']
         tbl_acc_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_acc,
                                           comparison_type='accuracy', comparison_dim='',
                                           using_errors=use_errors, color_scale=color_scale)
@@ -89,6 +93,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         print(header)
         print(tbl_acc_summary)
 
+        # print out runtime table for this group of fit problems
         tbl_runtime_indiv = build_rst_table(minimizers, linked_problems, norm_runtimes,
                                             comparison_type='runtime', comparison_dim='',
                                             using_errors=use_errors, color_scale=color_scale)
@@ -98,6 +103,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         print(header)
         print (tbl_runtime_indiv)
 
+        # optionally save the above table to file
         if save_to_file:
             fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
                      format(weighted=weighted_suffix_string(use_errors),
@@ -105,7 +111,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
             with open(fname, 'w') as tbl_file:
                 print(tbl_runtime_indiv, file=tbl_file)
 
-        # extended summary
+        # print out runtime summary table for this group of fit problems
         tbl_runtime_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_runtime,
                                               comparison_type='runtime', comparison_dim='',
                                               using_errors=use_errors, color_scale=color_scale)
@@ -442,11 +448,9 @@ def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tb
     results_text += '---------------- Summary (accuracy): -------- \n'
     results_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_acc_rankings, 0))
     results_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_acc_rankings, 0))
-    results_text += 'Average: {0}\n'.format(np.nanmean(norm_acc_rankings, 0))
-    results_text += 'Median: {0}\n'.format(np.nanmedian(norm_acc_rankings, 0))
+    results_text += 'Mean: {0}\n'.format(stats.nanmean(norm_acc_rankings, 0))
+    results_text += 'Median: {0}\n'.format(stats.nanmedian(norm_acc_rankings, 0))
     results_text += '\n'
-    results_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 25, axis=0))
-    results_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 75, axis=0))
 
     print(results_text)
 
@@ -463,10 +467,8 @@ def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tb
     time_text += '---------------- Summary (run time): -------- \n'
     time_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_runtimes, 0))
     time_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_runtimes, 0))
-    time_text += 'Average: {0}\n'.format(np.average(norm_runtimes, 0))
-    time_text += 'Median: {0}\n'.format(np.nanmedian(norm_runtimes, 0))
+    time_text += 'Mean: {0}\n'.format(stats.nanmean(norm_runtimes, 0))
+    time_text += 'Median: {0}\n'.format(stats.nanmedian(norm_runtimes, 0))
     time_text += '\n'
-    time_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 25, axis=0))
-    time_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 75, axis=0))
 
     print(time_text)
