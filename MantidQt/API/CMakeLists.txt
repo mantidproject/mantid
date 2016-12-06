@@ -134,6 +134,7 @@ set ( UI_FILES
 
 set( TEST_FILES
    BatchAlgorithmRunnerTest.h
+   FileDialogHandlerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
    PlotAxisTest.h

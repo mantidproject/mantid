@@ -5,21 +5,30 @@
 #include <boost/regex.hpp>
 
 namespace { // anonymous namespace
-const boost::regex FILE_EXT_REG_EXP{"^.+\\s+\\(\\*(\\S+).+"};
+const boost::regex FILE_EXT_REG_EXP{"^.+\\s+\\((\\S+)\\)$"};
 
-QString getExtension(const QString &selectedFilter) {
+QString getExtensionFromFilter(const QString &selectedFilter) {
+  // empty returns empty
   if (selectedFilter.isEmpty()) {
     return QString("");
   }
 
+  // search for single extension
   boost::smatch result;
   if (boost::regex_search(selectedFilter.toStdString(), result,
                           FILE_EXT_REG_EXP) &&
       result.size() == 2) {
-    return QString::fromStdString(result[1]);
+    auto extension = QString::fromStdString(result[1]);
+    if (extension.startsWith("*"))
+      return extension.remove(0, 1);
+    else
+      return extension;
   } else {
-    // failure returns empty string
-    return QString("");
+    // failure to match suggests multi-extension filter
+    std::stringstream msg;
+    msg << "Failed to determine single extension from \""
+        << selectedFilter.toStdString() << "\"";
+    throw std::runtime_error(msg.str());
   }
 }
 } // anonymous namespace
@@ -84,7 +93,7 @@ QString addExtension(const QString &filename, const QString &selectedFilter) {
 
   // Check the filename and append the selected filter if necessary
   if (QFileInfo(filename).completeSuffix().isEmpty()) {
-    auto ext = getExtension(selectedFilter);
+    auto ext = getExtensionFromFilter(selectedFilter);
     if (filename.endsWith(".") && ext.startsWith(".")) {
       ext = ext.remove(0, 1);
     }
