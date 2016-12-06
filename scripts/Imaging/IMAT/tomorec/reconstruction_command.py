@@ -92,10 +92,11 @@ class ReconstructionCommand(object):
                                        self._OUT_README_FNAME)
         tstart = self.gen_readme_summary_begin(readme_fullpath, cfg, cmd_line)
 
+        cfg.tomo_print("Loading in data...")
         data, white, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        print("Shape of raw data: {0}, dtype: {1}".format(data.shape,
+        cfg.tomo_print("Shape of raw data: {0}, dtype: {1}".format(data.shape,
                                                           data.dtype))
 
         # These imports will raise appropriate exceptions in case of error
@@ -104,7 +105,7 @@ class ReconstructionCommand(object):
 
         preproc_data = self.apply_all_preproc(data, cfg.preproc_cfg, white,
                                               dark)
-        print("Shape of pre-processed data: {0}, dtype: {1}".format(
+        cfg.tomo_print("Shape of pre-processed data: {0}, dtype: {1}".format(
             preproc_data.shape, data.dtype))
 
         # Save pre-proc images
@@ -116,7 +117,7 @@ class ReconstructionCommand(object):
         recon_data = self.run_reconstruct_3d(preproc_data, cfg.preproc_cfg,
                                              cfg.alg_cfg)
         t_recon_end = time.time()
-        print("Reconstructed volume. Shape: {0}, and pixel data type: {1}".
+        cfg.tomo_print("Reconstructed volume. Shape: {0}, and pixel data type: {1}".
               format(recon_data.shape, recon_data.dtype))
 
         # Post-processing
@@ -129,7 +130,7 @@ class ReconstructionCommand(object):
                                     (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
 
-        print("Finished reconstruction.")
+        cfg.tomo_print("Finished reconstruction.")
 
     def gen_readme_summary_begin(self, filename, cfg, cmd_line):
         """
@@ -1073,49 +1074,50 @@ class ReconstructionCommand(object):
     def find_center(self, cfg):
         self._check_paths_integrity(cfg)
 
+        cfg.tomo_print("Loading in data...", 2)
         # load in data
-        data, white, dark = self.read_in_stack(
+        sample, white, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-
+        cfg.tomo_print("Data loaded.", 2)
         # import tool
         import tomorec.tool_imports as tti
         tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
 
         # rotate
-        # TODO see if we can ignore adding white and dark
-        data, white, dark = self.rotate_stack(data, cfg.preproc_cfg)
+        sample, white, dark = self.rotate_stack(sample, cfg.preproc_cfg)
 
         # crop the ROI
         # not optional for now
         # if self.crop_before_normaliz:
-        data = self.crop_coords(data, cfg.preproc_cfg)
+        sample = self.crop_coords(sample, cfg.preproc_cfg)
 
-        # find center
-        self._check_data_stack(data)
+        # sanity check
+        cfg.tomo_print(" * Sanity check on data", 0)
+        self._check_data_stack(sample)
 
-        num_projections = data.shape[0]
+        num_projections = sample.shape[0]
         inc = float(cfg.preproc_cfg.max_angle) / (num_projections - 1)
 
+        cfg.tomo_print(" * Calculating projection angles", 0)
         proj_angles = np.arange(0, num_projections * inc, inc)
         # For tomopy
+        cfg.tomo_print(" * Calculating radians for TomoPy", 0)
         proj_angles = np.radians(proj_angles)
-
-        for slice_idx in [int(num_projections / 2)]:
-            tomopy_cor = tomopy.find_center(
-                tomo=projection_data,
-                theta=proj_angles,
-                ind=slice_idx,
-                emission=False)
 
         size = int(num_projections)
 
+
         calculated_cors = []
-        # find the COR of the middle slice
-        for slice_idx in [int(size / 2)]:
-            # for slice_idx in [int(0.15*size), int(0.30*size), int(0.45*size), int(0.60*size), int(0.75*size), int(0.90*size)]:
+        checked_projections = [int(size / 2)]
+        #checked_projections = [int(0.15*size), int(0.30*size), int(0.45*size), int(0.60*size), int(0.75*size), int(0.90*size)]
+        cfg.tomo_print("Starting COR calculation on " + str(len(checked_projections)) + " projections", 2)
+        for slice_idx in checked_projections:
             tomopy_cor = tomopy.find_center(
-                tomo=data, theta=proj_angles, ind=slice_idx, emission=False)
+                tomo=sample, theta=proj_angles, ind=slice_idx, emission=False)
             calculated_cors.append(tomopy_cor)
+
+        cfg.tomo_print("Finished COR calculation.", 2)
+
         # print to stdout
         print(sum(calculated_cors) / float(len(calculated_cors)))

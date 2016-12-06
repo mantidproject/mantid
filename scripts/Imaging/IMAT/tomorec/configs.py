@@ -174,3 +174,23 @@ class ReconstructionConfig(object):
 
     def __str__(self):
         return str(self.preproc_cfg) + str(self.alg_cfg) + str(self.postproc_cfg)
+
+    def tomo_print(self, message, importanceLevel=1):
+        """
+        TODO currently the importanceLevel parameter is ignored
+        Verbosity levels:
+        0 -> debug, print everything
+        1 -> information, print information about progress
+        2 -> print only major progress information, i.e data loaded, recon started, recon finished
+
+        Print only messages that have importanceLevel >= config verbosity level
+
+        :param message: Message to be printed
+        :param importanceLevel: Importance level depending on which messages will be printed
+        :return:
+        """
+
+        #  should be moved in the configs somewhere
+        temp_verbosity = 0
+        if(importanceLevel >= temp_verbosity):
+            print(message)

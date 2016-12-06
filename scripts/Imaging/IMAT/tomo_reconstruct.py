@@ -393,9 +393,11 @@ def main_tomo_rec():
                                        postproc_config)
     # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
-    if (args.find_cor > 0):  # TODO make prettier
+    if (args.find_cor > 0):
+        cfg.tomo_print("Finding COR")
         cmd.find_center(cfg)
     else:
+        cfg.tomo_print("Running reconstruction")
         cmd.do_recon(cfg, cmd_line=cmd_line)
 
 
