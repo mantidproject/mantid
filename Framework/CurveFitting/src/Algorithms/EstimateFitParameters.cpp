@@ -115,7 +115,7 @@ class BestParameters {
 
 public:
   /// Constructor
-  BestParameters(size_t size) : m_size(size) {}
+  explicit BestParameters(size_t size) : m_size(size) {}
   /// Test a cost function value if corresponding parameters must be stored.
   bool isOneOfBest(double value) const {
     return m_params.size() < m_size || value < m_params.rbegin()->first;
