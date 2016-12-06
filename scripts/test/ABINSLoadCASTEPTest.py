@@ -37,9 +37,9 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
     #  *************************** USE CASES ********************************************
-    _core = "../ExternalData/Testing/Data/UnitTest/"
+    _core = os.path.normcase("../ExternalData/Testing/Data/UnitTest/")  # hardcoded directory with testing files
 
-    # ===================================================================================
+# ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
 
@@ -82,7 +82,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         cwd = os.getcwd()
 
         # get calculated data
-        filename_unix = os.path.join(core, name+".phonon")
+        filename_unix = os.path.join(core, name + ".phonon")
         input_filename = path.abspath(filename_unix)
         input_filename = path.relpath(input_filename, cwd)
 
@@ -178,7 +178,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         for item in range(len(correct_atoms)):
 
             self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
-            self.assertEqual(correct_atoms[item]["mass"], atoms[item]["mass"])
+            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)
             self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
             self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
             self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
@@ -206,7 +206,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         for item in range(len(correct_atoms)):
 
             self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
-            self.assertEqual(correct_atoms[item]["mass"], atoms[item]["mass"])
+            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)
             self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
             self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
             self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),

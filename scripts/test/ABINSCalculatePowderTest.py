@@ -22,7 +22,7 @@ from AbinsModules import CalculatePowder, LoadCASTEP
 
 class ABINSCalculatePowderTest(unittest.TestCase):
 
-    _core = "../ExternalData/Testing/Data/UnitTest/"  # path to files
+    _core = os.path.normcase("../ExternalData/Testing/Data/UnitTest/")  # path to files
     _temperature = 10  # 10 K,  temperature for the benchmark
 
     # data
