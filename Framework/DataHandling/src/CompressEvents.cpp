@@ -3,6 +3,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include "tbb/parallel_for.h"
+
 #include <set>
 #include <numeric>
 
@@ -62,27 +65,34 @@ void CompressEvents::exec() {
                                                            false);
     // We DONT copy the data though
     // Loop over the histograms (detector spectra)
-    for (size_t index = 0; index < noSpectra; ++index) {
-      // The input event list
-      EventList &input_el = inputWS->getSpectrum(index);
-      // And on the output side
-      EventList &output_el = outputWS->getSpectrum(index);
-      // Copy other settings into output
-      output_el.setX(input_el.ptrX());
-      // The EventList method does the work.
-      input_el.compressEvents(tolerance, &output_el);
-      prog.report("Compressing");
-    }
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                      [tolerance, &inputWS, &outputWS,
+                       &prog](const tbb::blocked_range<size_t> &range) {
+                        for (size_t index = range.begin(); index < range.end();
+                             ++index) {
+                          // The input event list
+                          EventList &input_el = inputWS->getSpectrum(index);
+                          // And on the output side
+                          EventList &output_el = outputWS->getSpectrum(index);
+                          // Copy other settings into output
+                          output_el.setX(input_el.ptrX());
+                          // The EventList method does the work.
+                          input_el.compressEvents(tolerance, &output_el);
+                          prog.report("Compressing");
+                        }
+                      });
   } else {
-    // ---- In-place -----
-    // Loop over the histograms (detector spectra)
-    for (size_t i = 0; i < noSpectra; ++i) {
-      // The input (also output) event list
-      auto &output_el = outputWS->getSpectrum(i);
-      // The EventList method does the work.
-      output_el.compressEvents(tolerance, &output_el);
-      prog.report("Compressing");
-    }
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, noSpectra),
+        [tolerance, &outputWS, &prog](const tbb::blocked_range<size_t> &range) {
+          for (size_t index = range.begin(); index < range.end(); ++index) {
+            // The input (also output) event list
+            auto &output_el = outputWS->getSpectrum(index);
+            // The EventList method does the work.
+            output_el.compressEvents(tolerance, &output_el);
+            prog.report("Compressing");
+          }
+        });
   }
   // Cast to the matrixOutputWS and save it
   this->setProperty("OutputWorkspace", outputWS);

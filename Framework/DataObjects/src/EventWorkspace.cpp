@@ -1,22 +1,24 @@
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidKernel/ThreadPool.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include "tbb/parallel_for.h"
+
 #include <limits>
 #include <numeric>
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/CPUTimer.h"
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
@@ -543,30 +545,16 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
 }
 
 /** Task for sorting an event list */
-class EventSortingTask final : public Task {
+class EventSortingTask {
 public:
   /// ctor
-  EventSortingTask(const EventWorkspace *WS, size_t wiStart, size_t wiStop,
-                   EventSortType sortType, Mantid::API::Progress *prog)
-      : Task(), m_wiStart(wiStart), m_wiStop(wiStop), m_sortType(sortType),
-        m_WS(WS), prog(prog) {
-    m_cost = 0;
-    if (m_wiStop > m_WS->getNumberHistograms())
-      m_wiStop = m_WS->getNumberHistograms();
-
-    for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
-      double n = static_cast<double>(m_WS->getSpectrum(wi).getNumberEvents());
-      // Sorting time is approximately n * ln (n)
-      m_cost += n * log(n);
-    }
-
-  }
+  EventSortingTask(const EventWorkspace *WS, EventSortType sortType,
+                   Mantid::API::Progress *prog)
+      : m_sortType(sortType), m_WS(WS), prog(prog) {}
 
   // Execute the sort as specified.
-  void run() override {
-    if (!m_WS)
-      return;
-    for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
+  void operator()(const tbb::blocked_range<size_t> &range) {
+    for (size_t wi = range.begin(); wi < range.end(); ++wi) {
       m_WS->getSpectrum(wi).sort(m_sortType);
     }
     // Report progress
@@ -575,10 +563,6 @@ public:
   }
 
 private:
-  /// Start workspace index to process
-  size_t m_wiStart;
-  /// Stop workspace index to process
-  size_t m_wiStop;
   /// How to sort
   EventSortType m_sortType;
   /// EventWorkspace on which to sort
@@ -616,8 +600,8 @@ void EventWorkspace::sortAll(EventSortType sortType,
   }
 
   // Create the thread pool, and optimize by doing the longest sorts first.
-  EventSortingTask task(this, 0, data.size(), sortType, prog);
-  task.run();
+  EventSortingTask task(this, sortType, prog);
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, data.size()), task);
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.
