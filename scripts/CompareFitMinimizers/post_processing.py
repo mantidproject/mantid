@@ -59,8 +59,8 @@ def calc_summary_table(minimizers, group_results):
         norm_acc_rankings = accuracy_tbl / min_sum_err_sq[:, None]
         norm_runtime_rankings = time_tbl / min_runtime[:, None]
 
-        groups_norm_acc[group_idx, :] = np.nanmedian(norm_acc_rankings, 0)
-        groups_norm_runtime[group_idx, :] = np.nanmedian(norm_runtime_rankings, 0)
+        groups_norm_acc[group_idx, :] = stats.nanmedian(norm_acc_rankings, 0)
+        groups_norm_runtime[group_idx, :] = stats.nanmedian(norm_runtime_rankings, 0)
 
     return groups_norm_acc, groups_norm_runtime
 
