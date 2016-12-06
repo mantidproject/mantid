@@ -10,6 +10,14 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
+/**
+ * Create a new instance of the view.
+ *
+ * @param projectName :: the existing project path
+ * @param serialiser :: a ProjectSerialiser instance
+ * @param windows :: vector of window handles for the open application
+ * @param parent :: parent widget for this object
+ */
 ProjectSaveView::ProjectSaveView(const QString& projectName,
                                  ProjectSerialiser &serialiser,
                                  const std::vector<IProjectSerialisable*> &windows,
@@ -31,31 +39,62 @@ ProjectSaveView::ProjectSaveView(const QString& projectName,
 // IProjectSaveView interface implementations
 //==============================================================================
 
+/**
+ * Get all window handles passed to the view
+ * @return a vector of handles to each window
+ */
 std::vector<API::IProjectSerialisable *> ProjectSaveView::getWindows()
 {
   return m_serialisableWindows;
 }
 
+/**
+ * Get all of the checked workspace names
+ * @return a vector of workspace names
+ */
 std::vector<std::string> ProjectSaveView::getCheckedWorkspaceNames()
 {
   return getItemsWithCheckState(Qt::CheckState::Checked);
 }
 
+/**
+ * Get all of the unchecked workspace names
+ * @return a vector of workspace names
+ */
 std::vector<std::string> ProjectSaveView::getUncheckedWorkspaceNames()
 {
   return getItemsWithCheckState(Qt::CheckState::Unchecked);
 }
 
+/**
+ * Get the project path text
+ *
+ * This path may or may not exist yet and must be further validated.
+ *
+ * @return string representing the project path
+ */
 QString ProjectSaveView::getProjectPath()
 {
   return m_ui.projectPath->text();
 }
 
+/**
+ * Set the project path
+ * @param path :: path the project will be saved to
+ */
 void ProjectSaveView::setProjectPath(const QString &path)
 {
  m_ui.projectPath->setText(path);
 }
 
+/**
+ * Update the list of workspaces.
+ *
+ * This will create one new item in the list for each workspace info
+ * object passed
+ *
+ * @param workspaces :: vector of workspace info objects to add to the view
+ */
 void ProjectSaveView::updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces)
 {
   m_ui.workspaceList->clear();
@@ -66,6 +105,13 @@ void ProjectSaveView::updateWorkspacesList(const std::vector<WorkspaceInfo> &wor
   resizeWidgetColumns(m_ui.workspaceList);
 }
 
+/**
+ * Update the included windows list
+ *
+ * This will create one new item in the list for each window info object passed.
+ *
+ * @param windows :: vector of window info objects to add to the view
+ */
 void ProjectSaveView::updateIncludedWindowsList(const std::vector<WindowInfo> &windows)
 {
   m_ui.includedWindows->clear();
@@ -76,6 +122,13 @@ void ProjectSaveView::updateIncludedWindowsList(const std::vector<WindowInfo> &w
   resizeWidgetColumns(m_ui.includedWindows);
 }
 
+/**
+ * Update the excluded windows list
+ *
+ * This will create one new item in the list for each window info object passed.
+ *
+ * @param windows :: vector of window info objects to add to the view
+ */
 void ProjectSaveView::updateExcludedWindowsList(const std::vector<WindowInfo> &windows)
 {
   m_ui.excludedWindows->clear();
@@ -86,6 +139,10 @@ void ProjectSaveView::updateExcludedWindowsList(const std::vector<WindowInfo> &w
   resizeWidgetColumns(m_ui.excludedWindows);
 }
 
+/**
+ * Remove a list of windows from the included windows list
+ * @param windows :: vector of window names to remove from the include list
+ */
 void ProjectSaveView::removeFromIncludedWindowsList(const std::vector<std::string> &windows)
 {
   for (auto name : windows) {
@@ -93,6 +150,10 @@ void ProjectSaveView::removeFromIncludedWindowsList(const std::vector<std::strin
   }
 }
 
+/**
+ * Remove a list of windows from the excluded windows list
+ * @param windows :: vector of window names to remove from the exclude list
+ */
 void ProjectSaveView::removeFromExcludedWindowsList(const std::vector<std::string> &windows)
 {
   for (auto name : windows) {
@@ -103,6 +164,16 @@ void ProjectSaveView::removeFromExcludedWindowsList(const std::vector<std::strin
 // Private slots
 //==============================================================================
 
+/**
+ * Slot of handle when a workspace item is changed.
+ *
+ * When a workspace item is check or unchecked this will notify the presenter to
+ * move the windows associated with this workspace to the other (included/
+ * excluded) list.
+ *
+ * @param item :: QTreeWidget item that was modified
+ * @param column :: column that was modified
+ */
 void ProjectSaveView::workspaceItemChanged(QTreeWidgetItem *item, int column)
 {
   if(item->checkState(column) == Qt::CheckState::Checked) {
@@ -112,20 +183,16 @@ void ProjectSaveView::workspaceItemChanged(QTreeWidgetItem *item, int column)
   }
 }
 
-std::vector<std::string> ProjectSaveView::getItemsWithCheckState(const Qt::CheckState state) const
-{
-  std::vector<std::string> names;
-  for( int i = 0; i < m_ui.workspaceList->topLevelItemCount(); ++i )
-  {
-     auto item = m_ui.workspaceList->topLevelItem( i );
-     if(item->checkState(0) == state) {
-       auto name = item->text(0).toStdString();
-       names.push_back(name);
-     }
-  }
-  return names;
-}
-
+/**
+ * Slot to save the project.
+ *
+ * This will call the project serialiser passed on construction and save the
+ * current state of the project. If only certain workspaces have been selected
+ * then only a subset of the workspaces/windows will be passed to the project
+ * serialiser.
+ *
+ * @param checked :: unused arguement
+ */
 void ProjectSaveView::save(bool checked)
 {
   UNUSED_ARG(checked);
@@ -148,6 +215,12 @@ void ProjectSaveView::save(bool checked)
   close();
 }
 
+/**
+ * Slot to ask the user to find a new project path.
+ *
+ * This will open a file dialog and let the user choose a new location for the
+ * project.
+ */
 void ProjectSaveView::findFilePath()
 {
   QString fileName = "";
@@ -164,6 +237,32 @@ void ProjectSaveView::findFilePath()
 // Private helper methods
 //==============================================================================
 
+/**
+ * Get all items with a given check state from the workspace list
+ * @param state :: any of the values in Qt::CheckState
+ * @return a vector of names of workspaces that had the state
+ */
+std::vector<std::string> ProjectSaveView::getItemsWithCheckState(const Qt::CheckState state) const
+{
+  std::vector<std::string> names;
+  for( int i = 0; i < m_ui.workspaceList->topLevelItemCount(); ++i )
+  {
+     auto item = m_ui.workspaceList->topLevelItem( i );
+     if(item->checkState(0) == state) {
+       auto name = item->text(0).toStdString();
+       names.push_back(name);
+     }
+  }
+  return names;
+}
+
+/**
+ * Get any included window names
+ *
+ * These will depend on which workspaces are checked in the view
+ *
+ * @return vector of included window names
+ */
 std::vector<std::string> ProjectSaveView::getIncludedWindowNames() const
 {
   std::vector<std::string> names;
@@ -176,6 +275,11 @@ std::vector<std::string> ProjectSaveView::getIncludedWindowNames() const
   return names;
 }
 
+/**
+ * Remove an item from a QTreeWidget
+ * @param widget :: handle to the widget
+ * @param name :: name to match widget items with
+ */
 void ProjectSaveView::removeItem(QTreeWidget *widget, const std::string &name)
 {
   auto qname = QString::fromStdString(name);
@@ -185,6 +289,11 @@ void ProjectSaveView::removeItem(QTreeWidget *widget, const std::string &name)
   }
 }
 
+/**
+ * Add a new window item to the view
+ * @param widget :: the widget to add the item to
+ * @param info :: window info object with data to add
+ */
 void ProjectSaveView::addWindowItem(QTreeWidget *widget, const WindowInfo &info)
 {
   QStringList lst;
@@ -198,6 +307,10 @@ void ProjectSaveView::addWindowItem(QTreeWidget *widget, const WindowInfo &info)
   widget->addTopLevelItem(item);
 }
 
+/**
+ * Add a new workspace item to the view
+ * @param info :: workspace info object with data to add
+ */
 void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info)
 {
   QStringList lst;
@@ -213,6 +326,11 @@ void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info)
   m_ui.workspaceList->addTopLevelItem(item);
 }
 
+/**
+ * Check if project path is a new unsaved project or has been saved before
+ * @param projectName :: path to the project
+ * @return whether the project already exists
+ */
 bool ProjectSaveView::checkIfNewProject(const QString &projectName) const
 {
    return (projectName == "untitled" ||
@@ -222,12 +340,19 @@ bool ProjectSaveView::checkIfNewProject(const QString &projectName) const
            projectName.endsWith(".ogg", Qt::CaseInsensitive));
 }
 
+/**
+ * Resize the columns of a widget to match the length of the contents
+ * @param widget :: the widget to resize
+ */
 void ProjectSaveView::resizeWidgetColumns(QTreeWidget *widget)
 {
   for (int i = 0; i < widget->topLevelItemCount(); ++i)
     widget->resizeColumnToContents(i);
 }
 
+/**
+ * Connect the internal signals
+ */
 void ProjectSaveView::connectSignals()
 {
   //Connect signal to listen for when workspaces are changed (checked/unchecked)

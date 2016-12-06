@@ -10,6 +10,10 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 
+/**
+ * Construct a new model with a list of window handles
+ * @param windows :: vector of handles to windows open in Mantid
+ */
 ProjectSaveModel::ProjectSaveModel(
     std::vector<IProjectSerialisable *> windows) {
   auto workspaces = getWorkspaces();
@@ -32,6 +36,11 @@ ProjectSaveModel::ProjectSaveModel(
   }
 }
 
+/**
+ * Get windows which are associated with a given workspace name
+ * @param wsName :: the name of the workspace to get window for
+ * @return vector of window handles for the workspace
+ */
 std::vector<IProjectSerialisable *>
 ProjectSaveModel::getWindows(const std::string &wsName) const {
   if (hasWindows(wsName)) {
@@ -41,6 +50,11 @@ ProjectSaveModel::getWindows(const std::string &wsName) const {
   return std::vector<IProjectSerialisable *>();
 }
 
+/**
+ * Get unique windows for a list of workspace names
+ * @param wsNames :: vector of workspace names to get associated windows for
+ * @return an ordered vector of unique window handles sorted by window name
+ */
 std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(
     const std::vector<std::string> &wsNames) const {
   std::unordered_set<IProjectSerialisable *> uniqueWindows;
@@ -61,6 +75,12 @@ std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(
   return windows;
 }
 
+/**
+ * Get all unique window names for a list of workspaces
+ *
+ * @param wsNames :: vector of workspace names to get associated window names for
+ * @return an ordered vector of unique window names sorted alphabetically
+ */
 std::vector<std::string> ProjectSaveModel::getWindowNames(
     const std::vector<std::string> &wsNames) const {
   std::unordered_set<std::string> windowNames;
@@ -77,6 +97,10 @@ std::vector<std::string> ProjectSaveModel::getWindowNames(
   return names;
 }
 
+/**
+ * Get all workspace names in the model
+ * @return vector of all workspace names in the model
+ */
 std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
   std::vector<std::string> names;
   for (auto &item : m_workspaceWindows) {
@@ -87,6 +111,11 @@ std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
   return names;
 }
 
+/**
+ * Get window information for a selection of workspaces
+ * @param wsNames :: vector of workspace names to find associated windows for
+ * @return vector of window info objects associated with the workpaces
+ */
 std::vector<WindowInfo> ProjectSaveModel::getWindowInformation(
     const std::vector<std::string> &wsNames) const {
   std::vector<WindowInfo> winInfo;
@@ -103,6 +132,10 @@ std::vector<WindowInfo> ProjectSaveModel::getWindowInformation(
   return winInfo;
 }
 
+/**
+ * Get workspace information for all workspaces
+ * @return vector of workspace info objects for all workspaces
+ */
 std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
   WorkspaceIcons icons;
   std::vector<WorkspaceInfo> wsInfo;
@@ -124,11 +157,20 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
   return wsInfo;
 }
 
+/**
+ * Get all workspaces from the ADS
+ * @return vector of workspace handles from the ADS
+ */
 std::vector<Workspace_sptr> ProjectSaveModel::getWorkspaces() const {
   auto &ads = AnalysisDataService::Instance();
   return ads.getObjects();
 }
 
+/**
+ * Check is a workspace has any windows associated with it
+ * @param wsName :: the name of workspace
+ * @return whether the workspace has > 0 windows associated with it
+ */
 bool ProjectSaveModel::hasWindows(const std::string &wsName) const {
   auto item = m_workspaceWindows.find(wsName);
   if (item != m_workspaceWindows.end()) {

@@ -12,6 +12,10 @@
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
+/**
+ * Construct a new presenter with the given view
+ * @param view :: a handle to a view for this presenter
+ */
 ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
     : m_view(view), m_model(m_view->getWindows()) {
   auto workspaceNames = m_model.getWorkspaceNames();
@@ -21,6 +25,10 @@ ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
   m_view->updateWorkspacesList(info);
 }
 
+/**
+ * Notify the presenter to perform an action
+ * @param notification :: notification to choose the action to perform
+ */
 void ProjectSavePresenter::notify(Notification notification) {
   switch (notification) {
   case Notification::CheckWorkspace:
@@ -34,6 +42,10 @@ void ProjectSavePresenter::notify(Notification notification) {
   }
 }
 
+/**
+ * Update the view with a new list of windows that are included in project
+ * saving based on the currently checked workspaces
+ */
 void ProjectSavePresenter::includeWindowsForCheckedWorkspace() {
   auto wsNames = m_view->getCheckedWorkspaceNames();
   auto names = m_model.getWindowNames(wsNames);
@@ -42,6 +54,10 @@ void ProjectSavePresenter::includeWindowsForCheckedWorkspace() {
   m_view->removeFromExcludedWindowsList(names);
 }
 
+/**
+ * Update the view with a new list of windows that are excluded from project
+ * saving based on the currently checked workspaces
+ */
 void ProjectSavePresenter::excludeWindowsForUncheckedWorkspace() {
   auto wsNames = m_view->getUncheckedWorkspaceNames();
   auto names = m_model.getWindowNames(wsNames);
@@ -50,6 +66,11 @@ void ProjectSavePresenter::excludeWindowsForUncheckedWorkspace() {
   m_view->removeFromIncludedWindowsList(names);
 }
 
+/**
+ * Prepare a project folder for serialistion
+ *
+ * This will check the file path and if necessary create a new project folder
+ */
 void ProjectSavePresenter::prepareProjectFolder() {
   auto path = m_view->getProjectPath();
 

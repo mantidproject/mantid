@@ -47,16 +47,24 @@ public:
     PrepareProjectFolder
   };
 
+  /// Construct a new presenter with a view
   ProjectSavePresenter(IProjectSaveView* view);
+  /// Notify the presenter to do something
   void notify(Notification notification);
 
 private:
+  /// Update the view to add included windows for a workspace
   void includeWindowsForCheckedWorkspace();
+  /// Update the view to add excluded windows for a workspace
   void excludeWindowsForUncheckedWorkspace();
+  /// Prepare a project folder given the path
   void prepareProjectFolder();
+
+  // Instance Variables
 
   /// Handle to the view for this presenter
   IProjectSaveView *m_view;
+  /// Hold an instance of the model
   ProjectSaveModel m_model;
 };
 

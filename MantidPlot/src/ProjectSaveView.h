@@ -52,40 +52,67 @@ public:
                   const std::vector<MantidQt::API::IProjectSerialisable*> &windows,
                   QWidget *parent = nullptr);
 
+  /// Get all of the window handles passed to the view
   std::vector<MantidQt::API::IProjectSerialisable*> getWindows() override;
+  /// Get any checked workspace names on the view
   std::vector<std::string> getCheckedWorkspaceNames() override;
+  /// Get any unchecked workspace names on the view
   std::vector<std::string> getUncheckedWorkspaceNames() override;
+  /// Get the current path of the project
   QString getProjectPath() override;
+  /// Set the current path of the project
   void setProjectPath(const QString& path) override;
-
+  /// Update the list of workspaces with a collection of workspace info
   void updateWorkspacesList(const std::vector<WorkspaceInfo>& workspaces) override;
+  /// Update the list of included windows with a collection of window info
   void updateIncludedWindowsList(const std::vector<WindowInfo>& windows) override;
+  /// Update the list of excluded windows with a collection of window info
   void updateExcludedWindowsList(const std::vector<WindowInfo>& windows) override;
+  /// Remove a collection of windows from the included window list
   void removeFromIncludedWindowsList(const std::vector<std::string>& windows) override;
+  /// Remove a collection of windows from the excluded window list
   void removeFromExcludedWindowsList(const std::vector<std::string>& windows) override;
 
 signals:
+  /// Signal emitted when the ProjectSerialiser has finished writing
   void projectSaved();
 
 private slots:
+  /// Slot to browse for a new project path
   void findFilePath();
+  /// Slot to save the project
   void save(bool checked);
+  /// Slot to move windows when workspaces are checked/unchecked
   void workspaceItemChanged(QTreeWidgetItem* item, int column);
 
 private:
-    std::vector<std::string> getIncludedWindowNames() const;
-    std::vector<std::string> getItemsWithCheckState(const Qt::CheckState state) const;
-    void removeItem(QTreeWidget* widget, const std::string &name);
-    void addWindowItem(QTreeWidget* widget, const WindowInfo &info);
-    void addWorkspaceItem(const WorkspaceInfo &info);
-    bool checkIfNewProject(const QString& projectName) const;
-    void resizeWidgetColumns(QTreeWidget* widget);
-    void connectSignals();
+  /// Get a list of included windows names to be saved
+  std::vector<std::string> getIncludedWindowNames() const;
+  /// Get the name value of all items with a given check state
+  std::vector<std::string> getItemsWithCheckState(const Qt::CheckState state) const;
+  /// Remove an item from a QTreeWidget
+  void removeItem(QTreeWidget* widget, const std::string &name);
+  /// Add an new window item QTreeWidget
+  void addWindowItem(QTreeWidget* widget, const WindowInfo &info);
+  /// Add an new workspace item QTreeWidget
+  void addWorkspaceItem(const WorkspaceInfo &info);
+  /// Check if the project path already existed
+  bool checkIfNewProject(const QString& projectName) const;
+  /// Resize a QTreeWidgets columns to fit text correctly
+  void resizeWidgetColumns(QTreeWidget* widget);
+  /// Connect up signals to the interface on initilisation
+  void connectSignals();
 
-    std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;
-    std::unique_ptr<ProjectSavePresenter> m_presenter;
-    MantidQt::API::ProjectSerialiser&  m_serialiser;
-    Ui::ProjectSave m_ui;
+  // Instance variables
+
+  /// List of windows to be serialised
+  std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;
+  /// Handle to the presenter for this view
+  std::unique_ptr<ProjectSavePresenter> m_presenter;
+  /// Handle to the project serialiser
+  MantidQt::API::ProjectSerialiser&  m_serialiser;
+  /// Handle to the UI
+  Ui::ProjectSave m_ui;
 };
 }
 }

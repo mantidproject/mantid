@@ -44,7 +44,9 @@ std::string WindowIcons::getIconID(const std::string &windowID) const
 //-----------------------------------------------------------------------------
 // Private member functions
 //-----------------------------------------------------------------------------
+
 /**
+ * Initilise the internal lookup map
  */
 void WindowIcons::initInternalLookup() {
   m_idToPixmapName.clear();
@@ -59,6 +61,15 @@ void WindowIcons::initInternalLookup() {
   m_idToPixmapName["VSIWindow"] = ":/VatesSimpleGuiViewWidgets/icons/pvIcon.png";
 }
 
+/**
+ * Make a QIcon object froma file path
+ *
+ * This is used in the case that a pixmap does not exist and a file path to an
+ * image was provided instead.
+ *
+ * @param path :: path to the image to use to create the icon
+ * @return icon object made from the path
+ */
 QIcon WindowIcons::makeIconFromFile(const std::string &path) const
 {
     QIcon icon;

@@ -11,6 +11,9 @@
 namespace  MantidQt {
 namespace MantidWidgets {
 
+// POD structs to pass information to the view
+//==============================================================================
+
 struct WorkspaceInfo {
   std::string name;
   std::string type;
@@ -33,10 +36,13 @@ struct WindowInfo {
   }
 };
 
+// Model definition
+//==============================================================================
 
 class ProjectSaveModel
 {
 public:
+  /// Construct a new model instance with vector of window handles
   ProjectSaveModel(std::vector<MantidQt::API::IProjectSerialisable*> windows);
 
   /// Check if a workspace has any windows attached to it
@@ -58,6 +64,7 @@ public:
 
 private:
   // Instance variables
+
   /// Map to hold which windows are associated with a workspace
   std::unordered_map<std::string, std::vector<MantidQt::API::IProjectSerialisable*>> m_workspaceWindows;
 };
