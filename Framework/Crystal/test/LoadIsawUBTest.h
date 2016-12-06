@@ -30,7 +30,7 @@ public:
   void test_exec() {
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_ws", ws);
 
     LoadIsawUB alg;
@@ -84,7 +84,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
    */
   void test_integration() {
     Workspace2D_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 20);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 20);
     PeaksWorkspace_sptr pw;
     AnalysisDataService::Instance().addOrReplace("TOPAZ_3007", ws);
 
@@ -94,7 +94,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
         "True");
 
     // Match the goniometer angles
-    WorkspaceCreationHelper::SetGoniometer(ws, 86.92, 135.00, -105.66);
+    WorkspaceCreationHelper::setGoniometer(ws, 86.92, 135.00, -105.66);
     // WorkspaceCreationHelper::SetGoniometer(ws, 0, 0, 0);
 
     // Load the .mat file into it

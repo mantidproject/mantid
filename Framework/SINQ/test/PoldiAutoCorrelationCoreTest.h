@@ -219,7 +219,7 @@ public:
 
   void testgetCounts() {
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setCountData(testWorkspace);
@@ -234,7 +234,7 @@ public:
 
   void testgetNormCounts() {
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setNormCountData(testWorkspace);
@@ -247,7 +247,7 @@ public:
 
   void testgetSumOfCounts() {
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setCountData(testWorkspace);
@@ -265,7 +265,7 @@ public:
         boost::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     autoCorrelationCore.setCountData(testWorkspace);
     autoCorrelationCore.setNormCountData(testWorkspace);
 

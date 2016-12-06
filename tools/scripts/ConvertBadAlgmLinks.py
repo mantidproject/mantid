@@ -2,6 +2,7 @@
 import re
 import glob
 import os
+from mantid.api import AlgorithmFactory
 
 
 def grep(patt,lines):

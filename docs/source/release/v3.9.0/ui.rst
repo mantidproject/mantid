@@ -74,4 +74,5 @@ changes on GitHub
 VSI Improvements
 ----------------
 
-ParaView updated to v5.2.0
+- ParaView updated to v5.2.0
+- The sources and views more reliably show progress in the VSI status bar. 

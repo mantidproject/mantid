@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 

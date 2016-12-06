@@ -281,7 +281,7 @@ private:
 
   void createEventWorkspace() {
     EventWorkspace_sptr event =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 5, 5, 0, 0.9, 2, 0);
+        WorkspaceCreationHelper::createEventWorkspace(1, 5, 5, 0, 0.9, 2, 0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(inputEvWSname, event);
   }
