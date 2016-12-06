@@ -1976,21 +1976,6 @@ public:
                   << " seconds to sortTof (original).\n";
       TS_ASSERT(checkSort("sortTof"));
 
-      // Reset
-      fake_data();
-      Timer timer3;
-      el.sortTof2();
-      if (verbose)
-        std::cout << "   - " << timer3.elapsed() << " seconds to sortTof2.\n";
-      TS_ASSERT(checkSort("sortTof2"));
-
-      // Reset
-      fake_data();
-      Timer timer4;
-      el.sortTof4();
-      if (verbose)
-        std::cout << "   - " << timer4.elapsed() << " seconds to sortTof4.\n";
-      TS_ASSERT(checkSort("sortTof4"));
     }
   }
 
@@ -2678,22 +2663,11 @@ public:
 
   void test_sort_tof() { el_random.sortTof(); }
 
-  void test_sort_tof2() { el_random.sortTof2(); }
-
-  void test_sort_tof4() { el_random.sortTof4(); }
-
   void test_compressEvents() {
     CPUTimer tim;
     EventList out_el;
     el_sorted.compressEvents(10.0, &out_el);
     std::cout << '\n' << tim << " to compress events. \n";
-  }
-
-  void test_compressEvents_Parallel() {
-    CPUTimer tim;
-    EventList out_el;
-    el_sorted.compressEvents(10.0, &out_el, true);
-    std::cout << '\n' << tim << " to compress events in parallel. \n";
   }
 
   void test_multiply() { el_random *= 2.345; }
