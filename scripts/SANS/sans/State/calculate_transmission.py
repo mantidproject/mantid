@@ -10,7 +10,7 @@ from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveI
 from sans.common.sans_type import (RebinType, RangeStepType, FitType, DataType, convert_reduction_data_type_to_string)
 from sans.common.configurations import SANSConfigurations
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message,
-                                         is_not_none_and_first_larger_than_second, one_is_none)
+                                        is_not_none_and_first_larger_than_second, one_is_none)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file

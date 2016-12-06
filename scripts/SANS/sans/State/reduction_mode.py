@@ -6,9 +6,9 @@ from abc import (ABCMeta, abstractmethod)
 import copy
 
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
-                                       FloatWithNoneParameter, rename_descriptor_names)
+                                   FloatWithNoneParameter, rename_descriptor_names)
 from sans.common.sans_type import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
-                                    SANSInstrument)
+                                   SANSInstrument)
 from sans.common.constants import SANSConstants
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file

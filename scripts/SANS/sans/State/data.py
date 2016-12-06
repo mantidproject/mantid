@@ -6,7 +6,7 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter,
-                                       ClassTypeParameter, rename_descriptor_names)
+                                   ClassTypeParameter, rename_descriptor_names)
 from sans.common.sans_type import (SANSInstrument, SANSFacility)
 from sans.common.constants import SANSConstants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
