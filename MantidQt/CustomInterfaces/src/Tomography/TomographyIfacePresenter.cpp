@@ -44,8 +44,7 @@ const std::string TomographyIfacePresenter::g_defOutPathRemote =
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()),
-      m_statusMutex(new QMutex()), m_keepAliveTimer(NULL),
-      m_keepAliveThread(NULL) {
+      m_statusMutex(new QMutex()), m_keepAliveTimer(nullptr) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
@@ -55,9 +54,6 @@ TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
 
 TomographyIfacePresenter::~TomographyIfacePresenter() {
   cleanup();
-
-  if (m_keepAliveThread)
-    delete m_keepAliveThread;
 
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
@@ -642,6 +638,9 @@ void TomographyIfacePresenter::processRunRecon() {
     m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
     if (local) {
       setupAndRunLocalReconstruction(runnable, args, allOpts);
+
+      // start the refresh jobs timer if not running
+      startKeepAliveMechanism(m_view->keepAlivePeriod());
     } else {
       // get the actual compute resource name
       const std::string computingResouce = m_view->currentComputeResource();
@@ -651,23 +650,33 @@ void TomographyIfacePresenter::processRunRecon() {
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
+
   processRefreshJobs();
 }
 
-void TomographyIfacePresenter::setupAndRunLocalReconstruction(
-    const std::string &runnable, const std::vector<std::string> &args,
-    const std::string &allOpts) {
-
+bool TomographyIfacePresenter::userConfirmationToCancelRecon() {
   if (m_reconRunning) {
-    const auto result = m_view->userConfirmation(
+    const bool result = m_view->userConfirmation(
         "Reconstruction is RUNNING",
         "Are you sure you want to<br>cancel the running reconstruction?");
 
     if (!result) {
       // user clicked NO, so we don't terminate the running reconstruction and
       // simply return
-      return;
+      return false;
     }
+    m_reconRunning = false;
+  }
+  return true;
+}
+
+void TomographyIfacePresenter::setupAndRunLocalReconstruction(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts) {
+
+  if (!userConfirmationToCancelRecon()) {
+    // user didnt confirm
+    return;
   }
 
   // this kills the previous thread forcefully
@@ -685,8 +694,8 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
           SLOT(readWorkerStdErr(QString)));
 
   // remove the user confirmation for running recon, if the recon has finished
-  connect(m_workerThread.get(), SIGNAL(workerFinished()), this,
-          SLOT(workerFinished()));
+  connect(m_workerThread.get(), SIGNAL(workerFinished(qint64, int)), this,
+          SLOT(workerFinished(qint64, int)));
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
 
@@ -695,9 +704,15 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
   m_reconRunning = true;
 }
 
-/** Simply reset the switch that tracks if a recon is running
-*/
-void TomographyIfacePresenter::workerFinished() { m_reconRunning = false; }
+/** Simply reset the switch that tracks if a recon is running and
+ * update the process job in the reconstruction list
+ */
+void TomographyIfacePresenter::workerFinished(const qint64 pid,
+                                              const int exitCode) {
+  m_reconRunning = false;
+  m_model->updateProcessInJobList(pid, exitCode);
+  processRefreshJobs();
+}
 
 void TomographyIfacePresenter::reconProcessFailedToStart() {
   m_view->userError("Reconstruction failed to start",
@@ -707,9 +722,11 @@ void TomographyIfacePresenter::reconProcessFailedToStart() {
 
 void TomographyIfacePresenter::addProcessToJobList() {
   auto *worker = qobject_cast<TomographyProcess *>(sender());
-  qint64 pid = worker->getPID();
-  auto runnable = worker->getRunnable();
-  auto args = worker->getArgs();
+  const qint64 pid = worker->getPID();
+  const auto runnable = worker->getRunnable();
+  const auto args = worker->getArgs();
+
+  m_workerThread->setProcessPID(pid);
 
   m_model->addJobToStatus(pid, runnable, args);
   processRefreshJobs();
@@ -732,17 +749,10 @@ bool TomographyIfacePresenter::isLocalResourceSelected() const {
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
-  // No need to be logged in, there can be local processes
-  if (m_model->loggedIn().empty()) {
-    m_model->doRefreshJobsInfo("Local");
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
-                                  m_model->jobsStatusLocal());
-    return;
-  }
-
   m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
   {
+    // BUG :: still crash here if closed during running process
     // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
@@ -752,11 +762,13 @@ void TomographyIfacePresenter::processRefreshJobs() {
 }
 
 void TomographyIfacePresenter::processCancelJobs() {
-  if (m_model->loggedIn().empty())
-    return;
-
   const std::string &resource = m_view->currentComputeResource();
-  if (!isLocalResourceSelected()) {
+  if (isLocalResourceSelected()) {
+    if (userConfirmationToCancelRecon()) {
+      // user confirmed
+      m_workerThread.reset();
+    }
+  } else {
     m_model->doCancelJobs(resource, m_view->processingJobsIDs());
   }
 }
@@ -913,6 +925,11 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
     return;
   }
 
+  // timer is already running, so return
+  if (m_keepAliveTimer) {
+    return;
+  }
+
   m_model->logMsg(
       "Tomography GUI: starting mechanism to periodically query the "
       "status of jobs. This will update the status of running jobs every " +
@@ -922,22 +939,19 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
       "also expected to keep sessions on remote compute resources "
       "alive after logging in.");
 
-  if (m_keepAliveThread)
-    delete m_keepAliveThread;
-  QThread *m_keepAliveThread = new QThread();
-
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
-  m_keepAliveTimer = new QTimer(NULL); // no-parent so it can be moveToThread
+  m_keepAliveTimer = new QTimer(this); // no-parent so it can be moveToThread
 
   m_keepAliveTimer->setInterval(1000 * period); // interval in ms
-  m_keepAliveTimer->moveToThread(m_keepAliveThread);
-  // direct connection from the thread
-  connect(m_keepAliveTimer, SIGNAL(timeout()), SLOT(processRefreshJobs()),
-          Qt::DirectConnection);
-  QObject::connect(m_keepAliveThread, SIGNAL(started()), m_keepAliveTimer,
-                   SLOT(start()));
-  m_keepAliveThread->start();
+
+  // remove previous connections
+  m_keepAliveTimer->disconnect();
+
+  connect(m_keepAliveTimer, SIGNAL(timeout()), this,
+          SLOT(processRefreshJobs()));
+
+  m_keepAliveTimer->start();
 }
 
 void TomographyIfacePresenter::killKeepAliveMechanism() {

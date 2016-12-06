@@ -370,6 +370,7 @@ void TomographyIfaceModel::prepareSubmissionArguments(
     // external interpreter fails if remote we just want to append all of the
     // options, the script path is already appended
     args.emplace_back(local ? trailingCommands : longOpt);
+    allOpts = constructSingleStringFromVector(args);
     return;
   }
 
@@ -558,6 +559,19 @@ void TomographyIfaceModel::refreshLocalJobsInfo() {
       job.status = "Running";
     } else {
       job.status = "Done";
+    }
+  }
+}
+
+void TomographyIfaceModel::updateProcessInJobList(const qint64 pid,
+                                                  const int exitCode) {
+  // cast to string from qint64 so we can compare
+  const std::string processPID = std::to_string(static_cast<int>(pid));
+  for (auto &job : m_jobsStatusLocal) {
+    if (job.id == processPID) {
+      if (exitCode == 1) {
+        job.status = "Exit";
+      }
     }
   }
 }

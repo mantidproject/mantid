@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYPROCESS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYPROCESS_H_
 
-#include <vector>
 #include <QProcess>
 #include <QString>
 #include <QStringList>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,11 +37,11 @@ public:
   TomographyProcess() : QProcess(nullptr) {}
 
   // intentionally copy the vector
-  void setup(const std::string runnable, const std::vector<std::string> &args,
+  void setup(const std::string &runnable, const std::vector<std::string> &args,
              const std::string &allOpts) {
     m_allArgs = allOpts;
     m_runnable = QString::fromStdString(runnable);
-    m_args = constructArgumentsFromVector(args);
+    m_args = buildArguments(args);
   }
 
   std::string getRunnable() const { return m_runnable.toStdString(); }
@@ -49,6 +49,12 @@ public:
 
   qint64 getPID() const {
     auto pid = this->pid();
+
+    // qt connect could sometimes try to read the terminated process' PID
+    if (!pid) {
+      return 0;
+    }
+
 #ifdef _WIN32
     // windows gets a struct object with more info
     auto actualpid = static_cast<qint64>(pid->dwProcessId);
@@ -66,8 +72,7 @@ public slots:
   void startWorker() { start(m_runnable, m_args); }
 
 private:
-  QStringList
-  constructArgumentsFromVector(const std::vector<std::string> &args) const {
+  QStringList buildArguments(const std::vector<std::string> &args) const {
     QStringList list;
     list.reserve(static_cast<int>(args.size()));
 

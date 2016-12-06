@@ -7,6 +7,9 @@
 #include <QString>
 #include <QThread>
 
+// remove for DEBUG only
+#include <iostream>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 /*
@@ -33,50 +36,80 @@ class TomographyThread : public QThread {
   Q_OBJECT
 public:
   TomographyThread(QObject *parent, TomographyProcess *worker)
-      : QThread(parent) {
+      : QThread(parent), m_worker(worker) {
     // interactions between the thread and the worker are defined here
     connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
+    connect(this, SIGNAL(started()), this, SLOT(startWorker()));
 
     connect(worker, SIGNAL(readyReadStandardOutput()), this,
             SLOT(readWorkerStdOut()));
     connect(worker, SIGNAL(readyReadStandardError()), this,
             SLOT(readWorkerStdErr()));
 
-    connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
+    connect(worker, SIGNAL(finished(int)), this, SLOT(finished(int)));
 
-    // make sure we know who the worker is
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
 
-    worker->moveToThread(this);
-    m_worker = worker;
+    connect(this, SIGNAL(terminated()), worker, SLOT(terminate()));
+    m_worker->moveToThread(this);
   }
 
+  ~TomographyThread() override {
+    // this will terminate the process if another reconstruction is started,
+    // thus not allowing to have multiple reconstructions running at the same
+    // time
+    emit terminated();
+
+    // this causes segfault in processRefreshJobs if the check isnt here
+    if (m_workerRunning || !m_worker) {
+      // emit that the worker has been forcefully closed, exit with error code 1
+      // this is bad, find a way to notify without an explicit emit on thread
+      // destroy
+      emit workerFinished(m_workerPID, 1);
+    }
+  }
+
+  void setProcessPID(const qint64 pid) { m_workerPID = pid; }
+
+  qint64 getProcessPID() const { return m_workerPID; }
+
 public slots:
-  void workerFinished(int exitCode) {
-    UNUSED_ARG(exitCode);
+  void finished(const int exitCode) {
     // queue up object deletion
     m_worker->deleteLater();
-    emit workerFinished();
+    m_workerRunning = false;
+    // emit the exit code to the presenter so the process info can be updated
+    emit workerFinished(m_workerPID, exitCode);
   }
 
   void readWorkerStdOut() const {
     auto *worker = qobject_cast<TomographyProcess *>(sender());
-    emit stdOutReady(worker->readAllStandardOutput());
+    QString out(worker->readAllStandardOutput());
+    if (!out.isEmpty())
+      emit stdOutReady(out.trimmed());
   }
 
   void readWorkerStdErr() const {
     auto *worker = qobject_cast<TomographyProcess *>(sender());
-    emit stdErrReady(worker->readAllStandardError());
+    QString out(worker->readAllStandardError());
+
+    if (!out.isEmpty())
+      emit stdErrReady(out.trimmed());
   }
 
+  void startWorker() { m_workerRunning = true; }
+
 signals:
-  void workerFinished();
+  void workerFinished(const qint64, const int);
   void stdOutReady(const QString &s) const;
   void stdErrReady(const QString &s) const;
 
 private:
-  TomographyProcess *m_worker;
+  bool m_workerRunning = false;
+  /// Holder for the current running process' PID
+  qint64 m_workerPID;
+  TomographyProcess *const m_worker;
 };
 } // CustomInterfaces
 } // MantidQt

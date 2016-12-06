@@ -99,6 +99,8 @@ protected:
   void killKeepAliveMechanism();
 
   bool isLocalResourceSelected() const;
+signals:
+  void terminated();
 
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
@@ -107,10 +109,12 @@ protected slots:
   void readWorkerStdErr(const QString &s);
   void addProcessToJobList();
   void reconProcessFailedToStart();
-  void workerFinished();
+  void workerFinished(const qint64 pid, const int exitCode);
   void emitExternalProcessOutput();
 
 private:
+  /// Asks the user for permission to cancel the running reconstruction
+  bool userConfirmationToCancelRecon();
   void setupAndRunLocalReconstruction(const std::string &runnable,
                                       const std::vector<std::string> &args,
                                       const std::string &allOpts);
@@ -158,7 +162,6 @@ private:
 
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;
-  QThread *m_keepAliveThread;
 
   std::unique_ptr<TomographyThread> m_workerThread;
   std::string m_workerOutputCache;

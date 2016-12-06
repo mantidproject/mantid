@@ -200,6 +200,8 @@ public:
   std::string localComputeResource() const { return g_LocalResourceName; }
 
   void setTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
+  void updateProcessInJobList(const qint64 pid, const int exitCode);
+  void terminateProcess();
 
   // Names of reconstruction tools
   static const std::string g_TomoPyTool;
