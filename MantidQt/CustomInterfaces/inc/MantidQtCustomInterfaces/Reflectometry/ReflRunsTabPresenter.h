@@ -98,6 +98,8 @@ protected:
   void pushCommands();
 
 private:
+  std::string m_currentTransferMethod;
+
   static const std::string LegacyTransferMethod;
   static const std::string MeasureTransferMethod;
 
