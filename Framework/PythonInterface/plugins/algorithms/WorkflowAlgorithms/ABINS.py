@@ -1,5 +1,7 @@
 import pathos.multiprocessing as mp
 import numpy as np
+import os
+import py_compile
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
 from mantid.api._api import WorkspaceGroup
@@ -139,8 +141,16 @@ class ABINS(PythonAlgorithm):
                 break
 
         self._check_advanced_parameter()
+        self._update_advanced_parameters_pyc()
 
         return issues
+
+    def _update_advanced_parameters_pyc(self):
+        """
+        Updates advanced parameters.
+        """
+        param_path = os.path.realpath(AbinsParameters.__file__)
+        py_compile.compile(param_path)
 
     def PyExec(self):
 
