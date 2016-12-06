@@ -151,7 +151,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         for item in range(len(correct_atoms)):
 
             self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
-            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"])
+            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], places=-1)
             self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
             self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
             self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
