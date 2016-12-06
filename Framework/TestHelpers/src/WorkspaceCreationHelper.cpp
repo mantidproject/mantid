@@ -17,7 +17,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -32,8 +31,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
 
-#include <cmath>
-#include <sstream>
 
 namespace WorkspaceCreationHelper {
 using namespace Mantid;

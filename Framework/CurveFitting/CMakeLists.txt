@@ -86,7 +86,8 @@ set ( SRC_FILES
 	src/Functions/InelasticDiffSphere.cpp
 	src/Functions/InelasticIsoRotDiff.cpp
 	src/Functions/IsoRotDiff.cpp
-    src/Functions/Keren.cpp
+        src/Functions/Keren.cpp
+        src/Functions/Linear.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
@@ -237,7 +238,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
 	inc/MantidCurveFitting/Functions/InelasticIsoRotDiff.h
 	inc/MantidCurveFitting/Functions/IsoRotDiff.h
-    inc/MantidCurveFitting/Functions/Keren.h
+        inc/MantidCurveFitting/Functions/Keren.h
+        inc/MantidCurveFitting/Functions/Linear.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
@@ -364,7 +366,7 @@ set ( TEST_FILES
 	Functions/DiffSphereTest.h
 	Functions/DynamicKuboToyabeTest.h
 	Functions/ElasticIsoRotDiffTest.h
-    Functions/EndErfcTest.h
+        Functions/EndErfcTest.h
 	Functions/ExpDecayMuonTest.h
 	Functions/ExpDecayOscTest.h
 	Functions/ExpDecayTest.h
@@ -376,9 +378,10 @@ set ( TEST_FILES
 	Functions/GaussianTest.h
 	Functions/GramCharlierComptonProfileTest.h
 	Functions/IkedaCarpenterPVTest.h
-    Functions/InelasticIsoRotDiffTest.h
-    Functions/IsoRotDiffTest.h
-    Functions/KerenTest.h
+        Functions/InelasticIsoRotDiffTest.h
+        Functions/IsoRotDiffTest.h
+        Functions/KerenTest.h
+        Functions/LinearTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
 	Functions/Lorentzian1DTest.h
@@ -405,7 +408,7 @@ set ( TEST_FILES
 	Functions/StretchExpMuonTest.h
 	Functions/StretchExpTest.h
 	Functions/TabulatedFunctionTest.h
-    Functions/TeixeiraWaterSQETest.h
+        Functions/TeixeiraWaterSQETest.h
 	Functions/ThermalNeutronBk2BkExpAlphaTest.h
 	Functions/ThermalNeutronBk2BkExpBetaTest.h
 	Functions/ThermalNeutronBk2BkExpConvPVoigtTest.h

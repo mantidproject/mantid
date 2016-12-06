@@ -4,7 +4,6 @@
 #include <fstream>
 #include <limits>
 #include <numeric>
-#include <cxxtest/TestSuite.h>
 #include <boost/lexical_cast.hpp>
 
 // Include local copy of Valgrind header to avoid creating a dependency

@@ -18,6 +18,9 @@ If multiple spectra are defined in the WorkspaceToInterpolate workspace,
 they will all be interpolated against the first spectra in
 WorkspaceToMatch.
 
+Optionally, the algorithm can perform a linear interpolation, if the
+WorkspaceToMatch contains two points exactly.
+
 Optionally, this algorithm can also calculate the first and second
 derivatives of each of the interpolated points as a side product.
 Setting the DerivOrder property to zero will force the algorithm to
@@ -54,10 +57,29 @@ Usage
     #create some random points to interpolate between
     dataX2 = np.arange(1,110,10) * 0.07
     dataY2 = np.random.random_sample(dataX2.size) 
-    ws = CreateWorkspace(dataX2, dataY2)
+    ws_to_interpolate = CreateWorkspace(dataX2, dataY2)
 
     #interpolate using the reference workspace
-    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=0)
+    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws_to_interpolate, DerivOrder=1)
+
+**Example - linear interpolation of two points:**
+
+..testcode:: ExSplineInterpolationLinearOption
+
+    import numpy as np
+
+    #create points for interpolation
+    dataX1 = np.arange(1, 50, 10) * 0.07
+    dataY1 = np.sin(dataX1)
+    ws_to_match = CreateWorkspace(dataX1, dataY1)
+
+    #create two points to interpolate between
+    dataX2 = np.array([0.1, 2.0])
+    dataY2 = np.array([0.1, 0.15])
+    ws_to_interpolate = CreateWorkspace(dataX2, dataY2)
+
+    #interpolate using the reference workspace
+    interpolated_ws = SplineInterpolation(WorkspaceToMatch=ws_to_match, WorkspaceToInterpolate=ws_to_interpolate, Linear2Points=True)
     
 **Example - output the derivatives of the interpolated workspace:**  
 
@@ -71,7 +93,7 @@ Usage
     spline_ws = CreateWorkspace(dataX1, dataY1)
 
     #create some random points to interpolate between
-    dataX2 = np.arange(1,110,10) * 0.07
+    dataX2 = np.arange(1,110,10) * 0.7
     dataY2 = np.random.random_sample(dataX2.size) 
     ws = CreateWorkspace(dataX2, dataY2)
 

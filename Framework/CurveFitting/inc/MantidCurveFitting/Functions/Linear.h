@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include <boost/scoped_array.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -16,15 +15,10 @@ I.e. the function: A0+A1*x.
 
 Linear parameters:
 <UL>
-<LI> A0 - coefficient for constant term (default 0.0)</LI>
-<LI> A1 - coefficient for linear term (default 0.0)</LI>
+<LI> y0 - first function value (default 0.0)</LI>
+<LI> y1 - second function value (default 0.0)</LI>
 </UL>
 
-@author Anders Markvardsen, ISIS, RAL
-@date 23/10/2009
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -61,10 +55,13 @@ public:
 protected:
   /// overwrite IFunction base class method, which declares function parameters
   void init() override;
+
+  /// get slope of the linear function
+  double getSlope() const;
 };
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_LINEARBACKGROUND_H_*/
+#endif /*MANTID_CURVEFITTING_LINEAR_H_*/

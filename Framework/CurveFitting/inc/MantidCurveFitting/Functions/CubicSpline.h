@@ -79,9 +79,6 @@ private:
   /// GSL data structure used to calculate spline
   boost::shared_ptr<gsl_spline> m_spline;
 
-  /// Flag for checking if the spline needs recalculating
-  mutable bool m_recalculateSpline;
-
   /// Reallocate the spline object to use n data points
   void reallocGSLObjects(const int n);
 
@@ -108,8 +105,8 @@ private:
   double splineEval(const double x) const;
 };
 
-typedef boost::shared_ptr<CubicSpline> CubicSpline_sptr;
-typedef const boost::shared_ptr<CubicSpline> CubicSpline_const_sptr;
+typedef boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_sptr;
+typedef const boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_const_sptr;
 
 } // namespace Functions
 } // namespace CurveFitting

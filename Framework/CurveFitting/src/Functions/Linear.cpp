@@ -3,12 +3,17 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/Linear.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
 using namespace CurveFitting;
+namespace {
+/// static logger
+Kernel::Logger g_log("Linear");
+}
 
 using namespace Kernel;
 
@@ -18,29 +23,26 @@ DECLARE_FUNCTION(Linear)
 
 void Linear::init() {
   // default attributes and parameters
-  // minimum number of points is 2 (point data, might be 3 for histograms)
+  // minimum number of points is 2 (point data)
   declareAttribute("n", Attribute(2));
 
   // non-fitting parameters
   declareAttribute("x0", Attribute(0.0));
   declareAttribute("x1", Attribute(1.0));
 
-  declareParameter("y0", 0.0, "coefficient for constant term");
-  declareParameter("y1", 0.0, "coefficient for linear term");
+  declareParameter("y0", 0.0);
+  declareParameter("y1", 0.0);
 }
 
 void Linear::function1D(double *out, const double *xValues,
                                   const size_t nData) const {
-  const double a0 = getParameter("y0");
-  const double a1 = getParameter("y1");
-  const double x0 = getAttribute("x0").asDouble();
+  const double y1 = getParameter("y1");
   const double x1 = getAttribute("x1").asDouble();
 
-  const double slope = (a1 - a0) / (x1 - x0);
-  const double constant_term = a1 - slope * x1;
+  const double constant_term = y1 - getSlope() * x1;
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = constant_term + slope * xValues[i];
+    out[i] = constant_term + getSlope() * xValues[i];
   }
 
 }
@@ -58,8 +60,7 @@ void Linear::derivative1D(double *out, const double *xValues,
           << "Linear : order of derivative must be 1 or greater";
 
   if (order==1){
-    const double a1 = getParameter("A1");
-    std::fill_n(out, nData, a1);
+    std::fill_n(out, nData, getSlope());
   }
   else{
     std::fill_n(out, nData, 0.0);
@@ -103,6 +104,19 @@ void Linear::setAttribute(const std::string &attName,
   }
 
   storeAttributeValue(attName, att);
+}
+
+/** Get slope of the linear function (only first two points needed)
+ *
+ * @return slope :: The slope of the linear function
+ */
+double Linear::getSlope() const{
+  const double y0 = getParameter("y0");
+  const double y1 = getParameter("y1");
+  const double x0 = getAttribute("x0").asDouble();
+  const double x1 = getAttribute("x1").asDouble();
+
+  return (y1 - y0) / (x1 - x0);
 }
 
 } // namespace Functions

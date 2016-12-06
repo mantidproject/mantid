@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/Functions/CubicSpline.h"
-#include "MantidCurveFitting/Functions/LinearBackground.h"
+#include "MantidCurveFitting/Functions/Linear.h"
 
 
 namespace Mantid {

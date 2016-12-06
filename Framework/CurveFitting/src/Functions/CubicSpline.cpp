@@ -27,8 +27,8 @@ DECLARE_FUNCTION(CubicSpline)
  */
 CubicSpline::CubicSpline()
     : m_min_points(3), m_acc(gsl_interp_accel_alloc(), m_gslFree),
-      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree),
-      m_recalculateSpline(true) {}
+      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree){
+}
 
 /**init() will override IFunction base class
  * (a protected member that should be called via initialize())
@@ -62,8 +62,7 @@ void CubicSpline::function1D(double *out, const double *xValues,
   boost::scoped_array<double> y(new double[n]);
 
   // setup the reference points and calculate
-  if (m_recalculateSpline)
-    setupInput(x, y, n);
+  setupInput(x, y, n);
 
   calculateSpline(out, xValues, nData);
 }
@@ -104,7 +103,6 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
 
   // pass values to GSL objects
   initGSLObjects(x, y, n);
-  m_recalculateSpline = false;
 }
 
 /** Calculate the derivatives for a set of points on the spline
@@ -122,8 +120,7 @@ void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
   boost::scoped_array<double> y(new double[n]);
 
   // setup the reference points and calculate
-  if (m_recalculateSpline)
-    setupInput(x, y, n);
+  setupInput(x, y, n);
   calculateDerivative(out, xValues, nData, order);
 }
 
@@ -233,8 +230,6 @@ void CubicSpline::setAttribute(const std::string &attName,
         declareParameter(newYName, 0);
       }
 
-      // flag that the spline + derivatives will now need to be recalculated
-      m_recalculateSpline = true;
     } else if (n < oldN) {
       throw std::invalid_argument(
           "Cubic Spline: Can't decrease the number of attributes");
@@ -253,7 +248,6 @@ void CubicSpline::setAttribute(const std::string &attName,
 void CubicSpline::checkGSLError(const int status, const int errorType) const {
   // check GSL functions didn't return an error
   if (status == errorType) {
-    m_recalculateSpline = true;
 
     std::string message("CubicSpline: ");
     message.append(gsl_strerror(errorType));

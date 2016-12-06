@@ -2,12 +2,13 @@
 #define CubicSplineTEST_H_
 
 #include "MantidCurveFitting/Functions/CubicSpline.h"
-
-#include <boost/scoped_array.hpp>
-#include <cxxtest/TestSuite.h>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::CubicSpline;
+
+typedef boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_sptr;
+//typedef const boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_const_sptr;
 
 class CubicSplineTest : public CxxTest::TestSuite {
 public:
@@ -16,28 +17,27 @@ public:
   static CubicSplineTest *createSuite() { return new CubicSplineTest(); }
   static void destroySuite(CubicSplineTest *suite) { delete suite; }
 
-  void test_category() {
-    CubicSpline cfn;
-    cfn.initialize();
+  void test_category_and_name() {
 
-    std::vector<std::string> cats;
-    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
-    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
-    TS_ASSERT_EQUALS(cats.front(), "Background");
-    // This would enfonce one and only one category:
-    // TS_ASSERT(cfn.category() == "Background");
+    CubicSpline_sptr cfn = boost::make_shared<CubicSpline>();
+
+    TS_ASSERT(cfn->category() == "Background");
+    TS_ASSERT(cfn->name() == "CubicSpline");
   }
 
   void testSetNAttribute() {
-    CubicSpline cspline;
+    // call constructor - does not initialise
+    CubicSpline_sptr cspline = boost::make_shared<CubicSpline>();
 
+    // initialise "n"!
+    cspline->initialize();
     // cspline created with 3 attributes
-    TS_ASSERT(cspline.getAttribute("n").asInt() == 3);
+    TS_ASSERT_EQUALS(cspline->getAttribute("n").asInt(), 3);
 
     // resize to have 10 attributes
-    cspline.setAttributeValue("n", 10);
+    cspline->setAttributeValue("n", 10);
 
-    TS_ASSERT(cspline.getAttribute("n").asInt() == 10);
+    TS_ASSERT_EQUALS(cspline->getAttribute("n").asInt(), 10);
 
     // Check that resizing the spline has initialised the attributes/parameters
     for (int i = 0; i < 10; ++i) {
@@ -46,61 +46,36 @@ public:
       std::string xAttrName = "x" + index;
       std::string yAttrName = "y" + index;
 
-      TS_ASSERT_EQUALS(cspline.getAttribute(xAttrName).asDouble(), i);
-      TS_ASSERT_EQUALS(cspline.getParameter(yAttrName), 0);
+      TS_ASSERT_EQUALS(cspline->getAttribute(xAttrName).asDouble(), i);
+      TS_ASSERT_EQUALS(cspline->getParameter(yAttrName), 0);
     }
   }
 
   void testSetNAttributeBoundary() {
-    CubicSpline cspline;
+    CubicSpline_sptr cspline = boost::make_shared<CubicSpline>();
+
+    cspline->initialize();
 
     // cubic splines must have at least 3 points
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2), std::invalid_argument);
+    TS_ASSERT_THROWS(cspline->setAttributeValue("n", 2), std::invalid_argument);
 
     // set the number of points to something sensible
-    cspline.setAttributeValue("n", 5);
+    cspline->setAttributeValue("n", 5);
 
     // attempt to make it smaller than it already is
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4), std::invalid_argument);
+    TS_ASSERT_THROWS(cspline->setAttributeValue("n", 4), std::invalid_argument);
 
-    size_t oldAttrN = cspline.nAttributes();
+    size_t oldAttrN = cspline->nAttributes();
 
     // attempt to set the attribute to the same value doesn't
     // change anything
-    TS_ASSERT_THROWS_NOTHING(cspline.setAttributeValue("n", 5));
-    TS_ASSERT_EQUALS(oldAttrN, cspline.nAttributes());
-  }
-
-  void testSetXAttributeValue() {
-    CubicSpline cspline;
-
-    // setup x and y  values
-    cspline.setAttributeValue("n", 10);
-
-    for (int i = 0; i < 10; ++i) {
-      // set the x values to be some arbitary value
-      cspline.setXAttribute(i, i * 2);
-
-      auto index = std::to_string(i);
-      std::string xAttrName = "x" + index;
-
-      // check x value is equal to what we set
-      TS_ASSERT_EQUALS(cspline.getAttribute(xAttrName).asDouble(), i * 2);
-    }
-  }
-
-  void testSetXAttributeValueBoundary() {
-    CubicSpline cspline;
-
-    // check that an invalid index throws errors
-    TS_ASSERT_THROWS(cspline.setXAttribute(4, 0), std::range_error);
-
-    TS_ASSERT_THROWS(cspline.setXAttribute(-1, 4), std::range_error);
+    TS_ASSERT_THROWS_NOTHING(cspline->setAttributeValue("n", 5));
+    TS_ASSERT_EQUALS(oldAttrN, cspline->nAttributes());
   }
 
   void testKnownInterpolationValues() {
-    CubicSpline cspline;
-
+    CubicSpline_sptr cspline = boost::make_shared<CubicSpline>();
+    cspline->initialize();
     int nData = 10; // number of data points to fit too
 
     boost::scoped_array<double> x(new double[nData]);
@@ -115,7 +90,7 @@ public:
     FunctionDomain1DView view(x.get(), nData);
     FunctionValues testDataValues(view);
 
-    cspline.function(view, testDataValues);
+    cspline->function(view, testDataValues);
 
     // compare reference data with output data
     for (int i = 0; i < nData; ++i) {
@@ -123,36 +98,9 @@ public:
     }
   }
 
-  void testOutOfOrderInterploationPoints() {
-    CubicSpline cspline;
-
-    setupCubicSpline(cspline, 10, 1);
-
-    // swap the values of some points
-    cspline.setXAttribute(3, 1);
-    cspline.setXAttribute(1, 3);
-
-    int testDataSize = 5;
-
-    boost::scoped_array<double> x(new double[testDataSize]);
-    boost::scoped_array<double> refSet(new double[testDataSize]);
-
-    generateTestData(testDataSize, refSet, x, 1);
-
-    FunctionDomain1DView view(x.get(), testDataSize);
-    FunctionValues testDataValues(view);
-
-    cspline.function(view, testDataValues);
-
-    // compare reference data with output data
-    for (int i = 0; i < testDataSize; ++i) {
-      TS_ASSERT_DELTA(refSet[i], testDataValues[i], 1e-4);
-    }
-  }
-
   void testUnknowntInterpolationValues() {
-    CubicSpline cspline;
-
+    CubicSpline_sptr cspline = boost::make_shared<CubicSpline>();
+    cspline->initialize();
     int nData = 20;
     int testDataSize = 30;
 
@@ -168,7 +116,7 @@ public:
     FunctionDomain1DView view(x.get(), testDataSize);
     FunctionValues testDataValues(view);
 
-    cspline.function(view, testDataValues);
+    cspline->function(view, testDataValues);
 
     // compare reference data with output data
     for (int i = 0; i < testDataSize; ++i) {
@@ -177,8 +125,8 @@ public:
   }
 
   void testCalculateDerivative() {
-    CubicSpline cspline;
-
+    CubicSpline_sptr cspline = boost::make_shared<CubicSpline>();
+    cspline->initialize();
     int nData = 10;
     int testDataSize = 10;
 
@@ -189,7 +137,7 @@ public:
     setupCubicSpline(cspline, nData, 1);
     generateDerviTestData(testDataSize, refSet, x, 1, 1);
 
-    cspline.derivative1D(testDataValues.get(), x.get(), nData, 1);
+    cspline->derivative1D(testDataValues.get(), x.get(), nData, 1);
 
     // compare reference data with output data
     for (int i = 0; i < testDataSize; ++i) {
@@ -222,13 +170,13 @@ private:
   double splineYFunction(double x) { return x * 2; }
 
   // setup a CubicSpline class for testing
-  void setupCubicSpline(CubicSpline &cspline, int nData, double xModify) {
-    cspline.setAttributeValue("n", nData);
-
+  void setupCubicSpline(CubicSpline_sptr &cspline, int nData, double xModify) {
+    cspline->setAttributeValue("n", nData);
     // calculate a reference set to check against
     for (int i = 0; i < nData; ++i) {
-      cspline.setXAttribute(i, i * xModify);
-      cspline.setParameter(static_cast<size_t>(i),
+      //cspline.setXAttribute(i, i * xModify);
+      cspline->setAttributeValue("x" + std::to_string(i), i * xModify);
+      cspline->setParameter(static_cast<size_t>(i),
                            splineYFunction(i * xModify));
     }
   }

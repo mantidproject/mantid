@@ -14,8 +14,7 @@ DECLARE_ALGORITHM(SplineInterpolation)
 using namespace API;
 using namespace Kernel;
 using Functions::CubicSpline;
-using Functions::LinearBackground;
-
+using Functions::Linear;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -115,7 +114,7 @@ void SplineInterpolation::exec() {
   int binsNo = static_cast<int>(iws->blocksize());
 
   if (type == true && binsNo == 2){
-    m_interp_type = boost::make_shared<LinearBackground>();
+    m_interp_type = boost::make_shared<Linear>();
     g_log.information() << "Linear interpolation for 2 points.\n";
   }
   else{
@@ -153,19 +152,17 @@ void SplineInterpolation::exec() {
     outputWorkspace->setSharedX(i, mws->sharedX(0));
 
     // check if we want derivatives
-    if (order > 0) {
-      derivs[i] = WorkspaceFactory::Instance().create(mws, order);
-      auto vAxis = new API::NumericAxis(order);
+    derivs[i] = WorkspaceFactory::Instance().create(mws, order);
+    auto vAxis = new API::NumericAxis(order);
 
-      // calculate the derivatives for each order chosen
-      for (int j = 0; j < order; ++j) {
-        vAxis->setValue(j, j + 1);
-        derivs[i]->setSharedX(j, mws->sharedX(0));
-        calculateDerivatives(mwspt, derivs[i], j + 1);
-
-      }
-      derivs[i]->replaceAxis(1, vAxis);
+    // calculate the derivatives for each order chosen
+    for (int j = 0; j < order; ++j) {
+      vAxis->setValue(j, j + 1);
+      derivs[i]->setSharedX(j, mws->sharedX(0));
+      calculateDerivatives(mwspt, derivs[i], j + 1);
     }
+    derivs[i]->replaceAxis(1, vAxis);
+
 
     pgress.report();
   }
@@ -322,36 +319,38 @@ void SplineInterpolation::setXRange(
         MatrixWorkspace_sptr inputWorkspace,
         MatrixWorkspace_const_sptr interpolationWorkspace) const{
   // setup input parameters
-  int histNo = static_cast<int>(interpolationWorkspace->getNumberHistograms());
+  int histNo = static_cast<int>(inputWorkspace->getNumberHistograms());
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
 
   const size_t nintegData = interpolationWorkspace->y(0).size();
   const double *xintegValues = &(interpolationWorkspace->x(0)[0]);
 
-  for (int i = 0; i < histNo; ++i){
-      int nOutsideLeft = 0, nOutsideRight = 0;
+  int nOutsideLeft, nOutsideRight;
+  for (int n = 0; n < histNo; ++n){
+      nOutsideLeft = 0, nOutsideRight = 0;
 
       for (size_t i = 0; i < nData; ++i) {
 
         // determine number of values smaller than the integration range
-        if (xValues[i] <= xintegValues[0])
+        if (xValues[i] < xintegValues[0])
           nOutsideLeft++;
-        else if (xValues[i] >= xintegValues[nintegData - 1])
+        else if (xValues[i] > xintegValues[nintegData - 1])
           nOutsideRight++;
       }
-      double *yValues = &(inputWorkspace->mutableY(i)[0]);
+      double *yValues = &(inputWorkspace->mutableY(n)[0]);
       if (nOutsideLeft > 0){
         std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);
         g_log.warning()
             << nOutsideLeft <<
                " x value(s) larger than integration range, will not be calculated.\n";
       }
-      if (nOutsideRight > 0)
+      if (nOutsideRight > 0){
         nOutsideRight += 1;
         g_log.warning()
             << nOutsideRight <<
                " x value(s) smaller than integration range, will not be calculated.\n";
+      }
       for(size_t k=nData - nOutsideRight; k < nData; ++k)
         yValues[k] = yValues[nData - nOutsideRight];
   }
