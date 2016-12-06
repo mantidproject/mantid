@@ -232,8 +232,6 @@ void Stitch1DMany::exec() {
   }
   m_outputWorkspace = lhsWS;
 
-  m_outputWorkspace->history().printSelf(std::cout);
-
   // Save output
   this->setProperty("OutputWorkspace", m_outputWorkspace);
   this->setProperty("OutScaleFactors", m_scaleFactors);
@@ -284,10 +282,6 @@ void Stitch1DMany::doStitch1D(
       outWS->history().addHistory(inputWS->getHistory());
     }
   }
-  // We're a child algorithm, but we're recording history anyway
-  else if (isRecordingHistoryForChild() && m_parentHistory) {
-    m_parentHistory->addChildHistory(m_history);
-  }
 }
 
 /** Performs the Stitch1DMany algorithm at a specific period
@@ -322,6 +316,7 @@ void Stitch1DMany::doStitch1DMany(
 
   IAlgorithm_sptr alg = createChildAlgorithm("Stitch1DMany");
   alg->initialize();
+  alg->setChild(false);
   alg->setAlwaysStoreInADS(storeInADS);
   alg->setProperty("InputWorkspaces", toProcess);
   alg->setProperty("OutputWorkspace", outName);
@@ -333,13 +328,6 @@ void Stitch1DMany::doStitch1DMany(
   if (useManualScaleFactor)
     alg->setProperty("ManualScaleFactor", manualScaleFactor);
   alg->execute();
-
-  std::cout << "\nThe history: \n"; 
-  outName = alg->getPropertyValue("OutputWorkspace");
-  if (storeInADS) {
-    Workspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace>(outName);
-    outWS->history().printSelf(std::cout);
-  }
 
   outScaleFactors = alg->getProperty("OutScaleFactors");
 }
