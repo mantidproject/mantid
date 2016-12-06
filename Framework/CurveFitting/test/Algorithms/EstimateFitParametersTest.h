@@ -252,17 +252,19 @@ public:
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
     IFunction_sptr fun = alg.getProperty("Function");
-    auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
+    auto params =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
     TS_ASSERT(params);
     TS_ASSERT_EQUALS(params->rowCount(), 2);
     TS_ASSERT_EQUALS(params->columnCount(), 11);
 
     double costValue = 0.0;
     auto names = params->getColumn(0);
-    for(size_t col = 1; col < params->columnCount(); ++col) {
+    for (size_t col = 1; col < params->columnCount(); ++col) {
       auto column = params->getColumn(col);
-      for(size_t row = 0; row < column->size(); ++row) {
-        fun->setParameter(names->cell<std::string>(row), column->cell<double>(row));
+      for (size_t row = 0; row < column->size(); ++row) {
+        fun->setParameter(names->cell<std::string>(row),
+                          column->cell<double>(row));
       }
       CalculateCostFunction calc;
       calc.initialize();

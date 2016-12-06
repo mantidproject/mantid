@@ -112,15 +112,16 @@ class BestParameters {
   size_t m_size;
   /// Actual storage.
   std::map<double, GSLVector> m_params;
+
 public:
   /// Constructor
-  BestParameters(size_t size) :m_size(size) {}
+  BestParameters(size_t size) : m_size(size) {}
   /// Test a cost function value if corresponding parameters must be stored.
   bool isOneOfBest(double value) const {
     return m_params.size() < m_size || value < m_params.rbegin()->first;
   }
   /// Insert a set of parameters to the store.
-  void insertParams(double value, const GSLVector& params) {
+  void insertParams(double value, const GSLVector &params) {
     if (m_params.size() == m_size) {
       auto it = m_params.find(m_params.rbegin()->first);
       m_params.erase(it);
@@ -131,7 +132,7 @@ public:
   std::vector<GSLVector> getParams() const {
     std::vector<GSLVector> res;
     res.reserve(m_params.size());
-    for(auto &it : m_params) {
+    for (auto &it : m_params) {
       res.push_back(it.second);
     }
     return res;
@@ -147,10 +148,11 @@ public:
 /// @param constraints :: Additional constraints.
 /// @param nSamples :: A number of samples to generate.
 /// @param seed :: A seed for the random number generator.
-std::vector<GSLVector> runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
-                   const std::vector<std::pair<double, double>> &ranges,
-                   const std::vector<std::unique_ptr<IConstraint>> &constraints,
-                   const size_t nSamples, const size_t nOutput, const size_t seed) {
+std::vector<GSLVector>
+runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
+              const std::vector<std::pair<double, double>> &ranges,
+              const std::vector<std::unique_ptr<IConstraint>> &constraints,
+              const size_t nSamples, const size_t nOutput, const size_t seed) {
 
   Kernel::MersenneTwister randGenerator;
   if (seed != 0) {
