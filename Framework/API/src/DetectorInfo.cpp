@@ -102,6 +102,14 @@ void DetectorInfo::setMasked(const size_t index, bool masked) {
   m_pmap->addBool(&getDetector(index), "masked", masked);
 }
 
+/** Sets all mask flags to false (unmasked).
+ *
+ * This method was introduced to help with refactoring and may be removed in the
+ *future. */
+void DetectorInfo::clearMaskFlags() {
+  m_pmap->clearParametersByName("masked");
+}
+
 /// Set the absolute position of the detector with given index.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
