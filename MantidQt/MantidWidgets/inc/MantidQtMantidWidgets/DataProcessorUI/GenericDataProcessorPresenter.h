@@ -60,6 +60,8 @@ public:
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const std::map<std::string, std::string> &postprocessMap =
+          std::map<std::string, std::string>(),
       const std::string &loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(
@@ -124,6 +126,8 @@ private:
   DataProcessorProcessingAlgorithm m_processor;
   // Post-processing algorithm
   DataProcessorPostprocessingAlgorithm m_postprocessor;
+  // Post-processing map
+  std::map<std::string, std::string> m_postprocessMap;
   // Loader
   std::string m_loader;
   // A boolean indicating whether a post-processing algorithm has been defined

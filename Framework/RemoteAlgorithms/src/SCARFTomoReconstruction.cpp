@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ListValidator.h"
@@ -21,6 +22,8 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/StreamCopier.h>
+
+#include <boost/algorithm/string/replace.hpp>
 
 namespace Mantid {
 namespace RemoteAlgorithms {

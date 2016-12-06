@@ -5,12 +5,14 @@ from mantid.simpleapi import *
 from mantid import *
 import os
 import numpy as n
+from abc import ABCMeta, abstractmethod
 
 #pylint: disable=too-many-instance-attributes
 
 
 class PEARL_Reduction(stresstesting.MantidStressTest):
     '''Test adapted from actual script used by the scientists'''
+    __metaclass__ = ABCMeta # Mark as an abstract class
     validate=None
 
     def __init__(self):
@@ -165,6 +167,15 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         mtd.remove(monitor)
         return
 
+    def PEARL_remove_workspaces(self):
+        for i in range(0,14):
+            output="mod"+str(i+1)
+            van="van"+str(i+1)
+            rdata="rdata"+str(i+1)
+            mtd.remove(rdata)
+            mtd.remove(van)
+            mtd.remove(output)
+
     def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):
 
         self.tt_mode=ttmode
@@ -173,14 +184,9 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         work="work"
         focus="focus"
 
-        if isinstance(number, int):
-            outfile="PRL"+str(number)+".nxs"
-            gssfile="PRL"+str(number)+".gss"
-            outwork="PRL"+str(number)
-        else:
-            outfile="PRL"+number+".nxs"
-            gssfile="PRL"+number+".gss"
-            outwork="PRL"+number
+        outfile="PRL"+str(number)+".nxs"
+        gssfile="PRL"+str(number)+".gss"
+        outwork="PRL"+str(number)
 
         self.PEARL_read(number,ext,work)
         Rebin(InputWorkspace=work,OutputWorkspace=work,Params=self.tofbinning)
@@ -225,13 +231,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
                 ConvertUnits(InputWorkspace=tosave,OutputWorkspace=tosave,Target="dSpacing")
                 SaveNexus(Filename=outfile,InputWorkspace=tosave,Append=True)
 
-            for i in range(0,14):
-                output="mod"+str(i+1)
-                van="van"+str(i+1)
-                rdata="rdata"+str(i+1)
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
+            self.PEARL_remove_workspaces()
             mtd.remove("bank1")
 
         elif self.mode=="groups":
@@ -269,13 +269,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
                 SaveGSS(InputWorkspace=tosave,Filename=gssfile,Append=True,Bank=i+5)
                 ConvertUnits(InputWorkspace=tosave,OutputWorkspace=tosave,Target="dSpacing")
                 SaveNexus(Filename=outfile,InputWorkspace=tosave,Append=True)
-            for i in range(0,14):
-                output="mod"+str(i+1)
-                van="van"+str(i+1)
-                rdata="rdata"+str(i+1)
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
+            self.PEARL_remove_workspaces()
             mtd.remove("group1")
             mtd.remove("group2")
             mtd.remove("group3")
@@ -301,13 +295,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
                 ConvertUnits(InputWorkspace=tosave,OutputWorkspace=tosave,Target="dSpacing")
                 SaveNexus(Filename=outfile,InputWorkspace=tosave,Append=True)
 
-            for i in range(0,14):
-                output="mod"+str(i+1)
-                van="van"+str(i+1)
-                rdata="rdata"+str(i+1)
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
+            self.PEARL_remove_workspaces()
             mtd.remove("bank1")
 
         elif self.mode=="mods":

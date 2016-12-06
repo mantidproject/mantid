@@ -351,5 +351,39 @@ Then call `fit()` method::
     fit.fit()
     
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
+
+Finding Initial Parameters
+--------------------------
+
+If the initial values of the fitting parameters are not known they can be estimated using `monte_carlo()` method.
+It randomly searches the parameter space in a given region such that the calculated spectra are as close to the
+fit data as possible. The method uses :ref:`EstimateFitParameters <algm-EstimateFitParameters>` internally. See
+algorithm's description for the available properties.
+Here is an example of a fit with initial estimation::
+
+    from CrystalField.fitting import makeWorkspace
+    from CrystalField import CrystalField, CrystalFieldFit
+
+    # Create some crystal field data
+    origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=44.0, FWHM=1.1)
+    x, y = origin.getSpectrum()
+    ws = makeWorkspace(x, y)
+
+    # Define a CrystalField object.
+    cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+
+    # Set any ties on the field parameters.
+    cf.ties(B20=0.37737)
+    # Define the search intervals. Only these parameters will be estimated.
+    cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
+    # Create a fit object
+    fit = CrystalFieldFit(cf, InputWorkspace=ws)
+    # Find initial values for the field parameters.
+    fit.monte_carlo(NSamples=1000)
+    # Run fit
+    fit.fit()
+
   
 .. categories:: Interfaces Indirect
