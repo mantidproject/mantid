@@ -1239,9 +1239,8 @@ std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::vector<std::string> MantidMatrix::getWorkspaceNames()
-{
-  return { m_strName };
+std::vector<std::string> MantidMatrix::getWorkspaceNames() {
+  return {m_strName};
 }
 
 /**

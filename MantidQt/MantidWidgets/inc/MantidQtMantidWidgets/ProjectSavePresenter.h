@@ -3,11 +3,10 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtMantidWidgets/ProjectSaveModel.h"
 #include "MantidQtMantidWidgets/IProjectSaveView.h"
+#include "MantidQtMantidWidgets/ProjectSaveModel.h"
 
 #include <vector>
-
 
 //------------------------------------------------
 
@@ -38,8 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ProjectSavePresenter
-{
+class ProjectSavePresenter {
 public:
   enum class Notification {
     UncheckWorkspace,
@@ -48,7 +46,7 @@ public:
   };
 
   /// Construct a new presenter with a view
-  ProjectSavePresenter(IProjectSaveView* view);
+  ProjectSavePresenter(IProjectSaveView *view);
   /// Notify the presenter to do something
   void notify(Notification notification);
 
@@ -68,7 +66,7 @@ private:
   ProjectSaveModel m_model;
 };
 
-} //CustomInterfaces
-} //MantidQt
+} // CustomInterfaces
+} // MantidQt
 
 #endif // PROJECTSAVEPRESENTER_H

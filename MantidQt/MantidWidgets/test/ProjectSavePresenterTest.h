@@ -9,8 +9,8 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"
 
 using namespace MantidQt::API;
@@ -24,7 +24,7 @@ using namespace testing;
 class ProjectSavePresenterTest : public CxxTest::TestSuite {
 
 private:
-    NiceMock<MockProjectSaveView> m_view;
+  NiceMock<MockProjectSaveView> m_view;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -41,7 +41,7 @@ public:
   // ---------------------------------------------------
 
   void testConstructWithNoWorkspacesAndNoWindows() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     // View should be passed what workspaces exist and what windows
     // are currently included.
@@ -59,7 +59,7 @@ public:
 
   void testConstructWithSingleWorkspaceAndNoWindows() {
     auto workspaces = setUpWorkspaces({"ws1"});
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     // View should be passed what workspaces exist and what windows
     // are currently includednames.
@@ -77,7 +77,7 @@ public:
 
   void testConstructWithTwoWorkspacesAndNoWindows() {
     auto workspaces = setUpWorkspaces({"ws1", "ws2"});
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     // View should be passed what workspaces exist and what windows
     // are currently included.
@@ -100,7 +100,7 @@ public:
     info.name = "WindowName1Workspace";
     WindowStub window(info.name, {"ws1"});
 
-    std::vector<MantidQt::API::IProjectSerialisable*> windows = {&window};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window};
     std::vector<WindowInfo> winInfo = {info};
 
     // View should be passed what workspaces exist and what windows
@@ -118,7 +118,7 @@ public:
   }
 
   void testConstructWithOneWorkspaceAndTwoWindows() {
-    std::vector<std::string> wsNames= {"ws1"};
+    std::vector<std::string> wsNames = {"ws1"};
     auto workspaces = setUpWorkspaces(wsNames);
 
     WindowInfo win1Info, win2Info;
@@ -128,7 +128,8 @@ public:
     WindowStub window1(win1Info.name, wsNames);
     WindowStub window2(win2Info.name, wsNames);
 
-    std::vector<MantidQt::API::IProjectSerialisable*> windows = {&window1, &window2};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window1,
+                                                                  &window2};
     std::vector<WindowInfo> winInfo = {win1Info, win2Info};
 
     // View should be passed what workspaces exist and what windows
@@ -145,7 +146,6 @@ public:
     tearDownWorkspaces(workspaces);
   }
 
-
   void testConstructWithTwoWorkspacesAndOneWindow() {
     std::vector<std::string> wsNames = {"ws1", "ws2"};
     auto workspaces = setUpWorkspaces(wsNames);
@@ -154,7 +154,7 @@ public:
     info.name = "Windowname2Workspaces";
     WindowStub window(info.name, wsNames);
 
-    std::vector<MantidQt::API::IProjectSerialisable*> windows = {&window};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window};
     std::vector<WindowInfo> winInfo = {info};
 
     // View should be passed what workspaces exist and what windows
@@ -182,9 +182,9 @@ public:
     WindowStub window1(win1Info.name, {wsNames[0]});
     WindowStub window2(win2Info.name, {wsNames[1]});
 
-    std::vector<MantidQt::API::IProjectSerialisable*> windows = {&window1, &window2};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window1,
+                                                                  &window2};
     std::vector<WindowInfo> winInfo = {win1Info, win2Info};
-
 
     // View should be passed what workspaces exist and what windows
     // are currently included.
@@ -208,7 +208,7 @@ public:
     info.name = "WindowName1Workspaces";
     WindowStub window(info.name, wsNames);
 
-    std::vector<MantidQt::API::IProjectSerialisable*> windows = {&window};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window};
     std::vector<std::string> windowNames = {info.name};
     std::vector<WindowInfo> winInfo = {info};
 
@@ -220,12 +220,9 @@ public:
 
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_view, getUncheckedWorkspaceNames())
-        .WillOnce(Return(wsNames));
-    EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo))
-        .Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
+    EXPECT_CALL(m_view, getUncheckedWorkspaceNames()).WillOnce(Return(wsNames));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo)).Times(Exactly(1));
     EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames))
         .Times(Exactly(1));
 
@@ -244,26 +241,21 @@ public:
     info.name = "WindowName1Workspaces";
     WindowStub window(info.name, wsNames);
 
-    std::vector<MantidQt::API::IProjectSerialisable*> windows = {&window};
+    std::vector<MantidQt::API::IProjectSerialisable *> windows = {&window};
     std::vector<std::string> windowNames = {info.name};
     std::vector<WindowInfo> winInfo = {info};
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     ON_CALL(m_view, getUncheckedWorkspaceNames())
         .WillByDefault(Return(wsNames));
-    ON_CALL(m_view, getCheckedWorkspaceNames())
-        .WillByDefault(Return(wsNames));
+    ON_CALL(m_view, getCheckedWorkspaceNames()).WillByDefault(Return(wsNames));
 
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo))
-        .Times(Exactly(2));
-    EXPECT_CALL(m_view, getUncheckedWorkspaceNames())
-        .WillOnce(Return(wsNames));
-    EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo))
-        .Times(Exactly(1));
-    EXPECT_CALL(m_view, getCheckedWorkspaceNames())
-        .WillOnce(Return(wsNames));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(2));
+    EXPECT_CALL(m_view, getUncheckedWorkspaceNames()).WillOnce(Return(wsNames));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo)).Times(Exactly(1));
+    EXPECT_CALL(m_view, getCheckedWorkspaceNames()).WillOnce(Return(wsNames));
     EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames))
         .Times(Exactly(1));
     EXPECT_CALL(m_view, removeFromExcludedWindowsList(windowNames))
@@ -278,7 +270,7 @@ public:
   }
 
   void testPrepareProjectFolder_withFile() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
     QString filePath = "/tmp/mantidprojecttest/mantidprojecttest.mantid";
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
@@ -299,7 +291,7 @@ public:
   }
 
   void testPrepareProjectFolder_withFolder() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
     QString filePath = "/tmp/mantidprojecttest";
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
@@ -311,7 +303,8 @@ public:
     EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
 
     EXPECT_CALL(m_view, getProjectPath()).Times(Exactly(1));
-    EXPECT_CALL(m_view, setProjectPath(filePath + "/mantidprojecttest.mantid")).Times(Exactly(1));
+    EXPECT_CALL(m_view, setProjectPath(filePath + "/mantidprojecttest.mantid"))
+        .Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
     presenter.notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
@@ -332,10 +325,11 @@ public:
  * @param workspaces :: List of workspace names
  * @return a vector of workspace info structs
  */
-  std::vector<WorkspaceInfo> setUpWorkspaces(const std::vector<std::string> &workspaces) {
+  std::vector<WorkspaceInfo>
+  setUpWorkspaces(const std::vector<std::string> &workspaces) {
     std::vector<WorkspaceInfo> wsInfo;
 
-    for (auto & name : workspaces) {
+    for (auto &name : workspaces) {
       auto ws = WorkspaceCreationHelper::Create1DWorkspaceRand(10);
       WorkspaceCreationHelper::storeWS(name, ws);
       WorkspaceInfo info;
@@ -355,7 +349,6 @@ public:
       WorkspaceCreationHelper::removeWS(info.name);
     }
   }
-
 };
 
 #endif

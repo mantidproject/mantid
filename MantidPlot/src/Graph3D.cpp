@@ -3103,9 +3103,8 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::vector<std::string> Graph3D::getWorkspaceNames()
-{
-    // wsName is actually "Workspace workspacename", so we chop off
-    // the first 10 characters.
-    return { title.toStdString().substr(10, std::string::npos) };
+std::vector<std::string> Graph3D::getWorkspaceNames() {
+  // wsName is actually "Workspace workspacename", so we chop off
+  // the first 10 characters.
+  return {title.toStdString().substr(10, std::string::npos)};
 }

@@ -979,17 +979,16 @@ void TiledWindow::populateMenu(QMenu *menu) {
   menu->addAction(actionClear);
 }
 
-MantidQt::API::IProjectSerialisable *TiledWindow::loadFromProject(
-    const std::string &lines, ApplicationWindow *app, const int fileVersion)
-{
-    UNUSED_ARG(lines);
-    UNUSED_ARG(app);
-    UNUSED_ARG(fileVersion);
-    throw std::runtime_error("Not implemented");
+MantidQt::API::IProjectSerialisable *
+TiledWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                             const int fileVersion) {
+  UNUSED_ARG(lines);
+  UNUSED_ARG(app);
+  UNUSED_ARG(fileVersion);
+  throw std::runtime_error("Not implemented");
 }
 
-std::vector<std::string> TiledWindow::getWorkspaceNames()
-{
+std::vector<std::string> TiledWindow::getWorkspaceNames() {
   std::vector<std::string> wsNames;
   auto tiles = getAllTiles();
 
@@ -1002,13 +1001,9 @@ std::vector<std::string> TiledWindow::getWorkspaceNames()
   return wsNames;
 }
 
-std::string TiledWindow::getWindowName()
-{
-  return objectName().toStdString();
-}
+std::string TiledWindow::getWindowName() { return objectName().toStdString(); }
 
-std::string TiledWindow::saveToProject(ApplicationWindow *app)
-{
+std::string TiledWindow::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
   return "";
 }

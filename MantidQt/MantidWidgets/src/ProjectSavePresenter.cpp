@@ -2,8 +2,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 
 #include <algorithm>
 #include <iterator>

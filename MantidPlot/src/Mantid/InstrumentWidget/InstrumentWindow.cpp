@@ -99,13 +99,11 @@ MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
   return nullptr;
 }
 
-std::vector<std::string> InstrumentWindow::getWorkspaceNames()
-{
-  return { m_instrumentWidget->getWorkspaceNameStdString() };
+std::vector<std::string> InstrumentWindow::getWorkspaceNames() {
+  return {m_instrumentWidget->getWorkspaceNameStdString()};
 }
 
-std::string InstrumentWindow::getWindowName()
-{
+std::string InstrumentWindow::getWindowName() {
   return m_instrumentWidget->windowTitle().toStdString();
 }
 

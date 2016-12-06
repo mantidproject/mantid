@@ -21,7 +21,7 @@ WindowIcons::WindowIcons() : m_idToPixmapName() { initInternalLookup(); }
  */
 QIcon WindowIcons::getIcon(const std::string &windowID) const {
   auto value = m_idToPixmapName.value(windowID);
-  if(QString::fromStdString(value).endsWith(".png")) {
+  if (QString::fromStdString(value).endsWith(".png")) {
     return makeIconFromFile(value);
   } else {
     return getQPixmap(value);
@@ -33,9 +33,8 @@ QIcon WindowIcons::getIcon(const std::string &windowID) const {
  * @param windowID :: a string representing the ID of the window
  * @return a string with the QPixmap id for this window.
  */
-std::string WindowIcons::getIconID(const std::string &windowID) const
-{
-  if(m_idToPixmapName.contains(windowID))
+std::string WindowIcons::getIconID(const std::string &windowID) const {
+  if (m_idToPixmapName.contains(windowID))
     return m_idToPixmapName.value(windowID);
   else
     return "";
@@ -57,8 +56,10 @@ void WindowIcons::initInternalLookup() {
   m_idToPixmapName["MultiLayer"] = "graph_xpm";
   m_idToPixmapName["Graph3D"] = "trajectory_xpm";
   m_idToPixmapName["Workspace"] = "mantid_matrix_xpm";
-  m_idToPixmapName["SliceViewer"] = ":/SliceViewer/icons/SliceViewerWindow_icon.png";
-  m_idToPixmapName["VSIWindow"] = ":/VatesSimpleGuiViewWidgets/icons/pvIcon.png";
+  m_idToPixmapName["SliceViewer"] =
+      ":/SliceViewer/icons/SliceViewerWindow_icon.png";
+  m_idToPixmapName["VSIWindow"] =
+      ":/VatesSimpleGuiViewWidgets/icons/pvIcon.png";
 }
 
 /**
@@ -70,13 +71,11 @@ void WindowIcons::initInternalLookup() {
  * @param path :: path to the image to use to create the icon
  * @return icon object made from the path
  */
-QIcon WindowIcons::makeIconFromFile(const std::string &path) const
-{
-    QIcon icon;
-    icon.addFile(
-        QString::fromStdString(path),
-        QSize(), QIcon::Normal, QIcon::Off);
-    return icon;
+QIcon WindowIcons::makeIconFromFile(const std::string &path) const {
+  QIcon icon;
+  icon.addFile(QString::fromStdString(path), QSize(), QIcon::Normal,
+               QIcon::Off);
+  return icon;
 }
 }
 }

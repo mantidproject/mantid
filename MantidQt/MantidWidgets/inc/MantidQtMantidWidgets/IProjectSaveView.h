@@ -4,11 +4,11 @@
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "ui_ProjectSave.h"
 
-#include <QWidget>
 #include <QMainWindow>
+#include <QWidget>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,7 +46,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IProjectSaveView {
 public:
   /// Get all window handles passed to the view
-  virtual std::vector<MantidQt::API::IProjectSerialisable*> getWindows() = 0;
+  virtual std::vector<MantidQt::API::IProjectSerialisable *> getWindows() = 0;
   /// Get the names of all checked workspaces
   virtual std::vector<std::string> getCheckedWorkspaceNames() = 0;
   /// Get the names of all unchecked workspaces
@@ -54,17 +54,22 @@ public:
   /// Get the project path
   virtual QString getProjectPath() = 0;
   /// Set the project path
-  virtual void setProjectPath(const QString& path) = 0;
+  virtual void setProjectPath(const QString &path) = 0;
   /// Update the workspaces list with a collection of workspace info items
-  virtual void updateWorkspacesList(const std::vector<WorkspaceInfo>& workspaces) = 0;
+  virtual void
+  updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces) = 0;
   /// Update the included windows list with a collection of window info items
-  virtual void updateIncludedWindowsList(const std::vector<WindowInfo>& windows) = 0;
+  virtual void
+  updateIncludedWindowsList(const std::vector<WindowInfo> &windows) = 0;
   /// Update the excluded windows list with a collection of window info items
-  virtual void updateExcludedWindowsList(const std::vector<WindowInfo>& windows) = 0;
+  virtual void
+  updateExcludedWindowsList(const std::vector<WindowInfo> &windows) = 0;
   /// Remove items from the included window list
-  virtual void removeFromIncludedWindowsList(const std::vector<std::string>& windows) = 0;
+  virtual void
+  removeFromIncludedWindowsList(const std::vector<std::string> &windows) = 0;
   /// Remove items from the excluded window list
-  virtual void removeFromExcludedWindowsList(const std::vector<std::string>& windows) = 0;
+  virtual void
+  removeFromExcludedWindowsList(const std::vector<std::string> &windows) = 0;
 };
 }
 }

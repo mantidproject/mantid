@@ -1113,8 +1113,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::vector<std::string> MdViewerWidget::getWorkspaceNames()
-{
+std::vector<std::string> MdViewerWidget::getWorkspaceNames() {
   auto server = pqActiveObjects::instance().activeServer();
   auto model = pqApplicationCore::instance()->getServerManagerModel();
   const auto sources = model->findItems<pqPipelineSource *>(server);
@@ -1124,8 +1123,8 @@ std::vector<std::string> MdViewerWidget::getWorkspaceNames()
     const auto proxy = source->getProxy();
     const auto srcProxyName = proxy->GetXMLGroup();
     if (srcProxyName == QString("sources")) {
-      std::string wsName(vtkSMPropertyHelper(proxy, "WorkspaceName", true)
-                         .GetAsString());
+      std::string wsName(
+          vtkSMPropertyHelper(proxy, "WorkspaceName", true).GetAsString());
       workspaceNames.push_back(wsName);
     }
   }
@@ -1133,15 +1132,11 @@ std::vector<std::string> MdViewerWidget::getWorkspaceNames()
   return workspaceNames;
 }
 
-std::string MdViewerWidget::getWindowName()
-{
+std::string MdViewerWidget::getWindowName() {
   return m_widgetName.toStdString();
 }
 
-
-std::string MdViewerWidget::getWindowType() {
-  return "VSIWindow";
-}
+std::string MdViewerWidget::getWindowType() { return "VSIWindow"; }
 
 /**
  * This function tells the current view to render the data, perform any

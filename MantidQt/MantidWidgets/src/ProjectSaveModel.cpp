@@ -1,8 +1,8 @@
+#include "MantidQtMantidWidgets/ProjectSaveModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/WindowIcons.h"
 #include "MantidQtAPI/WorkspaceIcons.h"
-#include "MantidQtMantidWidgets/ProjectSaveModel.h"
 
 #include <unordered_set>
 
@@ -20,7 +20,7 @@ ProjectSaveModel::ProjectSaveModel(
   for (auto &ws : workspaces) {
     // Currently we don't support saving workspace groups.
     // so, here just skip any and just include the other workspaces
-    if(ws->id() == "WorkspaceGroup")
+    if (ws->id() == "WorkspaceGroup")
       continue;
 
     std::pair<std::string, std::vector<IProjectSerialisable *>> item(
@@ -78,7 +78,8 @@ std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(
 /**
  * Get all unique window names for a list of workspaces
  *
- * @param wsNames :: vector of workspace names to get associated window names for
+ * @param wsNames :: vector of workspace names to get associated window names
+ * for
  * @return an ordered vector of unique window names sorted alphabetically
  */
 std::vector<std::string> ProjectSaveModel::getWindowNames(
@@ -115,7 +116,7 @@ std::vector<WindowInfo> ProjectSaveModel::getWindowInformation(
   std::vector<WindowInfo> winInfo;
   WindowIcons icons;
 
-  for(auto window : getUniqueWindows(wsNames)) {
+  for (auto window : getUniqueWindows(wsNames)) {
     WindowInfo info;
     info.name = window->getWindowName();
     info.type = window->getWindowType();

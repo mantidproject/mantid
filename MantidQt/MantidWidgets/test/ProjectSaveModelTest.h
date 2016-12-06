@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
 #include "MantidQtMantidWidgets/ProjectSaveModel.h"
+#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"
 
@@ -32,12 +32,12 @@ public:
 
   void testConstructNoWorkspacesNoWindows() {
     tearDown(); // remove workspaces setup by default
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
-    TS_ASSERT_THROWS_NOTHING( ProjectSaveModel model(windows) );
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
+    TS_ASSERT_THROWS_NOTHING(ProjectSaveModel model(windows));
   }
 
   void testConstructOneWorkspaceNoWindows() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     ProjectSaveModel model(windows);
     TS_ASSERT(!model.hasWindows("ws1"));
@@ -45,7 +45,7 @@ public:
   }
 
   void testGetWindowsForWorkspaceNoWindows() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     ProjectSaveModel model(windows);
     TS_ASSERT(!model.hasWindows("ws1"));
@@ -53,7 +53,7 @@ public:
   }
 
   void testGetWindowsForWorkspaceOneWindow() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
     windows.push_back(&win1);
 
@@ -63,7 +63,7 @@ public:
   }
 
   void testGetWindowsForWorkspaceTwoWindows() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws1"});
     windows.push_back(&win1);
@@ -75,7 +75,7 @@ public:
   }
 
   void testGetWindowsForTwoWorkspacesAndTwoWindows() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws2"});
     windows.push_back(&win1);
@@ -89,7 +89,7 @@ public:
   }
 
   void testGetWorkspaceNames() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     ProjectSaveModel model(windows);
     TS_ASSERT(!model.hasWindows("ws1"));
@@ -102,7 +102,7 @@ public:
   }
 
   void testGetWindowNames() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws2"});
@@ -132,7 +132,7 @@ public:
   }
 
   void testGetWindows() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws2"});
@@ -181,7 +181,7 @@ public:
   }
 
   void testGetWindowInformation() {
-    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws2"});
@@ -206,8 +206,6 @@ public:
     TS_ASSERT_EQUALS(winInfo[1].type, "Matrix");
     TS_ASSERT_EQUALS(winInfo[1].icon_id, "mantid_matrix_xpm");
   }
-
-
 };
 
 #endif // MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H

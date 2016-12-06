@@ -6034,9 +6034,8 @@ bool ApplicationWindow::saveProject(bool compress) {
   return true;
 }
 
-void ApplicationWindow::prepareSaveProject()
-{
-  std::vector<IProjectSerialisable*> windows;
+void ApplicationWindow::prepareSaveProject() {
+  std::vector<IProjectSerialisable *> windows;
 
   for (auto window : getSerialisableWindows()) {
     auto win = dynamic_cast<IProjectSerialisable *>(window);
@@ -6051,16 +6050,17 @@ void ApplicationWindow::prepareSaveProject()
   }
 
   auto serialiser = new ProjectSerialiser(this, currentFolder());
-  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(projectname, *serialiser, windows, this);
-  connect(m_projectSaveView, SIGNAL(projectSaved()), this, SLOT(postSaveProject()));
+  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(
+      projectname, *serialiser, windows, this);
+  connect(m_projectSaveView, SIGNAL(projectSaved()), this,
+          SLOT(postSaveProject()));
   m_projectSaveView->show();
 }
 
 /**
  * The project was just saved. Update the main window.
  */
-void ApplicationWindow::postSaveProject()
-{
+void ApplicationWindow::postSaveProject() {
   setWindowTitle("MantidPlot - " + projectname);
 
   if (autoSave) {
@@ -6081,8 +6081,7 @@ void ApplicationWindow::postSaveProject()
 
   QFileInfo fi(projectname);
   QString baseName = fi.baseName();
-  FolderListItem *item =
-      dynamic_cast<FolderListItem *>(folders->firstChild());
+  FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
   if (item) {
     item->setText(0, baseName);
     item->folder()->setObjectName(baseName);
@@ -9135,8 +9134,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
 /**
  * Called when the user choses to close the program
  */
-void ApplicationWindow::prepareToCloseMantid()
-{
+void ApplicationWindow::prepareToCloseMantid() {
   if (!saved) {
     QString savemsg =
         tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
@@ -9146,7 +9144,8 @@ void ApplicationWindow::prepareToCloseMantid()
     if (result == 0) {
       prepareSaveProject();
       // When we're finished saving trigger the close event
-      connect(m_projectSaveView, SIGNAL(finished(int)), qApp, SLOT(closeAllWindows()));
+      connect(m_projectSaveView, SIGNAL(finished(int)), qApp,
+              SLOT(closeAllWindows()));
       return;
     } else if (result == 2) {
       // User wanted to cancel, do nothing
@@ -11562,7 +11561,8 @@ void ApplicationWindow::createActions() {
   actionSaveProject =
       new QAction(QIcon(":/SaveProject16x16.png"), tr("Save &Project"), this);
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
-  connect(actionSaveProject, SIGNAL(triggered()), this, SLOT(prepareSaveProject()));
+  connect(actionSaveProject, SIGNAL(triggered()), this,
+          SLOT(prepareSaveProject()));
 
   actionSaveFile = new QAction(QIcon(getQPixmap("filesave_nexus_xpm")),
                                tr("Save Nexus &File"), this);
@@ -13941,7 +13941,6 @@ void ApplicationWindow::saveAsProject() {
     serialiser.save(fn, selectedFilter.contains(".gz"));
   }
 }
-
 
 void ApplicationWindow::showFolderPopupMenu(const QPoint &p) {
   auto item = folders->itemAt(p);

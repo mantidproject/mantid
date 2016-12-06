@@ -3176,10 +3176,7 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
   return table;
 }
 
-std::vector<std::string> Table::getWorkspaceNames()
-{
-  return {};
-}
+std::vector<std::string> Table::getWorkspaceNames() { return {}; }
 
 std::string Table::saveTableMetadata() {
   MantidQt::API::TSVSerialiser tsv;

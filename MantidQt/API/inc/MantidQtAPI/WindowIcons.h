@@ -2,8 +2,8 @@
 #define MANTIDQT_API_WINDOWICONS_H_
 
 #include "DllOption.h"
-#include <QMap>
 #include <QIcon>
+#include <QMap>
 
 namespace MantidQt {
 namespace API {

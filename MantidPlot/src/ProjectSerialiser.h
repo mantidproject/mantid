@@ -57,10 +57,10 @@ public:
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
 
   /// Save the current state of the project to disk
-  void save(const QString &projectName,
-            const std::vector<std::string>& wsNames,
-            const std::vector<std::string>& windowNames, bool compress = false);
-  void save(const QString &projectName, bool compress = false, bool saveAll = true);
+  void save(const QString &projectName, const std::vector<std::string> &wsNames,
+            const std::vector<std::string> &windowNames, bool compress = false);
+  void save(const QString &projectName, bool compress = false,
+            bool saveAll = true);
   /// Load a project file from disk
   void load(std::string lines, const int fileVersion,
             const bool isTopLevel = true);
@@ -81,7 +81,7 @@ private:
   /// Store a reference to the caller application window instance
   ApplicationWindow *window;
   /// Store a reference to the current folder
-  Folder* m_currentFolder;
+  Folder *m_currentFolder;
   /// Vector of names of windows to save to file
   std::vector<std::string> m_windowNames;
   /// Vector of names of workspaces to save to file
@@ -146,7 +146,7 @@ private:
   /// Create a handle to a new QMdiSubWindow instance
   QMdiSubWindow *setupQMdiSubWindow() const;
   /// Check if a vector of strings contains a string
-  bool contains(const std::vector<std::string>& vec, const std::string& value);
+  bool contains(const std::vector<std::string> &vec, const std::string &value);
 };
 }
 }

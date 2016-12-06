@@ -196,7 +196,4 @@ std::string Note::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::vector<std::string> Note::getWorkspaceNames()
-{
-  return {};
-}
+std::vector<std::string> Note::getWorkspaceNames() { return {}; }

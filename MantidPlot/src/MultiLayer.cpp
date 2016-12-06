@@ -61,8 +61,8 @@
 #include "LegendWidget.h"
 #include "MultiLayer.h"
 #include "Plot.h"
-#include "Spectrogram.h"
 #include "SelectionMoveResizer.h"
+#include "Spectrogram.h"
 #include <ColorButton.h>
 
 #include "Mantid/MantidMDCurve.h"
@@ -1869,17 +1869,16 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::vector<std::string> MultiLayer::getWorkspaceNames()
-{
+std::vector<std::string> MultiLayer::getWorkspaceNames() {
   std::vector<std::string> names;
   std::string name;
-  MantidMatrixCurve* mmc;
-  Spectrogram* spec;
-  for(auto graph : graphsList) {
+  MantidMatrixCurve *mmc;
+  Spectrogram *spec;
+  for (auto graph : graphsList) {
     for (int i = 0; i < graph->getNumCurves(); ++i) {
       auto item = graph->plotItem(i);
 
-      switch(item->rtti()) {
+      switch (item->rtti()) {
       case QwtPlotItem::Rtti_PlotUserItem:
         mmc = dynamic_cast<MantidMatrixCurve *>(item);
         if (!mmc)
