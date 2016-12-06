@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
@@ -1547,6 +1548,9 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
   } else {
     IFunction_sptr func = FunctionFactory::Instance().createFunction(
         currentFitFunction.toStdString());
+    for (size_t i = 0; i < func->nParams(); i++) {
+      parameters << QString::fromStdString(func->parameterName(i));
+    }
   }
   return parameters;
 }

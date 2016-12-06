@@ -83,7 +83,7 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
-  const std::vector<detid_t> detectorIDs() const;
+  const std::vector<detid_t> &detectorIDs() const;
   /// Returns the index of the detector with the given detector ID.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
 

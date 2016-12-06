@@ -44,7 +44,7 @@ public:
     std::string outWSName("CalculateCoverageDGSTest_OutputWS"),
         inputWSName("CalculateCoverageDGSTest_InputWS");
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace(1, 1);
     std::vector<V3D> detectorPositions{{1, 1, 1}};
     V3D sampPos(0., 0., 0.), sourcePos(0, 0, -1.);
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(

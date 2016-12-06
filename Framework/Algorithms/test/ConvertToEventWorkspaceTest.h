@@ -160,7 +160,7 @@ public:
   /// Workspace with infinity or NAN = don't create events there.
   void test_with_nan_and_inf() {
     // Create the input
-    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
     double inf = std::numeric_limits<double>::infinity();
@@ -211,7 +211,7 @@ public:
   /// Create events for zero-weight bins
   void test_GenerateZeros() {
     // Create the input
-    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     // Clear the vector
     inWS->dataY(0).assign(10, 0.0);

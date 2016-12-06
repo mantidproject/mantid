@@ -26,9 +26,9 @@ public:
 
   void test_exec() {
     MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 
@@ -42,9 +42,9 @@ public:
 
   void test_mergeReplaceExisting() {
     MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 
@@ -72,9 +72,9 @@ public:
 
   void test_mergeKeepExisting() {
     MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 
@@ -102,9 +102,9 @@ public:
 
   void test_wipeExisting() {
     MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 

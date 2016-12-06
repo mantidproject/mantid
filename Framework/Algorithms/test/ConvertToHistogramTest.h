@@ -29,7 +29,7 @@ public:
   test_That_Output_Is_The_Same_As_Input_If_Input_Contains_Histogram_Data() {
     // True indicates a non histogram workspace
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(5, 10, true);
+        WorkspaceCreationHelper::create2DWorkspace123(5, 10, true);
 
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
     TS_ASSERT(outputWS);
@@ -45,7 +45,7 @@ public:
     // Creates a workspace with 10 points
     const int numYPoints(10);
     const int numSpectra(2);
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(
         numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
     Points x(numYPoints, LinearGenerator(0.0, 1.0));
@@ -137,7 +137,7 @@ public:
 
   void setUp() override {
     inputWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(20000, 10000, false);
+        WorkspaceCreationHelper::create2DWorkspace123(20000, 10000, false);
   }
 
   void tearDown() override {

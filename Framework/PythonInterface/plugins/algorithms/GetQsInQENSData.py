@@ -85,7 +85,7 @@ class GetQsInQENSData(PythonAlgorithm):
         # Find the Q values
         try:
             self._qvalues = self._extract_qvalues(qens_data)
-        except RuntimeError, error_message:
+        except RuntimeError as error_message:
             self.log().error(str(error_message))
             if self.getPropertyValue("RaiseMode"):
                 raise RuntimeError(error_message)

@@ -101,7 +101,11 @@ MANTID_KERNEL_DLL int isEmpty(const std::string &A);
 /// Determines if a string starts with a #
 MANTID_KERNEL_DLL bool skipLine(const std::string &line);
 /// Get a line and strip comments
-MANTID_KERNEL_DLL std::string getLine(std::istream &fh, const int spc = 256);
+/// Use only for a single call
+MANTID_KERNEL_DLL std::string getLine(std::istream &fh);
+/// Get a line and strip comments
+/// Use within a loop
+MANTID_KERNEL_DLL void getLine(std::istream &fh, std::string &Line);
 /// Peek at a line without extracting it from the stream
 MANTID_KERNEL_DLL std::string peekLine(std::istream &fh);
 /// get a part of a long line
