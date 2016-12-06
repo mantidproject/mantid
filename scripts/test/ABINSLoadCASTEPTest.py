@@ -38,6 +38,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     #  *************************** USE CASES ********************************************
     _core = "../ExternalData/Testing/Data/UnitTest/"
+
     # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
@@ -81,12 +82,14 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         cwd = os.getcwd()
 
         # get calculated data
-        input_filename = path.abspath(core + name + ".phonon")
+        filename_unix = os.path.join(core, name+".phonon")
+        input_filename = path.abspath(filename_unix)
         input_filename = path.relpath(input_filename, cwd)
+
         data = self._read_DFT(filename=input_filename)
 
         # get correct data
-        filename = path.abspath(core + name)
+        filename = path.abspath(os.path.join(core, name))
         filename = path.relpath(filename, cwd)
         correct_data = self._prepare_data(filename=filename)
 
@@ -103,8 +106,6 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         @return:
         """
         # 1) Read data
-        data = {}
-
         castep_reader = LoadCASTEP(input_dft_filename=filename)
 
         data = self._get_reader_data(castep_reader=castep_reader)
@@ -151,7 +152,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         for item in range(len(correct_atoms)):
 
             self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
-            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], places=-1)
+            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)  # delta in Hartree units
             self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
             self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
             self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),

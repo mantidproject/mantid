@@ -36,8 +36,8 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     squaricn = "squaricn_sum_CalculateSPowder"
     Si2 = "Si2-sc_CalculateSPowder"
 
-    Squaricn_path = path.abspath(core + squaricn)
-    Si2_path = path.abspath(core + Si2)
+    Squaricn_path = path.abspath(os.path.join(core, squaricn))
+    Si2_path = path.abspath(os.path.join(core, Si2))
 
     def remove_hdf_files(self):
         files = os.listdir(os.getcwd())
