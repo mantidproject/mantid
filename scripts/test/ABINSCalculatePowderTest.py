@@ -27,10 +27,10 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
     # data
     # Use case: one k-point
-    C6H6 = path.relpath(_core + "benzene_CalculatePowder")
+    C6H6 = path.abspath(_core + "benzene_CalculatePowder")
 
     #  Use case: many k-points
-    Si2 = path.relpath(_core + "Si2-sc_CalculatePowder")
+    Si2 = path.abspath(_core + "Si2-sc_CalculatePowder")
 
     #     test input
     def test_wrong_input(self):

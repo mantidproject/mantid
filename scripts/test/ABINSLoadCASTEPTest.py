@@ -78,12 +78,16 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     def _check(self, core=None, name=None):
 
+        cwd = os.getcwd()
+
         # get calculated data
-        input_filename = path.relpath(core + name + ".phonon")
+        input_filename = path.abspath(core + name + ".phonon")
+        input_filename = path.relpath(input_filename, cwd)
         _data = self._read_DFT(filename=input_filename)
 
         # get correct data
-        filename = path.relpath(core + name)
+        filename = path.abspath(core + name)
+        filename = path.relpath(filename, cwd)
         _correct_data = self._prepare_data(filename=filename)
 
         # check read data
