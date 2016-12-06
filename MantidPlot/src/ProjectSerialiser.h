@@ -60,7 +60,7 @@ public:
   void save(const QString &projectName,
             const std::vector<std::string>& wsNames,
             const std::vector<std::string>& windowNames, bool compress = false);
-  void save(Folder *folder, const QString &projectName, bool compress = false);
+  void save(const QString &projectName, bool compress = false, bool saveAll = true);
   /// Load a project file from disk
   void load(std::string lines, const int fileVersion,
             const bool isTopLevel = true);
@@ -88,6 +88,8 @@ private:
   std::vector<std::string> m_workspaceNames;
   /// Store a count of the number of windows during saving
   int m_windowCount;
+  /// Flag to check if e should save all workspaces
+  bool m_saveAll;
 
   // Saving Functions
 

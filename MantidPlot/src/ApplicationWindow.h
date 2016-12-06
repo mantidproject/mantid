@@ -1027,7 +1027,6 @@ public slots:
   // parentFolder or to the current folder if no parent folder is specified.
   Folder *appendProject(const QString &file_name, Folder *parentFolder = 0);
   void saveAsProject();
-  void saveFolderAsProject(Folder *f);
 
   //!  adds a folder list item to the list view "lv"
   void addFolderListViewItem(Folder *f);

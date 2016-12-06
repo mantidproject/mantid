@@ -6015,7 +6015,7 @@ bool ApplicationWindow::saveProject(bool compress) {
   }
 
   ProjectSerialiser serialiser(this);
-  serialiser.save(projectFolder(), projectname, compress);
+  serialiser.save(projectname, compress);
 
   setWindowTitle("MantidPlot - " + projectname);
   savedProject();
@@ -13909,10 +13909,6 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
 }
 
 void ApplicationWindow::saveAsProject() {
-  saveFolderAsProject(currentFolder());
-}
-
-void ApplicationWindow::saveFolderAsProject(Folder *f) {
   QString filter = tr("MantidPlot project") + " (*.qti);;"; // Mantid
   filter += tr("Compressed MantidPlot project") + " (*.qti.gz)";
 
@@ -13927,9 +13923,10 @@ void ApplicationWindow::saveFolderAsProject(Folder *f) {
       fn.append(".qti");
 
     ProjectSerialiser serialiser(this);
-    serialiser.save(f, fn, selectedFilter.contains(".gz"));
+    serialiser.save(fn, selectedFilter.contains(".gz"));
   }
 }
+
 
 void ApplicationWindow::showFolderPopupMenu(const QPoint &p) {
   auto item = folders->itemAt(p);

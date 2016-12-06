@@ -45,12 +45,7 @@ void ProjectSerialiser::save(const QString &projectName,
   window->projectname = projectName;
   QFileInfo fileInfo(projectName);
   window->workingDir = fileInfo.absoluteDir().absolutePath();
-
-  // update any listening progress bars
-  emit setProgressBarRange(0, static_cast<int>(wsNames.size()));
-  emit setProgressBarValue(0);
-
-  save(m_currentFolder, projectName, compress);
+  save(projectName, compress, false);
 }
 
 /**
@@ -60,9 +55,10 @@ void ProjectSerialiser::save(const QString &projectName,
  * @param projectName :: the name of the project to write to
  * @param compress :: whether to compress the project (default false)
  */
-void ProjectSerialiser::save(Folder *folder, const QString &projectName,
-                             bool compress) {
+void ProjectSerialiser::save(const QString &projectName,
+                             bool compress, bool saveAll) {
   m_windowCount = 0;
+  m_saveAll = saveAll;
   QFile fileHandle(projectName);
 
   // attempt to backup project files and check we can write
@@ -73,6 +69,10 @@ void ProjectSerialiser::save(Folder *folder, const QString &projectName,
 
   if (!m_currentFolder)
     m_currentFolder = window->currentFolder();
+
+  // update any listening progress bars
+  emit setProgressBarRange(0, static_cast<int>(m_workspaceNames.size()));
+  emit setProgressBarValue(0);
 
   QString text = serialiseProjectState(m_currentFolder);
   saveProjectFile(&fileHandle, projectName, text, compress);
@@ -385,7 +385,7 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
   for (auto &w : windows) {
     MantidQt::API::IProjectSerialisable *ips =
         dynamic_cast<MantidQt::API::IProjectSerialisable *>(w);
-    if(!contains(m_windowNames, w->getWindowName()))
+    if(!m_saveAll && !contains(m_windowNames, w->getWindowName()))
       continue;
 
     if (ips) {
@@ -435,7 +435,7 @@ QString ProjectSerialiser::saveWorkspaces() {
     QString wsName = QString::fromStdString(itemIter);
 
     // check whether the user wants to save this workspace
-    if(!contains(m_workspaceNames, wsName.toStdString()))
+    if(!m_saveAll && !contains(m_workspaceNames, wsName.toStdString()))
       continue;
 
     auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
@@ -481,8 +481,8 @@ QString ProjectSerialiser::saveAdditionalWindows() {
   QString output;
   for (auto win : window->getSerialisableWindows()) {
     auto serialisableWindow = dynamic_cast<IProjectSerialisable *>(win);
-    if (!serialisableWindow ||
-        !contains(m_windowNames, serialisableWindow->getWindowName()))
+    if (!serialisableWindow || (!m_saveAll &&
+        !contains(m_windowNames, serialisableWindow->getWindowName())))
       continue;
 
     auto lines = serialisableWindow->saveToProject(window);
