@@ -217,10 +217,13 @@ void ReflRunsTabPresenter::transfer() {
 
   // Do not begin transfer if nothing is selected or if the transfer method does
   // not match the one used for populating search
-  if (selectedRows.size() == 0)
+  if (selectedRows.size() == 0) {
+    m_mainPresenter->giveUserCritical(
+        "Error: Please select at least one run to transfer.",
+        "No runs selected");
     return;
-
-  if (m_currentTransferMethod != m_view->getTransferMethod()) {
+  }
+  else if (m_currentTransferMethod != m_view->getTransferMethod()) {
     m_mainPresenter->giveUserCritical(
         "Error: Method selected for transferring runs (" +
         m_view->getTransferMethod() +
