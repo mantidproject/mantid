@@ -356,9 +356,9 @@ void CreateGroupingWorkspace::exec() {
     inst = tempWS->getInstrument();
   }
 
-  //Validation for 2_4Grouping input used only for SNAP
+  // Validation for 2_4Grouping input used only for SNAP
   if (inst->getName().compare("SNAP") != 0 &&
-               grouping.compare("2_4Grouping") == 0) {
+      grouping.compare("2_4Grouping") == 0) {
     const std::string message("2_4Grouping only works for SNAP.");
     g_log.error(message);
     throw std::invalid_argument(message);
