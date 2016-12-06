@@ -97,15 +97,18 @@ QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
   */
   QString filename;
   if (prop->isLoadProperty()) {
-    QString filter = FileDialogHandler::getFileDialogFilter(baseProp);
+    const auto filter = FileDialogHandler::getFilter(baseProp);
+    const auto caption = FileDialogHandler::getCaption("Open file", baseProp);
     filename = QFileDialog::getOpenFileName(
-        NULL, "Open file",
+        nullptr, caption,
         AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   } else if (prop->isSaveProperty()) {
-    filename = FileDialogHandler::getSaveFileName(NULL, prop);
+    filename = FileDialogHandler::getSaveFileName(nullptr, prop);
   } else if (prop->isDirectoryProperty()) {
+    const auto caption =
+        FileDialogHandler::getCaption("Choose a Directory", baseProp);
     filename = QFileDialog::getExistingDirectory(
-        NULL, "Choose a Directory",
+        nullptr, caption,
         AlgorithmInputHistory::Instance().getPreviousDirectory());
   } else {
     throw std::runtime_error(
@@ -135,9 +138,9 @@ FilePropertyWidget::openMultipleFileDialog(Mantid::Kernel::Property *baseProp) {
   if (!prop)
     return QStringList();
 
-  QString filter = FileDialogHandler::getFileDialogFilter(baseProp);
+  const auto filter = FileDialogHandler::getFilter(baseProp);
   QStringList files = QFileDialog::getOpenFileNames(
-      NULL, "Open Multiple Files",
+      nullptr, "Open Multiple Files",
       AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
 
   return files;

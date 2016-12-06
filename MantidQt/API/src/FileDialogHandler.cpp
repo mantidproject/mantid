@@ -66,23 +66,16 @@ namespace FileDialogHandler {
 QString getSaveFileName(QWidget *parent,
                         const Mantid::Kernel::Property *baseProp,
                         QFileDialog::Options options) {
-  // set up filters
-  const auto filter = getFileDialogFilter(baseProp);
-
-  // generate the dialog title
-  QString dialogTitle("Save file");
-  if (bool(baseProp) && baseProp->name() != "Filename") {
-    dialogTitle.append(" - ");
-    dialogTitle.append(QString::fromStdString(baseProp->name()));
-  }
+  // set up filters and dialog title
+  const auto filter = getFilter(baseProp);
+  const auto caption = getCaption("Save file", baseProp);
 
   QString selectedFilter;
 
   // create the file browser
   QString filename = QFileDialog::getSaveFileName(
-      parent, dialogTitle,
-      AlgorithmInputHistory::Instance().getPreviousDirectory(), filter,
-      &selectedFilter, options);
+      parent, caption, AlgorithmInputHistory::Instance().getPreviousDirectory(),
+      filter, &selectedFilter, options);
 
   return addExtension(filename, selectedFilter);
 }
@@ -104,7 +97,7 @@ QString addExtension(const QString &filename, const QString &selectedFilter) {
   }
 }
 
-QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp) {
+QString getFilter(const Mantid::Kernel::Property *baseProp) {
   if (!baseProp)
     return ALL_FILES;
 
@@ -112,16 +105,14 @@ QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp) {
   const auto *multiProp =
       dynamic_cast<const Mantid::API::MultipleFileProperty *>(baseProp);
   if (bool(multiProp))
-    return getFileDialogFilter(multiProp->getExts(),
-                               multiProp->getDefaultExt());
+    return getFilter(multiProp->getExts(), multiProp->getDefaultExt());
 
   // regular file version
   const auto *singleProp =
       dynamic_cast<const Mantid::API::FileProperty *>(baseProp);
   // The allowed values in this context are file extensions
   if (bool(singleProp))
-    return getFileDialogFilter(singleProp->allowedValues(),
-                               singleProp->getDefaultExt());
+    return getFilter(singleProp->allowedValues(), singleProp->getDefaultExt());
 
   // otherwise only the all files exists
   return ALL_FILES;
@@ -134,8 +125,8 @@ QString getFileDialogFilter(const Mantid::Kernel::Property *baseProp) {
  * @param defaultExt :: default extension to use
  * @return a string that filters files by extenstions
  */
-QString getFileDialogFilter(const std::vector<std::string> &exts,
-                            const std::string &defaultExt) {
+QString getFilter(const std::vector<std::string> &exts,
+                  const std::string &defaultExt) {
   QString filter("");
 
   if (!defaultExt.empty()) {
@@ -157,6 +148,21 @@ QString getFileDialogFilter(const std::vector<std::string> &exts,
   }
   filter.append(ALL_FILES);
   return filter;
+}
+
+QString getCaption(const std::string &dialogName,
+                   const Mantid::Kernel::Property *prop) {
+  // generate the dialog title
+  auto dialogTitle = QString::fromStdString(dialogName);
+  if (bool(prop)) {
+    const auto name = prop->name();
+    if (name != "Filename" && prop->name() != "Directory" &&
+        prop->name() != "Dir") {
+      dialogTitle.append(" - ");
+      dialogTitle.append(QString::fromStdString(name));
+    }
+  }
+  return dialogTitle;
 }
 }
 }
