@@ -47,7 +47,6 @@ class Pearl(AbstractInst):
         self._spline_coeff = num_of_splines
 
         return self._create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
-                                                 output_file_name=output_file_name,
                                                  do_absorb_corrections=do_absorb_corrections,
                                                  gen_absorb_correction=gen_absorb_correction)
 
@@ -137,11 +136,10 @@ class Pearl(AbstractInst):
     def get_monitor_spectra_index(self, run_number):
         return get_monitor_spectra(run_number=run_number, focus_mode=self._focus_mode)
 
-    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
+    def spline_vanadium_ws(self, focused_vanadium_spectra):
         # TODO move spline number into the class
-        return pearl_spline.spline_vanadium_for_focusing(focused_vanadium_ws=focused_vanadium_ws,
-                                                         spline_number=self._spline_coeff,
-                                                         instrument_version=instrument_version)
+        return pearl_spline.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
+                                                         num_splines=self._spline_coeff)
 
     def pearl_focus_tof_rebinning(self, workspace):
         out_name = workspace.name() + "_rebinned"
@@ -161,9 +159,14 @@ class Pearl(AbstractInst):
                                                            perform_attenuation=attenuate)
 
     def vanadium_calibration_rebinning(self, vanadium_ws):
-        out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=self._create_van_tof_binning)
+        out_ws = common.crop_in_tof(ws_to_rebin=vanadium_ws, x_min=1500, x_max=19900, is_mixed_binning=True)
 
         return out_ws
+
+    def extract_and_crop_spectra(self, focused_ws):
+        ws_spectra = common.extract_ws_spectra(ws_to_split=focused_ws)
+        ws_spectra = common.crop_in_tof(ws_to_rebin=ws_spectra, x_min=1500, x_max=19900)
+        return ws_spectra
 
     def crop_data_tail(self, ws_to_crop):
         # TODO move this param into advanced config

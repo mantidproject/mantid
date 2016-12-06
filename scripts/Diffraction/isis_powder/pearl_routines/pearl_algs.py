@@ -18,14 +18,6 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
     return pearl_attenuated_ws
 
 
-def apply_tof_rebinning(ws_to_rebin, tof_params):
-    previous_units = ws_to_rebin.getAxis(0).getUnit().unitID()
-    ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
-    rebinned_ws = mantid.Rebin(InputWorkspace=ws_to_rebin, Params=tof_params, OutputWorkspace=ws_to_rebin)
-    rebinned_ws = mantid.ConvertUnits(InputWorkspace=rebinned_ws, Target=previous_units, OutputWorkspace=rebinned_ws)
-    return rebinned_ws
-
-
 def generate_vanadium_absorb_corrections(van_ws):
     raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
 
@@ -42,20 +34,6 @@ def generate_vanadium_absorb_corrections(van_ws):
                      InputWorkspace=absorb_ws, Append=False)
     common.remove_intermediate_workspace(shape_ws)
     return absorb_ws
-
-
-def get_instrument_ranges(instrument_version):
-    # TODO rename this to get number of banks/save range
-    if instrument_version == "new" or instrument_version == "old":  # New and old have identical ranges
-        num_of_banks = 12
-        save_range = 3
-    elif instrument_version == "new2":
-        num_of_banks = 14
-        save_range = 5
-    else:
-        raise ValueError("Instrument version unknown")
-
-    return num_of_banks, save_range
 
 
 def get_run_details(tt_mode, run_number_string, label, calibration_dir):

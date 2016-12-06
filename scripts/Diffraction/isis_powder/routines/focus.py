@@ -30,7 +30,7 @@ def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_
     processed_spectra = []
     run_details = instrument.get_run_details(run_number=run_number)
     num_of_banks = instrument.get_num_of_banks(run_details.instrument_version)
-    split_ws = common.extract_bank_spectra(ws_to_split=input_workspace, num_banks=num_of_banks)
+    split_ws = common.extract_ws_spectra(ws_to_split=input_workspace, num_banks=num_of_banks)
 
     if perform_vanadium_norm:
         vanadium_ws_list = mantid.LoadNexus(Filename=run_details.splined_vanadium)

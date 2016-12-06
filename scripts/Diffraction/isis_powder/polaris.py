@@ -106,36 +106,41 @@ class Polaris(AbstractInst):
 
         return spectra_name
 
-    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
-        extracted_spectra = common.extract_bank_spectra(focused_vanadium_ws, self._number_of_banks)
+    def spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
         mode = "spline"
 
         masking_file_path = os.path.join(self.calibration_dir, self._masking_file_name)
-        output = polaris_algs.process_vanadium_for_focusing(bank_spectra=extracted_spectra,
+        output = polaris_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_spectra,
                                                             spline_number=self._spline_coeff,
                                                             mode=mode, mask_path=masking_file_path)
-
-        for ws in extracted_spectra:
-            common.remove_intermediate_workspace(ws)
 
         return output
 
     def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
         return polaris_algs.generate_absorb_corrections(ws_to_match=ws_to_match)
 
+    def vanadium_calibration_rebinning(self, vanadium_ws):
+        common.crop_in_tof(ws_to_rebin=vanadium_ws, x_max=19900, is_mixed_binning=True)
+        # TODO find out maximum TOF value for POLARIS
+
+    def extract_and_crop_spectra(self, focused_ws):
+        ws_spectra = common.extract_ws_spectra(ws_to_split=focused_ws)
+        ws_spectra = common.crop_in_tof(ws_to_rebin=ws_spectra, x_min=800, x_max=20000)
+        return ws_spectra
+
     def calculate_focus_binning_params(self, sample):
         calculated_binning_params = polaris_algs.calculate_focus_binning_params(sample_ws=sample,
                                                                                 num_of_banks=self._number_of_banks)
         return calculated_binning_params
 
-    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, output_mode=None, attenuate=False):
         d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(processed_spectra)
         output_paths = self._generate_out_file_paths(run_details=run_details)
 
         polaris_output.save_polaris_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                                  output_paths=output_paths, run_number=run_details.run_number)
 
-        return d_spacing_group, tof_group
+        return d_spacing_group
 
 
 def _set_kwargs_from_basic_config_file(config_path, kwargs):

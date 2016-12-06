@@ -65,10 +65,9 @@ class AbstractInst(object):
     # These are to be called from either concrete instruments or common not by users
     # Common steps to all instruments
 
-    def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None,
+    def _create_calibration_vanadium(self, vanadium_runs, empty_runs,
                                      do_absorb_corrections=True, gen_absorb_correction=False):
         return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
-                                    output_van_file_name=output_file_name,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
     def _focus(self, run_number, input_batching, do_attenuation, do_van_normalisation):
@@ -159,8 +158,11 @@ class AbstractInst(object):
     def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         return ws_to_rebin
 
-    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
+    def spline_vanadium_ws(self, focused_vanadium_ws):
         return None
+
+    def extract_and_crop_spectra(self, focused_ws):
+        raise NotImplemented("Extract spectra and crop in tof not implemented")
 
 
 # ----- Private Implementation ----- #

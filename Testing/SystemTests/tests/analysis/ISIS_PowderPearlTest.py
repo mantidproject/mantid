@@ -10,8 +10,8 @@ from isis_powder.pearl import Pearl
 
 DIRS = config['datasearch.directories'].split(';')
 
-class VanadiumCalibrationTest(stresstesting.MantidStressTest):
 
+class VanadiumCalibrationTest(stresstesting.MantidStressTest):
     calibration_results = None
     existing_config = config['datasearch.directories']
 

@@ -9,21 +9,16 @@ import isis_powder.routines.common as common
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_details, perform_attenuation, focus_mode=None):
     output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
-    save_range = instrument.get_save_range(run_details.instrument_version)
 
     if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths, processed_spectra)
-
     elif focus_mode == "groups":
-        processed_nexus_files = _focus_mode_groups(run_details.instrument_version, output_file_paths, save_range,
+        processed_nexus_files = _focus_mode_groups(run_details.instrument_version, output_file_paths,
                                                    processed_spectra)
-
     elif focus_mode == "trans":
         processed_nexus_files = _focus_mode_trans(output_file_paths, perform_attenuation, instrument, processed_spectra)
-
     elif focus_mode == "mods":
         processed_nexus_files = _focus_mode_mods(output_file_paths, processed_spectra)
-
     else:
         raise ValueError("Focus mode unknown")
 
@@ -89,7 +84,7 @@ def _focus_mode_trans(output_file_paths, atten, instrument, calibrated_spectra):
     return output_list
 
 
-def _focus_mode_groups(instrument_version, output_file_paths, save_range, calibrated_spectra):
+def _focus_mode_groups(instrument_version, output_file_paths, calibrated_spectra):
     output_list = []
     to_save = _sum_groups_of_three_ws(calibrated_spectra, output_file_paths)
 
@@ -115,6 +110,7 @@ def _focus_mode_groups(instrument_version, output_file_paths, save_range, calibr
         append = True
         index += 1
 
+    save_range = 5
     for i in range(0, save_range):
         monitor_ws_name = output_file_paths["output_name"] + "_mod" + str(i + 10)
 
@@ -133,10 +129,6 @@ def _focus_mode_groups(instrument_version, output_file_paths, save_range, calibr
 def _focus_mode_all(output_file_paths, processed_spectra):
     summed_spectra_name = output_file_paths["output_name"] + "_mods1-9"
     summed_spectra = mantid.MergeRuns(InputWorkspaces=processed_spectra[:9], OutputWorkspace=summed_spectra_name)
-
-    #summed_spectra = mantid.CloneWorkspace(InputWorkspace=processed_spectra[0], OutputWorkspace=summed_spectra_name)
-    #for ws in processed_spectra[1:9]:
-    #    summed_spectra = mantid.Plus(LHSWorkspace=summed_spectra, RHSWorkspace=ws, OutputWorkspace=summed_spectra_name)
 
     summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111,
                                   OutputWorkspace=summed_spectra_name)
@@ -188,6 +180,6 @@ def _sum_groups_of_three_ws(calibrated_spectra, output_file_names):
         workspace_names = output_file_names["output_name"] + "_mod" + mod_first_number + '-' + mod_last_number
         output_list.append(mantid.Scale(InputWorkspace=workspace_list[outer_loop_count],
                                         OutputWorkspace=workspace_names, Factor=0.333333333333))
-    for ws in workspace_list:
-        common.remove_intermediate_workspace(ws)
+
+    common.remove_intermediate_workspace(workspace_list)
     return output_list

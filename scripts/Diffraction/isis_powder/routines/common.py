@@ -18,6 +18,25 @@ def create_calibration_by_names(calibration_runs, startup_objects, grouping_file
                            out_grouping_file_name=grouping_file_name, instrument=startup_objects)
 
 
+def crop_in_tof(ws_to_rebin, x_min=None, x_max=None):
+    if isinstance(ws_to_rebin, list):
+        cropped_ws = []
+        for ws in ws_to_rebin:
+            cropped_ws.append(_crop_single_ws_in_tof(ws, x_max=x_max, x_min=x_min))
+    else:
+        cropped_ws = _crop_single_ws_in_tof(ws_to_rebin, x_max=x_max, x_min=x_min)
+    return cropped_ws
+
+
+def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
+    previous_units = ws_to_rebin.getAxis(0).getUnit().unitID()
+    ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
+    cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin,
+                                      XMin=x_min, XMax=x_max)
+    cropped_ws = mantid.ConvertUnits(InputWorkspace=cropped_ws, Target=previous_units, OutputWorkspace=cropped_ws)
+    return cropped_ws
+
+
 def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
     if key in dictionary:
         return dictionary[key]
@@ -32,9 +51,10 @@ def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
         return this_throws  # Never gets this far just makes linters happy
 
 
-def extract_bank_spectra(ws_to_split, num_banks):
+def extract_ws_spectra(ws_to_split):
+    num_spectra = ws_to_split.getNumberHistograms()
     spectra_bank_list = []
-    for i in range(0, num_banks):
+    for i in range(0, num_spectra):
         output_name = "bank-" + str(i + 1)
         # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
         spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
@@ -153,13 +173,7 @@ def _load_list_of_files(run_numbers_list, instrument):
 def _sum_ws_range(ws_list):
     # Sum all workspaces
     out_ws_name = "summed_" + ws_list[0].name() + '_' + ws_list[-1].name()
-
-    summed_ws = mantid.CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace=out_ws_name)
-
-    for ws in ws_list[1:]:
-        summed_ws = mantid.Plus(LHSWorkspace=summed_ws, RHSWorkspace=ws, OutputWorkspace=out_ws_name)
-
-    # summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
+    summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
     return summed_ws
 
 

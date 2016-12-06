@@ -103,6 +103,8 @@ def get_run_details(chopper_on, sac_on, run_number_string, calibration_dir, mapp
 
 
 def split_into_tof_d_spacing_groups(processed_spectra):
+    import pydevd
+    pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
     name_index = 1
     d_spacing_output = []
     tof_output = []
@@ -110,9 +112,9 @@ def split_into_tof_d_spacing_groups(processed_spectra):
         d_spacing_out_name = "ResultD-" + str(name_index)
         tof_out_name = "ResultTOF-" + str(name_index)
         name_index += 1
-        # Rename d-spacing workspaces
-        d_spacing_output.append(mantid.CloneWorkspace(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name))
-        # Convert to TOF
+
+        d_spacing_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name,
+                                                    Target="dSpacing"))
         tof_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
 
     # Group the outputs
