@@ -5,7 +5,6 @@
 #include <fstream>
 
 #include "MantidDataHandling/SavePHX.h"
-#include "MantidAPI/DetectorInfo.h"
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -198,9 +197,6 @@ private:
     loader.setPropertyValue("Workspace", input);
     loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
-
-    // mask the detector
-    inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 
     // required to get it passed the algorthms validator
     inputWS->setDistribution(true);

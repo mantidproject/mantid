@@ -11,7 +11,6 @@
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -168,9 +167,6 @@ private:
     loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.setPropertyValue("Workspace", input);
     loader.execute();
-
-    // mask the detector
-    inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 
     // required to get it passed the algorthms validator
     inputWS->setDistribution(true);
