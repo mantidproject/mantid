@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import collections
 import glob
 from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
 from mantid.kernel import Direct, Direction, IntArrayProperty, StringListValidator, StringMandatoryValidator, UnitConversion
@@ -49,7 +50,7 @@ PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
 PROP_MONITOR_INDEX                    = 'Monitor'
 PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
-PROP_OUTPUT_EPP_WORKSPACE             = 'OutputEPPWorkspace'
+PROP_OUTPUT_DETECTOR_EPP_WORKSPACE             = 'OutputEPPWorkspace'
 PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
 PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE = 'OutputIncidentEnergyWorkspace'
 PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
@@ -64,34 +65,55 @@ REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
 REDUCTION_TYPE_SAMPLE = 'Sample'
 REDUCTION_TYPE_VANADIUM = 'Vanadium'
 
-temp_workspaces = []
+WS_CONTENT_DETECTORS = 0
+WS_CONTENT_MONITORS = 1
 
 class IntermediateWsCleanup:
-
+    '''
+    Manages intermediate workspace cleanup.
+    '''
     def __init__(self, cleanupMode):
         self._doDelete = cleanupMode == CLEANUP_DELETE
         self._protected = set()
-        self._unprotected = set()
+        self._toBeDeleted = set()
 
-    def toBeCleanedUp(self, names):
-        self._unprotected.add(names)
-        self._protected.discard(names)
+    def cleanup(self, *args):
+        '''
+        Deletes the given workspaces.
+        '''
+        for ws in args:
+            self._delete(ws)
 
-    def cleanup(self):
+    def cleanupLater(self, *args):
+        '''
+        Marks the given workspaces to be cleaned up later.
+        '''
+        map(self._toBeDeleted.add, map(str, args))
+
+    def finalCleanup(self):
+        '''
+        Deletes all workspaces marked to be cleaned up later.
+        ''' 
+        for ws in self._toBeDeleted:
+            if mtd.doesExist(ws):
+                DeleteWorkspace(Workspace=ws)
+
+    def protect(self, *args):
+        '''
+        Marks the given workspaces to be never deleted.
+        '''
+        map(self._protected.add, map(str, args))
+
+    def _delete(self, ws):
+        '''
+        Deletes the given workspace if it is not protected, and
+        deletion is actually turned on.
+        '''
         if not self._doDelete:
             return
-        for name in self._unprotected:
-            if mtd.doesExist(name):
-                DeleteWorkspace(Workspace=name)
-        self._unprotected.clear()
-
-    def protect(self, names):
-        self._protected.add(names)
-        self._unprotected.discard(names)
-
-    def resetProtected(self):
-        self._unprotected |= self._protected
-        self._protected.clear()
+        ws = str(ws)
+        if not ws in self._protected and mtd.doesExist(ws):
+            DeleteWorkspace(Workspace=ws)
 
 class NameSource:
 
@@ -106,6 +128,346 @@ class NameSource:
 
 def setAsBad(ws, index):
     ws.dataY(index)[0] += 1
+
+def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log):
+    '''
+    Loads files specified by filenames, merging them into a single
+    workspace.
+    '''
+    # TODO Stop this epp reference madness when LoadILLTOF v.2 is available.
+    # TODO Explore ways of loading data file-by-file and merging pairwise.
+    #      Should save some memory (IN5!).
+    rawWSName = wsNames.withSuffix('raw')
+    if eppReference:
+        if mtd.doesExist(str(eppReference)):
+            ws = Load(Filename=inputFilename,
+                      OutputWorkspace=rawWSName,
+                      WorkspaceVanadium=eppReference)
+        else:
+            ws = Load(Filename=inputFilename,
+                      OutputWorkspace=rawWSName,
+                      FilenameVanadium=eppReference)
+    else:
+        # For multiple files, we need an EPP reference workspace
+        # anyway, so we'll use the first file the user wants to
+        # load.
+        head, tail = path.split(inputFilename)
+        # Loop over known MultipleFileProperty file list
+        # specifiers.
+        for separator in [':', ',', '-', '+']:
+            referenceFilename, sep, rest = tail.partition(separator)
+            if referenceFilename:
+                break;
+        if referenceFilename:
+            referenceFilename = path.join(head, referenceFilename)
+            log.information('Using ' + referenceFilename + ' as initial EPP reference.')
+            eppReferenceWSName = wsNames.withSuffix('initial_epp_reference')
+            Load(Filename=referenceFilename,
+                 OutputWorkspace=eppReferenceWSName)
+            ws = Load(Filename=inputFilename,
+                      OutputWorkspace=rawWSName,
+                      WorkspaceVanadium=eppReferenceWSName)
+            wsCleanup.cleanup(eppReferenceWSName)
+        else:
+            # Single file, no EPP reference.
+            ws = Load(Filename=inputFilename,
+                      OutputWorkspace=rawWSName)
+    # Now merge the loaded files
+    mergedWSName = wsNames.withSuffix('merged')
+    ws = MergeRuns(InputWorkspaces=ws,
+                   OutputWorkspace=mergedWSName)
+    wsCleanup.cleanup(rawWSName)
+    return ws
+
+def _extractMonitorWs(ws, wsNames):
+    '''
+    Separates detector and monitor histograms from a workspace.
+    '''
+    detWSName = wsNames.withSuffix('extracted_detectors')
+    monWSName = wsNames.withSuffix('extracted_monitors')
+    detectorWS, monitorWS = ExtractMonitors(InputWorkspace=ws,
+                                            DetectorWorkspace=detWSName,
+                                            MonitorWorkspace=monWSName)
+    return detectorWS, monitorWS
+
+def _createFlatBackground(ws, windowWidth, wsNames):
+    '''
+    Returns a flat background workspace.
+    '''
+    bkgWSName = wsNames.withSuffix('flat_background')
+    bkgWS = CalculateFlatBackground(InputWorkspace=ws,
+                                    OutputWorkspace=bkgWSName,
+                                    Mode='Moving Average',
+                                    OutputMode='Return Background',
+                                    SkipMonitors=False,
+                                    NullifyNegativeValues=False,
+                                    AveragingWindowWidth=windowWidth)
+    return bkgWS
+
+def _subtractFlatBackground(ws, bkgWorkspace, bkgScaling, wsNames, wsCleanup):
+    '''
+    Subtracts a scaled flat background from a workspace.
+    '''
+    subtractedWSName = wsNames.withSuffix('background_subtracted')
+    scaledBkgWSName = wsNames.withSuffix('flat_background_scaled')
+    Scale(InputWorkspace = bkgWorkspace,
+          OutputWorkspace = scaledBkgWSName,
+          Factor = bkgScaling)
+    subtractedWS = Minus(LHSWorkspace=ws,
+                      RHSWorkspace=scaledBkgWSName,
+                      OutputWorkspace=subtractedWSName)
+    wsCleanup.cleanup(scaledBkgWSName)
+    return subtractedWS
+
+def _findEPP(ws, wsType, wsNames):
+    '''
+    Returns EPP table for a workspace.
+    '''
+    if wsType == WS_CONTENT_DETECTORS:
+        eppWSName = wsNames.withSuffix('epp_detectors')
+    else:
+        eppWSName = wsNames.withSuffix('epp_monitors')
+    eppWS = FindEPP(InputWorkspace = ws,
+                    OutputWorkspace = eppWSName)
+    return eppWS
+
+def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup):
+    '''
+    Returns a diagnostics workspace.
+    '''
+    # 1. Detectors with zero counts.
+    zeroCountWSName = wsNames.withSuffix('diagnostics_zero_counts')
+    zeroCountDiagnostics, nFailures = FindDetectorsOutsideLimits(InputWorkspace=ws,
+                                                                 OutputWorkspace=zeroCountWSName)
+    # 2. Detectors with high background.
+    noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_background')
+    noisyBkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWS,
+                                                        OutputWorkspace=noisyBkgWSName,
+                                                        LowThreshold=0.0,
+                                                        HighThreshold=10,
+                                                        LowOutlier=0.0)
+    combinedDiagnosticsWSName = wsNames.withSuffix('diagnostics')
+    diagnosticsWS = Plus(LHSWorkspace=zeroCountDiagnostics,
+                         RHSWorkspace=noisyBkgDiagnostics,
+                         OutputWorkspace=combinedDiagnosticsWSName)
+    wsCleanup.cleanup(zeroCountWSName)
+    wsCleanup.cleanup(noisyBkgWSName)
+    return diagnosticsWS
+
+def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames):
+    '''
+    Mask detectors according to diagnostics.
+    '''
+    maskedWSName = wsNames.withSuffix('diagnostics_applied')
+    maskedWS = CloneWorkspace(InputWorkspace=ws,
+                              OutputWorkspace=maskedWSName)
+    MaskDetectors(Workspace=maskedWS,
+                  MaskedWorkspace=diagnosticsWS)
+    return maskedWS
+
+def _applyUserMask(ws, mask, indexType, wsNames):
+    '''
+    Applies mask.
+    '''
+    maskedWSName = wsNames.withSuffix('masked')
+    maskedWorkspace = CloneWorkspace(InputWorkspace = ws,
+                                     OutputWorkspace = maskedWSName)
+    if indexType == INDEX_TYPE_DETECTOR_ID:
+        MaskDetectors(Workspace=maskedWorkspace,
+                      DetectorList=mask)
+    elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
+        MaskDetectors(Workspace=maskedWorkspace,
+                      SpectraList=mask)
+    elif indexType == INDEX_TYPE_WORKSPACE_INDEX:
+        MaskDetectors(Workspace=maskedWorkspace,
+                      WorkspaceIndexList=mask)
+    else:
+        raise RuntimeError('Unknown ' + PROP_INDEX_TYPE)
+    return maskedWorkspace
+
+def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace, indexType, eiCalibrationDets, eiCalibrationMon, wsNames, log):
+    '''
+    Returns the calibrated incident energy.
+    '''
+    instrument = detWorkspace.getInstrument().getName()
+    eiWorkspace = None
+    if instrument in ['IN4', 'IN6']:
+        pulseInterval = detWorkspace.getRun().getLogData('pulse_interval').value
+        energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
+                             DetectorEPPTable=detEPPWorkspace,
+                             IndexType=indexType,
+                             Detectors=eiCalibrationDets,
+                             MonitorWorkspace=monWorkspace,
+                             MonitorEppTable=monEPPWorkspace,
+                             Monitor=eiCalibrationMon,
+                             PulseInterval=pulseInterval)
+        eiWSName = wsNames.withSuffix('incident_energy')
+        eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,
+                                                  DataValue=energy)
+    else:
+        log.error('Instrument ' + instrument + ' not supported for incident energy calibration')
+    return eiWorkspace
+
+def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames):
+    '''
+    Updates incident energy and wavelength in the sample logs.
+    '''
+    energy = eiWS.readY(0)[0]
+    if wsType == WS_CONTENT_DETECTORS:
+        calibratedWSName = wsNames.withSuffix('incident_energy_calibrated_detectors')
+    elif wsType == WS_CONTENT_MONITORS:
+        calibratedWSName = wsNames.withSuffix('incident_energy_calibrated_monitors')
+    else:
+        raise RuntimeError('Unknown workspace content type')
+    calibratedWS = CloneWorkspace(InputWorkspace=ws,
+                                  OutputWorkspace=calibratedWSName)
+    AddSampleLog(Workspace=calibratedWS,
+                 LogName='Ei',
+                 LogText=str(energy),
+                 LogType='Number',
+                 NumberType='Double',
+                 LogUnit='meV')
+    wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
+    AddSampleLog(Workspace=calibratedWS,
+                 Logname='wavelength',
+                 LogText=str(wavelength),
+                 LogType='Number',
+                 NumberType='Double',
+                 LogUnit='Ångström')
+    return calibratedWS
+
+def _normalizeToMonitor(ws, monWS, monEPPWS, monIndex, wsNames, wsCleanup):
+    '''
+    Normalizes to monitor counts.
+    '''
+    normalizedWSName = wsNames.withSuffix('normalized_to_monitor')
+    normalizationFactorWsName = wsNames.withSuffix('normalization_factor_monitor')
+    eppRow = monEPPWS.row(monIndex)
+    sigma = eppRow['Sigma']
+    centre = eppRow['PeakCentre']
+    begin = centre - 3 * sigma
+    end = centre + 3 * sigma
+    normalizedWS, normalizationFactorWS = NormaliseToMonitor(InputWorkspace=ws,
+                                                             OutputWorkspace=normalizedWSName,
+                                                             MonitorWorkspace=monWS,
+                                                             MonitorWorkspaceIndex=monIndex,
+                                                             IntegrationRangeMin=begin,
+                                                             IntegrationRangeMax=end,
+                                                             NormFactorWS=normalizationFactorWsName)
+    wsCleanup.cleanup(normalizationFactorWS)
+    return normalizedWS
+
+def _normalizeToTime(ws, wsNames, wsCleanup):
+    '''
+    Normalizes to 'actual_time' sample log.
+    '''
+    normalizedWSName = wsNames.withSuffix('normalized_to_time')
+    normalizationFactorWsName = wsNames.withSuffix('normalization_factor_time')
+    time = inWs.getLogData('actual_time').value
+    normalizationFactorWS = CreateSingleValuedWorkspace(OutputWorkspace=normalizationFactorWsName,
+                                                        DataValue = time)
+    normalizedWS = Divide(LHSWorkspace=ws,
+                          RHSWorkspace=normalizationFactorWS,
+                          OutputWorkspace=normalizedWSName)
+    wsCleanup.cleanup(normalizationFactorWS)
+    return normalizedWS
+
+def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup):
+    '''
+    Subtracts cadmium corrected emtpy can.
+    '''
+    # out = (in - Cd) / transmission - (EC - Cd)
+    transmissionWSName = wsNames.withSuffix('transmission')
+    transmissionWS = CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
+                                                 DataValue=transmission)
+    cdSubtractedECWSName = wsNames.withSuffix('Cd_subtracted_EC')
+    cdSubtractedECWS = Minus(LHSWorkspace=ecWS,
+                             RHSWorkspace=cdWS,
+                             OutputWorkspace=cdSubtractedECWSName)
+    cdSubtractedWSName = wsNames.withSuffix('Cd_subtracted')
+    cdSubtractedWS = Minus(LHSWorkspace=ws,
+                           RHSWorkspace=cdWS,
+                           OutputWorkspace=cdSubtractedWSName)
+    correctedCdSubtractedWsName = wsNames.withSuffix('transmission_corrected_Cd_subtracted')
+    correctedCdSubtractedWS = Divide(LHSWorkspace=cdSubtractedWS,
+                                     RHSWorkspace=transmissionWS,
+                                     OutputWorkspace=correctedCdSubtractedWSName)
+    ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
+    ecSubtractedWS = Minus(LHSWorkspace=correctedCdSubtractedWS,
+                           RHSWorkspace=cdSubtractedECWS,
+                           OutputWorkspace=ecSubtractedWSName)
+    wsCleanup.cleanup(cdSubtractedECWS,
+                      cdSubtractedWS,
+                      correctedCdSubtractedWS)
+    return ecSubtractedWS
+
+
+def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup):
+    '''
+    Subtracts empty can.
+    '''
+    # out = in - transmission * EC
+    transmissionWSName = wsNames.withSuffix('transmission')
+    transmissionWS = CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
+                                                 DataValue=transmission)
+    correctedECWSName = wsNames.withSuffix('transmission_corrected_EC')
+    correctedECWS = Multiply(LHSWorkspace=ecWS,
+                             RHSWorkspace=transmissionWS,
+                             OutputWorkspace=correctedECWSName)
+    ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
+    ecSubtractedWS = Minus(LHSWorkspace=ws,
+                           RHSWorkspace=correctedECWS,
+                           OutputWorkspace=ecSubtractedWSName)
+    wsCleanup.cleanup(transmissionWS)
+    wsCleanup.cleanup(correctedECWS)
+    return ecSubtractedWS
+
+def _normalizeToVanadium(ws, vanaWS, wsNames):
+    '''
+    Normalizes to vanadium workspace.
+    '''
+    vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
+    vanaNormalizedWS = Divide(LHSWorkspace=ws,
+                              RHSWorkspace=vanaWS,
+                              OutputWorkspace=vanaNormalizedWSName)
+    return vanaNormalizedWS
+
+def _convertTOFToDeltaE(ws, wsNames):
+    '''
+    Converts the X units from time-of-flight to energy transfer.
+    '''
+    energyConvertedWSName = wsNames.withSuffix('energy_converted')
+    energyConvertedWS = ConvertUnits(InputWorkspace = ws,
+                                     OutputWorkspace = energyConvertedWSName,
+                                     Target = 'DeltaE',
+                                     EMode = 'Direct')
+    return energyConvertedWS
+
+def _rebin(ws, params, wsNames):
+    '''
+    Rebins a workspace.
+    '''
+    rebinnedWSName = wsNames.withSuffix('rebinned')
+    rebinnedWS = Rebin(InputWorkspace = ws,
+                       OutputWorkspace = rebinnedWSName,
+                       Params = params)
+    return rebinnedWS
+
+def _correctByKiKf(ws, wsNames):
+    '''
+    Applies the k_i / k_f correction.
+    '''
+    correctedWSName = wsNames.withSuffix('kikf')
+    correctedWS = CorrectKiKf(InputWorkspace = ws,
+                              OutputWorkspace = correctedWSName)
+    return correctedWS
+
+def _correctByDetectorEfficiency(ws, wsNames):
+    correctedWSName = wsNames.withSuffix('detector_efficiency_corrected')
+    correctedWS = DetectorEfficiencyCorUser(InputWorkspace = ws,
+                                            OutputWorkspace = correctedWSName)
+    return correctedWS
+
 
 class DirectILLReduction(DataProcessorAlgorithm):
 
@@ -126,392 +488,262 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
-        workspaceNamePrefix = self.getProperty(PROP_OUTPUT_WORKSPACE).valueAsStr
+        wsNamePrefix = self.getProperty(PROP_OUTPUT_WORKSPACE).valueAsStr
         cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
-        wsNames = NameSource(workspaceNamePrefix, cleanupMode)
+        wsNames = NameSource(wsNamePrefix, cleanupMode)
         wsCleanup = IntermediateWsCleanup(cleanupMode)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
-        # The variable 'workspace' shall hold the current 'main' data
+        # The variable 'mainWS' shall hold the current main data
         # throughout the algorithm.
-        if self.getProperty(PROP_INPUT_FILE).value:
-            # Load data
-            inputFilename = self.getProperty(PROP_INPUT_FILE).value
-            outWs = wsNames.withSuffix('raw')
-            wsCleanup.toBeCleanedUp(outWs)
+
+        # Init workspace.
+        inputFile = self.getProperty(PROP_INPUT_FILE).value
+        if inputFile:
             eppReference = self.getProperty(PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
-            if eppReference:
-                if mtd.doesExist(str(eppReference)):
-                    workspace = Load(Filename=inputFilename,
-                                     OutputWorkspace=outWs,
-                                     WorkspaceVanadium=eppReference)
-                else:
-                    workspace = Load(Filename=inputFilename,
-                                     OutputWorkspace=outWs,
-                                     FilenameVanadium=eppReference)
-            else:
-                # For multiple files, we need an EPP reference workspace
-                # anyway, so we'll use the first file the user wants to
-                # load.
-                head, tail = path.split(inputFilename)
-                # Loop over known MultipleFileProperty file list
-                # specifiers.
-                for separator in [':', ',', '-', '+']:
-                    referenceFilename, sep, rest = tail.partition(separator)
-                    if referenceFilename:
-                        break;
-                if referenceFilename:
-                    referenceFilename = path.join(head, referenceFilename)
-                    self.log().information('Using ' + referenceFilename + ' as initial EPP reference.')
-                    outWsName = wsNames.withSuffix('initial_epp_reference')
-                    wsCleanup.toBeCleanedUp(outWsName)
-                    referenceWs = Load(Filename=referenceFilename,
-                                       OutputWorkspace=outWsName)
-                    workspace = Load(Filename=inputFilename,
-                                     OutputWorkspace=outWs,
-                                     WorkspaceVanadium=referenceWs)
-                else:
-                    # Single file, no EPP reference.
-                    workspace = Load(Filename=inputFilename,
-                                     OutputWorkspace=outWs)
-            # Now merge the loaded files (if required)
-            outWsName = wsNames.withSuffix('merged')
-            wsCleanup.protect(outWsName)
-            workspace = MergeRuns(InputWorkspaces=workspace,
-                                  OutputWorkspace=outWsName)
+            mainWS = _loadFiles(inputFile,
+                                   eppReference,
+                                   wsNames,
+                                   wsCleanup,
+                                   self.log())
         elif self.getProperty(PROP_INPUT_WORKSPACE).value:
-            workspace = self.getProperty(PROP_INPUT_WORKSPACE).value
-        wsCleanup.cleanup()
+            mainWS = self.getProperty(PROP_INPUT_WORKSPACE).value
 
         # Extract monitors to a separate workspace
-        wsCleanup.resetProtected()
-        outWsName = wsNames.withSuffix('extracted_detectors')
-        wsCleanup.protect(outWsName)
-        monitorWorkspace = wsNames.withSuffix('extracted_monitors')
-        wsCleanup.protect(monitorWorkspace)
-        workspace, monitorWorkspace = ExtractMonitors(InputWorkspace=workspace,
-                                                      DetectorWorkspace=outWsName,
-                                                      MonitorWorkspace=monitorWorkspace)
+        detectorWorkspace, monitorWorkspace = _extractMonitorWs(mainWS,
+                                                                wsNames)
         monitorIndex = self.getProperty(PROP_MONITOR_INDEX).value
-        monitorIndex = self._convertToWorkspaceIndex(monitorIndex, monitorWorkspace)
-        wsCleanup.cleanup()
+        monitorIndex = self._convertToWorkspaceIndex(monitorIndex,
+                                                     monitorWorkspace)
+        wsCleanup.cleanup(mainWS)
+        mainWS = detectorWorkspace
+        del(detectorWorkspace)
+        wsCleanup.cleanupLater(monitorWorkspace)
 
-        # Fit time-independent background
+        # Time-independent background
         # ATM monitor background is ignored
-        bkgInWs = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
-        bkgOutWs = self.getPropertyValue(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE)
-        # Fit background regardless of where it actually comes from.
-        if bkgOutWs or not bkgInWs:
-            if not bkgOutWs:
-                bkgOutWs = wsNames.withSuffix('flat_backgrounds')
-                wsCleanup.protect(bkgOutWs)
-            bkgWindow = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
-            bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
-            bkgWorkspace = CalculateFlatBackground(InputWorkspace=workspace,
-                                                   OutputWorkspace=bkgOutWs,
-                                                   Mode='Moving Average',
-                                                   OutputMode='Return Background',
-                                                   SkipMonitors=False,
-                                                   NullifyNegativeValues=False,
-                                                   AveragingWindowWidth=bkgWindow)
-            bkgWorkspace = Scale(InputWorkspace = bkgWorkspace,
-                                 OutputWorkspace = bkgWorkspace,
-                                 Factor = bkgScaling)
-            if self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).value:
-                self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
-        if bkgInWs:
-            bkgWorkspace = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
-            if bkgWorkspace and self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).value:
-                self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
-        # Subtract time-independent background
-        outWs = wsNames.withSuffix('background_subtracted')
-        wsCleanup.protect(outWs)
-        workspace = Minus(LHSWorkspace=workspace,
-                          RHSWorkspace=bkgWorkspace,
-                          OutputWorkspace=outWs)
-        wsCleanup.cleanup()
+        bkgInWS = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
+        if not bkgInWS:
+            windowWidth = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
+            bkgWorkspace = _createFlatBackground(mainWS, 
+                                                 windowWidth,
+                                                 wsNames)
+        else:
+            bkgWorkspace = bkgInWS
+            wsCleanup.protect(bkgWorkspace)
+        if not self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).isDefault:
+            self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgWorkspace)
+        # Subtract the time-independent background.
+        bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
+        bkgSubtractedWorkspace = _subtractFlatBackground(mainWS,
+                                                         bkgWorkspace,
+                                                         bkgScaling,
+                                                         wsNames,
+                                                         wsCleanup)
+        wsCleanup.cleanup(mainWS)
+        mainWS = bkgSubtractedWorkspace
+        del(bkgSubtractedWorkspace)
+        wsCleanup.cleanupLater(bkgWorkspace)
 
-        # Find elastic peak positions
-        eppInWs = self.getProperty(PROP_EPP_WORKSPACE).value
-        monitorEppInWs = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
-        eppOutWs = self.getPropertyValue(PROP_OUTPUT_EPP_WORKSPACE)
-        monitorEppOutWs = self.getPropertyValue(PROP_OUTPUT_MONITOR_EPP_WORKSPACE)
-        # Same as with time-independent backgrounds: the EPP table may
-        # came from outside. Otherwise make our own.
-        if not eppInWs:
-            if not eppOutWs:
-                eppOutWs = wsNames.withSuffix('epp')
-                wsCleanup.protect(eppOutWs)
-            if not monitorEppOutWs:
-                monitorEppOutWs = wsNames.withSuffix('monitor_epp')
-                wsCleanup.protect(monitorEppOutWs)
-            eppWorkspace = FindEPP(InputWorkspace = workspace,
-                                   OutputWorkspace = eppOutWs)
-            monitorEppWorkspace = FindEPP(InputWorkspace = monitorWorkspace,
-                                          OutputWorkspace = monitorEppOutWs)
-            if self.getPropertyValue(PROP_OUTPUT_EPP_WORKSPACE):
-                self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppWorkspace)
-            if self.getPropertyValue(PROP_OUTPUT_MONITOR_EPP_WORKSPACE):
-                self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, monitorEppWorkspace)
-        if eppInWs:
-            eppWorkspace = self.getProperty(PROP_EPP_WORKSPACE).value
-            monitorEppWorkspace = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
-        wsCleanup.cleanup()
+        # Find elastic peak positions for detectors.
+        detectorEPPInWS = self.getProperty(PROP_EPP_WORKSPACE).value
+        if not detectorEPPInWS:
+            detectorEPPWS = _findEPP(mainWS,
+                                     WS_CONTENT_DETECTORS,
+                                     wsNames)
+        else:
+            detectorEPPWS = detectorInWS
+            wsCleanup.protect(detectorEPPWS)
+        if not self.getProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE).isDefault:
+            self.setProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE,
+                             detectorEPPWS)
+        # Elastic peaks for monitors
+        monitorEPPInWS = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
+        if not monitorEPPInWS:
+            monitorEPPWS = _findEPP(mainWS,
+                                    WS_CONTENT_MONITORS,
+                                    wsNames)
+        else:
+            monitorEPPWS = monitorInWS
+            wsCleanup.protect(monitorEPPWS)
+        if not self.getProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE).isDefault:
+            self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
+                             monitorEPPWS)
+        wsCleanup.cleanupLater(detectorEPPWS, monitorEPPWS)
 
         # Detector diagnostics, if requested.
         if self.getProperty(PROP_DETECTOR_DIAGNOSTICS).value == DIAGNOSTICS_YES:
-            diagnosticsWs = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
-            # No input diagnostics workspace? Diagnose!
-            if not diagnosticsWs:
-                # 1. Detectors with zero counts.
-                outWsName = wsNames.withSuffix('diagnostics_zero_counts')
-                wsCleanup.toBeCleanedUp(outWsName)
-                zeroCountDiagnostics, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
-                                                                             OutputWorkspace=outWsName)
-                # 2. Detectors with high background
-                outWsName = wsNames.withSuffix('diagnostics_spurious_background')
-                wsCleanup.toBeCleanedUp(outWsName)
-                bkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWorkspace,
-                                                               OutputWorkspace=outWsName,
-                                                               LowThreshold=0.0,
-                                                               HighThreshold=10,
-                                                               LowOutlier=0.0)
-                outWsName = wsNames.withSuffix('diagnostics')
-                wsCleanup.toBeCleanedUp(outWsName)
-                diagnosticsWs = Plus(LHSWorkspace=zeroCountDiagnostics,
-                                     RHSWorkspace=bkgDiagnostics,
-                                     OutputWorkspace=outWsName)
-            # Mask detectors identified as bad.
-            outWsName = wsNames.withSuffix('diagnostics_applied')
-            wsCleanup.protect(outWsName)
-            workspace = CloneWorkspace(InputWorkspace=workspace,
-                                       OutputWorkspace=outWsName)
-            MaskDetectors(Workspace=workspace,
-                          MaskedWorkspace=diagnosticsWs)
-            # Save output if desired.
+            diagnosticsInWS = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
+            if not diagnosticsInWS:
+                diagnosticsWS = _diagnoseDetectors(mainWS, bkgWorkspace, wsNames, wsCleanup)
+            else:
+                diagnosticsWS = diagnosticsInWS
+                wsCleanup.protect(diagnosticsWS)
             if not self.getProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE).isDefault:
-                self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE, diagnosticsWs)
+                self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE, diagnosticsWS)
+            diagnosedWorkspace = _maskDiagnosedDetectors(mainWS,
+                                                         diagnosticsWS,
+                                                         wsNames)
+            wsCleanup.cleanup(diagnosticsWS)
+            del(diagnosticsWS)
+            wsCleanup.cleanup(mainWS)
+            mainWS = diagnosedWorkspace
+            del(diagnosedWorkspace)
         # Apply user mask.
         userMask = self.getProperty(PROP_USER_MASK).value
-        if indexType == INDEX_TYPE_DETECTOR_ID:
-            MaskDetectors(Workspace=workspace,
-                          DetectorList=userMask)
-        elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
-            MaskDetectors(Workspace=workspace,
-                          SpectraList=userMask)
-        elif indexType == INDEX_TYPE_WORKSPACE_INDEX:
-            MaskDetectors(Workspace=workspace,
-                          WorkspaceIndexList=userMask)
-        else:
-            raise RuntimeError('Unknown ' + PROP_INDEX_TYPE)
-        wsCleanup.cleanup()
+        maskedWorkspace = _applyUserMask(mainWS, 
+                                         userMask,
+                                         indexType,
+                                         wsNames)
+        wsCleanup.cleanup(mainWS)
+        mainWS = maskedWorkspace
+        del(maskedWorkspace)
 
-        # Get calibrated incident energy from somewhere
-        # It should come from the same place as the epp workspace.
-        # Or should it?
+        # Get calibrated incident energy
         eiCalibration = self.getProperty(PROP_INCIDENT_ENERGY_CALIBRATION).value
         if eiCalibration == INCIDENT_ENERGY_CALIBRATION_YES:
-            instrument = workspace.getInstrument().getName()
-            eiWs = self.getProperty(PROP_INCIDENT_ENERGY_WORKSPACE).value
-            if not eiWs and instrument in ['IN4', 'IN6']:
+            eiInWS = self.getProperty(PROP_INCIDENT_ENERGY_WORKSPACE).value
+            if not eiInWS:
                 eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
-                pulseInterval = workspace.getRun().getLogData('pulse_interval').value
-                energy = GetEiMonDet(DetectorWorkspace=workspace,
-                                     DetectorEPPTable=eppWorkspace,
-                                     IndexType=indexType,
-                                     Detectors=eiCalibrationDets,
-                                     MonitorWorkspace=monitorWorkspace,
-                                     MonitorEppTable=monitorEppWorkspace,
-                                     Monitor=monitorIndex,
-                                     PulseInterval=pulseInterval)
-                eiWsName = wsNames.withSuffix('incident_energy')
-                wsCleanup.toBeCleanedUp(eiWsName)
-                eiWs = CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
-                                                   DataValue=energy)
+                eiCalibrationWS = _calibratedIncidentEnergy(mainWS,
+                                                            detectorEPPWS,
+                                                            monitorWorkspace,
+                                                            monitorEPPWS,
+                                                            indexType,
+                                                            eiCalibrationDets,
+                                                            monitorIndex,
+                                                            wsNames,
+                                                            self.log())
             else:
-                self.log().error('Instrument ' + instrument + ' not supported for incident energy calibration')
-            if eiWs:
-                # Update incident energy
-                energy = mtd[eiWsName].readY(0)[0]
-                outWs = wsNames.withSuffix('incident_energy_calibrated')
-                wsCleanup.protect(outWs)
-                workspace = CloneWorkspace(InputWorkspace=workspace,
-                                           OutputWorkspace=outWs)
-                AddSampleLog(Workspace=workspace,
-                             LogName='Ei',
-                             LogText=str(energy),
-                             LogType='Number',
-                             NumberType='Double',
-                             LogUnit='meV')
-                wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
-                AddSampleLog(Workspace=workspace,
-                             Logname='wavelength',
-                             LogText=str(wavelength),
-                             LogType='Number',
-                             NumberType='Double',
-                             LogUnit='Ångström')
-                if not self.getProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE).isDefault:
-                    self.setProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE, eiWs)
-        wsCleanup.cleanup()
+                eiCalibrationWS = eiInWS
+                wsCleanup.protect(eiCalibrationWS)
+            if eiCalibrationWS:
+                eiCalibratedDetWS = _applyIncidentEnergyCalibration(mainWS,
+                                                                    WS_CONTENT_DETECTORS,
+                                                                    eiCalibrationWS,
+                                                                    wsNames)
+                wsCleanup.cleanup(mainWS)
+                mainWS = eiCalibratedDetWS
+                del(eiCalibratedDetWS)
+                eiCalibratedMonWS = _applyIncidentEnergyCalibration(monitorWorkspace,
+                                                                    WS_CONTENT_MONITORS,
+                                                                    eiCalibrationWS,
+                                                                    wsNames)
+                wsCleanup.cleanup(monitorWorkspace)
+                monitorWorkspace = eiCalibratedMonWS
+                del(eiCalibratedMonWS)
+            if not self.getProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE).isDefault:
+                self.setProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE, eiCalibrationWS)
+            wsCleanup.cleanup(eiCalibrationWS)
+            del(eiCalibrationWS)
 
         # Normalisation to monitor/time
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
         if normalisationMethod:
             if normalisationMethod == NORM_METHOD_MONITOR:
-                outWs = wsNames.withSuffix('normalized_to_monitor')
-                wsCleanup.protect(outWs)
-                normFactorWsName = wsNames.withSuffix('monitor_normalization')
-                wsCleanup.toBeCleanedUp(normFactorWsName)
-                eppRow = monitorEppWorkspace.row(monitorIndex)
-                sigma = eppRow['Sigma']
-                centre = eppRow['PeakCentre']
-                begin = centre - 3 * sigma
-                end = centre + 3 * sigma
-                workspace, normFactor = NormaliseToMonitor(InputWorkspace=workspace,
-                                                           OutputWorkspace=outWs,
-                                                           MonitorWorkspace=monitorWorkspace,
-                                                           MonitorWorkspaceIndex=monitorIndex,
-                                                           IntegrationRangeMin=begin,
-                                                           IntegrationRangeMax=end,
-                                                           NormFactorWS=normFactorWsName)
+                normalizedWS = _normalizeToMonitor(mainWS,
+                                                   monitorWorkspace,
+                                                   monitorEPPWS,
+                                                   monitorIndex,
+                                                   wsNames,
+                                                   wsCleanup)
             elif normalisationMethod == NORM_METHOD_TIME:
-                outWs = wsNames.withSuffix('normalized_to_time')
-                wsCleanup.protect(outWs)
-                normFactorWsName=wsNames.withSuffix('time_normalization')
-                wsCleanup.toBeCleanedUp(normFactorWsName)
-                time = CreateSingleValuedWorkspace(OutputWorkspace=normFactorWsName,
-                                                   DataValue=inWs.getLogData('actual_time').value)
-                workspace = Divide(LHSWorkspace=workspace,
-                                   RHSWorkspace=time,
-                                   OutputWorkspace=outWs)
+                normalizedWS = _normalizeToTime(mainWS,
+                                                wsNames,
+                                                wsCleanup)
             else:
                 raise RuntimeError('Unknonwn normalisation method ' + normalisationMethod)
-        wsCleanup.cleanup()
+            wsCleanup.cleanup(mainWS)
+            mainWS = normalizedWS
+            del(normalizedWS)
 
         # Reduction for empty can and cadmium ends here.
         if reductionType == REDUCTION_TYPE_CD or reductionType == REDUCTION_TYPE_EC:
-            self._finalize(workspace, wsCleanup)
+            self._finalize(mainWS, wsCleanup)
             return
 
         # Continuing with vanadium and sample reductions.
 
         # Empty can subtraction
-        ecWs = self.getProperty(PROP_EC_WORKSPACE).value
-        if ecWs:
-            outWs = wsNames.withSuffix('EC_subtracted')
-            wsCleanup.protect(outWs)
-            cdWs = self.getProperty(PROP_CD_WORKSPACE).value
+        ecInWS = self.getProperty(PROP_EC_WORKSPACE).value
+        if ecInWS:
+            cdInWS = self.getProperty(PROP_CD_WORKSPACE).value
             transmission = self.getProperty(PROP_TRANSMISSION).value
-            transmissionWsName = wsNames.withSuffix('transmission')
-            wsCleanup.toBeCleanedUp(transmissionWsName)
-            transmission = CreateSingleValuedWorkspace(OutputWorkspace=transmissionWsName,
-                                                       DataValue=transmission)
-            # If Cd, calculate
-            # out = (in - Cd) / transmission - (EC - Cd)
-            if cdWs:
-                cdSubtractedEcWsName = wsNames.withSuffix('Cd_subtracted_EC')
-                wsCleanup.toBeCleanedUp(cdSubtractedEcWsName)
-                ecWs = Minus(LHSWorkspace=ecWs,
-                             RHSWorkspace=cdWs,
-                             OutputWorkspace=cdSubtractedEcWsName)
-                cdSubtractedWsName = wsNames.withSuffix('Cd_subtracted')
-                wsCleanup.toBeCleanedUp(cdSubtractedWsName)
-                workspace = Minus(LHSWorkspace=workspace,
-                                  RHSWorkspace=cdWs,
-                                  OutputWorkspace=cdSubtractedWsName)
-                correctedCdSubtractedWsName = wsNames.withSuffix('transmission_corrected_Cd_subtracted')
-                wsCleanup.toBeCleanedUp(correctedCdSubtractedWsName)
-                workspace = Divide(LHSWorkspace=workspace,
-                                   RHSWorkspace=transmission,
-                                   OutputWorkspace=correctedCdSubtractedWsName)
-                ecSubtractedWsName = wsNames.withSuffix('EC_subtracted')
-                wsCleanup.toBeCleanedUp(ecSubtractedWsName)
-                workspace = Minus(LHSWorkspace=workspace,
-                                  RHSWorkspace=ecWs,
-                                  OutputWorkspace=ecSubtractedWsName)
-            # If no Cd, calculate
-            # out = in - transmission * EC
+            if cdInWS:
+                ecSubtractedWS = _subtractECWithCd(mainWS,
+                                                   ecInWS,
+                                                   cdInWS,
+                                                   transmission,
+                                                   wsNames,
+                                                   wsCleanup)
             else:
-                correctedEcWsName = wsNames.withSuffix('transmission_corrected_EC')
-                wsCleanup.toBeCleanedUp(correctedEcWsName)
-                ecWs = Multiply(LHSWorkspace=ecWs,
-                                RHSWorkspace=transmission,
-                                OutputWorkspace=correctedEcWsName)
-                ecSubtractedWsName = wsNames.withSuffix('EC_subtracted')
-                wsCleanup.protect(ecSubtractedWsName)
-                workspace = Minus(LHSWorkspace=workspace,
-                                  RHSWorkspace=ecWs,
-                                  OutputWorkspace=ecSubtractedWsName)
-        wsCleanup.cleanup()
+                ecSubtractedWS = _subtractEC(mainWS,
+                                             ecInWS,
+                                             transmission,
+                                             wsNames,
+                                             wsCleanup)
+            wsCleanup.cleanup(mainWS)
+            mainWS = ecSubtractedWS
+            del(ecSubtractedWS)
 
         # Reduction for vanadium ends here.
         if reductionType == REDUCTION_TYPE_VANADIUM:
             # We output an integrated vanadium, ready to be used for
             # normalization.
-            outWs = self.getPropertyValue(PROP_OUTPUT_WORKSPACE)
+            outWS = self.getPropertyValue(PROP_OUTPUT_WORKSPACE)
             # TODO For the time being, we may just want to integrate
             # the vanadium data as `ComputeCalibrationCoef` does not do
             # the best possible Debye-Waller correction.
-            workspace = ComputeCalibrationCoefVan(VanadiumWorkspace=workspace,
-                                                  EPPTable=eppWorkspace,
-                                                  OutputWorkspace=outWs)
-            self._finalize(workspace, wsCleanup)
+            mainWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
+                                                  EPPTable=detectorEPPWS,
+                                                  OutputWorkspace=outWS)
+            self._finalize(mainWS, wsCleanup)
             return
 
         # Continuing with sample reduction.
 
-        # Vanadium normalisation
-        vanadiumNormFactors = self.getProperty(PROP_VANADIUM_WORKSPACE).value
-        if vanadiumNormFactors:
-            wsCleanup.resetProtected()
-            outWs = wsNames.withSuffix('vanadium_normalized')
-            wsCleanup.protect(outWs)
-            workspace = Divide(LHSWorkspace=workspace,
-                               RHSWorkspace=vanadiumNormFactors,
-                               OutputWorkspace=outWs)
-        wsCleanup.cleanup()
+        # Vanadium normalization.
+        # TODO Absolute normalization.
+        vanaWS = self.getProperty(PROP_VANADIUM_WORKSPACE).value
+        if vanaWS:
+            vanaNormalizedWS = _normalizeToVanadium(mainWS,
+                                                    vanaWS,
+                                                    wsNames)
+            wsCleanup.cleanup(mainWS)
+            mainWS = vanaNormalizedWS
+            del(vanaNormalizedWS)
 
         # Convert units from TOF to energy
-        wsCleanup.resetProtected()
-        outWs = wsNames.withSuffix('energy_converted')
-        wsCleanup.protect(outWs)
-        workspace = ConvertUnits(InputWorkspace = workspace,
-                                 OutputWorkspace = outWs,
-                                 Target = 'DeltaE',
-                                 EMode = 'Direct')
-        wsCleanup.cleanup()
+        energyConvertedWS = _convertTOFToDeltaE(mainWS, wsNames)
+        wsCleanup.cleanup(mainWS)
+        mainWS = energyConvertedWS
+        del(energyConvertedWS)
 
         # KiKf conversion
-        wsCleanup.resetProtected()
-        outWs = wsNames.withSuffix('kikf')
-        wsCleanup.protect(outWs)
-        workspace = CorrectKiKf(InputWorkspace = workspace,
-                                OutputWorkspace = outWs)
-        wsCleanup.cleanup()
+        kikfCorrectedWS = _correctByKiKf(mainWS, wsNames)
+        wsCleanup.cleanup(mainWS)
+        mainWS = kikfCorrectedWS
+        del(kikfCorrectedWS)
 
         # Rebinning
         # TODO automatize binning in w. Do we need rebinning in q as well?
         params = self.getProperty(PROP_BINNING_W).value
         if params:
-            wsCleanup.resetProtected()
-            outWs = wsNames.withSuffix('rebinned')
-            wsCleanup.protect(outWs)
-            workspace = Rebin(InputWorkspace = workspace,
-                              OutputWorkspace = outWs,
-                              Params = params)
-        wsCleanup.cleanup()
+            rebinnedWS = _rebin(mainWS, params, wsNames)
+            wsCleanup.cleanup(mainWS)
+            mainWS = rebinnedWS
+            del(rebinnedWS)
 
         # Detector efficiency correction
-        wsCleanup.resetProtected()
-        outWs = wsNames.withSuffix('detector_efficiency_corrected')
-        wsCleanup.protect(outWs)
-        workspace = DetectorEfficiencyCorUser(InputWorkspace = workspace,
-                                              OutputWorkspace = outWs)
-        wsCleanup.cleanup()
+        efficiencyCorrectedWS = _correctByDetectorEfficiency(mainWS,
+                                                             wsNames)
+        wsCleanup.cleanup(mainWS)
+        mainWS = efficiencyCorrectedWS
+        del(efficiencyCorrectedWS)
 
         # TODO Self-shielding corrections
 
-        self._finalize(workspace, wsCleanup)
+        self._finalize(mainWS, wsCleanup)
 
     def PyInit(self):
         # TODO Property validation.
@@ -634,7 +866,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Rebinning in w')
         # Rest of the output properties.
-        self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_EPP_WORKSPACE,
+        self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE,
                              '',
                              direction=Direction.Output,
                              optional=PropertyMode.Optional),
@@ -674,22 +906,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         return issues
 
-    def _convertToWorkspaceIndex(self, i, workspace):
+    def _convertToWorkspaceIndex(self, i, ws):
         indexType = self.getProperty(PROP_INDEX_TYPE).value
         if indexType == INDEX_TYPE_WORKSPACE_INDEX:
             return i
         elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
-            return workspace.getIndexFromSpectrumNumber(i)
+            return ws.getIndexFromSpectrumNumber(i)
         else: # INDEX_TYPE_DETECTOR_ID
-            for j in range(workspace.getNumberHistograms()):
-                if workspace.getSpectrum(j).hasDetectorID(i):
+            for j in range(ws.getNumberHistograms()):
+                if ws.getSpectrum(j).hasDetectorID(i):
                     return j
             raise RuntimeError('No workspace index found for detector id {0}'.format(i))
 
-    def _finalize(self, outputWorkspace, cleanup):
-        self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
-        cleanup.resetProtected()
-        cleanup.cleanup()
-        self.log().debug('Finished')
+    def _finalize(self, outWS, wsCleanup):
+        self.setProperty(PROP_OUTPUT_WORKSPACE, outWS)
+        wsCleanup.finalCleanup()
 
 AlgorithmFactory.subscribe(DirectILLReduction)
