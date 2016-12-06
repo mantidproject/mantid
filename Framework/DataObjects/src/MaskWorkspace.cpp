@@ -1,6 +1,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
@@ -71,8 +72,7 @@ void MaskWorkspace::clearMask() {
   }
 
   // Clear the mask flags
-  Geometry::ParameterMap &pmap = this->instrumentParameters();
-  pmap.clearParametersByName("masked");
+  mutableDetectorInfo().clearMaskFlags();
 }
 
 /**
