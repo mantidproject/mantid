@@ -66,9 +66,9 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //=================================== Event Workspaces
   //===================================
 
-  def("CreateEventWorkspace", (EventWorkspace_sptr (*)())CreateEventWorkspace,
+  def("createEventWorkspace", (EventWorkspace_sptr (*)())createEventWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
-  def("CreateEventWorkspace2", &CreateEventWorkspace2,
+  def("createEventWorkspace2", &createEventWorkspace2,
       return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== Peak Workspaces

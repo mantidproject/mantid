@@ -454,7 +454,7 @@ private:
   }
 
   MatrixWorkspace_sptr createInputWorkspaceEvent() const {
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace(
         int(nSpec), int(nBins), 50, 0.0, 1., 2);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     ws->setInstrument(
@@ -716,9 +716,9 @@ public:
   }
 
   ExtractSpectraTestPerformance() {
-    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(40000, 10000);
+    input = WorkspaceCreationHelper::create2DWorkspaceBinned(40000, 10000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(40000, 10000, 2000);
+        WorkspaceCreationHelper::createEventWorkspace(40000, 10000, 2000);
   }
 
   void testExec2D() {

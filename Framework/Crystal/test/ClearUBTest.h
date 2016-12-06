@@ -32,7 +32,7 @@ private:
 
   // Helper method to create a matrix workspace.
   std::string createMatrixWorkspace(const bool withOrientedLattice = true) {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     if (withOrientedLattice) {
       OrientedLattice latt(1.0, 2.0, 3.0, 90, 90, 90);
       ws->mutableSample().setOrientedLattice(&latt);

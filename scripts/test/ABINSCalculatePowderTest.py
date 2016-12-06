@@ -4,7 +4,7 @@ from os import path
 import numpy as np
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of CalculatePowderTest because simplejson is unavailable.")
     exit(1)
@@ -22,15 +22,15 @@ from AbinsModules import CalculatePowder, LoadCASTEP
 
 class ABINSCalculatePowderTest(unittest.TestCase):
 
-    _core = "../ExternalData/Testing/Data/UnitTest/"  # path to files
+    _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")  # path to files
     _temperature = 10  # 10 K,  temperature for the benchmark
 
     # data
     # Use case: one k-point
-    C6H6 = path.relpath(_core + "benzene_CalculatePowder")
+    C6H6 = path.abspath(os.path.join(_core, "benzene_CalculatePowder"))
 
     #  Use case: many k-points
-    Si2 = path.relpath(_core + "Si2-sc_CalculatePowder")
+    Si2 = path.abspath(os.path.join(_core, "Si2-sc_CalculatePowder"))
 
     #     test input
     def test_wrong_input(self):

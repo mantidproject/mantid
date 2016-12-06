@@ -5,7 +5,7 @@ import numpy as np
 
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of CalculateDWCrystalTest because simplejson is unavailable.")
     exit(1)
@@ -21,15 +21,15 @@ from AbinsModules import CalculateDWCrystal, LoadCASTEP
 
 class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
-    _core = "../ExternalData/Testing/Data/UnitTest/"  # path to files
+    _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")  # path to files
     _temperature = 10  # 10 K,  temperature for the benchmark
 
     # data
     # Use case: one k-point
-    C6H6 = path.relpath(_core + "benzene_CalculateDWCrystal")
+    C6H6 = path.abspath(os.path.join(_core, "benzene_CalculateDWCrystal"))
 
     #  Use case: many k-points
-    Si2 = path.relpath(_core + "Si2-sc_CalculateDWCrystal")
+    Si2 = path.abspath(os.path.join(_core, "Si2-sc_CalculateDWCrystal"))
 
     # simple tests
     def test_wrong_input(self):

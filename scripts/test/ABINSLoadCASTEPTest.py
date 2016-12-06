@@ -5,7 +5,7 @@ import numpy as np
 
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of LoadCASTEPTest because simplejson is unavailable.")
     exit(1)
@@ -38,8 +38,9 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
 
     #  *************************** USE CASES ********************************************
-    _core = "../ExternalData/Testing/Data/UnitTest/"
-    # ===================================================================================
+    _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")  # hardcoded directory with testing files
+
+# ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
 
@@ -79,20 +80,25 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     def _check(self, core=None, name=None):
 
+        cwd = os.getcwd()
+
         # get calculated data
-        input_filename = path.relpath(core + name + ".phonon")
-        _data = self._read_DFT(filename=input_filename)
+        filename_unix = os.path.join(core, name + ".phonon")
+        input_filename = path.abspath(filename_unix)
+        input_filename = path.relpath(input_filename, cwd)
+
+        data = self._read_DFT(filename=input_filename)
 
         # get correct data
-        filename = path.relpath(core + name)
-        _correct_data = self._prepare_data(filename=filename)
+        filename = path.abspath(os.path.join(core, name))
+        filename = path.relpath(filename, cwd)
+        correct_data = self._prepare_data(filename=filename)
 
         # check read data
-        self._check_reader_data(correct_data=_correct_data, data=_data)
+        self._check_reader_data(correct_data=correct_data, data=data)
 
         # check loaded data
-
-        self._check_loader_data(correct_data=_correct_data, input_dft_filename=input_filename)
+        self._check_loader_data(correct_data=correct_data, input_dft_filename=input_filename)
 
     def _read_DFT(self, filename=None):
         """
@@ -101,14 +107,12 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         @return:
         """
         # 1) Read data
-        data = {}
+        castep_reader = LoadCASTEP(input_dft_filename=filename)
 
-        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename)
-
-        data = self._get_reader_data(castep_reader=_CASTEP_reader)
+        data = self._get_reader_data(castep_reader=castep_reader)
 
         # test validData method
-        self.assertEqual(True, _CASTEP_reader._valid_hash())
+        self.assertEqual(True, castep_reader._valid_hash())
 
         return data
 
@@ -136,23 +140,23 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     def _check_reader_data(self, correct_data=None, data=None):
 
         # check data
-        _correct_k_points = correct_data["datasets"]["k_points_data"]
-        _items = data["datasets"]["k_points_data"]
-        self.assertEqual(True, np.allclose(_correct_k_points["frequencies"], _items["frequencies"]))
-        self.assertEqual(True, np.allclose(_correct_k_points["atomic_displacements"], _items["atomic_displacements"]))
-        self.assertEqual(True, np.allclose(_correct_k_points["k_vectors"], _items["k_vectors"]))
-        self.assertEqual(True, np.allclose(_correct_k_points["weights"], _items["weights"]))
+        correct_k_points = correct_data["datasets"]["k_points_data"]
+        items = data["datasets"]["k_points_data"]
+        self.assertEqual(True, np.allclose(correct_k_points["frequencies"], items["frequencies"]))
+        self.assertEqual(True, np.allclose(correct_k_points["atomic_displacements"], items["atomic_displacements"]))
+        self.assertEqual(True, np.allclose(correct_k_points["k_vectors"], items["k_vectors"]))
+        self.assertEqual(True, np.allclose(correct_k_points["weights"], items["weights"]))
 
-        _correct_atoms = correct_data["datasets"]["atoms_data"]
-        _atoms = data["datasets"]["atoms_data"]
-        for item in range(len(_correct_atoms)):
+        correct_atoms = correct_data["datasets"]["atoms_data"]
+        atoms = data["datasets"]["atoms_data"]
+        for item in range(len(correct_atoms)):
 
-            self.assertEqual(_correct_atoms[item]["sort"], _atoms[item]["sort"])
-            self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
-            self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
-            self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]),
-                                               _atoms[item]["fract_coord"]))
+            self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
+            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)  # delta in Hartree units
+            self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
+            self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
+            self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
+                                               atoms[item]["fract_coord"]))
 
         # check attributes
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
@@ -168,45 +172,45 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(np.array(correct_data["datasets"]["k_points_data"][item]),
                                                data["datasets"]["k_points_data"][item]))
 
-        _correct_atoms = correct_data["datasets"]["atoms_data"]
-        _atoms = data["datasets"]["atoms_data"]
+        correct_atoms = correct_data["datasets"]["atoms_data"]
+        atoms = data["datasets"]["atoms_data"]
 
-        for item in range(len(_correct_atoms)):
+        for item in range(len(correct_atoms)):
 
-            self.assertEqual(_correct_atoms[item]["sort"], _atoms[item]["sort"])
-            self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
-            self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
-            self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]),
-                                               _atoms[item]["fract_coord"]))
+            self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
+            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)
+            self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
+            self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
+            self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
+                                               atoms[item]["fract_coord"]))
 
     def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
         loader = LoadCASTEP(input_dft_filename=input_dft_filename)
-        _loaded_data = loader.load_data().extract()
+        loaded_data = loader.load_data().extract()
 
         # k points
-        _correct_items = correct_data["datasets"]["k_points_data"]
-        num_k = len(_correct_items)
-        _items = _loaded_data["k_points_data"]
+        correct_items = correct_data["datasets"]["k_points_data"]
+        num_k = len(correct_items)
+        items = loaded_data["k_points_data"]
 
-        self.assertEqual(True, np.allclose(_correct_items["frequencies"], _items["frequencies"]))
-        self.assertEqual(True, np.allclose(_correct_items["atomic_displacements"], _items["atomic_displacements"]))
-        self.assertEqual(True, np.allclose(_correct_items["k_vectors"], _items["k_vectors"]))
-        self.assertEqual(True, np.allclose(_correct_items["weights"], _items["weights"]))
+        self.assertEqual(True, np.allclose(correct_items["frequencies"], items["frequencies"]))
+        self.assertEqual(True, np.allclose(correct_items["atomic_displacements"], items["atomic_displacements"]))
+        self.assertEqual(True, np.allclose(correct_items["k_vectors"], items["k_vectors"]))
+        self.assertEqual(True, np.allclose(correct_items["weights"], items["weights"]))
 
         # atoms
-        _correct_atoms = correct_data["datasets"]["atoms_data"]
-        _atoms = _loaded_data["atoms_data"]
+        correct_atoms = correct_data["datasets"]["atoms_data"]
+        atoms = loaded_data["atoms_data"]
 
-        for item in range(len(_correct_atoms)):
+        for item in range(len(correct_atoms)):
 
-            self.assertEqual(_correct_atoms[item]["sort"], _atoms[item]["sort"])
-            self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
-            self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
-            self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]),
-                                               _atoms[item]["fract_coord"]))
+            self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
+            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)
+            self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
+            self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
+            self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
+                                               atoms[item]["fract_coord"]))
 
     def _get_reader_data(self, castep_reader=None):
         abins_type_data = castep_reader.read_phonon_file()

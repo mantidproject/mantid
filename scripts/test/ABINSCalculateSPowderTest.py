@@ -5,7 +5,7 @@ import numpy as np
 from AbinsModules import AbinsConstants, AbinsParameters
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of CalculateSPowderTest because simplejson is unavailable.")
     exit(1)
@@ -31,13 +31,13 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _order_event = AbinsConstants.FUNDAMENTALS
 
     # data
-    core = "../ExternalData/Testing/Data/UnitTest/"
+    core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")
 
     squaricn = "squaricn_sum_CalculateSPowder"
     Si2 = "Si2-sc_CalculateSPowder"
 
-    Squaricn_path = path.relpath(core + squaricn)
-    Si2_path = path.relpath(core + Si2)
+    Squaricn_path = path.abspath(os.path.join(core, squaricn))
+    Si2_path = path.abspath(os.path.join(core, Si2))
 
     def remove_hdf_files(self):
         files = os.listdir(os.getcwd())

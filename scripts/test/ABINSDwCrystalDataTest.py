@@ -3,7 +3,7 @@ from mantid.simpleapi import *
 import numpy as np
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of DwCrystalDataTest  because simplejson is unavailable.")
     exit(1)

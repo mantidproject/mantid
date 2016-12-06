@@ -69,6 +69,29 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
   }
   return successfullyApplied;
 }
+
+/**
+* @brief loadAndApplyRunTitle
+* @param file : Nexus::File pointer
+* @param workspace : Pointer to the workspace to set logs on
+* @return True only if reading and execution successful.
+*/
+bool loadAndApplyRunTitle(::NeXus::File *const file,
+                          API::MatrixWorkspace &workspace) {
+
+  bool successfullyApplied = false;
+  try {
+    file->openData("title");
+    workspace.mutableRun().addLogData(
+        new Mantid::Kernel::PropertyWithValue<std::string>("run_title",
+                                                           file->getStrData()));
+    file->closeData();
+    successfullyApplied = true;
+  } catch (::NeXus::Exception &) {
+    successfullyApplied = false;
+  }
+  return successfullyApplied;
+}
 }
 
 /// Empty default constructor
@@ -175,6 +198,8 @@ void LoadNexusLogs::exec() {
 
   // If there's measurement information, load that info as logs.
   loadAndApplyMeasurementInfo(&file, *workspace);
+  // If there's title information, load that info as logs.
+  loadAndApplyRunTitle(&file, *workspace);
 
   // Freddie Akeroyd 12/10/2011
   // current ISIS implementation contains an additional indirection between

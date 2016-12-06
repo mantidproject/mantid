@@ -4,8 +4,7 @@ import numpy as np
 from itertools import product
 
 try:
-    # noinspection PyUnresolvedReferences
-    import simplejson as json
+    import json
 except ImportError:
     logger.warning("Failure of CalculateDWCrystalTest because simplejson is unavailable.")
     exit(1)
