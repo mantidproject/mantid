@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include "MantidDataHandling/SavePHX.h"
+#include "MantidAPI/DetectorInfo.h"
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -199,11 +200,7 @@ private:
     loader.execute();
 
     // mask the detector
-    Geometry::ParameterMap *m_Pmap = &(inputWS->instrumentParameters());
-    boost::shared_ptr<const Instrument> instru = inputWS->getInstrument();
-    Geometry::IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
-    TS_ASSERT(toMask)
-    m_Pmap->addBool(toMask.get(), "masked", true);
+    inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 
     // required to get it passed the algorthms validator
     inputWS->setDistribution(true);
