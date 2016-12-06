@@ -113,6 +113,9 @@ protected slots:
   void emitExternalProcessOutput(const qint64 pid, const int exitCode);
 
 private:
+  void prepareSubmissionArguments(const bool local, std::string &runnable,
+                                  std::vector<std::string> &args,
+                                  std::string &allOpts);
   /// Asks the user for permission to cancel the running reconstruction
   bool userConfirmationToCancelRecon();
   void setupAndRunLocalReconstruction(const std::string &runnable,

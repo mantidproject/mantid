@@ -22,23 +22,24 @@
 #include <QThread>
 #include <QTimer>
 
-#include <intrin.h>
-
-#if defined(_DEBUG) && defined(_WIN32)
+#ifdef _DEBUG
+#ifdef _WIN32
 #ifndef DBREAK
+#include <intrin.h>
 #define DBREAK __debugbreak();
 #define MDBREAK(msg)                                                           \
   std::cout << msg << '\n';                                                    \
   DBREAK
-#endif
-#elif
+#endif // DBREAK
+#endif // _WIN32
+#else
 #ifndef DBREAK
 #define DBREAK __builtin_trap();
 #define MDBREAK(msg)                                                           \
   std::cout << msg << '\n';                                                    \
   DBREAK
-#endif
-#endif
+#endif // DBREAK
+#endif // _DEBUG
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -174,12 +175,14 @@ void TomographyIfacePresenter::processRunExternalProcess() {
   const std::string &cachedExec = m_view->getCachedExecutable();
   const std::vector<std::string> &cachedArgs = m_view->getCachedArguments();
 
+  DBREAK
+
   std::string runnable;
   std::vector<std::string> args;
   std::string allOpts;
   // still prepare submission arguments to get the defaults
   const bool local = true;
-  m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
+  prepareSubmissionArguments(local, runnable, args, allOpts);
 
   // append the additional args for now
   for (const auto &arg : cachedArgs) {
@@ -227,7 +230,6 @@ void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
           SLOT(emitExternalProcessOutput(qint64, int)));
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
-
   m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
                                        *worker);
   m_reconRunning = true;
@@ -236,6 +238,7 @@ void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
 void TomographyIfacePresenter::emitExternalProcessOutput(const qint64 pid,
                                                          const int exitCode) {
   m_model->updateProcessInJobList(pid, exitCode);
+  m_reconRunning = false;
   m_view->externalProcessFinished(m_workerOutputCache);
 }
 
@@ -639,20 +642,15 @@ void TomographyIfacePresenter::processRunRecon() {
     return;
   }
 
-  // pre-/post processing steps and filters
-  m_model->setPrePostProcSettings(m_view->prePostProcSettings());
-  // center of rotation and regions
-  m_model->setImageStackPreParams(m_view->currentROIEtcParams());
-
   // we have to branch out to handle local and remote somewhere
+  const bool local = isLocalResourceSelected();
+
+  std::string runnable;
+  std::vector<std::string> args;
+  std::string allOpts;
+
+  prepareSubmissionArguments(local, runnable, args, allOpts);
   try {
-    const bool local = isLocalResourceSelected();
-
-    std::string runnable;
-    std::vector<std::string> args;
-    std::string allOpts;
-
-    m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
     if (local) {
       setupAndRunLocalReconstruction(runnable, args, allOpts);
 
@@ -976,5 +974,17 @@ void TomographyIfacePresenter::killKeepAliveMechanism() {
     m_keepAliveTimer->stop();
 }
 
+void TomographyIfacePresenter::prepareSubmissionArguments(
+    const bool local, std::string &runnable, std::vector<std::string> &args,
+    std::string &allOpts) {
+  // update the filters and ROI settings
+  // pre-/post processing steps and filters
+  m_model->setPrePostProcSettings(m_view->prePostProcSettings());
+  // center of rotation and regions
+  m_model->setImageStackPreParams(m_view->currentROIEtcParams());
+
+  // we have to branch out to handle local and remote somewhere
+  m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

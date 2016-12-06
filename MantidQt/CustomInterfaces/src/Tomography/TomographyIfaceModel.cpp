@@ -1,14 +1,14 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
+#include "MantidQtCustomInterfaces/Tomography/TomographyCommandArguments.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyCommandArguments.h"
 
 #include <Poco/Path.h>
 
@@ -345,9 +345,7 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
 void TomographyIfaceModel::prepareSubmissionArguments(
     const bool local, std::string &runnable, std::vector<std::string> &args,
     std::string &allOpts) {
-  if (!m_currentToolSettings) {
-    throw std::invalid_argument("Settings for tool not set up");
-  }
+
   const std::string tool = usingTool();
   const std::string cmd = m_currentToolSettings->toCommand();
 
@@ -816,15 +814,6 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
     const ImageStackPreParams &corRegions, const bool local,
     std::vector<std::string> &opts) const {
 
-  // paths config
-  /*
-  for( const auto &path : m_pathsConfig){
-    if(!path.empty()){
-    opts.emplace_back(path.first, adaptInputPathForExecution(path.second,
-  local));
-  }
-  }
-  */
   opts.emplace_back("--input-path=" + adaptInputPathForExecution(
                                           m_pathsConfig.pathSamples(), local));
 
