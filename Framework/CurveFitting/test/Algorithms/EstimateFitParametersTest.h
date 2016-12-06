@@ -237,6 +237,45 @@ public:
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("I")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("S")));
   }
+
+  void test_output() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+
+    std::string funStr(
+        "name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
+    EstimateFitParameters alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setPropertyValue("Function", funStr);
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("OutputWorkspace", "out");
+    alg.execute();
+    IFunction_sptr fun = alg.getProperty("Function");
+    auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
+    TS_ASSERT(params);
+    TS_ASSERT_EQUALS(params->rowCount(), 2);
+    TS_ASSERT_EQUALS(params->columnCount(), 11);
+
+    double costValue = 0.0;
+    auto names = params->getColumn(0);
+    for(size_t col = 1; col < params->columnCount(); ++col) {
+      auto column = params->getColumn(col);
+      for(size_t row = 0; row < column->size(); ++row) {
+        fun->setParameter(names->cell<std::string>(row), column->cell<double>(row));
+      }
+      CalculateCostFunction calc;
+      calc.initialize();
+      calc.setProperty("Function", fun);
+      calc.setProperty("InputWorkspace", ws);
+      calc.execute();
+      double value = calc.getProperty("Value");
+      TSM_ASSERT_LESS_THAN(
+          "Parameter sets aren't sorted by cost function value.", costValue,
+          value);
+    }
+    AnalysisDataService::Instance().clear();
+  }
 };
 
 #endif /* MANTID_CURVEFITTING_ESTIMATEFITPARAMETERSTEST_H_ */

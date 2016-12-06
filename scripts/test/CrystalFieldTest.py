@@ -1279,7 +1279,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(ranges['B66'], 0.0011394030334966495, 7)
         self.assertAlmostEqual(ranges['B62'], 0.00076818536847364201, 7)
 
-    def test_estimate_parameters(self):
+    def test_estimate_parameters_cross_entropy(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
 
@@ -1301,6 +1301,30 @@ class CrystalFieldFitTest(unittest.TestCase):
                                 constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45',
                                 Type='Cross Entropy', NSamples=100)
         # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
+
+    def test_estimate_parameters_multiple_results(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
+                                constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', NSamples=1000)
+        self.assertEqual(fit.get_number_estimates(), 10)
         fit.fit()
         self.assertTrue(cf.chi2 < 100.0)
 

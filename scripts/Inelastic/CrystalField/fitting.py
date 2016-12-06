@@ -861,6 +861,7 @@ class CrystalFieldFit(object):
         self._output_workspace_base_name = 'fit'
         self._fit_properties = kwargs
         self._function = None
+        self._estimated_parameters = None
 
     def fit(self):
         """
@@ -879,13 +880,51 @@ class CrystalFieldFit(object):
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
         from CrystalField.normalisation import split2range
+        from mantid.api import mtd
         ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
                              Parameters=Parameters)
         constraints = [('%s<%s<%s' % (-bound, parName, bound)) for parName, bound in ranges.items()]
         self.model.constraints(*constraints)
+        if 'Type' not in kwargs or kwargs['Type'] == 'Monte Carlo':
+            if 'OutputWorkspace' in kwargs and kwargs['OutputWorkspace'].strip() != '':
+                output_workspace = kwargs['OutputWorkspace']
+            else:
+                output_workspace = 'estimated_parameters'
+                kwargs['OutputWorkspace'] = output_workspace
+        else:
+            output_workspace = None
         self.monte_carlo(**kwargs)
+        if output_workspace is not None:
+            self._estimated_parameters = mtd[output_workspace]
+
+    def get_number_estimates(self):
+        """
+        Get a number of parameter sets estimated with self.estimate_parameters().
+        """
+        if self._estimated_parameters is None:
+            return 0
+        else:
+            return self._estimated_parameters.columnCount() - 1
+
+    def select_estimated_parameters(self, index):
+        ne = self.get_number_estimates()
+        if ne == 0:
+            raise RuntimeError('There are no estimated parameters.')
+        if index >= ne:
+            raise RuntimeError('There are only %s sets of estimated parameters, requested set #%s' % (ne, index))
+        for row in range(self._estimated_parameters.rowCount()):
+            name = self._estimated_parameters.cell(row, 0)
+            value = self._estimated_parameters.cell(row, index)
+            self.model[name] = value
+            if self._function is not None:
+                self._function.setParameter(name, value)
 
     def _monte_carlo_single(self, **kwargs):
+        """
+        Call EstimateFitParameters algorithm in a single spectrum case.
+        Args:
+            **kwargs: Properties of the algorithm.
+        """
         from mantid.api import AlgorithmManager
         fun = self.model.makeSpectrumFunction()
         alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
@@ -900,6 +939,11 @@ class CrystalFieldFit(object):
         self._function = function
 
     def _monte_carlo_multi(self, **kwargs):
+        """
+        Call EstimateFitParameters algorithm in a multi-spectrum case.
+        Args:
+            **kwargs: Properties of the algorithm.
+        """
         from mantid.api import AlgorithmManager
         fun = self.model.makeMultiSpectrumFunction()
         alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')

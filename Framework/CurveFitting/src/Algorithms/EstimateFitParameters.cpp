@@ -3,6 +3,9 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
@@ -10,6 +13,7 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/NormalDistribution.h"
 
+#include <map>
 #include <numeric>
 
 namespace Mantid {
@@ -102,6 +106,38 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
   }
 }
 
+/// A class for sorting and storing sets of best function parameters.
+class BestParameters {
+  /// Maximum size of the store
+  size_t m_size;
+  /// Actual storage.
+  std::map<double, GSLVector> m_params;
+public:
+  /// Constructor
+  BestParameters(size_t size) :m_size(size) {}
+  /// Test a cost function value if corresponding parameters must be stored.
+  bool isOneOfBest(double value) const {
+    return m_params.size() < m_size || value < m_params.rbegin()->first;
+  }
+  /// Insert a set of parameters to the store.
+  void insertParams(double value, const GSLVector& params) {
+    if (m_params.size() == m_size) {
+      auto it = m_params.find(m_params.rbegin()->first);
+      m_params.erase(it);
+    }
+    m_params[value] = params;
+  }
+  /// Return all stored parameters, drop function values.
+  std::vector<GSLVector> getParams() const {
+    std::vector<GSLVector> res;
+    res.reserve(m_params.size());
+    for(auto &it : m_params) {
+      res.push_back(it.second);
+    }
+    return res;
+  }
+};
+
 /// Run the Monte Carlo version of the algorithm.
 /// Generate random values of function parameters and return those that
 /// give the smallest cost function.
@@ -111,19 +147,21 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
 /// @param constraints :: Additional constraints.
 /// @param nSamples :: A number of samples to generate.
 /// @param seed :: A seed for the random number generator.
-void runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
+std::vector<GSLVector> runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
                    const std::vector<std::pair<double, double>> &ranges,
                    const std::vector<std::unique_ptr<IConstraint>> &constraints,
-                   size_t nSamples, size_t seed) {
+                   const size_t nSamples, const size_t nOutput, const size_t seed) {
 
   Kernel::MersenneTwister randGenerator;
   if (seed != 0) {
     randGenerator.setSeed(seed);
   }
-  double bestValue = costFunction.val() + getConstraints(constraints);
+  double value = costFunction.val() + getConstraints(constraints);
   auto nParams = costFunction.nParams();
-  GSLVector bestParams;
-  costFunction.getParameters(bestParams);
+  GSLVector params;
+  costFunction.getParameters(params);
+  BestParameters bestParams(nOutput);
+  bestParams.insertParams(value, params);
 
   // Implicit cast from int to size_t
   for (size_t it = 0; it < nSamples; ++it) {
@@ -136,18 +174,20 @@ void runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
     if (getConstraints(constraints) > 0.0) {
       continue;
     }
-    auto value = costFunction.val();
+    value = costFunction.val();
     if (costFunction.nParams() != nParams) {
       throw std::runtime_error("Cost function changed number of parameters " +
                                std::to_string(nParams) + " -> " +
                                std::to_string(costFunction.nParams()));
     }
-    if (value < bestValue) {
-      bestValue = value;
-      costFunction.getParameters(bestParams);
+    if (bestParams.isOneOfBest(value)) {
+      costFunction.getParameters(params);
+      bestParams.insertParams(value, params);
     }
   }
-  costFunction.setParameters(bestParams);
+  auto outputParams = bestParams.getParams();
+  costFunction.setParameters(outputParams.front());
+  return outputParams;
 }
 /// Run the Cross Entropy version of the algorithm.
 /// https://en.wikipedia.org/wiki/Cross-entropy_method
@@ -283,6 +323,14 @@ void EstimateFitParameters::initConcrete() {
   declareProperty(
       "Type", "Monte Carlo",
       "Type of the algorithm: \"Monte Carlo\" or \"Cross Entropy\"");
+  declareProperty("NOutputs", 10, "Number of parameter sets to output to "
+                                  "OutputWorkspace. Unused if OutputWorkspace "
+                                  "isn't set. (Monte Carlo only)");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output,
+                      Mantid::API::PropertyMode::Optional),
+                  "Optional: A table workspace with parameter sets producing "
+                  "the smallest values of cost function. (Monte Carlo only)");
   declareProperty("NIterations", 10,
                   "Number of iterations of the Cross Entropy algorithm.");
   declareProperty("Selection", 10, "Size of the selection in the Cross Entropy "
@@ -359,7 +407,35 @@ void EstimateFitParameters::execConcrete() {
   size_t seed = static_cast<int>(getProperty("Seed"));
 
   if (getPropertyValue("Type") == "Monte Carlo") {
-    runMonteCarlo(*costFunction, ranges, constraints, nSamples, seed);
+    int nOutput = getProperty("NOutputs");
+    auto outputWorkspaceProp = getPointerToProperty("OutputWorkspace");
+    if (outputWorkspaceProp->isDefault() || nOutput <= 0) {
+      nOutput = 1;
+    }
+    auto output = runMonteCarlo(*costFunction, ranges, constraints, nSamples,
+                                static_cast<size_t>(nOutput), seed);
+
+    if (!outputWorkspaceProp->isDefault()) {
+      auto table = API::WorkspaceFactory::Instance().createTable();
+      auto column = table->addColumn("str", "Name");
+      column->setPlotType(6);
+      for (size_t i = 0; i < output.size(); ++i) {
+        column = table->addColumn("double", std::to_string(i + 1));
+        column->setPlotType(2);
+      }
+
+      for (size_t i = 0, ia = 0; i < m_function->nParams(); ++i) {
+        if (!m_function->isFixed(i)) {
+          TableRow row = table->appendRow();
+          row << m_function->parameterName(i);
+          for (size_t j = 0; j < output.size(); ++j) {
+            row << output[j][ia];
+          }
+          ++ia;
+        }
+      }
+      setProperty("OutputWorkspace", table);
+    }
   } else {
     size_t nSelection = static_cast<int>(getProperty("Selection"));
     size_t nIterations = static_cast<int>(getProperty("NIterations"));
