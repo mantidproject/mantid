@@ -1,7 +1,5 @@
-//--------------------------------------------------------------------------
-// Includes
-//--------------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorDiagnostic.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -608,29 +606,26 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
+  bool checkForMask = false;
+  Geometry::Instrument_const_sptr instrument = input.getInstrument();
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
+  }
+  const auto &spectrumInfo = input.spectrumInfo();
+
   for (const auto &hists : indexmap) {
     std::vector<double> medianInput;
     const int nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
 
-    bool checkForMask = false;
-    Geometry::Instrument_const_sptr instrument = input.getInstrument();
-    if (instrument != nullptr) {
-      checkForMask = ((instrument->getSource() != nullptr) &&
-                      (instrument->getSample() != nullptr));
-    }
-
     PARALLEL_FOR_IF(Kernel::threadSafe(input))
     for (int i = 0; i < nhists; ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
 
       if (checkForMask) {
-        const std::set<detid_t> &detids =
-            input.getSpectrum(hists[i]).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids))
-          continue;
-        if (instrument->isMonitor(detids))
+        if (spectrumInfo.isMasked(hists[i]) || spectrumInfo.isMonitor(hists[i]))
           continue;
       }
 

@@ -85,9 +85,9 @@ public:
       return;
 
     // check the results
-    Instrument_const_sptr out_instr = ws->getInstrument();
+    const auto &resultDetInfo = ws->detectorInfo();
     for (int j = 0; j < numspec; ++j) {
-      TS_ASSERT(!out_instr->isDetectorMasked(j));
+      TS_ASSERT(!resultDetInfo.isMasked(j));
     }
 
     // remove workspace from the data service.

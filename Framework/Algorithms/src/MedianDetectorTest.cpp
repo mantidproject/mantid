@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
@@ -246,6 +247,7 @@ int MedianDetectorTest::maskOutliers(
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  const auto &spectrumInfo = countsWS->spectrumInfo();
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
     std::vector<size_t> &hists = indexmap[i];
@@ -255,8 +257,7 @@ int MedianDetectorTest::maskOutliers(
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {
-        const auto &detids = countsWS->getSpectrum(hists[j]).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids)) {
+        if (spectrumInfo.isMasked(hists[j])) {
           numFailed -= 1; // it was already masked
         }
       }
@@ -313,6 +314,7 @@ int MedianDetectorTest::doDetectorTests(
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  const auto &spectrumInfo = countsWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS, *maskWS))
   for (int j = 0; j < static_cast<int>(indexmap.size()); ++j) {
@@ -332,13 +334,11 @@ int MedianDetectorTest::doDetectorTests(
       }
 
       if (checkForMask) {
-        const auto &detids =
-            countsWS->getSpectrum(hists.at(i)).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids)) {
+        if (spectrumInfo.isMasked(hists.at(i))) {
           maskWS->mutableY(hists.at(i))[0] = deadValue;
           continue;
         }
-        if (instrument->isMonitor(detids)) {
+        if (spectrumInfo.isMonitor(hists.at(i))) {
           // Don't include in calculation but don't mask it
           continue;
         }
