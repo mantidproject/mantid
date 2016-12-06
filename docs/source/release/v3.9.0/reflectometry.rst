@@ -22,6 +22,7 @@ ISIS Reflectometry (Polref)
 - When runs are transferred to the processing table groups are now labeled according to run title.
 - Column :literal:`dQ/Q` is used as the rebin parameter to stitch workspaces.
 - Documentation regarding the interface has been updated accordingly.
+- Error messages are displayed if the user either attempts to transfer zero runs or transfer runs with a different strategy to the one they used to search for runs with. 
 
 ISIS Reflectometry
 ##################

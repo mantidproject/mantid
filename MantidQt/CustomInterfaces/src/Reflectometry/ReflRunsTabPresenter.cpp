@@ -59,7 +59,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   methods.insert(LegacyTransferMethod);
   methods.insert(MeasureTransferMethod);
   m_view->setTransferMethods(methods);
-  
+
   // Set current transfer method
   m_currentTransferMethod = m_view->getTransferMethod();
 
@@ -222,13 +222,13 @@ void ReflRunsTabPresenter::transfer() {
         "Error: Please select at least one run to transfer.",
         "No runs selected");
     return;
-  }
-  else if (m_currentTransferMethod != m_view->getTransferMethod()) {
+  } else if (m_currentTransferMethod != m_view->getTransferMethod()) {
     m_mainPresenter->giveUserCritical(
         "Error: Method selected for transferring runs (" +
-        m_view->getTransferMethod() +
-        ") must match the method used for searching runs (" +
-        m_currentTransferMethod + ").", "Transfer method mismatch");
+            m_view->getTransferMethod() +
+            ") must match the method used for searching runs (" +
+            m_currentTransferMethod + ").",
+        "Transfer method mismatch");
     return;
   }
 
