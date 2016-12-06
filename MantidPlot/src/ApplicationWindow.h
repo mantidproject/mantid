@@ -602,6 +602,7 @@ public slots:
   bool hidden(QWidget *window);
   void closeActiveWindow();
   void closeWindow(MdiSubWindow *window);
+  void prepareToCloseMantid();
 
   //!  Does all the cleaning work before actually deleting a window!
   void removeWindowFromLists(MdiSubWindow *w);

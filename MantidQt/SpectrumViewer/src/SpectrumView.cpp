@@ -390,7 +390,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
 
 std::string SpectrumView::getWindowName()
 {
-  return "SpectrumViewer";
+  return this->windowTitle().toStdString();
 }
 
 std::vector<std::string> SpectrumView::getWorkspaceNames()

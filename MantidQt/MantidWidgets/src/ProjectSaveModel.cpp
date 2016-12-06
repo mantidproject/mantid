@@ -83,17 +83,11 @@ std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(
  */
 std::vector<std::string> ProjectSaveModel::getWindowNames(
     const std::vector<std::string> &wsNames) const {
-  std::unordered_set<std::string> windowNames;
-
-  for (auto &name : wsNames) {
-    auto windows = getWindows(name);
-    for (auto window : windows) {
-      windowNames.insert(window->getWindowName());
-    }
+  std::vector<std::string> names;
+  auto windows = getUniqueWindows(wsNames);
+  for (auto window : windows) {
+    names.push_back(window->getWindowName());
   }
-
-  std::vector<std::string> names(windowNames.cbegin(), windowNames.cend());
-  std::sort(names.begin(), names.end());
   return names;
 }
 
