@@ -5,8 +5,8 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
             name="TOSCA"
-            valid-from="2006-08-10 23:59:59"
-            valid-to="2016-11-25 23:59:59"
+            valid-from="2016-11-25 23:59:59"
+            valid-to="2100-01-31 23:59:59"
             last-modified="2011-03-21 00:00:00" >
 
   <defaults>
@@ -24,7 +24,7 @@
   <!--  SOURCE AND SAMPLE POSITION -->
 
   <component type="moderator">
-    <location z="-17.0" />
+    <location z="-17.01" />
   </component>
 
   <type name="moderator" is="Source">
@@ -46,7 +46,7 @@
 
   <!-- MONITORS -->
   <component type="monitor1" idlist="monitor1">
-    <location z="-1.206" />
+    <location z="-1.1385" />
   </component>
 
   <type name="monitor1" is="monitor">
@@ -702,7 +702,7 @@
   </idlist>
 
   <idlist idname="monitor1">
-    <id val="169" />
+    <id val="194" />
   </idlist>
 
   <idlist idname="diffraction">
