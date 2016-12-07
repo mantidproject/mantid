@@ -1540,17 +1540,16 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
     }
   }
   // Add another Lorentzian function parameter for two Lorentzian fit
-  if (functionName.compare("Two Lorentzian") == 0) {
+  if (functionName.compare("Two Lorentzians") == 0) {
     currentFitFunction = "Lorentzian";
-  }
-  if (functionName.compare("Zero Lorentzians") == 0) {
-    parameters.append("Zero");
-  } else {
     IFunction_sptr func = FunctionFactory::Instance().createFunction(
-        currentFitFunction.toStdString());
+      currentFitFunction.toStdString());
     for (size_t i = 0; i < func->nParams(); i++) {
       parameters << QString::fromStdString(func->parameterName(i));
     }
+  }
+  if (functionName.compare("Zero Lorentzians") == 0) {
+    parameters.append("Zero");
   }
   return parameters;
 }
