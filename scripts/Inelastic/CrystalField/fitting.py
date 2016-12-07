@@ -117,7 +117,7 @@ class CrystalField(object):
         self._fieldConstraints = []
         self._temperature = None
         self._FWHM = None
-        self._intensityScaling = 1.0
+        self._intensityScaling = None
         self._resolutionModel = None
         self._fwhmVariation = None
         self._fixAllPeaks = False
@@ -187,6 +187,8 @@ class CrystalField(object):
         out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         out += ',FixAllPeaks=%s' % self._fixAllPeaks
         out += ',PeakShape=%s' % self.getPeak(i).name
+        if self._intensityScaling is not None:
+            out += ',IntensityScaling=%s' % self._intensityScaling
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
         if len(self._fieldParameters) > 0:
@@ -236,6 +238,9 @@ class CrystalField(object):
         out += ',Temperatures=(%s)' % ','.join(map(str, self._temperature))
         if self._FWHM is not None:
             out += ',FWHMs=(%s)' % ','.join(map(str, self._FWHM))
+        if self._intensityScaling is not None:
+            for i in range(len(self._intensityScaling)):
+                out += ',IntensityScaling%s=%s' % (i, self._intensityScaling[i])
         out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
 
         tieList = []
@@ -381,7 +386,7 @@ class CrystalField(object):
 
     @Temperature.setter
     def Temperature(self, value):
-        self._temperature= value
+        self._temperature = value
         self._dirty_peaks = True
         self._dirty_spectra = True
 
@@ -779,14 +784,14 @@ class CrystalFieldMulti(object):
         fun = ';'.join([a.makeSpectrumFunction() for a in self.args])
         ties = self.getTies()
         if len(ties) > 0:
-            fun += ',ties=(%s)' % ties
+            fun += ';ties=(%s)' % ties
         return fun
 
     def makeMultiSpectrumFunction(self):
         fun = ';'.join([a.makeMultiSpectrumFunction() for a in self.args])
         ties = self.getTies()
         if len(ties) > 0:
-            fun += ',ties=(%s)' % ties
+            fun += ';ties=(%s)' % ties
         return fun
 
     def ties(self, **kwargs):
