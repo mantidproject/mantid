@@ -74,14 +74,21 @@ def _run_vanadium_calibration():
 
     pearl_obj = _setup_pearl_instrument(tt_mode=None)
     results = pearl_obj.create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
-                                                    do_absorb_corrections=True)
+                                                    absorption_corrections=True, long_mode=False)
     return results
 
 
 def _setup_pearl_instrument(tt_mode):
     user_name = "Test"
+    calibration_mapping_file_name = "pearl_calibration.yaml"
+    attenuation_file_name = "PRL112_DC25_10MM_FF.OUT"
+    attenuation_file_path = os.path.join(_get_calibration_dir(), attenuation_file_name)
+    calibration_map_file_path = os.path.join(_get_calibration_dir(), calibration_mapping_file_name)
+    # Setup raw data directory in Mantid
     config['datasearch.directories'] += ";" + _get_input_dir()
-    pearl_obj = Pearl(user_name=user_name, tt_mode=tt_mode,
-                      calibration_dir=_get_calibration_dir(), output_dir=_get_output_dir())
+
+    pearl_obj = Pearl(user_name=user_name, tt_mode=tt_mode, attenuation_file_name=attenuation_file_path,
+                      calibration_directory=_get_calibration_dir(), output_directory=_get_output_dir(),
+                      calibration_mapping_file=calibration_map_file_path)
     return pearl_obj
 

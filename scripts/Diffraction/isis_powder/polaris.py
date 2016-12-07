@@ -5,22 +5,22 @@ import os
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
+from isis_powder.routines import yaml_parser
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_algs, polaris_config_parser, polaris_output
+from isis_powder.polaris_routines import polaris_algs, polaris_output
 
 
 class Polaris(AbstractInst):
     # Instrument specific properties
     _masking_file_name = "VanaPeaks.dat"
-    _number_of_banks = 5
 
     def __init__(self, chopper_on, config_file=None, **kwargs):
 
-        _set_kwargs_from_basic_config_file(config_path=config_file, kwargs=kwargs)
-
-        # Have to pass in everything through named types until abstract_inst takes kwargs
+        expected_keys = ["user_name", "calibration_directory", "output_directory",
+                         "apply_solid_angle", "calibration_mapping_file"]
+        yaml_parser.set_kwargs_from_config_file(config_path=config_file, kwargs=kwargs, keys_to_find=expected_keys)
         super(Polaris, self).__init__(user_name=kwargs["user_name"], calibration_dir=kwargs["calibration_directory"],
-                                      output_dir=kwargs["output_directory"], kwargs=kwargs)
+                                      output_dir=kwargs["output_directory"])
 
         self._chopper_on = chopper_on
         self._apply_solid_angle = kwargs["apply_solid_angle"]
@@ -34,9 +34,8 @@ class Polaris(AbstractInst):
 
         self._ads_workaround = 0
 
-    def focus(self, run_number, input_mode, do_attenuation=True, do_van_normalisation=True):
-        return self._focus(run_number=run_number, input_batching=input_mode, do_attenuation=do_attenuation,
-                           do_van_normalisation=do_van_normalisation)
+    def focus(self, run_number, input_mode, do_van_normalisation=True):
+        return self._focus(run_number=run_number, input_batching=input_mode, do_van_normalisation=do_van_normalisation)
 
     def create_calibration_vanadium(self, run_in_range, do_absorb_corrections=True, gen_absorb_correction=False):
         run_details = self.get_run_details(run_number=int(run_in_range))
@@ -71,9 +70,6 @@ class Polaris(AbstractInst):
             return updated_list
         else:
             return "POL" + str(run_number)
-
-    def get_num_of_banks(self, instrument_version=''):
-        return self._number_of_banks
 
     def normalise_ws(self, ws_to_correct, run_details=None):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
@@ -119,10 +115,6 @@ class Polaris(AbstractInst):
     def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
         return polaris_algs.generate_absorb_corrections(ws_to_match=ws_to_match)
 
-    def vanadium_calibration_rebinning(self, vanadium_ws):
-        common.crop_in_tof(ws_to_rebin=vanadium_ws, x_max=19900, is_mixed_binning=True)
-        # TODO find out maximum TOF value for POLARIS
-
     def extract_and_crop_spectra(self, focused_ws):
         ws_spectra = common.extract_ws_spectra(ws_to_split=focused_ws)
         ws_spectra = common.crop_in_tof(ws_to_rebin=ws_spectra, x_min=800, x_max=20000)
@@ -133,7 +125,7 @@ class Polaris(AbstractInst):
                                                                                 num_of_banks=self._number_of_banks)
         return calculated_binning_params
 
-    def output_focused_ws(self, processed_spectra, run_details, output_mode=None, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(processed_spectra)
         output_paths = self._generate_out_file_paths(run_details=run_details)
 
@@ -141,27 +133,3 @@ class Polaris(AbstractInst):
                                                  output_paths=output_paths, run_number=run_details.run_number)
 
         return d_spacing_group
-
-
-def _set_kwargs_from_basic_config_file(config_path, kwargs):
-    if config_path:
-        basic_config_dict = polaris_config_parser.get_basic_config(file_path=config_path)
-    else:
-        # Create an empty dictionary so we still get error checking below and nicer error messages
-        basic_config_dict = {}
-
-    # Set any unset properties:
-    keys = ["user_name", "calibration_directory", "output_directory", "apply_solid_angle", "calibration_mapping_file"]
-    for key in keys:
-        _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
-
-
-def _set_from_config_kwargs_helper(config_dictionary, kwargs, key):
-    error_first = "Setting with name: '"
-    error_last = "' was not passed in the call or set in the basic config."
-    kwarg_value = kwargs.get(key, None)
-    if not kwarg_value:
-        # Only try to parse it if it wasn't passed
-        value = common.dictionary_key_helper(dictionary=config_dictionary, key=key, throws=True,
-                                             exception_msg=(error_first + key + error_last))
-        kwargs[key] = value

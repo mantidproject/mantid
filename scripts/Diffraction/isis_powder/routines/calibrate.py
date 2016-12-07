@@ -19,7 +19,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
     corrected_van_ws = instrument.crop_data_tail(ws_to_crop=corrected_van_ws)
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
-                                             CalibrationFile=run_details.calibration)
+                                             CalibrationFile=run_details.calibration_file_path)
 
     corrected_van_ws = instrument.apply_solid_angle_efficiency_corr(ws_to_correct=corrected_van_ws,
                                                                     run_details=run_details)
@@ -29,7 +29,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
                                                      corrected_van_ws=corrected_van_ws, gen_absorb=gen_absorb)
 
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=corrected_van_ws,
-                                                   GroupingFileName=run_details.grouping)
+                                                   GroupingFileName=run_details.grouping_file_path)
 
     focused_cropped_spectra = instrument.extract_and_crop_spectra(focused_ws=focused_vanadium)
     d_spacing_group = _save_focused_vanadium(instrument=instrument, run_details=run_details,
@@ -45,7 +45,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
 
 def _create_vanadium_splines(focused_spectra, instrument, run_details):
     splined_ws_list = instrument.spline_vanadium_ws(focused_spectra)
-    out_spline_van_file_path = run_details.splined_vanadium
+    out_spline_van_file_path = run_details.splined_vanadium_file_path
     append = False
     for ws in splined_ws_list:
         mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=ws, Append=append)
@@ -56,10 +56,10 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
 def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_absorb):
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="Wavelength")
 
-    if gen_absorb or not run_details.vanadium_absorption:
+    if gen_absorb or not run_details.vanadium_absorption_path:
         absorb_ws = instrument.generate_vanadium_absorb_corrections(run_details, corrected_van_ws)
     else:
-        absorb_ws = mantid.LoadNexus(Filename=run_details.vanadium_absorption)
+        absorb_ws = mantid.LoadNexus(Filename=run_details.vanadium_absorption_path)
 
     # PEARL rebins whilst POLARIS does not as some of the older absorption files have different number of bins
     corrected_van_ws = instrument.pearl_rebin_to_workspace(ws_to_rebin=corrected_van_ws, ws_to_match=absorb_ws)

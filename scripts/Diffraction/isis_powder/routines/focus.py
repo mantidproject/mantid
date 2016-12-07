@@ -7,21 +7,21 @@ from isis_powder.routines.common_enums import InputBatchingEnum
 import os
 
 
-def focus(run_number, instrument, input_batching, perform_attenuation=True, perform_vanadium_norm=True):
+def focus(run_number, instrument, input_batching, perform_vanadium_norm=True):
     if input_batching.lower() == InputBatchingEnum.Individual.lower():
-        return _individual_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm,
+        return _individual_run_focusing(input_batching, instrument, perform_vanadium_norm,
                                         run_number)
     else:
-        return _batched_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number)
+        return _batched_run_focusing(input_batching, instrument, perform_vanadium_norm, run_number)
 
 
-def _batched_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number):
+def _batched_run_focusing(input_batching, instrument, perform_vanadium_norm, run_number):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number,
                                                           input_batching=input_batching, instrument=instrument)
     output = None
     for ws in read_ws_list:
         output = _focus_one_ws(ws=ws, run_number=run_number, instrument=instrument,
-                               perform_attenuation=perform_attenuation, perform_vanadium_norm=perform_vanadium_norm)
+                               perform_vanadium_norm=perform_vanadium_norm)
         common.remove_intermediate_workspace(ws)
     return output
 
@@ -29,8 +29,7 @@ def _batched_run_focusing(input_batching, instrument, perform_attenuation, perfo
 def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_vanadium_norm):
     processed_spectra = []
     run_details = instrument.get_run_details(run_number=run_number)
-    num_of_banks = instrument.get_num_of_banks(run_details.instrument_version)
-    split_ws = common.extract_ws_spectra(ws_to_split=input_workspace, num_banks=num_of_banks)
+    split_ws = common.extract_ws_spectra(ws_to_split=input_workspace)
 
     if perform_vanadium_norm:
         vanadium_ws_list = mantid.LoadNexus(Filename=run_details.splined_vanadium)
@@ -49,7 +48,7 @@ def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_
     return processed_spectra
 
 
-def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_vanadium_norm=True):
+def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     run_details = instrument.get_run_details(run_number=run_number)
 
     # Check the necessary splined vanadium file has been created
@@ -84,8 +83,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_
     _apply_binning_to_spectra(spectra_list=calibrated_spectra, binning_list=rebinning_params)
 
     # Output
-    processed_nexus_files = instrument.output_focused_ws(calibrated_spectra, run_details=run_details,
-                                                         attenuate=perform_attenuation)
+    processed_nexus_files = instrument.output_focused_ws(calibrated_spectra, run_details=run_details)
 
     # Tidy
     common.remove_intermediate_workspace(input_workspace)
@@ -99,7 +97,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_
     return processed_nexus_files
 
 
-def _individual_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number):
+def _individual_run_focusing(input_batching, instrument, perform_vanadium_norm, run_number):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     output = None
@@ -107,7 +105,7 @@ def _individual_run_focusing(input_batching, instrument, perform_attenuation, pe
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument,
                                                     input_batching=input_batching)
         output = _focus_one_ws(ws=ws[0], run_number=run, instrument=instrument,
-                               perform_attenuation=perform_attenuation, perform_vanadium_norm=perform_vanadium_norm)
+                               perform_vanadium_norm=perform_vanadium_norm)
         common.remove_intermediate_workspace(ws)
     return output
 

@@ -15,16 +15,13 @@ from isis_powder.routines import calibrate, focus, common
 
 @add_metaclass(ABCMeta)
 class AbstractInst(object):
-    def __init__(self, user_name=None, calibration_dir=None, output_dir=None, **kwargs):
+    def __init__(self, user_name=None, calibration_dir=None, output_dir=None):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:
             raise ValueError("A user name must be specified")
         self._user_name = user_name
         self._calibration_dir = calibration_dir
         self._output_dir = output_dir
-
-        # Advanced settings
-        self._default_input_ext = _prefix_dot_to_ext(kwargs.get("default_input_ext", '.raw'))
 
     @property
     def calibration_dir(self):
@@ -70,8 +67,8 @@ class AbstractInst(object):
         return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
-    def _focus(self, run_number, input_batching, do_attenuation, do_van_normalisation):
-        return focus.focus(run_number=run_number, perform_attenuation=do_attenuation, input_batching=input_batching,
+    def _focus(self, run_number, input_batching, do_van_normalisation):
+        return focus.focus(run_number=run_number, input_batching=input_batching,
                            perform_vanadium_norm=do_van_normalisation, instrument=self)
 
     def _generate_out_file_paths(self, run_details, output_directory=None):
@@ -109,10 +106,6 @@ class AbstractInst(object):
     def generate_inst_file_name(run_number):
         pass
 
-    @abstractmethod
-    def get_num_of_banks(self, instrument_version=''):
-        pass
-
     # --- Instrument optional hooks ----#
 
     def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
@@ -136,14 +129,10 @@ class AbstractInst(object):
     def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
         raise NotImplementedError("Not implemented for this instrument yet")
 
-    @staticmethod
-    def get_save_range(instrument_version):
-        return None
-
     def normalise_ws(self, ws_to_correct, run_details=None):
         return None
 
-    def output_focused_ws(self, processed_spectra, run_details, output_mode=None, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         return None
 
     def pearl_focus_tof_rebinning(self, input_workspace):
@@ -151,9 +140,6 @@ class AbstractInst(object):
 
     def crop_data_tail(self, ws_to_crop):
         return ws_to_crop
-
-    def vanadium_calibration_rebinning(self, vanadium_ws):
-        return vanadium_ws
 
     def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         return ws_to_rebin

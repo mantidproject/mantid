@@ -6,9 +6,8 @@ from isis_powder.routines.common_enums import InputBatchingEnum
 
 # A small workaround to ensure when reading workspaces in a loop
 # the previous workspace does not got overridden
-_read_ws_count = 0
 global g_ads_workaround
-g_ads_workaround = {"read_ws": _read_ws_count}
+g_ads_workaround = {"read_ws": 0}
 
 # --- Public API --- #
 
@@ -25,15 +24,6 @@ def crop_in_tof(ws_to_rebin, x_min=None, x_max=None):
             cropped_ws.append(_crop_single_ws_in_tof(ws, x_max=x_max, x_min=x_min))
     else:
         cropped_ws = _crop_single_ws_in_tof(ws_to_rebin, x_max=x_max, x_min=x_min)
-    return cropped_ws
-
-
-def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
-    previous_units = ws_to_rebin.getAxis(0).getUnit().unitID()
-    ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
-    cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin,
-                                      XMin=x_min, XMax=x_max)
-    cropped_ws = mantid.ConvertUnits(InputWorkspace=cropped_ws, Target=previous_units, OutputWorkspace=cropped_ws)
     return cropped_ws
 
 
@@ -63,7 +53,6 @@ def extract_ws_spectra(ws_to_split):
 
 
 def generate_run_numbers(run_number_string):
-
     # Check its not a single run
     if isinstance(run_number_string, int) or run_number_string.isdigit():
         return [int(run_number_string)]  # Cast into a list and return
@@ -125,6 +114,15 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
         remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
+
+
+def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
+    previous_units = ws_to_rebin.getAxis(0).getUnit().unitID()
+    ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
+    cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin,
+                                      XMin=x_min, XMax=x_max)
+    cropped_ws = mantid.ConvertUnits(InputWorkspace=cropped_ws, Target=previous_units, OutputWorkspace=cropped_ws)
+    return cropped_ws
 
 
 def _normalise_workspaces(ws_list, instrument, run_information):

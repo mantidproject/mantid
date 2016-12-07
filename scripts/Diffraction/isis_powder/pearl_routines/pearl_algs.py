@@ -3,9 +3,10 @@ import os
 import numpy as numpy
 import mantid.simpleapi as mantid
 
-from isis_powder.pearl_routines import pearl_calib_factory, pearl_cycle_factory
 import isis_powder.routines.common as common
+from isis_powder.routines import yaml_parser
 from isis_powder.routines.RunDetails import RunDetails
+from isis_powder.pearl_routines import pearl_advanced_config
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
@@ -36,24 +37,26 @@ def generate_vanadium_absorb_corrections(van_ws):
     return absorb_ws
 
 
-def get_run_details(tt_mode, run_number_string, label, calibration_dir):
-    calibration_file, grouping_file, van_absorb, van_file = \
-        pearl_calib_factory.get_calibration_filename(cycle=label, tt_mode=tt_mode)
-    cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number_string)
+def get_run_details(absorb_on, long_mode_on, run_number_string, calibration_dir, mapping_file):
+    mapping_dict = yaml_parser.get_run_dictionary(run_number=run_number_string, file_path=mapping_file)
 
-    calibration_full_path = os.path.join(calibration_dir, calibration_file)
-    grouping_full_path = os.path.join(calibration_dir, grouping_file)
-    van_absorb_full_path = os.path.join(calibration_dir, van_absorb)
-    van_file_full_path = os.path.join(calibration_dir, van_file)
+    calibration_file = mapping_dict["calibration_file"]
+    empty_run_numbers = mapping_dict["empty_run_numbers"]
+    label = mapping_dict["label"]
+    splined_vanadium_name = _generate_splined_van_name(absorb_on=absorb_on, long_mode=long_mode_on,
+                                                       vanadium_run_string=run_number_string)
+    vanadium_run_numbers = mapping_dict["vanadium_run_numbers"]
 
-    run_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
-                             vanadium_runs=van_file_full_path, run_number=run_number_string)
-    run_details.vanadium_absorption = van_absorb_full_path
-    run_details.label = cycle
-    run_details.instrument_version = instrument_version
+    cycle_calibration_dir = os.path.join(calibration_dir, label)
+    calibration_file_path = os.path.join(cycle_calibration_dir, calibration_file)
+    splined_vanadium_path = os.path.join(cycle_calibration_dir, splined_vanadium_name)
 
-    # TODO remove this when we move to saving splined van ws on PEARL
-    run_details.splined_vanadium = run_details.vanadium
+    run_details = RunDetails(run_number=run_number_string)
+    run_details.calibration_file_path = calibration_file_path
+    run_details.empty_runs = empty_run_numbers
+    run_details.label = label
+    run_details.splined_vanadium_file_path = splined_vanadium_path
+    run_details.vanadium_run_numbers = vanadium_run_numbers
 
     return run_details
 
@@ -88,3 +91,25 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff):
     common.remove_intermediate_workspace(splined_monitor_ws)
 
     return normalised_ws
+
+
+def set_advanced_run_details(run_details, calibration_dir, tt_mode):
+    advanced_dictionary = pearl_advanced_config.file_names
+
+    grouping_file_path = os.path.join(calibration_dir, advanced_dictionary[tt_mode.lower() + "_grouping"])
+    run_details.grouping_file_path = grouping_file_path
+
+    absorption_file_path = os.path.join(calibration_dir, advanced_dictionary["vanadium_absorption"])
+    run_details.vanadium_absorption_path = absorption_file_path
+    return run_details
+
+
+def _generate_splined_van_name(absorb_on, long_mode, vanadium_run_string):
+    output_string = "SVan_" + str(vanadium_run_string)
+    if absorb_on:
+        output_string += "_absorb"
+    if long_mode:
+        output_string += "_long"
+
+    output_string += ".nxs"
+    return output_string

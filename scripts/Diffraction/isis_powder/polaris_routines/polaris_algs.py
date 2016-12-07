@@ -3,8 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import os
 import isis_powder.routines.common as common
+from isis_powder.routines import yaml_parser
 from isis_powder.routines.common_enums import InputBatchingEnum
-from isis_powder.polaris_routines import polaris_calib_parser
 from isis_powder.routines.RunDetails import RunDetails
 
 
@@ -70,7 +70,7 @@ def generate_solid_angle_corrections(run_details, instrument):
 
 def get_run_details(chopper_on, sac_on, run_number_string, calibration_dir, mapping_path):
     input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
-    yaml_dict = polaris_calib_parser.get_calibration_dict(run_number=input_run_number_list[0], file_path=mapping_path)
+    yaml_dict = yaml_parser.get_run_dictionary(run_number=input_run_number_list[0], file_path=mapping_path)
 
     if chopper_on:
         chopper_config = yaml_dict["chopper_on"]
@@ -95,8 +95,8 @@ def get_run_details(chopper_on, sac_on, run_number_string, calibration_dir, mapp
     run_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
                              vanadium_runs=vanadium_runs, run_number=run_number_string)
     run_details.label = label
-    run_details.sample_empty = empty_runs
-    run_details.splined_vanadium = splined_vanadium
+    run_details.empty_runs = empty_runs
+    run_details.splined_vanadium_file_path = splined_vanadium
     run_details.solid_angle_corr = solid_angle_file_path
 
     return run_details

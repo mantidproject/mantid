@@ -73,7 +73,7 @@ def _run_vanadium_calibration():
 def _run_focus():
     run_number = 79514
     polaris_obj = setup_polaris_instrument()
-    return polaris_obj.focus(run_number=run_number, input_mode=)
+    return polaris_obj.focus(run_number=run_number, input_mode="Individual")
 
 
 def _calibration_validation(cls, results):
@@ -116,7 +116,7 @@ def setup_polaris_instrument():
     config['datasearch.directories'] += ";" + path_to_add
     output_dir = _get_output_dir()
 
-    polaris_obj = polaris.Polaris(user_name=user_name, chopper_on=True,
+    polaris_obj = polaris.Polaris(user_name=user_name, chopper_on=True, apply_solid_angle=False,
                                   calibration_directory=calibration_dir, output_directory=output_dir)
     return polaris_obj
 

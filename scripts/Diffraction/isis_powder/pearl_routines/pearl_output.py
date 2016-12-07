@@ -13,8 +13,7 @@ def generate_and_save_focus_output(instrument, processed_spectra, run_details, p
     if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths, processed_spectra)
     elif focus_mode == "groups":
-        processed_nexus_files = _focus_mode_groups(run_details.instrument_version, output_file_paths,
-                                                   processed_spectra)
+        processed_nexus_files = _focus_mode_groups(output_file_paths, processed_spectra)
     elif focus_mode == "trans":
         processed_nexus_files = _focus_mode_trans(output_file_paths, perform_attenuation, instrument, processed_spectra)
     elif focus_mode == "mods":
@@ -84,7 +83,7 @@ def _focus_mode_trans(output_file_paths, atten, instrument, calibrated_spectra):
     return output_list
 
 
-def _focus_mode_groups(instrument_version, output_file_paths, calibrated_spectra):
+def _focus_mode_groups(output_file_paths, calibrated_spectra):
     output_list = []
     to_save = _sum_groups_of_three_ws(calibrated_spectra, output_file_paths)
 
@@ -96,12 +95,8 @@ def _focus_mode_groups(instrument_version, output_file_paths, calibrated_spectra
     append = False
     index = 1
     for ws in to_save:
-        if instrument_version == "new":
-            mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_paths["gss_filename"], Append=append,
-                           Bank=index)
-        elif instrument_version == "new2":
-            mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_paths["gss_filename"], Append=False,
-                           Bank=index)
+        mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_paths["gss_filename"], Append=False,
+                       Bank=index)
 
         workspace_names = ws.name()
         ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=workspace_names, Target="dSpacing")

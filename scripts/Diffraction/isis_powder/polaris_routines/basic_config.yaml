@@ -6,4 +6,3 @@ apply_solid_angle : "True"
 calibration_directory : "C:\\Users\\ieb35538\\Documents\\Repos\\a_mantidBuild\\ExternalData\\Testing\\Data\\SystemTest\\POLARIS\\Calibration"
 output_directory : "C:\\Users\\ieb35538\\Documents\\Repos\\a_mantidBuild\\ExternalData\\Testing\\Data\\SystemTest\\POLARIS\\DataOut"
 calibration_mapping_file : 'C:\Users\ieb35538\Documents\Repos\a_mantid\scripts\Diffraction\isis_powder\polaris_routines\polaris_calibration.yaml'
-advanced_config_file : "Not Set"
