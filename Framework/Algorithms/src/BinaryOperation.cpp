@@ -443,7 +443,8 @@ std::string BinaryOperation::checkSizeCompatibility(
 bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
                                            const SpectrumInfo &rhsSpectrumInfo,
                                            const int64_t index,
-                                           API::MatrixWorkspace &out) {
+                                           MatrixWorkspace &out,
+                                           SpectrumInfo &outSpectrumInfo) {
   bool continueOp(true);
 
   if ((lhsSpectrumInfo.hasDetectors(index) &&
@@ -451,7 +452,8 @@ bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
       (rhsSpectrumInfo.hasDetectors(index) &&
        rhsSpectrumInfo.isMasked(index))) {
     continueOp = false;
-    out.maskWorkspaceIndex(index);
+    out.getSpectrum(index).clearData();
+    outSpectrumInfo.setMasked(index, true);
   }
   return continueOp;
 }
@@ -517,6 +519,7 @@ void BinaryOperation::doSingleColumn() {
   // value from each m_rhs 'spectrum'
   // and then calling the virtual function
   const int64_t numHists = m_lhs->getNumberHistograms();
+  auto &outSpectrumInfo = m_out->mutableSpectrumInfo();
   auto &lhsSpectrumInfo = m_lhs->spectrumInfo();
   auto &rhsSpectrumInfo = m_rhs->spectrumInfo();
   if (m_eout) {
@@ -528,7 +531,8 @@ void BinaryOperation::doSingleColumn() {
       const double rhsE = m_rhs->readE(i)[0];
 
       // m_out->setX(i, m_lhs->refX(i)); //unnecessary - that was copied before.
-      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out)) {
+      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                               outSpectrumInfo)) {
         performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       }
       m_progress->report(this->name());
@@ -544,7 +548,8 @@ void BinaryOperation::doSingleColumn() {
       const double rhsE = m_rhs->readE(i)[0];
 
       m_out->setX(i, m_lhs->refX(i));
-      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out)) {
+      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                               outSpectrumInfo)) {
         // Get reference to output vectors here to break any sharing outside the
         // function call below
         // where the order of argument evaluation is not guaranteed (if it's
@@ -668,6 +673,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
   // TODO: Check if this works for event workspaces...
   propagateBinMasks(m_rhs, m_out);
 
+  auto &outSpectrumInfo = m_out->mutableSpectrumInfo();
   auto &lhsSpectrumInfo = m_lhs->spectrumInfo();
   auto &rhsSpectrumInfo = m_rhs->spectrumInfo();
 
@@ -691,7 +697,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         } else {
           // Check for masking except when mismatched sizes
           if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i,
-                                    *m_out))
+                                    *m_out, outSpectrumInfo))
             continue;
         }
         // Reach here? Do the division
@@ -724,7 +730,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         } else {
           // Check for masking except when mismatched sizes
           if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i,
-                                    *m_out))
+                                    *m_out, outSpectrumInfo))
             continue;
         }
 
@@ -762,7 +768,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
           continue;
       } else {
         // Check for masking except when mismatched sizes
-        if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out))
+        if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                                  outSpectrumInfo))
           continue;
       }
       // Reach here? Do the division
