@@ -26,8 +26,6 @@
 vtkStandardNewMacro(vtkMDEWNexusReader)
 
     using namespace Mantid::VATES;
-using Mantid::Geometry::IMDDimension_sptr;
-using Mantid::Geometry::IMDDimension_sptr;
 
 vtkMDEWNexusReader::vtkMDEWNexusReader()
     : FileName{nullptr}, m_loadInMemory{false}, m_depth{1}, m_time{0},

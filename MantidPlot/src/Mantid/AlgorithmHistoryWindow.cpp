@@ -1,5 +1,7 @@
 #include "AlgorithmHistoryWindow.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Workspace.h"
 
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"

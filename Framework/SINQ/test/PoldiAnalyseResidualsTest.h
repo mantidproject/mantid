@@ -32,7 +32,7 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_EQUALS(alg.sumCounts(testWorkspace, std::vector<int>(1, 1)), 2.0);
     TS_ASSERT_EQUALS(alg.sumCounts(testWorkspace, std::vector<int>(1, 0)), 0.0);
 
@@ -44,7 +44,7 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_EQUALS(alg.numberOfPoints(testWorkspace, std::vector<int>(1, 1)),
                      2);
     TS_ASSERT_EQUALS(alg.numberOfPoints(testWorkspace, std::vector<int>(1, 0)),
@@ -58,7 +58,7 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_THROWS_NOTHING(
         alg.addValue(testWorkspace, 3.0, std::vector<int>(1, 1)));
     TS_ASSERT_THROWS_NOTHING(
@@ -77,9 +77,9 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr measured =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     Workspace2D_sptr calculated =
-        WorkspaceCreationHelper::Create2DWorkspace154(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace154(2, 2);
 
     TS_ASSERT_THROWS_NOTHING(
         alg.calculateResidualWorkspace(measured, calculated));
@@ -103,7 +103,7 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     TS_ASSERT_THROWS_NOTHING(
         alg.normalizeResiduals(testWorkspace, std::vector<int>(1, 1)));
 
@@ -120,7 +120,7 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_EQUALS(alg.relativeCountChange(testWorkspace, 10.0), 0.0);
 
     alg.addValue(testWorkspace, 10.0, std::vector<int>(1, 0));
@@ -132,9 +132,9 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr lhs =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     Workspace2D_sptr rhs =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     Workspace2D_sptr sum = alg.addWorkspaces(lhs, rhs);
 

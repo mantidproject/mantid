@@ -148,7 +148,7 @@ private:
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST, 10, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
     return setUpWorkspace(input, inputWS);
   }
 
@@ -156,7 +156,7 @@ private:
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST, 10, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
     inputWS = setUpWorkspace(input, inputWS);
     API::Axis *axisOne = inputWS->getAxis(1);
     API::NumericAxis *newAxisOne = new NumericAxis(axisOne->length());

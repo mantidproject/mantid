@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/Interpolation.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
+	src/LiveListenerInfo.cpp
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
@@ -148,6 +149,7 @@ set ( INC_FILES
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
+	inc/MantidKernel/CaseInsensitiveMap.h
 	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
@@ -198,6 +200,7 @@ set ( INC_FILES
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
+	inc/MantidKernel/LiveListenerInfo.h
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
@@ -239,13 +242,14 @@ set ( INC_FILES
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
+	inc/MantidKernel/PropertyHelper.h
 	inc/MantidKernel/PropertyHistory.h
 	inc/MantidKernel/PropertyManager.h
 	inc/MantidKernel/PropertyManagerDataService.h
 	inc/MantidKernel/PropertyManagerOwner.h
 	inc/MantidKernel/PropertyManagerProperty.h
 	inc/MantidKernel/PropertyManager_fwd.h
-    	inc/MantidKernel/PropertyNexus.h
+	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -295,8 +299,7 @@ set ( INC_FILES
 	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
-  inc/MantidKernel/CaseInsensitiveMap.h
-  inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
@@ -351,6 +354,7 @@ set ( TEST_FILES
 	InternetHelperTest.h
 	InterpolationTest.h
 	ListValidatorTest.h
+	LiveListenerInfoTest.h
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h

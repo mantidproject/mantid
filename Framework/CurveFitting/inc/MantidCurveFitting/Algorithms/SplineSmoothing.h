@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
 
 namespace Mantid {

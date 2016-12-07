@@ -10,6 +10,7 @@
 
 #include "boost/make_shared.hpp"
 
+using namespace Mantid::Kernel;
 using Mantid::API::SampleShapeValidator;
 
 class SampleShapeValidatorTest : public CxxTest::TestSuite {

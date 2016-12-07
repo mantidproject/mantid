@@ -33,7 +33,7 @@ public:
   }
 
   void test_no_constraints() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double, int) { return 0.0; }, 1, 0, 1, 0.1);
 
     EstimateFitParameters alg;
@@ -46,7 +46,7 @@ public:
   }
 
   void test_no_lower_bound() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     EstimateFitParameters alg;
@@ -59,7 +59,7 @@ public:
   }
 
   void test_no_upper_bound() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     EstimateFitParameters alg;
@@ -72,7 +72,7 @@ public:
   }
 
   void test_all_free() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     std::string funStr(
@@ -103,7 +103,7 @@ public:
   }
 
   void test_fixed() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     std::string funStr(
@@ -133,7 +133,7 @@ public:
   }
 
   void test_tied() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     std::string funStr(
@@ -167,7 +167,7 @@ public:
   }
 
   void test_fix_bad_parameters() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return exp(-x * x / 4.0); }, 1, -8.5, 8.5, 1.0);
 
     std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
@@ -203,7 +203,7 @@ public:
   }
 
   void test_fix_bad_parameters_doesnt_change_values() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return exp(-x * x / 4.0); }, 1, -8.5, 8.5, 1.0);
 
     std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
