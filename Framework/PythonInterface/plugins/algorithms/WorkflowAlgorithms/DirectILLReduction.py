@@ -3,7 +3,7 @@
 import collections
 import glob
 from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
-from mantid.kernel import Direct, Direction, IntArrayProperty, StringListValidator, StringMandatoryValidator, UnitConversion
+from mantid.kernel import CompositeValidator, Direct, Direction, IntArrayProperty, IntBoundedValidator, IntMandatoryValidator, StringListValidator, StringMandatoryValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground, ClearMaskFlag,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
@@ -272,11 +272,14 @@ def _extractMonitorWs(ws, wsNames, algorithmLogging):
                                             EnableLogging=algorithmLogging)
     return detectorWS, monitorWS
 
-def _createFlatBackground(ws, windowWidth, wsNames, algorithmLogging):
+def _createFlatBackground(ws, wsType, windowWidth, wsNames, algorithmLogging):
     '''
     Returns a flat background workspace.
     '''
-    bkgWSName = wsNames.withSuffix('flat_background')
+    if wsType == WS_CONTENT_DETECTORS:
+        bkgWSName = wsNames.withSuffix('flat_background_for_detectors')
+    else:
+        bkgWSName = wsNames.withSuffix('flat_background_for_monitors')
     bkgWS = CalculateFlatBackground(InputWorkspace=ws,
                                     OutputWorkspace=bkgWSName,
                                     Mode='Moving Average',
@@ -287,12 +290,16 @@ def _createFlatBackground(ws, windowWidth, wsNames, algorithmLogging):
                                     EnableLogging=algorithmLogging)
     return bkgWS
 
-def _subtractFlatBackground(ws, bkgWorkspace, bkgScaling, wsNames, wsCleanup, algorithmLogging):
+def _subtractFlatBackground(ws, wsType, bkgWorkspace, bkgScaling, wsNames, wsCleanup, algorithmLogging):
     '''
     Subtracts a scaled flat background from a workspace.
     '''
-    subtractedWSName = wsNames.withSuffix('background_subtracted')
-    scaledBkgWSName = wsNames.withSuffix('flat_background_scaled')
+    if wsType == WS_CONTENT_DETECTORS:
+        subtractedWSName = wsNames.withSuffix('background_subtracted_detectors')
+        scaledBkgWSName = wsNames.withSuffix('flat_background_for_detectors_scaled')
+    else:
+        subtractedWSName = wsNames.withSuffix('background_subtracted_monitors')
+        scaledBkgWSName = wsNames.withSuffix('flat_background_for_monitors_scaled')
     Scale(InputWorkspace=bkgWorkspace,
           OutputWorkspace=scaledBkgWSName,
           Factor = bkgScaling,
@@ -699,11 +706,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanupLater(monitorWorkspace)
 
         # Time-independent background
-        # ATM monitor background is ignored
         bkgInWS = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
+        windowWidth = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
         if not bkgInWS:
-            windowWidth = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
-            bkgWS = _createFlatBackground(mainWS, 
+            bkgWS = _createFlatBackground(mainWS,
+                                          WS_CONTENT_DETECTORS,
                                           windowWidth,
                                           wsNames,
                                           childAlgorithmLogging)
@@ -712,9 +719,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
             wsCleanup.protect(bkgWS)
         if not self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).isDefault:
             self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgWS)
-        # Subtract the time-independent background.
         bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
         bkgSubtractedWorkspace = _subtractFlatBackground(mainWS,
+                                                         WS_CONTENT_DETECTORS,
                                                          bkgWS,
                                                          bkgScaling,
                                                          wsNames,
@@ -724,6 +731,23 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = bkgSubtractedWorkspace
         del(bkgSubtractedWorkspace)
         wsCleanup.cleanupLater(bkgWS)
+        # Monitor time-independent background.
+        monBkgWS = _createFlatBackground(monitorWorkspace,
+                                         WS_CONTENT_MONITORS,
+                                         windowWidth,
+                                         wsNames,
+                                         childAlgorithmLogging)
+        monBkgScaling = 1
+        bkgSubtractedMonWS = _subtractFlatBackground(monitorWorkspace,
+                                                     WS_CONTENT_MONITORS,
+                                                     monBkgWS,
+                                                     monBkgScaling,
+                                                     wsNames,
+                                                     wsCleanup,
+                                                     childAlgorithmLogging)
+        wsCleanup.cleanup(monitorWorkspace)
+        monitorWorkspace = bkgSubtractedMonWS
+        del(bkgSubtractedMonWS)
 
         # Find elastic peak positions for detectors.
         detectorEPPInWS = self.getProperty(PROP_EPP_WORKSPACE).value
@@ -956,6 +980,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def PyInit(self):
         # TODO Property validation.
         # Inputs
+        positiveInt = IntBoundedValidator()
+        positiveInt.setLower(0)
+        mandatoryPositiveInt = CompositeValidator()
+        mandatoryPositiveInt.add(IntMandatoryValidator())
+        mandatoryPositiveInt.add(positiveInt)
         self.declareProperty(FileProperty(PROP_INPUT_FILE,
                                           '',
                                           action=FileAction.OptionalLoad,
@@ -1038,8 +1067,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              1.0,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
-        self.declareProperty(PROP_FLAT_BACKGROUND_WINDOW,
-                             30,
+        self.declareProperty(name=PROP_FLAT_BACKGROUND_WINDOW,
+                             defaultValue=30,
+                             validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Running average window width (in bins) for flat background')
         self.declareProperty(MatrixWorkspaceProperty(PROP_FLAT_BACKGROUND_WORKSPACE,
