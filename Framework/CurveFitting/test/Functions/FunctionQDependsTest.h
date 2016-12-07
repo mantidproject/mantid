@@ -39,6 +39,7 @@ public:
 } // end of namespace
 
 class FunctionQDependsTest : public CxxTest::TestSuite {
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -51,9 +52,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(ImplementsFunctionQDepends f);
   }
 
+  void testInitialization() {
+    ImplementsFunctionQDepends f;
+    TS_ASSERT_THROWS_NOTHING(f.initialize());
+  }
+
   void testSetWorkspace() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
+    f.initialize();  // declare attributes
     // test with an non matrix workspace
     TS_ASSERT_THROWS_NOTHING(
         f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX));
@@ -71,6 +78,7 @@ public:
   void testQAttribute() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
+    f.initialize();  // declare attributes
     auto Q = f.getAttribute("Q").asDouble();
     TS_ASSERT_EQUALS(Q, Mantid::EMPTY_DBL());
     f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX);
@@ -90,6 +98,7 @@ public:
   void testWorkspaceIndexAttribute() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
+    f.initialize();  // declare attributes
     auto wi = f.getAttribute("WorkspaceIndex").asInt();
     TS_ASSERT_EQUALS(wi, Mantid::EMPTY_INT());
     f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX);
@@ -111,6 +120,7 @@ public:
   void testWorkspaceIndexTiesQ() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
+    f.initialize();  // declare attributes
     f.setMatrixWorkspace(this->withQonVerticalAxis(), 1, startX, endX);
     TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.5); // Q overwritten
     f.setAttribute("WorkspaceIndex", Attr(0));
@@ -131,7 +141,7 @@ private:
     auto momenta = new Mantid::API::NumericAxis(qvalues);
     momenta->setUnit("MomentumTransfer");
     // create the matrix workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins);
     ws->replaceAxis(1, momenta);
     return ws;
   }
@@ -151,12 +161,12 @@ private:
   // return a MatrixWorkspace without Q values
   Mantid::DataObjects::Workspace2D_sptr withoutQ() {
     int nhist{3}, nbins{9};
-    return WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins);
+    return WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins);
   }
 
   // return a Workspace not of MatrixWorkspace type
   Mantid::DataObjects::EventWorkspace_sptr unsuitableWS() {
-    return WorkspaceCreationHelper::CreateEventWorkspace();
+    return WorkspaceCreationHelper::createEventWorkspace();
   }
 };
 
