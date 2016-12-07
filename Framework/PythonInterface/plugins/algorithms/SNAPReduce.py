@@ -6,9 +6,10 @@ from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
     FileProperty, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
     ConvertUnits, CropWorkspace, DeleteWorkspace, DiffractionFocussing, Divide, \
-    GetIPTS, GroupDetectors, Load, LoadDetectorsGroupingFile, LoadMask, \
-    NormaliseByCurrent, Rebin, RenameWorkspace, ReplaceSpecialValues, \
-    RemovePromptPulse, SaveAscii, SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
+    EditInstrumentGeometry, GetIPTS, GroupDetectors, Load, LoadDetectorsGroupingFile, LoadMask, \
+    MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, RenameWorkspace, \
+    ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
+    SaveGSS, SaveNexusProcessed, mtd
 import os
 import numpy as np
 
@@ -58,7 +59,8 @@ class SNAPReduce(DataProcessorAlgorithm):
         for i in range(len(data)):
             temp = 0
             ave = 0
-            for r in range(max(0, i - order / 2), min(i + order / 2, len(data) - 1) + 1):
+            for r in range(max(0, i - int(order / 2)),
+                           min(i + int(order / 2), len(data) - 1) + 1):
                 temp = temp + (factor - abs(r - i)) * data[r]
                 ave = ave + factor - abs(r - i)
             sm[i] = temp / ave
@@ -79,7 +81,6 @@ class SNAPReduce(DataProcessorAlgorithm):
         return out
 
     def peak_clip(self, data, win=30, decrese=True, LLS=True, smooth_window=0):
-
         start_data = np.copy(data)
 
         window = win
@@ -394,6 +395,18 @@ class SNAPReduce(DataProcessorAlgorithm):
             if len(prefix) > 0:
                 new_Tag += '_' + prefix
 
+            # Edit instrument geomety to make final workspace smaller on disk
+            det_table = PreprocessDetectorsToMD(Inputworkspace='WS_red',
+                                                     OutputWorkspace='__SNAP_det_table')
+            polar = np.degrees(det_table.column('TwoTheta'))
+            azi = np.degrees(det_table.column('Azimuthal'))
+            EditInstrumentGeometry(Workspace="WS_red", L2=det_table.column('L2'),
+                                   Polar=polar, Azimuthal=azi)
+            EditInstrumentGeometry(Workspace="WS_nor", L2=det_table.column('L2'),
+                                   Polar=polar, Azimuthal=azi)
+            mtd.remove('__SNAP_det_table')
+
+            # Save requested formats
             if save_Data:
                 saveDir = self.getProperty("OutputDirectory").value.strip()
                 if len(saveDir) <= 0:
