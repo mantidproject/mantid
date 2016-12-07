@@ -284,7 +284,8 @@ double GetEi2::calculateEi(const double initial_guess) {
  * DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
-double GetEi2::getDistanceFromSource(size_t ws_index, const SpectrumInfo &spectrumInfo) const {
+double GetEi2::getDistanceFromSource(size_t ws_index,
+                                     const SpectrumInfo &spectrumInfo) const {
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index
                 << "' and the source\n";
 
@@ -299,7 +300,8 @@ double GetEi2::getDistanceFromSource(size_t ws_index, const SpectrumInfo &spectr
     g_log.debug() << "Detector position = " << spectrumInfo.position(ws_index)
                   << ", Source position = " << source->getPos() << "\n";
   }
-  const double dist = spectrumInfo.position(ws_index).distance(source->getPos());
+  const double dist =
+      spectrumInfo.position(ws_index).distance(source->getPos());
   g_log.debug() << "Distance = " << dist << " metres\n";
   return dist;
 }

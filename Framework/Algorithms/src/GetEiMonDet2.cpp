@@ -222,7 +222,8 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
                         << " should be detector, but is marked as monitor.\n";
       }
       if (!detector->isMasked()) {
-        const double d = spectrumInfo.position(index).distance(sample->getPos());
+        const double d =
+            spectrumInfo.position(index).distance(sample->getPos());
         distanceSum += d;
         const double epp = (*peakPositionColumn)[index];
         eppSum += epp;
@@ -348,7 +349,8 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
                     << "as monitor.\n";
   }
   const auto sample = m_detectorWs->getInstrument()->getSample();
-  monitorToSampleDistance = spectrumInfo.position(monitorIndex).distance(sample->getPos());
+  monitorToSampleDistance =
+      spectrumInfo.position(monitorIndex).distance(sample->getPos());
   g_log.information() << "Monitor-to-sample distance: "
                       << monitorToSampleDistance << ".\n";
 

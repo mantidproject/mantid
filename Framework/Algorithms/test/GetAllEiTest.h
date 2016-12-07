@@ -427,8 +427,10 @@ public:
     auto &spectrumInfoW = wws->spectrumInfo();
     auto det1WPosition = spectrumInfoW.position(0);
     auto det2WPosition = spectrumInfoW.position(1);
-    TSM_ASSERT_EQUALS("should be the same first detector position", det1WPosition, det1TPosition);
-    TSM_ASSERT_EQUALS("should be the same second detector position", det2WPosition, det2TPosition);
+    TSM_ASSERT_EQUALS("should be the same first detector position",
+                      det1WPosition, det1TPosition);
+    TSM_ASSERT_EQUALS("should be the same second detector position",
+                      det2WPosition, det2TPosition);
 
     TSM_ASSERT_EQUALS("Detector's ID for the first spectrum and new workspace "
                       "should coincide",

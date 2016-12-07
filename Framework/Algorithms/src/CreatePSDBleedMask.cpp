@@ -119,7 +119,8 @@ void CreatePSDBleedMask::exec() {
     boost::shared_ptr<const Geometry::IComponent> parent;
 
     if (!spectrumInfo.hasUniqueDetector(i)) {
-      const Geometry::DetectorGroup &group = dynamic_cast<const Geometry::DetectorGroup &>(det);
+      const Geometry::DetectorGroup &group =
+          dynamic_cast<const Geometry::DetectorGroup &>(det);
       parent = group.getDetectors().front()->getParent();
     } else {
       parent = det.getParent();

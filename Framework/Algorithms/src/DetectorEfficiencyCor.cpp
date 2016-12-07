@@ -191,7 +191,8 @@ aligned along one axis
 *  @throw NotFoundError if the detector or its gas pressure or wall thickness
 were not found
 */
-void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn, SpectrumInfo spectrumInfo) {
+void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn,
+                                                 SpectrumInfo spectrumInfo) {
   if (spectrumInfo.isMonitor(spectraIn) || spectrumInfo.isMasked(spectraIn)) {
     return;
   }
