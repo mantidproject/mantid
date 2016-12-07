@@ -294,7 +294,8 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
     normalizeVector<Mantid::coord_t, N>(orthogonalVector);
     normalizeVector<Mantid::coord_t, N>(nonOrthogonalVector);
 
-	//projecting onto third dimension by setting dimension coming out of screen to zero
+    // projecting onto third dimension by setting dimension coming out of screen
+    // to zero
     std::array<Mantid::coord_t, 3> temporaryNonOrthogonal{0.f, 0.f, 0.f};
     temporaryNonOrthogonal[currentDimension] =
         nonOrthogonalVector[currentDimension];

@@ -205,7 +205,7 @@ void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &numberPen,
 
   int additionalLinesToDraw =
       static_cast<int>(std::abs(std::ceil(yOffsetForXLine / increment)));
-  
+
   int index = 0;
   if (angle > 0) {
     // If the angle is positive, then we need to add more lines at the bottom of
