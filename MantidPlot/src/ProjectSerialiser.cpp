@@ -30,7 +30,8 @@ void file_compress(const char *file, const char *mode);
 }
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
-    : window(window), m_currentFolder(nullptr), m_windowCount(0), m_saveAll(true) {}
+    : window(window), m_currentFolder(nullptr), m_windowCount(0),
+      m_saveAll(true) {}
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
     : window(window), m_currentFolder(folder), m_windowCount(0) {}
