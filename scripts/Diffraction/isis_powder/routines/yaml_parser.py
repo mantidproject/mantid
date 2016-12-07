@@ -52,17 +52,16 @@ def _open_yaml_file_as_dictionary(file_path):
 
 
 def _find_dictionary_key(dict_to_search, run_number):
-
     for key in dict_to_search:
         if is_run_range_key_unbounded(key):  # Have an unbounded run don't generate numbers
             split_key = str(key).split('-')
             lower_key_bound = int(split_key[-2])
             if run_number > lower_key_bound:
                 return key
-
-        generated_runs = common.generate_run_numbers(run_number_string=key)
-        if run_number in generated_runs:
-            return key
+        else:
+            generated_runs = common.generate_run_numbers(run_number_string=key)
+            if run_number in generated_runs:
+                return key
 
     return None
 

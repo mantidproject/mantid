@@ -52,6 +52,12 @@ def extract_ws_spectra(ws_to_split):
     return spectra_bank_list
 
 
+def extract_and_crop_spectra(focused_ws, instrument):
+    ws_spectra = extract_ws_spectra(ws_to_split=focused_ws)
+    ws_spectra = instrument.crop_to_sane_tof(ws_to_crop=ws_spectra)
+    return ws_spectra
+
+
 def generate_run_numbers(run_number_string):
     # Check its not a single run
     if isinstance(run_number_string, int) or run_number_string.isdigit():

@@ -110,14 +110,17 @@ def _clean_up():
 
 def setup_polaris_instrument():
     user_name = "Test"
+    calibration_mapping_file_name = "polaris_calibration.yaml"
 
     calibration_dir = _get_calibration_dir()
-    path_to_add = os.path.join(DIRS[0], "POLARIS")
-    config['datasearch.directories'] += ";" + path_to_add
+    calibration_mapping_path = os.path.join(calibration_dir, calibration_mapping_file_name)
     output_dir = _get_output_dir()
 
+    path_to_add = os.path.join(DIRS[0], "POLARIS")
+    config['datasearch.directories'] += ";" + path_to_add
     polaris_obj = polaris.Polaris(user_name=user_name, chopper_on=True, apply_solid_angle=False,
-                                  calibration_directory=calibration_dir, output_directory=output_dir)
+                                  calibration_directory=calibration_dir, output_directory=output_dir,
+                                  calibration_mapping_file=calibration_mapping_path)
     return polaris_obj
 
 

@@ -114,9 +114,6 @@ class AbstractInst(object):
     def attenuate_workspace(self, input_workspace):
         return input_workspace
 
-    def calculate_focus_binning_params(self, sample):
-        return None
-
     def correct_sample_vanadium(self, focus_spectra, vanadium_spectra=None):
         raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
 
@@ -138,7 +135,7 @@ class AbstractInst(object):
     def pearl_focus_tof_rebinning(self, input_workspace):
         return input_workspace
 
-    def crop_data_tail(self, ws_to_crop):
+    def crop_to_sane_tof(self, ws_to_crop):
         return ws_to_crop
 
     def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
@@ -146,9 +143,6 @@ class AbstractInst(object):
 
     def spline_vanadium_ws(self, focused_vanadium_ws):
         return None
-
-    def extract_and_crop_spectra(self, focused_ws):
-        raise NotImplemented("Extract spectra and crop in tof not implemented")
 
 
 # ----- Private Implementation ----- #

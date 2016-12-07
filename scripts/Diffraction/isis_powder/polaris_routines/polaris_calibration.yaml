@@ -24,6 +24,13 @@
     vanadium_run_numbers : "93105"
     empty_run_numbers : "93106"
 
+95597-95599:
+  offset_file_name : "cycle_16_3_silicon_all_spectra.cal"
+  label : "16_3"
+  chopper_on:
+    vanadium_run_numbers : "95598"
+    empty_run_numbers : "95597"
+
 95600- :  #95614
   # Calibration run
   offset_file_name : "offsets_2011_cycle111b.cal"

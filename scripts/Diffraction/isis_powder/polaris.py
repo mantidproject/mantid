@@ -39,8 +39,8 @@ class Polaris(AbstractInst):
 
     def create_calibration_vanadium(self, run_in_range, do_absorb_corrections=True, gen_absorb_correction=False):
         run_details = self.get_run_details(run_number=int(run_in_range))
-        return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium,
-                                                 empty_runs=run_details.sample_empty,
+        return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
+                                                 empty_runs=run_details.empty_runs,
                                                  do_absorb_corrections=do_absorb_corrections,
                                                  gen_absorb_correction=gen_absorb_correction)
 
@@ -115,16 +115,6 @@ class Polaris(AbstractInst):
     def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
         return polaris_algs.generate_absorb_corrections(ws_to_match=ws_to_match)
 
-    def extract_and_crop_spectra(self, focused_ws):
-        ws_spectra = common.extract_ws_spectra(ws_to_split=focused_ws)
-        ws_spectra = common.crop_in_tof(ws_to_rebin=ws_spectra, x_min=800, x_max=20000)
-        return ws_spectra
-
-    def calculate_focus_binning_params(self, sample):
-        calculated_binning_params = polaris_algs.calculate_focus_binning_params(sample_ws=sample,
-                                                                                num_of_banks=self._number_of_banks)
-        return calculated_binning_params
-
     def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(processed_spectra)
         output_paths = self._generate_out_file_paths(run_details=run_details)
@@ -133,3 +123,7 @@ class Polaris(AbstractInst):
                                                  output_paths=output_paths, run_number=run_details.run_number)
 
         return d_spacing_group
+
+    def crop_to_sane_tof(self, ws_to_crop):
+        cropped_ws = common.crop_in_tof(ws_to_rebin=ws_to_crop, x_min=800, x_max=20000)
+        return cropped_ws

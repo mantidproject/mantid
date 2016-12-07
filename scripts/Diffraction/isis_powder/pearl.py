@@ -6,7 +6,7 @@ import mantid.simpleapi as mantid
 from isis_powder.routines import common, yaml_parser
 from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.pearl_routines import pearl_algs, pearl_calibration_algs, pearl_output, pearl_spline, PearlRunSettings
+from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_spline, PearlRunSettings
 
 
 class Pearl(AbstractInst):
@@ -116,14 +116,8 @@ class Pearl(AbstractInst):
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
 
-    def extract_and_crop_spectra(self, focused_ws):
-        ws_spectra = common.extract_ws_spectra(ws_to_split=focused_ws)
-        ws_spectra = common.crop_in_tof(ws_to_rebin=ws_spectra, x_min=1500, x_max=19900)
-        return ws_spectra
-
-    def crop_data_tail(self, ws_to_crop):
-        # TODO move this param into advanced config
-        out_ws = mantid.CropWorkspace(XMax="19900", InputWorkspace=ws_to_crop, OutputWorkspace=ws_to_crop)
+    def crop_to_sane_tof(self, ws_to_crop):
+        out_ws = common.crop_in_tof(ws_to_rebin=ws_to_crop, x_min=1500, x_max=19900)
         return out_ws
 
     def generate_vanadium_absorb_corrections(self, run_details, ws_to_match):

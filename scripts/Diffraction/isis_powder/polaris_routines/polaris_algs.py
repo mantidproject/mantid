@@ -8,14 +8,14 @@ from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.routines.RunDetails import RunDetails
 
 
-def calculate_focus_binning_params(sample_ws, num_of_banks):
-    # TODO move these out to config file
+def calculate_focus_binning_params(sample_ws):
+    # TODO remove this if they only want sane TOF values and not consistent binning
     focus_bin_widths = [-0.0050, -0.0010, -0.0010, -0.0010, -0.00050]
     focus_crop_start = 2  # These are used when calculating binning range
     focus_crop_end = 0.95
 
     calculated_binning_params = []
-
+    num_of_banks = sample_ws.getNumberHistograms()
     for i in range(0, num_of_banks):
         sample_data = sample_ws.readX(i)
         starting_bin = sample_data[0] * (1 + focus_crop_start)
@@ -60,8 +60,8 @@ def generate_absorb_corrections(ws_to_match):
 
 
 def generate_solid_angle_corrections(run_details, instrument):
-    vanadium_ws = common.load_current_normalised_ws_list(run_number_string=run_details.vanadium, instrument=instrument,
-                                                         input_batching=InputBatchingEnum.Summed)
+    vanadium_ws = common.load_current_normalised_ws_list(run_number_string=run_details.vanadium_run_numbers,
+                                                         instrument=instrument, input_batching=InputBatchingEnum.Summed)
     corrections = _calculate_solid_angle_efficiency_corrections(vanadium_ws[0])
     mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=run_details.solid_angle_corr)
     common.remove_intermediate_workspace(vanadium_ws)
@@ -92,10 +92,13 @@ def get_run_details(chopper_on, sac_on, run_number_string, calibration_dir, mapp
     solid_angle_file_path = os.path.join(in_calib_dir, solid_angle_file_name)
     splined_vanadium = os.path.join(in_calib_dir, splined_vanadium_name)
 
-    run_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
-                             vanadium_runs=vanadium_runs, run_number=run_number_string)
-    run_details.label = label
+    run_details = RunDetails(run_number=run_number_string)
     run_details.empty_runs = empty_runs
+    run_details.vanadium_run_numbers = vanadium_runs
+    run_details.label = label
+
+    run_details.calibration_file_path = calibration_full_path
+    run_details.grouping_file_path = grouping_full_path
     run_details.splined_vanadium_file_path = splined_vanadium
     run_details.solid_angle_corr = solid_angle_file_path
 
@@ -103,8 +106,6 @@ def get_run_details(chopper_on, sac_on, run_number_string, calibration_dir, mapp
 
 
 def split_into_tof_d_spacing_groups(processed_spectra):
-    import pydevd
-    pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
     name_index = 1
     d_spacing_output = []
     tof_output = []
