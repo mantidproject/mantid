@@ -17,6 +17,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
+constexpr double deg2rad = M_PI / 180.0;
+
 namespace Mantid {
 namespace Algorithms {
 

@@ -29,8 +29,6 @@
 vtkStandardNewMacro(vtkNexusPeaksReader)
 
 using namespace Mantid::VATES;
-using Mantid::Geometry::IMDDimension_sptr;
-using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 

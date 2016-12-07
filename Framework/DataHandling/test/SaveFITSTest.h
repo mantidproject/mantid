@@ -8,6 +8,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

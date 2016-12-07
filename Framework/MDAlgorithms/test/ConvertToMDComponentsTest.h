@@ -3,6 +3,7 @@
 // tests for different parts of ConvertToMD exec functions
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

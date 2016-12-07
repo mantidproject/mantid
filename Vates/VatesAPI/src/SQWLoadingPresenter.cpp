@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MDLoadingView.h"
@@ -6,6 +7,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <boost/regex.hpp>
 
 namespace Mantid {
