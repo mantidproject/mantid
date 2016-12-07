@@ -102,12 +102,16 @@ private:
   void addWindowItem(QTreeWidget *widget, const WindowInfo &info);
   /// Add an new workspace item QTreeWidget
   void addWorkspaceItem(const WorkspaceInfo &info);
+  /// Make a new tree widget item from a workspace info object
+  QTreeWidgetItem *makeWorkspaceItem(const WorkspaceInfo &info) const;
   /// Check if the project path already existed
   bool checkIfNewProject(const QString &projectName) const;
   /// Resize a QTreeWidgets columns to fit text correctly
   void resizeWidgetColumns(QTreeWidget *widget);
   /// Connect up signals to the interface on initilisation
   void connectSignals();
+  /// Update the checked state of the tree when an item is updated
+  void updateWorkspaceListCheckState(QTreeWidgetItem* item);
 
   // Instance variables
 

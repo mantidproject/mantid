@@ -167,20 +167,7 @@ void ProjectSaveView::removeFromExcludedWindowsList(
  * @param column :: column that was modified
  */
 void ProjectSaveView::workspaceItemChanged(QTreeWidgetItem *item, int column) {
-  blockSignals(true);
-  // update child check state
-  auto checkState = item->checkState(0);
-  for(int i = 0; i < item->childCount(); ++i)
-  {
-    item->child(i)->setCheckState(0, checkState);
-  }
-
-  auto parent = item->parent();
-  if(parent && checkState == Qt::CheckState::Unchecked)
-    parent->setCheckState(0, checkState);
-
-  blockSignals(false);
-
+  updateWorkspaceListCheckState(item);
   if (item->checkState(column) == Qt::CheckState::Checked) {
     m_presenter->notify(ProjectSavePresenter::Notification::CheckWorkspace);
   } else if (item->checkState(column) == Qt::CheckState::Unchecked) {
@@ -255,6 +242,7 @@ ProjectSaveView::getItemsWithCheckState(const Qt::CheckState state) const {
       names.push_back(name);
     }
 
+    // now check the child items and append any that have the check state
     for(int i = 0; i < item->childCount(); ++i) {
       auto child = item->child(i);
       if (child->checkState(0) == state) {
@@ -319,6 +307,23 @@ void ProjectSaveView::addWindowItem(QTreeWidget *widget,
  * @param info :: workspace info object with data to add
  */
 void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info) {
+  auto item = makeWorkspaceItem(info);
+
+  for(auto subInfo : info.subWorkspaces) {
+    auto subItem = makeWorkspaceItem(subInfo);
+    item->addChild(subItem);
+  }
+
+  m_ui.workspaceList->addTopLevelItem(item);
+}
+
+/**
+ * Build a new QTreeWidgetItem for a WorkspaceInfo
+ * @param info :: reference to the WorkspaceInfo to make an item for
+ * @return new QTreeWidgetItem for the info object
+ */
+QTreeWidgetItem *ProjectSaveView::makeWorkspaceItem(const WorkspaceInfo &info) const
+{
   QStringList lst;
   lst << QString::fromStdString(info.name);
   lst << QString::fromStdString(info.type);
@@ -326,25 +331,12 @@ void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info) {
   lst << QString::number(info.numWindows);
 
   auto item = new QTreeWidgetItem(lst);
+
   if (!info.icon_id.empty())
     item->setIcon(0, getQPixmap(info.icon_id));
   item->setCheckState(0, Qt::CheckState::Checked);
 
-  for(auto subInfo : info.subWorkspaces) {
-    QStringList subItem;
-    subItem << QString::fromStdString(subInfo.name);
-    subItem << QString::fromStdString(subInfo.type);
-    subItem << QString::fromStdString(subInfo.size);
-    subItem << QString::number(subInfo.numWindows);
-
-    auto subWidgetItem = new QTreeWidgetItem(subItem);
-    if (!info.icon_id.empty())
-      subWidgetItem->setIcon(0, getQPixmap(subInfo.icon_id));
-    subWidgetItem->setCheckState(0, Qt::CheckState::Checked);
-    item->addChild(subWidgetItem);
-  }
-
-  m_ui.workspaceList->addTopLevelItem(item);
+  return item;
 }
 
 /**
@@ -387,6 +379,35 @@ void ProjectSaveView::connectSignals() {
           m_ui.saveProgressBar, SLOT(setRange(int, int)));
   connect(&m_serialiser, SIGNAL(setProgressBarValue(int)), m_ui.saveProgressBar,
           SLOT(setValue(int)));
+}
+
+/**
+ * Update other items that are parents/children of this item.
+ *
+ * This makes sure that the state of the checkboxes are always logically
+ * consistent. E.g. is a parent item is checked, so are all its children
+ *
+ * @param item :: item that has changed check state
+ */
+void ProjectSaveView::updateWorkspaceListCheckState(QTreeWidgetItem *item)
+{
+  // block signals so we don't trigger more updates to widget items
+  blockSignals(true);
+
+  // update child check state
+  // children should match the check state of the parent item
+  auto checkState = item->checkState(0);
+  for(int i = 0; i < item->childCount(); ++i)
+  {
+    item->child(i)->setCheckState(0, checkState);
+  }
+
+  // the parent item should be unchecked if any single child is unchecked
+  auto parent = item->parent();
+  if(parent && checkState == Qt::CheckState::Unchecked)
+    parent->setCheckState(0, checkState);
+
+  blockSignals(false);
 }
 }
 }

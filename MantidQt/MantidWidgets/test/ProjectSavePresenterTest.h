@@ -42,15 +42,17 @@ public:
 
   void testConstructWithNoWorkspacesAndNoWindows() {
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
+    std::vector<WindowInfo> winInfo;
+    std::vector<WorkspaceInfo> wsInfo;
 
     // View should be passed what workspaces exist and what windows
     // are currently included.
     // As the ADS is empty at this point all lists should be empty
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
-    EXPECT_CALL(m_view, updateWorkspacesList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateIncludedWindowsList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
+    EXPECT_CALL(m_view, updateWorkspacesList(wsInfo)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo)).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -58,16 +60,17 @@ public:
   }
 
   void testConstructWithSingleWorkspaceAndNoWindows() {
+    std::vector<WindowInfo> winInfo;
     auto workspaces = setUpWorkspaces({"ws1"});
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
 
     // View should be passed what workspaces exist and what windows
-    // are currently includednames.
+    // are currently included names.
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateIncludedWindowsList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(winInfo)).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -78,14 +81,14 @@ public:
   void testConstructWithTwoWorkspacesAndNoWindows() {
     auto workspaces = setUpWorkspaces({"ws1", "ws2"});
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
+    std::vector<WindowInfo> winInfo;
 
     // View should be passed what workspaces exist and what windows
     // are currently included.
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     EXPECT_CALL(m_view, getWindows()).WillRepeatedly(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateIncludedWindowsList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -109,7 +112,6 @@ public:
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -138,7 +140,6 @@ public:
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -163,7 +164,6 @@ public:
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -192,7 +192,6 @@ public:
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -270,6 +269,8 @@ public:
   }
 
   void testPrepareProjectFolder_withFile() {
+    std::vector<WindowInfo> winInfo;
+    std::vector<WorkspaceInfo> wsInfo;
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     QString filePath = "/tmp/mantidprojecttest/mantidprojecttest.mantid";
 
@@ -277,9 +278,8 @@ public:
     ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
 
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
-    EXPECT_CALL(m_view, updateWorkspacesList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateIncludedWindowsList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
+    EXPECT_CALL(m_view, updateWorkspacesList(wsInfo)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
 
     EXPECT_CALL(m_view, getProjectPath()).Times(Exactly(1));
     EXPECT_CALL(m_view, setProjectPath(filePath)).Times(Exactly(1));
@@ -291,6 +291,8 @@ public:
   }
 
   void testPrepareProjectFolder_withFolder() {
+    std::vector<WindowInfo> winInfo;
+    std::vector<WorkspaceInfo> wsInfo;
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     QString filePath = "/tmp/mantidprojecttest";
 
@@ -298,9 +300,8 @@ public:
     ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
 
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
-    EXPECT_CALL(m_view, updateWorkspacesList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateIncludedWindowsList({})).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList({})).Times(Exactly(0));
+    EXPECT_CALL(m_view, updateWorkspacesList(wsInfo)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
 
     EXPECT_CALL(m_view, getProjectPath()).Times(Exactly(1));
     EXPECT_CALL(m_view, setProjectPath(filePath + "/mantidprojecttest.mantid"))
