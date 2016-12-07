@@ -29,7 +29,7 @@ using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IDetector_const_sptr;
 
-static const int THEMASKED = 2;
+static const int THEMASKED = 1;
 
 class SaveNXSPETest : public CxxTest::TestSuite {
 public:
