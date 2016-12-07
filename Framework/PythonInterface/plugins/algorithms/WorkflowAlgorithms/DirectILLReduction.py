@@ -677,33 +677,33 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup = IntermediateWsCleanup(cleanupMode, childAlgorithmLogging)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
-        # The variable 'mainWS' shall hold the current main data
-        # throughout the algorithm.
+        # The variables 'mainWS' and 'monWS shall hold the current main
+        # data throughout the algorithm.
 
         # Init workspace.
         inputFile = self.getProperty(PROP_INPUT_FILE).value
         if inputFile:
             eppReference = self.getProperty(PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
             mainWS = _loadFiles(inputFile,
-                                   eppReference,
-                                   wsNames,
-                                   wsCleanup,
-                                   self.log(),
-                                   childAlgorithmLogging)
+                                eppReference,
+                                wsNames,
+                                wsCleanup,
+                                self.log(),
+                                childAlgorithmLogging)
         elif self.getProperty(PROP_INPUT_WORKSPACE).value:
             mainWS = self.getProperty(PROP_INPUT_WORKSPACE).value
 
         # Extract monitors to a separate workspace
-        detectorWorkspace, monitorWorkspace = _extractMonitorWs(mainWS,
-                                                                wsNames,
-                                                                childAlgorithmLogging)
-        monitorIndex = self.getProperty(PROP_MONITOR_INDEX).value
-        monitorIndex = self._convertToWorkspaceIndex(monitorIndex,
-                                                     monitorWorkspace)
+        detWS, monWS = _extractMonitorWs(mainWS,
+                                         wsNames,
+                                         childAlgorithmLogging)
+        monIndex = self.getProperty(PROP_MONITOR_INDEX).value
+        monIndex = self._convertToWorkspaceIndex(monIndex,
+                                                 monWS)
         wsCleanup.cleanup(mainWS)
-        mainWS = detectorWorkspace
-        del(detectorWorkspace)
-        wsCleanup.cleanupLater(monitorWorkspace)
+        mainWS = detWS
+        del(detWS)
+        wsCleanup.cleanupLater(monWS)
 
         # Time-independent background
         bkgInWS = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
@@ -720,62 +720,62 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if not self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).isDefault:
             self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgWS)
         bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
-        bkgSubtractedWorkspace = _subtractFlatBackground(mainWS,
-                                                         WS_CONTENT_DETECTORS,
-                                                         bkgWS,
-                                                         bkgScaling,
-                                                         wsNames,
-                                                         wsCleanup,
-                                                         childAlgorithmLogging)
+        bkgSubtractedWS = _subtractFlatBackground(mainWS,
+                                                  WS_CONTENT_DETECTORS,
+                                                  bkgWS,
+                                                  bkgScaling,
+                                                  wsNames,
+                                                  wsCleanup,
+                                                  childAlgorithmLogging)
         wsCleanup.cleanup(mainWS)
-        mainWS = bkgSubtractedWorkspace
-        del(bkgSubtractedWorkspace)
+        mainWS = bkgSubtractedWS
+        del(bkgSubtractedWS)
         wsCleanup.cleanupLater(bkgWS)
         # Monitor time-independent background.
-        monBkgWS = _createFlatBackground(monitorWorkspace,
+        monBkgWS = _createFlatBackground(monWS,
                                          WS_CONTENT_MONITORS,
                                          windowWidth,
                                          wsNames,
                                          childAlgorithmLogging)
         monBkgScaling = 1
-        bkgSubtractedMonWS = _subtractFlatBackground(monitorWorkspace,
+        bkgSubtractedMonWS = _subtractFlatBackground(monWS,
                                                      WS_CONTENT_MONITORS,
                                                      monBkgWS,
                                                      monBkgScaling,
                                                      wsNames,
                                                      wsCleanup,
                                                      childAlgorithmLogging)
-        wsCleanup.cleanup(monitorWorkspace)
-        monitorWorkspace = bkgSubtractedMonWS
+        wsCleanup.cleanup(monWS)
+        monWS = bkgSubtractedMonWS
         del(bkgSubtractedMonWS)
 
         # Find elastic peak positions for detectors.
-        detectorEPPInWS = self.getProperty(PROP_EPP_WORKSPACE).value
-        if not detectorEPPInWS:
-            detectorEPPWS = _findEPP(mainWS,
-                                     WS_CONTENT_DETECTORS,
-                                     wsNames,
-                                     childAlgorithmLogging)
+        detEPPInWS = self.getProperty(PROP_EPP_WORKSPACE).value
+        if not detEPPInWS:
+            detEPPWS = _findEPP(mainWS,
+                                WS_CONTENT_DETECTORS,
+                                wsNames,
+                                childAlgorithmLogging)
         else:
-            detectorEPPWS = detectorInWS
-            wsCleanup.protect(detectorEPPWS)
+            detEPPWS = detInWS
+            wsCleanup.protect(detEPPWS)
         if not self.getProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE).isDefault:
             self.setProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE,
-                             detectorEPPWS)
+                             detEPPWS)
         # Elastic peaks for monitors
-        monitorEPPInWS = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
-        if not monitorEPPInWS:
-            monitorEPPWS = _findEPP(mainWS,
-                                    WS_CONTENT_MONITORS,
-                                    wsNames,
-                                    childAlgorithmLogging)
+        monEPPInWS = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
+        if not monEPPInWS:
+            monEPPWS = _findEPP(monWS,
+                                WS_CONTENT_MONITORS,
+                                wsNames,
+                                childAlgorithmLogging)
         else:
-            monitorEPPWS = monitorInWS
-            wsCleanup.protect(monitorEPPWS)
+            monEPPWS = monInWS
+            wsCleanup.protect(monEPPWS)
         if not self.getProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE).isDefault:
             self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
-                             monitorEPPWS)
-        wsCleanup.cleanupLater(detectorEPPWS, monitorEPPWS)
+                             monEPPWS)
+        wsCleanup.cleanupLater(detEPPWS, monEPPWS)
 
         # Detector diagnostics, if requested.
         if self.getProperty(PROP_DETECTOR_DIAGNOSTICS).value == DIAGNOSTICS_YES:
@@ -792,25 +792,25 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 wsCleanup.protect(diagnosticsWS)
             if not self.getProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE).isDefault:
                 self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE, diagnosticsWS)
-            diagnosedWorkspace = _maskDiagnosedDetectors(mainWS,
-                                                         diagnosticsWS,
-                                                         wsNames,
-                                                         childAlgorithmLogging)
+            diagnosedWS = _maskDiagnosedDetectors(mainWS,
+                                                  diagnosticsWS,
+                                                  wsNames,
+                                                  childAlgorithmLogging)
             wsCleanup.cleanup(diagnosticsWS)
             del(diagnosticsWS)
             wsCleanup.cleanup(mainWS)
-            mainWS = diagnosedWorkspace
-            del(diagnosedWorkspace)
+            mainWS = diagnosedWS
+            del(diagnosedWS)
         # Apply user mask.
         userMask = self.getProperty(PROP_USER_MASK).value
-        maskedWorkspace = _applyUserMask(mainWS, 
-                                         userMask,
-                                         indexType,
-                                         wsNames,
-                                         childAlgorithmLogging)
+        maskedWS = _applyUserMask(mainWS, 
+                                  userMask,
+                                  indexType,
+                                  wsNames,
+                                  childAlgorithmLogging)
         wsCleanup.cleanup(mainWS)
-        mainWS = maskedWorkspace
-        del(maskedWorkspace)
+        mainWS = maskedWS
+        del(maskedWS)
 
         # Get calibrated incident energy
         eiCalibration = self.getProperty(PROP_INCIDENT_ENERGY_CALIBRATION).value
@@ -819,12 +819,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
             if not eiInWS:
                 eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS,
-                                                            detectorEPPWS,
-                                                            monitorWorkspace,
-                                                            monitorEPPWS,
+                                                            detEPPWS,
+                                                            monWS,
+                                                            monEPPWS,
                                                             indexType,
                                                             eiCalibrationDets,
-                                                            monitorIndex,
+                                                            monIndex,
                                                             wsNames,
                                                             self.log(),
                                                             childAlgorithmLogging)
@@ -841,14 +841,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 wsCleanup.cleanup(mainWS)
                 mainWS = eiCalibratedDetWS
                 del(eiCalibratedDetWS)
-                eiCalibratedMonWS = _applyIncidentEnergyCalibration(monitorWorkspace,
+                eiCalibratedMonWS = _applyIncidentEnergyCalibration(monWS,
                                                                     WS_CONTENT_MONITORS,
                                                                     eiCalibrationWS,
                                                                     wsNames,
                                                                     report,
                                                                     childAlgorithmLogging)
-                wsCleanup.cleanup(monitorWorkspace)
-                monitorWorkspace = eiCalibratedMonWS
+                wsCleanup.cleanup(monWS)
+                monWS = eiCalibratedMonWS
                 del(eiCalibratedMonWS)
             if not self.getProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE).isDefault:
                 self.setProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE, eiCalibrationWS)
@@ -860,9 +860,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if normalisationMethod != NORM_METHOD_OFF:
             if normalisationMethod == NORM_METHOD_MONITOR:
                 normalizedWS = _normalizeToMonitor(mainWS,
-                                                   monitorWorkspace,
-                                                   monitorEPPWS,
-                                                   monitorIndex,
+                                                   monWS,
+                                                   monEPPWS,
+                                                   monIndex,
                                                    wsNames,
                                                    wsCleanup,
                                                    childAlgorithmLogging)
@@ -917,9 +917,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
             # the vanadium data as `ComputeCalibrationCoef` does not do
             # the best possible Debye-Waller correction.
             mainWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
-                                                  EPPTable=detectorEPPWS,
-                                                  OutputWorkspace=outWS,
-                                                  EnableLogging=childAlgorithmLogging)
+                                               EPPTable=detEPPWS,
+                                               OutputWorkspace=outWS,
+                                               EnableLogging=childAlgorithmLogging)
             self._finalize(mainWS, wsCleanup, report)
             return
 
@@ -989,6 +989,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                           '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['nxs']))
+        # TODO We may want an input monitor workspace here as well.
         self.declareProperty(MatrixWorkspaceProperty(PROP_INPUT_WORKSPACE,
                                                      '',
                                                      optional=PropertyMode.Optional,
