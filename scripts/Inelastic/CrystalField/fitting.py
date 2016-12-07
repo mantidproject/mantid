@@ -226,11 +226,11 @@ class CrystalField(object):
             out += ',constraints=(%s)' % constraints
         return out
 
-    # pylint: disable=too-many-public-branches
-    def makeMultiSpectrumFunction(self):
-        """Form a definition string for the CrystalFieldMultiSpectrum function"""
-        out = 'name=CrystalFieldMultiSpectrum,Ion=%s,Symmetry=%s' % (self._ion, self._symmetry)
-        out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
+    def _makeMultiAttributes(self):
+        """
+        Make the main attribute part of the function string for makeMultiSpectrumFunction()
+        """
+        out = ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         out += ',PeakShape=%s' % self.getPeak().name
         out += ',FixAllPeaks=%s' % self._fixAllPeaks
         if self.background is not None:
@@ -241,6 +241,46 @@ class CrystalField(object):
         if self._intensityScaling is not None:
             for i in range(len(self._intensityScaling)):
                 out += ',IntensityScaling%s=%s' % (i, self._intensityScaling[i])
+        return out
+
+    def _makeMultiResolutionModel(self):
+        """
+        Make the resolution model part of the function string for makeMultiSpectrumFunction()
+        """
+        out = ''
+        if self._resolutionModel is not None:
+            i = 0
+            for model in self._resolutionModel.model:
+                out += ',FWHMX{0}={1},FWHMY{0}={2}'.format(i, tuple(model[0]), tuple(model[1]))
+                i += 1
+            if self._fwhmVariation is not None:
+                out += ',FWHMVariation=%s' % self._fwhmVariation
+        return out
+
+    def _makeMultiPeaks(self):
+        """
+        Make the peaks part of the function string for makeMultiSpectrumFunction()
+        """
+        out = ''
+        i = 0
+        for peaks in self.peaks:
+            parOut = peaks.paramString('f%s.' % i, 1)
+            if len(parOut) > 0:
+                out += ',%s' % parOut
+            tiesOut = peaks.tiesString('f%s.' % i)
+            if len(tiesOut) > 0:
+                out += ',%s' % tiesOut
+            constraintsOut = peaks.constraintsString('f%s.' % i)
+            if len(constraintsOut) > 0:
+                out += ',%s' % constraintsOut
+            i += 1
+        return out
+
+    # pylint: disable=too-many-public-branches
+    def makeMultiSpectrumFunction(self):
+        """Form a definition string for the CrystalFieldMultiSpectrum function"""
+        out = 'name=CrystalFieldMultiSpectrum,Ion=%s,Symmetry=%s' % (self._ion, self._symmetry)
+        out += self._makeMultiAttributes()
         out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
 
         tieList = []
@@ -259,25 +299,9 @@ class CrystalField(object):
                 if len(constraintsOut) > 0:
                     constraintsList.append(constraintsOut)
                 i += 1
-        if self._resolutionModel is not None:
-            i = 0
-            for model in self._resolutionModel.model:
-                out += ',FWHMX{0}={1},FWHMY{0}={2}'.format(i, tuple(model[0]), tuple(model[1]))
-                i += 1
-            if self._fwhmVariation is not None:
-                out += ',FWHMVariation=%s' % self._fwhmVariation
-        i = 0
-        for peaks in self.peaks:
-            parOut = peaks.paramString('f%s.' % i, 1)
-            if len(parOut) > 0:
-                out += ',%s' % parOut
-            tiesOut = peaks.tiesString('f%s.' % i)
-            if len(tiesOut) > 0:
-                out += ',%s' % tiesOut
-            constraintsOut = peaks.constraintsString('f%s.' % i)
-            if len(constraintsOut) > 0:
-                out += ',%s' % constraintsOut
-            i += 1
+        out += self._makeMultiResolutionModel()
+        out += self._makeMultiPeaks()
+
         ties = self.getFieldTies()
         if len(ties) > 0:
             tieList.append(ties)
