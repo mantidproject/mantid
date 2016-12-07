@@ -15,15 +15,15 @@ from os import path
 CLEANUP_DELETE = 'Delete Intermediate Workspaces'
 CLEANUP_KEEP   = 'Keep Intermediate Workspaces'
 
+DIAGNOSTICS_NO    = 'No Detector Diagnostics'
 DIAGNOSTICS_YES   = 'Diagnose Detectors'
-DIAGNOSTICS_NO    = 'Omit Detector Diagnostics'
 
-INCIDENT_ENERGY_CALIBRATION_NO  = 'Omit Incident Energy Calibration'
+INCIDENT_ENERGY_CALIBRATION_NO  = 'No Incident Energy Calibration'
 INCIDENT_ENERGY_CALIBRATION_YES = 'Calibrate Incident Energy'
 
 INDEX_TYPE_DETECTOR_ID     = 'Detector ID'
-INDEX_TYPE_SPECTRUM_NUMBER = 'Spectrum Number'
 INDEX_TYPE_WORKSPACE_INDEX = 'Workspace Index'
+INDEX_TYPE_SPECTRUM_NUMBER = 'Spectrum Number'
 
 NORM_METHOD_MONITOR = 'Monitor'
 NORM_METHOD_OFF     = 'No Normalisation'
