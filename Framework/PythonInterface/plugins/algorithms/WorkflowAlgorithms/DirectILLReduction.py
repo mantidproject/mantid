@@ -314,7 +314,53 @@ def _findEPP(ws, wsType, wsNames, algorithmLogging):
                     EnableLogging=algorithmLogging)
     return eppWS
 
-def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, algorithmLogging):
+def _reportSingleZeroCountDiagnostics(report, diagnostics, wsIndex):
+    '''
+    Reports the result of zero count diagnostics for a single diagnose.
+    '''
+    diagnose = diagnostics.readY(wsIndex)[0]
+    if diagnose == 0:
+        pass # Nothing to report.
+    elif diagnose == 1:
+        report.notice('Workspace index {0} has zero counts.'.format(wsIndex))
+    else:
+        report.error(('Workspace index {0} has been marked as bad for ' +
+            'masking by zero count diagnostics for unknown reasons.').format(wsIndex))
+    det = diagnostics.getDetector(wsIndex)
+    if det and det.isMasked():
+        report.error(('Workspace index {0} has been marked as masked by ' +
+            'zero count diagnostics for unknown reasons.').format(wsIndex))
+
+def _reportSingleBackgroundDiagnostics(report, diagnostics, wsIndex):
+    '''
+    Reports the result of background diagnostics for a single diagnose.
+    '''
+    diagnose = diagnostics.readY(wsIndex)[0]
+    if diagnose == 0:
+        pass # Nothing to report.
+    elif diagnose == 1:
+        report.notice('Workspace index {0} has noisy background.'.format(wsIndex))
+    else:
+        report.error(('Workspace index {0} has been marked as bad for ' +
+            'masking by noisy background diagnostics for unknown reasons.').format(wsIndex))
+    det = diagnostics.getDetector(wsIndex)
+    if det and det.isMasked():
+        report.error(('Workspace index {0} has been marked as masked by ' +
+            'noisy background diagnostics for unknown reasons.').format(wsIndex))
+
+def _reportDiagnostics(report, zeroCountDiagnostics, bkgDiagnostics):
+    '''
+    Parses the mask workspaces and fills in the report accordingly.
+    '''
+    for i in range(zeroCountDiagnostics.getNumberHistograms()):
+        _reportSingleZeroCountDiagnostics(report,
+                                          zeroCountDiagnostics,
+                                          i)
+        _reportSingleBackgroundDiagnostics(report,
+                                           bkgDiagnostics,
+                                           i)
+
+def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, algorithmLogging, report):
     '''
     Returns a diagnostics workspace.
     '''
@@ -331,6 +377,7 @@ def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, algorithmLogging):
                                                         HighThreshold=10,
                                                         LowOutlier=0.0,
                                                         EnableLogging=algorithmLogging)
+    _reportDiagnostics(report, zeroCountDiagnostics, noisyBkgDiagnostics)
     combinedDiagnosticsWSName = wsNames.withSuffix('diagnostics')
     diagnosticsWS = Plus(LHSWorkspace=zeroCountDiagnostics,
                          RHSWorkspace=noisyBkgDiagnostics,
@@ -705,7 +752,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                    bkgWorkspace,
                                                    wsNames,
                                                    wsCleanup,
-                                                   childAlgorithmLogging)
+                                                   childAlgorithmLogging,
+                                                   report)
             else:
                 diagnosticsWS = diagnosticsInWS
                 wsCleanup.protect(diagnosticsWS)
