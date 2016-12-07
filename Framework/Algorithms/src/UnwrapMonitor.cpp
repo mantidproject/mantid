@@ -97,7 +97,7 @@ void UnwrapMonitor::exec() {
 
   // This will be used later to store the maximum number of bin BOUNDARIES for
   // the rebinning
-  int max_bins = 0;
+  size_t max_bins = 0;
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
@@ -124,12 +124,12 @@ void UnwrapMonitor::exec() {
 
     // Unwrap the x data. Returns the bin ranges that end up being used
     const double Ld = L1 + spectrumInfo.l2(i);
-    MantidVec newX;
+    std::vector<double> newX;
     const std::vector<int> rangeBounds = this->unwrapX(newX, i, Ld);
 
     // Unwrap the y & e data according to the ranges found above
-    MantidVec newY;
-    MantidVec newE;
+    std::vector<double> newY;
+    std::vector<double> newE;
     this->unwrapYandE(tempWS, i, rangeBounds, newY, newE);
 
     // Now set the new X, Y and E values on the Histogram
@@ -142,7 +142,7 @@ void UnwrapMonitor::exec() {
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
     if (!spectrumInfo.isMonitor(i)) {
-      const int XLen = static_cast<int>(tempWS->x(i).size());
+      const size_t XLen = tempWS->x(i).size();
       if (XLen > max_bins)
         max_bins = XLen;
     }
@@ -176,8 +176,9 @@ void UnwrapMonitor::exec() {
  *  @return A 3-element vector containing the bins at which the upper and lower
  * ranges start & end
  */
-const std::vector<int>
-UnwrapMonitor::unwrapX(MantidVec &newX, const int &spectrum, const double &Ld) {
+const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
+                                              const int &spectrum,
+                                              const double &Ld) {
   // Create and initalise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
@@ -302,10 +303,11 @@ std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
 void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
                                 const int &spectrum,
                                 const std::vector<int> &rangeBounds,
-                                MantidVec &newY, MantidVec &newE) {
+                                std::vector<double> &newY,
+                                std::vector<double> &newE) {
   // Copy over the relevant ranges of Y & E data
-  MantidVec &Y = newY;
-  MantidVec &E = newE;
+  std::vector<double> &Y = newY;
+  std::vector<double> &E = newE;
   // Get references to the input data
   const auto &YIn = m_inputWS->y(spectrum);
   const auto &EIn = m_inputWS->e(spectrum);
@@ -360,9 +362,10 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
  */
 API::MatrixWorkspace_sptr
 UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
-                     const double &min, const double &max, const int &numBins) {
+                     const double &min, const double &max,
+                     const size_t &numBins) {
   // Calculate the width of a bin
-  const double step = (max - min) / numBins;
+  const double step = (max - min) / static_cast<double>(numBins);
 
   // Create a Rebin child algorithm
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");

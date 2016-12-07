@@ -77,6 +77,12 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
         runNumber = match[0];
       }
     }
+    std::string runTitle;
+    try {
+      runTitle = run.getPropertyValueAsType<std::string>("run_title");
+    } catch (Exception::NotFoundError &) {
+      // OK, runTitle will be empty
+    }
 
     double theta = -1.0;
     try {
@@ -90,7 +96,7 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
 
     return MeasurementItem(measurementItemId, measurementItemSubId,
                            measurementItemLabel, measurementItemType, theta,
-                           runNumber);
+                           runNumber, runTitle);
 
   } catch (std::invalid_argument &ex) {
     std::stringstream buffer;

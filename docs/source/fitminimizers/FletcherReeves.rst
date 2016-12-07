@@ -1,4 +1,4 @@
-.. _FletcherReeves
+.. _FletcherReeves:
 
 Conjugate Gradient Minimizer (Fletcher-Reeves imp.)
 ===================================================

@@ -74,4 +74,7 @@ changes on GitHub
 VSI Improvements
 ----------------
 
-ParaView updated to v5.2.0
+- ParaView updated to v5.2.0
+- The sources and views more reliably show progress in the VSI status bar. 
+- Added a button to the standard view which applies the threshold filter.
+- Update the cut button to match the equivalent ParaView icon.

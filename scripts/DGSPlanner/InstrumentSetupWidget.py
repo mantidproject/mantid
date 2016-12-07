@@ -6,6 +6,7 @@ import numpy
 import matplotlib
 matplotlib.use('Qt4Agg')
 matplotlib.rcParams['backend.qt4']='PyQt4'
+#the following matplotlib imports cannot be placed before the use command, so we ignore flake8 warnings
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas # noqa
 from matplotlib.figure import Figure # noqa
 from mpl_toolkits.mplot3d import Axes3D # noqa

@@ -239,7 +239,7 @@ private:
   void ABCtestWorkspace(std::string inputWSname, bool mask) {
     int nSpectra(12);
     Workspace2D_sptr ws2D =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(
             nSpectra, 2);
     ws2D->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(3, 2, 0));

@@ -5,12 +5,10 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include <boost/scoped_ptr.hpp>
 #include <climits>
 
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 class ISISRAW;
 class ISISRAW2;
 

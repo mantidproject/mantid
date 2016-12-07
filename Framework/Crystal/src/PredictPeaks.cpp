@@ -432,7 +432,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
     p.setGoniometerMatrix(goniometerMatrix);
     // Save the run number found before.
     p.setRunNumber(m_runNumber);
-    p.setHKL(hkl);
+    p.setHKL(hkl * m_qConventionFactor);
 
     if (m_sfCalculator) {
       p.setIntensity(m_sfCalculator->getFSquared(hkl));

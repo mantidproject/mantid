@@ -2,6 +2,7 @@
 #define MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 
 #include "MantidAPI/BoxController.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
@@ -730,7 +731,7 @@ public:
     numHist = 100 * 100;
     size_t nEvents = 1000;
     inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(nEvents, numHist,
+        WorkspaceCreationHelper::createRandomEventWorkspace(nEvents, numHist,
                                                             0.1));
     inWsEv->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(int(numHist)));

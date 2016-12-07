@@ -4,6 +4,8 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -16,7 +18,6 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MergeMD)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MergeMD::name() const { return "MergeMD"; }
 
@@ -26,9 +27,6 @@ int MergeMD::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MergeMD::category() const { return "MDAlgorithms\\Creation"; }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void MergeMD::init() {
@@ -48,7 +46,6 @@ void MergeMD::init() {
   this->initBoxControllerProps("2", 500, 16);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Create the output MDWorkspace from a list of input
  *
  * @param inputs :: list of names of input MDWorkspaces

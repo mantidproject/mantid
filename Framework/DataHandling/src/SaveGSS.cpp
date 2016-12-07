@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"

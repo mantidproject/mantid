@@ -2,6 +2,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
@@ -9,6 +10,7 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <fstream>
+#include <iomanip>
 
 #include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
