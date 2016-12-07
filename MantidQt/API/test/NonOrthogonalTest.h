@@ -132,7 +132,7 @@ private:
   }
 
   void getExampleCoordTArray(Mantid::coord_t *coordTArrayExample,
-                             bool default = true) {
+                             bool default) {
     if (default) {
       coordTArrayExample[0] = 1.0;
       coordTArrayExample[1] = 0.0;
@@ -287,7 +287,7 @@ public:
 
   void test_getGridLineAnglesInRadianWithDefaultTestArray() {
     Mantid::coord_t skewMatrixCoord[9];
-    getExampleCoordTArray(skewMatrixCoord);
+    getExampleCoordTArray(skewMatrixCoord, true);
     std::pair<double, double> radianAngles;
     bool radianResultCorrect;
     radianResultCorrect = false;
@@ -305,7 +305,7 @@ public:
     bool coordsRemainZero;
     coordsRemainZero = false;
     Mantid::coord_t skewMatrixCoord[9];
-    getExampleCoordTArray(skewMatrixCoord);
+    getExampleCoordTArray(skewMatrixCoord, true);
     auto eventWorkspace = getOrthogonalEventWorkspace();
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
     for (size_t d = 0; d < eventWorkspace->getNumDims();
