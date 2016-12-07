@@ -16,8 +16,6 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class ProjectSavePresenter;
-
 /** @class ProjectSaveView
 
 ProjectSaveView is the interaces for defining the functions that the project

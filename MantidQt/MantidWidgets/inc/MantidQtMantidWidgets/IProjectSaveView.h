@@ -12,7 +12,6 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class ProjectSavePresenter;
 struct WindowInfo;
 struct WorkspaceInfo;
 
