@@ -1,10 +1,10 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
-#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -305,7 +305,7 @@ void ReflSettingsTabPresenter::getExpDefaults() {
 
   auto cAp = inst->getStringParameter("cAp");
   if (!cAp.empty())
-    defaults[4] = "\"" + cAp[0] + "\""; 
+    defaults[4] = "\"" + cAp[0] + "\"";
 
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
