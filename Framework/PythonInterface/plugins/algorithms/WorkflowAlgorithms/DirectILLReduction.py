@@ -26,6 +26,7 @@ INDEX_TYPE_SPECTRUM_NUMBER = 'SpectrumNumber'
 INDEX_TYPE_WORKSPACE_INDEX = 'WorkspaceIndex'
 
 NORM_METHOD_MONITOR = 'Monitor'
+NORM_METHOD_OFF     = 'No Normalisation'
 NORM_METHOD_TIME    = 'AcquisitionTime'
 
 PROP_BINNING_Q                        = 'QBinning'
@@ -50,7 +51,7 @@ PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
 PROP_MONITOR_INDEX                    = 'Monitor'
 PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
-PROP_OUTPUT_DETECTOR_EPP_WORKSPACE             = 'OutputEPPWorkspace'
+PROP_OUTPUT_DETECTOR_EPP_WORKSPACE    = 'OutputEPPWorkspace'
 PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
 PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE = 'OutputIncidentEnergyWorkspace'
 PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
@@ -824,7 +825,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Normalisation to monitor/time
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
-        if normalisationMethod:
+        if normalisationMethod != NORM_METHOD_OFF:
             if normalisationMethod == NORM_METHOD_MONITOR:
                 normalizedWS = _normalizeToMonitor(mainWS,
                                                    monitorWorkspace,
@@ -1049,7 +1050,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              doc='Detector diagnostics workspace obtained from another reduction run.')
         self.declareProperty(PROP_NORMALISATION,
                              NORM_METHOD_MONITOR,
-                             validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME]),
+                             validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME, NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method')
         self.declareProperty(PROP_TRANSMISSION,
