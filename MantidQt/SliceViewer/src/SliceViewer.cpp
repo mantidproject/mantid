@@ -2416,7 +2416,6 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
   ui.btnDoLine->setDisabled(checked);
   ui.btnSnapToGrid->setDisabled(checked);
   ui.btnClearLine->setDisabled(checked);
-  ui.btnRebinMode->setDisabled(checked);
   ui.btnPeakOverlay->setDisabled(checked);
   disableAxisForNonorthogonal(checked, QwtPlot::yLeft);
   disableAxisForNonorthogonal(checked, QwtPlot::xBottom);
