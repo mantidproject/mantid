@@ -3,7 +3,7 @@
 import collections
 import glob
 from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
-from mantid.kernel import CompositeValidator, Direct, Direction, IntArrayProperty, IntBoundedValidator, IntMandatoryValidator, StringListValidator, StringMandatoryValidator, UnitConversion
+from mantid.kernel import CompositeValidator, Direct, Direction, FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, IntBoundedValidator, IntMandatoryValidator, StringListValidator, StringMandatoryValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground, ClearMaskFlag,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
@@ -978,94 +978,101 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self._finalize(mainWS, wsCleanup, report)
 
     def PyInit(self):
-        # TODO Property validation.
-        # Inputs
-        positiveInt = IntBoundedValidator()
-        positiveInt.setLower(0)
+        # Validators.
         mandatoryPositiveInt = CompositeValidator()
         mandatoryPositiveInt.add(IntMandatoryValidator())
-        mandatoryPositiveInt.add(positiveInt)
-        self.declareProperty(FileProperty(PROP_INPUT_FILE,
-                                          '',
+        mandatoryPositiveInt.add(IntBoundedValidator(lower=0))
+        positiveIntArray = IntArrayBoundedValidator()
+        positiveIntArray.setLower(0)
+        scalingFactor = FloatBoundedValidator(lower=0, upper=1)
+
+        # Properties.
+        self.declareProperty(FileProperty(name=PROP_INPUT_FILE,
+                                          defaultValue='',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['nxs']))
+                                          extensions=['nxs']),
+                             doc='Input file')
         # TODO We may want an input monitor workspace here as well.
-        self.declareProperty(MatrixWorkspaceProperty(PROP_INPUT_WORKSPACE,
-                                                     '',
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_INPUT_WORKSPACE,
+                                                     defaultValue='',
                                                      optional=PropertyMode.Optional,
-                                                     direction=Direction.Input))
-        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_WORKSPACE,
-                             '',
-                             direction=Direction.Output),
+                                                     direction=Direction.Input),
+                             doc='Input workspace')
+        self.declareProperty(WorkspaceProperty(name=PROP_OUTPUT_WORKSPACE,
+                                               defaultValue='',
+                                               direction=Direction.Output),
                              doc='The output of the algorithm')
-        self.declareProperty(PROP_REDUCTION_TYPE,
-                             REDUCTION_TYPE_SAMPLE,
+        self.declareProperty(name=PROP_REDUCTION_TYPE,
+                             defaultValue=REDUCTION_TYPE_SAMPLE,
                              validator=StringListValidator([REDUCTION_TYPE_SAMPLE, REDUCTION_TYPE_VANADIUM, REDUCTION_TYPE_CD, REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of the reduction workflow and output')
-        self.declareProperty(PROP_CLEANUP_MODE,
-                             CLEANUP_DELETE,
+        self.declareProperty(name=PROP_CLEANUP_MODE,
+                             defaultValue=CLEANUP_DELETE,
                              validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces')
-        self.declareProperty(PROP_SUBALGORITHM_LOGGING,
-                             SUBALG_LOGGING_OFF,
+        self.declareProperty(name=PROP_SUBALGORITHM_LOGGING,
+                             defaultValue=SUBALG_LOGGING_OFF,
                              validator=StringListValidator([SUBALG_LOGGING_OFF, SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to print in the logs.')
-        self.declareProperty(PROP_INITIAL_ELASTIC_PEAK_REFERENCE,
-                             '',
+        self.declareProperty(name=PROP_INITIAL_ELASTIC_PEAK_REFERENCE,
+                             defaultValue='',
                              direction=Direction.Input,
                              doc="Reference file or workspace for initial 'EPP' sample log entry")
-        self.declareProperty(MatrixWorkspaceProperty(PROP_VANADIUM_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_VANADIUM_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Reduced vanadium workspace')
-        self.declareProperty(MatrixWorkspaceProperty(PROP_EC_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_EC_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Reduced empty can workspace')
-        self.declareProperty(MatrixWorkspaceProperty(PROP_CD_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_CD_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Reduced cadmium workspace')
-        self.declareProperty(ITableWorkspaceProperty(PROP_EPP_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty(name=PROP_EPP_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Table workspace containing results from the FindEPP algorithm')
-        self.declareProperty(ITableWorkspaceProperty(PROP_MONITOR_EPP_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty(name=PROP_MONITOR_EPP_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Table workspace containing results from the FindEPP algorithm for the monitor workspace')
-        self.declareProperty(PROP_INDEX_TYPE,
-                             INDEX_TYPE_WORKSPACE_INDEX,
+        self.declareProperty(name=PROP_INDEX_TYPE,
+                             defaultValue=INDEX_TYPE_WORKSPACE_INDEX,
+                             validator=StringListValidator([INDEX_TYPE_WORKSPACE_INDEX, INDEX_TYPE_SPECTRUM_NUMBER, INDEX_TYPE_DETECTOR_ID]),
                              direction=Direction.Input,
                              doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
-        self.declareProperty(PROP_MONITOR_INDEX,
-                             0,
+        self.declareProperty(name=PROP_MONITOR_INDEX,
+                             defaultValue=0,
+                             validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Index of the main monitor')
-        self.declareProperty(PROP_INCIDENT_ENERGY_CALIBRATION,
-                             INCIDENT_ENERGY_CALIBRATION_YES,
+        self.declareProperty(name=PROP_INCIDENT_ENERGY_CALIBRATION,
+                             defaultValue=INCIDENT_ENERGY_CALIBRATION_YES,
                              validator=StringListValidator([INCIDENT_ENERGY_CALIBRATION_YES, INCIDENT_ENERGY_CALIBRATION_YES]),
                              direction=Direction.Input,
                              doc='Enable or disable incident energy calibration on IN4 and IN6')
-        self.declareProperty(PROP_DETECTORS_FOR_EI_CALIBRATION,
-                             '',
+        self.declareProperty(name=PROP_DETECTORS_FOR_EI_CALIBRATION,
+                             defaultValue='',
                              direction=Direction.Input,
                              doc='List of detectors used for the incident energy calibration')
-        self.declareProperty(MatrixWorkspaceProperty(PROP_INCIDENT_ENERGY_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_INCIDENT_ENERGY_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='A single-valued workspace holding the calibrated incident energy')
-        self.declareProperty(PROP_FLAT_BACKGROUND_SCALING,
-                             1.0,
+        self.declareProperty(name=PROP_FLAT_BACKGROUND_SCALING,
+                             defaultValue=1.0,
+                             validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
         self.declareProperty(name=PROP_FLAT_BACKGROUND_WINDOW,
@@ -1073,65 +1080,67 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Running average window width (in bins) for flat background')
-        self.declareProperty(MatrixWorkspaceProperty(PROP_FLAT_BACKGROUND_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_FLAT_BACKGROUND_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Workspace from which to get flat background data')
-        self.declareProperty(IntArrayProperty(PROP_USER_MASK,
-                                              '',
+        self.declareProperty(IntArrayProperty(name=PROP_USER_MASK,
+                                              values='',
+                                              validator=positiveIntArray,
                                               direction=Direction.Input),
                              doc='List of spectra to mask')
-        self.declareProperty(PROP_DETECTOR_DIAGNOSTICS,
-                             DIAGNOSTICS_YES,
+        self.declareProperty(name=PROP_DETECTOR_DIAGNOSTICS,
+                             defaultValue=DIAGNOSTICS_YES,
                              validator=StringListValidator([DIAGNOSTICS_YES, DIAGNOSTICS_NO]),
                              direction=Direction.Input,
                              doc='If true, run detector diagnostics or apply ' + PROP_DIAGNOSTICS_WORKSPACE)
-        self.declareProperty(MatrixWorkspaceProperty(PROP_DIAGNOSTICS_WORKSPACE,
-                                                     '',
-                                                     Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_DIAGNOSTICS_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Detector diagnostics workspace obtained from another reduction run.')
-        self.declareProperty(PROP_NORMALISATION,
-                             NORM_METHOD_MONITOR,
+        self.declareProperty(name=PROP_NORMALISATION,
+                             defaultValue=NORM_METHOD_MONITOR,
                              validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME, NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method')
-        self.declareProperty(PROP_TRANSMISSION,
-                             1.0,
+        self.declareProperty(name=PROP_TRANSMISSION,
+                             defaultValue=1.0,
+                             validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Sample transmission for empty can subtraction')
-        self.declareProperty(PROP_BINNING_Q,
-                             '',
+        self.declareProperty(name=PROP_BINNING_Q,
+                             defaultValue='',
                              direction=Direction.Input,
                              doc='Rebinning in q')
-        self.declareProperty(PROP_BINNING_W,
-                             '',
+        self.declareProperty(name=PROP_BINNING_W,
+                             defaultValue='',
                              direction=Direction.Input,
                              doc='Rebinning in w')
         # Rest of the output properties.
-        self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE,
-                             '',
-                             direction=Direction.Output,
-                             optional=PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty(name=PROP_OUTPUT_DETECTOR_EPP_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
                              doc='Output workspace for elastic peak positions')
-        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE,
-                                               '',
+        self.declareProperty(WorkspaceProperty(name=PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE,
+                                               defaultValue='',
                                                direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc='Output workspace for calibrated inciden energy')
-        self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
-                             '',
-                             direction=Direction.Output,
-                             optional=PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty(name=PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
                              doc='Output workspace for elastic peak positions')
-        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE,
-                             '',
-                             direction=Direction.Output,
-                             optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty(name=PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE,
+                                               defaultValue='',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
                              doc='Output workspace for flat background')
-        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE,
-                                               '',
+        self.declareProperty(WorkspaceProperty(name=PROP_OUTPUT_DIAGNOSTICS_WORKSPACE,
+                                               defaultValue='',
                                                direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc='Output workspace for detector diagnostics')
