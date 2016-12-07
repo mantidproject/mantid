@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -198,6 +199,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   double distanceSum = 0;
   double eppSum = 0;
   size_t n = 0;
+  auto &spectrumInfo = m_detectorWs->spectrumInfo();
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
@@ -211,16 +213,16 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
     if (fitStatusColumn->cell<std::string>(index) ==
         EPPTableLiterals::FIT_STATUS_SUCCESS) {
       const auto detector = m_detectorWs->getDetector(index);
-      if (!detector) {
+      if (!spectrumInfo.hasDetectors(index)) {
         throw std::runtime_error("No detector specified by " +
                                  PropertyNames::DETECTORS + " found");
       }
-      if (detector->isMonitor()) {
+      if (spectrumInfo.isMonitor(index)) {
         g_log.warning() << "Workspace index " << index
                         << " should be detector, but is marked as monitor.\n";
       }
       if (!detector->isMasked()) {
-        const double d = detector->getDistance(*sample);
+        const double d = spectrumInfo.position(index).distance(sample->getPos());
         distanceSum += d;
         const double epp = (*peakPositionColumn)[index];
         eppSum += epp;
@@ -337,16 +339,16 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
     throw std::runtime_error("No successful monitor fit found in " +
                              PropertyNames::MONITOR_EPP_TABLE);
   }
-  const auto monitor = m_monitorWs->getDetector(monitorIndex);
-  if (monitor->isMasked()) {
+  auto &spectrumInfo = m_monitorWs->spectrumInfo();
+  if (spectrumInfo.isMasked(monitorIndex)) {
     throw std::runtime_error("Monitor spectrum is masked");
   }
-  if (!monitor->isMonitor()) {
+  if (!spectrumInfo.isMonitor(monitorIndex)) {
     g_log.warning() << "The monitor spectrum is not actually marked "
                     << "as monitor.\n";
   }
   const auto sample = m_detectorWs->getInstrument()->getSample();
-  monitorToSampleDistance = monitor->getDistance(*sample);
+  monitorToSampleDistance = spectrumInfo.position(monitorIndex).distance(sample->getPos());
   g_log.information() << "Monitor-to-sample distance: "
                       << monitorToSampleDistance << ".\n";
 
