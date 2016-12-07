@@ -442,7 +442,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QCheckBox" name="cbBeamSize">
+       <widget class="QCheckBox" name="ckBeamSize">
         <property name="text">
          <string>Use Instrument Default Beam Size</string>
         </property>
@@ -963,7 +963,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>cbBeamSize</sender>
+   <sender>ckBeamSize</sender>
    <signal>toggled(bool)</signal>
    <receiver>lbBeamHeight</receiver>
    <slot>setDisabled(bool)</slot>
@@ -979,7 +979,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>cbBeamSize</sender>
+   <sender>ckBeamSize</sender>
    <signal>toggled(bool)</signal>
    <receiver>spBeamHeight</receiver>
    <slot>setDisabled(bool)</slot>
@@ -995,7 +995,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>cbBeamSize</sender>
+   <sender>ckBeamSize</sender>
    <signal>toggled(bool)</signal>
    <receiver>lbBeamWidth</receiver>
    <slot>setDisabled(bool)</slot>
@@ -1011,7 +1011,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>cbBeamSize</sender>
+   <sender>ckBeamSize</sender>
    <signal>toggled(bool)</signal>
    <receiver>spBeamWidth</receiver>
    <slot>setDisabled(bool)</slot>
