@@ -1,7 +1,6 @@
 #ifndef MANTID_CURVEFITTING_LINEARBACKGROUNDTEST_H_
 #define MANTID_CURVEFITTING_LINEARBACKGROUNDTEST_H_
 
-
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 
 #include <array>

@@ -5,7 +5,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Logger.h"
 
-
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -27,13 +26,12 @@ DECLARE_FUNCTION(CubicSpline)
  */
 CubicSpline::CubicSpline()
     : m_min_points(3), m_acc(gsl_interp_accel_alloc(), m_gslFree),
-      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree){
-}
+      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree) {}
 
 /**init() will override IFunction base class
  * (a protected member that should be called via initialize())
  */
-void CubicSpline::init(){
+void CubicSpline::init() {
   // setup class with a default set of attributes
   declareAttribute("n", Attribute(m_min_points));
 
@@ -86,10 +84,10 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
 
     // if x[i] is out of order with its neighbours
     if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-        g_log.warning() << "Spline x parameters are not in ascending order. "
-                           "Only X values will be sorted.\n";
-        std::sort(x.get(), x.get() + n);
-        continue;
+      g_log.warning() << "Spline x parameters are not in ascending order. "
+                         "Only X values will be sorted.\n";
+      std::sort(x.get(), x.get() + n);
+      continue;
     }
 
     y[i] = getParameter(yName);
@@ -139,20 +137,24 @@ void CubicSpline::calculateSpline(double *out, const double *xValues,
 
   // calculate spline for given input set
   for (size_t i = 0; i < nData; ++i) {
-    if (checkXInRange(xValues[i])){
+    if (checkXInRange(xValues[i])) {
       out[i] = gsl_spline_eval(m_spline.get(), xValues[i], m_acc.get());
-      errorCode = gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &out[i]);
-    }
-    else{
+      errorCode =
+          gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &out[i]);
+    } else {
       if (xValues[i] < m_spline->interp->xmin) {
-        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmin, m_acc.get());
-        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmin, m_acc.get(), &out[i]);
+        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmin,
+                                 m_acc.get());
+        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmin,
+                                      m_acc.get(), &out[i]);
       } else {
-        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmax, m_acc.get());
-        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmax, m_acc.get(), &out[i]);
+        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmax,
+                                 m_acc.get());
+        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmax,
+                                      m_acc.get(), &out[i]);
       }
       g_log.warning()
-              << "Some x values where out of range and will not be calculated.\n";
+          << "Some x values where out of range and will not be calculated.\n";
     }
 
     // check if GSL function returned an error
@@ -175,8 +177,7 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
 
   // throw error if the order is not the 1st or 2nd derivative
   if (order < 1)
-    g_log.warning()
-          << "CubicSpline: order of derivative must be 1 or greater";
+    g_log.warning() << "CubicSpline: order of derivative must be 1 or greater";
 
   for (size_t i = 0; i < nData; ++i) {
     if (checkXInRange(xValues[i])) {
@@ -191,11 +192,10 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
         errorCode = gsl_spline_eval_deriv2_e(m_spline.get(), xValues[i],
                                              m_acc.get(), &xDeriv);
       }
-    }
-    else{
-        xDeriv = 0;
-        g_log.warning()
-                << "Some x values where out of range and will not be calculated.\n";
+    } else {
+      xDeriv = 0;
+      g_log.warning()
+          << "Some x values where out of range and will not be calculated.\n";
     }
 
     // check GSL functions didn't return an error

@@ -7,7 +7,6 @@
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting::Functions;
 
-
 class CubicSplineTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -172,10 +171,10 @@ private:
     cspline->setAttributeValue("n", nData);
     // calculate a reference set to check against
     for (int i = 0; i < nData; ++i) {
-      //cspline.setXAttribute(i, i * xModify);
+      // cspline.setXAttribute(i, i * xModify);
       cspline->setAttributeValue("x" + std::to_string(i), i * xModify);
       cspline->setParameter(static_cast<size_t>(i),
-                           splineYFunction(i * xModify));
+                            splineYFunction(i * xModify));
     }
   }
 };

@@ -6,7 +6,6 @@
 #include "MantidCurveFitting/Functions/CubicSpline.h"
 #include "MantidCurveFitting/Functions/Linear.h"
 
-
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
@@ -81,13 +80,11 @@ private:
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra
-  API::MatrixWorkspace_sptr
-  setupOutputWorkspace(MatrixWorkspace_sptr mws,
-                       MatrixWorkspace_sptr iws);
+  API::MatrixWorkspace_sptr setupOutputWorkspace(MatrixWorkspace_sptr mws,
+                                                 MatrixWorkspace_sptr iws);
 
   /// convert a binned workspace to point data. Uses mean of the bins as point
-  MatrixWorkspace_sptr
-  convertBinnedData(MatrixWorkspace_sptr workspace) const;
+  MatrixWorkspace_sptr convertBinnedData(MatrixWorkspace_sptr workspace) const;
 
   /// set the points that define the spline used for interpolation of a
   /// workspace
@@ -97,8 +94,7 @@ private:
   /// Calculate the interpolation of the input workspace against the spline and
   /// store it in outputWorkspace
   void calculateSpline(MatrixWorkspace_const_sptr inputWorkspace,
-                       MatrixWorkspace_sptr outputWorkspace,
-                       int row) const;
+                       MatrixWorkspace_sptr outputWorkspace, int row) const;
 
   /// Calculate the derivatives of the input workspace from the spline.
   void calculateDerivatives(MatrixWorkspace_const_sptr inputWorkspace,
@@ -106,13 +102,11 @@ private:
                             int order) const;
 
   /// Check if an x value falls within the range of the spline
-  void setXRange(
-          MatrixWorkspace_sptr inputWorkspace,
-          MatrixWorkspace_const_sptr interpolationWorkspace) const;
+  void setXRange(MatrixWorkspace_sptr inputWorkspace,
+                 MatrixWorkspace_const_sptr interpolationWorkspace) const;
 
   /// Check increasing x-values and sort x, y, e-values if needed
-  void ensureXIncreasing(
-          MatrixWorkspace_sptr inputWorkspace);
+  void ensureXIncreasing(MatrixWorkspace_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

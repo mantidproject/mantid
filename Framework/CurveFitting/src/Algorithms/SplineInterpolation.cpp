@@ -11,7 +11,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SplineInterpolation)
 
-
 using namespace Kernel;
 
 //----------------------------------------------------------------------------------------------
@@ -63,7 +62,8 @@ void SplineInterpolation::init() {
 //----------------------------------------------------------------------------------------------
 /** Input validation for the WorkspaceToInterpolate
  * If more than two points given, perform cubic spline interpolation
- * If only two points given, check if Linear2Points is true and if true, continue
+ * If only two points given, check if Linear2Points is true and if true,
+ * continue
  * If one point is given interpolation does not make sense
   */
 std::map<std::string, std::string> SplineInterpolation::validateInputs() {
@@ -79,17 +79,18 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
 
   // The minimum number of points for cubic splines is 3,
   // used and set by function CubicSpline as well
-  switch(binsNo){
-    case 1: message = "Workspace must have minimum two points.";
-            result["WorkspaceToInterpolate"] = message;
-    case 2:
-            if (lin2pts == false){
-              message = "Workspace has only 2 points, "
-                        "you can enable linear interpolation by "
-                        "setting the property Linear2Points. Otherwise "
-                        "provide a minimum of 3 points.";
-              result["WorkspaceToInterpolate"] = message;
-            }
+  switch (binsNo) {
+  case 1:
+    message = "Workspace must have minimum two points.";
+    result["WorkspaceToInterpolate"] = message;
+  case 2:
+    if (lin2pts == false) {
+      message = "Workspace has only 2 points, "
+                "you can enable linear interpolation by "
+                "setting the property Linear2Points. Otherwise "
+                "provide a minimum of 3 points.";
+      result["WorkspaceToInterpolate"] = message;
+    }
   }
 
   return result;
@@ -115,11 +116,10 @@ void SplineInterpolation::exec() {
   int histNo = static_cast<int>(iws->getNumberHistograms());
   int binsNo = static_cast<int>(iws->blocksize());
 
-  if (type == true && binsNo == 2){
+  if (type == true && binsNo == 2) {
     m_interp_type = boost::make_shared<Linear>();
     g_log.information() << "Linear interpolation for 2 points.\n";
-  }
-  else{
+  } else {
     m_interp_type = boost::make_shared<CubicSpline>();
   }
 
@@ -164,7 +164,6 @@ void SplineInterpolation::exec() {
       calculateDerivatives(mwspt, derivs[i], j + 1);
     }
     derivs[i]->replaceAxis(1, vAxis);
-
 
     pgress.report();
   }
@@ -270,7 +269,6 @@ void SplineInterpolation::setInterpolationPoints(
     // Call parent setParameter implementation
     m_interp_type->ParamFunction::setParameter(i, yIn[i], true);
   }
-
 }
 
 /** Calculate the derivatives of the given order from the interpolated points
@@ -318,8 +316,8 @@ void SplineInterpolation::calculateSpline(
  * @param row :: The row of the spectra to use
  */
 void SplineInterpolation::setXRange(
-        MatrixWorkspace_sptr inputWorkspace,
-        MatrixWorkspace_const_sptr interpolationWorkspace) const{
+    MatrixWorkspace_sptr inputWorkspace,
+    MatrixWorkspace_const_sptr interpolationWorkspace) const {
   // setup input parameters
   int histNo = static_cast<int>(inputWorkspace->getNumberHistograms());
   const size_t nData = inputWorkspace->y(0).size();
@@ -329,32 +327,31 @@ void SplineInterpolation::setXRange(
   const double *xintegValues = &(interpolationWorkspace->x(0)[0]);
 
   int nOutsideLeft, nOutsideRight;
-  for (int n = 0; n < histNo; ++n){
-      nOutsideLeft = 0, nOutsideRight = 0;
+  for (int n = 0; n < histNo; ++n) {
+    nOutsideLeft = 0, nOutsideRight = 0;
 
-      for (size_t i = 0; i < nData; ++i) {
+    for (size_t i = 0; i < nData; ++i) {
 
-        // determine number of values smaller than the integration range
-        if (xValues[i] < xintegValues[0])
-          nOutsideLeft++;
-        else if (xValues[i] > xintegValues[nintegData - 1])
-          nOutsideRight++;
-      }
-      double *yValues = &(inputWorkspace->mutableY(n)[0]);
-      if (nOutsideLeft > 0){
-        std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);
-        g_log.warning()
-            << nOutsideLeft <<
-               " x value(s) larger than integration range, will not be calculated.\n";
-      }
-      if (nOutsideRight > 0){
-        nOutsideRight += 1;
-        g_log.warning()
-            << nOutsideRight <<
-               " x value(s) smaller than integration range, will not be calculated.\n";
-      }
-      for(size_t k=nData - nOutsideRight; k < nData; ++k)
-        yValues[k] = yValues[nData - nOutsideRight];
+      // determine number of values smaller than the integration range
+      if (xValues[i] < xintegValues[0])
+        nOutsideLeft++;
+      else if (xValues[i] > xintegValues[nintegData - 1])
+        nOutsideRight++;
+    }
+    double *yValues = &(inputWorkspace->mutableY(n)[0]);
+    if (nOutsideLeft > 0) {
+      std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);
+      g_log.warning() << nOutsideLeft << " x value(s) larger than integration "
+                                         "range, will not be calculated.\n";
+    }
+    if (nOutsideRight > 0) {
+      nOutsideRight += 1;
+      g_log.warning() << nOutsideRight << " x value(s) smaller than "
+                                          "integration range, will not be "
+                                          "calculated.\n";
+    }
+    for (size_t k = nData - nOutsideRight; k < nData; ++k)
+      yValues[k] = yValues[nData - nOutsideRight];
   }
 }
 
@@ -363,7 +360,7 @@ void SplineInterpolation::setXRange(
  * @param inputWorkspace :: The input workspace being checked
  */
 void SplineInterpolation::ensureXIncreasing(
-        MatrixWorkspace_sptr inputWorkspace){
+    MatrixWorkspace_sptr inputWorkspace) {
   // setup input parameters
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);

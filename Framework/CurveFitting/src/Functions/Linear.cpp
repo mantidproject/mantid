@@ -35,7 +35,7 @@ void Linear::init() {
 }
 
 void Linear::function1D(double *out, const double *xValues,
-                                  const size_t nData) const {
+                        const size_t nData) const {
   const double y1 = getParameter("y1");
   const double x1 = getAttribute("x1").asDouble();
 
@@ -44,25 +44,21 @@ void Linear::function1D(double *out, const double *xValues,
   for (size_t i = 0; i < nData; i++) {
     out[i] = constant_term + getSlope() * xValues[i];
   }
-
 }
 
 // for interpolation and not for fitting
 void Linear::derivative1D(double *out, const double *xValues,
-                                       const size_t nData,
-                                       const size_t order) const {
+                          const size_t nData, const size_t order) const {
   // silience unused warning
   (void)xValues;
 
   // throw error if the order is not the 1st or 2nd derivative
   if (order < 1)
-    g_log.warning()
-          << "Linear : order of derivative must be 1 or greater";
+    g_log.warning() << "Linear : order of derivative must be 1 or greater";
 
-  if (order==1){
+  if (order == 1) {
     std::fill_n(out, nData, getSlope());
-  }
-  else{
+  } else {
     std::fill_n(out, nData, 0.0);
   }
 }
@@ -73,7 +69,7 @@ void Linear::derivative1D(double *out, const double *xValues,
  * @param att :: The attribute to set
  */
 void Linear::setAttribute(const std::string &attName,
-                               const API::IFunction::Attribute &att) {
+                          const API::IFunction::Attribute &att) {
 
   if (attName == "n") {
     // get the new and old number of data points
@@ -110,7 +106,7 @@ void Linear::setAttribute(const std::string &attName,
  *
  * @return slope :: The slope of the linear function
  */
-double Linear::getSlope() const{
+double Linear::getSlope() const {
   const double y0 = getParameter("y0");
   const double y1 = getParameter("y1");
   const double x0 = getAttribute("x0").asDouble();

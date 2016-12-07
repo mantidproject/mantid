@@ -45,8 +45,7 @@ public:
 
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
-  void derivative1D(double *out, const double *xValues,
-                    const size_t nData,
+  void derivative1D(double *out, const double *xValues, const size_t nData,
                     const size_t order = 1) const override;
 
   /// Set a value to attribute attName

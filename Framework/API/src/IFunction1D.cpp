@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
-
 namespace Mantid {
 namespace API {
 using namespace Geometry;

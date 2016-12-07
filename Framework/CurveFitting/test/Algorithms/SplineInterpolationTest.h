@@ -6,7 +6,6 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 
-
 using Mantid::CurveFitting::Algorithms::SplineInterpolation;
 using namespace Mantid::API;
 
@@ -67,8 +66,8 @@ public:
         WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-            SplineFunc(), 1, 3, 4, 1, false);
+        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+                                                               3, 4, 1, false);
 
     SplineInterpolation alg;
     alg.initialize();
@@ -87,8 +86,8 @@ public:
         WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-            SplineFunc(), 1, 3, 4, 1, false);
+        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+                                                               3, 4, 1, false);
 
     SplineInterpolation alg;
     alg.initialize();
@@ -101,13 +100,12 @@ public:
 
   void testInterpolationRange() {
 
-
     MatrixWorkspace_sptr mws =
         WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-            SplineFunc(), 1, 3, 20, 1, false);
+        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+                                                               3, 20, 1, false);
 
     SplineInterpolation alg;
     alg.initialize();
@@ -171,7 +169,6 @@ public:
     if (vAxisOut) {
       TS_ASSERT_EQUALS(vAxisOut->label(0), "a");
     }
-
   }
 
   void checkOutput(const SplineInterpolation &alg) const {
@@ -222,7 +219,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
   }
-
 };
 
 class SplineInterpolationTestPerformance : public CxxTest::TestSuite {

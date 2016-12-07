@@ -31,7 +31,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
 
-
 namespace WorkspaceCreationHelper {
 using namespace Mantid;
 using namespace Mantid::DataObjects;
