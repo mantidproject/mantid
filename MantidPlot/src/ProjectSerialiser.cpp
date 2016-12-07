@@ -34,7 +34,8 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
       m_saveAll(true) {}
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
-    : window(window), m_currentFolder(folder), m_windowCount(0) {}
+    : window(window), m_currentFolder(folder), m_windowCount(0),
+      m_saveAll(true) {}
 
 void ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &wsNames,
