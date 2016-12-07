@@ -58,6 +58,7 @@ Bugs Resolved
 - The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
 - Fixed a bug where enabling auto rebinning in the slice viewer and zooming would not rebin the workspace if it was a histogram workspace.
 - Legend placement has been fixed in the "tiled plot"/``plotSubplots`` option, and these graphs now use Mantid's default plot style options.
+- Fixed a bug where saving a plot created from columns of a table window are loaded back as a blank plot from a Mantid project.
 
 SliceViewer Improvements
 ------------------------
