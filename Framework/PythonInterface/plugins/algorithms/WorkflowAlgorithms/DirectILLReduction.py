@@ -694,19 +694,19 @@ class DirectILLReduction(DataProcessorAlgorithm):
         bkgInWS = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
         if not bkgInWS:
             windowWidth = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
-            bkgWorkspace = _createFlatBackground(mainWS, 
-                                                 windowWidth,
-                                                 wsNames,
-                                                 childAlgorithmLogging)
+            bkgWS = _createFlatBackground(mainWS, 
+                                          windowWidth,
+                                          wsNames,
+                                          childAlgorithmLogging)
         else:
-            bkgWorkspace = bkgInWS
-            wsCleanup.protect(bkgWorkspace)
+            bkgWS = bkgInWS
+            wsCleanup.protect(bkgWS)
         if not self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).isDefault:
-            self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgWorkspace)
+            self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgWS)
         # Subtract the time-independent background.
         bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
         bkgSubtractedWorkspace = _subtractFlatBackground(mainWS,
-                                                         bkgWorkspace,
+                                                         bkgWS,
                                                          bkgScaling,
                                                          wsNames,
                                                          wsCleanup,
@@ -714,7 +714,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         mainWS = bkgSubtractedWorkspace
         del(bkgSubtractedWorkspace)
-        wsCleanup.cleanupLater(bkgWorkspace)
+        wsCleanup.cleanupLater(bkgWS)
 
         # Find elastic peak positions for detectors.
         detectorEPPInWS = self.getProperty(PROP_EPP_WORKSPACE).value
@@ -749,7 +749,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             diagnosticsInWS = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
             if not diagnosticsInWS:
                 diagnosticsWS = _diagnoseDetectors(mainWS,
-                                                   bkgWorkspace,
+                                                   bkgWS,
                                                    wsNames,
                                                    wsCleanup,
                                                    childAlgorithmLogging,
