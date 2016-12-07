@@ -8,11 +8,12 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/Stitch1D.h"
-#include "MantidAlgorithms/Stitch1DMany.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/Stitch1D.h"
+#include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidKernel/UnitFactory.h"
 #include <math.h>
 
