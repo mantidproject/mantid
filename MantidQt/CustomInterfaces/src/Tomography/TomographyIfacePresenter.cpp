@@ -22,7 +22,8 @@
 #include <QThread>
 #include <QTimer>
 
-#ifdef _DEBUG
+//#define _DEBUG__CUSTOM
+#ifdef _DEBUG__CUSTOM
 #ifdef _WIN32
 #ifndef DBREAK
 #include <intrin.h>
@@ -31,15 +32,20 @@
   std::cout << msg << '\n';                                                    \
   DBREAK
 #endif // DBREAK
-#endif // _WIN32
-#else
+#else  // if GNU
 #ifndef DBREAK
 #define DBREAK __builtin_trap();
 #define MDBREAK(msg)                                                           \
   std::cout << msg << '\n';                                                    \
   DBREAK
 #endif // DBREAK
-#endif // _DEBUG
+#endif // _WIN32
+#else  // if not debug, define empty
+#ifndef DBREAK
+#define DBREAK
+#define MDBREAK(msg)
+#endif // DBREAK
+#endif // _DEBUG__CUSTOM
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;

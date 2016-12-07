@@ -12,10 +12,36 @@
 
 #include <Poco/Path.h>
 
+#define _DEBUG__CUSTOM
+#ifdef _DEBUG__CUSTOM
+#ifdef _WIN32
+#ifndef DBREAK
+#include <intrin.h>
+#define DBREAK __debugbreak();
+#define MDBREAK(msg)                                                           \
+  std::cout << msg << '\n';                                                    \
+  DBREAK
+#endif // DBREAK
+#else  // if GNU
+#ifndef DBREAK
+#define DBREAK __builtin_trap();
+#define MDBREAK(msg)                                                           \
+  std::cout << msg << '\n';                                                    \
+  DBREAK
+#endif // DBREAK
+#endif // _WIN32
+#else  // if not debug, define empty
+#ifndef DBREAK
+#define DBREAK
+#define MDBREAK(msg)
+#endif // DBREAK
+#endif // _DEBUG__CUSTOM
+
 #ifndef _WIN32
 // This is exclusively for kill/waitpid (interim solution, see below)
 #include <signal.h>
 #include <sys/wait.h>
+
 #endif
 
 using namespace Mantid::API;
@@ -783,12 +809,13 @@ void TomographyIfaceModel::logErrMsg(const std::string &msg) {
  * @returns A string like "x1, y1, x2, y2"
  */
 std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
-  std::string x1 = std::to_string(coords.first.X());
-  std::string y1 = std::to_string(coords.first.Y());
-  std::string x2 = std::to_string(coords.second.X());
-  std::string y2 = std::to_string(coords.second.Y());
+  DBREAK
+  std::string right = std::to_string(coords.first.X());   // right
+  std::string top = std::to_string(coords.first.Y());     // top
+  std::string left = std::to_string(coords.second.X());   // left
+  std::string bottom = std::to_string(coords.second.Y()); // bottom
 
-  return x1 + ", " + y1 + ", " + x2 + ", " + y2;
+  return left + ", " + top + ", " + right + ", " + bottom;
 }
 
 /**
