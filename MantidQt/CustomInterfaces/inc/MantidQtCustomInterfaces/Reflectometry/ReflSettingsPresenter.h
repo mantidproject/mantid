@@ -3,14 +3,11 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 // Forward decs
 class IReflSettingsView;
@@ -62,8 +59,9 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
-  IAlgorithm_sptr createReductionAlg();
-  Instrument_const_sptr createEmptyInstrument(std::string instName);
+  Mantid::API::IAlgorithm_sptr createReductionAlg();
+  Mantid::Geometry::Instrument_const_sptr
+  createEmptyInstrument(const std::string &instName);
   std::string getTransmissionRuns() const;
 
   /// The view we are managing

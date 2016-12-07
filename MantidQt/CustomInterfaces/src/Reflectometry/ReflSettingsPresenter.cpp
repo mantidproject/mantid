@@ -3,7 +3,9 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -336,7 +338,7 @@ IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
 /** Creates and returns an example empty instrument given an instrument name
 */
 Instrument_const_sptr
-ReflSettingsPresenter::createEmptyInstrument(std::string instName) {
+ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {
   IAlgorithm_sptr loadInst =
       AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadInst->setChild(true);
