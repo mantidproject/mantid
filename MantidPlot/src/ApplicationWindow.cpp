@@ -5940,13 +5940,11 @@ std::string ApplicationWindow::windowGeometryInfo(MdiSubWindow *w) {
   }
 
   tsv << x << y;
-  if (w->status() != MdiSubWindow::Minimized)
-    tsv << w->width() << w->height();
-  else
-    tsv << w->minRestoreSize().width() << w->minRestoreSize().height()
-        << "minimized";
+  tsv << w->width() << w->height();
 
-  if (hidden(w))
+  if (w->status() == MdiSubWindow::Minimized)
+    tsv << "minimized";
+  else if (hidden(w))
     tsv << "hidden";
   else if (w == activeWindow())
     tsv << "active";
@@ -14200,25 +14198,6 @@ void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it,
   folders->setFocus();
 }
 
-void ApplicationWindow::hideFolderWindows(Folder *f) {
-  QList<MdiSubWindow *> lst = f->windowsList();
-  foreach (MdiSubWindow *w, lst)
-    w->hide();
-
-  if ((f->children()).isEmpty())
-    return;
-
-  Folder *dir = f->folderBelow();
-  int initial_depth = f->depth();
-  while (dir && dir->depth() > initial_depth) {
-    lst = dir->windowsList();
-    foreach (MdiSubWindow *w, lst)
-      w->hide();
-
-    dir = dir->folderBelow();
-  }
-}
-
 bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
   if (!newFolder)
     return false;
@@ -14241,7 +14220,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
   if (active_window)
     active_window_state = active_window->status();
 
-  hideFolderWindows(oldFolder);
   d_current_folder = newFolder;
 
   resultsLog->clear();
