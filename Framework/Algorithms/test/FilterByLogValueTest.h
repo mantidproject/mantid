@@ -33,10 +33,10 @@ public:
     // InputWorkspace has to be an EventWorkspace
     TS_ASSERT_THROWS(
         alg.setProperty("InputWorkspace",
-                        WorkspaceCreationHelper::Create2DWorkspace(1, 1)),
+                        WorkspaceCreationHelper::create2DWorkspace(1, 1)),
         std::invalid_argument);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", WorkspaceCreationHelper::CreateEventWorkspace()));
+        "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // LogName must not be empty
     TS_ASSERT_THROWS(alg.setProperty("LogName", ""), std::invalid_argument);
@@ -57,7 +57,7 @@ public:
 
   void test_validateInputs() {
     // Create and event workspace. We don't care what data is in it.
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace();
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace();
     // Add a single-number log
     ws->mutableRun().addProperty("SingleValue", 5);
     // Add a time-series property
@@ -106,7 +106,7 @@ public:
    */
   EventWorkspace_sptr createInputWS(bool add_proton_charge = true) {
     // Default Event Workspace with times from 0-99
-    EventWorkspace_sptr ew = WorkspaceCreationHelper::CreateEventWorkspace2();
+    EventWorkspace_sptr ew = WorkspaceCreationHelper::createEventWorkspace2();
 
     DateAndTime run_start("2010-01-01T00:00:00"); // NOTE This run_start is
                                                   // hard-coded in
@@ -151,7 +151,7 @@ public:
     ew->mutableRun().addProperty(single);
 
     // Finalize the needed stuff
-    WorkspaceCreationHelper::EventWorkspace_Finalize(ew);
+    WorkspaceCreationHelper::eventWorkspace_Finalize(ew);
 
     return ew;
   }

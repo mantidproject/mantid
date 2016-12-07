@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_
-#define MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_
+#define MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,7 +16,8 @@ class CostFuncLeastSquares;
 namespace FuncMinimisers {
 
 /**
-    Implements a least squares minimization algorithm with damping.
+    Implements a Gauss-Newton minimization algorithm with damping
+    for use with least squares cost function.
 
     @author Roman Tolchenov, Tessella plc
 
@@ -41,12 +42,12 @@ namespace FuncMinimisers {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DampingMinimizer : public API::IFuncMinimizer {
+class DLLExport DampedGaussNewtonMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
-  DampingMinimizer(double relTol = 0.0001);
+  DampedGaussNewtonMinimizer(double relTol = 0.0001);
   /// Name of the minimizer.
-  std::string name() const override { return "DampingMinimizer"; }
+  std::string name() const override { return "DampedGaussNewtonMinimizer"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
   void initialize(API::ICostFunction_sptr function,
@@ -68,4 +69,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_*/
+#endif /* MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_*/

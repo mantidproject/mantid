@@ -1,3 +1,4 @@
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "../inc/MantidQtSliceViewer/LinePlotOptions.h"
 #include "MantidQtAPI/TSVSerialiser.h"
 

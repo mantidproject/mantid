@@ -3,6 +3,7 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAlgorithms/RadiusSum.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "RingProfileTest.h"
 #include <boost/shared_ptr.hpp>

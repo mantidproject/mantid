@@ -12,6 +12,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateTimeValidator.h"
 
 using namespace Mantid::Kernel;
@@ -111,7 +112,7 @@ Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType,
 Mantid::API::MatrixWorkspace_sptr
 provideWorkspaceSingleValue(LogType logType, DateAndTime startTime,
                             int length) {
-  auto ws = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10);
+  auto ws = WorkspaceCreationHelper::createWorkspaceSingleValue(10);
   // Add the logs
   provideLogs(logType, ws, startTime, length);
   return ws;
@@ -121,7 +122,7 @@ provideWorkspaceSingleValue(LogType logType, DateAndTime startTime,
 Mantid::API::MatrixWorkspace_sptr
 provideEventWorkspaceCustom(LogType logType, DateAndTime startTime, int length,
                             int pixels, int bins, int events) {
-  auto ws = WorkspaceCreationHelper::CreateEventWorkspaceWithStartTime(
+  auto ws = WorkspaceCreationHelper::createEventWorkspaceWithStartTime(
       pixels, bins, events, 0.0, 1.0, 2, 0, startTime);
   // Add the logs
   provideLogs(logType, ws, startTime, length);

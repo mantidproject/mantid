@@ -17,10 +17,10 @@ public:
     // Need a test workspace registered within the ADS
     const int yLength1 = 10;
     Workspace2D_sptr testWS1 =
-        WorkspaceCreationHelper::Create2DWorkspace(yLength1, 10);
+        WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
     const int yLength2 = 20;
     Workspace2D_sptr testWS2 =
-        WorkspaceCreationHelper::Create2DWorkspace(yLength2, 10);
+        WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     const size_t storeSizeAtStart(dataStore.size());
     const std::string testName1 = "DeleteWorkspace_testWS1";
@@ -56,10 +56,10 @@ public:
     // Need a test workspace registered within the ADS
     const int yLength1 = 10;
     Workspace2D_sptr testWS1 =
-        WorkspaceCreationHelper::Create2DWorkspace(yLength1, 10);
+        WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
     const int yLength2 = 20;
     Workspace2D_sptr testWS2 =
-        WorkspaceCreationHelper::Create2DWorkspace(yLength2, 10);
+        WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.clear();
 

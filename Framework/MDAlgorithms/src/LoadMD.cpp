@@ -3,6 +3,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -27,6 +28,7 @@
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <iostream>
 #include <vector>
 
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
