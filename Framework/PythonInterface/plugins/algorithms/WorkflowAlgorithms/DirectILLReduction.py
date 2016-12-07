@@ -358,7 +358,7 @@ def _reportDiagnostics(report, zeroCountDiagnostics, bkgDiagnostics):
                                            bkgDiagnostics,
                                            i)
 
-def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, algorithmLogging, report):
+def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, report, algorithmLogging):
     '''
     Returns a diagnostics workspace.
     '''
@@ -752,8 +752,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                    bkgWS,
                                                    wsNames,
                                                    wsCleanup,
-                                                   childAlgorithmLogging,
-                                                   report)
+                                                   report,
+                                                   childAlgorithmLogging)
             else:
                 diagnosticsWS = diagnosticsInWS
                 wsCleanup.protect(diagnosticsWS)
