@@ -239,7 +239,7 @@ public:
   }
 
   void test_output() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     std::string funStr(
