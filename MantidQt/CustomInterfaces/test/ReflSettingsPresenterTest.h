@@ -5,9 +5,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
 #include "ReflMockObjects.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
