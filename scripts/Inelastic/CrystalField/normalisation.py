@@ -191,12 +191,16 @@ def split2range(*args, **kwargs):
     if not argin['Parameters']:
         raise NameError('You must specify at least one crystal field parameter name')
 
-    Nlm = {bname: 1 for bname in set(argin['Parameters'])}
+    Nlm = {}
+    for bname in set(argin['Parameters']):
+        Nlm[bname] = 1
     Blm = norm2stev(IonNum=nre, **Nlm)
     ee, vv, ham = CFEnergy(nre, **Blm)
     # Factor of 2 is needed to get the Gaussian centred on the desired energy splitting.
     splitting_factor = 2 * argin['EnergySplitting'] / (np.max(ee-np.min(ee)))
-    Nlm = {bname: splitting_factor for bname in Blm.keys()}
+    Nlm = {}
+    for bname in Blm.keys():
+        Nlm[bname] = splitting_factor
     ranges = norm2stev(IonNum=nre, **Nlm)
 
     if argin['Output'].lower() is 'constraints':
