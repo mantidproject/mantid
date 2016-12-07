@@ -297,19 +297,19 @@ void ReflSettingsTabPresenter::getExpDefaults() {
 
   auto cRho = inst->getStringParameter("crho");
   if (!cRho.empty())
-    defaults[2] = cRho[0];
+    defaults[2] = "\"" + cRho[0] + "\"";
 
   auto cAlpha = inst->getStringParameter("calpha");
   if (!cAlpha.empty())
-    defaults[3] = cAlpha[0];
+    defaults[3] = "\"" + cAlpha[0] + "\"";
 
   auto cAp = inst->getStringParameter("cAp");
   if (!cAp.empty())
-    defaults[4] = cAp[0];
+    defaults[4] = "\"" + cAp[0] + "\""; 
 
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
-    defaults[5] = cPp[0];
+    defaults[5] = "\"" + cPp[0] + "\"";
 
   defaults[6] = alg->getPropertyValue("ScaleFactor");
 
