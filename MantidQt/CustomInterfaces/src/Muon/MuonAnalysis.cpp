@@ -560,8 +560,7 @@ void MuonAnalysis::runSaveGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultsave.directory")))
-          .toString();
+                                      "defaultsave.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -600,8 +599,7 @@ void MuonAnalysis::runLoadGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultload.directory")))
-          .toString();
+                                      "defaultload.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
