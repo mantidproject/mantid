@@ -29,6 +29,9 @@ NORM_METHOD_MONITOR = 'Monitor'
 NORM_METHOD_OFF     = 'No Normalisation'
 NORM_METHOD_TIME    = 'Acquisition Time'
 
+SUBALG_LOGGING_OFF = 'No Subalgorithm Logging'
+SUBALG_LOGGING_ON  = 'Allow Subalgorithm Logging'
+
 PROP_BINNING_Q                        = 'QBinning'
 PROP_BINNING_W                        = 'WBinning'
 PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
@@ -58,6 +61,7 @@ PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
 PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
 PROP_REDUCTION_TYPE                   = 'ReductionType'
 PROP_TRANSMISSION                     = 'Transmission'
+PROP_SUBALGORITHM_LOGGING             = 'SubalgorithmLogging'
 PROP_USER_MASK                        = 'MaskedDetectors'
 PROP_VANADIUM_WORKSPACE               = 'VanadiumWorkspace'
 
@@ -433,9 +437,11 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEP
     eiWorkspace = None
     if instrument in ['IN4', 'IN6']:
         pulseInterval = detWorkspace.getRun().getLogData('pulse_interval').value
+        # TODO Remove the IndexType hack when the GetEiMonDet pull request
+        #      is merged.
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorEPPTable=detEPPWorkspace,
-                             IndexType=indexType,
+                             IndexType=indexType.replace(' ', ''),
                              Detectors=eiCalibrationDets,
                              MonitorWorkspace=monWorkspace,
                              MonitorEppTable=monEPPWorkspace,
@@ -655,6 +661,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def PyExec(self):
         report = Report()
         childAlgorithmLogging = False
+        if self.getProperty(PROP_SUBALGORITHM_LOGGING).value == SUBALG_LOGGING_ON:
+            childAlgorithmLogging = True
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
         wsNamePrefix = self.getProperty(PROP_OUTPUT_WORKSPACE).valueAsStr
         cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
@@ -970,6 +978,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces')
+        self.declareProperty(PROP_SUBALGORITHM_LOGGING,
+                             SUBALG_LOGGING_OFF,
+                             validator=StringListValidator([SUBALG_LOGGING_OFF, SUBALG_LOGGING_ON]),
+                             direction=Direction.Input,
+                             doc='Enable or disable subalgorithms to print in the logs.')
         self.declareProperty(PROP_INITIAL_ELASTIC_PEAK_REFERENCE,
                              '',
                              direction=Direction.Input,
