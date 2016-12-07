@@ -799,10 +799,9 @@ void LeBailFunction::groupPeaks(
 
         if (thispeak_rightbound < rightpeak_leftbound) {
           // this peak and its right peak are well separated.
-          // finish this group by a copy
-          peakgroupvec.push_back(peakgroup);
-          //  clear for the next group
-          peakgroup.clear();
+          // finish this group by swapping values
+          peakgroupvec.push_back(std::move(peakgroup));
+          peakgroup = {};
         } else {
           // this peak and its right peak are close enough to be in same group.
           // do nothing

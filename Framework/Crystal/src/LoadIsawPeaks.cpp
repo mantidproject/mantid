@@ -227,7 +227,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
       DetWScale = width / bankR->xsize() / 100;
       DetHtScale = height / bankR->ysize() / 100;
     }
-    std::vector<std::string> bankNames{bankName};
+    const std::vector<std::string> bankNames{bankName};
 
     SCDCalibratePanels::FixUpBankParameterMap(
         bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap, false);
