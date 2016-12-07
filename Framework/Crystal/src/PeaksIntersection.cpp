@@ -5,6 +5,8 @@
 #include "MantidCrystal/PeaksIntersection.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+#include <boost/function.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

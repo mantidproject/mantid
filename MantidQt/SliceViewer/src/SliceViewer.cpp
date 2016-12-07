@@ -4,7 +4,9 @@
 #include <vector>
 #include <boost/make_shared.hpp>
 
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"

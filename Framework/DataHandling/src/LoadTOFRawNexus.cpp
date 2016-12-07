@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
 

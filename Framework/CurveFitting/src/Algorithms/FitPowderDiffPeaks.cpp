@@ -28,6 +28,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include <fstream>
+#include <iostream>
 
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>

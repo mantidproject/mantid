@@ -66,6 +66,7 @@
 
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidKernel/Strings.h"
 #include <MantidQtMantidWidgets/MantidTreeWidget.h>
 
 #include "Mantid/MantidMDCurveDialog.h"

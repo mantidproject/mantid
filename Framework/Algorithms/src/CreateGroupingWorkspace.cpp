@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <queue>
 #include <fstream>
 #include "MantidAPI/FileProperty.h"
