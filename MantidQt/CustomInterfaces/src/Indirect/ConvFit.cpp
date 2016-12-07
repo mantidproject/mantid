@@ -324,6 +324,11 @@ void ConvFit::plotClicked() {
         const auto specNumber = m_uiForm.cbPlotType->currentIndex();
         IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                   specNumber, specNumber);
+        // Plot results for both Lorentzians if "Two Lorentzians"
+        if (m_uiForm.cbFitType->currentIndex() == 2) {
+          IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+            specNumber + 2, specNumber + 2);
+        }
       }
     }
   } else {
