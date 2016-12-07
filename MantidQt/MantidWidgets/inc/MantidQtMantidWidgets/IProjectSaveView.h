@@ -2,7 +2,6 @@
 #define MANTID_CUSTOMINTERFACES_IPROJECTSAVEVIEW_H
 
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "ui_ProjectSave.h"
 
 #include <QMainWindow>
 #include <QWidget>
