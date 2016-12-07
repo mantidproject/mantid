@@ -49,19 +49,19 @@ def _parse_args(**kwargs):
 
 def stev2norm(**kwargs):
     """ Calculates the "normalised" crystal field parameters of P. Fabi
-        These parameters are defined in the appendix of the FOCUS program manual, 
+        These parameters are defined in the appendix of the FOCUS program manual,
         http://purl.org/net/epubs/manifestation/5723 page 59.
-        
+
         nlm = stev2norm(Ion=ionname, B=bvec)
         nlm = stev2norm(Ion=ionname, B20=b20val, ...)
         nlm = stev2norm(IonNum=ionnumber, B20=b20val, ...)
         [B20, B40] = stev2norm(IonNum=ionnumber, B20=b20val, B40=b40val, OutputTuple=True)
-        
+
         Note: This function only accepts keyword inputs.
-        
+
         Inputs:
             ionname - name of the (tripositive) rare earth ion, e.g. 'Ce', 'Pr'.
-            ionnumber - the number index of the rare earth ion: 
+            ionnumber - the number index of the rare earth ion:
                    1=Ce 2=Pr 3=Nd 4=Pm 5=Sm 6=Eu 7=Gd 8=Tb 9=Dy 10=Ho 11=Er 12=Tm 13=Yb
             bvec - a vector of the Stevens CF parameters in order: [B20 B21 B22 B40 B41 ... etc.]
                     This vector can also a be dictionary instead {'B20':1, 'B40':2}
@@ -78,7 +78,7 @@ def stev2norm(**kwargs):
     nre, par_names, Blm = _parse_args(**kwargs)
     # Gets the normalisation constants
     norm = _get_normalisation(nre, par_names)
-    # Calculates the normalised parameters. 
+    # Calculates the normalised parameters.
     Nlm = {}
     for pname in par_names:
         Nlm[pname] = Blm[pname] * norm[pname]
@@ -88,16 +88,16 @@ def stev2norm(**kwargs):
 
 def norm2stev(**kwargs):
     """ Calculates the Stevens (conventional) crystal field parameters from "normalised" parameters
-        The normalised parameters of P. Fabi are defined in the appendix of the FOCUS program manual, 
+        The normalised parameters of P. Fabi are defined in the appendix of the FOCUS program manual,
         http://purl.org/net/epubs/manifestation/5723 page 59.
-        
+
         nlm = norm2stev(Ion=ionname, B=bvec)
         nlm = norm2stev(Ion=ionname, B20=b20val, ...)
         nlm = norm2stev(IonNum=ionnumber, B20=b20val, ...)
         [B20, B40] = norm2stev(IonNum=ionnumber, B20=b20val, B40=b40val, OutputTuple=True)
-        
+
         Note: This function only accepts keyword inputs.
-        
+
         Inputs:
             ionname - name of the (tripositive) rare earth ion, e.g. 'Ce', 'Pr'.
             ionnumber - the number index of the rare earth ion: 
@@ -117,7 +117,7 @@ def norm2stev(**kwargs):
     nre, par_names, Blm = _parse_args(**kwargs)
     # Gets the normalisation constants
     norm = _get_normalisation(nre, par_names)
-    # Calculates the normalised parameters. 
+    # Calculates the normalised parameters.
     Nlm = {}
     for pname in par_names:
         Nlm[pname] = 0 if norm[pname] == 0 else Blm[pname] / norm[pname]
@@ -139,19 +139,19 @@ def split2range(*args, **kwargs):
 
         Inputs:
             ionname - name of the (tripositive) rare earth ion, e.g. 'Ce', 'Pr'.
-            ionnumber - the number index of the rare earth ion: 
+            ionnumber - the number index of the rare earth ion:
                 1=Ce 2=Pr 3=Nd 4=Pm 5=Sm 6=Eu 7=Gd 8=Tb 9=Dy 10=Ho 11=Er 12=Tm 13=Yb
-            energy_splitting - the desired energy splitting (difference between the energies of the 
+            energy_splitting - the desired energy splitting (difference between the energies of the
                 highest and lowest crystal field energy levels) in meV
             bnames - a list of names of the crystal field parameters to give the range for
-            'B20', etc - the names of the parameters can be given as individual arguments or 
+            'B20', etc - the names of the parameters can be given as individual arguments or
                 keyword arguments. In the case of keyword arguments, only the key names will be used
 
         Output:
-            ranges - a dictionary of the ranges such that sampling uniformly in |Blm|<range[bnames] 
-                will produce crystal field splittings distributed normally around the input 
-                energy_splitting. 
-            constraint_string - a string of the form '-[range]<Blm<[range]' where [range] is the 
+            ranges - a dictionary of the ranges such that sampling uniformly in |Blm|<range[bnames]
+                will produce crystal field splittings distributed normally around the input
+                energy_splitting.
+            constraint_string - a string of the form '-[range]<Blm<[range]' where [range] is the
                 calculated range for that parameter.
             By default, the Output keyword is set to "dictionary".
 
@@ -163,7 +163,7 @@ def split2range(*args, **kwargs):
     argin['Output'] = 'dictionary'
     argin['Parameters'] = []
     # Parses the non-keyword arguments
-    for ia in range(3 if len(args)>3 else len(args)): 
+    for ia in range(3 if len(args)>3 else len(args)):
         argin[argnames[ia]] = args[ia]
     # Further arguments beyond the first 3 are treated as crystal field parameter names
     for ia in range(3, len(args)):
@@ -177,7 +177,7 @@ def split2range(*args, **kwargs):
                 break
         if key.startswith('B'):
             argin['Parameters'].append(key)
-    
+
     # Error checking
     if 'Ion' not in argin.keys() and 'IonNum' not in argin.keys():
         raise NameError('You must specify the ion using either the ''Ion'', ''IonNum'' keywords')
@@ -190,7 +190,7 @@ def split2range(*args, **kwargs):
         raise NameError('You must specify the desired energy splitting')
     if not argin['Parameters']:
         raise NameError('You must specify at least one crystal field parameter name')
-    
+
     Nlm = {bname: 1 for bname in set(argin['Parameters'])}
     Blm = norm2stev(IonNum=nre, **Nlm)
     ee, vv, ham = CFEnergy(nre, **Blm)
