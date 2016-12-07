@@ -277,7 +277,7 @@ public:
     radianResultCorrect = false;
     radianAngles = MantidQt::API::getGridLineAnglesInRadian(skewMatrixCoord,
                                                             m_dimX, m_dimY);
-    if ((radianAngles.first == 0) && (isnan(radianAngles.second))) {
+    if ((radianAngles.first == 0) && (std::isnan(radianAngles.second))) {
       radianResultCorrect = true;
     }
     TSM_ASSERT("When given Zero array, getGridLinesInRadian should return 0 "
