@@ -3294,10 +3294,9 @@ void Graph::addLegendItem() {
  * @param key :: the legend key to trim
  * @return QString containing the trimmed value
  */
-QString Graph::trimTableNameFromLegendKey(const QString &key) const
-{
+QString Graph::trimTableNameFromLegendKey(const QString &key) const {
   int splitPos = key.indexOf("_");
-  return key.mid(splitPos+1, key.size()).replace('_', '-');
+  return key.mid(splitPos + 1, key.size()).replace('_', '-');
 }
 
 QString Graph::yAxisTitleFromFirstCurve() {
