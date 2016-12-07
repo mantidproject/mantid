@@ -4,7 +4,7 @@ import collections
 import glob
 from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
 from mantid.kernel import Direct, Direction, IntArrayProperty, StringListValidator, StringMandatoryValidator, UnitConversion
-from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
+from mantid.simpleapi import AddSampleLog, CalculateFlatBackground, ClearMaskFlag,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
@@ -339,12 +339,12 @@ def _reportSingleBackgroundDiagnostics(report, diagnostics, wsIndex):
     elif diagnose == 1:
         report.notice('Workspace index {0} has noisy background.'.format(wsIndex))
     else:
-        report.error(('Workspace index {0} has been marked as bad for ' +
-            'masking by noisy background diagnostics for unknown reasons.').format(wsIndex))
+        report.error(('Workspace index {0} has been marked as bad ' +
+            'by noisy background diagnostics for unknown reasons.').format(wsIndex))
     det = diagnostics.getDetector(wsIndex)
     if det and det.isMasked():
-        report.error(('Workspace index {0} has been marked as masked by ' +
-            'noisy background diagnostics for unknown reasons.').format(wsIndex))
+        report.notice(('Workspace index {0} has been marked as an outlier ' +
+            'in noisy background diagnostics.').format(wsIndex))
 
 def _reportDiagnostics(report, zeroCountDiagnostics, bkgDiagnostics):
     '''
@@ -376,6 +376,8 @@ def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, algorithmLogging, report):
                                                         LowOutlier=0.0,
                                                         EnableLogging=algorithmLogging)
     _reportDiagnostics(report, zeroCountDiagnostics, noisyBkgDiagnostics)
+    ClearMaskFlag(Workspace=noisyBkgDiagnostics,
+                  EnableLogging=algorithmLogging)
     combinedDiagnosticsWSName = wsNames.withSuffix('diagnostics')
     diagnosticsWS = Plus(LHSWorkspace=zeroCountDiagnostics,
                          RHSWorkspace=noisyBkgDiagnostics,
