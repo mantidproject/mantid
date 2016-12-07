@@ -298,9 +298,10 @@ void IFittingAlgorithm::declareCostFunctionProperty() {
       Kernel::Direction::InOut);
 }
 
-/// Create a cost function from the "CostFunction" property.
+/// Create a cost function from the "CostFunction" property
+/// and make it ready for evaluation.
 boost::shared_ptr<CostFunctions::CostFuncFitting>
-IFittingAlgorithm::getCostFunctionProperty() const {
+IFittingAlgorithm::getCostFunctionInitialized() const {
   // Function may need some preparation.
   m_function->setUpForFit();
 

@@ -300,7 +300,7 @@ void EstimateFitParameters::initConcrete() {
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.
 void EstimateFitParameters::execConcrete() {
-  auto costFunction = getCostFunctionProperty();
+  auto costFunction = getCostFunctionInitialized();
   auto func = costFunction->getFittingFunction();
 
   // Use additional constraints on parameters tied in some way

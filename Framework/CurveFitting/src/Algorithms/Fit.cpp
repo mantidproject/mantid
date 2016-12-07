@@ -4,10 +4,7 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
-#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -135,7 +132,7 @@ void Fit::execConcrete() {
     m_function->addConstraints(contstraints);
   }
 
-  auto costFunc = getCostFunctionProperty();
+  auto costFunc = getCostFunctionInitialized();
 
   // Try to retrieve optional properties
   int intMaxIterations = getProperty("MaxIterations");
