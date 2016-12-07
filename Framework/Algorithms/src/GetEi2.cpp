@@ -216,9 +216,10 @@ double GetEi2::calculateEi(const double initial_guess) {
   // Calculate actual peak postion for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};
+  auto &spectrumInfo = m_input_ws->spectrumInfo();
   for (unsigned int i = 0; i < 2; ++i) {
     size_t ws_index = mon_indices[i];
-    det_distances[i] = getDistanceFromSource(ws_index);
+    det_distances[i] = getDistanceFromSource(ws_index, spectrumInfo);
     const double peak_guess =
         det_distances[i] * std::sqrt(m_t_to_mev / initial_guess);
     const double t_min = (1.0 - m_tof_window) * peak_guess;
@@ -283,24 +284,22 @@ double GetEi2::calculateEi(const double initial_guess) {
  * DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
-double GetEi2::getDistanceFromSource(size_t ws_index) const {
+double GetEi2::getDistanceFromSource(size_t ws_index, const SpectrumInfo &spectrumInfo) const {
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index
                 << "' and the source\n";
 
   const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
-  // Retrieve a pointer detector
-  IDetector_const_sptr det = m_input_ws->getDetector(ws_index);
-  if (!det) {
+  if (!spectrumInfo.hasDetectors(ws_index)) {
     std::ostringstream msg;
     msg << "A detector for monitor at workspace index " << ws_index
         << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "Detector position = " << det->getPos()
+    g_log.debug() << "Detector position = " << spectrumInfo.position(ws_index)
                   << ", Source position = " << source->getPos() << "\n";
   }
-  const double dist = det->getDistance(*source);
+  const double dist = spectrumInfo.position(ws_index).distance(source->getPos());
   g_log.debug() << "Distance = " << dist << " metres\n";
   return dist;
 }
