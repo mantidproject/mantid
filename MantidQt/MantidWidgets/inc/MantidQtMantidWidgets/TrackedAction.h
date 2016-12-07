@@ -37,7 +37,7 @@ public:
   TrackedAction(QObject *parent);
   TrackedAction(const QString &text, QObject *parent);
   TrackedAction(const QIcon &icon, const QString &text, QObject *parent);
-  virtual ~TrackedAction(){};
+  virtual ~TrackedAction() = default;
 
   void setTrackingName(const std::string &name);
   std::string getTrackingName() const;
@@ -55,7 +55,7 @@ private:
   mutable std::string m_trackingName;
 
 public slots:
-  virtual void trackActivation(const bool checked);
+  void trackActivation(const bool checked);
 };
 
 } // namespace MantidWidgets

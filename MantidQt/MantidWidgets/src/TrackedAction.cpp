@@ -42,7 +42,7 @@ void TrackedAction::setTrackingName(const std::string &name) {
 
 /** Gets the tracking name for this action
 *   If the tacking name is not set a default name will be generated using
-*generateTrackingName
+*   generateTrackingName
 *   @returns The tracking name for this action
 **/
 std::string TrackedAction::getTrackingName() const {
@@ -79,7 +79,7 @@ std::string TrackedAction::generateTrackingName() const {
 }
 
 /** Registers the feature usage if usage is enabled
-*   @param checked True if the action is checked
+*   @param checked Whether the QAction is checked
 **/
 void TrackedAction::trackActivation(const bool checked) {
   UNUSED_ARG(checked);
