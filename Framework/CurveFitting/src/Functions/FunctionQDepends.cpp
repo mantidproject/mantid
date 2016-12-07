@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidAPI/SpectrumInfo.h"
 // third party libraries
 // N/A
 // standard library
@@ -27,15 +28,20 @@ namespace Functions {
    Public
    ===========*/
 
-FunctionQDepends::FunctionQDepends() {
+/**
+ * @brief declare commonattributes Q and WorkspaceIndex.
+ * Subclasses containing additional attributes should override this method by declaring the additional
+ * attributes and then calling the parent (this) method to declare Q and WorkspaceIndex.
+ */
+void FunctionQDepends::declareAttributes() {
   this->declareAttribute("Q", Attr(EMPTY_DBL()));
   this->declareAttribute("WorkspaceIndex", Attr(EMPTY_INT()));
 }
 
 /**
- * @brief Update attributes WorkspaceIndex and Q according to certain precedence
- *rules.
- *
+ * @brief Update attributes WorkspaceIndex and Q according to certain precedence rules.
+ * Subclasses featuring additional attributes should override and insert a call to
+ * this method within the overriding setAttribute function.
  * There are two ways to update Q: (i) loading the value from the spectrum, and
  *(ii) manual
  * input from the user. Therefore, rules of precedence must be set to prevent
@@ -55,7 +61,7 @@ void FunctionQDepends::setAttribute(const std::string &attName,
   if (attName == "WorkspaceIndex") {
     size_t wi{static_cast<size_t>(
         attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
-    if (!m_vQ.empty() && wi <= m_vQ.size()) {
+    if (!m_vQ.empty() && wi < m_vQ.size()) {
       Mantid::API::IFunction::setAttribute(attName, attValue);
       Mantid::API::IFunction::setAttribute("Q", Attribute(m_vQ.at(wi)));
     }
@@ -120,24 +126,18 @@ std::vector<double> FunctionQDepends::extractQValues(
   }
   // ...otherwise, compute the momentum transfer for each spectrum, if possible
   else {
+    const auto &spectrumInfo = workspace->spectrumInfo();
     size_t numHist = workspace->getNumberHistograms();
     for (size_t wi = 0; wi < numHist; wi++) {
-      // retrieve the detector object
-      Mantid::Geometry::IDetector_const_sptr det;
       try {
-        det = workspace->getDetector(wi);
-      } catch (Kernel::Exception::NotFoundError &) {
-        g_log.debug("Cannot populate Q values from workspace");
-        qs.clear();
-        break;
-      }
-      // compute momentum transfer
-      try {
-        double efixed = workspace->getEFixed(det);
-        double usignTheta = 0.5 * workspace->detectorTwoTheta(*det);
+        Mantid::Geometry::IDetector_const_sptr detector;
+        detector = workspace->getDetector(wi);
+        double efixed = workspace->getEFixed(detector);
+        double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
         double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
         qs.push_back(q);
-      } catch (std::runtime_error &) {
+      }
+      catch (Kernel::Exception::NotFoundError &) {
         g_log.debug("Cannot populate Q values from workspace");
         qs.clear();
         break;

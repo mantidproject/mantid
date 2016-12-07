@@ -55,14 +55,12 @@ class DLLExport FunctionQDepends : public Mantid::API::IFunction1D,
                                    Mantid::API::ParamFunction {
 
 public:
-  // Constructor
-  FunctionQDepends();
-
   /* -------------------
      Overridden methods
     -------------------*/
-  void setAttribute(const std::string &attName,
-                    const Mantid::API::IFunction::Attribute &attValue) override;
+  virtual void declareAttributes() override;
+  virtual void setAttribute(const std::string &attName,
+                            const Mantid::API::IFunction::Attribute &attValue) override;
   void setMatrixWorkspace(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
       size_t wi, double startX, double endX) override;
