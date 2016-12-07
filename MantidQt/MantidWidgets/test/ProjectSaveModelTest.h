@@ -181,7 +181,8 @@ public:
   }
 
   void testGetWorkspaceInformationWithGroup() {
-    auto group = WorkspaceCreationHelper::CreateWorkspaceGroup(3, 1, 10, "ws-group");
+    auto group =
+        WorkspaceCreationHelper::CreateWorkspaceGroup(3, 1, 10, "ws-group");
 
     ProjectSaveModel model({});
     auto wsInfo = model.getWorkspaceInformation();

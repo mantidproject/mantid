@@ -64,7 +64,8 @@ public:
 
 private:
   /// Create a workspace info object for this workspace
-  WorkspaceInfo makeWorkspaceInfoObject(Mantid::API::Workspace_const_sptr ws) const;
+  WorkspaceInfo
+  makeWorkspaceInfoObject(Mantid::API::Workspace_const_sptr ws) const;
 
   // Instance variables
 

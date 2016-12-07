@@ -135,9 +135,9 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
     auto ws = item.second;
     auto info = makeWorkspaceInfoObject(ws);
 
-    if(ws->id() == "WorkspaceGroup") {
+    if (ws->id() == "WorkspaceGroup") {
       auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-      for(int i =0; i < group->getNumberOfEntries(); ++i) {
+      for (int i = 0; i < group->getNumberOfEntries(); ++i) {
         auto subInfo = makeWorkspaceInfoObject(group->getItem(i));
         info.subWorkspaces.push_back(subInfo);
       }
@@ -158,16 +158,16 @@ std::vector<Workspace_sptr> ProjectSaveModel::getWorkspaces() const {
   return ads.getObjects();
 }
 
-WorkspaceInfo ProjectSaveModel::makeWorkspaceInfoObject(Workspace_const_sptr ws) const
-{
-    WorkspaceIcons icons;
-    WorkspaceInfo info;
-    info.name = ws->name();
-    info.numWindows = getWindows(ws->name()).size();
-    info.size = ws->getMemorySizeAsStr();
-    info.icon_id = icons.getIconID(ws->id());
-    info.type = ws->id();
-    return info;
+WorkspaceInfo
+ProjectSaveModel::makeWorkspaceInfoObject(Workspace_const_sptr ws) const {
+  WorkspaceIcons icons;
+  WorkspaceInfo info;
+  info.name = ws->name();
+  info.numWindows = getWindows(ws->name()).size();
+  info.size = ws->getMemorySizeAsStr();
+  info.icon_id = icons.getIconID(ws->id());
+  info.type = ws->id();
+  return info;
 }
 
 /**

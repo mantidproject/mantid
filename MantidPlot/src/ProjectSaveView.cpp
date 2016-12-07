@@ -243,7 +243,7 @@ ProjectSaveView::getItemsWithCheckState(const Qt::CheckState state) const {
     }
 
     // now check the child items and append any that have the check state
-    for(int i = 0; i < item->childCount(); ++i) {
+    for (int i = 0; i < item->childCount(); ++i) {
       auto child = item->child(i);
       if (child->checkState(0) == state) {
         auto childName = child->text(0).toStdString();
@@ -309,7 +309,7 @@ void ProjectSaveView::addWindowItem(QTreeWidget *widget,
 void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info) {
   auto item = makeWorkspaceItem(info);
 
-  for(auto subInfo : info.subWorkspaces) {
+  for (auto subInfo : info.subWorkspaces) {
     auto subItem = makeWorkspaceItem(subInfo);
     item->addChild(subItem);
   }
@@ -322,8 +322,8 @@ void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info) {
  * @param info :: reference to the WorkspaceInfo to make an item for
  * @return new QTreeWidgetItem for the info object
  */
-QTreeWidgetItem *ProjectSaveView::makeWorkspaceItem(const WorkspaceInfo &info) const
-{
+QTreeWidgetItem *
+ProjectSaveView::makeWorkspaceItem(const WorkspaceInfo &info) const {
   QStringList lst;
   lst << QString::fromStdString(info.name);
   lst << QString::fromStdString(info.type);
@@ -389,22 +389,20 @@ void ProjectSaveView::connectSignals() {
  *
  * @param item :: item that has changed check state
  */
-void ProjectSaveView::updateWorkspaceListCheckState(QTreeWidgetItem *item)
-{
+void ProjectSaveView::updateWorkspaceListCheckState(QTreeWidgetItem *item) {
   // block signals so we don't trigger more updates to widget items
   blockSignals(true);
 
   // update child check state
   // children should match the check state of the parent item
   auto checkState = item->checkState(0);
-  for(int i = 0; i < item->childCount(); ++i)
-  {
+  for (int i = 0; i < item->childCount(); ++i) {
     item->child(i)->setCheckState(0, checkState);
   }
 
   // the parent item should be unchecked if any single child is unchecked
   auto parent = item->parent();
-  if(parent && checkState == Qt::CheckState::Unchecked)
+  if (parent && checkState == Qt::CheckState::Unchecked)
     parent->setCheckState(0, checkState);
 
   blockSignals(false);

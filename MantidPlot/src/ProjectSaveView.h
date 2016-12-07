@@ -111,7 +111,7 @@ private:
   /// Connect up signals to the interface on initilisation
   void connectSignals();
   /// Update the checked state of the tree when an item is updated
-  void updateWorkspaceListCheckState(QTreeWidgetItem* item);
+  void updateWorkspaceListCheckState(QTreeWidgetItem *item);
 
   // Instance variables
 
