@@ -560,7 +560,8 @@ void MuonAnalysis::runSaveGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultsave.directory"))).toString();
+                                      "defaultsave.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -599,7 +600,8 @@ void MuonAnalysis::runLoadGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultload.directory"))).toString();
+                                      "defaultload.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -2208,20 +2210,20 @@ void MuonAnalysis::setAppendingRun(int inc) {
 void MuonAnalysis::changeRun(int amountToChange) {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
-  if ((currentFile.isEmpty()))
+  if ((currentFile.isEmpty())) {
     if (m_previousFilenames.isEmpty()) {
       // not a valid file, and no previous valid files
-      int ret =
-          QMessageBox::warning(this, tr("Muon Analysis"),
-                               tr("Unable to open the file.\n"
-                                  "and no previous valid files available."),
-                               QMessageBox::Ok, QMessageBox::Ok);
+      QMessageBox::warning(this, tr("Muon Analysis"),
+                           tr("Unable to open the file.\n"
+                              "and no previous valid files available."),
+                           QMessageBox::Ok, QMessageBox::Ok);
       allowLoading(true);
       return;
     } else {
       // blank box - use previous run
       currentFile = m_previousFilenames[0];
     }
+  }
 
   QString run("");
   int runSize(-1);
