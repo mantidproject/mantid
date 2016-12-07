@@ -12,22 +12,22 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground, ClearMaskFla
 import numpy
 from os import path
 
-CLEANUP_DELETE = 'DeleteIntermediateWorkspaces'
-CLEANUP_KEEP   = 'KeepIntermediateWorkspaces'
+CLEANUP_DELETE = 'Delete Intermediate Workspaces'
+CLEANUP_KEEP   = 'Keep Intermediate Workspaces'
 
-DIAGNOSTICS_YES   = 'DiagnoseDetectors'
-DIAGNOSTICS_NO    = 'OmitDetectorDiagnostics'
+DIAGNOSTICS_YES   = 'Diagnose Detectors'
+DIAGNOSTICS_NO    = 'Omit Detector Diagnostics'
 
-INCIDENT_ENERGY_CALIBRATION_NO  = 'OmitIncidentEnergyCalibration'
-INCIDENT_ENERGY_CALIBRATION_YES = 'CalibrateIncidentEnergy'
+INCIDENT_ENERGY_CALIBRATION_NO  = 'Omit Incident Energy Calibration'
+INCIDENT_ENERGY_CALIBRATION_YES = 'Calibrate Incident Energy'
 
-INDEX_TYPE_DETECTOR_ID     = 'DetectorID'
-INDEX_TYPE_SPECTRUM_NUMBER = 'SpectrumNumber'
-INDEX_TYPE_WORKSPACE_INDEX = 'WorkspaceIndex'
+INDEX_TYPE_DETECTOR_ID     = 'Detector ID'
+INDEX_TYPE_SPECTRUM_NUMBER = 'Spectrum Number'
+INDEX_TYPE_WORKSPACE_INDEX = 'Workspace Index'
 
 NORM_METHOD_MONITOR = 'Monitor'
 NORM_METHOD_OFF     = 'No Normalisation'
-NORM_METHOD_TIME    = 'AcquisitionTime'
+NORM_METHOD_TIME    = 'Acquisition Time'
 
 PROP_BINNING_Q                        = 'QBinning'
 PROP_BINNING_W                        = 'WBinning'
@@ -61,7 +61,7 @@ PROP_TRANSMISSION                     = 'Transmission'
 PROP_USER_MASK                        = 'MaskedDetectors'
 PROP_VANADIUM_WORKSPACE               = 'VanadiumWorkspace'
 
-REDUCTION_TYPE_CD = 'Empty can/cadmium'
+REDUCTION_TYPE_CD = 'Empty Can/Cadmium'
 REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
 REDUCTION_TYPE_SAMPLE = 'Sample'
 REDUCTION_TYPE_VANADIUM = 'Vanadium'
