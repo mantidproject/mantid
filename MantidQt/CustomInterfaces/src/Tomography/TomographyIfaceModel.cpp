@@ -809,11 +809,11 @@ void TomographyIfaceModel::logErrMsg(const std::string &msg) {
  * @returns A string like "x1, y1, x2, y2"
  */
 std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
-  DBREAK
-  std::string right = std::to_string(coords.first.X());   // right
-  std::string top = std::to_string(coords.first.Y());     // top
-  std::string left = std::to_string(coords.second.X());   // left
-  std::string bottom = std::to_string(coords.second.Y()); // bottom
+  // as shows on the ROI tab interface
+  std::string right = std::to_string(coords.first.X());
+  std::string top = std::to_string(coords.first.Y());
+  std::string left = std::to_string(coords.second.X());
+  std::string bottom = std::to_string(coords.second.Y());
 
   return left + ", " + top + ", " + right + ", " + bottom;
 }
