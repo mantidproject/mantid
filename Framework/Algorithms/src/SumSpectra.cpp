@@ -20,8 +20,9 @@ using namespace DataObjects;
 
 SumSpectra::SumSpectra()
     : API::Algorithm(), m_outSpecNum(0), m_minWsInd(0), m_maxWsInd(0),
-      m_keepMonitors(false), m_numberOfSpectra(0), m_yLength(0), m_indices(),
-      m_calculateWeightedSum(false), m_replaceSpecialValues(false) {}
+      m_keepMonitors(false), m_replaceSpecialValues(false),
+      m_numberOfSpectra(0), m_yLength(0), m_indices(),
+      m_calculateWeightedSum(false) {}
 
 /** Initialisation method.
  *
@@ -297,7 +298,7 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
 
     // Retrieve the spectrum into a vector
 
-    for (size_t i = 0; i < m_yLength; ++i) {
+    for (int i = 0; i < m_yLength; ++i) {
       if (m_calculateWeightedSum) {
         if (std::isnormal(YErrors[i])) {
           const double errsq = YErrors[i] * YErrors[i];
