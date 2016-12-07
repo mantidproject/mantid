@@ -13,6 +13,9 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
+
+using namespace Mantid::CurveFitting::Functions;
+
 /**
 
 A wrapper around GSL functions implementing cubic spline interpolation.
@@ -101,12 +104,12 @@ private:
   /// Check if an error occurred and throw appropriate message
   void checkGSLError(const int status, const int errorType) const;
 
-  /// Evaluate a point on the spline, with basic error handling
-  double splineEval(const double x) const;
+  /// Check if an x value falls within the range of the spline
+  bool checkXInRange(double x) const;
 };
 
-typedef boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_sptr;
-typedef const boost::shared_ptr<Mantid::CurveFitting::Functions::CubicSpline> CubicSpline_const_sptr;
+typedef boost::shared_ptr<CubicSpline> CubicSpline_sptr;
+typedef const boost::shared_ptr<CubicSpline> CubicSpline_const_sptr;
 
 } // namespace Functions
 } // namespace CurveFitting

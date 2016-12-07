@@ -76,8 +76,6 @@ void CubicSpline::function1D(double *out, const double *xValues,
 void CubicSpline::setupInput(boost::scoped_array<double> &x,
                              boost::scoped_array<double> &y, int n) const {
   // Populate data points from the input attributes and parameters
-  bool xSortFlag = false;
-
   for (int i = 0; i < n; ++i) {
     std::string num = std::to_string(i);
 
@@ -88,17 +86,13 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
 
     // if x[i] is out of order with its neighbours
     if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-      xSortFlag = true;
+        g_log.warning() << "Spline x parameters are not in ascending order. "
+                           "Only X values will be sorted.\n";
+        std::sort(x.get(), x.get() + n);
+        continue;
     }
 
     y[i] = getParameter(yName);
-  }
-
-  // sort the data points if necessary
-  if (xSortFlag) {
-    g_log.warning() << "Spline x parameters are not in ascending order. Values "
-                       "will be sorted.\n";
-    std::sort(x.get(), x.get() + n);
   }
 
   // pass values to GSL objects
@@ -124,6 +118,15 @@ void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
   calculateDerivative(out, xValues, nData, order);
 }
 
+/** Check if the supplied x value falls within the range of the spline
+ *
+ * @param x :: The x value to check
+ * @return Whether the value falls within the range of the spline
+ */
+bool CubicSpline::checkXInRange(double x) const {
+  return (x >= m_spline->interp->xmin && x <= m_spline->interp->xmax);
+}
+
 /** Calculate the values on the spline at each point supplied
  *
  * @param out :: The array to store the calculated values
@@ -133,12 +136,24 @@ void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
 void CubicSpline::calculateSpline(double *out, const double *xValues,
                                   const size_t nData) const {
   int errorCode = 0;
+
   // calculate spline for given input set
   for (size_t i = 0; i < nData; ++i) {
-    // calculate the y value
-    out[i] = gsl_spline_eval(m_spline.get(), xValues[i], m_acc.get());
-
-    errorCode = gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &out[i]);
+    if (checkXInRange(xValues[i])){
+      out[i] = gsl_spline_eval(m_spline.get(), xValues[i], m_acc.get());
+      errorCode = gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &out[i]);
+    }
+    else{
+      if (xValues[i] < m_spline->interp->xmin) {
+        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmin, m_acc.get());
+        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmin, m_acc.get(), &out[i]);
+      } else {
+        out[i] = gsl_spline_eval(m_spline.get(), m_spline->interp->xmax, m_acc.get());
+        errorCode = gsl_spline_eval_e(m_spline.get(), m_spline->interp->xmax, m_acc.get(), &out[i]);
+      }
+      g_log.warning()
+              << "Some x values where out of range and will not be calculated.\n";
+    }
 
     // check if GSL function returned an error
     checkGSLError(errorCode, GSL_EDOM);
@@ -164,16 +179,23 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
           << "CubicSpline: order of derivative must be 1 or greater";
 
   for (size_t i = 0; i < nData; ++i) {
-    // choose the order of the derivative
-    if (order == 1) {
-      xDeriv = gsl_spline_eval_deriv(m_spline.get(), xValues[i], m_acc.get());
-      errorCode = gsl_spline_eval_deriv_e(m_spline.get(), xValues[i],
-                                          m_acc.get(), &xDeriv);
-    } else if (order == 2) {
-      xDeriv =
-          gsl_spline_eval_deriv2(m_spline.get(), xValues[i], m_acc.get());
-      errorCode = gsl_spline_eval_deriv2_e(m_spline.get(), xValues[i],
-                                           m_acc.get(), &xDeriv);
+    if (checkXInRange(xValues[i])) {
+      // choose the order of the derivative
+      if (order == 1) {
+        xDeriv = gsl_spline_eval_deriv(m_spline.get(), xValues[i], m_acc.get());
+        errorCode = gsl_spline_eval_deriv_e(m_spline.get(), xValues[i],
+                                            m_acc.get(), &xDeriv);
+      } else if (order == 2) {
+        xDeriv =
+            gsl_spline_eval_deriv2(m_spline.get(), xValues[i], m_acc.get());
+        errorCode = gsl_spline_eval_deriv2_e(m_spline.get(), xValues[i],
+                                             m_acc.get(), &xDeriv);
+      }
+    }
+    else{
+        xDeriv = 0;
+        g_log.warning()
+                << "Some x values where out of range and will not be calculated.\n";
     }
 
     // check GSL functions didn't return an error

@@ -66,8 +66,9 @@ public:
     return "Interpolates a set of spectra onto a spline defined by a second "
            "input workspace. A linear interpolation can be performed if the "
            "second input workspace has only two points Optionally, this "
-           "algorithm can also calculate derivatives up to order 2 as a side "
-           "product";
+           "algorithm can also calculate derivatives of order 1 or 2 as a side "
+           "product. If X-values are not strictly ascending, then the X-, Y-, "
+           "and E- values of the workspaces will be sorted accordingly.";
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
@@ -82,7 +83,7 @@ private:
   /// spectra
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(MatrixWorkspace_sptr mws,
-                       MatrixWorkspace_sptr iws) const;
+                       MatrixWorkspace_sptr iws);
 
   /// convert a binned workspace to point data. Uses mean of the bins as point
   MatrixWorkspace_sptr
@@ -108,6 +109,10 @@ private:
   void setXRange(
           MatrixWorkspace_sptr inputWorkspace,
           MatrixWorkspace_const_sptr interpolationWorkspace) const;
+
+  /// Check increasing x-values and sort x, y, e-values if needed
+  void ensureXIncreasing(
+          MatrixWorkspace_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

@@ -86,8 +86,8 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
             if (lin2pts == false){
               message = "Workspace has only 2 points, "
                         "you can enable linear interpolation by "
-                        "setting the property Linear2Points. Otherwise"
-                        "you need to provide minimum 3 points.";
+                        "setting the property Linear2Points. Otherwise "
+                        "provide a minimum of 3 points.";
               result["WorkspaceToInterpolate"] = message;
             }
   }
@@ -107,6 +107,10 @@ void SplineInterpolation::exec() {
   // set input workspaces
   MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
   MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
+
+  // avoid x-value sorting in CubicSpline and ensure sorting if Linear2Points
+  ensureXIncreasing(mws);
+  ensureXIncreasing(iws);
 
   int histNo = static_cast<int>(iws->getNumberHistograms());
   int binsNo = static_cast<int>(iws->blocksize());
@@ -193,13 +197,14 @@ void SplineInterpolation::exec() {
  */
 MatrixWorkspace_sptr
 SplineInterpolation::setupOutputWorkspace(MatrixWorkspace_sptr mws,
-                                          MatrixWorkspace_sptr iws) const {
+                                          MatrixWorkspace_sptr iws) {
   size_t numSpec = iws->getNumberHistograms();
+
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(mws, numSpec);
 
-  // Use the vertical axis form the workspace to interpolate on the output WS
-  Axis *vAxis = iws->getAxis(1)->clone(mws.get());
+  // use the vertical axis from the workspace to interpolate on the output WS
+  Axis *vAxis = iws->getAxis(1)->clone(iws.get());
   outputWorkspace->replaceAxis(1, vAxis);
 
   return outputWorkspace;
@@ -266,9 +271,6 @@ void SplineInterpolation::setInterpolationPoints(
     m_interp_type->ParamFunction::setParameter(i, yIn[i], true);
   }
 
-  // recalculation if cubic spline
-  //if (m_interp_type->name() == "CubicSpline")
-  //  m_interp_type->setupInput(xIn, yIn, size);
 }
 
 /** Calculate the derivatives of the given order from the interpolated points
@@ -307,7 +309,9 @@ void SplineInterpolation::calculateSpline(
   m_interp_type->function1D(yValues, xValues, nData);
 }
 
-/** Check if the supplied x value falls within the range of the spline
+/** Check if the supplied x value falls within the interpolation range.
+ * This is in particular important for the Linear function and not for
+ * the CubicSpline
  *
  * @param inputWorkspace :: The input workspace
  * @param interpolationWorkspace :: The interpolation workspace
@@ -351,6 +355,30 @@ void SplineInterpolation::setXRange(
       }
       for(size_t k=nData - nOutsideRight; k < nData; ++k)
         yValues[k] = yValues[nData - nOutsideRight];
+  }
+}
+
+/** Sets up the spline object by with the parameters and attributes
+ *
+ * @param inputWorkspace :: The input workspace being checked
+ */
+void SplineInterpolation::ensureXIncreasing(
+        MatrixWorkspace_sptr inputWorkspace){
+  // setup input parameters
+  const size_t nData = inputWorkspace->y(0).size();
+  const double *xValues = &(inputWorkspace->x(0)[0]);
+
+  for (size_t i = 1; i < nData; ++i) {
+    // x values must be stricly increasing
+    if (xValues[i] < xValues[i - 1]) {
+      g_log.warning() << "x values must be stricly increasing. Start "
+                         "sorting ...\n";
+      Algorithm_sptr sorter = createChildAlgorithm("SortXAxis");
+      sorter->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
+      sorter->setProperty<Workspace_sptr>("OutputWorkspace", inputWorkspace);
+      sorter->execute();
+      continue;
+    }
   }
 }
 
