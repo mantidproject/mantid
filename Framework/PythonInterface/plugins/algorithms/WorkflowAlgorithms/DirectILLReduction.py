@@ -96,9 +96,7 @@ class IntermediateWsCleanup:
         Deletes all workspaces marked to be cleaned up later.
         ''' 
         for ws in self._toBeDeleted:
-            if mtd.doesExist(ws):
-                DeleteWorkspace(Workspace=ws,
-                                EnableLogging=self._deleteAlgorithmLogging)
+            self._delete(ws)
 
     def protect(self, *args):
         '''
