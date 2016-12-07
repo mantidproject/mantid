@@ -42,7 +42,7 @@ private:
     ExposedNearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                              const ISpectrumDetectorMapping &spectraMap,
                              bool ignoreMasked = false)
-        : NearestNeighbours(instrument, spectraMap, ignoreMasked) {}
+        : NearestNeighbours(8, instrument, spectraMap, ignoreMasked) {}
 
     // Direct access to intermdiate spectra detectors
     std::map<specnum_t, IDetector_const_sptr> getSpectraDetectors() {
@@ -88,7 +88,7 @@ public:
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, spectramap);
+    NearestNeighbours nn(8, m_instrument, spectramap);
 
     detid2det_map m_detectors;
     m_instrument->getDetectors(m_detectors);
@@ -153,7 +153,7 @@ public:
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, spectramap);
+    NearestNeighbours nn(8, m_instrument, spectramap);
 
     // Correct # of detectors
     TS_ASSERT_EQUALS(m_instrument->getDetectorIDs().size(), 512);
@@ -235,26 +235,9 @@ public:
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, spectramap);
+    NearestNeighbours nn(8, m_instrument, spectramap);
     for (size_t i = 0; i < 2000; i++) {
       nn.neighboursInRadius(1, 5.0);
-    }
-  }
-
-  void testUsingDefault() {
-    Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(
-        ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    const ISpectrumDetectorMapping spectramap =
-        NearestNeighboursTest::buildSpectrumDetectorMapping(1, 18);
-    // Default parameter map.
-    ParameterMap_sptr pmap(new ParameterMap());
-    // Parameterized instrument
-    Instrument_sptr m_instrument(new Instrument(instrument, pmap));
-
-    // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, spectramap);
-    for (size_t i = 0; i < 2000; i++) {
-      nn.neighboursInRadius(1, 0.0);
     }
   }
 

@@ -60,11 +60,6 @@ typedef std::unordered_map<specnum_t, std::set<detid_t>>
  */
 class MANTID_GEOMETRY_DLL NearestNeighbours {
 public:
-  /// Constructor with an instrument and a spectra map
-  NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
-                    const ISpectrumDetectorMapping &spectraMap,
-                    bool ignoreMaskedDetectors = false);
-
   /// Constructor with an instrument and a spectra map and number of neighbours
   NearestNeighbours(int nNeighbours,
                     boost::shared_ptr<const Instrument> instrument,

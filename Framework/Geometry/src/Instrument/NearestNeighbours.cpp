@@ -13,22 +13,6 @@ using Mantid::detid_t;
 using Kernel::V3D;
 
 /**
-*Constructor
-*@param instrument :: A shared pointer to Instrument object
-*@param spectraMap :: A reference to the spectra-detector mapping
-*@param ignoreMaskedDetectors :: flag indicating that masked detectors should be
-* ignored.
-*/
-NearestNeighbours::NearestNeighbours(
-    boost::shared_ptr<const Instrument> instrument,
-    const ISpectrumDetectorMapping &spectraMap, bool ignoreMaskedDetectors)
-    : m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8),
-      m_cutoff(-DBL_MAX), m_radius(0),
-      m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
-  this->build(m_noNeighbours);
-}
-
-/**
  * Constructor
  * @param nNeighbours :: Number of neighbours to use
  * @param instrument :: A shared pointer to Instrument object
