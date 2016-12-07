@@ -72,7 +72,8 @@ class IntermediateWsCleanup:
     '''
     Manages intermediate workspace cleanup.
     '''
-    def __init__(self, cleanupMode):
+    def __init__(self, cleanupMode, deleteAlgorithmLogging):
+        self._deleteAlgorithmLogging = deleteAlgorithmLogging
         self._doDelete = cleanupMode == CLEANUP_DELETE
         self._protected = set()
         self._toBeDeleted = set()
@@ -96,7 +97,8 @@ class IntermediateWsCleanup:
         ''' 
         for ws in self._toBeDeleted:
             if mtd.doesExist(ws):
-                DeleteWorkspace(Workspace=ws)
+                DeleteWorkspace(Workspace=ws,
+                                EnableLogging=self._deleteAlgorithmLogging)
 
     def protect(self, *args):
         '''
@@ -113,7 +115,8 @@ class IntermediateWsCleanup:
             return
         ws = str(ws)
         if not ws in self._protected and mtd.doesExist(ws):
-            DeleteWorkspace(Workspace=ws)
+            DeleteWorkspace(Workspace=ws,
+                            EnableLogging=self._deleteAlgorithmLogging)
 
 class NameSource:
 
@@ -198,7 +201,7 @@ class Report:
 def setAsBad(ws, index):
     ws.dataY(index)[0] += 1
 
-def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log):
+def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log, algorithmLogging):
     '''
     Loads files specified by filenames, merging them into a single
     workspace.
@@ -211,11 +214,13 @@ def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log):
         if mtd.doesExist(str(eppReference)):
             ws = Load(Filename=inputFilename,
                       OutputWorkspace=rawWSName,
-                      WorkspaceVanadium=eppReference)
+                      WorkspaceVanadium=eppReference,
+                      EnableLogging=algorithmLogging)
         else:
             ws = Load(Filename=inputFilename,
                       OutputWorkspace=rawWSName,
-                      FilenameVanadium=eppReference)
+                      FilenameVanadium=eppReference,
+                      EnableLogging=algorithmLogging)
     else:
         # For multiple files, we need an EPP reference workspace
         # anyway, so we'll use the first file the user wants to
@@ -232,23 +237,27 @@ def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log):
             log.information('Using ' + referenceFilename + ' as initial EPP reference.')
             eppReferenceWSName = wsNames.withSuffix('initial_epp_reference')
             Load(Filename=referenceFilename,
-                 OutputWorkspace=eppReferenceWSName)
+                 OutputWorkspace=eppReferenceWSName,
+                 EnableLogging=algorithmLogging)
             ws = Load(Filename=inputFilename,
                       OutputWorkspace=rawWSName,
-                      WorkspaceVanadium=eppReferenceWSName)
+                      WorkspaceVanadium=eppReferenceWSName,
+                      EnableLogging=algorithmLogging)
             wsCleanup.cleanup(eppReferenceWSName)
         else:
             # Single file, no EPP reference.
             ws = Load(Filename=inputFilename,
-                      OutputWorkspace=rawWSName)
+                      OutputWorkspace=rawWSName,
+                      EnableLogging=algorithmLogging)
     # Now merge the loaded files
     mergedWSName = wsNames.withSuffix('merged')
     ws = MergeRuns(InputWorkspaces=ws,
-                   OutputWorkspace=mergedWSName)
+                   OutputWorkspace=mergedWSName,
+                   EnableLogging=algorithmLogging)
     wsCleanup.cleanup(rawWSName)
     return ws
 
-def _extractMonitorWs(ws, wsNames):
+def _extractMonitorWs(ws, wsNames, algorithmLogging):
     '''
     Separates detector and monitor histograms from a workspace.
     '''
@@ -256,10 +265,11 @@ def _extractMonitorWs(ws, wsNames):
     monWSName = wsNames.withSuffix('extracted_monitors')
     detectorWS, monitorWS = ExtractMonitors(InputWorkspace=ws,
                                             DetectorWorkspace=detWSName,
-                                            MonitorWorkspace=monWSName)
+                                            MonitorWorkspace=monWSName,
+                                            EnableLogging=algorithmLogging)
     return detectorWS, monitorWS
 
-def _createFlatBackground(ws, windowWidth, wsNames):
+def _createFlatBackground(ws, windowWidth, wsNames, algorithmLogging):
     '''
     Returns a flat background workspace.
     '''
@@ -270,25 +280,28 @@ def _createFlatBackground(ws, windowWidth, wsNames):
                                     OutputMode='Return Background',
                                     SkipMonitors=False,
                                     NullifyNegativeValues=False,
-                                    AveragingWindowWidth=windowWidth)
+                                    AveragingWindowWidth=windowWidth,
+                                    EnableLogging=algorithmLogging)
     return bkgWS
 
-def _subtractFlatBackground(ws, bkgWorkspace, bkgScaling, wsNames, wsCleanup):
+def _subtractFlatBackground(ws, bkgWorkspace, bkgScaling, wsNames, wsCleanup, algorithmLogging):
     '''
     Subtracts a scaled flat background from a workspace.
     '''
     subtractedWSName = wsNames.withSuffix('background_subtracted')
     scaledBkgWSName = wsNames.withSuffix('flat_background_scaled')
-    Scale(InputWorkspace = bkgWorkspace,
-          OutputWorkspace = scaledBkgWSName,
-          Factor = bkgScaling)
+    Scale(InputWorkspace=bkgWorkspace,
+          OutputWorkspace=scaledBkgWSName,
+          Factor = bkgScaling,
+          EnableLogging=algorithmLogging)
     subtractedWS = Minus(LHSWorkspace=ws,
                       RHSWorkspace=scaledBkgWSName,
-                      OutputWorkspace=subtractedWSName)
+                      OutputWorkspace=subtractedWSName,
+                      EnableLogging=algorithmLogging)
     wsCleanup.cleanup(scaledBkgWSName)
     return subtractedWS
 
-def _findEPP(ws, wsType, wsNames):
+def _findEPP(ws, wsType, wsNames, algorithmLogging):
     '''
     Returns EPP table for a workspace.
     '''
@@ -297,64 +310,74 @@ def _findEPP(ws, wsType, wsNames):
     else:
         eppWSName = wsNames.withSuffix('epp_monitors')
     eppWS = FindEPP(InputWorkspace = ws,
-                    OutputWorkspace = eppWSName)
+                    OutputWorkspace = eppWSName,
+                    EnableLogging=algorithmLogging)
     return eppWS
 
-def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup):
+def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, algorithmLogging):
     '''
     Returns a diagnostics workspace.
     '''
     # 1. Detectors with zero counts.
     zeroCountWSName = wsNames.withSuffix('diagnostics_zero_counts')
     zeroCountDiagnostics, nFailures = FindDetectorsOutsideLimits(InputWorkspace=ws,
-                                                                 OutputWorkspace=zeroCountWSName)
+                                                                 OutputWorkspace=zeroCountWSName,
+                                                                 EnableLogging=algorithmLogging)
     # 2. Detectors with high background.
     noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_background')
     noisyBkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWS,
                                                         OutputWorkspace=noisyBkgWSName,
                                                         LowThreshold=0.0,
                                                         HighThreshold=10,
-                                                        LowOutlier=0.0)
+                                                        LowOutlier=0.0,
+                                                        EnableLogging=algorithmLogging)
     combinedDiagnosticsWSName = wsNames.withSuffix('diagnostics')
     diagnosticsWS = Plus(LHSWorkspace=zeroCountDiagnostics,
                          RHSWorkspace=noisyBkgDiagnostics,
-                         OutputWorkspace=combinedDiagnosticsWSName)
+                         OutputWorkspace=combinedDiagnosticsWSName,
+                         EnableLogging=algorithmLogging)
     wsCleanup.cleanup(zeroCountWSName)
     wsCleanup.cleanup(noisyBkgWSName)
     return diagnosticsWS
 
-def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames):
+def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
     '''
     Mask detectors according to diagnostics.
     '''
     maskedWSName = wsNames.withSuffix('diagnostics_applied')
     maskedWS = CloneWorkspace(InputWorkspace=ws,
-                              OutputWorkspace=maskedWSName)
+                              OutputWorkspace=maskedWSName,
+                              EnableLogging=algorithmLogging)
     MaskDetectors(Workspace=maskedWS,
-                  MaskedWorkspace=diagnosticsWS)
+                  MaskedWorkspace=diagnosticsWS,
+                  EnableLogging=algorithmLogging)
     return maskedWS
 
-def _applyUserMask(ws, mask, indexType, wsNames):
+def _applyUserMask(ws, mask, indexType, wsNames, algorithmLogging):
     '''
     Applies mask.
     '''
     maskedWSName = wsNames.withSuffix('masked')
     maskedWorkspace = CloneWorkspace(InputWorkspace = ws,
-                                     OutputWorkspace = maskedWSName)
+                                     OutputWorkspace = maskedWSName,
+                                     EnableLogging=algorithmLogging)
     if indexType == INDEX_TYPE_DETECTOR_ID:
         MaskDetectors(Workspace=maskedWorkspace,
-                      DetectorList=mask)
+                      DetectorList=mask,
+                      EnableLogging=algorithmLogging)
     elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
         MaskDetectors(Workspace=maskedWorkspace,
-                      SpectraList=mask)
+                      SpectraList=mask,
+                      EnableLogging=algorithmLogging)
     elif indexType == INDEX_TYPE_WORKSPACE_INDEX:
         MaskDetectors(Workspace=maskedWorkspace,
-                      WorkspaceIndexList=mask)
+                      WorkspaceIndexList=mask,
+                      EnableLogging=algorithmLogging)
     else:
         raise RuntimeError('Unknown ' + PROP_INDEX_TYPE)
     return maskedWorkspace
 
-def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace, indexType, eiCalibrationDets, eiCalibrationMon, wsNames, log):
+def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace, indexType, eiCalibrationDets, eiCalibrationMon, wsNames, log, algorithmLogging):
     '''
     Returns the calibrated incident energy.
     '''
@@ -369,15 +392,17 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEP
                              MonitorWorkspace=monWorkspace,
                              MonitorEppTable=monEPPWorkspace,
                              Monitor=eiCalibrationMon,
-                             PulseInterval=pulseInterval)
+                             PulseInterval=pulseInterval,
+                             EnableLogging=algorithmLogging)
         eiWSName = wsNames.withSuffix('incident_energy')
         eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,
-                                                  DataValue=energy)
+                                                  DataValue=energy,
+                                                  EnableLogging=algorithmLogging)
     else:
         log.error('Instrument ' + instrument + ' not supported for incident energy calibration')
     return eiWorkspace
 
-def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report):
+def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report, algorithmLogging):
     '''
     Updates incident energy and wavelength in the sample logs.
     '''
@@ -392,25 +417,28 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report):
     else:
         raise RuntimeError('Unknown workspace content type')
     calibratedWS = CloneWorkspace(InputWorkspace=ws,
-                                  OutputWorkspace=calibratedWSName)
+                                  OutputWorkspace=calibratedWSName,
+                                  EnableLogging=algorithmLogging)
     AddSampleLog(Workspace=calibratedWS,
                  LogName='Ei',
                  LogText=str(energy),
                  LogType='Number',
                  NumberType='Double',
-                 LogUnit='meV')
+                 LogUnit='meV',
+                 EnableLogging=algorithmLogging)
     AddSampleLog(Workspace=calibratedWS,
                  Logname='wavelength',
                  LogText=str(wavelength),
                  LogType='Number',
                  NumberType='Double',
-                 LogUnit='Ångström')
+                 LogUnit='Ångström',
+                 EnableLogging=algorithmLogging)
     report.notice("Applied Ei calibration to '" + str(ws) + "'.")
     report.notice('Original Ei: {} new Ei: {}.'.format(originalEnergy, energy))
     report.notice('Original wavelength: {} new wavelength {}.'.format(originalWavelength, wavelength))
     return calibratedWS
 
-def _normalizeToMonitor(ws, monWS, monEPPWS, monIndex, wsNames, wsCleanup):
+def _normalizeToMonitor(ws, monWS, monEPPWS, monIndex, wsNames, wsCleanup, algorithmLogging):
     '''
     Normalizes to monitor counts.
     '''
@@ -427,11 +455,12 @@ def _normalizeToMonitor(ws, monWS, monEPPWS, monIndex, wsNames, wsCleanup):
                                                              MonitorWorkspaceIndex=monIndex,
                                                              IntegrationRangeMin=begin,
                                                              IntegrationRangeMax=end,
-                                                             NormFactorWS=normalizationFactorWsName)
+                                                             NormFactorWS=normalizationFactorWsName,
+                                                             EnableLogging=algorithmLogging)
     wsCleanup.cleanup(normalizationFactorWS)
     return normalizedWS
 
-def _normalizeToTime(ws, wsNames, wsCleanup):
+def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
     '''
     Normalizes to 'actual_time' sample log.
     '''
@@ -439,73 +468,85 @@ def _normalizeToTime(ws, wsNames, wsCleanup):
     normalizationFactorWsName = wsNames.withSuffix('normalization_factor_time')
     time = inWs.getLogData('actual_time').value
     normalizationFactorWS = CreateSingleValuedWorkspace(OutputWorkspace=normalizationFactorWsName,
-                                                        DataValue = time)
+                                                        DataValue = time,
+                                                        EnableLogging=algorithmLogging)
     normalizedWS = Divide(LHSWorkspace=ws,
                           RHSWorkspace=normalizationFactorWS,
-                          OutputWorkspace=normalizedWSName)
+                          OutputWorkspace=normalizedWSName,
+                          EnableLogging=algorithmLogging)
     wsCleanup.cleanup(normalizationFactorWS)
     return normalizedWS
 
-def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup):
+def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup, algorithmLogging):
     '''
     Subtracts cadmium corrected emtpy can.
     '''
     # out = (in - Cd) / transmission - (EC - Cd)
     transmissionWSName = wsNames.withSuffix('transmission')
     transmissionWS = CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
-                                                 DataValue=transmission)
+                                                 DataValue=transmission,
+                                                 EnableLogging=algorithmLogging)
     cdSubtractedECWSName = wsNames.withSuffix('Cd_subtracted_EC')
     cdSubtractedECWS = Minus(LHSWorkspace=ecWS,
                              RHSWorkspace=cdWS,
-                             OutputWorkspace=cdSubtractedECWSName)
+                             OutputWorkspace=cdSubtractedECWSName,
+                             EnableLogging=algorithmLogging)
     cdSubtractedWSName = wsNames.withSuffix('Cd_subtracted')
     cdSubtractedWS = Minus(LHSWorkspace=ws,
                            RHSWorkspace=cdWS,
-                           OutputWorkspace=cdSubtractedWSName)
+                           OutputWorkspace=cdSubtractedWSName,
+                           EnableLogging=algorithmLogging)
     correctedCdSubtractedWsName = wsNames.withSuffix('transmission_corrected_Cd_subtracted')
     correctedCdSubtractedWS = Divide(LHSWorkspace=cdSubtractedWS,
                                      RHSWorkspace=transmissionWS,
-                                     OutputWorkspace=correctedCdSubtractedWSName)
+                                     OutputWorkspace=correctedCdSubtractedWSName,
+                                     EnableLogging=algorithmLogging)
     ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
     ecSubtractedWS = Minus(LHSWorkspace=correctedCdSubtractedWS,
                            RHSWorkspace=cdSubtractedECWS,
-                           OutputWorkspace=ecSubtractedWSName)
+                           OutputWorkspace=ecSubtractedWSName,
+                           EnableLogging=algorithmLogging)
     wsCleanup.cleanup(cdSubtractedECWS,
                       cdSubtractedWS,
-                      correctedCdSubtractedWS)
+                      correctedCdSubtractedWS,
+                      EnableLogging=algorithmLogging)
     return ecSubtractedWS
 
-def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup):
+def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup, algorithmLogging):
     '''
     Subtracts empty can.
     '''
     # out = in - transmission * EC
     transmissionWSName = wsNames.withSuffix('transmission')
     transmissionWS = CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
-                                                 DataValue=transmission)
+                                                 DataValue=transmission,
+                                                 EnableLogging=algorithmLogging)
     correctedECWSName = wsNames.withSuffix('transmission_corrected_EC')
     correctedECWS = Multiply(LHSWorkspace=ecWS,
                              RHSWorkspace=transmissionWS,
-                             OutputWorkspace=correctedECWSName)
+                             OutputWorkspace=correctedECWSName,
+                             EnableLogging=algorithmLogging)
     ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
     ecSubtractedWS = Minus(LHSWorkspace=ws,
                            RHSWorkspace=correctedECWS,
-                           OutputWorkspace=ecSubtractedWSName)
+                           OutputWorkspace=ecSubtractedWSName,
+                           EnableLogging=algorithmLogging)
     wsCleanup.cleanup(transmissionWS)
     wsCleanup.cleanup(correctedECWS)
     return ecSubtractedWS
 
-def _normalizeToVanadium(ws, vanaWS, wsNames):
+def _normalizeToVanadium(ws, vanaWS, wsNames, algorithmLogging):
     '''
     Normalizes to vanadium workspace.
     '''
     vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
     vanaNormalizedWS = Divide(LHSWorkspace=ws,
                               RHSWorkspace=vanaWS,
-                              OutputWorkspace=vanaNormalizedWSName)
+                              OutputWorkspace=vanaNormalizedWSName,
+                              EnableLogging=algorithmLogging)
     return vanaNormalizedWS
 
-def _convertTOFToDeltaE(ws, wsNames):
+def _convertTOFToDeltaE(ws, wsNames, algorithmLogging):
     '''
     Converts the X units from time-of-flight to energy transfer.
     '''
@@ -513,32 +554,36 @@ def _convertTOFToDeltaE(ws, wsNames):
     energyConvertedWS = ConvertUnits(InputWorkspace = ws,
                                      OutputWorkspace = energyConvertedWSName,
                                      Target = 'DeltaE',
-                                     EMode = 'Direct')
+                                     EMode = 'Direct',
+                                     EnableLogging=algorithmLogging)
     return energyConvertedWS
 
-def _rebin(ws, params, wsNames):
+def _rebin(ws, params, wsNames, algorithmLogging):
     '''
     Rebins a workspace.
     '''
     rebinnedWSName = wsNames.withSuffix('rebinned')
     rebinnedWS = Rebin(InputWorkspace = ws,
                        OutputWorkspace = rebinnedWSName,
-                       Params = params)
+                       Params = params,
+                       EnableLogging=algorithmLogging)
     return rebinnedWS
 
-def _correctByKiKf(ws, wsNames):
+def _correctByKiKf(ws, wsNames, algorithmLogging):
     '''
     Applies the k_i / k_f correction.
     '''
     correctedWSName = wsNames.withSuffix('kikf')
     correctedWS = CorrectKiKf(InputWorkspace = ws,
-                              OutputWorkspace = correctedWSName)
+                              OutputWorkspace = correctedWSName,
+                              EnableLogging=algorithmLogging)
     return correctedWS
 
-def _correctByDetectorEfficiency(ws, wsNames):
+def _correctByDetectorEfficiency(ws, wsNames, algorithmLogging):
     correctedWSName = wsNames.withSuffix('detector_efficiency_corrected')
     correctedWS = DetectorEfficiencyCorUser(InputWorkspace = ws,
-                                            OutputWorkspace = correctedWSName)
+                                            OutputWorkspace = correctedWSName,
+                                            EnableLogging=algorithmLogging)
     return correctedWS
 
 
@@ -561,11 +606,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         report = Report()
+        childAlgorithmLogging = False
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
         wsNamePrefix = self.getProperty(PROP_OUTPUT_WORKSPACE).valueAsStr
         cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
         wsNames = NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = IntermediateWsCleanup(cleanupMode)
+        wsCleanup = IntermediateWsCleanup(cleanupMode, childAlgorithmLogging)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
         # The variable 'mainWS' shall hold the current main data
@@ -579,13 +625,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                    eppReference,
                                    wsNames,
                                    wsCleanup,
-                                   self.log())
+                                   self.log(),
+                                   childAlgorithmLogging)
         elif self.getProperty(PROP_INPUT_WORKSPACE).value:
             mainWS = self.getProperty(PROP_INPUT_WORKSPACE).value
 
         # Extract monitors to a separate workspace
         detectorWorkspace, monitorWorkspace = _extractMonitorWs(mainWS,
-                                                                wsNames)
+                                                                wsNames,
+                                                                childAlgorithmLogging)
         monitorIndex = self.getProperty(PROP_MONITOR_INDEX).value
         monitorIndex = self._convertToWorkspaceIndex(monitorIndex,
                                                      monitorWorkspace)
@@ -601,7 +649,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
             windowWidth = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
             bkgWorkspace = _createFlatBackground(mainWS, 
                                                  windowWidth,
-                                                 wsNames)
+                                                 wsNames,
+                                                 childAlgorithmLogging)
         else:
             bkgWorkspace = bkgInWS
             wsCleanup.protect(bkgWorkspace)
@@ -613,7 +662,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                          bkgWorkspace,
                                                          bkgScaling,
                                                          wsNames,
-                                                         wsCleanup)
+                                                         wsCleanup,
+                                                         childAlgorithmLogging)
         wsCleanup.cleanup(mainWS)
         mainWS = bkgSubtractedWorkspace
         del(bkgSubtractedWorkspace)
@@ -624,7 +674,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if not detectorEPPInWS:
             detectorEPPWS = _findEPP(mainWS,
                                      WS_CONTENT_DETECTORS,
-                                     wsNames)
+                                     wsNames,
+                                     childAlgorithmLogging)
         else:
             detectorEPPWS = detectorInWS
             wsCleanup.protect(detectorEPPWS)
@@ -636,7 +687,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if not monitorEPPInWS:
             monitorEPPWS = _findEPP(mainWS,
                                     WS_CONTENT_MONITORS,
-                                    wsNames)
+                                    wsNames,
+                                    childAlgorithmLogging)
         else:
             monitorEPPWS = monitorInWS
             wsCleanup.protect(monitorEPPWS)
@@ -649,7 +701,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if self.getProperty(PROP_DETECTOR_DIAGNOSTICS).value == DIAGNOSTICS_YES:
             diagnosticsInWS = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
             if not diagnosticsInWS:
-                diagnosticsWS = _diagnoseDetectors(mainWS, bkgWorkspace, wsNames, wsCleanup)
+                diagnosticsWS = _diagnoseDetectors(mainWS,
+                                                   bkgWorkspace,
+                                                   wsNames,
+                                                   wsCleanup,
+                                                   childAlgorithmLogging)
             else:
                 diagnosticsWS = diagnosticsInWS
                 wsCleanup.protect(diagnosticsWS)
@@ -657,7 +713,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE, diagnosticsWS)
             diagnosedWorkspace = _maskDiagnosedDetectors(mainWS,
                                                          diagnosticsWS,
-                                                         wsNames)
+                                                         wsNames,
+                                                         childAlgorithmLogging)
             wsCleanup.cleanup(diagnosticsWS)
             del(diagnosticsWS)
             wsCleanup.cleanup(mainWS)
@@ -668,7 +725,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         maskedWorkspace = _applyUserMask(mainWS, 
                                          userMask,
                                          indexType,
-                                         wsNames)
+                                         wsNames,
+                                         childAlgorithmLogging)
         wsCleanup.cleanup(mainWS)
         mainWS = maskedWorkspace
         del(maskedWorkspace)
@@ -687,7 +745,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                             eiCalibrationDets,
                                                             monitorIndex,
                                                             wsNames,
-                                                            self.log())
+                                                            self.log(),
+                                                            childAlgorithmLogging)
             else:
                 eiCalibrationWS = eiInWS
                 wsCleanup.protect(eiCalibrationWS)
@@ -696,7 +755,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                                     WS_CONTENT_DETECTORS,
                                                                     eiCalibrationWS,
                                                                     wsNames,
-                                                                    report)
+                                                                    report,
+                                                                    childAlgorithmLogging)
                 wsCleanup.cleanup(mainWS)
                 mainWS = eiCalibratedDetWS
                 del(eiCalibratedDetWS)
@@ -704,7 +764,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                                     WS_CONTENT_MONITORS,
                                                                     eiCalibrationWS,
                                                                     wsNames,
-                                                                    report)
+                                                                    report,
+                                                                    childAlgorithmLogging)
                 wsCleanup.cleanup(monitorWorkspace)
                 monitorWorkspace = eiCalibratedMonWS
                 del(eiCalibratedMonWS)
@@ -722,11 +783,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                    monitorEPPWS,
                                                    monitorIndex,
                                                    wsNames,
-                                                   wsCleanup)
+                                                   wsCleanup,
+                                                   childAlgorithmLogging)
             elif normalisationMethod == NORM_METHOD_TIME:
                 normalizedWS = _normalizeToTime(mainWS,
                                                 wsNames,
-                                                wsCleanup)
+                                                wsCleanup,
+                                                childAlgorithmLogging)
             else:
                 raise RuntimeError('Unknonwn normalisation method ' + normalisationMethod)
             wsCleanup.cleanup(mainWS)
@@ -751,13 +814,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                    cdInWS,
                                                    transmission,
                                                    wsNames,
-                                                   wsCleanup)
+                                                   wsCleanup,
+                                                   childAlgorithmLogging)
             else:
                 ecSubtractedWS = _subtractEC(mainWS,
                                              ecInWS,
                                              transmission,
                                              wsNames,
-                                             wsCleanup)
+                                             wsCleanup,
+                                             childAlgorithmLogging)
             wsCleanup.cleanup(mainWS)
             mainWS = ecSubtractedWS
             del(ecSubtractedWS)
@@ -772,7 +837,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
             # the best possible Debye-Waller correction.
             mainWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
                                                   EPPTable=detectorEPPWS,
-                                                  OutputWorkspace=outWS)
+                                                  OutputWorkspace=outWS,
+                                                  EnableLogging=childAlgorithmLogging)
             self._finalize(mainWS, wsCleanup, report)
             return
 
@@ -784,19 +850,24 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if vanaWS:
             vanaNormalizedWS = _normalizeToVanadium(mainWS,
                                                     vanaWS,
-                                                    wsNames)
+                                                    wsNames,
+                                                    childAlgorithmLogging)
             wsCleanup.cleanup(mainWS)
             mainWS = vanaNormalizedWS
             del(vanaNormalizedWS)
 
         # Convert units from TOF to energy
-        energyConvertedWS = _convertTOFToDeltaE(mainWS, wsNames)
+        energyConvertedWS = _convertTOFToDeltaE(mainWS,
+                                                wsNames,
+                                                childAlgorithmLogging)
         wsCleanup.cleanup(mainWS)
         mainWS = energyConvertedWS
         del(energyConvertedWS)
 
         # KiKf conversion
-        kikfCorrectedWS = _correctByKiKf(mainWS, wsNames)
+        kikfCorrectedWS = _correctByKiKf(mainWS,
+                                         wsNames,
+                                         childAlgorithmLogging)
         wsCleanup.cleanup(mainWS)
         mainWS = kikfCorrectedWS
         del(kikfCorrectedWS)
@@ -805,14 +876,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # TODO automatize binning in w. Do we need rebinning in q as well?
         params = self.getProperty(PROP_BINNING_W).value
         if params:
-            rebinnedWS = _rebin(mainWS, params, wsNames)
+            rebinnedWS = _rebin(mainWS,
+                                params,
+                                wsNames,
+                                childAlgorithmLogging)
             wsCleanup.cleanup(mainWS)
             mainWS = rebinnedWS
             del(rebinnedWS)
 
         # Detector efficiency correction
         efficiencyCorrectedWS = _correctByDetectorEfficiency(mainWS,
-                                                             wsNames)
+                                                             wsNames,
+                                                             childAlgorithmLogging)
         wsCleanup.cleanup(mainWS)
         mainWS = efficiencyCorrectedWS
         del(efficiencyCorrectedWS)
