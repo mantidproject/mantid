@@ -143,7 +143,6 @@ void SpectrumInfo::setMasked(const size_t index, bool masked) {
   }
 }
 
-
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
 const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
