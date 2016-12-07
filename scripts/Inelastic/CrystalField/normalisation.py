@@ -100,7 +100,7 @@ def norm2stev(**kwargs):
 
         Inputs:
             ionname - name of the (tripositive) rare earth ion, e.g. 'Ce', 'Pr'.
-            ionnumber - the number index of the rare earth ion: 
+            ionnumber - the number index of the rare earth ion:
                    1=Ce 2=Pr 3=Nd 4=Pm 5=Sm 6=Eu 7=Gd 8=Tb 9=Dy 10=Ho 11=Er 12=Tm 13=Yb
             bvec - a vector of the Stevens CF parameters in order: [B20 B21 B22 B40 B41 ... etc.]
                     This vector can also a be dictionary instead {'B20':1, 'B40':2}
