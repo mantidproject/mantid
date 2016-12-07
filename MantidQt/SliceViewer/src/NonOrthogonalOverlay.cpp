@@ -96,8 +96,8 @@ QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
   VMD coords = m_slicePoint;
   coords[m_dimX] = static_cast<Mantid::Kernel::VMD_t>(x);
   coords[m_dimY] = static_cast<Mantid::Kernel::VMD_t>(y);
-  API::transformLookpointToWorkspaceCoordGeneric(coords, m_fromOrthogonalToHkl,
-                                                 m_dimX, m_dimY);
+  API::transformLookpointToWorkspaceCoordGeneric(
+      coords, m_fromOrthogonalToHkl, m_dimX, m_dimY, m_missingHKLDim);
   auto xNew = coords[m_dimX];
   auto yNew = coords[m_dimY];
   return QPointF(xNew, yNew);
@@ -109,6 +109,7 @@ void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
   m_ws = ws;
   m_dimX = dimX;
   m_dimY = dimY;
+  m_missingHKLDim = API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
   m_slicePoint = slicePoint;
 
   if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {

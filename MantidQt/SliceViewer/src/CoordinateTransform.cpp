@@ -7,10 +7,11 @@ namespace MantidQt {
 namespace SliceViewer {
 
 void NullTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
-                              size_t dimY) {
+                              size_t dimY, size_t missingHKLDim) {
   (void)coords;
   (void)dimX;
   (void)dimY;
+  (void)missingHKLDim;
 }
 void NullTransform::checkDimensionsForHKL(Mantid::API::IMDWorkspace_sptr ws,
                                           size_t dimX, size_t dimY) {
@@ -38,10 +39,10 @@ void NonOrthogonalTransform::checkDimensionsForHKL(
   m_dimensionsHKL = dimensionHKL;
 }
 void NonOrthogonalTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
-                                       size_t dimY) {
+                                       size_t dimY, size_t missingHKLDim) {
   if (m_dimensionsHKL) {
     API::transformLookpointToWorkspaceCoordGeneric(coords, m_skewMatrix, dimX,
-                                                   dimY);
+                                                   dimY, missingHKLDim);
   }
 }
 

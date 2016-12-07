@@ -93,6 +93,7 @@ private:
 
   size_t m_dimY;
   size_t m_dimX;
+  size_t m_missingHKLDim;
   Mantid::Kernel::VMD m_slicePoint;
 
   /// Width of the line (in coordinates of the plot)

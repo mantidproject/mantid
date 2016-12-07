@@ -11,8 +11,8 @@ namespace SliceViewer {
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER CoordinateTransform {
 public:
   virtual ~CoordinateTransform(){};
-  virtual void transform(Mantid::Kernel::VMD &coords, size_t dimX,
-                         size_t dimY) = 0;
+  virtual void transform(Mantid::Kernel::VMD &coords, size_t dimX, size_t dimY,
+                         size_t missingHKLDim) = 0;
   virtual void checkDimensionsForHKL(Mantid::API::IMDWorkspace_sptr ws,
                                      size_t dimX, size_t dimY) = 0;
 };
@@ -20,8 +20,8 @@ public:
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER NullTransform
     : public CoordinateTransform {
 public:
-  void transform(Mantid::Kernel::VMD &coords, size_t dimX,
-                 size_t dimY) override;
+  void transform(Mantid::Kernel::VMD &coords, size_t dimX, size_t dimY,
+                 size_t missingHKLDim) override;
   void checkDimensionsForHKL(Mantid::API::IMDWorkspace_sptr ws, size_t dimX,
                              size_t dimY) override;
 };
@@ -32,8 +32,8 @@ public:
   ~NonOrthogonalTransform();
   NonOrthogonalTransform(Mantid::API::IMDWorkspace_sptr ws, size_t dimX,
                          size_t dimY);
-  void transform(Mantid::Kernel::VMD &coords, size_t dimX,
-                 size_t dimY) override;
+  void transform(Mantid::Kernel::VMD &coords, size_t dimX, size_t dimY,
+                 size_t missingHKLDim) override;
   void checkDimensionsForHKL(Mantid::API::IMDWorkspace_sptr ws, size_t dimX,
                              size_t dimY) override;
 

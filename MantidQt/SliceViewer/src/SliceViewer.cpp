@@ -1531,7 +1531,8 @@ void SliceViewer::showInfoAt(double x, double y) {
 
   if (ui.btnNonOrthogonalToggle->isChecked()) {
     // Perform non-orthogonal correction if required
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    auto missingHKLDim = API::getMissingHKLDimensionIndex(m_ws, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, missingHKLDim);
   }
 
   signal_t signal =

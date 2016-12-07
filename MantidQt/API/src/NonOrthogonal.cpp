@@ -427,6 +427,7 @@ void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
        skewMatrix[3 * dimSlice + dimY] * lookPoint[dimY]) /
       skewMatrix[3 * dimSlice + dimSlice];
 
+  auto OrigDimSliceValue = lookPoint[dimSlice];
   lookPoint[dimSlice] = sliceDimResult;
 
   auto v1 = lookPoint[0];
@@ -439,6 +440,8 @@ void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
   lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
                     v2 * skewMatrix[1 + 3 * dimY] +
                     v3 * skewMatrix[2 + 3 * dimY];
+
+  lookPoint[dimSlice] = OrigDimSliceValue;
 }
 
 /**
