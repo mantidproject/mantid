@@ -209,7 +209,7 @@ public:
 
 private:
   void createWS(std::string name) {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(name, ws);
   }
 

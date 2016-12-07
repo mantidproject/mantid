@@ -14,6 +14,7 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class SpectrumInfoTest : public CxxTest::TestSuite {
 public:

@@ -1,8 +1,10 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Cache.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
@@ -45,7 +47,28 @@ Kernel::Logger g_log("ParameterMap");
 /**
  * Default constructor
  */
-ParameterMap::ParameterMap() : m_parameterFileNames(), m_map() {}
+ParameterMap::ParameterMap()
+    : m_cacheLocMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
+      m_cacheRotMap(Kernel::make_unique<
+          Kernel::Cache<const ComponentID, Kernel::Quat>>()),
+      m_boundingBoxMap(Kernel::make_unique<
+          Kernel::Cache<const ComponentID, BoundingBox>>()) {}
+
+ParameterMap::ParameterMap(const ParameterMap &other)
+    : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
+      m_cacheLocMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(
+              *other.m_cacheLocMap)),
+      m_cacheRotMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
+              *other.m_cacheRotMap)),
+      m_boundingBoxMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
+              *other.m_boundingBoxMap)) {}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+ParameterMap::~ParameterMap() = default;
 
 /**
 * Return string to be inserted into the parameter map
@@ -961,9 +984,9 @@ std::string ParameterMap::asString() const {
  * Clears the location, rotation & bounding box caches
  */
 void ParameterMap::clearPositionSensitiveCaches() {
-  m_cacheLocMap.clear();
-  m_cacheRotMap.clear();
-  m_boundingBoxMap.clear();
+  m_cacheLocMap->clear();
+  m_cacheRotMap->clear();
+  m_boundingBoxMap->clear();
 }
 
 /// Sets a cached location on the location cache
@@ -971,7 +994,7 @@ void ParameterMap::clearPositionSensitiveCaches() {
 /// @param location :: The location
 void ParameterMap::setCachedLocation(const IComponent *comp,
                                      const V3D &location) const {
-  m_cacheLocMap.setCache(comp->getComponentID(), location);
+  m_cacheLocMap->setCache(comp->getComponentID(), location);
 }
 
 /// Attempts to retrieve a location from the location cache
@@ -980,7 +1003,7 @@ void ParameterMap::setCachedLocation(const IComponent *comp,
 /// @returns true if the location is in the map, otherwise false
 bool ParameterMap::getCachedLocation(const IComponent *comp,
                                      V3D &location) const {
-  return m_cacheLocMap.getCache(comp->getComponentID(), location);
+  return m_cacheLocMap->getCache(comp->getComponentID(), location);
 }
 
 /// Sets a cached rotation on the rotation cache
@@ -988,7 +1011,7 @@ bool ParameterMap::getCachedLocation(const IComponent *comp,
 /// @param rotation :: The rotation as a quaternion
 void ParameterMap::setCachedRotation(const IComponent *comp,
                                      const Quat &rotation) const {
-  m_cacheRotMap.setCache(comp->getComponentID(), rotation);
+  m_cacheRotMap->setCache(comp->getComponentID(), rotation);
 }
 
 /// Attempts to retrieve a rotation from the rotation cache
@@ -997,7 +1020,7 @@ void ParameterMap::setCachedRotation(const IComponent *comp,
 /// @returns true if the rotation is in the map, otherwise false
 bool ParameterMap::getCachedRotation(const IComponent *comp,
                                      Quat &rotation) const {
-  return m_cacheRotMap.getCache(comp->getComponentID(), rotation);
+  return m_cacheRotMap->getCache(comp->getComponentID(), rotation);
 }
 
 /// Sets a cached bounding box
@@ -1005,7 +1028,7 @@ bool ParameterMap::getCachedRotation(const IComponent *comp,
 /// @param box :: A reference to the bounding box
 void ParameterMap::setCachedBoundingBox(const IComponent *comp,
                                         const BoundingBox &box) const {
-  m_boundingBoxMap.setCache(comp->getComponentID(), box);
+  m_boundingBoxMap->setCache(comp->getComponentID(), box);
 }
 
 /// Attempts to retrieve a bounding box from the cache
@@ -1014,7 +1037,7 @@ void ParameterMap::setCachedBoundingBox(const IComponent *comp,
 /// @returns true if the bounding is in the map, otherwise false
 bool ParameterMap::getCachedBoundingBox(const IComponent *comp,
                                         BoundingBox &box) const {
-  return m_boundingBoxMap.getCache(comp->getComponentID(), box);
+  return m_boundingBoxMap->getCache(comp->getComponentID(), box);
 }
 
 /**
@@ -1077,6 +1100,13 @@ const std::vector<std::string> &ParameterMap::getParameterFilenames() const {
 */
 void ParameterMap::addParameterFilename(const std::string &filename) {
   m_parameterFileNames.push_back(filename);
+}
+
+/// Wrapper for ParameterFactory::create to avoid include in header
+boost::shared_ptr<Parameter>
+ParameterMap::create(const std::string &className,
+                     const std::string &name) const {
+  return ParameterFactory::create(className, name);
 }
 
 } // Namespace Geometry

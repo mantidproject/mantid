@@ -4,7 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <boost/algorithm/string.hpp>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
 #include "ReflMockObjects.h"

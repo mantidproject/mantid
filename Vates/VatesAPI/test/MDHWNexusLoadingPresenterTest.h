@@ -181,7 +181,8 @@ public:
     try {
       auto workspaceProvider = Mantid::Kernel::make_unique<
           ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-      presenter.makeNonOrthogonal(product, std::move(workspaceProvider));
+      presenter.makeNonOrthogonal(product, std::move(workspaceProvider),
+                                  &mockDrawingProgressAction);
     } catch (...) {
       // Add the standard change of basis matrix and set the boundaries
       presenter.setDefaultCOBandBoundaries(product);

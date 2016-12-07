@@ -101,7 +101,7 @@ public:
 
   void testRebinnedOutput() {
     RebinnedOutput_sptr inputWS =
-        WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = inputWS->getName();
     AnalysisDataService::Instance().addOrReplace(inName, inputWS);
     std::string outName = "rebinTrans";
@@ -169,7 +169,7 @@ public:
 
     // set up testRebinnedOutputPerformance
     RebinnedOutput_sptr inputWS =
-        WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = rebinned_inputWS;
     AnalysisDataService::Instance().addOrReplace(inName, inputWS);
   }

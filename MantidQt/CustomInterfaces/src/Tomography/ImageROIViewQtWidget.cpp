@@ -481,6 +481,9 @@ void ImageROIViewQtWidget::refreshROIetAl() {
   if (!pp)
     return;
 
+  m_ui.label_img->setMaximumWidth(static_cast<int>(m_imgWidth));
+  m_ui.label_img->setMaximumHeight(static_cast<int>(m_imgHeight));
+
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
 

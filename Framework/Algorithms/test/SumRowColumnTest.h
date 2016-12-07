@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SumRowColumn.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -16,7 +17,7 @@ public:
 
   SumRowColumnTest() : inputWS("SumRowColumnTestWS") {
     AnalysisDataService::Instance().add(
-        inputWS, WorkspaceCreationHelper::Create2DWorkspaceBinned(100, 10));
+        inputWS, WorkspaceCreationHelper::create2DWorkspaceBinned(100, 10));
   }
 
   ~SumRowColumnTest() override { AnalysisDataService::Instance().clear(); }
