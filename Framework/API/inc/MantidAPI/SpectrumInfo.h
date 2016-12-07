@@ -7,7 +7,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include <vector>
-#include <set>
 
 namespace Mantid {
 using detid_t = int32_t;
