@@ -3,6 +3,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -120,6 +121,7 @@ void DetectorEfficiencyCor::exec() {
   int64_t numHists = m_inputWS->getNumberHistograms();
   double numHists_d = static_cast<double>(numHists);
   const int64_t progStep = static_cast<int64_t>(ceil(numHists_d / 100.0));
+  auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numHists; ++i) {
@@ -127,7 +129,7 @@ void DetectorEfficiencyCor::exec() {
 
     m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
     try {
-      correctForEfficiency(i);
+      correctForEfficiency(i, spectrumInfo);
     } catch (Exception::NotFoundError &) {
       // zero the Y data that can't be corrected
       m_outputWS->mutableY(i) *= 0.0;
@@ -189,9 +191,8 @@ aligned along one axis
 *  @throw NotFoundError if the detector or its gas pressure or wall thickness
 were not found
 */
-void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
-  IDetector_const_sptr det = m_inputWS->getDetector(spectraIn);
-  if (det->isMonitor() || det->isMasked()) {
+void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn, SpectrumInfo spectrumInfo) {
+  if (spectrumInfo.isMonitor(spectraIn) || spectrumInfo.isMasked(spectraIn)) {
     return;
   }
 
