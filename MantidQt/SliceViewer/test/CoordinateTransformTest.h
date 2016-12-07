@@ -35,6 +35,7 @@ private:
   }
   size_t m_dimX = 0;
   size_t m_dimY = 1;
+  size_t m_sliceDim = 2;
 
   Mantid::API::IMDEventWorkspace_sptr getNonOrthogonalEventWorkspace(
       bool wrongCoords = false, bool forgetUB = false, bool forgetWmat = false,
@@ -128,7 +129,7 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // cast into null
     TSM_ASSERT("Orthogonal workspaces should not be transformed",
@@ -145,7 +146,7 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // Assert
     TSM_ASSERT("Orthogonal workspaces should not be transformed",
@@ -167,7 +168,7 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // assert
     TSM_ASSERT_EQUALS("Zero coords should not be changed by skew matrix",
@@ -187,8 +188,8 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
-    double expectedValue = 0.633975;
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
+    double expectedValue = 0.75;
     bool skewCorrect = skewWithinTolerance(coords[0], expectedValue);
     TSM_ASSERT("Coords not skewed within limits", skewCorrect);
   }
@@ -202,7 +203,7 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT(
         "Datasets with wrong coordinates (non HKL) should not be transformed",
@@ -219,7 +220,7 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a UBmatrix should not be transformed",
                dynamic_cast<MantidQt::SliceViewer::NullTransform *>(
@@ -235,7 +236,7 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a Wmatrix should not be transformed",
                dynamic_cast<MantidQt::SliceViewer::NullTransform *>(
@@ -252,7 +253,7 @@ public:
     auto m_coordinateTransform =
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
-    m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+    m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a Affmatrix should still be transformed",
                dynamic_cast<MantidQt::SliceViewer::NonOrthogonalTransform *>(

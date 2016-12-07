@@ -37,11 +37,12 @@ private:
 
   Mantid::DataObjects::EventWorkspace_sptr getOrthogonalEventWorkspace() {
     Mantid::DataObjects::EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateEventWorkspace();
+        WorkspaceCreationHelper::createEventWorkspace();
     return ws;
   }
   size_t m_dimX = 0;
   size_t m_dimY = 1;
+  size_t m_sliceDim = 2;
 
   Mantid::API::IMDEventWorkspace_sptr getNonOrthogonalEventWorkspace(
       bool wrongCoords = false, bool forgetUB = false, bool forgetWmat = false,
@@ -313,7 +314,7 @@ public:
       coords[d] = Mantid::Kernel::VMD_t(0.0);
     }
     MantidQt::API::transformLookpointToWorkspaceCoordGeneric(
-        coords, skewMatrixCoord, m_dimX, m_dimY);
+        coords, skewMatrixCoord, m_dimX, m_dimY, m_sliceDim);
     if ((coords[0] == 0) && (coords[1] == 0)) {
       coordsRemainZero = true;
     }
@@ -333,9 +334,9 @@ public:
       coords[d] = Mantid::Kernel::VMD_t(1.5);
     }
     MantidQt::API::transformLookpointToWorkspaceCoordGeneric(
-        coords, skewMatrixCoord, m_dimX, m_dimY);
+        coords, skewMatrixCoord, m_dimX, m_dimY, m_sliceDim);
     if ((skewWithinTolerance(coords[0],
-                             static_cast<Mantid::Kernel::VMD_t>(0.633975))) &&
+                             static_cast<Mantid::Kernel::VMD_t>(0.75))) &&
         (coords[1] == 1.5) && (coords[2] == 1.5) && (coords[3] == 1.5)) {
       coordsAccurate = true;
     }
