@@ -96,7 +96,7 @@ void CorrectKiKf::exec() {
 
   // Get the parameter map
   const ParameterMap &pmap = outputWS->constInstrumentParameters();
-  const auto spectrumInfo = inputWS->spectrumInfo();
+  const auto &spectrumInfo = inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
@@ -205,7 +205,7 @@ void CorrectKiKf::execEvent() {
   const ParameterMap &pmap = outputWS->constInstrumentParameters();
 
   int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
-  const auto spectrumInfo = inputWS->spectrumInfo();
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {

@@ -175,7 +175,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
-  auto spectrumInfo = outputWS->spectrumInfo();
+  auto &spectrumInfo = outputWS->spectrumInfo();
 
   // TODO: Check why this parallel stuff breaks
   // Loop over the histograms (detector spectra)
