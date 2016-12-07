@@ -31,6 +31,8 @@ ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view)
 ReflSettingsPresenter::~ReflSettingsPresenter() {}
 
 /** Used by the view to tell the presenter something has changed
+*
+* @param flag :: A flag used by the view to tell the presenter what happened
 */
 void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
   switch (flag) {

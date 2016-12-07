@@ -35,7 +35,7 @@ ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 *
-* @param :: Index of the group in 'Settings' tab from which to get the options
+* @param group :: Index of the group in 'Settings' tab from which to get the options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
 std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
@@ -47,7 +47,7 @@ std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 
 /** Returns global processing options
 *
-* @param :: Index of the group in 'Settings' tab from which to get the options
+* @param group :: Index of the group in 'Settings' tab from which to get the options
 * @return :: Global processing options
 */
 std::string ReflMainWindowPresenter::getReductionOptions(int group) const {
@@ -60,7 +60,7 @@ std::string ReflMainWindowPresenter::getReductionOptions(int group) const {
 
 /** Returns global post-processing options
 *
-* @param :: Index of the group in 'Settings' tab from which to get the options
+* @param group :: Index of the group in 'Settings' tab from which to get the options
 * @return :: Global post-processing options
 */
 std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
