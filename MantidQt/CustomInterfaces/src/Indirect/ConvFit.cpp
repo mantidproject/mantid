@@ -327,7 +327,7 @@ void ConvFit::plotClicked() {
         // Plot results for both Lorentzians if "Two Lorentzians"
         if (m_uiForm.cbFitType->currentIndex() == 2) {
           IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
-            specNumber + 2, specNumber + 2);
+                                    specNumber + 2, specNumber + 2);
         }
       }
     }
@@ -1548,7 +1548,7 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
   if (functionName.compare("Two Lorentzians") == 0) {
     currentFitFunction = "Lorentzian";
     IFunction_sptr func = FunctionFactory::Instance().createFunction(
-      currentFitFunction.toStdString());
+        currentFitFunction.toStdString());
     for (size_t i = 0; i < func->nParams(); i++) {
       parameters << QString::fromStdString(func->parameterName(i));
     }
