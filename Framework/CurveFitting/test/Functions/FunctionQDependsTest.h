@@ -60,7 +60,7 @@ public:
   void testSetWorkspace() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
-    f.initialize();  // declare attributes
+    f.initialize(); // declare attributes
     // test with an non matrix workspace
     TS_ASSERT_THROWS_NOTHING(
         f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX));
@@ -78,7 +78,7 @@ public:
   void testQAttribute() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
-    f.initialize();  // declare attributes
+    f.initialize(); // declare attributes
     auto Q = f.getAttribute("Q").asDouble();
     TS_ASSERT_EQUALS(Q, Mantid::EMPTY_DBL());
     f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX);
@@ -98,7 +98,7 @@ public:
   void testWorkspaceIndexAttribute() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
-    f.initialize();  // declare attributes
+    f.initialize(); // declare attributes
     auto wi = f.getAttribute("WorkspaceIndex").asInt();
     TS_ASSERT_EQUALS(wi, Mantid::EMPTY_INT());
     f.setMatrixWorkspace(this->unsuitableWS(), 0, startX, endX);
@@ -120,7 +120,7 @@ public:
   void testWorkspaceIndexTiesQ() {
     double startX{0.0}, endX{1.0};
     ImplementsFunctionQDepends f;
-    f.initialize();  // declare attributes
+    f.initialize(); // declare attributes
     f.setMatrixWorkspace(this->withQonVerticalAxis(), 1, startX, endX);
     TS_ASSERT_EQUALS(f.getAttribute("Q").asDouble(), 0.5); // Q overwritten
     f.setAttribute("WorkspaceIndex", Attr(0));

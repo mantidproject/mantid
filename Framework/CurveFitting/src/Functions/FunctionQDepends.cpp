@@ -30,8 +30,10 @@ namespace Functions {
 
 /**
  * @brief declare commonattributes Q and WorkspaceIndex.
- * Subclasses containing additional attributes should override this method by declaring the additional
- * attributes and then calling the parent (this) method to declare Q and WorkspaceIndex.
+ * Subclasses containing additional attributes should override this method by
+ * declaring the additional
+ * attributes and then calling the parent (this) method to declare Q and
+ * WorkspaceIndex.
  */
 void FunctionQDepends::declareAttributes() {
   this->declareAttribute("Q", Attr(EMPTY_DBL()));
@@ -39,8 +41,10 @@ void FunctionQDepends::declareAttributes() {
 }
 
 /**
- * @brief Update attributes WorkspaceIndex and Q according to certain precedence rules.
- * Subclasses featuring additional attributes should override and insert a call to
+ * @brief Update attributes WorkspaceIndex and Q according to certain precedence
+ *rules.
+ * Subclasses featuring additional attributes should override and insert a call
+ *to
  * this method within the overriding setAttribute function.
  * There are two ways to update Q: (i) loading the value from the spectrum, and
  *(ii) manual
@@ -136,8 +140,7 @@ std::vector<double> FunctionQDepends::extractQValues(
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
         double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
         qs.push_back(q);
-      }
-      catch (Kernel::Exception::NotFoundError &) {
+      } catch (Kernel::Exception::NotFoundError &) {
         g_log.debug("Cannot populate Q values from workspace");
         qs.clear();
         break;
