@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Logger.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 

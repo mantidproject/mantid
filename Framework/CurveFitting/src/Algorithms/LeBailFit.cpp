@@ -15,7 +15,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <cctype>
 #include <fstream>
+#include <iomanip>
 
 const int OBSDATAINDEX(0);
 const int CALDATAINDEX(1);
@@ -206,7 +208,8 @@ void LeBailFit::init() {
   setPropertySettings("Minimizer", Kernel::make_unique<VisibleWhenProperty>(
                                        "Function", IS_EQUAL_TO, "LeBailFit"));
 
-  declareProperty("Damping", 1.0, "Damping factor if minizer is 'Damping'");
+  declareProperty("Damping", 1.0,
+                  "Damping factor if minimizer is 'Damped Gauss-Newton'");
   setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
                                      "Function", IS_EQUAL_TO, "LeBailFit"));
   setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
