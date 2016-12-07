@@ -4,6 +4,8 @@ import subprocess
 import shutil
 import hashlib
 from AbinsModules import AbinsParameters
+import os
+
 
 from mantid.kernel import logger
 
@@ -22,14 +24,10 @@ class IOmodule(object):
             except (IOError, ValueError) as err:
                 logger.error(str(err))
 
-            # extract name of file from its path.
-            # noinspection PyUnusedLocal
-            begin = 0
-            while input_filename.find("/") != -1:
-                begin = input_filename.find("/") + 1
-                input_filename = input_filename[begin:]
+            # extract name of file from the full path in the platform independent way
+            filename = os.path.split(self._input_filename)[1]
 
-            if input_filename == "":
+            if filename == "":
                 raise ValueError("Name of the file cannot be an empty string!")
 
         else:
@@ -40,7 +38,7 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the group. String was expected!")
 
-        core_name = input_filename[0:input_filename.find(".")]
+        core_name = filename[0:filename.find(".")]
         self._hdf_filename = core_name + ".hdf5"  # name of hdf file
 
         try:
@@ -365,6 +363,7 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the dataset!")
 
+        # noinspection PyUnresolvedReferences
         if isinstance(_hdf_group, h5py._hl.dataset.Dataset):
             return _hdf_group.value
         elif all([self._get_subgrp_name(path=_hdf_group[el].name).isdigit() for el in _hdf_group.keys()]):
@@ -391,6 +390,7 @@ class IOmodule(object):
         """
         ans = {}
         for key, item in hdf_file[path].items():
+            # noinspection PyUnresolvedReferences
             if isinstance(item, h5py._hl.dataset.Dataset):
                 ans[key] = item.value
             elif isinstance(item, h5py._hl.group.Group):
