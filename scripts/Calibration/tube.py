@@ -4,7 +4,8 @@
 Definition of Calibration
 =========================
 
-.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak])
+.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube,
+   excludeShorTubes, overridePeaks, fitPolyn, outputPeak])
 
 =========
 Use Cases
