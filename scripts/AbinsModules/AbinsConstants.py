@@ -140,9 +140,9 @@ def numeric_version_representation(string=None):
         raise ValueError("Invalid format of package version.")
 
     try:
-        return sum([int(x) for x in string.replace(".", " ").split()])
+        return sum([int(x) for x in string.replace('.', ' ').split()])
     except:
-        raise ValueError("Version of package couldn't be converted to number.")
+        raise ValueError("Version of package couldn't be converted to number. (version=", string)
 
 
 def is_numpy_valid(string=None):
