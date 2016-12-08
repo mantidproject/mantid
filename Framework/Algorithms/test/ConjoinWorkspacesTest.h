@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

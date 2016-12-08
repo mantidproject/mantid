@@ -1,3 +1,4 @@
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"

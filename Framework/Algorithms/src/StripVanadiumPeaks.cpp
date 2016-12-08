@@ -5,6 +5,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {

@@ -14,6 +14,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 

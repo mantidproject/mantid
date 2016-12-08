@@ -13,6 +13,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/make_unique.h"

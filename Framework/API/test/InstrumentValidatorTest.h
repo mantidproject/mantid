@@ -8,6 +8,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+using namespace Mantid::Kernel;
 using Mantid::API::InstrumentValidator;
 
 class InstrumentValidatorTest : public CxxTest::TestSuite {

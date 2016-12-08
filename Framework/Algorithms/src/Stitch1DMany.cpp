@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
