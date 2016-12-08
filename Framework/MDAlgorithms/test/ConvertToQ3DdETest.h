@@ -5,6 +5,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"

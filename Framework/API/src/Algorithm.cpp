@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"

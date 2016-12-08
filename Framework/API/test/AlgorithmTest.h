@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Strings.h"
 #include "FakeAlgorithms.h"
 #include "PropertyManagerHelper.h"
 #include <map>

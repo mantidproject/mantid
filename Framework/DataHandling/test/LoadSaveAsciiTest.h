@@ -6,6 +6,7 @@
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/SaveAscii.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
