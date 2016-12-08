@@ -3,6 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
@@ -19,7 +20,6 @@ namespace MantidWidgets {
 // Forward decs
 class ProgressableView;
 class DataProcessorView;
-class DataProcessorCommand;
 class DataProcessorTreeManager;
 
 /** @class GenericDataProcessorPresenter
@@ -78,7 +78,7 @@ public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor);
-  ~GenericDataProcessorPresenter() override;
+  virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
   void setOptions(const std::map<std::string, QVariant> &options) override;
@@ -109,9 +109,13 @@ public:
   void giveUserWarning(const std::string &prompt,
                        const std::string &title) const override;
 
-private:
-  // the tree manager
+protected:
+  // Process selected rows
+  virtual void process();
+  // The tree manager, a proxy class to retrieve data from the model
   std::unique_ptr<DataProcessorTreeManager> m_manager;
+
+private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   std::string m_wsName;
   // the table view we're managing
@@ -142,8 +146,6 @@ private:
   std::map<std::string, QVariant> m_options;
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
-  // process selected rows
-  void process();
   // Reduce a row
   std::vector<std::string> reduceRow(const std::vector<std::string> &data);
   // prepare a run or list of runs for processing

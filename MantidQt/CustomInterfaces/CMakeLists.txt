@@ -97,6 +97,7 @@ set ( SRC_FILES
 	src/Reflectometry/QtReflSaveTabView.cpp
 	src/Reflectometry/QtReflSettingsTabView.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
+	src/Reflectometry/ReflDataProcessorPresenter.cpp
 	src/Reflectometry/ReflEventPresenter.cpp
 	src/Reflectometry/ReflEventTabPresenter.cpp
 	src/Reflectometry/ReflGenericDataProcessorPresenterFactory.cpp
@@ -270,6 +271,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflEventPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflEventTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
@@ -543,6 +545,7 @@ set ( TEST_FILES
 	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
 	MuonAnalysisResultTableCreatorTest.h
+	ReflDataProcessorPresenterTest.h
 	ReflEventPresenterTest.h
 	ReflEventTabPresenterTest.h
 	ReflLegacyTransferStrategyTest.h
