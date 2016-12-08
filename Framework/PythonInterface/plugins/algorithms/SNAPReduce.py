@@ -2,8 +2,8 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, StringListValidator
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileFinder, \
-    FileProperty, PropertyMode, WorkspaceProperty
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
+    PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
     ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, DiffractionFocussing, \
     Divide, EditInstrumentGeometry, GetIPTS, GroupDetectors, Load, LoadDetectorsGroupingFile, \
@@ -22,31 +22,6 @@ class SNAPReduce(DataProcessorAlgorithm):
             self.IPTS_dir = GetIPTS(Instrument='SNAP',
                                     RunNumber=str(run))
         return self.IPTS_dir
-
-    def get_Run_Log_Local(self, run):
-
-        runs = list(range(run - 5, run + 1))
-        file_Str = ''
-
-        while len(runs) > 0:
-            try:
-                r = runs.pop()
-                self.log().notice('\n run is : %s' % r)
-                file_Str = FileFinder.findRuns(str(r))[0]
-                break
-            except RuntimeError:
-                pass
-
-        if file_Str == '':
-            self.log().error('The SNAP run %s is not found in the server - '
-                             + 'cannot find current IPTS, Choose another '
-                             + 'run' % run)
-            return False
-        else:
-            self.log().notice('File is: %s' % file_Str)
-            LogRun = int(file_Str.split('_')[1])
-            self.log().notice('Log Run is: %s' % LogRun)
-            return LogRun
 
     def smooth(self, data, order):
         # This smooths data based on linear weigthed average around
@@ -235,7 +210,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             pass
         elif normalization == "From Workspace":
             norm_workspace = self.getPropertyValue("NormalizationWorkspace")
-            if norm_workspace == None:
+            if norm_workspace is None:
                 issues['NormalizationWorkspace'] = 'Cannot be unset'
         elif normalization == "From Processed Nexus":
             filename = self.getProperty("NormalizationFilename").value
