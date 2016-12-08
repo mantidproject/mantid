@@ -1,5 +1,5 @@
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import logger
 import numpy as np
 from AbinsModules import IOmodule, AbinsConstants
 

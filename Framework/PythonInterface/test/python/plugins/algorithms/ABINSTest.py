@@ -10,7 +10,7 @@ def modules_not_available():
     """ Check whether required modules are available on this platform"""
     try:
         import numpy
-        version = numpy.version.version
+        version = numpy.__version__
         return AbinsConstants.is_numpy_valid(string=version) or AbinsConstants.old_python()
     except ImportError:
         logger.warning("Skipping AbinsTest because numpy is too old.")

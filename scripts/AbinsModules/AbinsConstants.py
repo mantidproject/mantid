@@ -2,7 +2,9 @@ import AbinsParameters
 import math
 import numpy as np
 from scipy import constants
-import sys
+import re
+from platform import python_version
+
 # Parameters in this bloc shouldn't be changed by a user. They should be treated as constants.
 # Changing these parameters may lead to non-functional ABINS.
 
@@ -128,11 +130,12 @@ S_THRESHOLD = 10e-8
 NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher
 
 
-def numeric_version_representation(string=None):
+def tuple_version_representation(string=None):
     """
-    Calculates numerical representation of package version.
+    Calculates as a tuple numerical representation of package version .
+
     :param string:  version of package in the format number1.number2.number3....numberN
-    :return: numerical representation of package version in the form number1 + number2 ....+ numberN
+    :return: numerical representation of package version in the form  of tuple (number1, number2 ...., numberN)
     """
     if not isinstance(string, str):
         raise ValueError("Version of package in the form of string is expected.")
@@ -140,7 +143,7 @@ def numeric_version_representation(string=None):
         raise ValueError("Invalid format of package version.")
 
     try:
-        return sum([int(x) for x in string.replace('.', ' ').split()])
+        return tuple([int(i) for i in re.findall(r'\d+', string=string)])
     except:
         raise ValueError("Version of package couldn't be converted to number. (version=", string)
 
@@ -151,12 +154,13 @@ def is_numpy_valid(string=None):
     :param string: version of numpy to be checked in the format number1.number2.number3
     :return: False if version of numpy  is valid otherwise True
     """
-    return numeric_version_representation(string=string) < numeric_version_representation(NUMPY_VERSION_REQUIRED)
+
+    return tuple_version_representation(string=string) < tuple_version_representation(NUMPY_VERSION_REQUIRED)
 
 
 def old_python():
     """
-    Checks if Python i not to old
-    :return: True if it is to old otherwise False
+    Checks if Python i not too old
+    :return: True if it is too old otherwise False
     """
-    return sys.version_info < (2, 7)
+    return tuple([int(i) for i in re.findall(r'\d+', string=python_version().replace("."," "))]) < (2, 7)
