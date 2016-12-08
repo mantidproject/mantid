@@ -25,7 +25,7 @@ class IOmodule(object):
                 logger.error(str(err))
 
             # extract name of file from the full path in the platform independent way
-            filename = os.path.split(self._input_filename)[1]
+            filename = os.path.basename(self._input_filename)
 
             if filename == "":
                 raise ValueError("Name of the file cannot be an empty string!")
