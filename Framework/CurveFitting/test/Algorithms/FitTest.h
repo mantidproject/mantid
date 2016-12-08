@@ -2043,7 +2043,8 @@ public:
   }
 
   void test_fit_peaks_Damping() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Damped GaussNewton");
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
+                    "Damped GaussNewton");
   }
 
   void test_fit_peaks_SteepestDescent() {
@@ -2086,7 +2087,8 @@ public:
   }
 
   void test_fit_smooth_Damping() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Damped GaussNewton");
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
+                    "Damped GaussNewton");
   }
 
   // disabled: too slow: ~17s
