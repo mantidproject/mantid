@@ -336,9 +336,8 @@ void SplineInterpolation::setXRange(
   const size_t nintegData = interpolationWorkspace->y(0).size();
   const double *xintegValues = &(interpolationWorkspace->x(0)[0]);
 
-  int nOutsideLeft, nOutsideRight;
   for (int n = 0; n < histNo; ++n) {
-    nOutsideLeft = 0, nOutsideRight = 0;
+    int nOutsideLeft = 0, nOutsideRight = 0;
 
     for (size_t i = 0; i < nData; ++i) {
 
