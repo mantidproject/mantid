@@ -2,7 +2,6 @@
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
 
@@ -22,12 +21,10 @@ namespace Mantid {
 
 namespace Kernel {
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
 class Logger;
 class DataItem;
 class DateAndTime;
+class IPropertySettings;
 class PropertyManager;
 template <typename T> class TimeSeriesProperty;
 template <typename T> class Matrix;
@@ -180,17 +177,9 @@ public:
   /// Return the property manager serialized as a json object.
   virtual ::Json::Value asJson(bool withDefaultValues = false) const = 0;
 
-  /** Give settings to a property to determine when it gets enabled/hidden.
-   * Passes ownership of the given IPropertySettings object to the named
-   * property
-   * @param name :: property name
-   * @param settings :: IPropertySettings     */
   void setPropertySettings(const std::string &name,
-                           std::unique_ptr<IPropertySettings> settings) {
-    Property *prop = getPointerToProperty(name);
-    if (prop)
-      prop->setSettings(std::move(settings));
-  }
+                           std::unique_ptr<IPropertySettings> settings);
+
   /** Set the group for a given property
    * @param name :: property name
    * @param group :: Name of the group it belongs to     */
