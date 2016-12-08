@@ -11,14 +11,6 @@ from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_spline, P
 
 class Pearl(AbstractInst):
 
-    # Instrument default settings
-    _default_input_ext = '.raw'
-    _default_group_names = "bank1,bank2,bank3,bank4"
-
-    _focus_tof_binning = "1500,-0.0006,19900"
-
-    _create_van_tof_binning = "1500,-0.0006,19900"
-
     def __init__(self, user_name, config_file=None, **kwargs):
 
         expected_keys = ["calibration_directory", "output_directory", "attenuation_file_name",
@@ -35,6 +27,8 @@ class Pearl(AbstractInst):
 
         self._run_settings = None
         self._ads_workaround = 0
+        self._cached_run_details = None
+        self._cached_run_details_number = None
 
     def focus(self, run_number, **kwargs):
         self._run_settings = _get_settings_focus_kwargs(config_file_path=self._basic_config_file_path, kwargs=kwargs)
@@ -45,7 +39,8 @@ class Pearl(AbstractInst):
         self._run_settings = _get_settings_van_calib_kwargs(config_file_path=self._basic_config_file_path,
                                                             kwargs=kwargs)
         self._run_settings.number_of_splines = kwargs.get("num_of_splines", 60)
-        run_details = self.get_run_details(run_number=int(run_in_range))
+        run_details = self.get_run_details(run_number_string=int(run_in_range))
+        run_details.run_number = run_details.vanadium_run_numbers
 
         return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
                                                  empty_runs=run_details.empty_runs,
@@ -58,17 +53,23 @@ class Pearl(AbstractInst):
     def _get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-    def get_run_details(self, run_number):
-        # TODO once we migrate this to another format (i.e. not the if/elif/else) implement cached val
+    def get_run_details(self, run_number_string):
+        input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
+        first_run = input_run_number_list[0]
+        if self._cached_run_details_number == first_run:
+            return self._cached_run_details
+
         run_settings = self._run_settings
         run_details = pearl_algs.get_run_details(absorb_on=run_settings.absorption_corrections,
                                                  long_mode_on=run_settings.divide_by_vanadium,
-                                                 run_number_string=run_number,
+                                                 run_number_string=run_number_string,
                                                  calibration_dir=self._calibration_dir,
                                                  mapping_file=self._calibration_mapping_path)
 
         run_details = pearl_algs.set_advanced_run_details(run_details=run_details, tt_mode=self._run_settings.tt_mode,
                                                           calibration_dir=self._calibration_dir)
+        self._cached_run_details_number = first_run
+        self._cached_run_details = run_details
         return run_details
 
     @staticmethod
@@ -108,7 +109,7 @@ class Pearl(AbstractInst):
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                         run_details=run_details, focus_mode=output_mode,
                                                         perform_attenuation=self._run_settings.perform_attenuation)
-        group_name = "PEARL" + run_details.run_number + "-Results-D-Grp"
+        group_name = "PEARL" + str(run_details.run_number) + "-Results-D-Grp"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
 

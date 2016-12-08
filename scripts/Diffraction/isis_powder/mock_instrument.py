@@ -20,7 +20,7 @@ class MockInstrument(AbstractInst):
     def get_default_group_names(self):
         return None
 
-    def get_run_details(self, run_number):
+    def get_run_details(self, run_number_string):
         # This is here to help remind people of the dict that is expected
         calibration_details = {"calibration": "cal",
                                "grouping": "group",

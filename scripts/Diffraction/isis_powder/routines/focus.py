@@ -16,7 +16,7 @@ def focus(run_number, instrument, input_batching, perform_vanadium_norm=True):
 
 
 def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
-    run_details = instrument.get_run_details(run_number=run_number)
+    run_details = instrument.get_run_details(run_number_string=run_number)
 
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium_file_path):
@@ -67,7 +67,7 @@ def _batched_run_focusing(input_batching, instrument, perform_vanadium_norm, run
 
 def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_vanadium_norm):
     processed_spectra = []
-    run_details = instrument.get_run_details(run_number=run_number)
+    run_details = instrument.get_run_details(run_number_string=run_number)
     split_ws = common.extract_and_crop_spectra(input_workspace, instrument=instrument)
 
     if perform_vanadium_norm:

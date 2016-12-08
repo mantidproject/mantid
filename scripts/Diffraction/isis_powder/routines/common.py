@@ -91,7 +91,7 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
 
 
 def load_current_normalised_ws_list(run_number_string, instrument, input_batching):
-    run_information = instrument.get_run_details(run_number=run_number_string)
+    run_information = instrument.get_run_details(run_number_string=run_number_string)
     raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
     if input_batching.lower() == InputBatchingEnum.Summed.lower() and len(raw_ws_list) > 1:

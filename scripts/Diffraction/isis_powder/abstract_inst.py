@@ -98,7 +98,7 @@ class AbstractInst(object):
     # Instrument specific properties
 
     @abstractmethod
-    def get_run_details(self, run_number):
+    def get_run_details(self, run_number_string):
         pass
 
     @staticmethod

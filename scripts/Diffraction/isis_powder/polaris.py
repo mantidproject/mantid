@@ -38,7 +38,8 @@ class Polaris(AbstractInst):
         return self._focus(run_number=run_number, input_batching=input_mode, do_van_normalisation=do_van_normalisation)
 
     def create_calibration_vanadium(self, run_in_range, do_absorb_corrections=True, gen_absorb_correction=False):
-        run_details = self.get_run_details(run_number=int(run_in_range))
+        run_details = self.get_run_details(run_number_string=int(run_in_range))
+        run_details.run_number = run_details.vanadium_run_numbers
         return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
                                                  empty_runs=run_details.empty_runs,
                                                  do_absorb_corrections=do_absorb_corrections,
@@ -49,16 +50,18 @@ class Polaris(AbstractInst):
 
     # Abstract implementation
 
-    def get_run_details(self, run_number):
-        if self._run_details_last_run_number == run_number:
+    def get_run_details(self, run_number_string):
+        input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
+        first_run = input_run_number_list[0]
+        if self._run_details_last_run_number == first_run:
             return self._run_details_cached_obj
 
         run_details = polaris_algs.get_run_details(chopper_on=self._chopper_on, sac_on=self._apply_solid_angle,
-                                                   run_number_string=run_number, calibration_dir=self._calibration_dir,
+                                                   run_number=first_run, calibration_dir=self._calibration_dir,
                                                    mapping_path=self._calibration_mapping_path)
 
         # Hold obj in case same run range is requested
-        self._run_details_last_run_number = run_number
+        self._run_details_last_run_number = first_run
         self._run_details_cached_obj = run_details
 
         return run_details
