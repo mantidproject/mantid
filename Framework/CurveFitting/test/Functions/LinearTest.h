@@ -1,7 +1,6 @@
 #ifndef MANTID_CURVEFITTING_LINEARTEST_H_
 #define MANTID_CURVEFITTING_LINEARTEST_H_
 
-
 #include "MantidCurveFitting/Functions/Linear.h"
 #include <boost/make_shared.hpp>
 #include <array>
@@ -15,9 +14,7 @@ class LinearTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LinearTest *createSuite() {
-    return new LinearTest();
-  }
+  static LinearTest *createSuite() { return new LinearTest(); }
   static void destroySuite(LinearTest *suite) { delete suite; }
 
   void test_category() {
@@ -49,7 +46,7 @@ public:
     std::array<double, numPoints> yValues;
     std::array<double, numPoints> deriv;
     lin->function1D(yValues.data(), xValues.data(), numPoints);
-    lin->derivative1D(deriv.data(), xValues.data(), numPoints, 1) ;
+    lin->derivative1D(deriv.data(), xValues.data(), numPoints, 1);
 
     for (size_t i = 0; i < numPoints; i++) {
       TS_ASSERT_DELTA(yValues[i], yValues[i], 1e-12);
