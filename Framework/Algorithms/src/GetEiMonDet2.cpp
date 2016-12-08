@@ -212,7 +212,6 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
     }
     if (fitStatusColumn->cell<std::string>(index) ==
         EPPTableLiterals::FIT_STATUS_SUCCESS) {
-      const auto detector = m_detectorWs->getDetector(index);
       if (!spectrumInfo.hasDetectors(index)) {
         throw std::runtime_error("No detector specified by " +
                                  PropertyNames::DETECTORS + " found");
@@ -221,7 +220,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
         g_log.warning() << "Workspace index " << index
                         << " should be detector, but is marked as monitor.\n";
       }
-      if (!detector->isMasked()) {
+      if (!spectrumInfo.isMasked(index)) {
         const double d =
             spectrumInfo.position(index).distance(sample->getPos());
         distanceSum += d;

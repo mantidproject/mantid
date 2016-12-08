@@ -188,8 +188,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
     std::size_t wsid = i;
 
-    if (spectrumInfo.hasUniqueDetector(i)) {
-
+    if (spectrumInfo.hasDetectors(i)) {
       double deg2rad = M_PI / 180.;
 
       auto &det = spectrumInfo.detector(i);

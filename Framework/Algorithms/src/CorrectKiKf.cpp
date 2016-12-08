@@ -107,8 +107,14 @@ void CorrectKiKf::exec() {
     if (emodeStr == "Indirect") {
       if (efixedProp != EMPTY_DBL())
         Efi = efixedProp;
+      // If a DetectorGroup is present should provide a value as a property
+      // instead
       else if (spectrumInfo.hasUniqueDetector(i)) {
         getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
+      } else {
+        g_log.information() << "Workspace Index " << i
+                            << ": cannot find detector"
+                            << "\n";
       }
     }
 
@@ -215,10 +221,17 @@ void CorrectKiKf::execEvent() {
     // Now get the detector object for this histogram to check if monitor
     // or to get Ef for indirect geometry
     if (emodeStr == "Indirect") {
-      if (efixedProp != EMPTY_DBL())
+      if (efixedProp != EMPTY_DBL()) {
         Efi = efixedProp;
-      else if (spectrumInfo.hasUniqueDetector(i))
+        // If a DetectorGroup is present should provide a value as a property
+        // instead
+      } else if (spectrumInfo.hasUniqueDetector(i)) {
         getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
+      } else {
+        g_log.information() << "Workspace Index " << i
+                            << ": cannot find detector"
+                            << "\n";
+      }
     }
 
     if (emodeStr == "Indirect")
@@ -273,7 +286,7 @@ void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
     {
       Ei = efixed;
       Ef = Ei - it->tof();
-    } else // Ef=Efixedty
+    } else // Ef=Efixed
     {
       Ef = efixed;
       Ei = Ef + it->tof();
@@ -293,6 +306,8 @@ void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
 void CorrectKiKf::getEfixedFromParameterMap(double &Efi, int64_t i,
                                             const SpectrumInfo &spectrumInfo,
                                             const ParameterMap &pmap) {
+  Efi = 0;
+
   if (spectrumInfo.isMonitor(i))
     return;
 
