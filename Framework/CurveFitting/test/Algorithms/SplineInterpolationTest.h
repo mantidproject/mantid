@@ -64,10 +64,10 @@ public:
 
   void test2Points() {
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                3, 4, 1, false);
 
     SplineInterpolation alg;
@@ -84,10 +84,10 @@ public:
   void test2PointsThrows() {
     // test input validation
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                3, 4, 1, false);
 
     SplineInterpolation alg;
@@ -102,10 +102,10 @@ public:
   void testInterpolationRange() {
 
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                3, 20, 1, false);
 
     SplineInterpolation alg;

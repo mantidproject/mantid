@@ -30,6 +30,7 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
 
