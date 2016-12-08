@@ -147,40 +147,13 @@
          </sizepolicy>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pgAbsCorFlatPlate">
          <layout class="QGridLayout" name="loFlatPlate">
           <property name="margin">
            <number>0</number>
           </property>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lbFlatCanFrontThickness">
-            <property name="text">
-             <string>Container Front Thickness:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lbFlatSampleWidth">
-            <property name="text">
-             <string>Sample Width:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>5</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="3">
            <widget class="QDoubleSpinBox" name="spFlatSampleHeight">
             <property name="suffix">
@@ -194,8 +167,58 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatSampleWidth">
+          <item row="2" column="0">
+           <widget class="QLabel" name="lbFlatSampleThickness">
+            <property name="text">
+             <string>Sample Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lbFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Container Front Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbFlatSampleWidth">
+            <property name="text">
+             <string>Sample Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="lbFlatSampleHeight">
+            <property name="text">
+             <string>Sample Height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QDoubleSpinBox" name="spFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -220,22 +243,8 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lbFlatSampleThickness">
-            <property name="text">
-             <string>Sample Thickness:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="lbFlatSampleHeight">
-            <property name="text">
-             <string>Sample Height:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3">
-           <widget class="QDoubleSpinBox" name="spFlatCanBackThickness">
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatSampleWidth">
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -249,6 +258,9 @@
           </item>
           <item row="3" column="2">
            <widget class="QLabel" name="lbFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Back Thickness:</string>
             </property>
@@ -261,26 +273,6 @@
           <property name="margin">
            <number>0</number>
           </property>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>5</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="lbAnnSampleOuterRadius">
-            <property name="text">
-             <string>Sample Outer Radius:</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="lbAnnSampleInnerRadius">
             <property name="text">
@@ -301,50 +293,75 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="3">
-           <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>5</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="lbAnnCanOuterRadius">
-            <property name="text">
-             <string>Container Outer Radius:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="spAnnCanInnerRadius">
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>5</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="lbAnnCanInnerRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Inner Radius:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lbAnnSampleHeight">
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnCanInnerRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="lbAnnCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
-             <string>Sample Height:</string>
+             <string>Container Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3">
+           <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="lbAnnSampleOuterRadius">
+            <property name="text">
+             <string>Sample Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -361,6 +378,13 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lbAnnSampleHeight">
+            <property name="text">
+             <string>Sample Height:</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="pgAbsCorCylinder">
@@ -368,10 +392,19 @@
           <property name="margin">
            <number>0</number>
           </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbCylSampleRadius">
-            <property name="text">
-             <string>Sample Radius:</string>
+          <item row="0" column="3">
+           <widget class="QDoubleSpinBox" name="spCylCanRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -388,7 +421,24 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbCylCanRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Container Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbCylSampleRadius">
+            <property name="text">
+             <string>Sample Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="spCylSampleHeight">
             <property name="suffix">
              <string> cm</string>
@@ -401,27 +451,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spCylCanRadius">
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>5</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lbCylCanRadius">
-            <property name="text">
-             <string>Container Radius:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
            <widget class="QLabel" name="lbCylSampleHeight">
             <property name="text">
              <string>Sample Height:</string>
@@ -440,24 +470,85 @@
      <property name="title">
       <string>General Details</string>
      </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="ckBeamSize">
+      <item row="2" column="2">
+       <widget class="QLabel" name="lbNumberEvents">
         <property name="text">
-         <string>Use Instrument Default Beam Size</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
+         <string>Events:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="1" column="2">
        <widget class="QLabel" name="lbBeamHeight">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
          <string>Beam Height:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QDoubleSpinBox" name="spBeamHeight">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="suffix">
+         <string> cm</string>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="spNumberWavelengths">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lbBeamWidth">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Beam Width:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="spBeamWidth">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="suffix">
+         <string> cm</string>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -468,75 +559,26 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="spNumberWavelengths">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="lbNumberEvents">
-        <property name="text">
-         <string>Events:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
+      <item row="2" column="4">
        <widget class="QSpinBox" name="spNumberEvents">
         <property name="maximum">
-         <number>10000000</number>
-        </property>
-        <property name="value">
-         <number>1000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QDoubleSpinBox" name="spBeamWidth">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="suffix">
-         <string> cm</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
+         <number>1000000</number>
         </property>
         <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="spBeamHeight">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="suffix">
-         <string> cm</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
+         <number>10</number>
         </property>
         <property name="value">
-         <double>1.000000000000000</double>
+         <number>5000</number>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="lbBeamWidth">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="ckBeamSize">
         <property name="text">
-         <string>Beam Width:</string>
+         <string>Use Instrument Default Beam Size</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -549,6 +591,13 @@
       <string>Sample Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbSampleChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spSampleDensity">
         <property name="decimals">
@@ -559,23 +608,6 @@
         </property>
         <property name="value">
          <double>0.100000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbSampleChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="leSampleChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
         </property>
        </widget>
       </item>
@@ -591,6 +623,16 @@
           <string>Number Density</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="leSampleChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
        </widget>
       </item>
      </layout>
@@ -810,6 +852,7 @@
   <tabstop>spAnnCanInnerRadius</tabstop>
   <tabstop>spAnnCanOuterRadius</tabstop>
   <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>spCylCanRadius</tabstop>
   <tabstop>spSampleDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>ckUseCanCorrections</tabstop>
@@ -822,15 +865,6 @@
   <tabstop>ckKeepFactors</tabstop>
   <tabstop>pbPlot</tabstop>
   <tabstop>pbSave</tabstop>
-  <tabstop>cbSampleDensity</tabstop>
-  <tabstop>cbCanDensity</tabstop>
-  <tabstop>spBeamHeight</tabstop>
-  <tabstop>spNumberWavelengths</tabstop>
-  <tabstop>spNumberEvents</tabstop>
-  <tabstop>spBeamWidth</tabstop>
-  <tabstop>spCylCanRadius</tabstop>
-  <tabstop>spAnnSampleHeight</tabstop>
-  <tabstop>spCylSampleHeight</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -953,44 +987,12 @@
    <slot>setValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>65</x>
-     <y>195</y>
+     <x>398</x>
+     <y>237</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>195</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckBeamSize</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lbBeamHeight</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>53</x>
-     <y>287</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>50</x>
-     <y>306</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckBeamSize</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spBeamHeight</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>179</x>
-     <y>286</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>245</x>
-     <y>308</y>
+     <x>783</x>
+     <y>237</y>
     </hint>
    </hints>
   </connection>
@@ -1001,12 +1003,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>134</x>
-     <y>287</y>
+     <x>46</x>
+     <y>281</y>
     </hint>
     <hint type="destinationlabel">
-     <x>457</x>
-     <y>310</y>
+     <x>47</x>
+     <y>314</y>
     </hint>
    </hints>
   </connection>
@@ -1017,12 +1019,204 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>197</x>
+     <x>176</x>
+     <y>283</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckBeamSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbBeamHeight</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>110</x>
+     <y>283</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>482</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckBeamSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spBeamHeight</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
      <y>284</y>
     </hint>
     <hint type="destinationlabel">
-     <x>633</x>
+     <x>672</x>
      <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>121</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>130</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>222</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>265</x>
+     <y>231</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>236</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>484</x>
+     <y>228</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>210</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>666</x>
+     <y>230</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanInnerRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>150</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>130</x>
+     <y>219</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spAnnCanInnerRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>87</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>252</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>289</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>460</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>77</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>630</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbCylCanRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>526</x>
+     <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCylCanRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>224</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>673</x>
+     <y>204</y>
     </hint>
    </hints>
   </connection>
