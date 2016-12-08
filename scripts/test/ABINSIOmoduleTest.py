@@ -4,12 +4,17 @@ import numpy as np
 from AbinsModules import IOmodule, AbinsConstants
 
 
-def old_python():
-    """" Check if Python has proper version."""
+def old_modules():
+    """" Check if Python and numpy  has proper version."""
     is_python_old = AbinsConstants.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSIOmoduleTest because because Python is too old.")
-    return is_python_old
+        logger.warning("Skipping ABINSIOmoduleTest because Python is too old.")
+
+    is_numpy_old = AbinsConstants.is_numpy_valid(np.__version__)
+    if is_numpy_old:
+        logger.warning("Skipping ABINSIOmoduleTest because numpy is too old.")
+
+    return is_python_old or is_numpy_old
 
 
 def skip_if(skipping_criteria):
@@ -17,16 +22,18 @@ def skip_if(skipping_criteria):
     Skip all tests if the supplied function returns true.
     Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
     """
+
     def decorate(cls):
         if skipping_criteria():
             for attr in cls.__dict__.keys():
                 if callable(getattr(cls, attr)) and 'test' in attr:
                     delattr(cls, attr)
         return cls
+
     return decorate
 
 
-@skip_if(old_python)
+@skip_if(old_modules)
 class ABINSIOmoduleTest(unittest.TestCase):
 
     # noinspection PyMethodMayBeStatic

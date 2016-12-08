@@ -11,7 +11,7 @@ def old_modules():
     if is_python_old:
         logger.warning("Skipping ABINSPowderDataTest because Python is too old.")
 
-    is_numpy_old = AbinsConstants.is_numpy_valid(np.version.version)
+    is_numpy_old = AbinsConstants.is_numpy_valid(np.__version__)
     if is_numpy_old:
         logger.warning("Skipping ABINSPowderDataTest because numpy is too old.")
 
