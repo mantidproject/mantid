@@ -650,7 +650,7 @@ void InstrumentActor::resetColors() {
       if (mask) {
         masked = mask->isMasked(dets);
       } else {
-        masked = spectrumInfo.isMasked(wi);
+        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
       }
 
       if (masked) {
