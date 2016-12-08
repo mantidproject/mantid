@@ -1,7 +1,7 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 #define MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 
-#include "MantidGeometry/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/V3D.h"
 // Boost graphing
@@ -13,9 +13,10 @@
 
 namespace Mantid {
 namespace Geometry {
-
 class Instrument;
 class IDetector;
+}
+namespace API {
 
 typedef std::unordered_map<specnum_t, std::set<detid_t>>
     ISpectrumDetectorMapping;
@@ -58,11 +59,11 @@ typedef std::unordered_map<specnum_t, std::set<detid_t>>
  *  File change history is stored at: <https://github.com/mantidproject/mantid>
  *  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_GEOMETRY_DLL NearestNeighbours {
+class MANTID_API_DLL NearestNeighbours {
 public:
   /// Constructor with an instrument and a spectra map and number of neighbours
   NearestNeighbours(int nNeighbours,
-                    boost::shared_ptr<const Instrument> instrument,
+                    boost::shared_ptr<const Geometry::Instrument> instrument,
                     const ISpectrumDetectorMapping &spectraMap,
                     bool ignoreMaskedDetectors = false);
 
@@ -75,12 +76,12 @@ public:
 
 protected:
   /// Get the spectra associated with all in the instrument
-  std::map<specnum_t, boost::shared_ptr<const IDetector>>
-  getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
+  std::map<specnum_t, boost::shared_ptr<const Geometry::IDetector>>
+  getSpectraDetectors(boost::shared_ptr<const Geometry::Instrument> instrument,
                       const ISpectrumDetectorMapping &spectraMap);
 
   /// A pointer the the instrument
-  boost::shared_ptr<const Instrument> m_instrument;
+  boost::shared_ptr<const Geometry::Instrument> m_instrument;
   /// A reference to the spectra map
   const ISpectrumDetectorMapping &m_spectraMap;
 
@@ -122,14 +123,7 @@ private:
   bool m_bIgnoreMaskedDetectors;
 };
 
-/// Typedef for shared pointer to the NearestNeighbours class
-typedef boost::shared_ptr<Mantid::Geometry::NearestNeighbours>
-    NearestNeighbours_sptr;
-/// Typedef for constant shared pointer to the NearestNeighbours class
-typedef boost::shared_ptr<const Mantid::Geometry::NearestNeighbours>
-    NearestNeighbours_const_sptr;
-
-} // namespace Geometry
+} // namespace API
 } // namespace Mantid
 
 #endif

@@ -1,10 +1,10 @@
 #ifndef MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
 #define MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
 
+#include "MantidAPI/NearestNeighbours.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -14,6 +14,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
+using namespace Mantid::API;
 using Mantid::Kernel::V3D;
 
 /**
@@ -37,7 +38,7 @@ public:
 private:
   /// Helper type giving access to protected methods. Makes testing of NN
   /// internals possible.
-  class ExposedNearestNeighbours : public Mantid::Geometry::NearestNeighbours {
+  class ExposedNearestNeighbours : public Mantid::API::NearestNeighbours {
   public:
     ExposedNearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                              const ISpectrumDetectorMapping &spectraMap,

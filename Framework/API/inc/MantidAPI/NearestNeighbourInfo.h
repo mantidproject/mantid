@@ -2,7 +2,7 @@
 #define MANTID_API_NEARESTNEIGHBOURINFO_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
+#include "MantidAPI/NearestNeighbours.h"
 
 namespace Mantid {
 namespace API {
@@ -48,7 +48,7 @@ public:
 
 private:
   const MatrixWorkspace &m_workspace;
-  Geometry::NearestNeighbours m_nearestNeighbours;
+  NearestNeighbours m_nearestNeighbours;
 };
 
 } // namespace API

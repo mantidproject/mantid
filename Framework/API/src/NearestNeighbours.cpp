@@ -1,4 +1,4 @@
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
+#include "MantidAPI/NearestNeighbours.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -8,7 +8,8 @@
 #include "MantidKernel/Timer.h"
 
 namespace Mantid {
-namespace Geometry {
+using namespace Geometry;
+namespace API {
 using Mantid::detid_t;
 using Kernel::V3D;
 
