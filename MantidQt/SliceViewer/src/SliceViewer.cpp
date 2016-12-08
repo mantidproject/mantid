@@ -2241,7 +2241,7 @@ void SliceViewer::rebinParamsChanged() {
     double min = 0;
     double max = 1;
     int numBins = 1;
-	if (widget->getShownDim() < 0) {
+    if (widget->getShownDim() < 0) {
       // Slice point. So integrate with a thickness
       min = widget->getSlicePoint() - widget->getThickness();
       max = widget->getSlicePoint() + widget->getThickness();
