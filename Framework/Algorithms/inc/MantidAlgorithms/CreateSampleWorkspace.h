@@ -6,6 +6,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid {

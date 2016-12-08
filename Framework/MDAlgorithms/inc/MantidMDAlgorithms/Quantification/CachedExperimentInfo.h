@@ -24,6 +24,7 @@
 */
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 

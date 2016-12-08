@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/Load.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -10,6 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 

@@ -57,7 +57,7 @@ public:
 
     auto alg = createAlgorithm();
     // Create a simple test workspace that has no instrument
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(10, 5);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(10, 5);
 
     TS_ASSERT_THROWS(
         alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS),

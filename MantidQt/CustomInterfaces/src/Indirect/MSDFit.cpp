@@ -1,5 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"

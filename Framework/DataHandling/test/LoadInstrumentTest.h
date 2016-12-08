@@ -646,7 +646,7 @@ public:
   MatrixWorkspace_sptr ws;
 
   void setUp() override {
-    ws = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
+    ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
   }
 
   void doTest(std::string filename, size_t numTimes = 1) {

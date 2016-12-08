@@ -39,7 +39,7 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
     }
   }
 
-  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(
       int(nhist), int(nbins), x0, deltax);
 
   // We need something other than a spectrum axis, call this one theta

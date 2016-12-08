@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
 #include "MantidAlgorithms/GSLFunctions.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/InstrumentValidator.h"

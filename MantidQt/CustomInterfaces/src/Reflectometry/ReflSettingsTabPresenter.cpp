@@ -3,7 +3,10 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {

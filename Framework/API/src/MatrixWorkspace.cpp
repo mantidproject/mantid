@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 
 #include <cmath>

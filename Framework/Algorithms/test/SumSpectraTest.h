@@ -188,7 +188,7 @@ public:
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;
-    EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, numBins, numEvents);
     AnalysisDataService::Instance().addOrReplace(inName, input);
 
@@ -223,7 +223,7 @@ public:
   void testRebinnedOutputSum() {
     AnalysisDataService::Instance().clear();
     RebinnedOutput_sptr ws =
-        WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = "rebinTest";
     std::string outName = "rebin_sum";
 
@@ -350,7 +350,7 @@ public:
     int nHist = 4;
 
     MatrixWorkspace_sptr tws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins);
     std::string inName = "rebinTest";
     std::string outName = "sumWS";
 
@@ -520,9 +520,9 @@ public:
   }
 
   SumSpectraTestPerformance() {
-    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(40000, 10000);
+    input = WorkspaceCreationHelper::create2DWorkspaceBinned(40000, 10000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(20000, 1000, 2000);
+        WorkspaceCreationHelper::createEventWorkspace(20000, 1000, 2000);
   }
 
   void testExec2D() {
