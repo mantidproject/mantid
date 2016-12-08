@@ -6,6 +6,7 @@
 
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -121,29 +122,29 @@ void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
 
   try {
     setParameter("b", cell.b());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
 
   try {
     setParameter("c", cell.c());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing
   }
 
   try {
     setParameter("Alpha", cell.alpha());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
   try {
     setParameter("Beta", cell.beta());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
   try {
     setParameter("Gamma", cell.gamma());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
 }
@@ -473,13 +474,13 @@ void PawleyFunction::function(const FunctionDomain &domain,
       try {
         size_t offset = calculateFunctionValues(peak, domain1D, localValues);
         values.addToCalculated(offset, localValues);
-      } catch (std::invalid_argument) {
+      } catch (const std::invalid_argument &) {
         // do nothing
       }
     }
 
     setPeakPositions(centreName, 0.0, cell);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     // do nothing
   }
 }

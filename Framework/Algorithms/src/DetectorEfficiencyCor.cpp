@@ -7,6 +7,8 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
@@ -157,7 +159,7 @@ void DetectorEfficiencyCor::exec() {
 void DetectorEfficiencyCor::retrieveProperties() {
   // these first three properties are fully checked by validators
   m_inputWS = getProperty("InputWorkspace");
-  m_paraMap = &(m_inputWS->instrumentParameters());
+  m_paraMap = &(m_inputWS->constInstrumentParameters());
 
   m_Ei = getProperty("IncidentEnergy");
   // If we're not given an Ei, see if one has been set.

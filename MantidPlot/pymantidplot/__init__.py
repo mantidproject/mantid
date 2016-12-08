@@ -22,6 +22,7 @@ import mantidqtpython
 from mantidqtpython import GraphOptions
 # historical names in MantidPlot
 from mantidqtpython import MantidQt as _MantidQt
+from six.moves import range
 InstrumentViewMaskTab = _MantidQt.MantidWidgets.InstrumentWidgetMaskTab
 InstrumentViewPickTab = _MantidQt.MantidWidgets.InstrumentWidgetPickTab
 
@@ -959,7 +960,7 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
 
     # --- Slice point ---
     if not slicepoint is None:
-        for d in xrange(len(slicepoint)):
+        for d in range(len(slicepoint)):
             try:
                 val = float(slicepoint[d])
             except ValueError:
@@ -1036,7 +1037,7 @@ Then, the contents of that section are replaced
     sections[section] = newtext.replace("\n", "")
 
     # Make the output
-    items = sections.items()
+    items = list(sections.items())
     items.sort()
     output = []
     for (section_name, text) in items:

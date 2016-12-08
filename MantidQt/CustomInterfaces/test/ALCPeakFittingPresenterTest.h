@@ -139,7 +139,7 @@ public:
   }
 
   void test_fitEmptyFunction() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
     ON_CALL(*m_view, function(QString("")))
         .WillByDefault(Return(IFunction_const_sptr()));
@@ -151,7 +151,7 @@ public:
   }
 
   void test_fit() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
     IFunction_sptr peaks = createGaussian(1, 2, 3);
@@ -166,7 +166,7 @@ public:
   }
 
   void test_onDataChanged() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
 
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
@@ -186,7 +186,7 @@ public:
     ON_CALL(*m_model, fittedPeaks())
         .WillByDefault(Return(createGaussian(1, 2, 3)));
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
     // TODO: check better
@@ -200,7 +200,7 @@ public:
     ON_CALL(*m_model, fittedPeaks())
         .WillByDefault(Return(IFunction_const_sptr()));
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
     EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
@@ -310,7 +310,7 @@ public:
    * Test that clicking "Plot guess" with no function set plots nothing
    */
   void test_plotGuess_noFunction() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
     ON_CALL(*m_view, function(QString("")))
         .WillByDefault(Return(IFunction_const_sptr()));
@@ -334,7 +334,7 @@ public:
    * Test that "Plot guess" with a function set plots a function
    */
   void test_plotGuess() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
     IFunction_sptr peaks = createGaussian(1, 2, 3);
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));

@@ -169,7 +169,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         # 2. Take in the case that there is no match
         if len(rownumbers) == 0:
             # No Match
-            logger.warning("Warning! There is no match for parameter %s" % (parnametofit))
+            mantid.logger.warning("Warning! There is no match for parameter %s" % (parnametofit))
             rownumbers.append(-1000)
         # ENDIFELSE
 

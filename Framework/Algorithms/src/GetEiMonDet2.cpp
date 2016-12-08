@@ -5,13 +5,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UserStringParser.h"
 #include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::API;
@@ -81,8 +81,8 @@ void GetEiMonDet2::init() {
   auto tofWorkspace = boost::make_shared<CompositeValidator>();
   tofWorkspace->add<WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<InstrumentValidator>();
-  auto mandatoryStringProperty =
-      boost::make_shared<MandatoryValidator<std::string>>();
+  auto mandatoryArrayProperty =
+      boost::make_shared<MandatoryValidator<std::vector<int>>>();
   auto mandatoryIntProperty = boost::make_shared<MandatoryValidator<int>>();
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
@@ -103,9 +103,9 @@ void GetEiMonDet2::init() {
                   boost::make_shared<StringListValidator>(indexTypes),
                   "The type of indices " + PropertyNames::DETECTORS + " and " +
                       PropertyNames::MONITOR + " refer to.");
-  declareProperty(PropertyNames::DETECTORS, "",
-                  "A list of detector ids/spectrum number/workspace indices.",
-                  mandatoryStringProperty);
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+                      PropertyNames::DETECTORS.c_str(), mandatoryArrayProperty),
+                  "A list of detector ids/spectrum number/workspace indices.");
   declareProperty(make_unique<WorkspaceProperty<>>(
                       PropertyNames::MONITOR_WORKSPACE.c_str(), "",
                       Direction::Input, PropertyMode::Optional, tofWorkspace),
@@ -367,7 +367,7 @@ namespace {
  *         workspace indices
  */
 template <typename Map>
-void mapIndices(const std::vector<unsigned int> &detectors, const int monitor,
+void mapIndices(const std::vector<int> &detectors, const int monitor,
                 const Map &detectorIndexMap, const Map &monitorIndexMap,
                 std::vector<size_t> &detectorIndices, size_t &monitorIndex) {
   auto back = std::back_inserter(detectorIndices);
@@ -396,9 +396,7 @@ void mapIndices(const std::vector<unsigned int> &detectors, const int monitor,
 void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
                                 size_t &monitorIndex) const {
   detectorIndices.clear();
-  UserStringParser spectraListParser;
-  const auto detectors = VectorHelper::flattenVector(
-      spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
+  const std::vector<int> detectors = getProperty(PropertyNames::DETECTORS);
   const int monitor = getProperty(PropertyNames::MONITOR);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
   if (indexType == IndexTypes::DETECTOR_ID) {

@@ -102,8 +102,15 @@ ReflGenericDataProcessorPresenterFactory::create() {
       "Stitch1DMany", "IvsQ_",
       std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
 
+  // Post-processing instructions linking column names to properties of the
+  // post-processing algorithm
+  // Key is column name
+  // Value is property name of the post-processing algorithm
+  std::map<std::string, std::string> postprocessMap = {{"dQ/Q", "Params"}};
+
   return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-      whitelist, preprocessMap, processor, postprocessor, "LoadISISNexus");
+      whitelist, preprocessMap, processor, postprocessor, postprocessMap,
+      "LoadISISNexus");
 }
 }
 }

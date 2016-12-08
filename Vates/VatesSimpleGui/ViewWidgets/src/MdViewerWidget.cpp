@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"

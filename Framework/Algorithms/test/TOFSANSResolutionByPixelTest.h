@@ -137,10 +137,10 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
     std::vector<double> guideLogDetails = std::vector<double>()) {
   Mantid::API::MatrixWorkspace_sptr ws2d;
   if (isModerator) {
-    ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         twos(), static_cast<int>(nhist), x0, x1, dx, true);
   } else {
-    ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         ones(), static_cast<int>(nhist), x0, x1, dx, true);
   }
 

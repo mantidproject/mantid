@@ -1,9 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LoadSpice2D_H
 #define MANTID_DATAHANDLING_LoadSpice2D_H
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/XmlHandler.h"
@@ -11,8 +9,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-
-//----------------------------------------------------------------------
 
 namespace Poco {
 namespace XML {
@@ -113,6 +109,8 @@ private:
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
   void rotateDetector(const double &);
   void setTimes();
+  void
+  setSansSpiceXmlFormatVersion(std::map<std::string, std::string> &metadata);
 
   // Member variables:
   DataObjects::Workspace2D_sptr m_workspace;
@@ -121,6 +119,7 @@ private:
   Mantid::DataHandling::XmlHandler m_xmlHandler;
   double m_wavelength{0.0};
   double m_dwavelength{0.0};
+  double m_sansSpiceXmlFormatVersion{0.0};
   Mantid::Kernel::DateAndTime m_startTime;
   Mantid::Kernel::DateAndTime m_endTime;
 };

@@ -1,4 +1,4 @@
-#pylint: disable=R0902,R0904
+#pylint: disable=R0901,R0902,R0904
 import numpy as np
 import os
 

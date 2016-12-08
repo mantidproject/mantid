@@ -10,6 +10,8 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include <gmock/gmock.h>
@@ -64,29 +66,60 @@ public:
 class MockSettingsTabView : public IReflSettingsTabView {
 public:
   // Global options
-  MOCK_CONST_METHOD0(getPlusOptions, std::string());
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
-
+  MOCK_CONST_METHOD0(getAnalysisMode, std::string());
+  MOCK_CONST_METHOD0(getDirectBeam, std::string());
+  MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
+  MOCK_CONST_METHOD0(getCRho, std::string());
+  MOCK_CONST_METHOD0(getCAlpha, std::string());
+  MOCK_CONST_METHOD0(getCAp, std::string());
+  MOCK_CONST_METHOD0(getCPp, std::string());
+  MOCK_CONST_METHOD0(getMomentumTransferStep, std::string());
+  MOCK_CONST_METHOD0(getScaleFactor, std::string());
+  MOCK_CONST_METHOD0(getIntMonCheck, std::string());
+  MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
+  MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());
+  MOCK_CONST_METHOD0(getMonitorBackgroundMin, std::string());
+  MOCK_CONST_METHOD0(getMonitorBackgroundMax, std::string());
+  MOCK_CONST_METHOD0(getLambdaMin, std::string());
+  MOCK_CONST_METHOD0(getLambdaMax, std::string());
+  MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
+  MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD1(setPolarisationOptionsEnabled, void(bool));
+  MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD1(setInstDefaults, void(const std::vector<double> &));
   // Calls we don't care about
-  void
-  createPlusHints(const std::map<std::string, std::string> &hints) override {
-    UNUSED_ARG(hints);
-  };
-  void createTransmissionHints(
-      const std::map<std::string, std::string> &hints) override {
-    UNUSED_ARG(hints);
-  };
-  void createReductionHints(
-      const std::map<std::string, std::string> &hints) override {
-    UNUSED_ARG(hints);
-  };
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override {
     UNUSED_ARG(hints);
   };
   IReflSettingsTabPresenter *getPresenter() const override { return nullptr; }
+};
+
+class MockSaveTabView : public IReflSaveTabView {
+public:
+  MOCK_CONST_METHOD1(setSavePath, void(const std::string &path));
+  MOCK_CONST_METHOD0(getSavePath, std::string());
+  MOCK_CONST_METHOD0(getPrefix, std::string());
+  MOCK_CONST_METHOD0(getFilter, std::string());
+  MOCK_CONST_METHOD0(getRegexCheck, bool());
+  MOCK_CONST_METHOD0(getCurrentWorkspaceName, std::string());
+  MOCK_CONST_METHOD0(getSelectedWorkspaces, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getSelectedParameters, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getFileFormatIndex, int());
+  MOCK_CONST_METHOD0(getTitleCheck, bool());
+  MOCK_CONST_METHOD0(getQResolutionCheck, bool());
+  MOCK_CONST_METHOD0(getSeparator, std::string());
+  MOCK_CONST_METHOD0(clearWorkspaceList, void());
+  MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD0(clearParametersList, void());
+  MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
+
+  // Calls we don't care about
+  IReflSaveTabPresenter *getPresenter() const override { return nullptr; }
 };
 
 class MockMainWindowView : public IReflMainWindowView {
@@ -116,7 +149,6 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD0(getPlusOptions, std::string());
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
@@ -124,15 +156,30 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
+  void notify(IReflSettingsTabPresenter::Flag flag) override {
+    UNUSED_ARG(flag);
+  };
+  void setInstrumentName(const std::string instName) override {
+    UNUSED_ARG(instName);
+  }
   ~MockSettingsTabPresenter() override{};
+};
+
+class MockSaveTabPresenter : public IReflSaveTabPresenter {
+public:
+  void notify(IReflSaveTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
+  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
+    UNUSED_ARG(presenter);
+  };
+  ~MockSaveTabPresenter() override{};
 };
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD0(getPlusOptions, std::string());
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));
@@ -142,6 +189,10 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  // Other calls we don't care about
+  void setInstrumentName(const std::string &instName) const override {
+    UNUSED_ARG(instName);
+  }
   ~MockMainWindowPresenter() override{};
 };
 

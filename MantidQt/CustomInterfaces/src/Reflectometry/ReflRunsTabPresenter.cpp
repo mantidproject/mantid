@@ -50,14 +50,6 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   // presenter with the list of commands
   m_tablePresenter->accept(this);
 
-  // TODO. Select strategy.
-  /*
-  std::unique_ptr<CatalogConfigService> catConfigService(
-  makeCatalogConfigServiceAdapter(ConfigService::Instance()));
-  UserCatalogInfo catalogInfo(
-  ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
-  */
-
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
@@ -113,9 +105,13 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     auto algRunner = m_view->getAlgorithmRunner();
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
-  } break;
+    break;
+  }
   case IReflRunsTabPresenter::TransferFlag:
     transfer();
+    break;
+  case IReflRunsTabPresenter::InstrumentChangedFlag:
+    m_mainPresenter->setInstrumentName(m_view->getSearchInstrument());
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -341,7 +337,6 @@ std::map<std::string, std::string>
 ReflRunsTabPresenter::getPreprocessingOptions() const {
 
   std::map<std::string, std::string> options;
-  options["Run(s)"] = m_mainPresenter->getPlusOptions();
   options["Transmission Run(s)"] = m_mainPresenter->getTransmissionOptions();
 
   return options;

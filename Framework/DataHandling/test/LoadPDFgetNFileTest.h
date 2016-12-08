@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/LoadPDFgetNFile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using Mantid::DataHandling::LoadPDFgetNFile;
 using namespace Mantid;

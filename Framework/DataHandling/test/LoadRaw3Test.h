@@ -12,6 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
+#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -431,7 +432,7 @@ public:
     Mantid::Geometry::IDetector_const_sptr ptrDet = i->getDetector(60);
     TS_ASSERT_EQUALS(ptrDet->getID(), 60);
 
-    Mantid::Geometry::ParameterMap &pmap = output2D->instrumentParameters();
+    const auto &pmap = output2D->constInstrumentParameters();
     TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 160);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
@@ -1154,8 +1155,8 @@ private:
     PropertyWithValue<int> *current_period_property =
         dynamic_cast<PropertyWithValue<int> *>(prop);
     TS_ASSERT(current_period_property != NULL);
-    int actual_period;
-    Kernel::toValue<int>(current_period_property->value(), actual_period);
+    int actual_period =
+        boost::lexical_cast<int>(current_period_property->value());
     TS_ASSERT_EQUALS(expected_period, actual_period);
     // Check the period n property.
     std::stringstream stream;

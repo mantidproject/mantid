@@ -26,7 +26,7 @@ public:
   }
 
   void testLoadWorkspaceIntoADS() {
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     EXPECT_CALL(*mockPresenter.get(),
                 notifyFromWorkspaceProvider(NotifyFlag::WorkspaceLoaded))
@@ -38,7 +38,7 @@ public:
   }
 
   void testRemoveWorkspaceFromADS() {
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
@@ -52,8 +52,8 @@ public:
   }
 
   void testClearADS() {
-    auto wksp1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto wksp2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto wksp2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     AnalysisDataService::Instance().add("wksp1", wksp1);
     AnalysisDataService::Instance().add("wksp2", wksp2);
@@ -68,7 +68,7 @@ public:
   }
 
   void testRenameWorkspace() {
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("wksp", wksp);
     EXPECT_CALL(*mockPresenter.get(),
                 notifyFromWorkspaceProvider(NotifyFlag::WorkspaceRenamed))
@@ -102,12 +102,12 @@ public:
   }
 
   void testWorkspaceGroupUpdated() {
-    auto wksp1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto wksp2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto wksp3 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto wksp2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto wksp3 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     auto group =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(0, 10, 10, "group");
+        WorkspaceCreationHelper::createWorkspaceGroup(0, 10, 10, "group");
 
     AnalysisDataService::Instance().add("wksp1", wksp1);
     AnalysisDataService::Instance().add("wksp2", wksp2);

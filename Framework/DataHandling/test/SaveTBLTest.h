@@ -2,6 +2,7 @@
 #define SAVETBLTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"

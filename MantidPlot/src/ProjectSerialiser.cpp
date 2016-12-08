@@ -12,6 +12,7 @@
 #include "Mantid/MantidMatrixFunction.h"
 #include "Mantid/MantidUI.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"

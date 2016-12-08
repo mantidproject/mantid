@@ -8,6 +8,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -101,7 +103,7 @@ void He3TubeEfficiency::exec() {
   }
 
   // Get the detector parameters
-  this->paraMap = &(this->inputWS->instrumentParameters());
+  this->paraMap = &(this->inputWS->constInstrumentParameters());
 
   // Store some information about the instrument setup that will not change
   this->samplePos = this->inputWS->getInstrument()->getSample()->getPos();

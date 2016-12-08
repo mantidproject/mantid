@@ -1,20 +1,9 @@
 #ifndef MANTID_DATAHANDLING_APPLYCALIBRATION_H_
 #define MANTID_DATAHANDLING_APPLYCALIBRATION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Geometry {
-class Instrument;
-}
-
 namespace Algorithms {
 /**
 
@@ -46,9 +35,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport ApplyCalibration : public API::Algorithm {
 public:
-  /// Default constructor
-  ApplyCalibration();
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ApplyCalibration"; }
   /// Summary of algorithms purpose
@@ -69,13 +55,6 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  /// Set the detector position from the calibration table
-  void setDetectorPosition(const Geometry::Instrument_const_sptr &instrument,
-                           const int detID, Mantid::Kernel::V3D pos,
-                           bool sameParent);
-
-  /// A pointer to the parameter map being modified
-  Geometry::ParameterMap *m_pmap;
 };
 
 } // namespace Algorithms
