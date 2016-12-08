@@ -47,10 +47,12 @@ public:
   const std::string summary() const override;
 
 private:
+  size_t m_elasticBinIndex = EMPTY_LONG();
   API::ITableWorkspace_const_sptr m_eppTable;
   API::MatrixWorkspace_const_sptr m_inputWs;
   API::MatrixWorkspace_const_sptr m_referenceWs;
   std::vector<size_t> m_workspaceIndices;
+
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;

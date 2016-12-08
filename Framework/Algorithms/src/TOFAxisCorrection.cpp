@@ -51,6 +51,7 @@ const static std::string WORKSPACE_INDEX("Workspace Index");
 /** A private namespace listing the properties of TOFAxisCorrection.
  */
 namespace PropertyNames {
+const static std::string ELASTIC_BIN_INDEX("ElasticBinIndex");
 const static std::string EPP_TABLE("EPPTable");
 const static std::string INCIDENT_ENERGY("IncidentEnergy");
 const static std::string INDEX_TYPE("IndexType");
@@ -66,6 +67,51 @@ namespace SampleLog {
 const static std::string INCIDENT_ENERGY("Ei");
 const static std::string WAVELENGTH("wavelength");
 } // namespace SampleLog
+
+/** Maps given index according to indexMap.
+ *
+ *  @param index The index to be mapped
+ *  @param indexMap The index map
+ *
+ *  @return The mapped index.
+ *
+ *  @throw std::runtime_error if index is not in the map
+ */
+template <typename Map>
+size_t mapIndex(const int index, const Map &indexMap) {
+  try {
+    return indexMap.at(index);
+  } catch (std::out_of_range &) {
+    throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA +
+                             " out of range.");
+  }
+}
+
+/** Converts given index from indexType to workspace index. If
+ *  indexType is already IndexType::WORKSPACE_INDEX, then index
+ *  is cast to size_t.
+ *
+ *  @param index Index to be converted
+ *  @param indexType Type of index.
+ *  @param ws Workspace to get index mappings from.
+ *
+ *  @return A workspace index corresponding to index.
+ */
+size_t toWorkspaceIndex(const int index, const std::string &indexType, API::MatrixWorkspace_const_sptr ws) {
+  if (indexType == IndexTypes::DETECTOR_ID) {
+    const auto indexMap = ws->getDetectorIDToWorkspaceIndexMap();
+    return mapIndex(index, indexMap);
+  } else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
+    const auto indexMap = ws->getSpectrumToWorkspaceIndexMap();
+    return mapIndex(index, indexMap);
+  } else {
+    if (index < 0) {
+      throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA +
+                               " out of range.");
+    }
+    return static_cast<size_t>(index);
+  }
+}
 
 /** Transforms indices according to given maps.
  *  @param spectra A vector of indices to be transformed
@@ -115,8 +161,10 @@ void TOFAxisCorrection::init() {
   auto tofWorkspace = boost::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
-  mustBePositive->setLower(0);
+  auto mustBePositiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  mustBePositiveDouble->setLower(0);
+  auto mustBePositiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  mustBePositiveInt->setLower(0);
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
@@ -140,12 +188,13 @@ void TOFAxisCorrection::init() {
   declareProperty(PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
                   boost::make_shared<Kernel::StringListValidator>(indexTypes),
                   "The type of indices used in " +
-                      PropertyNames::REFERENCE_SPECTRA + " (default: '" +
+                      PropertyNames::REFERENCE_SPECTRA + " or " + PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +
                       IndexTypes::DETECTOR_ID + "').");
+  declareProperty(PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt, "Bin index of the nominal elastic TOF channel.", Direction::Input);
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
                       PropertyNames::REFERENCE_SPECTRA.c_str()),
                   "A list of reference spectra.");
-  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive,
+  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
                   "Incident energy if EI sample log is not present/incorrect.",
                   Direction::Input);
 }
@@ -181,49 +230,61 @@ std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
       issues[PropertyNames::REFERENCE_WORKSPACE] =
           "'wavelength' is missing from the sample logs.";
     }
+    // If reference workspace is given, the rest of the properties are
+    // skipped.
     return issues;
   }
-  m_eppTable = getProperty(PropertyNames::EPP_TABLE);
-  if (!m_eppTable) {
-    issues[PropertyNames::EPP_TABLE] = "No EPP table specified.";
+  // If no reference workspace, we either use a predefined elastic channel
+  // or EPP tables to declare the elastic TOF.
+  const int elasticBinIndex = getProperty(PropertyNames::ELASTIC_BIN_INDEX);
+  if (elasticBinIndex != EMPTY_INT()) {
+    const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
+    m_elasticBinIndex = toWorkspaceIndex(elasticBinIndex, indexType, m_inputWs);
   } else {
-    auto peakPositionColumn =
+    m_eppTable = getProperty(PropertyNames::EPP_TABLE);
+    if (!m_eppTable) {
+      issues[PropertyNames::EPP_TABLE] = "No EPP table specified nor " + PropertyNames::ELASTIC_BIN_INDEX + " specified.";
+      return issues;
+    }
+    const auto peakPositionColumn =
         m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
-    auto fitStatusColumn =
+    const auto fitStatusColumn =
         m_eppTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
     if (!peakPositionColumn || !fitStatusColumn) {
       issues[PropertyNames::EPP_TABLE] =
           "EPP table doesn't contain the expected columns.";
-    } else {
-      const std::vector<int> spectra =
-          getProperty(PropertyNames::REFERENCE_SPECTRA);
-      if (spectra.empty()) {
-        issues[PropertyNames::REFERENCE_SPECTRA] = "No spectra selected.";
-      } else {
-        m_workspaceIndices = referenceWorkspaceIndices();
-        std::sort(m_workspaceIndices.begin(), m_workspaceIndices.end());
-        m_workspaceIndices.erase(
-            std::unique(m_workspaceIndices.begin(), m_workspaceIndices.end()),
-            m_workspaceIndices.end());
-        const auto &spectrumInfo = m_inputWs->spectrumInfo();
-        for (const auto i : m_workspaceIndices) {
-          if (spectrumInfo.isMonitor(i)) {
-            issues[PropertyNames::REFERENCE_SPECTRA] =
-                "Monitor found among the given spectra.";
-            break;
-          }
-          if (!spectrumInfo.hasDetectors(i)) {
-            issues[PropertyNames::REFERENCE_SPECTRA] =
-                "No detectors attached to workspace index " + i;
-            break;
-          }
-          if (i >= peakPositionColumn->size()) {
-            issues[PropertyNames::REFERENCE_SPECTRA] =
-                "Workspace index " + std::to_string(i) +
-                " not found in the EPP table.";
-          }
-        }
-      }
+      return issues;
+    }
+  }
+  const std::vector<int> spectra =
+      getProperty(PropertyNames::REFERENCE_SPECTRA);
+  if (spectra.empty()) {
+    issues[PropertyNames::REFERENCE_SPECTRA] = "No spectra selected.";
+    return issues;
+  }
+  m_workspaceIndices = referenceWorkspaceIndices();
+  std::sort(m_workspaceIndices.begin(), m_workspaceIndices.end());
+  m_workspaceIndices.erase(
+      std::unique(m_workspaceIndices.begin(), m_workspaceIndices.end()),
+      m_workspaceIndices.end());
+  const auto &spectrumInfo = m_inputWs->spectrumInfo();
+  for (const auto i : m_workspaceIndices) {
+    if (spectrumInfo.isMonitor(i)) {
+      issues[PropertyNames::REFERENCE_SPECTRA] =
+          "Monitor found among the given spectra.";
+      break;
+    }
+    if (!spectrumInfo.hasDetectors(i)) {
+      issues[PropertyNames::REFERENCE_SPECTRA] =
+          "No detectors attached to workspace index " + i;
+      break;
+    }
+    const auto peakPositionColumn =
+        m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
+    if (i >= peakPositionColumn->size()) {
+      issues[PropertyNames::REFERENCE_SPECTRA] =
+          "Workspace index " + std::to_string(i) +
+          " not found in the EPP table.";
     }
   }
 
@@ -292,8 +353,8 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
   double l2 = 0;
-  double averageEPP = 0;
-  averageL2AndEPP(spectrumInfo, l2, averageEPP);
+  double epp = 0;
+  averageL2AndEPP(spectrumInfo, l2, epp);
   double Ei = getProperty(PropertyNames::INCIDENT_ENERGY);
   if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
@@ -315,7 +376,7 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    const double shift = TOF - averageEPP;
+    const double shift = TOF - epp;
     if (i == 0) {
       g_log.debug() << "TOF shift: " << shift << '\n';
     }
@@ -358,8 +419,10 @@ void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
       if (!spectrumInfo.isMasked(index)) {
         const double d = spectrumInfo.l2(index);
         l2Sum += d;
-        const double epp = (*peakPositionColumn)[index];
-        eppSum += epp;
+        if (m_elasticBinIndex == static_cast<size_t>(EMPTY_LONG())) {
+          const double epp = (*peakPositionColumn)[index];
+          eppSum += epp;
+        }
         ++n;
         g_log.debug() << "Including workspace index " << index
                       << " - distance: " << d << " EPP: " << epp << ".\n";
@@ -380,31 +443,25 @@ void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
   }
   l2 = l2Sum / static_cast<double>(n);
   g_log.information() << "Average L2 distance: " << l2 << ".\n";
-  epp = eppSum / static_cast<double>(n);
-  g_log.information() << "Average detector EPP: " << epp << ".\n";
+  if (m_elasticBinIndex != static_cast<size_t>(EMPTY_LONG())) {
+    epp = m_inputWs->points(0)[m_elasticBinIndex];
+  } else {
+    epp = eppSum / static_cast<double>(n);
+  }
+  g_log.information() << "EPP: " << epp << ".\n";
 }
 
 /** Transform spectrum numbers or detector IDs to workspace indices.
  *  @return The transformed workspace indices.
  */
 std::vector<size_t> TOFAxisCorrection::referenceWorkspaceIndices() const {
-  const std::vector<int> spectra =
+  const std::vector<int> indices =
       getProperty(PropertyNames::REFERENCE_SPECTRA);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
-  std::vector<size_t> workspaceIndices;
-  workspaceIndices.reserve(spectra.size());
-  if (indexType == IndexTypes::DETECTOR_ID) {
-    const auto indexMap = m_inputWs->getDetectorIDToWorkspaceIndexMap();
-    mapIndices(spectra, indexMap, workspaceIndices);
-  } else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
-    const auto indexMap = m_inputWs->getSpectrumToWorkspaceIndexMap();
-    mapIndices(spectra, indexMap, workspaceIndices);
-  } else {
-    // There is a type mismatch between the RerefenceSpectra property
-    // (unsigned int) and workspace index (size_t), thus the copying.
-    auto back = std::back_inserter(workspaceIndices);
-    std::copy(spectra.begin(), spectra.end(), back);
-  }
+  std::vector<size_t> workspaceIndices(indices.size());
+  std::transform(indices.cbegin(), indices.cend(), workspaceIndices.begin(), [&indexType, this](int index) {
+    return toWorkspaceIndex(index, indexType, m_inputWs);
+  });
   return workspaceIndices;
 }
 
