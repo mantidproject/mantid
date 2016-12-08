@@ -29,7 +29,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
   auto endIterator = std::remove_copy_if(
       allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(),
       [&](const detid_t detID) -> bool {
-        return poldiDetectorInfo.isMasked(poldiDetectorInfo.indexOf(detID));
+        return !poldiDetectorInfo.isMasked(poldiDetectorInfo.indexOf(detID));
       });
   deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
 
