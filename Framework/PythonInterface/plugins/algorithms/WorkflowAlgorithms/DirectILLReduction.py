@@ -37,8 +37,8 @@ PROP_BINNING_W                        = 'WBinning'
 PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
 PROP_CLEANUP_MODE                     = 'Cleanup'
 PROP_DIAGNOSTICS_WORKSPACE            = 'DiagnosticsWorkspace'
-PROP_DETECTORS_FOR_EI_CALIBRATION     = 'IncidentEnergyCalibrationDetectors'
 PROP_DETECTOR_DIAGNOSTICS             = 'Diagnostics'
+PROP_DETECTORS_AT_L2                  = 'DetectorsExactlyAtL2'
 PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
 PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
 PROP_FLAT_BACKGROUND_SCALING          = 'FlatBackgroundScaling'
@@ -358,6 +358,10 @@ def _reportSingleBackgroundDiagnostics(report, diagnostics, wsIndex):
         report.notice(('Workspace index {0} has been marked as an outlier ' +
             'in noisy background diagnostics.').format(wsIndex))
 
+def _nominalTOF(ws):
+     ei = ws.getRun().getLogData('Ei').value
+     l1 = ws.getRun().getLogData('L1').value
+
 def _reportDiagnostics(report, zeroCountDiagnostics, bkgDiagnostics):
     '''
     Parses the mask workspaces and fills in the report accordingly.
@@ -370,16 +374,43 @@ def _reportDiagnostics(report, zeroCountDiagnostics, bkgDiagnostics):
                                            bkgDiagnostics,
                                            i)
 
-def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, report, algorithmLogging):
+def _medianEPP(eppWS, eppIndices):
+    centres = list()
+    sigmas = list()
+    for rowIndex in eppIndices:
+        eppRow = eppWS.row(rowIndex)
+        if eppRow['FitStatus'] == 'success':
+            centre.append(eppRow['PeakCentre'])
+            sigmas.append(eppRow['sigma'])
+    if len(centres) == 0:
+        raise RuntimeError('No successes in EPP table.')
+    median = numpy.median(numpy.array(centres))
+    sigma = numpy.median(numpy.array(sigmas))
+    return median, sigma
+    
+
+def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, wsNames, wsCleanup, report, algorithmLogging):
     '''
     Returns a diagnostics workspace.
     '''
-    # 1. Detectors with zero counts.
-    zeroCountWSName = wsNames.withSuffix('diagnostics_zero_counts')
-    zeroCountDiagnostics, nFailures = FindDetectorsOutsideLimits(InputWorkspace=ws,
-                                                                 OutputWorkspace=zeroCountWSName,
-                                                                 EnableLogging=algorithmLogging)
-    # 2. Detectors with high background.
+    # 1. Diagnose elastic peak region.
+    # TODO sigmaFactor should be user-settable.
+    # TODO MedianDetectorTest properties should be user-controllable.
+    constantL2WSName = wsNames.withSuffix('constant_L2')
+    constantL2WS = ConvertToConstantL2(InputWorkspace=ws,
+                                       OutputWorkspace=constantL2WSName,
+                                       EnableLogging=algorithmLogging)
+    medianEPPCentre, medianEPPSigma = _medianEPP(eppWS, eppIndices)
+    elasticPeakDiagnosticsWSName = wsNames.withSuffix('diagnostics_elastic_peak')
+    integrationBegin = medianEPPCentre - sigmaFactor * medianEPPSigma
+    integrationEnd = medianEPPCentre + sigmaFactor * medianEPPSigma
+    elasticPeakDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=constantL2WS,
+                                                           OutputWorkspace=elasticPeakDiagnosticsWSName,
+                                                           CorrectForSolidAngle=True,
+                                                           RangeLower=integrationBegin,
+                                                           RangeUpper=integrationEnd,
+                                                           EnableLogging=algorithmLogging)
+    # 2. Diagnose backgrounds.
     noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_background')
     noisyBkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWS,
                                                         OutputWorkspace=noisyBkgWSName,
@@ -395,8 +426,9 @@ def _diagnoseDetectors(ws, bkgWS, wsNames, wsCleanup, report, algorithmLogging):
                          RHSWorkspace=noisyBkgDiagnostics,
                          OutputWorkspace=combinedDiagnosticsWSName,
                          EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(zeroCountWSName)
-    wsCleanup.cleanup(noisyBkgWSName)
+    wsCleanup.cleanup(constantL2WS)
+    wsCleanup.cleanup(elasticPeakDiagnostics)
+    wsCleanup.cleanup(noisyBkgDiagnostics)
     return diagnosticsWS
 
 def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
@@ -781,8 +813,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if self.getProperty(PROP_DETECTOR_DIAGNOSTICS).value == DIAGNOSTICS_YES:
             diagnosticsInWS = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
             if not diagnosticsInWS:
+                detectorsAtL2 = self.getProperty(PROP_DETECTORS_AT_L2).value
                 diagnosticsWS = _diagnoseDetectors(mainWS,
                                                    bkgWS,
+                                                   detEPPWS,
+                                                   detectorsAtL2,
                                                    wsNames,
                                                    wsCleanup,
                                                    report,
@@ -817,7 +852,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if eiCalibration == INCIDENT_ENERGY_CALIBRATION_YES:
             eiInWS = self.getProperty(PROP_INCIDENT_ENERGY_WORKSPACE).value
             if not eiInWS:
-                eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
+                eiCalibrationDets = self.getProperty(PROP_DETECTORS_AT_L2).value
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS,
                                                             detEPPWS,
                                                             monWS,
@@ -1050,7 +1085,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              defaultValue=INDEX_TYPE_WORKSPACE_INDEX,
                              validator=StringListValidator([INDEX_TYPE_WORKSPACE_INDEX, INDEX_TYPE_SPECTRUM_NUMBER, INDEX_TYPE_DETECTOR_ID]),
                              direction=Direction.Input,
-                             doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
+                             doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_AT_L2 + ' properties')
         self.declareProperty(name=PROP_MONITOR_INDEX,
                              defaultValue=0,
                              validator=mandatoryPositiveInt,
@@ -1061,10 +1096,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([INCIDENT_ENERGY_CALIBRATION_YES, INCIDENT_ENERGY_CALIBRATION_YES]),
                              direction=Direction.Input,
                              doc='Enable or disable incident energy calibration on IN4 and IN6')
-        self.declareProperty(name=PROP_DETECTORS_FOR_EI_CALIBRATION,
-                             defaultValue='',
-                             direction=Direction.Input,
-                             doc='List of detectors used for the incident energy calibration')
+        # TODO This is actually mandatory if Ei calibration or
+        #      diagnostics are enabled.
+        self.declareProperty(IntArrayProperty(name=PROP_DETECTORS_AT_L2,
+                                              values='',
+                                              validator=positiveIntArray,
+                                              direction=Direction.Input),
+                             doc='List of detectors with the instruments nominal L2 distance.')
         self.declareProperty(MatrixWorkspaceProperty(name=PROP_INCIDENT_ENERGY_WORKSPACE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
