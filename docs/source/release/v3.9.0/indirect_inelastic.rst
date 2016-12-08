@@ -11,7 +11,7 @@ New features
 Algorithms
 ##########
 
-- :ref:`EnergyWindowScan <algm-EnergyWindowScan>` and :ref:`IndirectEnergyWindowScan <algm-IndirectEnergyWindowScan>` have been added
+- :ref:`EnergyWindowScan <algm-EnergyWindowScan>` and :ref:`IndirectQuickRun <algm-IndirectQuickRun>` have been added
   to perform a quick run of *EnergyTransfer*, *Elwin* and optional *MSDFit*
 - A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
 
