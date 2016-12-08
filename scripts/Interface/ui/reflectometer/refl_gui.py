@@ -601,7 +601,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
         tup = ()
         for idx in self.listMain.selectedItems():
-            split_title = re.split("th=|:", idx.text())
+            split_title = re.split(":th=|th=|:", idx.text())
             if len(split_title) != 3:
                 split_title = re.split(":", idx.text())
                 if len(split_title) != 2:
