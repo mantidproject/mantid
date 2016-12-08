@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace Mantid {
 namespace DataHandling {
 
