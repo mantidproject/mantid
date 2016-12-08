@@ -14199,22 +14199,22 @@ void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it,
 }
 
 void ApplicationWindow::hideFolderWindows(Folder *f) {
-    QList<MdiSubWindow *> lst = f->windowsList();
+  QList<MdiSubWindow *> lst = f->windowsList();
+  foreach (MdiSubWindow *w, lst)
+    w->hide();
+
+  if ((f->children()).isEmpty())
+    return;
+
+  Folder *dir = f->folderBelow();
+  int initial_depth = f->depth();
+  while (dir && dir->depth() > initial_depth) {
+    lst = dir->windowsList();
     foreach (MdiSubWindow *w, lst)
-        w->hide();
+      w->hide();
 
-    if ((f->children()).isEmpty())
-        return;
-
-    Folder *dir = f->folderBelow();
-    int initial_depth = f->depth();
-    while (dir && dir->depth() > initial_depth) {
-        lst = dir->windowsList();
-        foreach (MdiSubWindow *w, lst)
-            w->hide();
-
-        dir = dir->folderBelow();
-    }
+    dir = dir->folderBelow();
+  }
 }
 
 bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
@@ -14239,7 +14239,7 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
   if (active_window)
     active_window_state = active_window->status();
 
-  if(newFolder != oldFolder)
+  if (newFolder != oldFolder)
     hideFolderWindows(oldFolder);
 
   d_current_folder = newFolder;
