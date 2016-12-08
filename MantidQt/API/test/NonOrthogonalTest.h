@@ -132,8 +132,8 @@ private:
   }
 
   void getExampleCoordTArray(Mantid::coord_t *coordTArrayExample,
-                             bool default) {
-    if (default) {
+                             bool nonSkewed) {
+    if (nonSkewed) {
       coordTArrayExample[0] = 1.0;
       coordTArrayExample[1] = 0.0;
       coordTArrayExample[2] = 0.0;
