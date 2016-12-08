@@ -257,7 +257,8 @@ int MedianDetectorTest::maskOutliers(
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {
-        if (spectrumInfo.isMasked(hists[j])) {
+        if (spectrumInfo.hasDetectors(hists[j]) &&
+            spectrumInfo.isMasked(hists[j])) {
           numFailed -= 1; // it was already masked
         }
       }
@@ -333,7 +334,7 @@ int MedianDetectorTest::doDetectorTests(
                                  numSpec));
       }
 
-      if (checkForMask) {
+      if (checkForMask && spectrumInfo.hasDetectors(hists.at(i))) {
         if (spectrumInfo.isMasked(hists.at(i))) {
           maskWS->mutableY(hists.at(i))[0] = deadValue;
           continue;
