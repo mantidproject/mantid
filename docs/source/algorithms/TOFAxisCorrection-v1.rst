@@ -12,9 +12,23 @@ Description
 
 This algorithm is meant to adjust the time-of-flight axis so that the elastic peak is at zero energy transfer after unit conversion from 'TOF' to 'DeltaE'. The algorithm has two modes: either it uses a given *ReferenceWorkspace*, or it calculates a constant time-of-flight shift using the L1 + L2 distances of the *InputWorkspace* and incident energy.
 
+Using a reference workspace
+###########################
+
 If *ReferenceWorkspace* is set, this algorithm copies the X axis as well as the 'Ei' and 'wavelength' sample logs to the *OutputWorkspace*. The rest of the input properties are discarded.
 
-If no *ReferenceWorkspace* is given, the algorithm calculates the average L2 distance and the average elastic peak positions. The L2 values it gets from the *InputWorkspace* while the elastic peak positions are taken from *EPPTable*. *EPPTable* should be in the format returned by the :ref:`algm-FindEPP` algorithm. The spectra over which the averages are taken should be listed in *ReferenceSpectra*. Whether this input property refers to workspace indices, spectrum numbers or detector IDs is specified by *IndexType*. Incident energy can be either specified by *IncidentEnergy* or it is taken from the sample logs of *InputWorkspace*. In case *IncidentEnergy* is specified, the 'Ei' and 'wavelength' sample logs of *OutputWorkspace* are updated accordingly.
+Calculating new TOF axis
+########################
+
+If no *ReferenceWorkspace* is given, the algorithm takes the L1 distance from the *InputWorkspace* and calculates the average L2 distance :math:`l_2` using the histograms specified by *ReferenceSpectra*. The algorithm also needs to know the TOF :math:`t_{elastic}` corresponding to the zero-energy transfer. This is either taken as the bin centre of the X bin specified by *ElasticBinIndex* or calculated from the elastic peak positions given in *EPPTable*. *EPPTable* should be in the format returned by the :ref:`algm-FindEPP` algorithm. In this case the algorithm averages the `PeakCentre` column for histograms listed in *ReferenceSpectra*. Finally, the algorithm needs the incident energy :math:`E_i` which can be either specified by *IncidentEnergy* or is taken from the sample logs of *InputWorkspace*. In case *IncidentEnergy* is specified, the 'Ei' and 'wavelength' sample logs of *OutputWorkspace* are updated accordingly.
+
+The TOF shift :math:`\Delta t` is calculated by
+
+   :math:`\Delta t = t_{elastic} - (l_1 + l_2) / \sqrt{2 E_i / m_n}`,
+
+where :math:`m_n` is the neutron mass. The shift :math:`\Delta t` is then added to all X values of *OutputWorkspace*.
+
+Whether the *ReferenceSpectra* input property refers to workspace indices, spectrum numbers or detector IDs is specified by *IndexType*. 
 
 Usage
 -----

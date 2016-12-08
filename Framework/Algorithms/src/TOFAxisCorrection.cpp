@@ -379,19 +379,14 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
                      1e6;
   g_log.information() << "Calculated TOF for L1+L2 distance of " << l1 + l2
                       << "m: " << TOF << '\n';
+  const double shift = TOF - epp;
+  g_log.debug() << "TOF shift: " << shift << '\n';
   const int64_t histogramCount =
       static_cast<int64_t>(m_inputWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    const double shift = TOF - epp;
-    if (i == 0) {
-      g_log.debug() << "TOF shift: " << shift << '\n';
-    }
-    auto &xsOut = outputWs->mutableX(i);
-    for (auto &x : xsOut) {
-      x += shift;
-    }
+    outputWs->mutableX(i) += shift;
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
