@@ -85,10 +85,11 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_data(nullptr), m_X(), m_Y(), m_dimX(0), m_dimY(1), m_logColor(false),
       m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
       m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"),
+      m_firstNonOrthogonalWorkspaceOpen(true),
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL), m_firstNonOrthogonalWorkspaceOpen(true) {
+      m_peaksSliderWidget(NULL) {
 
   ui.setupUi(this);
 

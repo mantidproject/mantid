@@ -348,6 +348,7 @@ getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
         (i != dimY)) {
       return i;
     }
+    return NULL;
   }
 }
 
