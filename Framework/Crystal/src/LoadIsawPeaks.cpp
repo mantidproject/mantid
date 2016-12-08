@@ -5,8 +5,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;

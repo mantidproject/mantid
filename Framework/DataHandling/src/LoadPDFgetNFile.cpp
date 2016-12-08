@@ -8,6 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <fstream>
+#include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>

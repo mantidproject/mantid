@@ -3,15 +3,19 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/VectorHelper.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -131,7 +135,7 @@ void CalculateCoverageDGS::init() {
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     declareProperty(dim, options[i - 1],
                     boost::make_shared<StringListValidator>(options),
                     "Dimension to bin or integrate");
@@ -196,7 +200,7 @@ void CalculateCoverageDGS::exec() {
   size_t q1NumBins = 1, q2NumBins = 1, q3NumBins = 1, dENumBins = 1;
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     std::string dimensioni = getProperty(dim);
     if (dimensioni == "Q1") {
       affineMat[i - 1][0] = 1.;

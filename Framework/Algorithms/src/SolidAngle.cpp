@@ -84,7 +84,7 @@ void SolidAngle::exec() {
   const Kernel::V3D samplePos = spectrumInfo.samplePosition();
   g_log.debug() << "Sample position is " << samplePos << '\n';
 
-  int loopIterations = m_MaxSpec - m_MinSpec;
+  const int loopIterations = m_MaxSpec - m_MinSpec;
   int failCount = 0;
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
@@ -92,14 +92,14 @@ void SolidAngle::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int j = 0; j <= loopIterations; ++j) {
     PARALLEL_START_INTERUPT_REGION
-    int i = j + m_MinSpec;
+    const int i = j + m_MinSpec;
     if (spectrumInfo.hasDetectors(i)) {
       // Copy over the spectrum number & detector IDs
       outputWS->getSpectrum(j).copyInfoFrom(inputWS->getSpectrum(i));
       // Solid angle should be zero if detector is masked ('dead')
-      double solidAngle = spectrumInfo.isMasked(i)
-                              ? 0.0
-                              : spectrumInfo.detector(i).solidAngle(samplePos);
+      const double solidAngle =
+          spectrumInfo.isMasked(i) ? 0.0 : spectrumInfo.detector(i)
+                                               .solidAngle(samplePos);
 
       outputWS->mutableX(j)[0] = inputWS->x(i).front();
       outputWS->mutableX(j)[1] = inputWS->x(i).back();
@@ -119,7 +119,7 @@ void SolidAngle::exec() {
 
   if (failCount != 0) {
     g_log.information() << "Unable to calculate solid angle for " << failCount
-                        << " spectra. Zeroing spectrum.\n";
+                        << " spectra. Zeroing these spectra.\n";
   }
 }
 

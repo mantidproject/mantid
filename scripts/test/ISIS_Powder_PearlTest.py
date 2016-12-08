@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 
 import os
 import unittest
@@ -12,7 +13,7 @@ class isis_powder_PearlTest(unittest.TestCase):
 
     def test_cycle_information_generates_correctly(self):
         # This checks that the cycle information generates using the correct keys for the dict
-        output = self._get_pearl_inst_defaults()._get_cycle_information(85500)
+        output = self._get_pearl_inst_defaults()._get_label_information(85500)
         expected_cycle = "14_1"
         expected_inst_vers = "new2"
         self.assertEquals(output["cycle"], expected_cycle)
@@ -44,28 +45,9 @@ class isis_powder_PearlTest(unittest.TestCase):
         self.assertEquals(expected_new_name, new_output)
 
     # Non static methods
-    def test_get_calibration_full_paths(self):
-        input_cycle = "15_4"
-        input_tt_mode = self.default_tt_mode
-
-        expected_calfile = "pearl_offset_15_3.cal"
-        expected_van_aborb_file = "pearl_absorp_sphere_10mm_newinst2_long.nxs"
-        expected_grouping_file = "pearl_group_12_1_TT88.cal"
-        expected_vanadium_file = "van_spline_TT88_cycle_15_4.nxs"
-
-        expected_calibration_dir = self.calibration_dir
-
-        pearl_obj = self._get_pearl_inst_defaults()
-        output = pearl_obj._get_calibration_full_paths(input_cycle)
-
-        self.assertEquals(output["calibration"], expected_calibration_dir + expected_calfile)
-        self.assertEquals(output["grouping"], expected_calibration_dir + expected_grouping_file)
-        self.assertEquals(output["vanadium_absorption"], expected_calibration_dir + expected_van_aborb_file)
-        self.assertEquals(output["vanadium"], expected_calibration_dir + expected_vanadium_file)
-
     def _get_pearl_inst_defaults(self):
         return pearl.Pearl(user_name="unitTest-PEARL", calibration_dir=self.calibration_dir,
-                                       raw_data_dir=self.raw_data_dir, output_dir=self.output_dir)
+                           raw_data_dir=self.raw_data_dir, output_dir=self.output_dir)
 
     def _get_pearl_inst_all_specified(self):
         return pearl.Pearl(calibration_dir=self.calibration_dir, raw_data_dir=self.raw_data_dir,

@@ -39,7 +39,7 @@ public:
 
   void test_that_workspace_without_momentum_transfer_units_is_invalid() {
     // Arrange
-    auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(
+    auto ws = WorkspaceCreationHelper::create1DWorkspaceConstantWithXerror(
         10 /*size*/, 1.23 /*value&*/, 2.3 /*error*/, 23.4 /*xerror*/);
     const std::string filename = "SaveNXcanSASTestFile.h5";
 

@@ -1,8 +1,10 @@
 set ( SRC_FILES
 	src/Algorithms/CalculateChiSquared.cpp
+	src/Algorithms/CalculateCostFunction.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
+	src/Algorithms/EstimateFitParameters.cpp
 	src/Algorithms/EstimatePeakErrors.cpp
 	src/Algorithms/EvaluateFunction.cpp
 	src/Algorithms/Fit.cpp
@@ -30,7 +32,7 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
-	src/FuncMinimizers/DampingMinimizer.cpp
+	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
@@ -148,9 +150,11 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
+	inc/MantidCurveFitting/Algorithms/CalculateCostFunction.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
+	inc/MantidCurveFitting/Algorithms/EstimateFitParameters.h
 	inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
 	inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
 	inc/MantidCurveFitting/Algorithms/Fit.h
@@ -182,7 +186,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
@@ -304,8 +308,10 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	Algorithms/CalculateChiSquaredTest.h
+	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
+	Algorithms/EstimateFitParametersTest.h
 	Algorithms/EstimatePeakErrorsTest.h
 	Algorithms/EvaluateFunctionTest.h
 	Algorithms/FitPowderDiffPeaksTest.h
@@ -334,7 +340,7 @@ set ( TEST_FILES
 	FortranMatrixTest.h
 	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
-	FuncMinimizers/DampingMinimizerTest.h
+	FuncMinimizers/DampedGaussNewtonMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
 	FuncMinimizers/FRConjugateGradientTest.h
 	FuncMinimizers/LevenbergMarquardtMDTest.h

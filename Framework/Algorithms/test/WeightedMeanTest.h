@@ -2,6 +2,7 @@
 #define WEIGHTEDMEANTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/WeightedMean.h"
 #include "MantidDataHandling/LoadRaw3.h"
 

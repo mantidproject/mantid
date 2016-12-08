@@ -371,9 +371,10 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     auto histogram = out->histogram(0);
     histogram.setSharedX(inputWS->sharedX(wsIndex));
     histogram.setSharedE(inputWS->sharedE(wsIndex));
-    auto newSize = histogram.y().size() - 1;
 
+    auto newSize = histogram.y().size() - 1;
     histogram.resize(newSize);
+
     out->setHistogram(0, histogram);
   } else {
     out->setSharedX(0, inputWS->sharedX(wsIndex));
@@ -386,9 +387,8 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 /**
  * Get the start and end of the x-interval.
  * @param X :: The x-vector of a spectrum.
- * @param isHistogram :: Is the x-vector comming form a histogram? If it's true
- * the bin
- *   centres are used.
+ * @param isHistogram :: Is the x-vector coming form a histogram? If it's true
+ * the bin centers are used.
  * @return :: A pair of start x and end x.
  */
 std::pair<double, double>

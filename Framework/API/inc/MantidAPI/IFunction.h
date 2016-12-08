@@ -560,6 +560,14 @@ protected:
   /// Store an attribute's value
   void storeAttributeValue(const std::string &name,
                            const API::IFunction::Attribute &value);
+  /// A read-only ("mutable") attribute can be stored in a const method
+  void storeReadOnlyAttribute(const std::string &name,
+                              const API::IFunction::Attribute &value) const;
+
+  /// Write the list of ties to a stream
+  void writeTies(std::ostringstream &ostr) const;
+  /// Write the list of constraints to a stream
+  void writeConstraints(std::ostringstream &ostr) const;
 
   friend class ParameterTie;
   friend class CompositeFunction;
