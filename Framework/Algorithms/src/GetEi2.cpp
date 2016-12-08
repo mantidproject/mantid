@@ -277,9 +277,11 @@ double GetEi2::calculateEi(const double initial_guess) {
   }
 }
 
-/** Gets the distance between the source and detectors whose workspace index is
+/**
+ * Gets the distance between the source and detectors whose workspace index is
  * passed
  *  @param ws_index :: The workspace index of the detector
+ *  @param spectrumInfo :: A spectrum info object for the input workspace
  *  @return The distance between the source and the given detector(or
  * DetectorGroup)
  *  @throw runtime_error if there is a problem

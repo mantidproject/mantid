@@ -182,15 +182,17 @@ void DetectorEfficiencyCor::retrieveProperties() {
   }
 }
 
-/** Corrects a spectra for the detector efficiency calculated from detector
-information
-Gets the detector information and uses this to calculate its efficiency
-*  @param spectraIn :: index of the spectrum to get the efficiency for
-*  @throw invalid_argument if the shape of a detector is isn't a cylinder
-aligned along one axis
-*  @throw NotFoundError if the detector or its gas pressure or wall thickness
-were not found
-*/
+/**
+ * Corrects a spectra for the detector efficiency calculated from detector
+ * information
+ * Gets the detector information and uses this to calculate its efficiency
+ *  @param spectraIn :: index of the spectrum to get the efficiency for
+ *  @param spectrumInfo :: The SpectrumInfo object for the input workspace
+ *  @throw invalid_argument if the shape of a detector is not a cylinder aligned
+ * along one axis
+ *  @throw NotFoundError if the detector or its gas pressure or wall thickness
+ * were not found
+ */
 void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn,
                                                  SpectrumInfo spectrumInfo) {
   if (spectrumInfo.isMonitor(spectraIn) || spectrumInfo.isMasked(spectraIn)) {
