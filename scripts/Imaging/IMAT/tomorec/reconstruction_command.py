@@ -387,6 +387,7 @@ class ReconstructionCommand(object):
 
     def normalize_air_region(self, data, pre_cfg):
         """
+        TODO move to filters.py
         Normalize by beam intensity. This is not directly about proton
         charg - not using the proton charge field as usually found in
         experiment/nexus files. This uses an area of normalization, if
@@ -413,9 +414,14 @@ class ReconstructionCommand(object):
                     "Wrong air region coordinates when trying to use them to normalize images: {0}".
                     format(pre_cfg.normalize_air_region))
 
+            # DEBUG changed to use right/top/left/bottom TODO check if correct
+            right = pre_cfg.normalize_air_region[2]# why do we add 1?
+            top = pre_cfg.normalize_air_region[1]
+            left = pre_cfg.normalize_air_region[0]
+            bottom = pre_cfg.normalize_air_region[3]
+
             # skip if for example: 0, 0, 0, 0 (empty selection)
-            if pre_cfg.normalize_air_region[1] >= pre_cfg.normalize_air_region[3] or\
-               pre_cfg.normalize_air_region[0] >= pre_cfg.normalize_air_region[2]:
+            if top >= bottom or left >= right:
                 return data
 
             if not all(
@@ -428,10 +434,7 @@ class ReconstructionCommand(object):
 
             air_sums = []
             for idx in range(0, data.shape[0]):
-                air_data_sum = data[idx, pre_cfg.normalize_air_region[
-                    1]:pre_cfg.normalize_air_region[
-                        3], pre_cfg.normalize_air_region[0]:
-                                    pre_cfg.normalize_air_region[2]].sum()
+                air_data_sum = data[idx, top:bottom, left:right].sum()
                 air_sums.append(air_data_sum)
 
             air_sums = np.true_divide(air_sums, np.amax(air_sums))
@@ -1107,17 +1110,36 @@ class ReconstructionCommand(object):
 
         size = int(num_projections)
 
+        cor_num_checked_projections = 6
+        cor_proj_slice_indices = []
+
+        # depending on the COR projections it will select different slice indices
+        cor_slice_index = 0
+        for c in range(cor_num_checked_projections):
+            cor_slice_index += int(size/cor_num_checked_projections)
+            print(" >> Calculated slice index", cor_slice_index)
+            cor_proj_slice_indices.append(cor_slice_index)
 
         calculated_cors = []
-        checked_projections = [int(size / 2)]
-        #checked_projections = [int(0.15*size), int(0.30*size), int(0.45*size), int(0.60*size), int(0.75*size), int(0.90*size)]
-        cfg.tomo_print("Starting COR calculation on " + str(len(checked_projections)) + " projections", 2)
-        for slice_idx in checked_projections:
+
+        cfg.tomo_print("Starting COR calculation on " + str(cor_num_checked_projections) + " projections", 2)
+
+        pixelsFromLeftSide = float(cfg.preproc_cfg.crop_coords[0])
+        for slice_idx in cor_proj_slice_indices:
             tomopy_cor = tomopy.find_center(
                 tomo=sample, theta=proj_angles, ind=slice_idx, emission=False)
+            print("\t** COR for slice", str(slice_idx), ".. REL to CROP ", str(tomopy_cor), ".. REL to FULL ", str(tomopy_cor + pixelsFromLeftSide))
             calculated_cors.append(tomopy_cor)
 
-        cfg.tomo_print("Finished COR calculation.", 2)
 
-        # print to stdout
-        print(sum(calculated_cors) / float(len(calculated_cors)))
+        cfg.tomo_print("Finished COR calculation. ", 2)
+        averageCORrelativeToCrop = sum(calculated_cors) / float(len(calculated_cors))
+        averageCORrelativeToFullImage = sum(calculated_cors) / float(len(calculated_cors)) + pixelsFromLeftSide
+
+
+        # we add the pixels cut off from the left, to reflect the full image in Mantid
+
+        cfg.tomo_print("Printing average COR in relation to cropped image " + str(cfg.preproc_cfg.crop_coords) +":", 2)
+        print(str(int(round(averageCORrelativeToCrop))))
+        cfg.tomo_print("Printing average COR in relation to FULL image:", 2)
+        print(str(int(round(averageCORrelativeToFullImage))))

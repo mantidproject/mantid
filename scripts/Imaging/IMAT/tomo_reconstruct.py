@@ -59,9 +59,9 @@ sys.path.insert(0, os.path.split(path.dirname(__file__))[0])  # noqa
 from tomorec import reconstruction_command as tomocmd
 import tomorec.configs as tomocfg
 
-import pydevd
-pydevd.settrace(
-    'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
+# import pydevd
+# pydevd.settrace(
+#     'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
 
 
 def setup_cmd_options():
@@ -86,7 +86,7 @@ def setup_cmd_options():
         "--output-path",
         required=True,
         type=str,
-        help="Where to write the output slice images (reconstructred volume)")
+        help="Where to write the output slice images (reconstructed volume)")
 
     grp_req.add_argument("-c", "--cor", required=False, type=float, help="2")
 
@@ -380,8 +380,8 @@ def main_tomo_rec():
 
     # Save myself early. Save command this command line script and all packages/subpackages
     # TODO need to move it somewhere else later
-    # tomoio.self_save_zipped_scripts(
-    # args.output_path, os.path.abspath(inspect.getsourcefile(lambda: 0)))
+    tomoio.self_save_zipped_scripts(
+    args.output_path, os.path.abspath(inspect.getsourcefile(lambda: 0)))
 
     # Grab and check pre-processing options + algorithm setup + post-processing options
     preproc_config = grab_preproc_options(args)

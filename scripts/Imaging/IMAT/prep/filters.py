@@ -70,23 +70,30 @@ def crop_vol(data_vol, coords):
 
     @param data_vol :: 3D data volume
     @param coords :: coordinates of the corners that define a rectangle box (crop to this
-    box, as when cropping to the regions of interest). Given as list [x1, y1, x2, y2]
-
+    box, as when cropping to the regions of interest).
     Returns :: cropped data volume
     """
+    # if nothing is provided make the user aware
     cropped_data = None
+    right = coords[2]
+    top = coords[1]
+    left = coords[0]
+    bottom = coords[3]
     if not isinstance(coords, list) or 4 != len(coords):
         raise ValueError("Wrong coordinates object when trying to crop: {0}".format(coords))
     elif not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError("Wrong data volume when trying to crop: {0}".format(data_vol))
-    elif not any(coords) or coords[1] > coords[3] or coords[0] > coords[2]:
+    elif not any(coords) or top > bottom or left > right:
         # skip if for example: 0, 0, 0, 0 (empty selection)
+        print(" * No coordinates given, not cropping the images")
         return data_vol
     elif not all(isinstance(crd, int) for crd in coords):
         raise ValueError("Cannot use non-integer coordinates to crop images. Got "
                          "these coordinates: {0}".format(coords))
     else:
-        cropped_data = data_vol[:, coords[1]:(coords[3]+1), coords[0]:(coords[2]+1)]
+        cropped_data = data_vol[:, top:bottom, left:right]
+        # cropped_data = data_vol[:, left:right, top:bottom]
+        # cropped_data = data_vol[:, coords[1]:(coords[3]+1), coords[0]:(coords[2]+1)]
 
     return cropped_data
 

@@ -181,8 +181,6 @@ void TomographyIfacePresenter::processRunExternalProcess() {
   const std::string &cachedExec = m_view->getCachedExecutable();
   const std::vector<std::string> &cachedArgs = m_view->getCachedArguments();
 
-  DBREAK
-
   std::string runnable;
   std::vector<std::string> args;
   std::string allOpts;
