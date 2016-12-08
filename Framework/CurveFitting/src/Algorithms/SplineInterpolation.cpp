@@ -50,9 +50,10 @@ void SplineInterpolation::init() {
                       PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
-  auto validator = boost::make_shared<BoundedValidator<int>>(1, 2);
-  declareProperty("DerivOrder", 2, validator,
-                  "Order to derivatives to calculate.");
+  auto validator = boost::make_shared<BoundedValidator<int>>(0, 2);
+  declareProperty("DerivOrder", 0, validator,
+                  "Order to derivatives to calculate (default 0 "
+                  "omits calculation)");
 
   declareProperty("Linear2Points", false,
                   "Set to true to perform linear interpolation for 2 points "
@@ -67,8 +68,7 @@ void SplineInterpolation::init() {
  * If one point is given interpolation does not make sense
   */
 std::map<std::string, std::string> SplineInterpolation::validateInputs() {
-  // initialise message and its corresponding map (result)
-  std::string message;
+  // initialise map (result)
   std::map<std::string, std::string> result;
 
   // get inputs that need validation
@@ -81,16 +81,21 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
   // used and set by function CubicSpline as well
   switch (binsNo) {
   case 1:
-    message = "Workspace must have minimum two points.";
-    result["WorkspaceToInterpolate"] = message;
+    result["WorkspaceToInterpolate"] = "Workspace must have minimum two points.";
   case 2:
     if (lin2pts == false) {
-      message = "Workspace has only 2 points, "
-                "you can enable linear interpolation by "
-                "setting the property Linear2Points. Otherwise "
-                "provide a minimum of 3 points.";
-      result["WorkspaceToInterpolate"] = message;
+      result["WorkspaceToInterpolate"] = "Workspace has only 2 points, "
+              "you can enable linear interpolation by "
+              "setting the property Linear2Points. Otherwise "
+              "provide a minimum of 3 points.";
     }
+  }
+
+  const int deriv_order = getProperty("DerivOrder");
+  const std::string derivFileName = getProperty("OutputWorkspaceDeriv");
+  if (derivFileName.empty() && (deriv_order > 0)){
+    result["OutputWorkspaceDeriv"] = "Enter a name for the OutputWorkspaceDeriv "
+            "or set DerivOrder to zero.";
   }
 
   return result;
@@ -154,23 +159,24 @@ void SplineInterpolation::exec() {
     outputWorkspace->setSharedX(i, mws->sharedX(0));
 
     // check if we want derivatives
-    derivs[i] = WorkspaceFactory::Instance().create(mws, order);
-    auto vAxis = new NumericAxis(order);
+    if (order > 0){
+      derivs[i] = WorkspaceFactory::Instance().create(mws, order);
+      auto vAxis = new NumericAxis(order);
 
-    // calculate the derivatives for each order chosen
-    for (int j = 0; j < order; ++j) {
-      vAxis->setValue(j, j + 1);
-      derivs[i]->setSharedX(j, mws->sharedX(0));
-      calculateDerivatives(mwspt, derivs[i], j + 1);
+      // calculate the derivatives for each order chosen
+      for (int j = 0; j < order; ++j) {
+        vAxis->setValue(j, j + 1);
+        derivs[i]->setSharedX(j, mws->sharedX(0));
+        calculateDerivatives(mwspt, derivs[i], j + 1);
+      }
+      derivs[i]->replaceAxis(1, vAxis);
     }
-    derivs[i]->replaceAxis(1, vAxis);
 
     pgress.report();
   }
 
   // Store the output workspaces
-  std::string derivWsName = getPropertyValue("OutputWorkspaceDeriv");
-  if (order > 0 && derivWsName != "") {
+  if (order > 0) {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (int i = 0; i < histNo; ++i) {
