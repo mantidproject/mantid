@@ -3,11 +3,13 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/NearestNeighbours.h"
+#include <memory>
 
 namespace Mantid {
 namespace API {
 
 class MatrixWorkspace;
+class NearestNeighbours;
 
 /** NearestNeighbourInfo provides easy access to nearest-neighbour information
   for a workspace.
@@ -48,7 +50,7 @@ public:
 
 private:
   const MatrixWorkspace &m_workspace;
-  NearestNeighbours m_nearestNeighbours;
+  std::unique_ptr<NearestNeighbours> m_nearestNeighbours;
 };
 
 } // namespace API

@@ -1,4 +1,5 @@
 #include "MantidAPI/NearestNeighbours.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -22,9 +23,9 @@ using Kernel::V3D;
  * be ignored.
  */
 NearestNeighbours::NearestNeighbours(
-    int nNeighbours, boost::shared_ptr<const Instrument> instrument,
-    const ISpectrumDetectorMapping &spectraMap, bool ignoreMaskedDetectors)
-    : m_instrument(instrument), m_spectraMap(spectraMap),
+    int nNeighbours, const SpectrumInfo &spectrumInfo,
+    const std::vector<specnum_t> spectrumNumbers, bool ignoreMaskedDetectors)
+    : m_spectrumInfo(spectrumInfo), m_spectrumNumbers(spectrumNumbers),
       m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_radius(0),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);
@@ -105,14 +106,13 @@ NearestNeighbours::neighboursInRadius(const specnum_t spectrum,
  * the graph
  */
 void NearestNeighbours::build(const int noNeighbours) {
-  std::map<specnum_t, IDetector_const_sptr> spectraDets =
-      getSpectraDetectors(m_instrument, m_spectraMap);
-  if (spectraDets.empty()) {
+  const auto indices = getSpectraDetectors();
+  if (indices.empty()) {
     throw std::runtime_error(
         "NearestNeighbours::build - Cannot find any spectra");
   }
   const int nspectra =
-      static_cast<int>(spectraDets.size()); // ANN only deals with integers
+      static_cast<int>(indices.size()); // ANN only deals with integers
   if (noNeighbours >= nspectra) {
     throw std::invalid_argument(
         "NearestNeighbours::build - Invalid number of neighbours");
@@ -126,18 +126,16 @@ void NearestNeighbours::build(const int noNeighbours) {
   BoundingBox bbox;
   // Base the scaling on the first detector, should be adequate but we can look
   // at this
-  IDetector_const_sptr firstDet = (*spectraDets.begin()).second;
-  firstDet->getBoundingBox(bbox);
+  const auto &firstDet = m_spectrumInfo.detector(indices.front());
+  firstDet.getBoundingBox(bbox);
   m_scale = V3D(bbox.width());
   ANNpointArray dataPoints = annAllocPts(nspectra, 3);
   MapIV pointNoToVertex;
 
-  std::map<specnum_t, IDetector_const_sptr>::const_iterator detIt;
   int pointNo = 0;
-  for (detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt) {
-    IDetector_const_sptr detector = detIt->second;
-    const specnum_t spectrum = detIt->first;
-    V3D pos = detector->getPos() / m_scale;
+  for (const auto i : indices) {
+    const specnum_t spectrum = m_spectrumNumbers[i];
+    V3D pos = m_spectrumInfo.position(i) / m_scale;
     dataPoints[pointNo][0] = pos.X();
     dataPoints[pointNo][1] = pos.Y();
     dataPoints[pointNo][2] = pos.Z();
@@ -153,7 +151,7 @@ void NearestNeighbours::build(const int noNeighbours) {
   auto nnIndexList = new ANNidx[m_noNeighbours];
   auto nnDistList = new ANNdist[m_noNeighbours];
 
-  for (detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt) {
+  for (const auto idx : indices) {
     ANNpoint scaledPos = dataPoints[pointNo];
     annTree->annkSearch(scaledPos,      // Point to search nearest neighbours of
                         m_noNeighbours, // Number of neighbours to find (8)
@@ -171,7 +169,7 @@ void NearestNeighbours::build(const int noNeighbours) {
                       m_scale;
       V3D distance = neighbour - realPos;
       double separation = distance.norm();
-      boost::add_edge(m_specToVertex[detIt->first], // from
+      boost::add_edge(m_specToVertex[m_spectrumNumbers[idx]], // from
                       pointNoToVertex[index],       // to
                       distance, m_graph);
       if (separation > m_cutoff) {
@@ -221,30 +219,17 @@ NearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
   }
 }
 
-/**
- * Get the list of detectors associated with a spectra
- * @param instrument :: A pointer to the instrument
- * @param spectraMap :: A reference to the spectra map
- * @returns A map of spectra number to detector pointer
- */
-std::map<specnum_t, IDetector_const_sptr>
-NearestNeighbours::getSpectraDetectors(
-    boost::shared_ptr<const Instrument> instrument,
-    const ISpectrumDetectorMapping &spectraMap) {
-  std::map<specnum_t, IDetector_const_sptr> spectra;
-  if (spectraMap.empty())
-    return spectra;
-  auto cend = spectraMap.cend();
-  for (auto citr = spectraMap.cbegin(); citr != cend; ++citr) {
-    const std::vector<detid_t> detIDs(citr->second.begin(), citr->second.end());
-    IDetector_const_sptr det = instrument->getDetectorG(detIDs);
+/// Returns the list of valid spectrum indices
+std::vector<size_t> NearestNeighbours::getSpectraDetectors() {
+  std::vector<size_t> indices;
+  for (size_t i = 0; i < m_spectrumNumbers.size(); ++i) {
     // Always ignore monitors and ignore masked detectors if requested.
-    bool heedMasking = m_bIgnoreMaskedDetectors && det->isMasked();
-    if (!det->isMonitor() && !heedMasking) {
-      spectra.emplace(citr->first, det);
+    bool heedMasking = m_bIgnoreMaskedDetectors && m_spectrumInfo.isMasked(i);
+    if (!m_spectrumInfo.isMonitor(i) && !heedMasking) {
+      indices.push_back(i);
     }
   }
-  return spectra;
+  return indices;
 }
 }
 }
