@@ -174,7 +174,12 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   // but this method seems to be used rarely enough to justify this until the
   // Instrument-2.0 implementatio has progressed far enough to make this cheap.
   const auto &detectorInfo = this->detectorInfo();
-  return detectorInfo.isMasked(detectorInfo.indexOf(detectorID));
+  try {
+    return detectorInfo.isMasked(detectorInfo.indexOf(detectorID));
+  } catch (std::out_of_range &) {
+    // The workspace can contain bad detector IDs. DetectorInfo::indexOf throws.
+    return false;
+  }
 }
 
 /**
