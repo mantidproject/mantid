@@ -54,9 +54,12 @@ calculateExcitations(const DoubleFortranVector &e_energies,
 void MANTID_CURVEFITTING_DLL
 calculateMagneticMoment(const ComplexFortranMatrix &ev,
                         const DoubleFortranVector &Hmag,
-                        const int nre, double &gj,
-                        DoubleFortranVector &moment);
+                        const int nre, DoubleFortranVector &moment);
 
+void MANTID_CURVEFITTING_DLL
+calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
+                              const std::vector<double> &Hdir,
+                              const int nre, ComplexFortranMatrix &mumat);
 
 } // namespace Functions
 } // namespace CurveFitting

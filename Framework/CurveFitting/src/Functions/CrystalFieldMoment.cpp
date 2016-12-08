@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
+#include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/FortranDefs.h"
@@ -19,61 +19,62 @@ namespace Functions {
 
 namespace {
 
-// Does the actual calculation of the magnetisation
+// Does the actual calculation of the magnetic moment
 void calculate(double *out, const double *xValues, const size_t nData,
                const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector Hmag, const double T,
+               const DoubleFortranVector Hdir, const double Hmag,
                const double convfact) {
-  const double beta = 1 / (PhysicalConstants::BoltzmannConstant * T);
-  // x-data is the applied field magnitude. We need to recalculate
-  // the Zeeman term and diagonalise the Hamiltonian at each x-point.
+  const double k_B = PhysicalConstants::BoltzmannConstant;
+  DoubleFortranVector en;
+  ComplexFortranMatrix ev;
+  DoubleFortranVector H = Hdir;
+  H *= Hmag;
+  calculateZeemanEigensystem(en, ev, ham, nre, H);
+  // Calculates the diagonal of the magnetic moment operator <wf|mu|wf>
+  DoubleFortranVector moment;
+  calculateMagneticMoment(ev, Hdir, nre, moment);
   int nlevels = ham.len1();
-  for (size_t iH = 0; iH < nData; iH++) {
-    DoubleFortranVector en;
-    ComplexFortranMatrix ev;
-    DoubleFortranVector H = Hmag;
-    H *= xValues[iH];
-    calculateZeemanEigensystem(en, ev, ham, nre, H);
-    // Calculates the diagonal of the magnetic moment operator <wf|mu|wf>
-    DoubleFortranVector moment;
-    calculateMagneticMoment(ev, Hmag, nre, moment);
+  // x-data is the temperature.
+  for (size_t iT = 0; iT < nData; iT++) {
     double expfact;
     double Z = 0.;
     double M = 0.; 
+    const double beta = 1 / (k_B * xValues[iT]);
     for (auto iE = 1; iE <= nlevels; iE++) {
       expfact = exp(-beta * en(iE));
       Z += expfact;
       M += moment(iE) * expfact;
     }
-    out[iH] = convfact * M / Z;
+    out[iT] = convfact * M / Z;
   }
 }
 
 }
 
-DECLARE_FUNCTION(CrystalFieldMagnetisation)
+DECLARE_FUNCTION(CrystalFieldMoment)
 
-CrystalFieldMagnetisation::CrystalFieldMagnetisation()
+CrystalFieldMoment::CrystalFieldMoment()
     : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
-  declareAttribute("Temperature", Attribute(1.0));
+  declareAttribute("Hmag", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
+  declareAttribute("inverse", Attribute(false));
 }
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMagnetisation::set_hamiltonian(const ComplexFortranMatrix &ham_in,
+void CrystalFieldMoment::set_hamiltonian(const ComplexFortranMatrix &ham_in,
                                                 const int nre_in) {
   setDirect = true;
   ham = ham_in;
   nre = nre_in;
 }
 
-void CrystalFieldMagnetisation::function1D(double *out,
+void CrystalFieldMoment::function1D(double *out,
                                            const double *xValues,
                                            const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
-  auto T = getAttribute("Temperature").asDouble();
+  auto Hmag = getAttribute("Hmag").asDouble();
   double Hnorm = sqrt(Hdir[0]*Hdir[0] + Hdir[1]*Hdir[1] + Hdir[2]*Hdir[2]);
   DoubleFortranVector H(1, 3);
   for (auto i = 0; i < 3; i++) {
@@ -82,8 +83,8 @@ void CrystalFieldMagnetisation::function1D(double *out,
   auto unit = getAttribute("Unit").asString();
   const double NAMUB = 5.5849397;  // N_A*mu_B - J/T/mol
   // Converts to different units - SI is in J/T/mol or Am^2/mol. cgs in emu/mol.
-  // NB. Atomic ("bohr") units gives magnetisation in uB/ion, but other units
-  // give the molar magnetisation.
+  // NB. Atomic ("bohr") units gives magnetisation in bohr magneton/ion, but
+  // other units give the molar magnetisation.
   double convfact = boost::iequals(unit, "SI") ? NAMUB : 
                     (boost::iequals(unit, "cgs") ? NAMUB*1000. : 1.);
   if (!setDirect) {
@@ -96,11 +97,16 @@ void CrystalFieldMagnetisation::function1D(double *out,
     int nre_ = 0; 
     calculateEigenSystem(en_, wf_, ham_, hz_, nre_);
     ham_ += hz_;
-    calculate(out, xValues, nData, ham_, nre_, H, T, convfact);
+    calculate(out, xValues, nData, ham_, nre_, H, Hmag, convfact);
   }
   else {
     // Use stored values
-    calculate(out, xValues, nData, ham, nre, H, T, convfact);
+    calculate(out, xValues, nData, ham, nre, H, Hmag, convfact);
+  }
+  if (getAttribute("inverse").asBool()) {
+    for (size_t i = 0; i < nData; i++) {
+      out[i] = 1. / out[i];
+    }
   }
 }
 

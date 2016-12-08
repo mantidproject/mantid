@@ -1051,17 +1051,40 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
 void calculateMagneticMoment(const ComplexFortranMatrix &ev,
                              const DoubleFortranVector &Hdir,
                              const int nre,
-                             double &gj,
                              DoubleFortranVector &moment) {
   int dim = (int)ddimj[nre - 1];
-  gj = ggj[nre - 1];
+  auto gj = ggj[nre - 1];
   moment.allocate(dim);
   for (auto i = 1; i <= dim; ++i) {
     moment(i) = real(matjx(ev, i, i, dim))*Hdir(1) +  // <ev|jx|ev>
                 real(matjy(ev, i, i, dim))*Hdir(2) +  // <ev|jy|ev>
                 real(matjz(ev, i, i, dim))*Hdir(3);   // <ev|jz|ev>
   }
+  moment *= gj;
 } 
+
+/// Calculate the full magnetic moment matrix in a particular eigenvector basis. 
+/// @param eigenvector :: Input. The eigenvector basis.
+/// @param hdir :: Input. Cartesian direction of the magnetic moment operator
+/// @param nre :: Input. The ion number to calculate for.
+/// @param gj :: Output. The Lande g-factor of this ion.
+/// @param mumat :: Output the matrix elements of the magnetic moment matrix
+void calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
+                                   const std::vector<double> &Hdir,
+                                   const int nre,
+                                   ComplexFortranMatrix &mumat) {
+  int dim = (int)ddimj[nre - 1];
+  auto gj = ggj[nre - 1];
+  mumat.allocate(1, dim, 1, dim);
+  for (auto i = 1; i <= dim; ++i) {
+    for (auto j = 1; j <= dim; ++j) {
+      mumat(i,j) = matjx(ev, i, j, dim)*Hdir[0] +  // <ev|jx|ev'>
+                   matjy(ev, i, j, dim)*Hdir[1] +  // <ev|jy|ev'>
+                   matjz(ev, i, j, dim)*Hdir[2];   // <ev|jz|ev'>
+    }
+  }
+  mumat *= gj;
+}
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -3,7 +3,9 @@
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
+#include "MantidCurveFitting/Functions/CrystalFieldSusceptibility.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
+#include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -112,10 +114,13 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
       switch(static_cast<int>(physpropId[iSpec])) {
-        case 3:
-        case 4:
-          declareAttribute("Unit" + suffix, Attribute("bohr"));
+        case 3: // Hmag, Hdir, inverse, Unit,
+          declareAttribute("Hmag", Attribute(1.0));
+          declareAttribute("inverse" + suffix, Attribute(false));
+        case 2: // Hdir, inverse, Unit
           declareAttribute("Hdir" + suffix, Attribute(std::vector<double>{0., 0., 1.}));
+        case 4: // Hdir, Unit
+          declareAttribute("Unit" + suffix, Attribute("bohr"));
           break;
       }
     }
@@ -263,6 +268,16 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
       spectrum->set_eigensystem(en, wf, nre);
       return IFunction_sptr(spectrum);
     }
+    case 2: { // Susceptibility
+      auto spectrum = new CrystalFieldSusceptibility;
+      spectrum->set_eigensystem(en, wf, nre);
+      auto suffix = std::to_string(iSpec);
+      auto hdir = getAttribute("Hdir" + suffix).asVector();
+      spectrum->setAttribute("Hdir", Attribute(hdir));
+      auto inverse = getAttribute("inverse" + suffix).asBool();
+      spectrum->setAttribute("inverse", Attribute(inverse));
+      return IFunction_sptr(spectrum);
+    }
     case 3: { // Magnetisation
       auto spectrum = new CrystalFieldMagnetisation;
       spectrum->set_hamiltonian(ham, nre);
@@ -272,6 +287,20 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
       spectrum->setAttribute("Unit", Attribute(unit));
       auto hdir = getAttribute("Hdir" + suffix).asVector();
       spectrum->setAttribute("Hdir", Attribute(hdir));
+      return IFunction_sptr(spectrum);
+    }
+    case 4: { // Moment vs temperature
+      auto spectrum = new CrystalFieldMoment;
+      spectrum->set_hamiltonian(ham, nre);
+      auto suffix = std::to_string(iSpec);
+      auto unit = getAttribute("Unit" + suffix).asString();
+      spectrum->setAttribute("Unit", Attribute(unit));
+      auto hdir = getAttribute("Hdir" + suffix).asVector();
+      spectrum->setAttribute("Hdir", Attribute(hdir));
+      auto hmag = getAttribute("Hmag" + suffix).asDouble();
+      spectrum->setAttribute("Hmag", Attribute(hmag));
+      auto inverse = getAttribute("inverse" + suffix).asBool();
+      spectrum->setAttribute("inverse", Attribute(inverse));
       return IFunction_sptr(spectrum);
     }
   }
@@ -313,9 +342,19 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
       heatcap.set_eigensystem(en, wf, nre);
       break;
     }
+    case 2: {
+      auto &suscept = dynamic_cast<CrystalFieldSusceptibility &>(spectrum);
+      suscept.set_eigensystem(en, wf, nre);
+      break;
+    }
     case 3: {
       auto &magnetisation = dynamic_cast<CrystalFieldMagnetisation &>(spectrum);
       magnetisation.set_hamiltonian(ham, nre);
+      break;
+    }
+    case 4: {
+      auto &moment = dynamic_cast<CrystalFieldMoment &>(spectrum);
+      moment.set_hamiltonian(ham, nre);
       break;
     }
     default:

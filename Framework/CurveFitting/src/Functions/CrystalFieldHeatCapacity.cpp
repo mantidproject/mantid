@@ -64,7 +64,7 @@ void CrystalFieldHeatCapacity::function1D(double *out,
                                           const double *xValues,
                                           const size_t nData) const {
   if (!setDirect) {
-    // Because this method is const, we can change the stored en / wf
+    // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
     DoubleFortranVector en_;
     ComplexFortranMatrix wf_;
