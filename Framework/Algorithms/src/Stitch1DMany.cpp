@@ -197,15 +197,6 @@ std::map<std::string, std::string> Stitch1DMany::validateCommonInputs() {
     errors["EndOverlaps"] =
         "EndOverlaps must have the same number of entries as StartOverlaps.";
 
-  if (!m_scaleRHSWorkspace) {
-    // Flip these around for processing
-    std::reverse(m_startOverlaps.begin(), m_startOverlaps.end());
-    std::reverse(m_endOverlaps.begin(), m_endOverlaps.end());
-    for (auto &period : m_inputWSMatrix) {
-      std::reverse(period.begin(), period.end());
-    }
-  }
-
   if (m_params.empty())
     errors["Params"] = "At least one parameter must be given.";
 
