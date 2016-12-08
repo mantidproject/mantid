@@ -1003,6 +1003,9 @@ public slots:
   // depending on the user's viewing policy
   void hideAllFolderWindows();
 
+  //!  hides all windows in folder f
+  void hideFolderWindows(Folder *f);
+
   //!  pops up folder information
   void folderProperties();
 
