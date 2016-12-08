@@ -6,7 +6,7 @@ from AbinsModules import PowderData, AbinsConstants
 
 
 def old_modules():
-    """" Check if Python and numpy  has proper version."""
+    """" Check if there are proper versions of  Python and numpy."""
     is_python_old = AbinsConstants.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSPowderDataTest because Python is too old.")

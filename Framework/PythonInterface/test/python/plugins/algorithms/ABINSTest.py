@@ -4,17 +4,20 @@ from mantid.simpleapi import mtd
 from mantid.simpleapi import ABINS, Scale, CompareWorkspaces, Load, DeleteWorkspace
 import os
 from AbinsModules import AbinsConstants
+import numpy as np
 
 
-def modules_not_available():
-    """ Check whether required modules are available on this platform"""
-    try:
-        import numpy
-        version = numpy.__version__
-        return AbinsConstants.is_numpy_valid(string=version) or AbinsConstants.old_python()
-    except ImportError:
-        logger.warning("Skipping AbinsTest because numpy is too old.")
-        return True
+def old_modules():
+    """" Check if there are proper versions of  Python and numpy."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSTest because Python is too old.")
+
+    is_numpy_old = AbinsConstants.is_numpy_valid(np.__version__)
+    if is_numpy_old:
+        logger.warning("Skipping ABINSTest because numpy is too old.")
+
+    return is_python_old or is_numpy_old
 
 
 def skip_if(skipping_criteria):
@@ -31,7 +34,7 @@ def skip_if(skipping_criteria):
     return decorate
 
 
-@skip_if(modules_not_available)
+@skip_if(old_modules)
 class ABINSTest(unittest.TestCase):
 
     def remove_hdf_files(self):
