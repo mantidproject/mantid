@@ -135,13 +135,11 @@ QString getFilter(const std::vector<std::string> &exts,
   }
 
   if (!exts.empty()) {
-    // --------- Load a File -------------
-    auto iend = exts.end();
     // Push a wild-card onto the front of each file suffix
-    for (auto itr = exts.begin(); itr != iend; ++itr) {
-      if ((*itr) != defaultExt) {
-        filter.append(QString::fromStdString(*itr) + " (*" +
-                      QString::fromStdString(*itr) + ");;");
+    for (auto &itr : exts) {
+      if (itr != defaultExt) {
+        filter.append(QString::fromStdString(itr) + " (*" +
+                      QString::fromStdString(itr) + ");;");
       }
     }
     filter = filter.trimmed();
