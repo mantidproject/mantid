@@ -62,31 +62,24 @@ class ABINSIOmoduleTest(unittest.TestCase):
         saver.save()
 
     def _save_wrong_attribute(self):
-        _poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
-        _poor_saver.add_attribute("BadPassengers", np.array([4]))
-        with self.assertRaises(ValueError):
-            _poor_saver.save()
+        poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver.add_attribute("BadPassengers", np.array([4]))
+        self.assertRaises(ValueError, poor_saver.save)
 
     def _save_wrong_dataset(self):
-        _poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
-        _poor_saver.add_data("BadPassengers", 4)
-        with self.assertRaises(ValueError):
-            _poor_saver.save()
+        poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver.add_data("BadPassengers", 4)
+        self.assertRaises(ValueError, poor_saver.save)
 
     def _wrong_filename(self):
-        with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            poor_loader = IOmodule(input_filename=1, group_name="goodgroup")
+        self.assertRaises(ValueError, IOmodule, input_filename=1, group_name="goodgroup")
 
     def _wrong_groupname(self):
-        with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            poor_loader = IOmodule(input_filename="goodfile", group_name=1)
+        self.assertRaises(ValueError, IOmodule, input_filename="goodfile", group_name=1)
 
     def _wrong_file(self):
         poor_loader = IOmodule(input_filename="bum", group_name="nice_group")
-        with self.assertRaises(IOError):
-            poor_loader.load(list_of_attributes="one_attribute")
+        self.assertRaises(IOError, poor_loader.load, list_of_attributes="one_attribute")
 
     def _loading_attributes(self):
         data = self.loader.load(list_of_attributes=["Fuel", "Speed"])
@@ -94,30 +87,18 @@ class ABINSIOmoduleTest(unittest.TestCase):
 
         self.assertEqual(100, attr_data["Fuel"])
         self.assertEqual(200, attr_data["Speed"])
-
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_attributes=["NiceFuel"])
-
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_attributes=1)
-
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_attributes=[1, "Speed"])
+        self.assertRaises(ValueError, self.loader.load, list_of_attributes=["NiceFuel"])
+        self.assertRaises(ValueError, self.loader.load, list_of_attributes=1)
+        self.assertRaises(ValueError, self.loader.load, list_of_attributes=[1, "Speed"])
 
     def _loading_datasets(self):
         data = self.loader.load(list_of_datasets=["Passengers", "FireExtinguishers"])
  
         self.assertEqual(np.array([4]), data["datasets"]["Passengers"])
         self.assertEqual(np.array([2]), data["datasets"]["FireExtinguishers"])
-
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_datasets=["NicePassengers"])
-
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_datasets=1)
-
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_datasets=[1, "Passengers"])
+        self.assertRaises(ValueError, self.loader.load, list_of_datasets=["NicePassengers"])
+        self.assertRaises(ValueError, self.loader.load, list_of_datasets=1)
+        self.assertRaises(ValueError, self.loader.load, list_of_datasets=[1, "Passengers"])
 
     def _loading_structured_datasets(self):
         """
@@ -135,11 +116,9 @@ class ABINSIOmoduleTest(unittest.TestCase):
         self.assertEqual({"AdjustableHeadrests": True, "ExtraPadding": True},
                          data["datasets"]["chairs"])
 
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_datasets=["WrongDataSet"])
+        self.assertRaises(ValueError, self.loader.load, list_of_datasets=["WrongDataSet"])
 
-        with self.assertRaises(ValueError):
-            self.loader.load(list_of_datasets=1)
+        self.assertRaises(ValueError, self.loader.load, list_of_datasets=1)
 
     def runTest(self):
 
