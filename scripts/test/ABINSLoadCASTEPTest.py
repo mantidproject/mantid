@@ -1,30 +1,34 @@
 import unittest
 from mantid.simpleapi import *
-from os import path
+import os
 import numpy as np
-
-
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of LoadCASTEPTest because simplejson is unavailable.")
-    exit(1)
-
-try:
-    import scipy
-except ImportError:
-    logger.warning("Failure of LoadCASTEPTest because scipy is unavailable.")
-    exit(1)
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of LoadCASTEPTest because h5py is unavailable.")
-    exit(1)
-
+import json
 from AbinsModules import LoadCASTEP, AbinsConstants
 
 
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSLoadCASTEPTest because Python is too old.")
+    return is_python_old
+
+
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(old_python)
 class ABINSLoadCASTEPTest(unittest.TestCase):
 
     # simple tests
@@ -34,6 +38,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             _bad_castep_reader.read_phonon_file()
 
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
     #  *************************** USE CASES ********************************************
@@ -83,14 +88,14 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         # get calculated data
         filename_unix = os.path.join(core, name + ".phonon")
-        input_filename = path.abspath(filename_unix)
-        input_filename = path.relpath(input_filename, cwd)
+        input_filename = os.path.abspath(filename_unix)
+        input_filename = os.path.relpath(input_filename, cwd)
 
         data = self._read_DFT(filename=input_filename)
 
         # get correct data
-        filename = path.abspath(os.path.join(core, name))
-        filename = path.relpath(filename, cwd)
+        filename = os.path.abspath(os.path.join(core, name))
+        filename = os.path.relpath(filename, cwd)
         correct_data = self._prepare_data(filename=filename)
 
         # check read data
@@ -115,9 +120,10 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         return data
 
+    # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
-        correct_data = None
+
         with open(filename + "_data.txt") as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
@@ -191,7 +197,6 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
-        num_k = len(correct_items)
         items = loaded_data["k_points_data"]
 
         self.assertEqual(True, np.allclose(correct_items["frequencies"], items["frequencies"]))
@@ -212,6 +217,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
                                                atoms[item]["fract_coord"]))
 
+    # noinspection PyMethodMayBeStatic
     def _get_reader_data(self, castep_reader=None):
         abins_type_data = castep_reader.read_phonon_file()
         data = {"datasets": abins_type_data.extract(),

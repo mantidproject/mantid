@@ -1,24 +1,34 @@
 import unittest
-from mantid.simpleapi import *
-from os import path
+from mantid.simpleapi import logger
+import os
 import numpy as np
-
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of CalculateCrystalTest because simplejson is unavailable.")
-    exit(1)
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of CalculateCrystalTest because h5py is unavailable.")
-    exit(1)
+import json
+from AbinsModules import AbinsConstants, CalculateCrystal, LoadCASTEP
 
 
-from AbinsModules import CalculateCrystal, LoadCASTEP
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSCalculateCrystalTest because Python is too old.")
+    return is_python_old
 
 
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(old_python)
 class ABINSCalculateCrystalTest(unittest.TestCase):
 
     _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")  # path to files
@@ -26,10 +36,10 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
 
     # data
     # Use case: one k-point
-    C6H6 = path.abspath(os.path.join(_core, "benzene_CalculateCrystal"))
+    C6H6 = os.path.abspath(os.path.join(_core, "benzene_CalculateCrystal"))
 
     #  Use case: many k-points
-    Si2 = path.abspath(os.path.join(_core, "Si2-sc_CalculateCrystal"))
+    Si2 = os.path.abspath(os.path.join(_core, "Si2-sc_CalculateCrystal"))
 
     #     test input
     def test_wrong_input(self):
@@ -41,15 +51,18 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
 
         # wrong filename
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             _poor_tester = CalculateCrystal(filename=1, temperature=self._temperature, abins_data=_good_data)
 
         # wrong temperature
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             _poor_tester = CalculateCrystal(filename=filename, temperature=-10, abins_data=_good_data)
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = _good_data.extract()["atoms_data"]
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             _poor_tester = CalculateCrystal(filename=filename, temperature=self._temperature, abins_data=bad_data)
 
     #       main test
@@ -86,9 +99,9 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
 
         return {"DFT": _CASTEP_reader.read_phonon_file(), "dw_crystal_data": _crystal}
 
+    # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
-        correct_data = None
         with open(filename) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " ").
                                       replace("array", "").

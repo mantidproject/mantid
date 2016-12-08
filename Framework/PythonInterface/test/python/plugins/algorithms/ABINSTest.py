@@ -2,23 +2,36 @@ import unittest
 from mantid import logger
 from mantid.simpleapi import mtd
 from mantid.simpleapi import ABINS, Scale, CompareWorkspaces, Load, DeleteWorkspace
-
+import os
 from AbinsModules import AbinsConstants
 
-import os
 
-try:
-    import scipy
-except ImportError:
-    logger.warning("Failure of  ABINSTest because scipy is unavailable.")
-    exit(1)
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of ABINSTest because h5py is unavailable.")
-    exit(1)
+def modules_not_available():
+    """ Check whether required modules are available on this platform"""
+    try:
+        import numpy
+        version = numpy.version.version
+        return AbinsConstants.is_numpy_valid(string=version) or AbinsConstants.old_python()
+    except ImportError:
+        logger.warning("Skipping AbinsTest because numpy is too old.")
+        return True
 
 
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(modules_not_available)
 class ABINSTest(unittest.TestCase):
 
     def remove_hdf_files(self):

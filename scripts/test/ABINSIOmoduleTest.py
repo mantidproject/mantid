@@ -1,18 +1,35 @@
 import unittest
 from mantid.simpleapi import *
 import numpy as np
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of IOmodule test because h5py is unavailable.")
-    exit(1)
-
-from AbinsModules import IOmodule
+from AbinsModules import IOmodule, AbinsConstants
 
 
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSIOmoduleTest because because Python is too old.")
+    return is_python_old
+
+
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(old_python)
 class ABINSIOmoduleTest(unittest.TestCase):
 
+    # noinspection PyMethodMayBeStatic
     def _save_stuff(self):
         saver = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
 
@@ -51,10 +68,12 @@ class ABINSIOmoduleTest(unittest.TestCase):
 
     def _wrong_filename(self):
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_loader = IOmodule(input_filename=1, group_name="goodgroup")
 
     def _wrong_groupname(self):
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_loader = IOmodule(input_filename="goodfile", group_name=1)
 
     def _wrong_file(self):

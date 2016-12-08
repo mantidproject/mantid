@@ -1,17 +1,33 @@
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import logger
 import numpy as np
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of AtomsDataTest because h5py is unavailable.")
-    exit(1)
-
-from AbinsModules import AtomsDaTa
+from AbinsModules import AtomsDaTa, AbinsConstants
 
 
-class AtomsDataTest(unittest.TestCase):
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSAtomsDataTest because Python is too old.")
+    return is_python_old
+
+
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(old_python)
+class ABINSAtomsDataTest(unittest.TestCase):
     _good_data = [{'sort': 0, 'symbol': 'Si', 'fract_coord': np.asarray([0.,  0.,  0.]), 'atom': 0, 'mass':28.085500},
                   {'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([0.25,  0.25,  0.25]), 'atom': 1,
                    'mass':28.085500}]
@@ -22,6 +38,7 @@ class AtomsDataTest(unittest.TestCase):
     # constructor
     def test_wrong_num_atoms(self):
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             wrong_tester = AtomsDaTa(num_atoms=-2)
 
     # append

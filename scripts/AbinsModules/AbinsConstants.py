@@ -2,7 +2,7 @@ import AbinsParameters
 import math
 import numpy as np
 from scipy import constants
-
+import sys
 # Parameters in this bloc shouldn't be changed by a user. They should be treated as constants.
 # Changing these parameters may lead to non-functional ABINS.
 
@@ -124,3 +124,39 @@ QUANTUM_ORDER_FOUR = 4
 
 # values of S below that are considered to be zero
 S_THRESHOLD = 10e-8
+
+NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher
+
+
+def numeric_version_representation(string=None):
+    """
+    Calculates numerical representation of package version.
+    :param string:  version of package in the format number1.number2.number3....numberN
+    :return: numerical representation of package version in the form number1 + number2 ....+ numberN
+    """
+    if not isinstance(string, str):
+        raise ValueError("Version of package in the form of string is expected.")
+    if "." not in string:
+        raise ValueError("Invalid format of package version.")
+
+    try:
+        return sum([int(x) for x in string.replace(".", " ").split()])
+    except:
+        raise ValueError("Version of package couldn't be converted to number.")
+
+
+def is_numpy_valid(string=None):
+    """
+
+    :param string: version of numpy to be checked in the format number1.number2.number3
+    :return: False if version of numpy  is valid otherwise True
+    """
+    return numeric_version_representation(string=string) < numeric_version_representation(NUMPY_VERSION_REQUIRED)
+
+
+def old_python():
+    """
+    Checks if Python i not to old
+    :return: True if it is to old otherwise False
+    """
+    return sys.version_info < (2, 7)

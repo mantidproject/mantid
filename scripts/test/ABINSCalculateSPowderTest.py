@@ -1,25 +1,41 @@
 import unittest
-from mantid.simpleapi import *
-from os import path
+from mantid.simpleapi import logger
+import os
+import json
 import numpy as np
-from AbinsModules import AbinsConstants
-
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of CalculateSPowderTest because simplejson is unavailable.")
-    exit(1)
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of CalculateSPowderTest because h5py is unavailable.")
-    exit(1)
+from AbinsModules import AbinsConstants, CalculateS, LoadCASTEP
 
 
-from AbinsModules import CalculateS, LoadCASTEP
+def old_modules():
+    """" Check if Python and numpy  has proper version."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSCalculateSPowderTest because Python is too old.")
+
+    is_numpy_old = AbinsConstants.is_numpy_valid(np.version.version)
+    if is_numpy_old:
+        logger.warning("Skipping ABINSCalculateSPowderTest because numpy is too old.")
+
+    return is_python_old or is_numpy_old
 
 
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+
+    return decorate
+
+
+@skip_if(old_modules)
 class ABINSCalculateSPowderTest(unittest.TestCase):
     """
     Test of  CalculateS for the Powder scenario.
@@ -36,8 +52,8 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     squaricn = "squaricn_sum_CalculateSPowder"
     Si2 = "Si2-sc_CalculateSPowder"
 
-    Squaricn_path = path.abspath(os.path.join(core, squaricn))
-    Si2_path = path.abspath(os.path.join(core, Si2))
+    Squaricn_path = os.path.abspath(os.path.join(core, squaricn))
+    Si2_path = os.path.abspath(os.path.join(core, Si2))
 
     def remove_hdf_files(self):
         files = os.listdir(os.getcwd())
@@ -61,29 +77,34 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         # wrong filename
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_s = CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data, instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
 
         # wrong temperature
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_s = CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=_good_data,
                                 instrument_name=self._instrument_name, quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID",
                                 abins_data=_good_data, instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
@@ -119,9 +140,9 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         return {"DFT": _CASTEP_reader.read_phonon_file(), "S": _S}
 
+    # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
-        correct_data = None
         with open(filename) as data_file:
             # noinspection PyPep8
             correct_data = json.loads(data_file.read().replace("\\n", " ").

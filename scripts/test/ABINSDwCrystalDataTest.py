@@ -1,22 +1,32 @@
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import logger
 import numpy as np
-
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of DwCrystalDataTest  because simplejson is unavailable.")
-    exit(1)
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of DwCrystalDataTest because h5py is unavailable.")
-    exit(1)
-
-from AbinsModules import DwCrystalData
+from AbinsModules import DwCrystalData, AbinsConstants
 
 
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSDwCrystalDataTest because Python is too old.")
+    return is_python_old
+
+
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(old_python)
 class ABINSDwCrystalDataTest(unittest.TestCase):
     # fake DW tensors for two atoms
     _good_data = np.asarray([[[1.0, 1.0, 1.0],
@@ -33,10 +43,12 @@ class ABINSDwCrystalDataTest(unittest.TestCase):
 
         # invalid temperature
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_tester = DwCrystalData(temperature=-1, num_atoms=2)
 
         # invalid number of atoms
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_tester = DwCrystalData(temperature=10, num_atoms=-2)
 
     def test_wrong_append(self):

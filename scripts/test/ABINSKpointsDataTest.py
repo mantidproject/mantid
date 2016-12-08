@@ -1,18 +1,33 @@
 import unittest
 import numpy as np
-from mantid.simpleapi import *
+from mantid.simpleapi import logger
+from AbinsModules import KpointsData, AbinsConstants
 
 
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of KpointsDataTest because h5py is unavailable.")
-    exit(1)
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsConstants.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSKpointsDataTest because Python is too old.")
+    return is_python_old
 
-from AbinsModules import KpointsData
+
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
 
 
-class KpointsDataTest(unittest.TestCase):
+@skip_if(old_python)
+class ABINSKpointsDataTest(unittest.TestCase):
 
     _good_data = {"k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
                   "weights": np.asarray([0.3, 0.2, 0.5]),
@@ -159,9 +174,11 @@ class KpointsDataTest(unittest.TestCase):
     # tests for constructor
     def test_constructor_assertions(self):
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_tester = KpointsData(num_k=0.1, num_atoms=2)
 
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_tester = KpointsData(num_k=1, num_atoms=-2)
 
 
