@@ -223,26 +223,35 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         return issues
 
+    def _getMaskWSname(self):
+        masking = self.getProperty("Masking").value
+        maskWSname = None
+        if masking == 'Custom - xml masking file':
+            maskWSname = 'CustomMask'
+            LoadMask(InputFile=self.getProperty('MaskingFilename').value,
+                     Instrument='SNAP', OutputWorkspace=maskWSname)
+        elif masking == 'Horizontal':
+            maskWSname = 'HorizontalMask'
+            if not mtd.doesExist('HorizontalMask'):
+                LoadMask(InputFile='/SNS/SNAP/shared/libs/Horizontal_Mask.xml',
+                         Instrument='SNAP', OutputWorkspace=maskWSname)
+        elif masking == 'Vertical':
+            maskWSname = 'VerticalMask'
+            if not mtd.doesExist('VerticalMask'):
+                LoadMask(InputFile='/SNS/SNAP/shared/libs/Vertical_Mask.xml',
+                         Instrument='SNAP', OutputWorkspace=maskWSname)
+        elif masking == "Masking Workspace":
+            maskWSname = str(self.getProperty("MaskingWorkspace").value)
+
+        return maskWSname
+
+
     def PyExec(self):
         # Retrieve all relevant notice
 
         in_Runs = self.getProperty("RunNumbers").value
 
-        masking = self.getProperty("Masking").value
-
-        if masking == "Custom - xml masking file":
-            LoadMask(InputFile=self.getProperty("MaskingFilename").value,
-                     Instrument='SNAP', OutputWorkspace='CustomMask')
-        elif masking == "Horizontal":
-            if not mtd.doesExist('HorizontalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Horizontal_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace='HorizontalMask')
-        elif masking == "Vertical":
-            if not mtd.doesExist('VerticalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Vertical_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace='VerticalMask')
-        elif masking == "Masking Workspace":
-            mask_workspace = self.getProperty("MaskingWorkspace").value
+        maskWSname = self._getMaskWSname()
 
         calib = self.getProperty("Calibration").value
         if calib == "Calibration File":
@@ -254,21 +263,12 @@ class SNAPReduce(DataProcessorAlgorithm):
         if norm == "From Processed Nexus":
             norm_File = self.getProperty("Normalization filename").value
             Normalization = LoadNexusProcessed(Filename=norm_File)
-        if norm == "From Workspace":
+        elif norm == "From Workspace":
             normWS = self.getProperty("NormalizationWorkspace").value
 
+        group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4_Grouping'}
         group = self.getProperty("GroupDetectorsBy").value
-
-        if group == 'All':
-            real_name = 'All'
-        elif group == 'Column':
-            real_name = 'Column'
-        elif group == 'Banks':
-            real_name = 'Group'
-        elif group == 'Modules':
-            real_name = 'bank'
-        elif group == '2_4 Grouping':
-            real_name = '2_4_Grouping'
+        real_name = group_to_real.get(group, group)
 
         if not mtd.doesExist(group):
             if group == "2_4 Grouping":
@@ -305,22 +305,12 @@ class SNAPReduce(DataProcessorAlgorithm):
             WS = RemovePromptPulse(InputWorkspace=WS, OutputWorkspace='WS',
                                    Width='1600', Frequency='60.4')
 
-            if masking == "Custom - xml masking file":
-                WS = MaskDetectors(Workspace=WS, MaskedWorkspace='CustomMask')
-            elif masking == "Masking Workspace":
-                WS = MaskDetectors(
-                    Workspace=WS, MaskedWorkspace=mask_workspace)
-            elif masking == "Vertical":
-                WS = MaskDetectors(
-                    Workspace=WS, MaskedWorkspace='VerticalMask')
-            elif masking == "Horizontal":
-                WS = MaskDetectors(
-                    Workspace=WS, MaskedWorkspace='HorizontalMask')
+            if maskWSname is not None:
+                WS = MaskDetectors(Workspace=WS, MaskedWorkspace=maskWSname)
 
             if calib == "Convert Units":
                 WS_d = ConvertUnits(InputWorkspace='WS',
                                     Target='dSpacing', Outputworkspace='WS_d')
-
             else:
                 self.log().notice("\n calibration file : %s" % cal_File)
                 WS_d = AlignDetectors(
