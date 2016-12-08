@@ -279,12 +279,14 @@ std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
           "No detectors attached to workspace index " + i;
       break;
     }
-    const auto peakPositionColumn =
-        m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
-    if (i >= peakPositionColumn->size()) {
-      issues[PropertyNames::REFERENCE_SPECTRA] =
-          "Workspace index " + std::to_string(i) +
-          " not found in the EPP table.";
+    if (m_eppTable) {
+      const auto peakPositionColumn =
+          m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
+      if (i >= peakPositionColumn->size()) {
+        issues[PropertyNames::REFERENCE_SPECTRA] =
+            "Workspace index " + std::to_string(i) +
+            " not found in the EPP table.";
+      }
     }
   }
 
@@ -354,7 +356,13 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   const double l1 = spectrumInfo.l1();
   double l2 = 0;
   double epp = 0;
-  averageL2AndEPP(spectrumInfo, l2, epp);
+  g_log.information() << "EPP: " << epp << ".\n";
+  if (m_eppTable) {
+    averageL2AndEPP(spectrumInfo, l2, epp);
+  } else {
+    epp = m_inputWs->points(0)[m_elasticBinIndex];
+    l2 = averageL2(spectrumInfo);
+  }
   double Ei = getProperty(PropertyNames::INCIDENT_ENERGY);
   if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
@@ -407,7 +415,7 @@ void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
   size_t n = 0;
   const int64_t indexCount = static_cast<int64_t>(m_workspaceIndices.size());
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP(parallel for if ( m_eppTable->threadSafe())
+  PRAGMA_OMP(parallel for if (m_eppTable->threadSafe())
              reduction(+: n, l2Sum, eppSum))
   for (int64_t i = 0; i < indexCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -415,14 +423,11 @@ void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
     interruption_point();
     if (fitStatusColumn->cell<std::string>(index) ==
         EPPTableLiterals::FIT_STATUS_SUCCESS) {
-      const auto detector = m_inputWs->getDetector(index);
       if (!spectrumInfo.isMasked(index)) {
         const double d = spectrumInfo.l2(index);
         l2Sum += d;
-        if (m_elasticBinIndex == static_cast<size_t>(EMPTY_LONG())) {
-          const double epp = (*peakPositionColumn)[index];
-          eppSum += epp;
-        }
+        const double epp = (*peakPositionColumn)[index];
+        eppSum += epp;
         ++n;
         g_log.debug() << "Including workspace index " << index
                       << " - distance: " << d << " EPP: " << epp << ".\n";
@@ -443,12 +448,37 @@ void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
   }
   l2 = l2Sum / static_cast<double>(n);
   g_log.information() << "Average L2 distance: " << l2 << ".\n";
-  if (m_elasticBinIndex != static_cast<size_t>(EMPTY_LONG())) {
-    epp = m_inputWs->points(0)[m_elasticBinIndex];
-  } else {
-    epp = eppSum / static_cast<double>(n);
+  epp = eppSum / static_cast<double>(n);
+  g_log.information() << "Average EPP: " << epp << ".\n";
+}
+
+double TOFAxisCorrection::averageL2(const API::SpectrumInfo &spectrumInfo) {
+  double l2Sum = 0;
+  size_t n = 0;
+  const int64_t indexCount = static_cast<int64_t>(m_workspaceIndices.size());
+  // cppcheck-suppress syntaxError
+  PRAGMA_OMP(parallel for reduction(+: n, l2Sum))
+  for (int64_t i = 0; i < indexCount; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const size_t index = m_workspaceIndices[i];
+    interruption_point();
+    if (!spectrumInfo.isMasked(index)) {
+      const double d = spectrumInfo.l2(index);
+      ++n;
+      l2Sum += d;
+    } else {
+      g_log.debug() << "Excluding masked workspace index " << index << ".\n";
+    }
+    PARALLEL_END_INTERUPT_REGION
   }
-  g_log.information() << "EPP: " << epp << ".\n";
+  PARALLEL_CHECK_INTERUPT_REGION
+  if (n == 0) {
+    throw std::runtime_error("No unmasked detectors found in " +
+                             PropertyNames::REFERENCE_SPECTRA);
+  }
+  const double l2 = l2Sum / static_cast<double>(indexCount);
+  g_log.information() << "Average L2 distance: " << l2 << ".\n";
+  return l2;
 }
 
 /** Transform spectrum numbers or detector IDs to workspace indices.

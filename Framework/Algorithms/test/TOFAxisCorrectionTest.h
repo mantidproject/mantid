@@ -61,7 +61,7 @@ public:
     }
   }
 
-  void test_CorrectionWithoutReferenceWorkspace() {
+  void test_CorrectionUsingEPPTable() {
     const size_t blocksize = 512;
     const double x0 = 1402;
     const double dx = 0.23;
@@ -73,24 +73,14 @@ public:
       row.peakCentre = eppTOF;
     }
     const double length = flightLengthIN4(inputWs);
-    const double velocity = length / (eppTOF * 1e-6);
-    const double nominalEi = Mantid::PhysicalConstants::NeutronMass * velocity *
-                             velocity / 2 / Mantid::PhysicalConstants::meV;
+    const double nominalEi = incidentEnergy(eppTOF, length);
     inputWs->mutableRun().addProperty("EI", nominalEi, true);
-    const double nominalWavelength = Mantid::PhysicalConstants::h / velocity /
-                                     Mantid::PhysicalConstants::NeutronMass *
-                                     1e10;
+    const double nominalWavelength = wavelength(nominalEi, length);
     inputWs->mutableRun().addProperty("wavelength", nominalWavelength, true);
     const double actualEi = 1.05 * nominalEi;
-    const double actualElasticTOF =
-        length / (std::sqrt(2 * actualEi * Mantid::PhysicalConstants::meV /
-                            Mantid::PhysicalConstants::NeutronMass)) /
-        1e-6;
-    const double actualVelocity = length / (actualElasticTOF * 1e-6);
-    const double actualWavelength =
-        Mantid::PhysicalConstants::h / actualVelocity /
-        Mantid::PhysicalConstants::NeutronMass * 1e10;
-    const double TOFshift = actualElasticTOF - eppTOF;
+    const double actualElasticTOF = tof(actualEi, length);
+    const double actualWavelength = wavelength(actualEi, length);
+    const double TOFShift = actualElasticTOF - eppTOF;
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
     auto alg = createTOFAxisCorrectionAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
@@ -105,19 +95,39 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outputWs = alg->getProperty("OutputWorkspace");
-    TS_ASSERT(outputWs);
-    TS_ASSERT_EQUALS(outputWs->run().getPropertyAsSingleValue("EI"), actualEi);
-    TS_ASSERT_EQUALS(outputWs->run().getPropertyAsSingleValue("wavelength"),
-                     actualWavelength)
-    for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
-      for (size_t j = 0; j < blocksize; ++j) {
-        TS_ASSERT_DELTA(outputWs->x(i)[j], inputWs->x(i)[j] + TOFshift, 1e-6)
-        TS_ASSERT_EQUALS(outputWs->y(i)[j], inputWs->y(i)[j])
-        TS_ASSERT_EQUALS(outputWs->e(i)[j], inputWs->e(i)[j])
-      }
-      TS_ASSERT_DELTA(outputWs->x(i).back(), inputWs->x(i).back() + TOFshift,
-                      1e-6)
-    }
+    assertTOFShift(outputWs, inputWs, actualEi, actualWavelength, TOFShift);
+  }
+
+  void test_CorrectionUsingElasticBinIndex() {
+    const size_t blocksize = 512;
+    const double x0 = 1402;
+    const double dx = 0.23;
+    const size_t eppIndex = blocksize / 3;
+    const double eppTOF = x0 + static_cast<double>(eppIndex) * dx + dx / 2;
+    auto inputWs = createInputWorkspace(blocksize, x0, dx, eppTOF);
+    const double length = flightLengthIN4(inputWs);
+    const double nominalEi = incidentEnergy(eppTOF, length);
+    inputWs->mutableRun().addProperty("EI", nominalEi, true);
+    const double nominalWavelength = wavelength(nominalEi, length);
+    inputWs->mutableRun().addProperty("wavelength", nominalWavelength, true);
+    const double actualEi = 1.05 * nominalEi;
+    const double actualElasticTOF = tof(actualEi, length);
+    const double actualWavelength = wavelength(actualEi, length);
+    const double TOFShift = actualElasticTOF - eppTOF;
+    auto alg = createTOFAxisCorrectionAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("IncidentEnergy", actualEi))
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outputWs = alg->getProperty("OutputWorkspace");
+    assertTOFShift(outputWs, inputWs, actualEi, actualWavelength, TOFShift);
   }
 
   void test_FailureIfNoInputPropertiesSet() {
@@ -199,7 +209,10 @@ public:
     const double actualEi = 0.93 * nominalEi;
     inputWs->mutableRun().addProperty("EI", actualEi, true);
     const double actualElasticTOF = tof(actualEi, length);
-    const double TOFshift = actualElasticTOF - eppTOF;
+    const double TOFShift = actualElasticTOF - eppTOF;
+    // In this case the algorithm doesn't update the wavelength in
+    // the samplelogs since also Ei will not be updated.
+    const double originalWavelength = wavelength(nominalEi, length);
     std::vector<EPPTableRow> eppRows(inputWs->getNumberHistograms());
     for (auto &row : eppRows) {
       row.peakCentre = eppTOF;
@@ -217,20 +230,26 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outputWs = alg->getProperty("OutputWorkspace");
-    TS_ASSERT(outputWs);
-    TS_ASSERT_EQUALS(outputWs->run().getPropertyAsSingleValue("EI"), actualEi);
-    for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
-      for (size_t j = 0; j < blocksize; ++j) {
-        TS_ASSERT_DELTA(outputWs->x(i)[j], inputWs->x(i)[j] + TOFshift, 1e-6)
-        TS_ASSERT_EQUALS(outputWs->y(i)[j], inputWs->y(i)[j])
-        TS_ASSERT_EQUALS(outputWs->e(i)[j], inputWs->e(i)[j])
+    assertTOFShift(outputWs, inputWs, actualEi, originalWavelength, TOFShift);
+  }
+
+private:
+  static void assertTOFShift(MatrixWorkspace_sptr shiftedWs, MatrixWorkspace_sptr ws, const double ei, const double wavelength, const double shift) {
+    TS_ASSERT(shiftedWs);
+    TS_ASSERT_EQUALS(shiftedWs->run().getPropertyAsSingleValue("EI"), ei);
+    TS_ASSERT_DELTA(shiftedWs->run().getPropertyAsSingleValue("wavelength"),
+                     wavelength, 1e-8)
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      for (size_t j = 0; j < ws->blocksize(); ++j) {
+        TS_ASSERT_DELTA(shiftedWs->x(i)[j], ws->x(i)[j] + shift, 1e-6)
+        TS_ASSERT_EQUALS(shiftedWs->y(i)[j], ws->y(i)[j])
+        TS_ASSERT_EQUALS(shiftedWs->e(i)[j], ws->e(i)[j])
       }
-      TS_ASSERT_DELTA(outputWs->x(i).back(), inputWs->x(i).back() + TOFshift,
+      TS_ASSERT_DELTA(shiftedWs->x(i).back(), ws->x(i).back() + shift,
                       1e-6)
     }
   }
 
-private:
   static std::unique_ptr<TOFAxisCorrection> createTOFAxisCorrectionAlgorithm() {
     std::unique_ptr<TOFAxisCorrection> alg(new TOFAxisCorrection);
     alg->setChild(true);
