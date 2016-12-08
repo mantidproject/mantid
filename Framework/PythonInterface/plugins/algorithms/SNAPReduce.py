@@ -2,14 +2,14 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, StringListValidator
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileFinder, \
     FileProperty, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
-    ConvertUnits, CropWorkspace, DeleteWorkspace, DiffractionFocussing, Divide, \
-    EditInstrumentGeometry, GetIPTS, GroupDetectors, Load, LoadDetectorsGroupingFile, LoadMask, \
-    MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, RenameWorkspace, \
-    ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
-    SaveGSS, SaveNexusProcessed, mtd
+    ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, DiffractionFocussing, \
+    Divide, EditInstrumentGeometry, GetIPTS, GroupDetectors, Load, LoadDetectorsGroupingFile, \
+    LoadMask, LoadNexusProcessed, LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, \
+    PreprocessDetectorsToMD, Rebin, RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, \
+    SaveAscii, SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
 import os
 import numpy as np
 
@@ -235,6 +235,8 @@ class SNAPReduce(DataProcessorAlgorithm):
             pass
         elif normalization == "From Workspace":
             norm_workspace = self.getPropertyValue("NormalizationWorkspace")
+            if norm_workspace == None:
+                issues['NormalizationWorkspace'] = 'Cannot be unset'
         elif normalization == "From Processed Nexus":
             filename = self.getProperty("NormalizationFilename").value
             if len(filename) <= 0:
@@ -397,7 +399,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             # Edit instrument geomety to make final workspace smaller on disk
             det_table = PreprocessDetectorsToMD(Inputworkspace='WS_red',
-                                                     OutputWorkspace='__SNAP_det_table')
+                                                OutputWorkspace='__SNAP_det_table')
             polar = np.degrees(det_table.column('TwoTheta'))
             azi = np.degrees(det_table.column('Azimuthal'))
             EditInstrumentGeometry(Workspace="WS_red", L2=det_table.column('L2'),

@@ -1,7 +1,9 @@
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import os
+
 
 def _skip_test():
     """Helper function to determine if we run the test"""
@@ -34,6 +36,7 @@ def do_cleanup():
 
     return True
 
+
 class SNAP_short(stresstesting.MantidStressTest):
     def skipTests(self):
         return _skip_test()
@@ -53,7 +56,6 @@ class SNAP_short(stresstesting.MantidStressTest):
                    Normalization='Extracted from Data', PeakClippingWindowSize=7,
                    SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
                    SaveData=True, OutputDirectory=getSaveDir())
-
 
     def validate(self):
         self.tolerance = 1.0e-2
