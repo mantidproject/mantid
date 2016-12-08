@@ -41,12 +41,14 @@ class Pearl(AbstractInst):
         return self._focus(run_number=run_number, input_batching=InputBatchingEnum.Summed,
                            do_van_normalisation=self._run_settings.divide_by_vanadium)
 
-    def create_calibration_vanadium(self, vanadium_runs, empty_runs, **kwargs):
+    def create_calibration_vanadium(self, run_in_range, **kwargs):
         self._run_settings = _get_settings_van_calib_kwargs(config_file_path=self._basic_config_file_path,
                                                             kwargs=kwargs)
         self._run_settings.number_of_splines = kwargs.get("num_of_splines", 60)
+        run_details = self.get_run_details(run_number=int(run_in_range))
 
-        return self._create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
+        return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
+                                                 empty_runs=run_details.empty_runs,
                                                  do_absorb_corrections=self._run_settings.absorption_corrections)
 
     # Params #
