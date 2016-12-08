@@ -6,8 +6,8 @@ from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fil
     PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
     ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, DiffractionFocussing, \
-    Divide, EditInstrumentGeometry, GetIPTS, GroupDetectors, Load, LoadDetectorsGroupingFile, \
-    LoadMask, LoadNexusProcessed, LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, \
+    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadDetectorsGroupingFile, LoadMask, \
+    LoadNexusProcessed, LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, \
     PreprocessDetectorsToMD, Rebin, RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, \
     SaveAscii, SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
 import os
@@ -245,6 +245,64 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         return maskWSname
 
+    def _generateNormalization(self, WS, normType, normWS):
+        if normType == 'None':
+            return None
+        elif normType == "Extracted from Data":
+            window = self.getProperty("PeakClippingWindowSize").value
+
+            smooth_range = self.getProperty("SmoothingRange").value
+
+            peak_clip_WS = CloneWorkspace(WS)
+            n_histo = peak_clip_WS.getNumberHistograms()
+
+            x = peak_clip_WS.extractX()
+            y = peak_clip_WS.extractY()
+            e = peak_clip_WS.extractE()
+
+            for h in range(n_histo):
+                peak_clip_WS.setX(h, x[h])
+                peak_clip_WS.setY(h, self.peak_clip(y[h], win=window, decrese=True,
+                                                    LLS=True, smooth_window=smooth_range))
+                peak_clip_WS.setE(h, e[h])
+            return peak_clip_WS
+        else: # other values are already held in normWS
+            return normWS
+
+    def _save(self, runnumber, basename, norm):
+        if not self.getProperty("SaveData").value:
+            return
+
+        saveDir = self.getProperty("OutputDirectory").value.strip()
+        if len(saveDir) <= 0:
+            self.log().notice('Using default save location')
+            saveDir = os.path.join(
+                self.get_IPTS_Local(runnumber), 'shared', 'data')
+        self.log().notice('Writing to \'' + saveDir + '\'')
+
+        if norm == 'None':
+            SaveNexusProcessed(InputWorkspace='WS_red',
+                               Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
+            SaveAscii(InputWorkspace='WS_red',
+                      Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
+            ConvertUnits(InputWorkspace='WS_red', OutputWorkspace='WS_tof',
+                         Target="TOF", AlignBins=False)
+        else:
+            SaveNexusProcessed(InputWorkspace='WS_nor',
+                               Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
+            SaveAscii(InputWorkspace='WS_nor',
+                      Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
+            ConvertUnits(InputWorkspace='WS_nor', OutputWorkspace='WS_tof',
+                         Target="TOF", AlignBins=False)
+
+        SaveGSS(InputWorkspace='WS_tof',
+                Filename=os.path.join(saveDir, 'gsas', basename + '.gsa'),
+                Format='SLOG', SplitFiles=False, Append=False, ExtendedHeader=True)
+        SaveFocusedXYE(InputWorkspace='WS_tof',
+                       Filename=os.path.join(
+                           saveDir, 'fullprof', basename + '.dat'),
+                       SplitFiles=True, Append=False)
+        DeleteWorkspace(Workspace='WS_tof')
 
     def PyExec(self):
         # Retrieve all relevant notice
@@ -262,9 +320,11 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         if norm == "From Processed Nexus":
             norm_File = self.getProperty("Normalization filename").value
-            Normalization = LoadNexusProcessed(Filename=norm_File)
+            normWS = LoadNexusProcessed(Filename=norm_File)
         elif norm == "From Workspace":
             normWS = self.getProperty("NormalizationWorkspace").value
+        else:
+            normWS = None
 
         group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4_Grouping'}
         group = self.getProperty("GroupDetectorsBy").value
@@ -283,8 +343,6 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         prefix = self.getProperty("OptionalPrefix").value
 
-        save_Data = self.getProperty("SaveData").value
-
         # --------------------------- REDUCE DATA -----------------------------
 
         Tag = 'SNAP'
@@ -296,8 +354,8 @@ class SNAPReduce(DataProcessorAlgorithm):
                 WS = LoadPreNexusLive(Instrument='SNAP')
             else:
                 WS = Load(Filename='SNAP' + str(r), Outputworkspace='WS')
-                WS = NormaliseByCurrent(
-                    InputWorkspace=WS, Outputworkspace='WS')
+                WS = NormaliseByCurrent(InputWorkspace=WS,
+                                        Outputworkspace='WS')
 
             WS = CompressEvents(InputWorkspace=WS, Outputworkspace='WS')
             WS = CropWorkspace(InputWorkspace='WS',
@@ -319,41 +377,13 @@ class SNAPReduce(DataProcessorAlgorithm):
             WS_d = Rebin(InputWorkspace=WS_d, Params=params,
                          Outputworkspace='WS_d')
 
-            if group == "Low Res 5:6-high Res 1:4":
-                WS_red = GroupDetectors(InputWorkspace=WS_d,
-                                        MapFile=r'/SNS/SNAP/shared/libs/14_56_grouping.xml',
-                                        PreserveEvents=False)
-            else:
-                WS_red = DiffractionFocussing(InputWorkspace=WS_d, GroupingWorkspace=group,
-                                              PreserveEvents=False)
+            WS_red = DiffractionFocussing(InputWorkspace=WS_d, GroupingWorkspace=group,
+                                          PreserveEvents=False)
 
-            if norm == "From Processed Nexus":
-                WS_nor = Divide(LHSWorkspace=WS_red,
-                                RHSWorkspace=Normalization)
-            elif norm == "From Workspace":
+            normWS = self._generateNormalization(WS_red, norm, normWS)
+            WS_nor = None
+            if normWS is not None:
                 WS_nor = Divide(LHSWorkspace=WS_red, RHSWorkspace=normWS)
-            elif norm == "Extracted from Data":
-
-                window = self.getProperty("PeakClippingWindowSize").value
-
-                smooth_range = self.getProperty("SmoothingRange").value
-
-                peak_clip_WS = CloneWorkspace(WS_red)
-                n_histo = peak_clip_WS.getNumberHistograms()
-
-                x = peak_clip_WS.extractX()
-                y = peak_clip_WS.extractY()
-                e = peak_clip_WS.extractE()
-
-                for h in range(n_histo):
-                    peak_clip_WS.setX(h, x[h])
-                    peak_clip_WS.setY(h, self.peak_clip(y[h], win=window, decrese=True,
-                                                        LLS=True, smooth_window=smooth_range))
-                    peak_clip_WS.setE(h, e[h])
-
-                WS_nor = Divide(LHSWorkspace=WS_red, RHSWorkspace=peak_clip_WS)
-
-            if norm != 'None':
                 WS_nor = ReplaceSpecialValues(Inputworkspace=WS_nor,
                                               NaNValue='0', NaNError='0',
                                               InfinityValue='0', InfinityError='0')
@@ -369,81 +399,46 @@ class SNAPReduce(DataProcessorAlgorithm):
             azi = np.degrees(det_table.column('Azimuthal'))
             EditInstrumentGeometry(Workspace="WS_red", L2=det_table.column('L2'),
                                    Polar=polar, Azimuthal=azi)
-            EditInstrumentGeometry(Workspace="WS_nor", L2=det_table.column('L2'),
-                                   Polar=polar, Azimuthal=azi)
+            if WS_nor is not None:
+                EditInstrumentGeometry(Workspace="WS_nor", L2=det_table.column('L2'),
+                                       Polar=polar, Azimuthal=azi)
             mtd.remove('__SNAP_det_table')
 
             # Save requested formats
-            if save_Data:
-                saveDir = self.getProperty("OutputDirectory").value.strip()
-                if len(saveDir) <= 0:
-                    self.log().notice('Using default save location')
-                    saveDir = os.path.join(
-                        self.get_IPTS_Local(r), 'shared', 'data')
-                self.log().notice('Writing to \'' + saveDir + '\'')
+            basename = '%s_%s_%s' % (new_Tag, r, group)
+            self._save(r, basename, norm)
 
-                basename = '%s_%s_%s' % (new_Tag, r, group)
-
-                if norm == 'None':
-                    WS_tof = ConvertUnits(
-                        InputWorkspace="WS_red", Target="TOF", AlignBins=False)
-                else:
-                    WS_tof = ConvertUnits(
-                        InputWorkspace="WS_nor", Target="TOF", AlignBins=False)
-
-                if norm == 'None':
-                    SaveNexusProcessed(InputWorkspace=WS_red,
-                                       Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
-                    SaveAscii(InputWorkspace=WS_red,
-                              Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
-                else:
-                    SaveNexusProcessed(InputWorkspace=WS_nor,
-                                       Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
-                    SaveAscii(InputWorkspace=WS_nor,
-                              Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
-
-                SaveGSS(InputWorkspace=WS_tof,
-                        Filename=os.path.join(
-                            saveDir, 'gsas', basename + '.gsa'),
-                        Format='SLOG', SplitFiles=False, Append=False, ExtendedHeader=True)
-                SaveFocusedXYE(InputWorkspace=WS_tof,
-                               Filename=os.path.join(
-                                   saveDir, 'fullprof', basename + '.dat'),
-                               SplitFiles=True, Append=False)
-                DeleteWorkspace(Workspace='WS_tof')
-
+            # temporary workspace no longer needed
             DeleteWorkspace(Workspace='WS')
 
-            if Process_Mode == "Production":
-                DeleteWorkspace(Workspace='WS_d')
-                if norm != "None":
-                    DeleteWorkspace(Workspace='WS_red')
-                    RenameWorkspace(InputWorkspace=WS_nor,
-                                    OutputWorkspace='%s_%s_%s_nor' % (new_Tag, r, group))
-                else:
-                    RenameWorkspace(InputWorkspace=WS_red,
-                                    OutputWorkspace='%s_%s_%s_red' % (new_Tag, r, group))
-
-                if norm == "Extracted from Data":
-                    DeleteWorkspace(Workspace='peak_clip_WS')
+            # rename everything as appropriate and determine output workspace name
+            RenameWorkspace(Inputworkspace='WS_d',
+                            OutputWorkspace='%s_%s_d' % (new_Tag, r))
+            RenameWorkspace(Inputworkspace='WS_red',
+                            OutputWorkspace=basename + '_red')
+            if norm == 'None':
+                outputWksp = basename + '_red'
             else:
-                RenameWorkspace(Inputworkspace='WS_d',
-                                OutputWorkspace='%s_%s_d' % (new_Tag, r))
-                RenameWorkspace(Inputworkspace='WS_red',
-                                OutputWorkspace='%s_%s_%s_red' % (new_Tag, r, group))
+                outputWksp = basename + '_nor'
+                RenameWorkspace(Inputworkspace='WS_nor',
+                                OutputWorkspace=basename + '_nor')
+            if norm == "Extracted from Data":
+                RenameWorkspace(Inputworkspace='peak_clip_WS',
+                                OutputWorkspace='%s_%s_normalizer' % (new_Tag, r))
+
+            # delte some things in production
+            if Process_Mode == "Production":
+                DeleteWorkspace(Workspace='%s_%s_d' % (new_Tag, r)) # was 'WS_d'
 
                 if norm != "None":
-                    RenameWorkspace(Inputworkspace='WS_nor',
-                                    OutputWorkspace='%s_%s_%s_nor' % (new_Tag, r, group))
+                    DeleteWorkspace(Workspace=basename + '_red') # was 'WS_red'
 
                 if norm == "Extracted from Data":
-                    RenameWorkspace(Inputworkspace='peak_clip_WS',
-                                    OutputWorkspace='%s_%s_normalizer' % (new_Tag, r))
+                    DeleteWorkspace(Workspace='%s_%s_normalizer' % (new_Tag, r)) # was 'peak_clip_WS'
 
             propertyName = 'OutputWorkspace'
-            wksp = '%s_%s_%s_nor' % (new_Tag, r, group)
             self.declareProperty(WorkspaceProperty(
-                propertyName, wksp, Direction.Output))
-            self.setProperty(propertyName, wksp)
+                propertyName, outputWksp, Direction.Output))
+            self.setProperty(propertyName, outputWksp)
 
 AlgorithmFactory.subscribe(SNAPReduce)
