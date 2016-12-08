@@ -624,7 +624,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
     for (int i = 0; i < nhists; ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
 
-      if (checkForMask) {
+      if (checkForMask && spectrumInfo.hasDetectors(hists[i])) {
         if (spectrumInfo.isMasked(hists[i]) || spectrumInfo.isMonitor(hists[i]))
           continue;
       }
