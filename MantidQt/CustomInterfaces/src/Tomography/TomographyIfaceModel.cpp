@@ -810,12 +810,25 @@ void TomographyIfaceModel::logErrMsg(const std::string &msg) {
  */
 std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
   // as shows on the ROI tab interface
-  std::string right = std::to_string(coords.first.X());
-  std::string top = std::to_string(coords.first.Y());
-  std::string left = std::to_string(coords.second.X());
-  std::string bottom = std::to_string(coords.second.Y());
+  int left = coords.second.X();
+  int top = coords.first.Y();
+  int right = coords.first.X();
+  int bottom = coords.second.Y();
+  // we want left and top to always be the small pixel values of the rectangle
+  // this happens when the user drags from left to right, and should be fixed in
+  // the ROI
+  if (left > right) {
+    std::swap(left, right);
+  }
+  if (top > bottom) {
+    std::swap(top, bottom);
+  }
+  std::string s_left = std::to_string(left);
+  std::string s_top = std::to_string(top);
+  std::string s_right = std::to_string(right);
+  std::string s_bottom = std::to_string(bottom);
 
-  return left + ", " + top + ", " + right + ", " + bottom;
+  return s_left + ", " + s_top + ", " + s_right + ", " + s_bottom;
 }
 
 /**

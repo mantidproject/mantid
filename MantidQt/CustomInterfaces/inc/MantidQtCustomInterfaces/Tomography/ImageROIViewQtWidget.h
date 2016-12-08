@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
 
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
@@ -142,13 +142,13 @@ protected:
   void resetWidgetsOnNewStack();
 
   /// update coordinates from mouse event
-  void mouseUpdateCoR(int x, int y);
-  void mouseUpdateROICorners12(int x, int y);
-  void mouseUpdateROICorner2(int x, int y);
-  void mouseFinishROI(int x, int y);
-  void mouseUpdateNormAreaCorners12(int x, int y);
-  void mouseUpdateNormAreaCorner2(int x, int y);
-  void mouseFinishNormArea(int x, int y);
+  void mouseUpdateCoR(const int x, const int y);
+  void mouseUpdateROICornersStartSelection(const int x, const int y);
+  void mouseUpdateROICornerContinuedSelection(const int x, const int y);
+  void mouseFinishROI(const int x, const int y);
+  void mouseUpdateNormAreaCornersStartSelection(const int x, const int y);
+  void mouseUpdateNormAreaCornerContinuedSelection(const int x, const int y);
+  void mouseFinishNormArea(const int x, const int y);
 
 private slots:
   void browseImageClicked();
@@ -240,19 +240,31 @@ private:
   void refreshNormArea();
 
   /// draw a cross/target symbol
-  void drawCenterCrossSymbol(QPainter &painter, Mantid::Kernel::V2D &center);
+  void drawCenterCrossSymbol(QPainter &painter,
+                             const Mantid::Kernel::V2D &center) const;
 
   /// draw a rectangle/box to highlight the ROI: region of
   /// interest
-  void drawBoxROI(QPainter &painter, Mantid::Kernel::V2D &first,
-                  Mantid::Kernel::V2D &second);
+  void drawBoxROI(QPainter &painter, const Mantid::Kernel::V2D &first,
+                  const Mantid::Kernel::V2D &second) const;
 
   /// draw a rectangle/box to highlight the normalization
   /// ("air") region
-  void drawBoxNormalizationRegion(QPainter &painter, Mantid::Kernel::V2D &first,
-                                  Mantid::Kernel::V2D &second);
+  void drawBoxNormalizationRegion(QPainter &painter,
+                                  const Mantid::Kernel::V2D &first,
+                                  const Mantid::Kernel::V2D &second) const;
 
   bool eventFilter(QObject *obj, QEvent *event) override;
+
+  struct RectangleXY {
+	  int right;
+	  int top;
+  } m_startOfRectangle;
+
+  void updateValuesForSpinBoxes(const int x, const int y,
+                                const struct ImageROIViewQtWidget::RectangleXY startPositions,
+                                QSpinBox *spinLeft, QSpinBox *spinTop,
+                                QSpinBox *spinRight, QSpinBox *spinBottom);
 
   Ui::ImageSelectCoRAndRegions m_ui;
 
@@ -284,8 +296,8 @@ private:
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IImageROIPresenter> m_presenter;
-};
 
+};
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

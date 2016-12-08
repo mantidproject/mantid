@@ -6,8 +6,8 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/MantidColorMap.h"
 
-#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -151,10 +151,10 @@ void ImageROIViewQtWidget::setupConnections() {
           SLOT(imageTypeUpdated(int)));
 
   // parameter (points) widgets
-  connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedCoR(int)));
-  connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedCoR(int)));
+  // connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
+  //         SLOT(valueUpdatedCoR(int)));
+  // connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
+  //         SLOT(valueUpdatedCoR(int)));
 
   connect(m_ui.spinBox_roi_right, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedROI(int)));
@@ -551,8 +551,8 @@ void ImageROIViewQtWidget::refreshNormArea() {
   m_ui.label_img->setPixmap(toDisplay);
 }
 
-void ImageROIViewQtWidget::drawCenterCrossSymbol(QPainter &painter,
-                                                 Mantid::Kernel::V2D &center) {
+void ImageROIViewQtWidget::drawCenterCrossSymbol(
+    QPainter &painter, const Mantid::Kernel::V2D &center) const {
   // TODO: display settings / nicer symbol?
 
   QPen penCoR(Qt::red);
@@ -566,8 +566,8 @@ void ImageROIViewQtWidget::drawCenterCrossSymbol(QPainter &painter,
 }
 
 void ImageROIViewQtWidget::drawBoxROI(QPainter &painter,
-                                      Mantid::Kernel::V2D &first,
-                                      Mantid::Kernel::V2D &second) {
+                                      const Mantid::Kernel::V2D &first,
+                                      const Mantid::Kernel::V2D &second) const {
   QPen penROI(Qt::green);
   painter.setPen(penROI);
   painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
@@ -576,8 +576,8 @@ void ImageROIViewQtWidget::drawBoxROI(QPainter &painter,
 }
 
 void ImageROIViewQtWidget::drawBoxNormalizationRegion(
-    QPainter &painter, Mantid::Kernel::V2D &first,
-    Mantid::Kernel::V2D &second) {
+    QPainter &painter, const Mantid::Kernel::V2D &first,
+    const Mantid::Kernel::V2D &second) const {
   QPen penNA(Qt::yellow);
   painter.setPen(penNA);
   painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
@@ -1088,16 +1088,17 @@ bool ImageROIViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
       if (IImageROIView::SelectCoR == m_selectionState) {
         mouseUpdateCoR(x, y);
       } else if (IImageROIView::SelectROIFirst == m_selectionState) {
-        mouseUpdateROICorners12(x, y);
+        mouseUpdateROICornersStartSelection(x, y);
       } else if (IImageROIView::SelectNormAreaFirst == m_selectionState) {
-        mouseUpdateNormAreaCorners12(x, y);
+        mouseUpdateNormAreaCornersStartSelection(x, y);
       }
+
     } else if (type == QEvent::MouseMove) {
 
       if (IImageROIView::SelectROISecond == m_selectionState) {
-        mouseUpdateROICorner2(x, y);
+        mouseUpdateROICornerContinuedSelection(x, y);
       } else if (IImageROIView::SelectNormAreaSecond == m_selectionState) {
-        mouseUpdateNormAreaCorner2(x, y);
+        mouseUpdateNormAreaCornerContinuedSelection(x, y);
       }
     } else if (type == QEvent::MouseButtonRelease) {
 
@@ -1120,34 +1121,83 @@ bool ImageROIViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageROIViewQtWidget::grabCoRFromMousePoint(int x, int y) {
-  m_params.cor = Mantid::Kernel::V2D(x, y);
+void ImageROIViewQtWidget::grabCoRFromMousePoint(const int x, const int y) {
+  // m_params.cor = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_cor_x->setValue(x);
   m_ui.spinBox_cor_y->setValue(y);
 }
 
-void ImageROIViewQtWidget::grabROICorner1FromMousePoint(int x, int y) {
-  m_params.roi.first = Mantid::Kernel::V2D(x, y);
+void ImageROIViewQtWidget::grabROICorner1FromMousePoint(const int x,
+                                                        const int y) {
+  // this is re-used for Norm Region selection as you cannot be selecting both
+  // at the same time
+  m_startOfRectangle.right = x;
+  m_startOfRectangle.top = y;
+
   m_ui.spinBox_roi_right->setValue(x);
   m_ui.spinBox_roi_top->setValue(y);
 }
 
-void ImageROIViewQtWidget::grabROICorner2FromMousePoint(int x, int y) {
-  m_params.roi.second = Mantid::Kernel::V2D(x, y);
-  m_ui.spinBox_roi_left->setValue(x);
-  m_ui.spinBox_roi_bottom->setValue(y);
+void ImageROIViewQtWidget::grabROICorner2FromMousePoint(const int x,
+                                                        const int y) {
+  updateValuesForSpinBoxes(x, y, m_startOfRectangle, m_ui.spinBox_roi_left,
+                           m_ui.spinBox_roi_top, m_ui.spinBox_roi_right,
+                           m_ui.spinBox_roi_bottom);
 }
 
-void ImageROIViewQtWidget::grabNormAreaCorner1FromMousePoint(int x, int y) {
-  m_params.normalizationRegion.first = Mantid::Kernel::V2D(x, y);
+void ImageROIViewQtWidget::grabNormAreaCorner1FromMousePoint(const int x,
+                                                             const int y) {
+  // this is re-used for Norm Region selection as you cannot be selecting both
+  // at the same time
+  m_startOfRectangle.right = x;
+  m_startOfRectangle.top = y;
+
   m_ui.spinBox_norm_right->setValue(x);
   m_ui.spinBox_norm_top->setValue(y);
 }
 
-void ImageROIViewQtWidget::grabNormAreaCorner2FromMousePoint(int x, int y) {
-  m_params.normalizationRegion.second = Mantid::Kernel::V2D(x, y);
-  m_ui.spinBox_norm_left->setValue(x);
-  m_ui.spinBox_norm_bottom->setValue(y);
+void ImageROIViewQtWidget::grabNormAreaCorner2FromMousePoint(const int x,
+                                                             const int y) {
+
+  updateValuesForSpinBoxes(x, y, m_startOfRectangle, m_ui.spinBox_norm_left,
+                           m_ui.spinBox_norm_top, m_ui.spinBox_norm_right,
+                           m_ui.spinBox_norm_bottom);
+}
+
+void ImageROIViewQtWidget::updateValuesForSpinBoxes(
+    const int x, const int y, const RectangleXY startPositions,
+    QSpinBox *spinLeft, QSpinBox *spinTop, QSpinBox *spinRight,
+    QSpinBox *spinBottom) {
+
+  // put at the top so that it has chance to fire before a setValue event
+  spinLeft->blockSignals(true);
+  spinTop->blockSignals(true);
+  spinRight->blockSignals(true);
+  spinBottom->blockSignals(true);
+
+  int left = x;
+  int right = startPositions.right;
+  int bottom = y;
+  int top = startPositions.top;
+
+  // left side is over the right one
+  if (left > right) {
+    std::swap(left, right);
+  }
+
+  if (top > bottom) {
+    std::swap(top, bottom);
+  }
+
+  spinLeft->setValue(left);
+  spinTop->setValue(top);
+  spinRight->setValue(right);
+  spinBottom->setValue(bottom);
+
+  spinLeft->blockSignals(false);
+  spinTop->blockSignals(false);
+  spinRight->blockSignals(false);
+  spinBottom->blockSignals(false);
 }
 
 /**
@@ -1158,7 +1208,7 @@ void ImageROIViewQtWidget::grabNormAreaCorner2FromMousePoint(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageROIViewQtWidget::mouseUpdateCoR(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateCoR(const int x, const int y) {
   grabCoRFromMousePoint(x, y);
   refreshROIetAl();
 
@@ -1172,7 +1222,8 @@ void ImageROIViewQtWidget::mouseUpdateCoR(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageROIViewQtWidget::mouseUpdateROICorners12(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateROICornersStartSelection(const int x,
+                                                               const int y) {
   grabROICorner1FromMousePoint(x, y);
   grabROICorner2FromMousePoint(x, y);
   refreshROIetAl();
@@ -1188,8 +1239,10 @@ void ImageROIViewQtWidget::mouseUpdateROICorners12(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageROIViewQtWidget::mouseUpdateROICorner2(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateROICornerContinuedSelection(const int x,
+                                                                  const int y) {
   grabROICorner2FromMousePoint(x, y);
+  grabROIFromWidgets();
   refreshROIetAl();
 }
 
@@ -1201,25 +1254,28 @@ void ImageROIViewQtWidget::mouseUpdateROICorner2(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageROIViewQtWidget::mouseFinishROI(int x, int y) {
+void ImageROIViewQtWidget::mouseFinishROI(const int x, const int y) {
   grabROICorner2FromMousePoint(x, y);
   refreshROIetAl();
   m_presenter->notify(IImageROIPresenter::FinishedROI);
 }
 
-void ImageROIViewQtWidget::mouseUpdateNormAreaCorners12(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateNormAreaCornersStartSelection(
+    const int x, const int y) {
   grabNormAreaCorner1FromMousePoint(x, y);
   grabNormAreaCorner2FromMousePoint(x, y);
   refreshROIetAl();
   m_selectionState = IImageROIView::SelectNormAreaSecond;
 }
 
-void ImageROIViewQtWidget::mouseUpdateNormAreaCorner2(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateNormAreaCornerContinuedSelection(
+    const int x, const int y) {
   grabNormAreaCorner2FromMousePoint(x, y);
+  grabNormAreaFromWidgets();
   refreshROIetAl();
 }
 
-void ImageROIViewQtWidget::mouseFinishNormArea(int x, int y) {
+void ImageROIViewQtWidget::mouseFinishNormArea(const int x, const int y) {
   grabNormAreaCorner2FromMousePoint(x, y);
   refreshROIetAl();
   m_presenter->notify(IImageROIPresenter::FinishedNormalization);
@@ -1273,7 +1329,7 @@ void ImageROIViewQtWidget::findCORClicked() {
 }
 
 void ImageROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
-	std::cout << "DEBUG >> " << str.toStdString();
+  std::cout << "DEBUG >> " << str.toStdString();
 }
 
 } // namespace CustomInterfaces
