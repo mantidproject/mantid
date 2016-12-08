@@ -88,7 +88,8 @@ private:
   double calculateEi(const double initial_guess);
   /// Get the distance from the source of the detector at the workspace index
   /// given
-  double getDistanceFromSource(const size_t ws_index, const API::SpectrumInfo &spectrumInfo) const;
+  double getDistanceFromSource(const size_t ws_index,
+                               const API::SpectrumInfo &spectrumInfo) const;
   /// Calculate the peak position within the given window
   double calculatePeakPosition(const size_t ws_index, const double t_min,
                                const double t_max);
