@@ -430,7 +430,7 @@ public:
   void testRemoveSpecialValuesOn() {
     constexpr size_t numOfHistos = 2;
     auto inWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(numOfHistos, 3, true);
+        WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
     auto &yVals = inWs->mutableY(1);
 
     yVals[0] = std::numeric_limits<double>::infinity();
@@ -467,7 +467,7 @@ public:
   void testRemoveSpecialValuesOff() {
     constexpr size_t numOfHistos = 2;
     auto inWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(numOfHistos, 3, true);
+        WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
     auto &yVals = inWs->mutableY(1);
 
     yVals[0] = std::numeric_limits<double>::infinity();
