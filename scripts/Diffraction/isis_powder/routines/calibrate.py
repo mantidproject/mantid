@@ -16,7 +16,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
                                                     instrument=instrument)
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
-    corrected_van_ws = instrument.crop_to_sane_tof(ws_to_crop=corrected_van_ws)
+    #  corrected_van_ws = instrument.crop_to_sane_tof(ws_to_crop=corrected_van_ws)
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration_file_path)
@@ -61,13 +61,11 @@ def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_abs
     else:
         absorb_ws = mantid.LoadNexus(Filename=run_details.vanadium_absorption_path)
 
-    # PEARL rebins whilst POLARIS does not as some of the older absorption files have different number of bins
-    corrected_van_ws = instrument.pearl_rebin_to_workspace(ws_to_rebin=corrected_van_ws, ws_to_match=absorb_ws)
+    if corrected_van_ws.getNumberBins() != absorb_ws.getNumberBins():
+        corrected_van_ws = mantid.RebinToWorkspace(WorkspaceToRebin=corrected_van_ws, WorkspaceToMatch=absorb_ws)
     corrected_van_ws = mantid.Divide(LHSWorkspace=corrected_van_ws, RHSWorkspace=absorb_ws)
-
-    #  corrected_van_ws = instrument.vanadium_calibration_rebinning(vanadium_ws=corrected_van_ws)
-
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="dSpacing")
+
     common.remove_intermediate_workspace(absorb_ws)
     return corrected_van_ws
 

@@ -24,7 +24,6 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
                          + str(run_details.splined_vanadium_file_path) +
                          " \nHave you created a vanadium calibration with these settings yet?\n")
 
-    ws = instrument.pearl_focus_tof_rebinning(ws)  # Rebins for PEARL
     # Compensate for empty sample if specified
     input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,
                                                    empty_sample_ws_string=run_details.empty_runs)

@@ -96,12 +96,6 @@ class Pearl(AbstractInst):
         return pearl_spline.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
                                                          num_splines=self._run_settings.number_of_splines)
 
-    def pearl_focus_tof_rebinning(self, workspace):
-        out_name = workspace.name() + "_rebinned"
-        out_ws = mantid.Rebin(InputWorkspace=workspace, Params=self._focus_tof_binning,
-                              OutputWorkspace=out_name)
-        return out_ws
-
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
 
@@ -117,17 +111,11 @@ class Pearl(AbstractInst):
         return grouped_d_spacing
 
     def crop_to_sane_tof(self, ws_to_crop):
-        out_ws = common.crop_in_tof(ws_to_rebin=ws_to_crop, x_min=1500, x_max=19900)
+        out_ws = common.crop_in_tof(ws_to_rebin=ws_to_crop, x_min=1000, x_max=19900)
         return out_ws
 
     def generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
         return pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_match)
-
-    def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
-        rebinned_ws = mantid.RebinToWorkspace(WorkspaceToRebin=ws_to_rebin, WorkspaceToMatch=ws_to_match)
-        common.remove_intermediate_workspace(ws_to_rebin)
-        ws_to_rebin = rebinned_ws
-        return ws_to_rebin
 
     def correct_sample_vanadium(self, focus_spectra, vanadium_spectra=None):
         data_ws = mantid.ConvertUnits(InputWorkspace=focus_spectra, Target="TOF")

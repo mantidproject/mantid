@@ -132,14 +132,8 @@ class AbstractInst(object):
     def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         return None
 
-    def pearl_focus_tof_rebinning(self, input_workspace):
-        return input_workspace
-
     def crop_to_sane_tof(self, ws_to_crop):
         return ws_to_crop
-
-    def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
-        return ws_to_rebin
 
     def spline_vanadium_ws(self, focused_vanadium_ws):
         return None

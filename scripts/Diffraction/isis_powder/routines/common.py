@@ -24,6 +24,7 @@ def crop_in_tof(ws_to_rebin, x_min=None, x_max=None):
             cropped_ws.append(_crop_single_ws_in_tof(ws, x_max=x_max, x_min=x_min))
     else:
         cropped_ws = _crop_single_ws_in_tof(ws_to_rebin, x_max=x_max, x_min=x_min)
+
     return cropped_ws
 
 
@@ -124,10 +125,12 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
 
 def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
     previous_units = ws_to_rebin.getAxis(0).getUnit().unitID()
-    ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
+    if previous_units != "TOF":
+        ws_to_rebin = mantid.ConvertUnits(InputWorkspace=ws_to_rebin, Target="TOF", OutputWorkspace=ws_to_rebin)
     cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin,
                                       XMin=x_min, XMax=x_max)
-    cropped_ws = mantid.ConvertUnits(InputWorkspace=cropped_ws, Target=previous_units, OutputWorkspace=cropped_ws)
+    if previous_units != "TOF":
+        cropped_ws = mantid.ConvertUnits(InputWorkspace=cropped_ws, Target=previous_units, OutputWorkspace=cropped_ws)
     return cropped_ws
 
 
