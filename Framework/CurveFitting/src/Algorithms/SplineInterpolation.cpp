@@ -82,21 +82,24 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
   // used and set by function CubicSpline as well
   switch (binsNo) {
   case 1:
-    result["WorkspaceToInterpolate"] = "Workspace must have minimum two points.";
+    result["WorkspaceToInterpolate"] =
+        "Workspace must have minimum two points.";
   case 2:
     if (lin2pts == false) {
-      result["WorkspaceToInterpolate"] = "Workspace has only 2 points, "
-              "you can enable linear interpolation by "
-              "setting the property Linear2Points. Otherwise "
-              "provide a minimum of 3 points.";
+      result["WorkspaceToInterpolate"] =
+          "Workspace has only 2 points, "
+          "you can enable linear interpolation by "
+          "setting the property Linear2Points. Otherwise "
+          "provide a minimum of 3 points.";
     }
   }
 
   const int deriv_order = getProperty("DerivOrder");
   const std::string derivFileName = getProperty("OutputWorkspaceDeriv");
-  if (derivFileName.empty() && (deriv_order > 0)){
-    result["OutputWorkspaceDeriv"] = "Enter a name for the OutputWorkspaceDeriv "
-            "or set DerivOrder to zero.";
+  if (derivFileName.empty() && (deriv_order > 0)) {
+    result["OutputWorkspaceDeriv"] =
+        "Enter a name for the OutputWorkspaceDeriv "
+        "or set DerivOrder to zero.";
   }
 
   return result;
@@ -160,7 +163,7 @@ void SplineInterpolation::exec() {
     outputWorkspace->setSharedX(i, mws->sharedX(0));
 
     // check if we want derivatives
-    if (order > 0){
+    if (order > 0) {
       derivs[i] = WorkspaceFactory::Instance().create(mws, order);
       auto vAxis = new NumericAxis(order);
 
