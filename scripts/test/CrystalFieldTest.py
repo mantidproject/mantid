@@ -1226,7 +1226,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Define a CrystalField object with parameters slightly shifted.
         cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
-                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+                          Temperature=44.0, FWHM=1.0)
 
         # Set the ties
         cf.ties(B20=0.37737)
@@ -1249,11 +1249,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws2 = makeWorkspace(*origin.getSpectrum(1))
 
         # Define a CrystalField object with parameters slightly shifted.
-        x = [0, 50]
-        y = [1, 2]
-        rm = ResolutionModel([(x, y), (x, y)])
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=9,
-                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.0], ResolutionModel=rm, FWHMVariation=0)
+                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
 
         # Set the ties
         cf.ties(B20=0.37737)
@@ -1316,7 +1313,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Define a CrystalField object with parameters slightly shifted.
         cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
-                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+                          Temperature=44.0, FWHM=1.0)
 
         # Set the ties
         cf.ties(B20=0.37737)
