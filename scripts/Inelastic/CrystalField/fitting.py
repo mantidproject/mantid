@@ -185,7 +185,7 @@ class CrystalField(object):
         temperature = self._getTemperature(i)
         out = 'name=CrystalFieldSpectrum,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
-        out += ',FixAllPeaks=%s' % self._fixAllPeaks
+        out += ',FixAllPeaks=%s' % (1 if self._fixAllPeaks else 0)
         out += ',PeakShape=%s' % self.getPeak(i).name
         if self._intensityScaling is not None:
             out += ',IntensityScaling=%s' % self._intensityScaling
@@ -902,10 +902,13 @@ class CrystalFieldFit(object):
             return self._fit_single()
 
     def monte_carlo(self, **kwargs):
+        fix_all_peaks = self.model.FixAllPeaks
+        self.model.FixAllPeaks = True
         if isinstance(self._input_workspace, list):
             self._monte_carlo_multi(**kwargs)
         else:
             self._monte_carlo_single(**kwargs)
+        self.model.FixAllPeaks = fix_all_peaks
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
         from CrystalField.normalisation import split2range

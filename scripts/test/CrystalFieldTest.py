@@ -1291,7 +1291,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Define a CrystalField object with parameters slightly shifted.
         cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
-                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+                          Temperature=44.0, FWHM=1.0)
 
         # Set the ties
         cf.ties(B20=0.37737)
