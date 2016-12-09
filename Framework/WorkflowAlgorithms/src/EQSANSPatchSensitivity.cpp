@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/cow_ptr.h"
@@ -43,6 +41,8 @@ void EQSANSPatchSensitivity::exec() {
   // Need to get hold of the parameter map
   Geometry::ParameterMap &pmap = inputWS->instrumentParameters();
 
+  const auto &spectrumInfo = patchWS->spectrumInfo();
+  const auto &inSpectrumInfo = inputWS->spectrumInfo();
   // Loop over all tubes and patch as necessary
   for (int i = 0; i < nx_pixels; i++) {
     std::vector<int> patched_ids;
@@ -65,21 +65,19 @@ void EQSANSPatchSensitivity::exec() {
         continue;
       }
 
-      IDetector_const_sptr det = patchWS->getDetector(iDet);
       // If this detector is a monitor, skip to the next one
-      if (det->isMonitor())
+      if (spectrumInfo.isMonitor(iDet))
         continue;
 
       const MantidVec &YValues = inputWS->readY(iDet);
       const MantidVec &YErrors = inputWS->readE(iDet);
 
       // If this detector is masked, skip to the next one
-      if (det->isMasked())
+      if (spectrumInfo.isMasked(i))
         patched_ids.push_back(iDet);
       else {
-        IDetector_const_sptr sensitivityDet = inputWS->getDetector(iDet);
-        if (!sensitivityDet->isMasked()) {
-          double yPosition = det->getPos().Y();
+        if (!inSpectrumInfo.isMasked(iDet)) {
+          double yPosition = spectrumInfo.position(iDet).Y();
           totalUnmasked += YErrors[0] * YErrors[0] * YValues[0];
           errorUnmasked += YErrors[0] * YErrors[0];
           nUnmasked++;
