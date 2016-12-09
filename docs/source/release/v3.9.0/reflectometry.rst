@@ -26,6 +26,10 @@ ISIS Reflectometry (Polref)
 ISIS Reflectometry
 ##################
 
+- Processing runs now produces the un-binned IvsQ workspace as well.
+- Error in transfer button not working fixed.
+- Error in 'Save Workspaces' dialog not populating the save path correctly fixed.
+
 |
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Reflectometry%22>`__
