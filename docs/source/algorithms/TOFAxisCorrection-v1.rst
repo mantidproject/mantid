@@ -24,7 +24,7 @@ If no *ReferenceWorkspace* is given, the algorithm takes the L1 distance :math:`
 
 The TOF shift :math:`\Delta t` is calculated by
 
-   :math:`\Delta t = t_{elastic} - (l_1 + l_2) / \sqrt{2 E_i / m_n}`,
+    :math:`\Delta t = t_{elastic} - (l_1 + l_2) / \sqrt{2 E_i / m_n}`,
 
 where :math:`m_n` is the neutron mass. The shift :math:`\Delta t` is then added to all X values of *OutputWorkspace*.
 
@@ -39,189 +39,191 @@ Usage
 
 .. testcode:: ExElasticBin
 
-   import numpy
-   from scipy import constants
-   
-   L1 = 2.0 # in metres.
-   L2 = 2.0
-   Ei = 55.0 # in meV
-   v = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
-   elasticTOF = (L1 + L2) / v * 1e6 # in micro seconds.
-   
-   # Make a workspace with wrong TOF axis.
-   TOFMin = 0.0
-   TOFMax = 100.0
-   binWidth = 0.5
-   # Lets say the elastic bin is in the centre of the spectrum.
-   elasticBinIndex = int(((TOFMax - TOFMin) / binWidth) / 2.0)
-   # Build a Gaussian elastic peak in the workspace.
-   peakCentre = TOFMin + elasticBinIndex * binWidth
-   spectrumDescription = '''name=Gaussian, PeakCentre={0},
-   Height=100, Sigma={1}'''.format(peakCentre, 0.03 * peakCentre)
-   ws = CreateSampleWorkspace(WorkspaceType='Histogram',
-       NumBanks=1,
-       BankPixelWidth=1,
-       Function='User Defined',
-       UserDefinedFunction=spectrumDescription,
-       BankDistanceFromSample=L2,
-       SourceDistanceFromSample=L1,
-       XMin=TOFMin,
-       XMax=TOFMax,
-       BinWidth=binWidth)
-   
-   # Do the correction.
-   correctedWs = TOFAxisCorrection(ws,
-       IndexType='Workspace Index',
-       ReferenceSpectra='0',
-       ElasticBinIndex=elasticBinIndex,
-       IncidentEnergy=Ei)
-   
-   # Convert TOF to energy transfer.
-   convertedWs = ConvertUnits(correctedWs,
-       Target='DeltaE',
-       EMode='Direct')
-   
-   # Check results
-   # Zero energy transfer should be around elasticBinIndex.
-   for index in range(elasticBinIndex-1, elasticBinIndex+2):
-       binCentre = (convertedWs.readX(0)[index+1] + convertedWs.readX(0)[index]) / 2
-       print('DeltaE at bin centre {0}: {1:0.4f}'.format(index,binCentre))
+    import numpy
+    from scipy import constants
+    
+    L1 = 2.0 # in metres.
+    L2 = 2.0
+    Ei = 55.0 # in meV
+    v = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
+    elasticTOF = (L1 + L2) / v * 1e6 # in micro seconds.
+    
+    # Make a workspace with wrong TOF axis.
+    TOFMin = 0.0
+    TOFMax = 100.0
+    binWidth = 0.5
+    # Lets say the elastic bin is in the centre of the spectrum.
+    elasticBinIndex = int(((TOFMax - TOFMin) / binWidth) / 2.0)
+    # Build a Gaussian elastic peak in the workspace.
+    peakCentre = TOFMin + elasticBinIndex * binWidth
+    spectrumDescription = '''name=Gaussian, PeakCentre={0},
+    Height=100, Sigma={1}'''.format(peakCentre, 0.03 * peakCentre)
+    ws = CreateSampleWorkspace(WorkspaceType='Histogram',
+        NumBanks=1,
+        BankPixelWidth=1,
+        Function='User Defined',
+        UserDefinedFunction=spectrumDescription,
+        BankDistanceFromSample=L2,
+        SourceDistanceFromSample=L1,
+        XMin=TOFMin,
+        XMax=TOFMax,
+        BinWidth=binWidth)
+    
+    # Do the correction.
+    correctedWs = TOFAxisCorrection(ws,
+        IndexType='Workspace Index',
+        ReferenceSpectra='0',
+        ElasticBinIndex=elasticBinIndex,
+        IncidentEnergy=Ei)
+    
+    # Convert TOF to energy transfer.
+    convertedWs = ConvertUnits(correctedWs,
+        Target='DeltaE',
+        EMode='Direct')
+    
+    # Check results
+    # Zero energy transfer should be around elasticBinIndex.
+    for index in range(elasticBinIndex-1, elasticBinIndex+2):
+        binCentre = (convertedWs.readX(0)[index+1] + convertedWs.readX(0)[index]) / 2
+        print('DeltaE at bin centre {0}: {1:0.4f}'.format(index,binCentre))
 
 Output:
 
-.. testOutput:: ExElasticBin
+.. testoutput:: ExElasticBin
 
-   DeltaE at bin centre 99: -0.0893
-   DeltaE at bin centre 100: -0.0000
-   DeltaE at bin centre 101: 0.0891
+    DeltaE at bin centre 99: -0.0893
+    DeltaE at bin centre 100: -0.0000
+    DeltaE at bin centre 101: 0.0891
 
 **Example - TOFAxisCorrection using EPP table**
 
 .. testcode:: ExEPPTable
 
-   import numpy
-   from scipy import constants
-   
-   L1 = 2.0 # in metres
-   L2 = 2.0
-   Ei = 55.0 # in meV
-   velocity = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
-   elasticTOF = (L1 + L2) / velocity * 1e6 # in micro seconds.
-   
-   # Make a workspace with wrong TOF axis.
-   TOFMin = 0.0
-   TOFMax = 100.0
-   # Build a Gaussian elastic peak in the workspace.
-   peakCentre = TOFMin + 2.0 * (TOFMax - TOFMin) / 3.0
-   spectrumDescription = '''name=Gaussian, PeakCentre={0},
-   Height=100, Sigma={1}'''.format(peakCentre, 0.03 * peakCentre)
-   ws = CreateSampleWorkspace(WorkspaceType='Histogram',
-       NumBanks=1,
-       BankPixelWidth=1,
-       Function='User Defined',
-       UserDefinedFunction=spectrumDescription,
-       BankDistanceFromSample=L2,
-       SourceDistanceFromSample=L1,
-       XMin=TOFMin,
-       XMax=TOFMax,
-       BinWidth=0.5)
-   
-   # Prepare for the correction.
-   EPPTable = FindEPP(ws)
-   
-   # Do the correction.
-   correctedWs = TOFAxisCorrection(ws,
-       EPPTable=EPPTable,
-       IndexType='Workspace Index',
-       ReferenceSpectra='0',
-       IncidentEnergy=Ei)
-   
-   # Check results.
-   print('Original TOF for the elastic peak: {0:0.1f}'.format(
-      ws.readX(0)[numpy.argmax(ws.readY(0))]))
-   print('Corrected TOF for the elastic peak: {0:0.1f}'.format(
-      correctedWs.readX(0)[numpy.argmax(correctedWs.readY(0))]))
-   print('Actual elastic TOF: {0:0.1f}'.format(elasticTOF))
+    import numpy
+    from scipy import constants
+    
+    L1 = 2.0 # in metres
+    L2 = 2.0
+    Ei = 55.0 # in meV
+    velocity = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
+    elasticTOF = (L1 + L2) / velocity * 1e6 # in micro seconds.
+    
+    # Make a workspace with wrong TOF axis.
+    TOFMin = 0.0
+    TOFMax = 100.0
+    # Build a Gaussian elastic peak in the workspace.
+    peakCentre = TOFMin + 2.0 * (TOFMax - TOFMin) / 3.0
+    spectrumDescription = '''name=Gaussian, PeakCentre={0},
+    Height=100, Sigma={1}'''.format(peakCentre, 0.03 * peakCentre)
+    ws = CreateSampleWorkspace(WorkspaceType='Histogram',
+           NumBanks=1,
+           BankPixelWidth=1,
+           Function='User Defined',
+           UserDefinedFunction=spectrumDescription,
+           BankDistanceFromSample=L2,
+           SourceDistanceFromSample=L1,
+           XMin=TOFMin,
+           XMax=TOFMax,
+           BinWidth=0.5)
+    
+    # Prepare for the correction.
+    EPPTable = FindEPP(ws)
+    
+    # Do the correction.
+    correctedWs = TOFAxisCorrection(ws,
+        EPPTable=EPPTable,
+        IndexType='Workspace Index',
+        ReferenceSpectra='0',
+        IncidentEnergy=Ei)
+    
+    # Check results.
+    print('Original TOF for the elastic peak: {0:0.1f}'.format(
+        ws.readX(0)[numpy.argmax(ws.readY(0))]))
+    print('Corrected TOF for the elastic peak: {0:0.1f}'.format(
+        correctedWs.readX(0)[numpy.argmax(correctedWs.readY(0))]))
+    print('Actual elastic TOF: {0:0.1f}'.format(elasticTOF))
 
 Output:
 
 .. testoutput:: ExEPPTable
 
-   Original TOF for the elastic peak: 66.5
-   Corrected TOF for the elastic peak: 1232.7
-   Actual elastic TOF: 1233.1
+    Original TOF for the elastic peak: 66.5
+    Corrected TOF for the elastic peak: 1232.7
+    Actual elastic TOF: 1233.1
 
 **Example - TOFAxisCorrection using a reference workspace**
 
 .. testcode:: ExReferenceWS
-   import numpy
-   from scipy import constants
-   
-   L1 = 2.0
-   L2 = 2.0
-   Ei = 55.0 # in meV
-   v = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
-   elasticTOF = (L1 + L2) / v * 1e6 # in micro seconds.
-   
-   # Make two workspaces with wrong TOF axis.
-   TOFMin = 0.0
-   TOFMax = 100.0
-   peakCentre = TOFMin + 2.0 * (TOFMax - TOFMin) / 3.0
-   # Build a Gaussian elastic peak in the first workspace.
-   spectrumDescription = '''name=Gaussian, PeakCentre={0},
-   Height=100, Sigma={1}'''.format(peakCentre, 0.03 * peakCentre)
-   ws1 = CreateSampleWorkspace(WorkspaceType='Histogram',
-       NumBanks=1,
-       BankPixelWidth=1,
-       Function='User Defined',
-       UserDefinedFunction=spectrumDescription,
-       BankDistanceFromSample=L2,
-       SourceDistanceFromSample=L1,
-       XMin=TOFMin,
-       XMax=TOFMax,
-       BinWidth=0.5)
-   # Build a second workspace with slightly different Gaussian.
-   spectrumDescription = '''name=Gaussian, PeakCentre={0},
-   Height=100, Sigma={1}'''.format(peakCentre, 0.06 * peakCentre)
-   ws2 = CreateSampleWorkspace(WorkspaceType='Histogram',
-       NumBanks=1,
-       BankPixelWidth=1,
-       Function='User Defined',
-       UserDefinedFunction=spectrumDescription,
-       BankDistanceFromSample=L2,
-       SourceDistanceFromSample=L1,
-       XMin=TOFMin,
-       XMax=TOFMax,
-       BinWidth=0.5)
-   
-   # Correct the first workspace using the EPP table method.
-   EPPTable = FindEPP(ws1)
-   
-   # Do the correction.
-   correctedWs1 = TOFAxisCorrection(ws1,
-       EPPTable=EPPTable,
-       IndexType='Workspace Index',
-       ReferenceSpectra='0',
-       IncidentEnergy=Ei)
-   
-   # Correct the second workspace by using the first as a reference.
-   correctedWs2 = TOFAxisCorrection(ws2,
-       ReferenceWorkspace=correctedWs1)
-   
-   # Check results
-   print('First workspace original TOF for the elastic peak: {0:0.1f}'.format(
-       ws1.readX(0)[numpy.argmax(ws1.readY(0))]))
-   print('EPP table corrected TOF for the elastic peak: {0:0.1f}'.format(
-       correctedWs1.readX(0)[numpy.argmax(correctedWs1.readY(0))]))
-   print('Elastic TOF for the corrected second workspace: {0:0.1f}'.format(
-       correctedWs2.readX(0)[numpy.argmax(correctedWs2.readY(0))]))
+
+    import numpy
+    from scipy import constants
+    
+    L1 = 2.0
+    L2 = 2.0
+    Ei = 55.0 # in meV
+    v = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
+    elasticTOF = (L1 + L2) / v * 1e6 # in micro seconds.
+    
+    # Make two workspaces with wrong TOF axis.
+    TOFMin = 0.0
+    TOFMax = 100.0
+    peakCentre = TOFMin + 2.0 * (TOFMax - TOFMin) / 3.0
+    # Build a Gaussian elastic peak in the first workspace.
+    spectrumDescription = '''name=Gaussian, PeakCentre={0},
+    Height=100, Sigma={1}'''.format(peakCentre, 0.03 * peakCentre)
+    ws1 = CreateSampleWorkspace(WorkspaceType='Histogram',
+        NumBanks=1,
+        BankPixelWidth=1,
+        Function='User Defined',
+        UserDefinedFunction=spectrumDescription,
+        BankDistanceFromSample=L2,
+        SourceDistanceFromSample=L1,
+        XMin=TOFMin,
+        XMax=TOFMax,
+        BinWidth=0.5)
+    # Build a second workspace with slightly different Gaussian.
+    spectrumDescription = '''name=Gaussian, PeakCentre={0},
+    Height=100, Sigma={1}'''.format(peakCentre, 0.06 * peakCentre)
+    ws2 = CreateSampleWorkspace(WorkspaceType='Histogram',
+    NumBanks=1,
+    BankPixelWidth=1,
+    Function='User Defined',
+    UserDefinedFunction=spectrumDescription,
+    BankDistanceFromSample=L2,
+    SourceDistanceFromSample=L1,
+    XMin=TOFMin,
+    XMax=TOFMax,
+    BinWidth=0.5)
+    
+    # Correct the first workspace using the EPP table method.
+    EPPTable = FindEPP(ws1)
+    
+    # Do the correction.
+    correctedWs1 = TOFAxisCorrection(ws1,
+        EPPTable=EPPTable,
+        IndexType='Workspace Index',
+        ReferenceSpectra='0',
+        IncidentEnergy=Ei)
+    
+    # Correct the second workspace by using the first as a reference.
+    correctedWs2 = TOFAxisCorrection(ws2,
+        ReferenceWorkspace=correctedWs1)
+    
+    # Check results
+    print('First workspace original TOF for the elastic peak: {0:0.1f}'.format(
+        ws1.readX(0)[numpy.argmax(ws1.readY(0))]))
+    print('EPP table corrected TOF for the elastic peak: {0:0.1f}'.format(
+        correctedWs1.readX(0)[numpy.argmax(correctedWs1.readY(0))]))
+    print('Elastic TOF for the corrected second workspace: {0:0.1f}'.format(
+        correctedWs2.readX(0)[numpy.argmax(correctedWs2.readY(0))]))
 
 Output:
 
 .. testoutput:: ExReferenceWS
-   First workspace original TOF for the elastic peak: 66.5
-   EPP table corrected TOF for the elastic peak: 1232.7
-   Elastic TOF for the corrected second workspace: 1232.7
+
+    First workspace original TOF for the elastic peak: 66.5
+    EPP table corrected TOF for the elastic peak: 1232.7
+    Elastic TOF for the corrected second workspace: 1232.7
 
 .. categories::
 
