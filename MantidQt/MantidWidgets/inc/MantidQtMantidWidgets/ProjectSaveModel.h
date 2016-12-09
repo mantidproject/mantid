@@ -5,6 +5,7 @@
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtAPI/pixmaps.h"
 
+#include "WidgetDllOption.h"
 #include <unordered_map>
 #include <vector>
 
@@ -36,7 +37,7 @@ struct WindowInfo {
 // Model definition
 //==============================================================================
 
-class ProjectSaveModel {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ProjectSaveModel {
 public:
   /// Construct a new model instance with vector of window handles
   ProjectSaveModel(std::vector<MantidQt::API::IProjectSerialisable *> windows);
