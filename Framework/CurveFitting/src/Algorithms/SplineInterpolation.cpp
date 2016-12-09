@@ -323,7 +323,6 @@ void SplineInterpolation::calculateSpline(
  *
  * @param inputWorkspace :: The input workspace
  * @param interpolationWorkspace :: The interpolation workspace
- * @param row :: The row of the spectra to use
  */
 void SplineInterpolation::setXRange(
     MatrixWorkspace_sptr inputWorkspace,

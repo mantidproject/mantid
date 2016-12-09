@@ -1,6 +1,8 @@
 #ifndef MANTID_CURVEFITTING_LINEARBACKGROUNDTEST_H_
 #define MANTID_CURVEFITTING_LINEARBACKGROUNDTEST_H_
 
+#include <cxxtest/TestSuite.h>
+
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 
 #include <array>

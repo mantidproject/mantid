@@ -26,6 +26,8 @@ derivatives of each of the interpolated points as a side product.
 Setting the DerivOrder property to zero will force the algorithm to
 calculate no derivatives.
 
+Please note that the OutputWorkspace will have constant zero error values.
+
 For Histogram Workspaces
 ########################
 
@@ -45,7 +47,7 @@ Usage
 
 **Example - interpolate between points in one workspace to match a reference workspace:**  
 
-.. testcode:: ExSplineInterpolationSimple
+.. testcode:: ExSplineInterpolation
 
     import numpy as np
 
@@ -55,12 +57,21 @@ Usage
     spline_ws = CreateWorkspace(dataX1, dataY1)
 
     #create some random points to interpolate between
-    dataX2 = np.arange(1,110,10) * 0.07
+    dataX2 = np.arange(1, 110, 10) * 0.07
     dataY2 = np.random.random_sample(dataX2.size) 
     ws_to_interpolate = CreateWorkspace(dataX2, dataY2)
 
     #interpolate using the reference workspace
-    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws_to_interpolate, DerivOrder=1)
+    interpolated_ws_1 = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws_to_interpolate)
+
+    #interpolate using the reference workspace and output a group workspace of derivatives for each spectrum
+    interpolated_ws_2 = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws_to_interpolate, DerivOrder=2, OutputWorkspaceDeriv='derivs')
+
+Output:
+
+.. testoutput:: ExSplineInterpolation2Points
+
+    The interpolated workspaces are identical: mtd['interpolated_ws_1'].extractY() == mtd['interpolated_ws_2'].extractY()
 
 **Example - linear interpolation of two points:**
 
@@ -81,25 +92,6 @@ Usage
     #interpolate using the reference workspace
     interpolated_ws = SplineInterpolation(WorkspaceToMatch=ws_to_match, WorkspaceToInterpolate=ws_to_interpolate, Linear2Points=True)
     
-**Example - output the derivatives of the interpolated workspace:**  
-
-.. testcode:: ExSplineInterpolationDeriv
-
-    import numpy as np
-
-    #create a smooth function for interpolation
-    dataX1 = np.arange(1, 100) * 0.07
-    dataY1 = np.sin(dataX1)
-    spline_ws = CreateWorkspace(dataX1, dataY1)
-
-    #create some random points to interpolate between
-    dataX2 = np.arange(1,110,10) * 0.7
-    dataY2 = np.random.random_sample(dataX2.size) 
-    ws = CreateWorkspace(dataX2, dataY2)
-
-    #interpolate using the reference workspace and output a group workspace of derivatives for each spectrum
-    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=2, OutputWorkspaceDeriv='derivs')
-
 .. categories::
 
 .. sourcelink::

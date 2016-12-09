@@ -1,6 +1,9 @@
 #ifndef MANTID_CURVEFITTING_SPLINEINTERPOLATIONTEST_H_
 #define MANTID_CURVEFITTING_SPLINEINTERPOLATIONTEST_H_
 
+
+#include <cxxtest/TestSuite.h>
+
 #include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"

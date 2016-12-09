@@ -4,6 +4,7 @@
 #include <fstream>
 #include <limits>
 #include <numeric>
+#include <cxxtest/TestSuite.h>
 #include <boost/lexical_cast.hpp>
 
 // Include local copy of Valgrind header to avoid creating a dependency
@@ -474,7 +475,7 @@ private:
     fitalg_function->function(dataXview, dataYvalues);
 
     // Create the workspace
-    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
 
     // Create the instrument
     boost::shared_ptr<Instrument> inst =

@@ -3,6 +3,7 @@
 
 #include "MantidCurveFitting/Functions/CubicSpline.h"
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting::Functions;
@@ -171,7 +172,6 @@ private:
     cspline->setAttributeValue("n", nData);
     // calculate a reference set to check against
     for (int i = 0; i < nData; ++i) {
-      // cspline.setXAttribute(i, i * xModify);
       cspline->setAttributeValue("x" + std::to_string(i), i * xModify);
       cspline->setParameter(static_cast<size_t>(i),
                             splineYFunction(i * xModify));
