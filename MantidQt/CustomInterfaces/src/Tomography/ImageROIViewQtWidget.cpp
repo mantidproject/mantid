@@ -1322,10 +1322,9 @@ void ImageROIViewQtWidget::closeEvent(QCloseEvent *event) {
 }
 
 void ImageROIViewQtWidget::findCORClicked() {
-  // this should run a --find-cor run on tomopy
-  // the argument that will need to be appended to find the CoR
-  // the receiver is the main ViewQtGui
-  emit(findCORClicked("", {"-f 1"}));
+  // this should run a --find-cor, empty executable path string signifies that
+  // the default external interpretor will be used
+  emit(findCORClicked("", {"--find-cor"}));
 }
 
 void ImageROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {

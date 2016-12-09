@@ -12,31 +12,6 @@
 
 #include <Poco/Path.h>
 
-#define _DEBUG__CUSTOM
-#ifdef _DEBUG__CUSTOM
-#ifdef _WIN32
-#ifndef DBREAK
-#include <intrin.h>
-#define DBREAK __debugbreak();
-#define MDBREAK(msg)                                                           \
-  std::cout << msg << '\n';                                                    \
-  DBREAK
-#endif // DBREAK
-#else  // if GNU
-#ifndef DBREAK
-#define DBREAK __builtin_trap();
-#define MDBREAK(msg)                                                           \
-  std::cout << msg << '\n';                                                    \
-  DBREAK
-#endif // DBREAK
-#endif // _WIN32
-#else  // if not debug, define empty
-#ifndef DBREAK
-#define DBREAK
-#define MDBREAK(msg)
-#endif // DBREAK
-#endif // _DEBUG__CUSTOM
-
 #ifndef _WIN32
 // This is exclusively for kill/waitpid (interim solution, see below)
 #include <signal.h>
@@ -405,9 +380,6 @@ void TomographyIfaceModel::prepareSubmissionArguments(
 
   // used for remote submission
   allOpts = constructSingleStringFromVector(args);
-
-  logMsg("Running " + usingTool() + ", with binary: " + runnable +
-         ", with parameters: " + allOpts);
 }
 
 /**
@@ -468,6 +440,10 @@ void TomographyIfaceModel::doRemoteRunReconstructionJob(
     const std::string &compRes, const std::string &runnable,
     const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
+  
+  logMsg("Running " + usingTool() + ", with binary: " + runnable +
+         ", with parameters: " + allOpts);
+         
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
   transAlg->initialize();
@@ -514,6 +490,10 @@ void TomographyIfaceModel::doLocalRunReconstructionJob(
 
   // Can only run one reconstruction at a time
   // Qt doesn't use exceptions so we can't make sure it ran here
+  
+  logMsg("Running " + usingTool() + ", with binary: " + runnable +
+         ", with parameters: " + allOpts);
+
   worker.setup(runnable, args, allOpts);
   thread.start();
 }

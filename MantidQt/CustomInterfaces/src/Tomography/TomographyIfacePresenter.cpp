@@ -240,8 +240,7 @@ void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
 
 void TomographyIfacePresenter::emitExternalProcessOutput(const qint64 pid,
                                                          const int exitCode) {
-  m_model->updateProcessInJobList(pid, exitCode);
-  m_reconRunning = false;
+  workerFinished(pid, exitCode);
   m_view->externalProcessFinished(m_workerOutputCache);
 }
 
