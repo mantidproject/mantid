@@ -613,6 +613,9 @@ class ReconstructionCommand(object):
     def rotate_stack(self, data, cfg, white=None, dark=None):
         """
         Rotates a stack (sample, white and dark images).
+        This funciton is usually used on the whole picture, which is a square. 
+        If the picture is cropped first, the ROI coordinates 
+        have to be adjusted separately to be pointing at the NON ROTATED image!
 
         @param data :: stack of sample images
         @param cfg :: pre-processing configuration
@@ -649,7 +652,7 @@ class ReconstructionCommand(object):
         """
 
         self._check_data_stack(data)
-
+        import resource
         if 0 == cfg.rotation % 2:
             dim_y = data.shape[1]
             dim_x = data.shape[2]
@@ -657,16 +660,17 @@ class ReconstructionCommand(object):
             # if we're rotating by 90 or 270 degrees, we flip the shape
             dim_y = data.shape[2]
             dim_x = data.shape[1]
-
-        data_rotated = np.zeros(
-            (data.shape[0], dim_y, dim_x), dtype=data.dtype)
+        print(" >>> Memory usage",
+              resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         for idx in range(0, data.shape[0]):
             # rot90 rotates counterclockwise; cfg.rotation rotates clockwise
             counterclock_rotations = 4 - cfg.rotation
-            data_rotated[idx, :, :] = np.rot90(data[idx, :, :],
-                                               counterclock_rotations)
+            data[idx, :, :] = np.rot90(data[idx, :, :], counterclock_rotations)
 
-        return data_rotated
+        print(" >>> Memory usage",
+              resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+        return data
 
     def run_reconstruct_3d(self, proj_data, preproc_cfg, alg_cfg):
         """
@@ -1103,11 +1107,6 @@ class ReconstructionCommand(object):
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
         cfg.tomo_print_timed(" * Data loaded in")
 
-        # crop the ROI, this is done first, so beware of what the correct ROI coordinates are
-        cfg.tomo_print_timed(" * Starting image cropping")
-        sample = self.crop_coords(sample, cfg.preproc_cfg)
-        cfg.tomo_print_timed(" * Images cropped in")
-
         # rotate after cropping, will require different ROI
         cfg.tomo_print_timed(" * Starting rotation...")
         # rotate
@@ -1115,6 +1114,11 @@ class ReconstructionCommand(object):
         cfg.tomo_print_timed(
             " * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}. Elapsed time:".
             format(cfg.preproc_cfg.rotation * 90, sample.dtype))
+
+        # crop the ROI, this is done first, so beware of what the correct ROI coordinates are
+        cfg.tomo_print_timed(" * Starting image cropping")
+        sample = self.crop_coords(sample, cfg.preproc_cfg)
+        cfg.tomo_print_timed(" * Images cropped in")
 
         # sanity check
         cfg.tomo_print(" * Sanity check on data", 0)
