@@ -192,5 +192,5 @@ class ReconstructionConfig(object):
 
         #  should be moved in the configs somewhere
         temp_verbosity = 0
-        if(importanceLevel >= temp_verbosity):
+        if importanceLevel >= temp_verbosity:
             print(message)

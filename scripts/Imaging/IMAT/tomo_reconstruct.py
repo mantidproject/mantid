@@ -59,10 +59,6 @@ sys.path.insert(0, os.path.split(path.dirname(__file__))[0])  # noqa
 from tomorec import reconstruction_command as tomocmd
 import tomorec.configs as tomocfg
 
-# import pydevd
-# pydevd.settrace(
-#     'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
-
 
 def setup_cmd_options():
     """
@@ -88,15 +84,19 @@ def setup_cmd_options():
         type=str,
         help="Where to write the output slice images (reconstructed volume)")
 
-    grp_req.add_argument("-c", "--cor", required=False, type=float, help="2")
+    grp_req.add_argument(
+        "-c",
+        "--cor",
+        required=False,
+        type=float,
+        help="Provide a pre-calculated centre of rotation. If one is not provided it will be automatically calculated"
+    )
 
     grp_req.add_argument(
         "-f",
         "--find-cor",
+        action='store_true',
         required=False,
-        type=int,
-        nargs="?",
-        default=0,
         help="Find the center of rotation (in pixels). rotation around y axis is assumed"
     )
 
@@ -378,11 +378,6 @@ def main_tomo_rec():
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()
 
-    # Save myself early. Save command this command line script and all packages/subpackages
-    # TODO need to move it somewhere else later
-    tomoio.self_save_zipped_scripts(
-    args.output_path, os.path.abspath(inspect.getsourcefile(lambda: 0)))
-
     # Grab and check pre-processing options + algorithm setup + post-processing options
     preproc_config = grab_preproc_options(args)
     alg_config = grab_tool_alg_options(args)
@@ -393,10 +388,14 @@ def main_tomo_rec():
                                        postproc_config)
     # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
-    if (args.find_cor > 0):
+    if (args.find_cor):
         cfg.tomo_print("Finding COR")
         cmd.find_center(cfg)
     else:
+        # Save myself early. Save command this command line script and all packages/subpackages
+        tomoio.self_save_zipped_scripts(
+            args.output_path,
+            os.path.abspath(inspect.getsourcefile(lambda: 0)))
         cfg.tomo_print("Running reconstruction")
         cmd.do_recon(cfg, cmd_line=cmd_line)
 

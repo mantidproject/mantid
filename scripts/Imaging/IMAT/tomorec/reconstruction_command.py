@@ -1144,7 +1144,6 @@ class ReconstructionCommand(object):
             calculated_cors) + pixelsFromLeftSide
 
         # we add the pixels cut off from the left, to reflect the full image in Mantid
-
         cfg.tomo_print("Printing average COR in relation to cropped image " +
                        str(cfg.preproc_cfg.crop_coords) + ":", 2)
         print(str(round(averageCORrelativeToCrop)))
