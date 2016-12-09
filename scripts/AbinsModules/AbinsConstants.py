@@ -164,7 +164,7 @@ def old_python():
     Checks if Python i not too old
     :return: True if it is too old otherwise False
     """
-    return tuple([int(i) for i in re.findall(r'\d+', string=python_version().replace("."," "))]) < (2, 7)
+    return tuple([int(i) for i in re.findall(r'\d+', string=python_version().replace(".", " "))]) < (2, 7)
 
 
 def get_core_folder():
