@@ -33,19 +33,19 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
     def test_two_wing_multi(self):
 
         args = {'Run': self._runs_two_wing_multi,
-                'OutputWorkspace': 'out_ws'}
+                'OutputWorkspace': 'out'}
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed")
 
-        self._check_workspace_group(mtd['out_ws'], 2, 18, 1024)
+        self._check_workspace_group(mtd['out_red'], 2, 18, 1024)
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed")
 
-        self._check_workspace_group(mtd['out_ws'], 2, 18, 1024)
+        self._check_workspace_group(mtd['out_red'], 2, 18, 1024)
 
         args['SumRuns'] = True
 
@@ -53,17 +53,18 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed")
 
-        self._check_workspace_group(mtd['out_ws'], 1, 18, 1024)
+        self._check_workspace_group(mtd['out_red'], 1, 18, 1024)
 
     def test_one_wing(self):
 
-        args = {'Run': self._run_one_wing}
+        args = {'Run': self._run_one_wing,
+                'OutputWorkspace': 'out'}
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed")
 
-        self._check_workspace_group(mtd['red'], 1, 18, 1024)
+        self._check_workspace_group(mtd['out_red'], 1, 18, 1024)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 

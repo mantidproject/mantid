@@ -7,7 +7,7 @@ from mantid import mtd
 import numpy
 
 
-class IndirectILLReductionQENS(DataProcessorAlgorithm):
+class IndirectILLReductionQENS(PythonAlgorithm):
 
     _sample_files = None
     _alignment_files = None
@@ -98,10 +98,9 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                              validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
-                                                    optional=PropertyMode.Optional,
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
-                             doc="Group name for the reduced workspace(s).")
+                             doc='Group name for the reduced workspace(s).')
 
     def validateInputs(self):
 
@@ -133,7 +132,8 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
-        self._red_ws = self.getPropertyValue('OutputWorkspace')
+
+        self._red_ws = self.getPropertyValue('OutputWorkspace') + '_red'
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')

@@ -47,7 +47,8 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
 
         args = {'Run': self._runs['two_wing_QENS'],
                 'MapFile': os.path.join(config['groupingFiles.directory'], grouping_filename),
-                'CropDeadMonitorChannels': True}
+                'CropDeadMonitorChannels': True,
+                'OutputWorkspace': 'red'}
 
         IndirectILLEnergyTransfer(**args)
 

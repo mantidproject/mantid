@@ -24,7 +24,7 @@ def extract_workspace(ws, ws_out, x_start, x_end):
     ScaleX(InputWorkspace=ws_out, OutputWorkspace=ws_out, Factor=-x_start, Operation='Add')
 
 
-class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
+class IndirectILLEnergyTransfer(PythonAlgorithm):
 
     _run_file = None
     _map_file = None
@@ -75,10 +75,9 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
                              doc='Whether or not to exclude the first and last few channels '
                                  'with 0 monitor count in the energy transfer formula.')
 
-        self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
-                                                    optional=PropertyMode.Optional,
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
-                             doc="Group name for the reduced workspace(s).")
+                             doc='Group name for the reduced workspace(s).')
 
     def validateInputs(self):
 
@@ -300,7 +299,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
         self._convert_to_energy(ws, n_cropped_bins)
 
-        ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='Theta', EMode='Indirect')
+        #ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='Theta', EMode='Indirect')
 
     def _normalise_to_monitor(self, ws, mon):
         """

@@ -9,7 +9,7 @@ import numpy as np
 import time
 
 
-class IndirectILLReductionFWS(DataProcessorAlgorithm):
+class IndirectILLReductionFWS(PythonAlgorithm):
 
     _SAMPLE = 'sample'
     _BACKGROUND = 'background'
@@ -95,7 +95,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                              validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', 'red',
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
                              doc='Output workspace group')
 
@@ -121,7 +121,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         self._common_args['Analyser'] = self.getPropertyValue('Analyser')
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
 
-        self._red_ws = self.getPropertyValue('OutputWorkspace')
+        self._red_ws = self.getPropertyValue('OutputWorkspace') + '_red'
 
         # Nexus metadata criteria for FWS type of data (both EFWS and IFWS)
         self._criteria = '($/entry0/instrument/Doppler/maximum_delta_energy$ == 0. or ' \
