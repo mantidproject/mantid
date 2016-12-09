@@ -189,7 +189,6 @@
 #include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
 
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -6040,7 +6039,7 @@ void ApplicationWindow::savetoNexusFile() {
   QString selectedFilter;
   QString fileDir =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  QString fileName = MantidQt::API::FileDialogHandler::getSaveFileName(
+  QString fileName = QFileDialog::getSaveFileName(
       this, tr("Save File As"), fileDir, filter, &selectedFilter);
   if (!fileName.isEmpty()) {
     std::string wsName;
@@ -6103,8 +6102,8 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
     filter += tr("Compressed MantidPlot project") + " (*.mantid.gz)";
 
     QString selectedFilter;
-    fn = MantidQt::API::FileDialogHandler::getSaveFileName(
-        this, tr("Save Project As"), workingDir, filter, &selectedFilter);
+    fn = QFileDialog::getSaveFileName(this, tr("Save Project As"), workingDir,
+                                      filter, &selectedFilter);
     if (selectedFilter.contains(".gz"))
       compress = true;
   }
@@ -6478,10 +6477,10 @@ void ApplicationWindow::exportASCII(const QString &tableName,
     return;
 
   QString selectedFilter;
-  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(
-      this, tr("Choose a filename to save under"),
-      asciiDirPath + "/" + w->objectName(), "*.txt;;*.dat;;*.DAT",
-      &selectedFilter);
+  QString fname =
+      QFileDialog::getSaveFileName(this, tr("Choose a filename to save under"),
+                                   asciiDirPath + "/" + w->objectName(),
+                                   "*.txt;;*.dat;;*.DAT", &selectedFilter);
   if (!fname.isEmpty()) {
     QFileInfo fi(fname);
     QString baseName = fi.fileName();
@@ -7615,7 +7614,7 @@ void ApplicationWindow::exportPDF() {
     return;
   }
 
-  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(
+  QString fname = QFileDialog::getSaveFileName(
       this, tr("Choose a filename to save under"), workingDir, "*.pdf");
   if (!fname.isEmpty()) {
     QFileInfo fi(fname);
@@ -13862,7 +13861,7 @@ void ApplicationWindow::saveFolderAsProject(Folder *f) {
   filter += tr("Compressed MantidPlot project") + " (*.qti.gz)";
 
   QString selectedFilter;
-  QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
+  QString fn = QFileDialog::getSaveFileName(
       this, tr("Save project as"), workingDir, filter, &selectedFilter);
   if (!fn.isEmpty()) {
     QFileInfo fi(fn);

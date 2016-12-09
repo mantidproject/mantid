@@ -51,8 +51,6 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include "MantidQtAPI/FileDialogHandler.h"
-
 #include <numeric>
 #include <stdexcept>
 
@@ -317,8 +315,8 @@ InstrumentWidgetTab *InstrumentWidget::getTab(const Tab tab) const {
 QString InstrumentWidget::getSaveFileName(const QString &title,
                                           const QString &filters,
                                           QString *selectedFilter) {
-  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
-      this, title, m_savedialog_dir, filters, selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(this, title, m_savedialog_dir,
+                                                  filters, selectedFilter);
 
   // If its empty, they cancelled the dialog
   if (!filename.isEmpty()) {
@@ -676,9 +674,9 @@ void InstrumentWidget::saveImage(QString filename) {
 * Use the file dialog to select a filename to save grouping.
 */
 QString InstrumentWidget::getSaveGroupingFilename() {
-  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
-      this, "Save grouping file", m_savedialog_dir,
-      "Grouping (*.xml);;All files (*)");
+  QString filename =
+      QFileDialog::getSaveFileName(this, "Save grouping file", m_savedialog_dir,
+                                   "Grouping (*.xml);;All files (*)");
 
   // If its empty, they cancelled the dialog
   if (!filename.isEmpty()) {
