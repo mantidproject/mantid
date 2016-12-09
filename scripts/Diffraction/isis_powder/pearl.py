@@ -1,50 +1,53 @@
 from __future__ import (absolute_import, division, print_function)
 
-import os
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import common, yaml_parser
+from isis_powder.routines import common, InstrumentSettings, yaml_parser
 from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_spline, PearlRunSettings
+from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_spline, pearl_advanced_config
 
 
 class Pearl(AbstractInst):
-
-    def __init__(self, user_name, config_file=None, **kwargs):
-
-        expected_keys = ["calibration_directory", "output_directory", "attenuation_file_name",
+    def __init__(self, **kwargs):
+        expected_attr = ["user_name", "config_file", "calibration_dir", "output_dir", "attenuation_file_name",
                          "calibration_mapping_file"]
-        yaml_parser.set_kwargs_from_config_file(config_path=config_file, kwargs=kwargs, keys_to_find=expected_keys)
+        import pydevd
+        pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
+        # Parse all possible locations that the parameters can be set from
+        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
+        self._inst_settings = InstrumentSettings.InstrumentSettings(
+                              attr_mapping_dict=self.attr_mapping, adv_conf_dict=pearl_advanced_config.variables,
+                              basic_conf_dict=basic_config_dict, kwargs=kwargs)
 
-        super(Pearl, self).__init__(user_name=user_name, calibration_dir=kwargs["calibration_directory"],
-                                    output_dir=kwargs["output_directory"])
+        self._inst_settings.check_expected_attributes_are_set(attr_mapping=self.attr_mapping,
+                                                              expected_attr_names=expected_attr)
 
-        self._basic_config_file_path = config_file
-        self._calibration_mapping_path = kwargs["calibration_mapping_file"]
-        attenuation_file_name = kwargs["attenuation_file_name"]  # "PRL112_DC25_10MM_FF.OUT"
-        self._attenuation_full_path = os.path.join(self._calibration_dir, attenuation_file_name)
+        super(Pearl, self).__init__(user_name=self._inst_settings.user_name,
+                                    calibration_dir=self._inst_settings.calibration_dir,
+                                    output_dir=self._inst_settings.output_dir)
 
-        self._run_settings = None
         self._ads_workaround = 0
         self._cached_run_details = None
         self._cached_run_details_number = None
 
     def focus(self, run_number, **kwargs):
-        self._run_settings = _get_settings_focus_kwargs(config_file_path=self._basic_config_file_path, kwargs=kwargs)
         return self._focus(run_number=run_number, input_batching=InputBatchingEnum.Summed,
                            do_van_normalisation=self._run_settings.divide_by_vanadium)
 
     def create_calibration_vanadium(self, run_in_range, **kwargs):
-        self._run_settings = _get_settings_van_calib_kwargs(config_file_path=self._basic_config_file_path,
-                                                            kwargs=kwargs)
-        self._run_settings.number_of_splines = kwargs.get("num_of_splines", 60)
+        kwargs["tt_mode"] = "tt88"
+        self._inst_settings.update_attributes_from_kwargs(attr_mapping_dict=self.attr_mapping, kwargs=kwargs)
+        expected_attr = ["long_mode", "van_norm", "absorb_corrections"]
+        self._inst_settings.check_expected_attributes_are_set(attr_mapping=self.attr_mapping,
+                                                              expected_attr_names=expected_attr)
+
         run_details = self.get_run_details(run_number_string=int(run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
 
         return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
                                                  empty_runs=run_details.empty_runs,
-                                                 do_absorb_corrections=self._run_settings.absorption_corrections)
+                                                 do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     # Params #
     def get_default_group_names(self):
@@ -59,14 +62,14 @@ class Pearl(AbstractInst):
         if self._cached_run_details_number == first_run:
             return self._cached_run_details
 
-        run_settings = self._run_settings
-        run_details = pearl_algs.get_run_details(absorb_on=run_settings.absorption_corrections,
-                                                 long_mode_on=run_settings.divide_by_vanadium,
+        # TODO justt pass in inst settings instead
+        run_details = pearl_algs.get_run_details(absorb_on=self._inst_settings.absorb_corrections,
+                                                 long_mode_on=self._inst_settings.long_mode,
                                                  run_number_string=run_number_string,
                                                  calibration_dir=self._calibration_dir,
-                                                 mapping_file=self._calibration_mapping_path)
+                                                 mapping_file=self._inst_settings.calibration_mapping_file)
 
-        run_details = pearl_algs.set_advanced_run_details(run_details=run_details, tt_mode=self._run_settings.tt_mode,
+        run_details = pearl_algs.set_advanced_run_details(run_details=run_details, tt_mode=self._inst_settings.tt_mode,
                                                           calibration_dir=self._calibration_dir)
         self._cached_run_details_number = first_run
         self._cached_run_details = run_details
@@ -108,7 +111,7 @@ class Pearl(AbstractInst):
         output_spectra = \
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                         run_details=run_details, focus_mode=output_mode,
-                                                        perform_attenuation=self._run_settings.perform_attenuation)
+                                                        perform_attenuation=self._inst_settings.perform_atten)
         group_name = "PEARL" + str(run_details.run_number) + "-Results-D-Grp"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
@@ -140,35 +143,18 @@ class Pearl(AbstractInst):
 
         return data_processed
 
-    # Implementation of instrument specific steps
-
-
-def _get_settings_common_kwargs(config_file_path, kwargs):
-    expected_keys = ["long_mode"]
-    yaml_parser.set_kwargs_from_config_file(config_path=config_file_path, kwargs=kwargs, keys_to_find=expected_keys)
-    run_settings = PearlRunSettings.PearlRunSettings()
-    run_settings.long_mode = kwargs["long_mode"]
-    return run_settings
-
-
-def _get_settings_focus_kwargs(config_file_path, kwargs):
-    run_settings = _get_settings_common_kwargs(config_file_path=config_file_path, kwargs=kwargs)
-    expected_keys = ["divide_vanadium", "tt_mode", "output_mode", "attenuate"]
-    yaml_parser.set_kwargs_from_config_file(config_path=config_file_path, kwargs=kwargs, keys_to_find=expected_keys)
-    run_settings.tt_mode = kwargs["tt_mode"]
-    run_settings.focus_mode = kwargs["output_mode"]
-    run_settings.perform_attenuation = kwargs["attenuate"]
-    run_settings.divide_by_vanadium = kwargs["divide_vanadium"]
-    return run_settings
-
-
-def _get_settings_van_calib_kwargs(config_file_path, kwargs):
-    run_settings = _get_settings_common_kwargs(config_file_path=config_file_path, kwargs=kwargs)
-    expected_keys = ["absorption_corrections"]
-    yaml_parser.set_kwargs_from_config_file(config_path=config_file_path, kwargs=kwargs, keys_to_find=expected_keys)
-    run_settings.absorption_corrections = kwargs["absorption_corrections"]
-    run_settings.tt_mode = "tt88"  # Use full range in vanadium mode
-    return run_settings
+    # Maps parameter/config name -> script names
+    attr_mapping = [("absorb_corrections", "absorb_corrections"),
+                    ("attenuation_file_name", "attenuation_file_name"),
+                    ("config_file", "config_file_name"),
+                    ("calibration_config_file", "calibration_mapping_file"),
+                    ("calibration_directory", "calibration_dir"),
+                    ("long_mode", "long_mode"),
+                    ("tt_mode", "tt_mode"),
+                    ("output_directory", "output_dir"),
+                    ("perform_atten", "perform_attenuation"),
+                    ("user_name", "user_name"),
+                    ("vanadium_normalisation", "van_norm")]
 
 
 def _generate_file_name(run_number):

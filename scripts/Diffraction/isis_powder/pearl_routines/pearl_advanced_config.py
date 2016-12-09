@@ -5,6 +5,28 @@ file_names = {
     "tt35_grouping": "pearl_group_12_1_TT35.cal"
 }
 
+script_params = {
+    "b_spline_coefficient": 60,
+}
+
+tof_cropping_ranges = [
+    (1500, 19900),  # Bank 1
+    (1500, 19900),  # Bank 2
+    (1500, 19900),  # Bank 3
+    (1500, 19900),  # Bank 4
+    (1500, 19900),  # Bank 5
+    (1500, 19900),  # Bank 6
+    (1500, 19900),  # Bank 7
+    (1500, 19900),  # Bank 8
+    (1500, 19900),  # Bank 9
+    (1500, 19900),  # Bank 10
+    (1500, 19900),  # Bank 11
+    (1500, 19900),  # Bank 12
+    (1500, 19900),  # Bank 13
+    (1500, 19900)   # Bank 14
+    ]
+
+
 variable_help = {
     "file_names": {
         "vanadium_absorb_file_name": "Takes the name of the calculated vanadium absorption corrections. This file "
@@ -21,4 +43,10 @@ variable_help = {
 
 
     }
+}
+
+variables = {
+    "bank_tof_crop_values" : tof_cropping_ranges,
+    "file_names_dict": file_names,
+    "script_params_dict": script_params
 }

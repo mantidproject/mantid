@@ -8,7 +8,7 @@ from isis_powder.routines import yaml_sanity
 
 
 def get_run_dictionary(run_number, file_path):
-    config_file = _open_yaml_file_as_dictionary(file_path)
+    config_file = open_yaml_file_as_dictionary(file_path)
     yaml_sanity.calibration_file_sanity_check(config_file)
     run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number)
 
@@ -23,19 +23,7 @@ def is_run_range_key_unbounded(key):
     return True if split_key[-1] == '' else False
 
 
-def set_kwargs_from_config_file(config_path, kwargs, keys_to_find):
-    if config_path:
-        basic_config_dict = _open_yaml_file_as_dictionary(file_path=config_path)
-    else:
-        # Create an empty dictionary so we still get error checking below and nicer error messages
-        basic_config_dict = {}
-
-    # Set any unset properties:
-    for key in keys_to_find:
-        _get_kwarg_key_from_dict(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
-
-
-def _open_yaml_file_as_dictionary(file_path):
+def open_yaml_file_as_dictionary(file_path):
     if not file_path or not os.path.isfile(file_path):
         raise ValueError("Config file not found at path of:\n" + str(file_path) + '\n ')
 
@@ -64,14 +52,3 @@ def _find_dictionary_key(dict_to_search, run_number):
                 return key
 
     return None
-
-
-def _get_kwarg_key_from_dict(config_dictionary, kwargs, key):
-    error_first = "Setting with name: '"
-    error_last = "' was not passed in the call or set in the basic config."
-    kwarg_value = kwargs.get(key, None)
-    if kwarg_value is None:
-        # Only try to parse it if it wasn't passed in
-        value = common.dictionary_key_helper(dictionary=config_dictionary, key=key, throws=True,
-                                             exception_msg=(error_first + key + error_last))
-        kwargs[key] = value

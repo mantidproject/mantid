@@ -61,7 +61,6 @@ def _batched_run_focusing(input_batching, instrument, perform_vanadium_norm, run
     for ws in read_ws_list:
         output = _focus_one_ws(ws=ws, run_number=run_number, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm)
-        common.remove_intermediate_workspace(ws)
     return output
 
 

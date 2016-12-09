@@ -7,7 +7,7 @@ class RunDetails(object):
     """
 
     def __init__(self, run_number):
-        # Essential attributes
+        # Essential attribute
         self.run_number = run_number
 
         self.empty_runs = None
@@ -20,4 +20,3 @@ class RunDetails(object):
         self.vanadium_absorption_path = None
         self.vanadium_run_numbers = None
 
-        self.solid_angle_corr = None  # TODO move back into POLARIS

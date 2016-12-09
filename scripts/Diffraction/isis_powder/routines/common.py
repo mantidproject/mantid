@@ -9,8 +9,6 @@ from isis_powder.routines.common_enums import InputBatchingEnum
 global g_ads_workaround
 g_ads_workaround = {"read_ws": 0}
 
-# --- Public API --- #
-
 
 def create_calibration_by_names(calibration_runs, startup_objects, grouping_file_name, group_names):
     _create_blank_cal_file(calibration_runs=calibration_runs, group_names=group_names,

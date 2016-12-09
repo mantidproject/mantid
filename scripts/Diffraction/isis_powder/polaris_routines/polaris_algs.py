@@ -2,60 +2,26 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 import os
-import isis_powder.routines.common as common
-from isis_powder.routines import yaml_parser
+from isis_powder.routines import common, yaml_parser
 from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.routines.RunDetails import RunDetails
-
-
-def calculate_focus_binning_params(sample_ws):
-    # TODO remove this if they only want sane TOF values and not consistent binning
-    focus_bin_widths = [-0.0050, -0.0010, -0.0010, -0.0010, -0.00050]
-    focus_crop_start = 2  # These are used when calculating binning range
-    focus_crop_end = 0.95
-
-    calculated_binning_params = []
-    num_of_banks = sample_ws.getNumberHistograms()
-    for i in range(0, num_of_banks):
-        sample_data = sample_ws.readX(i)
-        starting_bin = sample_data[0] * (1 + focus_crop_start)
-        ending_bin = sample_data[-1] * focus_crop_end
-        bin_width = focus_bin_widths[i]
-
-        bank_binning_params = [str(starting_bin), str(bin_width), str(ending_bin)]
-        calculated_binning_params.append(bank_binning_params)
-
-    return calculated_binning_params
+from isis_powder.polaris_routines import polaris_advanced_config
 
 
 def generate_absorb_corrections(ws_to_match):
     absorb_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)
-
-    # TODO move all of this into defaults
-    cylinder_sample_height = str(4)
-    cylinder_sample_radius = str(0.4)
-
-    attenuation_cross_section = str(4.88350)
-    scattering_cross_section = str(5.15775)
-    sample_number_density = str(0.0718956)
-
-    number_of_slices = str(10)
-    number_of_annuli = str(10)
-    number_of_wavelength_points = str(100)
-
-    exp_method = "Normal"
-    # TODO move all of the above into defaults
+    absorb_dict = polaris_advanced_config.absorption_correction_params
 
     absorb_ws = mantid.CylinderAbsorption(InputWorkspace=absorb_ws,
-                                          CylinderSampleHeight=cylinder_sample_height,
-                                          CylinderSampleRadius=cylinder_sample_radius,
-                                          AttenuationXSection=attenuation_cross_section,
-                                          ScatteringXSection=scattering_cross_section,
-                                          SampleNumberDensity=sample_number_density,
-                                          NumberOfSlices=number_of_slices,
-                                          NumberOfAnnuli=number_of_annuli,
-                                          NumberOfWavelengthPoints=number_of_wavelength_points,
-                                          ExpMethod=exp_method)
+                                          CylinderSampleHeight=absorb_dict["cylinder_sample_height"],
+                                          CylinderSampleRadius=absorb_dict["cylinder_sample_radius"],
+                                          AttenuationXSection=absorb_dict["attenuation_cross_section"],
+                                          ScatteringXSection=absorb_dict["scattering_cross_section"],
+                                          SampleNumberDensity=absorb_dict["sample_number_density"],
+                                          NumberOfSlices=absorb_dict["number_of_slices"],
+                                          NumberOfAnnuli=absorb_dict["number_of_annuli"],
+                                          NumberOfWavelengthPoints=absorb_dict["number_of_wavelength_points"],
+                                          ExpMethod=absorb_dict["exponential_method"])
     return absorb_ws
 
 
@@ -126,15 +92,10 @@ def split_into_tof_d_spacing_groups(processed_spectra):
     return d_spacing_group, tof_group
 
 
-def process_vanadium_for_focusing(bank_spectra, mode, mask_path, spline_number=None):
-    # TODO move spline number/mode out of params passed and instead get this to read it itself
-    if mode == "spline":  # TODO support more modes
-        bragg_masking_list = _read_masking_file(mask_path)
-        output = _spline_vanadium_for_focusing(vanadium_spectra_list=bank_spectra,
-                                               spline_coefficient=spline_number, mask_list=bragg_masking_list)
-    else:
-        raise NotImplementedError("Other vanadium processing methods not yet implemented")
-
+def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number=None):
+    bragg_masking_list = _read_masking_file(mask_path)
+    output = _spline_vanadium_for_focusing(vanadium_spectra_list=bank_spectra,
+                                           spline_coefficient=spline_number, mask_list=bragg_masking_list)
     return output
 
 

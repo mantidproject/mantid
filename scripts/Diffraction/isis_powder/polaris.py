@@ -7,12 +7,11 @@ import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
 from isis_powder.routines import yaml_parser
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_algs, polaris_output
+from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_output
 
 
 class Polaris(AbstractInst):
     # Instrument specific properties
-    _masking_file_name = "VanaPeaks.dat"
 
     def __init__(self, chopper_on, config_file=None, **kwargs):
 
@@ -22,11 +21,8 @@ class Polaris(AbstractInst):
         super(Polaris, self).__init__(user_name=kwargs["user_name"], calibration_dir=kwargs["calibration_directory"],
                                       output_dir=kwargs["output_directory"])
 
-        self._chopper_on = chopper_on
-        self._apply_solid_angle = kwargs["apply_solid_angle"]
         self._calibration_mapping_path = kwargs["calibration_mapping_file"]
-
-        self._spline_coeff = 100  # TODO move this out into advanced config
+        self._chopper_on = chopper_on
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_last_run_number = None
@@ -56,7 +52,8 @@ class Polaris(AbstractInst):
         if self._run_details_last_run_number == first_run:
             return self._run_details_cached_obj
 
-        run_details = polaris_algs.get_run_details(chopper_on=self._chopper_on, sac_on=self._apply_solid_angle,
+        solid_angle_on = bool(polaris_advanced_config.standard_variables["apply_solid_angle_corrections"])
+        run_details = polaris_algs.get_run_details(chopper_on=self._chopper_on, sac_on=solid_angle_on,
                                                    run_number=first_run, calibration_dir=self._calibration_dir,
                                                    mapping_path=self._calibration_mapping_path)
 
@@ -79,15 +76,12 @@ class Polaris(AbstractInst):
         return normalised_ws
 
     def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
-        if not self._apply_solid_angle:
+        solid_angle_on = bool(polaris_advanced_config.standard_variables["apply_solid_angle_corrections"])
+
+        if not solid_angle_on:
             return ws_to_correct
 
-        if not run_details or not os.path.isfile(run_details.solid_angle_corr):
-            corrections = \
-                polaris_algs.generate_solid_angle_corrections(run_details=run_details, instrument=self)
-        else:
-            corrections = mantid.Load(Filename=run_details.solid_angle_corr)
-
+        corrections = polaris_algs.generate_solid_angle_corrections(run_details=run_details, instrument=self)
         corrected_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=corrections)
         common.remove_intermediate_workspace(corrections)
         common.remove_intermediate_workspace(ws_to_correct)
@@ -106,12 +100,12 @@ class Polaris(AbstractInst):
         return spectra_name
 
     def spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
-        mode = "spline"
-
-        masking_file_path = os.path.join(self.calibration_dir, self._masking_file_name)
+        masking_file_name = polaris_advanced_config.file_names["bragg_peaks_masking"]
+        spline_coeff = polaris_advanced_config.standard_variables["b_spline_coefficient"]
+        masking_file_path = os.path.join(self.calibration_dir, masking_file_name)
         output = polaris_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_spectra,
-                                                            spline_number=self._spline_coeff,
-                                                            mode=mode, mask_path=masking_file_path)
+                                                            spline_number=spline_coeff,
+                                                            mask_path=masking_file_path)
 
         return output
 
