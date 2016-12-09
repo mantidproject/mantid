@@ -1030,10 +1030,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
                     wqBinned, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
-                                                                 thetaIn=angle, OutputWorkspace=runno+'_IvsQ_binned_'+str(i+1),
-                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
-                                                                 ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                 MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
+                                                                       thetaIn=angle, OutputWorkspace=runno+'_IvsQ_binned_'+str(i+1),
+                                                                       OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
+                                                                       ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                                       MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
                     wqUnbinned = ConvertUnits(InputWorkspace=wlam, Target="MomentumTransfer", OutputWorkspace=runno+'_IvsQ_'+str(i+1))
 
                     wqBinnedList.append(wqBinned)
@@ -1047,10 +1047,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 th = thetaGroup[0]
             else:
                 wqBinned, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
-                                                             thetaIn=angle, OutputWorkspace=runno+'_IvsQ_binned',
-                                                             OutputWorkspaceWavelength=runno+'_IvsLam',
-                                                             ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
+                                                                   thetaIn=angle, OutputWorkspace=runno+'_IvsQ_binned',
+                                                                   OutputWorkspaceWavelength=runno+'_IvsLam',
+                                                                   ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                                   MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
                 wqUnbinned = ConvertUnits(InputWorkspace=wlam, Target="MomentumTransfer", OutputWorkspace=runno+'_IvsQ')
 
             cleanup()
