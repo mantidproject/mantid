@@ -199,7 +199,7 @@ template <typename T> bool doRequiresSkewMatrix(T workspace) {
 template <size_t N>
 std::array<Mantid::coord_t, N>
 getTransformedArray(Mantid::coord_t skewMatrix[N * N], size_t dimension) {
-  std::array<Mantid::coord_t, N> vec = {0., 0., 0.};
+  std::array<Mantid::coord_t, N> vec = {{0., 0., 0.}};
   for (size_t index = 0; index < N; ++index) {
     vec[index] = skewMatrix[dimension + index * N];
   }
@@ -242,8 +242,8 @@ std::array<Mantid::coord_t, 3>
 *
 */
 std::array<Mantid::coord_t, 3> getNormalVector(size_t dimX, size_t dimY) {
-  std::array<Mantid::coord_t, 3> vector1 = {0., 0., 0.};
-  std::array<Mantid::coord_t, 3> vector2 = {0., 0., 0.};
+  std::array<Mantid::coord_t, 3> vector1 = {{0., 0., 0.}};
+  std::array<Mantid::coord_t, 3> vector2 = {{0., 0., 0.}};
   vector1[dimX] = 1.0;
   vector2[dimY] = 1.0;
 
@@ -296,7 +296,7 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
 
     // projecting onto third dimension by setting dimension coming out of screen
     // to zero
-    std::array<Mantid::coord_t, 3> temporaryNonOrthogonal{0.f, 0.f, 0.f};
+    std::array<Mantid::coord_t, 3> temporaryNonOrthogonal{{0.f, 0.f, 0.f}};
     temporaryNonOrthogonal[currentDimension] =
         nonOrthogonalVector[currentDimension];
     temporaryNonOrthogonal[otherDimension] =
@@ -348,8 +348,8 @@ getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
         (i != dimY)) {
       return i;
     }
-    return NULL;
   }
+  return static_cast<size_t>(NULL);
 }
 
 void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
@@ -474,8 +474,8 @@ getGridLineAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX,
   // Get the two vectors for the selected dimensions in the orthogonal axis
   // representation.
 
-  std::array<Mantid::coord_t, 3> dimXOriginal = {0., 0., 0.};
-  std::array<Mantid::coord_t, 3> dimYOriginal = {0., 0., 0.};
+  std::array<Mantid::coord_t, 3> dimXOriginal = {{0., 0., 0.}};
+  std::array<Mantid::coord_t, 3> dimYOriginal = {{0., 0., 0.}};
   dimXOriginal[dimX] = 1.0;
   dimYOriginal[dimY] = 1.0;
   auto dimXTransformed = getTransformedArray<3>(skewMatrixCoord, dimX);
