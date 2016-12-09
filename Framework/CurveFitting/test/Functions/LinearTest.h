@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/Functions/Linear.h"
 #include <boost/make_shared.hpp>
 #include <array>
+#include <numeric>
 
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::Linear;

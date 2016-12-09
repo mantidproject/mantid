@@ -68,7 +68,7 @@ private:
   const int m_min_points;
 
   /// overwrite IFunction base class method, which declares function parameters
-  void init();
+  void init() override;
 
   /// Functor to free a GSL objects in a shared pointer
   struct GSLFree {

@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/Functions/CubicSpline.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Logger.h"
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
