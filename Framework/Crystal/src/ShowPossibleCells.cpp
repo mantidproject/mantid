@@ -51,7 +51,7 @@ void ShowPossibleCells::exec() {
   }
 
   OrientedLattice o_lattice = ws->sample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  const Matrix<double> &UB = o_lattice.getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error(
