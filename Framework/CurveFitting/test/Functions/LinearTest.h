@@ -38,8 +38,8 @@ public:
 
     const double y0 = 0.0;
     const double y1 = 1.0;
-    lin->setParameter("y0", y0);
-    lin->setParameter("y1", y1);
+    lin->setParameter("Y0", y0);
+    lin->setParameter("Y1", y1);
 
     const std::size_t numPoints = 100;
     std::array<double, numPoints> xValues;

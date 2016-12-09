@@ -41,9 +41,9 @@ void CubicSpline::init() {
   declareAttribute("x1", Attribute(1.0));
   declareAttribute("x2", Attribute(2.0));
 
-  declareParameter("y0", 0);
-  declareParameter("y1", 0);
-  declareParameter("y2", 0);
+  declareParameter("Y0", 0);
+  declareParameter("Y1", 0);
+  declareParameter("Y2", 0);
 }
 
 /** Execute the function
@@ -79,14 +79,14 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
     std::string num = std::to_string(i);
 
     std::string xName = "x" + num;
-    std::string yName = "y" + num;
+    std::string yName = "Y" + num;
 
     x[i] = getAttribute(xName).asDouble();
 
     // if x[i] is out of order with its neighbours
     if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
       g_log.warning() << "Spline x parameters are not in ascending order. "
-                         "Only X values will be sorted.\n";
+                         "Only x values will be sorted.\n";
       std::sort(x.get(), x.get() + n);
       continue;
     }
@@ -234,7 +234,7 @@ void CubicSpline::setAttribute(const std::string &attName,
         std::string num = std::to_string(i);
 
         std::string newXName = "x" + num;
-        std::string newYName = "y" + num;
+        std::string newYName = "Y" + num;
 
         declareAttribute(newXName,
                          Attribute(oldX + static_cast<double>(i - oldN + 1)));

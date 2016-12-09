@@ -31,13 +31,13 @@ void Linear::init() {
   declareAttribute("x0", Attribute(0.0));
   declareAttribute("x1", Attribute(1.0));
 
-  declareParameter("y0", 0.0);
-  declareParameter("y1", 0.0);
+  declareParameter("Y0", 0.0);
+  declareParameter("Y1", 0.0);
 }
 
 void Linear::function1D(double *out, const double *xValues,
                         const size_t nData) const {
-  const double y1 = getParameter("y1");
+  const double y1 = getParameter("Y1");
   const double x1 = getAttribute("x1").asDouble();
 
   const double constant_term = y1 - getSlope() * x1;
@@ -88,7 +88,7 @@ void Linear::setAttribute(const std::string &attName,
         std::string num = std::to_string(i);
 
         std::string newXName = "x" + num;
-        std::string newYName = "y" + num;
+        std::string newYName = "Y" + num;
 
         declareAttribute(newXName,
                          Attribute(oldX + static_cast<double>(i - oldN + 1)));
@@ -108,8 +108,8 @@ void Linear::setAttribute(const std::string &attName,
  * @return slope :: The slope of the linear function
  */
 double Linear::getSlope() const {
-  const double y0 = getParameter("y0");
-  const double y1 = getParameter("y1");
+  const double y0 = getParameter("Y0");
+  const double y1 = getParameter("Y1");
   const double x0 = getAttribute("x0").asDouble();
   const double x1 = getAttribute("x1").asDouble();
 

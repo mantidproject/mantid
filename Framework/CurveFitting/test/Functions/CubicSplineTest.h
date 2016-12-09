@@ -42,7 +42,7 @@ public:
       auto index = std::to_string(i);
 
       std::string xAttrName = "x" + index;
-      std::string yAttrName = "y" + index;
+      std::string yAttrName = "Y" + index;
 
       TS_ASSERT_EQUALS(cspline->getAttribute(xAttrName).asDouble(), i);
       TS_ASSERT_EQUALS(cspline->getParameter(yAttrName), 0);
