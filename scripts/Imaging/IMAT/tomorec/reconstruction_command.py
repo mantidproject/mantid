@@ -97,7 +97,7 @@ class ReconstructionCommand(object):
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
         cfg.tomo_print("Shape of raw data: {0}, dtype: {1}".format(data.shape,
-                                                          data.dtype))
+                                                                   data.dtype))
 
         # These imports will raise appropriate exceptions in case of error
         import tomorec.tool_imports as tti
@@ -117,8 +117,9 @@ class ReconstructionCommand(object):
         recon_data = self.run_reconstruct_3d(preproc_data, cfg.preproc_cfg,
                                              cfg.alg_cfg)
         t_recon_end = time.time()
-        cfg.tomo_print("Reconstructed volume. Shape: {0}, and pixel data type: {1}".
-              format(recon_data.shape, recon_data.dtype))
+        cfg.tomo_print(
+            "Reconstructed volume. Shape: {0}, and pixel data type: {1}".
+            format(recon_data.shape, recon_data.dtype))
 
         # Post-processing
         self.apply_postproc_filters(recon_data, cfg.postproc_cfg)
@@ -415,7 +416,7 @@ class ReconstructionCommand(object):
                     format(pre_cfg.normalize_air_region))
 
             # DEBUG changed to use right/top/left/bottom TODO check if correct
-            right = pre_cfg.normalize_air_region[2]# why do we add 1?
+            right = pre_cfg.normalize_air_region[2]  # why do we add 1?
             top = pre_cfg.normalize_air_region[1]
             left = pre_cfg.normalize_air_region[0]
             bottom = pre_cfg.normalize_air_region[3]
@@ -1116,30 +1117,34 @@ class ReconstructionCommand(object):
         # depending on the COR projections it will select different slice indices
         cor_slice_index = 0
         for c in range(cor_num_checked_projections):
-            cor_slice_index += int(size/cor_num_checked_projections)
+            cor_slice_index += int(size / cor_num_checked_projections)
             print(" >> Calculated slice index", cor_slice_index)
             cor_proj_slice_indices.append(cor_slice_index)
 
         calculated_cors = []
 
-        cfg.tomo_print("Starting COR calculation on " + str(cor_num_checked_projections) + " projections", 2)
+        cfg.tomo_print("Starting COR calculation on " +
+                       str(cor_num_checked_projections) + " projections", 2)
 
         pixelsFromLeftSide = float(cfg.preproc_cfg.crop_coords[0])
         for slice_idx in cor_proj_slice_indices:
             tomopy_cor = tomopy.find_center(
                 tomo=sample, theta=proj_angles, ind=slice_idx, emission=False)
-            print("\t** COR for slice", str(slice_idx), ".. REL to CROP ", str(tomopy_cor), ".. REL to FULL ", str(tomopy_cor + pixelsFromLeftSide))
+            print("\t** COR for slice", str(slice_idx), ".. REL to CROP ",
+                  str(tomopy_cor), ".. REL to FULL ",
+                  str(tomopy_cor + pixelsFromLeftSide))
             calculated_cors.append(tomopy_cor)
 
-
         cfg.tomo_print("Finished COR calculation. ", 2)
-        averageCORrelativeToCrop = sum(calculated_cors) / float(len(calculated_cors))
-        averageCORrelativeToFullImage = sum(calculated_cors) / float(len(calculated_cors)) + pixelsFromLeftSide
-
+        averageCORrelativeToCrop = sum(calculated_cors) / float(
+            len(calculated_cors))
+        averageCORrelativeToFullImage = sum(calculated_cors) / float(
+            len(calculated_cors)) + pixelsFromLeftSide
 
         # we add the pixels cut off from the left, to reflect the full image in Mantid
 
-        cfg.tomo_print("Printing average COR in relation to cropped image " + str(cfg.preproc_cfg.crop_coords) +":", 2)
+        cfg.tomo_print("Printing average COR in relation to cropped image " +
+                       str(cfg.preproc_cfg.crop_coords) + ":", 2)
         print(str(int(round(averageCORrelativeToCrop))))
         cfg.tomo_print("Printing average COR in relation to FULL image:", 2)
         print(str(int(round(averageCORrelativeToFullImage))))

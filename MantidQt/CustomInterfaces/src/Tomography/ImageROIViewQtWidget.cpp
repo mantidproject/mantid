@@ -151,10 +151,10 @@ void ImageROIViewQtWidget::setupConnections() {
           SLOT(imageTypeUpdated(int)));
 
   // parameter (points) widgets
-  // connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
-  //         SLOT(valueUpdatedCoR(int)));
-  // connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
-  //         SLOT(valueUpdatedCoR(int)));
+  connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedCoR(int)));
+  connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedCoR(int)));
 
   connect(m_ui.spinBox_roi_right, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedROI(int)));
@@ -275,7 +275,7 @@ void ImageROIViewQtWidget::showStack(
 
   showProjection(m_stackSamples, 0);
   initParamWidgets(width, height);
-  refreshROIetAl();
+  refreshImage();
   enableParamWidgets(true);
   enableImageTypes(wsg && wsg->size() > 0, wsgFlats && wsgFlats->size() > 0,
                    wsgDarks && wsgDarks->size() > 0);
@@ -437,17 +437,17 @@ void ImageROIViewQtWidget::resetWidgetsOnNewStack() {
 
 void ImageROIViewQtWidget::valueUpdatedCoR(int) {
   grabCoRFromWidgets();
-  refreshROIetAl();
+  refreshImage();
 }
 
 void ImageROIViewQtWidget::valueUpdatedROI(int) {
   grabROIFromWidgets();
-  refreshROIetAl();
+  refreshImage();
 }
 
 void ImageROIViewQtWidget::valueUpdatedNormArea(int) {
   grabNormAreaFromWidgets();
-  refreshROIetAl();
+  refreshImage();
 }
 
 /**
@@ -481,7 +481,7 @@ void ImageROIViewQtWidget::grabNormAreaFromWidgets() {
  * for every event that modifies the current image and/or selection of
  * parameters.
  */
-void ImageROIViewQtWidget::refreshROIetAl() {
+void ImageROIViewQtWidget::refreshImage() {
 
   const QPixmap *pp = m_ui.label_img->pixmap();
   if (!pp)
@@ -663,7 +663,7 @@ void ImageROIViewQtWidget::corClicked() {
 
 void ImageROIViewQtWidget::corResetClicked() {
   m_presenter->notify(IImageROIPresenter::ResetCoR);
-  refreshROIetAl();
+  refreshImage();
 }
 
 void ImageROIViewQtWidget::roiClicked() {
@@ -672,7 +672,7 @@ void ImageROIViewQtWidget::roiClicked() {
 
 void ImageROIViewQtWidget::roiResetClicked() {
   m_presenter->notify(IImageROIPresenter::ResetROI);
-  refreshROIetAl();
+  refreshImage();
 }
 
 void ImageROIViewQtWidget::normAreaClicked() {
@@ -681,7 +681,7 @@ void ImageROIViewQtWidget::normAreaClicked() {
 
 void ImageROIViewQtWidget::normAreaResetClicked() {
   m_presenter->notify(IImageROIPresenter::ResetNormalization);
-  refreshROIetAl();
+  refreshImage();
 }
 
 void ImageROIViewQtWidget::playClicked() {
@@ -783,7 +783,7 @@ void ImageROIViewQtWidget::showProjectionImage(
   m_ui.label_img->show();
   m_basePixmap.reset(new QPixmap(pixmap));
 
-  refreshROIetAl();
+  refreshImage();
 }
 
 /**
@@ -1210,7 +1210,7 @@ void ImageROIViewQtWidget::updateValuesForSpinBoxes(
  */
 void ImageROIViewQtWidget::mouseUpdateCoR(const int x, const int y) {
   grabCoRFromMousePoint(x, y);
-  refreshROIetAl();
+  refreshImage();
 
   m_presenter->notify(IImageROIPresenter::FinishedCoR);
 }
@@ -1226,7 +1226,7 @@ void ImageROIViewQtWidget::mouseUpdateROICornersStartSelection(const int x,
                                                                const int y) {
   grabROICorner1FromMousePoint(x, y);
   grabROICorner2FromMousePoint(x, y);
-  refreshROIetAl();
+  refreshImage();
   m_selectionState = IImageROIView::SelectROISecond;
 }
 
@@ -1243,7 +1243,7 @@ void ImageROIViewQtWidget::mouseUpdateROICornerContinuedSelection(const int x,
                                                                   const int y) {
   grabROICorner2FromMousePoint(x, y);
   grabROIFromWidgets();
-  refreshROIetAl();
+  refreshImage();
 }
 
 /**
@@ -1256,7 +1256,7 @@ void ImageROIViewQtWidget::mouseUpdateROICornerContinuedSelection(const int x,
  */
 void ImageROIViewQtWidget::mouseFinishROI(const int x, const int y) {
   grabROICorner2FromMousePoint(x, y);
-  refreshROIetAl();
+  refreshImage();
   m_presenter->notify(IImageROIPresenter::FinishedROI);
 }
 
@@ -1264,7 +1264,7 @@ void ImageROIViewQtWidget::mouseUpdateNormAreaCornersStartSelection(
     const int x, const int y) {
   grabNormAreaCorner1FromMousePoint(x, y);
   grabNormAreaCorner2FromMousePoint(x, y);
-  refreshROIetAl();
+  refreshImage();
   m_selectionState = IImageROIView::SelectNormAreaSecond;
 }
 
@@ -1272,12 +1272,12 @@ void ImageROIViewQtWidget::mouseUpdateNormAreaCornerContinuedSelection(
     const int x, const int y) {
   grabNormAreaCorner2FromMousePoint(x, y);
   grabNormAreaFromWidgets();
-  refreshROIetAl();
+  refreshImage();
 }
 
 void ImageROIViewQtWidget::mouseFinishNormArea(const int x, const int y) {
   grabNormAreaCorner2FromMousePoint(x, y);
-  refreshROIetAl();
+  refreshImage();
   m_presenter->notify(IImageROIPresenter::FinishedNormalization);
 }
 
@@ -1329,7 +1329,41 @@ void ImageROIViewQtWidget::findCORClicked() {
 }
 
 void ImageROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
-  std::cout << "DEBUG >> " << str.toStdString();
+  std::string output = str.toStdString();
+
+  // -- to not be on the null character
+  auto back_iterator = --(output.cend());
+  std::string cor_number;
+  for (; back_iterator != output.begin(); --back_iterator) {
+    if (*back_iterator == '\n') {
+      // found the last new line
+      cor_number = std::string(back_iterator + 1, output.cend());
+      break;
+    }
+  }
+  int cor = 0;
+  try {
+    cor = std::stoi(cor_number);
+  } catch (std::invalid_argument &) {
+    // output COR cannot be converted, do not change anything and just return
+    // silently
+    return;
+  }
+  m_ui.spinBox_cor_x->setValue(cor);
+  // middle of image is ((bottom - top) / 2)
+  // center is (top location + middle)
+  int imageCentre =
+      m_ui.spinBox_roi_top->value() +
+      ((m_ui.spinBox_roi_bottom->value() - m_ui.spinBox_roi_top->value()) / 2);
+
+  m_ui.spinBox_cor_y->setValue(imageCentre);
+
+  // refresh all coordinate variables
+  grabCoRFromWidgets();
+  grabROIFromWidgets();
+  grabNormAreaFromWidgets();
+  // redraw the image with the rectangles
+  refreshImage();
 }
 
 } // namespace CustomInterfaces

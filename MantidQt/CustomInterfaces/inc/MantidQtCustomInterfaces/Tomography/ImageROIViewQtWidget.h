@@ -234,7 +234,7 @@ private:
 
   /// repaint the image with new positions of points and
   /// rectangles
-  void refreshROIetAl();
+  void refreshImage();
   void refreshCoR();
   void refreshROI();
   void refreshNormArea();
@@ -257,14 +257,15 @@ private:
   bool eventFilter(QObject *obj, QEvent *event) override;
 
   struct RectangleXY {
-	  int right;
-	  int top;
+    int right;
+    int top;
   } m_startOfRectangle;
 
-  void updateValuesForSpinBoxes(const int x, const int y,
-                                const struct ImageROIViewQtWidget::RectangleXY startPositions,
-                                QSpinBox *spinLeft, QSpinBox *spinTop,
-                                QSpinBox *spinRight, QSpinBox *spinBottom);
+  void updateValuesForSpinBoxes(
+      const int x, const int y,
+      const struct ImageROIViewQtWidget::RectangleXY startPositions,
+      QSpinBox *spinLeft, QSpinBox *spinTop, QSpinBox *spinRight,
+      QSpinBox *spinBottom);
 
   Ui::ImageSelectCoRAndRegions m_ui;
 
@@ -296,7 +297,6 @@ private:
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IImageROIPresenter> m_presenter;
-
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
