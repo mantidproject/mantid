@@ -32,6 +32,10 @@ DetectorInfo::DetectorInfo(
     m_detIDToIndex[m_detectorIDs[i]] = i;
 }
 
+/// Returns the size of the DetectorInfo, i.e., the number of detectors in the
+/// instrument.
+size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
+
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   return getDetector(index).isMonitor();
@@ -157,6 +161,11 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
   }
+}
+
+/// Return a const reference to the detector with given index.
+const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
+  return getDetector(index);
 }
 
 /// Returns the source position.
