@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_IREFLSETTINGSPRESENTER_H
 
 #include <string>
 
@@ -8,10 +8,10 @@ namespace CustomInterfaces {
 
 class IReflMainWindowPresenter;
 
-/** @class IReflSettingsTabPresenter
+/** @class IReflSettingsPresenter
 
-IReflSettingsTabPresenter is an interface which defines the functions that need
-to be implemented by a concrete 'Settings' tab presenter
+IReflSettingsPresenter is an interface which defines the functions that need
+to be implemented by a concrete 'Settings' presenter
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -34,18 +34,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflSettingsTabPresenter {
+class IReflSettingsPresenter {
 public:
-  virtual ~IReflSettingsTabPresenter(){};
+  virtual ~IReflSettingsPresenter(){};
   /// Pre-processing
-  virtual std::string getTransmissionOptions(int group) const = 0;
+  virtual std::string getTransmissionOptions() const = 0;
   /// Processing
-  virtual std::string getReductionOptions(int group) const = 0;
+  virtual std::string getReductionOptions() const = 0;
   /// Post-processing
-  virtual std::string getStitchOptions(int group) const = 0;
+  virtual std::string getStitchOptions() const = 0;
+
+  enum Flag { ExpDefaultsFlag, InstDefaultsFlag };
+
+  /// Tell the presenter something happened
+  virtual void notify(IReflSettingsPresenter::Flag flag) = 0;
   /// Set current instrument name
   virtual void setInstrumentName(const std::string &instName) = 0;
 };
 }
 }
-#endif /* MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H */
+#endif /* MANTID_CUSTOMINTERFACES_IREFLSETTINGSPRESENTER_H */

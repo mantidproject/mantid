@@ -19,8 +19,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <QFileInfo>
 #include <QLineEdit>
-#include <QFileDialog>
 #include <QHash>
 #include <QMessageBox>
 

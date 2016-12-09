@@ -1,20 +1,20 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
-#include <vector>
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflMainWindowPresenter;
-class IReflSettingsPresenter;
+class IReflSettingsView;
 
-/** @class ReflSettingsTabPresenter
+/** @class ReflSettingsPresenter
 
-ReflSettingsTabPresenter is a presenter class for the tab 'Settings' in the
+ReflSettingsPresenter is a presenter class for the widget 'Settings' in the
 Reflectometry (Polref) Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -38,27 +38,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsTabPresenter
-    : public IReflSettingsTabPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsPresenter
+    : public IReflSettingsPresenter {
 public:
   /// Constructor
-  ReflSettingsTabPresenter(std::vector<IReflSettingsPresenter *> presenters);
+  ReflSettingsPresenter(IReflSettingsView *view);
   /// Destructor
-  ~ReflSettingsTabPresenter() override;
-  /// Set the instrument name
+  ~ReflSettingsPresenter() override;
+  void notify(IReflSettingsPresenter::Flag flag) override;
   void setInstrumentName(const std::string &instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions(int group) const override;
+  std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions(int group) const override;
+  std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions(int group) const override;
+  std::string getStitchOptions() const override;
 
 private:
-  /// The presenters for each group as a vector
-  std::vector<IReflSettingsPresenter *> m_settingsPresenters;
+  void createStitchHints();
+  void getExpDefaults();
+  void getInstDefaults();
+  Mantid::API::IAlgorithm_sptr createReductionAlg();
+  Mantid::Geometry::Instrument_const_sptr
+  createEmptyInstrument(const std::string &instName);
+  std::string getTransmissionRuns() const;
+
+  /// The view we are managing
+  IReflSettingsView *m_view;
+  /// Name of the current instrument in use
+  std::string m_currentInstrumentName;
 };
 }
 }
-#endif /* MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H */
+#endif /* MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H */
