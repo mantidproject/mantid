@@ -63,9 +63,10 @@ void AbsorptionCorrections::run() {
   absCorAlgo->setProperty("DefaultBeamSize", m_uiForm.ckBeamSize->isChecked());
   absCorAlgo->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   absCorAlgo->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
-  const auto wave = m_uiForm.spNumberWavelengths->value();
+  long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
   absCorAlgo->setProperty("NumberWavelengths", wave);
-  absCorAlgo->setProperty("Events", m_uiForm.spNumberEvents->value());
+  long events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  absCorAlgo->setProperty("Events", events);
 
   // Can details
   bool useCan = m_uiForm.ckUseCan->isChecked();
