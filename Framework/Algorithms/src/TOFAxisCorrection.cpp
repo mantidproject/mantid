@@ -190,10 +190,10 @@ void TOFAxisCorrection::init() {
                   "The type of indices used in " +
                       PropertyNames::REFERENCE_SPECTRA + " or " + PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +
                       IndexTypes::DETECTOR_ID + "').");
-  declareProperty(PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt, "Bin index of the nominal elastic TOF channel.", Direction::Input);
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
                       PropertyNames::REFERENCE_SPECTRA.c_str()),
                   "A list of reference spectra.");
+  declareProperty(PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt, "Bin index of the nominal elastic TOF channel.", Direction::Input);
   declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
                   "Incident energy if EI sample log is not present/incorrect.",
                   Direction::Input);
