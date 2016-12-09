@@ -248,8 +248,10 @@ bool WorkspaceSelector::checkEligibility(
   } else if (!hasValidSuffix(name)) {
     return false;
   } else if (!m_showGroups) {
-    auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
-    if (group!=nullptr) return false;
+    auto group =
+        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
+    if (group != nullptr)
+      return false;
   }
 
   return true;
