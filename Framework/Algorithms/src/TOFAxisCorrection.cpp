@@ -284,7 +284,7 @@ std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
     }
     if (!spectrumInfo.hasDetectors(i)) {
       issues[PropertyNames::REFERENCE_SPECTRA] =
-          "No detectors attached to workspace index " + i;
+          "No detectors attached to workspace index " + std::to_string(i) + ".";
       break;
     }
     if (m_eppTable) {
