@@ -121,7 +121,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("IncidentEnergy", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -182,7 +183,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(elasticBin)))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ElasticBinIndex", static_cast<int>(elasticBin)))
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }
@@ -223,7 +225,8 @@ public:
     const double x0 = 23.66;
     const double dx = 0.05;
     const double TOF = x0 + dx * 3 * blocksize / 4;
-    auto inputWs = createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
+    auto inputWs =
+        createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
     const double referenceTOF = 1.06 * TOF;
     auto referenceWs = createInputWorkspace(blocksize, x0, dx, referenceTOF);
     auto alg = createTOFAxisCorrectionAlgorithm();
@@ -293,19 +296,20 @@ private:
     ws->mutableRun().addProperty("wavelength", lambda);
   }
 
-  static void assertTOFShift(MatrixWorkspace_sptr shiftedWs, MatrixWorkspace_sptr ws, const double ei, const double wavelength, const double shift) {
+  static void assertTOFShift(MatrixWorkspace_sptr shiftedWs,
+                             MatrixWorkspace_sptr ws, const double ei,
+                             const double wavelength, const double shift) {
     TS_ASSERT(shiftedWs);
     TS_ASSERT_EQUALS(shiftedWs->run().getPropertyAsSingleValue("EI"), ei);
     TS_ASSERT_DELTA(shiftedWs->run().getPropertyAsSingleValue("wavelength"),
-                     wavelength, 1e-8)
+                    wavelength, 1e-8)
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < ws->blocksize(); ++j) {
         TS_ASSERT_DELTA(shiftedWs->x(i)[j], ws->x(i)[j] + shift, 1e-6)
         TS_ASSERT_EQUALS(shiftedWs->y(i)[j], ws->y(i)[j])
         TS_ASSERT_EQUALS(shiftedWs->e(i)[j], ws->e(i)[j])
       }
-      TS_ASSERT_DELTA(shiftedWs->x(i).back(), ws->x(i).back() + shift,
-                      1e-6)
+      TS_ASSERT_DELTA(shiftedWs->x(i).back(), ws->x(i).back() + shift, 1e-6)
     }
   }
 
@@ -336,23 +340,23 @@ private:
                                                    const double x0,
                                                    const double dx,
                                                    const double TOF) {
-    auto inputWs = createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
+    auto inputWs =
+        createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
     addSampleLogs(inputWs, TOF);
     return inputWs;
   }
 
-  static MatrixWorkspace_sptr createInputWorkspaceWithoutSampleLogs(const size_t blocksize,
-                                                                    const double x0,
-                                                                    const double dx,
-                                                                    const double TOF) {
-  auto inputWs = createEmptyIN4Workspace("_input_ws");
-  const double sigma = 3 * dx;
-  auto gaussianPeak = [TOF, sigma](const double x) {
-    const double a = -(x - TOF) / sigma;
-    return std::exp(-a * a / 2);
-  };
-  fillWorkspace(inputWs, blocksize, x0, dx, gaussianPeak);
-  return inputWs;
+  static MatrixWorkspace_sptr
+  createInputWorkspaceWithoutSampleLogs(const size_t blocksize, const double x0,
+                                        const double dx, const double TOF) {
+    auto inputWs = createEmptyIN4Workspace("_input_ws");
+    const double sigma = 3 * dx;
+    auto gaussianPeak = [TOF, sigma](const double x) {
+      const double a = -(x - TOF) / sigma;
+      return std::exp(-a * a / 2);
+    };
+    fillWorkspace(inputWs, blocksize, x0, dx, gaussianPeak);
+    return inputWs;
   }
 
   template <typename Function>

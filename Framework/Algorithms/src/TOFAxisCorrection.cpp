@@ -77,8 +77,7 @@ const static std::string WAVELENGTH("wavelength");
  *
  *  @throw std::runtime_error if index is not in the map
  */
-template <typename Map>
-size_t mapIndex(const int index, const Map &indexMap) {
+template <typename Map> size_t mapIndex(const int index, const Map &indexMap) {
   try {
     return indexMap.at(index);
   } catch (std::out_of_range &) {
@@ -97,7 +96,8 @@ size_t mapIndex(const int index, const Map &indexMap) {
  *
  *  @return A workspace index corresponding to index.
  */
-size_t toWorkspaceIndex(const int index, const std::string &indexType, API::MatrixWorkspace_const_sptr ws) {
+size_t toWorkspaceIndex(const int index, const std::string &indexType,
+                        API::MatrixWorkspace_const_sptr ws) {
   if (indexType == IndexTypes::DETECTOR_ID) {
     const auto indexMap = ws->getDetectorIDToWorkspaceIndexMap();
     return mapIndex(index, indexMap);
@@ -161,7 +161,8 @@ void TOFAxisCorrection::init() {
   auto tofWorkspace = boost::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
-  auto mustBePositiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositiveDouble =
+      boost::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveDouble->setLower(0);
   auto mustBePositiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositiveInt->setLower(0);
@@ -188,13 +189,17 @@ void TOFAxisCorrection::init() {
   declareProperty(PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
                   boost::make_shared<Kernel::StringListValidator>(indexTypes),
                   "The type of indices used in " +
-                      PropertyNames::REFERENCE_SPECTRA + " or " + PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +
+                      PropertyNames::REFERENCE_SPECTRA + " or " +
+                      PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +
                       IndexTypes::DETECTOR_ID + "').");
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
                       PropertyNames::REFERENCE_SPECTRA.c_str()),
                   "A list of reference spectra.");
-  declareProperty(PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt, "Bin index of the nominal elastic TOF channel.", Direction::Input);
-  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
+  declareProperty(
+      PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt,
+      "Bin index of the nominal elastic TOF channel.", Direction::Input);
+  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(),
+                  mustBePositiveDouble,
                   "Incident energy if EI sample log is not present/incorrect.",
                   Direction::Input);
 }
@@ -243,7 +248,9 @@ std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
   } else {
     m_eppTable = getProperty(PropertyNames::EPP_TABLE);
     if (!m_eppTable) {
-      issues[PropertyNames::EPP_TABLE] = "No EPP table specified nor " + PropertyNames::ELASTIC_BIN_INDEX + " specified.";
+      issues[PropertyNames::EPP_TABLE] = "No EPP table specified nor " +
+                                         PropertyNames::ELASTIC_BIN_INDEX +
+                                         " specified.";
       return issues;
     }
     const auto peakPositionColumn =
@@ -488,9 +495,10 @@ std::vector<size_t> TOFAxisCorrection::referenceWorkspaceIndices() const {
       getProperty(PropertyNames::REFERENCE_SPECTRA);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
   std::vector<size_t> workspaceIndices(indices.size());
-  std::transform(indices.cbegin(), indices.cend(), workspaceIndices.begin(), [&indexType, this](int index) {
-    return toWorkspaceIndex(index, indexType, m_inputWs);
-  });
+  std::transform(indices.cbegin(), indices.cend(), workspaceIndices.begin(),
+                 [&indexType, this](int index) {
+                   return toWorkspaceIndex(index, indexType, m_inputWs);
+                 });
   return workspaceIndices;
 }
 
