@@ -4,7 +4,7 @@ Error Propagation
 =================
 
 The purpose of this document is to explain how Mantid deals with error
-propogation and how it is used in its algorithms.
+propagation and how it is used in its algorithms.
 
 Theory
 ------
