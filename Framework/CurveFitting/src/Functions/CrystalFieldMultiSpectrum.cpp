@@ -114,12 +114,12 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
       switch(static_cast<int>(physpropId[iSpec])) {
-        case 3: // Hmag, Hdir, inverse, Unit,
-          declareAttribute("Hmag", Attribute(1.0));
-          declareAttribute("inverse" + suffix, Attribute(false));
+        case 4: // Hmag, Hdir, inverse, Unit,
+          declareAttribute("Hmag" + suffix, Attribute(1.0));
         case 2: // Hdir, inverse, Unit
+          declareAttribute("inverse" + suffix, Attribute(false));
+        case 3: // Hdir, Unit
           declareAttribute("Hdir" + suffix, Attribute(std::vector<double>{0., 0., 1.}));
-        case 4: // Hdir, Unit
           declareAttribute("Unit" + suffix, Attribute("bohr"));
           break;
       }

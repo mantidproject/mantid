@@ -72,7 +72,7 @@ DECLARE_FUNCTION(CrystalFieldSusceptibility)
 CrystalFieldSusceptibility::CrystalFieldSusceptibility()
     : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
-  declareAttribute("Unit", Attribute("bohr"));
+  declareAttribute("Unit", Attribute("SI"));
   declareAttribute("inverse", Attribute(false));
 }
 
@@ -106,6 +106,13 @@ void CrystalFieldSusceptibility::function1D(double *out,
   else {
     // Use stored values
     calculate(out, xValues, nData, en, wf, nre, H);
+  }
+  // In cgs units, the definition of the permeability constant omits the 4pi
+  if (boost::iequals(getAttribute("Unit").asString(), "cgs")) {
+    const double fourpi = 4 * M_PI;
+    for (size_t i = 0; i < nData; i++) {
+      out[i] /= fourpi;
+    }
   }
   if (getAttribute("inverse").asBool()) {
     for (size_t i = 0; i < nData; i++) {
