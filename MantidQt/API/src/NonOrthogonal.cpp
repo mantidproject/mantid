@@ -207,8 +207,7 @@ getTransformedArray(Mantid::coord_t skewMatrix[N * N], size_t dimension) {
 }
 
 template <typename T, size_t N> void normalizeVector(std::array<T, N> &vector) {
-  auto sumOfSquares =
-      [](double sum, double element) { return sum + element * element; };
+  auto sumOfSquares = [](T sum, T element) { return sum + element * element; };
   auto norm = std::accumulate(vector.begin(), vector.end(), 0.f, sumOfSquares);
   norm = std::sqrt(norm);
   for (auto &element : vector) {
@@ -316,7 +315,7 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
     angle = 0.;
 
   } else if (dotProduct == -1.) {
-    angle = static_cast<float>(M_PI);
+    angle = static_cast<double>(M_PI);
 
   } else {
     angle = std::acos(dotProduct);
