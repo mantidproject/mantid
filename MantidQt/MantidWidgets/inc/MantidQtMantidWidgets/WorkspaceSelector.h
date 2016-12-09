@@ -66,6 +66,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS WorkspaceSelector : public QComboBox {
                  setWorkspaceTypes)
   Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE
                  showHiddenWorkspaces)
+  Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
   Q_PROPERTY(QStringList Suffix READ getSuffixes WRITE setSuffixes)
   Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE
@@ -82,6 +83,8 @@ public:
   void setWorkspaceTypes(const QStringList &types);
   bool showHiddenWorkspaces() const;
   void showHiddenWorkspaces(bool show);
+  bool showWorkspaceGroups() const;
+  void showWorkspaceGroups(bool show);
   bool isOptional() const;
   void setOptional(bool optional);
   QStringList getSuffixes() const;
@@ -131,7 +134,9 @@ private:
   /// A list of workspace types that should be shown in the ComboBox
   QStringList m_workspaceTypes;
   /// Whether to show "hidden" workspaces
-  bool m_showHidden;
+  bool m_showHidden;  
+  // show/hide workspace groups
+  bool m_showGroups;
   bool m_optional; ///< Whether to add an extra empty entry to the combobox
   // suffix
   QStringList m_suffix;
