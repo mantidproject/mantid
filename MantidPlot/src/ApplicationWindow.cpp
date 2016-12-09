@@ -5940,13 +5940,11 @@ std::string ApplicationWindow::windowGeometryInfo(MdiSubWindow *w) {
   }
 
   tsv << x << y;
-  if (w->status() != MdiSubWindow::Minimized)
-    tsv << w->width() << w->height();
-  else
-    tsv << w->minRestoreSize().width() << w->minRestoreSize().height()
-        << "minimized";
+  tsv << w->width() << w->height();
 
-  if (hidden(w))
+  if (w->status() == MdiSubWindow::Minimized)
+    tsv << "minimized";
+  else if (hidden(w))
     tsv << "hidden";
   else if (w == activeWindow())
     tsv << "active";
@@ -14365,7 +14363,9 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
   if (active_window)
     active_window_state = active_window->status();
 
-  hideFolderWindows(oldFolder);
+  if (newFolder != oldFolder)
+    hideFolderWindows(oldFolder);
+
   d_current_folder = newFolder;
 
   resultsLog->clear();
