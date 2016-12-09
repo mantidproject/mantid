@@ -1,5 +1,5 @@
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import logger
 import os
 import numpy as np
 import json
@@ -42,7 +42,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
     #  *************************** USE CASES ********************************************
-    _core = os.path.abspath("../ExternalData/Testing/Data/UnitTest/")  # hardcoded directory with testing files
+    _core = AbinsConstants.get_core_folder()
 
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
@@ -81,28 +81,23 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self._check(core=self._core, name=self._many_k_no_sum)
 
     # Helper functions
-
     def _check(self, core=None, name=None):
 
+        # calculate folder with testing data
         cwd = os.getcwd()
+        filename = os.path.relpath(os.path.join(core, name), cwd)
 
         # get calculated data
-        filename_unix = os.path.join(core, name + ".phonon")
-        input_filename = os.path.abspath(filename_unix)
-        input_filename = os.path.relpath(input_filename, cwd)
-
-        data = self._read_DFT(filename=input_filename)
+        data = self._read_DFT(filename=filename)
 
         # get correct data
-        filename = os.path.abspath(os.path.join(core, name))
-        filename = os.path.relpath(filename, cwd)
         correct_data = self._prepare_data(filename=filename)
 
         # check read data
         self._check_reader_data(correct_data=correct_data, data=data)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_dft_filename=input_filename)
+        self._check_loader_data(correct_data=correct_data, input_dft_filename=filename)
 
     def _read_DFT(self, filename=None):
         """
@@ -111,7 +106,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         @return:
         """
         # 1) Read data
-        castep_reader = LoadCASTEP(input_dft_filename=filename)
+        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
 
         data = self._get_reader_data(castep_reader=castep_reader)
 
@@ -192,7 +187,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
-        loader = LoadCASTEP(input_dft_filename=input_dft_filename)
+        loader = LoadCASTEP(input_dft_filename=input_dft_filename + ".phonon")
         loaded_data = loader.load_data().extract()
 
         # k points

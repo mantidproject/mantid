@@ -31,73 +31,69 @@ def skip_if(skipping_criteria):
 @skip_if(old_python)
 class ABINSCalculateCrystalTest(unittest.TestCase):
 
-    _core = os.path.abspath("../ExternalData/Testing/Data/UnitTest/")  # path to files
+    core = AbinsConstants.get_core_folder()
     _temperature = 10  # 10 K,  temperature for the benchmark
 
     # data
     # Use case: one k-point
-    C6H6 = os.path.abspath(os.path.join(_core, "benzene_CalculateCrystal"))
+    _C6H6 = os.path.join(core, "benzene_CalculateCrystal")
 
     #  Use case: many k-points
-    Si2 = os.path.abspath(os.path.join(_core, "Si2-sc_CalculateCrystal"))
+    _Si2 = os.path.join(core, "Si2-sc_CalculateCrystal")
 
     #     test input
     def test_wrong_input(self):
 
-        filename = self.Si2 + ".phonon"
+        filename = self._Si2 + ".phonon"
 
-        _castep_reader = LoadCASTEP(input_dft_filename=filename)
-        _good_data = _castep_reader.read_phonon_file()
+        castep_reader = LoadCASTEP(input_dft_filename=filename)
+        good_data = castep_reader.read_phonon_file()
 
         # wrong filename
-        with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            _poor_tester = CalculateCrystal(filename=1, temperature=self._temperature, abins_data=_good_data)
+        self.assertRaises(ValueError, CalculateCrystal, filename=1,
+                          temperature=self._temperature, abins_data=good_data)
 
         # wrong temperature
-        with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            _poor_tester = CalculateCrystal(filename=filename, temperature=-10, abins_data=_good_data)
+        self.assertRaises(ValueError, CalculateCrystal, filename=filename, temperature=-10, abins_data=good_data)
 
         # data from object of type AtomsData instead of object of type AbinsData
-        bad_data = _good_data.extract()["atoms_data"]
-        with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            _poor_tester = CalculateCrystal(filename=filename, temperature=self._temperature, abins_data=bad_data)
+        bad_data = good_data.extract()["atoms_data"]
+        self.assertRaises(ValueError, CalculateCrystal, filename=filename,
+                          temperature=self._temperature, abins_data=bad_data)
 
     #       main test
     def test_good_case(self):
-        self._good_case(name=self.C6H6)
-        self._good_case(name=self.Si2)
+        self._good_case(name=self._C6H6)
+        self._good_case(name=self._Si2)
 
     #       helper functions
     def _good_case(self, name=None):
 
         # calculation of crystal data
-        _good_data = self._get_good_data(filename=name)
+        good_data = self._get_good_data(filename=name)
 
-        _good_tester = CalculateCrystal(filename=name + ".phonon",
-                                        temperature=self._temperature,
-                                        abins_data=_good_data["DFT"])
-        calculated_data = _good_tester.calculate_data().extract()
+        good_tester = CalculateCrystal(filename=name + ".phonon",
+                                       temperature=self._temperature,
+                                       abins_data=good_data["DFT"])
+        calculated_data = good_tester.calculate_data().extract()
 
         # check if evaluated crystal data  is correct
-        self.assertEqual(True, np.allclose(_good_data["dw_crystal_data"], calculated_data["dw_crystal_data"]))
+        self.assertEqual(True, np.allclose(good_data["dw_crystal_data"], calculated_data["dw_crystal_data"]))
 
         # check if loading crystal data is correct
         new_tester = CalculateCrystal(filename=name + ".phonon",
                                       temperature=self._temperature,
-                                      abins_data=_good_data["DFT"])
+                                      abins_data=good_data["DFT"])
         loaded_data = new_tester.load_data().extract()
 
         self.assertEqual(True, np.allclose(calculated_data["dw_crystal_data"], loaded_data["dw_crystal_data"]))
 
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
-        _crystal = self._prepare_data(filename=filename + "_crystal_DW.txt")
+        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
+        crystal = self._prepare_data(filename=filename + "_crystal_DW.txt")
 
-        return {"DFT": _CASTEP_reader.read_phonon_file(), "dw_crystal_data": _crystal}
+        return {"DFT": castep_reader.read_phonon_file(), "dw_crystal_data": crystal}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

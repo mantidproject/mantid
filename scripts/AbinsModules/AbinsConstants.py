@@ -4,6 +4,7 @@ import numpy as np
 from scipy import constants
 import re
 from platform import python_version
+from mantid import config
 
 # Parameters in this bloc shouldn't be changed by a user. They should be treated as constants.
 # Changing these parameters may lead to non-functional ABINS.
@@ -164,3 +165,16 @@ def old_python():
     :return: True if it is too old otherwise False
     """
     return tuple([int(i) for i in re.findall(r'\d+', string=python_version().replace("."," "))]) < (2, 7)
+
+
+def get_core_folder():
+    """
+    Calculates folder in which testing data is stored. Folder is determined in the platform independent way. It is
+    assumed that the path to the testing data includes keyword  "UnitTest".
+    :return: path to the folder with testing data
+    """
+    folders = config.getDataSearchDirs()
+    for folder in folders:
+        if "UnitTest" in folder:
+            return folder
+    raise ValueError("Folder with testing data not found.")
