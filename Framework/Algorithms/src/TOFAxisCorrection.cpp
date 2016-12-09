@@ -463,7 +463,6 @@ double TOFAxisCorrection::averageL2(const API::SpectrumInfo &spectrumInfo) {
   double l2Sum = 0;
   size_t n = 0;
   const int64_t indexCount = static_cast<int64_t>(m_workspaceIndices.size());
-  // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for reduction(+: n, l2Sum))
   for (int64_t i = 0; i < indexCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
