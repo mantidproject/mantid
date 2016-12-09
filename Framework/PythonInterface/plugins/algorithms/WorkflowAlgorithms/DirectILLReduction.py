@@ -41,9 +41,9 @@ PROP_DETECTOR_DIAGNOSTICS             = 'Diagnostics'
 PROP_DETECTORS_AT_L2                  = 'DetectorsExactlyAtL2'
 PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
 PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
-PROP_FLAT_BACKGROUND_SCALING          = 'FlatBackgroundScaling'
-PROP_FLAT_BACKGROUND_WINDOW           = 'FlatBackgroundAveragingWindow'
-PROP_FLAT_BACKGROUND_WORKSPACE        = 'FlatBackgroundWorkspace'
+PROP_FLAT_BKG_SCALING                 = 'FlatBkgScaling'
+PROP_FLAT_BKG_WINDOW                  = 'FlatBkgAveragingWindow'
+PROP_FLAT_BKG_WORKSPACE               = 'FlatBkgWorkspace'
 PROP_INCIDENT_ENERGY_CALIBRATION      = 'IncidentEnergyCalibration'
 PROP_INCIDENT_ENERGY_WORKSPACE        = 'IncidentEnergyWorkspace'
 PROP_INDEX_TYPE                       = 'IndexType'
@@ -55,7 +55,7 @@ PROP_MONITOR_INDEX                    = 'Monitor'
 PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
 PROP_OUTPUT_DETECTOR_EPP_WORKSPACE    = 'OutputEPPWorkspace'
-PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
+PROP_OUTPUT_FLAT_BKG_WORKSPACE        = 'OutputFlatBkgWorkspace'
 PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE = 'OutputIncidentEnergyWorkspace'
 PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
 PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
@@ -272,14 +272,14 @@ def _extractMonitorWs(ws, wsNames, algorithmLogging):
                                             EnableLogging=algorithmLogging)
     return detectorWS, monitorWS
 
-def _createFlatBackground(ws, wsType, windowWidth, wsNames, algorithmLogging):
+def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
     '''
     Returns a flat background workspace.
     '''
     if wsType == WS_CONTENT_DETECTORS:
-        bkgWSName = wsNames.withSuffix('flat_background_for_detectors')
+        bkgWSName = wsNames.withSuffix('flat_bkg_for_detectors')
     else:
-        bkgWSName = wsNames.withSuffix('flat_background_for_monitors')
+        bkgWSName = wsNames.withSuffix('flat_bkg_for_monitors')
     bkgWS = CalculateFlatBackground(InputWorkspace=ws,
                                     OutputWorkspace=bkgWSName,
                                     Mode='Moving Average',
@@ -290,16 +290,16 @@ def _createFlatBackground(ws, wsType, windowWidth, wsNames, algorithmLogging):
                                     EnableLogging=algorithmLogging)
     return bkgWS
 
-def _subtractFlatBackground(ws, wsType, bkgWorkspace, bkgScaling, wsNames, wsCleanup, algorithmLogging):
+def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames, wsCleanup, algorithmLogging):
     '''
     Subtracts a scaled flat background from a workspace.
     '''
     if wsType == WS_CONTENT_DETECTORS:
-        subtractedWSName = wsNames.withSuffix('background_subtracted_detectors')
-        scaledBkgWSName = wsNames.withSuffix('flat_background_for_detectors_scaled')
+        subtractedWSName = wsNames.withSuffix('flat_bkg_subtracted_detectors')
+        scaledBkgWSName = wsNames.withSuffix('flat_bkg_for_detectors_scaled')
     else:
-        subtractedWSName = wsNames.withSuffix('background_subtracted_monitors')
-        scaledBkgWSName = wsNames.withSuffix('flat_background_for_monitors_scaled')
+        subtractedWSName = wsNames.withSuffix('flat_bkg_subtracted_monitors')
+        scaledBkgWSName = wsNames.withSuffix('flat_bkg_for_monitors_scaled')
     Scale(InputWorkspace=bkgWorkspace,
           OutputWorkspace=scaledBkgWSName,
           Factor = bkgScaling,
@@ -341,7 +341,7 @@ def _reportSingleZeroCountDiagnostics(report, diagnostics, wsIndex):
         report.error(('Workspace index {0} has been marked as masked by ' +
             'zero count diagnostics for unknown reasons.').format(wsIndex))
 
-def _reportSingleBackgroundDiagnostics(report, diagnostics, wsIndex):
+def _reportSingleBkgDiagnostics(report, diagnostics, wsIndex):
     '''
     Reports the result of background diagnostics for a single diagnose.
     '''
@@ -370,7 +370,7 @@ def _reportDiagnostics(report, zeroCountDiagnostics, bkgDiagnostics):
         _reportSingleZeroCountDiagnostics(report,
                                           zeroCountDiagnostics,
                                           i)
-        _reportSingleBackgroundDiagnostics(report,
+        _reportSingleBkgDiagnostics(report,
                                            bkgDiagnostics,
                                            i)
 
@@ -411,7 +411,7 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, wsNames, wsCleanup, report,
                                                            RangeUpper=integrationEnd,
                                                            EnableLogging=algorithmLogging)
     # 2. Diagnose backgrounds.
-    noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_background')
+    noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
     noisyBkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWS,
                                                         OutputWorkspace=noisyBkgWSName,
                                                         LowThreshold=0.0,
@@ -738,10 +738,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanupLater(monWS)
 
         # Time-independent background
-        bkgInWS = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
-        windowWidth = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
+        bkgInWS = self.getProperty(PROP_FLAT_BKG_WORKSPACE).value
+        windowWidth = self.getProperty(PROP_FLAT_BKG_WINDOW).value
         if not bkgInWS:
-            bkgWS = _createFlatBackground(mainWS,
+            bkgWS = _createFlatBkg(mainWS,
                                           WS_CONTENT_DETECTORS,
                                           windowWidth,
                                           wsNames,
@@ -749,10 +749,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         else:
             bkgWS = bkgInWS
             wsCleanup.protect(bkgWS)
-        if not self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).isDefault:
-            self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgWS)
-        bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
-        bkgSubtractedWS = _subtractFlatBackground(mainWS,
+        if not self.getProperty(PROP_OUTPUT_FLAT_BKG_WORKSPACE).isDefault:
+            self.setProperty(PROP_OUTPUT_FLAT_BKG_WORKSPACE, bkgWS)
+        bkgScaling = self.getProperty(PROP_FLAT_BKG_SCALING).value
+        bkgSubtractedWS = _subtractFlatBkg(mainWS,
                                                   WS_CONTENT_DETECTORS,
                                                   bkgWS,
                                                   bkgScaling,
@@ -764,13 +764,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
         del(bkgSubtractedWS)
         wsCleanup.cleanupLater(bkgWS)
         # Monitor time-independent background.
-        monBkgWS = _createFlatBackground(monWS,
+        monBkgWS = _createFlatBkg(monWS,
                                          WS_CONTENT_MONITORS,
                                          windowWidth,
                                          wsNames,
                                          childAlgorithmLogging)
         monBkgScaling = 1
-        bkgSubtractedMonWS = _subtractFlatBackground(monWS,
+        bkgSubtractedMonWS = _subtractFlatBkg(monWS,
                                                      WS_CONTENT_MONITORS,
                                                      monBkgWS,
                                                      monBkgScaling,
@@ -1108,17 +1108,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='A single-valued workspace holding the calibrated incident energy')
-        self.declareProperty(name=PROP_FLAT_BACKGROUND_SCALING,
+        self.declareProperty(name=PROP_FLAT_BKG_SCALING,
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
-        self.declareProperty(name=PROP_FLAT_BACKGROUND_WINDOW,
+        self.declareProperty(name=PROP_FLAT_BKG_WINDOW,
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Running average window width (in bins) for flat background')
-        self.declareProperty(MatrixWorkspaceProperty(name=PROP_FLAT_BACKGROUND_WORKSPACE,
+        self.declareProperty(MatrixWorkspaceProperty(name=PROP_FLAT_BKG_WORKSPACE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
@@ -1172,7 +1172,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='Output workspace for elastic peak positions')
-        self.declareProperty(WorkspaceProperty(name=PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE,
+        self.declareProperty(WorkspaceProperty(name=PROP_OUTPUT_FLAT_BKG_WORKSPACE,
                                                defaultValue='',
                                                direction=Direction.Output,
                                                optional=PropertyMode.Optional),
