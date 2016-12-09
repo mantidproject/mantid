@@ -1,8 +1,3 @@
-/*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then
- use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
-
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -12,7 +7,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
 #include <algorithm>
 
 #include <nexus/napi.h>
@@ -35,7 +30,7 @@ LoadILLReflectometry::LoadILLReflectometry()
       m_numberOfPixelsPerTube{0}, // number of pixels per tube - Y
       m_numberOfChannels{0},      // time channels - Z
       m_numberOfHistograms{0}, m_wavelength{0}, m_channelWidth{0},
-      m_supportedInstruments{"D17"} {}
+      m_supportedInstruments{"D17","d17"} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -64,13 +59,27 @@ int LoadILLReflectometry::confidence(
   if (descriptor.pathExists("/entry0/wavelength")               // ILL
       && descriptor.pathExists("/entry0/experiment_identifier") // ILL
       && descriptor.pathExists("/entry0/mode")                  // ILL
-      && descriptor.pathExists("/entry0/instrument/Chopper1")   // TO BE DONE
-      && descriptor.pathExists("/entry0/instrument/Chopper2")   // ???
-      ) {
+      && descriptor.pathExists("/entry0/instrument/VirtualChopper")   // ILL reflectometry
+      )
     return 80;
-  } else {
+  else
     return 0;
-  }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Validate inputs
+ * please note, that this validation cannot be part of the confidence checking, where it would
+ * also make sense.
+ * @returns a string map containing the error messages
+  */
+std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  const std::string fileName = getProperty("Filename");
+  if (!fileName.empty() && (m_supportedInstruments.find(fileName) != m_supportedInstruments.end()))
+    result["Filename"] = "Instrument not supported.";
+
+  return result;
 }
 
 //----------------------------------------------------------------------------------------------

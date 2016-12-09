@@ -49,6 +49,9 @@ public:
     return "Loads a ILL/D17 nexus file.";
   }
 
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   void init() override;
   void exec() override;
@@ -80,7 +83,8 @@ private:
   double m_wavelength;
   double m_channelWidth;
 
-  std::vector<std::string> m_supportedInstruments;
+  //std::vector<std::string> m_supportedInstruments;
+  std::unordered_set<std::string> m_supportedInstruments;
   LoadHelper m_loader;
 };
 
