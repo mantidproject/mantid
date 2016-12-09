@@ -364,7 +364,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
     }
   }
 
-  for (const auto &index : indicesToMask)
+  for (const auto index : indicesToMask)
     detInfo.setMasked(index, true);
 }
 

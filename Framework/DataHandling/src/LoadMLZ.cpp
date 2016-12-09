@@ -134,7 +134,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
   }
   g_log.debug() << '\n';
 
-  for (const auto &index : indicesToMask)
+  for (const auto index : indicesToMask)
     detInfo.setMasked(index, true);
 }
 
