@@ -130,9 +130,9 @@ void DetectorEfficiencyCor::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
-    try {
+    if (spectrumInfo.hasDetectors(i)) {
       correctForEfficiency(i, spectrumInfo);
-    } catch (Exception::NotFoundError &) {
+    } else {
       // zero the Y data that can't be corrected
       m_outputWS->mutableY(i) *= 0.0;
       PARALLEL_CRITICAL(deteff_invalid) {
