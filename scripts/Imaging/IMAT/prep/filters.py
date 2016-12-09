@@ -33,32 +33,42 @@ def scale_down(data_vol, block_size, method='average'):
     same data type as the input data volume.
     """
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
-        raise ValueError("Wrong data volume when trying to crop (expected a 3d numpy array): {0}".
-                         format(data_vol))
+        raise ValueError(
+            "Wrong data volume when trying to crop (expected a 3d numpy array): {0}".
+            format(data_vol))
     if block_size > data_vol.shape[1] or block_size > data_vol.shape[2]:
-        raise ValueError("Block size too large when trying to crop data volume. Block size: {0}, "
-                         "data dimensions: {1}".format(block_size, data_vol.shape))
+        raise ValueError(
+            "Block size too large when trying to crop data volume. Block size: {0}, "
+            "data dimensions: {1}".format(block_size, data_vol.shape))
 
-    if 0 != np.mod(data_vol.shape[1], block_size) or 0 != np.mod(data_vol.shape[2], block_size):
-        raise ValueError("The block size ({0}) must be an exact integer divisor of the sizes of the "
-                         "x and y dimensions ({1} and {2} of the input data volume".
-                         format(data_vol.shape[2], data_vol.shape[1], block_size))
+    if 0 != np.mod(data_vol.shape[1], block_size) or 0 != np.mod(
+            data_vol.shape[2], block_size):
+        raise ValueError(
+            "The block size ({0}) must be an exact integer divisor of the sizes of the "
+            "x and y dimensions ({1} and {2} of the input data volume".format(
+                data_vol.shape[2], data_vol.shape[1], block_size))
 
     supported_methods = ['average', 'sum']
     if method.lower() not in supported_methods:
-        raise ValueError("The method to combine pixels in blocks must be one of {0}. Got unknown "
-                         "value: {1}".format(supported_methods, method))
+        raise ValueError(
+            "The method to combine pixels in blocks must be one of {0}. Got unknown "
+            "value: {1}".format(supported_methods, method))
 
-    rescaled_vol = np.zeros((data_vol.shape[0], data_vol.shape[1]//block_size,
-                             data_vol.shape[2]//block_size), dtype=data_vol.dtype)
+    rescaled_vol = np.zeros(
+        (data_vol.shape[0], data_vol.shape[1] // block_size,
+         data_vol.shape[2] // block_size),
+        dtype=data_vol.dtype)
     # for block averages in every slice/image along the vertical/z axis
-    tmp_shape = rescaled_vol.shape[1], block_size, rescaled_vol.shape[2], block_size
+    tmp_shape = rescaled_vol.shape[1], block_size, rescaled_vol.shape[
+        2], block_size
     for vert_slice in range(len(rescaled_vol)):
         vsl = data_vol[vert_slice, :, :]
         if 'average' == method:
-            rescaled_vol[vert_slice, :, :] = vsl.reshape(tmp_shape).mean(-1).mean(1)
+            rescaled_vol[vert_slice, :, :] = vsl.reshape(tmp_shape).mean(
+                -1).mean(1)
         elif 'sum' == method:
-            rescaled_vol[vert_slice, :, :] = vsl.reshape(tmp_shape).mean(-1).mean(1)
+            rescaled_vol[vert_slice, :, :] = vsl.reshape(tmp_shape).mean(
+                -1).mean(1)
 
     return rescaled_vol
 
@@ -79,17 +89,21 @@ def crop_vol(data_vol, coords):
     top = coords[1]
     left = coords[0]
     bottom = coords[3]
+
     if not isinstance(coords, list) or 4 != len(coords):
-        raise ValueError("Wrong coordinates object when trying to crop: {0}".format(coords))
+        raise ValueError(
+            "Wrong coordinates object when trying to crop: {0}".format(coords))
     elif not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
-        raise ValueError("Wrong data volume when trying to crop: {0}".format(data_vol))
+        raise ValueError("Wrong data volume when trying to crop: {0}".format(
+            data_vol))
     elif not any(coords) or top > bottom or left > right:
         # skip if for example: 0, 0, 0, 0 (empty selection)
         print(" * No coordinates given, not cropping the images")
         return data_vol
     elif not all(isinstance(crd, int) for crd in coords):
-        raise ValueError("Cannot use non-integer coordinates to crop images. Got "
-                         "these coordinates: {0}".format(coords))
+        raise ValueError(
+            "Cannot use non-integer coordinates to crop images. Got "
+            "these coordinates: {0}".format(coords))
     else:
         cropped_data = data_vol[:, top:bottom, left:right]
         # cropped_data = data_vol[:, left:right, top:bottom]
@@ -119,12 +133,14 @@ def remove_stripes_ring_artifacts(data_vol, method='wavelet-fourier'):
     supported_methods = ['wavelet-fourier']
 
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
-        raise ValueError("Wrong data volume when trying to filter stripes/ring artifacts: {0}".
-                         format(data_vol))
+        raise ValueError(
+            "Wrong data volume when trying to filter stripes/ring artifacts: {0}".
+            format(data_vol))
 
     if method.lower() not in supported_methods:
-        raise ValueError("The method to remove stripes and ring artifacts must be one of {0}. "
-                         "Got unknown value: {1}".format(supported_methods, method))
+        raise ValueError(
+            "The method to remove stripes and ring artifacts must be one of {0}. "
+            "Got unknown value: {1}".format(supported_methods, method))
 
     try:
         import tomopy
@@ -157,8 +173,9 @@ def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
     Returns :: masked volume
     """
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
-        raise ValueError("Wrong data volume when trying to apply a circular mask: {0}".
-                         format(data_vol))
+        raise ValueError(
+            "Wrong data volume when trying to apply a circular mask: {0}".
+            format(data_vol))
 
     edge_z, edge_y, edge_x = data_vol.shape
     mask_in = _calc_mask(edge_y, edge_x, ratio)
@@ -178,15 +195,15 @@ def _calc_mask(ydim, xdim, ratio):
 
     Returns :: mask as a numpy array of boolean values (in/out-side mask)
     """
-    radius_y = ydim/2.0
-    radius_x = xdim/2.0
+    radius_y = ydim / 2.0
+    radius_x = xdim / 2.0
     if ydim < xdim:
         small_radius2 = radius_y * radius_y
     else:
         small_radius2 = radius_x * radius_x
 
-    y_mask, x_mask = np.ogrid[0.5 - radius_y:0.5 + radius_y,
-                              0.5 - radius_x:0.5 + radius_x]
+    y_mask, x_mask = np.ogrid[0.5 - radius_y:0.5 + radius_y, 0.5 - radius_x:0.5
+                              + radius_x]
 
     small_radius2 *= ratio * ratio
-    return (y_mask*y_mask + x_mask*x_mask) < (small_radius2)
+    return (y_mask * y_mask + x_mask * x_mask) < (small_radius2)

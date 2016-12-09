@@ -1092,8 +1092,6 @@ class ReconstructionCommand(object):
         sample, white, dark = self.rotate_stack(sample, cfg.preproc_cfg)
 
         # crop the ROI
-        # not optional for now
-        # if self.crop_before_normaliz:
         sample = self.crop_coords(sample, cfg.preproc_cfg)
 
         # sanity check
@@ -1126,7 +1124,12 @@ class ReconstructionCommand(object):
         cfg.tomo_print("Starting COR calculation on " +
                        str(cor_num_checked_projections) + " projections", 2)
 
-        pixelsFromLeftSide = float(cfg.preproc_cfg.crop_coords[0])
+        cropCoords = cfg.preproc_cfg.crop_coords[0]
+        imageWidth = sample.shape[2]  # i think?
+
+        # if crop corrds match with the image width then the full image was selected
+        pixelsFromLeftSide = cropCoords if cropCoords - imageWidth <= 1 else 0
+
         for slice_idx in cor_proj_slice_indices:
             tomopy_cor = tomopy.find_center(
                 tomo=sample, theta=proj_angles, ind=slice_idx, emission=False)
@@ -1136,15 +1139,14 @@ class ReconstructionCommand(object):
             calculated_cors.append(tomopy_cor)
 
         cfg.tomo_print("Finished COR calculation. ", 2)
-        averageCORrelativeToCrop = sum(calculated_cors) / float(
-            len(calculated_cors))
-        averageCORrelativeToFullImage = sum(calculated_cors) / float(
-            len(calculated_cors)) + pixelsFromLeftSide
+        averageCORrelativeToCrop = sum(calculated_cors) / len(calculated_cors)
+        averageCORrelativeToFullImage = sum(calculated_cors) / len(
+            calculated_cors) + pixelsFromLeftSide
 
         # we add the pixels cut off from the left, to reflect the full image in Mantid
 
         cfg.tomo_print("Printing average COR in relation to cropped image " +
                        str(cfg.preproc_cfg.crop_coords) + ":", 2)
-        print(str(int(round(averageCORrelativeToCrop))))
+        print(str(round(averageCORrelativeToCrop)))
         cfg.tomo_print("Printing average COR in relation to FULL image:", 2)
-        print(str(int(round(averageCORrelativeToFullImage))))
+        print(str(round(averageCORrelativeToFullImage)))

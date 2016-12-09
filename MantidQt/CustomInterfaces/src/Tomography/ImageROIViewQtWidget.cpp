@@ -414,9 +414,9 @@ void ImageROIViewQtWidget::resetCoR() {
 }
 
 void ImageROIViewQtWidget::resetROI() {
-  m_ui.spinBox_roi_right->setValue(0);
+  m_ui.spinBox_roi_left->setValue(0);
   m_ui.spinBox_roi_top->setValue(0);
-  m_ui.spinBox_roi_left->setValue(m_ui.spinBox_roi_left->maximum());
+  m_ui.spinBox_roi_right->setValue(m_ui.spinBox_roi_right->maximum());
   m_ui.spinBox_roi_bottom->setValue(m_ui.spinBox_roi_bottom->maximum());
 }
 
