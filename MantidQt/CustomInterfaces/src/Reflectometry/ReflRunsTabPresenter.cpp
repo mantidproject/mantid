@@ -61,6 +61,9 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   methods.insert(MeasureTransferMethod);
   m_view->setTransferMethods(methods);
 
+  // Set current transfer method
+  m_currentTransferMethod = m_view->getTransferMethod();
+
   // Set up the instrument selectors
   std::vector<std::string> instruments;
   instruments.emplace_back("INTER");
@@ -204,6 +207,7 @@ void ReflRunsTabPresenter::search() {
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_currentTransferMethod = m_view->getTransferMethod();
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
         *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
@@ -218,8 +222,20 @@ void ReflRunsTabPresenter::transfer() {
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
 
-  // Do not begin transfer if nothing is selected
+  // Do not begin transfer if nothing is selected or if the transfer method does
+  // not match the one used for populating search
   if (selectedRows.size() == 0) {
+    m_mainPresenter->giveUserCritical(
+        "Error: Please select at least one run to transfer.",
+        "No runs selected");
+    return;
+  } else if (m_currentTransferMethod != m_view->getTransferMethod()) {
+    m_mainPresenter->giveUserCritical(
+        "Error: Method selected for transferring runs (" +
+            m_view->getTransferMethod() +
+            ") must match the method used for searching runs (" +
+            m_currentTransferMethod + ").",
+        "Transfer method mismatch");
     return;
   }
 
@@ -292,9 +308,8 @@ void ReflRunsTabPresenter::transfer() {
 */
 std::unique_ptr<ReflTransferStrategy>
 ReflRunsTabPresenter::getTransferStrategy() {
-  const std::string currentMethod = m_view->getTransferMethod();
   std::unique_ptr<ReflTransferStrategy> rtnStrategy;
-  if (currentMethod == MeasureTransferMethod) {
+  if (m_currentTransferMethod == MeasureTransferMethod) {
 
     // We need catalog info overrides from the user-based config service
     std::unique_ptr<CatalogConfigService> catConfigService(
@@ -314,12 +329,12 @@ ReflRunsTabPresenter::getTransferStrategy() {
     rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
         std::move(catInfo), std::move(source));
     return rtnStrategy;
-  } else if (currentMethod == LegacyTransferMethod) {
+  } else if (m_currentTransferMethod == LegacyTransferMethod) {
     rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
     return rtnStrategy;
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +
-                             currentMethod);
+                             m_currentTransferMethod);
   }
 }
 
