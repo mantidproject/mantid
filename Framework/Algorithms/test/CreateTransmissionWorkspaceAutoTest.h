@@ -2,10 +2,15 @@
 #define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTOTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceHistory.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 
 using Mantid::Algorithms::CreateTransmissionWorkspaceAuto;

@@ -34,6 +34,8 @@ private slots:
   void updateUiElements(const QString &);
   void accept() override;
   void initListenerPropLayout(const QString &);
+  void updateConnectionChoices(const QString &inst_name);
+  void updateConnectionDetails(const QString &connection);
 
 private:
   /// Initialize the layout
@@ -63,6 +65,9 @@ private:
 
   /// The algorithm for processing the accumulated workspace
   Mantid::API::Algorithm_sptr m_postProcessingAlg;
+
+  /// Constant used for custom listener connection setups
+  static const QString CUSTOM_CONNECTION;
 };
 }
 }

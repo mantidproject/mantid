@@ -31,10 +31,10 @@ options are available:
 - `Conjugate gradient (Polak-Ribiere imp.) <../fitminimizers/PolakRibiere.html>`__
 - `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../fitminimizers/BFGS.html>`__
 - `Levenberg-Marquardt <../fitminimizers/LevenbergMarquardt.html>`__ (default)
-- Levenberg-MarquardtMD
+- `Levenberg-MarquardtMD <../fitminimizers/LevenbergMarquardtMD.html>`__
 
   A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
-- `Gauss-Newton <../fitminimizers/GaussNewton.html>`__ algorithm with damping.
+- `Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
 - `Trust region
   <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust

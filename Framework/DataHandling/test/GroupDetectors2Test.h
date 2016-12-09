@@ -95,7 +95,7 @@ public:
 
   void testAveragingWithNoInstrument() {
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 3, false);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 3, false);
     GroupDetectors2 grouper;
     grouper.initialize();
     grouper.setChild(true);
@@ -532,7 +532,7 @@ public:
     int numPixels = 5;
     int numBins = 5;
     int numEvents = 200;
-    EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, numBins, numEvents, 0, 1, 4);
     AnalysisDataService::Instance().addOrReplace("GDEvents", input);
     GroupDetectors2 alg2;

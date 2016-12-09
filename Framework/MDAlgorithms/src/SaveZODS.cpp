@@ -1,6 +1,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SaveZODS.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"

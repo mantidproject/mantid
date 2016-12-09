@@ -19,8 +19,10 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -70,7 +72,7 @@ void removeWS(const std::string &name) {
   Mantid::API::AnalysisDataService::Instance().remove(name);
 }
 
-Workspace2D_sptr Create1DWorkspaceRand(int size) {
+Workspace2D_sptr create1DWorkspaceRand(int size) {
   MantidVec y1(size);
   MantidVec e1(size);
 
@@ -88,7 +90,7 @@ Workspace2D_sptr Create1DWorkspaceRand(int size) {
   return retVal;
 }
 
-Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
+Workspace2D_sptr create1DWorkspaceConstant(int size, double value,
                                            double error) {
   MantidVec y1(size, value);
   MantidVec e1(size, error);
@@ -100,16 +102,16 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   return retVal;
 }
 
-Workspace2D_sptr Create1DWorkspaceConstantWithXerror(int size, double value,
+Workspace2D_sptr create1DWorkspaceConstantWithXerror(int size, double value,
                                                      double error,
                                                      double xError) {
-  auto ws = Create1DWorkspaceConstant(size, value, error);
+  auto ws = create1DWorkspaceConstant(size, value, error);
   auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(size, xError);
   ws->setSharedDx(0, dx1);
   return ws;
 }
 
-Workspace2D_sptr Create1DWorkspaceFib(int size) {
+Workspace2D_sptr create1DWorkspaceFib(int size) {
   MantidVec y1(size);
   MantidVec e1(size);
   std::generate(y1.begin(), y1.end(), FibSeries<double>());
@@ -121,8 +123,8 @@ Workspace2D_sptr Create1DWorkspaceFib(int size) {
   return retVal;
 }
 
-Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundaries) {
-  return Create2DWorkspaceBinned(nhist, numBoundaries);
+Workspace2D_sptr create2DWorkspace(int nhist, int numBoundaries) {
+  return create2DWorkspaceBinned(nhist, numBoundaries);
 }
 
 /** Create a Workspace2D where the Y value at each bin is
@@ -131,9 +133,9 @@ Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundaries) {
  * @param numBoundaries :: # of bins
  * @return Workspace2D
  */
-Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
+Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
                                                          int numBoundaries) {
-  Workspace2D_sptr out = Create2DWorkspaceBinned(nhist, numBoundaries);
+  Workspace2D_sptr out = create2DWorkspaceBinned(nhist, numBoundaries);
   for (int wi = 0; wi < nhist; wi++)
     for (int x = 0; x < numBoundaries; x++)
       out->dataY(wi)[x] = wi * 1.0;
@@ -142,7 +144,7 @@ Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
 
 Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
-  Workspace2D_sptr outputWS = Create2DWorkspaceBinned(nHist, nBins);
+  Workspace2D_sptr outputWS = create2DWorkspaceBinned(nHist, nBins);
   auto const newAxis = new NumericAxis(nHist);
   outputWS->replaceAxis(1, newAxis);
   newAxis->unit() = boost::make_shared<Units::Degrees>();
@@ -154,7 +156,7 @@ Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 }
 
 Workspace2D_sptr
-Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
+create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             const std::set<int64_t> &maskedWorkspaceIndices,
                             double xVal, double yVal, double eVal) {
   auto x1 = Kernel::make_cow<HistogramData::HistogramX>(
@@ -174,11 +176,11 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
   return retVal;
 }
 
-Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
+Workspace2D_sptr create2DWorkspaceWithValuesAndXerror(
     int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,
     double eVal, double dxVal,
     const std::set<int64_t> &maskedWorkspaceIndices) {
-  auto ws = Create2DWorkspaceWithValues(
+  auto ws = create2DWorkspaceWithValues(
       nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
   PointStandardDeviations dx1(nBins, dxVal);
   for (int i = 0; i < nHist; i++) {
@@ -188,16 +190,16 @@ Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
 }
 
 Workspace2D_sptr
-Create2DWorkspace123(int64_t nHist, int64_t nBins, bool isHist,
+create2DWorkspace123(int64_t nHist, int64_t nBins, bool isHist,
                      const std::set<int64_t> &maskedWorkspaceIndices) {
-  return Create2DWorkspaceWithValues(nHist, nBins, isHist,
+  return create2DWorkspaceWithValues(nHist, nBins, isHist,
                                      maskedWorkspaceIndices, 1.0, 2.0, 3.0);
 }
 
 Workspace2D_sptr
-Create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist,
+create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist,
                      const std::set<int64_t> &maskedWorkspaceIndices) {
-  return Create2DWorkspaceWithValues(nHist, nBins, isHist,
+  return create2DWorkspaceWithValues(nHist, nBins, isHist,
                                      maskedWorkspaceIndices, 1.0, 5.0, 4.0);
 }
 
@@ -239,12 +241,12 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
 /**
  * Create a group with nEntries. It is added to the ADS with the given stem
  */
-WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
+WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, int nBins,
                                          const std::string &stem) {
   auto group = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().add(stem, group);
   for (int i = 0; i < nEntries; ++i) {
-    Workspace2D_sptr ws = Create2DWorkspace(nHist, nBins);
+    Workspace2D_sptr ws = create2DWorkspace(nHist, nBins);
     std::ostringstream os;
     os << stem << "_" << i;
     AnalysisDataService::Instance().add(os.str(), ws);
@@ -256,7 +258,7 @@ WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
 /** Create a 2D workspace with this many histograms and bins.
  * Filled with Y = 2.0 and E = M_SQRT2w
  */
-Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
+Workspace2D_sptr create2DWorkspaceBinned(int nhist, int nbins, double x0,
                                          double deltax) {
   BinEdges x(nbins + 1, LinearGenerator(x0, deltax));
   Counts y(nbins, 2);
@@ -275,7 +277,7 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = M_SQRT2w
  */
-Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
+Workspace2D_sptr create2DWorkspaceBinned(int nhist, const int numBoundaries,
                                          const double xBoundaries[]) {
   BinEdges x(xBoundaries, xBoundaries + numBoundaries);
   const int numBins = numBoundaries - 1;
@@ -331,10 +333,10 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
 
   Workspace2D_sptr space;
   if (isHistogram)
-    space = Create2DWorkspaceBinned(
+    space = create2DWorkspaceBinned(
         nhist, nbins); // A 1:1 spectra is created by default
   else
-    space = Create2DWorkspace123(nhist, nbins, false);
+    space = create2DWorkspace123(nhist, nbins, false);
   space->setTitle(
       "Test histogram"); // actually adds a property call run_title to the logs
   space->getAxis(0)->setUnit("TOF");
@@ -363,7 +365,7 @@ create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
       ComponentCreationHelper::createTestInstrumentRectangular(numBanks,
                                                                numPixels);
   Workspace2D_sptr ws =
-      Create2DWorkspaceBinned(numBanks * numPixels * numPixels, numBins);
+      create2DWorkspaceBinned(numBanks * numPixels * numPixels, numBins);
   ws->setInstrument(inst);
   ws->getAxis(0)->setUnit("dSpacing");
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
@@ -392,7 +394,7 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
       ComponentCreationHelper::createTestInstrumentRectangular(numBanks,
                                                                numPixels);
   EventWorkspace_sptr ws =
-      CreateEventWorkspace2(numBanks * numPixels * numPixels, 100);
+      createEventWorkspace2(numBanks * numPixels * numPixels, 100);
   ws->setInstrument(inst);
 
   // Set the X axes
@@ -426,7 +428,7 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
       ComponentCreationHelper::createTestInstrumentCylindrical(
           numBanks, srcPos, samplePos, 0.0025, 0.005);
   EventWorkspace_sptr ws =
-      CreateEventWorkspace2(numBanks * DETECTORS_PER_BANK, 100);
+      createEventWorkspace2(numBanks * DETECTORS_PER_BANK, 100);
   ws->setInstrument(inst);
 
   std::vector<detid_t> detectorIds = inst->getDetectorIDs();
@@ -482,7 +484,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   const int nSpectra = 2;
   const int nBins = 100;
   const double deltaX = 2000; // TOF
-  auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
+  auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
 
   workspace->setTitle(
       "Test histogram"); // actually adds a property call run_title to the logs
@@ -529,17 +531,17 @@ void createInstrumentForWorkspaceWithDistances(
 }
 
 //================================================================================================================
-WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value) {
+WorkspaceSingleValue_sptr createWorkspaceSingleValue(double value) {
   return boost::make_shared<WorkspaceSingleValue>(value, sqrt(value));
 }
 
-WorkspaceSingleValue_sptr CreateWorkspaceSingleValueWithError(double value,
+WorkspaceSingleValue_sptr createWorkspaceSingleValueWithError(double value,
                                                               double error) {
   return boost::make_shared<WorkspaceSingleValue>(value, error);
 }
 
 /** Perform some finalization on event workspace stuff */
-void EventWorkspace_Finalize(EventWorkspace_sptr ew) {
+void eventWorkspace_Finalize(EventWorkspace_sptr ew) {
   // get a proton charge
   ew->mutableRun().integrateProtonCharge();
 }
@@ -548,8 +550,8 @@ void EventWorkspace_Finalize(EventWorkspace_sptr ew) {
  * 500 pixels
  * 1000 histogrammed bins.
  */
-EventWorkspace_sptr CreateEventWorkspace() {
-  return CreateEventWorkspace(500, 1001, 100, 1000);
+EventWorkspace_sptr createEventWorkspace() {
+  return createEventWorkspace(500, 1001, 100, 1000);
 }
 
 /** Create event workspace with:
@@ -558,17 +560,17 @@ EventWorkspace_sptr CreateEventWorkspace() {
  * 200 events; two in each bin, at time 0.5, 1.5, etc.
  * PulseTime = 0 second x2, 1 second x2, 2 seconds x2, etc. after 2010-01-01
  */
-EventWorkspace_sptr CreateEventWorkspace2(int numPixels, int numBins) {
-  return CreateEventWorkspace(numPixels, numBins, 100, 0.0, 1.0, 2);
+EventWorkspace_sptr createEventWorkspace2(int numPixels, int numBins) {
+  return createEventWorkspace(numPixels, numBins, 100, 0.0, 1.0, 2);
 }
 
 /** Create event workspace
  */
-EventWorkspace_sptr CreateEventWorkspace(int numPixels, int numBins,
+EventWorkspace_sptr createEventWorkspace(int numPixels, int numBins,
                                          int numEvents, double x0,
                                          double binDelta, int eventPattern,
                                          int start_at_pixelID) {
-  return CreateEventWorkspaceWithStartTime(
+  return createEventWorkspaceWithStartTime(
       numPixels, numBins, numEvents, x0, binDelta, eventPattern,
       start_at_pixelID, DateAndTime("2010-01-01T00:00:00"));
 }
@@ -577,7 +579,7 @@ EventWorkspace_sptr CreateEventWorkspace(int numPixels, int numBins,
  * Create event workspace with defined start date time
  */
 EventWorkspace_sptr
-CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
+createEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
                                   double x0, double binDelta, int eventPattern,
                                   int start_at_pixelID, DateAndTime run_start) {
 
@@ -627,7 +629,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
 /** Create event workspace, with several detector IDs in one event list.
  */
 EventWorkspace_sptr
-CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
+createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta, double xOffset) {
 
   auto retVal = boost::make_shared<EventWorkspace>();
@@ -665,7 +667,7 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
  * @param bin_delta :: a constant offset to shift the bin bounds by
  * @return EventWorkspace
  */
-EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
+EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
                                                double bin_delta) {
   auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numpixels, numbins, numbins - 1);
@@ -703,9 +705,9 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
 /** Create Workspace2d, with numHist spectra, each with 9 detectors,
  * with IDs 1-9, 10-18, 19-27
  */
-MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins,
+MatrixWorkspace_sptr createGroupedWorkspace2D(size_t numHist, int numBins,
                                               double binDelta) {
-  Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist),
+  Workspace2D_sptr retVal = create2DWorkspaceBinned(static_cast<int>(numHist),
                                                     numBins, 0.0, binDelta);
   retVal->setInstrument(
       ComponentCreationHelper::createTestInstrumentCylindrical(
@@ -723,10 +725,10 @@ MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins,
 // =====================================================================================
 // RootOfNumHist == square root of hystohram number;
 MatrixWorkspace_sptr
-CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
+createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
                                           double binDelta) {
   size_t numHist = RootOfNumHist * RootOfNumHist;
-  Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist),
+  Workspace2D_sptr retVal = create2DWorkspaceBinned(static_cast<int>(numHist),
                                                     numBins, 0.0, binDelta);
   retVal->setInstrument(
       ComponentCreationHelper::createTestInstrumentCylindrical(
@@ -742,7 +744,7 @@ CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
 
 // not strictly creating a workspace, but really helpfull to see what one
 // contains
-void DisplayDataY(const MatrixWorkspace_sptr ws) {
+void displayDataY(const MatrixWorkspace_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
@@ -752,11 +754,11 @@ void DisplayDataY(const MatrixWorkspace_sptr ws) {
     std::cout << '\n';
   }
 }
-void DisplayData(const MatrixWorkspace_sptr ws) { DisplayDataX(ws); }
+void displayData(const MatrixWorkspace_sptr ws) { displayDataX(ws); }
 
 // not strictly creating a workspace, but really helpfull to see what one
 // contains
-void DisplayDataX(const MatrixWorkspace_sptr ws) {
+void displayDataX(const MatrixWorkspace_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
@@ -769,7 +771,7 @@ void DisplayDataX(const MatrixWorkspace_sptr ws) {
 
 // not strictly creating a workspace, but really helpfull to see what one
 // contains
-void DisplayDataE(const MatrixWorkspace_sptr ws) {
+void displayDataE(const MatrixWorkspace_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
@@ -787,7 +789,7 @@ void DisplayDataE(const MatrixWorkspace_sptr ws) {
  * @param name :: property name
  * @param val :: value
  */
-void AddTSPEntry(Run &runInfo, std::string name, double val) {
+void addTSPEntry(Run &runInfo, std::string name, double val) {
   TimeSeriesProperty<double> *tsp;
   tsp = new TimeSeriesProperty<double>(name);
   tsp->addValue("2011-05-24T00:00:00", val);
@@ -803,7 +805,7 @@ void AddTSPEntry(Run &runInfo, std::string name, double val) {
  * @param b :: lattice length
  * @param c :: lattice length
  */
-void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
+void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
   auto latt =
       Mantid::Kernel::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
@@ -818,11 +820,11 @@ void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
  * @param chi :: +X rotation angle (deg)
  * @param omega :: +Y rotation angle (deg)
  */
-void SetGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi,
+void setGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi,
                    double omega) {
-  AddTSPEntry(ws->mutableRun(), "phi", phi);
-  AddTSPEntry(ws->mutableRun(), "chi", chi);
-  AddTSPEntry(ws->mutableRun(), "omega", omega);
+  addTSPEntry(ws->mutableRun(), "phi", phi);
+  addTSPEntry(ws->mutableRun(), "chi", chi);
+  addTSPEntry(ws->mutableRun(), "omega", omega);
   Mantid::Geometry::Goniometer gm;
   gm.makeUniversalGoniometer();
   ws->mutableRun().setGoniometer(gm, true);
@@ -838,7 +840,7 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
     rHist++;
 
   Mantid::API::MatrixWorkspace_sptr ws =
-      CreateGroupedWorkspace2DWithRingsAndBoxes(rHist, 10, 0.1);
+      createGroupedWorkspace2DWithRingsAndBoxes(rHist, 10, 0.1);
   auto pAxis0 = new NumericAxis(numBins);
   for (size_t i = 0; i < numBins; i++) {
     double dE = -1.0 + static_cast<double>(i) * 0.8;
@@ -851,9 +853,9 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
         Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt.release());
 
-    AddTSPEntry(ws->mutableRun(), "phi", 0);
-    AddTSPEntry(ws->mutableRun(), "chi", 0);
-    AddTSPEntry(ws->mutableRun(), "omega", 0);
+    addTSPEntry(ws->mutableRun(), "phi", 0);
+    addTSPEntry(ws->mutableRun(), "chi", 0);
+    addTSPEntry(ws->mutableRun(), "omega", 0);
     Mantid::Geometry::Goniometer gm;
     gm.makeUniversalGoniometer();
     ws->mutableRun().setGoniometer(gm, true);
@@ -881,7 +883,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   size_t numPixels = L2.size();
 
   Mantid::API::MatrixWorkspace_sptr ws =
-      Create2DWorkspaceWithValues(uint64_t(numPixels), uint64_t(numBins), true,
+      create2DWorkspaceWithValues(uint64_t(numPixels), uint64_t(numBins), true,
                                   maskedWorkspaceIndices, 0, 1, 0.1);
 
   // detectors at L2, sample at 0 and source at -L2_min
@@ -933,9 +935,9 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei), true);
   // these properties have to be different -> specific for processed ws, as time
   // now should be reconciled
-  AddTSPEntry(ws->mutableRun(), "phi", 0);
-  AddTSPEntry(ws->mutableRun(), "chi", 0);
-  AddTSPEntry(ws->mutableRun(), "omega", 0);
+  addTSPEntry(ws->mutableRun(), "phi", 0);
+  addTSPEntry(ws->mutableRun(), "chi", 0);
+  addTSPEntry(ws->mutableRun(), "omega", 0);
   Mantid::Geometry::Goniometer gm;
   gm.makeUniversalGoniometer();
   ws->mutableRun().setGoniometer(gm, true);
@@ -1013,7 +1015,7 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
   return outputWS;
 }
 
-RebinnedOutput_sptr CreateRebinnedOutputWorkspace() {
+RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   RebinnedOutput_sptr outputWS =
       Mantid::DataObjects::RebinnedOutput_sptr(new RebinnedOutput());
   // outputWS->setName("rebinTest");

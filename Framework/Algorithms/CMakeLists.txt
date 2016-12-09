@@ -152,6 +152,7 @@ set ( SRC_FILES
 	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
+	src/InterpolationOption.cpp
 	src/InvertMask.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
@@ -462,6 +463,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
+	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
@@ -774,6 +776,7 @@ set ( TEST_FILES
 	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
+	InterpolationOptionTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h

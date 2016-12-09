@@ -11,6 +11,7 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -124,11 +125,11 @@ public:
 
   void test_sumWorkspaces() {
     MatrixWorkspace_sptr ws1 =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     MatrixWorkspace_sptr ws3 =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     DateAndTime start{"2015-12-23T15:32:40Z"};
     DateAndTime end{"2015-12-24T09:00:00Z"};
     addLog(ws1, "run_start", start.toSimpleString());

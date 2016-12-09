@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -17,6 +18,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/AutoPtr.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include <fstream>
 

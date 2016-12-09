@@ -4,6 +4,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PropertyHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 #include <QStringList>

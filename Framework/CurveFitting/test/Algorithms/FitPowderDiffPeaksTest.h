@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h"
 #include "MantidDataHandling/LoadAscii.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"

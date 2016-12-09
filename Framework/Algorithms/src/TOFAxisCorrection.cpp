@@ -12,6 +12,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {

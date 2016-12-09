@@ -73,15 +73,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   integration(Mantid::API::MatrixWorkspace_sptr &input, const double &start,
               const double &stop);
-  /// Perform multiplication over a range
-  Mantid::API::MatrixWorkspace_sptr
-  multiplyRange(Mantid::API::MatrixWorkspace_sptr &input, const int &startBin,
-                const int &endBin, const double &factor);
-  /// Perform multiplication over a range
-  Mantid::API::MatrixWorkspace_sptr
-  multiplyRange(Mantid::API::MatrixWorkspace_sptr &input, const int &startBin,
-                const double &factor);
-  /// Create a single valued workspace
   Mantid::API::MatrixWorkspace_sptr singleValueWS(double val);
   /// Calclate the weighted mean
   Mantid::API::MatrixWorkspace_sptr

@@ -6,6 +6,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Unit.h"
@@ -36,8 +37,6 @@ public:
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(VesuvioL1ThetaResolution)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string VesuvioL1ThetaResolution::name() const {
@@ -213,12 +212,11 @@ void VesuvioL1ThetaResolution::exec() {
     // Process data for L1 distribution
     if (m_l1DistributionWs) {
       auto &x = m_l1DistributionWs->mutableX(i);
-      std::vector<double> y(numEvents, 1.0);
 
       std::sort(l1.begin(), l1.end());
       std::copy(l1.begin(), l1.end(), x.begin());
 
-      m_l1DistributionWs->mutableY(i) = y;
+      m_l1DistributionWs->mutableY(i) = 1.0;
 
       auto &spec = m_l1DistributionWs->getSpectrum(i);
       spec.setSpectrumNo(specNo);
@@ -228,12 +226,11 @@ void VesuvioL1ThetaResolution::exec() {
     // Process data for theta distribution
     if (m_thetaDistributionWs) {
       auto &x = m_thetaDistributionWs->mutableX(i);
-      std::vector<double> y(numEvents, 1.0);
 
       std::sort(theta.begin(), theta.end());
       std::copy(theta.begin(), theta.end(), x.begin());
 
-      m_thetaDistributionWs->mutableY(i) = y;
+      m_thetaDistributionWs->mutableY(i) = 1.0;
 
       auto &spec = m_thetaDistributionWs->getSpectrum(i);
       spec.setSpectrumNo(specNo);

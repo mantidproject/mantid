@@ -5,7 +5,9 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <QFileInfo>
 #include <QUrl>
@@ -124,7 +126,6 @@ void StepScan::startLiveListener() {
         "This interface requires event data.\nThe live data for " +
             QString::fromStdString(m_instrument) + " is in histogram form");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
-    m_uiForm.mWRunFiles->liveButtonSetEnabled(false);
     return;
   }
 
