@@ -594,6 +594,22 @@ void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor,
 }
 
 /**
+ * Save shapes drawn on the view to a table workspace
+ */
+void ProjectionSurface::saveShapesToTableWorkspace() {
+  m_maskShapes.saveToTableWorkspace();
+}
+
+/**
+ * Load shapes from a table workspace on to the view.
+ * @param ws :: table workspace to load shapes from
+ */
+void ProjectionSurface::loadShapesFromTableWorkspace(
+    Mantid::API::ITableWorkspace_const_sptr ws) {
+  m_maskShapes.loadFromTableWorkspace(ws);
+}
+
+/**
 * Return a combined list of peak parkers from all overlays
 * @param detID :: The detector ID of interest
 */

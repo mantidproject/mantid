@@ -945,7 +945,8 @@ bool InstrumentWidget::overlay(const QString &wsName) {
   }
 
   auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
-  if (!pws) {
+  auto table = boost::dynamic_pointer_cast<ITableWorkspace>(workspace);
+  if (!pws && !table) {
     QMessageBox::warning(this, "MantidPlot - Warning",
                          "Work space called '" + wsName +
                              "' is not suitable."
@@ -965,7 +966,12 @@ bool InstrumentWidget::overlay(const QString &wsName) {
     surface->setPeaksWorkspace(pws);
     updateInstrumentView();
     success = true;
+  } else if (table && surface) {
+    surface->loadShapesFromTableWorkspace(table);
+    updateInstrumentView();
+    success = true;
   }
+
   return success;
 }
 

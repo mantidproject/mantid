@@ -95,6 +95,7 @@ protected slots:
   void storeBinMask();
   void storeMask();
   void clearMask();
+  void saveShapesToTable() const;
   void saveInvertedMaskToWorkspace();
   void saveInvertedMaskToFile();
   void saveMaskToWorkspace();
@@ -165,6 +166,7 @@ protected:
 
   QPushButton *m_applyToData;
   QPushButton *m_applyToView;
+  QPushButton *m_saveShapesToTable;
   QPushButton *m_clearAll;
   QPushButton *m_saveButton;
   bool m_maskBins;
