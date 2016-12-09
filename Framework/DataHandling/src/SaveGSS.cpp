@@ -219,7 +219,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
         g_log.warning() << "There is no detector associated with spectrum "
                         << iws
                         << ". Workspace is treated as NO-INSTRUMENT case. \n";
-      } else if(spectrumInfo.isMasked(iws)) {
+      } else if (spectrumInfo.isMasked(iws)) {
         continue;
       }
     }
