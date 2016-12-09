@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/Peak.h"
@@ -962,7 +963,7 @@ public:
     std::string workspaceName = "test_workspace_name";
     for (size_t index = 0; index < 2; ++index) {
       // Create a sample workspace and add it to the ADS, so it gets a name.
-      auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
+      auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
           3, static_cast<double>(index), static_cast<double>(index));
       AnalysisDataService::Instance().addOrReplace(workspaceName, ws);
       alg.setProperty("InputWorkspace",
@@ -1245,7 +1246,7 @@ private:
     groups[5].push_back(20);
 
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 30, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 30, 1.0);
     ws->getSpectrum(4).clear();
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), groups.size());

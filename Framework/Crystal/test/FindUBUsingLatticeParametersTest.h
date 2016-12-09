@@ -1,6 +1,7 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/DeleteTableRows.h"
 #include "MantidKernel/System.h"

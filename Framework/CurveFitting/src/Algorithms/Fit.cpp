@@ -51,11 +51,7 @@ void Fit::initConcrete() {
       boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
 
   declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator,
-                  "Minimizer to use for fitting. Minimizers available are "
-                  "\"Levenberg-Marquardt\", \"Simplex\", \"FABADA\", "
-                  "\"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate "
-                  "gradient (Polak-Ribiere imp.)\", \"BFGS\", and "
-                  "\"Levenberg-MarquardtMD\"");
+                  "Minimizer to use for fitting.");
 
   std::vector<std::string> costFuncOptions =
       API::CostFunctionFactory::Instance().getKeys();

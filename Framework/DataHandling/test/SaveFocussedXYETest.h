@@ -7,6 +7,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
@@ -33,7 +34,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
@@ -94,27 +95,27 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     work_in1->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     work_in2->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     work_in3->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     work_in4->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
@@ -190,27 +191,27 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in1->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in2->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in3->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in4->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
@@ -293,12 +294,12 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 2.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 2.0);
     work_in1->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
@@ -370,7 +371,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::Create2DWorkspace154(1, 3, false);
+        WorkspaceCreationHelper::create2DWorkspace154(1, 3, false);
     workspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 

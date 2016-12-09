@@ -476,7 +476,7 @@ private:
     fitalg_function->function(dataXview, dataYvalues);
 
     // Create the workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
 
     // Create the instrument
     boost::shared_ptr<Instrument> inst =
