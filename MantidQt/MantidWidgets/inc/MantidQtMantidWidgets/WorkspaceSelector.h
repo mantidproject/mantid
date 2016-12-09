@@ -134,7 +134,7 @@ private:
   /// A list of workspace types that should be shown in the ComboBox
   QStringList m_workspaceTypes;
   /// Whether to show "hidden" workspaces
-  bool m_showHidden;  
+  bool m_showHidden;
   // show/hide workspace groups
   bool m_showGroups;
   bool m_optional; ///< Whether to add an extra empty entry to the combobox
