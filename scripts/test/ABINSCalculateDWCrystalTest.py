@@ -32,7 +32,7 @@ def skip_if(skipping_criteria):
 @skip_if(old_python)
 class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
-    _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")  # path to files
+    _core = os.path.abspath("../ExternalData/Testing/Data/UnitTest/")  # path to files
     _temperature = 10  # 10 K,  temperature for the benchmark
 
     # data

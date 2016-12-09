@@ -42,7 +42,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
     #  *************************** USE CASES ********************************************
-    _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")  # hardcoded directory with testing files
+    _core = os.path.abspath("../ExternalData/Testing/Data/UnitTest/")  # hardcoded directory with testing files
 
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|

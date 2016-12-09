@@ -47,13 +47,19 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _order_event = AbinsConstants.FUNDAMENTALS
 
     # data
-    core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")
+    # core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")
+    core = os.path.abspath("../ExternalData/Testing/Data/UnitTest/")
+    # core = ""
 
     squaricn = "squaricn_sum_CalculateSPowder"
     Si2 = "Si2-sc_CalculateSPowder"
 
     Squaricn_path = os.path.abspath(os.path.join(core, squaricn))
     Si2_path = os.path.abspath(os.path.join(core, Si2))
+
+    # Squaricn_path = squaricn
+    # Si2_path = Si2
+
 
     def remove_hdf_files(self):
         files = os.listdir(os.getcwd())
