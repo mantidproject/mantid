@@ -57,7 +57,8 @@ class CrystalField(object):
                         ToleranceEnergy:     energy tolerance,
                         ToleranceIntensity:  intensity tolerance,
                         ResolutionModel:     A resolution model.
-                        FWHMVariation:      Absolute value of allowed variation of a peak width during a fit.
+                        FWHMVariation:       Absolute value of allowed variation of a peak width during a fit.
+                        FixAllPeaks:         A boolean flag that fixes all parameters of the peaks.
 
                         Field parameters:
 
@@ -119,6 +120,7 @@ class CrystalField(object):
         self._intensityScaling = 1.0
         self._resolutionModel = None
         self._fwhmVariation = None
+        self._fixAllPeaks = False
 
         for key in kwargs:
             if key == 'ToleranceEnergy':
@@ -135,6 +137,8 @@ class CrystalField(object):
                 self._temperature = kwargs[key]
             elif key == 'FWHMVariation':
                 self._fwhmVariation = kwargs[key]
+            elif key == 'FixAllPeaks':
+                self._fixAllPeaks = kwargs[key]
             else:
                 # Crystal field parameters
                 self._fieldParameters[key] = kwargs[key]
@@ -181,10 +185,12 @@ class CrystalField(object):
         temperature = self._getTemperature(i)
         out = 'name=CrystalFieldSpectrum,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
+        out += ',FixAllPeaks=%s' % self._fixAllPeaks
         out += ',PeakShape=%s' % self.getPeak(i).name
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
-        out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        if len(self._fieldParameters) > 0:
+            out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
         if self._resolutionModel is not None:
             if self._resolutionModel.multi:
                 model = self._resolutionModel.model[i]
@@ -224,6 +230,7 @@ class CrystalField(object):
         out = 'name=CrystalFieldMultiSpectrum,Ion=%s,Symmetry=%s' % (self._ion, self._symmetry)
         out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         out += ',PeakShape=%s' % self.getPeak().name
+        out += ',FixAllPeaks=%s' % self._fixAllPeaks
         if self.background is not None:
             out += ',Background=%s' % self.background[0].nameString()
         out += ',Temperatures=(%s)' % ','.join(map(str, self._temperature))
@@ -405,6 +412,14 @@ class CrystalField(object):
             self._resolutionModel = value
         else:
             self._resolutionModel = ResolutionModel(value)
+
+    @property
+    def FixAllPeaks(self):
+        return self._fixAllPeaks
+
+    @FixAllPeaks.setter
+    def FixAllPeaks(self, value):
+        self._fixAllPeaks = value
 
     def ties(self, **kwargs):
         """Set ties on the field parameters.
@@ -845,6 +860,7 @@ class CrystalFieldFit(object):
         self._input_workspace = InputWorkspace
         self._output_workspace_base_name = 'fit'
         self._fit_properties = kwargs
+        self._function = None
 
     def fit(self):
         """
@@ -855,12 +871,53 @@ class CrystalFieldFit(object):
         else:
             return self._fit_single()
 
+    def monte_carlo(self, **kwargs):
+        if isinstance(self._input_workspace, list):
+            self._monte_carlo_multi(**kwargs)
+        else:
+            self._monte_carlo_single(**kwargs)
+
+    def _monte_carlo_single(self, **kwargs):
+        from mantid.api import AlgorithmManager
+        fun = self.model.makeSpectrumFunction()
+        alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', self._input_workspace)
+        for param in kwargs:
+            alg.setProperty(param, kwargs[param])
+        alg.execute()
+        function = alg.getProperty('Function').value
+        self.model.update(function)
+        self._function = function
+
+    def _monte_carlo_multi(self, **kwargs):
+        from mantid.api import AlgorithmManager
+        fun = self.model.makeMultiSpectrumFunction()
+        alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', self._input_workspace[0])
+        i = 1
+        for workspace in self._input_workspace[1:]:
+            alg.setProperty('InputWorkspace_%s' % i, workspace)
+            i += 1
+        for param in kwargs:
+            alg.setProperty(param, kwargs[param])
+        alg.execute()
+        function = alg.getProperty('Function').value
+        self.model.update_multi(function)
+        self._function = function
+
     def _fit_single(self):
         """
         Fit when the model has a single spectrum.
         """
         from mantid.api import AlgorithmManager
-        fun = self.model.makeSpectrumFunction()
+        if self._function is None:
+            fun = self.model.makeSpectrumFunction()
+        else:
+            fun = str(self._function)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)

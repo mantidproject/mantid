@@ -10,6 +10,8 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include <gmock/gmock.h>
@@ -97,6 +99,29 @@ public:
   IReflSettingsTabPresenter *getPresenter() const override { return nullptr; }
 };
 
+class MockSaveTabView : public IReflSaveTabView {
+public:
+  MOCK_CONST_METHOD1(setSavePath, void(const std::string &path));
+  MOCK_CONST_METHOD0(getSavePath, std::string());
+  MOCK_CONST_METHOD0(getPrefix, std::string());
+  MOCK_CONST_METHOD0(getFilter, std::string());
+  MOCK_CONST_METHOD0(getRegexCheck, bool());
+  MOCK_CONST_METHOD0(getCurrentWorkspaceName, std::string());
+  MOCK_CONST_METHOD0(getSelectedWorkspaces, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getSelectedParameters, std::vector<std::string>());
+  MOCK_CONST_METHOD0(getFileFormatIndex, int());
+  MOCK_CONST_METHOD0(getTitleCheck, bool());
+  MOCK_CONST_METHOD0(getQResolutionCheck, bool());
+  MOCK_CONST_METHOD0(getSeparator, std::string());
+  MOCK_CONST_METHOD0(clearWorkspaceList, void());
+  MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD0(clearParametersList, void());
+  MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
+
+  // Calls we don't care about
+  IReflSaveTabPresenter *getPresenter() const override { return nullptr; }
+};
+
 class MockMainWindowView : public IReflMainWindowView {
 public:
   MOCK_METHOD3(askUserString,
@@ -138,6 +163,15 @@ public:
     UNUSED_ARG(instName);
   }
   ~MockSettingsTabPresenter() override{};
+};
+
+class MockSaveTabPresenter : public IReflSaveTabPresenter {
+public:
+  void notify(IReflSaveTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
+  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
+    UNUSED_ARG(presenter);
+  };
+  ~MockSaveTabPresenter() override{};
 };
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {

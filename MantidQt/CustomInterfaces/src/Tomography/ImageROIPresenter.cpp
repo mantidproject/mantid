@@ -135,7 +135,7 @@ void ImageROIPresenter::processBrowseImage() {
     return;
 
   m_stackPath = path;
-  processNewStack(true);
+  processLoadSingleImage();
 }
 
 void ImageROIPresenter::processBrowseStack() {
@@ -145,7 +145,7 @@ void ImageROIPresenter::processBrowseStack() {
     return;
 
   m_stackPath = path;
-  processNewStack(false);
+  processLoadStackOfImages();
 }
 
 /**
@@ -177,62 +177,64 @@ StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
   return soid;
 }
 
-void ImageROIPresenter::processNewStack(bool singleImg) {
-  if (!singleImg) {
-
-    StackOfImagesDirs soid("");
-    try {
-      soid = checkInputStack(m_stackPath);
-    } catch (std::exception &e) {
-      // Poco::FileNotFoundException: this should never happen, unless
-      // the open dir dialog misbehaves unexpectedly, or in tests
-      m_view->userWarning(
-          "Error trying to open directories/files",
-          "The path selected via the dialog cannot be openend or "
-          "there was a problem while trying to access it. This "
-          "is an unexpected inconsistency. Error details: " +
-              std::string(e.what()));
+void ImageROIPresenter::processLoadSingleImage() {
+  try {
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    if (ads.doesExist(g_wsgName)) {
+      ads.remove(g_wsgName);
     }
-
-    if (!soid.isValid())
-      return;
-
-    std::vector<std::string> imgs = soid.sampleFiles();
-    if (0 >= imgs.size()) {
-      m_view->userWarning(
-          "Error while trying to find image/projection files in the stack "
-          "directories",
-          "Could not find any (image) file in the samples subdirectory: " +
-              soid.sampleImagesDir());
-      return;
+    if (ads.doesExist(g_wsgFlatsName)) {
+      ads.remove(g_wsgFlatsName);
     }
-
-    loadFITSStack(soid, g_wsgName, g_wsgFlatsName, g_wsgDarksName);
-    m_stackFlats = nullptr;
-    m_stackDarks = nullptr;
-
-  } else {
-    // TODO: find a better place for this
-    try {
-      auto &ads = Mantid::API::AnalysisDataService::Instance();
-      if (ads.doesExist(g_wsgName)) {
-        ads.remove(g_wsgName);
-      }
-      if (ads.doesExist(g_wsgFlatsName)) {
-        ads.remove(g_wsgFlatsName);
-      }
-      if (ads.doesExist(g_wsgDarksName)) {
-        ads.remove(g_wsgDarksName);
-      }
-    } catch (std::runtime_error &rexc) {
-      g_log.warning("There was a problem while trying to remove apparently "
-                    "existing workspaces. Error details: " +
-                    std::string(rexc.what()));
+    if (ads.doesExist(g_wsgDarksName)) {
+      ads.remove(g_wsgDarksName);
     }
-
-    loadFITSImage(m_stackPath, g_wsgName);
+  } catch (std::runtime_error &rexc) {
+    g_log.warning("There was a problem while trying to remove apparently "
+                  "existing workspaces. Error details: " +
+                  std::string(rexc.what()));
   }
 
+  loadFITSImage(m_stackPath, g_wsgName);
+  setupAlgorithmRunnerAfterLoad();
+}
+
+void ImageROIPresenter::processLoadStackOfImages() {
+  StackOfImagesDirs soid("");
+  try {
+    soid = checkInputStack(m_stackPath);
+  } catch (std::exception &e) {
+    // Poco::FileNotFoundException: this should never happen, unless
+    // the open dir dialog misbehaves unexpectedly, or in tests
+    m_view->userWarning("Error trying to open directories/files",
+                        "The path selected via the dialog cannot be openend or "
+                        "there was a problem while trying to access it. This "
+                        "is an unexpected inconsistency. Error details: " +
+                            std::string(e.what()));
+  }
+
+  if (!soid.isValid())
+    return;
+
+  std::vector<std::string> imgs = soid.sampleFiles();
+  if (0 >= imgs.size()) {
+    m_view->userWarning(
+        "Error while trying to find image/projection files in the stack "
+        "directories",
+        "Could not find any (image) file in the samples subdirectory: " +
+            soid.sampleImagesDir());
+    return;
+  }
+
+  loadFITSStack(soid, g_wsgName, g_wsgFlatsName, g_wsgDarksName);
+  m_stackFlats = nullptr;
+  m_stackDarks = nullptr;
+  setupAlgorithmRunnerAfterLoad();
+}
+
+void ImageROIPresenter::setupAlgorithmRunnerAfterLoad() {
+  // reset any previous connections
+  m_algRunner.get()->disconnect();
   connect(m_algRunner.get(), SIGNAL(batchComplete(bool)), this,
           SLOT(finishedLoadStack(bool)), Qt::QueuedConnection);
 

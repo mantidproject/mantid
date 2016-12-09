@@ -57,6 +57,7 @@ Bugs Resolved
 - Fixed exception being thrown when saving project with custom interfaces open
 - The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
 - Fixed a bug where enabling auto rebinning in the slice viewer and zooming would not rebin the workspace if it was a histogram workspace.
+- Legend placement has been fixed in the "tiled plot"/``plotSubplots`` option, and these graphs now use Mantid's default plot style options.
 
 SliceViewer Improvements
 ------------------------
@@ -73,4 +74,7 @@ changes on GitHub
 VSI Improvements
 ----------------
 
-ParaView updated to v5.2.0
+- ParaView updated to v5.2.0
+- The sources and views more reliably show progress in the VSI status bar. 
+- Added a button to the standard view which applies the threshold filter.
+- Update the cut button to match the equivalent ParaView icon.

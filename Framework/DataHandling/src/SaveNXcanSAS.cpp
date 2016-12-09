@@ -19,6 +19,7 @@
 #include <H5Cpp.h>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>

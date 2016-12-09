@@ -47,6 +47,8 @@ public:
       MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
   /// Toggle multiple fitting mode
   void setMultiFitState(Muon::MultiFitState state);
+  /// Set function in model (fit property browser)
+  void setFunctionInModel(const Mantid::API::IFunction_sptr &function);
 public slots:
   /// Update function and pass to fit property browser
   void updateFunction();

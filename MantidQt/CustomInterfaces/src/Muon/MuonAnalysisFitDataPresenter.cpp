@@ -6,6 +6,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
@@ -149,9 +150,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
  * Updates WS index, startX, endX
  */
 void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
-  // update workspace index
-  const unsigned int wsIndex = m_dataSelector->getWorkspaceIndex();
-  m_fitBrowser->setWorkspaceIndex(static_cast<int>(wsIndex));
+  // update workspace index: always 0
+  m_fitBrowser->setWorkspaceIndex(0);
 
   // update start and end times
   const double start = m_dataSelector->getStartTime();
@@ -189,7 +189,7 @@ void MuonAnalysisFitDataPresenter::handleXRangeChangedGraphically(double start,
 /**
  * Called by selectMultiPeak: fit browser has been reassigned to a new
  * workspace.
- * Sets run number, instrument and workspace index in the data selector.
+ * Sets run number and instrument in the data selector.
  * If multiple runs selected, disable sequential fit option.
  * @param wsName :: [input] Name of new workspace
  */
@@ -748,7 +748,6 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   const QString numberString = instRun.right(instRun.size() - firstZero);
   m_dataSelector->setWorkspaceDetails(
       numberString, QString::fromStdString(wsParams.instrument));
-  m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
 
   // Set selected groups/pairs and periods here too
   // (unless extra groups/periods are already selected, in which case don't

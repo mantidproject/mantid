@@ -22,6 +22,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 
 #include "MantidMDAlgorithms/ReflectometryTransformKiKf.h"
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"

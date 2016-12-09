@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>

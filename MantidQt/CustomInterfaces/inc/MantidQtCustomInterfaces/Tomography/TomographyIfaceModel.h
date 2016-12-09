@@ -7,12 +7,17 @@
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 // Qt classes forward declarations
 class QMutex;
+
+namespace Poco {
+class Pipe;
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -83,9 +88,52 @@ public:
 
   /// Username last logged in, if any.
   std::string loggedIn() const { return m_loggedInUser; }
+
   // TODO: add companion currentComputeResource where LoggedIn() is in
-  void usingTool(const std::string &tool) { m_currentTool = tool; }
-  std::string usingTool() const { return m_currentTool; }
+  //--------------------------------------------
+  // Current tool Settings
+  //--------------------------------------------
+  void usingTool(const std::string &tool) { m_currentToolName = tool; }
+  std::string usingTool() const { return m_currentToolName; }
+
+  void setCurrentToolMethod(std::string toolMethod) {
+    m_currentToolMethod = toolMethod;
+  }
+  std::string getCurrentToolMethod() const { return m_currentToolMethod; }
+
+  void setCurrentToolSettings(std::shared_ptr<TomoRecToolConfig> settings) {
+    m_currentToolSettings = settings;
+  }
+
+  //--------------------------------------------
+  // Access to the system settings information
+  //--------------------------------------------
+  // get the remote scripts base dir from the system settings
+  std::string getCurrentRemoteScriptsBasePath() const {
+    return m_systemSettings.m_remote.m_basePathReconScripts;
+  }
+
+  /// get the local paths from the system settings
+  std::string getCurrentLocalScriptsBasePath() const {
+    return m_systemSettings.m_local.m_reconScriptsPath;
+  }
+
+  std::string getExeternalInterpreterPath() const {
+    return m_systemSettings.m_local.m_externalInterpreterPath;
+  }
+
+  /// get the experiment reference currently selected
+  std::string getCurrentExperimentReference() const {
+    return m_systemSettings.m_experimentReference;
+  }
+
+  /// returns the scripts folder, used for remote path
+  std::string getTomoScriptFolderPath() const { return g_tomoScriptFolderPath; }
+
+  /// returns the tomo script location path inside the scripts folder
+  std::string getTomoScriptLocationPath() const {
+    return g_mainReconstructionScript;
+  }
 
   /// ping the (remote) compute resource
   bool doPing(const std::string &compRes);
@@ -102,6 +150,7 @@ public:
                         std::vector<std::string> &cmds);
   /// Submit a new job to the (remote or local) compute resource
   void doSubmitReconstructionJob(const std::string &compRes);
+
   /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
                     const std::vector<std::string> &id);
@@ -110,33 +159,18 @@ public:
 
   void refreshLocalJobsInfo();
 
-  void doRunReconstructionJobLocal();
-
-  void updateExperimentReference(const std::string ref) {
-    m_experimentRef = ref;
-  }
+  void setExperimentReference(const std::string ref) { m_experimentRef = ref; }
 
   /// Update to the current setings given by the user
-  void updateSystemSettings(const TomoSystemSettings &settings) {
+  void setSystemSettings(const TomoSystemSettings &settings) {
     m_systemSettings = settings;
   }
 
-  /// Update to the current setings given by the user
-  void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
-    m_toolsSettings = ts;
-  }
-
-  void updateTomopyMethod(const std::string &method) {
-    m_tomopyMethod = method;
-  }
-
-  void updateAstraMethod(const std::string &method) { m_astraMethod = method; }
-
-  void updatePrePostProcSettings(const TomoReconFiltersSettings &filters) {
+  void setPrePostProcSettings(const TomoReconFiltersSettings &filters) {
     m_prePostProcSettings = filters;
   }
 
-  void updateImageStackPreParams(const ImageStackPreParams &roiEtc) {
+  void setImageStackPreParams(const ImageStackPreParams &roiEtc) {
     m_imageStackPreParams = roiEtc;
   }
 
@@ -149,15 +183,39 @@ public:
   /// for clean destruction
   void cleanup();
 
-  std::string localComputeResource() const { return m_localCompName; }
+  std::string localComputeResource() const { return g_LocalResourceName; }
 
-  void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
+  void setTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
-  // tools not yet available/supported - TODO
+  // Names of reconstruction tools
+  static const std::string g_TomoPyTool;
+  static const std::string g_AstraTool;
+  static const std::string g_customCmdTool;
+  // not supported yet
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
 
-private:
+  // Name of the remote compute resource
+  static const std::string g_SCARFName;
+  static const std::string g_LocalResourceName;
+
+  // The main tomo_reconstruct.py or similar script (as it is distributed with
+  // Mantid). This is the entry point for reconstruction jobs.
+  static const std::string g_mainReconstructionScript;
+  static const std::string g_tomoScriptFolderPath;
+
+protected: // protected to expose everything to testing
+  std::string
+  constructSingleStringFromVector(const std::vector<std::string> args) const;
+
+  void doRunReconstructionJobLocal(const std::string &run,
+                                   const std::string &allOpts,
+                                   const std::vector<std::string> &args);
+
+  void doRunReconstructionJobRemote(const std::string &compRes,
+                                    const std::string &run,
+                                    const std::string &allOpts);
+
   /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
@@ -167,22 +225,27 @@ private:
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
                                std::vector<std::string> &opt) const;
 
-  void checkWarningToolNotSetup(const std::string &tool,
-                                const std::string &cmd) const;
+  bool checkIfToolIsSetupProperly(const std::string &tool,
+                                  const std::string &cmd) const;
 
-  std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
+  void makeTomoRecScriptOptions(const bool local,
+                                std::vector<std::string> &opts) const;
 
   void filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
-                           const ImageStackPreParams &corRegions, bool local,
+                           const ImageStackPreParams &corRegions,
+                           const bool local,
                            std::vector<std::string> &opts) const;
 
   void splitCmdLine(const std::string &cmd, std::string &run,
                     std::string &opts) const;
 
+  /// process the tool name to be appropriate for the command line arg
+  std::string prepareToolNameForArgs(const std::string &toolName) const;
+
   void checkDataPathsSet() const;
 
   std::string adaptInputPathForExecution(const std::string &path,
-                                         bool local) const;
+                                         const bool local) const;
 
   std::string buildOutReconstructionDir(const std::string &samplesDir,
                                         bool) const;
@@ -196,10 +259,13 @@ private:
   std::string
   buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
 
+  /// Prints the streams from the Poco::launch process into mantid
+  void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe,
+                                      const Poco::Pipe &errPipe);
+
+private:
   /// facility for the remote compute resource
   const std::string m_facility;
-  /// display name of the "local" compute resource
-  const std::string m_localCompName;
 
   /// Experiment reference (RBNumber for example)
   std::string m_experimentRef;
@@ -225,36 +291,29 @@ private:
   /// reconstruction tools available on SCARF
   std::vector<std::string> m_SCARFtools;
 
-  // Name of the remote compute resource
-  static const std::string g_SCARFName;
-
-  std::string m_currentTool;
-
   TomoPathsConfig m_pathsConfig;
 
   // System settting including several paths and parameters (local and remote)
   TomoSystemSettings m_systemSettings;
 
-  // Settings for the third party (tomographic reconstruction) tools
-  TomoReconToolsUserSettings m_toolsSettings;
+  //--------------------------------
+  // Current tool variables
+  //--------------------------------
 
-  std::string m_tomopyMethod;
-  std::string m_astraMethod;
+  // current tool's name, updated from the presenter on change
+  std::string m_currentToolName;
+
+  // the tool settings so we can use it for reconstruction params
+  std::shared_ptr<TomoRecToolConfig> m_currentToolSettings;
+
+  // current tool's method, updated from the presenter on change
+  std::string m_currentToolMethod;
 
   // Settings for the pre-/post-processing filters
   TomoReconFiltersSettings m_prePostProcSettings;
 
   // Parameters set for the ROI, normalization region, etc.
   ImageStackPreParams m_imageStackPreParams;
-
-  // The main tomo_reconstruct.py or similar script (as it is distributed with
-  // Mantid). This is the entry point for reconstruction jobs.
-  static const std::string g_mainReconstructionScript;
-
-  // Names of reconstruction tools
-  static const std::string g_TomoPyTool;
-  static const std::string g_AstraTool;
-  static const std::string g_customCmdTool;
 
   // mutex for the job status info update operations
   // TODO: replace with std::mutex+std::lock_guard

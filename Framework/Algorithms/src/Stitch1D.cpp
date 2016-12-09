@@ -143,9 +143,10 @@ void Stitch1D::init() {
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
-  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
-                                                       true, Direction::Input),
-                  "Scaling either with respect to workspace 1 or workspace 2");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
+                                           Direction::Input),
+      "Scaling either with respect to LHS workspace or RHS workspace");
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
                                                        false, Direction::Input),
                   "True to use a provided value for the scale factor.");
@@ -280,7 +281,7 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_sptr &lhsWS,
   return result;
 }
 
-/**Runs the Rebin Algorithm as a child
+/**Runs the Rebin Algorithm as a child and replaces special values
  @param input :: The input workspace
  @param params :: a vector<double> containing rebinning parameters
  @return A shared pointer to the resulting MatrixWorkspace
@@ -357,52 +358,6 @@ MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input,
                     boost::lexical_cast<std::string>(stop));
   integration->execute();
   MatrixWorkspace_sptr outWS = integration->getProperty("OutputWorkspace");
-  return outWS;
-}
-
-/**Runs the MultiplyRange Algorithm as a child defining an end bin
- @param input :: The input workspace
- @param startBin :: The first bin int eh range to multiply
- @param endBin :: The last bin in the range to multiply
- @param factor :: The multiplication factor
- @return A shared pointer to the resulting MatrixWorkspace
- */
-MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
-                                             const int &startBin,
-                                             const int &endBin,
-                                             const double &factor) {
-  auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
-  multiplyRange->setProperty("InputWorkspace", input);
-  multiplyRange->setProperty("StartBin", startBin);
-  multiplyRange->setProperty("EndBin", endBin);
-  multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
-  g_log.information("MultiplyRange EndBin: " + std::to_string(endBin));
-  g_log.information("MultiplyRange Factor: " +
-                    boost::lexical_cast<std::string>(factor));
-  multiplyRange->execute();
-  MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
-  return outWS;
-}
-
-/**Runs the MultiplyRange Algorithm as a child
- @param input :: The input workspace
- @param startBin :: The first bin int eh range to multiply
- @param factor :: The multiplication factor
- @return A shared pointer to the resulting MatrixWorkspace
- */
-MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
-                                             const int &startBin,
-                                             const double &factor) {
-  auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
-  multiplyRange->setProperty("InputWorkspace", input);
-  multiplyRange->setProperty("StartBin", startBin);
-  multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
-  g_log.information("MultiplyRange Factor: " +
-                    boost::lexical_cast<std::string>(factor));
-  multiplyRange->execute();
-  MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
   return outWS;
 }
 

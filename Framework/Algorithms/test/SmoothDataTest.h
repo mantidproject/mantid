@@ -189,7 +189,7 @@ public:
     constexpr size_t numBins(1000000);
 
     inputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(numHistograms, numBins);
+        WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
 
     auto &yVals = inputWs->mutableY(0);
     auto &eVals = inputWs->mutableE(0);

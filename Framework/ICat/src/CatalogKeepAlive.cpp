@@ -1,5 +1,6 @@
 #include "MantidICat/CatalogKeepAlive.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <Poco/Thread.h>
 

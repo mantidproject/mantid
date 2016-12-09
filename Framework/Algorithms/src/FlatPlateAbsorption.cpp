@@ -1,9 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {

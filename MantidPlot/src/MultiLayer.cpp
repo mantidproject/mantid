@@ -66,6 +66,7 @@
 
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidKernel/Strings.h"
 #include <MantidQtMantidWidgets/MantidTreeWidget.h>
 
 #include "Mantid/MantidMDCurveDialog.h"
@@ -1895,5 +1896,6 @@ void MultiLayer::setCommonAxisScales() {
     auto *plot = layer(i)->plotWidget();
     plot->setAxisScale(AXIS_X, lowestX, highestX);
     plot->setAxisScale(AXIS_Y, lowestY, highestY);
+    layer(i)->replot();
   }
 }
