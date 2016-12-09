@@ -976,7 +976,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq, accumulation=self.live_method)
-        wlam, wq, th = None, None, None
+        wlam, wqBinned, wqUnbinned, th = None, None, None, None
 
         # Only make a transmission workspace if we need one.
         if transrun and not transmission_ws:
@@ -1020,7 +1020,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             # If we're dealing with a workspace group, we'll manually map execution over each group member
             # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
-                wqGroup = []
+                wqBinnedList = []
+                wqUnbinnedList = []
                 wlamGroup = []
                 thetaGroup = []
                 group_trans_ws = transmission_ws
@@ -1028,28 +1029,34 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
-                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
-                                                                 thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
+                    wqBinned, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
+                                                                 thetaIn=angle, OutputWorkspace=runno+'_IvsQ_binned_'+str(i+1),
                                                                  OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
                                                                  ScaleFactor=factor,MomentumTransferStep=Qstep,
                                                                  MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
-                    wqGroup.append(wq)
+                    wqUnbinned = ConvertUnits(InputWorkspace=wlam, Target="MomentumTransfer", OutputWorkspace=runno+'_IvsQ_'+str(i+1))
+
+                    wqBinnedList.append(wqBinned)
+                    wqUnbinnedList.append(wqUnbinned)
                     wlamGroup.append(wlam)
                     thetaGroup.append(th)
 
-                wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ')
+                wqBinned = GroupWorkspaces(InputWorkspaces=wqBinnedList, OutputWorkspace=runno+'_IvsQ_binned')
+                wqUnbinned = GroupWorkspaces(InputWorkspaces=wqUnbinnedList, OutputWorkspace=runno+'_IvsQ')
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
-                                                             thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
+                wqBinned, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
+                                                             thetaIn=angle, OutputWorkspace=runno+'_IvsQ_binned',
                                                              OutputWorkspaceWavelength=runno+'_IvsLam',
                                                              ScaleFactor=factor,MomentumTransferStep=Qstep,
                                                              MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
+                wqUnbinned = ConvertUnits(InputWorkspace=wlam, Target="MomentumTransfer", OutputWorkspace=runno+'_IvsQ')
 
             cleanup()
         else:
-            wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
+            wlam, wqBinned, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
+            wqUnbinned = ConvertUnits(InputWorkspace=wlam, Target="MomentumTransfer", OutputWorkspace=runno+'_IvsQ')
 
         if self.__group_tof_workspaces and not isinstance(ws, WorkspaceGroup):
             if "TOF" in mtd:
@@ -1063,17 +1070,17 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-        if isinstance(wq, WorkspaceGroup):
-            inst = wq[0].getInstrument()
+        if isinstance(wqBinned, WorkspaceGroup):
+            inst = wqBinned[0].getInstrument()
         else:
-            inst = wq.getInstrument()
+            inst = wqBinned.getInstrument()
 
         lmin = inst.getNumberParameter('LambdaMin')[0]
         lmax = inst.getNumberParameter('LambdaMax')[0]
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
 
-        return th, qmin, qmax, wlam, wq
+        return th, qmin, qmax, wlam, wqBinned
 
     def _save_table_contents(self, filename):
         """
