@@ -273,7 +273,8 @@ public:
     std::vector<WorkspaceInfo> wsInfo;
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     QFileInfo fi(".");
-    QString filePath = fi.absolutePath() + "/mantidprojecttest/mantidprojecttest.mantid";
+    QString filePath =
+        fi.absolutePath() + "/mantidprojecttest/mantidprojecttest.mantid";
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
