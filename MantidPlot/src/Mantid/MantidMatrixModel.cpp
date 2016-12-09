@@ -3,6 +3,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
@@ -312,8 +313,7 @@ bool MantidMatrixModel::checkMaskedCache(int row) const {
     } else {
       try {
         size_t wsIndex = static_cast<size_t>(row);
-        auto det = m_workspace->getDetector(wsIndex);
-        isMasked = det->isMasked();
+        isMasked = m_workspace->spectrumInfo().isMasked(wsIndex);
         m_maskCache.insert(row, isMasked);
       } catch (std::exception &) {
         m_maskCache.insert(row, false);
