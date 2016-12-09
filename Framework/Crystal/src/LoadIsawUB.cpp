@@ -4,6 +4,7 @@
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::Kernel::Strings;
 using Mantid::Kernel::DblMatrix;

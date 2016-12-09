@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/Minus.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/Workspace2D.h"

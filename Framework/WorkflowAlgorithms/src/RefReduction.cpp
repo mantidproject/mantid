@@ -1,4 +1,5 @@
 #include "MantidWorkflowAlgorithms/RefReduction.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"

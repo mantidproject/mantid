@@ -137,10 +137,8 @@ public:
   };
   /// Options for the live button
   enum LiveButtonOpts {
-    Hide,       ///< Don't use the live button
-    AlwaysShow, ///< Show whether a connection is possible or not (will be
-    /// disabled)
-    ShowIfCanConnect ///< Only show if able to connect to the live data server
+    Hide, ///< Don't use the live button
+    Show, ///< Display the live button
   };
 
   /// Default constructor
@@ -175,7 +173,6 @@ public:
   void liveButtonState(LiveButtonOpts);
 
   // Standard setters/getters
-  void liveButtonSetEnabled(bool);
   void liveButtonSetChecked(bool);
   bool liveButtonIsChecked() const;
   bool isEmpty() const;
@@ -238,8 +235,6 @@ signals:
   void fileFindingFinished();
   /// Emitted when the live button is toggled
   void liveButtonPressed(bool);
-  /// Signal emitted after asynchronous checking of live stream availability
-  void liveButtonSetEnabledSignal(bool);
   /// Emitted when inspection of any found files is completed
   void fileInspectionFinished();
 
@@ -278,8 +273,6 @@ private:
   /// displays the validator red star if either m_fileProblem or
   /// m_entryNumProblem are not empty
   void refreshValidator();
-  /// Called asynchronously to check the availability of the live stream
-  void checkLiveConnection();
   /// Turn on/off display of validator red star (default is on)
   void setValidatorDisplay(bool display);
 

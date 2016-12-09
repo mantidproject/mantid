@@ -19,6 +19,7 @@
 #include "MantidKernel/ConfigService.h"
 
 #include <iomanip>
+#include <iostream>
 #include <functional>
 #include <algorithm>
 #include "MantidDataObjects/MDBoxIterator.h"

@@ -15,7 +15,9 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid::API;

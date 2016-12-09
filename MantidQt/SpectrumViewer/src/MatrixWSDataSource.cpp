@@ -15,6 +15,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"

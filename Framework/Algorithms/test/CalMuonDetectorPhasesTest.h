@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/PhysicalConstants.h"

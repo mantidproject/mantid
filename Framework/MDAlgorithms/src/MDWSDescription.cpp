@@ -11,6 +11,7 @@
 
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <boost/lexical_cast.hpp>
 

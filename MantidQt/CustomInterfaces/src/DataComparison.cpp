@@ -1,11 +1,9 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/DataComparison.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DataComparison");
