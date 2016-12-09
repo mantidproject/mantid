@@ -5,8 +5,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -91,11 +91,11 @@ public:
     TS_ASSERT_EQUALS(int(maskWS->getValue(101003)), 1);
     TS_ASSERT_EQUALS(int(maskWS->getValue(101008)), 1);
     TS_ASSERT_EQUALS(int(maskWS->getValue(715079)), 0);
-    const auto &spectrumInfo = maskWS->spectrumInfo();
-    TS_ASSERT(!spectrumInfo.isMasked(101001));
-    TS_ASSERT(spectrumInfo.isMasked(101003));
-    TS_ASSERT(spectrumInfo.isMasked(101008));
-    TS_ASSERT(!spectrumInfo.isMasked(715079));
+    const auto &detectorInfo = maskWS->detectorInfo();
+    TS_ASSERT(!detectorInfo.isMasked(detectorInfo.indexOf(101001)));
+    TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(101003)));
+    TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(101008)));
+    TS_ASSERT(!detectorInfo.isMasked(detectorInfo.indexOf(715079)));
     // Check if filename is saved
     TS_ASSERT_EQUALS(alg.getPropertyValue("CalFilename"),
                      maskWS->run().getProperty("Filename")->value());
