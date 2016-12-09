@@ -272,7 +272,8 @@ public:
     std::vector<WindowInfo> winInfo;
     std::vector<WorkspaceInfo> wsInfo;
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
-    QString filePath = "/tmp/mantidprojecttest/mantidprojecttest.mantid";
+    QFileInfo fi(".");
+    QString filePath = fi.absolutePath() + "/mantidprojecttest/mantidprojecttest.mantid";
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
@@ -294,7 +295,8 @@ public:
     std::vector<WindowInfo> winInfo;
     std::vector<WorkspaceInfo> wsInfo;
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
-    QString filePath = "/tmp/mantidprojecttest";
+    QFileInfo fi(".");
+    QString filePath = fi.absolutePath() + "/mantidprojecttest";
 
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
     ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
@@ -313,7 +315,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
 
     // clean up
-    QFileInfo fi(filePath);
     fi.absoluteDir().rmdir(filePath);
   }
 
