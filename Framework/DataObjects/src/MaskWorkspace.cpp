@@ -172,7 +172,7 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   // the mask bit on the workspace can be set
   // Performance wise, it is not optimal to call detectorInfo() for every index,
   // but this method seems to be used rarely enough to justify this until the
-  // Instrument-2.0 implementatio has progressed far enough to make this cheap.
+  // Instrument-2.0 implementation has progressed far enough to make this cheap.
   const auto &detectorInfo = this->detectorInfo();
   try {
     return detectorInfo.isMasked(detectorInfo.indexOf(detectorID));
