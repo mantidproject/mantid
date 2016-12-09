@@ -160,9 +160,11 @@ public:
   bool userConfirmation(const std::string &title,
                         const std::string &body) override;
 
-  std::string getCachedExecutable() override { return m_extExec; }
+  std::string getCachedExecutable() const override { return m_extExec; }
 
-  std::vector<std::string> getCachedArguments() override { return m_extArgs; }
+  std::vector<std::string> getCachedArguments() const override {
+    return m_extArgs;
+  }
   void externalProcessFinished(const std::string &str);
 
 signals:

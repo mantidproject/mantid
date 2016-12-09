@@ -12,7 +12,6 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <QTimer>
-
 // forward declarations for Qt
 class QWidget;
 class QPixmap;
