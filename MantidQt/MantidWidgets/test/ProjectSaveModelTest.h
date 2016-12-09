@@ -19,9 +19,9 @@ class ProjectSaveModelTest : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    auto ws1 = WorkspaceCreationHelper::Create1DWorkspaceRand(10);
+    auto ws1 = WorkspaceCreationHelper::create1DWorkspaceRand(10);
     WorkspaceCreationHelper::storeWS("ws1", ws1);
-    auto ws2 = WorkspaceCreationHelper::Create1DWorkspaceRand(10);
+    auto ws2 = WorkspaceCreationHelper::create1DWorkspaceRand(10);
     WorkspaceCreationHelper::storeWS("ws2", ws2);
   }
 
@@ -182,7 +182,7 @@ public:
 
   void testGetWorkspaceInformationWithGroup() {
     auto group =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(3, 1, 10, "ws-group");
+        WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 10, "ws-group");
 
     ProjectSaveModel model({});
     auto wsInfo = model.getWorkspaceInformation();
