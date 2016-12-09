@@ -58,12 +58,12 @@ Output:
 .. testoutput:: ExFixedWindowScans
 
     Result is now a WorkspaceGroup, which has 3 workspaces, one per each energy value
-    first item, called ws_0.0 corresponds to energy value of 0.0
+    first item, called ws_red_0.0 corresponds to energy value of 0.0
     it has 18 histograms and 2 bins, one per each temperature
 
 .. testcleanup:: ExFixedWindowScans
 
-   DeleteWorkspace('ws')
+   DeleteWorkspace('ws_red')
 
 .. categories::
 

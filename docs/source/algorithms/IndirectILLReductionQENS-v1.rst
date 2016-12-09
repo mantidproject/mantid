@@ -98,12 +98,12 @@ Output:
 .. testoutput:: ExIndirectILLReductionQENS
 
     Result is a WorkspaceGroup, that contains 3 workspaces
-    the name of the first one is 136553_ws corresponding to run 136553
+    the name of the first one is 136553_ws_red corresponding to run 136553
     it has 18 spectra and 1024 bins
 
 .. testcleanup:: ExIndirectILLReductionQENS
 
-   DeleteWorkspace('ws')
+   DeleteWorkspace('ws_red')
 
 .. categories::
 
