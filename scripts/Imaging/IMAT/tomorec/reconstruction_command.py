@@ -92,46 +92,56 @@ class ReconstructionCommand(object):
                                        self._OUT_README_FNAME)
         tstart = self.gen_readme_summary_begin(readme_fullpath, cfg, cmd_line)
 
-        cfg.tomo_print("Loading in data...")
+        cfg.tomo_print_timed(" * Loading data...")
+
         data, white, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
         cfg.tomo_print("Shape of raw data: {0}, dtype: {1}".format(data.shape,
                                                                    data.dtype))
+        cfg.tomo_print_timed(" * Data loaded in")
 
         # These imports will raise appropriate exceptions in case of error
         import tomorec.tool_imports as tti
         tti.import_tomo_tool(cfg.alg_cfg.tool)
 
+        cfg.tomo_print_timed(" * Applying all pre-processing filters...")
         preproc_data = self.apply_all_preproc(data, cfg.preproc_cfg, white,
                                               dark)
-        cfg.tomo_print("Shape of pre-processed data: {0}, dtype: {1}".format(
-            preproc_data.shape, data.dtype))
+        cfg.tomo_print_timed(
+            "Shape of pre-processed data: {0}, dtype: {1}, completed in".
+            format(preproc_data.shape, data.dtype))
 
+        cfg.tomo_print_timed(" * Saving all pre-processing images")
         # Save pre-proc images
         self.save_preproc_images(cfg.postproc_cfg.output_dir, preproc_data,
                                  cfg.preproc_cfg)
+        cfg.tomo_print_timed(" * Saving finished in")
 
         # Reconstruction
+        cfg.tomo_print_timed(" * Starting reconstruction...")
         t_recon_start = time.time()
         recon_data = self.run_reconstruct_3d(preproc_data, cfg.preproc_cfg,
                                              cfg.alg_cfg)
         t_recon_end = time.time()
-        cfg.tomo_print(
-            "Reconstructed volume. Shape: {0}, and pixel data type: {1}".
+        cfg.tomo_print_timed(
+            " * Reconstructed volume. Shape: {0}, and pixel data type: {1}. Elapsed time:".
             format(recon_data.shape, recon_data.dtype))
 
+        cfg.tomo_print_timed(" * Applying post-processing filters...")
         # Post-processing
         self.apply_postproc_filters(recon_data, cfg.postproc_cfg)
+        cfg.tomo_print_timed(" * Finished applying post-processing filters in")
 
+        cfg.tomo_print_timed(" * Saving reconstruction output...")
         # Save output from the reconstruction
         self.save_recon_output(recon_data, cfg, save_netcdf_vol=True)
+        cfg.tomo_print_timed(" * Finished saving reconstruction output in")
+        cfg.tomo_total_timer()
 
         self.gen_readme_summary_end(readme_fullpath,
                                     (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
-
-        cfg.tomo_print("Finished reconstruction.")
 
     def gen_readme_summary_begin(self, filename, cfg, cmd_line):
         """
@@ -277,6 +287,9 @@ class ReconstructionCommand(object):
             print(" * Note: pixel data type changed to:", data.dtype)
 
         data, white, dark = self.rotate_stack(data, cfg, white, dark)
+        print(
+            " * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}".
+            format(cfg.rotation * 90, data.dtype))
         if self.crop_before_normaliz:
             data = self.crop_coords(data, cfg)
 
@@ -623,10 +636,6 @@ class ReconstructionCommand(object):
         if dark:
             dark = self._rotate_imgs(dark, cfg)
 
-        print(
-            " * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}".
-            format(cfg.rotation * 90, data.dtype))
-
         return (data, white, dark)
 
     def _rotate_imgs(self, data, cfg):
@@ -638,14 +647,17 @@ class ReconstructionCommand(object):
 
         Returns :: rotated data (stack of images)
         """
+
         self._check_data_stack(data)
 
         if 0 == cfg.rotation % 2:
             dim_y = data.shape[1]
             dim_x = data.shape[2]
         else:
-            dim_y = data.shape[1]
-            dim_x = data.shape[2]
+            # if we're rotating by 90 or 270 degrees, we flip the shape
+            dim_y = data.shape[2]
+            dim_x = data.shape[1]
+
         data_rotated = np.zeros(
             (data.shape[0], dim_y, dim_x), dtype=data.dtype)
         for idx in range(0, data.shape[0]):
@@ -1078,21 +1090,31 @@ class ReconstructionCommand(object):
     def find_center(self, cfg):
         self._check_paths_integrity(cfg)
 
-        cfg.tomo_print("Loading in data...", 2)
+        cfg.tomo_print_timed(" * Importing tool " + cfg.alg_cfg.tool)
+        # import tool
+        import tomorec.tool_imports as tti
+        tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
+        cfg.tomo_print_timed(" * Tool loaded in")
+
+        cfg.tomo_print_timed(" * Loading data...")
         # load in data
         sample, white, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        cfg.tomo_print("Data loaded.", 2)
-        # import tool
-        import tomorec.tool_imports as tti
-        tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
+        cfg.tomo_print_timed(" * Data loaded in")
 
+        # crop the ROI, this is done first, so beware of what the correct ROI coordinates are
+        cfg.tomo_print_timed(" * Starting image cropping")
+        sample = self.crop_coords(sample, cfg.preproc_cfg)
+        cfg.tomo_print_timed(" * Images cropped in")
+
+        # rotate after cropping, will require different ROI
+        cfg.tomo_print_timed(" * Starting rotation...")
         # rotate
         sample, white, dark = self.rotate_stack(sample, cfg.preproc_cfg)
-
-        # crop the ROI
-        sample = self.crop_coords(sample, cfg.preproc_cfg)
+        cfg.tomo_print_timed(
+            " * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}. Elapsed time:".
+            format(cfg.preproc_cfg.rotation * 90, sample.dtype))
 
         # sanity check
         cfg.tomo_print(" * Sanity check on data", 0)
@@ -1101,31 +1123,36 @@ class ReconstructionCommand(object):
         num_projections = sample.shape[0]
         inc = float(cfg.preproc_cfg.max_angle) / (num_projections - 1)
 
-        cfg.tomo_print(" * Calculating projection angles", 0)
+        cfg.tomo_print(" * Calculating projection angles")
         proj_angles = np.arange(0, num_projections * inc, inc)
         # For tomopy
-        cfg.tomo_print(" * Calculating radians for TomoPy", 0)
+        cfg.tomo_print(" * Calculating radians for TomoPy")
         proj_angles = np.radians(proj_angles)
 
         size = int(num_projections)
 
+        # depending on the number of COR projections it will select different slice indices
         cor_num_checked_projections = 6
         cor_proj_slice_indices = []
-
-        # depending on the COR projections it will select different slice indices
         cor_slice_index = 0
-        for c in range(cor_num_checked_projections):
-            cor_slice_index += int(size / cor_num_checked_projections)
-            print(" >> Calculated slice index", cor_slice_index)
+
+        if cor_num_checked_projections < 2:
+            # this will give us the middle slice
+            cor_slice_index = int(size / 2)
             cor_proj_slice_indices.append(cor_slice_index)
+        else:
+            for c in range(cor_num_checked_projections):
+                cor_slice_index += int(size / cor_num_checked_projections)
+                cor_proj_slice_indices.append(cor_slice_index)
 
         calculated_cors = []
 
-        cfg.tomo_print("Starting COR calculation on " +
-                       str(cor_num_checked_projections) + " projections", 2)
+        cfg.tomo_print_timed(" * Starting COR calculation for " +
+                             str(cor_num_checked_projections) + " out of " +
+                             str(sample.shape[0]) + " projections", 2)
 
         cropCoords = cfg.preproc_cfg.crop_coords[0]
-        imageWidth = sample.shape[2]  # i think?
+        imageWidth = sample.shape[2]
 
         # if crop corrds match with the image width then the full image was selected
         pixelsFromLeftSide = cropCoords if cropCoords - imageWidth <= 1 else 0
@@ -1133,19 +1160,20 @@ class ReconstructionCommand(object):
         for slice_idx in cor_proj_slice_indices:
             tomopy_cor = tomopy.find_center(
                 tomo=sample, theta=proj_angles, ind=slice_idx, emission=False)
-            print("\t** COR for slice", str(slice_idx), ".. REL to CROP ",
+            print(" ** COR for slice", str(slice_idx), ".. REL to CROP ",
                   str(tomopy_cor), ".. REL to FULL ",
                   str(tomopy_cor + pixelsFromLeftSide))
             calculated_cors.append(tomopy_cor)
 
-        cfg.tomo_print("Finished COR calculation. ", 2)
+        cfg.tomo_print_timed(" * Finished COR calculation in", 2)
+        cfg.tomo_total_timer()
         averageCORrelativeToCrop = sum(calculated_cors) / len(calculated_cors)
         averageCORrelativeToFullImage = sum(calculated_cors) / len(
             calculated_cors) + pixelsFromLeftSide
 
         # we add the pixels cut off from the left, to reflect the full image in Mantid
-        cfg.tomo_print("Printing average COR in relation to cropped image " +
-                       str(cfg.preproc_cfg.crop_coords) + ":", 2)
+        cfg.tomo_print(" * Printing average COR in relation to cropped image "
+                       + str(cfg.preproc_cfg.crop_coords) + ":", 2)
         print(str(round(averageCORrelativeToCrop)))
-        cfg.tomo_print("Printing average COR in relation to FULL image:", 2)
+        cfg.tomo_print(" * Printing average COR in relation to FULL image:", 2)
         print(str(round(averageCORrelativeToFullImage)))

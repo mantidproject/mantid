@@ -386,6 +386,9 @@ def main_tomo_rec():
     cmd_line = " ".join(sys.argv)
     cfg = tomocfg.ReconstructionConfig(preproc_config, alg_config,
                                        postproc_config)
+    # start the whole execution timer
+    cfg.tomo_total_timer()
+
     # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
     if (args.find_cor):
