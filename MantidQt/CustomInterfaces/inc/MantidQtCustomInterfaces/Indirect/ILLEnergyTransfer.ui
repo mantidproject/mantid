@@ -693,7 +693,7 @@
          <string>Output workspace name</string>
         </property>
         <property name="text">
-         <string>result</string>
+         <string>sample</string>
         </property>
         <property name="placeholderText">
          <string>result</string>
@@ -1169,7 +1169,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
