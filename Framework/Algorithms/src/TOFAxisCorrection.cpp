@@ -334,14 +334,18 @@ void TOFAxisCorrection::useReferenceWorkspace(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  outputWs->mutableRun()
-      .getProperty(SampleLog::INCIDENT_ENERGY)
-      ->setValueFromProperty(
-          *m_referenceWs->run().getProperty(SampleLog::INCIDENT_ENERGY));
-  outputWs->mutableRun()
-      .getProperty(SampleLog::WAVELENGTH)
-      ->setValueFromProperty(
-          *m_referenceWs->run().getProperty(SampleLog::WAVELENGTH));
+  if (outputWs->run().hasProperty(SampleLog::INCIDENT_ENERGY)) {
+    outputWs->mutableRun()
+        .getProperty(SampleLog::INCIDENT_ENERGY)
+        ->setValueFromProperty(
+            *m_referenceWs->run().getProperty(SampleLog::INCIDENT_ENERGY));
+  }
+  if (outputWs->run().hasProperty(SampleLog::WAVELENGTH)) {
+    outputWs->mutableRun()
+        .getProperty(SampleLog::WAVELENGTH)
+        ->setValueFromProperty(
+            *m_referenceWs->run().getProperty(SampleLog::WAVELENGTH));
+  }
 }
 
 /** Do manual TOF axis correction.

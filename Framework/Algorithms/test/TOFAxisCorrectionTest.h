@@ -167,7 +167,27 @@ public:
     TS_ASSERT(!alg->isExecuted());
   }
 
-  void test_FailureNoEiGivenAtAll() {
+  void test_FailureNoEiGivenAtAllWithElasticBinIndex() {
+    const size_t blocksize = 512;
+    const double x0 = 1390.1;
+    const double dx = 0.24;
+    const size_t elasticBin = blocksize / 3;
+    const double eppTOF = x0 + static_cast<double>(elasticBin) * dx + dx / 2;
+    auto inputWs = createInputWorkspace(blocksize, x0, dx, eppTOF);
+    inputWs->mutableRun().removeProperty("EI");
+    auto alg = createTOFAxisCorrectionAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("IndexType", "Workspace Index"))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(elasticBin)))
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT(!alg->isExecuted());
+  }
+
+  void test_FailureNoEiGivenAtAllWithEPPTable() {
     const size_t blocksize = 512;
     const double x0 = 1390.1;
     const double dx = 0.24;
@@ -196,6 +216,37 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
+  }
+
+  void test_SampleLogsMissingInReferenceWorkspace() {
+    const size_t blocksize = 16;
+    const double x0 = 23.66;
+    const double dx = 0.05;
+    const double TOF = x0 + dx * 3 * blocksize / 4;
+    auto inputWs = createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
+    const double referenceTOF = 1.06 * TOF;
+    auto referenceWs = createInputWorkspace(blocksize, x0, dx, referenceTOF);
+    auto alg = createTOFAxisCorrectionAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ReferenceWorkspace", referenceWs));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outputWs = alg->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWs);
+    TS_ASSERT(!outputWs->run().hasProperty("Ei"))
+    TS_ASSERT(!outputWs->run().hasProperty("wavelength"))
+    for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
+      for (size_t j = 0; j < blocksize; ++j) {
+        TS_ASSERT_DELTA(outputWs->x(i)[j], referenceWs->x(i)[j], 1e-6)
+        TS_ASSERT_EQUALS(outputWs->y(i)[j], inputWs->y(i)[j])
+        TS_ASSERT_EQUALS(outputWs->e(i)[j], inputWs->e(i)[j])
+      }
+      TS_ASSERT_DELTA(outputWs->x(i).back(), referenceWs->x(i).back(), 1e-6)
+    }
   }
 
   void test_UseEiFromSampleLogs() {
@@ -234,6 +285,14 @@ public:
   }
 
 private:
+  static void addSampleLogs(MatrixWorkspace_sptr ws, const double TOF) {
+    const double length = flightLengthIN4(ws);
+    const double Ei = incidentEnergy(TOF, length);
+    ws->mutableRun().addProperty("EI", Ei);
+    const double lambda = wavelength(Ei, length);
+    ws->mutableRun().addProperty("wavelength", lambda);
+  }
+
   static void assertTOFShift(MatrixWorkspace_sptr shiftedWs, MatrixWorkspace_sptr ws, const double ei, const double wavelength, const double shift) {
     TS_ASSERT(shiftedWs);
     TS_ASSERT_EQUALS(shiftedWs->run().getPropertyAsSingleValue("EI"), ei);
@@ -277,19 +336,23 @@ private:
                                                    const double x0,
                                                    const double dx,
                                                    const double TOF) {
-    auto inputWs = createEmptyIN4Workspace("_input_ws");
-    const double sigma = 3 * dx;
-    auto gaussianPeak = [TOF, sigma](const double x) {
-      const double a = -(x - TOF) / sigma;
-      return std::exp(-a * a / 2);
-    };
-    fillWorkspace(inputWs, blocksize, x0, dx, gaussianPeak);
-    const double length = flightLengthIN4(inputWs);
-    const double Ei = incidentEnergy(TOF, length);
-    inputWs->mutableRun().addProperty("EI", Ei);
-    const double lambda = wavelength(Ei, length);
-    inputWs->mutableRun().addProperty("wavelength", lambda);
+    auto inputWs = createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
+    addSampleLogs(inputWs, TOF);
     return inputWs;
+  }
+
+  static MatrixWorkspace_sptr createInputWorkspaceWithoutSampleLogs(const size_t blocksize,
+                                                                    const double x0,
+                                                                    const double dx,
+                                                                    const double TOF) {
+  auto inputWs = createEmptyIN4Workspace("_input_ws");
+  const double sigma = 3 * dx;
+  auto gaussianPeak = [TOF, sigma](const double x) {
+    const double a = -(x - TOF) / sigma;
+    return std::exp(-a * a / 2);
+  };
+  fillWorkspace(inputWs, blocksize, x0, dx, gaussianPeak);
+  return inputWs;
   }
 
   template <typename Function>
