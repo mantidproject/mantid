@@ -130,9 +130,9 @@ void DetectorEfficiencyCor::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
-    if (spectrumInfo.hasDetectors(i)) {
+    try {
       correctForEfficiency(i, spectrumInfo);
-    } else {
+    } catch (Exception::NotFoundError &) {
       // zero the Y data that can't be corrected
       m_outputWS->mutableY(i) *= 0.0;
       PARALLEL_CRITICAL(deteff_invalid) {
@@ -197,6 +197,9 @@ void DetectorEfficiencyCor::retrieveProperties() {
  */
 void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn,
                                                  SpectrumInfo spectrumInfo) {
+  if (!spectrumInfo.hasDetectors(spectraIn))
+    throw Exception::NotFoundError("No detectors found", spectraIn);
+
   if (spectrumInfo.isMonitor(spectraIn) || spectrumInfo.isMasked(spectraIn)) {
     return;
   }
@@ -215,9 +218,6 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn,
                                                         // average the
                                                         // correction computing
                                                         // it for the spectrum
-  if (ndets == 0) {
-    throw Exception::NotFoundError("No detectors found", spectraIn);
-  }
 
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
