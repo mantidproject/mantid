@@ -1,12 +1,12 @@
 import unittest
 from mantid.simpleapi import logger
 import numpy as np
-from AbinsModules import AtomsDaTa, AbinsConstants
+from AbinsModules import AtomsDaTa, AbinsTestHelpers
 
 
 def old_python():
     """" Check if Python has proper version."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSAtomsDataTest because Python is too old.")
     return is_python_old

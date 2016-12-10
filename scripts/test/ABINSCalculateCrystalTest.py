@@ -3,12 +3,12 @@ from mantid.simpleapi import logger
 import os
 import numpy as np
 import json
-from AbinsModules import AbinsConstants, CalculateCrystal, LoadCASTEP
+from AbinsModules import AbinsTestHelpers, CalculateCrystal, LoadCASTEP
 
 
 def old_python():
     """" Check if Python has proper version."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSCalculateCrystalTest because Python is too old.")
     return is_python_old
@@ -31,7 +31,7 @@ def skip_if(skipping_criteria):
 @skip_if(old_python)
 class ABINSCalculateCrystalTest(unittest.TestCase):
 
-    core = AbinsConstants.get_core_folder()
+    core = AbinsTestHelpers.get_core_folder()
     _temperature = 10  # 10 K,  temperature for the benchmark
 
     # data

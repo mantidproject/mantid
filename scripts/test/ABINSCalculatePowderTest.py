@@ -2,17 +2,17 @@ import unittest
 from mantid.simpleapi import logger
 import os
 import numpy as np
-from AbinsModules import CalculatePowder, LoadCASTEP, AbinsConstants
+from AbinsModules import CalculatePowder, LoadCASTEP, AbinsTestHelpers
 import json
 
 
 def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSCalculatePowderTest because Python is too old.")
 
-    is_numpy_old = AbinsConstants.is_numpy_valid(np.__version__)
+    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
     if is_numpy_old:
         logger.warning("Skipping ABINSCalculatePowderTest because numpy is too old.")
 
@@ -36,7 +36,7 @@ def skip_if(skipping_criteria):
 @skip_if(old_modules)
 class ABINSCalculatePowderTest(unittest.TestCase):
 
-    core = AbinsConstants.get_core_folder()
+    core = AbinsTestHelpers.get_core_folder()
     # data
     # Use case: one k-point
     _C6H6 = os.path.join(core, "benzene_CalculatePowder")
@@ -86,10 +86,10 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
-        _powder = self._prepare_data(filename=filename + "_powder.txt")
+        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
+        powder = self._prepare_data(filename=filename + "_powder.txt")
 
-        return {"DFT": _CASTEP_reader.read_phonon_file(), "powder": _powder}
+        return {"DFT": castep_reader.read_phonon_file(), "powder": powder}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

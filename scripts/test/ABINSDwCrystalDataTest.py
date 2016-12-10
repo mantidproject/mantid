@@ -1,12 +1,12 @@
 import unittest
 from mantid.simpleapi import logger
 import numpy as np
-from AbinsModules import DwCrystalData, AbinsConstants
+from AbinsModules import DwCrystalData, AbinsTestHelpers
 
 
 def old_python():
     """" Check if Python has proper version."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSDwCrystalDataTest because Python is too old.")
     return is_python_old
@@ -53,26 +53,26 @@ class ABINSDwCrystalDataTest(unittest.TestCase):
 
     def test_wrong_append(self):
         # list instead of numpy array
-        _bad_item = [[1.0, 1.0, 1.0],
+        bad_item = [[1.0, 1.0, 1.0],
                      [1.0, 1.0, 1.0],
                      [1.0, 1.0, 1.0]]  # list 3x3
 
         with self.assertRaises(ValueError):
-            self.tester._append(item=_bad_item, num_atom=0)
+            self.tester._append(item=bad_item, num_atom=0)
 
         # bad shape of numpy array
-        _bad_item = np.asarray([[1.0, 1.0, 1.0],
+        bad_item = np.asarray([[1.0, 1.0, 1.0],
                                 [1.0, 1.0, 1.0]])  # array 2x3 instead of 3x3
 
         with self.assertRaises(ValueError):
-            self.tester._append(item=_bad_item, num_atom=0)
+            self.tester._append(item=bad_item, num_atom=0)
 
         # bad type of elements: integers instead of floats
-        _bad_item = np.asarray([[1, 1, 1],
+        bad_item = np.asarray([[1, 1, 1],
                                 [1, 1, 1],
                                 [1, 1, 1]])  # array 3x3
         with self.assertRaises(ValueError):
-            self.tester._append(item=_bad_item, num_atom=0)
+            self.tester._append(item=bad_item, num_atom=0)
 
     def test_wrong_set(self):
 

@@ -2,12 +2,12 @@ import unittest
 from mantid.simpleapi import logger
 import numpy as np
 from itertools import product
-from AbinsModules import FrequencyPowderGenerator, AbinsParameters, AbinsConstants
+from AbinsModules import FrequencyPowderGenerator, AbinsParameters, AbinsConstants, AbinsTestHelpers
 
 
 def old_python():
     """" Check if Python has proper version."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSFrequencyPowderGeneratorTest because Python is too old.")
     return is_python_old

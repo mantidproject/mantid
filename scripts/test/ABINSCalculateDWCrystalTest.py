@@ -4,12 +4,12 @@ import os
 import numpy as np
 import json
 
-from AbinsModules import CalculateDWCrystal, LoadCASTEP, AbinsConstants
+from AbinsModules import CalculateDWCrystal, LoadCASTEP, AbinsTestHelpers
 
 
 def old_python():
     """" Check if Python has proper version."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSCalculateDWCrystalTest because Python is too old.")
     return is_python_old
@@ -32,7 +32,7 @@ def skip_if(skipping_criteria):
 @skip_if(old_python)
 class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
-    core = AbinsConstants.get_core_folder()
+    core = AbinsTestHelpers.get_core_folder()
     temperature = 10  # 10 K,  temperature for the benchmark
 
     # data

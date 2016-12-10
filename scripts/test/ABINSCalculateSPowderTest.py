@@ -3,16 +3,16 @@ from mantid.simpleapi import logger
 import os
 import json
 import numpy as np
-from AbinsModules import AbinsConstants, CalculateS, LoadCASTEP
+from AbinsModules import AbinsConstants, CalculateS, LoadCASTEP, AbinsTestHelpers
 
 
 def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSCalculateSPowderTest because Python is too old.")
 
-    is_numpy_old = AbinsConstants.is_numpy_valid(np.__version__)
+    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
     if is_numpy_old:
         logger.warning("Skipping ABINSCalculateSPowderTest because numpy is too old.")
 
@@ -45,7 +45,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _sample_form = "Powder"
     _instrument_name = "TOSCA"
     _order_event = AbinsConstants.FUNDAMENTALS
-    core = AbinsConstants.get_core_folder()
+    core = AbinsTestHelpers.get_core_folder()
 
     squaricn = "squaricn_sum_CalculateSPowder"
     Si2 = "Si2-sc_CalculateSPowder"
@@ -131,10 +131,10 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
-        _S = self._prepare_data(filename=filename + "_S.txt")
+        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
+        s_data = self._prepare_data(filename=filename + "_S.txt")
 
-        return {"DFT": _CASTEP_reader.read_phonon_file(), "S": _S}
+        return {"DFT": castep_reader.read_phonon_file(), "S": s_data}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

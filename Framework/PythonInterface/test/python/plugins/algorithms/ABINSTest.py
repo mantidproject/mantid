@@ -3,17 +3,17 @@ from mantid import logger
 from mantid.simpleapi import mtd
 from mantid.simpleapi import ABINS, Scale, CompareWorkspaces, Load, DeleteWorkspace
 import os
-from AbinsModules import AbinsConstants
+from AbinsModules import AbinsConstants, AbinsTestHelpers
 import numpy as np
 
 
 def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
-    is_python_old = AbinsConstants.old_python()
+    is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
         logger.warning("Skipping ABINSTest because Python is too old.")
 
-    is_numpy_old = AbinsConstants.is_numpy_valid(np.__version__)
+    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
     if is_numpy_old:
         logger.warning("Skipping ABINSTest because numpy is too old.")
 
