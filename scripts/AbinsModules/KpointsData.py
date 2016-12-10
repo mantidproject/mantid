@@ -39,12 +39,12 @@ class KpointsData(GeneralData):
         super(KpointsData, self).__init__()
         dim = 3  # number of coordinates
 
-        if isinstance(num_k, int) and num_k > 0:
+        if isinstance(num_k, (int, long)) and num_k > 0:
             self._num_k = num_k
         else:
             raise ValueError("Invalid number of k-points.")
 
-        if isinstance(num_atoms, int) and num_atoms > 0:
+        if isinstance(num_atoms, (int, long)) and num_atoms > 0:
             self._num_freq = dim * num_atoms  # number of phonons for one k-point
             self._num_atoms = num_atoms  # number of displacements for one k-point
         else:
