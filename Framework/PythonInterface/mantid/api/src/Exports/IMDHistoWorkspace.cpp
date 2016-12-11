@@ -1,4 +1,5 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
@@ -256,7 +257,13 @@ void export_IMDHistoWorkspace() {
       .def("getCenter", &IMDHistoWorkspace::getCenter,
            (arg("self"), arg("linear_index")),
            return_value_policy<return_by_value>(),
-           "Return the position of the center of a bin at a given position");
+           "Return the position of the center of a bin at a given position")
+
+      .def("setDisplayNormalization",
+           &IMDHistoWorkspace::setDisplayNormalization,
+           (arg("self"), arg("normalization")),
+           "Sets the visual normalization of"
+           " the workspace.");
 
   //-------------------------------------------------------------------------------------------------
 

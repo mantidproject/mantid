@@ -1,15 +1,14 @@
 #include "SampleLogDialogBase.h"
 
-// Mantid API
+#include "MantidAPI/AnalysisDataService.h"
 #include <MantidAPI/MultipleExperimentInfos.h>
 #include <MantidAPI/IMDWorkspace.h>
 #include "MantidAPI/Run.h"
 
-// Mantid Kernel
 #include <MantidKernel/TimeSeriesProperty.h>
 #include <MantidKernel/ArrayProperty.h>
+#include "MantidKernel/Strings.h"
 
-// Qt
 #include <QMenu>
 #include <QFileInfo>
 #include <QHeaderView>

@@ -21,7 +21,7 @@ class DwCrystalData(GeneralData):
         else:
             raise ValueError("Improper value of temperature.")
 
-        if isinstance(num_atoms, int) and num_atoms > 0:
+        if isinstance(num_atoms, (int, long)) and num_atoms > 0:
             self._num_atoms = num_atoms
         else:
             raise ValueError("Improper number of atoms.")
@@ -64,7 +64,7 @@ class DwCrystalData(GeneralData):
         @param data: Debye-Waller factor to check
         @param atom:  number of atom
         """
-        if not isinstance(atom, int):
+        if not isinstance(atom, (int, long)):
             raise ValueError("Number of atom should be an integer.")
         if atom < 0 or atom > self._num_atoms:  # here we count from zero
             raise ValueError("Invalid number of atom.")

@@ -1,22 +1,32 @@
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import logger
 import numpy as np
-
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of DwCrystalDataTest  because simplejson is unavailable.")
-    exit(1)
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of DwCrystalDataTest because h5py is unavailable.")
-    exit(1)
-
-from AbinsModules import DwCrystalData
+from AbinsModules import DwCrystalData, AbinsTestHelpers
 
 
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsTestHelpers.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSDwCrystalDataTest because Python is too old.")
+    return is_python_old
+
+
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(old_python)
 class ABINSDwCrystalDataTest(unittest.TestCase):
     # fake DW tensors for two atoms
     _good_data = np.asarray([[[1.0, 1.0, 1.0],
@@ -33,34 +43,36 @@ class ABINSDwCrystalDataTest(unittest.TestCase):
 
         # invalid temperature
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_tester = DwCrystalData(temperature=-1, num_atoms=2)
 
         # invalid number of atoms
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_tester = DwCrystalData(temperature=10, num_atoms=-2)
 
     def test_wrong_append(self):
         # list instead of numpy array
-        _bad_item = [[1.0, 1.0, 1.0],
+        bad_item = [[1.0, 1.0, 1.0],
                      [1.0, 1.0, 1.0],
                      [1.0, 1.0, 1.0]]  # list 3x3
 
         with self.assertRaises(ValueError):
-            self.tester._append(item=_bad_item, num_atom=0)
+            self.tester._append(item=bad_item, num_atom=0)
 
         # bad shape of numpy array
-        _bad_item = np.asarray([[1.0, 1.0, 1.0],
+        bad_item = np.asarray([[1.0, 1.0, 1.0],
                                 [1.0, 1.0, 1.0]])  # array 2x3 instead of 3x3
 
         with self.assertRaises(ValueError):
-            self.tester._append(item=_bad_item, num_atom=0)
+            self.tester._append(item=bad_item, num_atom=0)
 
         # bad type of elements: integers instead of floats
-        _bad_item = np.asarray([[1, 1, 1],
+        bad_item = np.asarray([[1, 1, 1],
                                 [1, 1, 1],
                                 [1, 1, 1]])  # array 3x3
         with self.assertRaises(ValueError):
-            self.tester._append(item=_bad_item, num_atom=0)
+            self.tester._append(item=bad_item, num_atom=0)
 
     def test_wrong_set(self):
 

@@ -1,44 +1,49 @@
 import unittest
-from mantid.simpleapi import *
-from os import path
+from mantid.simpleapi import logger
+import os
 import numpy as np
+import json
+from AbinsModules import LoadCASTEP, AbinsTestHelpers
 
 
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of LoadCASTEPTest because simplejson is unavailable.")
-    exit(1)
-
-try:
-    import scipy
-except ImportError:
-    logger.warning("Failure of LoadCASTEPTest because scipy is unavailable.")
-    exit(1)
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of LoadCASTEPTest because h5py is unavailable.")
-    exit(1)
-
-from AbinsModules import LoadCASTEP, AbinsConstants
+def old_python():
+    """" Check if Python has proper version."""
+    is_python_old = AbinsTestHelpers.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSLoadCASTEPTest because Python is too old.")
+    return is_python_old
 
 
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+    return decorate
+
+
+@skip_if(old_python)
 class ABINSLoadCASTEPTest(unittest.TestCase):
 
     # simple tests
     def test_non_existing_file(self):
         with self.assertRaises(IOError):
-            _bad_castep_reader = LoadCASTEP(input_dft_filename="NonExistingFile.txt")
-            _bad_castep_reader.read_phonon_file()
+            bad_castep_reader = LoadCASTEP(input_dft_filename="NonExistingFile.txt")
+            bad_castep_reader.read_phonon_file()
 
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
 
     #  *************************** USE CASES ********************************************
-    _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")  # hardcoded directory with testing files
+    _core = AbinsTestHelpers.get_core_folder()
 
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
@@ -46,7 +51,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     _gamma_sum = "squaricn_sum_LoadCASTEP"
 
-    def test_Gamma_sum_correction(self):
+    def test_gamma_sum_correction(self):
         self._check(core=self._core, name=self._gamma_sum)
 
     # ===================================================================================
@@ -55,7 +60,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
 
-    def test_Gamma_no_sum_correction(self):
+    def test_gamma_no_sum_correction(self):
         self._check(core=self._core, name=self._gamma_no_sum)
     #
     #
@@ -77,37 +82,32 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self._check(core=self._core, name=self._many_k_no_sum)
 
     # Helper functions
-
     def _check(self, core=None, name=None):
 
+        # calculate folder with testing data
         cwd = os.getcwd()
+        filename = os.path.relpath(os.path.join(core, name), cwd)
 
         # get calculated data
-        filename_unix = os.path.join(core, name + ".phonon")
-        input_filename = path.abspath(filename_unix)
-        input_filename = path.relpath(input_filename, cwd)
-
-        data = self._read_DFT(filename=input_filename)
+        data = self._read_dft(filename=filename)
 
         # get correct data
-        filename = path.abspath(os.path.join(core, name))
-        filename = path.relpath(filename, cwd)
         correct_data = self._prepare_data(filename=filename)
 
         # check read data
-        self._check_reader_data(correct_data=correct_data, data=data)
+        self._check_reader_data(correct_data=correct_data, data=data, filename=filename)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_dft_filename=input_filename)
+        self._check_loader_data(correct_data=correct_data, input_dft_filename=filename)
 
-    def _read_DFT(self, filename=None):
+    def _read_dft(self, filename=None):
         """
         Reads data from .phonon file.
-        @param filename:
-        @return:
+        @param filename: name of file with phonon data (name + phonon)
+        @return: phonon data
         """
         # 1) Read data
-        castep_reader = LoadCASTEP(input_dft_filename=filename)
+        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
 
         data = self._get_reader_data(castep_reader=castep_reader)
 
@@ -116,9 +116,10 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         return data
 
+    # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
-        correct_data = None
+
         with open(filename + "_data.txt") as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
@@ -137,7 +138,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         return correct_data
 
-    def _check_reader_data(self, correct_data=None, data=None):
+    def _check_reader_data(self, correct_data=None, data=None, filename=None):
 
         # check data
         correct_k_points = correct_data["datasets"]["k_points_data"]
@@ -162,7 +163,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
         self.assertEqual(correct_data["attributes"]["DFT_program"], data["attributes"]["DFT_program"])
-        self.assertEqual(correct_data["attributes"]["filename"], data["attributes"]["filename"])
+        self.assertEqual(filename + ".phonon", data["attributes"]["filename"])
 
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
@@ -186,12 +187,11 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
-        loader = LoadCASTEP(input_dft_filename=input_dft_filename)
+        loader = LoadCASTEP(input_dft_filename=input_dft_filename + ".phonon")
         loaded_data = loader.load_data().extract()
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
-        num_k = len(correct_items)
         items = loaded_data["k_points_data"]
 
         self.assertEqual(True, np.allclose(correct_items["frequencies"], items["frequencies"]))
@@ -212,6 +212,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
                                                atoms[item]["fract_coord"]))
 
+    # noinspection PyMethodMayBeStatic
     def _get_reader_data(self, castep_reader=None):
         abins_type_data = castep_reader.read_phonon_file()
         data = {"datasets": abins_type_data.extract(),

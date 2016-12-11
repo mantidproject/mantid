@@ -126,3 +126,5 @@ LARGE_SIZE = 10000000  # if resulting S is bigger than that switch to processing
 
 # values of S below that are considered to be zero
 S_THRESHOLD = 10e-8
+
+NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher

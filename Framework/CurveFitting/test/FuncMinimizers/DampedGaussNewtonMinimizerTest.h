@@ -1,10 +1,10 @@
-#ifndef CURVEFITTING_DAMPINGTEST_H_
-#define CURVEFITTING_DAMPINGTEST_H_
+#ifndef CURVEFITTING_DAMPEDGAUSSNEWTONTEST_H_
+#define CURVEFITTING_DAMPEDGAUSSNEWTONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/FuncMinimizers/DampingMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -20,7 +20,7 @@ using namespace Mantid::CurveFitting::Constraints;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
-class DampingMinimizerTest : public CxxTest::TestSuite {
+class DampedGaussNewtonMinimizerTest : public CxxTest::TestSuite {
 public:
   void test_Gaussian() {
     API::FunctionDomain1D_sptr domain(
@@ -49,7 +49,7 @@ public:
         boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
-    DampingMinimizer s;
+    DampedGaussNewtonMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.existsProperty("Damping"));
     double damping = s.getProperty("Damping");
@@ -91,7 +91,7 @@ public:
         boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
-    DampingMinimizer s;
+    DampedGaussNewtonMinimizer s;
     s.initialize(costFun);
     s.setProperty("Damping", 100.0);
     double damping = s.getProperty("Damping");
@@ -135,7 +135,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
-    DampingMinimizer s;
+    DampedGaussNewtonMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(costFun->val(), 0.2, 0.01);
@@ -175,7 +175,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
-    DampingMinimizer s;
+    DampedGaussNewtonMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(costFun->val(), 0.2, 0.01);
@@ -215,7 +215,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
-    DampingMinimizer s;
+    DampedGaussNewtonMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(costFun->val(), 0.002, 0.01);
@@ -256,7 +256,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
-    DampingMinimizer s;
+    DampedGaussNewtonMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
@@ -266,4 +266,4 @@ public:
   }
 };
 
-#endif /*CURVEFITTING_DAMPINGTEST_H_*/
+#endif /*CURVEFITTING_DAMPEDGAUSSNEWTONTEST_H_*/

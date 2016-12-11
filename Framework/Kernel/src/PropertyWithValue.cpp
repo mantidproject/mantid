@@ -49,7 +49,7 @@ template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<IValidator>>;
 template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<PropertyManager>>;
-#if defined(_WIN32) || defined(__clang__)
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class MANTID_KERNEL_DLL PropertyWithValue<long>;
 template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long>>;

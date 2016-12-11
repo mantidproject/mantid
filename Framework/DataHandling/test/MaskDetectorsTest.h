@@ -5,6 +5,7 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"

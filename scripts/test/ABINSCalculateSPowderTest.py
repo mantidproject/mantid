@@ -1,25 +1,42 @@
 import unittest
-from mantid.simpleapi import *
-from os import path
+from mantid.simpleapi import logger
+import os
+import json
 import numpy as np
-from AbinsModules import AbinsConstants, AbinsParameters
 
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of CalculateSPowderTest because simplejson is unavailable.")
-    exit(1)
-
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of CalculateSPowderTest because h5py is unavailable.")
-    exit(1)
+from AbinsModules import AbinsConstants, CalculateS, LoadCASTEP, AbinsTestHelpers, AbinsParameters
 
 
-from AbinsModules import CalculateS, LoadCASTEP
+def old_modules():
+    """" Check if there are proper versions of  Python and numpy."""
+    is_python_old = AbinsTestHelpers.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSCalculateSPowderTest because Python is too old.")
+
+    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
+    if is_numpy_old:
+        logger.warning("Skipping ABINSCalculateSPowderTest because numpy is too old.")
+
+    return is_python_old or is_numpy_old
 
 
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+
+    return decorate
+
+
+@skip_if(old_modules)
 class ABINSCalculateSPowderTest(unittest.TestCase):
     """
     Test of  CalculateS for the Powder scenario.
@@ -29,15 +46,13 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _sample_form = "Powder"
     _instrument_name = "TOSCA"
     _order_event = AbinsConstants.FUNDAMENTALS
-
-    # data
-    core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")
+    core = AbinsTestHelpers.get_core_folder()
 
     squaricn = "squaricn_sum_CalculateSPowder"
     Si2 = "Si2-sc_CalculateSPowder"
 
-    Squaricn_path = path.abspath(os.path.join(core, squaricn))
-    Si2_path = path.abspath(os.path.join(core, Si2))
+    _Squaricn_path = os.path.join(core, squaricn)
+    _Si2_path = os.path.join(core, Si2)
 
     def remove_hdf_files(self):
         files = os.listdir(os.getcwd())
@@ -55,74 +70,77 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     #     test input
     def test_wrong_input(self):
-        filename = self.Si2_path + ".phonon"
+        filename = self._Si2_path + ".phonon"
 
-        _castep_reader = LoadCASTEP(input_dft_filename=filename)
-        _good_data = _castep_reader.read_phonon_file()
+        castep_reader = LoadCASTEP(input_dft_filename=filename)
+        good_data = castep_reader.read_phonon_file()
 
         # wrong filename
         with self.assertRaises(ValueError):
-            poor_s = CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
-                                abins_data=_good_data, instrument_name=self._instrument_name,
-                                quantum_order_num=self._order_event)
+
+            CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
+                       abins_data=good_data, instrument_name=self._instrument_name, quantum_order_num=self._order_event)
 
         # wrong temperature
         with self.assertRaises(ValueError):
-            poor_s = CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=_good_data,
-                                instrument_name=self._instrument_name, quantum_order_num=self._order_event)
+
+            CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=good_data,
+                       instrument_name=self._instrument_name, quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
-            poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID",
-                                abins_data=_good_data, instrument_name=self._instrument_name,
-                                quantum_order_num=self._order_event)
+
+            CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID", abins_data=good_data,
+                       instrument_name=self._instrument_name, quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
-            poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
-                                abins_data=_good_data.extract(), instrument_name=self._instrument_name,
-                                quantum_order_num=self._order_event)
+
+            CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
+                       abins_data=good_data.extract(), instrument_name=self._instrument_name,
+                       quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
-            poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
-                                abins_data=_good_data.extract(), instrument_name=self._instrument_name,
-                                quantum_order_num=self._order_event)
+            # noinspection PyUnusedLocal
+            CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
+                       abins_data=good_data.extract(), instrument_name=self._instrument_name,
+                       quantum_order_num=self._order_event)
 
     #  main test
     def test_good_case(self):
-        self._good_case(name=self.Si2_path)
-        self._good_case(name=self.Squaricn_path)
+        self._good_case(name=self._Si2_path)
+        self._good_case(name=self._Squaricn_path)
 
     # helper functions
     def _good_case(self, name=None):
         # calculation of powder data
-        _good_data = self._get_good_data(filename=name)
-        _good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature,
-                                  sample_form=self._sample_form, abins_data=_good_data["DFT"],
-                                  instrument_name=self._instrument_name, quantum_order_num=self._order_event)
-        calculated_data = _good_tester.get_data()
+        good_data = self._get_good_data(filename=name)
+        good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature,
+                                 sample_form=self._sample_form, abins_data=good_data["DFT"],
+                                 instrument_name=self._instrument_name, quantum_order_num=self._order_event)
+        calculated_data = good_tester.get_data()
 
-        self._check_data(good_data=_good_data["S"], data=calculated_data.extract())
+        self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
         # check if loading powder data is correct
         new_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
-                                abins_data=_good_data["DFT"], instrument_name=self._instrument_name,
+                                abins_data=good_data["DFT"], instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
         loaded_data = new_tester.load_data()
 
-        self._check_data(good_data=_good_data["S"], data=loaded_data.extract())
+        self._check_data(good_data=good_data["S"], data=loaded_data.extract())
 
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
-        _S = self._prepare_data(filename=filename + "_S.txt")
+        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
+        s_data = self._prepare_data(filename=filename + "_S.txt")
 
-        return {"DFT": _CASTEP_reader.read_phonon_file(), "S": _S}
+        return {"DFT": castep_reader.read_phonon_file(), "S": s_data}
 
+    # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
-        correct_data = None
         with open(filename) as data_file:
             # noinspection PyPep8
             correct_data = json.loads(data_file.read().replace("\\n", " ").

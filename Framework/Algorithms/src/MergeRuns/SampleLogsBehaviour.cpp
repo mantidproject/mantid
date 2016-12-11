@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {

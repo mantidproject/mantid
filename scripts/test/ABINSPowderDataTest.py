@@ -1,33 +1,47 @@
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import logger
 import numpy as np
 
-
-try:
-    import json
-except ImportError:
-    logger.warning("Failure of PowderDataTest because simplejson is unavailable.")
-    exit(1)
-try:
-    import scipy
-except ImportError:
-    logger.warning("Failure of PowderDataTest because scipy is unavailable.")
-    exit(1)
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of PowderDataTest because h5py is unavailable.")
-    exit(1)
-
-from AbinsModules import PowderData
+from AbinsModules import PowderData, AbinsTestHelpers
 
 
+def old_modules():
+    """" Check if there are proper versions of  Python and numpy."""
+    is_python_old = AbinsTestHelpers.old_python()
+    if is_python_old:
+        logger.warning("Skipping ABINSPowderDataTest because Python is too old.")
+
+    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
+    if is_numpy_old:
+        logger.warning("Skipping ABINSPowderDataTest because numpy is too old.")
+
+    return is_python_old or is_numpy_old
+
+
+def skip_if(skipping_criteria):
+    """
+    Skip all tests if the supplied function returns true.
+    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    """
+
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
+        return cls
+
+    return decorate
+
+
+@skip_if(old_modules)
 class ABINSPowderDataTest(unittest.TestCase):
 
     def test_input(self):
 
         # wrong number of atoms
         with self.assertRaises(ValueError):
+            # noinspection PyUnusedLocal
             poor_tester = PowderData(num_atoms=-2)
 
     def test_set(self):
