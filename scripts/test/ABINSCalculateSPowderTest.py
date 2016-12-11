@@ -46,19 +46,14 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _sample_form = "Powder"
     _instrument_name = "TOSCA"
     _order_event = AbinsConstants.FUNDAMENTALS
-    core = AbinsTestHelpers.get_core_folder()
-
-    squaricn = "squaricn_sum_CalculateSPowder"
-    Si2 = "Si2-sc_CalculateSPowder"
-
-    _Squaricn_path = os.path.join(core, squaricn)
-    _Si2_path = os.path.join(core, Si2)
+    _squaricn = "squaricn_sum_CalculateSPowder"
+    _si2 = "Si2-sc_CalculateSPowder"
 
     def remove_hdf_files(self):
         files = os.listdir(os.getcwd())
         print os.getcwd()
         for filename in files:
-            if self.Si2 in filename or self.squaricn in filename:
+            if self._si2 in filename or self._squaricn in filename:
                 os.remove(filename)
 
     def setUp(self):
@@ -70,9 +65,9 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     #     test input
     def test_wrong_input(self):
-        filename = self._Si2_path + ".phonon"
+        full_path_filename = AbinsTestHelpers.find_file(filename=self._si2 + ".phonon")
 
-        castep_reader = LoadCASTEP(input_dft_filename=filename)
+        castep_reader = LoadCASTEP(input_dft_filename=full_path_filename)
         good_data = castep_reader.read_phonon_file()
 
         # wrong filename
@@ -84,39 +79,41 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         # wrong temperature
         with self.assertRaises(ValueError):
 
-            CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=good_data,
+            CalculateS(filename=full_path_filename, temperature=-1, sample_form=self._sample_form, abins_data=good_data,
                        instrument_name=self._instrument_name, quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
 
-            CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID", abins_data=good_data,
-                       instrument_name=self._instrument_name, quantum_order_num=self._order_event)
+            CalculateS(filename=full_path_filename, temperature=self._temperature, sample_form="SOLID",
+                       abins_data=good_data, instrument_name=self._instrument_name,
+                       quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
 
-            CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
+            CalculateS(filename=full_path_filename, temperature=self._temperature, sample_form=self._sample_form,
                        abins_data=good_data.extract(), instrument_name=self._instrument_name,
                        quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
+            CalculateS(filename=full_path_filename, temperature=self._temperature, sample_form=self._sample_form,
                        abins_data=good_data.extract(), instrument_name=self._instrument_name,
                        quantum_order_num=self._order_event)
 
     #  main test
     def test_good_case(self):
-        self._good_case(name=self._Si2_path)
-        self._good_case(name=self._Squaricn_path)
+        self._good_case(name=self._si2)
+        self._good_case(name=self._squaricn)
 
     # helper functions
     def _good_case(self, name=None):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
-        good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature,
+        good_tester = CalculateS(filename=AbinsTestHelpers.find_file(filename=name + ".phonon"),
+                                 temperature=self._temperature,
                                  sample_form=self._sample_form, abins_data=good_data["DFT"],
                                  instrument_name=self._instrument_name, quantum_order_num=self._order_event)
         calculated_data = good_tester.get_data()
@@ -124,7 +121,8 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
         # check if loading powder data is correct
-        new_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
+        new_tester = CalculateS(filename=AbinsTestHelpers.find_file(filename=name + ".phonon"),
+                                temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=good_data["DFT"], instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
         loaded_data = new_tester.load_data()
@@ -133,8 +131,8 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
-        s_data = self._prepare_data(filename=filename + "_S.txt")
+        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
+        s_data = self._prepare_data(filename=AbinsTestHelpers.find_file(filename=filename + "_S.txt"))
 
         return {"DFT": castep_reader.read_phonon_file(), "S": s_data}
 

@@ -10,6 +10,7 @@ import os
 from mantid.kernel import logger
 
 
+# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic
 class IOmodule(object):
     """
     Class for ABINS I/O HDF file operations.
@@ -389,7 +390,6 @@ class IOmodule(object):
         """
         ans = {}
         for key, item in hdf_file[path].items():
-
             # noinspection PyUnresolvedReferences,PyProtectedMember,PyProtectedMember
             if isinstance(item, h5py._hl.dataset.Dataset):
                 ans[key] = item.value

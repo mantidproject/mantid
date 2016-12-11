@@ -9,6 +9,7 @@ import AbinsParameters
 import AbinsConstants
 
 
+# noinspection PyMethodMayBeStatic
 class GeneralDFTProgram(IOmodule):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used

@@ -13,6 +13,7 @@ import AbinsParameters
 import AbinsConstants
 
 
+# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic
 class CalculateS(IOmodule, FrequencyPowderGenerator):
     """
     Class for calculating S(Q, omega)
@@ -238,6 +239,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                                              fundamentals_coefficients=fund_coeff_chunk,
                                                              quantum_order=lg_order)
 
+                        # noinspection PyProtectedMember
                         q2 = self._instrument._calculate_q_powder(frequencies=part_local_freq)
 
                         part_value_dft = \
@@ -277,6 +279,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                                                            fundamentals_coefficients=fund_coeff,
                                                                            quantum_order=order)
 
+                # noinspection PyProtectedMember
                 q2 = self._instrument._calculate_q_powder(frequencies=local_freq)
 
                 value_dft = self._calculate_order[order](q2=q2,

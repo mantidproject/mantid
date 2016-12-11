@@ -6,6 +6,7 @@ import AbinsParameters
 import AbinsConstants
 
 
+# noinspection PyMethodMayBeStatic
 class CalculatePowder(IOmodule):
     """
     Class for calculating powder data.

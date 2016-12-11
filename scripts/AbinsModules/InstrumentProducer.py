@@ -2,6 +2,7 @@ from Instruments import ToscaInstrument, TwoDMap
 from AbinsModules import AbinsConstants
 
 
+# noinspection PyMethodMayBeStatic
 class InstrumentProducer(object):
     def __init__(self):
         pass
