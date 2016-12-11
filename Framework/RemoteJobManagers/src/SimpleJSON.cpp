@@ -665,7 +665,7 @@ string readUntilCloseChar(istream &istr) {
 
     if ((!value.empty()) ||
         (!isspace(
-            next))) // don't add white space to the start of the value string
+             next))) // don't add white space to the start of the value string
     {
       value += next;
     }

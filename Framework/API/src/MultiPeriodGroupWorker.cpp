@@ -96,8 +96,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     }
   }
 
-  if (!vecMultiPeriodWorkspaceGroups.empty() &&
-      !vecWorkspaceGroups.empty()) {
+  if (!vecMultiPeriodWorkspaceGroups.empty() && !vecWorkspaceGroups.empty()) {
     throw std::invalid_argument(
         "The input contains a mix of multi-period and other workspaces.");
   }
