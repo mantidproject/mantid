@@ -1,9 +1,8 @@
 import unittest
 import numpy as np
 from mantid.simpleapi import *
-from AbinsModules import KpointsData
 from AbinsModules.InstrumentProducer import InstrumentProducer
-from AbinsModules import AbinsConstants, AbinsParameters
+from AbinsModules import AbinsConstants, AbinsParameters, KpointsData
 
 
 class ABINSCalculateQToscaTest(unittest.TestCase):
