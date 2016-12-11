@@ -91,7 +91,7 @@ void ConvertCWSDExpToMomentum::exec() {
 
   // background
   std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
-  if (bkgdwsname.size() > 0) {
+  if (!bkgdwsname.empty()) {
     m_removeBackground = true;
     m_backgroundWS = getProperty("BackgroundWorkspace");
     // check background
@@ -215,7 +215,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
 
   // Check whether to add / or \ to m_dataDir
   std::string sep;
-  if (m_dataDir.size() > 0) {
+  if (!m_dataDir.empty()) {
 // Determine system
 #if _WIN64
     const bool isWindows = true;
@@ -542,7 +542,7 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
 
   errmsg = errss.str();
 
-  return (errmsg.size() == 0);
+  return (errmsg.empty());
 }
 
 //----------------------------------------------------------------------------------------------

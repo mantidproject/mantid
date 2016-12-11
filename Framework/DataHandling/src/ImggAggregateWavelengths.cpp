@@ -692,7 +692,7 @@ ImggAggregateWavelengths::buildOutputSubdirNamesFromUniformBands(
   std::vector<std::string> outputSubdirs;
   // get number of available images from first effective subdirectory
   std::vector<Poco::Path> images;
-  for (size_t idx = 0; idx < inputSubDirs.size() && 0 == images.size(); ++idx) {
+  for (size_t idx = 0; idx < inputSubDirs.size() && images.empty(); ++idx) {
     images = findInputImages(inputSubDirs[idx]);
   }
   auto outRanges = splitSizeIntoRanges(images.size(), bands);

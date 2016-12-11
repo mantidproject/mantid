@@ -115,7 +115,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
 
   ParameterMap_sptr parMap = instr->getParameterMap();
 
-  while (in.good() && (startChar.size() < 1 || startChar != "7")) {
+  while (in.good() && (startChar.empty() || startChar != "7")) {
     readToEndOfLine(in, true);
     startChar = getWord(in, false);
   }
@@ -144,7 +144,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
 
   readToEndOfLine(in, true);
   startChar = getWord(in, false);
-  while (in.good() && (startChar.size() < 1 || startChar != "5")) {
+  while (in.good() && (startChar.empty() || startChar != "5")) {
     readToEndOfLine(in, true);
     startChar = getWord(in, false);
   }
@@ -159,7 +159,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     std::string line;
     for (int i = 0; i < 16; i++) {
       std::string s = getWord(in, false);
-      if (s.size() < 1) {
+      if (s.empty()) {
         g_log.error() << "Not enough info to describe panel \n";
         throw std::length_error("Not enough info to describe panel ");
       }

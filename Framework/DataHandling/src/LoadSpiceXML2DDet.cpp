@@ -68,24 +68,24 @@ void SpiceXMLNode::setParameters(const std::string &nodetype,
   }
 
   // unit
-  if (nodeunit.size() > 0) {
+  if (!nodeunit.empty()) {
     m_unit = nodeunit;
   }
 
   // description
-  if (nodedescription.size() > 0)
+  if (!nodedescription.empty())
     m_description = nodedescription;
 }
 
 /** Check whether XML has unit set
  */
-bool SpiceXMLNode::hasUnit() const { return (m_unit.size() > 0); }
+bool SpiceXMLNode::hasUnit() const { return (!m_unit.empty()); }
 
 /** Check whether XML node has value set
  * @brief SpiceXMLNode::hasValue
  * @return
  */
-bool SpiceXMLNode::hasValue() const { return (m_value.size() > 0); }
+bool SpiceXMLNode::hasValue() const { return (!m_value.empty()); }
 
 /** Is this node of string type?
  * @brief SpiceXMLNode::isString
@@ -232,7 +232,7 @@ void LoadSpiceXML2DDet::processInputs() {
 
   // Retreive sample environment data from SPICE scan table workspace
   std::string spicetablewsname = getPropertyValue("SpiceTableWorkspace");
-  if (spicetablewsname.size() > 0)
+  if (!spicetablewsname.empty())
     m_hasScanTable = true;
   else
     m_hasScanTable = false;
@@ -470,7 +470,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         std::string &line = vecLines[i];
 
         // Skip empty line
-        if (line.size() == 0) {
+        if (line.empty()) {
           g_log.debug() << "\tFound empty Line at " << i << "\n";
           continue;
         }
@@ -709,7 +709,7 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
   API::IAlgorithm_sptr loadinst = createChildAlgorithm("LoadInstrument");
   loadinst->initialize();
   loadinst->setProperty("Workspace", matrixws);
-  if (idffilename.size() > 0) {
+  if (!idffilename.empty()) {
     loadinst->setProperty("Filename", idffilename);
   } else
     loadinst->setProperty("InstrumentName", "HB3A");
