@@ -3,6 +3,7 @@ import AbinsConstants
 import numpy as np
 
 
+# noinspection PyMethodMayBeStatic
 class FrequencyPowderGenerator(object):
     """
     Class which generates frequencies for quantum order events.

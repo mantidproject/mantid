@@ -44,7 +44,7 @@ class CalculateDWCrystal(object):
         Working equation implemented according to:
         https://forge.epn-campus.eu/html/ab2tds/debye_waller.html
         """
-        _DW = DwCrystalData(temperature=self._temperature, num_atoms=self._num_atoms)
+        dw = DwCrystalData(temperature=self._temperature, num_atoms=self._num_atoms)
 
         _data = self._abins_data.extract()
         _mass_hartree_factor = np.asarray([1.0 / (atom["mass"] * 2) for atom in _data["atoms_data"]])
@@ -85,8 +85,9 @@ class CalculateDWCrystal(object):
                 np.add(_item_k, np.multiply(_item_freq, _weights[k]), _item_k)
 
             np.multiply(_item_k, _mass_hartree_factor[num], _item_k)
-            _DW._append(item=_item_k, num_atom=num)
-        return _DW
+            # noinspection PyProtectedMember
+            dw._append(item=_item_k, num_atom=num)
+        return dw
 
     def calculate_data(self):
         """

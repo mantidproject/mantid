@@ -1,7 +1,8 @@
 import re
-from platform import python_version
-from mantid import config
+import platform
+import mantid
 import AbinsConstants
+import os
 
 
 # Module with helper functions used to create tests.
@@ -39,17 +40,19 @@ def old_python():
     Checks if Python i not too old
     :return: True if it is too old otherwise False
     """
-    return tuple([int(i) for i in re.findall(r'\d+', string=python_version().replace(".", " "))]) < (2, 7)
+    return tuple([int(i) for i in re.findall(r'\d+', string=platform.python_version().replace(".", " "))]) < (2, 7)
 
 
-def get_core_folder():
+def find_file(filename=None):
     """
-    Calculates folder in which testing data is stored. Folder is determined in the platform independent way. It is
-    assumed that the path to the testing data includes keyword  "UnitTest".
-    :return: path to the folder with testing data
+    Calculates path of filename with the testing data. Path is determined in the platform independent way.
+
+    :param filename: name of file to find
+    :return: full path for the file with the testing data
     """
-    folders = config.getDataSearchDirs()
+    folders = mantid.config.getDataSearchDirs()
     for folder in folders:
-        if "UnitTest" in folder:
-            return folder
-    raise ValueError("Folder with testing data not found.")
+        full_path = os.path.join(folder, filename)
+        if os.path.isfile(full_path):
+            return full_path
+    raise ValueError("File with testing data not found.")

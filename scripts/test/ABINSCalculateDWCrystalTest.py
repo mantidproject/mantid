@@ -1,6 +1,5 @@
 import unittest
 from mantid.simpleapi import *
-import os
 import numpy as np
 import json
 
@@ -32,22 +31,20 @@ def skip_if(skipping_criteria):
 @skip_if(old_python)
 class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
-    core = AbinsTestHelpers.get_core_folder()
     temperature = 10  # 10 K,  temperature for the benchmark
 
     # data
     # Use case: one k-point
-    C6H6 = os.path.join(core, "benzene_CalculateDWCrystal")
+    _c6h6 = "benzene_CalculateDWCrystal"
 
     #  Use case: many k-points
-    Si2 = os.path.join(core, "Si2-sc_CalculateDWCrystal")
+    _si2 = "Si2-sc_CalculateDWCrystal"
 
     # simple tests
     def test_wrong_input(self):
-        filename = self.Si2 + ".phonon"
+        filename = self._si2 + ".phonon"
 
-        castep_reader = LoadCASTEP(input_dft_filename=filename)
-
+        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename))
         good_data = castep_reader.read_phonon_file()
 
         # wrong temperature
@@ -59,8 +56,8 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
     #       main test
     def test_good_case(self):
-        self._good_case(name=self.C6H6)
-        self._good_case(name=self.Si2)
+        self._good_case(name=self._c6h6)
+        self._good_case(name=self._si2)
 
     #       helper functions
     def _good_case(self, name=None):
@@ -76,8 +73,8 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
-        dw = self._prepare_data(filename=filename + "_crystal_DW.txt")
+        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
+        dw = self._prepare_data(filename=AbinsTestHelpers.find_file(filename=filename + "_crystal_DW.txt"))
 
         return {"DFT": castep_reader.read_phonon_file(), "DW": dw}
 

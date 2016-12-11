@@ -54,23 +54,23 @@ class ABINSDwCrystalDataTest(unittest.TestCase):
     def test_wrong_append(self):
         # list instead of numpy array
         bad_item = [[1.0, 1.0, 1.0],
-                     [1.0, 1.0, 1.0],
-                     [1.0, 1.0, 1.0]]  # list 3x3
+                    [1.0, 1.0, 1.0],
+                    [1.0, 1.0, 1.0]]  # list 3x3
 
         with self.assertRaises(ValueError):
             self.tester._append(item=bad_item, num_atom=0)
 
         # bad shape of numpy array
         bad_item = np.asarray([[1.0, 1.0, 1.0],
-                                [1.0, 1.0, 1.0]])  # array 2x3 instead of 3x3
+                               [1.0, 1.0, 1.0]])  # array 2x3 instead of 3x3
 
         with self.assertRaises(ValueError):
             self.tester._append(item=bad_item, num_atom=0)
 
         # bad type of elements: integers instead of floats
         bad_item = np.asarray([[1, 1, 1],
-                                [1, 1, 1],
-                                [1, 1, 1]])  # array 3x3
+                               [1, 1, 1],
+                               [1, 1, 1]])  # array 3x3
         with self.assertRaises(ValueError):
             self.tester._append(item=bad_item, num_atom=0)
 

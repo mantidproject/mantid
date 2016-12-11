@@ -1,6 +1,7 @@
 import numpy as np
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
+# noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, \
                              Rebin, Load, SaveAscii
@@ -9,7 +10,7 @@ from mantid.kernel import logger, StringListValidator, Direction, StringArrayPro
 from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters, AbinsConstants
 
 
-# noinspection PyPep8Naming
+# noinspection PyPep8Naming,PyMethodMayBeStatic
 class ABINS(PythonAlgorithm):
 
     _dft_program = None
@@ -152,8 +153,6 @@ class ABINS(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read DFT data
-        dft_data = None
-
         if self._dft_program == "CASTEP":
 
             dft_reader = LoadCASTEP(input_dft_filename=self._phonon_file)

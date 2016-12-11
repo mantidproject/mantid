@@ -10,6 +10,7 @@ import os
 from mantid.kernel import logger
 
 
+# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic
 class IOmodule(object):
     """
     Class for ABINS I/O HDF file operations.
@@ -363,7 +364,7 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the dataset!")
 
-        # noinspection PyUnresolvedReferences
+        # noinspection PyUnresolvedReferences,PyProtectedMember
         if isinstance(_hdf_group, h5py._hl.dataset.Dataset):
             return _hdf_group.value
         elif all([self._get_subgrp_name(path=_hdf_group[el].name).isdigit() for el in _hdf_group.keys()]):
@@ -390,7 +391,7 @@ class IOmodule(object):
         """
         ans = {}
         for key, item in hdf_file[path].items():
-            # noinspection PyUnresolvedReferences
+            # noinspection PyUnresolvedReferences,PyProtectedMember,PyProtectedMember
             if isinstance(item, h5py._hl.dataset.Dataset):
                 ans[key] = item.value
             elif isinstance(item, h5py._hl.group.Group):

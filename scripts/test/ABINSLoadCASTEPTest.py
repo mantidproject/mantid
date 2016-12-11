@@ -1,6 +1,5 @@
 import unittest
 from mantid.simpleapi import logger
-import os
 import numpy as np
 import json
 from AbinsModules import LoadCASTEP, AbinsTestHelpers
@@ -42,8 +41,6 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
     #  *************************** USE CASES ********************************************
-    _core = AbinsTestHelpers.get_core_folder()
-
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
@@ -51,7 +48,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     _gamma_sum = "squaricn_sum_LoadCASTEP"
 
     def test_gamma_sum_correction(self):
-        self._check(core=self._core, name=self._gamma_sum)
+        self._check(name=self._gamma_sum)
 
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
@@ -60,7 +57,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
 
     def test_gamma_no_sum_correction(self):
-        self._check(core=self._core, name=self._gamma_no_sum)
+        self._check(name=self._gamma_no_sum)
     #
     #
     # ===================================================================================
@@ -69,7 +66,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     _many_k_sum = "Si2-phonon_LoadCASTEP"
 
     def test_sum_correction_single_crystal(self):
-        self._check(core=self._core, name=self._many_k_sum)
+        self._check(name=self._many_k_sum)
 
     # ===================================================================================
     # |   Use case: more than one k-point without sum correction                        |
@@ -78,26 +75,21 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     _many_k_no_sum = "Si2-sc_LoadCASTEP"
 
     def test_no_sum_correction_single_crystal(self):
-        self._check(core=self._core, name=self._many_k_no_sum)
+        self._check(name=self._many_k_no_sum)
 
     # Helper functions
-    def _check(self, core=None, name=None):
-
-        # calculate folder with testing data
-        cwd = os.getcwd()
-        filename = os.path.relpath(os.path.join(core, name), cwd)
-
+    def _check(self, name=None):
         # get calculated data
-        data = self._read_dft(filename=filename)
+        data = self._read_dft(filename=name)
 
         # get correct data
-        correct_data = self._prepare_data(filename=filename)
+        correct_data = self._prepare_data(filename=name)
 
         # check read data
-        self._check_reader_data(correct_data=correct_data, data=data, filename=filename)
+        self._check_reader_data(correct_data=correct_data, data=data, filename=name)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_dft_filename=filename)
+        self._check_loader_data(correct_data=correct_data, input_dft_filename=name)
 
     def _read_dft(self, filename=None):
         """
@@ -106,7 +98,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         @return: phonon data
         """
         # 1) Read data
-        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
+        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
 
         data = self._get_reader_data(castep_reader=castep_reader)
 
@@ -119,10 +111,10 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
 
-        with open(filename + "_data.txt") as data_file:
+        with open(AbinsTestHelpers.find_file(filename + "_data.txt")) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
-        array = np.loadtxt(filename + "_atomic_displacements_data.txt").view(complex).reshape(-1)
+        array = np.loadtxt(AbinsTestHelpers.find_file(filename + "_atomic_displacements_data.txt")).view(complex).reshape(-1)
         k = len(correct_data["datasets"]["k_points_data"]["weights"])
         atoms = len(correct_data["datasets"]["atoms_data"])
         array = array.reshape(k, atoms, atoms * 3, 3)
@@ -163,7 +155,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
         self.assertEqual(correct_data["attributes"]["DFT_program"], data["attributes"]["DFT_program"])
-        self.assertEqual(filename + ".phonon", data["attributes"]["filename"])
+        self.assertEqual(AbinsTestHelpers.find_file(filename + ".phonon"), data["attributes"]["filename"])
 
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
@@ -187,7 +179,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
     def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
-        loader = LoadCASTEP(input_dft_filename=input_dft_filename + ".phonon")
+        loader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(input_dft_filename + ".phonon"))
         loaded_data = loader.load_data().extract()
 
         # k points

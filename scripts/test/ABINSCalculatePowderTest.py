@@ -1,6 +1,5 @@
 import unittest
 from mantid.simpleapi import logger
-import os
 import numpy as np
 from AbinsModules import CalculatePowder, LoadCASTEP, AbinsTestHelpers
 import json
@@ -36,20 +35,19 @@ def skip_if(skipping_criteria):
 @skip_if(old_modules)
 class ABINSCalculatePowderTest(unittest.TestCase):
 
-    core = AbinsTestHelpers.get_core_folder()
     # data
     # Use case: one k-point
-    _C6H6 = os.path.join(core, "benzene_CalculatePowder")
+    _c6h6 = "benzene_CalculatePowder"
 
     #  Use case: many k-points
-    _Si2 = os.path.join(core, "Si2-sc_CalculatePowder")
+    _si2 = "Si2-sc_CalculatePowder"
 
     #     test input
     def test_wrong_input(self):
 
-        filename = self._Si2 + ".phonon"
+        full_path_filename = AbinsTestHelpers.find_file(filename=self._si2 + ".phonon")
 
-        castep_reader = LoadCASTEP(input_dft_filename=filename)
+        castep_reader = LoadCASTEP(input_dft_filename=full_path_filename)
         good_data = castep_reader.read_phonon_file()
 
         # wrong filename
@@ -57,12 +55,12 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = good_data.extract()["atoms_data"]
-        self.assertRaises(ValueError, CalculatePowder, filename=filename, abins_data=bad_data)
+        self.assertRaises(ValueError, CalculatePowder, filename=full_path_filename, abins_data=bad_data)
 
     #       main test
     def test_good_case(self):
-        self._good_case(name=self._C6H6)
-        self._good_case(name=self._Si2)
+        self._good_case(name=self._c6h6)
+        self._good_case(name=self._si2)
 
     #       helper functions
     def _good_case(self, name=None):
@@ -70,7 +68,8 @@ class ABINSCalculatePowderTest(unittest.TestCase):
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
 
-        good_tester = CalculatePowder(filename=name + ".phonon", abins_data=good_data["DFT"])
+        good_tester = CalculatePowder(filename=AbinsTestHelpers.find_file(filename=name + ".phonon"),
+                                      abins_data=good_data["DFT"])
         calculated_data = good_tester.calculate_data().extract()
 
         # check if evaluated powder data  is correct
@@ -79,15 +78,16 @@ class ABINSCalculatePowderTest(unittest.TestCase):
             self.assertEqual(True, np.allclose(good_data["powder"][key], calculated_data[key]))
 
         # check if loading powder data is correct
-        new_tester = CalculatePowder(filename=name + ".phonon", abins_data=good_data["DFT"])
+        new_tester = CalculatePowder(filename=AbinsTestHelpers.find_file(name + ".phonon"),
+                                     abins_data=good_data["DFT"])
         loaded_data = new_tester.load_data().extract()
         for key in good_data["powder"]:
             self.assertEqual(True, np.allclose(calculated_data[key], loaded_data[key]))
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
-        powder = self._prepare_data(filename=filename + "_powder.txt")
+        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename + ".phonon"))
+        powder = self._prepare_data(filename=AbinsTestHelpers.find_file(filename + "_powder.txt"))
 
         return {"DFT": castep_reader.read_phonon_file(), "powder": powder}
 

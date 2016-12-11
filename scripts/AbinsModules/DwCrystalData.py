@@ -81,7 +81,6 @@ class DwCrystalData(GeneralData):
         """
         Checks if structure of Debye-Waller factor is valid.
         @param items: Debye-Waller factor to check
-        @param atom:  number of atom
         """
 
         if not isinstance(items, np.ndarray):

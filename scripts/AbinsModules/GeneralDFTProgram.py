@@ -9,6 +9,7 @@ import AbinsParameters
 import AbinsConstants
 
 
+# noinspection PyMethodMayBeStatic
 class GeneralDFTProgram(IOmodule):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
@@ -142,7 +143,7 @@ class GeneralDFTProgram(IOmodule):
         This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
         It converts atomic displacements from atomic units to Angstroms
 
-        @param k_data: dictionary with the data to rearrange
+        @param data: dictionary with the data to rearrange
         @return: Returns an object of type AbinsData
         """
 
