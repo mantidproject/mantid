@@ -1,7 +1,6 @@
 import unittest
 from mantid.simpleapi import logger
 import numpy as np
-
 from AbinsModules import PowderData, AbinsTestHelpers
 
 
