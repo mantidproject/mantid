@@ -19,14 +19,12 @@
  File change history is stored at: <https://github.com/mantidproject/mantid>
  */
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 
 #include <fstream> // used to get ofstream
+#include <iomanip>
 
 /* @class SaveCSV
 

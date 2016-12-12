@@ -7,6 +7,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <nexus/NeXusFile.hpp>
@@ -294,9 +295,9 @@ void LoadNXSPE::exec() {
     instrument->markAsDetector(det);
   }
 
-  Geometry::ParameterMap &pmap = outputWS->instrumentParameters();
   std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
                                 itdataend, iterrorend;
+  auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
@@ -304,9 +305,7 @@ void LoadNXSPE::exec() {
     outputWS->dataX(i) = energies;
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
-      outputWS->dataY(i) = std::vector<double>(numBins, 0);
-      outputWS->dataE(i) = std::vector<double>(numBins, 0);
-      pmap.addBool(outputWS->getDetector(i)->getComponentID(), "masked", true);
+      spectrumInfo.setMasked(i, true);
     } else {
       outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
       outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);

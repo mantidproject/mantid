@@ -1,6 +1,7 @@
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"
 #include "MantidKernel/Exception.h"

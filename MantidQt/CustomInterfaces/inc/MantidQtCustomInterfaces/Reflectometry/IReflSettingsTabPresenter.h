@@ -37,21 +37,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflSettingsTabPresenter {
 public:
   virtual ~IReflSettingsTabPresenter(){};
-  /// Accept a main presenter
-  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
   /// Pre-processing
-  virtual std::string getTransmissionOptions() const = 0;
+  virtual std::string getTransmissionOptions(int group) const = 0;
   /// Processing
-  virtual std::string getReductionOptions() const = 0;
+  virtual std::string getReductionOptions(int group) const = 0;
   /// Post-processing
-  virtual std::string getStitchOptions() const = 0;
-
-  enum Flag { ExpDefaultsFlag, InstDefaultsFlag };
-
-  /// Tell the presenter something happened
-  virtual void notify(IReflSettingsTabPresenter::Flag flag) = 0;
+  virtual std::string getStitchOptions(int group) const = 0;
   /// Set current instrument name
-  virtual void setInstrumentName(const std::string instName) = 0;
+  virtual void setInstrumentName(const std::string &instName) = 0;
 };
 }
 }

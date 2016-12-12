@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"

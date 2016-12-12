@@ -132,6 +132,8 @@ void TomographyIfaceViewQtGUI::browseAggScriptClicked() {
 void TomographyIfaceViewQtGUI::runAggregateBands(
     Mantid::API::IAlgorithm_sptr alg) {
 
+  // reset any previous connections
+  m_aggAlgRunner.get()->disconnect();
   connect(m_aggAlgRunner.get(), SIGNAL(batchComplete(bool)), this,
           SLOT(finishedAggBands(bool)), Qt::QueuedConnection);
 

@@ -83,7 +83,7 @@ private:
   std::multimap<double, size_t> m_indexMap;
 
   /// Getting Efixed
-  double getEfixed(Geometry::IDetector_const_sptr detector,
+  double getEfixed(const Mantid::Geometry::IDetector &detector,
                    API::MatrixWorkspace_const_sptr inputWS, int emode) const;
 };
 

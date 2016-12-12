@@ -9,6 +9,7 @@
 #include <Poco/File.h>
 
 #include <fstream>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;

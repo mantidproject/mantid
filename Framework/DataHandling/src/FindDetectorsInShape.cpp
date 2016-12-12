@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/FindDetectorsInShape.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"

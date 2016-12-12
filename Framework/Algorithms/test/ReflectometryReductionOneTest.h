@@ -11,6 +11,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
