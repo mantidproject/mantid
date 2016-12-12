@@ -411,6 +411,24 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
+  void test_getDetectorByID() {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithParameter(*exptInfo, "a", "b");
+
+    IDetector_const_sptr det;
+    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
+    TS_ASSERT(det);
+
+    // Set a mapping
+    std::set<Mantid::detid_t> group{1, 2};
+    Mantid::det2group_map mapping{{1, group}};
+    exptInfo->cacheDetectorGroupings(mapping);
+
+    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
+    TS_ASSERT(det);
+    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
+  }
+
   void test_detectorIDsInGroup() {
     using namespace Mantid;
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);

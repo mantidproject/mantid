@@ -134,6 +134,12 @@ public:
     TS_ASSERT_EQUALS(group, fileBacked->getGroupMembers(1));
   }
 
+  void test_getDetectorByID() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT(fileBacked->getDetectorByID(10100));
+  }
+
   void test_detectorIDsInGroup() {
     auto fileBacked = createTestObject();
 
