@@ -1,9 +1,10 @@
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtAPI/WindowIcons.h"
 #include "MantidQtMantidWidgets/ProjectSavePresenter.h"
 
 #include "ProjectSaveView.h"
+
+#include <QFileDialog>
 
 using namespace MantidQt::API;
 
@@ -218,8 +219,8 @@ void ProjectSaveView::findFilePath() {
   filter += "Compressed MantidPlot project (*.mantid.gz)";
 
   QString selectedFilter;
-  fileName = MantidQt::API::FileDialogHandler::getSaveFileName(
-      this, tr("Save Project As"), "", filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(
+      this, "Save Project As", "", filter, &selectedFilter);
 
   m_ui.projectPath->setText(fileName);
 }
