@@ -24,6 +24,7 @@ Improved
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` gained a new option: `Interpolation`.
   This controls the method used for interpolation. Availabile options are: `Linear` & `CSpline`.
+- :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
 
 Deprecated
 ##########
