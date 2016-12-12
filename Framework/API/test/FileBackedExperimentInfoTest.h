@@ -134,10 +134,10 @@ public:
     TS_ASSERT_EQUALS(group, fileBacked->getGroupMembers(1));
   }
 
-  void test_getDetectorByID() {
+  void test_detectorIDsInGroup() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT(fileBacked->getDetectorByID(10100));
+    TS_ASSERT_EQUALS(fileBacked->detectorIDsInGroup(0).size(), 1);
   }
 
   void test_ModeratorModelMethods() {
