@@ -1,18 +1,11 @@
-//--------------------------------------------------------------------------
-// Includes
-//--------------------------------------------------------------------------
 #include "MantidAlgorithms/DeleteWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid {
-
 namespace Algorithms {
 
 // Register the algorithm
 DECLARE_ALGORITHM(DeleteWorkspace)
-
-//--------------------------------------------------------------------------
-// Private member functions
-//--------------------------------------------------------------------------
 
 /// Initialize the algorithm properties
 void DeleteWorkspace::init() {

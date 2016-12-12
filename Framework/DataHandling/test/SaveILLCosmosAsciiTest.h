@@ -268,7 +268,7 @@ private:
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
                 bool createLogs = false) {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     if (createLogs) {
       ws->mutableRun().addProperty("run_title",

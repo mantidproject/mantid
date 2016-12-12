@@ -3,6 +3,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -95,15 +96,16 @@ void ConvertSpectrumAxis::exec() {
       emode = 2;
     const double delta = 0.0;
     double efixed;
+    auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
-      IDetector_const_sptr detector = inputWS->getDetector(i);
       double twoTheta, l1val, l2;
-      if (!detector->isMonitor()) {
-        twoTheta = inputWS->detectorTwoTheta(*detector);
-        l2 = detector->getDistance(*sample);
+      if (!spectrumInfo.isMonitor(i)) {
+        twoTheta = spectrumInfo.twoTheta(i);
+        l2 = spectrumInfo.l2(i);
         l1val = l1;
-        efixed = getEfixed(detector, inputWS, emode); // get efixed
+        efixed =
+            getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
       } else {
         twoTheta = 0.0;
         l2 = l1;
@@ -172,14 +174,15 @@ void ConvertSpectrumAxis::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-double ConvertSpectrumAxis::getEfixed(IDetector_const_sptr detector,
-                                      MatrixWorkspace_const_sptr inputWS,
-                                      int emode) const {
+double
+ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
+                               MatrixWorkspace_const_sptr inputWS,
+                               int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
-    g_log.debug() << "Detector: " << detector->getID() << " Efixed: " << efixed
+    g_log.debug() << "Detector: " << detector.getID() << " Efixed: " << efixed
                   << "\n";
   } else {
     if (emode == 1) {
@@ -192,29 +195,29 @@ double ConvertSpectrumAxis::getEfixed(IDetector_const_sptr detector,
         } else {
           efixed = 0.0;
           g_log.warning() << "Efixed could not be found for detector "
-                          << detector->getID() << ", set to 0.0\n";
+                          << detector.getID() << ", set to 0.0\n";
         }
       } else {
         efixed = 0.0;
         g_log.warning() << "Efixed could not be found for detector "
-                        << detector->getID() << ", set to 0.0\n";
+                        << detector.getID() << ", set to 0.0\n";
       }
     } else if (emode == 2) {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
+      std::vector<double> efixedVec = detector.getNumberParameter("Efixed");
       if (efixedVec.empty()) {
-        int detid = detector->getID();
+        int detid = detector.getID();
         IDetector_const_sptr detectorSingle =
             inputWS->getInstrument()->getDetector(detid);
         efixedVec = detectorSingle->getNumberParameter("Efixed");
       }
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
-        g_log.debug() << "Detector: " << detector->getID()
+        g_log.debug() << "Detector: " << detector.getID()
                       << " EFixed: " << efixed << "\n";
       } else {
         efixed = 0.0;
         g_log.warning() << "Efixed could not be found for detector "
-                        << detector->getID() << ", set to 0.0\n";
+                        << detector.getID() << ", set to 0.0\n";
       }
     }
   }

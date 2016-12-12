@@ -50,32 +50,54 @@ void QtReflRunsTabView::initLayout() {
   // Create the DataProcessor presenter
   ReflGenericDataProcessorPresenterFactory presenterFactory;
 
-  QDataProcessorWidget *qDataProcessorWidget = new QDataProcessorWidget(
+  QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
-  ui.layoutProcessPane->addWidget(qDataProcessorWidget);
+  ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
+
+  QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
+      std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
+  ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
+
+  std::vector<DataProcessorPresenter *> processingWidgets;
+  processingWidgets.push_back(qDataProcessorWidget_1->getPresenter());
+  processingWidgets.push_back(qDataProcessorWidget_2->getPresenter());
 
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
       this /* main view */,
       this /* Currently this concrete view is also responsible for prog reporting */,
-      qDataProcessorWidget->getPresenter() /* The data processor presenter */);
+      processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
-  // Synchronize the two instrument selection widgets
-  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-          qDataProcessorWidget,
-          SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  connect(qDataProcessorWidget,
-          SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
-          ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
   // Synchronize the slit calculator
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
-  connect(qDataProcessorWidget,
+  // Selected group changed
+  connect(ui.toolbox, SIGNAL(currentChanged(int)), this, SLOT(groupChanged()));
+
+  // Synchronize the instrument selection widgets
+  // Processing table in group 1
+  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
+          qDataProcessorWidget_1,
+          SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
+  connect(qDataProcessorWidget_1,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
+          ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
+  connect(qDataProcessorWidget_1,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
+          SLOT(instrumentChanged(int)));
+  // Processing table in group 2
+  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
+          qDataProcessorWidget_2,
+          SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
+  connect(qDataProcessorWidget_2,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
+          ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
+  connect(qDataProcessorWidget_2,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
 }
@@ -300,6 +322,20 @@ std::string QtReflRunsTabView::getSearchString() const {
 */
 std::string QtReflRunsTabView::getTransferMethod() const {
   return ui.comboTransferMethod->currentText().toStdString();
+}
+
+/**
+* @return the selected group
+*/
+int QtReflRunsTabView::getSelectedGroup() const {
+  return ui.toolbox->currentIndex();
+}
+
+/** This is slot is triggered when the selected group changes.
+*
+*/
+void QtReflRunsTabView::groupChanged() {
+  m_presenter->notify(IReflRunsTabPresenter::GroupChangedFlag);
 }
 
 } // namespace CustomInterfaces

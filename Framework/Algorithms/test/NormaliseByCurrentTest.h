@@ -139,7 +139,7 @@ public:
 
   void test_exec() {
     AnalysisDataService::Instance().add(
-        "normIn", WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 3, 1));
+        "normIn", WorkspaceCreationHelper::create2DWorkspaceBinned(10, 3, 1));
     doTest("normIn", "normOut", 1.0, 0.5 * M_SQRT2);
     AnalysisDataService::Instance().remove("normIn");
     AnalysisDataService::Instance().remove("normOut");
@@ -152,17 +152,17 @@ public:
     // uniform error value of 3.0.
 
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     a->setYUnit("Counts");
     addMultiPeriodLogsTo(a, 1, protonChargeByPeriod);
 
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     b->setYUnit("Counts");
     addMultiPeriodLogsTo(b, 2, protonChargeByPeriod);
 
     MatrixWorkspace_sptr c =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     c->setYUnit("Counts");
     addMultiPeriodLogsTo(c, 3, protonChargeByPeriod);
 
@@ -177,7 +177,7 @@ public:
     const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
 
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     ws->setYUnit("Counts");
     addMultiPeriodLogsTo(ws, 1, protonChargeByPeriod); // If this worked, we
                                                        // would be normalising
@@ -194,7 +194,7 @@ public:
     const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
 
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     ws->setYUnit("Counts");
     addMultiPeriodLogsTo(ws, 1, protonChargeByPeriod); // If this worked, we
                                                        // would be normalising
@@ -212,7 +212,7 @@ public:
     const std::string protonChargeByPeriod = "2.0, 4.0";
 
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     ws->setYUnit("Counts");
     addMultiPeriodLogsTo(ws, 1, protonChargeByPeriod); // If this worked, we
                                                        // would be normalising
@@ -229,7 +229,7 @@ public:
   void testThrowsWithoutCURRENT_PERIOD_Log() {
     const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     ws->setYUnit("Counts");
     addMultiPeriodLogsTo(ws, 1, protonChargeByPeriod); // If this worked, we
                                                        // would be normalising
@@ -252,7 +252,7 @@ public:
   void testThrowsWithoutPROTON_CHARGE_BY_PERIOD_Log() {
     const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     ws->setYUnit("Counts");
     addMultiPeriodLogsTo(ws, 1, protonChargeByPeriod); // If this worked, we
                                                        // would be normalising
@@ -277,7 +277,7 @@ public:
 
   void test_execInPlace() {
     AnalysisDataService::Instance().add(
-        "normIn", WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 3, 1));
+        "normIn", WorkspaceCreationHelper::create2DWorkspaceBinned(10, 3, 1));
     doTest("normIn", "normIn", 1.0, 0.5 * M_SQRT2);
     AnalysisDataService::Instance().remove("normIn");
   }
@@ -285,7 +285,7 @@ public:
   void test_execEvent() {
     AnalysisDataService::Instance().add(
         "normInEvent",
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
+        WorkspaceCreationHelper::createEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
 
     EventWorkspace_const_sptr outputEvent;
     outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
@@ -300,7 +300,7 @@ public:
   void test_execEventInPlace() {
     AnalysisDataService::Instance().add(
         "normInEvent",
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
+        WorkspaceCreationHelper::createEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
 
     EventWorkspace_const_sptr outputEvent;
     outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
@@ -313,7 +313,7 @@ public:
 
   void test_execZero() {
     AnalysisDataService::Instance().add(
-        "normIn", WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1));
+        "normIn", WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1));
 
     NormaliseByCurrent norm1;
     norm1.initialize();
@@ -359,21 +359,21 @@ public:
     // test_execPerformance
     AnalysisDataService::Instance().add(
         execWSIn,
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins, 1));
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins, 1));
 
     // test_execInPlacePerformance
     AnalysisDataService::Instance().add(
         execInPlaceWSIn,
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins, 1));
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins, 1));
 
     // test_execEventPerformance
     AnalysisDataService::Instance().add(
-        execEventWSIn, WorkspaceCreationHelper::CreateEventWorkspace(
+        execEventWSIn, WorkspaceCreationHelper::createEventWorkspace(
                            nHist, nBins, nPixels, 0.0, 1.0, 2));
 
     // test_execEventInPlacePerformance
     AnalysisDataService::Instance().add(
-        execEventInPlaceWSIn, WorkspaceCreationHelper::CreateEventWorkspace(
+        execEventInPlaceWSIn, WorkspaceCreationHelper::createEventWorkspace(
                                   nHist, nBins, nPixels, 0.0, 1.0, 2));
 
     // test_multiPeriodDataPerformance
@@ -382,17 +382,17 @@ public:
     // Note that CreateWorkspace123 creates uniform signal value of 2.0, and
     // uniform error value of 3.0.
     multiPeriodWS1 =
-        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins, 1);
     multiPeriodWS1->setYUnit("Counts");
     addMultiPeriodLogsTo(multiPeriodWS1, 1, protonChargeByPeriod);
 
     multiPeriodWS2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins, 1);
     multiPeriodWS2->setYUnit("Counts");
     addMultiPeriodLogsTo(multiPeriodWS2, 2, protonChargeByPeriod);
 
     multiPeriodWS3 =
-        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins, 1);
     multiPeriodWS3->setYUnit("Counts");
     addMultiPeriodLogsTo(multiPeriodWS3, 3, protonChargeByPeriod);
   }

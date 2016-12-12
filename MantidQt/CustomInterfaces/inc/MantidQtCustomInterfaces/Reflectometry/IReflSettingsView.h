@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABVIEW_H
-#define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABVIEW_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSVIEW_H
+#define MANTID_CUSTOMINTERFACES_IREFLSETTINGSVIEW_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include <vector>
@@ -9,13 +9,12 @@ namespace MantidQt {
 
 namespace CustomInterfaces {
 
-class IReflSettingsTabPresenter;
+class IReflSettingsPresenter;
 
-/** @class IReflSettingsTabView
+/** @class IReflSettingsView
 
-IReflSettingsTabView is the base view class for the Reflectometry Interface. It
-contains
-no QT specific functionality as that should be handled by a subclass.
+IReflSettingsView is the base view class for the Reflectometry settings. It
+contains no QT specific functionality as that should be handled by a subclass.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -39,14 +38,14 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport IReflSettingsTabView {
+class DLLExport IReflSettingsView {
 public:
   /// Constructor
-  IReflSettingsTabView(){};
+  IReflSettingsView(){};
   /// Destructor
-  virtual ~IReflSettingsTabView(){};
+  virtual ~IReflSettingsView(){};
   /// Returns the presenter managing this view
-  virtual IReflSettingsTabPresenter *getPresenter() const = 0;
+  virtual IReflSettingsPresenter *getPresenter() const = 0;
 
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
@@ -84,4 +83,4 @@ public:
 };
 }
 }
-#endif /* MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H */
+#endif /* MANTID_CUSTOMINTERFACES_IREFLSETTINGSVIEW_H */

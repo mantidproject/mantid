@@ -1,3 +1,4 @@
+#include "MantidKernel/Logger.h"
 #include "MantidQtMantidWidgets/DisplayCurveFit.h"
 // includes for workspace handling
 

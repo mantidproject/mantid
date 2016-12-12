@@ -7,7 +7,7 @@ import numpy as np
 # Import mantid to setup the python paths to the bundled scripts
 import mantid
 from CrystalField.energies import energies
-from mantid.simpleapi import CalculateChiSquared
+from mantid.simpleapi import CalculateChiSquared, EvaluateFunction, mtd
 from mantid.kernel import ConfigService
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
@@ -1226,7 +1226,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Define a CrystalField object with parameters slightly shifted.
         cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
-                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+                          Temperature=44.0, FWHM=1.0)
 
         # Set the ties
         cf.ties(B20=0.37737)
@@ -1249,11 +1249,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws2 = makeWorkspace(*origin.getSpectrum(1))
 
         # Define a CrystalField object with parameters slightly shifted.
-        x = [0, 50]
-        y = [1, 2]
-        rm = ResolutionModel([(x, y), (x, y)])
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=9,
-                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.0], ResolutionModel=rm, FWHMVariation=0)
+                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
 
         # Set the ties
         cf.ties(B20=0.37737)
@@ -1388,6 +1385,123 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
         self.assertTrue('f3.IntensityScaling0=0.1*f2.IntensityScaling0' in s)
         self.assertTrue('f3.IntensityScaling1=0.1*f2.IntensityScaling1' in s)
+
+    def test_normalisation(self):
+        from CrystalField.normalisation import split2range
+        ranges = split2range(Ion='Pr', EnergySplitting=10,
+                             Parameters=['B20', 'B22', 'B40', 'B42', 'B44', 'B60', 'B62', 'B64', 'B66'])
+        self.assertAlmostEqual(ranges['B44'], 0.013099063718959822, 7)
+        self.assertAlmostEqual(ranges['B60'], 0.00010601965319487525, 7)
+        self.assertAlmostEqual(ranges['B40'], 0.0022141458870077678, 7)
+        self.assertAlmostEqual(ranges['B42'], 0.009901961430901874, 7)
+        self.assertAlmostEqual(ranges['B64'], 0.00084150490931686321, 7)
+        self.assertAlmostEqual(ranges['B22'], 0.19554806997215959, 7)
+        self.assertAlmostEqual(ranges['B20'], 0.11289973083793813, 7)
+        self.assertAlmostEqual(ranges['B66'], 0.0011394030334966495, 7)
+        self.assertAlmostEqual(ranges['B62'], 0.00076818536847364201, 7)
+
+    def test_estimate_parameters_cross_entropy(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
+                                constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45',
+                                Type='Cross Entropy', NSamples=100)
+        # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
+
+    def test_estimate_parameters_multiple_results(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
+                                constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', NSamples=1000)
+        self.assertEqual(fit.get_number_estimates(), 10)
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
+
+    def test_intensity_scaling_single_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=44.0, FWHM=1.0)
+        _, y0 = cf.getSpectrum()
+
+        cf.IntensityScaling = 2.5
+        _, y1 = cf.getSpectrum()
+
+        self.assertTrue(np.all(y1 / y0 > 2.49999999999))
+        self.assertTrue(np.all(y1 / y0 < 2.50000000001))
+
+    def test_intensity_scaling_single_spectrum_1(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', IntensityScaling=2.5, B20=0.37737, B22=3.9770, B40=-0.031787,
+                          B42=-0.11611, B44=-0.12544, Temperature=44.0, FWHM=1.0)
+        _, y0 = cf.getSpectrum()
+
+        cf.IntensityScaling = 1.0
+        _, y1 = cf.getSpectrum()
+
+        self.assertTrue(np.all(y0 / y1 > 2.49999999999))
+        self.assertTrue(np.all(y0 / y1 < 2.50000000001))
+
+    def test_intensity_scaling_multi_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.2])
+        x, y0 = cf.getSpectrum(0)
+        ws0 = makeWorkspace(x, y0)
+        x, y1 = cf.getSpectrum(1)
+        ws1 = makeWorkspace(x, y1)
+
+        cf.IntensityScaling = [2.5, 1.5]
+
+        EvaluateFunction(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0, InputWorkspace_1=ws1,
+                         OutputWorkspace='out')
+        out = mtd['out']
+        out0 = out[0].readY(1)
+        out1 = out[1].readY(1)
+
+        self.assertTrue(np.all(out0 / y0 > 2.49999999999))
+        self.assertTrue(np.all(out0 / y0 < 2.50000000001))
+
+        self.assertTrue(np.all(out1 / y1 > 1.49999999999))
+        self.assertTrue(np.all(out1 / y1 < 1.50000000001))
 
 
 if __name__ == "__main__":

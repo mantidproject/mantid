@@ -9,6 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -1940,8 +1941,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
           << "data workspace.\n";
       try {
         auto to = m_ws->getSingleHeldWorkspace();
-        auto from = dataWS;
-        copyLogs(from, to);
+        copyLogs(dataWS, to);
         g_log.information() << "Log data copied.\n";
       } catch (std::runtime_error &) {
         g_log.error()

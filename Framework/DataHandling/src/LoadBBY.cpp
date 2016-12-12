@@ -2,6 +2,7 @@
 #include <cstdio>
 
 #include "MantidDataHandling/LoadBBY.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LogManager.h"

@@ -1,3 +1,4 @@
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RemoveWorkspaceHistory.h"
 
@@ -10,7 +11,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RemoveWorkspaceHistory)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string RemoveWorkspaceHistory::name() const {
   return "RemoveWorkspaceHistory";
@@ -29,7 +29,6 @@ const std::string RemoveWorkspaceHistory::summary() const {
   return "Removes all algorithm history records from a given workspace.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RemoveWorkspaceHistory::init() {
@@ -38,7 +37,6 @@ void RemoveWorkspaceHistory::init() {
                   "Workspace to remove the algorithm history from.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void RemoveWorkspaceHistory::exec() {

@@ -55,6 +55,7 @@
 #include <QUrl>
 
 #include <algorithm>
+#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -179,7 +180,7 @@ void FitPropertyBrowser::init() {
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
-               << "Damping";
+               << "Damped GaussNewton";
 
   m_ignoreInvalidData = m_boolManager->addProperty("Ignore invalid data");
   setIgnoreInvalidData(settings.value("Ignore invalid data", false).toBool());

@@ -14,6 +14,7 @@
 // standard library headers
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 using BConstraint = Mantid::CurveFitting::Constraints::BoundaryConstraint;
 

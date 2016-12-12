@@ -25,6 +25,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidKernel/make_unique.h"
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -366,6 +367,10 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
 */
 void DataProcessorTwoLevelTreeManager::newTable(
     const DataProcessorWhiteList &whitelist) {
+
+  size_t nrows = m_ws->rowCount();
+  for (size_t row = 0; row < nrows; row++)
+    m_ws->removeRow(0);
 
   m_model.reset(new QDataProcessorTwoLevelTreeModel(
       createDefaultWorkspace(whitelist), whitelist));

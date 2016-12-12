@@ -5,6 +5,7 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::CurveFitting::Algorithms::SplineSmoothing;
 
@@ -36,7 +37,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 5, 0.02, false);
 
     // setup algorithm
@@ -53,7 +54,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;
@@ -69,7 +70,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;

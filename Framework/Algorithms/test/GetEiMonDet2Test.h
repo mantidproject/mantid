@@ -315,7 +315,7 @@ private:
   static MatrixWorkspace_sptr createWorkspace() {
     const size_t nDetectors = 1;
     // Number of spectra = detectors + monitor.
-    auto ws = Create2DWorkspace(nDetectors + 1, 2);
+    auto ws = create2DWorkspace(nDetectors + 1, 2);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     attachInstrument(ws);
     ws->mutableRun().addProperty("Ei", EI, true);
