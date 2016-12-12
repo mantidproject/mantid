@@ -56,7 +56,7 @@ A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis
 In addition the table workspace should be opened as well and the processing table
 (shown below) should now contain four rows (13460, 13462, 13469, 13470).
 
-.. figure:: /images/ISISReflectometryPolref_INTER_table.PNG
+.. figure:: /images/ISISReflectometryPolref_INTER_table.png
   :align: center
 
 Let's process the first group, which consists of the first two rows of the
@@ -373,7 +373,7 @@ In the image below we select two runs from the Search table that we wish to tran
 Attempting to transfer an invalid run will result in that run not being transferred to the processing table. If the transfer was not successful then that specific
 run will be highlighted in the Search table.
 
-.. figure:: /images/ISISReflectometryPolref_failed_transfer_run.PNG
+.. figure:: /images/ISISReflectometryPolref_failed_transfer_run.png
    :alt: Failed transfer will be highlighted in orange, successful transfer is put into processing table
 
 Hovering over the highlighted run with your cursor will allow you to see why the run was invalid.

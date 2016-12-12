@@ -54,7 +54,7 @@
 #include <QComboBox>
 #include <QDateTime>
 #include <QDoubleSpinBox>
-#include <QFileDialog>
+#include <QFileInfo>
 #include <QFontDialog>
 #include <QGroupBox>
 #include <QKeySequence>

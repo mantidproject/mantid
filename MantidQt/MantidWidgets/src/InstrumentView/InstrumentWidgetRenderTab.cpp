@@ -12,7 +12,6 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
 #include <QAction>
