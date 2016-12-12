@@ -348,7 +348,7 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
 }
 
 /// Returns the detector IDs that make up the group that this ID is part of
-const std::vector<detid_t> &
+const std::set<detid_t> &
 ExperimentInfo::getGroupMembers(const detid_t detID) const {
   auto iter = m_detgroups.find(detID);
   if (iter != m_detgroups.end()) {
@@ -371,7 +371,7 @@ ExperimentInfo::getDetectorByID(const detid_t detID) const {
   if (m_detgroups.empty()) {
     return getInstrument()->getDetector(detID);
   } else {
-    const std::vector<detid_t> &ids = this->getGroupMembers(detID);
+    const auto &ids = this->getGroupMembers(detID);
     return getInstrument()->getDetectorG(ids);
   }
 }

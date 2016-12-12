@@ -75,8 +75,7 @@ public:
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
   /// Returns the detector IDs that make up the group that this ID is part of
-  virtual const std::vector<detid_t> &
-  getGroupMembers(const detid_t detID) const;
+  virtual const std::set<detid_t> &getGroupMembers(const detid_t detID) const;
   /// Get a detector or detector group from an ID
   virtual Geometry::IDetector_const_sptr
   getDetectorByID(const detid_t detID) const;

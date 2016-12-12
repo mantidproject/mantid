@@ -420,7 +420,7 @@ public:
     TS_ASSERT(det);
 
     // Set a mapping
-    std::vector<Mantid::detid_t> group{1, 2};
+    std::set<Mantid::detid_t> group{1, 2};
     Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
@@ -446,10 +446,10 @@ public:
   test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
     ExperimentInfo expt;
     Mantid::det2group_map mappings;
-    mappings.emplace(1, std::vector<Mantid::detid_t>(1, 2));
+    mappings.emplace(1, std::set<Mantid::detid_t>{2});
     expt.cacheDetectorGroupings(mappings);
 
-    std::vector<Mantid::detid_t> ids;
+    std::set<Mantid::detid_t> ids;
     TS_ASSERT_THROWS_NOTHING(ids = expt.getGroupMembers(1));
   }
 

@@ -60,8 +60,7 @@ public:
 
   void cacheDetectorGroupings(const det2group_map &mapping) override;
 
-  const std::vector<detid_t> &
-  getGroupMembers(const detid_t detID) const override;
+  const std::set<detid_t> &getGroupMembers(const detid_t detID) const override;
 
   Geometry::IDetector_const_sptr
   getDetectorByID(const detid_t detID) const override;

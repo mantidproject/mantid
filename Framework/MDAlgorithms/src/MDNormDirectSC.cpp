@@ -561,9 +561,8 @@ MDNormDirectSC::removeGroupedIDs(const ExperimentInfo &exptInfo,
 
     try {
       const auto &members = exptInfo.getGroupMembers(curID);
-      singleIDs.push_back(members.front());
-      std::copy(members.begin() + 1, members.end(),
-                std::inserter(groupedIDs, groupedIDs.begin()));
+      singleIDs.push_back(*members.begin());
+      groupedIDs.insert(members.begin(), members.end());
     } catch (std::runtime_error &) {
       singleIDs.push_back(curID);
     }
