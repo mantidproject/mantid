@@ -311,11 +311,12 @@ bool MantidMatrixModel::checkMaskedCache(int row) const {
     if (m_maskCache.contains(row)) {
       isMasked = m_maskCache.value(row);
     } else {
-      try {
-        size_t wsIndex = static_cast<size_t>(row);
-        isMasked = m_workspace->spectrumInfo().isMasked(wsIndex);
+      const auto &spectrumInfo = m_workspace->spectrumInfo();
+      size_t wsIndex = static_cast<size_t>(row);
+      if (spectrumInfo.hasDetectors(wsIndex)) {
+        isMasked = spectrumInfo.isMasked(wsIndex);
         m_maskCache.insert(row, isMasked);
-      } catch (std::exception &) {
+      } else {
         m_maskCache.insert(row, false);
         isMasked = false;
       }
