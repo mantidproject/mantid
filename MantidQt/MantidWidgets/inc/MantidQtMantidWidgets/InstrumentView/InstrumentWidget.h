@@ -152,6 +152,7 @@ signals:
   void requestSelectComponent(const QString &);
   void preDeletingHandle();
   void clearingHandle();
+  void maskedWorkspaceOverlayed();
 
 protected:
   /// Implements AlgorithmObserver's finish handler

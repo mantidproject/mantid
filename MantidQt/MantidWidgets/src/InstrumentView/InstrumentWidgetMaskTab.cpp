@@ -331,6 +331,9 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   buttons->addWidget(m_applyToData, 0, 0);
   box->setLayout(buttons);
   layout->addWidget(box);
+
+  connect(m_instrWidget, SIGNAL(maskedWorkspaceOverlayed()), this,
+          SLOT(enableApplyButtons()));
 }
 
 /**
@@ -1059,6 +1062,7 @@ void InstrumentWidgetMaskTab::enableApplyButtons() {
     m_applyToData->setEnabled(false);
     m_applyToView->setEnabled(false);
   }
+  m_saveShapesToTable->setEnabled(hasMaskShapes);
   m_saveButton->setEnabled(hasDetectorMask && (!enableBinMasking));
   m_clearAll->setEnabled(hasMask);
   setActivity();

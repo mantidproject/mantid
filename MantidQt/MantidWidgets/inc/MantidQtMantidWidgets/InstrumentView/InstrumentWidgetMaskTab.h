@@ -109,7 +109,7 @@ protected slots:
   void saveExcludeGroupToFile();
   void showSaveMenuTooltip(QAction *);
   void toggleMaskGroup();
-
+  void enableApplyButtons();
   void doubleChanged(QtProperty *);
 
 protected:
@@ -124,7 +124,6 @@ protected:
   void saveMaskingToCalFile(bool invertMask = false);
   void saveMaskingToTableWorkspace(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
-  void enableApplyButtons();
   void setSelectActivity();
   Mode getMode() const;
   /// Get mask/group border color

@@ -10,6 +10,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Unit.h"
@@ -946,7 +947,9 @@ bool InstrumentWidget::overlay(const QString &wsName) {
 
   auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
   auto table = boost::dynamic_pointer_cast<ITableWorkspace>(workspace);
-  if (!pws && !table) {
+  auto maskedWs = boost::dynamic_pointer_cast<IMaskWorkspace>(workspace);
+
+  if (!pws && !table && !maskedWs) {
     QMessageBox::warning(this, "MantidPlot - Warning",
                          "Work space called '" + wsName +
                              "' is not suitable."
@@ -970,6 +973,14 @@ bool InstrumentWidget::overlay(const QString &wsName) {
     surface->loadShapesFromTableWorkspace(table);
     updateInstrumentView();
     success = true;
+  } else if (maskedWs && surface) {
+    auto actor = getInstrumentActor();
+    actor->setMaskMatrixWorkspace(
+              boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                  maskedWs));
+    actor->updateColors();
+    updateInstrumentDetectors();
+    emit maskedWorkspaceOverlayed();
   }
 
   return success;
