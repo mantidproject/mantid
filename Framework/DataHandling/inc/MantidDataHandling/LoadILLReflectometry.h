@@ -40,15 +40,18 @@ public:
   LoadILLReflectometry();
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
-
-  const std::string name() const override;
-  int version() const override;
-  const std::string category() const override;
-
+  /// Algorithm's name for identification. @see Algorithm::name
+  const std::string name() const override {
+    return "LoadILLReflectometry";
+  }
+  /// Algorithm's version for identification. @see Algorithm::version
+  int version() const override { return 1;}
+  /// Algorithm's category for search and find. @see Algorithm::category
+  const std::string category() const override {return "DataHandling\\Nexus";}
+  /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
     return "Loads a ILL/D17 nexus file.";
   }
-
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
 
@@ -56,18 +59,20 @@ private:
   void init() override;
   void exec() override;
 
-  void initWorkSpace(NeXus::NXEntry &entry,
+  void initWorkspace(NeXus::NXEntry &entry,
                      std::vector<std::vector<int>> monitorsData);
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
-                                std::vector<std::vector<int>> monitorsData);
+  void loadData(NeXus::NXEntry &entry,
+                                std::vector<std::vector<int>> monitorsData,
+                                std::string &filename);
   void loadNexusEntriesIntoProperties(std::string nexusfilename);
+  std::vector<int>loadSingleMonitor(NeXus::NXEntry &entry, std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
-  void centerDetector(double);
-  void placeDetector(double, double);
+  //void centerDetector(double);
+  void placeDetector(NeXus::NXEntry &entry);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
