@@ -6,6 +6,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -254,15 +255,10 @@ public:
     masked_indices.insert(3);
     masked_indices.insert(4);
 
-    ParameterMap &pmap = existingMask->instrumentParameters();
-    for (int i = 0; i < static_cast<int>(existingMask->getNumberHistograms());
-         ++i) {
-      if (masked_indices.count(i) == 1) {
-        IDetector_const_sptr det;
-        TS_ASSERT_THROWS_NOTHING(det = existingMask->getDetector(i));
-        pmap.addBool(det.get(), "masked", true);
-      }
-    }
+    auto &detInfo = existingMask->mutableDetectorInfo();
+    for (int i = 0; i < static_cast<int>(detInfo.size()); ++i)
+      if (masked_indices.count(i) == 1)
+        detInfo.setMasked(i, true);
 
     MaskDetectors masker;
     TS_ASSERT_THROWS_NOTHING(masker.initialize());
