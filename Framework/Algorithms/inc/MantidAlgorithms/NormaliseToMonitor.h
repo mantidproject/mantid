@@ -1,12 +1,10 @@
 #ifndef MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 #define MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
 
 namespace Mantid {
 namespace HistogramData {

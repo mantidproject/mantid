@@ -39,7 +39,7 @@ public:
     cloner.initialize();
     // create 2D input workspace
     Mantid::API::MatrixWorkspace_sptr in =
-        WorkspaceCreationHelper::Create2DWorkspace(5, 10);
+        WorkspaceCreationHelper::create2DWorkspace(5, 10);
     // add instance to variable 'in'
 
     Mantid::API::MatrixWorkspace_sptr out;

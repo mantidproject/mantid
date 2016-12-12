@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>

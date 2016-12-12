@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
@@ -42,6 +43,8 @@ public:
     m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins,
                                  numberOfBins - 1);
   }
+
+  void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
 
   void test_sourcePosition() {
     TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(),
@@ -174,6 +177,20 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detectorInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
+  }
+
+  void test_setMasked() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    detectorInfo.setMasked(0, false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), false);
+    detectorInfo.setMasked(0, true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    // Make sure no other detectors are affected
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(4), false);
   }
 
   void test_setRotation() {

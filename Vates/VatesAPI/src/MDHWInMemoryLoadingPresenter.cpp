@@ -1,15 +1,19 @@
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <qwt_double_interval.h>
-#include <vtkUnstructuredGrid.h>
+
+#include "tbb/tbb.h"
+#include "vtkStructuredGrid.h"
+#include "vtkUnsignedCharArray.h"
+#include "vtkUnstructuredGrid.h"
 
 namespace Mantid {
 namespace VATES {
@@ -61,6 +65,63 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   return bCanReadIt;
 }
 
+namespace {
+class CellVisibility {
+public:
+  explicit CellVisibility(const unsigned char *array)
+      : MASKED_CELL_VALUE(vtkDataSetAttributes::HIDDENCELL |
+                          vtkDataSetAttributes::REFINEDCELL),
+        InputCellGhostArray(array) {}
+  bool operator()(vtkIdType id) const {
+    if (InputCellGhostArray)
+      return !(this->InputCellGhostArray[id] & this->MASKED_CELL_VALUE);
+    else
+      return true;
+  }
+
+private:
+  const unsigned char MASKED_CELL_VALUE;
+  const unsigned char *InputCellGhostArray;
+};
+
+struct MinAndMax {
+  double m_minimum = VTK_DOUBLE_MAX;
+  double m_maximum = VTK_DOUBLE_MIN;
+  vtkDataArray *m_cellScalars;
+  CellVisibility m_isCellVisible;
+  MinAndMax(vtkDataArray *cellScalars, const unsigned char *cellGhostArray)
+      : m_cellScalars(cellScalars), m_isCellVisible(cellGhostArray) {}
+  MinAndMax(MinAndMax &rhs, tbb::split)
+      : m_cellScalars(rhs.m_cellScalars), m_isCellVisible(rhs.m_isCellVisible) {
+  }
+  void operator()(const tbb::blocked_range<int> &r) {
+    for (int id = r.begin(); id != r.end(); ++id) {
+      if (m_isCellVisible(id)) {
+        double s = m_cellScalars->GetComponent(id, 0);
+        m_minimum = std::min(m_minimum, s);
+        m_maximum = std::max(m_maximum, s);
+      }
+    }
+  }
+  void join(MinAndMax &rhs) {
+    m_minimum = std::min(m_minimum, rhs.m_minimum);
+    m_maximum = std::max(m_maximum, rhs.m_maximum);
+  }
+};
+
+void ComputeScalarRange(vtkStructuredGrid *grid, double *cellRange) {
+  vtkDataArray *cellScalars = grid->GetCellData()->GetScalars();
+  auto cga = grid->GetCellGhostArray();
+  MinAndMax minandmax(cellScalars, cga ? cga->GetPointer(0) : nullptr);
+
+  int num = boost::numeric_cast<int>(grid->GetNumberOfCells());
+  tbb::parallel_reduce(tbb::blocked_range<int>(0, num), minandmax);
+
+  cellRange[0] = minandmax.m_minimum;
+  cellRange[1] = minandmax.m_maximum;
+}
+}
+
 /*
 Executes the underlying algorithm to create the MVP model.
 @param factory : visualisation factory to use.
@@ -87,20 +148,32 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
       drawingProgressUpdate); // HACK: progressUpdate should be
                               // argument for drawing!
 
-  /*extractMetaData needs to be re-run here because the first execution of this
-    from ::executeLoadMetadata will not have ensured that all dimensions
-    have proper range extents set.
-  */
-
   // Update the meta data min and max values with the values of the visual data
   // set. This is necessary since we want the full data range of the visual
   // data set and not of the actual underlying data set.
-  double *range = visualDataSet->GetScalarRange();
-  if (range) {
-    this->m_metadataJsonManager->setMinValue(range[0]);
-    this->m_metadataJsonManager->setMaxValue(range[1]);
+
+  // vtkStructuredGrid::GetScalarRange(...) is slow and single-threaded.
+  // Until this is addressed in VTK, we are better of doing the calculation
+  // ourselves.
+  // 600x600x600 vtkStructuredGrid, every other cell blank
+  // structuredGrid->GetScalarRange(range) : 2.267s
+  // structuredGrid->GetCellData()->GetScalars()->GetRange(range) : 1.023s
+  // ComputeScalarRange(structuredGrid,range): 0.075s
+  double range[2];
+  if (auto structuredGrid = vtkStructuredGrid::SafeDownCast(visualDataSet)) {
+    ComputeScalarRange(structuredGrid, range);
+  } else {
+    // should never happen
+    visualDataSet->GetScalarRange(range);
   }
 
+  this->m_metadataJsonManager->setMinValue(range[0]);
+  this->m_metadataJsonManager->setMaxValue(range[1]);
+
+  /*extractMetaData needs to be re-run here because the first execution of this
+   from ::executeLoadMetadata will not have ensured that all dimensions
+   have proper range extents set.
+  */
   this->extractMetadata(*m_cachedVisualHistoWs);
 
   // Transposed workpace is temporary, outside the ADS, and does not have a

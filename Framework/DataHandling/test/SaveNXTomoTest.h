@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 
@@ -186,7 +187,7 @@ public:
 private:
   Workspace_sptr makeWorkspaceSingle(const std::string &input) {
     // Create a single workspace
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(
         m_axisSize * m_axisSize, 1, 1.0);
     ws->setTitle(input);
 
@@ -227,11 +228,11 @@ private:
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(wspaces.size()); ++i) {
       if (specPerRow) {
-        wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+        wspaces[i] = WorkspaceCreationHelper::create2DWorkspaceBinned(
             m_axisSize, m_axisSize + 1, 1.0);
 
       } else {
-        wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+        wspaces[i] = WorkspaceCreationHelper::create2DWorkspaceBinned(
             m_axisSize * m_axisSize, 1, 1.0);
       }
       wspaces[i]->setTitle(

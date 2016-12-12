@@ -28,3 +28,4 @@ Crystal Field
 -------------
 
 - The peak widths can be fixed to or varied around values obtained from experimental or calculated instrument resolution function.
+- The initial field parameters can be estimated using a Monte Carlo seach algorithm.

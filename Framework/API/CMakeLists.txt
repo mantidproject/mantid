@@ -111,6 +111,7 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
+	src/PropertyWithValue.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
@@ -324,6 +325,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceHistory.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
+	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
 )

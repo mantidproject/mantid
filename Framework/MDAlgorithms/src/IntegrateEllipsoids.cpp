@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"

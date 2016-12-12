@@ -1,5 +1,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include <sstream>
 
 namespace Mantid {
 namespace API {

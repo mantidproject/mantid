@@ -80,8 +80,7 @@ public:
     Mantid::Kernel::StringTokenizer elements(
         text, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
-    for (const auto &it : elements) {
-      std::string element(it);
+    for (const auto &element : elements) {
       try {
         newValues.push_back(boost::lexical_cast<Type>(element));
       } catch (boost::bad_lexical_cast &) {

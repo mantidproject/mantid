@@ -6,6 +6,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"

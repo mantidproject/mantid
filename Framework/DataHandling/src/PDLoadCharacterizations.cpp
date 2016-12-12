@@ -12,6 +12,7 @@
 #include <boost/regex.hpp>
 #include <fstream>
 #include <set>
+#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
