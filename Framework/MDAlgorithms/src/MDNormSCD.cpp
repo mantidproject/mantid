@@ -116,8 +116,10 @@ void MDNormSCD::exec() {
   cacheInputs();
   auto outputWS = binInputWS();
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  outputWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
   createNormalizationWS(*outputWS);
+  m_normWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty("OutputNormalizationWorkspace", m_normWS);
 
   // Check for other dimensions if we could measure anything in the original

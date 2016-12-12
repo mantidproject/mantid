@@ -132,6 +132,7 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
       }
     }
   }
+  applyTies();
 }
 
 /** Removes the tie off a parameter. The parameter becomes active
