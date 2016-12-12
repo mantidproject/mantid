@@ -179,6 +179,7 @@ void StandardView::setupViewButtons() {
 void StandardView::destroyView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(QString("Slice"));
+  this->destroyFilter(QString("Threshold"));
   builder->destroy(this->m_view);
 }
 

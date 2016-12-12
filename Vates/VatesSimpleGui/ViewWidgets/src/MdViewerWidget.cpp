@@ -242,14 +242,12 @@ void MdViewerWidget::setupUiAndConnections() {
     m_colorMapEditorPanel->setUpPanel();
   }
 
-  // this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction *temp = new QAction(this);
   pqDeleteReaction *deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,
                          SIGNAL(deleteRequested(pqPipelineSource *)),
                          SLOT(deleteSource(pqPipelineSource *)));
 
-  // pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
   VsiApplyBehaviour *applyBehavior =
       new VsiApplyBehaviour(&m_colorScaleLock, this);
 
@@ -696,7 +694,11 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
     this->setColorForBackground();
     this->setColorMap();
 
-    this->ui.modeControlWidget->setToStandardView();
+    // this->ui.modeControlWidget->setToStandardView();
+    if (VatesViewerInterface::PEAKS != workspaceType) {
+      resetCurrentView(workspaceType, instrumentName);
+    }
+
     this->currentView->hide();
     // Set the auto log scale state
     this->currentView->initializeColorScale();
@@ -725,20 +727,10 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
   pqPipelineSource *source = this->currentView->setPluginSource(
       sourcePlugin, workspaceName, gridAxesOn);
   source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
-
   this->renderAndFinalSetup();
-
-  // Reset the current view to the correct initial view
-  // Note that we can only reset if a source plugin exists.
-  // Also note that we can only reset the current view to the
-  // correct initial after calling renderAndFinalSetup. We first
-  // need to load in the current view and then switch to be inline
-  // with the current architecture.
   if (VatesViewerInterface::PEAKS != workspaceType) {
     resetCurrentView(workspaceType, instrumentName);
   }
-
-  // save
 }
 
 /**
@@ -1243,10 +1235,7 @@ void MdViewerWidget::swapViews() {
   if (!this->hiddenView)
     g_log.error(
         "Inconsistency found when swapping views, the next view is NULL");
-
-  ViewBase *temp = this->currentView;
-  this->currentView = this->hiddenView;
-  this->hiddenView = temp;
+  std::swap(this->currentView, this->hiddenView);
 }
 
 /**
