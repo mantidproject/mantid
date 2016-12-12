@@ -277,6 +277,17 @@ void FileBackedExperimentInfo::setEFixed(const detid_t detID,
   ExperimentInfo::setEFixed(detID, value);
 }
 
+size_t FileBackedExperimentInfo::numberOfDetectorGroups() const {
+  populateIfNotLoaded();
+  return ExperimentInfo::numberOfDetectorGroups();
+}
+
+const std::set<detid_t> &
+FileBackedExperimentInfo::detectorIDsInGroup(const size_t index) const {
+  populateIfNotLoaded();
+  return ExperimentInfo::detectorIDsInGroup(index);
+}
+
 //------------------------------------------------------------------------------------------------------
 // Private members
 //------------------------------------------------------------------------------------------------------

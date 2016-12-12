@@ -96,6 +96,10 @@ public:
 
   void setEFixed(const detid_t detID, const double value) override;
 
+  size_t numberOfDetectorGroups() const override;
+  const std::set<detid_t> &
+  detectorIDsInGroup(const size_t index) const override;
+
 private:
   void populateIfNotLoaded() const;
   void populateFromFile() const;
