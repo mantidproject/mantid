@@ -3,6 +3,7 @@
 
 #include "MantidAlgorithms/DllConfig.h"
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace HistogramData {
