@@ -345,6 +345,8 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
  */
 void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
   m_detgroups = mapping;
+  // Create default grouping if `mapping` is empty.
+  cacheDefaultDetectorGrouping();
 }
 
 /// Returns the detector IDs that make up the group that this ID is part of
@@ -919,14 +921,27 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
 }
 
 size_t ExperimentInfo::numberOfDetectorGroups() const {
+  std::call_once(m_defaultDetectorGroupingCached,
+                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
+
   return m_detgroups.size();
 }
 
 const std::set<detid_t> &
 ExperimentInfo::detectorIDsInGroup(const size_t index) const {
+  std::call_once(m_defaultDetectorGroupingCached,
+                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
+
   // TODO NO! This is wrong!
   const auto detID = sptr_instrument->getDetectorIDs()[index];
   return m_detgroups.at(detID);
+}
+
+void ExperimentInfo::cacheDefaultDetectorGrouping() const {
+  if (!m_detgroups.empty())
+    return;
+  for (const auto detID : sptr_instrument->getDetectorIDs())
+    m_detgroups[detID] = std::set<detid_t>{detID};
 }
 
 /** Save the object to an open NeXus file.

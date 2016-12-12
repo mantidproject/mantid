@@ -203,7 +203,10 @@ private:
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
   /// Detector grouping information
-  det2group_map m_detgroups;
+  mutable det2group_map m_detgroups;
+  void cacheDefaultDetectorGrouping() const;
+  mutable std::once_flag m_defaultDetectorGroupingCached;
+
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
 
