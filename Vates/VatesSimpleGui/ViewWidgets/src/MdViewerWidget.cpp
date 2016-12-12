@@ -694,7 +694,6 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
     this->setColorForBackground();
     this->setColorMap();
 
-    // this->ui.modeControlWidget->setToStandardView();
     if (VatesViewerInterface::PEAKS != workspaceType) {
       resetCurrentView(workspaceType, instrumentName);
     }
