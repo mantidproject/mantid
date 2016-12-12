@@ -1,9 +1,9 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIPRESENTER_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIPRESENTER_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
 #include <memory>
@@ -48,9 +48,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIPresenter
+class MANTIDQT_CUSTOMINTERFACES_DLL TomographyROIPresenter
     : public QObject,
-      public IImageROIPresenter {
+      public ITomographyROIPresenter {
   // Q_OBJECT for the 'algorithm runner' signals
   // TODO: move the AlgorithmRunner to the view? Have a different, non-Qt
   // runner?
@@ -59,10 +59,10 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIPresenter
 
 public:
   /// Default constructor - normally used from the concrete view
-  ImageROIPresenter(IImageROIView *view);
-  ~ImageROIPresenter() override;
+  TomographyROIPresenter(ITomographyROIView *view);
+  ~TomographyROIPresenter() override;
 
-  void notify(IImageROIPresenter::Notification notif) override;
+  void notify(ITomographyROIPresenter::Notification notif) override;
 
 protected:
   void initialize();
@@ -142,7 +142,7 @@ private:
   static const std::string g_wsgDarksName;
 
   /// Associated view for this presenter (MVP pattern)
-  IImageROIView *const m_view;
+  ITomographyROIView *const m_view;
 
   /// Associated model for this presenter (MVP pattern). This is just
   /// a set of coordinates
@@ -154,4 +154,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIPRESENTER_H_

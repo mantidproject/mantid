@@ -175,7 +175,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
   // this is a Qt widget, let Qt manage the pointer
-  m_tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
+  m_tabROIW = new TomographyROIViewQtWidget(m_ui.tabMain);
   m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();

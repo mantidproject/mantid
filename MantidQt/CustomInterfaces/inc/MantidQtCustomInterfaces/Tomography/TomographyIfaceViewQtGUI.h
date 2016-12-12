@@ -10,7 +10,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
@@ -317,7 +317,7 @@ private:
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
   Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
-  ImageROIViewQtWidget *m_tabROIW;
+  TomographyROIViewQtWidget *m_tabROIW;
   ImggFormatsConvertViewQtWidget *m_tabImggFormats;
 
   std::vector<std::string> m_processingJobsIDs;

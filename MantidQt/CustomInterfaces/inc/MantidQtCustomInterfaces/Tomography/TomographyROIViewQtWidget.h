@@ -1,11 +1,11 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIVIEWQTWIDGET_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIVIEWQTWIDGET_H_
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIView.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
 
@@ -32,8 +32,8 @@ image or stack of images. Provides a concrete view for the graphical
 interface for tomography functionality in Mantid. This view is
 Qt-based and it is probably the only one that will be implemented in a
 foreseeable horizon. The interface of this class is given by
-IImageROIView so that it fits in the MVP (Model-View-Presenter) design
-of the ImageROI widget.
+ITomographyROIView so that it fits in the MVP (Model-View-Presenter) design
+of the TomographyROI widget.
 
 Copyright &copy; 2015-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -56,14 +56,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIViewQtWidget
+class MANTIDQT_CUSTOMINTERFACES_DLL TomographyROIViewQtWidget
     : public QWidget,
-      public IImageROIView {
+      public ITomographyROIView {
   Q_OBJECT
 
 public:
-  ImageROIViewQtWidget(QWidget *parent = 0);
-  ~ImageROIViewQtWidget() override;
+  TomographyROIViewQtWidget(QWidget *parent = 0);
+  ~TomographyROIViewQtWidget() override;
 
   void setParams(ImageStackPreParams &params) override;
 
@@ -262,7 +262,7 @@ private:
 
   void updateValuesForSpinBoxes(
       const int x, const int y,
-      const struct ImageROIViewQtWidget::RectangleXY startPositions,
+      const struct TomographyROIViewQtWidget::RectangleXY startPositions,
       QSpinBox *spinLeft, QSpinBox *spinTop, QSpinBox *spinRight,
       QSpinBox *spinBottom);
 
@@ -295,9 +295,9 @@ private:
   SelectionState m_selectionState;
 
   // presenter as in the model-view-presenter
-  boost::scoped_ptr<IImageROIPresenter> m_presenter;
+  boost::scoped_ptr<ITomographyROIPresenter> m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIVIEWQTWIDGET_H_
