@@ -228,6 +228,46 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
+  void test_scale_factor_from_period_out_of_range_throws() {
+
+    // First group
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
+    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+    group1->addWorkspace(ws1);
+    group1->addWorkspace(ws2);
+    // Second group
+    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
+    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
+    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
+    group2->addWorkspace(ws3);
+    group2->addWorkspace(ws4);
+    // Third group
+    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
+    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0);
+    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
+    group3->addWorkspace(ws5);
+    group3->addWorkspace(ws6);
+
+    // The algorithm needs the workspaces to be in the ADS
+    AnalysisDataService::Instance().addOrReplace("group1", group1);
+    AnalysisDataService::Instance().addOrReplace("group2", group2);
+    AnalysisDataService::Instance().addOrReplace("group3", group3);
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "group1, group2, group3");
+    alg.setProperty("Params", "0.1, 0.1, 2.6");
+    alg.setProperty("StartOverlaps", "0.8, 1.6");
+    alg.setProperty("EndOverlaps", "1.1, 1.9");
+    alg.setProperty("UseManualScaleFactor", "1");
+    alg.setProperty("ManualScaleFactor", 1.0);
+    alg.setProperty("ScaleFactorFromPeriod", 4);
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
   void test_two_workspaces() {
     // Two matrix workspaces with two spectra each
 
@@ -755,7 +795,7 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.9");
     alg.setProperty("UseManualScaleFactor", "1");
     alg.setProperty("ManualScaleFactor", 1.0);
-    alg.setProperty("ScaleFactorFromPeriod", 1);
+    alg.setProperty("ScaleFactorFromPeriod", 2);
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
 
@@ -946,7 +986,7 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.9");
     alg.setProperty("UseManualScaleFactor", "1");
     alg.setProperty("ManualScaleFactor", 1.0);
-    alg.setProperty("ScaleFactorFromPeriod", 1);
+    alg.setProperty("ScaleFactorFromPeriod", 2);
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
 

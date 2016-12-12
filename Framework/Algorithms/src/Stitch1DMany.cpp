@@ -64,9 +64,9 @@ void Stitch1DMany::init() {
 
   auto scaleFactorFromPeriodValidator =
       boost::make_shared<BoundedValidator<int>>();
-  scaleFactorFromPeriodValidator->setLower(0);
+  scaleFactorFromPeriodValidator->setLower(1);
   declareProperty(make_unique<PropertyWithValue<int>>(
-                      "ScaleFactorFromPeriod", 0,
+                      "ScaleFactorFromPeriod", 1,
                       scaleFactorFromPeriodValidator, Direction::Input),
                   "Provided index of period to obtain scale factor from.");
 }
@@ -144,6 +144,9 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
   }
 
   m_scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
+  m_scaleFactorFromPeriod--; // To account for period being indexed from 1
+  if (m_scaleFactorFromPeriod >= m_inputWSGroups.size())
+    throw std::runtime_error("Period index out of range");
 
   // Throw if a common error is found
   auto commonErrors = validateCommonInputs();
