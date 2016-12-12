@@ -135,6 +135,8 @@ private:
   QtProperty *m_maxIterations;
   /// EvaluationType property
   QtProperty *m_evaluationType;
+  /// Peak radius property
+  QtProperty *m_peakRadius;
 
   // Fit properties
   /// Output property

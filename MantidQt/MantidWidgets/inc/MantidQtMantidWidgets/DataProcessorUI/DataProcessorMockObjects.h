@@ -108,17 +108,20 @@ public:
                      bool(const std::string &prompt, const std::string &title));
   MOCK_CONST_METHOD2(giveUserWarning,
                      void(const std::string &prompt, const std::string &title));
+  MOCK_METHOD0(publishCommandsMocked, void());
 
 private:
   // Calls we don't care about
   const std::map<std::string, QVariant> &options() const override {
     return m_options;
   };
+
   std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
     for (size_t i = 0; i < 27; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
+    publishCommandsMocked();
     return commands;
   };
   std::set<std::string> getTableList() const {

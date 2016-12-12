@@ -39,7 +39,6 @@
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
-#include <QFileDialog>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
