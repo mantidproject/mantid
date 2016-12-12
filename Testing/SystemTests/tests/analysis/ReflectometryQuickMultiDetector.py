@@ -27,4 +27,4 @@ class ReflectometryQuickMultiDetector(stresstesting.MantidStressTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '4699_IvsQ','4699_IvsQ_Result.nxs'
+        return '4699_IvsQ_binned','4699_IvsQ_Result.nxs'

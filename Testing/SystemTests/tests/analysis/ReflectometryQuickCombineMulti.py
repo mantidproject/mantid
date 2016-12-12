@@ -28,7 +28,7 @@ class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
             quick.quick(str(runNumber), trans=transmissionRuns, theta=incidentAngle)
         finally:
             config[defaultInstKey] = defaultInstrument
-        return mtd[str(runNumber) + '_IvsQ']
+        return mtd[str(runNumber) + '_IvsQ_binned']
 
     def createBinningParam(self, low, step, high):
         return "%f,%f,%f" %(low, step, high)
