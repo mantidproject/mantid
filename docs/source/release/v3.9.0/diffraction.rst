@@ -9,6 +9,7 @@ Crystal Improvements
 --------------------
 :ref:`algm-FindUBUsingLatticeParameters` will now return an oriented lattice even when the number of peaks used is very low.
 :ref:`algm-FindUBUsingLatticeParameters` has a new option to fix lattice parameters. This will find an orientation, but without optimisation between indexed HKLs and q vectors.
+:ref:`algm-CreateGroupingWorkspace` has a new option to create one group of 4 columns of SNAP detectors and another with the remaining 2 columns. This grouping is used frequently in their reduction.
 
 Engineering Diffraction
 -----------------------
@@ -24,6 +25,11 @@ sample container specific information, as well as additional
 information about the empty sample environment and instrument.
 
 :ref:`algm-SetDetScale` has a new option, DetScaleFile, to input a text file with each line containing the detector number and scale factor for that detector.  These scales will be used in SaveHKL and AnvredCorrection.  If scales for a detector are given in both the DetScaleList text string and the DetScaleFile file, the values from the text string will be used.
+
+:ref:`algm-SNAPReduce` is new to mantid, but not for SNAP
+users. Adding the algorithm to mantid installations will reduce the
+amount of issues that SNAP users will encounter trying to reduce their
+data.
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

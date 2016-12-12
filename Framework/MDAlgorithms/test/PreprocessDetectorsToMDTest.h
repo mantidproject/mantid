@@ -2,6 +2,7 @@
 #define MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

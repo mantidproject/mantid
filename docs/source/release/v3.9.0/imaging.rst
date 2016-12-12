@@ -14,7 +14,6 @@ Tomographic reconstruction graphical user interface
 
 Bug Fixes
 ---------
-- The external interpreter and scripts paths are no longer ignored and are now correctly appended when running a local reconstruction
 - Selecting the Center of Rotation, Area for Normalsation and Region of Interest will now always follow the exact position of the mouse
 - The coordinates for the Region of Interest and Area for Normalsation will now always be accurate to the picture
 - Multiple success/warning/error messages will no longer be shown after an operation. 

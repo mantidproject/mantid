@@ -4,6 +4,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"

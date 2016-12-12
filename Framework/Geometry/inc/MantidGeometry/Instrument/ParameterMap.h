@@ -6,21 +6,18 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IDTypes.h" //For specnum_t
 #include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/Cache.h"
 
 #include "tbb/concurrent_unordered_map.h"
 
+#include <memory>
 #include <vector>
 #include <typeinfo>
 
 namespace Mantid {
+namespace Kernel {
+template <class KEYTYPE, class VALUETYPE> class Cache;
+}
 namespace Geometry {
-
-//---------------------------------------------------------------------------
-// Forward declarations
-//---------------------------------------------------------------------------
 class BoundingBox;
 
 /** @class ParameterMap ParameterMap.h
@@ -74,6 +71,9 @@ public:
       ComponentID, boost::shared_ptr<Parameter>>::const_iterator pmap_cit;
   /// Default constructor
   ParameterMap();
+  /// Const constructor
+  ParameterMap(const ParameterMap &other);
+  ~ParameterMap();
   /// Returns true if the map is empty, false otherwise
   inline bool empty() const { return m_map.empty(); }
   /// Return the size of the map
@@ -141,7 +141,7 @@ public:
   void add(const std::string &type, const IComponent *comp,
            const std::string &name, const T &value,
            const std::string *const pDescription = nullptr) {
-    auto param = ParameterFactory::create(type, name);
+    auto param = create(type, name);
     auto typedParam = boost::dynamic_pointer_cast<ParameterType<T>>(param);
     assert(typedParam); // If not true the factory has created the wrong type
     typedParam->setValue(value);
@@ -340,6 +340,9 @@ public:
   pmap_cit end() const { return m_map.end(); }
 
 private:
+  boost::shared_ptr<Parameter> create(const std::string &className,
+                                      const std::string &name) const;
+
   /// Assignment operator
   ParameterMap &operator=(ParameterMap *rhs);
   /// internal function to get position of the parameter in the parameter map
@@ -356,11 +359,12 @@ private:
   /// internal parameter map instance
   pmap m_map;
   /// internal cache map instance for cached position values
-  mutable Kernel::Cache<const ComponentID, Kernel::V3D> m_cacheLocMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
   /// internal cache map instance for cached rotation values
-  mutable Kernel::Cache<const ComponentID, Kernel::Quat> m_cacheRotMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
   /// internal cache map for cached bounding boxes
-  mutable Kernel::Cache<const ComponentID, BoundingBox> m_boundingBoxMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
+      m_boundingBoxMap;
 };
 
 /// ParameterMap shared pointer typedef

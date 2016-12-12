@@ -5,6 +5,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <cstdint>
 #include <vector>
 

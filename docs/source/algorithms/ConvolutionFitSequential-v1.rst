@@ -71,7 +71,7 @@ Output:
   
   Result has 2 Spectra
   
-  Amplitude 0: 4.293
+  Amplitude 0: 4.314
   Amplitude 1: 4.179
   Amplitude 2: 3.979
 
@@ -79,7 +79,7 @@ Output:
   X axis at 1: 0.72917
   X axis at 2: 0.92340
 
-  Amplitude Err 0: 0.00465
+  Amplitude Err 0: 0.00460
   Amplitude Err 1: 0.00464
   Amplitude Err 2: 0.00504
 

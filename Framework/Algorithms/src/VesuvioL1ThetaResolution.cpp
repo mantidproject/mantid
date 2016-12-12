@@ -6,6 +6,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Unit.h"
@@ -36,8 +37,6 @@ public:
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(VesuvioL1ThetaResolution)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string VesuvioL1ThetaResolution::name() const {
