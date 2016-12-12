@@ -925,16 +925,7 @@ size_t ExperimentInfo::numberOfDetectorGroups() const {
 const std::set<detid_t> &
 ExperimentInfo::detectorIDsInGroup(const size_t index) const {
   const auto detID = sptr_instrument->getDetectorIDs()[index];
-  // No grouping information: 1:1 detector -> spectrum mapping
-  if (m_detgroups.empty()) {
-    return {detID};
-  }
-  auto iter = m_detgroups.find(detID);
-  if (iter != m_detgroups.end()) {
-    return iter->second;
-  } else {
-    return {};
-  }
+  return m_detgroups.at(detID);
 }
 
 /** Save the object to an open NeXus file.
