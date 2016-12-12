@@ -52,7 +52,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         LoadNexusProcessed(Filename="ILLIN16B_FWS.nxs",OutputWorkspace="ref")
 
-        result = CompareWorkspaces(Workspace1='ifws',Workspace2='ref',**self.params)
+        result = CompareWorkspaces(Workspace1='ifws_red',Workspace2='ref',**self.params)
 
         if result[0]:
             self.assertTrue(result[0])
@@ -71,7 +71,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         LoadNexusProcessed(Filename="ILLIN16B_EFWS.nxs",OutputWorkspace="ref")
 
-        result = CompareWorkspaces(Workspace1='efws_0.0',Workspace2='ref',**self.params)
+        result = CompareWorkspaces(Workspace1='efws_red_0.0',Workspace2='ref',**self.params)
 
         if result[0]:
             self.assertTrue(result[0])
@@ -94,7 +94,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
                                 SortXAxis=True,
                                 OutputWorkspace="efws_sum")
 
-        result = CompareWorkspaces(Workspace1='efws_int', Workspace2='efws_sum', Tolerance=1e-9)
+        result = CompareWorkspaces(Workspace1='efws_int_red', Workspace2='efws_sum_red', Tolerance=1e-9)
 
         if result[0]:
             self.assertTrue(result[0])

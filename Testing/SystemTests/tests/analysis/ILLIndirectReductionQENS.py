@@ -38,7 +38,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         args = {'Run' : '136553.nxs',
                 'UnmirrorOption' : 0,
-                'OutputWorkspace' : 'both'}
+                'OutputWorkspace' : 'zero'}
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
@@ -46,7 +46,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         args['UnmirrorOption'] = 1
 
-        args['OutputWorkspace'] = 'red'
+        args['OutputWorkspace'] = 'both'
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
@@ -68,17 +68,17 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 3")
 
-        summed = Plus(mtd['left'].getItem(0),mtd['right'].getItem(0))
+        summed = Plus(mtd['left_red'].getItem(0),mtd['right_red'].getItem(0))
 
         Scale(InputWorkspace=summed,Factor=0.5,OutputWorkspace=summed)
 
-        result = CompareWorkspaces(summed,mtd['red'].getItem(0))
+        result = CompareWorkspaces(summed,mtd['both_red'].getItem(0))
 
         self.assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
 
-        left_right = GroupWorkspaces([mtd['left'].getItem(0).getName(), mtd['right'].getItem(0).getName()])
+        left_right = GroupWorkspaces([mtd['left_red'].getItem(0).getName(), mtd['right_red'].getItem(0).getName()])
 
-        result = CompareWorkspaces(left_right,'both')
+        result = CompareWorkspaces(left_right,'zero_red')
 
         self.assertTrue(result[0],"Unmirror 0 should be the group of 2 and 3")
 
@@ -102,7 +102,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 5")
 
-        result = CompareWorkspaces('vana4', 'vana5')
+        result = CompareWorkspaces('vana4_red', 'vana5_red')
 
         self.assertTrue(result[0], "Unmirror 4 should be the same as 5 if "
                                    "the same run is also defined as alignment run")
@@ -127,7 +127,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 7")
 
-        result = CompareWorkspaces('vana6','vana7')
+        result = CompareWorkspaces('vana6_red','vana7_red')
 
         self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
                                    "the same run is also defined as alignment run")
@@ -149,9 +149,10 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
                                  BackgroundRun="136599-136600",
                                  AlignmentRun="136555-136556",
                                  BackgroundScalingFactor=0.1,
-                                 UnmirrorOption=7)
+                                 UnmirrorOption=7,
+                                 OutputWorkspace='out')
 
         self.tearDown()
 
     def validate(self):
-        return ['136558_red','ILLIN16B_QENS.nxs']
+        return ['136558_out_red','ILLIN16B_QENS.nxs']
