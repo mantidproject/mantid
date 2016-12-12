@@ -448,7 +448,6 @@ private:
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
-    using IntProperty = PropertyWithValue<int64_t>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
@@ -469,7 +468,6 @@ private:
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
-    using IntProperty = PropertyWithValue<int64_t>;
     using StringProperty = PropertyWithValue<std::string>;
 
     auto props = boost::make_shared<PropertyManager>();
