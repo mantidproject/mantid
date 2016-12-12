@@ -36,12 +36,7 @@ options are available:
   A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
 - `Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
-- `Trust region
-  <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust
-  region algorithm <https://en.wikipedia.org/wiki/Trust_region>`__ that,
-  at each iteration, calculates and returns the step that reduces the
-  model by an acceptable amount by solving (or approximating a
-  solution to) the trust-region subproblem
+- `Trust region <../fitminimizers/TrustRegion.html>`__
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
