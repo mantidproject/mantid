@@ -1,10 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/LogManager.h"
+#include "MantidKernel/Cache.h"
 #include "MantidKernel/PropertyNexus.h"
-
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace API {
@@ -92,6 +91,27 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
+
+LogManager::LogManager()
+    : m_singleValueCache(Kernel::make_unique<Kernel::Cache<
+          std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {}
+
+LogManager::LogManager(const LogManager &other)
+    : m_manager(other.m_manager),
+      m_singleValueCache(Kernel::make_unique<Kernel::Cache<
+          std::pair<std::string, Kernel::Math::StatisticType>, double>>(
+          *other.m_singleValueCache)) {}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+LogManager::~LogManager() = default;
+
+LogManager &LogManager::operator=(const LogManager &other) {
+  m_manager = other.m_manager;
+  m_singleValueCache = Kernel::make_unique<Kernel::Cache<
+      std::pair<std::string, Kernel::Math::StatisticType>, double>>(
+      *other.m_singleValueCache);
+  return *this;
+}
 
 /**
 * Set the run start and end
@@ -211,7 +231,7 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
  */
 void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter) {
   // This will invalidate the cache
-  m_singleValueCache.clear();
+  m_singleValueCache->clear();
   m_manager.filterByProperty(filter);
 }
 
@@ -260,7 +280,7 @@ bool LogManager::hasProperty(const std::string &name) const {
 void LogManager::removeProperty(const std::string &name, bool delProperty) {
   // Remove any cached entries for this log. Need to make this more general
   for (unsigned int stat = 0; stat < 7; ++stat) {
-    m_singleValueCache.removeCache(
+    m_singleValueCache->removeCache(
         std::make_pair(name, static_cast<Math::StatisticType>(stat)));
   }
   m_manager.removeProperty(name, delProperty);
@@ -329,7 +349,7 @@ double LogManager::getPropertyAsSingleValue(
     const std::string &name, Kernel::Math::StatisticType statistic) const {
   double singleValue(0.0);
   const auto key = std::make_pair(name, statistic);
-  if (!m_singleValueCache.getCache(key, singleValue)) {
+  if (!m_singleValueCache->getCache(key, singleValue)) {
     const Property *log = getProperty(name);
     if (!convertPropertyToDouble(log, singleValue, statistic)) {
       if (const auto stringLog =
@@ -349,7 +369,7 @@ double LogManager::getPropertyAsSingleValue(
       }
     }
     // Put it in the cache
-    m_singleValueCache.setCache(key, singleValue);
+    m_singleValueCache->setCache(key, singleValue);
   }
   return singleValue;
 }

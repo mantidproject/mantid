@@ -146,7 +146,7 @@ private:
     constexpr int nhist = 3;
     constexpr int nbins = 256;
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins, 1., .2);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins, 1., .2);
     for (int i = 0; i < nhist; i++) {
       double value = offset + static_cast<double>(i);
       auto &y = inputWS->mutableY(i);
@@ -189,7 +189,7 @@ private:
     constexpr int nhist = 50000;
     constexpr int nbins = 1000;
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins, 1., .2);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins, 1., .2);
     for (int i = 0; i < nhist; i++) {
       double value = offset + static_cast<double>(i);
       auto &y = inputWS->mutableY(i);

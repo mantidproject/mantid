@@ -4,12 +4,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/algorithm/string.hpp>
 
 #include <nexus/napi.h>
+#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,7 +48,7 @@ const std::string LoadILLIndirect::category() const {
 //----------------------------------------------------------------------------------------------
 
 /**
-* Return the confidence with with this algorithm can load the file
+* Return the confidence with this algorithm can load the file
 * @param descriptor A descriptor for the file
 * @returns An integer specifying the confidence level. 0 indicates it will not
 * be used
@@ -239,10 +241,6 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   // load the counts from the file into memory
   dataSD.load();
 
-  // Assign calculated bins to first X axis
-  ////  m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
-  /// detectorTofBins.end());
-
   size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
   size_t nb_SD_detectors = dataSD.dim0();
@@ -250,22 +248,17 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
                                     nb_monitors + nb_SD_detectors);
 
-  // Assign fake values to first X axis <<to be completed>>
-  for (size_t i = 0; i <= m_numberOfChannels; ++i) {
-    m_localWorkspace->dataX(0)[i] = double(i);
-  }
+  // Assign fake values to first X axis
+  const HistogramData::BinEdges histoBinEdges(
+      m_numberOfChannels + 1, HistogramData::LinearGenerator(1.0, 1.0));
 
   // First, Monitor
   for (size_t im = 0; im < nb_monitors; im++) {
 
-    if (im > 0) {
-      m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
-    }
-
-    // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im)
-        .assign(monitor_p, monitor_p + m_numberOfChannels);
+    const HistogramData::Counts histoCounts(monitor_p,
+                                            monitor_p + m_numberOfChannels);
+    m_localWorkspace->setHistogram(im, histoBinEdges, std::move(histoCounts));
 
     progress.report();
   }
@@ -274,18 +267,12 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
-      // just copy the time binning axis to every spectra
-      m_localWorkspace->dataX(spec + nb_monitors) = m_localWorkspace->readX(0);
-
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec + nb_monitors)
-          .assign(data_p, data_p + m_numberOfChannels);
-
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec + nb_monitors);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadILLIndirect::calculateError);
+      const HistogramData::Counts histoCounts(data_p,
+                                              data_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram((spec + nb_monitors), histoBinEdges,
+                                     std::move(histoCounts));
 
       ++spec;
       progress.report();
@@ -295,15 +282,16 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   // Then add Simple Detector (SD)
   for (int i = 0; i < dataSD.dim0(); ++i) {
 
-    // just copy again the time binning axis to every spectra
-    m_localWorkspace->dataX(spec + nb_monitors + i) =
-        m_localWorkspace->readX(0);
-
     // Assign Y
     int *dataSD_p = &dataSD(i, 0, 0);
-    m_localWorkspace->dataY(spec + nb_monitors + i)
-        .assign(dataSD_p, dataSD_p + m_numberOfChannels);
+    const HistogramData::Counts histoCounts(dataSD_p,
+                                            dataSD_p + m_numberOfChannels);
+    const HistogramData::CountStandardDeviations histoErrors(m_numberOfChannels,
+                                                             0.0);
 
+    m_localWorkspace->setHistogram((spec + nb_monitors + i), histoBinEdges,
+                                   std::move(histoCounts),
+                                   std::move(histoErrors));
     progress.report();
   }
 

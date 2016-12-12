@@ -1,14 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
 
-import mantid.simpleapi as mantid
-import numpy as numpy
-
 import os
 
+import mantid.simpleapi as mantid
+import numpy as numpy
+from mantid import config
+
+import isis_powder.routines.common as common
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder import pearl_calib_factory
-from isis_powder import pearl_cycle_factory
-import isis_powder.common as common
+from isis_powder.pearl_routines import fmode_output, pearl_calib_factory, pearl_cycle_factory
+from isis_powder.routines.RunDetails import RunDetails
 
 
 class Pearl(AbstractInst):
@@ -25,27 +26,40 @@ class Pearl(AbstractInst):
     _create_van_first_tof_binning = "100,-0.0006,19990"
     _create_van_second_tof_binning = "150,-0.0006,19900"
 
-    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
-                 input_file_ext=".raw", tt_mode="TT88"):
+    def __init__(self, user_name, tt_mode="TT88", calibration_dir=None, output_dir=None, **kwargs):
 
-        super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
-                                    output_dir=output_dir, default_input_ext=input_file_ext, tt_mode=tt_mode)
+        super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
+                                    output_dir=output_dir, kwargs=kwargs)
+
+        self._tt_mode = tt_mode
+        self._focus_mode = None
 
         # This advanced option disables appending the current cycle to the
         # path given for raw files.
         self._disable_appending_cycle_to_raw_dir = False
 
-        # live_data_directory = None  # TODO deal with this
-
         # Old API support
         self._old_atten_file = None
-        self._old_api_uses_full_paths = False
+        self._existing_config = None
 
         # File names
-        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO
-        self._attenuation_full_path = calibration_dir + pearl_mc_absorption_file_name  # TODO
+        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO how often does this change
+        self._attenuation_full_path = os.path.join(calibration_dir, pearl_mc_absorption_file_name)
 
     # --- Abstract Implementation ---- #
+
+    def focus(self, run_number, focus_mode, do_attenuation=True, do_van_normalisation=True):
+        self._focus_mode = focus_mode
+        return self._focus(run_number=run_number,
+                           do_attenuation=do_attenuation, do_van_normalisation=do_van_normalisation)
+
+    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=60,
+                                    do_absorb_corrections=True, gen_absorb_correction=False):
+
+        self._create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
+                                          output_file_name=output_file_name, num_of_splines=num_of_splines,
+                                          do_absorb_corrections=do_absorb_corrections,
+                                          gen_absorb_correction=gen_absorb_correction)
 
     # Params #
     def _get_default_group_names(self):
@@ -54,9 +68,6 @@ class Pearl(AbstractInst):
     def _get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-    def _get_focus_tof_binning(self):
-        return self._focus_tof_binning
-
     def _get_create_van_tof_binning(self):
         return_dict = {"1": self._create_van_first_tof_binning,
                        "2": self._create_van_second_tof_binning}
@@ -64,28 +75,46 @@ class Pearl(AbstractInst):
 
     # Methods #
 
-    def _get_calibration_full_paths(self, cycle):
+    def _get_run_details(self, run_number):
+        # TODO once we migrate this to another format (i.e. not the if/elif/else) implement cached val
+        cycle_dict = self._get_label_information(run_number=run_number)
 
         calibration_file, grouping_file, van_absorb, van_file =\
-            pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=self.tt_mode)
+            pearl_calib_factory.get_calibration_filename(cycle=cycle_dict["cycle"], tt_mode=self._tt_mode)
+        cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number)
 
         calibration_dir = self.calibration_dir
 
-        calibration_full_path = calibration_dir + calibration_file
-        grouping_full_path = calibration_dir + grouping_file
-        van_absorb_full_path = calibration_dir + van_absorb
-        van_file_full_path = calibration_dir + van_file
+        calibration_full_path = os.path.join(calibration_dir, calibration_file)
+        grouping_full_path = os.path.join(calibration_dir, grouping_file)
+        van_absorb_full_path = os.path.join(calibration_dir, van_absorb)
+        van_file_full_path = os.path.join(calibration_dir, van_file)
 
-        calibration_details = {"calibration": calibration_full_path,
-                               "grouping": grouping_full_path,
-                               "vanadium_absorption": van_absorb_full_path,
-                               "vanadium": van_file_full_path}
+        run_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
+                                 vanadium_runs=van_file_full_path, run_number=run_number)
+        run_details.vanadium_absorption = van_absorb_full_path
+        run_details.label = cycle
+        run_details.instrument_version = instrument_version
 
-        return calibration_details
+        # TODO remove this when we move to saving splined van ws on PEARL
+        run_details.splined_vanadium = run_details.vanadium
 
-    @staticmethod
-    def _get_cycle_information(run_number):
-        cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number)
+        return run_details
+
+    def _get_label_information(self, run_number):
+        # TODO remove this when we move to combining CAL/RUN factories
+        run_input = ""
+        if isinstance(run_number, int) or run_number.isdigit():
+            run_input = int(run_number)
+        else:
+            # Only take first valid number as it is probably of the form 12345_12350
+            for character in run_number:
+                if character.isdigit():
+                    run_input += character
+                else:
+                    break
+
+        cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_input)
 
         cycle_information = {'cycle': cycle,
                              'instrument_version': instrument_version}
@@ -105,10 +134,9 @@ class Pearl(AbstractInst):
         return self._run_attenuate_workspace(input_workspace=input_workspace)
 
     def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        input_ws = common._read_ws(number=calibration_runs, instrument=self)
-        cycle_information = self._get_cycle_information(calibration_runs)
+        input_ws = common.load_current_normalised_ws(run_number_string=calibration_runs, instrument=self)
+        cycle_information = self._get_label_information(calibration_runs)
 
-        # TODO move these hard coded params to instrument specific
         if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
             input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")
 
@@ -129,8 +157,8 @@ class Pearl(AbstractInst):
             grouping_file_path = grouping_file_name
             offset_file_path = offset_file_name
         else:
-            offset_file_path = self.calibration_dir + offset_file_name
-            grouping_file_path = self.calibration_dir + grouping_file_name
+            offset_file_path = os.path.join(self.calibration_dir, offset_file_name)
+            grouping_file_path = os.path.join(self.calibration_dir, grouping_file_name)
 
         # Ceo Cell refined to 5.4102(3) so 220 is 1.912795
         offset_output_path = mantid.GetDetectorOffsets(InputWorkspace=cross_cor_ws, Step=0.002, DReference=1.912795,
@@ -147,8 +175,12 @@ class Pearl(AbstractInst):
     def _create_calibration_silicon(self, calibration_runs, cal_file_name, grouping_file_name):
         self._do_silicon_calibration(calibration_runs, cal_file_name, grouping_file_name)
 
-    def _get_monitor(self, run_number, input_dir, spline_terms=20):
-        return self._run_get_monitor(run_number=run_number, input_dir=input_dir, spline_terms=spline_terms)
+    def _normalise_ws(self, ws_to_correct, run_details=None):
+        if not run_details:
+            raise RuntimeError("Run details was not passed into PEARL: normalise_ws")
+        monitor_ws = common.load_monitor(run_numbers=run_details.run_number, instrument=self)
+        return self._normalise_current_ws(ws_to_correct=ws_to_correct, load_monitor_ws=monitor_ws,
+                                          spline_terms=20)
 
     def _get_monitor_spectra(self, run_number):
         return self._get_monitor_spectrum(run_number=run_number)
@@ -164,10 +196,80 @@ class Pearl(AbstractInst):
             out_list = _spline_new_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
                                               instrument_version=instrument_version)
         elif instrument_version == "old":
-            out_list = _spline_old_background(in_workspace=focused_vanadium_ws)
+            out_list = _spline_old_instrument_background(in_workspace=focused_vanadium_ws)
         else:
             raise ValueError("Spline Background - PEARL: Instrument version unknown")
         return out_list
+
+    def _do_tof_rebinning_focus(self, input_workspace):
+        input_workspace = mantid.Rebin(InputWorkspace=input_workspace, Params=self._focus_tof_binning)
+        return input_workspace
+
+    def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
+        return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
+
+    def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
+        return fmode_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
+                                                           run_details=run_details,
+                                                           perform_attenuation=attenuate,
+                                                           focus_mode=self._focus_mode)
+
+    def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
+        tof_rebin_param_dict = self._get_create_van_tof_binning()
+        tof_rebin_param = tof_rebin_param_dict[str(tof_rebin_pass)]
+
+        rebinned_ws = mantid.ConvertUnits(InputWorkspace=vanadium_ws, Target="TOF")
+        rebinned_ws = mantid.Rebin(InputWorkspace=rebinned_ws, Params=tof_rebin_param)
+
+        rebinned_ws = mantid.ConvertUnits(InputWorkspace=rebinned_ws, Target=return_units)
+
+        common.remove_intermediate_workspace(vanadium_ws)
+        vanadium_ws = rebinned_ws
+        return vanadium_ws
+
+    def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
+        raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
+
+        # TODO are these values applicable to all instruments
+        shape_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)
+        mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
+                                                          <radius val="0.005" /> </sphere>')
+
+        absorb_ws = \
+            mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
+                                        ScatteringXSection="5.1", SampleNumberDensity="0.072",
+                                        NumberOfWavelengthPoints="25", ElementSize="0.05")
+        mantid.SaveNexus(Filename=calibration_full_paths["vanadium_absorption"],
+                         InputWorkspace=absorb_ws, Append=False)
+        common.remove_intermediate_workspace(shape_ws)
+        return absorb_ws
+
+    def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
+        rebinned_ws = mantid.RebinToWorkspace(WorkspaceToRebin=ws_to_rebin, WorkspaceToMatch=ws_to_match)
+        common.remove_intermediate_workspace(ws_to_rebin)
+        ws_to_rebin = rebinned_ws
+        return ws_to_rebin
+
+    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
+        data_ws = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
+        data_ws = mantid.ConvertUnits(InputWorkspace=data_ws, Target="TOF")
+        data_ws = mantid.Rebin(InputWorkspace=data_ws, Params=self._focus_tof_binning)
+
+        if vanadium_ws:
+            data_processed = "van_processed" + str(index)  # Workaround for Mantid overwriting the WS in a loop
+            vanadium_ws = mantid.Rebin(InputWorkspace=vanadium_ws, Params=self._focus_tof_binning)
+            data_ws = mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_processed)
+        else:
+            data_processed = "processed-" + str(index)
+
+        mantid.CropWorkspace(InputWorkspace=data_ws, XMin=0.1, OutputWorkspace=data_processed)
+
+        if vanadium_ws:
+            mantid.Scale(InputWorkspace=data_processed, Factor=10, OutputWorkspace=data_processed)
+
+        common.remove_intermediate_workspace(data_ws)
+
+        return data_processed
 
     # Implementation of instrument specific steps
 
@@ -186,8 +288,9 @@ class Pearl(AbstractInst):
         return pearl_attenuated_ws
 
     def _do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
-        create_si_ws = common._read_ws(number=runs_to_process, instrument=self)
-        cycle_details = self._get_cycle_information(runs_to_process)
+        # TODO fix all of this as the script is too limited to be useful
+        create_si_ws = common.load_current_normalised_ws(run_number_string=runs_to_process, instrument=self)
+        cycle_details = self._get_label_information(runs_to_process)
         instrument_version = cycle_details["instrument_version"]
 
         if instrument_version == "new" or instrument_version == "new2":
@@ -227,8 +330,7 @@ class Pearl(AbstractInst):
                                                            GroupingFileName=grouping_output_path)
         del create_si_offsets_ws, create_si_grouped_ws
 
-    def _run_get_monitor(self, run_number, input_dir, spline_terms):
-        load_monitor_ws = common._load_monitor(run_number, input_dir=input_dir, instrument=self)
+    def _normalise_current_ws(self, ws_to_correct, load_monitor_ws, spline_terms):
         get_monitor_ws = mantid.ConvertUnits(InputWorkspace=load_monitor_ws, Target="Wavelength")
         common.remove_intermediate_workspace(load_monitor_ws)
         lmin, lmax = self._get_lambda_range()
@@ -238,15 +340,22 @@ class Pearl(AbstractInst):
         ex_regions[:, 1] = [2.96, 3.2]
         ex_regions[:, 2] = [2.1, 2.26]
         ex_regions[:, 3] = [1.73, 1.98]
-        # ConvertToDistribution(works)
 
         for reg in range(0, 4):
             get_monitor_ws = mantid.MaskBins(InputWorkspace=get_monitor_ws, XMin=ex_regions[0, reg],
                                              XMax=ex_regions[1, reg])
 
         monitor_ws = mantid.SplineBackground(InputWorkspace=get_monitor_ws, WorkspaceIndex=0, NCoeff=spline_terms)
+
+        normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength")
+        normalised_ws = mantid.NormaliseToMonitor(InputWorkspace=normalised_ws, MonitorWorkspace=monitor_ws,
+                                                  IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
+        normalised_ws = mantid.ConvertUnits(InputWorkspace=normalised_ws, Target="TOF")
+
         common.remove_intermediate_workspace(get_monitor_ws)
-        return monitor_ws
+        common.remove_intermediate_workspace(monitor_ws)
+
+        return normalised_ws
 
     def _get_monitor_spectrum(self, run_number):
         if run_number < 71009:
@@ -262,7 +371,18 @@ class Pearl(AbstractInst):
             mspectra = 1
         return mspectra
 
-    # Support for old API
+    def _generate_raw_data_cycle_dir(self, run_cycle):
+        if self._skip_appending_cycle_to_raw_dir():
+            return self.raw_data_dir
+        str_run_cycle = str(run_cycle)
+
+        # Append current cycle to raw data directory
+        generated_dir = os.path.join(self.raw_data_dir, str_run_cycle)
+        generated_dir += '/'
+
+        return generated_dir
+
+    # Support for old API - This can be removed when PEARL_routines is removed
     def _old_api_constructor_set(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
                                  input_file_ext=None, tt_mode=None):
         # Any param can be set so check each individually
@@ -286,7 +406,7 @@ class Pearl(AbstractInst):
         self._calibration_dir = calib_dir
 
     def _old_api_set_raw_data_dir(self, raw_data_dir):
-        self._disable_appending_cycle_to_raw_dir = True
+        self._old_api_uses_full_paths = True
         self._raw_data_dir = raw_data_dir
 
     def _old_api_set_output_dir(self, output_dir):
@@ -301,8 +421,19 @@ class Pearl(AbstractInst):
     def _old_api_set_full_paths(self, val):
         self._old_api_uses_full_paths = val
 
-    def _PEARL_use_full_path(self):
+    def _PEARL_filename_is_full_path(self):
         return self._old_api_uses_full_paths
+
+    def PEARL_setup_input_directories(self, run_number):
+        run_details = self._get_run_details(run_number=run_number)
+        generated_path = self._generate_raw_data_cycle_dir(run_cycle=run_details.label)
+        user_dirs = config['datasearch.directories']
+        user_dirs_list = user_dirs.split(';')
+        if generated_path not in user_dirs_list:
+            config['datasearch.directories'] += ';' + generated_path
+
+    def _get_focus_tof_binning(self):
+        return self._focus_tof_binning
 
 
 def _old_api_get_file_name(in_path):
@@ -394,7 +525,7 @@ def _perform_spline_range(instrument_version, num_splines, stripped_ws):
     return splined_ws_list
 
 
-def _spline_old_background(in_workspace):
+def _spline_old_instrument_background(in_workspace):
     van_stripped = mantid.ConvertUnits(InputWorkspace=in_workspace, Target="dSpacing")
 
     # remove bragg peaks before spline

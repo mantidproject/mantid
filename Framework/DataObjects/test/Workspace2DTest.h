@@ -21,7 +21,7 @@ using namespace Mantid::API;
 using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
 using HistogramData::LinearGenerator;
-using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
 class Workspace2DTest : public CxxTest::TestSuite {
 public:
@@ -36,7 +36,7 @@ public:
   Workspace2DTest() {
     nbins = 5;
     nhist = 10;
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
   }
 
   void testClone() {
@@ -128,7 +128,7 @@ public:
   }
 
   void testIntegrateSpectra_entire_range() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     MantidVec sums;
     ws->getIntegratedSpectra(sums, 10, 5, true);
     for (int i = 0; i < nhist; ++i) {
@@ -137,7 +137,7 @@ public:
     }
   }
   void testIntegrateSpectra_empty_range() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     MantidVec sums;
     ws->getIntegratedSpectra(sums, 10, 5, false);
     for (int i = 0; i < nhist; ++i) {
@@ -147,7 +147,7 @@ public:
   }
 
   void testIntegrateSpectra_partial_range() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     MantidVec sums;
     ws->getIntegratedSpectra(sums, 1.9, 3.2, false);
     for (int i = 0; i < nhist; ++i) {
@@ -157,7 +157,7 @@ public:
   }
 
   void test_generateHistogram() {
-    Workspace2D_sptr ws = Create2DWorkspaceBinned(2, 5);
+    Workspace2D_sptr ws = create2DWorkspaceBinned(2, 5);
     MantidVec X, Y, E;
     X.push_back(0.0);
     X.push_back(0.5);
@@ -181,7 +181,7 @@ public:
   }
 
   void test_getMemorySizeForXAxes() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     // Here they are shared, so only 1 X axis
     TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(),
                      1 * (nbins + 1) * sizeof(double));
@@ -267,8 +267,8 @@ public:
 
   Workspace2DTestPerformance() {
     nhist = 1000000; // 1 million
-    ws1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, 5);
-    ws2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 5);
+    ws1 = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, 5);
+    ws2 = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 5);
     for (size_t i = 0; i < 10; i++) {
       auto &spec = ws2->getSpectrum(i);
       for (detid_t j = detid_t(i) * 100000; j < detid_t(i + 1) * 100000; j++) {

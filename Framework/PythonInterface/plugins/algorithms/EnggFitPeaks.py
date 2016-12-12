@@ -306,10 +306,10 @@ class EnggFitPeaks(PythonAlgorithm):
         run = in_wks.getRun()
         if 1 == in_wks.getNumberHistograms() and run.hasProperty('difc'):
             difc = run.getLogData('difc').value
-            if run.hasProperty('difa'):
-                _difa = run.getLogData('difa').value
-            else:
-                _difa = 0
+            #if run.hasProperty('difa'):
+            #    _difa = run.getLogData('difa').value
+            #else:
+            #    _difa = 0
             if run.hasProperty('tzero'):
                 tzero = run.getLogData('tzero').value
             else:

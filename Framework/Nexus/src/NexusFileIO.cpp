@@ -1,8 +1,5 @@
 // NexusFileIO
 // @author Ronald Fowler
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <vector>
 #include <sstream>
 
@@ -19,6 +16,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

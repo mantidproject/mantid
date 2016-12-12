@@ -24,10 +24,11 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
-#include "MantidCurveFitting/FuncMinimizers/DampingMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include <fstream>
+#include <iostream>
 
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>

@@ -12,14 +12,18 @@ New
 ###
 
 - :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>` is the new name for CorrectFlightPaths.
+- :ref:`BinWidthAtX <algm-BinWidthAtX>` and :ref:`MedianBinWidth <algm-MedianBinWidth>` provide information about the bin widths of histograms.
+
 
 Improved
 ########
 
-- :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has now a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
+- :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
 - :ref: All algorithms using `AsciiPointBase` now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects `SaveReflCustomAscii <algm-SaveReflCustomAscii>`, `SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, `SaveANSTOAscii <algm-SaveANSTOAscii>` and `SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
-- :ref:`ReplaceSpecialValues <algm_ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
+- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` gained a new option: `Interpolation`.
+  This controls the method used for interpolation. Availabile options are: `Linear` & `CSpline`.
 
 Deprecated
 ##########
@@ -35,8 +39,20 @@ Performance
 CurveFitting
 ------------
 
+- Systemtest, FittingBenchmarks, added for testing fit minimizer benchmarking scripts generating the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This Systemtest also demo how these tables can be created as a standard Mantid script.
+- Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
+- Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates initial values of a fiting function in given intervals.
+
 Improved
 ########
+
+- The `Peak Radius` global setting for 1D peaks that limits the interval on which they are calculated is replaced with `PeakRadius` property of the :ref:`Fit <algm-Fit>` algorithm (see algorithm's description for the details).
+
+.. figure:: ../../images/NoPeakRadius_3.9.png
+   :class: screenshot
+   :width: 550px
+
+- The output and normalization MDHistoWorkspaces from :ref:`MDNormSCD <algm-MDNormSCD>` and :ref:`MDNormDirectSC <algm-MDNormDirectSC>` have the 'displayNormalization' set to 'NoNormalization'. For older outputs, the `setDisplayNormalization` function is now exposed to python.
 
 Python
 ------
@@ -55,14 +71,11 @@ Bug Fixes
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` should no longer leak memory when the execution is cancelled.
 - :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` will now load the stored workspace names from a processed Nexus file in the case of multiperiod data.
 - If a run is aborted and restarted, the ``running`` log in the workspace will correctly reflect this. (``running`` will be false at all times before the abort.)
+- Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.
+- Issues with :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` sometimes returning bogus values when the **Return Background** option was used were fixed.
 
 Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`__
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Python%22>`__
 changes on GitHub
-
-Bug Fixes
----------
-
-- Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.

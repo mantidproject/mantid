@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/Sample.h"
 
@@ -46,20 +47,20 @@ public:
   }
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls) {
+                    std::vector<V3D> hkls, int convention = 1) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
     MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
+        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
-    WorkspaceCreationHelper::SetOrientedLattice(inWS, 12.0, 12.0, 12.0);
-    WorkspaceCreationHelper::SetGoniometer(inWS, 0., 0., 0.);
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
 
     PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 10000);
 
@@ -89,7 +90,10 @@ public:
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
-    // std::cout << ws->getPeak(0).getHKL() << " hkl\n";
+    V3D hklTest(-10, -6, 1);
+    hklTest *= convention;
+    if (expectedNumber > 1)
+      TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -118,13 +122,13 @@ public:
 
     // Make the fake input workspace
     MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
+        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
-    WorkspaceCreationHelper::SetOrientedLattice(inWS, 10.0, 10.0, 10.0);
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 10.0, 10.0, 10.0);
 
     // Make a U matrix of 22.5 degree rotation around +Y
     DblMatrix u(3, 3);
@@ -136,7 +140,7 @@ public:
 
     // Final rotation should add up to 45 degrees around +Y so that hkl 1,0,0
     // goes to +X
-    WorkspaceCreationHelper::SetGoniometer(inWS, GonioRotation, 0., 0.);
+    WorkspaceCreationHelper::setGoniometer(inWS, GonioRotation, 0., 0.);
 
     DblMatrix ub = inWS->sample().getOrientedLattice().getUB();
     PeaksWorkspace_sptr hklPW = getHKLpw(inst, {{-1, 0, 0}}, 0);
@@ -178,7 +182,7 @@ public:
   void test_crystallography() {
     Kernel::ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
-    do_test_exec("Primitive", 10, std::vector<V3D>());
+    do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
   }
 };
 

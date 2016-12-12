@@ -112,6 +112,10 @@ StandardView::StandardView(QWidget *parent,
   QObject::connect(this->m_ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
 
+  // Set the cut button to create a slice on the data
+  QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this,
+                   SLOT(onThresholdButtonClicked()));
+
   // Listen to a change in the active source, to adapt our rebin buttons
   QObject::connect(&pqActiveObjects::instance(),
                    SIGNAL(sourceChanged(pqPipelineSource *)), this,
@@ -205,15 +209,11 @@ void StandardView::render() {
   if (!this->isPeaksWorkspace(this->origSrc)) {
     vtkSMPVRepresentationProxy::SetScalarColoring(
         drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
-    // drep->getProxy()->UpdateVTKObjects();
-    // vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
-    //                                                               "signal",
-    //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
-  this->resetDisplay();
   emit this->triggerAccept();
+  this->resetDisplay();
 }
 
 void StandardView::onCutButtonClicked() {
@@ -225,6 +225,21 @@ void StandardView::onCutButtonClicked() {
   // Apply cut to currently viewed data
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->createFilter("filters", "Cut", this->getPvActiveSrc());
+
+  // We need to attach the visibility listener to the newly
+  // created filter, this is required for automatic updating the color scale
+  setVisibilityListener();
+}
+
+void StandardView::onThresholdButtonClicked() {
+  // check that has active source
+  if (!hasActiveSource()) {
+    return;
+  }
+
+  // Apply cut to currently viewed data
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  builder->createFilter("filters", "Threshold", this->getPvActiveSrc());
 
   // We need to attach the visibility listener to the newly
   // created filter, this is required for automatic updating the color scale

@@ -6,6 +6,7 @@
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/algorithm/string/compare.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <nexus/NeXusFile.hpp>
 #include <Poco/Path.h>
 

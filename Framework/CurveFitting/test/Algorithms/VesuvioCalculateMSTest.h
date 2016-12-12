@@ -199,7 +199,7 @@ public:
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
                      std::invalid_argument);
   }
@@ -208,7 +208,7 @@ public:
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     testWS->getAxis(0)->setUnit("TOF");
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
                      std::invalid_argument);
