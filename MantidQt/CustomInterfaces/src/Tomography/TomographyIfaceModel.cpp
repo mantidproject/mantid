@@ -1,9 +1,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
@@ -243,7 +243,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -564,12 +565,10 @@ void TomographyIfaceModel::refreshLocalJobsInfo() {
 void TomographyIfaceModel::updateProcessInJobList(const qint64 pid,
                                                   const int exitCode) {
   // cast to string from qint64 so we can compare
-  const std::string processPID = std::to_string(static_cast<int>(pid));
+  const std::string processPID = std::to_string(pid);
   for (auto &job : m_jobsStatusLocal) {
-    if (job.id == processPID) {
-      if (exitCode == 1) {
-        job.status = "Exit";
-      }
+    if (job.id == processPID && exitCode == 1) {
+      job.status = "Exit";
     }
   }
 }
