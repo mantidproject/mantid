@@ -403,8 +403,7 @@ def read_stack_of_images(sample_path,
 
     sample_path = os.path.expanduser(sample_path)
 
-    if verbose:
-        print("Loading stack of images from {0}".format(sample_path))
+    print(" * Loading stack of images from {0}".format(sample_path))
 
     if not file_prefix:
         file_prefix = ''
@@ -418,9 +417,8 @@ def read_stack_of_images(sample_path,
 
     files_match.sort(key=_alphanum_key_split)
 
-    if verbose:
-        print("Found {0} image files in {1}".format(
-            len(files_match), sample_path))
+    print(" * Found {0} image files in {1}".format(
+        len(files_match), sample_path))
 
     # It is assumed that all images have the same size and properties as the first.
     try:

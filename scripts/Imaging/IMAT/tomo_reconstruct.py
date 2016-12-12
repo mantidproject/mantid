@@ -386,20 +386,20 @@ def main_tomo_rec():
     cmd_line = " ".join(sys.argv)
     cfg = tomocfg.ReconstructionConfig(preproc_config, alg_config,
                                        postproc_config)
-    # start the whole execution timer
-    cfg.tomo_total_timer()
 
     # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
+    # start the whole execution timer
+    cmd.tomo_total_timer()
     if (args.find_cor):
-        cfg.tomo_print("Finding COR")
+        cmd.tomo_print(" >>> Finding COR <<<")
         cmd.find_center(cfg)
     else:
         # Save myself early. Save command this command line script and all packages/subpackages
         tomoio.self_save_zipped_scripts(
             args.output_path,
             os.path.abspath(inspect.getsourcefile(lambda: 0)))
-        cfg.tomo_print("Running reconstruction")
+        cmd.tomo_print(" >>> Running reconstruction <<<")
         cmd.do_recon(cfg, cmd_line=cmd_line)
 
 

@@ -98,7 +98,7 @@ def crop_vol(data_vol, coords):
             data_vol))
     elif not any(coords) or top > bottom or left > right:
         # skip if for example: 0, 0, 0, 0 (empty selection)
-        print(" * No coordinates given, not cropping the images")
+        print(" ! No coordinates given, not cropping the images")
         return data_vol
     elif not all(isinstance(crd, int) for crd in coords):
         raise ValueError(
