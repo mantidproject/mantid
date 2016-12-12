@@ -269,7 +269,8 @@ void FunctionGenerator::addTie(API::ParameterTie *tie) {
     m_source->addTie(tie);
   } else {
     checkTargetFunction();
-    tie->reset(m_target.get(), tie->getIndex() - m_nOwnParams, tie->isDefault());
+    tie->reset(m_target.get(), tie->getIndex() - m_nOwnParams,
+               tie->isDefault());
     m_target->addTie(tie);
   }
 }

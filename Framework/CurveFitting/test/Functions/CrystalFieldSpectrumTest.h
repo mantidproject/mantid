@@ -657,10 +657,12 @@ public:
         "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
         "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
         "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
-        "0.031787,B42=-0.11611;name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,Temperature="
+        "0.031787,B42=-0.11611;name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+        "Temperature="
         "44.0,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
         "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
-        "0.031787,B42=-0.11611;ties=(f1.IntensityScaling=2.0*f0.IntensityScaling,f0.f1.FWHM=f1.f2.FWHM/2)";
+        "0.031787,B42=-0.11611;ties=(f1.IntensityScaling=2.0*f0."
+        "IntensityScaling,f0.f1.FWHM=f1.f2.FWHM/2)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     {
       auto index = fun->parameterIndex("f1.IntensityScaling");

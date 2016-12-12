@@ -418,7 +418,8 @@ size_t CompositeFunction::addFunction(IFunction_sptr f) {
 void CompositeFunction::removeFunction(size_t i) {
   if (i >= nFunctions()) {
     throw std::out_of_range("Function index (" + std::to_string(i) +
-                            ") out of range (" + std::to_string(nFunctions()) + ").");
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
   }
 
   IFunction_sptr fun = getFunction(i);
@@ -481,8 +482,8 @@ void CompositeFunction::replaceFunctionPtr(const IFunction_sptr f_old,
 void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
   if (i >= nFunctions()) {
     throw std::out_of_range("Function index (" + std::to_string(i) +
-                        ") out of range (" + std::to_string(nFunctions()) + ").");
-
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
   }
 
   IFunction_sptr fun = getFunction(i);
@@ -528,7 +529,8 @@ void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
 IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
   if (i >= nFunctions()) {
     throw std::out_of_range("Function index (" + std::to_string(i) +
-                            ") out of range (" + std::to_string(nFunctions()) + ").");
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
   }
   return m_functions[i];
 }
@@ -541,7 +543,8 @@ IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
 size_t CompositeFunction::functionIndex(std::size_t i) const {
   if (i >= nParams()) {
     throw std::out_of_range("Function parameter index (" + std::to_string(i) +
-                            ") out of range (" + std::to_string(nParams()) + ").");
+                            ") out of range (" + std::to_string(nParams()) +
+                            ").");
   }
   return m_IFunction[i];
 }
