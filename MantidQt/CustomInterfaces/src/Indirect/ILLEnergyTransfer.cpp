@@ -233,6 +233,9 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
     if (m_uiForm.ckPlot->isChecked()) {
       plot();
     }
+    if (m_uiForm.ck2Theta->isChecked()) {
+      convertTo2Theta();
+    }
   }
 
   // Nothing to do here
@@ -260,6 +263,20 @@ void ILLEnergyTransfer::save() {
   pyInput += "\",\"";
   pyInput += m_uiForm.leOutWS->text();
   pyInput += ".nxs\")\n";
+  m_pythonRunner.runPythonCode(pyInput);
+}
+
+/**
+ * Handles the conversion of y-axis to 2theta
+ */
+void ILLEnergyTransfer::convertTo2Theta() {
+  QString pyInput;
+  QString inputWS = m_uiForm.leOutWS->text();
+  pyInput += "ConvertSpectrumAxis(InputWorkspace=\"";
+  pyInput += inputWS;
+  pyInput += "_red\",EMode=\"Indirect\",Target=\"Theta\",OutputWorkspace=\"";
+  pyInput += inputWS;
+  pyInput += "_2theta\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 

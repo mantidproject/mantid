@@ -299,8 +299,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self._convert_to_energy(ws, n_cropped_bins)
 
-        #ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='Theta', EMode='Indirect')
-
     def _normalise_to_monitor(self, ws, mon):
         """
         Normalises the ws to the monitor dependent on the reduction type

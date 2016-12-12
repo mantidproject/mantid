@@ -56,6 +56,7 @@ private:
   double m_peakRange[2];
   void save();
   void plot();
+  void convertTo2Theta();
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

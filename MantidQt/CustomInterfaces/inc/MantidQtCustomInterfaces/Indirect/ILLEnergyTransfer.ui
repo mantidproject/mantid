@@ -701,6 +701,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="ck2Theta">
+        <property name="toolTip">
+         <string>Convert the y-axis of the output also to 2theta.</string>
+        </property>
+        <property name="text">
+         <string>Convert to 2Theta</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
