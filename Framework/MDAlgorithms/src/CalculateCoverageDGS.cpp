@@ -169,7 +169,7 @@ void CalculateCoverageDGS::exec() {
   const auto &detectorInfo = inputWS->detectorInfo();
   std::vector<double> tt, phi;
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
-    if (!detectorInfo.isMasked(i)) {
+    if (!detectorInfo.isMasked(i) && !detectorInfo.isMonitor(i)) {
       const auto &detector = detectorInfo.detector(i);
       tt.push_back(detector.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
       phi.push_back(detector.getPhi());
