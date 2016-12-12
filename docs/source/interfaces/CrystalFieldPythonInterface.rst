@@ -332,6 +332,12 @@ If there are multiple ions define `CrystalField` objects for each ion separately
     cf2 = CrystalField('Pr', 'C2v', **params)
     cf = cf1 + cf2
 
+The expression that combines the `CrystalField` objects also defines the contributions of each site into the overall intensity.
+The higher the coefficient of the object in the expression the higher its relative contribution. For example::
+
+    cf = 2*cf1 + cf2
+
+means that the intensity of `cf1` should be twice that of `cf2`.
 
 Fitting
 -------
