@@ -203,7 +203,8 @@ private:
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
   /// Detector grouping information
-  mutable det2group_map m_detgroups;
+  mutable std::vector<std::set<detid_t>> m_detgroups;
+  mutable std::unordered_map<detid_t, size_t> m_det2group;
   void cacheDefaultDetectorGrouping() const;
   mutable std::once_flag m_defaultDetectorGroupingCached;
 

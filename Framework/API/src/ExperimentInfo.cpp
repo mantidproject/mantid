@@ -344,7 +344,11 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
  * group.
  */
 void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
-  m_detgroups = mapping;
+  m_detgroups.clear();
+  for (const auto &item : mapping) {
+    m_det2group[item.first] = m_detgroups.size();
+    m_detgroups.push_back(item.second);
+  }
   // Create default grouping if `mapping` is empty.
   cacheDefaultDetectorGrouping();
 }
@@ -352,9 +356,9 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
 /// Returns the detector IDs that make up the group that this ID is part of
 const std::set<detid_t> &
 ExperimentInfo::getGroupMembers(const detid_t detID) const {
-  auto iter = m_detgroups.find(detID);
-  if (iter != m_detgroups.end()) {
-    return iter->second;
+  auto iter = m_det2group.find(detID);
+  if (iter != m_det2group.end()) {
+    return m_detgroups[iter->second];
   } else {
     throw std::runtime_error(
         "ExperimentInfo::getGroupMembers - Unable to find ID " +
@@ -932,16 +936,16 @@ ExperimentInfo::detectorIDsInGroup(const size_t index) const {
   std::call_once(m_defaultDetectorGroupingCached,
                  &ExperimentInfo::cacheDefaultDetectorGrouping, this);
 
-  // TODO NO! This is wrong!
-  const auto detID = sptr_instrument->getDetectorIDs()[index];
-  return m_detgroups.at(detID);
+  return m_detgroups.at(index);
 }
 
 void ExperimentInfo::cacheDefaultDetectorGrouping() const {
   if (!m_detgroups.empty())
     return;
-  for (const auto detID : sptr_instrument->getDetectorIDs())
-    m_detgroups[detID] = std::set<detid_t>{detID};
+  for (const auto detID : sptr_instrument->getDetectorIDs()) {
+    m_det2group[detID] = m_detgroups.size();
+    m_detgroups.push_back({detID});
+  }
 }
 
 /** Save the object to an open NeXus file.
