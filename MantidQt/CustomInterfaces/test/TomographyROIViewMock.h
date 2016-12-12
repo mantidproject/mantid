@@ -8,7 +8,8 @@
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockTomographyROIView : public MantidQt::CustomInterfaces::ITomographyROIView {
+class MockTomographyROIView
+    : public MantidQt::CustomInterfaces::ITomographyROIView {
 public:
   // void initParams(ImageStackPreParams &params)
   MOCK_METHOD1(setParams,

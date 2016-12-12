@@ -512,8 +512,8 @@ public:
     testing::NiceMock<MockTomographyROIView> mockView;
     MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, changeSelectionState(ITomographyROIView::SelectROIFirst))
-        .Times(1);
+    EXPECT_CALL(mockView, changeSelectionState(
+                              ITomographyROIView::SelectROIFirst)).Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -582,8 +582,9 @@ public:
     testing::NiceMock<MockTomographyROIView> mockView;
     MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, changeSelectionState(
-                              ITomographyROIView::SelectNormAreaFirst)).Times(1);
+    EXPECT_CALL(mockView,
+                changeSelectionState(ITomographyROIView::SelectNormAreaFirst))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -669,7 +670,8 @@ public:
 private:
   // boost::shared_ptr
   boost::scoped_ptr<testing::NiceMock<MockTomographyROIView>> m_view;
-  boost::scoped_ptr<MantidQt::CustomInterfaces::TomographyROIPresenter> m_presenter;
+  boost::scoped_ptr<MantidQt::CustomInterfaces::TomographyROIPresenter>
+      m_presenter;
 
   // To have one FITS, etc.
   Mantid::API::MatrixWorkspace_sptr m_ws;

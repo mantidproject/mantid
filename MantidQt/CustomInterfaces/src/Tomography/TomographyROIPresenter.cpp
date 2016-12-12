@@ -211,7 +211,8 @@ void TomographyROIPresenter::processBrowseStack() {
  * @return a stack of images built from the path passed, not
  * necessarily correct (check with isValid())
  */
-StackOfImagesDirs TomographyROIPresenter::checkInputStack(const std::string &path) {
+StackOfImagesDirs
+TomographyROIPresenter::checkInputStack(const std::string &path) {
   StackOfImagesDirs soid(path, true);
 
   const std::string soiPath = soid.sampleImagesDir();
@@ -484,9 +485,9 @@ void TomographyROIPresenter::processResetNormalization() {
 void TomographyROIPresenter::processShutDown() { m_view->saveSettings(); }
 
 void TomographyROIPresenter::loadFITSStack(const StackOfImagesDirs &soid,
-                                      const std::string &wsgName,
-                                      const std::string &wsgFlatsName,
-                                      const std::string &wsgDarksName) {
+                                           const std::string &wsgName,
+                                           const std::string &wsgFlatsName,
+                                           const std::string &wsgDarksName) {
   const std::vector<std::string> &imgs = soid.sampleFiles();
   if (imgs.empty())
     return;
@@ -503,7 +504,7 @@ void TomographyROIPresenter::loadFITSStack(const StackOfImagesDirs &soid,
 }
 
 void TomographyROIPresenter::loadFITSList(const std::vector<std::string> &imgs,
-                                     const std::string &wsName) {
+                                          const std::string &wsName) {
 
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   try {
@@ -625,7 +626,7 @@ std::string TomographyROIPresenter::filterImagePathsForFITSStack(
 }
 
 void TomographyROIPresenter::loadFITSImage(const std::string &path,
-                                      const std::string &wsName) {
+                                           const std::string &wsName) {
   // get fits file into workspace and retrieve it from the ADS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
   try {

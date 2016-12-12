@@ -19,7 +19,7 @@ class BatchAlgorithmRunner;
 }
 
 namespace CustomInterfaces {
-	class TomographyThread;
+class TomographyThread;
 
 /**
 Presenter for the image center of rotation (and other parameters)

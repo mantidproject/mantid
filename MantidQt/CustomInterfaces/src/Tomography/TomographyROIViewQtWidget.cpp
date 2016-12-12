@@ -27,8 +27,9 @@ const std::string TomographyROIViewQtWidget::m_settingsGroup =
     "CustomInterfaces/TomographyROIView";
 
 TomographyROIViewQtWidget::TomographyROIViewQtWidget(QWidget *parent)
-    : QWidget(parent), ITomographyROIView(), m_colorMapFilename(), m_imgWidth(0),
-      m_imgHeight(0), m_selectionState(SelectNone), m_presenter(NULL) {
+    : QWidget(parent), ITomographyROIView(), m_colorMapFilename(),
+      m_imgWidth(0), m_imgHeight(0), m_selectionState(SelectNone),
+      m_presenter(NULL) {
   initLayout();
 
   // using an event filter. might be worth refactoring into a specific
@@ -311,14 +312,14 @@ void TomographyROIViewQtWidget::showProjection(
 }
 
 void TomographyROIViewQtWidget::userWarning(const std::string &err,
-                                       const std::string &description) {
+                                            const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
 }
 
 void TomographyROIViewQtWidget::userError(const std::string &err,
-                                     const std::string &description) {
+                                          const std::string &description) {
   QMessageBox::critical(this, QString::fromStdString(err),
                         QString::fromStdString(description), QMessageBox::Ok,
                         QMessageBox::Ok);
@@ -384,8 +385,8 @@ std::string TomographyROIViewQtWidget::askSingleImagePath() {
 }
 
 void TomographyROIViewQtWidget::enableImageTypes(bool enableSamples,
-                                            bool enableFlats,
-                                            bool enableDarks) {
+                                                 bool enableFlats,
+                                                 bool enableDarks) {
   QComboBox *itypes = m_ui.comboBox_image_type;
   if (!itypes || 3 != itypes->count())
     return;
@@ -565,9 +566,9 @@ void TomographyROIViewQtWidget::drawCenterCrossSymbol(
       static_cast<int>(center.X()), static_cast<int>(center.Y() + 5));
 }
 
-void TomographyROIViewQtWidget::drawBoxROI(QPainter &painter,
-                                      const Mantid::Kernel::V2D &first,
-                                      const Mantid::Kernel::V2D &second) const {
+void TomographyROIViewQtWidget::drawBoxROI(
+    QPainter &painter, const Mantid::Kernel::V2D &first,
+    const Mantid::Kernel::V2D &second) const {
   QPen penROI(Qt::green);
   painter.setPen(penROI);
   painter.drawRect(static_cast<int>(first.X()), static_cast<int>(first.Y()),
@@ -594,7 +595,8 @@ void TomographyROIViewQtWidget::enableParamWidgets(bool enable) {
   m_ui.groupBox_norm->setEnabled(enable);
 }
 
-void TomographyROIViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
+void TomographyROIViewQtWidget::initParamWidgets(size_t maxWidth,
+                                                 size_t maxHeight) {
   m_imgWidth = static_cast<int>(maxWidth);
   m_imgHeight = static_cast<int>(maxHeight);
 
@@ -800,10 +802,9 @@ void TomographyROIViewQtWidget::showProjectionImage(
  * @param rotationAngle rotate the image by this angle with respect to the
  *  original image in the workspace when displaying it
  */
-QPixmap
-TomographyROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
-                                               size_t width, size_t height,
-                                               float rotationAngle) {
+QPixmap TomographyROIViewQtWidget::transferWSImageToQPixmap(
+    const MatrixWorkspace_sptr ws, size_t width, size_t height,
+    float rotationAngle) {
 
   QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
                 QImage::Format_RGB32);
@@ -947,8 +948,8 @@ void TomographyROIViewQtWidget::checkNewProjectionImage(
  * @throws runtime_error if there are problems when retrieving the
  * width/height or if they are inconsistent.
  */
-void TomographyROIViewQtWidget::getCheckedDimensions(const MatrixWorkspace_sptr ws,
-                                                size_t &width, size_t &height) {
+void TomographyROIViewQtWidget::getCheckedDimensions(
+    const MatrixWorkspace_sptr ws, size_t &width, size_t &height) {
   const size_t MAXDIM = 2048 * 32;
   const std::string widthLogName = "Axis1";
   try {
@@ -992,8 +993,8 @@ void TomographyROIViewQtWidget::getCheckedDimensions(const MatrixWorkspace_sptr 
   }
 }
 
-void TomographyROIViewQtWidget::getPixelMinMax(MatrixWorkspace_sptr ws, double &min,
-                                          double &max) {
+void TomographyROIViewQtWidget::getPixelMinMax(MatrixWorkspace_sptr ws,
+                                               double &min, double &max) {
   for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       const double &v = ws->readY(i)[j];
@@ -1121,14 +1122,15 @@ bool TomographyROIViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void TomographyROIViewQtWidget::grabCoRFromMousePoint(const int x, const int y) {
+void TomographyROIViewQtWidget::grabCoRFromMousePoint(const int x,
+                                                      const int y) {
   // m_params.cor = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_cor_x->setValue(x);
   m_ui.spinBox_cor_y->setValue(y);
 }
 
 void TomographyROIViewQtWidget::grabROICorner1FromMousePoint(const int x,
-                                                        const int y) {
+                                                             const int y) {
   // this is re-used for Norm Region selection as you cannot be selecting both
   // at the same time
   m_startOfRectangle.right = x;
@@ -1139,14 +1141,14 @@ void TomographyROIViewQtWidget::grabROICorner1FromMousePoint(const int x,
 }
 
 void TomographyROIViewQtWidget::grabROICorner2FromMousePoint(const int x,
-                                                        const int y) {
+                                                             const int y) {
   updateValuesForSpinBoxes(x, y, m_startOfRectangle, m_ui.spinBox_roi_left,
                            m_ui.spinBox_roi_top, m_ui.spinBox_roi_right,
                            m_ui.spinBox_roi_bottom);
 }
 
 void TomographyROIViewQtWidget::grabNormAreaCorner1FromMousePoint(const int x,
-                                                             const int y) {
+                                                                  const int y) {
   // this is re-used for Norm Region selection as you cannot be selecting both
   // at the same time
   m_startOfRectangle.right = x;
@@ -1157,7 +1159,7 @@ void TomographyROIViewQtWidget::grabNormAreaCorner1FromMousePoint(const int x,
 }
 
 void TomographyROIViewQtWidget::grabNormAreaCorner2FromMousePoint(const int x,
-                                                             const int y) {
+                                                                  const int y) {
 
   updateValuesForSpinBoxes(x, y, m_startOfRectangle, m_ui.spinBox_norm_left,
                            m_ui.spinBox_norm_top, m_ui.spinBox_norm_right,
@@ -1222,8 +1224,8 @@ void TomographyROIViewQtWidget::mouseUpdateCoR(const int x, const int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void TomographyROIViewQtWidget::mouseUpdateROICornersStartSelection(const int x,
-                                                               const int y) {
+void TomographyROIViewQtWidget::mouseUpdateROICornersStartSelection(
+    const int x, const int y) {
   grabROICorner1FromMousePoint(x, y);
   grabROICorner2FromMousePoint(x, y);
   refreshImage();
@@ -1239,8 +1241,8 @@ void TomographyROIViewQtWidget::mouseUpdateROICornersStartSelection(const int x,
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void TomographyROIViewQtWidget::mouseUpdateROICornerContinuedSelection(const int x,
-                                                                  const int y) {
+void TomographyROIViewQtWidget::mouseUpdateROICornerContinuedSelection(
+    const int x, const int y) {
   grabROICorner2FromMousePoint(x, y);
   grabROIFromWidgets();
   refreshImage();

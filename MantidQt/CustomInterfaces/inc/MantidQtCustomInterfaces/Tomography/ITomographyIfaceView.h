@@ -282,8 +282,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-          &localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers

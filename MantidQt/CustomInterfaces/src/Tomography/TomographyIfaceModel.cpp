@@ -245,8 +245,7 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: "
-                        << tid << '\n';
+                           "be created, with ID: " << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -440,10 +439,10 @@ void TomographyIfaceModel::doRemoteRunReconstructionJob(
     const std::string &compRes, const std::string &runnable,
     const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
-  
+
   logMsg("Running " + usingTool() + ", with binary: " + runnable +
          ", with parameters: " + allOpts);
-         
+
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
   transAlg->initialize();
@@ -490,7 +489,7 @@ void TomographyIfaceModel::doLocalRunReconstructionJob(
 
   // Can only run one reconstruction at a time
   // Qt doesn't use exceptions so we can't make sure it ran here
-  
+
   logMsg("Running " + usingTool() + ", with binary: " + runnable +
          ", with parameters: " + allOpts);
 
