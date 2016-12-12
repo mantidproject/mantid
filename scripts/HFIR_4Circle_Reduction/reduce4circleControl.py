@@ -194,56 +194,8 @@ class CWSCDReductionControl(object):
         sin_theta = q * wavelength/(4*math.pi)
         theta = math.asin(sin_theta)
         corrected_intensity = peak_intensity * math.sin(2*theta) * step_omega
-        print '[DB] Lorentz correction: I * sin(2*theta) * delta(omega) = %.5f * sin(2*%.5f) * %.5f =' \
-              ' %.5f; q = %.5f.' % (peak_intensity, theta*180/math.pi, step_omega, corrected_intensity, q)
 
         return corrected_intensity
-
-    # def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
-    #     """
-    #     Calculate center of peak by weighting the peak centers of multiple Pt (slice from 3D peak)
-    #     :param exp_number:
-    #     :param scan_number:
-    #     :param pt_numbers:
-    #     :return: 2-tuple: boolean, peak center (3-tuple of float)
-    #     """
-    #     # Check & set pt. numbers
-    #     assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not %s.' \
-    #                                         '' % (str(exp_number), str(type(exp_number)))
-    #     assert isinstance(scan_number, int), 'Scan number %s must be an integer but not %s.' \
-    #                                          '' % (str(scan_number), str(type(scan_number)))
-    #     if pt_numbers is None:
-    #         status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-    #         assert status
-    #     else:
-    #         pt_number_list = pt_numbers
-    #     assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
-    #
-    #     # Check whether the MDEventWorkspace used to find peaks exists
-    #     if self.has_merged_data(exp_number, scan_number, pt_number_list):
-    #         pass
-    #     else:
-    #         return False, 'Exp %d Scan %d: data must be merged already.' % (exp_number, scan_number)
-    #
-    #     # Find peak in Q-space
-    #     merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
-    #     peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-    #     mantidsimple.FindPeaksMD(InputWorkspace=merged_ws_name,
-    #                              MaxPeaks=10,
-    #                              PeakDistanceThreshold=5.,
-    #                              DensityThresholdFactor=0.1,
-    #                              OutputWorkspace=peak_ws_name)
-    #     assert AnalysisDataService.doesExist(peak_ws_name), 'Output PeaksWorkspace %s cannot be found.' \
-    #                                                         '' % peak_ws_name
-    #
-    #     # calculate the peaks with weight
-    #     process_record = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
-    #     process_record.calculate_peak_center()
-    #     peak_center = process_record.get_peak_centre()
-    #     # set the merged peak information to data structure
-    #     self._myPeakInfoDict[(exp_number, scan_number)] = process_record
-    #
-    #     return True, peak_center
 
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
@@ -676,7 +628,6 @@ class CWSCDReductionControl(object):
 
         # get ub matrix
         ub_matrix = self.get_ub_matrix(exp_number)
-        print '[DB...BAT] UB matrix is of type ', type(ub_matrix)
 
         for scan_number in scan_number_list:
             peak_dict = dict()
@@ -1325,7 +1276,7 @@ class CWSCDReductionControl(object):
             final_peak_center[i] = sum_peak_center[i] * (1./sum_bin_counts)
         #final_peak_center = sum_peak_center * (1./sum_bin_counts)
 
-        print 'Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
+        print '[INFO] Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
 
         # Integrate peaks
         total_intensity = 0.
@@ -1454,7 +1405,6 @@ class CWSCDReductionControl(object):
         # Default for exp_no
         if exp_no is None:
             exp_no = self._expNumber
-        print '[DB...BAD] Load Spice Scan File Exp Number = %d, Stored Exp. Number = %d' % (exp_no, self._expNumber)
 
         # Check whether the workspace has been loaded
         assert isinstance(exp_no, int)
@@ -1722,10 +1672,7 @@ class CWSCDReductionControl(object):
                 alg_args['OutputWorkspace'] = out_q_name
                 alg_args['Directory'] = self._dataDir
 
-                # TODO/ISSUE/NOW - Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
-                print '[DB...BAT] Scan %d: Det-Sample Dict: ' % scan_no, self._detSampleDistanceDict
-                print '[DB...BAT] Scan %d: Det-Center Dict: ' % scan_no, self._detCenterDict
-
+                # Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
                 # calculate the sample-detector distance shift if it is defined
                 if exp_no in self._detSampleDistanceDict:
                     alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[exp_no] - \
@@ -1747,7 +1694,6 @@ class CWSCDReductionControl(object):
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
 
                 # call:
-                print '[DB...BAT] Input for ConvertCWSDExpToMomentum: ', alg_args
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
 
                 self._myMDWsList.append(out_q_name)
@@ -2529,9 +2475,8 @@ class CWSCDReductionControl(object):
                 try:
                     mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print 'Unable to download scan %d from %s due to %s.' % (scan_number,
-                                                                             spice_file_url,
-                                                                             str(download_error))
+                    print '[ERROR] Unable to download scan %d from %s due to %s.' % (scan_number,spice_file_url,
+                                                                                     str(download_error))
                     break
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
@@ -2599,7 +2544,6 @@ class CWSCDReductionControl(object):
                                       q_range, max_tsample])
 
             except RuntimeError as e:
-                print e
                 return False, None, str(e)
             except ValueError as e:
                 # Unable to import a SPICE file without necessary information
@@ -2607,7 +2551,7 @@ class CWSCDReductionControl(object):
         # END-FOR (scan_number)
 
         if error_message != '':
-            print 'Error!\n%s' % error_message
+            print '[Error]\n%s' % error_message
 
         self._scanSummaryList = scan_sum_list
 

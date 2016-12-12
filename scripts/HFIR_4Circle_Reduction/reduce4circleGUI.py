@@ -512,22 +512,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.load_project(project_file_name)
 
-        # # load project
-        # ui_dict = self._myControl.load_project(project_file_name)
-        #
-        # # set the UI parameters to GUI
-        # try:
-        #     self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-        #     self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-        #     self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-        #     self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
-        #
-        #     # now try to call some actions
-        #     self.do_apply_setup()
-        #     self.do_set_experiment()
-        # except KeyError:
-        #     print '[Error] Some field cannot be found.'
-
         return
 
     def load_project(self, project_file_name):
@@ -590,8 +574,9 @@ class MainWindow(QtGui.QMainWindow):
         :param QCloseEvent:
         :return:
         """
-        print '[QCloseEvent=]', str(QCloseEvent)
         self.menu_quit()
+
+        return
 
     def do_accept_ub(self):
         """ Accept the calculated UB matrix and thus put to controller
@@ -986,7 +971,6 @@ class MainWindow(QtGui.QMainWindow):
         convert merged workspace in Q-sample frame to HKL frame
         :return:
         """
-        # TODO/NOW/TEST/ - Convert to HKL
         # get experiment number
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
@@ -1418,8 +1402,6 @@ class MainWindow(QtGui.QMainWindow):
         if len(row_number_list) == 0:
             self.pop_one_button_dialog('No scan is selected for scan')
             return
-        else:
-            print '[DB...BAT] IntegratePeaks: selected rows: ', row_number_list
 
         # get experiment number
         status, ret_obj = gutil.parse_integers_editors(self.ui.lineEdit_exp, allow_blank=False)
@@ -1881,8 +1863,6 @@ class MainWindow(QtGui.QMainWindow):
         Merge several scans to a single MDWorkspace and give suggestion for re-binning
         :return:
         """
-        # TODO/NOW/TEST/ - merge multiple scans
-
         # find the selected scans
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(selected_rows) < 2:
@@ -1973,7 +1953,6 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 merge_status = 'Failed. Reason: %s' % ret_tup
                 merged_name = 'x'
-                print merge_status
 
             # update table
             self.ui.tableWidget_mergeScans.set_status(row_number, merge_status)
@@ -2073,9 +2052,8 @@ class MainWindow(QtGui.QMainWindow):
 
         dlg = refineubfftsetup.RefineUBFFTSetupDialog(self)
         if dlg.exec_():
-            min_d, max_d, tolerance = dlg.get_values()
-            print '[DB...BAT]', min_d, max_d, tolerance
             # Do stuff with values
+            min_d, max_d, tolerance = dlg.get_values()
         else:
             # case for cancel
             return
@@ -2498,7 +2476,7 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    print 'Error to get UB matrix: %s' % str(key_err)
+                    print '[Error] unable to get UB matrix: %s' % str(key_err)
                     self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
@@ -2529,12 +2507,10 @@ class MainWindow(QtGui.QMainWindow):
     def do_setup_dir_default(self):
         """
         Set up default directory for storing data and working
+        If directory /HFIR/HB3A exists, it means that the user can access HFIR archive server
         :return:
         """
         home_dir = os.path.expanduser('~')
-
-        # TODO/NOW/TEST - make this one work for server-based
-        # example: os.path.exists('/HFIR/HB3A/exp322') won't take long time to find out the server is off.
 
         # Data cache directory
         project_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
@@ -2641,8 +2617,6 @@ class MainWindow(QtGui.QMainWindow):
         set the user-defined detector center
         :return:
         """
-        # TODO/NOW/TEST/ - set detector center
-
         # get information
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_detCenterPixHorizontal,
@@ -2835,8 +2809,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             raise RuntimeError('None radio button is selected for UB')
 
-        print '[DB...BAT] UB to set: ', ub_matrix
-
         # set to in-use UB matrix and control
         self.ui.tableWidget_ubInUse.set_from_matrix(ub_matrix)
 
@@ -2925,17 +2897,11 @@ class MainWindow(QtGui.QMainWindow):
         assert len(ret_obj) == 5
         md_file_name, weight_peak_centers, weight_peak_intensities, avg_peak_centre, avg_peak_intensity = ret_obj
 
-        print 'Write file to %s' % md_file_name
-        for i_peak in xrange(len(weight_peak_centers)):
-            peak_i = weight_peak_centers[i_peak]
-            print '%f, %f, %f' % (peak_i[0], peak_i[1], peak_i[2])
-        print
-        print avg_peak_centre
-
         # Plot
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
 
+        print '[INFO] Write file to %s' % md_file_name
         self._my3DWindow.add_plot_by_file(md_file_name)
         self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
         self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
@@ -3523,8 +3489,6 @@ class MainWindow(QtGui.QMainWindow):
 
             # gather values for updating
             intensity = sig_value
-            print '[DB...BAT] UpdatePeakIntegrationValue: Row %d: peak center %s of type %s.' \
-                  '' % (row_number, str(peak_centre), type(peak_centre))
 
             # check intensity value
             is_error = False
@@ -3612,8 +3576,6 @@ class MainWindow(QtGui.QMainWindow):
         except RuntimeError as run_err:
             self.pop_one_button_dialog(str(run_err))
             return
-        else:
-            print '[DB...BAT] UpdateMergeInformation: Row = ', row_number
 
         # set intensity, state to table
         if mode == 0:
