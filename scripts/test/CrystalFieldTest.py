@@ -1320,5 +1320,75 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertTrue('f1.IntensityScaling=0.8*f2.IntensityScaling' in s)
         self.assertTrue('f3.IntensityScaling=0.1*f2.IntensityScaling' in s)
 
+    def test_multi_ion_intensity_scaling_multi_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from mantid.simpleapi import FunctionFactory
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': [44.0, 50.0], 'FWHM': [1.1, 1.6]}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f1.IntensityScaling0=1.0*f0.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=1.0*f0.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + cf2 * 8
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.25*f1.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.25*f1.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + cf2
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f1.IntensityScaling0=0.5*f0.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.5*f0.IntensityScaling1' in s)
+
+        cf3 = CrystalField('Tb', 'C2v', **params)
+        cf = 2 * cf1 + cf2 * 8 + cf3
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.25*f1.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.25*f1.IntensityScaling1' in s)
+        self.assertTrue('f2.IntensityScaling0=0.125*f1.IntensityScaling0' in s)
+        self.assertTrue('f2.IntensityScaling1=0.125*f1.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + cf2 * 8 + 10 * cf3
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.2*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.2*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.2*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.2*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+
+        cf = cf1 + (cf2 * 8 + 10 * cf3)
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.1*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.1*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+
+        cf4 = CrystalField('Yb', 'C2v', **params)
+        cf = (2 * cf1 + cf2 * 8) + (10 * cf3 + cf4)
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.2*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.2*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+        self.assertTrue('f3.IntensityScaling0=0.1*f2.IntensityScaling0' in s)
+        self.assertTrue('f3.IntensityScaling1=0.1*f2.IntensityScaling1' in s)
+
+
 if __name__ == "__main__":
     unittest.main()

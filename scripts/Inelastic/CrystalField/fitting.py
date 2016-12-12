@@ -418,6 +418,10 @@ class CrystalField(object):
     def FixAllPeaks(self, value):
         self._fixAllPeaks = value
 
+    @property
+    def NumberOfSpectra(self):
+        return len(self._temperature)
+
     def ties(self, **kwargs):
         """Set ties on the field parameters.
 
@@ -816,6 +820,7 @@ class CrystalFieldMulti(object):
 
     def makeMultiSpectrumFunction(self):
         fun = ';'.join([a.makeMultiSpectrumFunction() for a in self.sites])
+        fun += self._makeIntensityScalingTiesMulti()
         ties = self.getTies()
         if len(ties) > 0:
             fun += ',ties=(%s)' % ties
@@ -879,13 +884,33 @@ class CrystalFieldMulti(object):
         if n_sites < 2:
             return ''
         factors = np.array(self.abundances)
-        ties = []
         i_largest = np.argmax(factors)
         largest_factor = factors[i_largest]
         tie_template = 'f%s.IntensityScaling=%s*' + 'f%s.IntensityScaling' % i_largest
+        ties = []
         for i in range(n_sites):
             if i != i_largest:
                 ties.append(tie_template % (i, factors[i] / largest_factor))
+        s = ';ties=(%s)' % ','.join(ties)
+        return s
+
+    def _makeIntensityScalingTiesMulti(self):
+        """
+        Make a tie string that ties IntensityScaling's of the sites according to their abundances.
+        """
+        n_sites = len(self.sites)
+        if n_sites < 2:
+            return ''
+        factors = np.array(self.abundances)
+        i_largest = np.argmax(factors)
+        largest_factor = factors[i_largest]
+        tie_template = 'f{1}.IntensityScaling{0}={2}*f%s.IntensityScaling{0}' % i_largest
+        ties = []
+        n_spectra = self.sites[0].NumberOfSpectra
+        for spec in range(n_spectra):
+            for i in range(n_sites):
+                if i != i_largest:
+                    ties.append(tie_template.format(spec, i, factors[i] / largest_factor))
         s = ';ties=(%s)' % ','.join(ties)
         return s
 
