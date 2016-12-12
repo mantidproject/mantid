@@ -1913,6 +1913,14 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
 }
 
+size_t MatrixWorkspace::numberOfDetectorGroups() const {
+  return getNumberHistograms();
+}
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
+}
+
 } // namespace API
 } // Namespace Mantid
 

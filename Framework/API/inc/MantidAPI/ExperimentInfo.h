@@ -161,6 +161,9 @@ public:
   const DetectorInfo &detectorInfo() const;
   DetectorInfo &mutableDetectorInfo();
 
+  virtual size_t numberOfDetectorGroups() const;
+  virtual const std::set<detid_t> &detectorIDsInGroup(const size_t index) const;
+
 protected:
   /// Called when instrument or parameter map is reset to notify child classes.
   virtual void invalidateInstrumentReferences() const {}
