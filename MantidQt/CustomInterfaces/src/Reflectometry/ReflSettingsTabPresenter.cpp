@@ -131,23 +131,31 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
 
   // Add CRho
   auto crho = m_view->getCRho();
-  if (!crho.empty())
+  if (!crho.empty()) {
+    quoteWrap(crho);
     options.push_back("CRho=" + crho);
+  }
 
   // Add CAlpha
   auto calpha = m_view->getCAlpha();
-  if (!calpha.empty())
+  if (!calpha.empty()) {
+    quoteWrap(calpha);
     options.push_back("CAlpha=" + calpha);
+  }
 
   // Add CAp
   auto cap = m_view->getCAp();
-  if (!cap.empty())
+  if (!cap.empty()) {
+    quoteWrap(cap);
     options.push_back("CAp=" + cap);
+  }
 
   // Add CPp
   auto cpp = m_view->getCPp();
-  if (!cpp.empty())
+  if (!cpp.empty()) {
+    quoteWrap(cpp);
     options.push_back("CPp=" + cpp);
+  }
 
   // Add direct beam
   auto dbnr = m_view->getDirectBeam();
@@ -219,6 +227,10 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   auto transRuns = this->getTransmissionRuns();
   if (!transRuns.empty())
     options.push_back(transRuns);
+
+  for (auto &x : options) {
+    std::cout << ">>> " << x << "\n";
+  }
 
   return boost::algorithm::join(options, ",");
 }
@@ -296,8 +308,9 @@ void ReflSettingsTabPresenter::getExpDefaults() {
   defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
 
   auto cRho = inst->getStringParameter("crho");
-  if (!cRho.empty())
+  if (!cRho.empty()) {
     defaults[2] = "\"" + cRho[0] + "\"";
+  }
 
   auto cAlpha = inst->getStringParameter("calpha");
   if (!cAlpha.empty())
@@ -314,6 +327,16 @@ void ReflSettingsTabPresenter::getExpDefaults() {
   defaults[6] = alg->getPropertyValue("ScaleFactor");
 
   m_view->setExpDefaults(defaults);
+}
+
+/** Wraps string with quote marks if it does not already have them
+* @param str :: [input] The string to be wrapped
+*/
+void ReflSettingsTabPresenter::quoteWrap(std::string &str) const {
+  if (str.front() != '\"')
+    str = "\"" + str;
+  if (str.back() != '\"')
+    str = str + "\"";
 }
 
 /** Fills instrument settings with default values

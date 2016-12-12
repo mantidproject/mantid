@@ -65,6 +65,7 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
+  void quoteWrap(std::string &str) const;
   IAlgorithm_sptr createReductionAlg();
   Instrument_const_sptr createEmptyInstrument(std::string instName);
   std::string getTransmissionRuns() const;
