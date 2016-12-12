@@ -391,6 +391,7 @@ def main_tomo_rec():
     cmd = tomocmd.ReconstructionCommand()
     # start the whole execution timer
     cmd.tomo_total_timer()
+
     if (args.find_cor):
         cmd.tomo_print(" >>> Finding COR <<<")
         cmd.find_center(cfg)
@@ -401,6 +402,9 @@ def main_tomo_rec():
             os.path.abspath(inspect.getsourcefile(lambda: 0)))
         cmd.tomo_print(" >>> Running reconstruction <<<")
         cmd.do_recon(cfg, cmd_line=cmd_line)
+
+    # end the whole execution timer
+    cmd.tomo_total_timer()
 
 
 if __name__ == '__main__':

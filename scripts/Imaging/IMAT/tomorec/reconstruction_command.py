@@ -263,8 +263,6 @@ class ReconstructionCommand(object):
             self.tomo_print_timed_stop(
                 " * Finished saving reconstructed volume as NetCDF.")
 
-        # end the total reconstruction timer, started from tomo_reconstruct.py
-        self.tomo_total_timer()
         self.gen_readme_summary_end(readme_fullpath,
                                     (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
@@ -1329,9 +1327,6 @@ class ReconstructionCommand(object):
             calculated_cors.append(tomopy_cor)
 
         self.tomo_print_timed_stop(" * Finished COR calculation.", 2)
-
-        # end the total reconstruction timer, started from tomo_reconstruct.py
-        self.tomo_total_timer()
 
         averageCORrelativeToCrop = sum(calculated_cors) / len(calculated_cors)
         averageCORrelativeToFullImage = sum(calculated_cors) / len(
