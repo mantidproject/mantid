@@ -170,7 +170,7 @@ void NearestNeighbours::build(const int noNeighbours) {
       V3D distance = neighbour - realPos;
       double separation = distance.norm();
       boost::add_edge(m_specToVertex[m_spectrumNumbers[idx]], // from
-                      pointNoToVertex[index],       // to
+                      pointNoToVertex[index],                 // to
                       distance, m_graph);
       if (separation > m_cutoff) {
         m_cutoff = separation;

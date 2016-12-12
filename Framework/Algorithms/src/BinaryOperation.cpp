@@ -696,8 +696,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i,
-                                    *m_out, outSpectrumInfo))
+          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                                    outSpectrumInfo))
             continue;
         }
         // Reach here? Do the division
@@ -729,8 +729,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i,
-                                    *m_out, outSpectrumInfo))
+          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                                    outSpectrumInfo))
             continue;
         }
 
