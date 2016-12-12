@@ -387,6 +387,7 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
 /**
  * Create the XML required to define a cylinder from the given args
  * @param args A user-supplied dict of args
+ * @param refFrame Defines the reference frame for the shape
  * @param hollow True if an annulus is to be created
  * @return The XML definition string
  */
