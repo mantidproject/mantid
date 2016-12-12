@@ -59,6 +59,7 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
+  void quoteWrap(std::string &str) const;
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
