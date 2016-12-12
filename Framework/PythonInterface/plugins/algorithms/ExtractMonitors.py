@@ -69,6 +69,7 @@ class ExtractMonitors(DataProcessorAlgorithm):
                 extract_alg.setProperty("WorkspaceIndexList", detectors)
                 extract_alg.execute()
                 detector_ws = extract_alg.getProperty("OutputWorkspace").value
+                self.setProperty("DetectorWorkspace", detector_ws)
             else:
                 self.log().error("No detectors found in input workspace. No detector output workspace created.")
 
@@ -79,20 +80,9 @@ class ExtractMonitors(DataProcessorAlgorithm):
                 extract_alg.setProperty("WorkspaceIndexList", monitors)
                 extract_alg.execute()
                 monitor_ws = extract_alg.getProperty("OutputWorkspace").value
+                self.setProperty("MonitorWorkspace", monitor_ws)
             else:
                 self.log().error("No monitors found in input workspace. No monitor output workspace created.")
-
-        if detector_ws_name and detectors:
-            self.setProperty("DetectorWorkspace", detector_ws)
-            delete_alg = self.createChildAlgorithm("DeleteWorkspace")
-            delete_alg.setProperty("Workspace", detector_ws)
-            delete_alg.execute()
-
-        if monitor_ws_name and monitors:
-            self.setProperty("MonitorWorkspace", monitor_ws)
-            delete_alg = self.createChildAlgorithm("DeleteWorkspace")
-            delete_alg.setProperty("Workspace", monitor_ws)
-            delete_alg.execute()
 
         if detector_ws_name and detectors and monitor_ws_name and monitors:
             detector_ws.setMonitorWorkspace(monitor_ws)
