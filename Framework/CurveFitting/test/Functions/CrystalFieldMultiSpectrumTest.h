@@ -371,6 +371,47 @@ public:
     TS_ASSERT_LESS_THAN(chi2, 100.0);
   }
 
+  void test_ties_in_composite_function() {
+    std::string funDef =
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,Symmetry=C2v,Temperatures=(44.0,"
+        "50),FWHMs=(1.1,0.9),B44=-0.115325956893,B40=0.0844136192563,B42=-0."
+        "459507287606,B22=4.36779676967;name=CrystalFieldMultiSpectrum,Ion=Pr,"
+        "Symmetry=C2v,Temperatures=(44.0,50),FWHMs=(1.1,0.9),B44=-0."
+        "115325956893,B40=0.0844136192563,B42=-0.459507287606,B22=4."
+        "36779676967;ties=(f1.IntensityScaling0=2.0*f0.IntensityScaling0,f1."
+        "IntensityScaling1=2.0*f0.IntensityScaling1,f0.f0.f1.FWHM=f1.f0.f1.FWHM/2)";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    {
+      auto index = fun->parameterIndex("f1.IntensityScaling0");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(),
+                       "f1.IntensityScaling0=2.0*f0.IntensityScaling0");
+    }
+    {
+      auto index = fun->parameterIndex("f1.IntensityScaling1");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(),
+                       "f1.IntensityScaling1=2.0*f0.IntensityScaling1");
+    }
+    {
+      auto index = fun->parameterIndex("f0.f0.f1.FWHM");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(), "f0.f0.f1.FWHM=f1.f0.f1.FWHM/2");
+    }
+  }
+
 private:
   Workspace_sptr createWorkspace() {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 100, 100);
