@@ -863,14 +863,12 @@ MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view,
   if (VatesViewerInterface::MDHW == workspaceType) {
     // Histo workspaces cannot have a splatter plot,
     if (view == ModeControlWidget::SPLATTERPLOT) {
-      g_log.notice()
-          << "The preferred initial view favours the splatterplot as initial "
-             "view, "
-          << "but an MDHisto workspace is being loaded. An MDHisto workspace "
-          << "cannot be loaded into a splatterplot view. Defaulted to standard "
-             "view. \n";
+      g_log.notice("The preferred initial view favours the splatterplot "
+                   "as initial view, but an MDHisto workspace is being "
+                   "loaded. A MDHisto workspace cannot be loaded into a "
+                   "splatterplot view. Defaulted to MultiSlice view.");
 
-      selectedView = ModeControlWidget::STANDARD;
+      selectedView = ModeControlWidget::MULTISLICE;
     } else {
       selectedView = view;
     }
