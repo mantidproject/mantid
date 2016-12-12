@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <gsl/gsl_math.h>
@@ -371,6 +372,21 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *, const double *,
 void IkedaCarpenterPV::functionDeriv(const API::FunctionDomain &domain,
                                      API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
+}
+
+/// Returns the integral intensity of the peak
+double IkedaCarpenterPV::intensity() const {
+  auto interval = getDomainInterval(1e-2);
+
+  API::PeakFunctionIntegrator integrator;
+  API::IntegrationResult result =
+      integrator.integrate(*this, interval.first, interval.second);
+
+  if (!result.success) {
+    return 0.0;
+  }
+
+  return result.result;
 }
 
 } // namespace Functions

@@ -219,7 +219,6 @@ private:
   QLineEdit *functionArguments;
   QComboBox *defaultPeakShape;
   QSpinBox *findPeaksFWHM, *findPeaksTolerance;
-  QSpinBox *peakRadius;
   QSpinBox *decimals;
   /// mantid options page
   QWidget *mantidOptionsPage;
