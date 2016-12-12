@@ -924,6 +924,7 @@ size_t ExperimentInfo::numberOfDetectorGroups() const {
 
 const std::set<detid_t> &
 ExperimentInfo::detectorIDsInGroup(const size_t index) const {
+  // TODO NO! This is wrong!
   const auto detID = sptr_instrument->getDetectorIDs()[index];
   return m_detgroups.at(detID);
 }
