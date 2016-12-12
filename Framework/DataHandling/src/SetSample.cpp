@@ -3,12 +3,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
@@ -19,33 +22,15 @@
 namespace Mantid {
 namespace DataHandling {
 
+using Geometry::Goniometer;
+using Geometry::ReferenceFrame;
 using Geometry::SampleEnvironment;
 using Kernel::Logger;
+using Kernel::PropertyWithValue;
+using Kernel::Quat;
 using Kernel::V3D;
 
 namespace {
-
-/**
- * Retrieve "Axis" property value. The most commmon use case is calling
- * this algorithm from Python where Axis is input as a C long. The
- * definition of long varies across platforms and long v = args.getProperty()
- * is currently unable to cope so we go via the long route to retrieve
- * the value.
- * @param args Dictionary-type containing the argument
- */
-int64_t getAxisIndex(const Kernel::PropertyManager &args) {
-  using Kernel::Property;
-  using Kernel::PropertyWithValue;
-  int64_t axisIdx(1);
-  if (args.existsProperty("Axis")) {
-    Kernel::Property *axisProp = args.getProperty("Axis");
-    axisIdx = static_cast<PropertyWithValue<int64_t> *>(axisProp)->operator()();
-    if (axisIdx < 0 || axisIdx > 2)
-      throw std::invalid_argument(
-          "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
-  }
-  return axisIdx;
-}
 
 /**
   * Return the centre coordinates of the base of a cylinder given the
@@ -55,7 +40,7 @@ int64_t getAxisIndex(const Kernel::PropertyManager &args) {
   * @param axis The index of the height-axis of the cylinder
   */
 V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
-                  int64_t axisIdx) {
+                  unsigned axisIdx) {
   const V3D halfHeight = [&]() {
     switch (axisIdx) {
     case 0:
@@ -76,7 +61,7 @@ V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
  * @param axisIdx Index 0,1,2 for the axis of a cylinder
  * @return A string containing the axis tag for this index
  */
-std::string axisXML(int64_t axisIdx) {
+std::string axisXML(unsigned axisIdx) {
   switch (axisIdx) {
   case 0:
     return "<axis x=\"1\" y=\"0\" z=\"0\" />";
@@ -180,7 +165,7 @@ void SetSample::exec() {
   // combined with this
   const SampleEnvironment *sampleEnviron(nullptr);
   if (environArgs) {
-    sampleEnviron = setSampleEnvironment(workspace, *environArgs);
+    sampleEnviron = setSampleEnvironment(workspace, environArgs);
   }
 
   if (geometryArgs || sampleEnviron) {
@@ -201,13 +186,13 @@ void SetSample::exec() {
  */
 const Geometry::SampleEnvironment *
 SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
-                                const Kernel::PropertyManager &args) {
+                                const Kernel::PropertyManager_sptr &args) {
   using Geometry::SampleEnvironmentSpecFileFinder;
   using Geometry::SampleEnvironmentFactory;
   using Kernel::ConfigService;
 
-  const std::string envName = args.getPropertyValue("Name");
-  const std::string canName = args.getPropertyValue("Container");
+  const std::string envName = args->getPropertyValue("Name");
+  const std::string canName = args->getPropertyValue("Container");
   // The specifications need to be qualified by the facility and instrument.
   // Check instrument for name and then lookup facility if facility
   // is unknown then set to default facility & instrument.
@@ -248,7 +233,7 @@ SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
  * @return A string containing the XML definition of the shape
  */
 void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
-                               const Kernel::PropertyManager_sptr &args,
+                               Kernel::PropertyManager_sptr &args,
                                const Geometry::SampleEnvironment *sampleEnv) {
   using Geometry::Container;
   /* The sample geometry can be specified in two ways:
@@ -258,10 +243,13 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
   */
 
   // Try known shapes or CSG first if supplied
-  const auto xml = tryCreateXMLFromArgsOnly(args);
-  if (!xml.empty()) {
-    runSetSampleShape(workspace, xml);
-    return;
+  if (args) {
+    auto refFrame = workspace->getInstrument()->getReferenceFrame();
+    const auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
+    if (!xml.empty()) {
+      runSetSampleShape(workspace, xml);
+      return;
+    }
   }
   // Any arguments in the args dict are assumed to be values that should
   // override the default set by the sampleEnv samplegeometry if it exists
@@ -300,23 +288,25 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
 /**
  * Create the required XML for a given shape type plus its arguments
  * @param args A dict of flags defining the shape
+ * @param refFrame Defines the reference frame for the shape
  * @return A string containing the XML if possible or an empty string
  */
 std::string
-SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args) {
+SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
+                                    const Geometry::ReferenceFrame &refFrame) {
   std::string result;
-  if (!args || !args->existsProperty("Shape")) {
+  if (!args.existsProperty("Shape")) {
     return result;
   }
 
-  const auto shape = args->getPropertyValue("Shape");
+  const auto shape = args.getPropertyValue("Shape");
   if (shape == "CSG") {
-    result = args->getPropertyValue("Value");
+    result = args.getPropertyValue("Value");
   } else if (shape == "FlatPlate") {
-    result = createFlatPlateXML(*args);
+    result = createFlatPlateXML(args, refFrame);
   } else if (boost::algorithm::ends_with(shape, "Cylinder")) {
     result = createCylinderLikeXML(
-        *args, boost::algorithm::starts_with(shape, "Hollow"));
+        args, refFrame, boost::algorithm::starts_with(shape, "Hollow"));
   } else {
     throw std::invalid_argument(
         "Unknown 'Shape' argument provided in "
@@ -332,42 +322,65 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args) {
 /**
  * Create the XML required to define a flat plate from the given args
  * @param args A user-supplied dict of args
+ * @param refFrame Defines the reference frame for the shape
  * @return The XML definition string
  */
 std::string
-SetSample::createFlatPlateXML(const Kernel::PropertyManager &args) const {
-  // X
-  double widthInCM = args.getProperty("Width");
-  // Y
-  double heightInCM = args.getProperty("Height");
-  // Z
-  double thickInCM = args.getProperty("Thick");
-  std::vector<double> center = args.getProperty("Center");
-  // convert to metres
-  std::transform(center.begin(), center.end(), center.begin(),
-                 [](double val) { return val *= 0.01; });
-
-  // Half lengths in metres (*0.01*0.5)
+SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
+                              const Geometry::ReferenceFrame &refFrame) const {
+  // Helper to take 3 coordinates and turn them to a V3D respecting the
+  // current reference frame
+  auto makeV3D = [&refFrame](double x, double y, double z) {
+    V3D v;
+    v[refFrame.pointingHorizontal()] = x;
+    v[refFrame.pointingUp()] = y;
+    v[refFrame.pointingAlongBeam()] = z;
+    return v;
+  };
+  const double widthInCM = args.getProperty("Width");
+  const double heightInCM = args.getProperty("Height");
+  const double thickInCM = args.getProperty("Thick");
+  // Convert to half-"width" in metres
   const double szX = (widthInCM * 5e-3);
   const double szY = (heightInCM * 5e-3);
   const double szZ = (thickInCM * 5e-3);
+  // Contruct cuboid corners. Define points about origin, rotate and then
+  // translate to final center position
+  auto lfb = makeV3D(szX, -szY, -szZ);
+  auto lft = makeV3D(szX, szY, -szZ);
+  auto lbb = makeV3D(szX, -szY, szZ);
+  auto rfb = makeV3D(-szX, -szY, -szZ);
+  // optional rotation about the center of object
+  if (args.existsProperty("Angle")) {
+    Goniometer gr;
+    const auto upAxis = makeV3D(0, 1, 0);
+    gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(),
+                args.getProperty("Angle"), Geometry::CCW, Geometry::angDegrees);
+    auto &rotation = gr.getR();
+    lfb.rotate(rotation);
+    lft.rotate(rotation);
+    lbb.rotate(rotation);
+    rfb.rotate(rotation);
+  }
+  std::vector<double> center = args.getProperty("Center");
+  const V3D centrePos(center[0] * 0.01, center[1] * 0.01, center[2] * 0.01);
+  // translate to true center after rotation
+  lfb += centrePos;
+  lft += centrePos;
+  lbb += centrePos;
+  rfb += centrePos;
 
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"sample-shape\"> "
-                 << "<left-front-bottom-point x=\"" << szX + center[0]
-                 << "\" y=\"" << -szY + center[1] << "\" z=\""
-                 << -szZ + center[2] << "\"  /> "
-                 << "<left-front-top-point  x=\"" << szX + center[0]
-                 << "\" y=\"" << szY + center[1] << "\" z=\""
-                 << -szZ + center[2] << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << szX + center[0]
-                 << "\" y=\"" << -szY + center[1] << "\" z=\""
-                 << szZ + center[2] << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << -szX + center[0]
-                 << "\" y=\"" << -szY + center[1] << "\" z=\""
-                 << -szZ + center[2] << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << lfb.X() << "\" y=\""
+                 << lfb.Y() << "\" z=\"" << lfb.Z() << "\"  /> "
+                 << "<left-front-top-point  x=\"" << lft.X() << "\" y=\""
+                 << lft.Y() << "\" z=\"" << lft.Z() << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << lbb.X() << "\" y=\""
+                 << lbb.Y() << "\" z=\"" << lbb.Z() << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rfb.X() << "\" y =\""
+                 << rfb.Y() << "\" z=\"" << rfb.Z() << "\"  /> "
                  << "</cuboid>";
-
   return xmlShapeStream.str();
 }
 
@@ -379,6 +392,7 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args) const {
  */
 std::string
 SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
+                                 const Geometry::ReferenceFrame &refFrame,
                                  bool hollow) const {
   const std::string tag = hollow ? "hollow-cylinder" : "cylinder";
   double height = args.getProperty("Height");
@@ -386,7 +400,6 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   double outerRadius =
       hollow ? args.getProperty("OuterRadius") : args.getProperty("Radius");
   std::vector<double> centre = args.getProperty("Center");
-  int64_t axisIdx = getAxisIndex(args);
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;
@@ -395,6 +408,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
                  [](double val) { return val *= 0.01; });
   // XML needs center position of bottom base but user specifies center of
   // cylinder
+  const unsigned axisIdx = static_cast<unsigned>(refFrame.pointingUp());
   const V3D baseCentre = cylBaseCentre(centre, height, axisIdx);
 
   std::ostringstream xmlShapeStream;

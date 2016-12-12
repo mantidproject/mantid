@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/SetSample.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Rules.h"
@@ -201,6 +202,7 @@ public:
   void test_Setting_Geometry_As_FlatPlate() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -214,13 +216,45 @@ public:
     auto tag = sampleShape.getShapeXML().find("cuboid");
     TS_ASSERT(tag != std::string::npos);
 
-    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0, 0.01)));
+    // Center
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.01, 0, 0)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.0105, 0.025, 0.02)));
+    // Origin
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0, 0.0)));
+  }
+
+  void test_Setting_Geometry_As_FlatPlate_With_Rotation() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWS);
+    const double angle(45.0);
+    alg->setProperty("Geometry", createFlatPlateGeometryProps(angle));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    auto tag = sampleShape.getShapeXML().find("cuboid");
+    TS_ASSERT(tag != std::string::npos);
+
+    // Center should be preserved inside the shape
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.01, 0, 0)));
+    // V3D(0.0005, 0.025, 0.02) rotated by 45 degrees CCW and translated
+    // to center
+    TS_ASSERT_EQUALS(true,
+                     sampleShape.isValid(V3D(-0.00732412, 0.01803122, 0.02)));
+    // End of horizontal axis should now not be inside the object
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.025, 0)));
   }
 
   void test_Setting_Geometry_As_Cylinder() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -234,15 +268,16 @@ public:
     auto tag = sampleShape.getShapeXML().find("cylinder");
     TS_ASSERT(tag != std::string::npos);
 
-    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.009, 0.015)));
-    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, -0.009, 0.015)));
-    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.011, 0.015)));
-    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, -0.011, 0.015)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
   }
 
   void test_Setting_Geometry_As_HollowCylinder() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
 
     auto alg = createAlgorithm();
     alg->setProperty("InputWorkspace", inputWS);
@@ -253,10 +288,10 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.009, 0.045)));
-    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, -0.009, 0.045)));
-    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.011, 0.045)));
-    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, -0.011, 0.045)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
   }
 
   //----------------------------------------------------------------------------
@@ -325,6 +360,16 @@ private:
     return std::move(alg);
   }
 
+  void setTestReferenceFrame(Mantid::API::MatrixWorkspace_sptr workspace) {
+    using Mantid::Geometry::Instrument;
+    using Mantid::Geometry::ReferenceFrame;
+    // Use Z=up,Y=across,X=beam so we test it listens to the reference frame
+    auto inst = boost::make_shared<Instrument>();
+    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+        Mantid::Geometry::Z, Mantid::Geometry::X, Mantid::Geometry::Right, ""));
+    workspace->setInstrument(inst);
+  }
+
   Mantid::Kernel::PropertyManager_sptr createMaterialProps() {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
@@ -373,7 +418,8 @@ private:
     return props;
   }
 
-  Mantid::Kernel::PropertyManager_sptr createFlatPlateGeometryProps() {
+  Mantid::Kernel::PropertyManager_sptr
+  createFlatPlateGeometryProps(double angle = 0.0) {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
     using DoubleProperty = PropertyWithValue<double>;
@@ -388,10 +434,13 @@ private:
         Mantid::Kernel::make_unique<DoubleProperty>("Height", 4), "");
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleProperty>("Thick", 0.1), "");
-    std::vector<double> center{0, 0, 1};
+    std::vector<double> center{1, 0, 0};
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
-
+    if (angle != 0.0) {
+      props->declareProperty(
+          Mantid::Kernel::make_unique<DoubleProperty>("Angle", angle), "");
+    }
     return props;
   }
 
@@ -412,8 +461,6 @@ private:
     std::vector<double> center{0, 0, 1};
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
-    props->declareProperty(Mantid::Kernel::make_unique<IntProperty>("Axis", 1),
-                           "");
 
     return props;
   }
@@ -438,8 +485,6 @@ private:
     std::vector<double> center{0, 0, 1};
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
-    props->declareProperty(Mantid::Kernel::make_unique<IntProperty>("Axis", 1),
-                           "");
 
     return props;
   }
@@ -458,6 +503,7 @@ private:
       throw std::runtime_error("Expected SurfPoint as top rule");
     }
   }
+
   std::string m_testRoot;
   // Use the TEST_LIVE entry in Facilities
   const std::string m_facilityName = "TEST_LIVE";
