@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
@@ -15,7 +12,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -621,7 +621,7 @@ void GroupDetectors2::processGroupingWorkspace(
             unUsedSpec[targetWSIndex] = (USED);
           }
         }
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
+      } catch (const Mantid::Kernel::Exception::NotFoundError &) {
         // the detector was not found - don't add it
       }
     }
@@ -687,7 +687,7 @@ void GroupDetectors2::processMatrixWorkspace(
           }
         }
       }
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (const Mantid::Kernel::Exception::NotFoundError &) {
       // the detector was not found - don't add it
     }
   }

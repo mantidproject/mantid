@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -142,7 +143,7 @@ void SaveGSS::exec() {
     errss << "Number of Spectra (" << nHist
           << ") cannot be larger than 99 for GSAS file";
     g_log.error(errss.str());
-    throw new std::invalid_argument(errss.str());
+    throw std::invalid_argument(errss.str());
   }
 
   std::string filename = getProperty("Filename");
@@ -160,8 +161,7 @@ void SaveGSS::exec() {
 
   // Check whether append or not
   if (!split) {
-    const std::string file(filename);
-    Poco::File fileobj(file);
+    Poco::File fileobj(filename);
     if (fileobj.exists() && !append) {
       // Non-append mode and will be overwritten
       g_log.warning() << "Target GSAS file " << filename

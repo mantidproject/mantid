@@ -240,8 +240,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   numMasked = 0;
   numZeros = 0;
 
-  const auto &spectrumInfo =
-      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
+  const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto i : this->m_indices) {
     // Don't go outside the range.
@@ -350,12 +349,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numMasked = 0;
   numZeros = 0;
 
-  // Careful: SumSpectra is called in an OpenMP by other algorithms (on distinct
-  // workspaces) so we manually disable the thread context check here. This will
-  // go wrong if clients call SumSpectra on the same workspace in different
-  // threads at the same time.
-  const auto &spectrumInfo =
-      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
+  const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto i : m_indices) {
     // Don't go outside the range.
@@ -444,8 +438,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   outEL.setSpectrumNo(m_outSpecNum);
   outEL.clearDetectorIDs();
 
-  const auto &spectrumInfo =
-      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
+  const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   size_t numSpectra(0);
   size_t numMasked(0);

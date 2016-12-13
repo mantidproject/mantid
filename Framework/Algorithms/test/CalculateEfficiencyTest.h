@@ -1,6 +1,7 @@
 #ifndef CALCULATEEFFICIENCYTEST_H_
 #define CALCULATEEFFICIENCYTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidDataHandling/LoadSpice2D.h"

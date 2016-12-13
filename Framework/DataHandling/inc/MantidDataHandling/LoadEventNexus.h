@@ -382,7 +382,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 
   // Ticket #2049: Cleanup all loadinstrument members to a single instance
   // If requested update the instrument to positions in the data file
-  const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
+  const auto &pmap = localWorkspace->constInstrumentParameters();
   if (!pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                      "det-pos-source"))
     return executionSuccessful;

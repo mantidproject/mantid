@@ -21,7 +21,7 @@ public:
   StripPeaksTest() {
     FrameworkManager::Instance();
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 200, 0.5, 0.02);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200, 0.5, 0.02);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
@@ -111,7 +111,7 @@ public:
   void setUp() override {
     FrameworkManager::Instance();
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 200, 0.5, 0.02);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200, 0.5, 0.02);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 

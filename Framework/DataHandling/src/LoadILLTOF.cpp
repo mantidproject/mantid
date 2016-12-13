@@ -1,6 +1,3 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/LoadILLTOF.h"
 
 #include "MantidAPI/Axis.h"
@@ -11,6 +8,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -20,10 +19,6 @@ using namespace NeXus;
 using namespace HistogramData;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
-
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -546,9 +541,13 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
 
   auto const &instrument = m_localWorkspace->getInstrument();
 
+  std::vector<detid_t> monitorIDs = instrument->getMonitors();
+
   for (const auto &monitor : monitors) {
-    m_localWorkspace->setHistogram(spec++, m_localWorkspace->binEdges(0),
+    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0),
                                    Counts(monitor.begin(), monitor.end()));
+    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
+    spec++;
   }
 
   std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);

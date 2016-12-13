@@ -6,6 +6,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/AlgorithmRunner.h"

@@ -26,8 +26,6 @@
 vtkStandardNewMacro(vtkMDEWNexusReader)
 
     using namespace Mantid::VATES;
-using Mantid::Geometry::IMDDimension_sptr;
-using Mantid::Geometry::IMDDimension_sptr;
 
 vtkMDEWNexusReader::vtkMDEWNexusReader()
     : FileName{nullptr}, m_loadInMemory{false}, m_depth{1}, m_time{0},
@@ -169,7 +167,7 @@ int vtkMDEWNexusReader::CanReadFile(const char *fname) {
   return temp.canReadFile();
 }
 
-unsigned long vtkMDEWNexusReader::GetMTime() { return Superclass::GetMTime(); }
+vtkMTimeType vtkMDEWNexusReader::GetMTime() { return Superclass::GetMTime(); }
 
 /**
   Update/Set the progress.

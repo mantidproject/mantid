@@ -116,11 +116,11 @@ private:
     if (doMasked) {
       masked.insert(0);
     }
-    return WorkspaceCreationHelper::Create2DWorkspace123(4, 3, true, masked);
+    return WorkspaceCreationHelper::create2DWorkspace123(4, 3, true, masked);
   }
 
   EventWorkspace_sptr createEventWorkspace() {
-    return WorkspaceCreationHelper::CreateEventWorkspace();
+    return WorkspaceCreationHelper::createEventWorkspace();
   }
 };
 

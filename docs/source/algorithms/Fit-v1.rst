@@ -209,6 +209,16 @@ Currently only the following functions can be used in a fit with "Histogram" eva
 If any other functions need to be included in the list please leave a request at the
 `Forum <http://forum.mantidproject.org/>`_.
 
+Peak Radius
+###########
+
+The effect of setting `PeakRadius` to a non-default value can be seen from next figure.
+
+.. figure:: /images/PeakRadius_Fit.png
+   :width: 700
+
+It can be used to speed up computations but there is a danger of introducing higher errors.
+
 
 Output
 ######

@@ -251,20 +251,19 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   double binningScaling = double(numBins) / (lengthInInput);
 
   // Extract the arguments
-  std::string id = name;
   std::string units = Strings::strip(strs[0]);
 
   // Create the appropriate frame
   auto frame = createMDFrameForNonAxisAligned(units, basis);
 
   // Create the output dimension
-  MDHistoDimension_sptr out(
-      new MDHistoDimension(name, id, *frame, static_cast<coord_t>(min),
-                           static_cast<coord_t>(max), numBins));
+  auto out = boost::make_shared<MDHistoDimension>(
+      name, name, *frame, static_cast<coord_t>(min), static_cast<coord_t>(max),
+      numBins);
 
   // Put both in the algo for future use
   m_bases.push_back(basis);
-  m_binDimensions.push_back(out);
+  m_binDimensions.push_back(std::move(out));
   m_binningScaling.push_back(binningScaling);
   m_transformScaling.push_back(transformScaling);
 }
@@ -430,8 +429,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
     auto ctTo = new DataObjects::CoordTransformAffine(inD, m_outD);
-    Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
-    Matrix<coord_t> toMatrix = fromMatrix;
+    Matrix<coord_t> toMatrix = ctFrom->getMatrix();
     // Invert the affine matrix to get the reverse transformation
     toMatrix.Invert();
     ctTo->setMatrix(toMatrix);

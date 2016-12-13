@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name
 # simply just print out all algorithm names in a directory which can be piped
 # to a file
-
+import os
 import glob
 
 os.chdir("PythonInterface/plugins/algorithms/WorkflowAlgorithms")

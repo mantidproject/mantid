@@ -9,9 +9,11 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -758,8 +760,8 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     return false;
   }
 
-  const Geometry::ParameterMap &ws1_parmap = ws1->instrumentParameters();
-  const Geometry::ParameterMap &ws2_parmap = ws2->instrumentParameters();
+  const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
+  const Geometry::ParameterMap &ws2_parmap = ws2->constInstrumentParameters();
 
   if (ws1_parmap != ws2_parmap) {
     g_log.debug()

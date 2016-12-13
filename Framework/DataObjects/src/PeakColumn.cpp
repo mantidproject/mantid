@@ -3,6 +3,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <boost/variant/get.hpp>
 

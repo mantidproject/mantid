@@ -199,7 +199,7 @@ void PoldiAnalyseResiduals::exec() {
       boost::make_shared<PoldiInstrumentAdapter>(measured);
   // Dead wires need to be taken into account
   PoldiAbstractDetector_sptr deadWireDetector =
-      boost::make_shared<PoldiDeadWireDecorator>(measured->getInstrument(),
+      boost::make_shared<PoldiDeadWireDecorator>(measured->detectorInfo(),
                                                  poldiInstrument->detector());
 
   // Since the valid workspace indices are required for some calculations, we

@@ -10,6 +10,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 
+// PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.tcc"
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/scoped_array.hpp>

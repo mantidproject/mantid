@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_SLICEMDTEST_H_
 #define MANTID_MDEVENTS_SLICEMDTEST_H_
 
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
