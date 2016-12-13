@@ -115,7 +115,8 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         with open(AbinsTestHelpers.find_file(filename + "_data.txt")) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
-        array = np.loadtxt(AbinsTestHelpers.find_file(filename + "_atomic_displacements_data.txt")).view(complex).reshape(-1)
+        array = np.loadtxt(AbinsTestHelpers.find_file(filename +
+                                                      "_atomic_displacements_data.txt")).view(complex).reshape(-1)
         k = len(correct_data["datasets"]["k_points_data"]["weights"])
         atoms = len(correct_data["datasets"]["atoms_data"])
         array = array.reshape(k, atoms, atoms * 3, 3)

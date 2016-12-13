@@ -31,7 +31,7 @@ def skip_if(skipping_criteria):
 @skip_if(old_python)
 class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
-    temperature = 10  # 10 K,  temperature for the benchmark
+    temperature = 10  # 10 K
 
     # data
     # Use case: one k-point
