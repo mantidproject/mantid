@@ -3,7 +3,6 @@
 
 #include "MantidBeamline/DllConfig.h"
 
-
 namespace Mantid {
 namespace Beamline {
 
@@ -31,7 +30,14 @@ namespace Beamline {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_BEAMLINE_DLL DetectorInfo {
-public:};
+public:
+  DetectorInfo(const size_t numberOfDetectors);
+
+  size_t size() const;
+
+private:
+  size_t m_size;
+};
 
 } // namespace Beamline
 } // namespace Mantid
