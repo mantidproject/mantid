@@ -4,9 +4,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
-
-#include "MantidQtCustomInterfaces/Tomography/TomographyCommandArguments.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
