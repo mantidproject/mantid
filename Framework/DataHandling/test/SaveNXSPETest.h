@@ -6,6 +6,7 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -28,7 +29,7 @@ using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IDetector_const_sptr;
 
-static const int THEMASKED = 2;
+static const int THEMASKED = 1;
 
 class SaveNXSPETest : public CxxTest::TestSuite {
 public:
@@ -160,11 +161,7 @@ private:
     }
 
     // mask the detector
-    ParameterMap *m_Pmap = &(inputWS->instrumentParameters());
-    boost::shared_ptr<const Instrument> instru = inputWS->getInstrument();
-    IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
-    TS_ASSERT(toMask);
-    m_Pmap->addBool(toMask.get(), "masked", true);
+    inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 
     // required to get it passed the algorthms validator
     inputWS->setDistribution(true);

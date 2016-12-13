@@ -36,9 +36,14 @@ public:
                                       &mockSettingsPresenter,
                                       &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions())
+    EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(0))
         .Times(Exactly(1));
-    presenter.getTransmissionOptions();
+    presenter.getTransmissionOptions(0);
+
+    EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(1))
+        .Times(Exactly(1));
+    presenter.getTransmissionOptions(1);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
   }
 
@@ -51,8 +56,14 @@ public:
                                       &mockSettingsPresenter,
                                       &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsPresenter, getReductionOptions()).Times(Exactly(1));
-    presenter.getReductionOptions();
+    EXPECT_CALL(mockSettingsPresenter, getReductionOptions(0))
+        .Times(Exactly(1));
+    presenter.getReductionOptions(0);
+
+    EXPECT_CALL(mockSettingsPresenter, getReductionOptions(1))
+        .Times(Exactly(1));
+    presenter.getReductionOptions(1);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
   }
 
@@ -65,8 +76,12 @@ public:
                                       &mockSettingsPresenter,
                                       &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsPresenter, getStitchOptions()).Times(Exactly(1));
-    presenter.getStitchOptions();
+    EXPECT_CALL(mockSettingsPresenter, getStitchOptions(0)).Times(Exactly(1));
+    presenter.getStitchOptions(0);
+
+    EXPECT_CALL(mockSettingsPresenter, getStitchOptions(1)).Times(Exactly(1));
+    presenter.getStitchOptions(1);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
   }
 

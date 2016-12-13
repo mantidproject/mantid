@@ -325,6 +325,7 @@ public:
     alg2.setPropertyValue("OutputWorkspace", "outws");
     alg2.execute();
     MatrixWorkspace_sptr stitched2 = alg2.getProperty("OutputWorkspace");
+
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), stitched2->x(0).rawData());
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), stitched2->y(0).rawData());
     TS_ASSERT_EQUALS(stitched->e(0).rawData(), stitched2->e(0).rawData());
@@ -836,6 +837,7 @@ public:
 
     // Second item in the output group
     stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
