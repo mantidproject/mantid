@@ -76,7 +76,7 @@ class ProjectManager(object):
         # create workspace directory
         self.create_workspace_directory()
 
-        print '[INFO] Saving %d MDEventWorkspaces to %s' % (len(self._wsList), self._wsDir)
+        print '[INFO] Saving {0} MDEventWorkspaces to {1}.'.format(len(self._wsList), self._wsDir)
 
         # save MDs
         for ws_name in self._wsList:

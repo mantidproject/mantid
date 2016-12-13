@@ -252,7 +252,7 @@ class IntegratePeaksThread(QThread):
                                                                                    mask_ws_name=self._selectedMaskName)
             except ValueError as val_err:
                 status = False
-                ret_obj = 'Unable to integrate scan %d due to %s.' % (scan_number, str(val_err))
+                ret_obj = 'Unable to integrate scan {0} due to {1}.'.format(scan_number, str(val_err))
 
             # handle integration error
             if status:

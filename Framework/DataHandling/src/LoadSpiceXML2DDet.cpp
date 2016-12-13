@@ -204,7 +204,7 @@ void LoadSpiceXML2DDet::init() {
   declareProperty("UserSpecifiedWaveLength", EMPTY_DBL(),
                   "User can specify the wave length of the instrument if it is "
                   "drifted from the designed value."
-                  "It haappens often.");
+                  "It happens often.");
 
   declareProperty(
       "ShiftedDetectorDistance", 0.,
@@ -549,7 +549,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
           }
         }
 
-        // Updae column index (i.e., column number)
+        // Update column index (i.e., column number)
         i_col += 1;
       } // END-FOR (i-vec line)
 
