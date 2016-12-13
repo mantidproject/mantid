@@ -4,12 +4,8 @@ Identifies upstream and downstream diamonds and assigns matrices to them
 '''
 
 # Import all needed libraries
-from matplotlib import pyplot as plt
 import numpy as np
-import csv
 import itertools as itt
-import cmath
-import scipy.optimize as sp
 
 # Function to read the reflections measured
 
