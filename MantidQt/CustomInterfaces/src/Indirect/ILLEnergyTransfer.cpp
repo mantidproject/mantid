@@ -249,7 +249,7 @@ void ILLEnergyTransfer::plot() {
                     "from IndirectReductionCommon import plot_reduction\n";
   pyInput += "plot_reduction(mtd[\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "\"].getItem(0).getName(),\"Contour\")\n";
+  pyInput += "_red\"].getItem(0).getName(),\"Contour\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
@@ -260,9 +260,9 @@ void ILLEnergyTransfer::save() {
   QString pyInput;
   pyInput += "SaveNexusProcessed(\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "\",\"";
+  pyInput += "_red\",\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += ".nxs\")\n";
+  pyInput += "_red.nxs\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 

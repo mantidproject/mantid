@@ -24,10 +24,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _runs = None
 
     def category(self):
-        return "Workflow\\MIDAS;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
 
     def summary(self):
-        return 'Performs quasi-elastic neutron scattering (QENS) multiple file reduction for ILL indirect geometry data, instrument IN16B.'
+        return 'Performs quasi-elastic neutron scattering (QENS) multiple file reduction ' \
+               'for ILL indirect geometry data, instrument IN16B.'
 
     def name(self):
         return "IndirectILLReductionQENS"
@@ -83,10 +84,17 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['xml']),
+                                          extensions=['map','xml']),
                              doc='Filename of the detector grouping map file to use. \n'
-                                 'If left blank the default will be used '
-                                 '(i.e. all vertical pixels will be summed in each PSD tube.)')
+                                 'By default all the pixels will be summed per each tube. \n'
+                                 'Use .map or .xml file (see GroupDetectors documentation) '
+                                 'only if different range is needed for each tube.')
+
+        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1,128],
+                             doc='Integration range of vertical pixels in each PSD tube. \n'
+                                 'By default all the pixels will be summed per each tube. \n'
+                                 'Use this option if the same range (other than default) '
+                                 'is needed for all the tubes.')
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -139,6 +147,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
         self._common_args['Analyser'] = self.getPropertyValue('Analyser')
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
+        self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
         self._common_args['CropDeadMonitorChannels'] = self.getProperty('CropDeadMonitorChannels').value
 
         if self._sum_all_runs is True:

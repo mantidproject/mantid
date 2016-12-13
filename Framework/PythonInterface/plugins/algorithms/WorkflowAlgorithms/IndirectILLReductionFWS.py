@@ -24,15 +24,13 @@ class IndirectILLReductionFWS(PythonAlgorithm):
     _back_scaling = None
     _criteria = None
     _progress = None
-    _analyser = None
-    _reflection = None
     _back_option = None
     _calib_option = None
     _common_args = {}
     _all_runs = None
 
     def category(self):
-        return 'Workflow\\MIDAS;Inelastic\\Reduction'
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
 
     def summary(self):
         return 'Performs fixed-window scan (FWS) multiple file reduction (both elastic and inelastic) ' \
@@ -80,10 +78,17 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['xml']),
+                                          extensions=['map','xml']),
                              doc='Filename of the detector grouping map file to use. \n'
-                                 'If left blank the default will be used '
-                                 '(i.e. all vertical pixels will be summed in each PSD tube.)')
+                                 'By default all the pixels will be summed per each tube. \n'
+                                 'Use .map or .xml file (see GroupDetectors documentation) '
+                                 'only if different range is needed for each tube.')
+
+        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1,128],
+                             doc='Integration range of vertical pixels in each PSD tube. \n'
+                                 'By default all the pixels will be summed per each tube. \n'
+                                 'Use this option if the same range (other than default) '
+                                 'is needed for all the tubes.')
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -120,6 +125,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
         self._common_args['Analyser'] = self.getPropertyValue('Analyser')
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
+        self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
 
         self._red_ws = self.getPropertyValue('OutputWorkspace') + '_red'
 

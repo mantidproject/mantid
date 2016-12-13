@@ -40,9 +40,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _dead_channels = None
     _ws = None
     _red_ws = None
+    _psd_int_range = None
+    _use_map_file = None
 
     def category(self):
-        return "Workflow\\MIDAS;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
 
     def summary(self):
         return 'Performs energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
@@ -57,9 +59,17 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
-                                          extensions=['xml']),
+                                          extensions=['map','xml']),
                              doc='Filename of the detector grouping map file to use. \n'
-                                 'If left blank the default will be used.')
+                                 'By default all the pixels will be summed per each tube. \n'
+                                 'Use .map or .xml file (see GroupDetectors documentation) '
+                                 'only if different range is needed for each tube.')
+
+        self.declareProperty(name='ManualPSDIntegrationRange',defaultValue=[1,128],
+                             doc='Integration range of vertical pixels in each PSD tube. \n'
+                                 'By default all the pixels will be summed per each tube. \n'
+                                 'Use this option if the same range (other than default) '
+                                 'is needed for all the tubes.')
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -83,6 +93,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         issues = dict()
 
+        self._psd_int_range = self.getProperty('ManualPSDIntegrationRange').value
+
+        if len(self._psd_int_range) != 2:
+            issues['ManualPSDIntegrationRange'] = 'Specify comma separated pixel range, e.g. 1,128'
+        elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > 128 \
+                or self._psd_int_range[0] >= self._psd_int_range[1]:
+            issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
+
         return issues
 
     def setUp(self):
@@ -93,6 +111,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._reflection = self.getPropertyValue('Reflection')
         self._dead_channels = self.getProperty('CropDeadMonitorChannels').value
         self._red_ws = self.getPropertyValue('OutputWorkspace')
+
+        if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == 128):
+            self._use_map_file = True
+        else:
+            self._use_map_file = False
 
     def _load_map_file(self):
         """
@@ -108,15 +131,16 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._parameter_file = os.path.join(idf_directory, ipf_name)
         self.log().information('Set parameter file : {0}'.format(self._parameter_file))
 
-        if self._map_file == '':
-            # path name for default map file
-            if self._instrument.hasParameter('Workflow.GroupingFile'):
-                grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
-                self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
-            else:
-                raise RuntimeError("Failed to find default detector grouping file. Please specify manually.")
+        if self._use_map_file:
+            if self._map_file == '':
+                # path name for default map file
+                if self._instrument.hasParameter('Workflow.GroupingFile'):
+                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
+                    self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+                else:
+                    raise RuntimeError("Failed to find default detector grouping file. Please specify manually.")
 
-        self.log().information('Set detector map file : {0}'.format(self._map_file))
+            self.log().information('Set detector map file : {0}'.format(self._map_file))
 
     def _mask(self, ws, xstart, xend):
         """
@@ -280,7 +304,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=mon, WorkspaceIndex=0)
 
-        GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, MapFile=self._map_file, Behaviour='Sum')
+        if self._use_map_file:
+            GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, MapFile=self._map_file)
+        else:
+            self._group_detectors_with_range(ws)
 
         xmin, xmax = self._monitor_zero_range(mon)
 
@@ -298,6 +325,33 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         DeleteWorkspace(mon)
 
         self._convert_to_energy(ws, n_cropped_bins)
+
+    def _group_detectors_with_range(self, ws):
+        """
+        Groups (sums) the multi-detector's pixels according to given range
+        @param ws :: input workspace name
+        """
+        pattern = ''
+
+        for tube in range(1,17):
+            pattern += str((tube - 1) * 128 + self._psd_int_range[0])
+            pattern += '-'
+            pattern += str((tube - 1) * 128 + self._psd_int_range[1])
+            pattern += ','
+
+        num_single_det = mtd[ws].getNumberHistograms()-16*128-1
+
+        for single_det in range(num_single_det):
+            sd_index = 16*128 + single_det + 1
+            pattern += str(sd_index)
+            pattern += ','
+
+        pattern = pattern.rstrip(',')
+
+        self.log().information("Grouping the detectors with pattern:\n {0}"
+                               .format(pattern))
+
+        GroupDetectors(InputWorkspace=ws,OutputWorkspace=ws,GroupingPattern=pattern)
 
     def _normalise_to_monitor(self, ws, mon):
         """
