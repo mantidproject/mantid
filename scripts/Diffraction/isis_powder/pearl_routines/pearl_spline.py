@@ -18,11 +18,11 @@ def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
 
     # run twice on low angle as peaks are very broad
     for i in range(0, 2):
-        mantid.StripPeaks(InputWorkspace=stripped_peaks_list[12], FWHM=100, Tolerance=10,
-                          OutputWorkspace=stripped_peaks_list[12])
+        stripped_peaks_list[12] = mantid.StripPeaks(InputWorkspace=stripped_peaks_list[12], FWHM=100, Tolerance=10,
+                                                    OutputWorkspace=stripped_peaks_list[12])
 
-        mantid.StripPeaks(InputWorkspace=stripped_peaks_list[13], FWHM=60, Tolerance=10,
-                          OutputWorkspace=stripped_peaks_list[13])
+        stripped_peaks_list[13] = mantid.StripPeaks(InputWorkspace=stripped_peaks_list[13], FWHM=60, Tolerance=10,
+                                                    OutputWorkspace=stripped_peaks_list[13])
 
     tof_ws_list = []
     for ws in stripped_peaks_list:

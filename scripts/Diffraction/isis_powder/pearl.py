@@ -12,8 +12,6 @@ class Pearl(AbstractInst):
     def __init__(self, **kwargs):
         expected_attr = ["user_name", "config_file", "calibration_dir", "output_dir", "attenuation_file_name",
                          "calibration_mapping_file"]
-        import pydevd
-        pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
         # Parse all possible locations that the parameters can be set from
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
         self._inst_settings = InstrumentSettings.InstrumentSettings(
@@ -37,6 +35,7 @@ class Pearl(AbstractInst):
 
     def create_calibration_vanadium(self, run_in_range, **kwargs):
         kwargs["tt_mode"] = "tt88"
+        kwargs["perform_attenuation"] = False
         self._inst_settings.update_attributes_from_kwargs(attr_mapping_dict=self.attr_mapping, kwargs=kwargs)
         expected_attr = ["long_mode", "van_norm", "absorb_corrections"]
         self._inst_settings.check_expected_attributes_are_set(attr_mapping=self.attr_mapping,
@@ -100,7 +99,7 @@ class Pearl(AbstractInst):
 
     def spline_vanadium_ws(self, focused_vanadium_spectra):
         return pearl_spline.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
-                                                         num_splines=self._run_settings.number_of_splines)
+                                                         num_splines=self._inst_settings.spline_coefficient)
 
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
@@ -143,18 +142,19 @@ class Pearl(AbstractInst):
 
         return data_processed
 
-    # Maps parameter/config name -> script names
-    attr_mapping = [("absorb_corrections", "absorb_corrections"),
-                    ("attenuation_file_name", "attenuation_file_name"),
-                    ("config_file", "config_file_name"),
+    # Maps                friendly user name -> script name
+    attr_mapping = [("absorb_corrections",      "absorb_corrections"),
+                    ("attenuation_file_name",   "attenuation_file_name"),
+                    ("config_file",             "config_file_name"),
                     ("calibration_config_file", "calibration_mapping_file"),
-                    ("calibration_directory", "calibration_dir"),
-                    ("long_mode", "long_mode"),
-                    ("tt_mode", "tt_mode"),
-                    ("output_directory", "output_dir"),
-                    ("perform_atten", "perform_attenuation"),
-                    ("user_name", "user_name"),
-                    ("vanadium_normalisation", "van_norm")]
+                    ("calibration_directory",   "calibration_dir"),
+                    ("long_mode",               "long_mode"),
+                    ("output_directory",        "output_dir"),
+                    ("perform_attenuation",     "perform_atten"),
+                    ("spline_coefficient",      "spline_coefficient"),
+                    ("tt_mode",                 "tt_mode"),
+                    ("user_name",               "user_name"),
+                    ("vanadium_normalisation",  "van_norm")]
 
 
 def _generate_file_name(run_number):

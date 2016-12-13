@@ -6,7 +6,7 @@ file_names = {
 }
 
 script_params = {
-    "b_spline_coefficient": 60,
+    "spline_coefficient": 60,
 }
 
 tof_cropping_ranges = [
