@@ -48,12 +48,12 @@ public:
         const size_t boxID = UNDEF_SIZET);
 
   MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > &
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
             extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
   MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > &
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
             extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
@@ -71,8 +71,8 @@ public:
   void setFileBacked() override;
   void clearFileBacked(bool loadDiskBackedData) override;
   //-----------------------------------------------------------------------------------------------
-  void saveAt(API::IBoxControllerIO *const /* */, uint64_t /*position*/) const
-      override;
+  void saveAt(API::IBoxControllerIO *const /* */,
+              uint64_t /*position*/) const override;
   void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
                       size_t /* Size */) override;
   void reserveMemoryForLoad(uint64_t /* Size */) override;
@@ -130,8 +130,8 @@ public:
 
   std::vector<MDE> *getEventsCopy() override;
 
-  void getEventsData(std::vector<coord_t> &coordTable, size_t &nColumns) const
-      override;
+  void getEventsData(std::vector<coord_t> &coordTable,
+                     size_t &nColumns) const override;
   void setEventsData(const std::vector<coord_t> &coordTable) override;
 
   size_t addEvent(const MDE &Evnt) override;
@@ -157,9 +157,9 @@ public:
 
   //---------------------------------------------------------------------------------------------------------------------------------
   void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
-  void generalBin(MDBin<MDE, nd> &bin,
-                  Mantid::Geometry::MDImplicitFunction &function) const
-      override;
+  void
+  generalBin(MDBin<MDE, nd> &bin,
+             Mantid::Geometry::MDImplicitFunction &function) const override;
   void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr)
       override { /* Do nothing with a box default. */
   }
@@ -235,7 +235,7 @@ private:
 
 public:
   /// Typedef for a shared pointer to a MDBox
-  typedef boost::shared_ptr<MDBox<MDE, nd> > sptr;
+  typedef boost::shared_ptr<MDBox<MDE, nd>> sptr;
 
   /// Typedef for a vector of the conatined events
   typedef std::vector<MDE> vec_t;
@@ -272,7 +272,7 @@ public:
 template <size_t nd> struct IF<MDLeanEvent<nd>, nd> {
 public:
   // create lean events from array of events data and add them to the box
-  static inline void EXEC(std::vector<MDLeanEvent<nd> > &data,
+  static inline void EXEC(std::vector<MDLeanEvent<nd>> &data,
                           const std::vector<signal_t> &sigErrSq,
                           const std::vector<coord_t> &Coord,
                           const std::vector<uint16_t> & /*runIndex*/,
