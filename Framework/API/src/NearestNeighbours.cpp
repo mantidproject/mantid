@@ -17,8 +17,10 @@ using Kernel::V3D;
 /**
  * Constructor
  * @param nNeighbours :: Number of neighbours to use
- * @param instrument :: A shared pointer to Instrument object
- * @param spectraMap :: A reference to the spectra-detector mapping
+ * @param spectrumInfo :: Reference to the SpectrumInfo of the underlying
+ * workspace
+ * @param spectrumNumbers :: Vector of spectrum numbers, defining the ordering
+ * of spectra
  * @param ignoreMaskedDetectors :: flag indicating that masked detectors should
  * be ignored.
  */

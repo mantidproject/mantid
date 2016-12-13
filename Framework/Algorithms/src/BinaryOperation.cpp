@@ -437,6 +437,7 @@ std::string BinaryOperation::checkSizeCompatibility(
  * @param rhsSpectrumInfo :: The RHS spectrum info object
  * @param index :: The workspace index to check
  * @param out :: A pointer to the output workspace
+ * @param outSpectrumInfo :: The spectrum info object of `out`
  * @returns True if further processing is not required on the spectra, false if
  * the binary operation should be performed.
  */
