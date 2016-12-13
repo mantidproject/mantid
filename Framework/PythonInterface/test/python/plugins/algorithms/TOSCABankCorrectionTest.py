@@ -34,9 +34,9 @@ class TOSCABankCorrectionTest(unittest.TestCase):
         corrected_reduction, peak_position, scale_factor_1, scale_factor_2 = \
           TOSCABankCorrection(InputWorkspace=self._original)
 
-        self.assertAlmostEqual(peak_position, 1077.47222328)
-        self.assertAlmostEqual(scale_factor_1, 1.0059271)
-        self.assertAlmostEqual(scale_factor_2, 0.9941423)
+        self.assertAlmostEqual(peak_position, 1079.84991188)
+        self.assertAlmostEqual(scale_factor_1, 1.0060389)
+        self.assertAlmostEqual(scale_factor_2, 0.9940331)
 
 
     def test_automatic_peak_in_range(self):
@@ -48,9 +48,9 @@ class TOSCABankCorrectionTest(unittest.TestCase):
           TOSCABankCorrection(InputWorkspace=self._original,
                               SearchRange=[200, 800])
 
-        self.assertAlmostEqual(peak_position, 713.20080359)
-        self.assertAlmostEqual(scale_factor_1, 1.006076146)
-        self.assertAlmostEqual(scale_factor_2, 0.993996806)
+        self.assertAlmostEqual(peak_position, 714.008962427)
+        self.assertAlmostEqual(scale_factor_1, 1.004949468)
+        self.assertAlmostEqual(scale_factor_2, 0.995099045)
 
 
     def test_manual_peak_selection(self):
@@ -62,9 +62,9 @@ class TOSCABankCorrectionTest(unittest.TestCase):
           TOSCABankCorrection(InputWorkspace=self._original,
                               PeakPosition='715')
 
-        self.assertAlmostEqual(peak_position, 713.4430671)
-        self.assertAlmostEqual(scale_factor_1, 1.00611439)
-        self.assertAlmostEqual(scale_factor_2, 0.99395947)
+        self.assertAlmostEqual(peak_position, 714.29114157)
+        self.assertAlmostEqual(scale_factor_1, 1.00491105)
+        self.assertAlmostEqual(scale_factor_2, 0.99513671)
 
 
     def test_manual_peak_not_found(self):

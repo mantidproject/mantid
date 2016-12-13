@@ -1,29 +1,20 @@
 #ifndef MANTID_API_WORKSPACE_H_
 #define MANTID_API_WORKSPACE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
 namespace Kernel {
 class Logger;
 }
 
 namespace API {
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
 class AnalysisDataServiceImpl;
+class WorkspaceHistory;
 
 /** Base Workspace Abstract Class.
 
@@ -53,7 +44,8 @@ class AnalysisDataServiceImpl;
  */
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
-  Workspace() = default;
+  Workspace();
+  ~Workspace();
 
   /** Returns a clone (copy) of the workspace with covariant return type in all
    * derived classes.
@@ -99,13 +91,13 @@ public:
   std::string getMemorySizeAsStr() const;
 
   /// Returns a reference to the WorkspaceHistory
-  WorkspaceHistory &history() { return m_history; }
+  WorkspaceHistory &history() { return *m_history; }
   /// Returns a reference to the WorkspaceHistory const
-  const WorkspaceHistory &getHistory() const { return m_history; }
+  const WorkspaceHistory &getHistory() const { return *m_history; }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  Workspace(const Workspace &) = default;
+  Workspace(const Workspace &);
 
 private:
   void setName(const std::string &);
@@ -117,7 +109,7 @@ private:
   /// workspace algebra
   std::string m_name;
   /// The history of the workspace, algorithm and environment
-  WorkspaceHistory m_history;
+  std::unique_ptr<WorkspaceHistory> m_history;
 
   /// Virtual clone method. Not implemented to force implementation in childs.
   virtual Workspace *doClone() const = 0;

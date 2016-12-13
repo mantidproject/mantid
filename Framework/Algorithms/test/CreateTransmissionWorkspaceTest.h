@@ -17,6 +17,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

@@ -132,6 +132,17 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   return count == 1;
 }
 
+/** Set the mask flag of the spectrum with given index.
+ *
+ * Currently this simply sets the mask flags for the underlying detectors. */
+void SpectrumInfo::setMasked(const size_t index, bool masked) {
+  for (const auto &det : getDetectorVector(index)) {
+    const auto detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    m_mutableDetectorInfo->setMasked(detIndex, masked);
+  }
+}
+
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
 const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
@@ -176,8 +187,15 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     // Else need to construct a DetectorGroup and use that
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &id : dets) {
-      const auto detIndex = m_detectorInfo.indexOf(id);
-      det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+      try {
+        const auto detIndex = m_detectorInfo.indexOf(id);
+        det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+      } catch (std::out_of_range &) {
+        // Workspaces can contain invalid detector IDs. Those IDs will be
+        // silently ignored here until this is fixed. Some valid IDs will exist
+        // if hasDetectors or hasUniqueDetectors has returned true, but there
+        // could still be invalid IDs.
+      }
     }
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);
