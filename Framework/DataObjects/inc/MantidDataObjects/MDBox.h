@@ -228,7 +228,7 @@ private:
 
     MyComparator(const std::vector<double> &val_vec) : value_vector(val_vec) {}
 
-    bool operator()(double i1, double i2) {
+    bool operator()(size_t i1, size_t i2) {
       return value_vector[i1] < value_vector[i2];
     }
   };
