@@ -221,8 +221,10 @@ public:
         ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Create the NearestNeighbours object directly.
+    const auto &spectrumInfo = ws->spectrumInfo();
+    const auto spectrumNumbers = getSpectrumNumbers(*ws);
     for (size_t i = 0; i < 2000; i++) {
-      NearestNeighbours nn(8, ws->spectrumInfo(), getSpectrumNumbers(*ws));
+      NearestNeighbours nn(8, spectrumInfo, spectrumNumbers);
       nn.neighbours(1);
     }
   }
