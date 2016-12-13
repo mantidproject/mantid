@@ -65,6 +65,10 @@ private:
   void setHeight(const double value) override;
   /// Set the FWHM of the peak
   void setFwhm(const double value) override;
+  /// Returns the integral intensity of the peak
+  double intensity() const override;
+  /// Sets the integral intensity of the peak
+  void setIntensity(const double value) override;
 };
 
 } // namespace Functions

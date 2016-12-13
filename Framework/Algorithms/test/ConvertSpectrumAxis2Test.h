@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
@@ -389,6 +390,35 @@ public:
     // Clean up workspaces.
     clean_up_workspaces(inputWS, outputWS);
   }
+};
+
+class ConvertSpectrumAxis2TestPerformance : public CxxTest::TestSuite {
+public:
+  static ConvertSpectrumAxis2TestPerformance *createSuite() {
+    return new ConvertSpectrumAxis2TestPerformance();
+  }
+  static void destroySuite(ConvertSpectrumAxis2TestPerformance *suite) {
+    delete suite;
+  }
+
+  ConvertSpectrumAxis2TestPerformance() {
+    m_testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        20000, 20000);
+  }
+
+  void test_conversion_to_signed_theta_with_many_entries() {
+    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+    conv.initialize();
+    conv.setChild(true);
+    conv.setProperty("InputWorkspace", m_testWS);
+    conv.setPropertyValue("OutputWorkspace", "outputWS");
+    conv.setPropertyValue("Target", "SignedTheta");
+    conv.setPropertyValue("EFixed", "10.0");
+    conv.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr m_testWS;
 };
 
 #endif /*CONVERTSPECTRUMAXIS2TEST_H_*/

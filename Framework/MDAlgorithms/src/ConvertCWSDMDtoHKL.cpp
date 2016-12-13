@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"

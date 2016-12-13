@@ -91,7 +91,7 @@ public:
   void testExecWithGroup() {
     // --------- Workspace with summed spectra -------
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
+        WorkspaceCreationHelper::createGroupedWorkspace2D(3, 200, 1.0);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 

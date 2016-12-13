@@ -185,8 +185,11 @@ std::string ArrayLengthValidator<TYPE>::checkValidity(
 
 // Required explicit instantiations
 template class ArrayLengthValidator<double>;
-template class ArrayLengthValidator<int>;
-template class ArrayLengthValidator<long>;
+template class ArrayLengthValidator<int32_t>;
+template class ArrayLengthValidator<int64_t>;
 template class ArrayLengthValidator<std::string>;
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
+template class ArrayLengthValidator<long>;
+#endif
 } // namespace Mantid
 } // namespace Kernel

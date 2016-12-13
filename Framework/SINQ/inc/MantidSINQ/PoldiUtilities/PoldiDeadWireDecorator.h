@@ -3,12 +3,13 @@
 
 #include "MantidKernel/System.h"
 
-#include "MantidGeometry/Instrument.h"
-
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h"
 
 namespace Mantid {
+namespace API {
+class DetectorInfo;
+}
 namespace Poldi {
 
 /** PoldiDeadWireDecorator :
@@ -47,7 +48,7 @@ public:
   PoldiDeadWireDecorator(std::set<int> deadWires,
                          boost::shared_ptr<PoldiAbstractDetector> detector =
                              boost::shared_ptr<PoldiAbstractDetector>());
-  PoldiDeadWireDecorator(Geometry::Instrument_const_sptr poldiInstrument,
+  PoldiDeadWireDecorator(const API::DetectorInfo &poldiDetectorInfo,
                          boost::shared_ptr<PoldiAbstractDetector> detector =
                              boost::shared_ptr<PoldiAbstractDetector>());
 
@@ -61,8 +62,6 @@ protected:
   void detectorSetHook() override;
   std::vector<int> getGoodElements(std::vector<int> rawElements);
 
-  static bool detectorIsNotMasked(Geometry::Instrument_const_sptr instrument,
-                                  detid_t detectorId);
   bool isDeadElement(int index);
 
   std::set<int> m_deadWireSet;

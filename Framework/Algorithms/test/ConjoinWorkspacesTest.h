@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -125,7 +126,7 @@ public:
   //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces() {
     MatrixWorkspace_sptr ews =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace(10, 10);
 
     // Check it fails if input overlap
     ConjoinWorkspaces conj;
@@ -138,7 +139,7 @@ public:
     // Check it fails if mixing event workspaces and workspace 2Ds
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace1", ews));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty(
-        "InputWorkspace2", WorkspaceCreationHelper::Create2DWorkspace(10, 10)));
+        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     conj.execute();
     TS_ASSERT(!conj.isExecuted());
   }
@@ -147,10 +148,10 @@ public:
     MatrixWorkspace_sptr ws1, ws2;
     int numPixels = 10;
     int numBins = 20;
-    ws1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins);
+    ws1 = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins);
     const std::string ws1_name = "ConjoinWorkspaces_testDoCheckForOverlap";
     AnalysisDataService::Instance().add(ws1_name, ws1);
-    ws2 = WorkspaceCreationHelper::CreateEventWorkspace(5, numBins);
+    ws2 = WorkspaceCreationHelper::createEventWorkspace(5, numBins);
 
     ConjoinWorkspaces conj;
     conj.initialize();
@@ -196,12 +197,12 @@ public:
     int numBins = 20;
 
     if (event) {
-      ws1 = WorkspaceCreationHelper::CreateEventWorkspace2(
+      ws1 = WorkspaceCreationHelper::createEventWorkspace2(
           10, numBins); // 2 events per bin
-      ws2 = WorkspaceCreationHelper::CreateEventWorkspace2(5, numBins);
+      ws2 = WorkspaceCreationHelper::createEventWorkspace2(5, numBins);
     } else {
-      ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, numBins);
-      ws2 = WorkspaceCreationHelper::Create2DWorkspace(5, numBins);
+      ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
+      ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
     }
     AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
     AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);

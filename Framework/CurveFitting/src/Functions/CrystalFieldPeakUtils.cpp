@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include <algorithm>
@@ -110,13 +110,16 @@ inline void ignorePeak(API::IPeakFunction &peak, double fwhm) {
 /// @param fwhmVariation :: A variation in the peak width allowed in a fit.
 /// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
 ///        are empty.
+/// @param nRequiredPeaks :: A number of peaks required to be created.
+/// @param fixAllPeaks :: If true fix all peak parameters
 /// @return :: The number of peaks that will be actually fitted.
 size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                              const std::string &peakShape,
                              const API::FunctionValues &centresAndIntensities,
                              const std::vector<double> &xVec,
                              const std::vector<double> &yVec,
-                             double fwhmVariation, double defaultFWHM) {
+                             double fwhmVariation, double defaultFWHM,
+                             size_t nRequiredPeaks, bool fixAllPeaks) {
   if (xVec.size() != yVec.size()) {
     throw std::runtime_error("WidthX and WidthY must have the same size.");
   }
@@ -124,6 +127,9 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
   bool useDefaultFWHM = xVec.empty();
   auto nPeaks = calculateNPeaks(centresAndIntensities);
   auto maxNPeaks = calculateMaxNPeaks(nPeaks);
+  if (nRequiredPeaks > maxNPeaks) {
+    maxNPeaks = nRequiredPeaks;
+  }
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
@@ -132,8 +138,6 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
     }
     if (i < nPeaks) {
       auto centre = centresAndIntensities.getCalculated(i);
-      peak->fixCentre();
-      peak->fixIntensity();
       peak->setCentre(centre);
       peak->setIntensity(centresAndIntensities.getCalculated(i + nPeaks));
       if (useDefaultFWHM) {
@@ -147,8 +151,13 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
           ignorePeak(*peak, defaultFWHM);
         }
       }
+      peak->fixCentre();
+      peak->fixIntensity();
     } else {
       ignorePeak(*peak, defaultFWHM);
+    }
+    if (fixAllPeaks) {
+      peak->fixAll();
     }
     spectrum.addFunction(peak);
   }
@@ -197,6 +206,8 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
           setWidthConstraint(peak, expectedFwhm, fwhmVariation);
         }
       }
+      peak.unfixIntensity();
+      peak.fixIntensity();
     } else {
       peak.setHeight(0.0);
       if (i > nOriginalPeaks) {

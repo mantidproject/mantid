@@ -17,9 +17,7 @@ namespace CurveFitting {
 namespace Functions {
 
 using namespace CurveFitting;
-
 using namespace Kernel;
-
 using namespace API;
 
 DECLARE_FUNCTION(CrystalFieldSpectrum)
@@ -33,6 +31,8 @@ CrystalFieldSpectrum::CrystalFieldSpectrum()
   declareAttribute("FWHMX", Attribute(vec));
   declareAttribute("FWHMY", Attribute(vec));
   declareAttribute("FWHMVariation", Attribute(0.1));
+  declareAttribute("NPeaks", Attribute(0));
+  declareAttribute("FixAllPeaks", Attribute(false));
 }
 
 /// Uses m_crystalField to calculate peak centres and intensities
@@ -41,6 +41,7 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   m_dirty = false;
   auto spectrum = new CompositeFunction;
   m_target.reset(spectrum);
+  m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
 
   FunctionDomainGeneral domain;
   FunctionValues values;
@@ -55,14 +56,18 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
         "CrystalFieldPeaks returned odd number of values.");
   }
 
-  auto xVec = IFunction::getAttribute("FWHMX").asVector();
-  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto xVec = getAttribute("FWHMX").asVector();
+  auto yVec = getAttribute("FWHMY").asVector();
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
 
-  auto peakShape = IFunction::getAttribute("PeakShape").asString();
-  auto defaultFWHM = IFunction::getAttribute("FWHM").asDouble();
+  auto peakShape = getAttribute("PeakShape").asString();
+  auto defaultFWHM = getAttribute("FWHM").asDouble();
+  size_t nRequiredPeaks = getAttribute("NPeaks").asInt();
+  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(
-      *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM);
+      *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
+      nRequiredPeaks, fixAllPeaks);
+  storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
 /// Update m_spectrum function.
@@ -72,15 +77,71 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     return;
   }
   m_dirty = false;
-  auto xVec = IFunction::getAttribute("FWHMX").asVector();
-  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto xVec = getAttribute("FWHMX").asVector();
+  auto yVec = getAttribute("FWHMY").asVector();
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
+  m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
-  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(
-      spectrum, values, m_nPeaks, 0, xVec, yVec, fwhmVariation);
+  m_nPeaks = CrystalFieldUtils::calculateNPeaks(values);
+  auto maxNPeaks = CrystalFieldUtils::calculateMaxNPeaks(m_nPeaks);
+  if (maxNPeaks > spectrum.nFunctions()) {
+    buildTargetFunction();
+  } else {
+    CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks, 0,
+                                              xVec, yVec, fwhmVariation);
+  }
+  storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
+}
+
+/// Custom string conversion method
+std::string CrystalFieldSpectrum::asString() const {
+  std::ostringstream ostr;
+  ostr << "name=" << this->name();
+  // Print the attributes
+  std::vector<std::string> attr = this->getAttributeNames();
+  for (const auto &attName : attr) {
+    std::string attValue = this->getAttribute(attName).value();
+    if (!attValue.empty() && attValue != "\"\"" && attValue != "()") {
+      ostr << ',' << attName << '=' << attValue;
+    }
+  }
+  // Print own parameters
+  for (size_t i = 0; i < m_nOwnParams; i++) {
+    const ParameterTie *tie = getTie(i);
+    if (!tie || !tie->isDefault()) {
+      ostr << ',' << parameterName(i) << '=' << getParameter(i);
+    }
+  }
+
+  // Print parameters of the important peaks only
+  const CompositeFunction &spectrum =
+      dynamic_cast<const CompositeFunction &>(*m_target);
+  for (size_t ip = 0; ip < m_nPeaks; ++ip) {
+    const auto &peak = *spectrum.getFunction(ip);
+    // Print peak's atributes
+    auto attr = peak.getAttributeNames();
+    for (const auto &attName : attr) {
+      std::string attValue = peak.getAttribute(attName).value();
+      if (!attValue.empty() && attValue != "\"\"") {
+        ostr << ",f" << ip << "." << attName << '=' << attValue;
+      }
+    }
+    // Print peak's parameters
+    for (size_t i = 0; i < peak.nParams(); i++) {
+      const ParameterTie *tie = peak.getTie(i);
+      if (!tie || !tie->isDefault()) {
+        ostr << ",f" << ip << "." << peak.parameterName(i) << '='
+             << peak.getParameter(i);
+      }
+    }
+  }
+
+  writeConstraints(ostr);
+  writeTies(ostr);
+  return ostr.str();
 }
 
 } // namespace Functions

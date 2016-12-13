@@ -1,4 +1,5 @@
-#pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches,too-many-instance-attributes,old-style-class,global-variable-not-assigned
+#pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches,
+#pylint: disable=too-many-instance-attributes,old-style-class,global-variable-not-assigned
 
 import cry_utils
 import re

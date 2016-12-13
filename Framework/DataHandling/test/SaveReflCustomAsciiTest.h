@@ -62,7 +62,7 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    // the first is black due to the leading tab
+    // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
@@ -95,7 +95,7 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    // the first is black due to the leading tab
+    // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
@@ -128,7 +128,7 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    // the first is black due to the leading tab
+    // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
@@ -161,7 +161,7 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    // the first is black due to the leading tab
+    // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
@@ -179,6 +179,7 @@ public:
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     alg->setPropertyValue("Title", "Testing this algorithm");
+    alg->setPropertyValue("Separator", "comma");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     if (!alg->isExecuted()) {
@@ -193,10 +194,10 @@ public:
     getline(in, fullline);
 
     std::vector<std::string> columns;
-    boost::split(columns, fullline, boost::is_any_of("\t"),
+    boost::split(columns, fullline, boost::is_any_of(","),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    // the first is black due to the leading tab
+    // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
@@ -232,7 +233,7 @@ private:
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
                 bool createLogs = false) {
     createLogs = false;
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
     // similiar
