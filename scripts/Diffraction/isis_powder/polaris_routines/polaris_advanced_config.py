@@ -2,7 +2,7 @@ file_names = {
     "bragg_peaks_masking": "VanaPeaks.dat"
 }
 
-standard_variables = {
+script_params = {
     "apply_solid_angle_corrections": False,
     "b_spline_coefficient": 100
 }
@@ -19,4 +19,10 @@ absorption_correction_params = {
     "number_of_annuli": 10,
     "number_of_wavelength_points": 100,
     "exponential_method": "Normal"
+}
+
+variables = {
+    "absorb_param_dict": absorption_correction_params,
+    "file_names_dict": file_names,
+    "script_params": script_params
 }

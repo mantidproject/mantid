@@ -5,24 +5,25 @@ import os
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
-from isis_powder.routines import yaml_parser
+from isis_powder.routines import yaml_parser, InstrumentSettings
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_output
+from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_output, polaris_param_mapping
 
 
 class Polaris(AbstractInst):
-    # Instrument specific properties
+    def __init__(self, **kwargs):
+        expected_keys = ["user_name", "calibration_dir", "output_dir", "cal_mapping_file",
+                         "solid_angle_on", "chopper_on"]
+        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
+        self._inst_settings = InstrumentSettings.InstrumentSettings(
+            attr_mapping=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
+            basic_conf_dict=basic_config_dict, kwargs=kwargs)
 
-    def __init__(self, chopper_on, config_file=None, **kwargs):
+        self._inst_settings.check_expected_attributes_are_set(expected_attr_names=expected_keys)
 
-        expected_keys = ["user_name", "calibration_directory", "output_directory",
-                         "apply_solid_angle", "calibration_mapping_file"]
-        yaml_parser.set_kwargs_from_config_file(config_path=config_file, kwargs=kwargs, keys_to_find=expected_keys)
-        super(Polaris, self).__init__(user_name=kwargs["user_name"], calibration_dir=kwargs["calibration_directory"],
-                                      output_dir=kwargs["output_directory"])
-
-        self._calibration_mapping_path = kwargs["calibration_mapping_file"]
-        self._chopper_on = chopper_on
+        super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
+                                      calibration_dir=self._inst_settings.calibration_dir,
+                                      output_dir=self._inst_settings.output_dir)
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_last_run_number = None
@@ -52,10 +53,11 @@ class Polaris(AbstractInst):
         if self._run_details_last_run_number == first_run:
             return self._run_details_cached_obj
 
-        solid_angle_on = bool(polaris_advanced_config.standard_variables["apply_solid_angle_corrections"])
-        run_details = polaris_algs.get_run_details(chopper_on=self._chopper_on, sac_on=solid_angle_on,
-                                                   run_number=first_run, calibration_dir=self._calibration_dir,
-                                                   mapping_path=self._calibration_mapping_path)
+        # TODO use _inst_settings instead
+        run_details = polaris_algs.get_run_details(
+            chopper_on=self._inst_settings.chopper_on, sac_on=self._inst_settings.solid_angle_on,
+            run_number=first_run, calibration_dir=self._inst_settings.calibration_dir,
+            mapping_path=self._inst_settings.cal_mapping_file)
 
         # Hold obj in case same run range is requested
         self._run_details_last_run_number = first_run
@@ -76,7 +78,7 @@ class Polaris(AbstractInst):
         return normalised_ws
 
     def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
-        solid_angle_on = bool(polaris_advanced_config.standard_variables["apply_solid_angle_corrections"])
+        solid_angle_on = bool(polaris_advanced_config.script_params["apply_solid_angle_corrections"])
 
         if not solid_angle_on:
             return ws_to_correct
@@ -88,25 +90,13 @@ class Polaris(AbstractInst):
         ws_to_correct = corrected_ws
         return ws_to_correct
 
-    def correct_sample_vanadium(self, focused_ws, vanadium_ws=None):
-        spectra_name = "sample_ws-" + str(self._ads_workaround + 1)
-        self._ads_workaround += 1
-
-        if vanadium_ws:
-            van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_ws, WorkspaceToMatch=focused_ws)
-            mantid.Divide(LHSWorkspace=focused_ws, RHSWorkspace=van_rebinned, OutputWorkspace=spectra_name)
-            common.remove_intermediate_workspace(van_rebinned)
-
-        return spectra_name
-
     def spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
         masking_file_name = polaris_advanced_config.file_names["bragg_peaks_masking"]
-        spline_coeff = polaris_advanced_config.standard_variables["b_spline_coefficient"]
+        spline_coeff = polaris_advanced_config.script_params["b_spline_coefficient"]
         masking_file_path = os.path.join(self.calibration_dir, masking_file_name)
         output = polaris_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_spectra,
                                                             spline_number=spline_coeff,
                                                             mask_path=masking_file_path)
-
         return output
 
     def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):

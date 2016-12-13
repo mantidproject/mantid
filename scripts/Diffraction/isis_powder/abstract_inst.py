@@ -114,9 +114,6 @@ class AbstractInst(object):
     def attenuate_workspace(self, input_workspace):
         return input_workspace
 
-    def correct_sample_vanadium(self, focused_ws, vanadium_ws=None):
-        raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
-
     def get_default_group_names(self):
         return None
 

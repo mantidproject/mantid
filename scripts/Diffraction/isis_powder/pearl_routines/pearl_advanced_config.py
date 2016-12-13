@@ -5,10 +5,6 @@ file_names = {
     "tt35_grouping": "pearl_group_12_1_TT35.cal"
 }
 
-script_params = {
-    "spline_coefficient": 60,
-}
-
 tof_cropping_ranges = [
     (1500, 19900),  # Bank 1
     (1500, 19900),  # Bank 2
@@ -26,6 +22,10 @@ tof_cropping_ranges = [
     (1500, 19900)   # Bank 14
     ]
 
+script_params = {
+    "spline_coefficient": 60,
+    "bank_tof_crop_values": tof_cropping_ranges,
+}
 
 variable_help = {
     "file_names": {
@@ -46,7 +46,6 @@ variable_help = {
 }
 
 variables = {
-    "bank_tof_crop_values" : tof_cropping_ranges,
     "file_names_dict": file_names,
     "script_params_dict": script_params
 }
