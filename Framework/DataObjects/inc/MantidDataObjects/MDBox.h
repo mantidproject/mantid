@@ -48,12 +48,12 @@ public:
         const size_t boxID = UNDEF_SIZET);
 
   MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > &
             extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
   MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > &
             extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
@@ -71,8 +71,8 @@ public:
   void setFileBacked() override;
   void clearFileBacked(bool loadDiskBackedData) override;
   //-----------------------------------------------------------------------------------------------
-  void saveAt(API::IBoxControllerIO *const /* */,
-              uint64_t /*position*/) const override;
+  void saveAt(API::IBoxControllerIO *const /* */, uint64_t /*position*/) const
+      override;
   void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
                       size_t /* Size */) override;
   void reserveMemoryForLoad(uint64_t /* Size */) override;
@@ -130,8 +130,8 @@ public:
 
   std::vector<MDE> *getEventsCopy() override;
 
-  void getEventsData(std::vector<coord_t> &coordTable,
-                     size_t &nColumns) const override;
+  void getEventsData(std::vector<coord_t> &coordTable, size_t &nColumns) const
+      override;
   void setEventsData(const std::vector<coord_t> &coordTable) override;
 
   size_t addEvent(const MDE &Evnt) override;
@@ -157,9 +157,9 @@ public:
 
   //---------------------------------------------------------------------------------------------------------------------------------
   void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
-  void
-  generalBin(MDBin<MDE, nd> &bin,
-             Mantid::Geometry::MDImplicitFunction &function) const override;
+  void generalBin(MDBin<MDE, nd> &bin,
+                  Mantid::Geometry::MDImplicitFunction &function) const
+      override;
   void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr)
       override { /* Do nothing with a box default. */
   }
@@ -174,7 +174,8 @@ public:
   void calculateDimensionStats(MDDimensionStats *stats) const;
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                        const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared, const coord_t innerRadiusSquared = 0.0) const override;
+                       signal_t &errorSquared,
+                       const coord_t innerRadiusSquared = 0.0) const override;
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                       const coord_t radiusSquared, coord_t *centroid,
                       signal_t &signal) const override;
@@ -222,10 +223,19 @@ private:
   MDBox(const MDBox &);
   /// common part of mdBox constructor
   void initMDBox(const size_t nBoxEvents);
+  struct MyComparator {
+    const std::vector<double> &value_vector;
+
+    MyComparator(const std::vector<double> &val_vec) : value_vector(val_vec) {}
+
+    bool operator()(double i1, double i2) {
+      return value_vector[i1] < value_vector[i2];
+    }
+  };
 
 public:
   /// Typedef for a shared pointer to a MDBox
-  typedef boost::shared_ptr<MDBox<MDE, nd>> sptr;
+  typedef boost::shared_ptr<MDBox<MDE, nd> > sptr;
 
   /// Typedef for a vector of the conatined events
   typedef std::vector<MDE> vec_t;
@@ -262,7 +272,7 @@ public:
 template <size_t nd> struct IF<MDLeanEvent<nd>, nd> {
 public:
   // create lean events from array of events data and add them to the box
-  static inline void EXEC(std::vector<MDLeanEvent<nd>> &data,
+  static inline void EXEC(std::vector<MDLeanEvent<nd> > &data,
                           const std::vector<signal_t> &sigErrSq,
                           const std::vector<coord_t> &Coord,
                           const std::vector<uint16_t> & /*runIndex*/,
@@ -279,7 +289,6 @@ public:
     return MDLeanEvent<nd>(Signal, Error, Coord);
   }
 };
-
 } // namespace DataObjects
 
 } // namespace Mantid
