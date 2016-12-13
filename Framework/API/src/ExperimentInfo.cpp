@@ -155,10 +155,17 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
-  // TODO Add Beamline::DetectorInfo reference to Instrument and assign that
-  // here. For now we just create a new DetectorInfo of the correct size:
-  m_detectorInfo = Kernel::make_unique<Beamline::DetectorInfo>(
-      sptr_instrument->getNumberDetectors());
+  const auto *detInfo = sptr_instrument->detectorInfo();
+  const auto numDets = sptr_instrument->getNumberDetectors();
+  if (detInfo) {
+    if (numDets != detInfo->size())
+      throw std::runtime_error("ExperimentInfo::setInstrument: size mismatch "
+                               "between DetectorInfo and number of detectors "
+                               "in instrument");
+    *m_detectorInfo = *detInfo;
+  } else {
+    m_detectorInfo = Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+  }
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -167,8 +174,14 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
-                                                         m_parmap);
+  if (sptr_instrument->getNumberDetectors() != m_detectorInfo->size())
+    throw std::runtime_error("ExperimentInfo::getInstrument: size mismatch "
+                             "between DetectorInfo and number of detectors in "
+                             "instrument");
+  auto instrument = Geometry::ParComponentFactory::createInstrument(
+      sptr_instrument, m_parmap);
+  instrument->setDetectorInfo(m_detectorInfo.get());
+  return instrument;
 }
 
 /**  Returns a new copy of the instrument parameters
