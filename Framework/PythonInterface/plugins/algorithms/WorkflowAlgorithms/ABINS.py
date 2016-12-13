@@ -1,7 +1,5 @@
 import pathos.multiprocessing as mp
 import numpy as np
-import os
-import py_compile
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
 # noinspection PyProtectedMember
@@ -16,6 +14,11 @@ from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters, AbinsConstants
 # noinspection PyPep8Naming,PyMethodMayBeStatic
 class ABINS(PythonAlgorithm):
 
+    # static variables of class ABINS
+    _to_print = True # static variable used to print preamble
+    # ----------------------------------------------------------------------------------------
+
+    # this variables should be treated as instance fields
     _dft_program = None
     _phonon_file = None
     _experimental_file = None
@@ -30,7 +33,6 @@ class ABINS(PythonAlgorithm):
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
-    # ----------------------------------------------------------------------------------------
 
     def category(self):
         return "Simulation"
@@ -41,7 +43,6 @@ class ABINS(PythonAlgorithm):
         return "Calculates inelastic neutron scattering."
 
         # ----------------------------------------------------------------------------------------
-
     def PyInit(self):
 
         # Declare all properties
@@ -108,6 +109,8 @@ class ABINS(PythonAlgorithm):
         """
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
+        self._make_preamble()
+
         issues = dict()
 
         temperature = self.getProperty("Temperature").value
@@ -142,16 +145,8 @@ class ABINS(PythonAlgorithm):
                 break
 
         self._check_advanced_parameter()
-        self._update_advanced_parameters_pyc()
 
         return issues
-
-    def _update_advanced_parameters_pyc(self):
-        """
-        Updates advanced parameters.
-        """
-        param_path = os.path.realpath(AbinsParameters.__file__)
-        py_compile.compile(param_path)
 
     def PyExec(self):
 
@@ -722,6 +717,21 @@ class ABINS(PythonAlgorithm):
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
 
         self._calc_partial = (len(self._atoms) > 0)
+
+    def _make_preamble(self):
+        if self.__class__._to_print:
+            logger.notice("""
+
+                          ABINS is a plugin to Mantid which allows scientists to compare
+                          experimental and theoretical inelastic neutron scattering spectra (INS).
+
+                          Authors:  Krzysztof Dymkowski
+                          Contributors: Leonardo Bernasconi (main author of module LoadCRYSTAL)
+
+                          Special thanks to Leandro Liborio for ab-initio benchmark data.
+
+                          """)
+            self.__class__._to_print = False
 
 try:
     AlgorithmFactory.subscribe(ABINS)
