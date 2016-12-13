@@ -51,7 +51,6 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   ws2->initialize(numSpectra, numBins, numBins);
 
   auto inst = boost::make_shared<Instrument>("TestInstrument");
-  ws2->setInstrument(inst);
   // We get a 1:1 map by default so the detector ID should match the spectrum
   // number
   for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
@@ -61,6 +60,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
     inst->markAsDetector(det);
     ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
   }
+  ws2->setInstrument(inst);
   return ws2;
 }
 
@@ -579,7 +579,6 @@ public:
     // the detector ID
     // is stored in at least 3 places
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
     // We get a 1:1 map by default so the detector ID should match the spectrum
     // number
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
@@ -594,6 +593,7 @@ public:
       inst->markAsDetector(det);
       ws->getSpectrum(i).addDetectorID(detid);
     }
+    ws->setInstrument(inst);
     ws->getSpectrum(66).clearDetectorIDs();
 
     TS_ASSERT_THROWS_NOTHING(

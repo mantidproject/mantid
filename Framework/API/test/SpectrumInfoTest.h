@@ -426,13 +426,13 @@ private:
     auto ws = Kernel::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
     }
+    ws->setInstrument(inst);
     auto &detectorInfo = ws->mutableDetectorInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
       if (i % 2 == 0)
