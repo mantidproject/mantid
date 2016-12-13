@@ -46,7 +46,8 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
-      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame) {}
+      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
+      m_detectorInfo(instr->m_detectorInfo) {}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -62,7 +63,8 @@ Instrument::Instrument(const Instrument &instr)
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
-      m_referenceFrame(instr.m_referenceFrame) {
+      m_referenceFrame(instr.m_referenceFrame),
+      m_detectorInfo(instr.m_detectorInfo) {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -1234,6 +1236,16 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     return Instrument::ContainsState::None;
 
 } // containsRectDetectors
+
+/// Only for use by ExperimentInfo. Returns the pointer to the DetectorInfo.
+const Beamline::DetectorInfo *Instrument::detectorInfo() const {
+  return m_detectorInfo;
+}
+
+/// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+void Instrument::setDetectorInfo(const Beamline::DetectorInfo *detectorInfo) {
+  m_detectorInfo = detectorInfo;
+}
 
 } // namespace Geometry
 } // Namespace Mantid
