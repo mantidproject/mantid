@@ -100,7 +100,7 @@ void FunctionQDepends::setMatrixWorkspace(
   }
   // Obtain Q values from the passed workspace, if possible. m_vQ will be
   // cleared if unsuccessful.
-  if(workspace) {
+  if (workspace) {
     m_vQ = this->extractQValues(*workspace);
   }
   if (!m_vQ.empty()) {
@@ -117,7 +117,8 @@ void FunctionQDepends::setMatrixWorkspace(
  * them.
  * @param workspace workspace possibly containing Q values.
  */
-std::vector<double> FunctionQDepends::extractQValues(const Mantid::API::MatrixWorkspace &workspace) {
+std::vector<double> FunctionQDepends::extractQValues(
+    const Mantid::API::MatrixWorkspace &workspace) {
   std::vector<double> qs;
   // Check if the vertical axis has units of momentum transfer, then extract Q
   // values...
