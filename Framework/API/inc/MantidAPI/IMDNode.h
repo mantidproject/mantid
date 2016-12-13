@@ -203,6 +203,7 @@ public:
   * @param radiusSquared :: radius^2 below which to integrate
   * @param signal [out] :: set to the integrated signal
   * @param errorSquared [out] :: set to the integrated squared error.
+  * @param innerRadiusSquared :: radius^2 of inner background
    */
   virtual void
   integrateSphere(Mantid::API::CoordTransform &radiusTransform,
