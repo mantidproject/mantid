@@ -1,5 +1,11 @@
 import numpy as np
-from pathos.multiprocessing import ProcessingPool
+
+try:
+    from pathos.multiprocessing import ProcessingPool
+    PATHOS_FOUND = True
+except ImportError:
+    PATHOS_FOUND = False
+
 from IOmodule import IOmodule
 from AbinsData import AbinsData
 from InstrumentProducer import InstrumentProducer
@@ -155,8 +161,13 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         atoms_items = dict()
         atoms = range(num_atoms)
 
-        p_local = ProcessingPool(ncpus=AbinsParameters.atoms_threads)
-        result = p_local.map(self._calculate_s_powder_1d_one_atom, atoms)
+        if PATHOS_FOUND:
+            p_local = ProcessingPool(ncpus=AbinsParameters.atoms_threads)
+            result = p_local.map(self._calculate_s_powder_1d_one_atom, atoms)
+        else:
+            result = []
+            for atom in atoms:
+                result.append(self._calculate_s_powder_1d_one_atom(atom=atom))
 
         for atom in range(num_atoms):
 

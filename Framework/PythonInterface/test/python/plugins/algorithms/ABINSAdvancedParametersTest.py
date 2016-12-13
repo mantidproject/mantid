@@ -7,15 +7,10 @@ from mantid.simpleapi import ABINS, DeleteWorkspace
 from AbinsModules import AbinsParameters
 
 try:
-    import scipy
+    from pathos.multiprocessing import ProcessingPool
+    PATHOS_FOUND = True
 except ImportError:
-    logger.warning("Failure of  ABINSTest because scipy is unavailable.")
-    exit(1)
-try:
-    import h5py
-except ImportError:
-    logger.warning("Failure of ABINSTest because h5py is unavailable.")
-    exit(1)
+    PATHOS_FOUND = False
 
 
 class ABINSAdvancedParametersTest(unittest.TestCase):
@@ -130,7 +125,7 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     # tests for folders
-    def test_wrong_DFT_group(self):
+    def test_wrong_dft_group(self):
         # name should be of type str
         AbinsParameters.dft_group = 2
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
@@ -258,8 +253,9 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_num_threads(self):
-        AbinsParameters.atoms_threads = -1
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        if PATHOS_FOUND:
+            AbinsParameters.atoms_threads = -1
+            self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_good_case(self):
 
