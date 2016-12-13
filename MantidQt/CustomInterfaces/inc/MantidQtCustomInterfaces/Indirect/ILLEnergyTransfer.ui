@@ -268,6 +268,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QRadioButton" name="rdGroupDefault">
+        <property name="toolTip">
+         <string>By default, all the pixels of each tube will be summed.</string>
+        </property>
         <property name="text">
          <string>Default</string>
         </property>
@@ -279,8 +282,24 @@
         </attribute>
        </widget>
       </item>
-      <item>
+      <item alignment="Qt::AlignLeft">
+       <widget class="QRadioButton" name="rdGroupRange">
+        <property name="toolTip">
+         <string>Choose the pixel range manually, will be applied to all PSD tubes.</string>
+        </property>
+        <property name="text">
+         <string>Choose Range</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_2</string>
+        </attribute>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignLeft">
        <widget class="QRadioButton" name="rdGroupChoose">
+        <property name="toolTip">
+         <string>Choose a detector grouping file, if separate range is needed per each PSD tube.</string>
+        </property>
         <property name="text">
          <string>Choose File</string>
         </property>
@@ -289,13 +308,38 @@
         </attribute>
        </widget>
       </item>
+      <item alignment="Qt::AlignLeft">
+       <widget class="QLineEdit" name="lePixelRange">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Pixel range to sum for each PSD tube, e.g. 1,128</string>
+        </property>
+        <property name="text">
+         <string>1,128</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QStackedWidget" name="swGroupingTypes">
         <property name="enabled">
          <bool>true</bool>
         </property>
         <property name="toolTip">
-         <string>Choose an .xml file for detector grouping</string>
+         <string/>
         </property>
         <property name="currentIndex">
          <number>1</number>
@@ -318,7 +362,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Detector grouping .xml file</string>
+             <string>Choose an .xml or .map file for detector grouping</string>
             </property>
             <property name="label" stdset="0">
              <string/>
@@ -326,6 +370,7 @@
             <property name="fileExtensions" stdset="0">
              <stringlist>
               <string>.xml</string>
+              <string>.map</string>
              </stringlist>
             </property>
            </widget>
@@ -1174,6 +1219,70 @@
     <hint type="destinationlabel">
      <x>523</x>
      <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupDefault</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePixelRange</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupChoose</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePixelRange</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>409</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupRange</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePixelRange</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupRange</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>rfMapFile</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>517</x>
+     <y>184</y>
     </hint>
    </hints>
   </connection>

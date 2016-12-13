@@ -85,7 +85,36 @@ bool ILLEnergyTransfer::validate() {
       } else {
         if (m_peakRange[0] >= m_peakRange[1]) {
           uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
-                              "Start energy is bigger then the end energy.");
+                              "Start energy is >= than the end energy.");
+        }
+      }
+    }
+  }
+
+  // Validate the manual PSD integration range
+  if (m_uiForm.rdGroupRange->isChecked()) {
+    auto range = m_uiForm.lePixelRange->text().split(',');
+    if (range.size() != 2) {
+      uiv.addErrorMessage(
+          "PSD Integration Range is invalid. \n"
+          "Provide comma separated two pixel numbers, e.g. 1,128");
+    } else {
+      bool ok1 = true;
+      m_pixelRange[0] = range[0].toInt(&ok1);
+      bool ok2 = true;
+      m_pixelRange[1] = range[1].toInt(&ok2);
+
+      if (!ok1 || !ok2) {
+        uiv.addErrorMessage(
+            "PSD Integration Range is invalid. \n"
+            "Provide comma separated two pixel numbers, e.g. 1,128");
+      } else {
+        if (m_pixelRange[0] >= m_pixelRange[1] || m_pixelRange[0] < 1 ||
+            m_pixelRange[1] > 128) {
+          uiv.addErrorMessage(
+              "PSD Integration Range is invalid. \n"
+              "Start or end pixel number is outside range [1-128], "
+              "or start pixel number is >= than the end pixel number.");
         }
       }
     }
@@ -208,6 +237,13 @@ void ILLEnergyTransfer::run() {
   if (useMapFile) {
     QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
     reductionAlg->setProperty("MapFile", mapFilename.toStdString());
+  }
+
+  // Handle manual PSD integration range
+  if (m_uiForm.rdGroupRange->isChecked()) {
+    auto pixelRange = boost::lexical_cast<std::string>(m_pixelRange[0]) + "," +
+                      boost::lexical_cast<std::string>(m_pixelRange[1]);
+    reductionAlg->setProperty("ManualPSDIntegrationRange", pixelRange);
   }
 
   // Output workspace name

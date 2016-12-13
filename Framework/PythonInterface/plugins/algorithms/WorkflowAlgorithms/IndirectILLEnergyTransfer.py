@@ -95,11 +95,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self._psd_int_range = self.getProperty('ManualPSDIntegrationRange').value
 
-        if len(self._psd_int_range) != 2:
-            issues['ManualPSDIntegrationRange'] = 'Specify comma separated pixel range, e.g. 1,128'
-        elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > 128 \
-                or self._psd_int_range[0] >= self._psd_int_range[1]:
-            issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
+        if not self.getPropertyValue('MapFile'):
+            if len(self._psd_int_range) != 2:
+                issues['ManualPSDIntegrationRange'] = 'Specify comma separated pixel range, e.g. 1,128'
+            elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > 128 \
+                    or self._psd_int_range[0] >= self._psd_int_range[1]:
+                issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
 
         return issues
 
