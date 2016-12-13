@@ -132,7 +132,7 @@ std::string extractIdfFileOnCurrentSystem(std::string idf) {
 
   // Get the specified IDF name
   Poco::Path path(idf);
-  auto fileName = path.getFileName();
+  const auto &fileName = path.getFileName();
 
   // Compare against all available IDFs
   const std::vector<std::string> &directoryNames =

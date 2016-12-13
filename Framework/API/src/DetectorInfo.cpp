@@ -32,6 +32,10 @@ DetectorInfo::DetectorInfo(
     m_detIDToIndex[m_detectorIDs[i]] = i;
 }
 
+/// Returns the size of the DetectorInfo, i.e., the number of detectors in the
+/// instrument.
+size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
+
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   return getDetector(index).isMonitor();
@@ -92,6 +96,17 @@ Kernel::V3D DetectorInfo::position(const size_t index) const {
 Kernel::Quat DetectorInfo::rotation(const size_t index) const {
   return getDetector(index).getRotation();
 }
+
+/// Set the mask flag of the detector with given index.
+void DetectorInfo::setMasked(const size_t index, bool masked) {
+  m_pmap->addBool(&getDetector(index), "masked", masked);
+}
+
+/** Sets all mask flags to false (unmasked).
+ *
+ * This method was introduced to help with refactoring and may be removed in the
+ *future. */
+void DetectorInfo::clearMaskFlags() { m_pmap->clearParametersByName("masked"); }
 
 /// Set the absolute position of the detector with given index.
 void DetectorInfo::setPosition(const size_t index,

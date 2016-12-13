@@ -473,19 +473,17 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   // Create a group for these new workspaces, if the group already exists, add
   // to it.
-  std::string groupName = outWSName;
-
   size_t fileNumberInGroup = 0;
   WorkspaceGroup_sptr wsGroup;
 
-  if (!AnalysisDataService::Instance().doesExist(groupName)) {
-    wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
-    wsGroup->setTitle(groupName);
+  if (!AnalysisDataService::Instance().doesExist(outWSName)) {
+    wsGroup = boost::make_shared<WorkspaceGroup>();
+    wsGroup->setTitle(outWSName);
   } else {
     // Get the name of the latest file in group to start numbering from
-    if (AnalysisDataService::Instance().doesExist(groupName))
+    if (AnalysisDataService::Instance().doesExist(outWSName))
       wsGroup =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
 
     std::string latestName = wsGroup->getNames().back();
     // Set next file number
