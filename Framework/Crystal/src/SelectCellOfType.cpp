@@ -5,6 +5,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/SelectCellWithForm.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -16,7 +17,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {
@@ -64,7 +64,6 @@ void SelectCellOfType::init() {
                         "Allow permutations of conventional cells");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SelectCellOfType::exec() {

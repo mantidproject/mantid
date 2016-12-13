@@ -3,11 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+using namespace Mantid::Kernel;
 using Mantid::API::SampleValidator;
 
 class SampleValidatorTest : public CxxTest::TestSuite {

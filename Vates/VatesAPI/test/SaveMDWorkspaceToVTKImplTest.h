@@ -215,7 +215,7 @@ private:
         saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
 
     saveMDToVTK.saveMDWorkspace(workspace, filename, normalization, threshold,
-                                recursionDepth);
+                                recursionDepth, "NONE");
   }
 
   Mantid::API::IMDWorkspace_sptr getTestWorkspace(std::string workspaceType) {

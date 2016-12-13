@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadSpiceAscii.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 using Mantid::DataHandling::LoadSpiceAscii;
 using namespace Mantid::API;

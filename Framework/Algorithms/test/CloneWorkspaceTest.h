@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -49,9 +50,9 @@ public:
     MatrixWorkspace_sptr in =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in");
     // Input file does not contain Dx, we just add it for testing.
-    HistogramData::BinEdgeStandardDeviations dx(in->readX(0).size());
+    HistogramData::PointStandardDeviations dx(in->readX(0).size() - 1);
     for (size_t i = 0; i < in->getNumberHistograms(); ++i)
-      in->setBinEdgeStandardDeviations(i, dx);
+      in->setPointStandardDeviations(i, dx);
 
     TS_ASSERT_THROWS_NOTHING(cloner.setPropertyValue("InputWorkspace", "in"));
     TS_ASSERT_THROWS_NOTHING(cloner.setPropertyValue("OutputWorkspace", "out"));
@@ -84,7 +85,7 @@ public:
   void testExecEvent() {
     // First make the algorithm
     EventWorkspace_sptr ew =
-        WorkspaceCreationHelper::CreateEventWorkspace(100, 60, 50);
+        WorkspaceCreationHelper::createEventWorkspace(100, 60, 50);
     AnalysisDataService::Instance().addOrReplace("in_event", ew);
 
     Mantid::Algorithms::CloneWorkspace alg;
@@ -147,7 +148,7 @@ public:
 
   void test_group() {
     WorkspaceGroup_const_sptr ingroup =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(3, 1, 1, "grouptoclone");
+        WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 1, "grouptoclone");
     Mantid::Algorithms::CloneWorkspace alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "grouptoclone");

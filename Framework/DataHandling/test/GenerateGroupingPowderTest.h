@@ -8,6 +8,8 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

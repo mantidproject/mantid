@@ -11,10 +11,6 @@
 #include <string>
 #include <vector>
 
-namespace {
-Mantid::Kernel::Logger g_log("MDLoadingPresenter");
-}
-
 class vtkUnstructuredGrid;
 namespace Mantid {
 namespace VATES {
@@ -61,7 +57,8 @@ public:
   virtual void setDefaultCOBandBoundaries(vtkDataSet *visualDataSet);
   virtual void makeNonOrthogonal(
       vtkDataSet *visualDataSet,
-      std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
+      std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider,
+      ProgressAction *progress);
   virtual bool canReadFile() const = 0;
   virtual const std::string &getGeometryXML() const = 0;
   virtual ~MDLoadingPresenter() {}

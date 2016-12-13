@@ -130,6 +130,7 @@ public:
   QList<PeakMarker2D *> getMarkersWithID(int detID) const;
   int getNumberPeaks() const;
   Mantid::Geometry::IPeak &getPeak(int);
+  QList<PeakMarker2D *> getSelectedPeakMarkers();
   /// Return PeaksWorkspace associated with this overlay.
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {
     return m_peaksWorkspace;

@@ -3,7 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 
 #include "SofQWTest.h"
 
@@ -40,23 +42,23 @@ public:
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(6), 2.0);
 
     const double delta(1e-08);
-    TS_ASSERT_DELTA(result->readY(0)[1160], 22.8567683273, delta);
-    TS_ASSERT_DELTA(result->readE(0)[1160], 0.2568965638, delta);
+    TS_ASSERT_DELTA(result->y(0)[1160], 22.8567683273, delta);
+    TS_ASSERT_DELTA(result->e(0)[1160], 0.2568965638, delta);
 
-    TS_ASSERT_DELTA(result->readY(1)[1145], 7.5942160104, delta);
-    TS_ASSERT_DELTA(result->readE(1)[1145], 0.1490079010, delta);
+    TS_ASSERT_DELTA(result->y(1)[1145], 7.5942160104, delta);
+    TS_ASSERT_DELTA(result->e(1)[1145], 0.1490079010, delta);
 
-    TS_ASSERT_DELTA(result->readY(2)[1200], 2.0249626546, delta);
-    TS_ASSERT_DELTA(result->readE(2)[1200], 0.0752776593, delta);
+    TS_ASSERT_DELTA(result->y(2)[1200], 2.0249626546, delta);
+    TS_ASSERT_DELTA(result->e(2)[1200], 0.0752776593, delta);
 
-    TS_ASSERT_DELTA(result->readY(3)[99], 0.0419939169, delta);
-    TS_ASSERT_DELTA(result->readE(3)[99], 0.0175106375, delta);
+    TS_ASSERT_DELTA(result->y(3)[99], 0.0419939169, delta);
+    TS_ASSERT_DELTA(result->e(3)[99], 0.0175106375, delta);
 
-    TS_ASSERT_DELTA(result->readY(4)[1654], 0.0167189448, delta);
-    TS_ASSERT_DELTA(result->readE(4)[1654], 0.0056801131, delta);
+    TS_ASSERT_DELTA(result->y(4)[1654], 0.0167189448, delta);
+    TS_ASSERT_DELTA(result->e(4)[1654], 0.0056801131, delta);
 
-    TS_ASSERT_DELTA(result->readY(5)[1025], 0.0808168496, delta);
-    TS_ASSERT_DELTA(result->readE(5)[1025], 0.0161117732, delta);
+    TS_ASSERT_DELTA(result->y(5)[1025], 0.0808168496, delta);
+    TS_ASSERT_DELTA(result->e(5)[1025], 0.0161117732, delta);
 
     // Spectra-detector mapping
     const size_t nspectra(6);
@@ -82,6 +84,24 @@ public:
       TS_ASSERT_EQUALS(specNoExpected, specNoActual);
       TS_ASSERT_EQUALS(expectedIDs[i], spectrum.getDetectorIDs());
     }
+  }
+};
+
+class SofQWNormalisedPolygonTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SofQWNormalisedPolygonTestPerformance *createSuite() {
+    return new SofQWNormalisedPolygonTestPerformance();
+  }
+  static void destroySuite(SofQWNormalisedPolygonTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  void testExec() {
+    auto result =
+        SofQWTest::runSQW<Mantid::Algorithms::SofQWNormalisedPolygon>();
   }
 };
 

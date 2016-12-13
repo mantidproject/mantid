@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <cmath>
 #include <numeric>
@@ -83,7 +82,7 @@ double Gaussian::intensity() const {
   auto sigma = getParameter("Sigma");
   if (sigma == 0.0) {
     auto height = getParameter("Height");
-    if (boost::math::isfinite(height)) {
+    if (std::isfinite(height)) {
       m_intensityCache = height;
     }
   } else {
@@ -115,7 +114,7 @@ void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
 void Gaussian::fixIntensity() {
   std::string formula =
       std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
-  tie("Height", formula);
+  tie("Height", formula, true);
 }
 
 void Gaussian::unfixIntensity() { removeTie("Height"); }

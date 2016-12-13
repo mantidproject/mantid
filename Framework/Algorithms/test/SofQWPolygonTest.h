@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQWPolygon.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include "SofQWTest.h"
 
@@ -38,23 +39,23 @@ public:
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(6), 2.0);
 
     const double delta(1e-08);
-    TS_ASSERT_DELTA(result->readY(0)[1160], 17.5583314826, delta);
-    TS_ASSERT_DELTA(result->readE(0)[1160], 0.197345265992, delta);
+    TS_ASSERT_DELTA(result->y(0)[1160], 17.5583314826, delta);
+    TS_ASSERT_DELTA(result->e(0)[1160], 0.197345265992, delta);
 
-    TS_ASSERT_DELTA(result->readY(1)[1145], 4.61301046588, delta);
-    TS_ASSERT_DELTA(result->readE(1)[1145], 0.0721823446635, delta);
+    TS_ASSERT_DELTA(result->y(1)[1145], 4.61301046588, delta);
+    TS_ASSERT_DELTA(result->e(1)[1145], 0.0721823446635, delta);
 
-    TS_ASSERT_DELTA(result->readY(2)[1200], 1.33394133548, delta);
-    TS_ASSERT_DELTA(result->readE(2)[1200], 0.0419839252961, delta);
+    TS_ASSERT_DELTA(result->y(2)[1200], 1.33394133548, delta);
+    TS_ASSERT_DELTA(result->e(2)[1200], 0.0419839252961, delta);
 
-    TS_ASSERT_DELTA(result->readY(3)[99], 0.0446085388561, delta);
-    TS_ASSERT_DELTA(result->readE(3)[99], 0.0185049423467, delta);
+    TS_ASSERT_DELTA(result->y(3)[99], 0.0446085388561, delta);
+    TS_ASSERT_DELTA(result->e(3)[99], 0.0185049423467, delta);
 
-    TS_ASSERT_DELTA(result->readY(4)[1654], 0.0171136490957, delta);
-    TS_ASSERT_DELTA(result->readE(4)[1654], 0.005007299861, delta);
+    TS_ASSERT_DELTA(result->y(4)[1654], 0.0171136490957, delta);
+    TS_ASSERT_DELTA(result->e(4)[1654], 0.005007299861, delta);
 
-    TS_ASSERT_DELTA(result->readY(5)[1025], 0.0516113202152, delta);
-    TS_ASSERT_DELTA(result->readE(5)[1025], 0.0102893133461, delta);
+    TS_ASSERT_DELTA(result->y(5)[1025], 0.0516113202152, delta);
+    TS_ASSERT_DELTA(result->e(5)[1025], 0.0102893133461, delta);
 
     // Spectra-detector mapping
     const size_t nspectra(6);

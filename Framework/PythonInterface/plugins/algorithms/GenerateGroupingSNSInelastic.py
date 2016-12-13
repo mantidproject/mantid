@@ -26,7 +26,6 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         """
         return "Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA."
 
-
     def PyInit(self):
         """ Python initialization:  Define input parameters
         """
@@ -71,11 +70,9 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
 
         banks = numdet/8/128
 
-
         f = open(filename,'w')
 
         f.write('<?xml version="1.0" encoding="UTF-8" ?>\n<detector-grouping instrument="'+instrument+'">\n')
-
 
         groupnum = 0
         for i in numpy.arange(banks):

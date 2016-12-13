@@ -1,27 +1,16 @@
 #ifndef MANTID_KERNEL_PROPERTYWITHVALUE_H_
 #define MANTID_KERNEL_PROPERTYWITHVALUE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidKernel/OptionalBool.h"
 
-#ifndef Q_MOC_RUN
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#endif
-
-#include <nexus/NeXusFile.hpp>
-
-#include "MantidKernel/IPropertySettings.h"
-#include <MantidKernel/StringTokenizer.h>
-#include <type_traits>
 #include <vector>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 
@@ -61,507 +50,38 @@ namespace Kernel {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-// --------------------- convert values to strings
-namespace {
-/// Convert values to strings.
-template <typename T> std::string toString(const T &value) {
-  return boost::lexical_cast<std::string>(value);
-}
-
-/// Throw an exception if a shared pointer is converted to a string.
-template <typename T> std::string toString(const boost::shared_ptr<T> &value) {
-  UNUSED_ARG(value);
-  throw boost::bad_lexical_cast();
-}
-
-/// Specialisation for a property of type std::vector.
-template <typename T>
-std::string toString(const std::vector<T> &value,
-                     const std::string &delimiter = ",") {
-  std::stringstream result;
-  std::size_t vsize = value.size();
-  for (std::size_t i = 0; i < vsize; ++i) {
-    result << value[i];
-    if (i + 1 != vsize)
-      result << delimiter;
-  }
-  return result.str();
-}
-
-/// Specialisation for a property of type std::vector<std::vector>.
-template <typename T>
-std::string toString(const std::vector<std::vector<T>> &value,
-                     const std::string &outerDelimiter = ",",
-                     const std::string &innerDelimiter = "+") {
-  std::stringstream result;
-  std::size_t vsize = value.size();
-  for (std::size_t i = 0; i < vsize; ++i) {
-    std::size_t innervsize = value[i].size();
-    for (std::size_t j = 0; j < innervsize; ++j) {
-      result << value[i][j];
-      if (j + 1 != innervsize)
-        result << innerDelimiter;
-    }
-
-    if (i + 1 != vsize)
-      result << outerDelimiter;
-  }
-  return result.str();
-}
-
-/// Specialisation for any type, should be appropriate for properties with a
-/// single value.
-template <typename T> int findSize(const T &) { return 1; }
-
-/// Specialisation for properties that are of type vector.
-template <typename T> int findSize(const std::vector<T> &value) {
-  return static_cast<int>(value.size());
-}
-
-// ------------- Convert strings to values
-template <typename T>
-inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
-  // try to split the string
-  std::size_t pos = strvalue.find(':');
-  if (pos == std::string::npos) {
-    pos = strvalue.find('-', 1);
-  }
-
-  // just convert the whole thing into a value
-  if (pos == std::string::npos) {
-    value.push_back(boost::lexical_cast<T>(strvalue));
-    return;
-  }
-
-  // convert the input string into boundaries and run through a list
-  T start = boost::lexical_cast<T>(strvalue.substr(0, pos));
-  T stop = boost::lexical_cast<T>(strvalue.substr(pos + 1));
-  for (T i = start; i <= stop; i++)
-    value.push_back(i);
-}
-
-template <typename T> void toValue(const std::string &strvalue, T &value) {
-  value = boost::lexical_cast<T>(strvalue);
-}
-
-template <typename T>
-void toValue(const std::string &, boost::shared_ptr<T> &) {
-  throw boost::bad_lexical_cast();
-}
-
-namespace detail {
-// vector<int> specializations
-template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value,
-             std::true_type) {
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
-  tokenizer values(strvalue, ",",
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  value.clear();
-  value.reserve(values.count());
-  for (const auto &token : values) {
-    appendValue(token, value);
-  }
-}
-
-template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value,
-             std::false_type) {
-  // Split up comma-separated properties
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
-  tokenizer values(strvalue, ",",
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-
-  value.clear();
-  value.reserve(values.count());
-  std::transform(
-      values.cbegin(), values.cend(), std::back_inserter(value),
-      [](const std::string &str) { return boost::lexical_cast<T>(str); });
-}
-
-// bool and char don't make sense as types to generate a range of values.
-// This is similar to std::is_integral<T>, but bool and char are std::false_type
-template <class T> struct is_range_type : public std::false_type {};
-template <class T> struct is_range_type<const T> : public is_range_type<T> {};
-template <class T>
-struct is_range_type<volatile const T> : public is_range_type<T> {};
-template <class T>
-struct is_range_type<volatile T> : public is_range_type<T> {};
-
-template <> struct is_range_type<unsigned short> : public std::true_type {};
-template <> struct is_range_type<unsigned int> : public std::true_type {};
-template <> struct is_range_type<unsigned long> : public std::true_type {};
-template <> struct is_range_type<unsigned long long> : public std::true_type {};
-
-template <> struct is_range_type<short> : public std::true_type {};
-template <> struct is_range_type<int> : public std::true_type {};
-template <> struct is_range_type<long> : public std::true_type {};
-template <> struct is_range_type<long long> : public std::true_type {};
-}
-template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value) {
-  detail::toValue(strvalue, value, detail::is_range_type<T>());
-}
-
-template <typename T>
-void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
-             const std::string &outerDelimiter = ",",
-             const std::string &innerDelimiter = "+") {
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
-  tokenizer tokens(strvalue, outerDelimiter,
-                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-
-  value.clear();
-  value.reserve(tokens.count());
-
-  for (const auto &token : tokens) {
-    tokenizer values(token, innerDelimiter,
-                     tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-    std::vector<T> vect;
-    vect.reserve(values.count());
-    std::transform(
-        values.begin(), values.end(), std::back_inserter(vect),
-        [](const std::string &str) { return boost::lexical_cast<T>(str); });
-    value.push_back(std::move(vect));
-  }
-}
-
-/*Used specifically to retrieve a vector of type T populated with values
- * given to it from strvalue parameter, Using toValue method.
- (See constructor used specifically for vector assignments)
- */
-template <typename T> T extractToValueVector(const std::string &strvalue) {
-  T valueVec;
-  toValue(strvalue, valueVec);
-  return valueVec;
-}
-
-//------------------------------------------------------------------------------------------------
-// Templated += operator functions for specific types
-template <typename T> inline void addingOperator(T &lhs, const T &rhs) {
-  // The cast here (and the expansion of the compound operator which that
-  // necessitates) is because if this function is created for a template
-  // type narrower than an int, the compiler will expande the operands to
-  // ints which leads to a compiler warning when it's assigned back to the
-  // narrower type.
-  lhs = static_cast<T>(lhs + rhs);
-}
-
-template <typename T>
-inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
-  // This concatenates the two
-  if (&lhs != &rhs) {
-    lhs.insert(lhs.end(), rhs.begin(), rhs.end());
-  } else {
-    std::vector<T> rhs_copy(rhs);
-    lhs.insert(lhs.end(), rhs_copy.begin(), rhs_copy.end());
-  }
-}
-
-template <> inline void addingOperator(bool &, const bool &) {
-  throw Exception::NotImplementedError(
-      "PropertyWithValue.h: += operator not implemented for type bool");
-}
-
-template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
-  throw Exception::NotImplementedError(
-      "PropertyWithValue.h: += operator not implemented for type OptionalBool");
-}
-
-template <typename T>
-inline void addingOperator(boost::shared_ptr<T> &,
-                           const boost::shared_ptr<T> &) {
-  throw Exception::NotImplementedError(
-      "PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
-}
-
-template <typename T>
-inline std::vector<std::string>
-determineAllowedValues(const T &, const IValidator &validator) {
-  return validator.allowedValues();
-}
-
-template <>
-inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
-                                                       const IValidator &) {
-  auto enumMap = OptionalBool::enumToStrMap();
-  std::vector<std::string> values;
-  values.reserve(enumMap.size());
-  std::transform(enumMap.cbegin(), enumMap.cend(), std::back_inserter(values),
-                 [](const std::pair<OptionalBool::Value, std::string> &str) {
-                   return str.second;
-                 });
-  return values;
-}
-}
-//------------------------------------------------------------------------------------------------
-// Now the PropertyWithValue class itself
-//------------------------------------------------------------------------------------------------
-
 template <typename TYPE> class DLLExport PropertyWithValue : public Property {
 public:
-  /** Constructor
-   *  @param name :: The name to assign to the property
-   *  @param defaultValue :: Is stored initial default value of the property
-   *  @param validator :: The validator to use for this property
-   *  @param direction :: Whether this is a Direction::Input, Direction::Output
-   * or Direction::InOut (Input & Output) property
-   */
   PropertyWithValue(
       const std::string &name, const TYPE &defaultValue,
       IValidator_sptr validator = IValidator_sptr(new NullValidator),
-      const unsigned int direction = Direction::Input)
-      : Property(name, typeid(TYPE), direction), m_value(defaultValue),
-        m_initialValue(defaultValue), m_validator(validator) {}
-
-  /** Constructor
-   *  @param name :: The name to assign to the property
-   *  @param defaultValue :: Is stored initial default value of the property
-   *  @param direction :: Whether this is a Direction::Input, Direction::Output
-   * or Direction::InOut (Input & Output) property
-   */
+      const unsigned int direction = Direction::Input);
   PropertyWithValue(const std::string &name, const TYPE &defaultValue,
-                    const unsigned int direction)
-      : Property(name, typeid(TYPE), direction), m_value(defaultValue),
-        m_initialValue(defaultValue),
-        m_validator(boost::make_shared<NullValidator>()) {}
-
-  /*
-    Constructor to handle vector value assignments to m_initialValue
-    so they can be remembered when the algorithm dialog is reloaded.
-  */
-  /**Constructor
-    *  @param name :: The name to assign to the property.
-    *  @param defaultValue :: A vector of numerical type, empty to comply with
-   * other definitions.
-    *  @param defaultValueStr :: The numerical values you wish to assign to the
-   * property
-    *  @param validator :: The validator to use for this property
-    *  @param direction :: Whether this is a Direction::Input, Direction::Output
-    * or Direction::InOut (Input & Output) property
-    */
+                    const unsigned int direction);
   PropertyWithValue(const std::string &name, const TYPE &defaultValue,
                     const std::string defaultValueStr,
-                    IValidator_sptr validator, const unsigned int direction)
-      : Property(name, typeid(TYPE), direction),
-        m_value(extractToValueVector<TYPE>(defaultValueStr)),
-        m_initialValue(extractToValueVector<TYPE>(defaultValueStr)),
-        m_validator(validator) {
-    UNUSED_ARG(defaultValue);
-  }
-
-  /**Copy constructor
-  *  Note the default value of the copied object is the initial value of
-  * original
-  */
-  PropertyWithValue(const PropertyWithValue &right)
-      : Property(right), m_value(right.m_value),
-        m_initialValue(right.m_initialValue), // the default is the initial
-                                              // value of the original object
-        m_validator(right.m_validator->clone()) {}
-  /// 'Virtual copy constructor'
-  PropertyWithValue<TYPE> *clone() const override {
-    return new PropertyWithValue<TYPE>(*this);
-  }
+                    IValidator_sptr validator, const unsigned int direction);
+  PropertyWithValue(const PropertyWithValue &right);
+  PropertyWithValue<TYPE> *clone() const override;
 
   void saveProperty(::NeXus::File *file) override;
-
-  /** Get the value of the property as a string
-   *  @return The property's value
-   */
-  std::string value() const override { return toString(m_value); }
-
-  /**
-   * Deep comparison.
-   * @param rhs The other property to compare to.
-   * @return true if the are equal.
-   */
-  virtual bool operator==(const PropertyWithValue<TYPE> &rhs) const {
-    if (this->name() != rhs.name())
-      return false;
-    return (m_value == rhs.m_value);
-  }
-
-  /**
-   * Deep comparison (not equal).
-   * @param rhs The other property to compare to.
-   * @return true if the are not equal.
-   */
-  virtual bool operator!=(const PropertyWithValue<TYPE> &rhs) const {
-    return !(*this == rhs);
-  }
-
-  /** Get the size of the property.
-  */
-  int size() const override { return findSize(m_value); }
-
-  /** Get the value the property was initialised with -its default value
-   *  @return The default value
-   */
-  std::string getDefault() const override { return toString(m_initialValue); }
-
-  /** Set the value of the property from a string representation.
-   *  Note that "1" & "0" must be used for bool properties rather than
-   * true/false.
-   *  @param value :: The value to assign to the property
-   *  @return Returns "" if the assignment was successful or a user level
-   * description of the problem
-   */
-  std::string setValue(const std::string &value) override {
-    try {
-      TYPE result = m_value;
-      std::string valueCopy = value;
-      if (autoTrim()) {
-        boost::trim(valueCopy);
-      }
-      toValue(valueCopy, result);
-      // Uses the assignment operator defined below which runs isValid() and
-      // throws based on the result
-      *this = result;
-      return "";
-    } catch (boost::bad_lexical_cast &) {
-      std::string error = "Could not set property " + name() +
-                          ". Can not convert \"" + value + "\" to " + type();
-      g_logger.debug() << error;
-      return error;
-    } catch (std::invalid_argument &except) {
-      g_logger.debug() << "Could not set property " << name() << ": "
-                       << except.what();
-      return except.what();
-    }
-  }
-
-  /**
-   * Set a property value via a DataItem
-   * @param data :: A shared pointer to a data item
-   * @return "" if the assignment was successful or a user level description of
-   * the problem
-   */
-  std::string setDataItem(const boost::shared_ptr<DataItem> data) override {
-    // Pass of the helper function that is able to distinguish whether
-    // the TYPE of the PropertyWithValue can be converted to a
-    // shared_ptr<DataItem>
-    return setTypedValue(
-        data, boost::is_convertible<TYPE, boost::shared_ptr<DataItem>>());
-  }
-
-  /// Copy assignment operator assigns only the value and the validator not the
-  /// name, default (initial) value, etc.
-  PropertyWithValue &operator=(const PropertyWithValue &right) {
-    if (&right == this)
-      return *this;
-    m_value = right.m_value;
-    m_validator = right.m_validator->clone();
-    return *this;
-  }
-
-  //--------------------------------------------------------------------------------------
-  /** Add the value of another property
-  * @param right the property to add
-  * @return the sum
-  */
-  PropertyWithValue &operator+=(Property const *right) override {
-    PropertyWithValue const *rhs =
-        dynamic_cast<PropertyWithValue const *>(right);
-
-    if (rhs) {
-      // This function basically does:
-      //  m_value += rhs->m_value; for values
-      //  or concatenates vectors for vectors
-      addingOperator(m_value, rhs->m_value);
-    } else
-      g_logger.warning() << "PropertyWithValue " << this->name()
-                         << " could not be added to another property of the "
-                            "same name but incompatible type.\n";
-
-    return *this;
-  }
-
-  //--------------------------------------------------------------------------------------
-  /** Assignment operator.
-   *  Allows assignment of a new value to the property by writing,
-   *  e.g., myProperty = 3;
-   *  @param value :: The new value to assign to the property
-   *  @return the reference to itself
-   */
-  virtual TYPE &operator=(const TYPE &value) {
-    TYPE oldValue = m_value;
-    if (std::is_same<TYPE, std::string>::value) {
-      std::string valueCopy = toString(value);
-      if (autoTrim()) {
-        boost::trim(valueCopy);
-      }
-      toValue(valueCopy, m_value);
-    } else {
-      m_value = value;
-    }
-    std::string problem = this->isValid();
-    if (problem == "") {
-      return m_value;
-    } else if (problem == "_alias") {
-      m_value = getValueForAlias(value);
-      return m_value;
-    } else {
-      m_value = oldValue;
-      throw std::invalid_argument(problem);
-    }
-  }
-
-  /** Allows you to get the value of the property via an expression like
-   * myProperty()
-   *  @returns the value of the property
-   */
-  virtual const TYPE &operator()() const { return m_value; }
-
-  /** Allows you to get the value of the property simply by typing its name.
-   *  Means you can use an expression like: int i = myProperty;
-   * @return the value
-   */
-  virtual operator const TYPE &() const { return m_value; }
-
-  /** Check the value chosen for the property is OK, unless overidden it just
-   * calls the validator's isValid()
-   *  N.B. Problems found in validator are written to the log
-   *  if you override this function to do checking outside a validator may want
-   * to do more logging
-   *  @returns "" if the value is valid or a discription of the problem
-   */
-  std::string isValid() const override { return m_validator->isValid(m_value); }
-
-  /** Indicates if the property's value is the same as it was when it was set
-  *  N.B. Uses an unsafe comparison in the case of doubles, consider overriding
-  * if the value is a pointer or floating point type
-  *  @return true if the value is the same as the initial value or false
-  * otherwise
-  */
-  bool isDefault() const override { return m_initialValue == m_value; }
-
-  /** Returns the set of valid values for this property, if such a set exists.
-   *  If not, it returns an empty vector.
-   *  @return Returns the set of valid values for this property, or it returns
-   * an empty vector.
-   */
-  std::vector<std::string> allowedValues() const override {
-    return determineAllowedValues(m_value, *m_validator);
-  }
-
-  /** Returns the set of valid values for this property, if such a set exists.
-  *  If not, it returns an empty vector.
-  *  @return Returns the set of valid values for this property, or it returns
-  * an empty vector.
-  */
-  bool isMultipleSelectionAllowed() override {
-    return m_validator->isMultipleSelectionAllowed();
-  }
-
-  /**
-   * Replace the current validator with the given one
-   * @param newValidator :: A replacement validator
-   */
-  virtual void replaceValidator(IValidator_sptr newValidator) {
-    m_validator = newValidator;
-  }
+  std::string value() const override;
+  virtual bool operator==(const PropertyWithValue<TYPE> &rhs) const;
+  virtual bool operator!=(const PropertyWithValue<TYPE> &rhs) const;
+  int size() const override;
+  std::string getDefault() const override;
+  std::string setValue(const std::string &value) override;
+  std::string setDataItem(const boost::shared_ptr<DataItem> data) override;
+  PropertyWithValue &operator=(const PropertyWithValue &right);
+  PropertyWithValue &operator+=(Property const *right) override;
+  virtual TYPE &operator=(const TYPE &value);
+  virtual const TYPE &operator()() const;
+  virtual operator const TYPE &() const;
+  std::string isValid() const override;
+  bool isDefault() const override;
+  std::vector<std::string> allowedValues() const override;
+  bool isMultipleSelectionAllowed() override;
+  virtual void replaceValidator(IValidator_sptr newValidator);
 
 protected:
   /// The value of the property
@@ -571,74 +91,15 @@ protected:
   TYPE m_initialValue;
 
 private:
-  /**
-   * Set the value of the property via a reference to another property.
-   * If the value is unacceptable the value is not changed but a string is
-   * returned.
-   * The value is only accepted if the other property has the same type as this
-   * @param right :: A reference to a property.
-   */
-  std::string setValueFromProperty(const Property &right) override {
-    auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right);
-    if (!prop) {
-      return "Could not set value: properties have different type.";
-    }
-    m_value = prop->m_value;
-    return "";
-  }
+  std::string setValueFromProperty(const Property &right) override;
 
-  /**
-   * Helper function for setValue(DataItem_sptr). Uses boost type traits to
-   * ensure
-   * it is only used if U is a type that is convertible to
-   * boost::shared_ptr<DataItem>
-   * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
-   */
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::true_type &) {
-    TYPE data = boost::dynamic_pointer_cast<typename TYPE::element_type>(value);
-    std::string msg;
-    if (data) {
-      try {
-        (*this) = data;
-      } catch (std::invalid_argument &exc) {
-        msg = exc.what();
-      }
-    } else {
-      msg = "Invalid DataItem. The object type (" +
-            std::string(typeid(value).name()) +
-            ") does not match the declared type of the property (" +
-            std::string(this->type()) + ").";
-    }
-    return msg;
-  }
+  std::string setTypedValue(const U &value, const boost::true_type &);
 
-  /**
-   * Helper function for setValue(DataItem_sptr). Uses boost type traits to
-   * ensure
-   * it is only used if U is NOT a type that is convertible to
-   * boost::shared_ptr<DataItem>
-   * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
-   */
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::false_type &) {
-    UNUSED_ARG(value);
-    return "Attempt to assign object of type DataItem to property (" + name() +
-           ") of incorrect type";
-  }
+  std::string setTypedValue(const U &value, const boost::false_type &);
 
-  /** Return value for a given alias.
-   * @param alias :: An alias for a value. If a value cannot be found throw an
-   * invalid_argument exception.
-   * @return :: A value.
-   */
-  const TYPE getValueForAlias(const TYPE &alias) const {
-    std::string strAlias = toString(alias);
-    std::string strValue = m_validator->getValueForAlias(strAlias);
-    TYPE value;
-    toValue(strValue, value);
-    return value;
-  }
+  const TYPE getValueForAlias(const TYPE &alias) const;
 
   /// Visitor validator class
   IValidator_sptr m_validator;
@@ -647,31 +108,36 @@ private:
   static Logger g_logger;
 
   /// Private default constructor
-  PropertyWithValue();
+  PropertyWithValue() = default;
 };
 
-template <> void PropertyWithValue<float>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<double>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
 template <>
-void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+MANTID_KERNEL_DLL void
+PropertyWithValue<float>::saveProperty(::NeXus::File *file);
 template <>
-void PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+MANTID_KERNEL_DLL void
+PropertyWithValue<double>::saveProperty(::NeXus::File *file);
 template <>
-void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
-
-template <typename TYPE>
-void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/) {
-  // AppleClang 7.3 and later gives a -Winfinite-recursion warning if I call the
-  // base class method. The function is small enough that reimplementing it
-  // isn't a big deal.
-  throw std::invalid_argument(
-      "PropertyWithValue::saveProperty - Cannot save '" + this->name() +
-      "', property type not implemented.");
-}
+MANTID_KERNEL_DLL void
+PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");

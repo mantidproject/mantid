@@ -1,13 +1,13 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
-import math
 import os
 from reduction_gui.reduction.sans.eqsans_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_instrument
 import ui.sans.ui_eqsans_info
+
 
 class SANSInstrumentWidget(BaseWidget):
     """
@@ -198,7 +198,8 @@ class SANSInstrumentWidget(BaseWidget):
     def _mask_plot_clicked(self):
         ws_name = os.path.basename(str(self._summary.mask_edit.text()))
         self.mask_ws = "__mask_%s" % ws_name
-        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
+        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2,
+                             reload=self.mask_reload, mask=self._masked_detectors)
         self._masked_detectors = []
         self.mask_reload = False
 

@@ -67,13 +67,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="lbNumberDensity">
-          <property name="text">
-           <string>Number Density</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="lbThickness">
           <property name="text">
@@ -101,9 +94,9 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="spNumberDensity">
+         <widget class="QDoubleSpinBox" name="spDensity">
           <property name="suffix">
-           <string> atoms/Å^3</string>
+           <string/>
           </property>
           <property name="decimals">
            <number>5</number>
@@ -135,6 +128,20 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QComboBox" name="cbDensityType">
+          <item>
+           <property name="text">
+            <string>Mass Density (g/cm^3)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Number Density  (atoms/Å^3)</string>
+           </property>
+          </item>
+         </widget>
         </item>
        </layout>
       </widget>

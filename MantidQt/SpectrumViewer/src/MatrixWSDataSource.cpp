@@ -15,6 +15,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
@@ -285,8 +286,8 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
       azi = det->getPhi();
     }
     SVUtils::PushNameValue("L2", 8, 4, l2, list);
-    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * deg2rad, list);
-    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * deg2rad, list);
+    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * rad2deg, list);
+    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * rad2deg, list);
 
     /* For now, only support diffractometers and monitors. */
     /* We need a portable way to determine emode and */

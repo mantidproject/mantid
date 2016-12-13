@@ -54,8 +54,8 @@ public:
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 2.0);
-    TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0);
+    TS_ASSERT_EQUALS(ws->y(0)[0], 2.0);
+    TS_ASSERT_EQUALS(ws->e(0)[0], 1.0);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -66,9 +66,9 @@ public:
     MatrixWorkspace_sptr inputWS = createWorkspace(false);
 
     // Put bad values into workspace
-    inputWS->dataY(1)[0] = std::numeric_limits<double>::quiet_NaN();
-    inputWS->dataE(1)[1] = std::numeric_limits<double>::quiet_NaN();
-    inputWS->dataY(1)[2] = std::numeric_limits<double>::infinity();
+    inputWS->mutableY(1)[0] = std::numeric_limits<double>::quiet_NaN();
+    inputWS->mutableE(1)[1] = std::numeric_limits<double>::quiet_NaN();
+    inputWS->mutableY(1)[2] = std::numeric_limits<double>::infinity();
 
     // Name of the output workspace.
     std::string outWSName("WeightedMeanOfWorkspaceTest_OutputWS");
@@ -88,8 +88,8 @@ public:
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 2.0);
-    TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0);
+    TS_ASSERT_EQUALS(ws->y(0)[0], 2.0);
+    TS_ASSERT_EQUALS(ws->e(0)[0], 1.0);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -116,11 +116,11 @@ private:
     if (doMasked) {
       masked.insert(0);
     }
-    return WorkspaceCreationHelper::Create2DWorkspace123(4, 3, true, masked);
+    return WorkspaceCreationHelper::create2DWorkspace123(4, 3, true, masked);
   }
 
   EventWorkspace_sptr createEventWorkspace() {
-    return WorkspaceCreationHelper::CreateEventWorkspace();
+    return WorkspaceCreationHelper::createEventWorkspace();
   }
 };
 

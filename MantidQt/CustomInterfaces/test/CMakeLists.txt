@@ -20,6 +20,7 @@ if ( CXXTEST_FOUND )
             Geometry
             HistogramData
             Kernel
+			MantidWidgets
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${QWT_LIBRARIES}

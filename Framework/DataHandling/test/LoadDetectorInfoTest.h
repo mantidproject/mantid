@@ -6,6 +6,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -359,7 +360,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(m_InoutWS));
 
-    const ParameterMap &pmap = WS->instrumentParameters();
+    const auto &pmap = WS->constInstrumentParameters();
 
     for (int j = 0; j < SmallTestDatFile::NDETECTS; ++j) {
 

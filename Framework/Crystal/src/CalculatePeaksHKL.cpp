@@ -2,6 +2,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/Sample.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -14,7 +15,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculatePeaksHKL)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CalculatePeaksHKL::name() const {
   return "CalculatePeaksHKL";
@@ -28,9 +28,6 @@ const std::string CalculatePeaksHKL::category() const {
   return "Crystal\\Peaks";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CalculatePeaksHKL::init() {
@@ -47,7 +44,6 @@ void CalculatePeaksHKL::init() {
       "Gets set with the number of indexed peaks.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CalculatePeaksHKL::exec() {
@@ -56,7 +52,7 @@ void CalculatePeaksHKL::exec() {
   const int n_peaks = ws->getNumberPeaks();
 
   OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  const Matrix<double> &UB = o_lattice.getUB();
 
   DblMatrix UB_inverse(UB);
 

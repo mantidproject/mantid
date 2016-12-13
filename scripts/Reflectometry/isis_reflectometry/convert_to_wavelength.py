@@ -1,8 +1,10 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as msi
 import mantid.api
 from mantid.kernel import logger
 import re
+
 
 class ConvertToWavelength(object):
 
@@ -118,7 +120,8 @@ class ConvertToWavelength(object):
 
         return _in_rng
 
-    def convert(self, wavelength_min, wavelength_max, detector_workspace_indexes, monitor_workspace_index, correct_monitor=False, bg_min=None, bg_max=None):
+    def convert(self, wavelength_min, wavelength_max, detector_workspace_indexes, monitor_workspace_index,
+                correct_monitor=False, bg_min=None, bg_max=None):
         """
         Run the conversion
 
@@ -152,7 +155,8 @@ class ConvertToWavelength(object):
         logger.debug("Monitor detector index %s" % str(monitor_workspace_index))
 
         # Crop out the monitor workspace
-        _monitor_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength, StartWorkspaceIndex=monitor_workspace_index,EndWorkspaceIndex=monitor_workspace_index)
+        _monitor_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength,
+                                        StartWorkspaceIndex=monitor_workspace_index,EndWorkspaceIndex=monitor_workspace_index)
         # Crop out the detector workspace then chop out the x-ranges of interest.
         _detector_ws =  ConvertToWavelength.crop_range(sum_wavelength, detector_workspace_indexes)
 
@@ -164,8 +168,3 @@ class ConvertToWavelength(object):
 
         msi.DeleteWorkspace(Workspace=sum_wavelength.getName())
         return (_monitor_ws, _detector_ws)
-
-
-
-
-

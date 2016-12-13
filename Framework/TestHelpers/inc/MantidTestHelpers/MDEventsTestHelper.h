@@ -17,6 +17,7 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/make_unique.h"
 
 namespace {
 template <typename MDE, size_t nd>
@@ -163,7 +164,7 @@ makeFakeMDEventWorkspace(const std::string &wsName, long numEvents = 10000,
 MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10,
                          coord_t max = 10.0, double errorSquared = 1.0,
-                         std::string name = "", double numEvents = 1.0);
+                         const std::string &name = "", double numEvents = 1.0);
 
 Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
     double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,

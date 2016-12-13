@@ -41,12 +41,12 @@ public:
     // Some values
     std::vector<double> values = {-1., -2., 10.};
     // Derivative
-    std::vector<double> result = entropy.secondDerivative(values);
+    std::vector<double> result = entropy.secondDerivative(values, 1);
     TS_ASSERT_EQUALS(values.size(), result.size());
     // fabs(x)
-    TS_ASSERT_DELTA(result[0], 1, 1E-6);
-    TS_ASSERT_DELTA(result[1], 2, 1E-6);
-    TS_ASSERT_DELTA(result[2], 10, 1E-6);
+    TS_ASSERT_DELTA(result[0], std::sqrt(2), 1E-6);
+    TS_ASSERT_DELTA(result[1], std::sqrt(5), 1E-6);
+    TS_ASSERT_DELTA(result[2], std::sqrt(101), 1E-6);
   }
   void test_correct_value() {
     MaxentEntropyNegativeValues entropy;

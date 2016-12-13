@@ -2,14 +2,18 @@
 
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -31,7 +35,6 @@ bool compareMomentum(const Mantid::Kernel::VMD &v1,
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormDirectSC)
 
-//----------------------------------------------------------------------------------------------
 /**
  * Constructor
  */
@@ -60,7 +63,6 @@ const std::string MDNormDirectSC::summary() const {
 /// Algorithm's name for use in the GUI and help. @see Algorithm::name
 const std::string MDNormDirectSC::name() const { return "MDNormDirectSC"; }
 
-//----------------------------------------------------------------------------------------------
 /**
   * Initialize the algorithm's properties.
   */
@@ -119,8 +121,10 @@ void MDNormDirectSC::exec() {
   cacheInputs();
   auto outputWS = binInputWS();
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  outputWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
   createNormalizationWS(*outputWS);
+  m_normWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty("OutputNormalizationWorkspace", m_normWS);
 
   // Check for other dimensions if we could measure anything in the original

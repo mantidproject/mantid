@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -31,9 +32,8 @@ void LoadMappingTable::exec() {
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  /// ISISRAW class instance which does raw file reading. Shared pointer to
-  /// prevent memory leak when an exception is thrown.
-  boost::scoped_ptr<ISISRAW2> iraw(new ISISRAW2);
+  /// ISISRAW class instance which does raw file reading.
+  auto iraw = Kernel::make_unique<ISISRAW2>();
 
   if (iraw->readFromFile(m_filename.c_str(), 0) !=
       0) // ReadFrom File with no data

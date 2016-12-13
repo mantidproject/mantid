@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import *
 from mantid.kernel import *
-import mantid, os
+import mantid
+import os
 
 
 # See ticket #14716
@@ -11,6 +12,7 @@ import mantid, os
 class CreateCacheFilename(PythonAlgorithm):
     """ Create cache filename
     """
+
     def category(self):
         """
         """
@@ -67,7 +69,7 @@ class CreateCacheFilename(PythonAlgorithm):
         if not prop_manager and not other_props:
             raise ValueError("Either PropertyManager or OtherProperties should be supplied")
         prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)\
-                       if prop_manager else None
+            if prop_manager else None
         # default to all properties in the manager
         props = self.getProperty("Properties").value
         if not props and prop_manager:
@@ -134,4 +136,3 @@ def matched(keys, patterns):
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateCacheFilename)
-

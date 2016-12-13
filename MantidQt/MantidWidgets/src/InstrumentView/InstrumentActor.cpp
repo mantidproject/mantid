@@ -16,6 +16,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Objects/Object.h"
@@ -29,7 +30,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <QMessageBox>
 #include <QSettings>
@@ -134,8 +135,7 @@ void InstrumentActor::setUpWorkspace(
   for (size_t i = 0; i < nHist; ++i) {
     const Mantid::MantidVec &values = sharedWorkspace->readX(i);
     double xtest = values.front();
-    if (xtest != std::numeric_limits<double>::infinity()) {
-
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
@@ -145,7 +145,7 @@ void InstrumentActor::setUpWorkspace(
     }
 
     xtest = values.back();
-    if (xtest != std::numeric_limits<double>::infinity()) {
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
@@ -635,11 +635,10 @@ void InstrumentActor::resetColors() {
   m_colors.resize(m_specIntegrs.size());
 
   auto sharedWorkspace = getWorkspace();
+  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
 
-  Instrument_const_sptr inst = getInstrument();
   IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
 
-  // PARALLEL_FOR1(m_workspace)
   for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
     size_t wi = size_t(iwi);
     double integratedValue = m_specIntegrs[wi];
@@ -651,7 +650,7 @@ void InstrumentActor::resetColors() {
       if (mask) {
         masked = mask->isMasked(dets);
       } else {
-        masked = inst->isDetectorMasked(dets);
+        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
       }
 
       if (masked) {
@@ -1152,7 +1151,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
         continue;
       }
       double sum = m_specIntegrs[i];
-      if (boost::math::isinf(sum) || boost::math::isnan(sum)) {
+      if (!std::isfinite(sum)) {
         throw std::runtime_error(
             "The workspace contains values that cannot be displayed (infinite "
             "or NaN).\n"

@@ -24,6 +24,7 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/ILiveListener.h"
+#include "MantidKernel/LiveListenerInfo.h"
 
 namespace Mantid {
 namespace API {
@@ -51,11 +52,16 @@ class MANTID_API_DLL LiveListenerFactoryImpl
     : public Kernel::DynamicFactory<ILiveListener> {
 public:
   boost::shared_ptr<ILiveListener>
-  create(const std::string &instrumentName, bool connect,
+  create(const std::string &instrumentName, bool connect = false,
+         const Kernel::IPropertyManager *properties = nullptr,
+         const std::string &listenerConnectionName = "") const;
+
+  boost::shared_ptr<ILiveListener>
+  create(const Kernel::LiveListenerInfo &info, bool connect = false,
          const Kernel::IPropertyManager *properties = nullptr) const;
+
   LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
   LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;
-  bool checkConnection(const std::string &instrumentName) const;
 
 private:
   friend struct Kernel::CreateUsingNew<LiveListenerFactoryImpl>;

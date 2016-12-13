@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -201,7 +202,7 @@ private:
                                                   double Ef) {
 
     Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 100, xmin, dx);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, xmin, dx);
 
     if ((Ei > 0 || Ef > 0) && deltaEUnits) {
       ws->getAxis(0)->setUnit("DeltaE");

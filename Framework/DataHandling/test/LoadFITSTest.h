@@ -5,6 +5,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadFITS.h"
 #include <MantidAPI/FrameworkManager.h>
 
@@ -162,12 +164,12 @@ public:
 
     // Sum the two bins from the last spectra - should be 70400
     double sumY =
-        ws1->readY(g_SPECTRA_COUNT - 1)[0] + ws2->readY(g_SPECTRA_COUNT - 1)[0];
+        ws1->y(g_SPECTRA_COUNT - 1)[0] + ws2->y(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_EQUALS(sumY, 275);
     // Check the sum of the error values for the last spectra in each file -
     // should be 375.183
     double sumE =
-        ws1->readE(g_SPECTRA_COUNT - 1)[0] + ws2->readE(g_SPECTRA_COUNT - 1)[0];
+        ws1->e(g_SPECTRA_COUNT - 1)[0] + ws2->e(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_LESS_THAN(std::abs(sumE - 23.4489), 0.0001); // Include a small
     // tolerance check with
     // the assert - not
@@ -208,9 +210,9 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), g_SPECTRA_COUNT);
 
       // check Y and Error
-      TS_ASSERT_EQUALS(ws->readY(g_SPECTRA_COUNT - 100)[0], expectedY[i]);
+      TS_ASSERT_EQUALS(ws->y(g_SPECTRA_COUNT - 100)[0], expectedY[i]);
       TS_ASSERT_LESS_THAN(
-          std::abs(ws->readE(g_SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
+          std::abs(ws->e(g_SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
     }
   }
 
@@ -346,15 +348,15 @@ public:
     size_t n = ws0->getNumberHistograms();
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (first one) is not as expected",
-        ws0->readY(n - 1)[0], 137);
+        ws0->y(n - 1)[0], 137);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (middle one) is not as expected",
-        ws0->readY(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
+        ws0->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (last one) is not as expected",
-        ws0->readY(n - 1).back(), 142);
+        ws0->y(n - 1).back(), 142);
 
     MatrixWorkspace_sptr ws1;
     TS_ASSERT_THROWS_NOTHING(
@@ -365,15 +367,15 @@ public:
                       ws1->getTitle(), g_smallFname2);
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (first one) is not as expected",
-        ws1->readY(n - 1)[0], 155);
+        ws1->y(n - 1)[0], 155);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (middle one) is not as expected",
-        ws1->readY(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
+        ws1->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (last one) is not as expected",
-        ws1->readY(n - 1).back(), 133);
+        ws1->y(n - 1).back(), 133);
   }
 
   void test_loadEmpty() {

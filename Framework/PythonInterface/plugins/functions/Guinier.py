@@ -28,12 +28,14 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class Guinier(IFunction1D):
     """
         Provide a Guinier fit function for SANS
 
         I(q) = I(0) exp(-R^2 q^2 / 3)
     """
+
     def category(self):
         return "SANS"
 

@@ -1,6 +1,6 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -70,11 +70,6 @@ size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
 } // namespace DataObjects
 } // namespace Mantid
-
-///\cond TEMPLATE
-
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
 
 namespace Mantid {
 namespace Kernel {

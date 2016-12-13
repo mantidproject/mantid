@@ -11,8 +11,10 @@
 #include "MantidKernel/WriteLock.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Strings.h"
 #include "FakeAlgorithms.h"
 #include "PropertyManagerHelper.h"
 #include <map>
@@ -31,6 +33,7 @@ public:
   int version() const override { return 1; }
   const std::string category() const override { return "Cat;Leopard;Mink"; }
   const std::string summary() const override { return "Test summary"; }
+
   void init() override {
     declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
                                                      Direction::Input));
@@ -44,6 +47,7 @@ public:
     declareProperty(make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
+
   void exec() override {
     boost::shared_ptr<WorkspaceTester> out1 =
         boost::make_shared<WorkspaceTester>();
@@ -59,7 +63,6 @@ public:
     double val = getProperty("Number");
     out1->dataY(0)[0] = val;
     setProperty("OutputWorkspace1", out1);
-    setProperty("OutputWorkspace2", out2);
     setProperty("OutputWorkspace2", out2);
   }
 };

@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
@@ -17,14 +19,11 @@ class IndirectCalibration(DataProcessorAlgorithm):
     _intensity_scale = None
     _run_numbers = None
 
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Calibration'
 
-
     def summary(self):
         return 'Creates a calibration workspace from a White-Beam Vanadium run.'
-
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
@@ -55,7 +54,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='Output workspace for calibration data.')
 
-
     def validateInputs(self):
         """
         Validates input ranges.
@@ -67,7 +65,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         issues['BackgroundRange'] = self._validate_range('BackgroundRange')
 
         return issues
-
 
     def _validate_range(self, property_name):
         """
@@ -85,7 +82,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
             return 'Incorrect number of values (should be 2)'
 
         return None
-
 
     def PyExec(self):
         from IndirectCommon import get_run_number
@@ -171,7 +167,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._add_logs()
         self.setProperty('OutputWorkspace', self._out_ws)
 
-
     def _setup(self):
         """
         Gets properties.
@@ -187,7 +182,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._intensity_scale = self.getProperty('ScaleFactor').value
         if self._intensity_scale == 1.0:
             self._intensity_scale = None
-
 
     def _add_logs(self):
         """

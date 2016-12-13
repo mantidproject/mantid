@@ -5,9 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/LiveListenerInfo.h"
+
 #include <set>
 #include <string>
 #include <map>
+#include <vector>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -64,15 +67,21 @@ public:
   std::string filePrefix(unsigned int runNumber) const;
   /// Returns the default delimiter between instrument name and run number
   std::string delimiter() const;
-  /// Returns the name of the live listener
-  const std::string &liveListener() const;
-  /// Returns an object representing the host & port to connect to for a live
-  /// data stream
-  const std::string &liveDataAddress() const;
   /// Return list of techniques
   const std::set<std::string> &techniques() const;
   /// The facility to which this instrument belongs
   const FacilityInfo &facility() const;
+
+  /// Returns the name of the default live listener
+  std::string liveListener(const std::string &name = "") const;
+  /// Returns a string containing the "host:port" for default live listener
+  std::string liveDataAddress(const std::string &name = "") const;
+  /// Returns LiveListenerInfo for specified connection name (or default)
+  const LiveListenerInfo &liveListenerInfo(std::string name = "") const;
+  /// Returns true if this instrument has at least one live listener defined
+  bool hasLiveListenerInfo() const;
+  /// Returns all available LiveListenerInfos as a vector
+  const std::vector<LiveListenerInfo> &liveListenerInfoList() const;
 
 private:
   void fillTechniques(const Poco::XML::Element *elem);
@@ -96,10 +105,11 @@ private:
   std::string m_shortName;        ///< Instrument short name
   ZeroPaddingMap m_zeroPadding;   ///< Run number-dependent zero padding
   std::string m_delimiter; ///< Delimiter between instrument name and run number
-  std::string m_liveListener;    ///< Name of the live listener class
-  std::string m_liveDataAddress; ///< Host & port for live data connection
   std::set<std::string>
       m_technique; ///< List of techniques the instrument can do
+
+  std::vector<LiveListenerInfo> m_listeners; ///< LiveListener connections
+  std::string m_defaultListener; ///< Default LiveListener connection to use
 };
 
 /// Allow this object to be printed to a stream

@@ -23,32 +23,35 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
 
+namespace {
+// Functor to generate spline values
+struct NormGaussianFunc1 {
+  double operator()(double x, int) {
+    double sig = 0.1;
+    return exp(-pow(x, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
+  }
+};
+// Functor to generate spline values
+struct NormGaussianFunc2 {
+  double operator()(double x, int) {
+    double sig = sqrt(0.1 * 0.1 + 0.1 * 0.1);
+    return exp(-pow(x, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
+  }
+};
+}
+
 class ConvolveWorkspacesTest : public CxxTest::TestSuite {
 public:
-  // Functor to generate spline values
-  struct NormGaussianFunc1 {
-    double operator()(double x, int) {
-      double sig = 0.1;
-      return exp(-pow(x, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
-    }
-  };
-  // Functor to generate spline values
-  struct NormGaussianFunc2 {
-    double operator()(double x, int) {
-      double sig = sqrt(0.1 * 0.1 + 0.1 * 0.1);
-      return exp(-pow(x, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
-    }
-  };
   void testFunction() {
     ConvolveWorkspaces alg;
 
     // Convolution of normalized Gaussians should have sigma =
     // sqrt(sig1^2+sig2^2)
     Workspace2D_sptr ws1 =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             NormGaussianFunc1(), 1, -2.0, 2.0, 0.01, false);
     Workspace2D_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             NormGaussianFunc2(), 1, -2.0, 2.0, 0.01, false);
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().addOrReplace("wksp1", ws1));
@@ -68,10 +71,10 @@ public:
     Workspace2D_sptr ows = alg.getProperty("OutputWorkspace");
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
-      const auto &xs2 = ws2->readX(i);
-      const auto &xs = ows->readX(i);
-      const auto &ys2 = ws2->readY(i);
-      const auto &ys = ows->readY(i);
+      const auto &xs2 = ws2->x(i);
+      const auto &xs = ows->x(i);
+      const auto &ys2 = ws2->y(i);
+      const auto &ys = ows->y(i);
 
       // check output for consistency
       for (size_t j = 0; j < ys.size(); ++j) {
@@ -82,6 +85,43 @@ public:
     AnalysisDataService::Instance().remove("wksp1");
     AnalysisDataService::Instance().remove("wksp2");
   }
+};
+
+class ConvolveWorkspacesTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvolveWorkspacesTestPerformance *createSuite() {
+    return new ConvolveWorkspacesTestPerformance();
+  }
+  static void destroySuite(ConvolveWorkspacesTestPerformance *suite) {
+    delete suite;
+  }
+
+  ConvolveWorkspacesTestPerformance() { FrameworkManager::Instance(); }
+
+  void setUp() override {
+    ws1 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        NormGaussianFunc1(), 1000, -5.0, 5.0, 0.005, false);
+    ws2 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        NormGaussianFunc2(), 1000, -5.0, 5.0, 0.005, false);
+    AnalysisDataService::Instance().addOrReplace("wksp1", ws1);
+    AnalysisDataService::Instance().addOrReplace("wksp2", ws2);
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void testExec() {
+    ConvolveWorkspaces alg;
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "Conv");
+    alg.setProperty("Workspace1", "wksp1");
+    alg.setProperty("Workspace2", "wksp2");
+    alg.execute();
+  }
+
+private:
+  Workspace2D_sptr ws1, ws2;
 };
 
 #endif /*ConvolveWorkspacesTEST_H_*/

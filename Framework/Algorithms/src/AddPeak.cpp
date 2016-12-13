@@ -3,7 +3,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/System.h"
 
@@ -18,7 +20,6 @@ DECLARE_ALGORITHM(AddPeak)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void AddPeak::init() {
@@ -34,7 +35,6 @@ void AddPeak::init() {
   declareProperty("BinCount", 0.0, "Bin count.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void AddPeak::exec() {

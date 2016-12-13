@@ -25,7 +25,7 @@ public:
 
   RebinnedOutputTest() {
     nHist = 6;
-    ws = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+    ws = WorkspaceCreationHelper::createRebinnedOutputWorkspace();
   }
 
   void testClone() {

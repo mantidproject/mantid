@@ -18,6 +18,7 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
+
 def _import_tool_tomopy():
     try:
         import tomopy
@@ -31,6 +32,7 @@ def _import_tool_tomopy():
                           format(exc))
 
     return tomopy
+
 
 def _import_tool_astra():
     # current astra distributions install here, so check there by default
@@ -52,6 +54,7 @@ def _import_tool_astra():
 
     print "Astra using cuda: {0}". format(astra.astra.use_cuda())
     return astra
+
 
 def import_tomo_tool(tool):
     if not tool or not isinstance(tool, str):

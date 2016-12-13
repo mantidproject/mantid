@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ChangeLogTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <sstream>
 

@@ -1,5 +1,5 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} ../../TestHelpers/inc)
 
   cxxtest_add_test ( HistogramDataTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( HistogramDataTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}

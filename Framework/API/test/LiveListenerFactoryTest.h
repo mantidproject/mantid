@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "LiveListenerTest.h"
+#include "ILiveListenerTest.h"
 #include <Poco/Path.h>
 
 using namespace Mantid;
@@ -21,7 +21,7 @@ public:
 
   LiveListenerFactoryTest() : factory(LiveListenerFactory::Instance()) {
     // Subscribe the mock implementation created in ILiveListenerTest.h
-    factory.subscribe<MockLiveListener>("MockLiveListener");
+    factory.subscribe<MockILiveListener>("MockILiveListener");
   }
 
   void setUp() override {
@@ -42,9 +42,9 @@ public:
   void test_create() {
     // Check that we can successfully create a registered class
     boost::shared_ptr<ILiveListener> l;
-    TS_ASSERT_THROWS_NOTHING(l = factory.create("MockLiveListener", false))
+    TS_ASSERT_THROWS_NOTHING(l = factory.create("MockILiveListener", false))
     // Check it's really the right class
-    TS_ASSERT(boost::dynamic_pointer_cast<MockLiveListener>(l))
+    TS_ASSERT(boost::dynamic_pointer_cast<MockILiveListener>(l))
 
     // Check that unregistered class request throws
     TS_ASSERT_THROWS(factory.create("fdsfds", false),
@@ -56,11 +56,6 @@ public:
     TS_ASSERT_THROWS(factory.create("MINITOPAZ", true), std::runtime_error);
     // Now test that it doesn't throw if we ask not to connect
     TS_ASSERT_THROWS_NOTHING(factory.create("MINITOPAZ", false));
-  }
-
-  void test_checkConnection() {
-    TS_ASSERT(factory.checkConnection("MockLiveListener"));
-    TS_ASSERT(!factory.checkConnection("MINITOPAZ"))
   }
 
   void test_createUnwrapped_throws() {

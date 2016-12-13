@@ -2,6 +2,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -350,6 +352,15 @@ void LoadEventPreNexus::exec() {
   }
   this->loadPixelMap(mapping_filename);
 
+  // Replace workspace by workspace of correct size
+  // Number of non-monitors in instrument
+  size_t nSpec = localWorkspace->getInstrument()->getDetectorIDs(true).size();
+  if (!this->spectra_list.empty())
+    nSpec = this->spectra_list.size();
+  auto tmp = createWorkspace<EventWorkspace>(nSpec, 2, 1);
+  WorkspaceFactory::Instance().initializeFromParent(localWorkspace, tmp, true);
+  localWorkspace = std::move(tmp);
+
   // Process the events into pixels
   this->procEvents(localWorkspace);
 
@@ -455,6 +466,13 @@ void LoadEventPreNexus::procEvents(
     if (it->first > detid_max)
       detid_max = it->first;
 
+  // For slight speed up
+  loadOnlySomeSpectra = (!this->spectra_list.empty());
+
+  // Turn the spectra list into a map, for speed of access
+  for (auto &spectrum : spectra_list)
+    spectraLoadMap[spectrum] = true;
+
   // Pad all the pixels
   prog->report("Padding Pixels");
   this->pixel_to_wkspindex.reserve(
@@ -462,23 +480,22 @@ void LoadEventPreNexus::procEvents(
   // Set to zero
   this->pixel_to_wkspindex.assign(detid_max + 1, 0);
   size_t workspaceIndex = 0;
+  specnum_t spectrumNumber = 1;
   for (it = detector_map.begin(); it != detector_map.end(); it++) {
     if (!it->second->isMonitor()) {
-      this->pixel_to_wkspindex[it->first] = workspaceIndex;
-      EventList &spec = workspace->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(it->first);
-      // Start the spectrum number at 1
-      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
-      workspaceIndex += 1;
+      if (!loadOnlySomeSpectra ||
+          (spectraLoadMap.find(it->first) != spectraLoadMap.end())) {
+        this->pixel_to_wkspindex[it->first] = workspaceIndex;
+        EventList &spec = workspace->getSpectrum(workspaceIndex);
+        spec.setDetectorID(it->first);
+        spec.setSpectrumNo(spectrumNumber);
+        ++workspaceIndex;
+      } else {
+        this->pixel_to_wkspindex[it->first] = -1;
+      }
+      ++spectrumNumber;
     }
   }
-
-  // For slight speed up
-  loadOnlySomeSpectra = (!this->spectra_list.empty());
-
-  // Turn the spectra list into a map, for speed of access
-  for (auto &spectrum : spectra_list)
-    spectraLoadMap[spectrum] = true;
 
   CPUTimer tim;
 
@@ -509,13 +526,9 @@ void LoadEventPreNexus::procEvents(
     EventWorkspace_sptr partWS;
     if (parallelProcessing) {
       prog->report("Creating Partial Workspace");
-      // Create a partial workspace
-      partWS = EventWorkspace_sptr(new EventWorkspace());
-      // Make sure to initialize.
-      partWS->initialize(1, 1, 1);
-      // Copy all the spectra numbers and stuff (no actual events to copy
-      // though).
-      partWS->copyDataFrom(*workspace);
+      // Create a partial workspace, copy all the spectra numbers and stuff
+      // (no actual events to copy though).
+      partWS = workspace->clone();
       // Push it in the array
       partWorkspaces[i] = partWS;
     } else
@@ -531,7 +544,10 @@ void LoadEventPreNexus::procEvents(
     for (detid_t j = 0; j < detid_max + 1; j++) {
       size_t wi = pixel_to_wkspindex[j];
       // Save a POINTER to the vector<tofEvent>
-      theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
+      if (wi != static_cast<size_t>(-1))
+        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
+      else
+        theseEventVectors[j] = nullptr;
     }
   }
 
@@ -633,10 +649,6 @@ void LoadEventPreNexus::procEvents(
   prog->resetNumSteps(3, 0.94, 1.00);
 
   // finalize loading
-  prog->report("Deleting Empty Lists");
-  if (loadOnlySomeSpectra)
-    workspace->deleteEmptyLists();
-
   prog->report("Setting proton charge");
   this->setProtonCharge(workspace);
   g_log.debug() << tim << " to set the proton charge log.\n";

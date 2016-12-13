@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -78,9 +79,11 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
                                       "WorkspaceGroup");
         }
 
-        auto currentX = ws2d->readX(0);
-        auto lastX = lastWS->readX(0);
-        if (currentX != lastX) {
+        auto &currentX = ws2d->x(0);
+        auto &lastX = lastWS->x(0);
+        auto xMatches =
+            std::equal(lastX.cbegin(), lastX.cend(), currentX.cbegin());
+        if (!xMatches) {
           throw std::invalid_argument("X-arrays do not match between all "
                                       "workspaces in the InputWorkspace "
                                       "WorkspaceGroup.");
@@ -234,7 +237,7 @@ PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
   MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
   // Copy the x-array across to the new workspace.
   for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i) {
-    wsTemplate->setX(i, base->refX(i));
+    wsTemplate->setSharedX(i, base->sharedX(i));
   }
   auto zeroed = this->multiply(wsTemplate, 0);
   auto filled = this->add(zeroed, value);

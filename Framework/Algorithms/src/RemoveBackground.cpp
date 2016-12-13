@@ -1,8 +1,9 @@
 #include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -12,6 +13,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/make_unique.h"
@@ -24,10 +26,6 @@ DECLARE_ALGORITHM(RemoveBackground)
 
 using namespace Kernel;
 using namespace API;
-
-//---------------------------------------------------------------------------------------------
-// Public methods
-//---------------------------------------------------------------------------------------------
 
 /** Initialization method. Declares properties to be used in algorithm.
 *
@@ -119,7 +117,7 @@ void RemoveBackground::exec() {
                                 inPlace, nullifyNegative);
 
   Progress prog(this, 0.0, 1.0, histnumber);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int hist = 0; hist < histnumber; ++hist) {
     PARALLEL_START_INTERUPT_REGION
     // get references to output Workspace X-arrays.
@@ -146,9 +144,9 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
-      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
-      m_Emode(0), m_Efix(0), m_nullifyNegative(false),
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr),
+      m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
+      m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }

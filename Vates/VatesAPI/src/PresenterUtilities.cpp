@@ -56,7 +56,8 @@ void applyCOBMatrixSettingsToVtkDataSet(
     Mantid::VATES::MDLoadingPresenter *presenter, vtkDataSet *dataSet,
     std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider) {
   try {
-    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider));
+    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider),
+                                 nullptr);
   } catch (std::invalid_argument &e) {
     std::string error = e.what();
     g_log_presenter_utilities.warning()
@@ -125,7 +126,7 @@ createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
 * @param name: the input name
 * @return a name with a time stamp
 */
-std::string createTimeStampedName(std::string name) {
+std::string createTimeStampedName(const std::string &name) {
   auto currentTime =
       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::string timeInReadableFormat = std::string(std::ctime(&currentTime));

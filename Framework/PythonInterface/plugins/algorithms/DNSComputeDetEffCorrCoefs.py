@@ -88,7 +88,6 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
                 workspaces.append(wsname)
         return workspaces
 
-
     def cleanup(self, wslist):
         """
         deletes workspaces from list
@@ -185,7 +184,6 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
             self.toremove.append(wsname)
             result[angle] = wsname
         return result
-
 
     def PyExec(self):
         # Input

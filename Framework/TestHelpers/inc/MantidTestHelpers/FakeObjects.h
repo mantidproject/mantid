@@ -29,11 +29,9 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace Mantid;
 
 //===================================================================================================================
@@ -53,13 +51,13 @@ public:
     m_histogram.setCountStandardDeviations(0);
   }
 
-  void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override {
     m_histogram.setX(X);
   }
   MantidVec &dataX() override { return m_histogram.dataX(); }
   const MantidVec &dataX() const override { return m_histogram.dataX(); }
   const MantidVec &readX() const override { return m_histogram.readX(); }
-  cow_ptr<HistogramData::HistogramX> ptrX() const override {
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override {
     return m_histogram.ptrX();
   }
 
@@ -101,10 +99,13 @@ private:
 //===================================================================================================================
 class WorkspaceTester : public MatrixWorkspace {
 public:
-  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory *nnFactory)
-      : MatrixWorkspace(nnFactory), spec(0) {}
   WorkspaceTester() : MatrixWorkspace(), spec(0) {}
   ~WorkspaceTester() override {}
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<WorkspaceTester> clone() const {
+    return std::unique_ptr<WorkspaceTester>(doClone());
+  }
 
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return spec; }
@@ -143,7 +144,7 @@ public:
 
 private:
   WorkspaceTester *doClone() const override {
-    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+    return new WorkspaceTester(*this);
   }
   std::vector<SpectrumTester> vec;
   size_t spec;
@@ -241,7 +242,7 @@ public:
     throw std::runtime_error("find not implemented");
   }
 
-  void find(V3D, size_t &, const size_t &) override {
+  void find(Kernel::V3D, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 

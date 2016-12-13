@@ -83,8 +83,10 @@ public:
     }
     Column_sptr c = m_columns[m_col];
     if (!c->isType<T>()) {
-      std::string str = "Type mismatch. ";
-      throw std::runtime_error(str);
+      std::ostringstream err;
+      err << "Type mismatch: " << typeid(T).name() << " (expected "
+          << c->get_type_info().name() << ")";
+      throw std::runtime_error(err.str());
     }
     c->cell<T>(m_row) = t;
     ++m_col;

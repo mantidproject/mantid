@@ -13,6 +13,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -269,7 +270,7 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
     std::vector<API::MatrixWorkspace_sptr> &workspaceList) {
 
   Poco::TemporaryFile tmpFile;
-  std::string tempFileName = tmpFile.path();
+  const std::string &tempFileName = tmpFile.path();
   g_log.debug() << "Dumping WSs in a temp file: " << tempFileName << '\n';
 
   std::ofstream myfile;

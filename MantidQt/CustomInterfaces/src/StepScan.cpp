@@ -1,21 +1,23 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/StepScan.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <QFileInfo>
-#include <QDesktopServices>
 #include <QUrl>
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace CustomInterfaces {
 
 // Register the class with the factory
@@ -124,7 +126,6 @@ void StepScan::startLiveListener() {
         "This interface requires event data.\nThe live data for " +
             QString::fromStdString(m_instrument) + " is in histogram form");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
-    m_uiForm.mWRunFiles->liveButtonSetEnabled(false);
     return;
   }
 
@@ -712,7 +713,7 @@ void StepScan::checkForVaryingLogs(const std::string &wsName) {
 }
 
 void StepScan::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Step_Scan_Interface"));
 }
 

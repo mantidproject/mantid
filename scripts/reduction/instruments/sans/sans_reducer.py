@@ -14,6 +14,7 @@ import inspect
 ## Version number
 __version__ = '0.0'
 
+
 class SANSReducer(Reducer):
     """
         SANS-specific implementation of the Reducer
@@ -138,7 +139,7 @@ class SANSReducer(Reducer):
         if issubclass(trans.__class__, sans_reduction_steps.BaseTransmission) or trans is None:
             self._transmission_calculator = trans
         else:
-            raise RuntimeError, "Reducer.set_transmission expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_transmission expects an object of class ReductionStep")
 
     def get_transmission(self):
         return self._transmission_calculator
@@ -168,7 +169,7 @@ class SANSReducer(Reducer):
         if issubclass(finder.__class__, sans_reduction_steps.BaseBeamFinder) or finder is None:
             self._beam_finder = finder
         else:
-            raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_beam_finder expects an object of class ReductionStep")
 
     @validate_step
     def set_absolute_scale(self, scaler):
@@ -184,7 +185,7 @@ class SANSReducer(Reducer):
         if issubclass(loader.__class__, ReductionStep):
             self._data_loader = loader
         else:
-            raise RuntimeError, "Reducer.set_data_loader expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_data_loader expects an object of class ReductionStep")
 
     def get_data_loader(self):
         return self._data_loader
@@ -208,7 +209,7 @@ class SANSReducer(Reducer):
         if self._sensitivity_correcter is not None:
             self._sensitivity_correcter.set_beam_center(beam_center)
         else:
-            raise RuntimeError, "Set the sensitivity correction before setting its beam center"
+            raise RuntimeError("Set the sensitivity correction before setting its beam center")
 
     @validate_step
     def set_dark_current_subtracter(self, subtracter):
@@ -229,7 +230,7 @@ class SANSReducer(Reducer):
         if issubclass(correcter.__class__, ReductionStep) or correcter is None:
             self._solid_angle_correcter = correcter
         else:
-            raise RuntimeError, "Reducer.set_solid_angle_correcter expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_solid_angle_correcter expects an object of class ReductionStep")
 
     @validate_step
     def set_azimuthal_averager(self, averager):
@@ -260,13 +261,13 @@ class SANSReducer(Reducer):
              @param trans: ReductionStep object
         """
         lineno = inspect.currentframe().f_code.co_firstlineno
-        warnings.warn_explicit("SANSReducer.set_bck_transmission id deprecated: use get_background().set_transmission()",\
-            DeprecationWarning, __file__, lineno)
+        warnings.warn_explicit("SANSReducer.set_bck_transmission id deprecated: use get_background().set_transmission()",
+                               DeprecationWarning, __file__, lineno)
 
         if issubclass(trans.__class__, sans_reduction_steps.BaseTransmission) or trans is None:
             self._background_subtracter.set_transmission(trans)
         else:
-            raise RuntimeError, "Reducer.set_bck_transmission expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_bck_transmission expects an object of class ReductionStep")
 
     @validate_step
     def set_IQxQy(self, calculator):
@@ -283,7 +284,7 @@ class SANSReducer(Reducer):
             the list of reduction steps.
         """
         if self.instrument is None:
-            raise RuntimeError, "SANSReducer: trying to run a reduction with no instrument specified"
+            raise RuntimeError("SANSReducer: trying to run a reduction with no instrument specified")
 
         if self._reduction_setup is not None:
             result = self._reduction_setup.execute(self)
@@ -367,4 +368,3 @@ class SANSReducer(Reducer):
         # Save output to file
         if self._save_iq is not None:
             self.append_step(self._save_iq)
-

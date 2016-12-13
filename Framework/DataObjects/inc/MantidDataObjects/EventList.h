@@ -6,18 +6,19 @@
 #endif
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/cow_ptr.h"
-#include <cstddef>
 #include <iosfwd>
-#include <set>
 #include <vector>
 
 namespace Mantid {
+namespace Kernel {
+class DateAndTime;
+class SplittingInterval;
+typedef std::vector<SplittingInterval> TimeSplitterType;
+class Unit;
+}
 namespace DataObjects {
 class EventWorkspaceMRU;
 
@@ -229,6 +230,7 @@ public:
   void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y,
                                   MantidVec &E,
                                   bool skipError = false) const override;
+
   void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y,
                                      MantidVec &E, const double &tofFactor,
                                      const double &tofOffset,
@@ -258,6 +260,8 @@ public:
   double getTofMax() const override;
   Mantid::Kernel::DateAndTime getPulseTimeMax() const override;
   Mantid::Kernel::DateAndTime getPulseTimeMin() const override;
+  void getPulseTimeMinMax(Mantid::Kernel::DateAndTime &tMin,
+                          Mantid::Kernel::DateAndTime &tM) const;
   Mantid::Kernel::DateAndTime
   getTimeAtSampleMax(const double &tofFactor,
                      const double &tofOffset) const override;
@@ -340,6 +344,11 @@ public:
   const HistogramData::HistogramE &e() const override;
   Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
   Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
+
+  void generateCountsHistogramPulseTime(
+      const double &xMin, const double &xMax, MantidVec &Y,
+      const double TofMin = -std::numeric_limits<double>::max(),
+      const double TofMax = std::numeric_limits<double>::max()) const;
 
 protected:
   void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;

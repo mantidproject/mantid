@@ -34,6 +34,7 @@ public:
     m_blackList.insert("DeltaFunction");
     m_blackList.insert("ElasticDiffRotDiscreteCircle");
     m_blackList.insert("ElasticDiffSphere");
+    m_blackList.insert("ElasticIsoRotDiff");
     m_blackList.insert("Muon_ExpDecayOscTest");
 
     m_peakFunctions = getAllPeakFunctions(m_blackList);

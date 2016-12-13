@@ -1,18 +1,13 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-
-#include <QDesktopServices>
-#include <QUrl>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -195,7 +190,8 @@ void IndirectDiffractionReduction::plotResults() {
       const auto workspaceExists =
           AnalysisDataService::Instance().doesExist(it);
       if (workspaceExists)
-        pyInput += "plotSpectrum('" + QString::fromStdString(it) + "', 0)\n";
+        pyInput += "plotSpectrum('" + QString::fromStdString(it) +
+                   "', 0, error_bars = True)\n";
       else
         showInformationBox(QString::fromStdString(
             "Workspace '" + it + "' not found\nUnable to plot workspace"));

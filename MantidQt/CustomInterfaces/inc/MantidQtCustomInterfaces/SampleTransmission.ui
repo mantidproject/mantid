@@ -160,10 +160,10 @@
        <string>Sample Details</string>
       </property>
       <layout class="QGridLayout" name="loSampleDetails">
-       <item row="1" column="0">
-        <widget class="QLabel" name="lbNumberDensity">
+       <item row="2" column="2">
+        <widget class="QLabel" name="valThickness">
          <property name="text">
-          <string>Number Density</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -174,17 +174,10 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="lbChemicalFormula">
-         <property name="text">
-          <string>Chemical Formula</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="1">
-        <widget class="QDoubleSpinBox" name="spNumberDensity">
+        <widget class="QDoubleSpinBox" name="spDensity">
          <property name="suffix">
-          <string notr="true"> atoms/Å³</string>
+          <string notr="true"/>
          </property>
          <property name="decimals">
           <number>5</number>
@@ -194,6 +187,13 @@
          </property>
          <property name="value">
           <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="valDensity">
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>
@@ -213,25 +213,32 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="valThickness">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="valNumberDensity">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="2">
         <widget class="QLabel" name="valChemicalFormula">
          <property name="text">
           <string/>
          </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="lbChemicalFormula">
+         <property name="text">
+          <string>Chemical Formula</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QComboBox" name="cbDensity">
+         <item>
+          <property name="text">
+           <string>Mass Density</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Number Density</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item row="0" column="1">
@@ -356,7 +363,7 @@
   <tabstop>spSingleHigh</tabstop>
   <tabstop>leMultiple</tabstop>
   <tabstop>leChemicalFormula</tabstop>
-  <tabstop>spNumberDensity</tabstop>
+  <tabstop>spDensity</tabstop>
   <tabstop>spThickness</tabstop>
   <tabstop>twResults</tabstop>
   <tabstop>pbCalculate</tabstop>

@@ -9,6 +9,7 @@ as part of the workflow.
 import stresstesting
 from mantid.simpleapi import *
 
+
 class OFFSPECReflRedOneAutoPolarizationCorrection(stresstesting.MantidStressTest):
     def runTest(self):
         inputWorkspace = Load("OFFSPEC00033767.nxs")

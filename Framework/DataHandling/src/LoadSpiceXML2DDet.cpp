@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -35,7 +36,6 @@ const char STRING = 's';
 const char FLOAT32 = 'f';
 const char INT32 = 'i';
 
-//----------------------------------------------------------------------------------------------
 /** Constructor for SpiceXMLNode
  * @brief SpiceXMLNode::SpiceXMLNode
  * @param nodename
@@ -43,14 +43,12 @@ const char INT32 = 'i';
 SpiceXMLNode::SpiceXMLNode(const std::string &nodename)
     : m_name{nodename}, m_typechar('s') {}
 
-//----------------------------------------------------------------------------------------------
 /** Set node value in string format
  * @brief SpiceXMLNode::setValue
  * @param strvalue
  */
 void SpiceXMLNode::setValue(const std::string &strvalue) { m_value = strvalue; }
 
-//----------------------------------------------------------------------------------------------
 /** Set XML node parameters
  * @brief SpiceXMLNode::setValues
  * @param nodetype
@@ -79,68 +77,58 @@ void SpiceXMLNode::setParameters(const std::string &nodetype,
     m_description = nodedescription;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Check whether XML has unit set
  */
 bool SpiceXMLNode::hasUnit() const { return (m_unit.size() > 0); }
 
-//----------------------------------------------------------------------------------------------
 /** Check whether XML node has value set
  * @brief SpiceXMLNode::hasValue
  * @return
  */
 bool SpiceXMLNode::hasValue() const { return (m_value.size() > 0); }
 
-//----------------------------------------------------------------------------------------------
 /** Is this node of string type?
  * @brief SpiceXMLNode::isString
  * @return
  */
 bool SpiceXMLNode::isString() const { return (m_typechar == STRING); }
 
-//----------------------------------------------------------------------------------------------
 /** Is this node of integer type?
  * @brief SpiceXMLNode::isInteger
  * @return
  */
 bool SpiceXMLNode::isInteger() const { return (m_typechar == INT32); }
 
-//----------------------------------------------------------------------------------------------
 /** Is this node of double type?
  * @brief SpiceXMLNode::isDouble
  * @return
  */
 bool SpiceXMLNode::isDouble() const { return (m_typechar == FLOAT32); }
 
-//----------------------------------------------------------------------------------------------
 /** Get name of XML node
  * @brief SpiceXMLNode::getName
  * @return
  */
 const std::string SpiceXMLNode::getName() const { return m_name; }
 
-//----------------------------------------------------------------------------------------------
 /** Get unit of XML node
  * @brief SpiceXMLNode::getUnit
  * @return
  */
 const std::string SpiceXMLNode::getUnit() const { return m_unit; }
 
-//----------------------------------------------------------------------------------------------
 /** Get node's description
  * @brief SpiceXMLNode::getDescription
  * @return
  */
 const std::string SpiceXMLNode::getDescription() const { return m_description; }
 
-//----------------------------------------------------------------------------------------------
 /** Get node's value in string
  * @brief SpiceXMLNode::getValue
  * @return
  */
 const std::string SpiceXMLNode::getValue() const { return m_value; }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 LoadSpiceXML2DDet::LoadSpiceXML2DDet()
@@ -148,30 +136,24 @@ LoadSpiceXML2DDet::LoadSpiceXML2DDet()
       m_loadInstrument(false), m_detSampleDistanceShift(0.0),
       m_hasScanTable(false), m_ptNumber4Log(0), m_idfFileName() {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 LoadSpiceXML2DDet::~LoadSpiceXML2DDet() = default;
 
-//----------------------------------------------------------------------------------------------
 const std::string LoadSpiceXML2DDet::name() const {
   return "LoadSpiceXML2DDet";
 }
 
-//----------------------------------------------------------------------------------------------
 int LoadSpiceXML2DDet::version() const { return 1; }
 
-//----------------------------------------------------------------------------------------------
 const std::string LoadSpiceXML2DDet::category() const {
   return "DataHandling\\XML";
 }
 
-//----------------------------------------------------------------------------------------------
 const std::string LoadSpiceXML2DDet::summary() const {
   return "Load 2-dimensional detector data file in XML format from SPICE. ";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Declare properties
  * @brief LoadSpiceXML2DDet::init
  */
@@ -223,9 +205,13 @@ void LoadSpiceXML2DDet::init() {
       "ShiftedDetectorDistance", 0.,
       "Amount of shift of the distance between source and detector centre."
       "It is used to apply instrument calibration.");
+
+  declareProperty("UserSpecifiedWaveLength", EMPTY_DBL(),
+                  "User can specify the wave length of the instrument if it is "
+                  "drifted from the designed value."
+                  "It haappens often.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process inputs arguments
  * @brief processInputs
  */
@@ -252,9 +238,10 @@ void LoadSpiceXML2DDet::processInputs() {
     m_hasScanTable = false;
 
   m_ptNumber4Log = getProperty("PtNumber");
+
+  m_userSpecifiedWaveLength = getProperty("UserSpecifiedWaveLength");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up sample logs especially 2theta and diffr for loading instrument
  * @brief LoadSpiceXML2DDet::setupSampleLogs
  * @param outws :: workspace to have sample logs to set up
@@ -299,7 +286,6 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
   return return_true;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main execution
  * @brief LoadSpiceXML2DDet::exec
  */
@@ -320,8 +306,14 @@ void LoadSpiceXML2DDet::exec() {
 
   if (m_loadInstrument && can_set_instrument) {
     loadInstrument(outws, m_idfFileName);
-    double wavelength;
-    bool has_wavelength = getHB3AWavelength(outws, wavelength);
+    // set wave length to user specified wave length
+    double wavelength = m_userSpecifiedWaveLength;
+    // if user does not specify wave length then try to get wave length from log
+    // sample _m1 (or m1 as well in future)
+    bool has_wavelength = !(wavelength == EMPTY_DBL());
+    if (!has_wavelength)
+      has_wavelength = getHB3AWavelength(outws, wavelength);
+
     if (has_wavelength) {
       setXtoLabQ(outws, wavelength);
     }
@@ -330,7 +322,6 @@ void LoadSpiceXML2DDet::exec() {
   setProperty("OutputWorkspace", outws);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Parse SPICE XML file for one Pt./measurement
  * @brief LoadSpiceXML2DDet::parseSpiceXML
  * @param xmlfilename :: name of the XML file to parse
@@ -429,7 +420,6 @@ LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
   return vecspicenode;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Create MatrixWorkspace from Spice XML file
  * @brief LoadSpiceXML2DDet::createMatrixWorkspace
  * @param vecxmlnode :: vector of SpiceXMLNode obtained from XML file
@@ -460,6 +450,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   // Go through all XML nodes to process
   size_t numxmlnodes = vecxmlnode.size();
   bool parsedDet = false;
+  double max_counts = 0.;
   for (size_t n = 0; n < numxmlnodes; ++n) {
     // Process node for detector's count
     const SpiceXMLNode &xmlnode = vecxmlnode[n];
@@ -529,11 +520,16 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
             else
               outws->dataE(j_row)[icol] = 1.0;
           }
+
+          // record max count
+          if (counts > max_counts) {
+            max_counts = counts;
+          }
         }
 
         // Update irow
         icol += 1;
-      }
+      } // END-FOR (i-vec line)
 
       // Set flag
       parsedDet = true;
@@ -571,10 +567,11 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     throw std::runtime_error(errss.str());
   }
 
+  g_log.notice() << "Maximum detector count on it is " << max_counts << "\n";
+
   return outws;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up sample logs from table workspace loaded where SPICE data file is
  * loaded
  * @brief LoadSpiceXML2DDet::setupSampleLogFromSpiceTable
@@ -617,7 +614,6 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
                     << "\n";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Get wavelength if the instrument is HB3A
  * @brief LoadSpiceXML2DDet::getHB3AWavelength
  * @param dataws
@@ -684,7 +680,6 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
   return haswavelength;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set x axis to momentum (lab frame Q)
  * @brief LoadSpiceXML2DDet::setXtoLabQ
  * @param dataws
@@ -703,7 +698,6 @@ void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
   dataws->getAxis(0)->setUnit("Momentum");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Load instrument
  * @brief LoadSpiceXML2DDet::loadInstrument
  * @param matrixws

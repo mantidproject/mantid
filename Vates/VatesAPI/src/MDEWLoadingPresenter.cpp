@@ -2,6 +2,7 @@
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
@@ -16,6 +17,10 @@
 #include <boost/algorithm/string.hpp>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
+
+namespace {
+Mantid::Kernel::Logger g_log("MDEWLoadingPresenter");
+}
 
 namespace Mantid {
 namespace VATES {

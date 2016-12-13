@@ -7,6 +7,7 @@ from mantid.simpleapi import *
 import os
 import stresstesting
 
+
 class HYSPECReductionTest(stresstesting.MantidStressTest):
     groupingFile = ''
     tolerance=1e-8
@@ -60,4 +61,3 @@ class HYSPECReductionTest(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = 1e-8
         return 'slice','HYSPECReduction_TIBasEvents.nxs'
-

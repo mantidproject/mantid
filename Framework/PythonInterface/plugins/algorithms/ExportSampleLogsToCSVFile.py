@@ -5,6 +5,7 @@ from mantid.kernel import *
 import os
 from six.moves import range # pylint: disable=redefined-builtin
 
+
 class ExportSampleLogsToCSVFile(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN
@@ -84,7 +85,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         # Log time tolerance
         self.declareProperty("TimeTolerance", 0.01,
-                             "If any 2 log entries with log times within the time tolerance, " + \
+                             "If any 2 log entries with log times within the time tolerance, " +
                              "they will be recorded in one line. Unit is second. ")
 
         return
@@ -126,7 +127,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return
 
-
     def _getProperties(self):
         """ Get and process properties
         """
@@ -160,7 +160,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             self._writeHeaderToSeparateFile = False
 
         return
-
 
     def _calLocalTimeDiff(self, logtimesdict, loglength):
         """ Calcualte the time difference between local time and UTC in seconds
@@ -387,7 +386,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         # Log valuess
         for i in range(len(logvaluelist)):
             timeindex = currtimeindexes[i]
-            if not i in nexttimelogindexes:
+            if i not in nexttimelogindexes:
                 timeindex -= 1
                 if timeindex < 0:
                     timeindex = 0
@@ -406,7 +405,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return wbuf
 
-
     def _progressTimeIndexes(self, currtimeindexes, nexttimelogindexes):
         """ Progress index
         """
@@ -415,7 +413,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
                 currtimeindexes[i] += 1
 
         return
-
 
     def _readSampleLogs(self):
         """ Read sample logs

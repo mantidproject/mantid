@@ -9,6 +9,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
@@ -95,7 +96,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
   if (peakTable) {
     try {
       peakCollections.push_back(getPeakCollection(peakTable));
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       // do nothing
     }
 
@@ -115,7 +116,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
       if (peakTable) {
         try {
           peakCollections.push_back(getPeakCollection(peakTable));
-        } catch (std::runtime_error) {
+        } catch (const std::runtime_error &) {
           // do nothing
         }
       }
@@ -320,7 +321,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
           getPeakCollectionFromFunction(localFunction);
 
       countPeakCollections.push_back(getCountPeakCollection(normalizedPeaks));
-    } catch (std::invalid_argument) {
+    } catch (const std::invalid_argument &) {
       // not a Poldi2DFunction - skip (the background functions)
     }
 
@@ -857,7 +858,7 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
   }
 
   PoldiAbstractDetector_sptr detector(new PoldiDeadWireDecorator(
-      workspace->getInstrument(), m_poldiInstrument->detector()));
+      workspace->detectorInfo(), m_poldiInstrument->detector()));
   std::vector<int> indices = detector->availableElements();
 
   // Create the grid for the diffractogram and corresponding domain/values
@@ -1313,7 +1314,7 @@ void PoldiFitPeaks2D::exec() {
           ITableWorkspace_sptr cell =
               getRefinedCellParameters(poldi2DFunction->getFunction(i));
           cells.push_back(cell);
-        } catch (std::invalid_argument) {
+        } catch (const std::invalid_argument &) {
           // do nothing
         }
       }

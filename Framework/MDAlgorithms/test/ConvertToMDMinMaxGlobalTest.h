@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::MDAlgorithms::ConvertToMDMinMaxGlobal;
@@ -181,7 +182,7 @@ private:
                                                   double Ef) {
 
     Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 100, xmin, dx);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, xmin, dx);
 
     if ((Ei > 0 || Ef > 0) && deltaEUnits) {
       ws->getAxis(0)->setUnit("DeltaE");

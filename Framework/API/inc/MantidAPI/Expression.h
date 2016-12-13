@@ -50,6 +50,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL Expression {
 public:
+  /// Specialised exception for parsing errors
+  class ParsingError : public std::runtime_error {
+  public:
+    ParsingError(const std::string &msg, const std::string &expr, size_t i);
+    ParsingError(const std::string &msg);
+  };
+
   /// Default contructor
   Expression();
   /// contructor

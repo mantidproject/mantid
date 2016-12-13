@@ -4,11 +4,10 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import os
-import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
 
 class AbsoluteUnitsScript(BaseScriptElement):
 
@@ -146,7 +145,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_low)
             self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                    "median_test_out_high",
-                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_high)
+                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_high)# noqa
             self.absunits_median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
                                                                               "median_test_low",
                                                                               default=AbsoluteUnitsScript.absunits_median_test_low)

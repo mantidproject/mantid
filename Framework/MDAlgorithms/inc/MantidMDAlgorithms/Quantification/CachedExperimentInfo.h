@@ -24,10 +24,14 @@
 */
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
+namespace Geometry {
+class Goniometer;
+}
 namespace MDAlgorithms {
 /**
  * Defines information about a neutron event within a given experiment

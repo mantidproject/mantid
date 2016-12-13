@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -19,7 +20,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyDetailedBalance)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ApplyDetailedBalance::init() {
@@ -37,7 +37,6 @@ void ApplyDetailedBalance::init() {
       "SampleLog variable name that contains the temperature, or a number");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ApplyDetailedBalance::exec() {

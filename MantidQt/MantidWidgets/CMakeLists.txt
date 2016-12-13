@@ -88,10 +88,15 @@ set ( SRC_FILES
 	src/MWRunFiles.cpp
 	src/MWView.cpp
 	src/MantidHelpWindow.cpp
+	src/MantidSurfacePlotDialog.cpp
+	src/MantidTreeWidget.cpp
+	src/MantidTreeWidgetItem.cpp
+	src/MantidWSIndexDialog.cpp
 	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
+	src/MuonFitDataSelector.cpp
 	src/MuonFitPropertyBrowser.cpp
-	src/MuonSequentialFitDialog.cpp
+	src/MuonFunctionBrowser.cpp
 	src/PeakPicker.cpp
 	src/PeriodicTableWidget.cpp
 	src/PreviewPlot.cpp
@@ -109,8 +114,12 @@ set ( SRC_FILES
 	src/SlitCalculator.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
+	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
 	src/WorkspaceEditorFactory.cpp
+	src/WorkspacePresenter/ADSAdapter.cpp
+	src/WorkspacePresenter/QWorkspaceDockView.cpp
+	src/WorkspacePresenter/WorkspacePresenter.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
@@ -144,11 +153,15 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/InputController.h
+	inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
+	inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
+	inc/MantidQtMantidWidgets/MantidTreeWidget.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
+    inc/MantidQtMantidWidgets/MuonFitDataSelector.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
-    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
+    inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/MWView.h
@@ -171,6 +184,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SlitCalculator.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
+    inc/MantidQtMantidWidgets/TrackedAction.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
     inc/MantidQtMantidWidgets/WorkspaceEditorFactory.h
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
@@ -195,8 +209,9 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h
     inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
-	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+    inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h
 )
 
 # Add the include files are NOT already in MOC_FILES
@@ -218,6 +233,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
@@ -239,12 +255,15 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
 	inc/MantidQtMantidWidgets/ErrorCurve.h
 	inc/MantidQtMantidWidgets/HintStrategy.h
+	inc/MantidQtMantidWidgets/IFunctionBrowser.h
+	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/IMuonFitFunctionControl.h
+	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
 	inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
 	inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
 	inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
@@ -293,9 +312,18 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/MantidDisplayBase.h
+	inc/MantidQtMantidWidgets/MantidTreeWidgetItem.h
+	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/ProgressPresenter.h
 	inc/MantidQtMantidWidgets/ProgressableView.h
-	inc/MantidQtMantidWidgets/WidgetDllOption.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
 )
 
 # QtDesigner UI files to process
@@ -313,7 +341,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
-    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/MuonFitDataSelector.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
@@ -333,20 +361,23 @@ set ( TEST_PY_FILES
 )
 
 set ( TEST_FILES
-  AlgorithmHintStrategyTest.h
-  DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
-  DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
-  DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
-  DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
-  DataProcessorUI/DataProcessorCommandsTest.h
-  DataProcessorUI/DataProcessorGenerateNotebookTest.h
-  DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
-  DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
-  DataProcessorUI/DataProcessorWhiteListTest.h
-  DataProcessorUI/GenericDataProcessorPresenterTest.h
-  DataProcessorUI/ParseKeyValueStringTest.h
-  DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
-  DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
+	AlgorithmHintStrategyTest.h
+	TrackedActionTest.h
+	DataProcessorUI/DataProcessorCommandsTest.h
+	DataProcessorUI/DataProcessorGenerateNotebookTest.h
+	DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
+	DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
+	DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
+	DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
+	DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
+	DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
+	DataProcessorUI/DataProcessorWhiteListTest.h
+	DataProcessorUI/GenericDataProcessorPresenterTest.h
+	DataProcessorUI/ParseKeyValueStringTest.h
+	DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
+	DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
+	WorkspacePresenter/ADSAdapterTest.h
+	WorkspacePresenter/WorkspacePresenterTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)

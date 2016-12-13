@@ -382,88 +382,26 @@ void ConfigServiceImpl::registerLoggingFilterChannel(
  *
  */
 void ConfigServiceImpl::configureLogging() {
-  try {
-    // Ensure that the logging directory exists
-    m_logFilePath = getString("logging.channels.fileChannel.path");
-    Poco::Path logpath(m_logFilePath);
-
-    // Undocumented way to override the mantid.log path
-    if (Poco::Environment::has("MANTIDLOGPATH")) {
-      logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
-      logpath = logpath.absolute();
-      m_logFilePath = logpath.toString();
-    }
-
-    // An absolute path makes things simpler
+  // Undocumented way to override the mantid.log path
+  if (Poco::Environment::has("MANTIDLOGPATH")) {
+    auto logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
     logpath = logpath.absolute();
-
-    // First, try the logpath given
-    if (!m_logFilePath.empty()) {
-      try {
-        // Save it for later
-        m_logFilePath = logpath.toString();
-
-        // make this path point to the parent directory and create it if it does
-        // not exist
-        Poco::Path parent = logpath;
-        parent.makeParent();
-        Poco::File(parent).createDirectories();
-
-        // Try to create or append to the file. If it fails, use the default
-        FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-        if (fp == nullptr) {
-          std::cerr
-              << "Error writing to log file path given in properties file: \""
-              << m_logFilePath << "\". Will use a default path instead.\n";
-          // Clear the path; this will make it use the default
-          m_logFilePath = "";
-        } else
-          fclose(fp);
-      } catch (std::exception &) {
-        std::cerr
-            << "Error writing to log file path given in properties file: \""
-            << m_logFilePath << "\". Will use a default path instead.\n";
-        // ERROR! Maybe the file is not writable!
-        // Clear the path; this will make it use the default
-        m_logFilePath = "";
-      }
-    }
-
-    // The path given was invalid somehow? Use a default
-    if (m_logFilePath.empty()) {
-      m_logFilePath = getUserPropertiesDir() + "mantid.log";
-      // Check whether the file can be written. The Poco::File::canWrite method
-      // does not work
-      // for files that don't exist, it throws an exception. It also can't be
-      // used to check for
-      // directory access as the Windows API doesn't return this information
-      // correctly for
-      // directories.
-      FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-      if (!fp) {
-        // if we cannot write to the default directory then set use the system
-        // temp
-        logpath = Poco::Path::temp() + "mantid.log";
-        m_logFilePath = logpath.toString();
-        std::cerr << "Error writing to log file path to default location: \""
-                  << m_logFilePath
-                  << "\". Will use a system temp path instead: \""
-                  << m_logFilePath << "\"\n";
-      } else
-        fclose(fp);
-    }
+    m_logFilePath = logpath.toString();
     // Set the line in the configuration properties.
-    //  this'll be picked up by LoggingConfigurator (somehow)
     m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
-
-    // make this path point to the parent directory and create it if it does not
-    // exist
-    logpath.makeParent();
-    if (!logpath.toString().empty()) {
-      Poco::File(logpath)
-          .createDirectories(); // Also creates all necessary directories
+  } else {
+    m_logFilePath = getString("logging.channels.fileChannel.path");
+    if (m_logFilePath.empty()) {
+      // Default to appdata/mantid.log
+      Poco::Path path(getAppDataDir());
+      path.append("mantid.log");
+      m_logFilePath = path.toString();
+      // Set the line in the configuration properties.
+      m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
     }
+  }
 
+  try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
@@ -471,7 +409,6 @@ void ConfigServiceImpl::configureLogging() {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << '\n';
   }
-
   // register the filter channels - the order here is important
   registerLoggingFilterChannel("fileFilterChannel", nullptr);
   registerLoggingFilterChannel("consoleFilterChannel", nullptr);
@@ -704,7 +641,11 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
         << "## Valid values are: error, warning, notice, information, debug\n";
     filestr << "#logging.channels.fileFilterChannel.level=debug\n\n";
     filestr << "## Sets the file to write logs to\n";
-    filestr << "#logging.channels.fileChannel.path=../mantid.log\n\n";
+    filestr << "#logging.channels.fileChannel.path=../mantid.log\n";
+    filestr << "## Uncomment the following line to flush log messages to disk "
+               "immediately.\n";
+    filestr << "## Useful for debugging crashes but it will hurt performance\n";
+    filestr << "#logging.channels.fileChannel.flush = true\n\n";
     filestr << "##\n";
     filestr << "## MantidPlot\n";
     filestr << "##\n\n";

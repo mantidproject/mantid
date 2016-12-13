@@ -24,6 +24,9 @@ public:
   static CrystalFieldTest *createSuite() { return new CrystalFieldTest(); }
   static void destroySuite(CrystalFieldTest *suite) { delete suite; }
 
+  // Conversion factor from barn to milibarn/steradian
+  const double c_mbsr = 79.5774715459;
+
   void test_it_works() {
     int nre = 1;
     DoubleFortranVector bmol(1, 3);
@@ -162,7 +165,7 @@ public:
     DoubleFortranVector e_energies;
     DoubleFortranMatrix i_energies;
     const double de = 1e-10;
-    const double di = 1e-3;
+    const double di = 1e-3 * c_mbsr;
     calculateIntensities(nre, en, wf, temperature, de, degeneration, e_energies,
                          i_energies);
 
@@ -175,9 +178,9 @@ public:
     TS_ASSERT_DELTA(e_excitations(1), 0.0, 1e-10);
     TS_ASSERT_DELTA(e_excitations(2), 29.33, 0.01);
     TS_ASSERT_DELTA(e_excitations(3), 44.34, 0.01);
-    TS_ASSERT_DELTA(i_excitations(1), 2.75, 0.01);
-    TS_ASSERT_DELTA(i_excitations(2), 0.72, 0.01);
-    TS_ASSERT_DELTA(i_excitations(3), 0.43, 0.01);
+    TS_ASSERT_DELTA(i_excitations(1), 2.75 * c_mbsr, 0.01 * c_mbsr);
+    TS_ASSERT_DELTA(i_excitations(2), 0.72 * c_mbsr, 0.01 * c_mbsr);
+    TS_ASSERT_DELTA(i_excitations(3), 0.43 * c_mbsr, 0.01 * c_mbsr);
   }
 
 private:

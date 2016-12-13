@@ -11,7 +11,7 @@ class SaveMDWorkspaceToVTKTest : public CxxTest::TestSuite {
 public:
   void test_that_wrong_workspace_type_throws() {
     // Arrange
-    auto workspace = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     Mantid::VATES::SaveMDWorkspaceToVTK alg;
     alg.setChild(true);
@@ -22,10 +22,11 @@ public:
     alg.setProperty("Normalization", "AutoSelect");
     alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
+    alg.setProperty("CompressorType", "NONE");
 
     // Act + Assert
     TSM_ASSERT_THROWS_ANYTHING(
-        "Wrong workspae type should cause the algorithm to throw",
+        "Wrong workspace type should cause the algorithm to throw",
         alg.execute());
   }
 
@@ -46,6 +47,7 @@ public:
     alg.setProperty("Normalization", "AutoSelect");
     alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
+    alg.setProperty("CompressorType", "NONE");
 
     // Act + Assert
     TSM_ASSERT_THROWS_ANYTHING(
@@ -75,6 +77,7 @@ public:
     alg.setProperty("Normalization", "AutoSelect");
     alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
+    alg.setProperty("CompressorType", "NONE");
 
     // Act and Assert
     TSM_ASSERT_THROWS_NOTHING("Should save without any issues.", alg.execute());

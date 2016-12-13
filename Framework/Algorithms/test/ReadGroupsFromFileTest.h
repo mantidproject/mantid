@@ -1,20 +1,20 @@
 #ifndef READGROUPSFROMFILETEST_H_
 #define READGROUPSFROMFILETEST_H_
 
-#include "MantidAlgorithms/ReadGroupsFromFile.h"
-#include "MantidAlgorithms/CreateGroupingWorkspace.h"
-#include "MantidDataHandling/SaveCalFile.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidAlgorithms/ReadGroupsFromFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/SaveCalFile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include <Poco/File.h>
@@ -99,9 +99,9 @@ public:
 
       TS_ASSERT_EQUALS(ws->blocksize(), 1);
 
-      TS_ASSERT_DELTA(ws->readY(2)[0], 1.0, 1e-6);
-      TS_ASSERT_DELTA(ws->readY(25)[0], 2.0, 1e-6);
-      TS_ASSERT_DELTA(ws->readY(45)[0], 3.0, 1e-6);
+      TS_ASSERT_DELTA(ws->y(2)[0], 1.0, 1e-6);
+      TS_ASSERT_DELTA(ws->y(25)[0], 2.0, 1e-6);
+      TS_ASSERT_DELTA(ws->y(45)[0], 3.0, 1e-6);
 
       // remove file created by this algorithm
       Poco::File(outputFile).remove();

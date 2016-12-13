@@ -6,6 +6,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -37,17 +38,27 @@ bool doesNotContainWildCard(const std::string &ext) {
 namespace Mantid {
 namespace API {
 /**
- * Constructor
+ * Alternative constructor with action
  *
- * @param name :: The name of the property
- * @param exts ::  The allowed/suggested extensions
+ * @param name   :: The name of the property
+ * @param action :: File action
+ * @param exts   ::  The allowed/suggested extensions
  */
 MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           unsigned int action,
                                            const std::vector<std::string> &exts)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
-          boost::make_shared<MultiFileValidator>(exts), Direction::Input),
-      m_multiFileLoadingEnabled(), m_exts(), m_parser(), m_defaultExt("") {
+          boost::make_shared<MultiFileValidator>(
+              exts, (action == FileProperty::Load)),
+          Direction::Input) {
+  if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
+    /// raise error for unsupported actions
+    throw std::runtime_error(
+        "Specified action is not supported for MultipleFileProperty");
+  } else {
+    m_action = action;
+  }
   std::string allowMultiFileLoading =
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
@@ -59,6 +70,35 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
       m_exts.push_back(ext);
+}
+
+/**
+ * Default constructor with default action
+ *
+ * @param name :: The name of the property
+ * @param exts ::  The allowed/suggested extensions
+ */
+MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           const std::vector<std::string> &exts)
+    : MultipleFileProperty(name, FileProperty::Load, exts) {}
+
+/**
+* Check if this property is optional
+* @returns True if the property is optinal, false otherwise
+*/
+bool MultipleFileProperty::isOptional() const {
+  return (m_action == FileProperty::OptionalLoad);
+}
+
+/**
+ * @returns Empty string if empty value is valid, error message otherwise
+ */
+std::string MultipleFileProperty::isEmptyValueValid() const {
+  if (isOptional()) {
+    return "";
+  } else {
+    return "No file specified.";
+  }
 }
 
 /**
@@ -74,8 +114,11 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
  *An empty string indicates success.
  */
 std::string MultipleFileProperty::setValue(const std::string &propValue) {
-  // No empty value is allowed.
-  if (propValue.empty())
+  // No empty value is allowed, unless optional.
+  // This is yet aditional check that is beyond the underlying
+  // MultiFileValidator,
+  // so isOptional needs to be inspected here as well
+  if (propValue.empty() && !isOptional())
     return "No file(s) specified.";
 
   // If multiple file loading is disabled, then set value assuming it is a

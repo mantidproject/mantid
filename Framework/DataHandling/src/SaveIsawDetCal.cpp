@@ -1,14 +1,18 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/SaveIsawDetCal.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include <fstream>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -21,7 +25,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawDetCal)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveIsawDetCal::init() {
@@ -41,7 +44,6 @@ void SaveIsawDetCal::init() {
                                        "If false, new file (default).");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveIsawDetCal::exec() {

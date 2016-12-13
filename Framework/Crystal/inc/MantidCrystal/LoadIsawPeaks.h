@@ -46,7 +46,6 @@ private:
 
   /// Reads calibration/detector section and returns first word of next line
   std::string ApplyCalibInfo(std::ifstream &in, std::string startChar,
-                             Geometry::Instrument_const_sptr instr_old,
                              Geometry::Instrument_const_sptr instr, double &T0);
 
   /// Reads first line of peaks file and returns first word of next line

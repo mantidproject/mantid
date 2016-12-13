@@ -19,10 +19,9 @@ class GetIPTS(PythonAlgorithm):
 
         for name in ['SNS', 'HFIR']:
             facility = ConfigService.getFacility(name)
-            facilityInstruments = [item.shortName()
-                                   for item in facility.instruments()
-                                   if item != 'DAS']
-            facilityInstruments.sort()
+            facilityInstruments = sorted([item.shortName()
+                                          for item in facility.instruments()
+                                          if item != 'DAS'])
             instruments.extend(facilityInstruments)
 
         return instruments

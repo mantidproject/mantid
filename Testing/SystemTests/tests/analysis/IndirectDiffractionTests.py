@@ -44,6 +44,7 @@ class ISISIndirectDiffractionReduction(stresstesting.MantidStressTest):
 
 #-------------------------------------------------------------------------------
 
+
 class IRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
 
     def __init__(self):
@@ -60,6 +61,7 @@ class IRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
         return 'IRISDiffspecDiffractionTest.nxs'
 
 #-------------------------------------------------------------------------------
+
 
 class TOSCADiffractionTest(ISISIndirectDiffractionReduction):
 
@@ -78,6 +80,7 @@ class TOSCADiffractionTest(ISISIndirectDiffractionReduction):
 
 #-------------------------------------------------------------------------------
 
+
 class OSIRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
 
     def __init__(self):
@@ -94,6 +97,7 @@ class OSIRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
         return 'OsirisDiffspecDiffractionTest.nxs'
 
 #-------------------------------------------------------------------------------
+
 
 class OSIRISDiffonlyDiffractionTest(stresstesting.MantidStressTest):
 

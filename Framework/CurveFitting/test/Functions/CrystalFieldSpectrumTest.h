@@ -9,8 +9,13 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/SimpleChebfun.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -19,6 +24,9 @@ using namespace Mantid::CurveFitting::Functions;
 
 class CrystalFieldSpectrumTest : public CxxTest::TestSuite {
 public:
+  // Conversion factor from barn to milibarn/steradian
+  const double c_mbsr = 79.5774715459;
+
   void test_function() {
     CrystalFieldSpectrum fun;
     fun.setParameter("B20", 0.37737);
@@ -65,15 +73,18 @@ public:
     TS_ASSERT(fun.isActive(i));
 
     TS_ASSERT_DELTA(fun.getParameter("f0.PeakCentre"), 0.0, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.Amplitude"), 2.749, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f0.Amplitude"), 2.749 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f1.PeakCentre"), 29.3261, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f1.Amplitude"), 0.7204, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f1.Amplitude"), 0.7204 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f1.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f2.PeakCentre"), 44.3412, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f2.FWHM"), 1.5, 1e-3);
   }
 
@@ -87,11 +98,12 @@ public:
     fun->setParameter("B44", -0.12544);
     fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
-    fun->setAttributeValue("ToleranceIntensity", 0.001);
+    fun->setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     fun->buildTargetFunction();
     fun->setParameter("f0.FWHM", 2.0);
     fun->setParameter("f1.FWHM", 20.0);
     fun->setParameter("f2.FWHM", 20.0);
+    fun->setParameter("IntensityScaling", 1 / c_mbsr);
     FunctionDomain1DVector x(0.0, 55.0, 100);
     FunctionValues y(x);
     fun->function(x, y);
@@ -118,12 +130,13 @@ public:
     fun->setParameter("B44", -0.12544);
     fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
-    fun->setAttributeValue("ToleranceIntensity", 0.001);
+    fun->setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     fun->setAttributeValue("PeakShape", "Gaussian");
     fun->buildTargetFunction();
     fun->setParameter("f0.Sigma", 10.0);
     fun->setParameter("f1.Sigma", 2.0);
     fun->setParameter("f2.Sigma", 3.0);
+    fun->setParameter("IntensityScaling", 1 / c_mbsr);
     FunctionDomain1DVector x(0.0, 55.0, 100);
     FunctionValues y(x);
     fun->function(x, y);
@@ -214,6 +227,457 @@ public:
       TS_ASSERT_EQUALS(constraint->asString(), "0<B44<10");
       TS_ASSERT_EQUALS(constraint->getIndex(), 13);
     }
+  }
+
+  void test_calculated_widths() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    auto checkW = [&x, &y](double c) {
+      return y.front() +
+             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+    };
+    fun.buildTargetFunction();
+    {
+      auto c = fun.getParameter("f0.PeakCentre");
+      auto w = fun.getParameter("f0.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f0.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.9, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.1, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f1.FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.4865, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.6865, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f2.PeakCentre");
+      auto w = fun.getParameter("f2.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f2.FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.7868, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.9868, 1e-4);
+    }
+    {
+      auto w = fun.getParameter("f3.FWHM");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+  }
+
+  void test_calculate_widths_out_range() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+
+    {
+      std::vector<double> x{0.0, 10.0};
+      std::vector<double> y{1.0, 2.0};
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
+      fun.buildTargetFunction();
+      TS_ASSERT_DIFFERS(fun.getParameter("f0.Amplitude"), 0.0);
+      TS_ASSERT_EQUALS(fun.getParameter("f1.Amplitude"), 0.0);
+      TS_ASSERT_EQUALS(fun.getParameter("f2.Amplitude"), 0.0);
+    }
+    {
+      std::vector<double> x{1.0, 50.0};
+      std::vector<double> y{1.0, 2.0};
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
+      TS_ASSERT_EQUALS(fun.getParameter("f0.Amplitude"), 0.0);
+      TS_ASSERT_DIFFERS(fun.getParameter("f1.Amplitude"), 0.0);
+      TS_ASSERT_DIFFERS(fun.getParameter("f2.Amplitude"), 0.0);
+    }
+  }
+
+  void test_calculate_widths_different_sizes1() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+
+    {
+      std::vector<double> x{0.0, 10.0, 50.0};
+      std::vector<double> y{1.0, 2.0};
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+    }
+    {
+      std::vector<double> x{0.0, 50.0};
+      std::vector<double> y{1.0, 2.0, 3.0};
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+    }
+    {
+      std::vector<double> x;
+      std::vector<double> y{1.0, 2.0};
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+    }
+    {
+      std::vector<double> x{0.0, 10.0, 50.0};
+      std::vector<double> y;
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
+      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+    }
+  }
+
+  void test_calculated_widths_longer_vectors() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+
+    auto wFun = [](double x) { return 2.0 + sin(M_PI * x / 50.0); };
+    SimpleChebfun cFun(wFun, 0.0, 50.0);
+    std::vector<double> x = cFun.linspace(30);
+    std::vector<double> y = cFun(x);
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    fun.buildTargetFunction();
+
+    {
+      auto c = fun.getParameter("f0.PeakCentre");
+      auto w = fun.getParameter("f0.FWHM");
+      TS_ASSERT_DELTA(w, wFun(c), 1e-3);
+    }
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.FWHM");
+      TS_ASSERT_DELTA(w, wFun(c), 1e-3);
+    }
+    {
+      auto c = fun.getParameter("f2.PeakCentre");
+      auto w = fun.getParameter("f2.FWHM");
+      TS_ASSERT_DELTA(w, wFun(c), 1e-3);
+    }
+    {
+      auto w = fun.getParameter("f3.FWHM");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+  }
+
+  void test_calculated_widths_gaussian() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("PeakShape", "Gaussian");
+
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    auto checkW = [&x, &y](double c) {
+      return y.front() +
+             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+    };
+
+    fun.buildTargetFunction();
+    Gaussian gauss;
+    gauss.initialize();
+    {
+      auto c = fun.getParameter("f0.PeakCentre");
+      auto w = fun.getParameter("f0.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f0.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.3821, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.4671, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f1.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.6312, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.7162, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f2.PeakCentre");
+      auto w = fun.getParameter("f2.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f2.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.7587, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.8437, 1e-4);
+    }
+    {
+      auto w = fun.getParameter("f3.Sigma");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+  }
+
+  void test_calculated_widths_non_default_bounds() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("FWHMVariation", 1.1);
+
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    auto checkW = [&x, &y](double c) {
+      return y.front() +
+             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+    };
+    fun.buildTargetFunction();
+    {
+      auto c = fun.getParameter("f0.PeakCentre");
+      auto w = fun.getParameter("f0.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f0.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.0, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 2.1, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f1.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.4865, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 2.6865, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f2.PeakCentre");
+      auto w = fun.getParameter("f2.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f2.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.7868, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 2.9868, 1e-4);
+    }
+    {
+      auto w = fun.getParameter("f3.FWHM");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+  }
+
+  void test_calculated_widths_update() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    fun.setAttributeValue("FWHMVariation", 0.01);
+    auto checkW = [&x, &y](double c) {
+      return y.front() +
+             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+    };
+    fun.buildTargetFunction();
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f1.FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.5765, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.5965, 1e-4);
+    }
+    fun.setParameter("B20", 0.57737);
+    fun.setParameter("B22", 2.9770);
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f1.FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.6879, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.7079, 1e-4);
+    }
+  }
+
+  void test_calculated_widths_update_gaussian() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("PeakShape", "Gaussian");
+
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    fun.setAttributeValue("FWHMVariation", 0.01);
+    auto checkW = [&x, &y](double c) {
+      return y.front() +
+             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+    };
+    Gaussian gauss;
+    gauss.initialize();
+    fun.buildTargetFunction();
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f1.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.6694, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.6779, 1e-4);
+    }
+    fun.setParameter("B20", 0.57737);
+    fun.setParameter("B22", 2.9770);
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f1.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.7167, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.7252, 1e-4);
+    }
+  }
+
+  void test_monte_carlo() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("FWHM", 1.0);
+    auto ws = createWorkspace(fun, 0, 50, 100);
+    auto mc = AlgorithmFactory::Instance().create("EstimateFitParameters", -1);
+    mc->initialize();
+    mc->setRethrows(true);
+    mc->setPropertyValue(
+        "Function",
+        "name=CrystalFieldSpectrum,Ion=Ce,"
+        "Symmetry=C2v,Temperature=44.0,FWHM=1.0,NPeaks=3,FixAllPeaks=1,"
+        "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
+    mc->setProperty("InputWorkspace", ws);
+    mc->setProperty("NSamples", 1000);
+    mc->setProperty("Constraints", "0<f2.PeakCentre<50");
+    mc->execute();
+    IFunction_sptr func = mc->getProperty("Function");
+
+    auto fit = AlgorithmFactory::Instance().create("Fit", -1);
+    fit->initialize();
+    fit->setProperty("Function", func);
+    fit->setProperty("InputWorkspace", ws);
+    fit->execute();
+    double chi2 = fit->getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi2, 100.0);
+  }
+
+  void test_change_number_of_fixed_params() {
+
+    std::string funDef =
+        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+        "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1);"
+        "name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+        "BextX=0,BextY=0,BextZ=0)";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    auto ws = createWorkspace(*fun, -20, 170, 100);
+
+    funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
+             "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,PeakShape="
+             "Lorentzian,FWHM=1.1,B44=-0.125,B40=-0.03,B42=-0.116,ties=(IB63="
+             "0,IB62=0,IB61=0,IB66=0,IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44="
+             "0,B22=3.977,B21=0,B20=0.37737,IB22=0,IB21=0,BextX=0,BextY=0,"
+             "BextZ=0,B66=0,B63=0,B62=0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,"
+             "BmolZ=0,BmolY=0,BmolX=0);name=CrystalFieldSpectrum,Ion=Pr,"
+             "Symmetry=C2v,Temperature=44.0,ToleranceEnergy=1.0,"
+             "ToleranceIntensity=6.0,PeakShape=Lorentzian,FWHM=1.1,B44=-0."
+             "125,B40=-0.03,B42=-0.116,ties=(IB63=0,IB62=0,IB61=0,IB66=0,"
+             "IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44=0,B22=3.977,B21=0,B20="
+             "0.37737,IB22=0,IB21=0,BextX=0,BextY=0,BextZ=0,B66=0,B63=0,B62="
+             "0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,BmolZ=0,BmolY=0,BmolX=0)";
+    fun = FunctionFactory::Instance().createInitialized(funDef);
+    auto fit = AlgorithmFactory::Instance().create("Fit", -1);
+    fit->setRethrows(true);
+    fit->initialize();
+    fit->setProperty("Function", fun);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("Output", "out");
+    TS_ASSERT_THROWS_NOTHING(fit->execute());
+  }
+
+private:
+  std::pair<double, double> getBounds(API::IFunction &fun,
+                                      const std::string &parName) {
+    auto ct = fun.getConstraint(fun.parameterIndex(parName));
+    if (ct == nullptr) {
+      throw std::runtime_error("Parameter " + parName +
+                               " doesn't have constraint");
+    }
+    auto bc = dynamic_cast<Constraints::BoundaryConstraint *>(ct);
+    if (ct == nullptr) {
+      throw std::runtime_error("Parameter " + parName +
+                               " doesn't have boundary constraint");
+    }
+    return std::make_pair(bc->lower(), bc->upper());
+  }
+
+  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0,
+                                       double x1, size_t nbins) {
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+    FunctionDomain1DVector x(x0, x1, nbins);
+    FunctionValues y(x);
+    fun.function(x, y);
+    ws->dataX(0) = x.toVector();
+    ws->dataY(0) = y.toVector();
+    return ws;
   }
 };
 

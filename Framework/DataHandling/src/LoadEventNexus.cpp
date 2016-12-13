@@ -5,8 +5,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -486,13 +489,13 @@ public:
 
     // Abort if anything failed
     if (m_loadError) {
-      prog->reportIncrement(4, entry_name + ": skipping");
       delete[] m_event_id;
       delete[] m_event_time_of_flight;
       if (m_have_weight) {
         delete[] m_event_weight;
       }
       delete event_index_ptr;
+
       return;
     }
 
@@ -1612,7 +1615,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       if (mT0 != 0.0) {
         int64_t numHistograms =
             static_cast<int64_t>(m_ws->getNumberHistograms());
-        PARALLEL_FOR1(m_ws)
+        PARALLEL_FOR_IF(Kernel::threadSafe(*m_ws))
         for (int64_t i = 0; i < numHistograms; ++i) {
           PARALLEL_START_INTERUPT_REGION
           // Do the offsetting
@@ -1909,9 +1912,10 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     // Note the reuse of the m_ws member variable below. Means I need to grab a
     // copy of its current value.
     auto dataWS = m_ws;
-    m_ws = boost::make_shared<
-        EventWorkspaceCollection>(); // Algorithm currently relies on an
-                                     // object-level workspace ptr
+    m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm
+                                                           // currently relies
+                                                           // on an
+    // object-level workspace ptr
     // add filename
     m_ws->mutableRun().addProperty("Filename", m_filename);
 
@@ -1937,8 +1941,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
           << "data workspace.\n";
       try {
         auto to = m_ws->getSingleHeldWorkspace();
-        auto from = dataWS;
-        copyLogs(from, to);
+        copyLogs(dataWS, to);
         g_log.information() << "Log data copied.\n";
       } catch (std::runtime_error &) {
         g_log.error()

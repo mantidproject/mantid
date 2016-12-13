@@ -1,13 +1,14 @@
 #ifndef SMOOTHDATATEST_H_
 #define SMOOTHDATATEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/CreateGroupingWorkspace.h"
-#include "MantidAlgorithms/SmoothData.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/SmoothData.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -23,9 +24,13 @@ public:
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", 2, 10, 10);
+
+    auto &yVals = space->mutableY(0);
+    auto &eVals = space->mutableE(0);
+
     for (int i = 0; i < 10; ++i) {
-      space->dataY(0)[i] = i + 1.0;
-      space->dataE(0)[i] = sqrt(i + 1.0);
+      yVals[i] = i + 1.0;
+      eVals[i] = sqrt(i + 1.0);
     }
 
     // Register the workspace in the data service
@@ -109,9 +114,9 @@ public:
 
     MatrixWorkspace_const_sptr output = smooth.getProperty("OutputWorkspace");
     // as alg child is set true, wouldnt need to use AnalysisDataService
-    const Mantid::MantidVec &Y = output->dataY(0);
-    const Mantid::MantidVec &X = output->dataX(0);
-    const Mantid::MantidVec &E = output->dataE(0);
+    const auto &Y = output->y(0);
+    const auto &X = output->x(0);
+    const auto &E = output->e(0);
     TS_ASSERT_EQUALS(Y[0], 0.3);
     TS_ASSERT_EQUALS(X[6], 1200);
     TS_ASSERT_DIFFERS(E[2], Y[2]);
@@ -131,7 +136,7 @@ public:
     TS_ASSERT_DIFFERS(X[0], Y[0]);
     TS_ASSERT_DIFFERS(E[5], Y[5]);
     // Check X vectors are shared
-    TS_ASSERT_EQUALS(&(output->dataX(0)), &(output->dataX(1)));
+    TS_ASSERT_EQUALS(&(output->x(0)), &(output->x(1)));
   }
 
   void testExec() {
@@ -153,8 +158,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputWS));
-    const Mantid::MantidVec &Y = output->dataY(0);
-    const Mantid::MantidVec &E = output->dataE(0);
+    const auto &Y = output->y(0);
+    const auto &E = output->e(0);
     TS_ASSERT_EQUALS(Y[0], 2);
     TS_ASSERT_DELTA(E[0], sqrt(Y[0] / 3.0), 0.0001);
     TS_ASSERT_EQUALS(Y[1], 2.5);
@@ -169,10 +174,50 @@ public:
     TS_ASSERT_DELTA(E[9], sqrt(Y[9] / 3.0), 0.0001);
 
     // Check X vectors are shared
-    TS_ASSERT_EQUALS(&(output->dataX(0)), &(output->dataX(1)));
+    TS_ASSERT_EQUALS(&(output->x(0)), &(output->x(1)));
 
     AnalysisDataService::Instance().remove(outputWS);
   }
+};
+
+class SmoothDataTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+
+    // Set up a small workspace for testing
+    constexpr size_t numHistograms(1);
+    constexpr size_t numBins(1000000);
+
+    inputWs =
+        WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
+
+    auto &yVals = inputWs->mutableY(0);
+    auto &eVals = inputWs->mutableE(0);
+
+    double currentVal(0.0);
+    for (size_t i = 0; i < numBins; ++i) {
+      yVals[i] = currentVal + 1.0;
+      eVals[i] = sqrt(currentVal + 1.0);
+      currentVal++;
+    }
+
+    smoothAlg.initialize();
+    smoothAlg.setProperty("InputWorkspace", inputWs);
+    smoothAlg.setPropertyValue("OutputWorkspace", "outputWS");
+    smoothAlg.setRethrows(true);
+  }
+
+  void testSmoothDataPerformance() {
+    TS_ASSERT_THROWS_NOTHING(smoothAlg.execute());
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");
+  }
+
+private:
+  Workspace2D_sptr inputWs;
+  SmoothData smoothAlg;
 };
 
 #endif /*SMOOTHDATATEST_H_*/

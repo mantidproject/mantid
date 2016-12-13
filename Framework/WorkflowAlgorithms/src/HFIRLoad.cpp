@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <string>
 
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
@@ -8,8 +5,10 @@
 #include "Poco/NumberFormatter.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
