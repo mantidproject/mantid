@@ -1913,7 +1913,8 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
 }
 
-/// Returns the number of detector groups. This is equal to the number of spectra.
+/// Returns the number of detector groups. This is equal to the number of
+/// spectra.
 size_t MatrixWorkspace::numberOfDetectorGroups() const {
   return getNumberHistograms();
 }
