@@ -135,13 +135,6 @@ public:
   }
   std::string currentReconTool() const override { return m_currentReconTool; }
 
-  /// get the path to the image that the user has requested to visualize
-  std::string visImagePath() const;
-
-  std::string showImagePath() const override { return m_imgPath; }
-  void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg) override;
-  void showImage(const std::string &path) override;
-
   int keepAlivePeriod() override { return m_settings.useKeepAlive; }
 
   TomoPathsConfig currentPathsConfig() const override { return m_pathsConfig; }
@@ -183,8 +176,6 @@ private slots:
   void runToolIndexChanged(int);
   void SCARFLoginClicked();
   void SCARFLogoutClicked();
-
-  void browseImageClicked();
 
   void browseLocalInOutDirClicked();
   void browseLocalRemoteDriveOrPath();
@@ -310,7 +301,6 @@ private:
   // 'tabs' but they could be separate dialogs, widgets, etc. combined in
   // different ways.
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
-  Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;
   Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;

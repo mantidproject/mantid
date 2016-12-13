@@ -69,15 +69,6 @@ public:
   // void enableRunReconstruct(bool on) {}
   MOCK_METHOD1(enableRunReconstruct, void(bool on));
 
-  // std::string showImagePath() {}
-  MOCK_CONST_METHOD0(showImagePath, std::string());
-
-  // void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg) {}
-  MOCK_METHOD1(showImage, void(const Mantid::API::MatrixWorkspace_sptr &wsg));
-
-  // void showImage(const std::string &path) {}
-  MOCK_METHOD1(showImage, void(const std::string &path));
-
   // TomoPathsConfig currentPathsConfig() const {}
   MOCK_CONST_METHOD0(currentPathsConfig,
                      MantidQt::CustomInterfaces::TomoPathsConfig());

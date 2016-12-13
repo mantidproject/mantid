@@ -79,7 +79,6 @@ protected:
   void processRunRecon();
   void processCancelJobs();
   void processVisualizeJobs();
-  void processViewImg();
   void processLogMsg();
   void processAggregateEnergyBands();
   void processShutDown();
