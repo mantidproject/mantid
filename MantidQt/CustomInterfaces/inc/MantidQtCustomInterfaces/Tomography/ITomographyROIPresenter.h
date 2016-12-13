@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIPRESENTER_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYROIPRESENTER_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYROIPRESENTER_H_
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,11 +36,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IImageROIPresenter {
+class ITomographyROIPresenter {
 
 public:
-  IImageROIPresenter(){};
-  virtual ~IImageROIPresenter(){};
+  ITomographyROIPresenter(){};
+  virtual ~ITomographyROIPresenter(){};
 
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
@@ -58,6 +58,7 @@ public:
     ColorRangeUpdated,     ///< The uses changes the values or options of the
                            ///< color range
     SelectCoR,             ///< Start picking of the center of rotation
+    FindCoR,               ///< Run calculate CoR
     SelectROI,             ///< Start selection of the region of interest
     SelectNormalization,   ///< Start selection of the normalization region
     FinishedCoR,           ///< A CoR has been picked
@@ -76,10 +77,10 @@ public:
    *
    * @param notif Type of notification to process.
    */
-  virtual void notify(IImageROIPresenter::Notification notif) = 0;
+  virtual void notify(ITomographyROIPresenter::Notification notif) = 0;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYROIPRESENTER_H_

@@ -119,8 +119,8 @@ set ( SRC_FILES
 	src/SampleTransmission.cpp
 	src/StepScan.cpp
 	src/Tomography/EnergyBandsViewQtGUI.cpp
-	src/Tomography/ImageROIPresenter.cpp
-	src/Tomography/ImageROIViewQtWidget.cpp
+	src/Tomography/TomographyROIPresenter.cpp
+	src/Tomography/TomographyROIViewQtWidget.cpp
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/ImggFormats.cpp
 	src/Tomography/ImggFormatsConvertPresenter.cpp
@@ -289,14 +289,14 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/SampleTransmission.h
 	inc/MantidQtCustomInterfaces/StepScan.h
-	inc/MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/IImageROIView.h
+	inc/MantidQtCustomInterfaces/Tomography/ITomographyROIPresenter.h
+	inc/MantidQtCustomInterfaces/Tomography/ITomographyROIView.h
 	inc/MantidQtCustomInterfaces/Tomography/IImggFormatsConvertPresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h
 	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
-	inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/ImggFormats.h
 	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h
@@ -428,8 +428,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
-                inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
-                inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
+                inc/MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h
+                inc/MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
@@ -532,7 +532,7 @@ set ( TEST_FILES
 	EnggDiffFittingPresenterTest.h
 	EnggDiffractionPresenterTest.h
 	IO_MuonGroupingTest.h
-	ImageROIPresenterTest.h
+	TomographyROIPresenterTest.h
 	ImggFormatsConvertPresenterTest.h
 	MDFLogValueFinderTest.h
 	MeasurementItemTest.h

@@ -177,7 +177,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
   // this is a Qt widget, let Qt manage the pointer
-  m_tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
+  m_tabROIW = new TomographyROIViewQtWidget(m_ui.tabMain);
   m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
@@ -208,6 +208,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   doSetupSectionSetup();
   doSetupSectionRun();
   doSetupSectionFilters();
+  doSetupSectionRoi();
 
   // extra / experimental tabs:
   doSetupSectionVisualize();
@@ -221,6 +222,26 @@ void TomographyIfaceViewQtGUI::initLayout() {
   // it will know what compute resources and tools we have available:
   // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(ITomographyIfacePresenter::SetupResourcesAndTools);
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionRoi() {
+  // connect the auto CoR button to run an external python process
+  connect(m_tabROIW,
+          SIGNAL(findCORClicked(std::string, std::vector<std::string>)), this,
+          SLOT(runExternalProcess(std::string, std::vector<std::string>)));
+  connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIW,
+          SLOT(readCoRFromProcessOutput(QString)));
+}
+
+void TomographyIfaceViewQtGUI::externalProcessFinished(const std::string &str) {
+  emit externalProcessFinished(QString::fromStdString(str));
+}
+
+void TomographyIfaceViewQtGUI::runExternalProcess(
+    const std::string &exec, const std::vector<std::string> &args) {
+  m_extExec = exec;
+  m_extArgs = args;
+  m_presenter->notify(ITomographyIfacePresenter::RunExternalProcess);
 }
 
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {

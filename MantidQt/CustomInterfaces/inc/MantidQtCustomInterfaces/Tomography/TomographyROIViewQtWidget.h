@@ -1,18 +1,17 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIVIEWQTWIDGET_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIVIEWQTWIDGET_H_
 
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIView.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
 
 #include <boost/scoped_ptr.hpp>
 
 #include <QTimer>
-
 // forward declarations for Qt
 class QWidget;
 class QPixmap;
@@ -33,8 +32,8 @@ image or stack of images. Provides a concrete view for the graphical
 interface for tomography functionality in Mantid. This view is
 Qt-based and it is probably the only one that will be implemented in a
 foreseeable horizon. The interface of this class is given by
-IImageROIView so that it fits in the MVP (Model-View-Presenter) design
-of the ImageROI widget.
+ITomographyROIView so that it fits in the MVP (Model-View-Presenter) design
+of the TomographyROI widget.
 
 Copyright &copy; 2015-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -57,14 +56,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIViewQtWidget
+class MANTIDQT_CUSTOMINTERFACES_DLL TomographyROIViewQtWidget
     : public QWidget,
-      public IImageROIView {
+      public ITomographyROIView {
   Q_OBJECT
 
 public:
-  ImageROIViewQtWidget(QWidget *parent = 0);
-  ~ImageROIViewQtWidget() override;
+  TomographyROIViewQtWidget(QWidget *parent = 0);
+  ~TomographyROIViewQtWidget() override;
 
   void setParams(ImageStackPreParams &params) override;
 
@@ -124,6 +123,13 @@ public:
 
   void saveSettings() const override;
 
+signals:
+  void findCORClicked(const std::string &exec,
+                      const std::vector<std::string> &args);
+
+public slots:
+  void readCoRFromProcessOutput(const QString &str);
+
 protected:
   void initLayout();
   void showImg();
@@ -135,19 +141,20 @@ protected:
   void resetWidgetsOnNewStack();
 
   /// update coordinates from mouse event
-  void mouseUpdateCoR(int x, int y);
-  void mouseUpdateROICorners12(int x, int y);
-  void mouseUpdateROICorner2(int x, int y);
-  void mouseFinishROI(int x, int y);
-  void mouseUpdateNormAreaCorners12(int x, int y);
-  void mouseUpdateNormAreaCorner2(int x, int y);
-  void mouseFinishNormArea(int x, int y);
+  void mouseUpdateCoR(const int x, const int y);
+  void mouseUpdateROICornersStartSelection(const int x, const int y);
+  void mouseUpdateROICornerContinuedSelection(const int x, const int y);
+  void mouseFinishROI(const int x, const int y);
+  void mouseUpdateNormAreaCornersStartSelection(const int x, const int y);
+  void mouseUpdateNormAreaCornerContinuedSelection(const int x, const int y);
+  void mouseFinishNormArea(const int x, const int y);
 
 private slots:
   void browseImageClicked();
   void browseStackClicked();
 
   void rotationUpdated(int idx);
+  void autoCoRToolChanged(int idx);
 
   void imageTypeUpdated(int idx);
 
@@ -169,23 +176,27 @@ private slots:
   void valueUpdatedCoR(int v);
   void valueUpdatedROI(int v);
   void valueUpdatedNormArea(int v);
+  void findCORClicked();
 
 private:
   void setupConnections();
 
   void readSettings();
 
-  /// enable types of images (sample, flat, dark) depending on their
+  /// enable types of images (sample, flat, dark)
+  /// depending on their
   /// availability
   void enableImageTypes(bool enableSamples, bool enableFlats, bool enableDarks);
 
-  /// enable/disable the groups with spin boxes for the center and corners
+  /// enable/disable the groups with spin boxes for the
+  /// center and corners
   void enableParamWidgets(bool enable);
 
   // widget closing
   void closeEvent(QCloseEvent *ev) override;
 
-  /// initialize values to defaults and set max/min for the spin boxes
+  /// initialize values to defaults and set max/min for
+  /// the spin boxes
   void initParamWidgets(size_t maxWidth, size_t maxHeight);
 
   /// Set coordinates in the widgets from a params object
@@ -220,30 +231,47 @@ private:
   void grabNormAreaCorner1FromMousePoint(int x, int y);
   void grabNormAreaCorner2FromMousePoint(int x, int y);
 
-  /// repaint the image with new positions of points and rectangles
-  void refreshROIetAl();
+  /// repaint the image with new positions of points and
+  /// rectangles
+  void refreshImage();
   void refreshCoR();
   void refreshROI();
   void refreshNormArea();
 
   /// draw a cross/target symbol
-  void drawCenterCrossSymbol(QPainter &painter, Mantid::Kernel::V2D &center);
+  void drawCenterCrossSymbol(QPainter &painter,
+                             const Mantid::Kernel::V2D &center) const;
 
-  /// draw a rectangle/box to highlight the ROI: region of interest
-  void drawBoxROI(QPainter &painter, Mantid::Kernel::V2D &first,
-                  Mantid::Kernel::V2D &second);
+  /// draw a rectangle/box to highlight the ROI: region of
+  /// interest
+  void drawBoxROI(QPainter &painter, const Mantid::Kernel::V2D &first,
+                  const Mantid::Kernel::V2D &second) const;
 
-  /// draw a rectangle/box to highlight the normalization ("air") region
-  void drawBoxNormalizationRegion(QPainter &painter, Mantid::Kernel::V2D &first,
-                                  Mantid::Kernel::V2D &second);
+  /// draw a rectangle/box to highlight the normalization
+  /// ("air") region
+  void drawBoxNormalizationRegion(QPainter &painter,
+                                  const Mantid::Kernel::V2D &first,
+                                  const Mantid::Kernel::V2D &second) const;
 
   bool eventFilter(QObject *obj, QEvent *event) override;
+
+  struct RectangleXY {
+    int right;
+    int top;
+  } m_startOfRectangle;
+
+  void updateValuesForSpinBoxes(
+      const int x, const int y,
+      const struct TomographyROIViewQtWidget::RectangleXY startPositions,
+      QSpinBox *spinLeft, QSpinBox *spinTop, QSpinBox *spinRight,
+      QSpinBox *spinBottom);
 
   Ui::ImageSelectCoRAndRegions m_ui;
 
   Mantid::API::WorkspaceGroup_sptr m_stackSamples, m_stackFlats, m_stackDarks;
 
-  /// this holds the base image on top of which rectangles and other
+  /// this holds the base image on top of which rectangles
+  /// and other
   /// objects are drawn
   boost::scoped_ptr<QPixmap> m_basePixmap;
 
@@ -262,14 +290,14 @@ private:
   /// max image size for the current stack
   int m_imgWidth, m_imgHeight;
 
-  /// are we picking the CoR, or the first point of the ROI, etc.
+  /// are we picking the CoR, or the first point of the
+  /// ROI, etc.
   SelectionState m_selectionState;
 
   // presenter as in the model-view-presenter
-  boost::scoped_ptr<IImageROIPresenter> m_presenter;
+  boost::scoped_ptr<ITomographyROIPresenter> m_presenter;
 };
-
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIVIEWQTWIDGET_H_

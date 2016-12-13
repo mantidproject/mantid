@@ -130,6 +130,15 @@ public:
   //   &body)
   MOCK_METHOD2(userConfirmation,
                bool(const std::string &title, const std::string &body));
+
+  //   virtual std::string getCachedExecutable() const = 0;
+  MOCK_CONST_METHOD0(getCachedExecutable, std::string());
+
+  //  virtual std::vector<std::string> getCachedArguments() const = 0;
+  MOCK_CONST_METHOD0(getCachedArguments, std::vector<std::string>());
+
+  //  virtual void externalProcessFinished(const std::string &str) = 0;
+  MOCK_METHOD1(externalProcessFinished, void(const std::string &str));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

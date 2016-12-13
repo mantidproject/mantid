@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIVIEW_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIVIEW_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYROIVIEW_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYROIVIEW_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
@@ -38,11 +38,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IImageROIView {
+class ITomographyROIView {
 
 public:
-  IImageROIView(){};
-  virtual ~IImageROIView(){};
+  ITomographyROIView(){};
+  virtual ~ITomographyROIView(){};
 
   // Selection states
   enum SelectionState {
@@ -290,4 +290,4 @@ public:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIVIEW_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYROIVIEW_H_

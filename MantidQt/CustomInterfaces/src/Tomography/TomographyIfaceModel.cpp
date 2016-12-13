@@ -5,6 +5,7 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
+#include "MantidQtCustomInterfaces/Tomography/TomographyCommandArguments.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
@@ -15,6 +16,7 @@
 // This is exclusively for kill/waitpid (interim solution, see below)
 #include <signal.h>
 #include <sys/wait.h>
+
 #endif
 
 using namespace Mantid::API;
@@ -343,9 +345,7 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
 void TomographyIfaceModel::prepareSubmissionArguments(
     const bool local, std::string &runnable, std::vector<std::string> &args,
     std::string &allOpts) {
-  if (!m_currentToolSettings) {
-    throw std::invalid_argument("Settings for tool not set up");
-  }
+
   const std::string tool = usingTool();
   const std::string cmd = m_currentToolSettings->toCommand();
 
@@ -379,9 +379,6 @@ void TomographyIfaceModel::prepareSubmissionArguments(
 
   // used for remote submission
   allOpts = constructSingleStringFromVector(args);
-
-  logMsg("Running " + usingTool() + ", with binary: " + runnable +
-         ", with parameters: " + allOpts);
 }
 
 /**
@@ -442,6 +439,10 @@ void TomographyIfaceModel::doRemoteRunReconstructionJob(
     const std::string &compRes, const std::string &runnable,
     const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
+
+  logMsg("Running " + usingTool() + ", with binary: " + runnable +
+         ", with parameters: " + allOpts);
+
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
   transAlg->initialize();
@@ -488,6 +489,10 @@ void TomographyIfaceModel::doLocalRunReconstructionJob(
 
   // Can only run one reconstruction at a time
   // Qt doesn't use exceptions so we can't make sure it ran here
+
+  logMsg("Running " + usingTool() + ", with binary: " + runnable +
+         ", with parameters: " + allOpts);
+
   worker.setup(runnable, args, allOpts);
   thread.start();
 }
@@ -781,12 +786,12 @@ void TomographyIfaceModel::logErrMsg(const std::string &msg) {
  * @returns A string like "x1, y1, x2, y2"
  */
 std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
-  std::string x1 = std::to_string(coords.first.X());
-  std::string y1 = std::to_string(coords.first.Y());
-  std::string x2 = std::to_string(coords.second.X());
-  std::string y2 = std::to_string(coords.second.Y());
+  std::string s_left = std::to_string(coords.second.X());
+  std::string s_top = std::to_string(coords.first.Y());
+  std::string s_right = std::to_string(coords.first.X());
+  std::string s_bottom = std::to_string(coords.second.Y());
 
-  return x1 + ", " + y1 + ", " + x2 + ", " + y2;
+  return s_left + ", " + s_top + ", " + s_right + ", " + s_bottom;
 }
 
 /**

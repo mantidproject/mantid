@@ -10,7 +10,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
@@ -160,6 +160,16 @@ public:
   bool userConfirmation(const std::string &title,
                         const std::string &body) override;
 
+  std::string getCachedExecutable() const override { return m_extExec; }
+
+  std::vector<std::string> getCachedArguments() const override {
+    return m_extArgs;
+  }
+  void externalProcessFinished(const std::string &str);
+
+signals:
+  void externalProcessFinished(const QString &str);
+
 private slots:
   /// for buttons, run tab, and similar
   void reconstructClicked();
@@ -226,6 +236,11 @@ private slots:
   // aggregation run finished
   void finishedAggBands(bool error);
 
+  // If the exec string is empty then the executable will be the one from the
+  // system settings tab
+  void runExternalProcess(const std::string &exec,
+                          const std::vector<std::string> &args);
+
 private:
   /// Setup the interface (tab UI)
   void initLayout() override;
@@ -237,6 +252,7 @@ private:
   void doSetupSectionEnergy();
   void doSetupSectionSystemSettings();
   void doSetupGeneralWidgets();
+  void doSetupSectionRoi();
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
@@ -301,7 +317,7 @@ private:
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
   Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
-  ImageROIViewQtWidget *m_tabROIW;
+  TomographyROIViewQtWidget *m_tabROIW;
   ImggFormatsConvertViewQtWidget *m_tabImggFormats;
 
   std::vector<std::string> m_processingJobsIDs;
@@ -382,6 +398,12 @@ private:
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<ITomographyIfacePresenter> m_presenter;
+
+  // holders for the external process' arguments
+  // as the connection to the presenter is not done via Qt Signals we have no
+  // other way of transfering data between them
+  std::string m_extExec = "";
+  std::vector<std::string> m_extArgs;
 };
 
 } // namespace CustomInterfaces

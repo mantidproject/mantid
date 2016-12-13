@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
-#define MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
+#ifndef MANTID_CUSTOMINTERFACES_TOMOGRAPHYROIVIEWMOCK_H
+#define MANTID_CUSTOMINTERFACES_TOMOGRAPHYROIVIEWMOCK_H
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
@@ -8,7 +8,8 @@
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockImageROIView : public MantidQt::CustomInterfaces::IImageROIView {
+class MockTomographyROIView
+    : public MantidQt::CustomInterfaces::ITomographyROIView {
 public:
   // void initParams(ImageStackPreParams &params)
   MOCK_METHOD1(setParams,
@@ -23,7 +24,7 @@ public:
 
   // void changeSelectionState(const SelectionState state);
   MOCK_METHOD1(changeSelectionState,
-               void(const IImageROIView::SelectionState &));
+               void(const ITomographyROIView::SelectionState &));
 
   // void showStack(const std::string &path);
   MOCK_METHOD1(showStack, void(const std::string &));
@@ -109,4 +110,4 @@ public:
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 
-#endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
+#endif // MANTID_CUSTOMINTERFACES_TOMOGRAPHYROIVIEWMOCK_H

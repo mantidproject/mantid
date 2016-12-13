@@ -1,11 +1,12 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIPRESENTER_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIPRESENTER_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
+#include <memory>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -18,6 +19,7 @@ class BatchAlgorithmRunner;
 }
 
 namespace CustomInterfaces {
+class TomographyThread;
 
 /**
 Presenter for the image center of rotation (and other parameters)
@@ -46,9 +48,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIPresenter
+class MANTIDQT_CUSTOMINTERFACES_DLL TomographyROIPresenter
     : public QObject,
-      public IImageROIPresenter {
+      public ITomographyROIPresenter {
   // Q_OBJECT for the 'algorithm runner' signals
   // TODO: move the AlgorithmRunner to the view? Have a different, non-Qt
   // runner?
@@ -57,10 +59,10 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ImageROIPresenter
 
 public:
   /// Default constructor - normally used from the concrete view
-  ImageROIPresenter(IImageROIView *view);
-  ~ImageROIPresenter() override;
+  TomographyROIPresenter(ITomographyROIView *view);
+  ~TomographyROIPresenter() override;
 
-  void notify(IImageROIPresenter::Notification notif) override;
+  void notify(ITomographyROIPresenter::Notification notif) override;
 
 protected:
   void initialize();
@@ -76,6 +78,7 @@ protected:
   void processNewStack(bool singleImage);
   void processLoadSingleImage();
   void processLoadStackOfImages();
+  void processFindCoR();
   void setupAlgorithmRunnerAfterLoad();
   void processChangeImageType();
   void processChangeRotation();
@@ -98,6 +101,8 @@ protected:
 
 private slots:
   void finishedLoadStack(bool error);
+  void readWorkerStdOut(const QString &s);
+  void readWorkerStdErr(const QString &s);
 
 private:
   StackOfImagesDirs checkInputStack(const std::string &path);
@@ -137,14 +142,16 @@ private:
   static const std::string g_wsgDarksName;
 
   /// Associated view for this presenter (MVP pattern)
-  IImageROIView *const m_view;
+  ITomographyROIView *const m_view;
 
   /// Associated model for this presenter (MVP pattern). This is just
   /// a set of coordinates
   const boost::scoped_ptr<ImageStackPreParams> m_model;
+
+  std::unique_ptr<TomographyThread> m_workerThread;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYROIPRESENTER_H_
