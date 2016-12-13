@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
-from mantid.kernel import ConfigService
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
