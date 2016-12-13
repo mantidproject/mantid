@@ -13,12 +13,15 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
+#include "MantidBeamline/DetectorInfo.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -47,7 +50,8 @@ Kernel::Logger g_log("ExperimentInfo");
 ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
-      sptr_instrument(new Instrument()) {}
+      sptr_instrument(new Instrument()),
+      m_detectorInfo(Kernel::make_unique<Beamline::DetectorInfo>(0)) {}
 
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
@@ -75,6 +79,8 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
+  m_detectorInfo =
+      Kernel::make_unique<Beamline::DetectorInfo>(*other->m_detectorInfo);
 }
 
 /** Clone this ExperimentInfo class into a new one
@@ -141,7 +147,7 @@ const std::string ExperimentInfo::toString() const {
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     m_parmap = instr->getParameterMap();
@@ -149,6 +155,10 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
+  // TODO Add Beamline::DetectorInfo reference to Instrument and assign that
+  // here. For now we just create a new DetectorInfo of the correct size:
+  m_detectorInfo = Kernel::make_unique<Beamline::DetectorInfo>(
+      sptr_instrument->getNumberDetectors());
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -176,7 +186,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
       invalidateInstrumentReferences();
-      m_detectorInfo = nullptr;
+      m_detectorInfoWrapper = nullptr;
     }
     if (!m_parmap.unique()) {
       ParameterMap_sptr oldData = m_parmap;
@@ -321,7 +331,7 @@ void ExperimentInfo::populateInstrumentParameters() {
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
 }
 
@@ -332,7 +342,7 @@ void ExperimentInfo::replaceInstrumentParameters(
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
 }
 
@@ -889,12 +899,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
  * this reference.
  */
 const DetectorInfo &ExperimentInfo::detectorInfo() const {
-  if (!m_detectorInfo) {
+  if (!m_detectorInfoWrapper) {
     std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
-    if (!m_detectorInfo)
-      m_detectorInfo = Kernel::make_unique<DetectorInfo>(getInstrument());
+    if (!m_detectorInfoWrapper)
+      m_detectorInfoWrapper =
+          Kernel::make_unique<DetectorInfo>(getInstrument());
   }
-  return *m_detectorInfo;
+  return *m_detectorInfoWrapper;
 }
 
 /** Return a non-const reference to the DetectorInfo object. Not thread safe.
@@ -904,18 +915,19 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
 
   // We get the non-const ParameterMap reference *first* such that no copy is
   // triggered unless really necessary. The call to `instrumentParameters`
-  // releases the old m_detectorInfo to drop the reference count to the
+  // releases the old m_detectorInfoWrapper to drop the reference count to the
   // ParameterMap by 1 (DetectorInfo contains a parameterized Instrument, so the
-  // reference count to the ParameterMap is at least 2 if m_detectorInfo is not
-  // nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then the
-  // ExperimentInfo is not the sole owner of the ParameterMap a copy is
+  // reference count to the ParameterMap is at least 2 if m_detectorInfoWrapper
+  // is not nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then
+  // the ExperimentInfo is not the sole owner of the ParameterMap a copy is
   // triggered.
   auto pmap = &instrumentParameters();
   // Here `getInstrument` creates a parameterized instrument, increasing the
   // reference count to the ParameterMap. This has do be done *after* getting
   // the ParameterMap.
-  m_detectorInfo = Kernel::make_unique<DetectorInfo>(getInstrument(), pmap);
-  return *m_detectorInfo;
+  m_detectorInfoWrapper =
+      Kernel::make_unique<DetectorInfo>(getInstrument(), pmap);
+  return *m_detectorInfoWrapper;
 }
 
 /** Save the object to an open NeXus file.
