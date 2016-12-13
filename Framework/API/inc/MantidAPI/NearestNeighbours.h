@@ -61,7 +61,7 @@ class SpectrumInfo;
 class MANTID_API_DLL NearestNeighbours {
 public:
   NearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
-                    const std::vector<specnum_t> spectrumNumbers,
+                    std::vector<specnum_t> spectrumNumbers,
                     bool ignoreMaskedDetectors = false);
 
   // Neighbouring spectra by radius

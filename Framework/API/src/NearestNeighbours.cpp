@@ -24,10 +24,12 @@ using Kernel::V3D;
  * @param ignoreMaskedDetectors :: flag indicating that masked detectors should
  * be ignored.
  */
-NearestNeighbours::NearestNeighbours(
-    int nNeighbours, const SpectrumInfo &spectrumInfo,
-    const std::vector<specnum_t> spectrumNumbers, bool ignoreMaskedDetectors)
-    : m_spectrumInfo(spectrumInfo), m_spectrumNumbers(spectrumNumbers),
+NearestNeighbours::NearestNeighbours(int nNeighbours,
+                                     const SpectrumInfo &spectrumInfo,
+                                     std::vector<specnum_t> spectrumNumbers,
+                                     bool ignoreMaskedDetectors)
+    : m_spectrumInfo(spectrumInfo),
+      m_spectrumNumbers(std::move(spectrumNumbers)),
       m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_radius(0),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);
