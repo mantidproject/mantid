@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -362,10 +363,8 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, bins - 1, bins, bins - 1);
   // ... but clear the masking from the parameter map as we don't want to carry
-  // that over since this is essentially
-  // a 2D rebin
-  ParameterMap &pmap = outputWorkspace->instrumentParameters();
-  pmap.clearParametersByName("masked");
+  // that over since this is essentially a 2D rebin
+  outputWorkspace->mutableDetectorInfo().clearMaskFlags();
 
   // Create a numeric axis to replace the vertical one
   Axis *verticalAxis = new BinEdgeAxis(bins);

@@ -37,7 +37,7 @@
         </stringlist>
        </property>
        <property name="liveButton" stdset="0">
-        <enum>MantidQt::API::MWRunFiles::AlwaysShow</enum>
+        <enum>MantidQt::API::MWRunFiles::Show</enum>
        </property>
       </widget>
      </item>

@@ -1,13 +1,11 @@
 #include "TextFileIO.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
+#include <QApplication>
 #include <QFile>
 #include <QFileDialog>
-#include <QFileInfo>
 #include <QMessageBox>
 #include <QTextStream>
-#include <QApplication>
-
-#include "MantidQtAPI/FileDialogHandler.h"
 
 /**
  * Construct an object with a list of file filters
@@ -47,15 +45,8 @@ bool TextFileIO::save(const QString &txt, const QString &filename) const {
 QString TextFileIO::askWhereToSave() const {
   QString selectedFilter;
   QString filter = m_filters.join(";;");
-  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
-      NULL, "MantidPlot - Save", "", filter, &selectedFilter);
-  if (filename.isEmpty())
-    return QString();
-  if (QFileInfo(filename).suffix().isEmpty()) {
-    QString ext = selectedFilter.section('(', 1).section(' ', 0, 0);
-    ext.remove(0, 1);
-    if (ext != ")")
-      filename += ext;
-  }
-  return filename;
+  QString filename = QFileDialog::getSaveFileName(NULL, "MantidPlot - Save", "",
+                                                  filter, &selectedFilter);
+  return MantidQt::API::FileDialogHandler::addExtension(filename,
+                                                        selectedFilter);
 }

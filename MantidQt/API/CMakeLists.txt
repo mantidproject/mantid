@@ -5,6 +5,7 @@
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
+        src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
@@ -141,6 +142,7 @@ set ( TEST_PY_FILES
 
 set( TEST_FILES
    BatchAlgorithmRunnerTest.h
+   FileDialogHandlerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
    PlotAxisTest.h

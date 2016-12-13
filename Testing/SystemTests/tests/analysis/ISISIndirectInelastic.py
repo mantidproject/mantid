@@ -1024,6 +1024,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             BackgroundType=self.bg,
             SpecMin=self.spectra_min,
             SpecMax=self.spectra_max,
+            PeakRadius=5,
             OutputWorkspace='result')
 
     def _validate_properties(self):

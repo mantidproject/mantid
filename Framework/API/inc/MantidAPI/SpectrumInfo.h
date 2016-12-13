@@ -72,6 +72,8 @@ public:
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
 
+  void setMasked(const size_t index, bool masked);
+
   // This is likely to be deprecated/removed with the introduction of
   // Instrument-2.0: The concept of detector groups will probably be dropped so
   // returning a single detector for a spectrum will not be possible anymore.

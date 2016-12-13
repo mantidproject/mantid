@@ -84,12 +84,12 @@ set ( SRC_FILES
 	src/InstrumentView/XIntegrationControl.cpp
 	src/LineEditWithClear.cpp
 	src/LogValueSelector.cpp
-	src/MantidTreeWidget.cpp
-	src/MantidTreeWidgetItem.cpp
 	src/MWDiag.cpp
 	src/MWView.cpp
 	src/MantidHelpWindow.cpp
 	src/MantidSurfacePlotDialog.cpp
+	src/MantidTreeWidget.cpp
+	src/MantidTreeWidgetItem.cpp
 	src/MantidWSIndexDialog.cpp
 	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
@@ -113,14 +113,15 @@ set ( SRC_FILES
 	src/SlitCalculator.cpp
 	src/StringDialogEditor.cpp
 	src/StringEditorFactory.cpp
+	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
 	src/WorkspaceEditorFactory.cpp
+	src/WorkspacePresenter/ADSAdapter.cpp
+	src/WorkspacePresenter/QWorkspaceDockView.cpp
+	src/WorkspacePresenter/WorkspacePresenter.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
-    src/WorkspacePresenter/WorkspacePresenter.cpp
-    src/WorkspacePresenter/ADSAdapter.cpp
-	src/WorkspacePresenter/QWorkspaceDockView.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -181,6 +182,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SlitCalculator.h
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
+    inc/MantidQtMantidWidgets/TrackedAction.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
     inc/MantidQtMantidWidgets/WorkspaceEditorFactory.h
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
@@ -229,6 +231,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
@@ -250,7 +253,6 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
@@ -313,14 +315,13 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/ProgressPresenter.h
-    inc/MantidQtMantidWidgets/ProgressableView.h
-    inc/MantidQtMantidWidgets/ProgressPresenter.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
+	inc/MantidQtMantidWidgets/ProgressableView.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
 )
 
 # QtDesigner UI files to process
@@ -352,22 +353,23 @@ set ( UI_FILES
 )
 
 set ( TEST_FILES
-  AlgorithmHintStrategyTest.h
-  DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
-  DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
-  DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
-  DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
-  DataProcessorUI/DataProcessorCommandsTest.h
-  DataProcessorUI/DataProcessorGenerateNotebookTest.h
-  DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
-  DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
-  DataProcessorUI/DataProcessorWhiteListTest.h
-  DataProcessorUI/GenericDataProcessorPresenterTest.h
-  DataProcessorUI/ParseKeyValueStringTest.h
-  DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
-  DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
-  WorkspacePresenter/WorkspacePresenterTest.h
-  WorkspacePresenter/ADSAdapterTest.h
+	AlgorithmHintStrategyTest.h
+	TrackedActionTest.h
+	DataProcessorUI/DataProcessorCommandsTest.h
+	DataProcessorUI/DataProcessorGenerateNotebookTest.h
+	DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
+	DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
+	DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
+	DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
+	DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
+	DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
+	DataProcessorUI/DataProcessorWhiteListTest.h
+	DataProcessorUI/GenericDataProcessorPresenterTest.h
+	DataProcessorUI/ParseKeyValueStringTest.h
+	DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
+	DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
+	WorkspacePresenter/ADSAdapterTest.h
+	WorkspacePresenter/WorkspacePresenterTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)

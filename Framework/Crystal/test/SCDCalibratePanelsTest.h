@@ -9,6 +9,7 @@
 #define SCDCALIBRATEPANELSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 
 using namespace Mantid::API;

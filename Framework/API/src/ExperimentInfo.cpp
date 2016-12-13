@@ -18,6 +18,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -25,6 +26,7 @@
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
+#include <Poco/SAX/Attributes.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <nexus/NeXusException.hpp>

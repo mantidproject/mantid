@@ -104,7 +104,7 @@ public:
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -167,7 +167,7 @@ public:
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -268,7 +268,7 @@ public:
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;

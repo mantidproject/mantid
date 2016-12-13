@@ -227,10 +227,6 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   doButtonOpt(m_buttonOpt);
 
   liveButtonState(m_liveButtonState);
-  connect(this, SIGNAL(liveButtonSetEnabledSignal(bool)), m_uiForm.liveButton,
-          SLOT(setEnabled(bool)));
-  connect(this, SIGNAL(liveButtonSetEnabledSignal(bool)), m_uiForm.liveButton,
-          SLOT(show()));
   connect(m_uiForm.liveButton, SIGNAL(toggled(bool)), this,
           SIGNAL(liveButtonPressed(bool)));
 
@@ -450,28 +446,9 @@ void MWRunFiles::liveButtonState(const LiveButtonOpts option) {
   m_liveButtonState = option;
   if (m_liveButtonState == Hide) {
     m_uiForm.liveButton->hide();
-  } else {
-    liveButtonSetEnabled(false); // This setting ensures right outcome if the
-                                 // connection check fails
-    // Checks (asynchronously) whether it's possible to connect to the user's
-    // default instrument
-    QtConcurrent::run(this, &MWRunFiles::checkLiveConnection);
-    if (m_liveButtonState == AlwaysShow) {
-      m_uiForm.liveButton->show();
-    }
+  } else if (m_liveButtonState == Show) {
+    m_uiForm.liveButton->show();
   }
-}
-
-void MWRunFiles::checkLiveConnection() {
-  // Checks whether it's possible to connect to the user's default instrument
-  if (LiveListenerFactory::Instance().checkConnection(
-          ConfigService::Instance().getInstrument().name())) {
-    emit liveButtonSetEnabledSignal(true);
-  }
-}
-
-void MWRunFiles::liveButtonSetEnabled(const bool enabled) {
-  m_uiForm.liveButton->setEnabled(enabled);
 }
 
 void MWRunFiles::liveButtonSetChecked(const bool checked) {
@@ -997,13 +974,13 @@ QString MWRunFiles::openFileDialog() {
     if (!file.isEmpty())
       filenames.append(file);
   } else if (m_allowMultipleFiles) {
-    filenames =
-        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, 0,
-                                      QFileDialog::DontResolveSymlinks);
+    filenames = QFileDialog::getOpenFileNames(this, "Open file", dir,
+                                              m_fileFilter, nullptr,
+                                              QFileDialog::DontResolveSymlinks);
   } else {
     QString file =
-        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, 0,
-                                     QFileDialog::DontResolveSymlinks);
+        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter,
+                                     nullptr, QFileDialog::DontResolveSymlinks);
     if (!file.isEmpty())
       filenames.append(file);
   }

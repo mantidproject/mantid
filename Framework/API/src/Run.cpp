@@ -1,10 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 
 #include <nexus/NeXusFile.hpp>
 
@@ -38,16 +37,30 @@ const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
 Kernel::Logger g_log("Run");
 }
 
-//----------------------------------------------------------------------
-// Public member functions
-//----------------------------------------------------------------------
+Run::Run() : m_goniometer(Kernel::make_unique<Geometry::Goniometer>()) {}
+
+Run::Run(const Run &other)
+    : LogManager(other), m_goniometer(Kernel::make_unique<Geometry::Goniometer>(
+                             *other.m_goniometer)),
+      m_histoBins(other.m_histoBins) {}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+Run::~Run() = default;
+
+Run &Run::operator=(const Run &other) {
+  LogManager::operator=(other);
+  m_goniometer = Kernel::make_unique<Geometry::Goniometer>(*other.m_goniometer);
+  m_histoBins = other.m_histoBins;
+  return *this;
+}
 
 boost::shared_ptr<Run> Run::clone() {
   auto clone = boost::make_shared<Run>();
   for (auto property : this->m_manager.getProperties()) {
     clone->addProperty(property->clone());
   }
-  clone->m_goniometer = this->m_goniometer;
+  clone->m_goniometer =
+      Kernel::make_unique<Geometry::Goniometer>(*this->m_goniometer);
   clone->m_histoBins = this->m_histoBins;
   return clone;
 }
@@ -184,7 +197,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
   if (log) {
     const std::vector<double> logValues = log->valuesAsVector();
     double total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
-    std::string unit = log->units();
+    const std::string &unit = log->units();
     // Do we need to take account of a unit
     if (unit.find("picoCoulomb") != std::string::npos) {
       /// Conversion factor between picoColumbs and microAmp*hours
@@ -280,7 +293,7 @@ std::vector<double> Run::getBinBoundaries() const {
  */
 size_t Run::getMemorySize() const {
   size_t total = LogManager::getMemorySize();
-  total += sizeof(m_goniometer);
+  total += sizeof(*m_goniometer);
   total += m_histoBins.size() * sizeof(double);
   return total;
 }
@@ -294,13 +307,13 @@ size_t Run::getMemorySize() const {
  */
 void Run::setGoniometer(const Geometry::Goniometer &goniometer,
                         const bool useLogValues) {
-  Geometry::Goniometer old = m_goniometer;
+  auto old = std::move(m_goniometer);
   try {
-    m_goniometer = goniometer; // copy it in
+    m_goniometer = Kernel::make_unique<Geometry::Goniometer>(goniometer);
     if (useLogValues)
       calculateGoniometerMatrix();
   } catch (std::runtime_error &) {
-    m_goniometer = old;
+    m_goniometer = std::move(old);
     throw;
   }
 }
@@ -314,7 +327,7 @@ void Run::setGoniometer(const Geometry::Goniometer &goniometer,
  * @return 3x3 double rotation matrix
  */
 const Mantid::Kernel::DblMatrix &Run::getGoniometerMatrix() const {
-  return m_goniometer.getR();
+  return m_goniometer->getR();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -328,7 +341,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
   LogManager::saveNexus(file, group, true);
 
   // write the goniometer
-  m_goniometer.saveNexus(file, GONIOMETER_LOG_NAME);
+  m_goniometer->saveNexus(file, GONIOMETER_LOG_NAME);
 
   // write the histogram bins, if there are any
   if (!m_histoBins.empty()) {
@@ -381,7 +394,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
   for (const auto &name_class : entries) {
     if (name_class.second == "NXpositioner") {
       // Goniometer class
-      m_goniometer.loadNexus(file, name_class.first);
+      m_goniometer->loadNexus(file, name_class.first);
     } else if (name_class.first == HISTO_BINS_LOG_NAME) {
       file->openGroup(name_class.first, "NXdata");
       file->readData("value", m_histoBins);
@@ -435,8 +448,8 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
  * Calculate the goniometer matrix
  */
 void Run::calculateGoniometerMatrix() {
-  for (size_t i = 0; i < m_goniometer.getNumberAxes(); ++i) {
-    const std::string axisName = m_goniometer.getAxis(i).name;
+  for (size_t i = 0; i < m_goniometer->getNumberAxes(); ++i) {
+    const std::string axisName = m_goniometer->getAxis(i).name;
     const double minAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Minimum);
     const double maxAngle =
@@ -471,7 +484,7 @@ void Run::calculateGoniometerMatrix() {
                       "1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
       }
     }
-    m_goniometer.setRotationAngle(i, angle);
+    m_goniometer->setRotationAngle(i, angle);
   }
 }
 
