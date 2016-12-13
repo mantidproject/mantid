@@ -562,7 +562,7 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
 	  for (const auto & it :events) {
 	    coord_t out[nd];
 	    radiusTransform.apply(it.getCenter(), out);
-	    if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
+	    if (out[0] < radiusSquared) {
 	      signal += static_cast<signal_t>(it.getSignal());
 	      errorSquared += static_cast<signal_t>(it.getErrorSquared());
 	    }

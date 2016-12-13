@@ -15,7 +15,7 @@ Crystal Improvements
 
 :ref:`algm-IntegratePeaksMD` now removes the top 1% of the background events so that intensity spikes near the edges are removed.
 
-:ref:`algm-IntegrateEllipsoids` has an new option, AdaptiveQMultiplier, for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes.  These are the same as the adaptive options in :ref:`algm-IntegratePeaksMD`.
+:ref:`algm-IntegrateEllipsoids` has a new option, AdaptiveQMultiplier, for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes.  These are the same as the adaptive options in :ref:`algm-IntegratePeaksMD`.
 
 Engineering Diffraction
 -----------------------
