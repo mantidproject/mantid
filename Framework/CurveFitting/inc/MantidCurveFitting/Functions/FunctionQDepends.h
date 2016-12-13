@@ -67,8 +67,7 @@ public:
       size_t wi, double startX, double endX) override;
 
 private:
-  std::vector<double> extractQValues(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace);
+  std::vector<double> extractQValues(const Mantid::API::MatrixWorkspace &workspace);
   // list of Q values associated to the spectra
   std::vector<double> m_vQ;
 

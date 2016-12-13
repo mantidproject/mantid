@@ -100,7 +100,9 @@ void FunctionQDepends::setMatrixWorkspace(
   }
   // Obtain Q values from the passed workspace, if possible. m_vQ will be
   // cleared if unsuccessful.
-  m_vQ = this->extractQValues(workspace);
+  if(workspace) {
+    m_vQ = this->extractQValues(*workspace);
+  }
   if (!m_vQ.empty()) {
     this->setAttribute("WorkspaceIndex", Attr(static_cast<int>(wi)));
   }
@@ -115,13 +117,12 @@ void FunctionQDepends::setMatrixWorkspace(
  * them.
  * @param workspace workspace possibly containing Q values.
  */
-std::vector<double> FunctionQDepends::extractQValues(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace) {
+std::vector<double> FunctionQDepends::extractQValues(const Mantid::API::MatrixWorkspace &workspace) {
   std::vector<double> qs;
   // Check if the vertical axis has units of momentum transfer, then extract Q
   // values...
   auto axis_ptr =
-      dynamic_cast<Mantid::API::NumericAxis *>(workspace->getAxis(1));
+      dynamic_cast<Mantid::API::NumericAxis *>(workspace.getAxis(1));
   if (axis_ptr) {
     const boost::shared_ptr<Kernel::Unit> &unit_ptr = axis_ptr->unit();
     if (unit_ptr->unitID() == "MomentumTransfer") {
@@ -130,13 +131,13 @@ std::vector<double> FunctionQDepends::extractQValues(
   }
   // ...otherwise, compute the momentum transfer for each spectrum, if possible
   else {
-    const auto &spectrumInfo = workspace->spectrumInfo();
-    size_t numHist = workspace->getNumberHistograms();
+    const auto &spectrumInfo = workspace.spectrumInfo();
+    size_t numHist = workspace.getNumberHistograms();
     for (size_t wi = 0; wi < numHist; wi++) {
       try {
         Mantid::Geometry::IDetector_const_sptr detector;
-        detector = workspace->getDetector(wi);
-        double efixed = workspace->getEFixed(detector);
+        detector = workspace.getDetector(wi);
+        double efixed = workspace.getEFixed(detector);
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
         double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
         qs.push_back(q);
