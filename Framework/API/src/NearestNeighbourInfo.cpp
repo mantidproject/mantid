@@ -1,4 +1,5 @@
 #include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/NearestNeighbours.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/make_unique.h"
 
@@ -24,6 +25,9 @@ NearestNeighbourInfo::NearestNeighbourInfo(const MatrixWorkspace &workspace,
       nNeighbours, workspace.spectrumInfo(), std::move(spectrumNumbers),
       ignoreMaskedDetectors);
 }
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+NearestNeighbourInfo::~NearestNeighbourInfo() = default;
 
 /** Queries the NearestNeighbours object for the selected detector.
 * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.

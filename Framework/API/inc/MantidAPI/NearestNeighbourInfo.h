@@ -2,10 +2,16 @@
 #define MANTID_API_NEARESTNEIGHBOURINFO_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/NearestNeighbours.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
+
 #include <memory>
+#include <map>
 
 namespace Mantid {
+namespace Geometry {
+class IDetector;
+}
 namespace API {
 
 class MatrixWorkspace;
@@ -40,6 +46,7 @@ public:
   NearestNeighbourInfo(const MatrixWorkspace &workspace,
                        const bool ignoreMaskedDetectors,
                        const int nNeighbours = 8);
+  ~NearestNeighbourInfo();
 
   std::map<specnum_t, Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp,
