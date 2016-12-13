@@ -92,10 +92,11 @@ def split_into_tof_d_spacing_groups(processed_spectra):
     return d_spacing_group, tof_group
 
 
-def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number=None):
+def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
     bragg_masking_list = _read_masking_file(mask_path)
-    output = _spline_vanadium_for_focusing(vanadium_spectra_list=bank_spectra,
-                                           spline_coefficient=spline_number, mask_list=bragg_masking_list)
+    masked_workspace_list = _apply_bragg_peaks_masking(bank_spectra, mask_list=bragg_masking_list)
+    output = common.spline_vanadium_for_focusing(focused_vanadium_spectra=masked_workspace_list,
+                                                 num_splines=spline_number)
     return output
 
 
@@ -111,12 +112,10 @@ def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
             continue
 
         output_name = "masked_vanadium-" + str(index + 1)
-
         for mask_params in bank_mask_list:
             out_workspace = mantid.MaskBins(InputWorkspace=output_workspaces[index], OutputWorkspace=output_name,
                                             XMin=mask_params[0], XMax=mask_params[1])
             output_workspaces[index] = out_workspace
-
         index += 1
 
     return output_workspaces
@@ -178,18 +177,3 @@ def _read_masking_file(masking_file_path):
                 line.rstrip()
                 bank_masking_list.append(line.split())
     return all_banks_masking_list
-
-
-def _spline_vanadium_for_focusing(vanadium_spectra_list, spline_coefficient, mask_list):
-        masked_workspace = _apply_bragg_peaks_masking(workspaces_to_mask=vanadium_spectra_list,
-                                                      mask_list=mask_list)
-        index = 0
-        output_list = []
-        for ws in masked_workspace:
-            index += 1
-            output_ws_name = "splined_vanadium_ws-" + str(index)
-            splined_ws = mantid.SplineBackground(InputWorkspace=ws, OutputWorkspace=output_ws_name,
-                                                 WorkspaceIndex=0, NCoeff=spline_coefficient)
-            output_list.append(splined_ws)
-
-        return output_list

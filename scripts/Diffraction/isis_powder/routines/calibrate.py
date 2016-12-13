@@ -16,7 +16,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
                                                     instrument=instrument)
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
-    #  corrected_van_ws = instrument.crop_to_sane_tof(ws_to_crop=corrected_van_ws)
+    corrected_van_ws = instrument.crop_short_long_mode(ws_to_crop=corrected_van_ws)
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration_file_path)
@@ -31,14 +31,14 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=corrected_van_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
 
-    focused_cropped_spectra = common.extract_and_crop_spectra(focused_ws=focused_vanadium, instrument=instrument)
+    focused_spectra = common.extract_ws_spectra(focused_vanadium)
     d_spacing_group = _save_focused_vanadium(instrument=instrument, run_details=run_details,
-                                             cropped_spectra=focused_cropped_spectra)
-    _create_vanadium_splines(focused_cropped_spectra, instrument, run_details)
+                                             van_spectra=focused_spectra)
+    _create_vanadium_splines(focused_spectra, instrument, run_details)
 
     common.remove_intermediate_workspace(corrected_van_ws)
     common.remove_intermediate_workspace(focused_vanadium)
-    common.remove_intermediate_workspace(focused_cropped_spectra)
+    common.remove_intermediate_workspace(focused_spectra)
 
     return d_spacing_group
 
@@ -70,7 +70,7 @@ def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_abs
     return corrected_van_ws
 
 
-def _save_focused_vanadium(instrument, run_details, cropped_spectra):
-    d_spacing_group = instrument.output_focused_ws(processed_spectra=cropped_spectra,
+def _save_focused_vanadium(instrument, run_details, van_spectra):
+    d_spacing_group = instrument.output_focused_ws(processed_spectra=van_spectra,
                                                    run_details=run_details, output_mode="all")
     return d_spacing_group

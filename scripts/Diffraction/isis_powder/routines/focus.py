@@ -27,7 +27,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     # Compensate for empty sample if specified
     input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,
                                                    empty_sample_ws_string=run_details.empty_runs)
-    input_workspace = instrument.crop_to_sane_tof(ws_to_crop=input_workspace)
+    input_workspace = instrument.crop_short_long_mode(ws_to_crop=input_workspace)
 
     # Align / Focus
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
@@ -73,12 +73,12 @@ def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_
         vanadium_ws_list = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
         for focus_spectra, van_spectra in zip(split_ws, vanadium_ws_list[1:]):
             processed_spectra.append(
-                instrument.correct_sample_vanadium(focus_spectra=focus_spectra, vanadium_spectra=van_spectra))
+                instrument.correct_sample_vanadium(focused_ws=focus_spectra, vanadium_ws=van_spectra))
         common.remove_intermediate_workspace(vanadium_ws_list[0])
 
     else:
         for focus_spectra in split_ws:
-            processed_spectra.append(instrument.correct_sample_vanadium(focus_spectra=focus_spectra))
+            processed_spectra.append(instrument.correct_sample_vanadium(focused_ws=focus_spectra))
 
     common.remove_intermediate_workspace(split_ws)
 

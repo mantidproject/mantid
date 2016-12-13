@@ -114,7 +114,7 @@ class AbstractInst(object):
     def attenuate_workspace(self, input_workspace):
         return input_workspace
 
-    def correct_sample_vanadium(self, focus_spectra, vanadium_spectra=None):
+    def correct_sample_vanadium(self, focused_ws, vanadium_ws=None):
         raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
 
     def get_default_group_names(self):
@@ -132,7 +132,7 @@ class AbstractInst(object):
     def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         return None
 
-    def crop_to_sane_tof(self, ws_to_crop):
+    def crop_short_long_mode(self, ws_to_crop):
         return ws_to_crop
 
     def spline_vanadium_ws(self, focused_vanadium_ws):

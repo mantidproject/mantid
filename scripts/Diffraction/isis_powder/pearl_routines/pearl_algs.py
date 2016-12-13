@@ -37,25 +37,34 @@ def generate_vanadium_absorb_corrections(van_ws):
     return absorb_ws
 
 
-def get_run_details(absorb_on, long_mode_on, run_number_string, calibration_dir, mapping_file):
-    mapping_dict = yaml_parser.get_run_dictionary(run_number=run_number_string, file_path=mapping_file)
+def get_run_details(run_number_string, inst_settings):
+    mapping_dict = yaml_parser.get_run_dictionary(run_number=run_number_string, file_path=inst_settings.cal_map_path)
 
-    calibration_file = mapping_dict["calibration_file"]
+    calibration_file_name = mapping_dict["calibration_file"]
     empty_run_numbers = mapping_dict["empty_run_numbers"]
     label = mapping_dict["label"]
-    splined_vanadium_name = _generate_splined_van_name(absorb_on=absorb_on, long_mode=long_mode_on,
-                                                       vanadium_run_string=run_number_string)
     vanadium_run_numbers = mapping_dict["vanadium_run_numbers"]
 
+    splined_vanadium_name = _generate_splined_van_name(absorb_on=inst_settings.absorb_corrections,
+                                                       long_mode=inst_settings.long_mode,
+                                                       vanadium_run_string=run_number_string)
+
+    calibration_dir = inst_settings.calibration_dir
     cycle_calibration_dir = os.path.join(calibration_dir, label)
-    calibration_file_path = os.path.join(cycle_calibration_dir, calibration_file)
+
+    absorption_file_path = os.path.join(calibration_dir, inst_settings.van_absorb_file)
+    calibration_file_path = os.path.join(cycle_calibration_dir, calibration_file_name)
+    tt_grouping_key = inst_settings.tt_mode.lower() + '_grouping'
+    grouping_file_path = os.path.join(calibration_dir, getattr(inst_settings, tt_grouping_key))
     splined_vanadium_path = os.path.join(cycle_calibration_dir, splined_vanadium_name)
 
     run_details = RunDetails(run_number=run_number_string)
     run_details.calibration_file_path = calibration_file_path
+    run_details.grouping_file_path = grouping_file_path
     run_details.empty_runs = empty_run_numbers
     run_details.label = label
     run_details.splined_vanadium_file_path = splined_vanadium_path
+    run_details.vanadium_absorption_path = absorption_file_path
     run_details.vanadium_run_numbers = vanadium_run_numbers
 
     return run_details
@@ -64,7 +73,6 @@ def get_run_details(absorb_on, long_mode_on, run_number_string, calibration_dir,
 def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff):
     lambda_lower = 0.03  # TODO move these into config
     lambda_upper = 6.00
-
     processed_monitor_ws = mantid.ConvertUnits(InputWorkspace=monitor_ws, Target="Wavelength")
     processed_monitor_ws = mantid.CropWorkspace(InputWorkspace=processed_monitor_ws,
                                                 XMin=lambda_lower, XMax=lambda_upper)
@@ -91,17 +99,6 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff):
     common.remove_intermediate_workspace(splined_monitor_ws)
 
     return normalised_ws
-
-
-def set_advanced_run_details(run_details, calibration_dir, tt_mode):
-    advanced_dictionary = pearl_advanced_config.file_names
-
-    grouping_file_path = os.path.join(calibration_dir, advanced_dictionary[tt_mode.lower() + "_grouping"])
-    run_details.grouping_file_path = grouping_file_path
-
-    absorption_file_path = os.path.join(calibration_dir, advanced_dictionary["vanadium_absorption"])
-    run_details.vanadium_absorption_path = absorption_file_path
-    return run_details
 
 
 def _generate_splined_van_name(absorb_on, long_mode, vanadium_run_string):

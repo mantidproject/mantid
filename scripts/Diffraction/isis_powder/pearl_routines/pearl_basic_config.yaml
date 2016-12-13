@@ -2,7 +2,7 @@ user_name : "Mantid_Tester"
 
 calibration_directory : 'C:\Users\ieb35538\Documents\Repos\a_mantidBuild\ExternalData\Testing\Data\SystemTest\PEARL\Calibration'
 output_directory : 'C:\Users\ieb35538\Documents\Repos\a_mantidBuild\ExternalData\Testing\Data\SystemTest\PEARL\data_out'
-calibration_config_file : 'C:\Users\ieb35538\Documents\Repos\a_mantid\scripts\Diffraction\isis_powder\pearl_routines\pearl_calibration.yaml'
+calibration_config_path : 'C:\Users\ieb35538\Documents\Repos\a_mantid\scripts\Diffraction\isis_powder\pearl_routines\pearl_calibration.yaml'
 
 
 

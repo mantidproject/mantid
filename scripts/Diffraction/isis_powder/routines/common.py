@@ -53,7 +53,7 @@ def extract_ws_spectra(ws_to_split):
 
 def extract_and_crop_spectra(focused_ws, instrument):
     ws_spectra = extract_ws_spectra(ws_to_split=focused_ws)
-    ws_spectra = instrument.crop_to_sane_tof(ws_to_crop=ws_spectra)
+    ws_spectra = instrument.crop_short_long_mode(ws_to_crop=ws_spectra)
     return ws_spectra
 
 
@@ -109,6 +109,21 @@ def remove_intermediate_workspace(workspaces):
             mantid.DeleteWorkspace(ws)
     else:
         mantid.DeleteWorkspace(workspaces)
+
+
+def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
+    bank_index = 1
+    tof_ws_list = []
+    for ws in focused_vanadium_spectra:
+        out_name = "spline_bank_" + str(bank_index)
+        bank_index += 1
+        tof_ws_list.append(mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name))
+
+    splined_ws_list = []
+    for ws in tof_ws_list:
+        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=ws, OutputWorkspace=ws, NCoeff=num_splines))
+
+    return splined_ws_list
 
 
 def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):

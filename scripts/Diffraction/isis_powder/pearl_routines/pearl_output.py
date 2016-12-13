@@ -19,7 +19,7 @@ def generate_and_save_focus_output(instrument, processed_spectra, run_details, p
     elif focus_mode == "mods":
         processed_nexus_files = _focus_mode_mods(output_file_paths, processed_spectra)
     else:
-        raise ValueError("Focus mode unknown")
+        raise ValueError("Focus mode '" + str(focus_mode) + "' unknown.")
 
     return processed_nexus_files
 

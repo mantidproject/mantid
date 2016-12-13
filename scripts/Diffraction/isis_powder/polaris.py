@@ -88,13 +88,13 @@ class Polaris(AbstractInst):
         ws_to_correct = corrected_ws
         return ws_to_correct
 
-    def correct_sample_vanadium(self, focus_spectra, vanadium_spectra=None):
+    def correct_sample_vanadium(self, focused_ws, vanadium_ws=None):
         spectra_name = "sample_ws-" + str(self._ads_workaround + 1)
         self._ads_workaround += 1
 
-        if vanadium_spectra:
-            van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_spectra, WorkspaceToMatch=focus_spectra)
-            mantid.Divide(LHSWorkspace=focus_spectra, RHSWorkspace=van_rebinned, OutputWorkspace=spectra_name)
+        if vanadium_ws:
+            van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_ws, WorkspaceToMatch=focused_ws)
+            mantid.Divide(LHSWorkspace=focused_ws, RHSWorkspace=van_rebinned, OutputWorkspace=spectra_name)
             common.remove_intermediate_workspace(van_rebinned)
 
         return spectra_name
@@ -121,6 +121,6 @@ class Polaris(AbstractInst):
 
         return d_spacing_group
 
-    def crop_to_sane_tof(self, ws_to_crop):
+    def crop_short_long_mode(self, ws_to_crop):
         cropped_ws = common.crop_in_tof(ws_to_rebin=ws_to_crop, x_min=800, x_max=20000)
         return cropped_ws

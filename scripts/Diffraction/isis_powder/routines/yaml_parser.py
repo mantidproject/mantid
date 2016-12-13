@@ -24,7 +24,9 @@ def is_run_range_key_unbounded(key):
 
 
 def open_yaml_file_as_dictionary(file_path):
-    if not file_path or not os.path.isfile(file_path):
+    if not file_path:
+        return None
+    elif not os.path.isfile(file_path):
         raise ValueError("Config file not found at path of:\n" + str(file_path) + '\n ')
 
     read_config = None
