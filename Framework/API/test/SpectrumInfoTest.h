@@ -460,6 +460,18 @@ public:
     TS_ASSERT_EQUALS(spectrumInfo2.isMasked(0), true);
   }
 
+  void test_grouping_in_ExperimentInfo_ignored_for_MatrixWorkspace() {
+    det2group_map mapping{{1, {1, 2}}};
+    m_workspace.cacheDetectorGroupings(mapping);
+    TS_ASSERT_EQUALS(m_workspace.numberOfDetectorGroups(), 5);
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;
