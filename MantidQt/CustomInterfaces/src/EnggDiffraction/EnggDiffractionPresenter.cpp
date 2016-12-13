@@ -183,14 +183,12 @@ void EnggDiffractionPresenter::notify(
 void EnggDiffractionPresenter::processStart() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   m_view->showStatus("Ready");
-
-  updateNewCalib(m_view->currentCalibFile());
 }
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
 
-  std::string fname = m_view->askExistingCalibFilename();
+  const std::string fname = m_view->askExistingCalibFilename();
   if (fname.empty()) {
     return;
   }
