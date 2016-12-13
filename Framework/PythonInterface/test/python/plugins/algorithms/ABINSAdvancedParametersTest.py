@@ -18,7 +18,6 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
     def setUp(self):
 
         # set up input for ABINS
-        dft_program = "CASTEP"
         self._Si2 = "Si2-sc_ABINSAdvancedParameters"
         self._wrk_name = self._Si2 + "_ref"
 
