@@ -3,6 +3,7 @@
 
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -24,8 +25,7 @@ public:
     this->inputSpace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nTestHist,
                                                                      102, true);
-    this->inputSpace->instrumentParameters().addBool(
-        inputSpace->getDetector(1).get(), "masked", true);
+    inputSpace->mutableSpectrumInfo().setMasked(1, true);
 
     inputSpace->mutableE(5)[38] = 0.0;
   }

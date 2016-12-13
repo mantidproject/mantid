@@ -3,6 +3,7 @@
 
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
