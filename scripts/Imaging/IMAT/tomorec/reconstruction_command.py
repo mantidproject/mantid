@@ -102,7 +102,7 @@ class ReconstructionCommand(object):
         """
         On every second call this will terminate and print the timer
         TODO currently the priority parameter is ignored
-        
+
         Verbosity levels:
         0 -> debug, print everything
         1 -> information, print information about progress
@@ -133,7 +133,7 @@ class ReconstructionCommand(object):
         """
         On every second call this will terminate and print the timer. This will append ". " to the string
         TODO currently the priority parameter is ignored
-        
+
         Verbosity levels:
         0 -> debug, print everything
         1 -> information, print information about progress
@@ -259,7 +259,7 @@ class ReconstructionCommand(object):
         if save_netcdf_vol:
             self.tomo_print_timed_start(
                 " * Saving reconstructed volume as NetCDF...")
-            tomoio.save_recon_netcdf(recon_data, output_dir)
+            tomoio.save_recon_netcdf(recon_data, cfg.postproc_cfg.output_dir)
             self.tomo_print_timed_stop(
                 " * Finished saving reconstructed volume as NetCDF.")
 
@@ -490,6 +490,9 @@ class ReconstructionCommand(object):
         """
         self._check_data_stack(preproc_data)
 
+        import tomorec.tool_imports as tti
+        tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
+
         # Remove stripes in sinograms / ring artefacts in reconstructed volume
         if cfg.stripe_removal_method:
             import prep as iprep
@@ -497,9 +500,11 @@ class ReconstructionCommand(object):
                 self.tomo_print_timed_start(
                     " * Starting removal of stripes/ring artifacts using the method '{0}'...".
                     format(cfg.stripe_removal_method))
+
                 #preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
                 preproc_data = iprep.filters.remove_stripes_ring_artifacts(
                     preproc_data, 'wavelet-fourier')
+
                 self.tomo_print_timed_start(
                     " * Finished removal of stripes/ring artifacts.")
 
@@ -507,8 +512,10 @@ class ReconstructionCommand(object):
                 self.tomo_print_timed_start(
                     " * Starting removal of stripes/ring artifacts, using the method '{0}'...".
                     format(cfg.stripe_removal_method))
+
                 preproc_data = tomopy.prep.stripe.remove_stripe_ti(
                     preproc_data)
+
                 self.tomo_print_timed_stop(
                     " * Finished removal of stripes/ring artifacts.")
             else:
@@ -523,11 +530,14 @@ class ReconstructionCommand(object):
         # Experimental options, disabled and not present in the config objects for now
         # These and related algorithms needs more evaluation/benchmarking
         if False:
+            self.tomo_print_timed_start(" * Starting adjust range...")
             preproc_data = tomopy.misc.corr.adjust_range(preproc_data)
+            self.tomo_print_timed_stop(" * Finished adjusting range.")
 
         if False:
             self.tomo_print_timed_start(
                 " * Starting background normalisation...")
+
             preproc_data = tomopy.prep.normalize.normalize_bg(
                 preproc_data, air=5)
             self.tomo_print_timed_stop(" * Finished background normalisation.")
@@ -774,8 +784,8 @@ class ReconstructionCommand(object):
     def rotate_stack(self, data, cfg, white=None, dark=None):
         """
         Rotates a stack (sample, white and dark images).
-        This funciton is usually used on the whole picture, which is a square. 
-        If the picture is cropped first, the ROI coordinates 
+        This funciton is usually used on the whole picture, which is a square.
+        If the picture is cropped first, the ROI coordinates
         have to be adjusted separately to be pointing at the NON ROTATED image!
 
         @param data :: stack of sample images
@@ -822,14 +832,6 @@ class ReconstructionCommand(object):
         """
 
         self._check_data_stack(data)
-        if 0 == cfg.rotation % 2:
-            dim_y = data.shape[1]
-            dim_x = data.shape[2]
-        else:
-            # if we're rotating by 90 or 270 degrees, we flip the shape
-            dim_y = data.shape[2]
-            dim_x = data.shape[1]
-
         self._debug_print_memory_usage_linux("before rotation.")
 
         for idx in range(0, data.shape[0]):
@@ -863,7 +865,6 @@ class ReconstructionCommand(object):
         # For tomopy
         proj_angles = np.radians(proj_angles)
 
-        verbosity = 1
         if 'astra' == alg_cfg.tool:
             # run_reconstruct_3d_astra(proj_data, algorithm, cor, proj_angles=proj_angles)
             return self.run_reconstruct_3d_astra_simple(
@@ -874,7 +875,7 @@ class ReconstructionCommand(object):
             preproc_cfg.cor))
         if 'tomopy' == alg_cfg.tool and 'gridrec' != alg_cfg.algorithm and 'fbp' != alg_cfg.algorithm:
             if not alg_cfg.num_iter:
-                alg.cfg_num_iter = tomocfg.PreProcConfig.DEF_NUM_ITER
+                reconstruction_tool.cfg_num_iter = tomocfg.PreProcConfig.DEF_NUM_ITER
             # For ref, some typical run times with 4 cores:
             # 'bart' with num_iter=20 => 467.640s ~= 7.8m
             # 'sirt' with num_iter=30 => 698.119 ~= 11.63
@@ -905,106 +906,106 @@ class ReconstructionCommand(object):
 
         return rec
 
-    def astra_reconstruct3d(self, sinogram, angles, depth, alg_cfg):
-        """
-        Run a reconstruction with astra
+    # def astra_reconstruct3d(self, sinogram, angles, depth, alg_cfg):
+    #     """
+    #     Run a reconstruction with astra
 
-        @param sinogram :: sinogram data
-        @param angles :: angles of the image projections
-        @param depth :: number of rows in images/sinograms
-        @param alg_cfg :: tool/algorithm configuration
-        """
-        # Some of these have issues depending on the GPU setup
-        algs_avail = "[FP3D_CUDA], [BP3D_CUDA]], [FDK_CUDA], [SIRT3D_CUDA], [CGLS3D_CUDA]"
+    #     @param sinogram :: sinogram data
+    #     @param angles :: angles of the image projections
+    #     @param depth :: number of rows in images/sinograms
+    #     @param alg_cfg :: tool/algorithm configuration
+    #     """
+    #     # Some of these have issues depending on the GPU setup
+    #     algs_avail = "[FP3D_CUDA], [BP3D_CUDA]], [FDK_CUDA], [SIRT3D_CUDA], [CGLS3D_CUDA]"
 
-        if alg_cfg.algorithm.upper() not in algs_avail:
-            raise ValueError(
-                "Invalid algorithm requested for the Astra package: {0}. "
-                "Supported algorithms: {1}".format(alg_cfg.algorithm,
-                                                   algs_avail))
-        det_rows = sinogram.shape[0]
-        det_cols = sinogram.shape[2]
+    #     if alg_cfg.algorithm.upper() not in algs_avail:
+    #         raise ValueError(
+    #             "Invalid algorithm requested for the Astra package: {0}. "
+    #             "Supported algorithms: {1}".format(alg_cfg.algorithm,
+    #                                                algs_avail))
+    #     det_rows = sinogram.shape[0]
+    #     det_cols = sinogram.shape[2]
 
-        vol_geom = astra.create_vol_geom(sinograms.shape[0], depth,
-                                         sinogram.shape[2])
-        proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0, det_cols,
-                                           det_rows, np.deg2rad(angles))
+    #     vol_geom = astra.create_vol_geom(sinograms.shape[0], depth,
+    #                                      sinogram.shape[2])
+    #     proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0, det_cols,
+    #                                        det_rows, np.deg2rad(angles))
 
-        sinogram_id = astra.data3d.create("-sino", proj_geom, sinogram)
-        # Create a data object for the reconstruction
-        rec_id = astra.data3d.create('-vol', vol_geom)
+    #     sinogram_id = astra.data3d.create("-sino", proj_geom, sinogram)
+    #     # Create a data object for the reconstruction
+    #     rec_id = astra.data3d.create('-vol', vol_geom)
 
-        cfg = astra.astra_dict(alg_cfg.algorithm)
-        cfg['ReconstructionDataId'] = rec_id
-        cfg['ProjectionDataId'] = sinogram_id
+    #     cfg = astra.astra_dict(alg_cfg.algorithm)
+    #     cfg['ReconstructionDataId'] = rec_id
+    #     cfg['ProjectionDataId'] = sinogram_id
 
-        # Create the algorithm object from the configuration structure
-        alg_id = astra.algorithm.create(cfg)
-        # This will have a runtime in the order of 10 seconds.
-        astra.algorithm.run(alg_id, alg_cfg.num_iter)
-        # This could be used to check the norm of the difference between the projection data
-        # and the forward projection of the reconstruction.
-        # if "CUDA" in cfg_alg.algorithm and "FBP" not cfg_alg.algorithm:
-        # self.norm_diff += astra.algorithm.get_res_norm(alg_id)**2
-        # print math.sqrt(self.norm_diff)
+    #     # Create the algorithm object from the configuration structure
+    #     alg_id = astra.algorithm.create(cfg)
+    #     # This will have a runtime in the order of 10 seconds.
+    #     astra.algorithm.run(alg_id, alg_cfg.num_iter)
+    #     # This could be used to check the norm of the difference between the projection data
+    #     # and the forward projection of the reconstruction.
+    #     # if "CUDA" in cfg_alg.algorithm and "FBP" not cfg_alg.algorithm:
+    #     # self.norm_diff += astra.algorithm.get_res_norm(alg_id)**2
+    #     # print math.sqrt(self.norm_diff)
 
-        # Get the result
-        rec = astra.data3d.get(rec_id)
+    #     # Get the result
+    #     rec = astra.data3d.get(rec_id)
 
-        astra.algorithm.delete(alg_id)
-        astra.data3d.delete(rec_id)
-        astra.data3d.delete(sinogram_id)
+    #     astra.algorithm.delete(alg_id)
+    #     astra.data3d.delete(rec_id)
+    #     astra.data3d.delete(sinogram_id)
 
-        return rec
+    #     return rec
 
-    def run_reconstruct_3d_astra(self, proj_data, proj_angles, alg_cfg):
-        """
-        Run a reconstruction with astra, approach based on swpapping axes
+    # def run_reconstruct_3d_astra(self, proj_data, proj_angles, alg_cfg):
+    #     """
+    #     Run a reconstruction with astra, approach based on swpapping axes
 
-        @param proj_data :: projection images
-        @param proj_angles :: angles corresponding to the projection images
-        @param alg_cfg :: tool/algorithm configuration
-        """
+    #     @param proj_data :: projection images
+    #     @param proj_angles :: angles corresponding to the projection images
+    #     @param alg_cfg :: tool/algorithm configuration
+    #     """
 
-        def get_max_frames(algorithm):
-            frames = 8 if "3D" in algorithm else 1
-            return frames
+    #     def get_max_frames(algorithm):
+    #         frames = 8 if "3D" in algorithm else 1
+    #         return frames
 
-        nSinos = get_max_frames(algorithm=algorithm)
-        iterations = alg_cfg.num_iter
-        print(" astra recon - doing {0} iterations".format(iterations))
+    #     nSinos = get_max_frames(alg_cfg.algorithm)
+    #     iterations = alg_cfg.num_iter
+    #     print(" astra recon - doing {0} iterations".format(iterations))
 
-        # swaps outermost dimensions so it is sinogram layout
-        sinogram = proj_data
-        sinogram = np.swapaxes(sinogram, 0, 1)
+    # swaps outermost dimensions so it is sinogram layout
+    # sinogram = proj_data
+    # sinogram = np.swapaxes(sinogram, 0, 1)
 
-        # Needs to be figured out better
-        #ctr = cor
-        #width = sinogram.shape[1]
-        #pad = 50
+    # Needs to be figured out better
+    #ctr = cor
+    #width = sinogram.shape[1]
+    #pad = 50
 
-        #sino = np.nan_to_num(1./sinogram)
+    #sino = np.nan_to_num(1./sinogram)
 
-        # pad the array so that the centre of rotation is in the middle
-        #alen = ctr
-        #blen = width - ctr
-        #mid = width / 2.0
+    # pad the array so that the centre of rotation is in the middle
+    #alen = ctr
+    #blen = width - ctr
+    #mid = width / 2.0
 
-        #if ctr > mid:
-        #plow = pad
-        #phigh = (alen - blen) + pad
-        #else:
-        #plow = (blen - alen) + pad
-        #phigh = pad
+    #if ctr > mid:
+    #plow = pad
+    #phigh = (alen - blen) + pad
+    #else:
+    #plow = (blen - alen) + pad
+    #phigh = pad
 
-        #logdata = np.log(sino+1)
+    #logdata = np.log(sino+1)
 
-        sinogram = np.tile(sinogram.reshape((1, ) + sinogram.shape), (8, 1, 1))
+    # sinogram = np.tile(sinogram.reshape((1, ) + sinogram.shape), (8, 1, 1))
 
-        rec = astra_reconstruct3d(
-            sinogram, proj_angles, depth=nSinos, alg_cfg=alg_cfg)
+    # rec = self.astra_reconstruct3d(
+    #     sinogram, proj_angles, depth=nSinos, alg_cfg=alg_cfg)
 
-        return rec
+    # return rec
 
     def run_reconstruct_3d_astra_simple(self,
                                         proj_data,
