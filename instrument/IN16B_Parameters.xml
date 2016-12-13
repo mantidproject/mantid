@@ -42,6 +42,7 @@
 </parameter>
 <parameter name="Workflow.GroupingFile" type="string">
   <value val="IN16B_Grouping.xml" />
+  <!-- Note that equivalent IN16B_map.map file also exists. -->
 </parameter>
 </component-link>
 
