@@ -55,7 +55,9 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self._check_workspace_group(mtd['red'], 2, 18, 1017)
 
     def test_one_wing_QENS(self):
-        args = {'Run': self._runs['one_wing_QENS']}
+        # tests one wing QENS with PSD range
+        args = {'Run': self._runs['one_wing_QENS'],
+                'ManualPSDIntegrationRange': [20,100]}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1024)
 
