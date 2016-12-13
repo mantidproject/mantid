@@ -195,7 +195,7 @@ MdViewerWidget::MdViewerWidget(QWidget *parent)
   // We're in the standalone application mode
   this->internalSetup(false);
   this->setupUiAndConnections();
-  this->setupMainView();
+  this->setupMainView(ModeControlWidget::STANDARD);
 }
 
 MdViewerWidget::~MdViewerWidget() {}
@@ -272,17 +272,17 @@ void MdViewerWidget::panelChanged() { this->currentView->renderAll(); }
  * event filter, tweaks the UI layout for the view and calls the routine that
  * sets up connections between ParaView and the main window widgets.
  */
-void MdViewerWidget::setupMainView() {
+void MdViewerWidget::setupMainView(ModeControlWidget::Views viewType) {
   // Commented this out to only use Mantid supplied readers
   // Initialize all readers available to ParaView. Now our application can load
   // all types of datasets supported by ParaView.
   // vtkSMProxyManager::GetProxyManager()->GetReaderFactory()->RegisterPrototypes("sources");
 
-  // Set the view at startup to STANDARD, the view will be changed, depending on
+  // Set the view at startup to view, the view will be changed, depending on
   // the workspace
-  this->currentView = this->createAndSetMainViewWidget(
-      this->ui.viewWidget, ModeControlWidget::STANDARD);
-  this->initialView = ModeControlWidget::STANDARD;
+  this->currentView =
+      this->createAndSetMainViewWidget(this->ui.viewWidget, viewType);
+  this->initialView = viewType;
   this->currentView->installEventFilter(this);
 
   // Create a layout to manage the view properly
@@ -727,9 +727,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
       sourcePlugin, workspaceName, gridAxesOn);
   source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
   this->renderAndFinalSetup();
-  if (VatesViewerInterface::PEAKS != workspaceType) {
-    resetCurrentView(workspaceType, instrumentName);
-  }
+  this->currentView->show();
 }
 
 /**
@@ -882,12 +880,15 @@ MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view,
  * This function performs setup for the plugin mode of the Vates Simple
  * Interface. It calls a number of defined functions to complete the process.
  */
-void MdViewerWidget::setupPluginMode() {
+void MdViewerWidget::setupPluginMode(int WsType,
+                                     const std::string &instrumentName) {
   // Don't use the current color map at start up.
   this->useCurrentColorSettings = false;
   this->setupUiAndConnections();
   this->createMenus();
-  this->setupMainView();
+  ModeControlWidget::Views initialView =
+      this->getInitialView(WsType, instrumentName);
+  this->setupMainView(initialView);
 }
 
 /**
