@@ -70,9 +70,7 @@ public:
   // Add parameters to the instrument parameter map
   virtual void populateInstrumentParameters();
 
-  /// Replaces current parameter map with copy of given map
   virtual void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
-  /// exchange contents of current parameter map with contents of other map)
   virtual void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs

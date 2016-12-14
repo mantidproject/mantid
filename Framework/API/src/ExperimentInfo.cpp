@@ -340,6 +340,8 @@ void ExperimentInfo::populateInstrumentParameters() {
 
 /**
  * Replaces current parameter map with a copy of the given map
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap const reference to parameter map whose copy replaces the current
  * parameter map
  */
@@ -352,6 +354,8 @@ void ExperimentInfo::replaceInstrumentParameters(
 
 /**
  * exchanges contents of current parameter map with contents of other map)
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap reference to parameter map which would exchange its contents with
  * current map
  */
