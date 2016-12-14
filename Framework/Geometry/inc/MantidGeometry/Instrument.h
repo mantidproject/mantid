@@ -248,8 +248,10 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
-  const Beamline::DetectorInfo *detectorInfo() const;
-  void setDetectorInfo(const Beamline::DetectorInfo *detectorInfo);
+  bool hasDetectorInfo() const;
+  const Beamline::DetectorInfo &detectorInfo() const;
+  void
+  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -330,7 +332,7 @@ private:
 
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  const Beamline::DetectorInfo *m_detectorInfo{nullptr};
+  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 };
 
 } // namespace Geometry

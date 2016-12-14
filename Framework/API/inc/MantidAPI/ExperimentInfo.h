@@ -208,7 +208,7 @@ private:
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
 
-  std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
+  boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
   mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
   mutable std::mutex m_detectorInfoMutex;
 };

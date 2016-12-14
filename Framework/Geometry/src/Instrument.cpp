@@ -1237,14 +1237,22 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
 
 } // containsRectDetectors
 
-/// Only for use by ExperimentInfo. Returns the pointer to the DetectorInfo.
-const Beamline::DetectorInfo *Instrument::detectorInfo() const {
-  return m_detectorInfo;
+/// Only for use by ExperimentInfo. Returns returns true if this instrument
+/// contains a DetectorInfo.
+bool Instrument::hasDetectorInfo() const {
+  return static_cast<bool>(m_detectorInfo);
+}
+/// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
+const Beamline::DetectorInfo &Instrument::detectorInfo() const {
+  if (!hasDetectorInfo())
+    throw std::runtime_error("CAnnot return reference to NULL DetectorInfo");
+  return *m_detectorInfo;
 }
 
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
-void Instrument::setDetectorInfo(const Beamline::DetectorInfo *detectorInfo) {
-  m_detectorInfo = detectorInfo;
+void Instrument::setDetectorInfo(
+    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
+  m_detectorInfo = std::move(detectorInfo);
 }
 
 } // namespace Geometry

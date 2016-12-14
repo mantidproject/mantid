@@ -51,7 +51,7 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(Kernel::make_unique<Beamline::DetectorInfo>(0)) {}
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {}
 
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
@@ -154,17 +154,19 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
-  const auto *detInfo = sptr_instrument->detectorInfo();
   const auto numDets = sptr_instrument->getNumberDetectors();
-  if (detInfo) {
-    if (numDets != detInfo->size())
+  if (sptr_instrument->hasDetectorInfo()) {
+    const auto &detInfo = sptr_instrument->detectorInfo();
+    if (numDets != detInfo.size())
       throw std::runtime_error("ExperimentInfo::setInstrument: size mismatch "
                                "between DetectorInfo and number of detectors "
                                "in instrument");
-    *m_detectorInfo = *detInfo;
+    // We allocate a new DetectorInfo in case there is an Instrument holding a
+    // reference to our current DetectorInfo.
+    m_detectorInfo = boost::make_shared<Beamline::DetectorInfo>(detInfo);
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
-    m_detectorInfo = Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+    m_detectorInfo = boost::make_shared<Beamline::DetectorInfo>(numDets);
   }
 }
 
@@ -180,7 +182,7 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
                              "instrument");
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
-  instrument->setDetectorInfo(m_detectorInfo.get());
+  instrument->setDetectorInfo(m_detectorInfo);
   return instrument;
 }
 
