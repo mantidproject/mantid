@@ -470,7 +470,7 @@ class MERLINReduction(ISISDirectInelasticReduction):
 
 
 class LETReduction(stresstesting.MantidStressTest):
-    tolerance = 1e-5
+    tolerance = 1e-6
     tolerance_is_reller=True
 
     def requiredMemoryMB(self):
@@ -492,7 +492,7 @@ class LETReduction(stresstesting.MantidStressTest):
         self.ws_name = outWS.name()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-6
         self.tolerance_is_reller=True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
@@ -504,7 +504,7 @@ class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
     """
     written in a hope that most of the stuff find here will eventually find its way into main reduction routines
     """
-    tolerance = 1e-5
+    tolerance = 1e-6
     tolerance_is_reller=True
 
     def requiredMemoryMB(self):
@@ -531,8 +531,8 @@ class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
         #  ws *=mults[ind]
 
     def validate(self):
-        self.tolerance = 1e-5
-        self.tolerance_is_reller=True
+        self.tolerance = 1e-6
+        self.tolerance_is_reller=False
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 
