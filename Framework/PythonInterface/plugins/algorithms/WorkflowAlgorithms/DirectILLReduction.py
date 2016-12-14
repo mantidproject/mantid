@@ -72,7 +72,7 @@ PROP_SUBALGORITHM_LOGGING               = 'SubalgorithmLogging'
 PROP_USER_MASK                          = 'MaskedDetectors'
 PROP_VANADIUM_WORKSPACE                 = 'VanadiumWorkspace'
 
-REDUCTION_TYPE_CD = 'Empty Can/Cadmium'
+REDUCTION_TYPE_CD = 'Empty Container/Cadmium'
 REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
 REDUCTION_TYPE_SAMPLE = 'Sample'
 REDUCTION_TYPE_VANADIUM = 'Vanadium'
@@ -592,7 +592,7 @@ def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
 
 def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup, algorithmLogging):
     '''
-    Subtracts cadmium corrected emtpy can.
+    Subtracts cadmium corrected emtpy container.
     '''
     # out = (in - Cd) / transmission - (EC - Cd)
     transmissionWSName = wsNames.withSuffix('transmission')
@@ -627,7 +627,7 @@ def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup, algorith
 
 def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup, algorithmLogging):
     '''
-    Subtracts empty can.
+    Subtracts empty container.
     '''
     # out = in - transmission * EC
     transmissionWSName = wsNames.withSuffix('transmission')
@@ -949,14 +949,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
             mainWS = normalizedWS
             del(normalizedWS)
 
-        # Reduction for empty can and cadmium ends here.
+        # Reduction for empty container and cadmium ends here.
         if reductionType == REDUCTION_TYPE_CD or reductionType == REDUCTION_TYPE_EC:
             self._finalize(mainWS, wsCleanup, report)
             return
 
         # Continuing with vanadium and sample reductions.
 
-        # Empty can subtraction
+        # Empty container subtraction
         ecInWS = self.getProperty(PROP_EC_WORKSPACE).value
         if ecInWS:
             cdInWS = self.getProperty(PROP_CD_WORKSPACE).value
@@ -1109,7 +1109,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='Reduced empty can workspace')
+                             doc='Reduced empty container workspace')
         self.declareProperty(MatrixWorkspaceProperty(name=PROP_CD_WORKSPACE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -1221,7 +1221,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
-                             doc='Sample transmission for empty can subtraction')
+                             doc='Sample transmission for empty container subtraction')
         self.declareProperty(name=PROP_BINNING_Q,
                              defaultValue='',
                              direction=Direction.Input,
