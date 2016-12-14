@@ -225,7 +225,6 @@ void makeTestWorkspace(const int ndets, const int nbins,
   }
 
   Instrument_sptr instr(new Instrument);
-  space2D->setInstrument(instr);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
   instr->markAsSamplePos(samplePos);
 
@@ -235,6 +234,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
     Detector *d = new Detector(os.str(), i, 0);
     instr->markAsDetector(d);
   }
+  space2D->setInstrument(instr);
 
   // Register the workspace in the data service
   AnalysisDataService::Instance().add(ads_name, space2D);
