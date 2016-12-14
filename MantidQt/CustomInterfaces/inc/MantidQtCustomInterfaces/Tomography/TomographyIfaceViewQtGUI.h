@@ -158,7 +158,7 @@ public:
   std::vector<std::string> getCachedArguments() const override {
     return m_extArgs;
   }
-  void externalProcessFinished(const std::string &str);
+  void externalProcessFinished(const std::string &str) override;
 
 signals:
   void externalProcessFinished(const QString &str);

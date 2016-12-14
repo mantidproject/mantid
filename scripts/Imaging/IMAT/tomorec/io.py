@@ -157,7 +157,10 @@ def write_image(img_data,
     return filename
 
 
-def avg_image_files(path, base_path, file_extension=None,
+def avg_image_files(path,
+                    base_path,
+                    file_prefix=None,
+                    file_extension=None,
                     agg_method='average'):
     """
     Reads files from a directory, assuming they are images from a
@@ -176,8 +179,7 @@ def avg_image_files(path, base_path, file_extension=None,
     path = os.path.expanduser(path)
 
     img_files = glob.glob(
-        os.path.join(sample_path, "{0}*.{1}".format(file_prefix,
-                                                    file_extension)))
+        os.path.join(path, "{0}*.{1}".format(file_prefix, file_extension)))
 
     if len(img_files) <= 0:
         raise RuntimeError("No image files found in " + path)
@@ -187,7 +189,7 @@ def avg_image_files(path, base_path, file_extension=None,
     imgs = pyfits.open(img_files[0])
     if len(imgs) < 1:
         raise RuntimeError("Could not load at least one image from path: {0}".
-                           format(path_proj))
+                           format(base_path))
 
     data_dtype = imgs[0].data.dtype
     # from fits files we usually get this, just change it to uint16
@@ -271,7 +273,7 @@ def _read_img(filename, file_extension=None):
         if len(imgs) < 1:
             raise RuntimeError(
                 "Could not load at least one FITS image/table file from: {0}".
-                format(sample_path))
+                format(filename))
 
         # Input fits files always contain a single image
         img_arr = imgs[0].data
@@ -308,9 +310,8 @@ def _read_listed_files(files, slice_img_shape, file_extension, dtype):
         try:
             data[idx, :, :] = _read_img(in_file, file_extension)
         except IOError as exc:
-            raise RuntimeError(
-                "Could not load file {0} from {1}. Error details: {2}".format(
-                    ifile, sample_path, str(exc)))
+            raise RuntimeError("Could not load file {0}. Error details: {2}".
+                               format(in_file, str(exc)))
 
     return data
 
@@ -340,7 +341,7 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension,
         if len(files_match) <= 0:
             print(
                 "Could not find any flat field / open beam image files in: {0}".
-                format(flat_field_prefix))
+                format(field_prefix))
         else:
             imgs_stack = _read_listed_files(files_match, img_shape,
                                             file_extension, data_dtype)
