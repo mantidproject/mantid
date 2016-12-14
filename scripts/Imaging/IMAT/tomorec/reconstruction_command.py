@@ -200,6 +200,18 @@ class ReconstructionCommand(object):
         """
         self._check_paths_integrity(cfg)
 
+        if not cfg or not isinstance(cfg, tomocfg.ReconstructionConfig):
+            raise ValueError(
+                "Cannot run a reconstruction without a valid configuration")
+
+        if not cfg.preproc_cfg.input_dir:
+            raise ValueError(
+                "Cannot run a reconstruction without setting the input path")
+
+        if not cfg.postproc_cfg.output_dir:
+            raise ValueError(
+                "Cannot run a reconstruction without setting the output path")
+
         # First step import the tool
         self.tomo_print_timed_start(" * Importing tool " + cfg.alg_cfg.tool)
         # import tool
