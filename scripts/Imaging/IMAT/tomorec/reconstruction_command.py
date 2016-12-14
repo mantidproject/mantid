@@ -855,7 +855,7 @@ class ReconstructionCommand(object):
         Returns :: reconstructed volume
         """
         self._check_data_stack(proj_data)
-
+        self._debug_print_memory_usage_linux(", before reconstruction.")
         num_proj = proj_data.shape[0]
         inc = float(preproc_cfg.max_angle) / (num_proj - 1)
 
@@ -902,7 +902,7 @@ class ReconstructionCommand(object):
         self.tomo_print_timed_stop(
             " * Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
             format(rec.shape, rec.dtype))
-
+        self._debug_print_memory_usage_linux(", after reconstruction.")
         return rec
 
     def astra_reconstruct3d(self, sinogram, angles, depth, alg_cfg):
