@@ -19,14 +19,17 @@ namespace CustomInterfaces {
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
-                                    postprocessor, postprocessMap, loader) {}
+                                    postprocessor, postprocessMap, loader) {
+
+  *m_mainPresenter = *GenericDataProcessorPresenter::m_mainPresenter;
+}
 
 /**
 * Destructor
@@ -42,7 +45,11 @@ void ReflDataProcessorPresenter::process() {
 
   // if uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  GenericDataProcessorPresenter::process();
+  std::string timeSlicingOptions = GenericDataProcessorPresenter::m_mainPresenter->getTimeSlicingOptions();
+  if (timeSlicingOptions.empty()) {
+    GenericDataProcessorPresenter::process();
+    return;
+  }
   // return here, nothing else to do
 
   // Uniform slicing:

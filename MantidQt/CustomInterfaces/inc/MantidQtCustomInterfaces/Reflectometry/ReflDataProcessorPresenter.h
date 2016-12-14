@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLDATAPROCESSORPRESENTER_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -54,6 +55,8 @@ public:
 private:
   // process selected rows
   void process() override;
+  // A workspace receiver we want to notify
+  MantidQt::MantidWidgets::DataProcessorMainPresenter *m_mainPresenter;
 };
 }
 }

@@ -114,6 +114,8 @@ protected:
   virtual void process();
   // The tree manager, a proxy class to retrieve data from the model
   std::unique_ptr<DataProcessorTreeManager> m_manager;
+  // A workspace receiver we want to notify
+  DataProcessorMainPresenter *m_mainPresenter;
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
@@ -138,8 +140,6 @@ private:
   bool m_postprocess;
   // The number of columns
   int m_columns;
-  // A workspace receiver we want to notify
-  DataProcessorMainPresenter *m_mainPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
