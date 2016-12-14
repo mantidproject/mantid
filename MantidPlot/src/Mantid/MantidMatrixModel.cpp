@@ -8,8 +8,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
-#include "MantidGeometry/IDetector.h"
-
 #include <QApplication>
 #include <QObject>
 #include <QPalette>
