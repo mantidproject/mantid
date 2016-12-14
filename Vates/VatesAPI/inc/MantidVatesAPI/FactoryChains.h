@@ -23,8 +23,9 @@ createFactoryChainForHistoWorkspace(VisualNormalization normalization,
                                     double time);
 
 /// Creates a factory chain for MDEvent workspaces
-std::unique_ptr<vtkMDHexFactory> DLLExport createFactoryChainForEventWorkspace(
-    VisualNormalization normalization, double time);
+std::unique_ptr<vtkMDHexFactory> DLLExport
+createFactoryChainForEventWorkspace(VisualNormalization normalization,
+                                    double time);
 
 /// Function to apply the Change-of-Basis-Matrix
 void DLLExport applyCOBMatrixSettingsToVtkDataSet(

@@ -29,8 +29,7 @@ public:
     IMDWorkspace *nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
-    vtkMDHistoLineFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS(
         "No workspace, so should not be possible to complete initialization.",
@@ -39,8 +38,7 @@ public:
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
-    vtkMDHistoLineFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
@@ -79,8 +77,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoLineFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     // Successor is provided.
     factory.setSuccessor(std::move(uniqueSuccessor));
@@ -102,8 +99,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoLineFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor "
                       "was available.",
@@ -135,8 +131,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoLineFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     // Successor is provided.
     factory.setSuccessor(std::move(uniqueSuccessor));
@@ -151,8 +146,7 @@ public:
   }
 
   void testTypeName() {
-    vtkMDHistoLineFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDHistoLineFactory", factory.getFactoryTypeName());
   }
 };

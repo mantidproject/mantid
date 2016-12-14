@@ -85,11 +85,10 @@ std::unique_ptr<vtkMDHexFactory>
 createFactoryChainForEventWorkspace(VisualNormalization normalization,
                                     double time) {
   auto factory = Mantid::Kernel::make_unique<vtkMDHexFactory>(normalization);
-  factory
-      ->setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDQuadFactory>(normalization))
+  factory->setSuccessor(
+               Mantid::Kernel::make_unique<vtkMDQuadFactory>(normalization))
       .setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDLineFactory>(normalization))
+           Mantid::Kernel::make_unique<vtkMDLineFactory>(normalization))
       .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
   factory->setTime(time);
   return factory;
@@ -108,13 +107,12 @@ createFactoryChainForHistoWorkspace(VisualNormalization normalization,
   auto factory =
       Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
           normalization, time);
-  factory
-      ->setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(normalization))
+  factory->setSuccessor(
+               Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(normalization))
       .setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(normalization))
+           Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(normalization))
       .setSuccessor(
-          Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(normalization))
+           Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(normalization))
       .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
   return factory;
 }

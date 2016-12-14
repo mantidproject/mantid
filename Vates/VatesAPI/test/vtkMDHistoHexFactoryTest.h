@@ -37,8 +37,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
     factory.initialize(ws_sptr);
 
     auto product = factory.create(progressUpdate);
@@ -76,8 +75,7 @@ public:
     IMDWorkspace *nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS(
         "No workspace, so should not be possible to complete initialization.",
@@ -86,8 +84,7 @@ public:
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
@@ -107,8 +104,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
 
     // Successor is provided.
     factory.setSuccessor(std::move(uniqueSuccessor));
@@ -130,8 +126,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor "
                       "was available.",
@@ -163,8 +158,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
 
     // Successor is provided.
     factory.setSuccessor(std::move(uniqueSuccessor));
@@ -180,8 +174,7 @@ public:
 
   void testTypeName() {
     using namespace Mantid::VATES;
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDHistoHexFactory", factory.getFactoryTypeName());
   }
 };
@@ -204,8 +197,7 @@ public:
     FakeProgressAction progressUpdate;
 
     // Create the factory.
-    vtkMDHistoHexFactory factory(
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
     factory.initialize(m_ws_sptr);
 
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));

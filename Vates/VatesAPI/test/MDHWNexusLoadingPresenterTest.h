@@ -161,9 +161,8 @@ public:
     auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
         normalizationOption, time);
 
-    factory
-        ->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-            normalizationOption))
+    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+                              normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
             normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
