@@ -80,5 +80,5 @@ VSI Improvements
 - The sources and views more reliably show progress in the VSI status bar. 
 - Added a button to the standard view which applies the threshold filter.
 - Update the cut button to match the equivalent ParaView icon.
-- Changed the technique-dependent initial view for a MDHistoworkspace from a single crystal diffraction instrument to the MultiSlice view.
+- Changed the fallback for a MDHistoworkspace opened in the (incompatible) SplatterPlot view to the MultiSlice view.
 - Faster initial loading of a MDHistoworkspace in the MultiSlice and ThreeSlice view.
