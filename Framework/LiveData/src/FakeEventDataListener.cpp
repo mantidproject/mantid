@@ -39,8 +39,7 @@ FakeEventDataListener::~FakeEventDataListener() {
 }
 
 bool FakeEventDataListener::connect(
-    const Poco::Net::SocketAddress &,
-    const API::ILiveListener::ConnectionArgs &) {
+    const Poco::Net::SocketAddress &) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }

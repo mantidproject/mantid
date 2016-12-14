@@ -189,8 +189,7 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
 /// required for the connection
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool TOPAZLiveEventDataListener::connect(
-    const Poco::Net::SocketAddress &address,
-    const Mantid::API::ILiveListener::ConnectionArgs &args)
+    const Poco::Net::SocketAddress &address)
 // The SocketAddress class will throw various exceptions if it encounters an
 // error.  We're assuming the calling function will catch any exceptions that
 // are important

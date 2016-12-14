@@ -1,7 +1,7 @@
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Logger.h"
 #include <Poco/Net/SocketAddress.h>
 
 using boost::shared_ptr;

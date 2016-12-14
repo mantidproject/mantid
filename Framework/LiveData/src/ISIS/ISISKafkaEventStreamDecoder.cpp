@@ -3,6 +3,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
