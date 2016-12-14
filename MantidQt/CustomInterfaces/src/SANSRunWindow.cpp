@@ -2177,8 +2177,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
 *  @param RunStep name of the RunStep Python object
 *  @param output where the number will be displayed
 */
-void SANSRunWindow::readNumberOfEntries(
-    const QString &RunStep, API::MWRunFiles *const output) {
+void SANSRunWindow::readNumberOfEntries(const QString &RunStep,
+                                        API::MWRunFiles *const output) {
   QString periods = runReduceScriptFunction("print i.ReductionSingleton()." +
                                             RunStep + ".periods_in_file");
   output->setNumberOfEntries(periods.toInt());

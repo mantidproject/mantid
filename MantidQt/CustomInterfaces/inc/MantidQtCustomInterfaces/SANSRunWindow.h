@@ -197,11 +197,9 @@ private:
   bool runAssign(int key, QString &logs);
   /// Load a scatter sample file or can run via Python objects using the passed
   /// Python command
-  bool assignDetBankRun(API::MWRunFiles &runFile,
-                        const QString &assignFn);
+  bool assignDetBankRun(API::MWRunFiles &runFile, const QString &assignFn);
   /// runs that contain only monitor counts can be direct or transmission runs
-  bool assignMonitorRun(API::MWRunFiles &trans,
-                        API::MWRunFiles &direct,
+  bool assignMonitorRun(API::MWRunFiles &trans, API::MWRunFiles &direct,
                         const QString &assignFn);
   /// Get the detectors' names
   void fillDetectNames(QComboBox *output);
