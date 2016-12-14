@@ -79,8 +79,7 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
-  m_detectorInfo =
-      Kernel::make_unique<Beamline::DetectorInfo>(*other->m_detectorInfo);
+  *m_detectorInfo = *other->m_detectorInfo;
 }
 
 /** Clone this ExperimentInfo class into a new one
@@ -164,6 +163,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
                                "in instrument");
     *m_detectorInfo = *detInfo;
   } else {
+    // If there is no DetectorInfo in the instrument we create a default one.
     m_detectorInfo = Kernel::make_unique<Beamline::DetectorInfo>(numDets);
   }
 }
