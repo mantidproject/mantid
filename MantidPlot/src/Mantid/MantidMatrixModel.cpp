@@ -284,7 +284,7 @@ bool MantidMatrixModel::checkMonitorCache(int row) const {
       const auto &specInfo = m_workspace->spectrumInfo();
       size_t wsIndex = static_cast<size_t>(row);
       isMon = specInfo.hasDetectors(wsIndex) && specInfo.isMonitor(wsIndex);
-      m_monCache.insert(row, isMasked);
+      m_monCache.insert(row, isMon);
     }
     return isMon;
   } else {
