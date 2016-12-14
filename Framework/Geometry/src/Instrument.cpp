@@ -1245,7 +1245,7 @@ bool Instrument::hasDetectorInfo() const {
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 const Beamline::DetectorInfo &Instrument::detectorInfo() const {
   if (!hasDetectorInfo())
-    throw std::runtime_error("CAnnot return reference to NULL DetectorInfo");
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
 
