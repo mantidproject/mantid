@@ -17,77 +17,77 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
 import numpy
 from os import path
 
-CLEANUP_DELETE = 'Delete Intermediate Workspaces'
-CLEANUP_KEEP = 'Keep Intermediate Workspaces'
+_CLEANUP_DELETE = 'Delete Intermediate Workspaces'
+_CLEANUP_KEEP = 'Keep Intermediate Workspaces'
 
-DIAGNOSTICS_NO = 'No Detector Diagnostics'
-DIAGNOSTICS_YES = 'Diagnose Detectors'
+_DIAGNOSTICS_NO = 'No Detector Diagnostics'
+_DIAGNOSTICS_YES = 'Diagnose Detectors'
 
-INCIDENT_ENERGY_CALIBRATION_NO = 'No Incident Energy Calibration'
-INCIDENT_ENERGY_CALIBRATION_YES = 'Calibrate Incident Energy'
+_INCIDENT_ENERGY_CALIBRATION_NO = 'No Incident Energy Calibration'
+_INCIDENT_ENERGY_CALIBRATION_YES = 'Calibrate Incident Energy'
 
-INDEX_TYPE_DETECTOR_ID = 'Detector ID'
-INDEX_TYPE_WORKSPACE_INDEX = 'Workspace Index'
-INDEX_TYPE_SPECTRUM_NUMBER = 'Spectrum Number'
+_INDEX_TYPE_DET_ID = 'Detector ID'
+_INDEX_TYPE_WS_INDEX = 'Workspace Index'
+_INDEX_TYPE_SPECTRUM_NUMBER = 'Spectrum Number'
 
-NORM_METHOD_MONITOR = 'Monitor'
-NORM_METHOD_OFF = 'No Normalisation'
-NORM_METHOD_TIME = 'Acquisition Time'
+_NORM_METHOD_MON = 'Monitor'
+_NORM_METHOD_OFF = 'No Normalisation'
+_NORM_METHOD_TIME = 'Acquisition Time'
 
-SUBALG_LOGGING_OFF = 'No Subalgorithm Logging'
-SUBALG_LOGGING_ON = 'Allow Subalgorithm Logging'
+_SUBALG_LOGGING_OFF = 'No Subalgorithm Logging'
+_SUBALG_LOGGING_ON = 'Allow Subalgorithm Logging'
 
-PROP_BINNING_Q = 'QBinning'
-PROP_BINNING_W = 'WBinning'
-PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgDiagnosticsHighThreshold'
-PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgDiagnosticsLowThreshold'
-PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgDiagnosticsErrorThreshold'
-PROP_CD_WORKSPACE = 'CadmiumWorkspace'
-PROP_CLEANUP_MODE = 'Cleanup'
-PROP_DIAGNOSTICS_WORKSPACE = 'DiagnosticsWorkspace'
-PROP_DETECTOR_DIAGNOSTICS = 'Diagnostics'
-PROP_DETECTORS_AT_L2 = 'DetectorsAtL2'
-PROP_EC_WORKSPACE = 'EmptyCanWorkspace'
-PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER = 'ElasticPeakWidthInSigmas'
-PROP_EPP_WORKSPACE = 'EPPWorkspace'
-PROP_FLAT_BKG_SCALING = 'FlatBkgScaling'
-PROP_FLAT_BKG_WINDOW = 'FlatBkgAveragingWindow'
-PROP_FLAT_BKG_WORKSPACE = 'FlatBkgWorkspace'
-PROP_INCIDENT_ENERGY_CALIBRATION = 'IncidentEnergyCalibration'
-PROP_INCIDENT_ENERGY_WORKSPACE = 'IncidentEnergyWorkspace'
-PROP_INDEX_TYPE = 'IndexType'
-PROP_INITIAL_ELASTIC_PEAK_REFERENCE = 'InitialElasticPeakReference'
-PROP_INPUT_FILE = 'InputFile'
-PROP_INPUT_WORKSPACE = 'InputWorkspace'
-PROP_MONITOR_EPP_WORKSPACE = 'MonitorEPPWorkspace'
-PROP_MONITOR_INDEX = 'Monitor'
-PROP_NORMALISATION = 'Normalisation'
-PROP_OUTPUT_DIAGNOSTICS_WORKSPACE = 'OutputDiagnosticsWorkspace'
-PROP_OUTPUT_DETECTOR_EPP_WORKSPACE = 'OutputEPPWorkspace'
-PROP_OUTPUT_FLAT_BKG_WORKSPACE = 'OutputFlatBkgWorkspace'
-PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE = 'OutputIncidentEnergyWorkspace'
-PROP_OUTPUT_MONITOR_EPP_WORKSPACE = 'OutputMonitorEPPWorkspace'
-PROP_OUTPUT_WORKSPACE = 'OutputWorkspace'
-PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
-PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakDiagnosticsLowThreshold'
-PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST = \
+_PROP_BINNING_Q = 'QBinning'
+_PROP_BINNING_W = 'WBinning'
+_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgDiagnosticsHighThreshold'
+_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgDiagnosticsLowThreshold'
+_PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgDiagnosticsErrorThreshold'
+_PROP_CD_WS = 'CadmiumWorkspace'
+_PROP_CLEANUP_MODE = 'Cleanup'
+_PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
+_PROP_DET_DIAGNOSTICS = 'Diagnostics'
+_PROP_DETS_AT_L2 = 'DetectorsAtL2'
+_PROP_EC_WS = 'EmptyCanWorkspace'
+_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER = 'ElasticPeakWidthInSigmas'
+_PROP_EPP_WS = 'EPPWorkspace'
+_PROP_FLAT_BKG_SCALING = 'FlatBkgScaling'
+_PROP_FLAT_BKG_WINDOW = 'FlatBkgAveragingWindow'
+_PROP_FLAT_BKG_WS = 'FlatBkgWorkspace'
+_PROP_INCIDENT_ENERGY_CALIBRATION = 'IncidentEnergyCalibration'
+_PROP_INCIDENT_ENERGY_WS = 'IncidentEnergyWorkspace'
+_PROP_INDEX_TYPE = 'IndexType'
+_PROP_INITIAL_ELASTIC_PEAK_REFERENCE = 'InitialElasticPeakReference'
+_PROP_INPUT_FILE = 'InputFile'
+_PROP_INPUT_WS = 'InputWorkspace'
+_PROP_MON_EPP_WS = 'MonitorEPPWorkspace'
+_PROP_MON_INDEX = 'Monitor'
+_PROP_NORMALISATION = 'Normalisation'
+_PROP_OUTPUT_DET_EPP_WS = 'OutputEPPWorkspace'
+_PROP_OUTPUT_DIAGNOSTICS_WS = 'OutputDiagnosticsWorkspace'
+_PROP_OUTPUT_FLAT_BKG_WS = 'OutputFlatBkgWorkspace'
+_PROP_OUTPUT_INCIDENT_ENERGY_WS = 'OutputIncidentEnergyWorkspace'
+_PROP_OUTPUT_MON_EPP_WS = 'OutputMonitorEPPWorkspace'
+_PROP_OUTPUT_WS = 'OutputWorkspace'
+_PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
+_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakDiagnosticsLowThreshold'
+_PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST = \
     'ElasticPeakDiagnosticsErrorThreshold'
-PROP_REDUCTION_TYPE = 'ReductionType'
-PROP_TRANSMISSION = 'Transmission'
-PROP_SUBALGORITHM_LOGGING = 'SubalgorithmLogging'
-PROP_USER_MASK = 'MaskedDetectors'
-PROP_VANADIUM_WORKSPACE = 'VanadiumWorkspace'
+_PROP_REDUCTION_TYPE = 'ReductionType'
+_PROP_TRANSMISSION = 'Transmission'
+_PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
+_PROP_USER_MASK = 'MaskedDetectors'
+_PROP_VANA_WS = 'VanadiumWorkspace'
 
-REDUCTION_TYPE_CD = 'Empty Container/Cadmium'
-REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
-REDUCTION_TYPE_SAMPLE = 'Sample'
-REDUCTION_TYPE_VANADIUM = 'Vanadium'
+_REDUCTION_TYPE_CD = 'Empty Container/Cadmium'
+_REDUCTION_TYPE_EC = _REDUCTION_TYPE_CD
+_REDUCTION_TYPE_SAMPLE = 'Sample'
+_REDUCTION_TYPE_VANA = 'Vanadium'
 
-WS_CONTENT_DETECTORS = 0
-WS_CONTENT_MONITORS = 1
+_WS_CONTENT_DETS = 0
+_WS_CONTENT_MONS = 1
 
 
-class DiagnosticsSettings:
+class _DiagnosticsSettings:
     '''
     Holds settings for MedianDetectorTest.
     '''
@@ -97,13 +97,13 @@ class DiagnosticsSettings:
         self.significanceTest = significanceTest
 
 
-class IntermediateWsCleanup:
+class _IntermediateWSCleanup:
     '''
     Manages intermediate workspace cleanup.
     '''
     def __init__(self, cleanupMode, deleteAlgorithmLogging):
         self._deleteAlgorithmLogging = deleteAlgorithmLogging
-        self._doDelete = cleanupMode == CLEANUP_DELETE
+        self._doDelete = cleanupMode == _CLEANUP_DELETE
         self._protected = set()
         self._toBeDeleted = set()
 
@@ -146,19 +146,27 @@ class IntermediateWsCleanup:
                             EnableLogging=self._deleteAlgorithmLogging)
 
 
-class NameSource:
-
+class _NameSource:
+    '''
+    Provides names for intermediate workspaces.
+    '''
     def __init__(self, prefix, cleanupMode):
+        '''
+        Initializes an instance of the class.
+        '''
         self._names = set()
         self._prefix = prefix
-        if cleanupMode == CLEANUP_DELETE:
+        if cleanupMode == _CLEANUP_DELETE:
             self._prefix = '__' + prefix
 
     def withSuffix(self, suffix):
+        '''
+        Returns a workspace name with given suffix applied.
+        '''
         return self._prefix + '_' + suffix
 
 
-class Report:
+class _Report:
     '''
     Logger for final report generation.
     '''
@@ -199,19 +207,19 @@ class Report:
         '''
         Adds an error entry to this report.
         '''
-        self._entries.append(Report._Entry(text, Report._LEVEL_ERROR))
+        self._entries.append(_Report._Entry(text, _Report._LEVEL_ERROR))
 
     def notice(self, text):
         '''
         Adds an information entry to this report.
         '''
-        self._entries.append(Report._Entry(text, Report._LEVEL_NOTICE))
+        self._entries.append(_Report._Entry(text, _Report._LEVEL_NOTICE))
 
     def warning(self, text):
         '''
         Adds a warning entry to this report.
         '''
-        self._entries.append(Report._Entry(text, Report._LEVEL_WARNING))
+        self._entries.append(_Report._Entry(text, _Report._LEVEL_WARNING))
 
     def toLog(self, log):
         '''
@@ -219,16 +227,12 @@ class Report:
         '''
         for entry in self._entries:
             loggingLevel = entry.level()
-            if loggingLevel == Report._LEVEL_NOTICE:
+            if loggingLevel == _Report._LEVEL_NOTICE:
                 log.notice(entry.contents())
-            elif loggingLevel == Report._LEVEL_WARNING:
+            elif loggingLevel == _Report._LEVEL_WARNING:
                 log.warning(entry.contents())
-            elif loggingLevel == Report._LEVEL_ERROR:
+            elif loggingLevel == _Report._LEVEL_ERROR:
                 log.error(entry.contents())
-
-
-def setAsBad(ws, index):
-    ws.dataY(index)[0] += 1
 
 
 def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log,
@@ -307,7 +311,7 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
     '''
     Returns a flat background workspace.
     '''
-    if wsType == WS_CONTENT_DETECTORS:
+    if wsType == _WS_CONTENT_DETS:
         bkgWSName = wsNames.withSuffix('flat_bkg_for_detectors')
     else:
         bkgWSName = wsNames.withSuffix('flat_bkg_for_monitors')
@@ -327,7 +331,7 @@ def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
     '''
     Subtracts a scaled flat background from a workspace.
     '''
-    if wsType == WS_CONTENT_DETECTORS:
+    if wsType == _WS_CONTENT_DETS:
         subtractedWSName = wsNames.withSuffix('flat_bkg_subtracted_detectors')
         scaledBkgWSName = wsNames.withSuffix('flat_bkg_for_detectors_scaled')
     else:
@@ -349,7 +353,7 @@ def _findEPP(ws, wsType, wsNames, algorithmLogging):
     '''
     Returns EPP table for a workspace.
     '''
-    if wsType == WS_CONTENT_DETECTORS:
+    if wsType == _WS_CONTENT_DETS:
         eppWSName = wsNames.withSuffix('epp_detectors')
     else:
         eppWSName = wsNames.withSuffix('epp_monitors')
@@ -416,6 +420,9 @@ def _reportDiagnostics(report, peakDiagnostics, bkgDiagnostics):
 
 
 def _medianEPP(eppWS, eppIndices):
+    '''
+    Calculates the median 'PeakCentre' for given workpsace indices.
+    '''
     centres = list()
     sigmas = list()
     for rowIndex in eppIndices:
@@ -502,20 +509,20 @@ def _applyUserMask(ws, mask, indexType, wsNames, algorithmLogging):
     maskedWorkspace = CloneWorkspace(InputWorkspace=ws,
                                      OutputWorkspace=maskedWSName,
                                      EnableLogging=algorithmLogging)
-    if indexType == INDEX_TYPE_DETECTOR_ID:
+    if indexType == _INDEX_TYPE_DET_ID:
         MaskDetectors(Workspace=maskedWorkspace,
                       DetectorList=mask,
                       EnableLogging=algorithmLogging)
-    elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
+    elif indexType == _INDEX_TYPE_SPECTRUM_NUMBER:
         MaskDetectors(Workspace=maskedWorkspace,
                       SpectraList=mask,
                       EnableLogging=algorithmLogging)
-    elif indexType == INDEX_TYPE_WORKSPACE_INDEX:
+    elif indexType == _INDEX_TYPE_WS_INDEX:
         MaskDetectors(Workspace=maskedWorkspace,
                       WorkspaceIndexList=mask,
                       EnableLogging=algorithmLogging)
     else:
-        raise RuntimeError('Unknown ' + PROP_INDEX_TYPE)
+        raise RuntimeError('Unknown ' + _PROP_INDEX_TYPE)
     return maskedWorkspace
 
 
@@ -563,10 +570,10 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
     energy = eiWS.readY(0)[0]
     wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0,
                                     0, 0, Direct, 5)
-    if wsType == WS_CONTENT_DETECTORS:
+    if wsType == _WS_CONTENT_DETS:
         calibratedWSName = \
             wsNames.withSuffix('incident_energy_calibrated_detectors')
-    elif wsType == WS_CONTENT_MONITORS:
+    elif wsType == _WS_CONTENT_MONS:
         calibratedWSName = \
             wsNames.withSuffix('incident_energy_calibrated_monitors')
     else:
@@ -705,7 +712,7 @@ def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup, algorithmLogging):
     return ecSubtractedWS
 
 
-def _normalizeToVanadium(ws, vanaWS, wsNames, algorithmLogging):
+def _normalizeToVana(ws, vanaWS, wsNames, algorithmLogging):
     '''
     Normalizes to vanadium workspace.
     '''
@@ -754,6 +761,9 @@ def _correctByKiKf(ws, wsNames, algorithmLogging):
 
 
 def _correctByDetectorEfficiency(ws, wsNames, algorithmLogging):
+    '''
+    Applies detector efficiency corrections.
+    '''
     correctedWSName = wsNames.withSuffix('detector_efficiency_corrected')
     correctedWS = DetectorEfficiencyCorUser(InputWorkspace=ws,
                                             OutputWorkspace=correctedWSName,
@@ -780,40 +790,40 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return 1
 
     def PyExec(self):
-        report = Report()
+        report = _Report()
         childAlgorithmLogging = False
-        if self.getProperty(PROP_SUBALGORITHM_LOGGING).value == \
-                SUBALG_LOGGING_ON:
+        if self.getProperty(_PROP_SUBALG_LOGGING).value == \
+                _SUBALG_LOGGING_ON:
             childAlgorithmLogging = True
-        reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
-        wsNamePrefix = self.getProperty(PROP_OUTPUT_WORKSPACE).valueAsStr
-        cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
-        wsNames = NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = IntermediateWsCleanup(cleanupMode, childAlgorithmLogging)
-        indexType = self.getProperty(PROP_INDEX_TYPE).value
+        reductionType = self.getProperty(_PROP_REDUCTION_TYPE).value
+        wsNamePrefix = self.getProperty(_PROP_OUTPUT_WS).valueAsStr
+        cleanupMode = self.getProperty(_PROP_CLEANUP_MODE).value
+        wsNames = _NameSource(wsNamePrefix, cleanupMode)
+        wsCleanup = _IntermediateWSCleanup(cleanupMode, childAlgorithmLogging)
+        indexType = self.getProperty(_PROP_INDEX_TYPE).value
 
         # The variables 'mainWS' and 'monWS shall hold the current main
         # data throughout the algorithm.
 
         # Init workspace.
-        inputFile = self.getProperty(PROP_INPUT_FILE).value
+        inputFile = self.getProperty(_PROP_INPUT_FILE).value
         if inputFile:
             eppReference = \
-                self.getProperty(PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
+                self.getProperty(_PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
             mainWS = _loadFiles(inputFile,
                                 eppReference,
                                 wsNames,
                                 wsCleanup,
                                 self.log(),
                                 childAlgorithmLogging)
-        elif self.getProperty(PROP_INPUT_WORKSPACE).value:
-            mainWS = self.getProperty(PROP_INPUT_WORKSPACE).value
+        elif self.getProperty(_PROP_INPUT_WS).value:
+            mainWS = self.getProperty(_PROP_INPUT_WS).value
 
         # Extract monitors to a separate workspace
         detWS, monWS = _extractMonitorWs(mainWS,
                                          wsNames,
                                          childAlgorithmLogging)
-        monIndex = self.getProperty(PROP_MONITOR_INDEX).value
+        monIndex = self.getProperty(_PROP_MON_INDEX).value
         monIndex = self._convertToWorkspaceIndex(monIndex,
                                                  monWS)
         wsCleanup.cleanup(mainWS)
@@ -822,22 +832,22 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanupLater(monWS)
 
         # Time-independent background
-        bkgInWS = self.getProperty(PROP_FLAT_BKG_WORKSPACE).value
-        windowWidth = self.getProperty(PROP_FLAT_BKG_WINDOW).value
+        bkgInWS = self.getProperty(_PROP_FLAT_BKG_WS).value
+        windowWidth = self.getProperty(_PROP_FLAT_BKG_WINDOW).value
         if not bkgInWS:
             bkgWS = _createFlatBkg(mainWS,
-                                   WS_CONTENT_DETECTORS,
+                                   _WS_CONTENT_DETS,
                                    windowWidth,
                                    wsNames,
                                    childAlgorithmLogging)
         else:
             bkgWS = bkgInWS
             wsCleanup.protect(bkgWS)
-        if not self.getProperty(PROP_OUTPUT_FLAT_BKG_WORKSPACE).isDefault:
-            self.setProperty(PROP_OUTPUT_FLAT_BKG_WORKSPACE, bkgWS)
-        bkgScaling = self.getProperty(PROP_FLAT_BKG_SCALING).value
+        if not self.getProperty(_PROP_OUTPUT_FLAT_BKG_WS).isDefault:
+            self.setProperty(_PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
+        bkgScaling = self.getProperty(_PROP_FLAT_BKG_SCALING).value
         bkgSubtractedWS = _subtractFlatBkg(mainWS,
-                                           WS_CONTENT_DETECTORS,
+                                           _WS_CONTENT_DETS,
                                            bkgWS,
                                            bkgScaling,
                                            wsNames,
@@ -849,13 +859,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanupLater(bkgWS)
         # Monitor time-independent background.
         monBkgWS = _createFlatBkg(monWS,
-                                  WS_CONTENT_MONITORS,
+                                  _WS_CONTENT_MONS,
                                   windowWidth,
                                   wsNames,
                                   childAlgorithmLogging)
         monBkgScaling = 1
         bkgSubtractedMonWS = _subtractFlatBkg(monWS,
-                                              WS_CONTENT_MONITORS,
+                                              _WS_CONTENT_MONS,
                                               monBkgWS,
                                               monBkgScaling,
                                               wsNames,
@@ -866,63 +876,63 @@ class DirectILLReduction(DataProcessorAlgorithm):
         del(bkgSubtractedMonWS)
 
         # Find elastic peak positions for detectors.
-        detEPPInWS = self.getProperty(PROP_EPP_WORKSPACE).value
+        detEPPInWS = self.getProperty(_PROP_EPP_WS).value
         if not detEPPInWS:
             detEPPWS = _findEPP(mainWS,
-                                WS_CONTENT_DETECTORS,
+                                _WS_CONTENT_DETS,
                                 wsNames,
                                 childAlgorithmLogging)
         else:
             detEPPWS = detEPPInWS
             wsCleanup.protect(detEPPWS)
-        if not self.getProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE).isDefault:
-            self.setProperty(PROP_OUTPUT_DETECTOR_EPP_WORKSPACE,
+        if not self.getProperty(_PROP_OUTPUT_DET_EPP_WS).isDefault:
+            self.setProperty(_PROP_OUTPUT_DET_EPP_WS,
                              detEPPWS)
         # Elastic peaks for monitors
-        monEPPInWS = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
+        monEPPInWS = self.getProperty(_PROP_MON_EPP_WS).value
         if not monEPPInWS:
             monEPPWS = _findEPP(monWS,
-                                WS_CONTENT_MONITORS,
+                                _WS_CONTENT_MONS,
                                 wsNames,
                                 childAlgorithmLogging)
         else:
             monEPPWS = monEPPInWS
             wsCleanup.protect(monEPPWS)
-        if not self.getProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE).isDefault:
-            self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
+        if not self.getProperty(_PROP_OUTPUT_MON_EPP_WS).isDefault:
+            self.setProperty(_PROP_OUTPUT_MON_EPP_WS,
                              monEPPWS)
         wsCleanup.cleanupLater(detEPPWS, monEPPWS)
 
         # Detector diagnostics, if requested.
-        if self.getProperty(PROP_DETECTOR_DIAGNOSTICS).value == \
-                DIAGNOSTICS_YES:
+        if self.getProperty(_PROP_DET_DIAGNOSTICS).value == \
+                _DIAGNOSTICS_YES:
             diagnosticsInWS = \
-                self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
+                self.getProperty(_PROP_DIAGNOSTICS_WS).value
             if not diagnosticsInWS:
                 lowThreshold = \
-                    self.getProperty(PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
+                    self.getProperty(_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
                 highThreshold = \
                     self.getProperty(
-                        PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
+                        _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
                 significanceTest = \
                     self.getProperty(
-                        PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
-                peakDiagnosticsSettings = DiagnosticsSettings(lowThreshold,
+                        _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+                peakDiagnosticsSettings = _DiagnosticsSettings(lowThreshold,
                                                               highThreshold,
                                                               significanceTest)
                 sigmaMultiplier = \
-                    self.getProperty(PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+                    self.getProperty(_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
                 lowThreshold = \
-                    self.getProperty(PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
+                    self.getProperty(_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
                 highThreshold = \
-                    self.getProperty(PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
+                    self.getProperty(_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
                 significanceTest = \
                     self.getProperty(
-                        PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
-                bkgDiagnosticsSettings = DiagnosticsSettings(lowThreshold,
+                        _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+                bkgDiagnosticsSettings = _DiagnosticsSettings(lowThreshold,
                                                              highThreshold,
                                                              significanceTest)
-                detectorsAtL2 = self.getProperty(PROP_DETECTORS_AT_L2).value
+                detectorsAtL2 = self.getProperty(_PROP_DETS_AT_L2).value
                 diagnosticsWS = _diagnoseDetectors(mainWS,
                                                    bkgWS,
                                                    detEPPWS,
@@ -938,8 +948,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 diagnosticsWS = diagnosticsInWS
                 wsCleanup.protect(diagnosticsWS)
             if not self.getProperty(
-                    PROP_OUTPUT_DIAGNOSTICS_WORKSPACE).isDefault:
-                self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE,
+                    _PROP_OUTPUT_DIAGNOSTICS_WS).isDefault:
+                self.setProperty(_PROP_OUTPUT_DIAGNOSTICS_WS,
                                  diagnosticsWS)
             diagnosedWS = _maskDiagnosedDetectors(mainWS,
                                                   diagnosticsWS,
@@ -951,7 +961,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             mainWS = diagnosedWS
             del(diagnosedWS)
         # Apply user mask.
-        userMask = self.getProperty(PROP_USER_MASK).value
+        userMask = self.getProperty(_PROP_USER_MASK).value
         maskedWS = _applyUserMask(mainWS,
                                   userMask,
                                   indexType,
@@ -963,12 +973,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Get calibrated incident energy
         eiCalibration = \
-            self.getProperty(PROP_INCIDENT_ENERGY_CALIBRATION).value
-        if eiCalibration == INCIDENT_ENERGY_CALIBRATION_YES:
-            eiInWS = self.getProperty(PROP_INCIDENT_ENERGY_WORKSPACE).value
+            self.getProperty(_PROP_INCIDENT_ENERGY_CALIBRATION).value
+        if eiCalibration == _INCIDENT_ENERGY_CALIBRATION_YES:
+            eiInWS = self.getProperty(_PROP_INCIDENT_ENERGY_WS).value
             if not eiInWS:
                 eiCalibrationDets = \
-                    self.getProperty(PROP_DETECTORS_AT_L2).value
+                    self.getProperty(_PROP_DETS_AT_L2).value
                 eiCalibrationWS = \
                     _calibratedIncidentEnergy(mainWS,
                                               detEPPWS,
@@ -986,7 +996,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             if eiCalibrationWS:
                 eiCalibratedDetWS = \
                     _applyIncidentEnergyCalibration(mainWS,
-                                                    WS_CONTENT_DETECTORS,
+                                                    _WS_CONTENT_DETS,
                                                     eiCalibrationWS,
                                                     wsNames,
                                                     report,
@@ -996,7 +1006,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 del(eiCalibratedDetWS)
                 eiCalibratedMonWS = \
                     _applyIncidentEnergyCalibration(monWS,
-                                                    WS_CONTENT_MONITORS,
+                                                    _WS_CONTENT_MONS,
                                                     eiCalibrationWS,
                                                     wsNames,
                                                     report,
@@ -1005,18 +1015,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 monWS = eiCalibratedMonWS
                 del(eiCalibratedMonWS)
             if not self.getProperty(
-                    PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE).isDefault:
-                self.setProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE,
+                    _PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
+                self.setProperty(_PROP_OUTPUT_INCIDENT_ENERGY_WS,
                                  eiCalibrationWS)
             wsCleanup.cleanup(eiCalibrationWS)
             del(eiCalibrationWS)
 
         # Normalisation to monitor/time
-        normalisationMethod = self.getProperty(PROP_NORMALISATION).value
-        if normalisationMethod != NORM_METHOD_OFF:
-            if normalisationMethod == NORM_METHOD_MONITOR:
+        normalisationMethod = self.getProperty(_PROP_NORMALISATION).value
+        if normalisationMethod != _NORM_METHOD_OFF:
+            if normalisationMethod == _NORM_METHOD_MON:
                 sigmaMultiplier = \
-                    self.getProperty(PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+                    self.getProperty(_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
                 normalizedWS = _normalizeToMonitor(mainWS,
                                                    monWS,
                                                    monEPPWS,
@@ -1025,7 +1035,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                    wsNames,
                                                    wsCleanup,
                                                    childAlgorithmLogging)
-            elif normalisationMethod == NORM_METHOD_TIME:
+            elif normalisationMethod == _NORM_METHOD_TIME:
                 normalizedWS = _normalizeToTime(mainWS,
                                                 wsNames,
                                                 wsCleanup,
@@ -1038,18 +1048,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
             del(normalizedWS)
 
         # Reduction for empty container and cadmium ends here.
-        if reductionType == REDUCTION_TYPE_CD or reductionType == \
-                REDUCTION_TYPE_EC:
+        if reductionType == _REDUCTION_TYPE_CD or reductionType == \
+                _REDUCTION_TYPE_EC:
             self._finalize(mainWS, wsCleanup, report)
             return
 
         # Continuing with vanadium and sample reductions.
 
         # Empty container subtraction
-        ecInWS = self.getProperty(PROP_EC_WORKSPACE).value
+        ecInWS = self.getProperty(_PROP_EC_WS).value
         if ecInWS:
-            cdInWS = self.getProperty(PROP_CD_WORKSPACE).value
-            transmission = self.getProperty(PROP_TRANSMISSION).value
+            cdInWS = self.getProperty(_PROP_CD_WS).value
+            transmission = self.getProperty(_PROP_TRANSMISSION).value
             if cdInWS:
                 ecSubtractedWS = _subtractECWithCd(mainWS,
                                                    ecInWS,
@@ -1070,10 +1080,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
             del(ecSubtractedWS)
 
         # Reduction for vanadium ends here.
-        if reductionType == REDUCTION_TYPE_VANADIUM:
+        if reductionType == _REDUCTION_TYPE_VANA:
             # We output an integrated vanadium, ready to be used for
             # normalization.
-            outWS = self.getPropertyValue(PROP_OUTPUT_WORKSPACE)
+            outWS = self.getPropertyValue(_PROP_OUTPUT_WS)
             # TODO For the time being, we may just want to integrate
             # the vanadium data as `ComputeCalibrationCoef` does not do
             # the best possible Debye-Waller correction.
@@ -1089,9 +1099,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Vanadium normalization.
         # TODO Absolute normalization.
-        vanaWS = self.getProperty(PROP_VANADIUM_WORKSPACE).value
+        vanaWS = self.getProperty(_PROP_VANA_WS).value
         if vanaWS:
-            vanaNormalizedWS = _normalizeToVanadium(mainWS,
+            vanaNormalizedWS = _normalizeToVana(mainWS,
                                                     vanaWS,
                                                     wsNames,
                                                     childAlgorithmLogging)
@@ -1117,7 +1127,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Rebinning
         # TODO automatize binning in w. Do we need rebinning in q as well?
-        params = self.getProperty(PROP_BINNING_W).value
+        params = self.getProperty(_PROP_BINNING_W).value
         if params:
             rebinnedWS = _rebin(mainWS,
                                 params,
@@ -1152,248 +1162,249 @@ class DirectILLReduction(DataProcessorAlgorithm):
         scalingFactor = FloatBoundedValidator(lower=0, upper=1)
 
         # Properties.
-        self.declareProperty(FileProperty(name=PROP_INPUT_FILE,
+        self.declareProperty(FileProperty(name=_PROP_INPUT_FILE,
                                           defaultValue='',
                                           action=FileAction.OptionalLoad,
                                           extensions=['nxs']),
                              doc='Input file')
         self.declareProperty(MatrixWorkspaceProperty(
-            name=PROP_INPUT_WORKSPACE,
+            name=_PROP_INPUT_WS,
             defaultValue='',
             optional=PropertyMode.Optional,
             direction=Direction.Input),
             doc='Input workspace.')
-        self.declareProperty(WorkspaceProperty(name=PROP_OUTPUT_WORKSPACE,
+        self.declareProperty(WorkspaceProperty(name=_PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
                              doc='The output of the algorithm.')
-        self.declareProperty(name=PROP_REDUCTION_TYPE,
-                             defaultValue=REDUCTION_TYPE_SAMPLE,
+        self.declareProperty(name=_PROP_REDUCTION_TYPE,
+                             defaultValue=_REDUCTION_TYPE_SAMPLE,
                              validator=StringListValidator([
-                                 REDUCTION_TYPE_SAMPLE,
-                                 REDUCTION_TYPE_VANADIUM,
-                                 REDUCTION_TYPE_CD,
-                                 REDUCTION_TYPE_EC]),
+                                 _REDUCTION_TYPE_SAMPLE,
+                                 _REDUCTION_TYPE_VANA,
+                                 _REDUCTION_TYPE_CD,
+                                 _REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of the reduction workflow and output.')
-        self.declareProperty(name=PROP_CLEANUP_MODE,
-                             defaultValue=CLEANUP_DELETE,
+        self.declareProperty(name=_PROP_CLEANUP_MODE,
+                             defaultValue=_CLEANUP_DELETE,
                              validator=StringListValidator([
-                                 CLEANUP_DELETE,
-                                 CLEANUP_KEEP]),
+                                 _CLEANUP_DELETE,
+                                 _CLEANUP_KEEP]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
-        self.declareProperty(name=PROP_SUBALGORITHM_LOGGING,
-                             defaultValue=SUBALG_LOGGING_OFF,
+        self.declareProperty(name=_PROP_SUBALG_LOGGING,
+                             defaultValue=_SUBALG_LOGGING_OFF,
                              validator=StringListValidator([
-                                 SUBALG_LOGGING_OFF, SUBALG_LOGGING_ON]),
+                                 _SUBALG_LOGGING_OFF,
+                                 _SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
-        self.declareProperty(name=PROP_INITIAL_ELASTIC_PEAK_REFERENCE,
+        self.declareProperty(name=_PROP_INITIAL_ELASTIC_PEAK_REFERENCE,
                              defaultValue='',
                              direction=Direction.Input,
                              doc="Reference file or workspace for " +
                                  "initial 'EPP' sample log entry.")
-        self.declareProperty(name=PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
+        self.declareProperty(name=_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                              defaultValue=3.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc="Width of the elastic peak in multiples " +
                                  " of 'Sigma' in the EPP table.")
         self.declareProperty(MatrixWorkspaceProperty(
-            name=PROP_VANADIUM_WORKSPACE,
+            name=_PROP_VANA_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced vanadium workspace.')
         self.declareProperty(MatrixWorkspaceProperty(
-            name=PROP_EC_WORKSPACE,
+            name=_PROP_EC_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced empty container workspace.')
         self.declareProperty(MatrixWorkspaceProperty(
-            name=PROP_CD_WORKSPACE,
+            name=_PROP_CD_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced cadmium workspace.')
         self.declareProperty(ITableWorkspaceProperty(
-            name=PROP_EPP_WORKSPACE,
+            name=_PROP_EPP_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Table workspace containing results from the FindEPP ' +
                 'algorithm.')
         self.declareProperty(ITableWorkspaceProperty(
-            name=PROP_MONITOR_EPP_WORKSPACE,
+            name=_PROP_MON_EPP_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Table workspace containing results from the FindEPP ' +
                 'algorithm for the monitor workspace.')
-        self.declareProperty(name=PROP_INDEX_TYPE,
-                             defaultValue=INDEX_TYPE_WORKSPACE_INDEX,
+        self.declareProperty(name=_PROP_INDEX_TYPE,
+                             defaultValue=_INDEX_TYPE_WS_INDEX,
                              validator=StringListValidator([
-                                 INDEX_TYPE_WORKSPACE_INDEX,
-                                 INDEX_TYPE_SPECTRUM_NUMBER,
-                                 INDEX_TYPE_DETECTOR_ID]),
+                                 _INDEX_TYPE_WS_INDEX,
+                                 _INDEX_TYPE_SPECTRUM_NUMBER,
+                                 _INDEX_TYPE_DET_ID]),
                              direction=Direction.Input,
                              doc='Type of numbers in ' +
-                                 PROP_MONITOR_INDEX +
-                                 ' and ' + PROP_DETECTORS_AT_L2 +
+                                 _PROP_MON_INDEX +
+                                 ' and ' + _PROP_DETS_AT_L2 +
                                  ' properties.')
-        self.declareProperty(name=PROP_MONITOR_INDEX,
+        self.declareProperty(name=_PROP_MON_INDEX,
                              defaultValue=0,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Index of the main monitor.')
-        self.declareProperty(name=PROP_INCIDENT_ENERGY_CALIBRATION,
-                             defaultValue=INCIDENT_ENERGY_CALIBRATION_YES,
+        self.declareProperty(name=_PROP_INCIDENT_ENERGY_CALIBRATION,
+                             defaultValue=_INCIDENT_ENERGY_CALIBRATION_YES,
                              validator=StringListValidator([
-                                 INCIDENT_ENERGY_CALIBRATION_YES,
-                                 INCIDENT_ENERGY_CALIBRATION_YES]),
+                                 _INCIDENT_ENERGY_CALIBRATION_YES,
+                                 _INCIDENT_ENERGY_CALIBRATION_NO]),
                              direction=Direction.Input,
                              doc='Enable or disable incident energy ' +
                                  'calibration on IN4 and IN6.')
         # TODO This is actually mandatory if Ei calibration or
         #      diagnostics are enabled.
-        self.declareProperty(IntArrayProperty(name=PROP_DETECTORS_AT_L2,
+        self.declareProperty(IntArrayProperty(name=_PROP_DETS_AT_L2,
                                               values='',
                                               validator=positiveIntArray,
                                               direction=Direction.Input),
                              doc='List of detectors with the instruments ' +
                                  'nominal L2 distance.')
         self.declareProperty(MatrixWorkspaceProperty(
-            name=PROP_INCIDENT_ENERGY_WORKSPACE,
+            name=_PROP_INCIDENT_ENERGY_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='A single-valued workspace holding the calibrated ' +
                 'incident energy.')
-        self.declareProperty(name=PROP_FLAT_BKG_SCALING,
+        self.declareProperty(name=_PROP_FLAT_BKG_SCALING,
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
-        self.declareProperty(name=PROP_FLAT_BKG_WINDOW,
+        self.declareProperty(name=_PROP_FLAT_BKG_WINDOW,
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Running average window width (in bins) ' +
                                  'for flat background.')
         self.declareProperty(MatrixWorkspaceProperty(
-            name=PROP_FLAT_BKG_WORKSPACE,
+            name=_PROP_FLAT_BKG_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Workspace from which to get flat background data.')
-        self.declareProperty(IntArrayProperty(name=PROP_USER_MASK,
+        self.declareProperty(IntArrayProperty(name=_PROP_USER_MASK,
                                               values='',
                                               validator=positiveIntArray,
                                               direction=Direction.Input),
                              doc='List of spectra to mask.')
-        self.declareProperty(name=PROP_DETECTOR_DIAGNOSTICS,
-                             defaultValue=DIAGNOSTICS_YES,
+        self.declareProperty(name=_PROP_DET_DIAGNOSTICS,
+                             defaultValue=_DIAGNOSTICS_YES,
                              validator=StringListValidator([
-                                 DIAGNOSTICS_YES,
-                                 DIAGNOSTICS_NO]),
+                                 _DIAGNOSTICS_YES,
+                                 _DIAGNOSTICS_NO]),
                              direction=Direction.Input,
                              doc='If true, run detector diagnostics or ' +
-                                 'apply ' + PROP_DIAGNOSTICS_WORKSPACE + '.')
+                                 'apply ' + _PROP_DIAGNOSTICS_WS + '.')
         self.declareProperty(MatrixWorkspaceProperty(
-            name=PROP_DIAGNOSTICS_WORKSPACE,
+            name=_PROP_DIAGNOSTICS_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace obtained from another ' +
                 'reduction run.')
-        self.declareProperty(name=PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
+        self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.1,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in elastic peak diagnostics.')
-        self.declareProperty(name=PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
+        self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=3.0,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in elastic peak diagnostics.')
-        self.declareProperty(name=PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
+        self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Error bar multiplier for significance ' +
                                  'test in the elastic peak diagnostics.')
-        self.declareProperty(name=PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
+        self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in noisy background diagnostics.')
-        self.declareProperty(name=PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
+        self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=33.3,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in noisy background diagnostics.')
-        self.declareProperty(name=PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
+        self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Error bar multiplier for significance ' +
                                  'test in the noisy background diagnostics.')
-        self.declareProperty(name=PROP_NORMALISATION,
-                             defaultValue=NORM_METHOD_MONITOR,
+        self.declareProperty(name=_PROP_NORMALISATION,
+                             defaultValue=_NORM_METHOD_MON,
                              validator=StringListValidator([
-                                 NORM_METHOD_MONITOR,
-                                 NORM_METHOD_TIME,
-                                 NORM_METHOD_OFF]),
+                                 _NORM_METHOD_MON,
+                                 _NORM_METHOD_TIME,
+                                 _NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method.')
-        self.declareProperty(name=PROP_TRANSMISSION,
+        self.declareProperty(name=_PROP_TRANSMISSION,
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Sample transmission for empty container ' +
                                  'subtraction.')
-        self.declareProperty(name=PROP_BINNING_Q,
+        self.declareProperty(name=_PROP_BINNING_Q,
                              defaultValue='',
                              direction=Direction.Input,
                              doc='Rebinning in q.')
-        self.declareProperty(name=PROP_BINNING_W,
+        self.declareProperty(name=_PROP_BINNING_W,
                              defaultValue='',
                              direction=Direction.Input,
                              doc='Rebinning in w.')
         # Rest of the output properties.
         self.declareProperty(ITableWorkspaceProperty(
-            name=PROP_OUTPUT_DETECTOR_EPP_WORKSPACE,
+            name=_PROP_OUTPUT_DET_EPP_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for elastic peak positions.')
         self.declareProperty(WorkspaceProperty(
-            name=PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE,
+            name=_PROP_OUTPUT_INCIDENT_ENERGY_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for calibrated inciden energy.')
         self.declareProperty(ITableWorkspaceProperty(
-            name=PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
+            name=_PROP_OUTPUT_MON_EPP_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for elastic peak positions.')
         self.declareProperty(WorkspaceProperty(
-            name=PROP_OUTPUT_FLAT_BKG_WORKSPACE,
+            name=_PROP_OUTPUT_FLAT_BKG_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for flat background.')
         self.declareProperty(WorkspaceProperty(
-            name=PROP_OUTPUT_DIAGNOSTICS_WORKSPACE,
+            name=_PROP_OUTPUT_DIAGNOSTICS_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
@@ -1405,21 +1416,24 @@ class DirectILLReduction(DataProcessorAlgorithm):
         """
         issues = dict()
 
-        fileGiven = not self.getProperty(PROP_INPUT_FILE).isDefault
-        wsGiven = not self.getProperty(PROP_INPUT_WORKSPACE).isDefault
+        fileGiven = not self.getProperty(_PROP_INPUT_FILE).isDefault
+        wsGiven = not self.getProperty(_PROP_INPUT_WS).isDefault
         # Validate that an input exists
         if fileGiven == wsGiven:
-            issues[PROP_INPUT_FILE] = \
+            issues[_PROP_INPUT_FILE] = \
                 'Must give either an input file or an input workspace.'
         return issues
 
     def _convertToWorkspaceIndex(self, i, ws):
-        indexType = self.getProperty(PROP_INDEX_TYPE).value
-        if indexType == INDEX_TYPE_WORKSPACE_INDEX:
+        '''
+        Converts given number to workspace index.
+        '''
+        indexType = self.getProperty(_PROP_INDEX_TYPE).value
+        if indexType == _INDEX_TYPE_WS_INDEX:
             return i
-        elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
+        elif indexType == _INDEX_TYPE_SPECTRUM_NUMBER:
             return ws.getIndexFromSpectrumNumber(i)
-        else:  # INDEX_TYPE_DETECTOR_ID
+        else:  # _INDEX_TYPE_DET_ID
             for j in range(ws.getNumberHistograms()):
                 if ws.getSpectrum(j).hasDetectorID(i):
                     return j
@@ -1427,7 +1441,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                '{0}'.format(i))
 
     def _finalize(self, outWS, wsCleanup, report):
-        self.setProperty(PROP_OUTPUT_WORKSPACE, outWS)
+        '''
+        Does final cleanup, reporting and sets the output property.
+        '''
+        self.setProperty(_PROP_OUTPUT_WS, outWS)
         wsCleanup.finalCleanup()
         report.toLog(self.log())
 
