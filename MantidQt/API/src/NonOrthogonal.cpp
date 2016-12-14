@@ -78,7 +78,7 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
     bNorm.push_back(std::sqrt(sumOverRow));
   }
 
-  // Apply column normalisation to skew matrix 
+  // Apply column normalisation to skew matrix
   const size_t dim = 3;
   Mantid::Kernel::DblMatrix scaleMat(3, 3, true);
   for (size_t index = 0; index < dim; ++index) {
