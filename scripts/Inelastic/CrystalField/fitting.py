@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
+import warnings
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
@@ -711,10 +712,14 @@ class CrystalField(object):
         return CrystalFieldMulti(CrystalFieldSite(self, 1.0), other)
 
     def __mul__(self, factor):
-        return CrystalFieldSite(self, float(factor))
+        ffactor = float(factor)
+        if ffactor == 0.0:
+            msg = 'Intensity scaling factor for %s(%s) is set to zero ' % (self.Ion, self.Symmetry)
+            warnings.warn(msg, SyntaxWarning)
+        return CrystalFieldSite(self, ffactor)
 
     def __rmul__(self, factor):
-        return CrystalFieldSite(self, float(factor))
+        return self.__mul__(factor)
 
     def _getTemperature(self, i):
         """Get temperature value for i-th spectrum."""
@@ -726,7 +731,7 @@ class CrystalField(object):
             return float(self._temperature)
         else:
             nTemp = len(self._temperature)
-            if i >= -nTemp and i < nTemp:
+            if -nTemp <= i < nTemp:
                 return float(self._temperature[i])
             else:
                 raise RuntimeError('Cannot evaluate spectrum %s. Only %s temperatures are given.' % (i, nTemp))
