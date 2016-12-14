@@ -2,10 +2,10 @@
 
 import collections
 import glob
-from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
+from mantid.api import AlgorithmFactory, AlgorithmManagerImpl, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
 from mantid.kernel import CompositeValidator, Direct, Direction, FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, IntBoundedValidator, IntMandatoryValidator, StringListValidator, StringMandatoryValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground, ClearMaskFlag,\
-                             CloneWorkspace, ComputeCalibrationCoefVan,\
+                             CloneWorkspace, ComputeCalibrationCoefVan, ConvertToConstantL2,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
                              MaskDetectors, MedianDetectorTest, MergeRuns, Minus, Multiply, NormaliseToMonitor, Plus, Rebin, Scale
@@ -32,38 +32,45 @@ NORM_METHOD_TIME    = 'Acquisition Time'
 SUBALG_LOGGING_OFF = 'No Subalgorithm Logging'
 SUBALG_LOGGING_ON  = 'Allow Subalgorithm Logging'
 
-PROP_BINNING_Q                        = 'QBinning'
-PROP_BINNING_W                        = 'WBinning'
-PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
-PROP_CLEANUP_MODE                     = 'Cleanup'
-PROP_DIAGNOSTICS_WORKSPACE            = 'DiagnosticsWorkspace'
-PROP_DETECTOR_DIAGNOSTICS             = 'Diagnostics'
-PROP_DETECTORS_AT_L2                  = 'DetectorsExactlyAtL2'
-PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
-PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
-PROP_FLAT_BKG_SCALING                 = 'FlatBkgScaling'
-PROP_FLAT_BKG_WINDOW                  = 'FlatBkgAveragingWindow'
-PROP_FLAT_BKG_WORKSPACE               = 'FlatBkgWorkspace'
-PROP_INCIDENT_ENERGY_CALIBRATION      = 'IncidentEnergyCalibration'
-PROP_INCIDENT_ENERGY_WORKSPACE        = 'IncidentEnergyWorkspace'
-PROP_INDEX_TYPE                       = 'IndexType'
-PROP_INITIAL_ELASTIC_PEAK_REFERENCE   = 'InitialElasticPeakReference'
-PROP_INPUT_FILE                       = 'InputFile'
-PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
-PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
-PROP_MONITOR_INDEX                    = 'Monitor'
-PROP_NORMALISATION                    = 'Normalisation'
-PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
-PROP_OUTPUT_DETECTOR_EPP_WORKSPACE    = 'OutputEPPWorkspace'
-PROP_OUTPUT_FLAT_BKG_WORKSPACE        = 'OutputFlatBkgWorkspace'
-PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE = 'OutputIncidentEnergyWorkspace'
-PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
-PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
-PROP_REDUCTION_TYPE                   = 'ReductionType'
-PROP_TRANSMISSION                     = 'Transmission'
-PROP_SUBALGORITHM_LOGGING             = 'SubalgorithmLogging'
-PROP_USER_MASK                        = 'MaskedDetectors'
-PROP_VANADIUM_WORKSPACE               = 'VanadiumWorkspace'
+PROP_BINNING_Q                          = 'QBinning'
+PROP_BINNING_W                          = 'WBinning'
+PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD     = 'NoisyBkgDiagnosticsHighThreshold'
+PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD      = 'NoisyBkgDiagnosticsLowThreshold'
+PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST  = 'NoisyBkgDiagnosticsErrorThreshold'
+PROP_CD_WORKSPACE                       = 'CadmiumWorkspace'
+PROP_CLEANUP_MODE                       = 'Cleanup'
+PROP_DIAGNOSTICS_WORKSPACE              = 'DiagnosticsWorkspace'
+PROP_DETECTOR_DIAGNOSTICS               = 'Diagnostics'
+PROP_DETECTORS_AT_L2                    = 'DetectorsAtL2'
+PROP_EC_WORKSPACE                       = 'EmptyCanWorkspace'
+PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER      = 'ElasticPeakWidthInSigmas'
+PROP_EPP_WORKSPACE                      = 'EPPWorkspace'
+PROP_FLAT_BKG_SCALING                   = 'FlatBkgScaling'
+PROP_FLAT_BKG_WINDOW                    = 'FlatBkgAveragingWindow'
+PROP_FLAT_BKG_WORKSPACE                 = 'FlatBkgWorkspace'
+PROP_INCIDENT_ENERGY_CALIBRATION        = 'IncidentEnergyCalibration'
+PROP_INCIDENT_ENERGY_WORKSPACE          = 'IncidentEnergyWorkspace'
+PROP_INDEX_TYPE                         = 'IndexType'
+PROP_INITIAL_ELASTIC_PEAK_REFERENCE     = 'InitialElasticPeakReference'
+PROP_INPUT_FILE                         = 'InputFile'
+PROP_INPUT_WORKSPACE                    = 'InputWorkspace'
+PROP_MONITOR_EPP_WORKSPACE              = 'MonitorEPPWorkspace'
+PROP_MONITOR_INDEX                      = 'Monitor'
+PROP_NORMALISATION                      = 'Normalisation'
+PROP_OUTPUT_DIAGNOSTICS_WORKSPACE       = 'OutputDiagnosticsWorkspace'
+PROP_OUTPUT_DETECTOR_EPP_WORKSPACE      = 'OutputEPPWorkspace'
+PROP_OUTPUT_FLAT_BKG_WORKSPACE          = 'OutputFlatBkgWorkspace'
+PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE   = 'OutputIncidentEnergyWorkspace'
+PROP_OUTPUT_MONITOR_EPP_WORKSPACE       = 'OutputMonitorEPPWorkspace'
+PROP_OUTPUT_WORKSPACE                   = 'OutputWorkspace'
+PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD    = 'ElasticPeakDiagnosticsHighThreshold'
+PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD     = 'ElasticPeakDiagnosticsLowThreshold'
+PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST = 'ElasticPeakDiagnosticsErrorThreshold'
+PROP_REDUCTION_TYPE                     = 'ReductionType'
+PROP_TRANSMISSION                       = 'Transmission'
+PROP_SUBALGORITHM_LOGGING               = 'SubalgorithmLogging'
+PROP_USER_MASK                          = 'MaskedDetectors'
+PROP_VANADIUM_WORKSPACE                 = 'VanadiumWorkspace'
 
 REDUCTION_TYPE_CD = 'Empty Can/Cadmium'
 REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
@@ -72,6 +79,15 @@ REDUCTION_TYPE_VANADIUM = 'Vanadium'
 
 WS_CONTENT_DETECTORS = 0
 WS_CONTENT_MONITORS = 1
+
+class DiagnosticsSettings:
+    '''
+    Holds settings for MedianDetectorTest.
+    '''
+    def __init__(self, lowThreshold, highThreshold, significanceTest):
+        self.lowThreshold = lowThreshold
+        self.highThreshold = highThreshold
+        self.significanceTest = significanceTest
 
 class IntermediateWsCleanup:
     '''
@@ -324,7 +340,7 @@ def _findEPP(ws, wsType, wsNames, algorithmLogging):
                     EnableLogging=algorithmLogging)
     return eppWS
 
-def _reportSingleZeroCountDiagnostics(report, diagnostics, wsIndex):
+def _reportSinglePeakDiagnostics(report, diagnostics, wsIndex):
     '''
     Reports the result of zero count diagnostics for a single diagnose.
     '''
@@ -332,14 +348,15 @@ def _reportSingleZeroCountDiagnostics(report, diagnostics, wsIndex):
     if diagnose == 0:
         pass # Nothing to report.
     elif diagnose == 1:
-        report.notice('Workspace index {0} has zero counts.'.format(wsIndex))
+        report.notice('Workspace index {0} did not pass elastic peak diagnostics.'.format(wsIndex))
     else:
         report.error(('Workspace index {0} has been marked as bad for ' +
-            'masking by zero count diagnostics for unknown reasons.').format(wsIndex))
+            'masking by elastic peakd diagnostics for unknown reasons.').format(wsIndex))
     det = diagnostics.getDetector(wsIndex)
     if det and det.isMasked():
-        report.error(('Workspace index {0} has been marked as masked by ' +
-            'zero count diagnostics for unknown reasons.').format(wsIndex))
+        report.notice(('Workspace index {0} has been marked as an outlier ' +
+            'and excluded from the peak median intensity calculation in ' +
+            'elastic peak diagnostics.').format(wsIndex))
 
 def _reportSingleBkgDiagnostics(report, diagnostics, wsIndex):
     '''
@@ -349,30 +366,31 @@ def _reportSingleBkgDiagnostics(report, diagnostics, wsIndex):
     if diagnose == 0:
         pass # Nothing to report.
     elif diagnose == 1:
-        report.notice('Workspace index {0} has noisy background.'.format(wsIndex))
+        report.notice('Workspace index {0} did not pass noisy background diagnostics.'.format(wsIndex))
     else:
         report.error(('Workspace index {0} has been marked as bad ' +
             'by noisy background diagnostics for unknown reasons.').format(wsIndex))
     det = diagnostics.getDetector(wsIndex)
     if det and det.isMasked():
         report.notice(('Workspace index {0} has been marked as an outlier ' +
-            'in noisy background diagnostics.').format(wsIndex))
+            'and excluded from the background median calculation in ' +
+            'noisy background diagnostics.').format(wsIndex))
 
 def _nominalTOF(ws):
      ei = ws.getRun().getLogData('Ei').value
      l1 = ws.getRun().getLogData('L1').value
 
-def _reportDiagnostics(report, zeroCountDiagnostics, bkgDiagnostics):
+def _reportDiagnostics(report, peakDiagnostics, bkgDiagnostics):
     '''
     Parses the mask workspaces and fills in the report accordingly.
     '''
-    for i in range(zeroCountDiagnostics.getNumberHistograms()):
-        _reportSingleZeroCountDiagnostics(report,
-                                          zeroCountDiagnostics,
-                                          i)
+    for i in range(peakDiagnostics.getNumberHistograms()):
+        _reportSinglePeakDiagnostics(report,
+                                     peakDiagnostics,
+                                     i)
         _reportSingleBkgDiagnostics(report,
-                                           bkgDiagnostics,
-                                           i)
+                                    bkgDiagnostics,
+                                    i)
 
 def _medianEPP(eppWS, eppIndices):
     centres = list()
@@ -380,8 +398,8 @@ def _medianEPP(eppWS, eppIndices):
     for rowIndex in eppIndices:
         eppRow = eppWS.row(rowIndex)
         if eppRow['FitStatus'] == 'success':
-            centre.append(eppRow['PeakCentre'])
-            sigmas.append(eppRow['sigma'])
+            centres.append(eppRow['PeakCentre'])
+            sigmas.append(eppRow['Sigma'])
     if len(centres) == 0:
         raise RuntimeError('No successes in EPP table.')
     median = numpy.median(numpy.array(centres))
@@ -389,23 +407,24 @@ def _medianEPP(eppWS, eppIndices):
     return median, sigma
     
 
-def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, wsNames, wsCleanup, report, algorithmLogging):
+def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings, sigmaMultiplier, noisyBkgSettings, wsNames, wsCleanup, report, algorithmLogging):
     '''
     Returns a diagnostics workspace.
     '''
     # 1. Diagnose elastic peak region.
-    # TODO sigmaFactor should be user-settable.
-    # TODO MedianDetectorTest properties should be user-controllable.
     constantL2WSName = wsNames.withSuffix('constant_L2')
     constantL2WS = ConvertToConstantL2(InputWorkspace=ws,
                                        OutputWorkspace=constantL2WSName,
                                        EnableLogging=algorithmLogging)
     medianEPPCentre, medianEPPSigma = _medianEPP(eppWS, eppIndices)
     elasticPeakDiagnosticsWSName = wsNames.withSuffix('diagnostics_elastic_peak')
-    integrationBegin = medianEPPCentre - sigmaFactor * medianEPPSigma
-    integrationEnd = medianEPPCentre + sigmaFactor * medianEPPSigma
+    integrationBegin = medianEPPCentre - sigmaMultiplier * medianEPPSigma
+    integrationEnd = medianEPPCentre + sigmaMultiplier * medianEPPSigma
     elasticPeakDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=constantL2WS,
                                                            OutputWorkspace=elasticPeakDiagnosticsWSName,
+                                                           SignificanceTest=peakSettings.significanceTest,
+                                                           LowThreshold=peakSettings.lowThreshold,
+                                                           HighThreshold=peakSettings.highThreshold,
                                                            CorrectForSolidAngle=True,
                                                            RangeLower=integrationBegin,
                                                            RangeUpper=integrationEnd,
@@ -414,15 +433,16 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, wsNames, wsCleanup, report,
     noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
     noisyBkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWS,
                                                         OutputWorkspace=noisyBkgWSName,
-                                                        LowThreshold=0.0,
-                                                        HighThreshold=10,
+                                                        SignificanceTest=noisyBkgSettings.significanceTest,
+                                                        LowThreshold=noisyBkgSettings.lowThreshold,
+                                                        HighThreshold=noisyBkgSettings.highThreshold,
                                                         LowOutlier=0.0,
                                                         EnableLogging=algorithmLogging)
-    _reportDiagnostics(report, zeroCountDiagnostics, noisyBkgDiagnostics)
+    _reportDiagnostics(report, elasticPeakDiagnostics, noisyBkgDiagnostics)
     ClearMaskFlag(Workspace=noisyBkgDiagnostics,
                   EnableLogging=algorithmLogging)
     combinedDiagnosticsWSName = wsNames.withSuffix('diagnostics')
-    diagnosticsWS = Plus(LHSWorkspace=zeroCountDiagnostics,
+    diagnosticsWS = Plus(LHSWorkspace=elasticPeakDiagnostics,
                          RHSWorkspace=noisyBkgDiagnostics,
                          OutputWorkspace=combinedDiagnosticsWSName,
                          EnableLogging=algorithmLogging)
@@ -531,7 +551,7 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report, algorithm
     report.notice('Original wavelength: {} new wavelength {}.'.format(originalWavelength, wavelength))
     return calibratedWS
 
-def _normalizeToMonitor(ws, monWS, monEPPWS, monIndex, wsNames, wsCleanup, algorithmLogging):
+def _normalizeToMonitor(ws, monWS, monEPPWS, sigmaMultiplier, monIndex, wsNames, wsCleanup, algorithmLogging):
     '''
     Normalizes to monitor counts.
     '''
@@ -540,8 +560,8 @@ def _normalizeToMonitor(ws, monWS, monEPPWS, monIndex, wsNames, wsCleanup, algor
     eppRow = monEPPWS.row(monIndex)
     sigma = eppRow['Sigma']
     centre = eppRow['PeakCentre']
-    begin = centre - 3 * sigma
-    end = centre + 3 * sigma
+    begin = centre - sigmaMultiplier * sigma
+    end = centre + sigmaMultiplier * sigma
     normalizedWS, normalizationFactorWS = NormaliseToMonitor(InputWorkspace=ws,
                                                              OutputWorkspace=normalizedWSName,
                                                              MonitorWorkspace=monWS,
@@ -679,7 +699,6 @@ def _correctByDetectorEfficiency(ws, wsNames, algorithmLogging):
                                             EnableLogging=algorithmLogging)
     return correctedWS
 
-
 class DirectILLReduction(DataProcessorAlgorithm):
 
     def __init__(self):
@@ -813,11 +832,27 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if self.getProperty(PROP_DETECTOR_DIAGNOSTICS).value == DIAGNOSTICS_YES:
             diagnosticsInWS = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
             if not diagnosticsInWS:
+                lowThreshold = self.getProperty(PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
+                highThreshold = self.getProperty(PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
+                significanceTest = self.getProperty(PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+                peakDiagnosticsSettings = DiagnosticsSettings(lowThreshold,
+                                                              highThreshold,
+                                                              significanceTest)
+                sigmaMultiplier = self.getProperty(PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+                lowThreshold = self.getProperty(PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
+                highThreshold = self.getProperty(PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
+                significanceTest = self.getProperty(PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+                bkgDiagnosticsSettings = DiagnosticsSettings(lowThreshold,
+                                                             highThreshold,
+                                                             significanceTest)
                 detectorsAtL2 = self.getProperty(PROP_DETECTORS_AT_L2).value
                 diagnosticsWS = _diagnoseDetectors(mainWS,
                                                    bkgWS,
                                                    detEPPWS,
                                                    detectorsAtL2,
+                                                   peakDiagnosticsSettings,
+                                                   sigmaMultiplier,
+                                                   bkgDiagnosticsSettings,
                                                    wsNames,
                                                    wsCleanup,
                                                    report,
@@ -894,9 +929,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
         if normalisationMethod != NORM_METHOD_OFF:
             if normalisationMethod == NORM_METHOD_MONITOR:
+                sigmaMultiplier = self.getProperty(PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
                 normalizedWS = _normalizeToMonitor(mainWS,
                                                    monWS,
                                                    monEPPWS,
+                                                   sigmaMultiplier,
                                                    monIndex,
                                                    wsNames,
                                                    wsCleanup,
@@ -1014,9 +1051,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Validators.
+        greaterThanUnityFloat = FloatBoundedValidator(lower=1)
         mandatoryPositiveInt = CompositeValidator()
         mandatoryPositiveInt.add(IntMandatoryValidator())
         mandatoryPositiveInt.add(IntBoundedValidator(lower=0))
+        positiveFloat = FloatBoundedValidator(lower=0)
         positiveIntArray = IntArrayBoundedValidator()
         positiveIntArray.setLower(0)
         scalingFactor = FloatBoundedValidator(lower=0, upper=1)
@@ -1056,6 +1095,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              defaultValue='',
                              direction=Direction.Input,
                              doc="Reference file or workspace for initial 'EPP' sample log entry")
+        self.declareProperty(name=PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
+                             defaultValue=3.0,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc="Width of the elastic peak in multiples of 'Sigma' in the EPP table.")
         self.declareProperty(MatrixWorkspaceProperty(name=PROP_VANADIUM_WORKSPACE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -1138,6 +1182,36 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='Detector diagnostics workspace obtained from another reduction run.')
+        self.declareProperty(name=PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
+                             defaultValue=0.1,
+                             validator=scalingFactor,
+                             direction=Direction.Input,
+                             doc='Multiplier for lower acceptance limit used in elastic peak diagnostics.')
+        self.declareProperty(name=PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
+                             defaultValue=3.0,
+                             validator=greaterThanUnityFloat,
+                             direction=Direction.Input,
+                             doc='Multiplier for higher acceptance limit used in elastic peak diagnostics.')
+        self.declareProperty(name=PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
+                             defaultValue=3.3,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Error bar multiplier for significance test in the elastic peak diagnostics.')
+        self.declareProperty(name=PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
+                             defaultValue=0.0,
+                             validator=scalingFactor,
+                             direction=Direction.Input,
+                             doc='Multiplier for lower acceptance limit used in noisy background diagnostics.')
+        self.declareProperty(name=PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
+                             defaultValue=33.3,
+                             validator=greaterThanUnityFloat,
+                             direction=Direction.Input,
+                             doc='Multiplier for higher acceptance limit used in noisy background diagnostics.')
+        self.declareProperty(name=PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
+                             defaultValue=3.3,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Error bar multiplier for significance test in the noisy background diagnostics.')
         self.declareProperty(name=PROP_NORMALISATION,
                              defaultValue=NORM_METHOD_MONITOR,
                              validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME, NORM_METHOD_OFF]),
@@ -1191,7 +1265,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         fileGiven = not self.getProperty(PROP_INPUT_FILE).isDefault
         wsGiven = not self.getProperty(PROP_INPUT_WORKSPACE).isDefault
-        # Validate an input exists
+        # Validate that an input exists
         if fileGiven == wsGiven:
             issues[PROP_INPUT_FILE] = 'Must give either an input file or an input workspace.'
 
