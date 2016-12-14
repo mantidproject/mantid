@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -17,9 +18,10 @@ namespace API {
  * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
  * is not null. */
 DetectorInfo::DetectorInfo(
+    Beamline::DetectorInfo &detectorInfo,
     boost::shared_ptr<const Geometry::Instrument> instrument,
     Geometry::ParameterMap *pmap)
-    : m_pmap(pmap), m_instrument(instrument),
+    : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
@@ -30,6 +32,18 @@ DetectorInfo::DetectorInfo(
   m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
   for (size_t i = 0; i < m_detectorIDs.size(); ++i)
     m_detIDToIndex[m_detectorIDs[i]] = i;
+}
+
+/// Assigns the contents of the non-wrapping part of `rhs` to this.
+DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
+  if (detectorIDs() != rhs.detectorIDs())
+    throw std::runtime_error("DetectorInfo::operator=: Detector IDs in "
+                             "assignment do not match. Assignment not "
+                             "possible");
+  // Do NOT assign anything in the "wrapping" part of DetectorInfo. We simply
+  // assign the underlying Beamline::DetectorInfo.
+  m_detectorInfo = rhs.m_detectorInfo;
+  return *this;
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the

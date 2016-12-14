@@ -918,7 +918,7 @@ const DetectorInfo &ExperimentInfo::detectorInfo() const {
     std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
     if (!m_detectorInfoWrapper)
       m_detectorInfoWrapper =
-          Kernel::make_unique<DetectorInfo>(getInstrument());
+          Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument());
   }
   return *m_detectorInfoWrapper;
 }
@@ -941,7 +941,7 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   // reference count to the ParameterMap. This has do be done *after* getting
   // the ParameterMap.
   m_detectorInfoWrapper =
-      Kernel::make_unique<DetectorInfo>(getInstrument(), pmap);
+      Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
   return *m_detectorInfoWrapper;
 }
 
