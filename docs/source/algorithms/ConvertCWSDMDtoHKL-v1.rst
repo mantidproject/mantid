@@ -79,12 +79,14 @@ Usage
 
   # Examine
   mdws = mtd['QSampleMD']
-  print 'Output MDEventWorkspace has %d events.'%(mdws.getNEvents())
-
   hklws = mtd['HKLMD']
-  print 'H: range from %.5f to %.5f.' % (hklws.getXDimension().getMinimum(), hklws.getXDimension().getMaximum())
-  print 'K: range from %.5f to %.5f.' % (hklws.getYDimension().getMinimum(), hklws.getYDimension().getMaximum())
-  print 'L: range from %.5f to %.5f.' % (hklws.getZDimension().getMinimum(), hklws.getZDimension().getMaximum())
+  print 'Output QSample and HKL workspaces have %d and %d events.'%(mdws.getNEvents(), hklws.getNEvents())
+
+  BinMD(InputWorkspace='HKLMD', AlignedDim0='H,-0.3,0.3,60', AlignedDim1='K,-0.4,0.5,90', AlignedDim2='L,4,8,10', OutputWorkspace='BinndHKL')
+  histws = mtd['BinndHKL']
+  events_array = histws.getNumEventsArray()
+  print 'events[22, 53, 5] = %.1f' % events_array[22, 53, 5]
+  print 'events[30, 40, 5] = %.1f' % events_array[30, 40, 5]
 
 ..
    .. testcleanup::  ExConvertHB3AToHKL
@@ -101,10 +103,9 @@ Usage
 
    .. testoutput:: ExConvertHB3AToHKL
 
-     Output MDEventWorkspace has 1631 events.
-     H: range from -0.26509 to 0.22324.
-     K: range from -0.33148 to 0.45354.
-     L: range from 4.92654 to 7.17077.
+     Output QSample and HKL workspaces have 1631 and 1631 events.
+     events[22, 53, 5] = 19.0
+     events[30, 40, 5] = 38.0
 
 .. categories::
 
