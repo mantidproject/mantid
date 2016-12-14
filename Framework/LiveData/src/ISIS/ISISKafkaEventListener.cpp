@@ -22,7 +22,6 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   KafkaBroker broker(address.toString());
   try {
     std::string instrumentName = getProperty("InstrumentName");
-    ;
     const std::string eventTopic(instrumentName +
                                  KafkaRebalanceCb::EVENT_TOPIC_SUFFIX),
         runInfoTopic(instrumentName + KafkaRebalanceCb::RUN_TOPIC_SUFFIX),
