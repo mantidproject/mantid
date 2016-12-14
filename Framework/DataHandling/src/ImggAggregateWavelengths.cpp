@@ -560,7 +560,7 @@ ImggAggregateWavelengths::findInputSubdirs(const Poco::Path &path) {
 
     // there is at least one image file: take just the first level directory
     if (it->isFile()) {
-      const std::string name = it.name();
+      const std::string &name = it.name();
       const std::string extShort = name.substr(name.size() - 3);
       const std::string extLong = name.substr(name.size() - 4);
 

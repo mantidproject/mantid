@@ -1,3 +1,4 @@
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 #include <algorithm>
@@ -17,18 +18,19 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
 }
 
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(
-    Instrument_const_sptr poldiInstrument,
+    const API::DetectorInfo &poldiDetectorInfo,
     boost::shared_ptr<PoldiAbstractDetector> detector)
     : PoldiDetectorDecorator(detector), m_deadWireSet(), m_goodElements() {
   setDecoratedDetector(detector);
 
-  std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
+  std::vector<detid_t> allDetectorIds = poldiDetectorInfo.detectorIDs();
   std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
 
   auto endIterator = std::remove_copy_if(
       allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(),
-      boost::bind<bool>(&PoldiDeadWireDecorator::detectorIsNotMasked,
-                        poldiInstrument, _1));
+      [&](const detid_t detID) -> bool {
+        return !poldiDetectorInfo.isMasked(poldiDetectorInfo.indexOf(detID));
+      });
   deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
 
   setDeadWires(std::set<int>(deadDetectorIds.begin(), deadDetectorIds.end()));
@@ -74,11 +76,6 @@ PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
   }
 
   return rawElements;
-}
-
-bool PoldiDeadWireDecorator::detectorIsNotMasked(
-    Instrument_const_sptr instrument, detid_t detectorId) {
-  return !instrument->isDetectorMasked(detectorId);
 }
 
 bool PoldiDeadWireDecorator::isDeadElement(int index) {

@@ -1586,11 +1586,6 @@ void ConfigDialog::initCurveFittingTab() {
   findPeaksTolerance->setMaximum(1000000);
   grid->addWidget(findPeaksTolerance, 4, 1);
 
-  grid->addWidget(new QLabel(tr("Peak Radius (in FWHM)")), 5, 0);
-  peakRadius = new QSpinBox();
-  peakRadius->setMaximum(std::numeric_limits<int>::max());
-  grid->addWidget(peakRadius, 5, 1);
-
   grid->addWidget(new QLabel(tr("Double property decimals")), 6, 0);
   decimals = new QSpinBox();
   grid->addWidget(decimals, 6, 1);
@@ -1673,15 +1668,6 @@ void ConfigDialog::initCurveFittingTab() {
     findPeaksTolerance->setValue(setting.toInt());
   } else {
     findPeaksTolerance->setValue(4);
-  }
-
-  setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "curvefitting.peakRadius"));
-  if (!setting.isEmpty()) {
-    peakRadius->setValue(setting.toInt());
-  } else {
-    peakRadius->setValue(5);
   }
 
   decimals->setValue(app->mantidUI->fitFunctionBrowser()->getDecimals());
@@ -2805,9 +2791,6 @@ void ConfigDialog::updateCurveFitSettings() {
 
   setting = QString::number(findPeaksTolerance->value()).toStdString();
   cfgSvc.setString("curvefitting.findPeaksTolerance", setting);
-
-  setting = QString::number(peakRadius->value()).toStdString();
-  cfgSvc.setString("curvefitting.peakRadius", setting);
 
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 }

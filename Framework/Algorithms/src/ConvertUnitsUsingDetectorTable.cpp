@@ -175,7 +175,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
-  auto &spectrumInfo = outputWS->spectrumInfo();
+  auto &spectrumInfo = outputWS->mutableSpectrumInfo();
 
   // TODO: Check why this parallel stuff breaks
   // Loop over the histograms (detector spectra)
@@ -250,7 +250,9 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
       } else {
         // Not found
         failedDetectorCount++;
-        outputWS->maskWorkspaceIndex(wsid);
+        outputWS->getSpectrum(wsid).clearData();
+        if (spectrumInfo.hasDetectors(wsid))
+          spectrumInfo.setMasked(wsid, true);
       }
 
     } else {
@@ -260,7 +262,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
       // detectors, this call is
       // the same as just zeroing out the data (calling clearData on the
       // spectrum)
-      outputWS->maskWorkspaceIndex(i);
+      outputWS->getSpectrum(i).clearData();
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());

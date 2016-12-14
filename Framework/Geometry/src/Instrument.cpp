@@ -514,53 +514,6 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   return false;
 }
 
-//--------------------------------------------------------------------------
-/** Is the detector with the given ID masked?
- *
- * @param detector_id :: detector ID to look for.
- * @return true if masked; false if not masked or if the detector was not found.
- */
-bool Instrument::isDetectorMasked(const detid_t &detector_id) const {
-  // With no parameter map, then no detector is EVER masked
-  if (!isParametrized())
-    return false;
-  // Find the (base) detector object in the map.
-  auto it = m_instr->m_detectorCache.find(detector_id);
-  if (it == m_instr->m_detectorCache.end())
-    return false;
-  // This is the detector
-  const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == nullptr)
-    return false;
-  // Access the parameter map directly.
-  Parameter_sptr maskedParam = m_map->get(det, "masked");
-  if (!maskedParam)
-    return false;
-  // If the parameter is defined, then yes, it is masked.
-  return maskedParam->value<bool>();
-}
-
-//--------------------------------------------------------------------------
-/** Is this group of detectors masked?
- *
- * This returns true (masked) if ALL of the detectors listed are masked.
- * It returns false (not masked) if there are no detectors in the list
- * It returns false (not masked) if any of the detectors are NOT masked.
- *
- * @param detector_ids :: set of detector IDs
- * @return true if masked.
- */
-bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const {
-  if (detector_ids.empty())
-    return false;
-
-  for (auto detector_id : detector_ids) {
-    if (!this->isDetectorMasked(detector_id))
-      return false;
-  }
-  return true;
-}
-
 /**
  * Returns a pointer to the geometrical object for the given set of IDs
  * @param det_ids :: A list of detector ids

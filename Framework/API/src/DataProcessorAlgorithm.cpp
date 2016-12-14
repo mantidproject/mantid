@@ -236,8 +236,8 @@ Workspace_sptr DataProcessorAlgorithm::assemble(Workspace_sptr partialWS) {
 Workspace_sptr
 DataProcessorAlgorithm::assemble(const std::string &partialWSName,
                                  const std::string &outputWSName) {
-  std::string threadOutput = partialWSName;
 #ifdef MPI_BUILD
+  std::string threadOutput = partialWSName;
   Workspace_sptr partialWS =
       AnalysisDataService::Instance().retrieve(partialWSName);
   IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
@@ -252,6 +252,8 @@ DataProcessorAlgorithm::assemble(const std::string &partialWSName,
     threadOutput = outputWSName;
 #else
   UNUSED_ARG(outputWSName)
+  const std::string &threadOutput = partialWSName;
+
 #endif
   Workspace_sptr outputWS =
       AnalysisDataService::Instance().retrieve(threadOutput);
