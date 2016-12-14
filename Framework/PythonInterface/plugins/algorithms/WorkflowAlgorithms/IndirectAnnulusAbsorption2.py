@@ -160,7 +160,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                              OutputWorkspace=self._ass_ws,
                              EventsPerPoint=self._events,
                              NumberOfWavelengthPoints=self._number_wavelengths,
-                             Interpolation = 'CSpline')
+                             Interpolation='CSpline')
 
         group = self._ass_ws
 
@@ -229,7 +229,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                      OutputWorkspace='__Acc1',
                                      EventsPerPoint=self._events,
                                      NumberOfWavelengthPoints=self._number_wavelengths,
-                                     Interpolation = 'CSpline')
+                                     Interpolation='CSpline')
 
                 SetBeam(can2_wave_ws,
                         Geometry={'Shape': 'Slit',
@@ -249,7 +249,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                      OutputWorkspace='__Acc2',
                                      EventsPerPoint=self._events,
                                      NumberOfWavelengthPoints=self._number_wavelengths,
-                                     Interpolation = 'CSpline')
+                                     Interpolation='CSpline')
 
                 multiply_alg.setProperty("LHSWorkspace", '__Acc1')
                 multiply_alg.setProperty("RHSWorkspace", '__Acc2')
@@ -390,10 +390,13 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         # Get beam size defaults
         # Hard-coded because the ISIS parameters weren't being picked up
         inst = mtd[self._sample_ws_name].getInstrument().getName
-        if (self.getPropertyValue("DefaultBeamSize")):
-            if inst == 'IRIS':self._beam_height, self._beam_width = 3.2, 2.1
-            elif inst == 'OSIRIS':self._beam_height, self._beam_width = 4.4, 2.2
-            else: logger.error('Unable to obtain default beam dimensions')
+        if self.getPropertyValue("DefaultBeamSize"):
+            if inst == 'IRIS':
+                self._beam_height, self._beam_width = 3.2, 2.1
+            elif inst == 'OSIRIS':
+                self._beam_height, self._beam_width = 4.4, 2.2
+            else:
+                logger.error('Unable to obtain default beam dimensions')
 
     def validateInputs(self):
         """
