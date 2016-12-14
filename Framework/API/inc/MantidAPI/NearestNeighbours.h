@@ -1,7 +1,7 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 #define MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 
-#include "MantidGeometry/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/V3D.h"
 // Boost graphing
@@ -13,14 +13,14 @@
 
 namespace Mantid {
 namespace Geometry {
-
 class Instrument;
 class IDetector;
-
-typedef std::unordered_map<specnum_t, std::set<detid_t>>
-    ISpectrumDetectorMapping;
-
+}
+namespace API {
+class SpectrumInfo;
 /**
+ * This class is not intended for direct use. Use NearestNeighbourInfo instead!
+ *
  * This class is used to find the nearest neighbours of a detector in the
  * instrument geometry. This class can be queried through calls to the
  * getNeighbours() function on a Detector object.
@@ -58,17 +58,10 @@ typedef std::unordered_map<specnum_t, std::set<detid_t>>
  *  File change history is stored at: <https://github.com/mantidproject/mantid>
  *  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_GEOMETRY_DLL NearestNeighbours {
+class MANTID_API_DLL NearestNeighbours {
 public:
-  /// Constructor with an instrument and a spectra map
-  NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
-                    const ISpectrumDetectorMapping &spectraMap,
-                    bool ignoreMaskedDetectors = false);
-
-  /// Constructor with an instrument and a spectra map and number of neighbours
-  NearestNeighbours(int nNeighbours,
-                    boost::shared_ptr<const Instrument> instrument,
-                    const ISpectrumDetectorMapping &spectraMap,
+  NearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
+                    std::vector<specnum_t> spectrumNumbers,
                     bool ignoreMaskedDetectors = false);
 
   // Neighbouring spectra by radius
@@ -79,17 +72,14 @@ public:
   std::map<specnum_t, Mantid::Kernel::V3D> neighbours(specnum_t spectrum) const;
 
 protected:
-  /// Get the spectra associated with all in the instrument
-  std::map<specnum_t, boost::shared_ptr<const IDetector>>
-  getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
-                      const ISpectrumDetectorMapping &spectraMap);
-
-  /// A pointer the the instrument
-  boost::shared_ptr<const Instrument> m_instrument;
-  /// A reference to the spectra map
-  const ISpectrumDetectorMapping &m_spectraMap;
+  std::vector<size_t> getSpectraDetectors();
 
 private:
+  /// A reference to the SpectrumInfo
+  const SpectrumInfo &m_spectrumInfo;
+  /// Vector of spectrum numbers
+  const std::vector<specnum_t> m_spectrumNumbers;
+
   /// typedef for Graph object used to hold the calculated information
   typedef boost::adjacency_list<
       boost::vecS, boost::vecS, boost::directedS,
@@ -127,14 +117,7 @@ private:
   bool m_bIgnoreMaskedDetectors;
 };
 
-/// Typedef for shared pointer to the NearestNeighbours class
-typedef boost::shared_ptr<Mantid::Geometry::NearestNeighbours>
-    NearestNeighbours_sptr;
-/// Typedef for constant shared pointer to the NearestNeighbours class
-typedef boost::shared_ptr<const Mantid::Geometry::NearestNeighbours>
-    NearestNeighbours_const_sptr;
-
-} // namespace Geometry
+} // namespace API
 } // namespace Mantid
 
 #endif

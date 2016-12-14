@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -258,9 +259,10 @@ public:
     }
 
     // Now mask all detectors in the workspace
-    std::vector<size_t>::const_iterator wit;
-    for (wit = indexLis.begin(); wit != indexLis.end(); ++wit) {
-      inputWS->maskWorkspaceIndex(*wit);
+    auto &spectrumInfo = inputWS->mutableSpectrumInfo();
+    for (const auto i : indexLis) {
+      inputWS->getSpectrum(i).clearData();
+      spectrumInfo.setMasked(i, true);
     }
     // let's retrieve masks now
 

@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/Functions/FlatBackground.cpp
 	src/Functions/FullprofPolynomial.cpp
 	src/Functions/FunctionGenerator.cpp
+	src/Functions/FunctionQDepends.cpp
 	src/Functions/GausDecay.cpp
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
@@ -231,6 +232,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/FlatBackground.h
 	inc/MantidCurveFitting/Functions/FullprofPolynomial.h
 	inc/MantidCurveFitting/Functions/FunctionGenerator.h
+	inc/MantidCurveFitting/Functions/FunctionQDepends.h
 	inc/MantidCurveFitting/Functions/GausDecay.h
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
@@ -376,6 +378,7 @@ set ( TEST_FILES
 	Functions/ExpDecayTest.h
 	Functions/FlatBackgroundTest.h
 	Functions/FullprofPolynomialTest.h
+	Functions/FunctionQDependsTest.h
 	Functions/GausDecayTest.h
 	Functions/GausOscTest.h
 	Functions/GaussianComptonProfileTest.h
