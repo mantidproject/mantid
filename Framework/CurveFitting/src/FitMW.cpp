@@ -1,27 +1,28 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
+#include "MantidCurveFitting/SeqDomain.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
-
+#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Matrix.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -32,6 +33,75 @@ using API::Axis;
 using API::MatrixWorkspace;
 using API::Algorithm;
 using API::Jacobian;
+
+namespace {
+
+/// Helper calss that finds if a point should be excluded from fit.
+class ExcludeRangeFinder {
+  /// Index of current excluded range
+  size_t m_exclIndex;
+  /// Start of current excluded range
+  double m_startExcludedRange;
+  /// End of current excluded range
+  double m_endExcludeRange;
+  /// Reference to a list of exclusion ranges.
+  const std::vector<double> &m_exclude;
+
+public:
+  /// Constructor.
+  /// @param exclude :: The value of the "Exclude" property.
+  /// @param startX :: The start of the overall fit interval.
+  /// @param endX :: The end of the overall fit interval.
+  ExcludeRangeFinder(const std::vector<double> &exclude, double startX,
+                     double endX)
+      : m_exclIndex(0), m_startExcludedRange(endX), m_endExcludeRange(endX),
+        m_exclude(exclude) {
+    if (!m_exclude.empty()) {
+      if (startX < m_exclude.back() && endX > m_exclude.front()) {
+        findNextExcludedRange(startX);
+      }
+    }
+  }
+  /// Find the range from m_exclude that may contain points x >= p .
+  /// @param p :: An x value to use in the seach.
+  void findNextExcludedRange(double p) {
+    if (p >= m_exclude.back()) {
+      m_exclIndex = m_exclude.size();
+      return;
+    }
+    for (auto it = m_exclude.begin() + m_exclIndex; it != m_exclude.end();
+         ++it) {
+      if (*it > p) {
+        m_exclIndex = static_cast<size_t>(std::distance(m_exclude.begin(), it));
+        if (m_exclIndex % 2 == 0) {
+          // A number at an even position in m_exclude starts an exclude
+          // range
+          m_startExcludedRange = *it;
+          m_endExcludeRange = *(it + 1);
+        } else {
+          // A number at an odd position in m_exclude ends an exclude range
+          m_startExcludedRange = *(it - 1);
+          m_endExcludeRange = *it;
+          --m_exclIndex;
+        }
+        break;
+      }
+    }
+  }
+
+  /// Check if an x-value lies in an exclusion range.
+  /// @param value :: A value to check.
+  bool isExcluded(double value) {
+    if (m_exclIndex < m_exclude.size() && value >= m_startExcludedRange &&
+        value <= m_endExcludeRange) {
+      return true;
+    } else if (m_exclIndex < m_exclude.size()) {
+      findNextExcludedRange(value);
+    }
+    return false;
+  }
+};
+}
 
 /**
  * Constructor.
@@ -69,6 +139,13 @@ void FitMW::setParameters() const {
       m_maxSize = static_cast<size_t>(maxSizeInt);
     }
     m_normalise = m_manager->getProperty(m_normalisePropertyName);
+    m_exclude = m_manager->getProperty(m_excludePropertyName);
+    if (m_exclude.size() % 2 != 0) {
+      throw std::runtime_error("Exclude property has an odd number of entries. "
+                               "It has to be even as each pair specifies a "
+                               "start and an end of an interval to exclude.");
+    }
+    std::sort(m_exclude.begin(), m_exclude.end());
   }
 }
 
@@ -82,6 +159,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
   IMWDomainCreator::declareDatasetProperties(suffix, addProp);
   m_maxSizePropertyName = "MaxSize" + suffix;
   m_normalisePropertyName = "Normalise" + suffix;
+  m_excludePropertyName = "Exclude" + suffix;
 
   if (addProp) {
     if (m_domainType != Simple &&
@@ -97,6 +175,11 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
           new PropertyWithValue<bool>(m_normalisePropertyName, false),
           "An option to normalise the histogram data (divide be the bin "
           "width).");
+    }
+    if (!m_manager->existsProperty(m_excludePropertyName)) {
+      declareProperty(new ArrayProperty<double>(m_excludePropertyName),
+                      "A list of pairs of doubles that specify ranges that "
+                      "must be excluded from fit.");
     }
   }
 }
@@ -167,7 +250,10 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   if (endIndex > Y.size()) {
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
-  // bool foundZeroOrNegativeError = false;
+
+  // Helps find points excluded form fit.
+  ExcludeRangeFinder excludeFinder(m_exclude, X.front(), X.back());
+
   for (size_t i = m_startIndex; i < endIndex; ++i) {
     size_t j = i - m_startIndex + i0;
     double y = Y[i];
@@ -183,8 +269,10 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
       error /= binWidth;
     }
 
-    if (!std::isfinite(y)) // nan or inf data
-    {
+    if (excludeFinder.isExcluded(X[i])) {
+      weight = 0.0;
+    } else if (!std::isfinite(y)) {
+      // nan or inf data
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");
       y = 0.0; // leaving inf or nan would break the fit
