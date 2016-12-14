@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption, GroupWorkspaces
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
-    PropertyMode, Progress, WorkspaceGroupProperty, mtd
-from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-    Direction, logger, FloatBoundedValidator, MaterialBuilder, CompositeValidator
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        PropertyMode, Progress, WorkspaceGroupProperty, mtd)
+from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
+                           Direction, logger, FloatBoundedValidator)
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):

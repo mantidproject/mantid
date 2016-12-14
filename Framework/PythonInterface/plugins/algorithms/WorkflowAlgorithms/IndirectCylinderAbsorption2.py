@@ -4,7 +4,7 @@ from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption, GroupWork
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, PropertyMode, Progress, mtd)
 from mantid.kernel import (StringMandatoryValidator, Direction, logger, FloatBoundedValidator,
-                           IntBoundedValidator, MaterialBuilder, StringListValidator)
+                           IntBoundedValidator, StringListValidator)
 
 
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
