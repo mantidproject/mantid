@@ -84,19 +84,20 @@ def crop_vol(data_vol, coords):
     Returns :: cropped data volume
     """
     # if nothing is provided make the user aware
-    cropped_data = None
-    right = coords[2]
-    top = coords[1]
-    left = coords[0]
-    bottom = coords[3]
-
     if not isinstance(coords, list) or 4 != len(coords):
         raise ValueError(
             "Wrong coordinates object when trying to crop: {0}".format(coords))
     elif not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError("Wrong data volume when trying to crop: {0}".format(
             data_vol))
-    elif not any(coords) or top > bottom or left > right:
+    # move into named variables for ease of use
+    left = coords[0]
+    top = coords[1]
+    right = coords[2]
+    bottom = coords[3]
+
+    cropped_data = None
+    if not any(coords) or top > bottom or left > right:
         # skip if for example: 0, 0, 0, 0 (empty selection)
         print(" ! No coordinates given, not cropping the images")
         return data_vol
@@ -106,8 +107,6 @@ def crop_vol(data_vol, coords):
             "these coordinates: {0}".format(coords))
     else:
         cropped_data = data_vol[:, top:bottom, left:right]
-        # cropped_data = data_vol[:, left:right, top:bottom]
-        # cropped_data = data_vol[:, coords[1]:(coords[3]+1), coords[0]:(coords[2]+1)]
 
     return cropped_data
 

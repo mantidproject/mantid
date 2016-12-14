@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -423,6 +424,7 @@ void He3TubeEfficiency::execEvent() {
       boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
 
   std::size_t numHistograms = outputWS->getNumberHistograms();
+  auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
@@ -440,7 +442,8 @@ void He3TubeEfficiency::execEvent() {
       // Parameters are bad so skip correction
       PARALLEL_CRITICAL(deteff_invalid) {
         this->spectraSkipped.push_back(outputWS->getAxis(1)->spectraNo(i));
-        outputWS->maskWorkspaceIndex(i);
+        outputWS->getSpectrum(i).clearData();
+        spectrumInfo.setMasked(i, true);
       }
     }
 

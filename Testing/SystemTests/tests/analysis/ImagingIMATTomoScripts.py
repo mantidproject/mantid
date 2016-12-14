@@ -24,11 +24,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
     # This should rather use setUpClass() - not supported in Python 2.6 (rhel6)
     def setUp(self):
         # example files to make a stack of images
-        _raw_files = ['LARMOR00005328_Metals_000_SummedImg_1.fits',
-                      'LARMOR00005329_Metals_000_SummedImg_2.fits',
-                      'LARMOR00005330_Metals_000_SummedImg_3.fits',
-                      'LARMOR00005331_Metals_000_SummedImg_4.fits',
-                      'LARMOR00005332_Metals_000_SummedImg_5.fits']
+        _raw_files = requiredFiles()
 
         # a name for the stack / group of workspaces
         _data_wsname = 'small_img_stack'
@@ -39,9 +35,10 @@ class ImagingIMATTomoTests(unittest.TestCase):
         if not self.__class__.data_wsg:
             filename_string = ",".join(_raw_files)
             # Load all images into a workspace group, one matrix workspace per image
-            self.__class__.data_wsg = sapi.LoadFITS(Filename=filename_string,
-                                                    LoadAsRectImg=True,
-                                                    OutputWorkspace=_data_wsname)
+            self.__class__.data_wsg = sapi.LoadFITS(
+                Filename=filename_string,
+                LoadAsRectImg=True,
+                OutputWorkspace=_data_wsname)
             self.__class__.data_vol = self._ws_group_to_data_vol(self.data_wsg)
 
         # double-check before every test that the input workspaces are available and of the
@@ -51,7 +48,9 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         # this could use assertIsInstance (new in version 2.7)
         self.assertTrue(isinstance(self.data_wsg, WorkspaceGroup))
-        img_workspaces = [ self.data_wsg.getItem(i) for i in range(0, self.data_wsg.size()) ]
+        img_workspaces = [
+            self.data_wsg.getItem(i) for i in range(0, self.data_wsg.size())
+        ]
         for wksp in img_workspaces:
             self.assertTrue(isinstance(wksp, MatrixWorkspace))
 
@@ -62,6 +61,15 @@ class ImagingIMATTomoTests(unittest.TestCase):
         import shutil
         if os.path.exists(self.test_output_dir):
             shutil.rmtree(self.test_output_dir)
+
+    def requiredFiles(self):
+        return [
+            'LARMOR00005328_Metals_000_SummedImg_1.fits',
+            'LARMOR00005329_Metals_000_SummedImg_2.fits',
+            'LARMOR00005330_Metals_000_SummedImg_3.fits',
+            'LARMOR00005331_Metals_000_SummedImg_4.fits',
+            'LARMOR00005332_Metals_000_SummedImg_5.fits'
+        ]
 
     # Remember: use this when rhel6/Python 2.6 is deprecated
     # @classmethod
@@ -86,7 +94,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
         ws1 = ws_group.getItem(0)
         ydim = ws1.getNumberHistograms()
         xdim = ws1.blocksize()
-        data_vol = np.zeros( (zdim, ydim, xdim) )
+        data_vol = np.zeros((zdim, ydim, xdim))
 
         for zidx, wksp in enumerate(ws_group):
             for yidx in range(0, wksp.getNumberHistograms()):
@@ -97,6 +105,11 @@ class ImagingIMATTomoTests(unittest.TestCase):
         return data_vol.astype('float32')
 
     def test_scale_down_errors(self):
+        """
+        Not used in reconstruction right now.
+        This test is left here only in case the scale_down is required in the future.
+        - 14/12/2016
+        """
         import IMAT.prep as iprep
 
         with self.assertRaises(ValueError):
@@ -112,19 +125,25 @@ class ImagingIMATTomoTests(unittest.TestCase):
             iprep.filters.scale_down(self.data_vol, 2, method='fail-now')
 
     def test_scale_down_ok(self):
+        """
+        Not used in reconstruction right now.
+        This test is left here only in case the scale_down is required in the future.
+        - 14/12/2016
+        """
         import IMAT.prep as iprep
 
         dummy_shape = (7, 256, 256)
         dummy = np.ones(dummy_shape, dtype='float')
         scaled = iprep.filters.scale_down(dummy, 2)
-        self.assertEquals(scaled.shape, (dummy_shape[0], dummy_shape[1]/2, dummy_shape[2]/2))
+        self.assertEquals(scaled.shape, (dummy_shape[0], dummy_shape[1] / 2,
+                                         dummy_shape[2] / 2))
 
         scaled = iprep.filters.scale_down(self.data_vol, 2)
 
         self.assertEquals(len(scaled.shape), 3)
         self.assertEquals(self.data_vol.shape[0], scaled.shape[0])
-        self.assertEquals(self.data_vol.shape[1]/2, scaled.shape[1])
-        self.assertEquals(self.data_vol.shape[2]/2, scaled.shape[2])
+        self.assertEquals(self.data_vol.shape[1] / 2, scaled.shape[1])
+        self.assertEquals(self.data_vol.shape[2] / 2, scaled.shape[2])
 
     def test_crop_errors(self):
         import IMAT.prep as iprep
@@ -133,41 +152,59 @@ class ImagingIMATTomoTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             iprep.filters.crop_vol(self.data_vol, coords)
 
+        # fail because coords length < 4
         coords = [0, 0, 0]
         with self.assertRaises(ValueError):
             iprep.filters.crop_vol(self.data_vol, coords)
 
+        # fail because coords length > 4
         coords = [0, 0, 0, 0, 0]
         with self.assertRaises(ValueError):
             iprep.filters.crop_vol(self.data_vol, coords)
 
+        # fail because shape length will be < 3
         coords = [0, 0, 10, 10]
         with self.assertRaises(ValueError):
             iprep.filters.crop_vol(self.data_vol[1, :, :], coords)
 
+        # fail because coords aren't ints as expected
+        coords = ["0", "0", "5", "5"]
+        with self.assertRaises(ValueError):
+            iprep.filters.crop_vol(self.data_vol[1, :, :], coords)
+
     def test_crop_empty(self):
+        """
+        Test cropping with empty coords. 
+        This should NOT change the input data whatsoever.
+        """
         import IMAT.prep as iprep
 
         coords = [0, 0, 0, 0]
         cropped = iprep.filters.crop_vol(self.data_vol, coords)
 
         self.assertTrue(isinstance(self.data_vol, np.ndarray))
-        self.assertTrue(isinstance(cropped, np.ndarray),
-                        msg="the result of cropping with empty (0) coordinates should be a "
-                        "numpy array")
+        self.assertTrue(
+            isinstance(cropped, np.ndarray),
+            msg="the result of cropping with empty (0) coordinates should be a "
+            "numpy array")
 
-        self.assertEqual(cropped.shape, self.data_vol.shape,
-                         msg="the result of cropping with empty (0) coordinates should have "
-                         "the appropriate dimensions. Found {0} instead of {1}".
-                         format(cropped.shape, self.data_vol.shape))
+        self.assertEqual(
+            cropped.shape,
+            self.data_vol.shape,
+            msg="the result of cropping with empty (0) coordinates should have "
+            "the appropriate dimensions. Found {0} instead of {1}".format(
+                cropped.shape, self.data_vol.shape))
 
-        peek_positions = [[3,57], [57, 4]]
+        peek_positions = [[3, 57], [57, 4]]
         for pos in peek_positions:
             (pos_x, pos_y) = pos
-            cropped_coord_equals = cropped[:, pos_y, pos_x] == self.data_vol[:, pos_y, pos_x]
-            self.assertTrue(cropped_coord_equals.all(),
-                            msg="cropping should not change values (found differences at "
-                            "coordinates: {0}, {1})".format(pos_x, pos_y))
+            cropped_coord_equals = cropped[:, pos_y,
+                                           pos_x] == self.data_vol[:, pos_y,
+                                                                   pos_x]
+            self.assertTrue(
+                cropped_coord_equals.all(),
+                msg="cropping should not change values (found differences at "
+                "coordinates: {0}, {1})".format(pos_x, pos_y))
 
     def test_crop_coordinates_skips(self):
         import IMAT.prep as iprep
@@ -176,30 +213,41 @@ class ImagingIMATTomoTests(unittest.TestCase):
         cropped = iprep.filters.crop_vol(self.data_vol, coords)
 
         self.assertTrue(isinstance(self.data_vol, np.ndarray))
-        self.assertTrue(isinstance(cropped, np.ndarray),
-                        msg="the result of cropping with inconsistent) coordinates should be a "
-                        "numpy array")
+        self.assertTrue(
+            isinstance(cropped, np.ndarray),
+            msg="the result of cropping with inconsistent) coordinates should be a "
+            "numpy array")
 
-        self.assertEqual(cropped.shape, self.data_vol.shape,
-                         msg="the result of cropping with inconsistent coordinates should have "
-                         "the appropriate dimensions (same as original). Found {0} instead of {1}".
-                         format(cropped.shape, self.data_vol.shape))
+        self.assertEqual(
+            cropped.shape,
+            self.data_vol.shape,
+            msg="the result of cropping with inconsistent coordinates should have "
+            "the appropriate dimensions (same as original). Found {0} instead of {1}".
+            format(cropped.shape, self.data_vol.shape))
 
     def test_crop_ok(self):
         import IMAT.prep as iprep
 
         coords = [2, 2, 100, 100]
+        left = coords[0]
+        top = coords[1]
+        right = coords[2]
+        bottom = coords[3]
         cropped = iprep.filters.crop_vol(self.data_vol, coords)
 
         self.assertTrue(isinstance(self.data_vol, np.ndarray))
-        self.assertTrue(isinstance(cropped, np.ndarray),
-                        msg="the result of cropping should be a numpy array")
+        self.assertTrue(
+            isinstance(cropped, np.ndarray),
+            msg="the result of cropping should be a numpy array")
 
-        expected_shape = (self.data_vol.shape[0], coords[3] - coords[1] + 1, coords[2] - coords[0] + 1)
-        self.assertEqual(cropped.shape, expected_shape,
-                         msg="the result of cropping should have the appropriate dimensions")
+        expected_shape = (self.data_vol.shape[0], bottom - top, right - left)
+        self.assertEqual(
+            cropped.shape,
+            expected_shape,
+            msg="the result of cropping should have the appropriate dimensions")
 
-        orig_cropped_equals = self.data_vol[:, coords[1]:coords[3]+1, coords[0]:coords[2]+1] == cropped
+        orig_cropped_equals = self.data_vol[:, top:bottom, left:
+                                            right] == cropped
         self.assertTrue(orig_cropped_equals.all())
 
     def test_correct_import_excepts(self):
@@ -218,37 +266,46 @@ class ImagingIMATTomoTests(unittest.TestCase):
             iprep.filters.circular_mask('fail!')
 
         with self.assertRaises(ValueError):
-            iprep.filters.circular_mask(np.zeros((2,3)))
+            iprep.filters.circular_mask(np.zeros((2, 3)))
 
         with self.assertRaises(ValueError):
-            iprep.filters.circular_mask(np.zeros((2,1,2,1)))
+            iprep.filters.circular_mask(np.zeros((2, 1, 2, 1)))
 
     def test_circular_mask_ok(self):
         import IMAT.prep as iprep
 
         masked = iprep.filters.circular_mask(self.data_vol, ratio=0.0)
-        np.testing.assert_allclose(masked, self.data_vol,
-                                   err_msg="An empty circular mask not behaving as expected")
+        np.testing.assert_allclose(
+            masked,
+            self.data_vol,
+            err_msg="An empty circular mask not behaving as expected")
 
-        masked = iprep.filters.circular_mask(self.data_vol, ratio=1.0, mask_out_val=0)
-        self.assertEquals(masked[2, 2, 3], 0,
-                          msg="Circular mask: wrong values outside")
+        masked = iprep.filters.circular_mask(
+            self.data_vol, ratio=1.0, mask_out_val=0)
+        self.assertEquals(
+            masked[2, 2, 3], 0, msg="Circular mask: wrong values outside")
 
         some_val = -1.23456
-        masked = iprep.filters.circular_mask(self.data_vol, ratio=1.0, mask_out_val=some_val)
+        masked = iprep.filters.circular_mask(
+            self.data_vol, ratio=1.0, mask_out_val=some_val)
 
-        for coords in [(3, 510, 0), (2,2,3), (1,0,0), (0, 500, 5)]:
+        for coords in [(3, 510, 0), (2, 2, 3), (1, 0, 0), (0, 500, 5)]:
             peek_out = masked[coords]
-            self.assertAlmostEquals(peek_out, some_val,
-                                    msg="Circular mask: wrong value found outside. Expected: {0}, "
-                                    "found: {1}".format(some_val, peek_out))
+            self.assertAlmostEquals(
+                peek_out,
+                some_val,
+                msg="Circular mask: wrong value found outside. Expected: {0}, "
+                "found: {1}".format(some_val, peek_out))
 
-        for coords in [(3, 200, 200), (2, 50, 20), (1, 300, 100), (0, 400, 200)]:
+        for coords in [(3, 200, 200), (2, 50, 20), (1, 300, 100),
+                       (0, 400, 200)]:
             peek_in = masked[coords]
             expected_val = self.data_vol[coords]
-            self.assertAlmostEquals(peek_in, expected_val,
-                                    msg="Circular mask: wrong value found inside. Expected: "
-                                    "{0}, found: {1}".format(expected_val, peek_in))
+            self.assertAlmostEquals(
+                peek_in,
+                expected_val,
+                msg="Circular mask: wrong value found inside. Expected: "
+                "{0}, found: {1}".format(expected_val, peek_in))
 
     def test_remove_stripes_raises(self):
         import IMAT.prep as iprep
@@ -257,32 +314,31 @@ class ImagingIMATTomoTests(unittest.TestCase):
             iprep.filters.remove_stripes_ring_artifacts('fail!')
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(np.zeros((2,2,2)), 'fail-method')
+            iprep.filters.remove_stripes_ring_artifacts(
+                np.zeros((2, 2, 2)), 'fail-method')
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(np.zeros((3,3)))
+            iprep.filters.remove_stripes_ring_artifacts(np.zeros((3, 3)))
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(np.zeros((1,1,2,2)))
+            iprep.filters.remove_stripes_ring_artifacts(np.zeros((1, 1, 2, 2)))
 
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self.data_vol, '')
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
-                                                        'funny-method-doesnt-exist')
+            iprep.filters.remove_stripes_ring_artifacts(
+                self.data_vol, 'funny-method-doesnt-exist')
 
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
                                                         'fourier-wavelet')
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
-                                                        'fw')
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol, 'fw')
 
         with self.assertRaises(ValueError):
-            iprep.filters.remove_stripes_ring_artifacts(self.data_vol,
-                                                        'wf')
+            iprep.filters.remove_stripes_ring_artifacts(self.data_vol, 'wf')
 
     def test_remove_stripes_err(self):
         import IMAT.prep as iprep
@@ -305,15 +361,20 @@ class ImagingIMATTomoTests(unittest.TestCase):
                                                                method)
 
         self.assertTrue(isinstance(self.data_vol, np.ndarray))
-        self.assertTrue(isinstance(stripped, np.ndarray),
-                        msg="the result of remove_stripes should be a numpy array")
-        self.assertEquals(stripped.shape, self.data_vol.shape,
-                          msg="the result of remove_stripes should be a numpy array")
+        self.assertTrue(
+            isinstance(stripped, np.ndarray),
+            msg="the result of remove_stripes should be a numpy array")
+        self.assertEquals(
+            stripped.shape,
+            self.data_vol.shape,
+            msg="the result of remove_stripes should be a numpy array")
         expected_val = -0.25781357
         val = stripped[0, 100, 123]
-        self.assertAlmostEquals(val, expected_val,
-                                msg="Expected the results of stripe removal (method {0} not to change "
-                                "with respect to previous executions".format(method))
+        self.assertAlmostEquals(
+            val,
+            expected_val,
+            msg="Expected the results of stripe removal (method {0} not to change "
+            "with respect to previous executions".format(method))
 
     def test_config_pre(self):
         """
@@ -389,6 +450,8 @@ class ImagingIMATTomoTests(unittest.TestCase):
         alg_conf = cfgs.ToolAlgorithmConfig()
         post_conf = cfgs.PostProcConfig()
         conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        # error because no input or output dir
         with self.assertRaises(ValueError):
             cmd.do_recon(conf, cmd_line='irrelevant')
 
@@ -396,21 +459,54 @@ class ImagingIMATTomoTests(unittest.TestCase):
         import IMAT.tomorec.io as tomoio
         tomoio.make_dirs_if_needed(self.test_input_dir)
         conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        # error because no output dir
         with self.assertRaises(ValueError):
             cmd.do_recon(conf, cmd_line='irrelevant')
 
         post_conf.output_dir = self.test_output_dir
         tomoio.make_dirs_if_needed(self.test_output_dir)
         conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
-        # should fail because no images found in input dir
-        with self.assertRaises(RuntimeError):
+        # will fail at importing the tool
+        with self.assertRaises(ImportError):
             cmd.do_recon(conf, cmd_line='irrelevant')
 
         import os
         self.assertTrue(os.path.exists(self.test_input_dir))
-        self.assertTrue(os.path.exists(os.path.join(self.test_output_dir,
-                                                    '0.README_reconstruction.txt')))
+        self.assertTrue(
+            os.path.exists(
+                os.path.join(self.test_output_dir,
+                             '0.README_reconstruction.txt')))
         self.assertTrue(os.path.exists(self.test_output_dir))
+
+    def test_read_in_stack_fails(self):
+        import IMAT.tomorec.reconstruction_command as cmd
+        cmd = cmd.ReconstructionCommand()
+
+        with self.assertRaises(ValueError):
+            cmd.do_recon('', cmd_line='')
+
+        import IMAT.tomorec.configs as cfgs
+        pre_conf = cfgs.PreProcConfig()
+        alg_conf = cfgs.ToolAlgorithmConfig()
+        post_conf = cfgs.PostProcConfig()
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        pre_conf.input_dir = self.test_input_dir
+        import IMAT.tomorec.io as tomoio
+        tomoio.make_dirs_if_needed(self.test_input_dir)
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        post_conf.output_dir = self.test_output_dir
+        tomoio.make_dirs_if_needed(self.test_output_dir)
+        conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
+
+        # should fail because no input images were found in the dir
+        with self.assertRaises(ValueError):
+            cmd.read_in_stack(conf.preproc_conf.input_dir,
+                              conf.preproc_conf.in_img_format,
+                              conf.preproc_cfg.input_dir_flat,
+                              conf.preproc_cfg.input_dir_dark)
 
     def test_rotate_raises(self):
         import IMAT.tomorec.reconstruction_command as cmd
@@ -423,8 +519,8 @@ class ImagingIMATTomoTests(unittest.TestCase):
         conf = cfgs.ReconstructionConfig(pre_conf, alg_conf, post_conf)
 
         pre_conf.rotation = 1
-        # absolutely invalid data
-        with self.assertRaises(ValueError):
+        # absolutely invalid data, empty array doesn't have .dtype
+        with self.assertRaises(AttributeError):
             cmd.rotate_stack([], pre_conf)
 
         # wrong data type or dimensions (for samples / flats / darks
@@ -459,24 +555,36 @@ class ImagingIMATTomoTests(unittest.TestCase):
         pre_conf.rotation = 1
 
         (rotated, white, dark) = cmd.rotate_stack(self.data_vol, pre_conf)
-        np.testing.assert_allclose(rotated, self.data_vol,
-                                   err_msg="Epected rotated data volume not to change when "
-                                   "the rotation option is disabled")
-        self.assertEquals(white, None, msg="When the white stack is None, it should still be "
-                          "None after rotation")
-        self.assertEquals(dark, None, msg="When the dark stack is None, it should still be "
-                          "None after rotation")
+        np.testing.assert_allclose(
+            rotated,
+            self.data_vol,
+            err_msg="Epected rotated data volume not to change when "
+            "the rotation option is disabled")
+        self.assertEquals(
+            white,
+            None,
+            msg="When the white stack is None, it should still be "
+            "None after rotation")
+        self.assertEquals(
+            dark,
+            None,
+            msg="When the dark stack is None, it should still be "
+            "None after rotation")
 
         pre_conf.rotation = 1
         (rotated_90, white, dark) = cmd.rotate_stack(self.data_vol, pre_conf)
-        coordinates =  [(3, 510, 0), (2,2,3), (1,0,0), (0, 500, 5)]
-        expected_vals = [-0.810005187988, 0.656108379364, -0.531451165676, 0.430478185415]
+        coordinates = [(3, 510, 0), (2, 2, 3), (1, 0, 0), (0, 500, 5)]
+        expected_vals = [
+            -0.810005187988, 0.656108379364, -0.531451165676, 0.430478185415
+        ]
         for coord, expected in zip(coordinates, expected_vals):
             real_val = rotated_90[coord]
-            self.assertAlmostEquals(real_val, expected,
-                                    msg="Rotation: wrong value found at coordinate {0},{1},{2}. "
-                                    "Expected: {3}, found: {4}".format(coord[0], coord[1], coord[2],
-                                                                       expected, real_val))
+            self.assertAlmostEquals(
+                real_val,
+                expected,
+                msg="Rotation: wrong value found at coordinate {0},{1},{2}. "
+                "Expected: {3}, found: {4}".format(
+                    coord[0], coord[1], coord[2], expected, real_val))
 
     def test_normalize_air_raises(self):
         import IMAT.tomorec.reconstruction_command as cmd
@@ -531,8 +639,10 @@ class ImagingIMATTomoTests(unittest.TestCase):
         pre_conf = cfgs.PreProcConfig()
 
         normalized = cmd.normalize_air_region(self.data_vol, pre_conf)
-        np.testing.assert_allclose(normalized, self.data_vol,
-                                   err_msg="Epected normalized data volume not to changed")
+        np.testing.assert_allclose(
+            normalized,
+            self.data_vol,
+            err_msg="Epected normalized data volume not to changed")
 
     def test_normalize_flat_raises(self):
         import IMAT.tomorec.reconstruction_command as cmd
@@ -550,11 +660,13 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         # wrong data dimensions
         with self.assertRaises(ValueError):
-            cmd.normalize_flat_dark(np.ones((3, 2)), pre_conf, np.ones((10, 23)), None)
+            cmd.normalize_flat_dark(
+                np.ones((3, 2)), pre_conf, np.ones((10, 23)), None)
 
         # wrong dimensions of the flat image
         with self.assertRaises(ValueError):
-            cmd.normalize_flat_dark(self.data_vol, pre_conf, np.ones((10, 23)), None)
+            cmd.normalize_flat_dark(self.data_vol, pre_conf,
+                                    np.ones((10, 23)), None)
 
         # invalid configurations
         with self.assertRaises(ValueError):
@@ -581,10 +693,13 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         for img_idx in range(0, self.data_vol.shape[0]):
             fake_white = self.data_vol[img_idx, :, :]
-            norm = cmd.normalize_flat_dark(self.data_vol, pre_conf, fake_white, None)
-            np.testing.assert_allclose(norm[img_idx, : :], np.ones(fake_white.shape),
-                                       err_msg="Epected normalized data volume not to changed "
-                                       "wheh using fake flat image, with index {0}".format(img_idx))
+            norm = cmd.normalize_flat_dark(self.data_vol, pre_conf, fake_white,
+                                           None)
+            np.testing.assert_allclose(
+                norm[img_idx, ::],
+                np.ones(fake_white.shape),
+                err_msg="Epected normalized data volume not to changed "
+                "wheh using fake flat image, with index {0}".format(img_idx))
 
     def test_read_stack_fails_ok(self):
         import IMAT.tomorec.reconstruction_command as cmd
@@ -610,17 +725,18 @@ class ImagingIMATScriptsTest(stresstesting.MantidStressTest):
         # Disable for Python 2.6 (which we still have on rhel6)
         import sys
         vers = sys.version_info
-        if vers < (2,7,0):
+        if vers < (2, 7, 0):
             from mantid import logger
-            logger.warning("Not running this test as it requires Python >= 2.7. Version found: {0}".
-                           format(vers))
+            logger.warning(
+                "Not running this test as it requires Python >= 2.7. Version found: {0}".
+                format(vers))
             self._success = True
             return
 
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(ImagingIMATTomoTests, "test") )
+        suite.addTest(unittest.makeSuite(ImagingIMATTomoTests, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
