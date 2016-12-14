@@ -343,6 +343,7 @@ def sumSpectra(parent, ws):
     """
     alg = parent.createChildAlgorithm('SumSpectra')
     alg.setProperty('InputWorkspace', ws)
+    alg.setProperty('RemoveSpecialValues', True)
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value
