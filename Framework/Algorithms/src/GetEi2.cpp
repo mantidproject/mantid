@@ -5,6 +5,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IDetector_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -291,6 +292,7 @@ double GetEi2::getDistanceFromSource(size_t ws_index,
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index
                 << "' and the source\n";
 
+  const auto &detector = spectrumInfo.detector(ws_index);
   const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
   if (!spectrumInfo.hasDetectors(ws_index)) {
     std::ostringstream msg;
@@ -302,8 +304,7 @@ double GetEi2::getDistanceFromSource(size_t ws_index,
     g_log.debug() << "Detector position = " << spectrumInfo.position(ws_index)
                   << ", Source position = " << source->getPos() << "\n";
   }
-  const double dist =
-      spectrumInfo.position(ws_index).distance(source->getPos());
+  const double dist = detector.getDistance(*source);
   g_log.debug() << "Distance = " << dist << " metres\n";
   return dist;
 }
