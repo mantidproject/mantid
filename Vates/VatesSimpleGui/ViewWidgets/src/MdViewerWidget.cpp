@@ -195,7 +195,7 @@ MdViewerWidget::MdViewerWidget(QWidget *parent)
   // We're in the standalone application mode
   this->internalSetup(false);
   this->setupUiAndConnections();
-  this->setupMainView();
+  this->setupMainView(ModeControlWidget::STANDARD);
 }
 
 MdViewerWidget::~MdViewerWidget() {}
@@ -242,14 +242,12 @@ void MdViewerWidget::setupUiAndConnections() {
     m_colorMapEditorPanel->setUpPanel();
   }
 
-  // this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction *temp = new QAction(this);
   pqDeleteReaction *deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,
                          SIGNAL(deleteRequested(pqPipelineSource *)),
                          SLOT(deleteSource(pqPipelineSource *)));
 
-  // pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
   VsiApplyBehaviour *applyBehavior =
       new VsiApplyBehaviour(&m_colorScaleLock, this);
 
@@ -274,17 +272,17 @@ void MdViewerWidget::panelChanged() { this->currentView->renderAll(); }
  * event filter, tweaks the UI layout for the view and calls the routine that
  * sets up connections between ParaView and the main window widgets.
  */
-void MdViewerWidget::setupMainView() {
+void MdViewerWidget::setupMainView(ModeControlWidget::Views viewType) {
   // Commented this out to only use Mantid supplied readers
   // Initialize all readers available to ParaView. Now our application can load
   // all types of datasets supported by ParaView.
   // vtkSMProxyManager::GetProxyManager()->GetReaderFactory()->RegisterPrototypes("sources");
 
-  // Set the view at startup to STANDARD, the view will be changed, depending on
+  // Set the view at startup to view, the view will be changed, depending on
   // the workspace
-  this->currentView = this->createAndSetMainViewWidget(
-      this->ui.viewWidget, ModeControlWidget::STANDARD);
-  this->initialView = ModeControlWidget::STANDARD;
+  this->currentView =
+      this->createAndSetMainViewWidget(this->ui.viewWidget, viewType);
+  this->initialView = viewType;
   this->currentView->installEventFilter(this);
 
   // Create a layout to manage the view properly
@@ -696,7 +694,10 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
     this->setColorForBackground();
     this->setColorMap();
 
-    this->ui.modeControlWidget->setToStandardView();
+    if (VatesViewerInterface::PEAKS != workspaceType) {
+      resetCurrentView(workspaceType, instrumentName);
+    }
+
     this->currentView->hide();
     // Set the auto log scale state
     this->currentView->initializeColorScale();
@@ -725,20 +726,8 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
   pqPipelineSource *source = this->currentView->setPluginSource(
       sourcePlugin, workspaceName, gridAxesOn);
   source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
-
   this->renderAndFinalSetup();
-
-  // Reset the current view to the correct initial view
-  // Note that we can only reset if a source plugin exists.
-  // Also note that we can only reset the current view to the
-  // correct initial after calling renderAndFinalSetup. We first
-  // need to load in the current view and then switch to be inline
-  // with the current architecture.
-  if (VatesViewerInterface::PEAKS != workspaceType) {
-    resetCurrentView(workspaceType, instrumentName);
-  }
-
-  // save
+  this->currentView->show();
 }
 
 /**
@@ -871,14 +860,12 @@ MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view,
   if (VatesViewerInterface::MDHW == workspaceType) {
     // Histo workspaces cannot have a splatter plot,
     if (view == ModeControlWidget::SPLATTERPLOT) {
-      g_log.notice()
-          << "The preferred initial view favours the splatterplot as initial "
-             "view, "
-          << "but an MDHisto workspace is being loaded. An MDHisto workspace "
-          << "cannot be loaded into a splatterplot view. Defaulted to standard "
-             "view. \n";
+      g_log.notice("The preferred initial view favours the splatterplot "
+                   "as initial view, but an MDHisto workspace is being "
+                   "loaded. A MDHisto workspace cannot be loaded into a "
+                   "splatterplot view. Defaulted to MultiSlice view.");
 
-      selectedView = ModeControlWidget::STANDARD;
+      selectedView = ModeControlWidget::MULTISLICE;
     } else {
       selectedView = view;
     }
@@ -893,12 +880,15 @@ MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view,
  * This function performs setup for the plugin mode of the Vates Simple
  * Interface. It calls a number of defined functions to complete the process.
  */
-void MdViewerWidget::setupPluginMode() {
+void MdViewerWidget::setupPluginMode(int WsType,
+                                     const std::string &instrumentName) {
   // Don't use the current color map at start up.
   this->useCurrentColorSettings = false;
   this->setupUiAndConnections();
   this->createMenus();
-  this->setupMainView();
+  ModeControlWidget::Views initialView =
+      this->getInitialView(WsType, instrumentName);
+  this->setupMainView(initialView);
 }
 
 /**
@@ -1243,10 +1233,7 @@ void MdViewerWidget::swapViews() {
   if (!this->hiddenView)
     g_log.error(
         "Inconsistency found when swapping views, the next view is NULL");
-
-  ViewBase *temp = this->currentView;
-  this->currentView = this->hiddenView;
-  this->hiddenView = temp;
+  std::swap(this->currentView, this->hiddenView);
 }
 
 /**
