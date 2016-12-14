@@ -293,8 +293,6 @@ class PeakProcessRecord(object):
         """
         assert isinstance(pt_intensity_dict, dict)
 
-        print '[DB...BAT] Pt intensity dict keys: ', pt_intensity_dict.keys()
-
         self._ptIntensityDict = pt_intensity_dict
 
         return

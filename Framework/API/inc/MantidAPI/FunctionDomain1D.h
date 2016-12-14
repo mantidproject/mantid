@@ -59,11 +59,15 @@ public:
   const double *getPointerAt(size_t i) const { return m_data + i; }
   /// Convert to a vector
   std::vector<double> toVector() const;
+  /// Set a peak redius to pass to peak functions.
+  void setPeakRadius(int radius);
+  /// Get the peak radius.
+  int getPeakRadius() const;
 
 protected:
   /// Protected constructor, shouldn't be created directly. Use
   /// FunctionDomain1DView instead.
-  FunctionDomain1D(const double *x, size_t n) : m_data(x), m_n(n) {}
+  FunctionDomain1D(const double *x, size_t n);
   /// Reset the pointer and size of the domain
   void resetData(const double *x, size_t n) {
     m_data = x;
@@ -71,8 +75,12 @@ protected:
   }
 
 private:
-  const double *m_data; ///< pointer to the start of the domain data
-  size_t m_n;           ///< size of the data
+  /// pointer to the start of the domain data
+  const double *m_data;
+  /// size of the data
+  size_t m_n;
+  /// A peak radius that IPeakFunctions should use
+  int m_peakRadius;
 };
 
 /**

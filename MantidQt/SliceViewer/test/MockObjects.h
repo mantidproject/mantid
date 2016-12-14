@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"

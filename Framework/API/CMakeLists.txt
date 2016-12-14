@@ -100,6 +100,7 @@ set ( SRC_FILES
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NearestNeighbourInfo.cpp
+	src/NearestNeighbours.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -285,6 +286,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NearestNeighbourInfo.h
+        inc/MantidAPI/NearestNeighbours.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -399,6 +401,7 @@ set ( TEST_FILES
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
 	NearestNeighbourInfoTest.h
+	NearestNeighboursTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h

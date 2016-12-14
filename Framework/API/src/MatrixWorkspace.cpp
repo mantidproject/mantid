@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 
 #include <cmath>
@@ -893,35 +894,6 @@ bool MatrixWorkspace::isCommonBins() const {
   }
 
   return m_isCommonBinsFlag;
-}
-
-/**
-* Mask a given workspace index, setting the data and error values to zero
-* @param index :: The index within the workspace to mask
-*/
-void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
-  if (index >= this->getNumberHistograms()) {
-    throw Kernel::Exception::IndexError(
-        index, this->getNumberHistograms(),
-        "MatrixWorkspace::maskWorkspaceIndex,index");
-  }
-
-  auto &spec = this->getSpectrum(index);
-
-  // Virtual method clears the spectrum as appropriate
-  spec.clearData();
-
-  const auto dets = spec.getDetectorIDs();
-  for (auto detId : dets) {
-    try {
-      if (const Geometry::Detector *det =
-              dynamic_cast<const Geometry::Detector *>(
-                  sptr_instrument->getDetector(detId).get())) {
-        m_parmap->addBool(det, "masked", true); // Thread-safe method
-      }
-    } catch (Kernel::Exception::NotFoundError &) {
-    }
-  }
 }
 
 /** Called by the algorithm MaskBins to mask a single bin for the first time,

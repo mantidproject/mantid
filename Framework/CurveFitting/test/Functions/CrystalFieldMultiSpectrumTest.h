@@ -148,14 +148,14 @@ public:
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 2.0 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 59.5010, 0.001);
     out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.3734 * 3.3 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 98.1627, 0.001);
     AnalysisDataService::Instance().clear();
   }
 

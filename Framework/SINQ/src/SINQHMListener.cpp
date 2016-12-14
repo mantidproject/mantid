@@ -18,6 +18,8 @@
 #include <Poco/Net/HTTPBasicCredentials.h>
 #include <Poco/StreamCopier.h>
 
+#include <boost/algorithm/string/trim.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;

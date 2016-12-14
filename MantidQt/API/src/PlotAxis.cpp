@@ -4,6 +4,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
 
+#include <boost/lexical_cast.hpp>
+
 namespace MantidQt {
 namespace API {
 

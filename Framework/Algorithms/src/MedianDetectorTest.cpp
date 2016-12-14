@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
@@ -246,6 +247,7 @@ int MedianDetectorTest::maskOutliers(
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  auto &spectrumInfo = countsWS->mutableSpectrumInfo();
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
     std::vector<size_t> &hists = indexmap[i];
@@ -255,17 +257,19 @@ int MedianDetectorTest::maskOutliers(
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {
-        const auto &detids = countsWS->getSpectrum(hists[j]).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids)) {
+        if (spectrumInfo.hasDetectors(hists[j]) &&
+            spectrumInfo.isMasked(hists[j])) {
           numFailed -= 1; // it was already masked
         }
       }
       if ((value < out_lo * median) && (value > 0.0)) {
-        countsWS->maskWorkspaceIndex(hists[j]);
+        countsWS->getSpectrum(hists[j]).clearData();
+        spectrumInfo.setMasked(hists[j], true);
         PARALLEL_ATOMIC
         ++numFailed;
       } else if (value > out_hi * median) {
-        countsWS->maskWorkspaceIndex(hists[j]);
+        countsWS->getSpectrum(hists[j]).clearData();
+        spectrumInfo.setMasked(hists[j], true);
         PARALLEL_ATOMIC
         ++numFailed;
       }
@@ -313,6 +317,7 @@ int MedianDetectorTest::doDetectorTests(
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  const auto &spectrumInfo = countsWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS, *maskWS))
   for (int j = 0; j < static_cast<int>(indexmap.size()); ++j) {
@@ -331,14 +336,12 @@ int MedianDetectorTest::doDetectorTests(
                                  numSpec));
       }
 
-      if (checkForMask) {
-        const auto &detids =
-            countsWS->getSpectrum(hists.at(i)).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids)) {
+      if (checkForMask && spectrumInfo.hasDetectors(hists.at(i))) {
+        if (spectrumInfo.isMasked(hists.at(i))) {
           maskWS->mutableY(hists.at(i))[0] = deadValue;
           continue;
         }
-        if (instrument->isMonitor(detids)) {
+        if (spectrumInfo.isMonitor(hists.at(i))) {
           // Don't include in calculation but don't mask it
           continue;
         }

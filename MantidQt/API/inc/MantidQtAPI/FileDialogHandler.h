@@ -1,11 +1,18 @@
 #ifndef MANTIDQT_API_FILEDIALOGHANDLER_H_
 #define MANTIDQT_API_FILEDIALOGHANDLER_H_
 
+#include "MantidKernel/DllConfig.h"
 #include <QFileDialog>
 #ifdef Q_OS_DARWIN
 #include <errno.h>
 #include <sys/sysctl.h>
 #endif
+
+namespace Mantid {
+namespace Kernel {
+class Property;
+}
+}
 
 namespace MantidQt {
 namespace API {
@@ -35,33 +42,41 @@ namespace API {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct FileDialogHandler {
-  /** The MacOS's native save dialog crashes when running a 10.6 package on 10.8
-  * so this function, which takes
-  *  the same arguments as the Qt function, ensures a nonnative object is used
-  * on the Mac when necessary.
-  *  If compiled on 10.8 the native will be used
-  *  @param parent :: the dialog will be shown centered over this parent widget
-  *  @param caption :: The dialog's caption
-  *  @param dir :: The file dialog's working directory will be set to dir. If
-  * dir includes a file name, the file will be selected
-  *  @param filter :: extensions of files to look for
-  *  @param selectedFilter :: pass a pointer an existing string that will be
-  * filled with the extension the user selected
-  *  @param options :: The options argument holds various options about how to
-  * run the dialog
+namespace FileDialogHandler {
+/**
+ * @param parent :: the dialog will be shown centered over this parent
+ * widget
+ * @param baseProp :: The property that the dialog parameters will be extracted
+ * from.
+ * @param options :: The options argument holds various options about how
+ * to run the dialog
   */
-  static QString getSaveFileName(QWidget *parent = 0,
-                                 const QString &caption = QString(),
-                                 const QString &dir = QString(),
-                                 const QString &filter = QString(),
-                                 QString *selectedFilter = 0,
-                                 QFileDialog::Options options = 0) {
-    options = options | QFileDialog::DontUseNativeDialog;
-    return QFileDialog::getSaveFileName(parent, caption, dir, filter,
-                                        selectedFilter, options);
-  }
-};
+DLLExport QString getSaveFileName(QWidget *parent = 0,
+                                  const Mantid::Kernel::Property *baseProp = 0,
+                                  QFileDialog::Options options = 0);
+
+/**
+ * For file dialogs. This will add the selected extension if an extension
+ * doesn't
+ * already exist.
+ */
+DLLExport QString
+addExtension(const QString &filename, const QString &selectedFilter);
+
+DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
+
+/** For file dialogs
+ *
+ * @param exts :: vector of extensions
+ * @param defaultExt :: default extension to use
+ * @return a string that filters files by extenstions
+ */
+DLLExport QString
+getFilter(const std::vector<std::string> &exts, const std::string &defaultExt);
+
+DLLExport QString
+getCaption(const std::string &dialogName, const Mantid::Kernel::Property *prop);
+}
 }
 }
 

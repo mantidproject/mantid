@@ -133,6 +133,9 @@ private:
   std::string m_idfFileName;
   /// User specified wave length
   double m_userSpecifiedWaveLength;
+  /// shift of detector on X and Y direction
+  double m_detXShift;
+  double m_detYShift;
 };
 
 } // namespace DataHandling

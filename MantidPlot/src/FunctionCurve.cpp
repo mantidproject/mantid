@@ -254,9 +254,10 @@ void FunctionCurve::loadData(int points) {
  * Load the data from a MatrixWorkspace if it is a Mantid-type FunctionCurve.
  * @param ws :: A workspace to load the data from.
  * @param wi :: An index of a histogram with the data.
+ * @param peakRadius :: A peak radius to pass to the domain.
  */
 void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
-                                   size_t wi) {
+                                   size_t wi, int peakRadius) {
   if (!d_variable.isEmpty() || d_formulas.isEmpty() ||
       d_formulas[0] != "Mantid")
     return;
@@ -310,6 +311,9 @@ void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
     f->applyTies();
     Mantid::API::FunctionDomain1DVector domain(X);
     Mantid::API::FunctionValues Y(domain);
+    if (peakRadius > 0) {
+      domain.setPeakRadius(peakRadius);
+    }
     f->function(domain, Y);
 
     setData(&X[0], Y.getPointerToCalculated(0), static_cast<int>(X.size()));
