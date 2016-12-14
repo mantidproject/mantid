@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -74,8 +75,10 @@ public:
 
     // Mask a spectrum and check it is carried over
     const size_t maskTop(5), maskBottom(10);
-    in1->maskWorkspaceIndex(maskTop);
-    in2->maskWorkspaceIndex(maskBottom);
+    in1->getSpectrum(maskTop).clearData();
+    in2->getSpectrum(maskBottom).clearData();
+    in1->mutableSpectrumInfo().setMasked(maskTop, true);
+    in2->mutableSpectrumInfo().setMasked(maskBottom, true);
 
     // Check it fails if properties haven't been set
     TS_ASSERT_THROWS(conj.execute(), std::runtime_error);
