@@ -83,7 +83,7 @@ void ThreeSliceView::makeThreeSlice() {
 
   this->origSrc = src;
 
-  if (NULL == this->origSrc) {
+  if (this->origSrc == nullptr) {
     return;
   }
 

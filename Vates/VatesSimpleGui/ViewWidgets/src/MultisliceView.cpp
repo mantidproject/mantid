@@ -100,7 +100,7 @@ void MultiSliceView::setupData() {
 
 void MultiSliceView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
-  if (NULL == this->origSrc) {
+  if (this->origSrc == nullptr) {
     return;
   }
   this->checkSliceViewCompat();
