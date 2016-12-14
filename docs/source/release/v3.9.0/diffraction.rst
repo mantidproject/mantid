@@ -17,6 +17,13 @@ Crystal Improvements
 
 :ref:`algm-IntegrateEllipsoids` has a new option, AdaptiveQMultiplier, for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes.  These are the same as the adaptive options in :ref:`algm-IntegratePeaksMD`.
 
+Single Crystal Diffraction
+--------------------------
+HB3A's IDF is modified to allow its detector center shifted from default position.
+:ref:`algm-LoadSpiceXML2DDet` has new options for users to input amount of detector's shift in X and Y direction.
+:ref:`algm-ConvertCWSDExpToMomentum` has new options for users to input amount of detector's shift in X and Y direction.
+User interface *HFIR 4Circle Reduction* has been modified to allow user to specify wave length, detector center and distance between detector and sample.
+
 Engineering Diffraction
 -----------------------
 

@@ -660,8 +660,6 @@ def round_hkl_1(hkl):
     :param hkl:
     :return:
     """
-    print type(hkl)
-
     mi_h = round(hkl[0])
     mi_k = round(hkl[1])
     mi_l = round(hkl[2])
