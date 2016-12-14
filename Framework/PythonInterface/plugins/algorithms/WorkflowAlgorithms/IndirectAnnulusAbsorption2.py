@@ -388,6 +388,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             self._acc_ws = self._abs_ws + '_acc'
 
         # Get beam size defaults
+        # Hard-coded because the ISIS parameters weren't being picked up
         inst = mtd[self._sample_ws_name].getInstrument().getName
         if (self.getPropertyValue("DefaultBeamSize")):
             if inst == 'IRIS':self._beam_height, self._beam_width = 3.2, 2.1

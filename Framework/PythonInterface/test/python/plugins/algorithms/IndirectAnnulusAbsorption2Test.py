@@ -52,8 +52,23 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
         corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
                                                     SampleChemicalFormula='H2-O',
                                                     Events=200,
-                                                    UseCanCorrections=False,
-                                                    Version=2)
+                                                    UseCanCorrections=False)
+
+        self.assertEqual(fact.size(), 1)
+        self._test_workspaces(corrected, fact)
+
+    def test_beam_dimensions(self):
+        """
+        Tests beam dimensions
+        """
+
+        corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
+                                                      SampleChemicalFormula='H2-O'
+                                                      NumberWavelengths=2,
+                                                      Events=200,
+                                                      DefaultBeamSize=False,
+                                                      BeamHeight=2,
+                                                      BeamWidth=3)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -67,8 +82,7 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
                                                     SampleChemicalFormula='H2-O',
                                                     CanWorkspace=self._can_ws,
                                                     Events=200,
-                                                    UseCanCorrections=False,
-                                                    Version=2)
+                                                    UseCanCorrections=False)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -84,8 +98,7 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
                                                     CanWorkspace=self._can_ws,
                                                     CanScaleFactor=0.8,
                                                     Events=200,
-                                                    UseCanCorrections=False,
-                                                    Version=2)
+                                                    UseCanCorrections=False)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -101,8 +114,7 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
                                                     CanChemicalFormula='V',
                                                     CanScaleFactor=0.8,
                                                     Events=200,
-                                                    UseCanCorrections=True,
-                                                    Version=2)
+                                                    UseCanCorrections=True)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -121,8 +133,7 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
                                                     CanDensityType='Number',
                                                     CanDensity=0.5,
                                                     Events=200,
-                                                    UseCanCorrections=True,
-                                                    Version=2)
+                                                    UseCanCorrections=True)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -141,8 +152,7 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
                                                     CanDensityType='Mass',
                                                     CanDensity=0.5,
                                                     Events=200,
-                                                    UseCanCorrections=True,
-                                                    Version=2)
+                                                    UseCanCorrections=True)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
