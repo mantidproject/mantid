@@ -98,7 +98,9 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
     // Propagate spectrum masking
     if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
       output->getSpectrum(nhist1 + j).clearData();
-      outSpectrumInfo.setMasked(nhist1 + j, true);
+      PARALLEL_CRITICAL(setMasked) {
+        outSpectrumInfo.setMasked(nhist1 + j, true);
+      }
     }
 
     m_progress->report();
@@ -150,7 +152,9 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
     // factory
     if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
       output->getSpectrum(output_wi).clearData();
-      outSpectrumInfo.setMasked(output_wi, true);
+      PARALLEL_CRITICAL(setMaskedEvent) {
+        outSpectrumInfo.setMasked(output_wi, true);
+      }
     }
 
     m_progress->report();
