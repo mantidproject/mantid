@@ -294,7 +294,8 @@ double GetEi2::getDistanceFromSource(size_t ws_index,
 
   const auto &detector = spectrumInfo.detector(ws_index);
   const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
-  if (!spectrumInfo.hasDetectors(ws_index) || !spectrumInfo.isMonitor(ws_index)) {
+  if (!spectrumInfo.hasDetectors(ws_index) ||
+      !spectrumInfo.isMonitor(ws_index)) {
     std::ostringstream msg;
     msg << "A detector for monitor at workspace index " << ws_index
         << " cannot be found. ";
