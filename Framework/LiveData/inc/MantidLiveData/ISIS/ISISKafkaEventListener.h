@@ -38,7 +38,7 @@ class ISISKafkaEventStreamDecoder;
  */
 class DLLExport ISISKafkaEventListener : public API::LiveListener {
 public:
-  ISISKafkaEventListener() = default;
+  ISISKafkaEventListener();
   /// Destructor. Should handle termination of any socket connections.
   ~ISISKafkaEventListener() override = default;
 
