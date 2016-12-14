@@ -7,7 +7,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <set>
 #include <numeric>
