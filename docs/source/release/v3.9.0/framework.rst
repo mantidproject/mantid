@@ -22,6 +22,7 @@ Improved
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
 - :ref: All algorithms using `AsciiPointBase` now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects `SaveReflCustomAscii <algm-SaveReflCustomAscii>`, `SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, `SaveANSTOAscii <algm-SaveANSTOAscii>` and `SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
+- :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` has a working progress bar.
 - :ref:`SumSpectra <algm-SumSpectra>` has an option to ignore special floating point values called 'RemoveSpecialValues'. This is off by default but when enabled will ignore values such as NaN or Infinity during the summation of the spectra.  It was also updated to fix special values being used in some cases when the option was selected.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` gained a new option: `Interpolation`.
   This controls the method used for interpolation. Availabile options are: `Linear` & `CSpline`.
