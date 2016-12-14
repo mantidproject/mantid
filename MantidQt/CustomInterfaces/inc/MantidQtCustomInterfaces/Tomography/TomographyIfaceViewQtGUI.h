@@ -10,9 +10,9 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
 #include "ui_TomographyIfaceQtGUI.h"
@@ -119,8 +119,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
@@ -232,11 +232,12 @@ private slots:
   void runExternalProcess(const std::string &exec,
                           const std::vector<std::string> &args);
 
+  void imageOrStackLoadedInRoi(const std::string &path);
+
 private:
   /// Setup the interface (tab UI)
   void initLayout() override;
 
-  void doSetupSectionSetup();
   void doSetupSectionRun();
   void doSetupSectionFilters();
   void doSetupSectionVisualize();

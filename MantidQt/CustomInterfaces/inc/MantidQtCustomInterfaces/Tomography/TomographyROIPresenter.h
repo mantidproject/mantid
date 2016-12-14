@@ -105,6 +105,10 @@ private slots:
   void readWorkerStdErr(const QString &s);
 
 private:
+  inline std::string trimFileNameFromPath(const std::string &path) {
+    return path.substr(0, path.find_last_of("/\\"));
+  }
+
   StackOfImagesDirs checkInputStack(const std::string &path);
 
   /// loads a list of images from a stack, from their individual paths
