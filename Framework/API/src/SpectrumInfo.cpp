@@ -132,6 +132,17 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   return count == 1;
 }
 
+/** Set the mask flag of the spectrum with given index.
+ *
+ * Currently this simply sets the mask flags for the underlying detectors. */
+void SpectrumInfo::setMasked(const size_t index, bool masked) {
+  for (const auto &det : getDetectorVector(index)) {
+    const auto detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    m_mutableDetectorInfo->setMasked(detIndex, masked);
+  }
+}
+
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
 const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
