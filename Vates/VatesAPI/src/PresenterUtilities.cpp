@@ -76,7 +76,6 @@ void applyCOBMatrixSettingsToVtkDataSet(
 
 /**
  * Creates a factory chain for MDEvent workspaces
- * @param threshold: the threshold range
  * @param normalization: the normalization option
  * @param time: the time slice time
  * @returns a factory chain
@@ -96,7 +95,6 @@ createFactoryChainForEventWorkspace(VisualNormalization normalization,
 
 /**
 * Creates a factory chain for MDHisto workspaces
-* @param threshold: the threshold range
 * @param normalization: the normalization option
 * @param time: the time slice time
 * @returns a factory chain
