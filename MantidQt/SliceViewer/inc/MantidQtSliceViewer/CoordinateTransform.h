@@ -48,3 +48,4 @@ createCoordinateTransform(Mantid::API::IMDWorkspace_sptr ws, size_t dimX,
 }
 }
 #endif
+

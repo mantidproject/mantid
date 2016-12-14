@@ -149,3 +149,4 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
 
 } // namespace
 } // namespace
+

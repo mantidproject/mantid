@@ -62,7 +62,14 @@ Bugs Resolved
 SliceViewer Improvements
 ------------------------
 
-|
+ - Added ability to view data using non orthogonal axes. View can be toggled on or off.
+ 
+.. figure:: ../../images/sliceViewerNonOrthogonal.png
+   :class: screenshot
+   :width: 450px
+   :align: right
+
+   SliceViewer with nonorthogonal view 
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
