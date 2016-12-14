@@ -45,6 +45,9 @@ public:
   /// Returns the presenter managing this view
   IReflEventPresenter *getPresenter() const override;
 
+  /// Returns the number of time slices
+  std::string getNumTimeSlices() const override;
+
 private:
   /// Initialise the interface
   void initLayout();

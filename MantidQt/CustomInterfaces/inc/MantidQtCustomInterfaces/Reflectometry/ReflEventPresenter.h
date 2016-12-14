@@ -44,6 +44,9 @@ public:
   /// Destructor
   ~ReflEventPresenter() override;
 
+  /// Returns global options for time slicing
+  std::string getTimeSlicingOptions() const override;
+
 private:
   /// The view we are managing
   IReflEventView *m_view;

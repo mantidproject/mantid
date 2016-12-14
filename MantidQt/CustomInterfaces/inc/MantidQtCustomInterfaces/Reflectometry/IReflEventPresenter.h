@@ -37,6 +37,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflEventPresenter {
 public:
   virtual ~IReflEventPresenter(){};
+  /// Time-slicing options
+  virtual std::string getTimeSlicingOptions() const = 0;
 };
 }
 }

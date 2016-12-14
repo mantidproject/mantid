@@ -34,5 +34,13 @@ IReflEventPresenter *QtReflEventView::getPresenter() const {
   return m_presenter.get();
 }
 
+/** Returns the number of time slices
+* @return :: The number of time slices
+*/
+std::string QtReflEventView::getNumTimeSlices() const {
+
+  return m_ui.evenTimeSlicesEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
