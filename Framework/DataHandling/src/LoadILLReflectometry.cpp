@@ -185,23 +185,19 @@ void LoadILLReflectometry::setInstrumentName(
 void LoadILLReflectometry::initWorkspace(
     NeXus::NXEntry & /*entry*/, std::vector<std::vector<int>> monitorsData) {
 
-  // dim0 * m_numberOfPixelsPerTube is the total number of detectors
-  m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
-
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
-  g_log.debug() << "Monitors: " << monitorsData.size() << '\n';
+  g_log.debug() << "Number of monitors: " << monitorsData.size() << '\n';
   for (size_t i = 0; i < monitorsData.size(); ++i)
-    g_log.debug() << "Monitors[0]: " << monitorsData[i].size() << '\n';
+    g_log.debug() << "Data size of monitor[" << i <<"]: " << monitorsData[i].size() << '\n';
 
-  // Now create the output workspace
+  // create the output workspace
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", m_numberOfHistograms + monitorsData.size(),
       m_numberOfChannels + 1, m_numberOfChannels);
 
-  // MAYBE NOT
-  m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  Mantid::Kernel::NexusDescriptor descriptor(filename);
+
+  if (descriptor.pathExists("/entry0/monitor1.time_of_flight_0"))
+    m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
   m_localWorkspace->setYUnitLabel("Counts");
 }
@@ -216,8 +212,17 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   NXInt data = dataGroup.openIntData();
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+
+  // total number of detectors
+  m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
+  g_log.debug() << "Number of detectors" << m_numberOfHistograms << '\n';
+
   m_numberOfChannels = static_cast<size_t>(data.dim2());
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 }
 
 /**
@@ -281,7 +286,6 @@ void LoadILLReflectometry::loadData(
   // load the counts from the file into memory
   data.load();
 
-  size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
 
   Progress progress(this, 0, 1,
@@ -340,7 +344,6 @@ void LoadILLReflectometry::loadData(
         mean_chop_2_phase = entry.getFloat("instrument/Chopper2/phase");
       }
 
-      g_log.debug() << "m_numberOfChannels: " << m_numberOfChannels << '\n';
       g_log.debug() << "m_channelWidth: " << m_channelWidth << '\n';
       //g_log.debug() << "tof_delay: " << tof_delay << '\n';
       g_log.debug() << "POFF: " << POFF << '\n';
@@ -374,7 +377,7 @@ void LoadILLReflectometry::loadData(
   }
   else{
           g_log.information()
-              << "No monitor1.time_of_flight_0 \n";
+              << "No monitorx.time_of_flight_x \n";
 
           xVals.reserve(m_localWorkspace->x(0).size());
           for (size_t t = 0; t <= m_numberOfChannels;
@@ -387,7 +390,7 @@ void LoadILLReflectometry::loadData(
 
   HistogramData::BinEdges binEdges(xVals);
 
-  // Load monitors
+  // Write monitors
   for (size_t im = 0; im < nb_monitors; im++) {
     int *monitor_p = monitorsData[im].data();
     const HistogramData::Counts histoCounts(monitor_p,
@@ -400,6 +403,8 @@ void LoadILLReflectometry::loadData(
     progress.report();
   }
 
+  // Write data
+  size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);

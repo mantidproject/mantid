@@ -88,7 +88,6 @@ private:
   double m_wavelength;
   double m_channelWidth;
 
-  //std::vector<std::string> m_supportedInstruments;
   std::unordered_set<std::string> m_supportedInstruments;
   LoadHelper m_loader;
 };
