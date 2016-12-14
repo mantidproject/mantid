@@ -21,6 +21,18 @@
 import numpy as np
 
 
+def _debug_print_memory_usage_linux(self, message=""):
+    try:
+        # Windows doesn't seem to have resouce package, so this will silently fail
+        import resource
+        print(" >> Memory usage",
+              resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, "KB, ",
+              int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) / 1024,
+              "MB", message)
+    except Exception:
+        pass
+
+
 def scale_down(data_vol, block_size, method='average'):
     """
     Downscale to for example shrink 1Kx1K images to 512x512
@@ -84,6 +96,12 @@ def crop_vol(data_vol, coords):
     Returns :: cropped data volume
     """
     # if nothing is provided make the user aware
+    cropped_data = None
+    right = coords[2]
+    top = coords[1]
+    left = coords[0]
+    bottom = coords[3]
+    _debug_print_memory_usage_linux(", before crop")
     if not isinstance(coords, list) or 4 != len(coords):
         raise ValueError(
             "Wrong coordinates object when trying to crop: {0}".format(coords))
@@ -108,6 +126,7 @@ def crop_vol(data_vol, coords):
     else:
         cropped_data = data_vol[:, top:bottom, left:right]
 
+    _debug_print_memory_usage_linux(", after crop")
     return cropped_data
 
 
