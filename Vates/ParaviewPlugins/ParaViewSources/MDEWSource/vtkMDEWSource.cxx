@@ -22,7 +22,6 @@
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/optional.hpp>
@@ -175,16 +174,14 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
-    ThresholdRange_scptr thresholdRange =
-        boost::make_shared<IgnoreZerosThresholdRange>();
-    auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
-        thresholdRange, m_normalization);
+    auto hexahedronFactory =
+        Mantid::Kernel::make_unique<vtkMDHexFactory>(m_normalization);
 
-    hexahedronFactory->setSuccessor(
-                         Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-                             thresholdRange, m_normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
-            thresholdRange, m_normalization))
+    hexahedronFactory
+        ->setSuccessor(
+            Mantid::Kernel::make_unique<vtkMDQuadFactory>(m_normalization))
+        .setSuccessor(
+            Mantid::Kernel::make_unique<vtkMDLineFactory>(m_normalization))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     hexahedronFactory->setTime(m_time);

@@ -29,10 +29,8 @@ namespace Mantid {
 namespace VATES {
 
 vtkMDHistoHexFactory::vtkMDHistoHexFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normalizationOption)
-    : m_normalizationOption(normalizationOption),
-      m_thresholdRange(thresholdRange) {}
+    : m_normalizationOption(normalizationOption) {}
 
 /**
 Assigment operator
@@ -43,7 +41,6 @@ vtkMDHistoHexFactory &vtkMDHistoHexFactory::
 operator=(const vtkMDHistoHexFactory &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
-    this->m_thresholdRange = other.m_thresholdRange;
     this->m_workspace = other.m_workspace;
   }
   return *this;
@@ -55,16 +52,11 @@ Copy Constructor
 */
 vtkMDHistoHexFactory::vtkMDHistoHexFactory(const vtkMDHistoHexFactory &other) {
   this->m_normalizationOption = other.m_normalizationOption;
-  this->m_thresholdRange = other.m_thresholdRange;
   this->m_workspace = other.m_workspace;
 }
 
 void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
-
-  // Setup range values according to whatever strategy object has been injected.
-  m_thresholdRange->setWorkspace(workspace);
-  m_thresholdRange->calculate();
 }
 
 void vtkMDHistoHexFactory::validateWsNotNull() const {
@@ -137,9 +129,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     if (index % progressIncrement == 0)
       progressUpdate.eventRaised(static_cast<double>(index) * progressFactor);
     double signalScalar = signal->GetValue(index);
-    bool maskValue = (!std::isfinite(signalScalar) ||
-                      !m_thresholdRange->inRange(signalScalar));
-    if (maskValue) {
+    if (!std::isfinite(signalScalar)) {
       visualDataSet->BlankCell(index);
     }
   }

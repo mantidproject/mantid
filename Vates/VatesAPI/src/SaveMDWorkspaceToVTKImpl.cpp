@@ -1,7 +1,5 @@
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 
 #include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
@@ -71,15 +69,14 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent)
  * @param workspace: the workspace which is to be saved.
  * @param filename: the name of the file to which the workspace is to be saved.
  * @param normalization: the visual normalization option
- * @param thresholdRange: a plolicy for the threshold range
  * @param recursionDepth: the recursion depth for MDEvent Workspaces determines
  * @param compressorType: the compression type used by VTK
  * from which level data should be displayed
  */
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     Mantid::API::IMDWorkspace_sptr workspace, const std::string &filename,
-    VisualNormalization normalization, ThresholdRange_scptr thresholdRange,
-    int recursionDepth, const std::string &compressorType) const {
+    VisualNormalization normalization, int recursionDepth,
+    const std::string &compressorType) const {
   auto isHistoWorkspace =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
       nullptr;
@@ -102,8 +99,8 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
   auto time = selectTimeSliceValue(workspace);
 
   // Get presenter and data set factory set up
-  auto factoryChain = getDataSetFactoryChain(isHistoWorkspace, thresholdRange,
-                                             normalization, time);
+  auto factoryChain =
+      getDataSetFactoryChain(isHistoWorkspace, normalization, time);
 
   auto presenter = getPresenter(isHistoWorkspace, workspace, recursionDepth);
 
@@ -149,22 +146,19 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
 /**
  * Creates the correct factory chain based
  * @param isHistoWorkspace: flag if workspace is MDHisto
- * @param thresholdRange: the threshold range
  * @param normalization: the normalization option
  * @param time: the time slice info
  * @returns a data set factory
  */
 std::unique_ptr<vtkDataSetFactory>
 SaveMDWorkspaceToVTKImpl::getDataSetFactoryChain(
-    bool isHistoWorkspace, ThresholdRange_scptr thresholdRange,
-    VisualNormalization normalization, double time) const {
+    bool isHistoWorkspace, VisualNormalization normalization,
+    double time) const {
   std::unique_ptr<vtkDataSetFactory> factory;
   if (isHistoWorkspace) {
-    factory = createFactoryChainForHistoWorkspace(thresholdRange, normalization,
-                                                  time);
+    factory = createFactoryChainForHistoWorkspace(normalization, time);
   } else {
-    factory = createFactoryChainForEventWorkspace(thresholdRange, normalization,
-                                                  time);
+    factory = createFactoryChainForEventWorkspace(normalization, time);
   }
   return factory;
 }
@@ -267,26 +261,6 @@ void SaveMDWorkspaceToVTKImpl::setupMembers() {
                            VisualNormalization::NumEventsNormalization);
   m_normalizations.emplace("VolumeNormalization",
                            VisualNormalization::VolumeNormalization);
-
-  m_thresholds.emplace_back("IgnoreZerosThresholdRange");
-  m_thresholds.emplace_back("NoThresholdRange");
-}
-
-std::vector<std::string>
-SaveMDWorkspaceToVTKImpl::getAllowedThresholdsInStringRepresentation() const {
-  return m_thresholds;
-}
-
-ThresholdRange_scptr SaveMDWorkspaceToVTKImpl::translateStringToThresholdRange(
-    const std::string thresholdRange) const {
-  if (thresholdRange == m_thresholds[0]) {
-    return boost::make_shared<IgnoreZerosThresholdRange>();
-  } else if (thresholdRange == m_thresholds[1]) {
-    return boost::make_shared<NoThresholdRange>();
-  } else {
-    throw std::runtime_error("SaveMDWorkspaceToVTK: The selected threshold "
-                             "range seems to be incorrect.");
-  }
 }
 
 /**
