@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace Mantid {
@@ -94,9 +96,33 @@ void CopyInstrumentParameters::exec() {
     // changed parameters
     m_receivingWorkspace->swapInstrumentParameters(targMap);
 
+    // Deal with parameters that are stored in Beamline::DetectorInfo
+    const auto &givingDetInfo = m_givingWorkspace->detectorInfo();
+    auto &receivingDetInfo = m_receivingWorkspace->mutableDetectorInfo();
+    try {
+      // If all detector IDs match a simple assignment should work.
+      receivingDetInfo = givingDetInfo;
+    } catch (std::runtime_error &) {
+      // Fallback for mismatch of detector IDs.
+      const auto &givingDetIDs = givingDetInfo.detectorIDs();
+      for (const auto detID : receivingDetInfo.detectorIDs()) {
+        // TODO Uncomment code and add handling for every field being added to
+        // Beamline::DetectorInfo.
+        // const auto receivingIndex = receivingDetInfo.indexOf(detID);
+        if (std::find(givingDetIDs.begin(), givingDetIDs.end(), detID) !=
+            givingDetIDs.end()) {
+          // const auto givingIndex = givingDetInfo.indexOf(detID);
+          // Copy values for all fields in Beamline::DetectorInfo
+        } else {
+          // Set default values for all fields in Beamline::DetectorInfo
+        }
+      }
+    }
   } else {
     // unchanged Copy parameters
     m_receivingWorkspace->replaceInstrumentParameters(givParams);
+    m_receivingWorkspace->mutableDetectorInfo() =
+        m_givingWorkspace->detectorInfo();
   }
 }
 
