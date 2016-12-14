@@ -96,7 +96,12 @@ void CopyInstrumentParameters::exec() {
     // changed parameters
     m_receivingWorkspace->swapInstrumentParameters(targMap);
 
-    // Deal with parameters that are stored in Beamline::DetectorInfo
+    // Deal with parameters that are stored in DetectorInfo. Note that this
+    // mimics what the above code is doing when copying the ParameterMap, even
+    // if it may not make sense. That is, we do a matching purely based on
+    // detector IDs, but completely ignore whether these belong to different
+    // instruments or different incompatible versions of the same instrument.
+    // This algorithm should probably enforce stricter compatiblity checks.
     const auto &givingDetInfo = m_givingWorkspace->detectorInfo();
     auto &receivingDetInfo = m_receivingWorkspace->mutableDetectorInfo();
     try {
@@ -112,9 +117,9 @@ void CopyInstrumentParameters::exec() {
         if (std::find(givingDetIDs.begin(), givingDetIDs.end(), detID) !=
             givingDetIDs.end()) {
           // const auto givingIndex = givingDetInfo.indexOf(detID);
-          // Copy values for all fields in Beamline::DetectorInfo
+          // Copy values for all fields in DetectorInfo
         } else {
-          // Set default values for all fields in Beamline::DetectorInfo
+          // Set default values for all fields in DetectorInfo
         }
       }
     }
