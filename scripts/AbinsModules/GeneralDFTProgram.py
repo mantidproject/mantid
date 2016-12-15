@@ -10,18 +10,17 @@ import AbinsConstants
 
 
 # noinspection PyMethodMayBeStatic
-class GeneralDFTProgram(IOmodule):
+class GeneralDFTProgram(object):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
     in INS analysis.
     """
     def __init__(self, input_dft_filename=None):
 
-        super(GeneralDFTProgram, self).__init__(input_filename=input_dft_filename, group_name=AbinsParameters.dft_group)
-
         self._num_k = None
         self._num_atoms = None
         self._sample_form = None
+        self._clerk = IOmodule(input_filename=input_dft_filename, group_name=AbinsParameters.dft_group)
 
     def read_phonon_file(self):
         """
@@ -107,26 +106,25 @@ class GeneralDFTProgram(IOmodule):
         """
         return None
 
-    def load_data(self):
+    def load_formatted_data(self):
         """
-        Loads data from hdf file.
+        Loads data from hdf file. After data is loaded it is put into AbinsData object.
         @return:
         """
-        _data = self.load(list_of_datasets=["frequencies", "weights", "k_vectors",
-                                            "atomic_displacements", "unit_cell", "atoms"])
-        _datasets = _data["datasets"]
-        self._num_k = _datasets["k_vectors"].shape[0]
-        self._num_atoms = len(_datasets["atoms"])
+        data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors",
+                                                  "atomic_displacements", "unit_cell", "atoms"])
+        datasets = data["datasets"]
+        self._num_k = datasets["k_vectors"].shape[0]
+        self._num_atoms = len(datasets["atoms"])
 
-        _loaded_data = {"frequencies": _datasets["frequencies"],
-                        "weights": _datasets["weights"],
-                        "k_vectors": _datasets["k_vectors"],
-                        "atomic_displacements": _datasets["atomic_displacements"],
-                        "unit_cell": _datasets["unit_cell"],
-                        "atoms": _datasets["atoms"]
-                        }
+        loaded_data = {"frequencies": datasets["frequencies"],
+                       "weights": datasets["weights"],
+                       "k_vectors": datasets["k_vectors"],
+                       "atomic_displacements": datasets["atomic_displacements"],
+                       "unit_cell": datasets["unit_cell"],
+                       "atoms": datasets["atoms"]}
 
-        return self._rearrange_data(data=_loaded_data)
+        return self._rearrange_data(data=loaded_data)
 
     # Protected methods which should be reused by classes which read DFT phonon data
     def _recover_symmetry_points(self, data=None):
@@ -166,20 +164,20 @@ class GeneralDFTProgram(IOmodule):
         result_data.set(k_points_data=k_points, atoms_data=atoms)
         return result_data
 
-    def get_data(self):
+    def get_formatted_data(self):
 
         # try to load DFT data from *.hdf5 file
         try:
 
-            self.check_previous_data()
-            dft_data = self.load_data()
+            self._clerk.check_previous_data()
+            dft_data = self.load_formatted_data()
             logger.notice(str(dft_data) + " has been loaded from the HDF file.")
 
         # if loading from *.hdf5 file failed than read data directly  from input DFT file and erase hdf file
         except (IOError, ValueError) as err:
 
             logger.notice(str(err))
-            self.erase_hdf_file()
+            self._clerk.erase_hdf_file()
             dft_data = self.read_phonon_file()
             logger.notice(str(dft_data) + " from DFT input file has been loaded.")
 

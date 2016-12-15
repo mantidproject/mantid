@@ -41,9 +41,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=[self._gamma_sum, self._gamma_no_sum,
-                                                            self._many_k_no_sum, self._many_k_sum,
-                                                            "benzene"])
+        AbinsTestHelpers.remove_output_files(list_of_names=["LoadCASTEP"])
 
 
 #  *************************** USE CASES ********************************************
@@ -109,7 +107,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         data = self._get_reader_data(castep_reader=castep_reader)
 
         # test validData method
-        self.assertEqual(True, castep_reader._valid_hash())
+        self.assertEqual(True, castep_reader._clerk._valid_hash())
 
         return data
 
@@ -186,7 +184,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
         loader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(input_dft_filename + ".phonon"))
-        loaded_data = loader.load_data().extract()
+        loaded_data = loader.load_formatted_data().extract()
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
@@ -214,9 +212,9 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     def _get_reader_data(self, castep_reader=None):
         abins_type_data = castep_reader.read_phonon_file()
         data = {"datasets": abins_type_data.extract(),
-                "attributes": castep_reader._attributes
+                "attributes": castep_reader._clerk._attributes
                 }
-        data["datasets"].update({"unit_cell": castep_reader._data["unit_cell"]})
+        data["datasets"].update({"unit_cell": castep_reader._clerk._data["unit_cell"]})
         return data
 
 if __name__ == '__main__':

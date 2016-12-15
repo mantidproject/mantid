@@ -52,7 +52,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         AbinsParameters.atoms_threads = 1
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=[self._si2, self._squaricn])
+        AbinsTestHelpers.remove_output_files(list_of_names=["CalculateSPowder"])
 
     #     test input
     def test_wrong_input(self):
@@ -107,7 +107,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
                                  temperature=self._temperature,
                                  sample_form=self._sample_form, abins_data=good_data["DFT"],
                                  instrument_name=self._instrument_name, quantum_order_num=self._order_event)
-        calculated_data = good_tester.get_data()
+        calculated_data = good_tester.get_formatted_data()
 
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
@@ -116,7 +116,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
                                 temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=good_data["DFT"], instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
-        loaded_data = new_tester.load_data()
+        loaded_data = new_tester.load_formatted_data()
 
         self._check_data(good_data=good_data["S"], data=loaded_data.extract())
 

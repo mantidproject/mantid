@@ -4,10 +4,11 @@ from PowderData import PowderData
 from AbinsData import AbinsData
 import AbinsParameters
 import AbinsConstants
+from mantid.kernel import logger
 
 
 # noinspection PyMethodMayBeStatic
-class CalculatePowder(IOmodule):
+class CalculatePowder(object):
     """
     Class for calculating powder data.
     """
@@ -21,8 +22,7 @@ class CalculatePowder(IOmodule):
             raise ValueError("Object of AbinsData was expected.")
         self._abins_data = abins_data
 
-        super(CalculatePowder, self).__init__(input_filename=filename,
-                                              group_name=AbinsParameters.powder_data_group + "/")
+        self._clerk = IOmodule(input_filename=filename, group_name=AbinsParameters.powder_data_group)
 
     def _get_gamma_data(self, k_data=None):
         """
@@ -88,6 +88,24 @@ class CalculatePowder(IOmodule):
 
         return powder
 
+    def get_formatted_data(self):
+        """
+        Method to obtain data
+        @return: obtained data
+        """
+        try:
+            self._clerk.check_previous_data()
+            data = self.load_formatted_data()
+            logger.notice(str(data) + " has been loaded from the HDF file.")
+
+        except (IOError, ValueError) as err:
+
+            logger.notice("Warning: " + str(err) + " Data has to be calculated.")
+            data = self.calculate_data()
+            logger.notice(str(data) + " has been calculated.")
+
+        return data
+
     def calculate_data(self):
         """
         Calculates mean square displacements and Debye-Waller factors.  Saves both MSD and DW  to an hdf file.
@@ -95,19 +113,19 @@ class CalculatePowder(IOmodule):
         """
 
         data = self._calculate_powder()
-        self.add_file_attributes()
-        self.add_data("powder_data", data.extract())
-        self.save()
+
+        self._clerk.add_file_attributes()
+        self._clerk.add_data("powder_data", data.extract())
+        self._clerk.save()
 
         return data
 
-    def load_data(self):
+    def load_formatted_data(self):
         """
         Loads mean square displacements and Debye-Waller factors from an hdf file.
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
-
-        data = self.load(list_of_datasets=["powder_data"])
+        data = self._clerk.load(list_of_datasets=["powder_data"])
         powder_data = PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"].shape[0])
         powder_data.set(data["datasets"]["powder_data"])
 

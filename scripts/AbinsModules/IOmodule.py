@@ -10,7 +10,7 @@ import os
 from mantid.kernel import logger
 
 
-# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic
+# noinspection PyMethodMayBeStatic
 class IOmodule(object):
     """
     Class for ABINS I/O HDF file operations.
@@ -29,15 +29,15 @@ class IOmodule(object):
             filename = os.path.basename(self._input_filename)
 
             if filename.strip() == "":
-                raise ValueError("Name of the file cannot be an empty string!")
+                raise ValueError("Name of the file cannot be an empty string.")
 
         else:
-            raise ValueError("Invalid name of hdf file. String was expected!")
+            raise ValueError("Invalid name of input file. String was expected.")
 
         if isinstance(group_name, str):
             self._group_name = group_name
         else:
-            raise ValueError("Invalid name of the group. String was expected!")
+            raise ValueError("Invalid name of the group. String was expected.")
 
         core_name = filename[0:filename.find(".")]
         self._hdf_filename = core_name + ".hdf5"  # name of hdf file
@@ -85,38 +85,6 @@ class IOmodule(object):
 
         if not self._valid_advanced_parameters():
             raise ValueError("Different advanced parameters were used in the previous calculations.")
-
-    def load_data(self):
-        """
-        Method which loads data from an hdf file. Method which has to be implemented by an inheriting class.
-        """
-        return None
-
-    def calculate_data(self):
-        """
-        Method which evaluates data in case loading failed. Method which has to be implemented by an inheriting class.
-        """
-        return None
-
-    def get_data(self):
-        """
-        Method to obtain data
-        @return: obtained data
-        """
-        try:
-
-            self.check_previous_data()
-
-            _data = self.load_data()
-            logger.notice(str(_data) + " has been loaded from the HDF file.")
-
-        except (IOError, ValueError) as err:
-
-            logger.notice("Warning: " + str(err) + " Data has to be calculated.")
-            _data = self.calculate_data()
-            logger.notice(str(_data) + " has been calculated.")
-
-        return _data
 
     def erase_hdf_file(self):
         """
@@ -283,7 +251,7 @@ class IOmodule(object):
         @return:  value of attribute
         """
         if name not in group.attrs:
-            raise ValueError("Attribute %s in not present in %s file!" % (name, self._hdf_filename))
+            raise ValueError("Attribute %s in not present in %s file." % (name, self._hdf_filename))
         else:
             return group.attrs[name]
 
@@ -361,12 +329,12 @@ class IOmodule(object):
         @return:
         """
         if not isinstance(name, str):
-            raise ValueError("Invalid name of the dataset!")
+            raise ValueError("Invalid name of the dataset.")
 
         if name in group:
             _hdf_group = group[name]
         else:
-            raise ValueError("Invalid name of the dataset!")
+            raise ValueError("Invalid name of the dataset.")
 
         # noinspection PyUnresolvedReferences,PyProtectedMember
         if isinstance(_hdf_group, h5py._hl.dataset.Dataset):
@@ -417,7 +385,7 @@ class IOmodule(object):
         with h5py.File(self._hdf_filename, 'r') as hdf_file:
 
             if self._group_name not in hdf_file:
-                raise ValueError("No group %s in hdf file!" % self._group_name)
+                raise ValueError("No group %s in hdf file." % self._group_name)
 
             group = hdf_file[self._group_name]
 
@@ -452,6 +420,9 @@ class IOmodule(object):
                  which contains only hexadecimal digits
         """
         return self._calculate_hash(filename=AbinsParameters.__file__.replace(".pyc", ".py"))
+
+    def get_input_filename(self):
+        return self._input_filename
 
     def calculate_dft_file_hash(self):
         """

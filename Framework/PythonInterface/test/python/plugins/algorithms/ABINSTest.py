@@ -40,7 +40,8 @@ class ABINSTest(unittest.TestCase):
     _squaricn = "squaricn_sum_ABINS"
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=[self._si2, self._squaricn, "benzene"])
+        AbinsTestHelpers.remove_output_files(list_of_names=["ABINS", "explicit", "restart",  "default", "total",
+                                                            "no_scale", "exp"])
 
         # remove workspaces
         DeleteWorkspace(self._squaricn + "_ref")

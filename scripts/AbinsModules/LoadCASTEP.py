@@ -160,7 +160,7 @@ class LoadCASTEP(GeneralDFTProgram):
                          r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
         header_sum = re.compile(header_str_sum)
 
-        with open(self._input_filename, "rU") as f:
+        with open(self._clerk.get_input_filename(), "rU") as f:
             found = False
             for line in f:  # iterate over the file one line at a time(memory efficient)
                 if header_sum.match(line):
@@ -204,7 +204,7 @@ class LoadCASTEP(GeneralDFTProgram):
         block_count = 0
 
         frequencies, weights, k_vectors, eigenvectors = [], [], [], []
-        with open(self._input_filename, 'rU') as f_handle:
+        with open(self._clerk.get_input_filename(), "rU") as f_handle:
             file_data.update(self._parse_phonon_file_header(f_handle))
             header_found = False
             while True:
@@ -242,11 +242,11 @@ class LoadCASTEP(GeneralDFTProgram):
         # save stuff to hdf file
         _data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
         for name in _data_to_save:
-            self.add_data(name=name, value=file_data[name])
+            self._clerk.add_data(name=name, value=file_data[name])
 
-        self.add_file_attributes()
-        self.add_attribute("DFT_program", "CASTEP")
+        self._clerk.add_file_attributes()
+        self._clerk.add_attribute("DFT_program", "CASTEP")
 
-        self.save()
+        self._clerk.save()
 
         return self._rearrange_data(data=file_data)

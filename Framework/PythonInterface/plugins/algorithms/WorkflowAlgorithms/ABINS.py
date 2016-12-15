@@ -174,7 +174,7 @@ class ABINS(PythonAlgorithm):
 
             raise RuntimeError("Currently only output files from CASTEP are supported.")
 
-        dft_data = dft_reader.get_data()
+        dft_data = dft_reader.get_formatted_data()
 
         prog_reporter.report("Phonon data has been read.")
 
@@ -183,7 +183,7 @@ class ABINS(PythonAlgorithm):
                                   sample_form=self._sample_form, abins_data=dft_data, instrument_name=self._instrument,
                                   quantum_order_num=self._num_quantum_order_events)
 
-        s_data = s_calculator.get_data()
+        s_data = s_calculator.get_formatted_data()
 
         prog_reporter.report("Dynamical structure factors have been determined.")
 
@@ -718,7 +718,6 @@ class ABINS(PythonAlgorithm):
 
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
-        self._evaluate_combinations = self._num_quantum_order_events > AbinsConstants.QUANTUM_ORDER_ONE
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
 

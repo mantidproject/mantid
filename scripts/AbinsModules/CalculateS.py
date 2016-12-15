@@ -1,6 +1,8 @@
 import numpy as np
+from mantid.kernel import logger
 
 try:
+    # noinspection PyUnresolvedReferences
     from pathos.multiprocessing import ProcessingPool
     PATHOS_FOUND = True
 except ImportError:
@@ -19,8 +21,8 @@ import AbinsParameters
 import AbinsConstants
 
 
-# noinspection PyMethodMayBeStatic,PyMethodMayBeStatic,PyMethodMayBeStatic
-class CalculateS(IOmodule, FrequencyPowderGenerator):
+# noinspection PyMethodMayBeStatic
+class CalculateS(object):
     """
     Class for calculating S(Q, omega)
     """
@@ -66,11 +68,23 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
-        IOmodule.__init__(self,
-                          input_filename=filename,
-                          group_name=(AbinsParameters.s_data_group + "/" + self._instrument_name + "/" +
-                                      self._sample_form + "/%sK" % self._temperature))
-        FrequencyPowderGenerator.__init__(self)
+        if isinstance(filename, str):
+            if filename.strip() == "":
+                raise ValueError("Name of the file cannot be an empty string!")
+
+            self._input_filename = filename
+
+        else:
+            raise ValueError("Invalid name of input file. String was expected!")
+
+        self._clerk = IOmodule(input_filename=filename,
+                               group_name=(AbinsParameters.s_data_group + "/" + self._instrument_name + "/" +
+                                           self._sample_form + "/%sK" % self._temperature))
+
+        if self._sample_form == "Powder":
+            self._freq_generator = FrequencyPowderGenerator()
+        else:
+            raise ValueError("Only powder case is implemented at the moment.")
 
         self._calculate_order = {AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
                                  AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
@@ -89,7 +103,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         if self._sample_form == "Powder":
 
             _powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
-            _powder_data = _powder_calculator.get_data()
+            _powder_data = _powder_calculator.get_formatted_data()
             _s_data = self._calculate_s_powder_1d(powder_data=_powder_data)
 
         # Crystal case: calculate DW
@@ -243,12 +257,12 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                     # number of transitions can only go up
                     for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
-                        part_local_freq, part_local_coeff = \
-                            self.construct_freq_combinations(previous_array=part_local_freq,
-                                                             previous_coefficients=part_local_coeff,
-                                                             fundamentals_array=fund_chunk,
-                                                             fundamentals_coefficients=fund_coeff_chunk,
-                                                             quantum_order=lg_order)
+                        part_local_freq, part_local_coeff = self._freq_generator.construct_freq_combinations(
+                            previous_array=part_local_freq,
+                            previous_coefficients=part_local_coeff,
+                            fundamentals_array=fund_chunk,
+                            fundamentals_coefficients=fund_coeff_chunk,
+                            quantum_order=lg_order)
 
                         # noinspection PyProtectedMember
                         q2 = self._instrument._calculate_q_powder(frequencies=part_local_freq)
@@ -284,11 +298,12 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             # if relatively small array of transitions then process it in one shot
             else:
 
-                local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
-                                                                           previous_coefficients=local_coeff,
-                                                                           fundamentals_array=self._fundamentals_freq,
-                                                                           fundamentals_coefficients=fund_coeff,
-                                                                           quantum_order=order)
+                local_freq, local_coeff = self._freq_generator.construct_freq_combinations(
+                    previous_array=local_freq,
+                    previous_coefficients=local_coeff,
+                    fundamentals_array=self._fundamentals_freq,
+                    fundamentals_coefficients=fund_coeff,
+                    quantum_order=order)
 
                 # noinspection PyProtectedMember
                 q2 = self._instrument._calculate_q_powder(frequencies=local_freq)
@@ -469,19 +484,20 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @return: object of type SData and dictionary with total S.
         """
         data = self._calculate_s()
-        self.add_file_attributes()
-        self.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
-        self.add_data("data", data.extract())
-        self.save()
+
+        self._clerk.add_file_attributes()
+        self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
+        self._clerk.add_data("data", data.extract())
+        self._clerk.save()
 
         return data
 
-    def load_data(self):
+    def load_formatted_data(self):
         """
         Loads S from an hdf file.
         @return: object of type SData.
         """
-        data = self.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
+        data = self._clerk.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
         if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
             raise ValueError("User requested a larger number of quantum events to be included in the simulation "
                              "then in the previous calculations. S cannot be loaded from the hdf file.")
@@ -515,3 +531,23 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         s_data.set(items=data["datasets"]["data"])
 
         return s_data
+
+    def get_formatted_data(self):
+        """
+        Method to obtain data
+        @return: obtained data
+        """
+        try:
+
+            self._clerk.check_previous_data()
+
+            data = self.load_formatted_data()
+            logger.notice(str(data) + " has been loaded from the HDF file.")
+
+        except (IOError, ValueError) as err:
+
+            logger.notice("Warning: " + str(err) + " Data has to be calculated.")
+            data = self.calculate_data()
+            logger.notice(str(data) + " has been calculated.")
+
+        return data

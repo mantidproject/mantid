@@ -44,7 +44,7 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
     #     test input
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=[self._c6h6, self._si2])
+        AbinsTestHelpers.remove_output_files(list_of_names=["CalculatePowder"])
 
     def test_wrong_input(self):
 
@@ -83,7 +83,7 @@ class ABINSCalculatePowderTest(unittest.TestCase):
         # check if loading powder data is correct
         new_tester = CalculatePowder(filename=AbinsTestHelpers.find_file(name + ".phonon"),
                                      abins_data=good_data["DFT"])
-        loaded_data = new_tester.load_data().extract()
+        loaded_data = new_tester.load_formatted_data().extract()
         for key in good_data["powder"]:
             self.assertEqual(True, np.allclose(calculated_data[key], loaded_data[key]))
 

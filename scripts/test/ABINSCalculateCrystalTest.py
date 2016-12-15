@@ -40,7 +40,7 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
     _si2 = "Si2-sc_CalculateCrystal"
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=[self._c6h6, self._si2])
+        AbinsTestHelpers.remove_output_files(list_of_names=["CalculateCrystal"])
 
     #     test input
     def test_wrong_input(self):
