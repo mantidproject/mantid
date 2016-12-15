@@ -429,33 +429,21 @@ void MaskDetectors::appendToIndexListFromWS(
   size_t endIndex = std::get<1>(range_info);
   bool range_constrained = std::get<2>(range_info);
 
+  const auto &spectrumInfo = sourceWS->spectrumInfo();
   if (range_constrained) {
     constrainIndexInRange(indexList, tmp_index, startIndex, endIndex);
 
     for (size_t i = startIndex; i <= endIndex; ++i) {
-      IDetector_const_sptr det;
-      try {
-        det = sourceWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
-        continue;
-      }
-      if (det->isMasked()) {
+      if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)) {
         tmp_index.push_back(i);
       }
     }
-
   } else {
     tmp_index.swap(indexList);
 
     endIndex = sourceWS->getNumberHistograms();
     for (size_t i = 0; i < endIndex; ++i) {
-      IDetector_const_sptr det;
-      try {
-        det = sourceWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
-        continue;
-      }
-      if (det->isMasked()) {
+      if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)) {
         tmp_index.push_back(i);
       }
     }
