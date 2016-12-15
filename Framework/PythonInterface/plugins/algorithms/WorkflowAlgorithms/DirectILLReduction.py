@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction,\
-    FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd,\
+    FileProperty, InstrumentValidator, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd,\
     PropertyMode, WorkspaceProperty, WorkspaceUnitValidator
 from mantid.kernel import CompositeValidator, Direct, Direction,\
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty,\
@@ -825,6 +825,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         positiveIntArray = IntArrayBoundedValidator()
         positiveIntArray.setLower(0)
         scalingFactor = FloatBoundedValidator(lower=0, upper=1)
+        inputWorkspaceValidator = CompositeValidator()
+        inputWorkspaceValidator.add(InstrumentValidator())
+        inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
 
         # Properties.
         self.declareProperty(FileProperty(name=_PROP_INPUT_FILE,
@@ -835,7 +838,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_INPUT_WS,
             defaultValue='',
-            validator=WorkspaceUnitValidator('TOF'),
+            validator=inputWorkspaceValidator,
             optional=PropertyMode.Optional,
             direction=Direction.Input),
             doc='Input workspace.')
@@ -881,18 +884,21 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_VANA_WS,
             defaultValue='',
+            validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced vanadium workspace.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_EC_WS,
             defaultValue='',
+            validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced empty container workspace.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_CD_WS,
             defaultValue='',
+            validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced cadmium workspace.')
