@@ -158,6 +158,7 @@ void He3TubeEfficiency::exec() {
  * information. Gets the detector information and uses this to calculate its
  * efficiency
  *  @param spectraIndex :: index of the spectrum to get the efficiency for
+ *  @param spectrumInfo :: the SpectrumInfo object for the input workspace
  *  @throw invalid_argument if the shape of a detector is isn't a cylinder
  *  aligned along one axis
  *  @throw NotFoundError if the detector or its gas pressure or wall thickness

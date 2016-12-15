@@ -856,7 +856,7 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) /
  *        the length of the distance between the two.
  * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
  * @param samplePos: position of the sample
- * @param det: Geometry object representing the detector (position of the pixel)
+ * @param detPos: position of the detector
  * @param offset: value (close to zero) that changes the factor := factor *
  *(1+offset).
  */
