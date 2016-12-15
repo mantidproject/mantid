@@ -295,23 +295,24 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
 
     const auto &YValues = localworkspace->y(wsIndex);
     const auto &YErrors = localworkspace->e(wsIndex);
-
-    // Retrieve the spectrum into a vector
-
-    for (int i = 0; i < m_yLength; ++i) {
-      if (m_calculateWeightedSum) {
+    if (m_calculateWeightedSum) {
+      // Retrieve the spectrum into a vector
+      for (int i = 0; i < m_yLength; ++i) {
         if (std::isnormal(YErrors[i])) {
-          const double errsq = YErrors[i] * YErrors[i];
+          const double yErrorsVal = YErrors[i];
+          const double errsq = yErrorsVal * yErrorsVal;
           OutputYError[i] += errsq;
           Weight[i] += 1. / errsq;
           OutputYSum[i] += YValues[i] / errsq;
         } else {
           nZeros[i]++;
         }
-
-      } else {
-        OutputYSum[i] += YValues[i];
-        OutputYError[i] += YErrors[i] * YErrors[i];
+      }
+    } else {
+      OutputYSum += YValues;
+      for (int i = 0; i < m_yLength; ++i) {
+        const auto yErrorsVal = YErrors[i];
+        OutputYError[i] += yErrorsVal * yErrorsVal;
       }
     }
 
