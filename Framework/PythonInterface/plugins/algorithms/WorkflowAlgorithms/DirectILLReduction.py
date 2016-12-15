@@ -294,19 +294,6 @@ def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log,
     return ws
 
 
-def _extractMonitorWs(ws, wsNames, algorithmLogging):
-    '''
-    Separates detector and monitor histograms from a workspace.
-    '''
-    detWSName = wsNames.withSuffix('extracted_detectors')
-    monWSName = wsNames.withSuffix('extracted_monitors')
-    detectorWS, monitorWS = ExtractMonitors(InputWorkspace=ws,
-                                            DetectorWorkspace=detWSName,
-                                            MonitorWorkspace=monWSName,
-                                            EnableLogging=algorithmLogging)
-    return detectorWS, monitorWS
-
-
 def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
     '''
     Returns a flat background workspace.
@@ -501,31 +488,6 @@ def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
     return maskedWS
 
 
-def _applyUserMask(ws, mask, indexType, wsNames, algorithmLogging):
-    '''
-    Applies mask.
-    '''
-    maskedWSName = wsNames.withSuffix('masked')
-    maskedWorkspace = CloneWorkspace(InputWorkspace=ws,
-                                     OutputWorkspace=maskedWSName,
-                                     EnableLogging=algorithmLogging)
-    if indexType == _INDEX_TYPE_DET_ID:
-        MaskDetectors(Workspace=maskedWorkspace,
-                      DetectorList=mask,
-                      EnableLogging=algorithmLogging)
-    elif indexType == _INDEX_TYPE_SPECTRUM_NUMBER:
-        MaskDetectors(Workspace=maskedWorkspace,
-                      SpectraList=mask,
-                      EnableLogging=algorithmLogging)
-    elif indexType == _INDEX_TYPE_WS_INDEX:
-        MaskDetectors(Workspace=maskedWorkspace,
-                      WorkspaceIndexList=mask,
-                      EnableLogging=algorithmLogging)
-    else:
-        raise RuntimeError('Unknown ' + _PROP_INDEX_TYPE)
-    return maskedWorkspace
-
-
 def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace,
                               monEPPWorkspace, indexType, eiCalibrationDets,
                               eiCalibrationMon, wsNames, log,
@@ -712,31 +674,6 @@ def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup, algorithmLogging):
     return ecSubtractedWS
 
 
-def _normalizeToVana(ws, vanaWS, wsNames, algorithmLogging):
-    '''
-    Normalizes to vanadium workspace.
-    '''
-    vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
-    vanaNormalizedWS = Divide(LHSWorkspace=ws,
-                              RHSWorkspace=vanaWS,
-                              OutputWorkspace=vanaNormalizedWSName,
-                              EnableLogging=algorithmLogging)
-    return vanaNormalizedWS
-
-
-def _convertTOFToDeltaE(ws, wsNames, algorithmLogging):
-    '''
-    Converts the X units from time-of-flight to energy transfer.
-    '''
-    energyConvertedWSName = wsNames.withSuffix('energy_converted')
-    energyConvertedWS = ConvertUnits(InputWorkspace=ws,
-                                     OutputWorkspace=energyConvertedWSName,
-                                     Target='DeltaE',
-                                     EMode='Direct',
-                                     EnableLogging=algorithmLogging)
-    return energyConvertedWS
-
-
 def _rebin(ws, params, wsNames, algorithmLogging):
     '''
     Rebins a workspace.
@@ -747,28 +684,6 @@ def _rebin(ws, params, wsNames, algorithmLogging):
                        Params=params,
                        EnableLogging=algorithmLogging)
     return rebinnedWS
-
-
-def _correctByKiKf(ws, wsNames, algorithmLogging):
-    '''
-    Applies the k_i / k_f correction.
-    '''
-    correctedWSName = wsNames.withSuffix('kikf')
-    correctedWS = CorrectKiKf(InputWorkspace=ws,
-                              OutputWorkspace=correctedWSName,
-                              EnableLogging=algorithmLogging)
-    return correctedWS
-
-
-def _correctByDetectorEfficiency(ws, wsNames, algorithmLogging):
-    '''
-    Applies detector efficiency corrections.
-    '''
-    correctedWSName = wsNames.withSuffix('detector_efficiency_corrected')
-    correctedWS = DetectorEfficiencyCorUser(InputWorkspace=ws,
-                                            OutputWorkspace=correctedWSName,
-                                            EnableLogging=algorithmLogging)
-    return correctedWS
 
 
 class DirectILLReduction(DataProcessorAlgorithm):
@@ -791,261 +706,55 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         report = _Report()
-        childAlgorithmLogging = False
+        subalgLogging = False
         if self.getProperty(_PROP_SUBALG_LOGGING).value == \
                 _SUBALG_LOGGING_ON:
-            childAlgorithmLogging = True
+            subalgLogging = True
         reductionType = self.getProperty(_PROP_REDUCTION_TYPE).value
         wsNamePrefix = self.getProperty(_PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(_PROP_CLEANUP_MODE).value
         wsNames = _NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = _IntermediateWSCleanup(cleanupMode, childAlgorithmLogging)
-        indexType = self.getProperty(_PROP_INDEX_TYPE).value
+        wsCleanup = _IntermediateWSCleanup(cleanupMode, subalgLogging)
 
         # The variables 'mainWS' and 'monWS shall hold the current main
         # data throughout the algorithm.
 
-        # Init workspace.
-        inputFile = self.getProperty(_PROP_INPUT_FILE).value
-        if inputFile:
-            eppReference = \
-                self.getProperty(_PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
-            mainWS = _loadFiles(inputFile,
-                                eppReference,
-                                wsNames,
-                                wsCleanup,
-                                self.log(),
-                                childAlgorithmLogging)
-        elif self.getProperty(_PROP_INPUT_WS).value:
-            mainWS = self.getProperty(_PROP_INPUT_WS).value
+        # Get input workspace.
+        mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
 
-        # Extract monitors to a separate workspace
-        detWS, monWS = _extractMonitorWs(mainWS,
-                                         wsNames,
-                                         childAlgorithmLogging)
-        monIndex = self.getProperty(_PROP_MON_INDEX).value
-        monIndex = self._convertToWorkspaceIndex(monIndex,
-                                                 monWS)
-        wsCleanup.cleanup(mainWS)
-        mainWS = detWS
-        del(detWS)
-        wsCleanup.cleanupLater(monWS)
+        # Extract monitors to a separate workspace.
+        mainWS, monWS = self._separateMons(mainWS, wsNames,
+                                           wsCleanup, subalgLogging)
 
-        # Time-independent background
-        bkgInWS = self.getProperty(_PROP_FLAT_BKG_WS).value
-        windowWidth = self.getProperty(_PROP_FLAT_BKG_WINDOW).value
-        if not bkgInWS:
-            bkgWS = _createFlatBkg(mainWS,
-                                   _WS_CONTENT_DETS,
-                                   windowWidth,
-                                   wsNames,
-                                   childAlgorithmLogging)
-        else:
-            bkgWS = bkgInWS
-            wsCleanup.protect(bkgWS)
-        if not self.getProperty(_PROP_OUTPUT_FLAT_BKG_WS).isDefault:
-            self.setProperty(_PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
-        bkgScaling = self.getProperty(_PROP_FLAT_BKG_SCALING).value
-        bkgSubtractedWS = _subtractFlatBkg(mainWS,
-                                           _WS_CONTENT_DETS,
-                                           bkgWS,
-                                           bkgScaling,
-                                           wsNames,
-                                           wsCleanup,
-                                           childAlgorithmLogging)
-        wsCleanup.cleanup(mainWS)
-        mainWS = bkgSubtractedWS
-        del(bkgSubtractedWS)
+        # Time-independent background.
+        mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames,
+                                         wsCleanup, subalgLogging)
+        monWS = self._flatBkgMon(monWS, wsNames, wsCleanup, subalgLogging)
         wsCleanup.cleanupLater(bkgWS)
-        # Monitor time-independent background.
-        monBkgWS = _createFlatBkg(monWS,
-                                  _WS_CONTENT_MONS,
-                                  windowWidth,
-                                  wsNames,
-                                  childAlgorithmLogging)
-        monBkgScaling = 1
-        bkgSubtractedMonWS = _subtractFlatBkg(monWS,
-                                              _WS_CONTENT_MONS,
-                                              monBkgWS,
-                                              monBkgScaling,
-                                              wsNames,
-                                              wsCleanup,
-                                              childAlgorithmLogging)
-        wsCleanup.cleanup(monWS)
-        monWS = bkgSubtractedMonWS
-        del(bkgSubtractedMonWS)
 
-        # Find elastic peak positions for detectors.
-        detEPPInWS = self.getProperty(_PROP_EPP_WS).value
-        if not detEPPInWS:
-            detEPPWS = _findEPP(mainWS,
-                                _WS_CONTENT_DETS,
-                                wsNames,
-                                childAlgorithmLogging)
-        else:
-            detEPPWS = detEPPInWS
-            wsCleanup.protect(detEPPWS)
-        if not self.getProperty(_PROP_OUTPUT_DET_EPP_WS).isDefault:
-            self.setProperty(_PROP_OUTPUT_DET_EPP_WS,
-                             detEPPWS)
-        # Elastic peaks for monitors
-        monEPPInWS = self.getProperty(_PROP_MON_EPP_WS).value
-        if not monEPPInWS:
-            monEPPWS = _findEPP(monWS,
-                                _WS_CONTENT_MONS,
-                                wsNames,
-                                childAlgorithmLogging)
-        else:
-            monEPPWS = monEPPInWS
-            wsCleanup.protect(monEPPWS)
-        if not self.getProperty(_PROP_OUTPUT_MON_EPP_WS).isDefault:
-            self.setProperty(_PROP_OUTPUT_MON_EPP_WS,
-                             monEPPWS)
+        # Find elastic peak positions.
+        detEPPWS = self._createEPPWSDet(mainWS, wsNames,
+                                        wsCleanup, subalgLogging)
+        monEPPWS = self._createEPPWSMon(monWS, wsNames,
+                                        wsCleanup, subalgLogging)
         wsCleanup.cleanupLater(detEPPWS, monEPPWS)
 
         # Detector diagnostics, if requested.
-        if self.getProperty(_PROP_DET_DIAGNOSTICS).value == \
-                _DIAGNOSTICS_YES:
-            diagnosticsInWS = \
-                self.getProperty(_PROP_DIAGNOSTICS_WS).value
-            if not diagnosticsInWS:
-                lowThreshold = \
-                    self.getProperty(_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
-                highThreshold = \
-                    self.getProperty(
-                        _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
-                significanceTest = \
-                    self.getProperty(
-                        _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
-                peakDiagnosticsSettings = _DiagnosticsSettings(lowThreshold,
-                                                              highThreshold,
-                                                              significanceTest)
-                sigmaMultiplier = \
-                    self.getProperty(_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-                lowThreshold = \
-                    self.getProperty(_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
-                highThreshold = \
-                    self.getProperty(_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
-                significanceTest = \
-                    self.getProperty(
-                        _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
-                bkgDiagnosticsSettings = _DiagnosticsSettings(lowThreshold,
-                                                             highThreshold,
-                                                             significanceTest)
-                detectorsAtL2 = self.getProperty(_PROP_DETS_AT_L2).value
-                diagnosticsWS = _diagnoseDetectors(mainWS,
-                                                   bkgWS,
-                                                   detEPPWS,
-                                                   detectorsAtL2,
-                                                   peakDiagnosticsSettings,
-                                                   sigmaMultiplier,
-                                                   bkgDiagnosticsSettings,
-                                                   wsNames,
-                                                   wsCleanup,
-                                                   report,
-                                                   childAlgorithmLogging)
-            else:
-                diagnosticsWS = diagnosticsInWS
-                wsCleanup.protect(diagnosticsWS)
-            if not self.getProperty(
-                    _PROP_OUTPUT_DIAGNOSTICS_WS).isDefault:
-                self.setProperty(_PROP_OUTPUT_DIAGNOSTICS_WS,
-                                 diagnosticsWS)
-            diagnosedWS = _maskDiagnosedDetectors(mainWS,
-                                                  diagnosticsWS,
-                                                  wsNames,
-                                                  childAlgorithmLogging)
-            wsCleanup.cleanup(diagnosticsWS)
-            del(diagnosticsWS)
-            wsCleanup.cleanup(mainWS)
-            mainWS = diagnosedWS
-            del(diagnosedWS)
+        mainWS = self._detDiagnostics(mainWS, bkgWS, detEPPWS, wsNames,
+                                      wsCleanup, report, subalgLogging)
         # Apply user mask.
-        userMask = self.getProperty(_PROP_USER_MASK).value
-        maskedWS = _applyUserMask(mainWS,
-                                  userMask,
-                                  indexType,
-                                  wsNames,
-                                  childAlgorithmLogging)
-        wsCleanup.cleanup(mainWS)
-        mainWS = maskedWS
-        del(maskedWS)
+        mainWS = self._applyUserMask(mainWS, wsNames,
+                                     wsCleanup, subalgLogging)
 
-        # Get calibrated incident energy
-        eiCalibration = \
-            self.getProperty(_PROP_INCIDENT_ENERGY_CALIBRATION).value
-        if eiCalibration == _INCIDENT_ENERGY_CALIBRATION_YES:
-            eiInWS = self.getProperty(_PROP_INCIDENT_ENERGY_WS).value
-            if not eiInWS:
-                eiCalibrationDets = \
-                    self.getProperty(_PROP_DETS_AT_L2).value
-                eiCalibrationWS = \
-                    _calibratedIncidentEnergy(mainWS,
-                                              detEPPWS,
-                                              monWS,
-                                              monEPPWS,
-                                              indexType,
-                                              eiCalibrationDets,
-                                              monIndex,
-                                              wsNames,
-                                              self.log(),
-                                              childAlgorithmLogging)
-            else:
-                eiCalibrationWS = eiInWS
-                wsCleanup.protect(eiCalibrationWS)
-            if eiCalibrationWS:
-                eiCalibratedDetWS = \
-                    _applyIncidentEnergyCalibration(mainWS,
-                                                    _WS_CONTENT_DETS,
-                                                    eiCalibrationWS,
-                                                    wsNames,
-                                                    report,
-                                                    childAlgorithmLogging)
-                wsCleanup.cleanup(mainWS)
-                mainWS = eiCalibratedDetWS
-                del(eiCalibratedDetWS)
-                eiCalibratedMonWS = \
-                    _applyIncidentEnergyCalibration(monWS,
-                                                    _WS_CONTENT_MONS,
-                                                    eiCalibrationWS,
-                                                    wsNames,
-                                                    report,
-                                                    childAlgorithmLogging)
-                wsCleanup.cleanup(monWS)
-                monWS = eiCalibratedMonWS
-                del(eiCalibratedMonWS)
-            if not self.getProperty(
-                    _PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
-                self.setProperty(_PROP_OUTPUT_INCIDENT_ENERGY_WS,
-                                 eiCalibrationWS)
-            wsCleanup.cleanup(eiCalibrationWS)
-            del(eiCalibrationWS)
+        # Calibrate incident energy, if requested.
+        mainWS, monWS = self._calibrateEi(mainWS, detEPPWS, monWS, monEPPWS,
+                                          wsNames, wsCleanup, report,
+                                          subalgLogging)
+        wsCleanup.cleanupLater(monWS)
 
-        # Normalisation to monitor/time
-        normalisationMethod = self.getProperty(_PROP_NORMALISATION).value
-        if normalisationMethod != _NORM_METHOD_OFF:
-            if normalisationMethod == _NORM_METHOD_MON:
-                sigmaMultiplier = \
-                    self.getProperty(_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-                normalizedWS = _normalizeToMonitor(mainWS,
-                                                   monWS,
-                                                   monEPPWS,
-                                                   sigmaMultiplier,
-                                                   monIndex,
-                                                   wsNames,
-                                                   wsCleanup,
-                                                   childAlgorithmLogging)
-            elif normalisationMethod == _NORM_METHOD_TIME:
-                normalizedWS = _normalizeToTime(mainWS,
-                                                wsNames,
-                                                wsCleanup,
-                                                childAlgorithmLogging)
-            else:
-                raise RuntimeError('Unknonwn normalisation method ' +
-                                   normalisationMethod)
-            wsCleanup.cleanup(mainWS)
-            mainWS = normalizedWS
-            del(normalizedWS)
+        # Normalisation to monitor/time, if requested.
+        mainWS = self._normalize(mainWS, monWS, monEPPWS, wsNames,
+                                 wsCleanup, subalgLogging)
 
         # Reduction for empty container and cadmium ends here.
         if reductionType == _REDUCTION_TYPE_CD or reductionType == \
@@ -1055,29 +764,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Continuing with vanadium and sample reductions.
 
-        # Empty container subtraction
-        ecInWS = self.getProperty(_PROP_EC_WS).value
-        if ecInWS:
-            cdInWS = self.getProperty(_PROP_CD_WS).value
-            transmission = self.getProperty(_PROP_TRANSMISSION).value
-            if cdInWS:
-                ecSubtractedWS = _subtractECWithCd(mainWS,
-                                                   ecInWS,
-                                                   cdInWS,
-                                                   transmission,
-                                                   wsNames,
-                                                   wsCleanup,
-                                                   childAlgorithmLogging)
-            else:
-                ecSubtractedWS = _subtractEC(mainWS,
-                                             ecInWS,
-                                             transmission,
-                                             wsNames,
-                                             wsCleanup,
-                                             childAlgorithmLogging)
-            wsCleanup.cleanup(mainWS)
-            mainWS = ecSubtractedWS
-            del(ecSubtractedWS)
+        # Empty container subtraction, if requested.
+        mainWS = self._subtractEC(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Reduction for vanadium ends here.
         if reductionType == _REDUCTION_TYPE_VANA:
@@ -1091,7 +779,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
                                           EPPTable=detEPPWS,
                                           OutputWorkspace=outWS,
-                                          EnableLogging=childAlgorithmLogging)
+                                          EnableLogging=subalgLogging)
             self._finalize(mainWS, wsCleanup, report)
             return
 
@@ -1099,52 +787,29 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Vanadium normalization.
         # TODO Absolute normalization.
-        vanaWS = self.getProperty(_PROP_VANA_WS).value
-        if vanaWS:
-            vanaNormalizedWS = _normalizeToVana(mainWS,
-                                                    vanaWS,
-                                                    wsNames,
-                                                    childAlgorithmLogging)
-            wsCleanup.cleanup(mainWS)
-            mainWS = vanaNormalizedWS
-            del(vanaNormalizedWS)
+        mainWS = self._normalizeToVana(mainWS, wsNames, wsCleanup,
+                                       subalgLogging)
 
-        # Convert units from TOF to energy
-        energyConvertedWS = _convertTOFToDeltaE(mainWS,
-                                                wsNames,
-                                                childAlgorithmLogging)
-        wsCleanup.cleanup(mainWS)
-        mainWS = energyConvertedWS
-        del(energyConvertedWS)
+        # Convert units from TOF to energy.
+        mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup,
+                                          subalgLogging)
 
-        # KiKf conversion
-        kikfCorrectedWS = _correctByKiKf(mainWS,
-                                         wsNames,
-                                         childAlgorithmLogging)
-        wsCleanup.cleanup(mainWS)
-        mainWS = kikfCorrectedWS
-        del(kikfCorrectedWS)
+        # KiKf conversion.
+        mainWS = self._correctByKiKf(mainWS, wsNames,
+                                     wsCleanup, subalgLogging)
 
-        # Rebinning
+        # Rebinning.
         # TODO automatize binning in w. Do we need rebinning in q as well?
         params = self.getProperty(_PROP_BINNING_W).value
         if params:
-            rebinnedWS = _rebin(mainWS,
-                                params,
-                                wsNames,
-                                childAlgorithmLogging)
+            rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
             wsCleanup.cleanup(mainWS)
             mainWS = rebinnedWS
             del(rebinnedWS)
 
-        # Detector efficiency correction
-        efficiencyCorrectedWS = \
-            _correctByDetectorEfficiency(mainWS,
-                                         wsNames,
-                                         childAlgorithmLogging)
-        wsCleanup.cleanup(mainWS)
-        mainWS = efficiencyCorrectedWS
-        del(efficiencyCorrectedWS)
+        # Detector efficiency correction.
+        mainWS = self._correctByDetectorEfficiency(mainWS, wsNames,
+                                                   wsCleanup, subalgLogging)
 
         # TODO Self-shielding corrections
 
@@ -1411,9 +1076,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
             doc='Output workspace for detector diagnostics.')
 
     def validateInputs(self):
-        """
+        '''
         Checks for issues with user input.
-        """
+        '''
         issues = dict()
 
         fileGiven = not self.getProperty(_PROP_INPUT_FILE).isDefault
@@ -1423,6 +1088,101 @@ class DirectILLReduction(DataProcessorAlgorithm):
             issues[_PROP_INPUT_FILE] = \
                 'Must give either an input file or an input workspace.'
         return issues
+
+    def _applyUserMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
+        '''
+        Applies user mask to a workspace.
+        '''
+        userMask = self.getProperty(_PROP_USER_MASK).value
+        indexType = self.getProperty(_PROP_INDEX_TYPE).value
+        maskedWSName = wsNames.withSuffix('masked')
+        maskedWS = CloneWorkspace(InputWorkspace=mainWS,
+                                  OutputWorkspace=maskedWSName,
+                                  EnableLogging=algorithmLogging)
+        if indexType == _INDEX_TYPE_DET_ID:
+            MaskDetectors(Workspace=maskedWS,
+                          DetectorList=userMask,
+                          EnableLogging=algorithmLogging)
+        elif indexType == _INDEX_TYPE_SPECTRUM_NUMBER:
+            MaskDetectors(Workspace=maskedWS,
+                          SpectraList=userMask,
+                          EnableLogging=algorithmLogging)
+        elif indexType == _INDEX_TYPE_WS_INDEX:
+            MaskDetectors(Workspace=maskedWS,
+                          WorkspaceIndexList=userMask,
+                          EnableLogging=algorithmLogging)
+        else:
+            raise RuntimeError('Unknown ' + _PROP_INDEX_TYPE)
+        wsCleanup.cleanup(mainWS)
+        return maskedWS
+
+    def _calibrateEi(self, mainWS, detEPPWS, monWS, monEPPWS, wsNames,
+                     wsCleanup, report, subalgLogging):
+        '''
+        Performs and applies incident energy calibration.
+        '''
+        eiCalibration = \
+            self.getProperty(_PROP_INCIDENT_ENERGY_CALIBRATION).value
+        if eiCalibration == _INCIDENT_ENERGY_CALIBRATION_YES:
+            eiInWS = self.getProperty(_PROP_INCIDENT_ENERGY_WS).value
+            if not eiInWS:
+                eiCalibrationDets = \
+                    self.getProperty(_PROP_DETS_AT_L2).value
+                monIndex = self.getProperty(_PROP_MON_INDEX).value
+                monIndex = self._convertToWorkspaceIndex(monIndex, monWS)
+                indexType = self.getProperty(_PROP_INDEX_TYPE).value
+                eiCalibrationWS = \
+                    _calibratedIncidentEnergy(mainWS,
+                                              detEPPWS,
+                                              monWS,
+                                              monEPPWS,
+                                              indexType,
+                                              eiCalibrationDets,
+                                              monIndex,
+                                              wsNames,
+                                              self.log(),
+                                              subalgLogging)
+            else:
+                eiCalibrationWS = eiInWS
+                wsCleanup.protect(eiCalibrationWS)
+            if eiCalibrationWS:
+                eiCalibratedDetWS = \
+                    _applyIncidentEnergyCalibration(mainWS,
+                                                    _WS_CONTENT_DETS,
+                                                    eiCalibrationWS,
+                                                    wsNames,
+                                                    report,
+                                                    subalgLogging)
+                wsCleanup.cleanup(mainWS)
+                mainWS = eiCalibratedDetWS
+                eiCalibratedMonWS = \
+                    _applyIncidentEnergyCalibration(monWS,
+                                                    _WS_CONTENT_MONS,
+                                                    eiCalibrationWS,
+                                                    wsNames,
+                                                    report,
+                                                    subalgLogging)
+                wsCleanup.cleanup(monWS)
+                monWS = eiCalibratedMonWS
+            if not self.getProperty(
+                    _PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
+                self.setProperty(_PROP_OUTPUT_INCIDENT_ENERGY_WS,
+                                 eiCalibrationWS)
+            wsCleanup.cleanup(eiCalibrationWS)
+        return mainWS, monWS
+
+    def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Converts the X units from time-of-flight to energy transfer.
+        '''
+        energyConvertedWSName = wsNames.withSuffix('energy_converted')
+        energyConvertedWS = ConvertUnits(InputWorkspace=mainWS,
+                                         OutputWorkspace=energyConvertedWSName,
+                                         Target='DeltaE',
+                                         EMode='Direct',
+                                         EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return energyConvertedWS
 
     def _convertToWorkspaceIndex(self, i, ws):
         '''
@@ -1440,6 +1200,130 @@ class DirectILLReduction(DataProcessorAlgorithm):
             raise RuntimeError('No workspace index found for detector id ' +
                                '{0}'.format(i))
 
+    def _correctByDetectorEfficiency(self, mainWS, wsNames, wsCleanup,
+                                     subalgLogging):
+        '''
+        Applies detector efficiency corrections.
+        '''
+        correctedWSName = wsNames.withSuffix('detector_efficiency_corrected')
+        correctedWS = \
+            DetectorEfficiencyCorUser(InputWorkspace=mainWS,
+                                      OutputWorkspace=correctedWSName,
+                                      EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return correctedWS
+
+    def _correctByKiKf(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Applies the k_i / k_f correction.
+        '''
+        correctedWSName = wsNames.withSuffix('kikf')
+        correctedWS = CorrectKiKf(InputWorkspace=mainWS,
+                                  OutputWorkspace=correctedWSName,
+                                  EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return correctedWS
+
+    def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Creates an EPP table for a detector workspace.
+        '''
+        detEPPInWS = self.getProperty(_PROP_EPP_WS).value
+        if not detEPPInWS:
+            detEPPWS = _findEPP(mainWS,
+                                _WS_CONTENT_DETS,
+                                wsNames,
+                                subalgLogging)
+        else:
+            detEPPWS = detEPPInWS
+            wsCleanup.protect(detEPPWS)
+        if not self.getProperty(_PROP_OUTPUT_DET_EPP_WS).isDefault:
+            self.setProperty(_PROP_OUTPUT_DET_EPP_WS,
+                             detEPPWS)
+        return detEPPWS
+
+    def _createEPPWSMon(self, monWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Creates an EPP table for a monitor workspace.
+        '''
+        monEPPInWS = self.getProperty(_PROP_MON_EPP_WS).value
+        if not monEPPInWS:
+            monEPPWS = _findEPP(monWS,
+                                _WS_CONTENT_MONS,
+                                wsNames,
+                                subalgLogging)
+        else:
+            monEPPWS = monEPPInWS
+            wsCleanup.protect(monEPPWS)
+        if not self.getProperty(_PROP_OUTPUT_MON_EPP_WS).isDefault:
+            self.setProperty(_PROP_OUTPUT_MON_EPP_WS,
+                             monEPPWS)
+        return monEPPWS
+
+    def _detDiagnostics(self, mainWS, bkgWS, detEPPWS, wsNames, wsCleanup,
+                        report, subalgLogging):
+        '''
+        Performs and applies detector diagnostics.
+        '''
+        if self.getProperty(_PROP_DET_DIAGNOSTICS).value == \
+                _DIAGNOSTICS_YES:
+            diagnosticsInWS = \
+                self.getProperty(_PROP_DIAGNOSTICS_WS).value
+            if not diagnosticsInWS:
+                lowThreshold = \
+                    self.getProperty(
+                        _PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
+                highThreshold = \
+                    self.getProperty(
+                        _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
+                significanceTest = \
+                    self.getProperty(
+                        _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+                peakDiagnosticsSettings = \
+                    _DiagnosticsSettings(lowThreshold,
+                                         highThreshold,
+                                         significanceTest)
+                sigmaMultiplier = \
+                    self.getProperty(_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+                lowThreshold = \
+                    self.getProperty(_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
+                highThreshold = \
+                    self.getProperty(
+                        _PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
+                significanceTest = \
+                    self.getProperty(
+                        _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+                bkgDiagnosticsSettings = _DiagnosticsSettings(lowThreshold,
+                                                              highThreshold,
+                                                              significanceTest)
+                detectorsAtL2 = self.getProperty(_PROP_DETS_AT_L2).value
+                diagnosticsWS = _diagnoseDetectors(mainWS,
+                                                   bkgWS,
+                                                   detEPPWS,
+                                                   detectorsAtL2,
+                                                   peakDiagnosticsSettings,
+                                                   sigmaMultiplier,
+                                                   bkgDiagnosticsSettings,
+                                                   wsNames,
+                                                   wsCleanup,
+                                                   report,
+                                                   subalgLogging)
+            else:
+                diagnosticsWS = diagnosticsInWS
+                wsCleanup.protect(diagnosticsWS)
+            if not self.getProperty(
+                    _PROP_OUTPUT_DIAGNOSTICS_WS).isDefault:
+                self.setProperty(_PROP_OUTPUT_DIAGNOSTICS_WS,
+                                 diagnosticsWS)
+            diagnosedWS = _maskDiagnosedDetectors(mainWS,
+                                                  diagnosticsWS,
+                                                  wsNames,
+                                                  subalgLogging)
+            wsCleanup.cleanup(diagnosticsWS)
+            wsCleanup.cleanup(mainWS)
+            return diagnosedWS
+        return mainWS
+
     def _finalize(self, outWS, wsCleanup, report):
         '''
         Does final cleanup, reporting and sets the output property.
@@ -1447,5 +1331,157 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.setProperty(_PROP_OUTPUT_WS, outWS)
         wsCleanup.finalCleanup()
         report.toLog(self.log())
+
+    def _flatBkgDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Subtracts flat background from detector workspace.
+        '''
+        bkgInWS = self.getProperty(_PROP_FLAT_BKG_WS).value
+        windowWidth = self.getProperty(_PROP_FLAT_BKG_WINDOW).value
+        if not bkgInWS:
+            bkgWS = _createFlatBkg(mainWS,
+                                   _WS_CONTENT_DETS,
+                                   windowWidth,
+                                   wsNames,
+                                   subalgLogging)
+        else:
+            bkgWS = bkgInWS
+            wsCleanup.protect(bkgWS)
+        if not self.getProperty(_PROP_OUTPUT_FLAT_BKG_WS).isDefault:
+            self.setProperty(_PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
+        bkgScaling = self.getProperty(_PROP_FLAT_BKG_SCALING).value
+        bkgSubtractedWS = _subtractFlatBkg(mainWS,
+                                           _WS_CONTENT_DETS,
+                                           bkgWS,
+                                           bkgScaling,
+                                           wsNames,
+                                           wsCleanup,
+                                           subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return bkgSubtractedWS, bkgWS
+
+    def _flatBkgMon(self, monWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Subtracts flat background from monitor workspace.
+        '''
+        windowWidth = self.getProperty(_PROP_FLAT_BKG_WINDOW).value
+        monBkgWS = _createFlatBkg(monWS,
+                                  _WS_CONTENT_MONS,
+                                  windowWidth,
+                                  wsNames,
+                                  subalgLogging)
+        monBkgScaling = 1
+        bkgSubtractedMonWS = _subtractFlatBkg(monWS,
+                                              _WS_CONTENT_MONS,
+                                              monBkgWS,
+                                              monBkgScaling,
+                                              wsNames,
+                                              wsCleanup,
+                                              subalgLogging)
+        wsCleanup.cleanup(monBkgWS)
+        wsCleanup.cleanup(monWS)
+        return bkgSubtractedMonWS
+
+    def _inputWS(self, wsNames, wsCleanup, subalgLogging):
+        '''
+        Returns the raw input workspace.
+        '''
+        inputFile = self.getProperty(_PROP_INPUT_FILE).value
+        if inputFile:
+            eppReference = \
+                self.getProperty(_PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
+            mainWS = _loadFiles(inputFile,
+                                eppReference,
+                                wsNames,
+                                wsCleanup,
+                                self.log(),
+                                subalgLogging)
+        elif self.getProperty(_PROP_INPUT_WS).value:
+            mainWS = self.getProperty(_PROP_INPUT_WS).value
+        return mainWS
+
+    def _normalize(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup,
+                   subalgLogging):
+        '''
+        Normalizes to monitor or time.
+        '''
+        normalisationMethod = self.getProperty(_PROP_NORMALISATION).value
+        if normalisationMethod != _NORM_METHOD_OFF:
+            if normalisationMethod == _NORM_METHOD_MON:
+                sigmaMultiplier = \
+                    self.getProperty(_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+                monIndex = self.getProperty(_PROP_MON_INDEX).value
+                monIndex = self._convertToWorkspaceIndex(monIndex, monWS)
+                normalizedWS = _normalizeToMonitor(mainWS,
+                                                   monWS,
+                                                   monEPPWS,
+                                                   sigmaMultiplier,
+                                                   monIndex,
+                                                   wsNames,
+                                                   wsCleanup,
+                                                   subalgLogging)
+            elif normalisationMethod == _NORM_METHOD_TIME:
+                normalizedWS = _normalizeToTime(mainWS,
+                                                wsNames,
+                                                wsCleanup,
+                                                subalgLogging)
+            else:
+                raise RuntimeError('Unknonwn normalisation method ' +
+                                   normalisationMethod)
+            wsCleanup.cleanup(mainWS)
+            return normalizedWS
+        return mainWS
+
+    def _normalizeToVana(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Normalizes to vanadium workspace.
+        '''
+        vanaWS = self.getProperty(_PROP_VANA_WS).value
+        if vanaWS:
+            vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
+            vanaNormalizedWS = Divide(LHSWorkspace=mainWS,
+                                      RHSWorkspace=vanaWS,
+                                      OutputWorkspace=vanaNormalizedWSName,
+                                      EnableLogging=subalgLogging)
+            wsCleanup.cleanup(mainWS)
+            return vanaNormalizedWS
+        return mainWS
+
+    def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Extracts monitors to a separate workspace.
+        '''
+        detWSName = wsNames.withSuffix('extracted_detectors')
+        monWSName = wsNames.withSuffix('extracted_monitors')
+        detWS, monWS = ExtractMonitors(InputWorkspace=mainWS,
+                                       DetectorWorkspace=detWSName,
+                                       MonitorWorkspace=monWSName,
+                                       EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return detWS, monWS
+
+    def _subtractEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        ecInWS = self.getProperty(_PROP_EC_WS).value
+        if ecInWS:
+            cdInWS = self.getProperty(_PROP_CD_WS).value
+            transmission = self.getProperty(_PROP_TRANSMISSION).value
+            if cdInWS:
+                ecSubtractedWS = _subtractECWithCd(mainWS,
+                                                   ecInWS,
+                                                   cdInWS,
+                                                   transmission,
+                                                   wsNames,
+                                                   wsCleanup,
+                                                   subalgLogging)
+            else:
+                ecSubtractedWS = _subtractEC(mainWS,
+                                             ecInWS,
+                                             transmission,
+                                             wsNames,
+                                             wsCleanup,
+                                             subalgLogging)
+            wsCleanup.cleanup(mainWS)
+            return ecSubtractedWS
+        return mainWS
 
 AlgorithmFactory.subscribe(DirectILLReduction)
