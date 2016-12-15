@@ -259,8 +259,10 @@ signal_t MatrixWorkspaceMDIterator::getInnerError(size_t /*index*/) const {
  * masked, or if there is no detector at that index.
 */
 bool MatrixWorkspaceMDIterator::getIsMasked() const {
-  return m_spectrumInfo.hasDetectors(m_workspaceIndex) &&
-         m_spectrumInfo.isMasked(m_workspaceIndex);
+  if (!m_spectrumInfo.hasDetectors(m_workspaceIndex)) {
+    return true;
+  }
+  return m_spectrumInfo.isMasked(m_workspaceIndex);
 }
 
 /**
