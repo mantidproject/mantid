@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -1014,7 +1015,18 @@ void Instrument::saveNexus(::NeXus::File *file,
 
   // Now the parameter map, as a NXnote via its saveNexus method
   if (isParametrized()) {
-    const Geometry::ParameterMap &params = *getParameterMap();
+    Geometry::ParameterMap params(*getParameterMap());
+    // Masking is in DetectorInfo. Insert it into ParameterMap so it is saved
+    // alongside other parameters.
+    if (m_detectorInfo) {
+      const auto &detIDs = getDetectorIDs();
+      for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
+        if (m_detectorInfo->isMasked(i)) {
+          const auto &det = m_detectorCache.at(detIDs.at(i));
+          params.addBool(det.get(), std::string("masked"), true);
+        }
+      }
+    }
     params.saveNexus(file, "instrument_parameter_map");
   }
 
