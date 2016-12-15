@@ -248,7 +248,7 @@ void vtkMDHistoQuadFactory::initialize(
 }
 
 void vtkMDHistoQuadFactory::validate() const {
-  if (nullptr == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }

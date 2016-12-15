@@ -68,8 +68,7 @@ void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace) {
 }
 
 void vtkMDHistoHexFactory::validateWsNotNull() const {
-
-  if (nullptr == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }
@@ -164,7 +163,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const vtkIdType nPointsZ = nBinsZ + 1;
 
   vtkFloatArray *pointsarray = vtkFloatArray::SafeDownCast(points->GetData());
-  if (pointsarray == nullptr) {
+  if (!pointsarray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (pointsarray->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
@@ -215,7 +214,7 @@ vtkSmartPointer<vtkDataSet>
 vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
   auto product =
       tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
-  if (product != nullptr) {
+  if (product) {
     return product;
   } else {
     // Create in 3D mode

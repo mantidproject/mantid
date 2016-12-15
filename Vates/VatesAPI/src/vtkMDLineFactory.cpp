@@ -184,7 +184,7 @@ std::string vtkMDLineFactory::getFactoryTypeName() const {
 
 /// Template Method pattern to validate the factory before use.
 void vtkMDLineFactory::validate() const {
-  if (nullptr == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error(
         "vtkMDLineFactory has no workspace to run against");
   }

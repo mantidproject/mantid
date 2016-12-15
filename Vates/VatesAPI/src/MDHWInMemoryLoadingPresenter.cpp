@@ -35,10 +35,10 @@ MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }
-  if (nullptr == repository) {
+  if (!repository) {
     throw std::invalid_argument("The repository is NULL");
   }
-  if (nullptr == m_view) {
+  if (!m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }

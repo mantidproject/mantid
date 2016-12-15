@@ -180,7 +180,7 @@ std::string vtkMDQuadFactory::getFactoryTypeName() const {
 
 /// Template Method pattern to validate the factory before use.
 void vtkMDQuadFactory::validate() const {
-  if (nullptr == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error(
         "vtkMDQuadFactory has no workspace to run against");
   }

@@ -7,26 +7,28 @@ namespace Mantid {
 namespace VATES {
 
 void MetadataToFieldData::operator()(vtkFieldData *fieldData,
-                                     std::string metaData,
-                                     std::string id) const {
+                                     const std::string &metaData,
+                                     const std::string &id) const {
   execute(fieldData, metaData, id);
 }
 
-void MetadataToFieldData::execute(vtkFieldData *fieldData, std::string metaData,
-                                  std::string id) const {
+void MetadataToFieldData::execute(vtkFieldData *fieldData,
+                                  const std::string &metaData,
+                                  const std::string &id) const {
   // clean out existing.
-  vtkDataArray *arry = fieldData->GetArray(id.c_str());
-  if (nullptr != arry) {
+  vtkDataArray *array = fieldData->GetArray(id.c_str());
+  if (array) {
     fieldData->RemoveArray(id.c_str());
   }
   // create new.
-  vtkNew<vtkCharArray> newArry;
-  newArry->Allocate(metaData.size());
-  newArry->SetName(id.c_str());
-  fieldData->AddArray(newArry.GetPointer());
+  vtkNew<vtkCharArray> newArray;
+  newArray->Allocate(metaData.size());
+  newArray->SetName(id.c_str());
+  fieldData->AddArray(newArray.GetPointer());
 
-  for (unsigned int i = 0; i < metaData.size(); i++) {
-    newArry->InsertNextValue(metaData.at(i));
+  fieldData->SetNumberOfTuples(metaData.size());
+  for (size_t i = 0; i < metaData.size(); i++) {
+    newArray->SetValue(i, metaData[i]);
   }
 }
 }

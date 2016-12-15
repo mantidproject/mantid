@@ -445,8 +445,7 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
   pqPipelineSource *endOfSource2Pipeline = source2;
 
   while (filter1) {
-    vtkSMProxy *proxy1 = nullptr;
-    proxy1 = filter1->getProxy();
+    vtkSMProxy *proxy1 = filter1->getProxy();
     pqPipelineSource *newPipelineElement = nullptr;
     pqPipelineFilter *newFilter = nullptr;
     // Move source2 to its end.
@@ -756,7 +755,7 @@ RebinnedSourcesManager::createKeyPairForSource(pqPipelineSource *source) {
  * @param source A pointer to the source
  */
 void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource *source) {
-  if (nullptr != source) {
+  if (source) {
     // Go to the end of the source and work your way back
     pqPipelineSource *tempSource = source;
 

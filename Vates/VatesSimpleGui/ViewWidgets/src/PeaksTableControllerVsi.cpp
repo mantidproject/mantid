@@ -378,7 +378,7 @@ void PeaksTableControllerVsi::removeLayout(QWidget *widget) {
   QLayout *layout = widget->layout();
   if (layout != nullptr) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != nullptr) {
+    while ((item = layout->takeAt(0))) {
       layout->removeItem(item);
       delete item->widget();
     }

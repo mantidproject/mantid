@@ -1138,7 +1138,7 @@ void MdViewerWidget::setColorForBackground() {
 void MdViewerWidget::checkForUpdates() {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
-  if (nullptr == src) {
+  if (!src) {
     return;
   }
   vtkSMProxy *proxy = src->getProxy();
@@ -1379,7 +1379,7 @@ void MdViewerWidget::onLodToggled(bool state) {
  * setting the communication between it and the current view.
  */
 void MdViewerWidget::onRotationPoint() {
-  if (nullptr == this->rotPointDialog) {
+  if (!this->rotPointDialog) {
     this->rotPointDialog = new RotationPointDialog(this);
     this->connectRotationPointDialog();
   }
@@ -1403,7 +1403,7 @@ void MdViewerWidget::onWikiHelp() {
  * switch view since the connection to the current view is destroyed.
  */
 void MdViewerWidget::disconnectDialogs() {
-  if (nullptr != this->rotPointDialog) {
+  if (this->rotPointDialog) {
     this->rotPointDialog->close();
     QObject::disconnect(this->rotPointDialog, nullptr, this->currentView,
                         nullptr);
@@ -1445,7 +1445,7 @@ void MdViewerWidget::connectColorSelectionWidget() {
  * the current view.
  */
 void MdViewerWidget::connectRotationPointDialog() {
-  if (nullptr != this->rotPointDialog) {
+  if (this->rotPointDialog) {
     QObject::connect(
         this->rotPointDialog, SIGNAL(sendCoordinates(double, double, double)),
         this->currentView, SLOT(onResetCenterToPoint(double, double, double)));
@@ -1486,7 +1486,7 @@ void MdViewerWidget::afterReplaceHandle(
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
   UNUSED_ARG(ws);
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
-  if (nullptr != src) {
+  if (src) {
     // Have to mark the filter as modified to get it to update. Do this by
     // changing the requested workspace name to a dummy name and then change
     // back. However, push the change all the way down for it to work.
@@ -1516,7 +1516,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
   UNUSED_ARG(ws);
 
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
-  if (nullptr != src) {
+  if (src) {
     long long numSources = this->currentView->getNumSources();
     if (numSources > 1) {
       pqObjectBuilder *builder =

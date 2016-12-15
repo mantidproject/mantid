@@ -443,7 +443,7 @@ void ColorSelectionWidget::reset() {
  */
 void ColorSelectionWidget::setColorScaleLock(
     Mantid::VATES::ColorScaleLock *lock) {
-  if (m_colorScaleLock == nullptr) {
+  if (!m_colorScaleLock) {
     m_colorScaleLock = lock;
   }
 }
