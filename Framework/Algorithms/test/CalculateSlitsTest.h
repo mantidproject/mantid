@@ -10,7 +10,7 @@ using namespace Mantid::Algorithms;
 class CalculateSlitsTest : public CxxTest::TestSuite {
 public:
 
-  void test_sensible_values() {
+  void testSensibleArgs() {
     CalculateSlits alg;
     alg.initialize();
     alg.setProperty("Slit1Slit2", 1940.5);
@@ -29,7 +29,7 @@ public:
     TS_ASSERT_EQUALS(slit2, 0.34402409376933002);
   }
 
-  void test_with_negative_angle() {
+  void testWithNegativeAngle() {
     CalculateSlits alg;
     alg.initialize();
     alg.setProperty("Slit1Slit2", 1940.5);
@@ -48,7 +48,7 @@ public:
     TS_ASSERT_EQUALS(slit2, -0.34402409376933002);
   }
 
-  void test_with_angle_zero() {
+  void testWithZeroAngle() {
     CalculateSlits alg;
     alg.initialize();
     alg.setProperty("Slit1Slit2", 1940.5);
@@ -67,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(slit2, 0.0);
   }
 
-  void test_with_nan_and_inf() {
+  void testWithNanAndInf() {
     const double nan= std::numeric_limits<double>::quiet_NaN();
     const double inf = std::numeric_limits<double>::infinity();
     const double ninf = -inf;
@@ -90,7 +90,7 @@ public:
     TS_ASSERT(isnan(slit2));
   }
 
-  void test_with_no_args() {
+  void testWithNoArgs() {
     CalculateSlits alg;
     alg.initialize();
 
