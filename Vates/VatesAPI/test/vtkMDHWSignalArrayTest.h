@@ -35,11 +35,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(Mantid::VATES::NoNormalization,
-                                            ws_sptr.get())));
-    signal->InitializeArray(std::move(iterator), offset, imageSize);
+    signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
+                            offset, imageSize);
 
     for (auto index = 0; index < imageSize; ++index) {
       double output1[1];
@@ -82,7 +79,9 @@ public:
         dynamic_cast<MDHistoWorkspaceIterator *>(
             createIteratorWithNormalization(
                 Mantid::VATES::NumEventsNormalization, ws_sptr.get())));
-    signal->InitializeArray(std::move(iterator), offset, imageSize);
+    signal->InitializeArray(ws_sptr.get(),
+                            Mantid::VATES::NumEventsNormalization, offset,
+                            imageSize);
 
     vtkNew<vtkIdList> ptIds;
 
@@ -117,11 +116,8 @@ public:
     ws_sptr->setMDMaskAt(7, true);
     ws_sptr->setMDMaskAt(42, true);
 
-    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(Mantid::VATES::NoNormalization,
-                                            ws_sptr.get())));
-    signal->InitializeArray(std::move(iterator), offset, imageSize);
+    signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
+                            offset, imageSize);
 
     vtkNew<vtkIdList> idList1, idList2;
 
@@ -140,11 +136,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(Mantid::VATES::VolumeNormalization,
-                                            ws_sptr.get())));
-    signal->InitializeArray(std::move(iterator), offset, imageSize);
+    signal->InitializeArray(ws_sptr.get(), Mantid::VATES::VolumeNormalization,
+                            offset, imageSize);
 
     vtkNew<vtkDoubleArray> doubleArray;
     doubleArray->SetNumberOfComponents(1);
@@ -169,11 +162,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(Mantid::VATES::NoNormalization,
-                                            ws_sptr.get())));
-    signal->InitializeArray(std::move(iterator), offset, imageSize);
+    signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
+                            offset, imageSize);
     TS_ASSERT(signal->LookupValue(1.0) == 0);
     TS_ASSERT(signal->LookupTypedValue(1.0) == 0);
   }
@@ -188,11 +178,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(Mantid::VATES::NoNormalization,
-                                            ws_sptr.get())));
-    signal->InitializeArray(std::move(iterator), offset, imageSize);
+    signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
+                            offset, imageSize);
 
     vtkNew<vtkIdList> idList1, idList2;
     signal->LookupValue(0.0, idList1.GetPointer());
@@ -222,11 +209,9 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-    std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(
-                Mantid::VATES::NumEventsNormalization, ws_sptr.get())));
-    m_signal->InitializeArray(std::move(iterator), offset, imageSize);
+    m_signal->InitializeArray(ws_sptr.get(),
+                              Mantid::VATES::NumEventsNormalization, offset,
+                              imageSize);
   }
 
   void tearDown() override {}
