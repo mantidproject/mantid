@@ -9,7 +9,6 @@ using namespace Mantid::Algorithms;
 
 class CalculateSlitsTest : public CxxTest::TestSuite {
 public:
-
   void testSensibleArgs() {
     CalculateSlits alg;
     alg.initialize();
@@ -68,7 +67,7 @@ public:
   }
 
   void testWithNanAndInf() {
-    const double nan= std::numeric_limits<double>::quiet_NaN();
+    const double nan = std::numeric_limits<double>::quiet_NaN();
     const double inf = std::numeric_limits<double>::infinity();
     const double ninf = -inf;
 
@@ -103,8 +102,6 @@ public:
     const double slit2 = alg.getProperty("Slit2");
     TS_ASSERT(isnan(slit2));
   }
-
 };
-
 
 #endif /*CALCULATESLITSTEST_H_*/
