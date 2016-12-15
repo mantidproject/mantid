@@ -68,7 +68,7 @@ public:
   /**
    * Special function of correct widget invocation for plugin mode.
    */
-  virtual void setupPluginMode();
+  virtual void setupPluginMode(int WsType, const std::string &instrumentName);
 
   /// Static method to create a handle to new window instance
   static IProjectSerialisable *loadFromProject(const std::string &lines,
