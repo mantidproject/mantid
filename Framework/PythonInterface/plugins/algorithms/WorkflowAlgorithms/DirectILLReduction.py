@@ -2,7 +2,7 @@
 
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction,\
     FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd,\
-    PropertyMode, WorkspaceProperty
+    PropertyMode, WorkspaceProperty, WorkspaceUnitValidator
 from mantid.kernel import CompositeValidator, Direct, Direction,\
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty,\
     IntBoundedValidator, IntMandatoryValidator, StringListValidator,\
@@ -835,6 +835,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_INPUT_WS,
             defaultValue='',
+            validator=WorkspaceUnitValidator('TOF'),
             optional=PropertyMode.Optional,
             direction=Direction.Input),
             doc='Input workspace.')
