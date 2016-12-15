@@ -90,6 +90,7 @@ class PreProcConfig(object):
         # list with coordinates of the region for normalization / "air" / not blocked by any object
         self.normalize_air_region = None
         self.normalize_proton_charge = False
+        self.crop_before_normalize = False  # FIXME true for DEBUGGING only
         # region of interest
         self.crop_coords = None
         self.cut_off_level = 0

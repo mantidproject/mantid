@@ -32,6 +32,18 @@ import re
 import numpy as np
 
 
+def _debug_print_memory_usage_linux(message=""):
+    try:
+        # Windows doesn't seem to have resource package, so this will silently fail
+        import resource
+        print(" >> Memory usage " +
+              str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + " KB, " +
+              str(int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) / 1024) +
+              " MB", message)
+    except Exception:
+        pass
+
+
 def _import_pyfits():
     """
     To import pyfits optionally only when it is/can be used
@@ -321,31 +333,30 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension,
     """
     Load the images of the flat/dark/other field and calculate an average of them.
 
-    @param field_path :: path to the images
-    @param field_prefix :: prefix for the images of the flat/dark/other field images (filter).
+    :param field_path :: path to the images
+    :param field_prefix :: prefix for the images of the flat/dark/other field images (filter).
     example: OB, DARK, WHITE, etc.
+    :param file_prefix ::
+    :param file_extension :: extension string to look for file names
+    :param img_shape :: shape that every image should have
+    :param data_dtype :: output data type
 
-    @param file_extension :: extension string to look for file names
-    @param img_shape :: shape that every image should have
-    @param data_dtype :: output data type
+    :returns :: numpy array with an average (pixel-by-pixel) of the flat/dark/other field images
 
-    Returns :: numpy array with an average (pixel-by-pixel) of the flat/dark/other field images
     """
     avg = None
-    if field_prefix:
-        if not file_prefix:
-            file_prefix = ''
-        files_match = glob.glob(
-            os.path.join(field_path, "{0}*.{1}".format(field_prefix,
-                                                       file_extension)))
-        if len(files_match) <= 0:
-            print(
-                "Could not find any flat field / open beam image files in: {0}".
-                format(field_prefix))
-        else:
-            imgs_stack = _read_listed_files(files_match, img_shape,
-                                            file_extension, data_dtype)
-            avg = np.mean(imgs_stack, axis=0)
+
+    files_match = glob.glob(
+        os.path.join(field_path, "{0}*.{1}".format(field_prefix,
+                                                   file_extension)))
+    if len(files_match) <= 0:
+        print(
+            "Could not find any flat field / open beam image files in: {0}".
+            format(field_prefix))
+    else:
+        imgs_stack = _read_listed_files(files_match, img_shape,
+                                        file_extension, data_dtype)
+        avg = np.mean(imgs_stack, axis=0)
 
     return avg
 
@@ -358,9 +369,9 @@ def read_stack_of_images(sample_path,
                          flat_field_path=None,
                          dark_field_path=None,
                          file_extension='tiff',
-                         file_prefix=None,
-                         flat_field_prefix=None,
-                         dark_field_prefix=None,
+                         file_prefix='',
+                         flat_field_prefix='',
+                         dark_field_prefix='',
                          verbose=True):
     """
     Reads a stack of images into memory, assuming dark and flat images
@@ -406,8 +417,6 @@ def read_stack_of_images(sample_path,
 
     print(" * Loading stack of images from {0}".format(sample_path))
 
-    if not file_prefix:
-        file_prefix = ''
     files_match = glob.glob(
         os.path.join(sample_path, "{0}*.{1}".format(file_prefix,
                                                     file_extension)))
@@ -435,16 +444,24 @@ def read_stack_of_images(sample_path,
         data_dtype = np.uint16
 
     img_shape = first_img.shape
+    _debug_print_memory_usage_linux(", before sample loading.")
     sample_data = _read_listed_files(files_match, img_shape, file_extension,
                                      data_dtype)
+    _debug_print_memory_usage_linux(", after sample loading.")
+
+    _debug_print_memory_usage_linux(", before dark loading.")
 
     flat_avg = get_flat_dark_stack(flat_field_path, flat_field_prefix,
                                    flat_field_prefix, file_extension,
                                    img_shape, data_dtype)
+    _debug_print_memory_usage_linux(", after dark loading.")
+
+    _debug_print_memory_usage_linux(", before flat loading.")
 
     dark_avg = get_flat_dark_stack(dark_field_path, flat_field_prefix,
                                    dark_field_prefix, file_extension,
                                    img_shape, data_dtype)
+    _debug_print_memory_usage_linux(", after flat loading.")
 
     return sample_data, flat_avg, dark_avg
 
@@ -457,10 +474,11 @@ def save_recon_as_vertical_slices(recon_data,
     """
     Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
 
-    @param data :: data as images/slices stores in numpy array
-    @param output_dir :: where to save the files
-    @param name_prefix :: prefix for the names of the images - an index is appended to this prefix
-    @param zero_fill :: number of zeros to pad the image/slice index number
+    :param recon_data :: data as images/slices stores in numpy array
+    :param output_dir :: where to save the files
+    :param img_format :: the format that the images will be saved as
+    :param name_prefix :: prefix for the names of the images - an index is appended to this prefix
+    :param zero_fill :: number of zeros to pad the image/slice index number
     """
     make_dirs_if_needed(output_dir)
     min_pix = np.amin(recon_data)
