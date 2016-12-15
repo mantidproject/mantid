@@ -11,6 +11,14 @@ Crystal Improvements
 :ref:`algm-FindUBUsingLatticeParameters` has a new option to fix lattice parameters. This will find an orientation, but without optimisation between indexed HKLs and q vectors.
 :ref:`algm-CreateGroupingWorkspace` has a new option to create one group of 4 columns of SNAP detectors and another with the remaining 2 columns. This grouping is used frequently in their reduction.
 
+
+Single Crystal Diffraction
+--------------------------
+HB3A's IDF is modified to allow its detector center shifted from default position.
+:ref:`algm-LoadSpiceXML2DDet` has new options for users to input amount of detector's shift in X and Y direction.
+:ref:`algm-ConvertCWSDExpToMomentum` has new options for users to input amount of detector's shift in X and Y direction.
+User interface *HFIR 4Circle Reduction* has been modified to allow user to specify wave length, detector center and distance between detector and sample.
+
 Engineering Diffraction
 -----------------------
 
