@@ -43,6 +43,9 @@ class ABINSCalculatePowderTest(unittest.TestCase):
     _si2 = "Si2-sc_CalculatePowder"
 
     #     test input
+    def tearDown(self):
+        AbinsTestHelpers.remove_output_files(list_of_names=[self._c6h6, self._si2])
+
     def test_wrong_input(self):
 
         full_path_filename = AbinsTestHelpers.find_file(filename=self._si2 + ".phonon")

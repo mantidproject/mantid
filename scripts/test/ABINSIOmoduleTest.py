@@ -36,6 +36,9 @@ def skip_if(skipping_criteria):
 @skip_if(old_modules)
 class ABINSIOmoduleTest(unittest.TestCase):
 
+    def tearDown(self):
+        AbinsTestHelpers.remove_output_files(list_of_names=["Cars", "temphgfrt"])
+
     # noinspection PyMethodMayBeStatic
     def _save_stuff(self):
         saver = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
@@ -78,7 +81,7 @@ class ABINSIOmoduleTest(unittest.TestCase):
         self.assertRaises(ValueError, IOmodule, input_filename="goodfile", group_name=1)
 
     def _wrong_file(self):
-        poor_loader = IOmodule(input_filename="bum", group_name="nice_group")
+        poor_loader = IOmodule(input_filename="bumCars", group_name="nice_group")
         self.assertRaises(IOError, poor_loader.load, list_of_attributes="one_attribute")
 
     def _loading_attributes(self):

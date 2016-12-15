@@ -1,6 +1,5 @@
 import unittest
 from mantid.simpleapi import logger
-import os
 import json
 import numpy as np
 
@@ -49,19 +48,11 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _squaricn = "squaricn_sum_CalculateSPowder"
     _si2 = "Si2-sc_CalculateSPowder"
 
-    def remove_hdf_files(self):
-        files = os.listdir(os.getcwd())
-        print os.getcwd()
-        for filename in files:
-            if self._si2 in filename or self._squaricn in filename:
-                os.remove(filename)
-
     def setUp(self):
-        self.remove_hdf_files()
         AbinsParameters.atoms_threads = 1
 
     def tearDown(self):
-        self.remove_hdf_files()
+        AbinsTestHelpers.remove_output_files(list_of_names=[self._si2, self._squaricn])
 
     #     test input
     def test_wrong_input(self):

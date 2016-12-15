@@ -28,7 +28,7 @@ class IOmodule(object):
             # extract name of file from the full path in the platform independent way
             filename = os.path.basename(self._input_filename)
 
-            if filename == "":
+            if filename.strip() == "":
                 raise ValueError("Name of the file cannot be an empty string!")
 
         else:
@@ -235,8 +235,13 @@ class IOmodule(object):
 
         # Repack if possible to reclaim disk space
         try:
-            subprocess.check_call(["h5repack", "-i%s" % self._hdf_filename, "-otemphgfrt.hdf5"])
-            shutil.move("temphgfrt.hdf5", self._hdf_filename)
+            path = os.getcwd()
+            temp_file = self._hdf_filename[self._hdf_filename.find(".")] + "temphgfrt.hdf5"
+
+            subprocess.check_call(["h5repack" + " -i " + os.path.join(path, self._hdf_filename) +
+                                   " -o " + os.path.join(path, temp_file)])
+
+            shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
         except (OSError, IOError, RuntimeError):
             pass  # repacking failed: no h5repack installed in the system... but we proceed
 

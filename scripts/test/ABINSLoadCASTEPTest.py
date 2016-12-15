@@ -40,8 +40,13 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             # noinspection PyUnusedLocal
             poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
+    def tearDown(self):
+        AbinsTestHelpers.remove_output_files(list_of_names=[self._gamma_sum, self._gamma_no_sum,
+                                                            self._many_k_no_sum, self._many_k_sum,
+                                                            "benzene"])
 
-    #  *************************** USE CASES ********************************************
+
+#  *************************** USE CASES ********************************************
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================

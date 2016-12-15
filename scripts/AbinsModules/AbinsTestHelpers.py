@@ -56,3 +56,18 @@ def find_file(filename=None):
         if os.path.isfile(full_path):
             return full_path
     raise ValueError("File with testing data not found.")
+
+
+def remove_output_files(list_of_names=None):
+    """Removes output files created during a test."""
+    if not isinstance(list_of_names, list):
+        raise ValueError("List of names is expected.")
+    if not all(isinstance(i, str) for i in list_of_names):
+        raise ValueError("Each name should be a string.")
+
+    files = os.listdir(os.getcwd())
+    for filename in files:
+        for name in list_of_names:
+            if name in filename:
+                os.remove(filename)
+                break
