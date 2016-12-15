@@ -110,22 +110,14 @@ public:
                        const std::string &title) const override;
 
 protected:
-  // Process selected rows
-  virtual void process();
   // The tree manager, a proxy class to retrieve data from the model
   std::unique_ptr<DataProcessorTreeManager> m_manager;
   // A workspace receiver we want to notify
   DataProcessorMainPresenter *m_mainPresenter;
-
-private:
-  // the name of the workspace/table/model in the ADS, blank if unsaved
-  std::string m_wsName;
-  // the table view we're managing
+  // The table view we're managing
   DataProcessorView *m_view;
   // The progress view
   ProgressableView *m_progressView;
-  // The whitelist
-  DataProcessorWhiteList m_whitelist;
   // The pre-processing instructions
   std::map<std::string, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
   // The data processor algorithm
@@ -134,6 +126,20 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
+
+  // Post-process some rows
+  void postProcessGroup(const GroupData &data);
+  // Reduce a row
+  std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+
+  // Process selected rows
+  virtual void process();
+
+private:
+  // the name of the workspace/table/model in the ADS, blank if unsaved
+  std::string m_wsName;
+  // The whitelist
+  DataProcessorWhiteList m_whitelist;
   // Loader
   std::string m_loader;
   // A boolean indicating whether a post-processing algorithm has been defined
@@ -144,10 +150,6 @@ private:
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
-  // Post-process some rows
-  void postProcessGroup(const GroupData &data);
-  // Reduce a row
-  std::vector<std::string> reduceRow(const std::vector<std::string> &data);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,

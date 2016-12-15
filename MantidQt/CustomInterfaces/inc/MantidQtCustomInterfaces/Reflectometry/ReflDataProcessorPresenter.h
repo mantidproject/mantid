@@ -55,8 +55,6 @@ public:
 private:
   // process selected rows
   void process() override;
-  // A workspace receiver we want to notify
-  MantidQt::MantidWidgets::DataProcessorMainPresenter *m_mainPresenter;
 };
 }
 }
