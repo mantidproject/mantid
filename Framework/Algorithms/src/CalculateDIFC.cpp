@@ -95,7 +95,7 @@ void CalculateDIFC::calculate(API::Progress &progress,
   SpecialWorkspace2D_sptr localWS =
       boost::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs);
 
-  const auto detectorIDs = detectorInfo.detectorIDs();
+  const auto &detectorIDs = detectorInfo.detectorIDs();
 
   // Now go through all
   for (size_t i = 0; i < detectorInfo.size(); ++i) {

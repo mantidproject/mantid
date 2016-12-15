@@ -82,6 +82,7 @@ void MayersSampleCorrection::exec() {
   auto instrument = inputWS->getInstrument();
   const auto source = instrument->getSource();
   const auto sample = instrument->getSample();
+  const auto beamLine = sample->getPos() - source->getPos();
   const auto frame = instrument->getReferenceFrame();
 
   // Sample
@@ -117,7 +118,7 @@ void MayersSampleCorrection::exec() {
     params.mscat = mscatOn;
     params.l1 = spectrumInfo.l1();
     params.l2 = spectrumInfo.l2(i);
-    params.twoTheta = spectrumInfo.twoTheta(i);
+    params.twoTheta = det.getTwoTheta(sample->getPos(), beamLine);
     params.phi = det.getPhi();
     params.rho = sampleMaterial.numberDensity();
     params.sigmaAbs = sampleMaterial.absorbXSection();

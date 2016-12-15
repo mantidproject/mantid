@@ -141,7 +141,7 @@ private:
   double m_verticalBinSize;
 
   /// SpectrumInfo object, used for masking information
-  SpectrumInfo m_spectrumInfo;
+  const SpectrumInfo &m_spectrumInfo;
 };
 
 } // namespace API

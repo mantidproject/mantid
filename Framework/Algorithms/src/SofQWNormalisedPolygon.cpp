@@ -364,7 +364,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
       if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
           spec == deltaMinusT) {
         const auto &detector_n = spectrumInfo.detector(spec - 1);
-        double theta_n = workspace->detectorTwoTheta(detector_n) * 0.5;
+        double theta_n = spectrumInfo.twoTheta(spec - 1) * 0.5;
         double phi_n = detector_n.getPhi();
 
         double dTheta = std::fabs(theta - theta_n);

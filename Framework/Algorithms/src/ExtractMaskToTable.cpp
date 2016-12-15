@@ -208,7 +208,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
     throw runtime_error("There is no instrument in input workspace.");
 
   // Extract
-  vector<detid_t> detids = detectorInfo.detectorIDs();
+  const vector<detid_t> &detids = detectorInfo.detectorIDs();
 
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     bool masked = detectorInfo.isMasked(i);
