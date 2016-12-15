@@ -29,8 +29,10 @@ class MatrixWorkspace;
   spectra (which may correspond to one or more detectors), such as mask and
   monitor flags, L1, L2, and 2-theta.
 
-  This class is thread safe with OpenMP BUT NOT WITH ANY OTHER THREADING LIBRARY
-  such as Poco threads or Intel TBB.
+  This class is thread safe for read operations (const access) with OpenMP BUT
+  NOT WITH ANY OTHER THREADING LIBRARY such as Poco threads or Intel TBB. There
+  are no thread-safety guarantees for write operations (non-const access). Reads
+  concurrent with writes or concurrent writes are not allowed.
 
 
   @author Simon Heybrock
