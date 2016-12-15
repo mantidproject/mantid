@@ -4,6 +4,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -66,8 +67,10 @@ public:
 
     // Mask a spectrum and check it is carried over
     const size_t maskTop(5), maskBottom(10);
-    in1->maskWorkspaceIndex(maskTop);
-    in2->maskWorkspaceIndex(maskBottom);
+    in1->getSpectrum(maskTop).clearData();
+    in2->getSpectrum(maskBottom).clearData();
+    in1->mutableSpectrumInfo().setMasked(maskTop, true);
+    in2->mutableSpectrumInfo().setMasked(maskBottom, true);
 
     // Now it should succeed
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace1", "top"));
