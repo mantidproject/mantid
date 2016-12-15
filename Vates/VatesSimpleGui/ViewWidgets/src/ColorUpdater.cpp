@@ -66,7 +66,7 @@ VsiColorScale ColorUpdater::autoScale() {
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
                                   const Json::Value &model) {
   pqScalarsToColors *lut = repr->getLookupTable();
-  if (nullptr == lut) {
+  if (!lut) {
     // Got a bad proxy, so just return
     return;
   }
@@ -120,7 +120,7 @@ void ColorUpdater::colorScaleChange(double min, double max) {
 void ColorUpdater::updateLookupTable(pqDataRepresentation *representation) {
   pqScalarsToColors *lookupTable = representation->getLookupTable();
 
-  if (nullptr != lookupTable) {
+  if (lookupTable) {
     // Set the scalar range values
     lookupTable->setScalarRange(this->m_minScale, this->m_maxScale);
 

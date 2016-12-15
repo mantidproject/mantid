@@ -207,7 +207,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     geomXML = std::string(inGeomXML);
   }
 
-  if (nullptr != src2) {
+  if (src2) {
     // Need to see if scaling is applied to axis
     QString scalingProperty("Scaling Factor");
     switch (axisIndex) {

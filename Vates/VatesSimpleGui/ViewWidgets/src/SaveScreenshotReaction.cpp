@@ -141,7 +141,7 @@ void SaveScreenshotReaction::saveScreenshot(const QString &filename,
     img.TakeReference(view->captureImage(size));
   }
 
-  if (img.GetPointer() == nullptr) {
+  if (!img.GetPointer()) {
     qCritical() << "Save Image failed.";
   } else {
     pqImageUtil::saveImage(img, filename, quality);

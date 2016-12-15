@@ -137,8 +137,7 @@ void SplatterPlotView::render() {
   // 1. If there is no active source
   // 2. If we are loading a peak workspace without haveing
   //    a splatterplot source in place
-  bool isBadInput =
-      !src || (isPeaksWorkspace && this->m_splatSource == nullptr);
+  bool isBadInput = !src || (isPeaksWorkspace && !this->m_splatSource);
   if (isBadInput) {
     g_log.warning() << "SplatterPlotView: Could not render source. You are "
                        "either loading an active source "
@@ -151,7 +150,7 @@ void SplatterPlotView::render() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
-  if (!this->isPeaksWorkspace(src) && nullptr != this->m_splatSource) {
+  if (!this->isPeaksWorkspace(src) && this->m_splatSource) {
     QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
                          QApplication::tr("SplatterPlot mode does not allow "
                                           "more that one MDEventWorkspace to "
@@ -304,7 +303,7 @@ void SplatterPlotView::onPickModeToggled(bool state) {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   if (state) {
     pqPipelineSource *src = nullptr;
-    if (nullptr != this->m_threshSource) {
+    if (this->m_threshSource) {
       src = this->m_threshSource;
     } else {
       src = this->m_splatSource;
@@ -351,7 +350,7 @@ void SplatterPlotView::readAndSendCoordinates() {
   vtkSMDoubleVectorProperty *coords =
       vtkSMDoubleVectorProperty::SafeDownCast(pList[0]->GetProperty("Center"));
 
-  if (nullptr != coords) {
+  if (coords) {
     // Get coordinate type
     int peakViewCoords =
         vtkSMPropertyHelper(

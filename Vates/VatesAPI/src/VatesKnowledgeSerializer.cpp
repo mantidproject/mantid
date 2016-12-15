@@ -81,7 +81,7 @@ const std::string &VatesKnowledgeSerializer::getWorkspaceGeometry() const {
 }
 
 bool VatesKnowledgeSerializer::hasFunctionInfo() const {
-  return nullptr != m_spFunction.get();
+  return static_cast<bool>(m_spFunction);
 }
 
 bool VatesKnowledgeSerializer::hasGeometryInfo() const {

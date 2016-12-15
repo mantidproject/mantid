@@ -433,7 +433,7 @@ long long ViewBase::getNumSources() {
  * @param dvp the vector property containing the "time" information
  */
 void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp) {
-  if (nullptr == dvp) {
+  if (!dvp) {
     // This is a normal filter and therefore has no timesteps.
     // qDebug() << "No timestep vector, returning.";
     return;
@@ -584,7 +584,7 @@ void ViewBase::closeSubWindows() {}
  */
 pqPipelineRepresentation *ViewBase::getRep() {
   pqPipelineRepresentation *rep = this->getPvActiveRep();
-  if (nullptr == rep) {
+  if (!rep) {
     rep = this->origRep;
   }
   return rep;
@@ -595,7 +595,7 @@ pqPipelineRepresentation *ViewBase::getRep() {
  * @return true if the source is a MDHistoWorkspace
  */
 bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
-  if (nullptr == src) {
+  if (!src) {
     return false;
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
@@ -613,7 +613,7 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
  * @return true if the source is an internally rebinned workspace;
  */
 bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src) {
-  if (nullptr == src) {
+  if (!src) {
     return false;
   }
 
@@ -887,7 +887,7 @@ void ViewBase::setAxesGrid(bool on) {
  * Check if there is an active source available
  * @returns true if there is an active source else false
  */
-bool ViewBase::hasActiveSource() { return this->getPvActiveSrc() != nullptr; }
+bool ViewBase::hasActiveSource() { return this->getPvActiveSrc(); }
 
 } // namespace SimpleGui
 } // namespace Vates

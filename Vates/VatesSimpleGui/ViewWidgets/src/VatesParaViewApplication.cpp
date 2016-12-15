@@ -114,7 +114,7 @@ VatesParaViewApplication::~VatesParaViewApplication() {}
 
 VatesParaViewApplication *VatesParaViewApplication::instance() {
   static QPointer<VatesParaViewApplication> arg;
-  if (arg == nullptr) {
+  if (!arg) {
     arg = new VatesParaViewApplication();
   }
   return arg;

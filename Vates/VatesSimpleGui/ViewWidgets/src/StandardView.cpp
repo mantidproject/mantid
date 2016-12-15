@@ -187,7 +187,7 @@ pqRenderView *StandardView::getView() { return this->m_view.data(); }
 
 void StandardView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
-  if (nullptr == this->origSrc) {
+  if (!this->origSrc) {
     return;
   }
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();

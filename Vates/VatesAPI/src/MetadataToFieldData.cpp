@@ -22,11 +22,9 @@ void MetadataToFieldData::execute(vtkFieldData *fieldData,
   }
   // create new.
   vtkNew<vtkCharArray> newArray;
-  newArray->Allocate(metaData.size());
+  newArray->SetNumberOfTuples(metaData.size());
   newArray->SetName(id.c_str());
   fieldData->AddArray(newArray.GetPointer());
-
-  fieldData->SetNumberOfTuples(metaData.size());
   for (size_t i = 0; i < metaData.size(); i++) {
     newArray->SetValue(i, metaData[i]);
   }

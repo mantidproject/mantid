@@ -18,7 +18,7 @@ std::string FieldDataToMetadata::execute(vtkFieldData *fieldData,
     throw std::runtime_error("vtkFieldData argument is null");
   }
   vtkDataArray *array = fieldData->GetArray(id.c_str());
-  if (array == nullptr) {
+  if (!array) {
     throw std::runtime_error("The specified vtk array does not exist");
   }
   if (vtkCharArray *carray = vtkCharArray::FastDownCast(array)) {
