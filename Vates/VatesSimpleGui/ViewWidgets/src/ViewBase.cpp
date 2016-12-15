@@ -155,7 +155,7 @@ void ViewBase::clearRenderLayout(QFrame *frame) {
   QLayout *layout = frame->layout();
   if (layout) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != nullptr)
+    while ((item = layout->takeAt(0)))
       layout->removeItem(item);
     delete layout;
   }
@@ -167,7 +167,7 @@ void ViewBase::clearRenderLayout(QFrame *frame) {
  */
 void ViewBase::onColorMapChange(const Json::Value &model) {
   pqPipelineRepresentation *rep = this->getRep();
-  if (nullptr == rep) {
+  if (!rep) {
     return;
   }
   // Work around a "bug" in pqScalarToColors::checkRange() where the lower
@@ -252,7 +252,7 @@ void ViewBase::setColorsForView(ColorSelectionWidget *colorScale) {
  * @return true if the pipeline source is derived from PeaksWorkspace
  */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src) {
-  if (nullptr == src) {
+  if (!src) {
     return false;
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
