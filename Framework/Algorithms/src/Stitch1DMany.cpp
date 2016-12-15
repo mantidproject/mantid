@@ -143,7 +143,8 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
     }
   }
 
-  m_scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
+  int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
+  m_scaleFactorFromPeriod = (size_t)scaleFactorFromPeriod;
   m_scaleFactorFromPeriod--; // To account for period being indexed from 1
   if (m_scaleFactorFromPeriod >= m_inputWSGroups.size())
     throw std::runtime_error("Period index out of range");
