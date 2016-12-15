@@ -114,6 +114,14 @@ void PlotPeakByLogValue::init() {
   declareProperty("MaxIterations", 500,
                   "Stop after this number of iterations if a good fit is not "
                   "found");
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
   declareProperty("CreateOutput", false, "Set to true to create output "
                                          "workspaces with the results of the "
@@ -292,6 +300,7 @@ void PlotPeakByLogValue::exec() {
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
         fit->setPropertyValue("MaxIterations",
                               getPropertyValue("MaxIterations"));
+        fit->setPropertyValue("PeakRadius", getPropertyValue("PeakRadius"));
         fit->setProperty("CalcErrors", true);
         fit->setProperty("CreateOutput", createFitOutput);
         if (!histogramFit) {

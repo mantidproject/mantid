@@ -16,6 +16,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Objects/Object.h"
@@ -634,8 +635,8 @@ void InstrumentActor::resetColors() {
   m_colors.resize(m_specIntegrs.size());
 
   auto sharedWorkspace = getWorkspace();
+  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
 
-  Instrument_const_sptr inst = getInstrument();
   IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
 
   for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
@@ -649,7 +650,7 @@ void InstrumentActor::resetColors() {
       if (mask) {
         masked = mask->isMasked(dets);
       } else {
-        masked = inst->isDetectorMasked(dets);
+        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
       }
 
       if (masked) {

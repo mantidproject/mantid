@@ -38,6 +38,21 @@ void ConvertCWSDExpToMomentum::init() {
                                                       Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
+  declareProperty(
+      "DetectorSampleDistanceShift", 0.0,
+      "Amount of shift in sample-detector distance from 0.3750 meter.");
+
+  declareProperty(
+      "DetectorCenterXShift", 0.0,
+      "Amount of shift of detector center in X-direction from (115, 128).");
+
+  declareProperty(
+      "DetectorCenterYShift", 0.0,
+      "Amount of shift of detector center in Y-direction from (115, 128).");
+
+  declareProperty("UserDefinedWavelength", EMPTY_DBL(),
+                  "User defined wave length if it is specified.");
+
   declareProperty("CreateVirtualInstrument", false,
                   "Flag to create virtual instrument.");
 
@@ -88,6 +103,9 @@ void ConvertCWSDExpToMomentum::exec() {
     g_log.error() << "Importing error: " << errmsg << "\n";
     throw std::runtime_error(errmsg);
   }
+  m_detSampleDistanceShift = getProperty("DetectorSampleDistanceShift");
+  m_detXShift = getProperty("DetectorCenterXShift");
+  m_detYShift = getProperty("DetectorCenterYShift");
 
   // background
   std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
@@ -601,6 +619,15 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
     sizelist[1] = 256;
     loader->setProperty("DetectorGeometry", sizelist);
     loader->setProperty("LoadInstrument", true);
+    loader->setProperty("ShiftedDetectorDistance", m_detSampleDistanceShift);
+    loader->setProperty("DetectorCenterXShift", m_detXShift);
+    loader->setProperty("DetectorCenterYShift", m_detYShift);
+
+    double wavelength = getProperty("UserDefinedWavelength");
+
+    if (wavelength != EMPTY_DBL()) {
+      loader->setProperty("UserSpecifiedWaveLength", wavelength);
+    }
 
     loader->execute();
 

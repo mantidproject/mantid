@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -475,6 +476,7 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
   // Fit all the spectra with a gaussian
   Progress prog(this, 0, 1.0, nspec);
 
+  auto &spectrumInfo = m_maskWS->mutableSpectrumInfo();
   // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int wi = 0; wi < nspec; ++wi) {
@@ -509,7 +511,8 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
           const size_t workspaceIndex = mapEntry->second;
           if (offsetresult.mask > 0.9) {
             // Being masked
-            m_maskWS->maskWorkspaceIndex(workspaceIndex);
+            m_maskWS->getSpectrum(workspaceIndex).clearData();
+            spectrumInfo.setMasked(workspaceIndex, true);
             m_maskWS->mutableY(workspaceIndex)[0] = offsetresult.mask;
           } else {
             // Using the detector

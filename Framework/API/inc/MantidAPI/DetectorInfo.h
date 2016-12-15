@@ -63,6 +63,8 @@ public:
   DetectorInfo(boost::shared_ptr<const Geometry::Instrument> instrument,
                Geometry::ParameterMap *pmap = nullptr);
 
+  size_t size() const;
+
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   double l2(const size_t index) const;
@@ -71,11 +73,16 @@ public:
   Kernel::V3D position(const size_t index) const;
   Kernel::Quat rotation(const size_t index) const;
 
+  void setMasked(const size_t index, bool masked);
+  void clearMaskFlags();
+
   void setPosition(const size_t index, const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
 
   void setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);
   void setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);
+
+  const Geometry::IDetector &detector(const size_t index) const;
 
   // This does not really belong into DetectorInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.

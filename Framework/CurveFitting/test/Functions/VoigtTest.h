@@ -14,6 +14,7 @@
 
 using Mantid::CurveFitting::Functions::Voigt;
 using Mantid::API::IFunction;
+using Mantid::API::IPeakFunction;
 
 class VoigtTest : public CxxTest::TestSuite {
 public:
@@ -104,7 +105,7 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
 
     TS_ASSERT_DELTA(peakFn->centre(), pos, 1e-12);
-    TS_ASSERT_DELTA(peakFn->height(), 2.0 * a_L / 3.0, 1e-12);
+    TS_ASSERT_DELTA(peakFn->height(), 4.9570, 1e-4);
     TS_ASSERT_DELTA(peakFn->fwhm(), (gamma_L + gamma_G), 1e-12);
   }
 
@@ -128,16 +129,150 @@ public:
     TS_ASSERT_DELTA(peakFn->fwhm(), (gamma_L + gamma_G), 1e-12);
   }
 
+  void test_height() {
+    {
+      auto voigt = createFunction(0, 0, 0, 0);
+      TS_ASSERT_EQUALS(voigt->height(), 0.0);
+      voigt->setHeight(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(1, 0, 0, 0);
+      TS_ASSERT_EQUALS(voigt->height(), 0.0);
+      voigt->setHeight(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(1, 0, 1, 0);
+      TS_ASSERT_EQUALS(voigt->height(), 0.0);
+      voigt->setHeight(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 4.7123, 1e-4);
+    }
+    {
+      auto voigt = createFunction(1, 0, 0, 1);
+      TS_ASSERT_EQUALS(voigt->height(), 0.0);
+      voigt->setHeight(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 3.1933, 1e-4);
+    }
+    {
+      auto voigt = createFunction(0, 0, 1, 1);
+      TS_ASSERT_EQUALS(voigt->height(), 0.0);
+      voigt->setHeight(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 2, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 6.6795, 1e-4);
+    }
+    {
+      auto voigt = createFunction(4, 0, 2, 3);
+      TS_ASSERT_DELTA(voigt->height(), 2.3159, 1e-4);
+      voigt->setHeight(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 5, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 16.2778, 1e-4);
+    }
+  }
+
+  void test_intensity() {
+    {
+      auto voigt = createFunction(0, 0, 0, 0);
+      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      voigt->setIntensity(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 6068115080134125.22, 1e10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(1, 0, 0, 0);
+      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      voigt->setIntensity(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 6068115080134125.22, 1e10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(1, 0, 0, 1);
+      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      voigt->setIntensity(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 2.8183, 1e-4);
+      TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(1, 0, 1, 0);
+      TS_ASSERT_EQUALS(voigt->intensity(), 0.0);
+      voigt->setIntensity(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 1.9098, 1e-4);
+      TS_ASSERT_DELTA(voigt->fwhm(), 1, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(4, 0, 2, 3);
+      TS_ASSERT_DELTA(voigt->intensity(), 12.5663, 1e-4);
+      voigt->setIntensity(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 0.5528, 1e-4);
+      TS_ASSERT_DELTA(voigt->fwhm(), 5, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->IPeakFunction::intensity(), 3.0, 1e-2);
+    }
+  }
+
+  void test_fwhm() {
+    {
+      auto voigt = createFunction(0, 0, 0, 0);
+      TS_ASSERT_EQUALS(voigt->fwhm(), 0.0);
+      voigt->setFwhm(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 3, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 0.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 1.5, 1e-10);
+      TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 1.5, 1e-10);
+    }
+    {
+      auto voigt = createFunction(0, 0, 1, 0);
+      TS_ASSERT_EQUALS(voigt->fwhm(), 1.0);
+      voigt->setFwhm(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 3, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 0.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 3.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 0.0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(0, 0, 0, 1);
+      TS_ASSERT_EQUALS(voigt->fwhm(), 1.0);
+      voigt->setFwhm(3.0);
+      TS_ASSERT_DELTA(voigt->height(), 0, 1e-10);
+      TS_ASSERT_DELTA(voigt->fwhm(), 3, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 0.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 0.0, 1e-10);
+      TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 3.0, 1e-10);
+    }
+    {
+      auto voigt = createFunction(2, 0, 2, 1);
+      TS_ASSERT_EQUALS(voigt->fwhm(), 3.0);
+      voigt->setFwhm(5.5);
+      TS_ASSERT_DELTA(voigt->fwhm(), 5.5, 1e-10);
+      TS_ASSERT_DELTA(voigt->intensity(), 11.5191, 1e-4);
+      TS_ASSERT_DELTA(voigt->getParameter("LorentzFWHM"), 3.6666, 1e-4);
+      TS_ASSERT_DELTA(voigt->getParameter("GaussianFWHM"), 1.8333, 1e-4);
+    }
+  }
+
 private:
-  boost::shared_ptr<IFunction> createFunction(const double a_L,
-                                              const double pos,
-                                              const double gamma_L,
-                                              const double gamma_G) {
+  boost::shared_ptr<Mantid::API::IPeakFunction>
+  createFunction(const double a_L, const double pos, const double gamma_L,
+                 const double gamma_G) {
     boost::shared_ptr<IFunction> voigtFn = boost::make_shared<Voigt>();
     auto peakFn =
         boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
-    // Set a fairly wide radius for simple tests
-    peakFn->setPeakRadius(10);
     voigtFn->initialize();
 
     voigtFn->setParameter("LorentzAmp", a_L);
@@ -145,7 +280,7 @@ private:
     voigtFn->setParameter("LorentzFWHM", gamma_L);
     voigtFn->setParameter("GaussianFWHM", gamma_G);
 
-    return voigtFn;
+    return peakFn;
   }
 
   enum { g_domainSize = 10 };
