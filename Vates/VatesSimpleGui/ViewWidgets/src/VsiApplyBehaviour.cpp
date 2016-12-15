@@ -6,11 +6,7 @@ namespace SimpleGui {
 
 VsiApplyBehaviour::VsiApplyBehaviour(Mantid::VATES::ColorScaleLock *lock,
                                      QObject *parent)
-    : pqApplyBehavior(parent), m_colorScaleLock(nullptr) {
-  if (lock != nullptr) {
-    m_colorScaleLock = lock;
-  }
-}
+    : pqApplyBehavior(parent), m_colorScaleLock(lock) {}
 
 /**
  * Forward the register request
