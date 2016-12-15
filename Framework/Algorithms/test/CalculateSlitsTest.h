@@ -7,6 +7,10 @@
 
 using namespace Mantid::Algorithms;
 
+namespace {
+double roundFour(double i) { return floor(i * 10000 + 0.5) / 10000; }
+}
+
 class CalculateSlitsTest : public CxxTest::TestSuite {
 public:
   void testSensibleArgs() {
@@ -21,11 +25,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const double slit1 = alg.getProperty("Slit1");
-    TS_ASSERT_EQUALS(slit1, 1.0784367635946033);
+    // truncate the output values to 4 decimal places to eliminate
+    // insignificant error
+    const double slit1 = roundFour(alg.getProperty("Slit1"));
+    TS_ASSERT_EQUALS(slit1, 1.0784);
 
-    const double slit2 = alg.getProperty("Slit2");
-    TS_ASSERT_EQUALS(slit2, 0.34402409376933002);
+    const double slit2 = roundFour(alg.getProperty("Slit2"));
+    TS_ASSERT_EQUALS(slit2, 0.3440);
   }
 
   void testWithNegativeAngle() {
@@ -40,11 +46,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const double slit1 = alg.getProperty("Slit1");
-    TS_ASSERT_EQUALS(slit1, -1.0784367635946033);
+    // truncate the output values to 4 decimal places to eliminate
+    // insignificant error
+    const double slit1 = roundFour(alg.getProperty("Slit1"));
+    TS_ASSERT_EQUALS(slit1, -1.0784);
 
-    const double slit2 = alg.getProperty("Slit2");
-    TS_ASSERT_EQUALS(slit2, -0.34402409376933002);
+    const double slit2 = roundFour(alg.getProperty("Slit2"));
+    TS_ASSERT_EQUALS(slit2, -0.3440);
   }
 
   void testWithZeroAngle() {
