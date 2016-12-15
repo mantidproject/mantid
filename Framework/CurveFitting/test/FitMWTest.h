@@ -960,6 +960,7 @@ public:
     fit.setProperty("Function", "name=FlatBackground");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Exclude", exclude);
+    fit.setProperty("Output", "out");
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -981,9 +982,18 @@ public:
     TS_ASSERT_EQUALS(values->getFitWeight(10), 0);
 
     fit.execute();
-
     IFunction_sptr fun = fit.getProperty("Function");
     TS_ASSERT_EQUALS(fun->getParameter("A0"), 1);
+
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
+    TS_ASSERT(out);
+    if (!out) return;
+
+    auto &diff = out->y(2);
+    for(size_t i = 0; i < diff.size(); ++i) {
+      TS_ASSERT_EQUALS(diff[i], 0.0);
+    }
+
   }
 
   void test_exclude_odd_number() {
