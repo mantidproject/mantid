@@ -528,6 +528,10 @@ public:
   // End image methods
   //=====================================================================================
 
+  size_t numberOfDetectorGroups() const override;
+  const std::set<detid_t> &
+  detectorIDsInGroup(const size_t index) const override;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
