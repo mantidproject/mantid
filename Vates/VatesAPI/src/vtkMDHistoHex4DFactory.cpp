@@ -52,7 +52,7 @@ template <typename TimeMapper>
 void vtkMDHistoHex4DFactory<TimeMapper>::initialize(
     Mantid::API::Workspace_sptr workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 4>(workspace);
-  if (m_workspace != NULL) {
+  if (m_workspace != nullptr) {
     double tMax = m_workspace->getTDimension()->getMaximum();
     double tMin = m_workspace->getTDimension()->getMinimum();
     size_t nbins = m_workspace->getTDimension()->getNBins();

@@ -291,7 +291,7 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
 
   // Get the transformation that takes the points in the TRANSFORMED space back
   // into the ORIGINAL (not-rotated) space.
-  Mantid::API::CoordTransform const *transform = NULL;
+  Mantid::API::CoordTransform const *transform = nullptr;
   if (m_useTransform) {
     transform = workspace->getTransformToOriginal();
   }

@@ -45,7 +45,7 @@ bool MDHWNexusLoadingPresenter::canReadFile() const {
   if (!canLoadFileBasedOnExtension(m_filename, ".nxs")) {
     return 0;
   }
-  ::NeXus::File *file = NULL;
+  ::NeXus::File *file = nullptr;
 
   file = new ::NeXus::File(this->m_filename);
   // MDHistoWorkspace file has a different name for the entry

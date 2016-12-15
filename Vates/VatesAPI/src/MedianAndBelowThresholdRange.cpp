@@ -27,7 +27,7 @@ MedianAndBelowThresholdRange::~MedianAndBelowThresholdRange() {}
 Overriden calculate method.
 */
 void MedianAndBelowThresholdRange::calculate() {
-  if (NULL == m_workspace.get()) {
+  if (nullptr == m_workspace.get()) {
     throw std::logic_error("The workspace has not been set.");
   }
 

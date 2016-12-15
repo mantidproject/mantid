@@ -16,7 +16,7 @@ void MetadataToFieldData::execute(vtkFieldData *fieldData, std::string metaData,
                                   std::string id) const {
   // clean out existing.
   vtkDataArray *arry = fieldData->GetArray(id.c_str());
-  if (NULL != arry) {
+  if (nullptr != arry) {
     fieldData->RemoveArray(id.c_str());
   }
   // create new.

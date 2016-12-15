@@ -205,7 +205,7 @@ vtkSmartPointer<vtkDataSet>
 vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
   this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(
       m_workspace, progressUpdating, false);
-  if (this->dataSet != NULL) {
+  if (this->dataSet != nullptr) {
     return this->dataSet;
   } else {
     IMDEventWorkspace_sptr imdws =

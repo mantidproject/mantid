@@ -157,13 +157,14 @@ MdViewerWidget::AllVSIViewsState::~AllVSIViewsState() {}
  * This constructor is used in the plugin mode operation of the VSI.
  */
 MdViewerWidget::MdViewerWidget()
-    : VatesViewerInterface(), currentView(NULL),
+    : VatesViewerInterface(), currentView(nullptr),
 
-      hiddenView(NULL), viewSwitched(false), dataLoader(NULL), lodAction(NULL),
-      screenShot(NULL), viewLayout(NULL), viewSettings(NULL),
-      useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD),
+      hiddenView(nullptr), viewSwitched(false), dataLoader(nullptr),
+      lodAction(nullptr), screenShot(nullptr), viewLayout(nullptr),
+      viewSettings(nullptr), useCurrentColorSettings(false),
+      initialView(ModeControlWidget::STANDARD),
       m_rebinAlgorithmDialogProvider(this),
-      m_rebinnedWorkspaceIdentifier("_tempvsi"), m_colorMapEditorPanel(NULL),
+      m_rebinnedWorkspaceIdentifier("_tempvsi"), m_colorMapEditorPanel(nullptr),
       m_gridAxesStartUpOn(true), m_allViews() {
   // this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -209,7 +210,7 @@ void MdViewerWidget::internalSetup(bool pMode) {
   static int widgetNumber = 0;
   this->m_widgetName = QString("MdViewerWidget%1").arg(widgetNumber++);
   this->pluginMode = pMode;
-  this->rotPointDialog = NULL;
+  this->rotPointDialog = nullptr;
   this->lodThreshold = 5.0;
   this->viewSwitched = false;
 }
@@ -474,7 +475,7 @@ void MdViewerWidget::onSwitchSources(std::string rebinnedWorkspaceName,
     // Set the splatterplot button explicitly
     this->currentView->setSplatterplot(true);
 
-    pqActiveObjects::instance().setActiveSource(NULL);
+    pqActiveObjects::instance().setActiveSource(nullptr);
     pqActiveObjects::instance().setActiveSource(rebinnedSource);
   } catch (const std::runtime_error &error) {
     g_log.warning() << error.what();
@@ -523,7 +524,7 @@ pqPipelineSource *MdViewerWidget::prepareRebinnedWorkspace(
 
   // It seems that the new source gets set as active before it is fully
   // constructed. We therefore reset it.
-  pqActiveObjects::instance().setActiveSource(NULL);
+  pqActiveObjects::instance().setActiveSource(nullptr);
   pqActiveObjects::instance().setActiveSource(newRebinnedSource);
 
   this->renderAndFinalSetup();
@@ -1137,7 +1138,7 @@ void MdViewerWidget::setColorForBackground() {
 void MdViewerWidget::checkForUpdates() {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
-  if (NULL == src) {
+  if (nullptr == src) {
     return;
   }
   vtkSMProxy *proxy = src->getProxy();
@@ -1378,7 +1379,7 @@ void MdViewerWidget::onLodToggled(bool state) {
  * setting the communication between it and the current view.
  */
 void MdViewerWidget::onRotationPoint() {
-  if (NULL == this->rotPointDialog) {
+  if (nullptr == this->rotPointDialog) {
     this->rotPointDialog = new RotationPointDialog(this);
     this->connectRotationPointDialog();
   }
@@ -1402,9 +1403,10 @@ void MdViewerWidget::onWikiHelp() {
  * switch view since the connection to the current view is destroyed.
  */
 void MdViewerWidget::disconnectDialogs() {
-  if (NULL != this->rotPointDialog) {
+  if (nullptr != this->rotPointDialog) {
     this->rotPointDialog->close();
-    QObject::disconnect(this->rotPointDialog, 0, this->currentView, 0);
+    QObject::disconnect(this->rotPointDialog, nullptr, this->currentView,
+                        nullptr);
   }
 }
 
@@ -1443,7 +1445,7 @@ void MdViewerWidget::connectColorSelectionWidget() {
  * the current view.
  */
 void MdViewerWidget::connectRotationPointDialog() {
-  if (NULL != this->rotPointDialog) {
+  if (nullptr != this->rotPointDialog) {
     QObject::connect(
         this->rotPointDialog, SIGNAL(sendCoordinates(double, double, double)),
         this->currentView, SLOT(onResetCenterToPoint(double, double, double)));
@@ -1484,7 +1486,7 @@ void MdViewerWidget::afterReplaceHandle(
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
   UNUSED_ARG(ws);
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
-  if (NULL != src) {
+  if (nullptr != src) {
     // Have to mark the filter as modified to get it to update. Do this by
     // changing the requested workspace name to a dummy name and then change
     // back. However, push the change all the way down for it to work.
@@ -1514,7 +1516,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
   UNUSED_ARG(ws);
 
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
-  if (NULL != src) {
+  if (nullptr != src) {
     long long numSources = this->currentView->getNumSources();
     if (numSources > 1) {
       pqObjectBuilder *builder =
@@ -1668,22 +1670,22 @@ void MdViewerWidget::saveViewState(ViewBase *view) {
   switch (vtype) {
   case ModeControlWidget::Views::STANDARD: {
     m_allViews.stateStandard.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   case ModeControlWidget::Views::THREESLICE: {
     m_allViews.stateThreeSlice.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   case ModeControlWidget::Views::MULTISLICE: {
     m_allViews.stateMulti.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   case ModeControlWidget::Views::SPLATTERPLOT: {
     m_allViews.stateSplatter.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   default:
-    view = NULL;
+    view = nullptr;
     break;
   }
 }
@@ -1707,25 +1709,25 @@ void MdViewerWidget::restoreViewState(ViewBase *view,
   case ModeControlWidget::STANDARD: {
     if (m_allViews.stateStandard)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateStandard.GetPointer(), NULL);
+          m_allViews.stateStandard.GetPointer(), nullptr);
   } break;
   case ModeControlWidget::THREESLICE: {
     if (m_allViews.stateThreeSlice)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateThreeSlice.GetPointer(), NULL);
+          m_allViews.stateThreeSlice.GetPointer(), nullptr);
   } break;
   case ModeControlWidget::MULTISLICE: {
     if (m_allViews.stateMulti)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateMulti.GetPointer(), NULL);
+          m_allViews.stateMulti.GetPointer(), nullptr);
   } break;
   case ModeControlWidget::SPLATTERPLOT: {
     if (m_allViews.stateSplatter)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateSplatter.GetPointer(), NULL);
+          m_allViews.stateSplatter.GetPointer(), nullptr);
   } break;
   default:
-    view = NULL;
+    view = nullptr;
     break;
   }
 

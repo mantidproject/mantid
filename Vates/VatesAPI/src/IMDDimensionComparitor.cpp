@@ -21,7 +21,7 @@ bool IMDDimensionComparitor::isYDimension(
     Mantid::Geometry::IMDDimension_const_sptr queryDimension) {
   Mantid::Geometry::IMDDimension_const_sptr actualYDimension =
       m_workspace->getYDimension();
-  if (NULL == actualYDimension.get()) {
+  if (nullptr == actualYDimension.get()) {
     return false; // MDImages may have 1 dimension or more.
   } else {
     // Compare dimensions on the basis of their ids.
@@ -34,7 +34,7 @@ bool IMDDimensionComparitor::isZDimension(
     Mantid::Geometry::IMDDimension_const_sptr queryDimension) {
   Mantid::Geometry::IMDDimension_const_sptr actualZDimension =
       m_workspace->getZDimension();
-  if (NULL == actualZDimension.get()) {
+  if (nullptr == actualZDimension.get()) {
     return false; // MDImages may have 1 dimension or more.
   } else {
     // Compare dimensions on the basis of their ids.
@@ -47,7 +47,7 @@ bool IMDDimensionComparitor::istDimension(
     Mantid::Geometry::IMDDimension_const_sptr queryDimension) {
   Mantid::Geometry::IMDDimension_const_sptr actualtDimension =
       m_workspace->getTDimension();
-  if (NULL == actualtDimension.get()) {
+  if (nullptr == actualtDimension.get()) {
     return false; // MDImages may have 1 dimension or more.
   } else {
     // Compare dimensions on the basis of their ids.

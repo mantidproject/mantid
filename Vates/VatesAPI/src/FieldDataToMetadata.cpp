@@ -14,11 +14,11 @@ std::string FieldDataToMetadata::operator()(vtkFieldData *fieldData,
 std::string FieldDataToMetadata::execute(vtkFieldData *fieldData,
                                          const std::string &id) const {
   std::string sXml;
-  if (fieldData == NULL) {
+  if (fieldData == nullptr) {
     throw std::runtime_error("vtkFieldData argument is null");
   }
   vtkDataArray *arry = fieldData->GetArray(id.c_str());
-  if (arry == NULL) {
+  if (arry == nullptr) {
     throw std::runtime_error("The specified vtk array does not exist");
   }
   if (vtkCharArray *carry = dynamic_cast<vtkCharArray *>(arry)) {

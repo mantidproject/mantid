@@ -155,7 +155,7 @@ void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
 void MultiSliceView::checkSliceViewCompat() {
   QString wsName = this->getWorkspaceName();
   if (wsName.isEmpty()) {
-    QObject::disconnect(this->m_mainView, 0, this, 0);
+    QObject::disconnect(this->m_mainView, nullptr, this, nullptr);
   }
 }
 
@@ -183,8 +183,8 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
-  pqPipelineSource *src1 = NULL;
-  pqPipelineSource *src2 = NULL;
+  pqPipelineSource *src1 = nullptr;
+  pqPipelineSource *src2 = nullptr;
   foreach (pqPipelineSource *src, srcs) {
     const QString name(src->getProxy()->GetXMLName());
 
@@ -207,7 +207,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     geomXML = std::string(inGeomXML);
   }
 
-  if (NULL != src2) {
+  if (nullptr != src2) {
     // Need to see if scaling is applied to axis
     QString scalingProperty("Scaling Factor");
     switch (axisIndex) {

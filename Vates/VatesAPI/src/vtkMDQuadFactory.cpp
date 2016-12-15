@@ -94,7 +94,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     vtkNew<vtkIdList> quadPointList;
     quadPointList->SetNumberOfIds(4);
 
-    Mantid::API::CoordTransform const *transform = NULL;
+    Mantid::API::CoordTransform const *transform = nullptr;
     if (m_useTransform) {
       transform = imdws->getTransformToOriginal();
     }
@@ -180,7 +180,7 @@ std::string vtkMDQuadFactory::getFactoryTypeName() const {
 
 /// Template Method pattern to validate the factory before use.
 void vtkMDQuadFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (nullptr == m_workspace.get()) {
     throw std::runtime_error(
         "vtkMDQuadFactory has no workspace to run against");
   }

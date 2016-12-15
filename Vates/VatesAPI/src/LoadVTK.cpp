@@ -187,7 +187,7 @@ void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals,
   double *destinationSignals = outputWS->getSignalArray();
   double *destinationErrorsSQ = outputWS->getErrorSquaredArray();
 
-  if (errorsSQ == NULL) {
+  if (errorsSQ == nullptr) {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < nPoints; ++i) {
       PARALLEL_START_INTERUPT_REGION
@@ -257,7 +257,7 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
   ws->addDimension(dimZ);
   ws->initialize();
 
-  if (errorsSQ == NULL) {
+  if (errorsSQ == nullptr) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int64_t i = 0; i < nPoints; ++i) {
       PARALLEL_START_INTERUPT_REGION
@@ -318,14 +318,14 @@ void LoadVTK::exec() {
 
   vtkUnsignedShortArray *signals = vtkUnsignedShortArray::SafeDownCast(
       readDataset->GetPointData()->GetArray(signalArrayName.c_str()));
-  if (signals == NULL) {
+  if (signals == nullptr) {
     throw std::invalid_argument("Signal array: " + signalArrayName +
                                 " does not exist");
   }
 
   vtkUnsignedShortArray *errorsSQ = vtkUnsignedShortArray::SafeDownCast(
       readDataset->GetPointData()->GetArray(errorSQArrayName.c_str()));
-  if (!errorSQArrayName.empty() && errorsSQ == NULL) {
+  if (!errorSQArrayName.empty() && errorsSQ == nullptr) {
     throw std::invalid_argument("Error squared array: " + errorSQArrayName +
                                 " does not exist");
   }

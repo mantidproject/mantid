@@ -233,7 +233,7 @@ int vtkMDEWSource::RequestInformation(
     vtkInformation *vtkNotUsed(request),
     vtkInformationVector **vtkNotUsed(inputVector),
     vtkInformationVector *outputVector) {
-  if (m_presenter == NULL && !m_wsName.empty()) {
+  if (m_presenter == nullptr && !m_wsName.empty()) {
     std::unique_ptr<MDLoadingView> view =
         Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
     m_presenter = Mantid::Kernel::make_unique<MDEWInMemoryLoadingPresenter>(

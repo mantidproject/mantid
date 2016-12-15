@@ -6,8 +6,8 @@ namespace SimpleGui {
 
 VsiApplyBehaviour::VsiApplyBehaviour(Mantid::VATES::ColorScaleLock *lock,
                                      QObject *parent)
-    : pqApplyBehavior(parent), m_colorScaleLock(NULL) {
-  if (lock != NULL) {
+    : pqApplyBehavior(parent), m_colorScaleLock(nullptr) {
+  if (lock != nullptr) {
     m_colorScaleLock = lock;
   }
 }
@@ -30,13 +30,13 @@ void VsiApplyBehaviour::unregisterPanel(pqPropertiesPanel *panel) {
 /// React to the apply button press. We forward the request, but we add a lock
 void VsiApplyBehaviour::applied(pqPropertiesPanel *, pqProxy *pqproxy) {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(m_colorScaleLock);
-  this->pqApplyBehavior::applied(NULL, pqproxy);
+  this->pqApplyBehavior::applied(nullptr, pqproxy);
 }
 
 /// React to the apply button press. We forward the request, but we add a lock
 void VsiApplyBehaviour::applied(pqPropertiesPanel *) {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(m_colorScaleLock);
-  this->pqApplyBehavior::applied(NULL);
+  this->pqApplyBehavior::applied(nullptr);
 }
 }
 }

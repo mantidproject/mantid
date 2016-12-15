@@ -174,7 +174,7 @@ void vtkMDHistoLineFactory::initialize(
 }
 
 void vtkMDHistoLineFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (nullptr == m_workspace.get()) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }
