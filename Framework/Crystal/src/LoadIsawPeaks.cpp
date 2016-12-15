@@ -72,8 +72,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       getWord(in, false);
     readToEndOfLine(in, true);
     confidence = 95;
-  }
-  catch (std::exception &) {
+  } catch (std::exception &) {
   }
 
   return confidence;
@@ -83,11 +82,11 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadIsawPeaks::init() {
-  const std::vector<std::string> exts{ ".peaks", ".integrate" };
+  const std::vector<std::string> exts{".peaks", ".integrate"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, exts),
                   "Path to an ISAW-style .peaks filename.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace> >(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
@@ -138,8 +137,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     V3D sampPos = instr->getSample()->getPos();
     SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
                                                 parMap);
-  }
-  catch (...) {
+  } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
   }
@@ -182,8 +180,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
       iss >> bankNum >> nrows >> ncols >> width >> height >> depth >> detD >>
           Centx >> Centy >> Centz >> Basex >> Basey >> Basez >> Upx >> Upy >>
           Upz;
-    }
-    catch (...) {
+    } catch (...) {
 
       g_log.error() << "incorrect type of data for panel \n";
       throw std::length_error("incorrect type of data for panel ");
@@ -230,7 +227,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
       DetWScale = width / bankR->xsize() / 100;
       DetHtScale = height / bankR->ysize() / 100;
     }
-    const std::vector<std::string> bankNames{ bankName };
+    const std::vector<std::string> bankNames{bankName};
 
     SCDCalibratePanels::FixUpBankParameterMap(
         bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap, false);
@@ -578,8 +575,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       peak.setWavelength(wl.singleFromTOF(tof));
       // Add the peak to workspace
       outWS->addPeak(peak);
-    }
-    catch (std::runtime_error &e) {
+    } catch (std::runtime_error &e) {
       g_log.error() << "Error reading peak SEQN " << seqNum << " : " << e.what()
                     << '\n';
       throw std::runtime_error("Corrupted input file. ");
