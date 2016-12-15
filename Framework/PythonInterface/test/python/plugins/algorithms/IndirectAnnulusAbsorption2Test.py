@@ -63,7 +63,7 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
         """
 
         corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
-                                                      SampleChemicalFormula='H2-O'
+                                                      SampleChemicalFormula='H2-O',
                                                       NumberWavelengths=2,
                                                       Events=200,
                                                       DefaultBeamSize=False,
