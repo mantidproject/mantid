@@ -91,10 +91,10 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     const double slit1 = alg.getProperty("Slit1");
-    TS_ASSERT(isnan(slit1));
+    TS_ASSERT(std::isnan(slit1));
 
     const double slit2 = alg.getProperty("Slit2");
-    TS_ASSERT(isnan(slit2));
+    TS_ASSERT(std::isnan(slit2));
   }
 
   void testWithNoArgs() {
@@ -105,10 +105,10 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     const double slit1 = alg.getProperty("Slit1");
-    TS_ASSERT(isnan(slit1));
+    TS_ASSERT(std::isnan(slit1));
 
     const double slit2 = alg.getProperty("Slit2");
-    TS_ASSERT(isnan(slit2));
+    TS_ASSERT(std::isnan(slit2));
   }
 };
 
