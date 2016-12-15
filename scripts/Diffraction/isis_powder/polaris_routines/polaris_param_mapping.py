@@ -6,5 +6,11 @@ attr_mapping = [("apply_solid_angle",           "solid_angle_on"),
                 ("calibration_mapping_file",    "cal_mapping_file"),
                 ("chopper_on",                  "chopper_on"),
                 ("config_file",                 "config_file"),
-                ("output_directory", "output_dir"),
-                ("user_name", "user_name")]
+                ("do_van_normalisation",        "do_van_normalisation"),
+                ("do_absorb_corrections",       "do_absorb_corrections"),
+                ("generate_absorb_corrections", "gen_absorb_corrections"),
+                ("masking_file_name",           "masking_file_name"),
+                ("spline_coefficient",          "spline_coeff"),
+                ("tof_cropping_ranges",         "tof_cropping_values"),
+                ("output_directory",            "output_dir"),
+                ("user_name",                   "user_name")]

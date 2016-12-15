@@ -22,7 +22,7 @@ class isis_powder_AbstractInstTest(unittest.TestCase):
     def test_generate_full_input_path(self):
         inst = self._get_abstract_inst_all_specified()
         run_number = 12345
-        inst_file_name = inst.generate_inst_file_name(run_number)
+        inst_file_name = inst.generate_input_file_name(run_number)
         input_path = "test"
         reference_output = os.path.join(input_path, (inst_file_name + self.default_ext))
 

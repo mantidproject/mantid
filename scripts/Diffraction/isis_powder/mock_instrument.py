@@ -29,7 +29,7 @@ class MockInstrument(AbstractInst):
         return calibration_details
 
     @staticmethod
-    def generate_inst_file_name(run_number):
+    def generate_input_file_name(run_number):
         return "generate_inst_file_name" + str(run_number)
 
     @staticmethod

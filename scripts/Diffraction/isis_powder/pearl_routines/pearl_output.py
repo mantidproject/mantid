@@ -8,7 +8,7 @@ import isis_powder.routines.common as common
 
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_details, perform_attenuation, focus_mode=None):
-    output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
+    output_file_paths = instrument.generate_out_file_paths(run_details=run_details)
 
     if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths, processed_spectra)

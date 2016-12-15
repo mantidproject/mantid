@@ -15,13 +15,23 @@ def create_calibration_by_names(calibration_runs, startup_objects, grouping_file
                            out_grouping_file_name=grouping_file_name, instrument=startup_objects)
 
 
-def crop_in_tof(ws_to_rebin, x_min=None, x_max=None):
-    if isinstance(ws_to_rebin, list):
+def crop_banks_in_tof(bank_list, crop_values_list):
+    if len(bank_list) != len(crop_values_list):
+        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
+    output_list = []
+    for spectra, cropping_values in zip(bank_list, crop_values_list):
+        output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=cropping_values[0], x_max=cropping_values[-1]))
+
+    return output_list
+
+
+def crop_in_tof(ws_to_crop, x_min=None, x_max=None):
+    if isinstance(ws_to_crop, list):
         cropped_ws = []
-        for ws in ws_to_rebin:
+        for ws in ws_to_crop:
             cropped_ws.append(_crop_single_ws_in_tof(ws, x_max=x_max, x_min=x_min))
     else:
-        cropped_ws = _crop_single_ws_in_tof(ws_to_rebin, x_max=x_max, x_min=x_min)
+        cropped_ws = _crop_single_ws_in_tof(ws_to_crop, x_max=x_max, x_min=x_min)
 
     return cropped_ws
 
@@ -53,7 +63,7 @@ def extract_ws_spectra(ws_to_split):
 
 def extract_and_crop_spectra(focused_ws, instrument):
     ws_spectra = extract_ws_spectra(ws_to_split=focused_ws)
-    ws_spectra = instrument.crop_short_long_mode(ws_to_crop=ws_spectra)
+    ws_spectra = instrument.crop_banks_to_user_tof(ws_spectra)
     return ws_spectra
 
 
@@ -182,7 +192,7 @@ def _load_list_of_files(run_numbers_list, instrument):
     _check_load_range(list_of_runs_to_load=run_numbers_list)
 
     for run_number in run_numbers_list:
-        file_name = instrument.generate_inst_file_name(run_number=run_number)
+        file_name = instrument.generate_input_file_name(run_number=run_number)
         read_ws = mantid.Load(Filename=file_name)
         ws_name = generate_unique_workspace_name(original_name=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=ws_name))

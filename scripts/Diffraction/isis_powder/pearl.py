@@ -10,37 +10,29 @@ from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_
 
 class Pearl(AbstractInst):
     def __init__(self, **kwargs):
-        expected_attr = ["user_name", "config_file_name", "calibration_dir", "output_dir", "attenuation_file_name",
-                         "cal_map_path", "van_absorb_file"]
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
         self._inst_settings = InstrumentSettings.InstrumentSettings(
-           attr_mapping=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.variables,
+           attr_mapping=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.get_all_adv_variables(),
            basic_conf_dict=basic_config_dict, kwargs=kwargs)
-
-        self._inst_settings.check_expected_attributes_are_set(expected_attr_names=expected_attr)
 
         super(Pearl, self).__init__(user_name=self._inst_settings.user_name,
                                     calibration_dir=self._inst_settings.calibration_dir,
                                     output_dir=self._inst_settings.output_dir)
 
-        self._ads_workaround = 0
         self._cached_run_details = None
         self._cached_run_details_number = None
 
     def focus(self, run_number, **kwargs):
-        self._inst_settings.update_attributes_from_kwargs(kwargs=kwargs)
-        expected_attr = ["absorb_corrections", "long_mode", "tt_mode", "perform_atten", "van_norm"]
-        self._inst_settings.check_expected_attributes_are_set(expected_attr_names=expected_attr)
-
+        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number=run_number, input_batching=InputBatchingEnum.Summed,
                            do_van_normalisation=self._inst_settings.van_norm)
 
     def create_calibration_vanadium(self, run_in_range, **kwargs):
-        kwargs["tt_mode"] = "tt88"
+        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         kwargs["perform_attenuation"] = False
-        self._inst_settings.update_attributes_from_kwargs(kwargs=kwargs)
-        expected_attr = ["long_mode", "van_norm", "absorb_corrections"]
-        self._inst_settings.check_expected_attributes_are_set(expected_attr_names=expected_attr)
+        kwargs["tt_mode"] = "tt88"
+        self._inst_settings.update_attributes(kwargs=kwargs)
 
         run_details = self.get_run_details(run_number_string=int(run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
@@ -69,27 +61,32 @@ class Pearl(AbstractInst):
         return run_details
 
     @staticmethod
-    def generate_inst_file_name(run_number):
+    def generate_input_file_name(run_number):
         return _generate_file_name(run_number=run_number)
 
-    # Hook overrides
+    def generate_output_file_name(self, run_number):
+        output_name = "PEARL" + str(run_number)
+        # Append each mode of operation
+        output_name += "_" + self._inst_settings.tt_mode
+        output_name += "_long" if self._inst_settings.absorb_corrections else ""
+        return output_name
 
     def attenuate_workspace(self, input_workspace):
         attenuation_path = self._attenuation_full_path
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
     def normalise_ws(self, ws_to_correct, run_details=None):
-        if not run_details:
-            raise RuntimeError("Run details was not passed into PEARL: normalise_ws")
         monitor_ws = common.get_monitor_ws(ws_to_process=ws_to_correct, run_number_string=run_details.run_number,
                                            instrument=self)
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
-                                                        spline_coeff=20)
+                                                        spline_coeff=self._inst_settings.monitor_spline,
+                                                        integration_range=self._inst_settings.monitor_integration_range,
+                                                        lambda_values=self._inst_settings.monitor_lambda)
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
     def get_monitor_spectra_index(self, run_number):
-        return 1
+        return self._inst_settings.monitor_spec_no
 
     def spline_vanadium_ws(self, focused_vanadium_spectra):
         return common.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
@@ -109,12 +106,20 @@ class Pearl(AbstractInst):
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
 
+    def crop_banks_to_user_tof(self, focused_banks):
+        return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)
+
     def crop_short_long_mode(self, ws_to_crop):
-        out_ws = common.crop_in_tof(ws_to_rebin=ws_to_crop, x_max=19900)
+        out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_vals[0],
+                                    x_max=self._inst_settings.raw_data_crop_vals[-1])
         return out_ws
 
     def generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
         return pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_match)
+
+    def _switch_long_mode_inst_settings(self, long_mode_on):
+        self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on),
+                                              suppress_warnings=True)
 
 
 def _generate_file_name(run_number):

@@ -5,6 +5,7 @@ import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import InputBatchingEnum
 import os
+import warnings
 
 
 def focus(run_number, instrument, input_batching, perform_vanadium_norm=True):
@@ -20,9 +21,14 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
 
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium_file_path):
-        raise ValueError("Processed vanadium runs not found at this path: "
-                         + str(run_details.splined_vanadium_file_path) +
-                         " \nHave you created a vanadium calibration with these settings yet?\n")
+        if instrument.can_auto_gen_vanadium_cal():
+            warnings.warn("\nAttempting to automatically generate vanadium calibration at this path: "
+                          + str(run_details.splined_vanadium_file_path) + " for these settings.\n")
+            instrument.generate_auto_vanadium_calibration(run_details=run_details)
+        else:
+            ValueError("Processed vanadium runs not found at this path: "
+                       + str(run_details.splined_vanadium_file_path) +
+                       " \nHave you created a vanadium calibration with these settings yet?\n")
 
     # Compensate for empty sample if specified
     input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,

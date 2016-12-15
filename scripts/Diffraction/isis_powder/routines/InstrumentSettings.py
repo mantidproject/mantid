@@ -16,6 +16,10 @@ class InstrumentSettings(object):
     # Holds instance variables updated at runtime
     def __init__(self, attr_mapping, adv_conf_dict=None, basic_conf_dict=None, kwargs=None):
         self._attr_mapping = attr_mapping
+        self._adv_config_dict = adv_conf_dict
+        self._basic_conf_dict = basic_conf_dict
+        self._kwargs = kwargs
+
         self._unknown_keys_found = False
         self._parse_attributes(dict_to_parse=adv_conf_dict)
         self._parse_attributes(dict_to_parse=basic_conf_dict)
@@ -24,10 +28,14 @@ class InstrumentSettings(object):
             _print_known_keys(attr_mapping)
 
     def __getattr__(self, item):
-        raise AttributeError("The attribute with script name: '" + str(item) + "' was requested but was not set."
-                             " This means the list of expected parameters is incorrect/incomplete, the check was "
-                             "skipped or a script attribute name has changed."
-                             "\nPlease contact the development team.\n")
+        map_entry = next((attr_tuple for attr_tuple in self._attr_mapping if item == attr_tuple[-1]), None)
+        if map_entry:
+            # User forgot to enter the param:
+            raise AttributeError("The parameter with name: '" + str(map_entry[0]) + "' is required but was not set or "
+                                 "passed.\nPlease set this configuration option and try again")
+        else:
+            raise AttributeError("The attribute in the script with name " + str(item) + " is unknown to the mapping."
+                                 "\nPlease contact the development team.")
 
     def check_expected_attributes_are_set(self, expected_attr_names):
         for expected_attr in expected_attr_names:
@@ -39,21 +47,25 @@ class InstrumentSettings(object):
         expected_params_dict = dict(found_tuple_list)
         self._check_attribute_is_set(expected_params_dict)
 
-    def update_attributes_from_kwargs(self, kwargs):
+    def update_attributes(self, advanced_config=None, basic_config=None, kwargs=None, suppress_warnings=False):
+        self._adv_config_dict = advanced_config if advanced_config else self._adv_config_dict
+        self._basic_conf_dict = basic_config if basic_config else self._basic_conf_dict
+        self._kwargs = kwargs if kwargs else self._kwargs
+
         has_known_keys_already_been_printed = self._unknown_keys_found
-        self._parse_attributes(dict_to_parse=kwargs)
+        # Only update if one in hierarchy below it has been updated
+        if advanced_config:
+            self._parse_attributes(self._adv_config_dict, suppress_warnings=suppress_warnings)
+        if advanced_config or basic_config:
+            self._parse_attributes(self._basic_conf_dict,
+                                   suppress_warnings=(not bool(basic_config or suppress_warnings)))
+        if advanced_config or basic_config or kwargs:
+            self._parse_attributes(self._kwargs, suppress_warnings=(not bool(kwargs or suppress_warnings)))
+
         if not has_known_keys_already_been_printed and self._unknown_keys_found:
             _print_known_keys(self._attr_mapping)
 
-    def _check_attribute_is_set(self, expected_attributes_dict):
-        for config_name in expected_attributes_dict:
-            try:
-                getattr(self, expected_attributes_dict[config_name])
-            except AttributeError:
-                raise ValueError("Required parameter '" + str(config_name) +
-                                 "' was not set in any of the config files or passed as a parameter.\n")
-
-    def _parse_attributes(self, dict_to_parse):
+    def _parse_attributes(self, dict_to_parse, suppress_warnings=False):
         if not dict_to_parse:
             return
 
@@ -67,14 +79,19 @@ class InstrumentSettings(object):
             found_attribute = next((attr_tuple for attr_tuple in self._attr_mapping
                                     if config_key == attr_tuple[0]), None)
             if found_attribute:
-                # The first element of the attribute is the config name and the last element is the name scripts use
-                self._update_attribute(attr_name=found_attribute[-1], attr_val=dict_to_parse[found_attribute[0]])
-            else:
+                # The first element of the attribute is the config name and the last element is the friendly name
+                self._update_attribute(attr_name=found_attribute[-1], attr_val=dict_to_parse[found_attribute[0]],
+                                       friendly_name=found_attribute[0], suppress_warnings=suppress_warnings)
+            elif not suppress_warnings:
                 warnings.warn("Ignoring unknown configuration key: " + str(config_key))
                 self._unknown_keys_found = True
                 continue
 
-    def _update_attribute(self, attr_name, attr_val):
+    def _update_attribute(self, attr_name, attr_val, friendly_name, suppress_warnings):
+        # Does the attribute exist - has it changed and are we suppressing warnings
+        if hasattr(self, attr_name) and getattr(self, attr_name) != attr_val and not suppress_warnings:
+            warnings.warn("Replacing parameter: '" + str(friendly_name) + "' which was previously set to: '" +
+                          str(getattr(self, attr_name)) + "' with new value: '" + str(attr_val) + "'")
         setattr(self, attr_name, attr_val)
 
 
@@ -83,5 +100,5 @@ def _print_known_keys(master_mapping):
     print("----------------------------------")
     sorted_attributes = sorted(master_mapping, key=lambda tup: tup[0])
     for tuple_entry in sorted_attributes:
-        print (tuple_entry[0] + '\t', end="")
+        print (tuple_entry[0] + ', ', end="")
     print("\n----------------------------------")

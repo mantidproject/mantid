@@ -1,13 +1,28 @@
 file_names = {
-    "bragg_peaks_masking": "VanaPeaks.dat"
+    "masking_file_name": "VanaPeaks.dat"
 }
 
 script_params = {
-    "apply_solid_angle_corrections": False,
-    "b_spline_coefficient": 100
+    "apply_solid_angle": False,
+    "spline_coefficient": 100
+}
+
+tof_cropping_ranges = [
+    (1500, 19900),  # Bank 1
+    (1500, 19900),  # Bank 2
+    (1500, 19900),  # Bank 3
+    (1500, 19900),  # Bank 4
+    (1500, 19900),  # Bank 5
+    ]
+
+variables = {
+    "file_names_dict": file_names,
+    "script_params": script_params,
+    "tof_cropping_ranges": tof_cropping_ranges
 }
 
 absorption_correction_params = {
+    # These are read directly by the generate absorb corrections functions instead of being parsed
     "cylinder_sample_height": 4.0,
     "cylinder_sample_radius": 0.4,
 
@@ -19,10 +34,4 @@ absorption_correction_params = {
     "number_of_annuli": 10,
     "number_of_wavelength_points": 100,
     "exponential_method": "Normal"
-}
-
-variables = {
-    "absorb_param_dict": absorption_correction_params,
-    "file_names_dict": file_names,
-    "script_params": script_params
 }

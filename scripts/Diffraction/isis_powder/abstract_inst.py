@@ -36,14 +36,6 @@ class AbstractInst(object):
         return self._output_dir
 
     @property
-    def default_input_ext(self):
-        return self._default_input_ext
-
-    @default_input_ext.setter
-    def default_input_ext(self, new_ext):
-        self._default_input_ext = _prefix_dot_to_ext(new_ext)
-
-    @property
     def user_name(self):
         return self._user_name
 
@@ -71,15 +63,15 @@ class AbstractInst(object):
         return focus.focus(run_number=run_number, input_batching=input_batching,
                            perform_vanadium_norm=do_van_normalisation, instrument=self)
 
-    def _generate_out_file_paths(self, run_details, output_directory=None):
+    def generate_out_file_paths(self, run_details, output_directory=None):
         if not output_directory:
             output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
-        file_name = self.generate_inst_file_name(run_number=run_details.run_number)
-        nxs_file = os.path.join(output_directory, (str(file_name) + ".nxs"))
-        gss_file = os.path.join(output_directory, (str(file_name) + ".gss"))
-        tof_xye_file = os.path.join(output_directory, (str(file_name) + "_tof_xye.dat"))
-        d_xye_file = os.path.join(output_directory, (str(file_name) + "_d_xye.dat"))
-        out_name = str(file_name)
+        file_name = str(self.generate_output_file_name(run_number=run_details.run_number))
+        nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
+        gss_file = os.path.join(output_directory, (file_name + ".gsas"))
+        tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))
+        d_xye_file = os.path.join(output_directory, (file_name + "_d_xye.dat"))
+        out_name = file_name
 
         out_file_names = {"nxs_filename": nxs_file,
                           "gss_filename": gss_file,
@@ -91,11 +83,14 @@ class AbstractInst(object):
         return out_file_names
 
     def _generate_input_full_path(self, run_number, input_dir):
-        # Uses runtime polymorphism to generate the full run name
-        file_name = self.generate_inst_file_name(run_number)
-        return os.path.join(input_dir, (file_name + self._default_input_ext))
+        file_name = self.generate_input_file_name(run_number)
+        return os.path.join(input_dir, file_name)
 
     # Instrument specific properties
+
+    @staticmethod
+    def can_auto_gen_vanadium_cal():
+        return False
 
     @abstractmethod
     def get_run_details(self, run_number_string):
@@ -103,10 +98,14 @@ class AbstractInst(object):
 
     @staticmethod
     @abstractmethod
-    def generate_inst_file_name(run_number):
+    def generate_input_file_name(run_number):
         pass
 
     # --- Instrument optional hooks ----#
+
+    @abstractmethod
+    def generate_output_file_name(self, run_number):
+        raise NotImplementedError("Output names not implemented")
 
     def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
         return ws_to_correct
@@ -135,13 +134,8 @@ class AbstractInst(object):
     def spline_vanadium_ws(self, focused_vanadium_ws):
         return None
 
+    def crop_banks_to_user_tof(self, focused_banks):
+        return focused_banks
 
-# ----- Private Implementation ----- #
-# These should only be called by the abstract instrument class
-
-
-def _prefix_dot_to_ext(ext):
-    if not ext.startswith('.'):
-        return '.' + ext
-    else:
-        return ext
+    def generate_auto_vanadium_calibration(self, run_details):
+        raise NotImplementedError("Automatic vanadium corrections have not been implemented for this instrument.")

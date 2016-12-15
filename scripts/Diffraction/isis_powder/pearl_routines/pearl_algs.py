@@ -47,7 +47,7 @@ def get_run_details(run_number_string, inst_settings):
 
     splined_vanadium_name = _generate_splined_van_name(absorb_on=inst_settings.absorb_corrections,
                                                        long_mode=inst_settings.long_mode,
-                                                       vanadium_run_string=run_number_string)
+                                                       vanadium_run_string=vanadium_run_numbers)
 
     calibration_dir = inst_settings.calibration_dir
     cycle_calibration_dir = os.path.join(calibration_dir, label)
@@ -70,12 +70,10 @@ def get_run_details(run_number_string, inst_settings):
     return run_details
 
 
-def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff):
-    lambda_lower = 0.03  # TODO move these into config
-    lambda_upper = 6.00
+def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range):
     processed_monitor_ws = mantid.ConvertUnits(InputWorkspace=monitor_ws, Target="Wavelength")
     processed_monitor_ws = mantid.CropWorkspace(InputWorkspace=processed_monitor_ws,
-                                                XMin=lambda_lower, XMax=lambda_upper)
+                                                XMin=lambda_values[0], XMax=lambda_values[-1])
     ex_regions = numpy.zeros((2, 4))
     ex_regions[:, 0] = [3.45, 3.7]
     ex_regions[:, 1] = [2.96, 3.2]
@@ -91,8 +89,10 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff):
 
     normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength", OutputWorkspace=ws_to_correct)
     normalised_ws = mantid.NormaliseToMonitor(InputWorkspace=normalised_ws, MonitorWorkspace=splined_monitor_ws,
-                                              IntegrationRangeMin=0.6, IntegrationRangeMax=5.0,
+                                              IntegrationRangeMin=integration_range[0],
+                                              IntegrationRangeMax=integration_range[-1],
                                               OutputWorkspace=normalised_ws)
+
     normalised_ws = mantid.ConvertUnits(InputWorkspace=normalised_ws, Target="TOF", OutputWorkspace=normalised_ws)
 
     common.remove_intermediate_workspace(processed_monitor_ws)
