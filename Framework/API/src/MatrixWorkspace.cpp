@@ -1913,6 +1913,19 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
 }
 
+/// Returns the number of detector groups. This is equal to the number of
+/// spectra.
+size_t MatrixWorkspace::numberOfDetectorGroups() const {
+  return getNumberHistograms();
+}
+
+/// Returns a set of detector IDs for a group. This is equal to the detector IDs
+/// of the spectrum at given index.
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
+}
+
 } // namespace API
 } // Namespace Mantid
 
