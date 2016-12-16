@@ -62,7 +62,6 @@ public:
 /// Constructor
 CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
     : FunctionGenerator(IFunction_sptr(new Peaks)) {
-  declareAttribute("PhysicalProperties", Attribute(std::vector<double>(1, 0.0)));
   declareAttribute("Temperatures", Attribute(std::vector<double>(1, 1.0)));
   declareAttribute("Background", Attribute("FlatBackground", true));
   declareAttribute("PeakShape", Attribute("Lorentzian"));
@@ -72,6 +71,7 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("FWHMVariation", Attribute(0.1));
   declareAttribute("NPeaks", Attribute(0));
   declareAttribute("FixAllPeaks", Attribute(false));
+  declareAttribute("PhysicalProperties", Attribute(std::vector<double>(1, 0.0)));
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {

@@ -146,16 +146,16 @@ public:
         "Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 59.5010, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.002 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.002 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 2.0 * c_mbsr, 0.002 * c_mbsr);
     out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 98.1627, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.003 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3 * c_mbsr, 0.003 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 3.3 * c_mbsr, 0.003 * c_mbsr);
     AnalysisDataService::Instance().clear();
   }
 
@@ -165,7 +165,6 @@ public:
                   "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
                   "PhysicalProperties=(0,1,2,3,4)," // INS, Cp, chi, M(H), M(T)
                   "Hdir3=(1,1,1), Hmag4=1,"
-                  "IntensityScaling0=2.0,"
                   "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3";
     auto ws = createWorkspace();
     auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
@@ -184,9 +183,9 @@ public:
         "Workspace_0");
     TS_ASSERT(out0);
     TS_ASSERT_EQUALS(out0->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out0->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out0->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out0->readY(1)[2], 0.373 * 2.0 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out0->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out0->readY(1)[1], 0.738 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out0->readY(1)[2], 0.373 * c_mbsr, 0.001 * c_mbsr);
     // Test the heat capacity calculation
     auto out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
