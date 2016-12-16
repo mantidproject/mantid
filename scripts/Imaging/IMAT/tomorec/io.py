@@ -127,7 +127,6 @@ def write_image(img_data,
     filename = filename + '.' + img_format
 
     if scale_factor is None:
-
         min_pix = np.amin(img_data)
         max_pix = np.amax(img_data)
 
@@ -140,9 +139,11 @@ def write_image(img_data,
 
             scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / pix_range
 
-        img_data = np.clip(scale_factor * img_data, 0,
-                           np.finfo(img_data.dtype).max) if scale_factor > 1 else img_data
-        img_data = img_data.astype(dtype=dtype)
+    # apply scale_factor
+    img_data = np.clip(scale_factor * img_data, 0,
+                       np.finfo(img_data.dtype).max) if scale_factor > 1 else img_data
+
+    img_data = img_data.astype(dtype=dtype)
 
     # this rescale intensity would ignore the range of other images in the stack
     # in addition, it clips if the original values are below/above the
@@ -355,7 +356,7 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension,
     if len(files_match) <= 0:
         print(
             "Could not find any flat field / open beam image files in: {0}".
-                format(field_prefix))
+            format(field_prefix))
     else:
         imgs_stack = _read_listed_files(files_match, img_shape,
                                         file_extension, data_dtype)

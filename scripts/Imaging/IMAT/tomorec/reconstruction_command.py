@@ -233,7 +233,7 @@ class ReconstructionCommand(object):
         # ----------------------------------------------------------------
 
         self.tomo_print_timed_start(" * Loading data...")
-        data, white, dark = self.read_in_stack(
+        data, flat, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
         self.tomo_print_timed_stop(
@@ -242,7 +242,7 @@ class ReconstructionCommand(object):
 
         # ----------------------------------------------------------------
 
-        preproc_data = self.apply_all_preproc(data, cfg, white, dark)
+        preproc_data = self.apply_all_preproc(data, cfg, flat, dark)
 
         # ----------------------------------------------------------------
 
@@ -377,7 +377,7 @@ class ReconstructionCommand(object):
                                                                     tstart))
             oreadme.write('Time now (run end): ' + time.ctime(tend))
 
-    def apply_all_preproc(self, data, cfg, white, dark):
+    def apply_all_preproc(self, data, cfg, flat, dark):
         """
         Do all the pre-processing. This does all that is needed between a)
         loading the input data, and b) starting a reconstruction
@@ -386,7 +386,7 @@ class ReconstructionCommand(object):
 
         :param data :: raw data (sample projection images)
         :param cfg :: the whole filter configuration
-        :param white :: white / flat / open-beam image for normalization in some of the first
+        :param flat :: flat / flat / open-beam image for normalization in some of the first
         pre-processing steps
         :param dark :: dark image for normalization
 
@@ -398,7 +398,7 @@ class ReconstructionCommand(object):
         self.tomo_print(" * Beginning pre-processing with pixel data type: " +
                         str(data.dtype))
         preproc_data = self.apply_prep_filters(
-            data, cfg.preproc_cfg, white, dark)
+            data, cfg.preproc_cfg, flat, dark)
         # preproc_data = self.apply_line_projection(
         #     preproc_data, cfg.preproc_cfg)
 
@@ -447,8 +447,8 @@ class ReconstructionCommand(object):
         data = self.normalize_flat_dark(data, preproc_cfg, flat, dark)
         # data = self.normalize_air_region(data, preproc_cfg)
 
-        # if not preproc_cfg.crop_before_normalize:
-        #     data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
+        if not preproc_cfg.crop_before_normalize:
+            data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
 
         # data = self.apply_cut_off_and_others(data, preproc_cfg)
 
@@ -570,12 +570,12 @@ class ReconstructionCommand(object):
 
         return preproc_data
 
-    def crop_coords(self, sample, cfg, flat=None, dark=None):
+    def crop_coords(self, sample, preproc_cfg, flat=None, dark=None):
         """
         Crop stack of images to a region (region of interest or similar), image by image
 
         :param sample :: stack of images as a 3d numpy array
-        :param cfg :: pre-processing configuration
+        :param preproc_cfg :: pre-processing configuration
         :param flat :: the average flat image
         :param dark :: the average dark image
 
@@ -584,35 +584,37 @@ class ReconstructionCommand(object):
         self._check_data_stack(sample)
 
         # list with [left, top, right, bottom]
-        if cfg.crop_coords:
+        if preproc_cfg.crop_coords:
             try:
                 self.tomo_print_timed_start(
                     " * Starting image cropping step, with pixel data type: {0}, coordinates: {1}. ...".
-                    format(sample.dtype, cfg.crop_coords))
+                    format(sample.dtype, preproc_cfg.crop_coords))
 
                 import prep as iprep
-                sample = iprep.filters.crop_vol(sample, cfg.crop_coords)
+                sample = iprep.filters.crop_vol(sample, preproc_cfg.crop_coords)
 
-                left = cfg.crop_coords[0]
-                top = cfg.crop_coords[1]
-                right = cfg.crop_coords[2]
-                bottom = cfg.crop_coords[3]
+                left = preproc_cfg.crop_coords[0]
+                top = preproc_cfg.crop_coords[1]
+                right = preproc_cfg.crop_coords[2]
+                bottom = preproc_cfg.crop_coords[3]
 
                 if isinstance(flat, np.ndarray):
                     flat = flat[top:bottom, left:right]
+                    self.save_single_image(flat, preproc_cfg, scale_factor=1,
+                                           image_name='flat_with_subtracted_bg')
 
                 if isinstance(dark, np.ndarray):
                     dark = dark[top:bottom, left:right]
 
                 self.tomo_print_timed_stop(
                     " * Finished image cropping step, with pixel data type: {0}, coordinates: {1}. "
-                    "Resulting shape: {2}.".format(sample.dtype, cfg.crop_coords,
+                    "Resulting shape: {2}.".format(sample.dtype, preproc_cfg.crop_coords,
                                                    sample.shape))
 
             except ValueError as exc:
                 print(
                     "Error in crop (region of interest) parameter (expecting a list with four integers. "
-                    "Got: {0}. Error details: ".format(cfg.crop_coords), exc)
+                    "Got: {0}. Error details: ".format(preproc_cfg.crop_coords), exc)
         else:
             self.tomo_print(
                 " * Note: NOT applying cropping to region of interest.",
@@ -670,15 +672,17 @@ class ReconstructionCommand(object):
             # prevent divide-by-zero issues by setting to a very small number
             norm_divide[norm_divide == 0] = 1e-6
 
-            self.save_single_image(norm_divide, preproc_cfg, scale_factor=1)
+            self.save_single_image(norm_divide, preproc_cfg, scale_factor=1, image_name='flat_with_subtracted_bg')
 
             # normalise the sample images by subtracting the dark images background
             # and then dividing by the background normalised flat images
             # true_divide produces float64, we assume that precision,
             # hence why we're not casting the input images to floats
+
+            max_val = np.finfo(sample.dtype).max
             for idx in range(0, sample.shape[0]):
-                sample[idx, :, :] = np.true_divide(
-                    sample[idx, :, :] - norm_dark_img, norm_divide)
+                sample[idx, :, :] = np.clip(np.true_divide(
+                    sample[idx, :, :] - norm_dark_img, norm_divide), 0, max_val)
 
             self.tomo_print_timed_stop(
                 " * Finished normalization by flat/dark images with pixel data type: {0}.".
@@ -1296,9 +1300,6 @@ class ReconstructionCommand(object):
         :param out_dtype :: dtype used for the pixel type/depth in the output image files
         """
 
-        # DEBUG message
-        # print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
-
         if constant_factor:
             min_pix = np.amin(preproc_data[0, :, :])
             max_pix = np.amax(preproc_data[0, :, :])
@@ -1324,6 +1325,7 @@ class ReconstructionCommand(object):
             tomoio.make_dirs_if_needed(preproc_dir)
             for idx in range(0, preproc_data.shape[0]):
                 # rescale_intensity has issues with float64=>int16
+
                 tomoio.write_image(
                     preproc_data[idx, :, :],
                     os.path.join(preproc_dir,
@@ -1331,6 +1333,7 @@ class ReconstructionCommand(object):
                     img_format=preproc_cfg.out_img_format,
                     dtype=out_dtype,
                     scale_factor=scale_factor)
+
             self.tomo_print_timed_stop(
                 " * Saving pre-processed images finished.")
         else:
@@ -1351,8 +1354,9 @@ class ReconstructionCommand(object):
         :param data :: data volume with pre-processed images
         :param preproc_cfg :: pre-processing configuration set up for a reconstruction
         :param out_dtype :: dtype used for the pixel type/depth in the output image files
-        :param image_name:
-        :param image_index:
+        :param image_name: image name to be appended
+        :param image_index: image index to be appended
+        :param scale_factor :: Default None, if left None, the scale factor will be calculated for the image
         """
 
         # DEBUG message
@@ -1397,11 +1401,12 @@ class ReconstructionCommand(object):
         # import tool
         import tomorec.tool_imports as tti
         tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
+
         self.tomo_print_timed_stop(" * Tool loaded.")
 
         self.tomo_print_timed_start(" * Loading data...")
         # load in data
-        sample, white, dark = self.read_in_stack(
+        sample, flat, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
         self.tomo_print_timed_stop(
@@ -1409,11 +1414,11 @@ class ReconstructionCommand(object):
                 sample.shape, sample.dtype))
 
         # rotate
-        sample, white, dark = self.rotate_stack(sample, cfg.preproc_cfg)
+        sample, flat, dark = self.rotate_stack(sample, cfg.preproc_cfg)
 
         # crop the ROI, this is done first, so beware of what the correct ROI
         # coordinates are
-        sample = self.crop_coords(sample, cfg.preproc_cfg)
+        sample, flat, dark = self.crop_coords(sample, cfg.preproc_cfg)
 
         # sanity check
         self.tomo_print(" * Sanity check on data", 0)
