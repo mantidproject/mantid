@@ -30,7 +30,6 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
 
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=corrected_van_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
-
     focused_spectra = common.extract_ws_spectra(focused_vanadium)
     # Crop back to sane TOF as for PEARL at least 20,000-40,000 microseconds is extrapolated
     # to 0-60,000 microseconds

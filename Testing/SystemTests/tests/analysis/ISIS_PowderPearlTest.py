@@ -70,11 +70,10 @@ def _get_output_dir():
 
 def _run_vanadium_calibration():
     vanadium_runs = "95634_95647"
-    empty_runs = "95648_95654"
 
     pearl_obj = _setup_pearl_instrument(tt_mode=None)
-    results = pearl_obj.create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
-                                                    absorption_corrections=True, long_mode=False)
+    results = pearl_obj.create_calibration_vanadium(run_in_range=vanadium_runs, do_absorb_corrections=True,
+                                                    long_mode=False)
     return results
 
 
@@ -89,6 +88,6 @@ def _setup_pearl_instrument(tt_mode):
 
     pearl_obj = Pearl(user_name=user_name, tt_mode=tt_mode, attenuation_file_name=attenuation_file_path,
                       calibration_directory=_get_calibration_dir(), output_directory=_get_output_dir(),
-                      calibration_mapping_file=calibration_map_file_path)
+                      calibration_config_path=calibration_map_file_path)
     return pearl_obj
 

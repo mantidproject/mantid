@@ -34,7 +34,7 @@ class Pearl(AbstractInst):
         kwargs["tt_mode"] = "tt88"
         self._inst_settings.update_attributes(kwargs=kwargs)
 
-        run_details = self.get_run_details(run_number_string=int(run_in_range))
+        run_details = self.get_run_details(run_number_string=run_in_range)
         run_details.run_number = run_details.vanadium_run_numbers
 
         return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,

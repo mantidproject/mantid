@@ -60,18 +60,17 @@ def _gen_required_files():
 
 
 def _run_vanadium_calibration():
-    vanadium_run = 78338
-    gen_absorb = True
+    vanadium_run = 95598
 
     polaris_obj = setup_polaris_instrument()
     # Try it without an output name
 
-    return polaris_obj.create_calibration_vanadium(run_in_range=vanadium_run,
-                                                   gen_absorb_correction=gen_absorb)
+    return polaris_obj.create_calibration_vanadium(run_in_range=vanadium_run, do_absorb_corrections=True,
+                                                   generate_absorb_corrections=True)
 
 
 def _run_focus():
-    run_number = 79514
+    run_number = 95599
     polaris_obj = setup_polaris_instrument()
     return polaris_obj.focus(run_number=run_number, input_mode="Individual")
 
@@ -79,7 +78,6 @@ def _run_focus():
 def _calibration_validation(cls, results):
     _validation_setup(cls)
     results_name = results[0].getName()
-    # TODO this name is completely wrong
     reference_file_name = "ISIS_Powder-POLARIS78338_Van_Cal.nxs"
     return results_name, reference_file_name
 

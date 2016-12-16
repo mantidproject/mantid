@@ -103,21 +103,21 @@ def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
 
 
 def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
-
     index = 0
     output_workspaces = []
-    for ws in workspaces_to_mask:
-        output_workspaces.append(ws)
 
     for bank_mask_list in mask_list:
         if not bank_mask_list:
             continue
 
         output_name = "masked_vanadium-" + str(index + 1)
+        out_workspace = None
         for mask_params in bank_mask_list:
-            out_workspace = mantid.MaskBins(InputWorkspace=output_workspaces[index], OutputWorkspace=output_name,
+            out_workspace = mantid.MaskBins(InputWorkspace=workspaces_to_mask[index], OutputWorkspace=output_name,
                                             XMin=mask_params[0], XMax=mask_params[1])
-            output_workspaces[index] = out_workspace
+        if out_workspace:
+            output_workspaces.append(out_workspace)
+
         index += 1
 
     return output_workspaces
