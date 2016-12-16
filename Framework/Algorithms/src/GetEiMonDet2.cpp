@@ -221,8 +221,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
                         << " should be detector, but is marked as monitor.\n";
       }
       if (!spectrumInfo.isMasked(index)) {
-        const double d =
-            spectrumInfo.position(index).distance(sample->getPos());
+        const double d = spectrumInfo.detector(index).getDistance(*sample);
         distanceSum += d;
         const double epp = (*peakPositionColumn)[index];
         eppSum += epp;

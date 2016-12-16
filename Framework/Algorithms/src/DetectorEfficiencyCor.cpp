@@ -195,8 +195,8 @@ void DetectorEfficiencyCor::retrieveProperties() {
  *  @throw NotFoundError if the detector or its gas pressure or wall thickness
  * were not found
  */
-void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn,
-                                                 SpectrumInfo spectrumInfo) {
+void DetectorEfficiencyCor::correctForEfficiency(
+    int64_t spectraIn, const SpectrumInfo &spectrumInfo) {
   if (!spectrumInfo.hasDetectors(spectraIn))
     throw Exception::NotFoundError("No detectors found", spectraIn);
 

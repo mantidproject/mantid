@@ -103,7 +103,8 @@ private:
   /// Retrieve algorithm properties
   void retrieveProperties();
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(int64_t spectraIn, API::SpectrumInfo);
+  void correctForEfficiency(int64_t spectraIn,
+                            const API::SpectrumInfo &spectrumInfo);
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
