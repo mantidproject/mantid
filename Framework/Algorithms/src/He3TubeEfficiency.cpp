@@ -431,7 +431,6 @@ void He3TubeEfficiency::execEvent() {
   std::size_t numHistograms = outputWS->getNumberHistograms();
   auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
-  const auto &spectrumInfo = outputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
