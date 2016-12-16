@@ -676,8 +676,7 @@ class ReconstructionCommand(object):
             # true_divide produces float64, we assume that precision,
             # hence why we're not casting the input images to floats
             for idx in range(0, sample.shape[0]):
-                sample[idx, :, :] = np.true_divide(
-                    sample[idx, :, :] - norm_dark_img, norm_divide)
+                sample[idx, :, :] = np.true_divide(sample[idx, :, :] - norm_dark_img, norm_divide)
 
             self.tomo_print_timed_stop(
                 " * Finished normalization by flat/dark images with pixel data type: {0}.".
@@ -905,10 +904,9 @@ class ReconstructionCommand(object):
 
         self._debug_print_memory_usage_linux("before rotation.")
 
-        for idx in range(0, data.shape[0]):
-            # rot90 rotates counterclockwise; cfg.rotation rotates clockwise
-            counterclock_rotations = 4 - rotation
-            data[:] = np.rot90(data[:], counterclock_rotations)
+        # rot90 rotates counterclockwise; cfg.rotation rotates clockwise
+        counterclock_rotations = 4 - rotation
+        data[:, :] = np.rot90(data[:, :], counterclock_rotations)
 
         self._debug_print_memory_usage_linux("after rotation.")
 
