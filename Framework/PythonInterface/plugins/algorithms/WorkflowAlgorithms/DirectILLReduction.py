@@ -47,7 +47,7 @@ _PROP_CLEANUP_MODE = 'Cleanup'
 _PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 _PROP_DET_DIAGNOSTICS = 'Diagnostics'
 _PROP_DETS_AT_L2 = 'DetectorsAtL2'
-_PROP_EC_WS = 'EmptyCanWorkspace'
+_PROP_EC_WS = 'EmptyContainerWorkspace'
 _PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER = 'ElasticPeakWidthInSigmas'
 _PROP_EPP_WS = 'EPPWorkspace'
 _PROP_FLAT_BKG_SCALING = 'FlatBkgScaling'
@@ -78,8 +78,7 @@ _PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
 _PROP_USER_MASK = 'MaskedDetectors'
 _PROP_VANA_WS = 'VanadiumWorkspace'
 
-_REDUCTION_TYPE_CD = 'Empty Container/Cadmium'
-_REDUCTION_TYPE_EC = _REDUCTION_TYPE_CD
+_REDUCTION_TYPE_EC_CD = 'Empty Container/Cadmium'
 _REDUCTION_TYPE_SAMPLE = 'Sample'
 _REDUCTION_TYPE_VANA = 'Vanadium'
 
@@ -1048,8 +1047,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             del(normalizedWS)
 
         # Reduction for empty container and cadmium ends here.
-        if reductionType == _REDUCTION_TYPE_CD or reductionType == \
-                _REDUCTION_TYPE_EC:
+        if reductionType == _REDUCTION_TYPE_EC_CD:
             self._finalize(mainWS, wsCleanup, report)
             return
 
@@ -1182,8 +1180,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([
                                  _REDUCTION_TYPE_SAMPLE,
                                  _REDUCTION_TYPE_VANA,
-                                 _REDUCTION_TYPE_CD,
-                                 _REDUCTION_TYPE_EC]),
+                                 _REDUCTION_TYPE_EC_CD]),
                              direction=Direction.Input,
                              doc='Type of the reduction workflow and output.')
         self.declareProperty(name=_PROP_CLEANUP_MODE,
