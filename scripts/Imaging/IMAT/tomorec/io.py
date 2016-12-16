@@ -126,20 +126,19 @@ def write_image(img_data,
         img_format = 'png'
     filename = filename + '.' + img_format
 
-    min_pix = np.amin(img_data)
-    max_pix = np.amax(img_data)
+    if scale_factor is None:
 
-    # replace float infinities to one, which will just be scaled up
-    img_data[img_data == np.inf] = 1
+        min_pix = np.amin(img_data)
+        max_pix = np.amax(img_data)
 
-    # from bigger to smaller type, example: float32 => uint16
-    if dtype and img_data.dtype != dtype:
-        pix_range = max_pix - float(min_pix)
-        if scale_factor is None:
+        # replace float infinities to one, which will just be scaled up
+        img_data[img_data == np.inf] = 1
+
+        # from bigger to smaller type, example: float32 => uint16
+        if dtype and img_data.dtype != dtype:
+            pix_range = max_pix - min_pix
+
             scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / pix_range
-
-        print("pix min: {0}, max: {1}, scale_factor: {2}".format(
-            min_pix, max_pix, scale_factor))
 
         img_data = np.clip(scale_factor * img_data, 0,
                            np.finfo(img_data.dtype).max) if scale_factor > 1 else img_data

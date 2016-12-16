@@ -195,9 +195,9 @@ class ReconstructionCommand(object):
         """
         Run a reconstruction using a particular tool, algorithm and setup
 
-        @param preproc_cfg :: configuration (pre-processing + tool+algorithm + post-processing)
+        :param preproc_cfg :: configuration (pre-processing + tool+algorithm + post-processing)
 
-        @param cmd_line :: command line text if running from the CLI. When provided it will
+        :param cmd_line :: command line text if running from the CLI. When provided it will
         be written in the output readme file(s) for reference.
         """
         self._check_paths_integrity(cfg)
@@ -252,6 +252,7 @@ class ReconstructionCommand(object):
 
         # ----------------------------------------------------------------
 
+        return
         # Reconstruction
         # for file readme summary
         t_recon_start = time.time()
@@ -286,9 +287,9 @@ class ReconstructionCommand(object):
         To write configuration, settings, etc. early on. As early as possible, before any failure
         can happen.
 
-        @param filename :: name of the readme/final report file
-        @param cfg :: full reconstruction configuration
-        @param cmd_line :: command line originally used to run this reconstruction, when running
+        :param filename :: name of the readme/final report file
+        :param cfg :: full reconstruction configuration
+        :param cmd_line :: command line originally used to run this reconstruction, when running
         from the command line
 
         Returns :: time now (begin of run) in number of seconds since epoch (time() time)
@@ -343,11 +344,11 @@ class ReconstructionCommand(object):
         Write last part of report in the output readme/report file. This should be used whenever a
         reconstruction runs correctly.
 
-        @param filename :: name of the readme/final report file
-        @param data_stages :: tuple with data in three stages (raw, pre-processed, reconstructed)
-        @param tstart :: time at the beginning of the job/reconstruction, when the first part of the
+        :param filename :: name of the readme/final report file
+        :param data_stages :: tuple with data in three stages (raw, pre-processed, reconstructed)
+        :param tstart :: time at the beginning of the job/reconstruction, when the first part of the
         readme file was written
-        @param t_recon_elapsed :: reconstruction time
+        :param t_recon_elapsed :: reconstruction time
         """
         # append to a readme/report that should have been pre-filled with the
         # initial configuration
@@ -383,11 +384,11 @@ class ReconstructionCommand(object):
         run/job. From raw inputs to pre-proc data that is ready to go for
         reconstruction.
 
-        @param data :: raw data (sample projection images)
-        @param cfg :: the whole filter configuration
-        @param white :: white / flat / open-beam image for normalization in some of the first
+        :param data :: raw data (sample projection images)
+        :param cfg :: the whole filter configuration
+        :param white :: white / flat / open-beam image for normalization in some of the first
         pre-processing steps
-        @param dark :: dark image for normalization
+        :param dark :: dark image for normalization
 
         Returns :: pre-processed data.
 
@@ -415,12 +416,12 @@ class ReconstructionCommand(object):
         done as a first step (so all intermediate pre-processed
         results will be rotated as required).
 
-        @param data :: projection images data, as 3d numpy array, with images along outermost (z)
+        :param data :: projection images data, as 3d numpy array, with images along outermost (z)
         dimension
 
-        @param preproc_cfg :: pre-processing configuration
-        @param flat :: white/flat/open-beam image for normalization
-        @param dark :: dark image for normalization
+        :param preproc_cfg :: pre-processing configuration
+        :param flat :: white/flat/open-beam image for normalization
+        :param dark :: dark image for normalization
 
         Returns :: process/filtered data (sizes can change (cropped) and data can be rotated). 
         The flat and dark images are discarded after the pre-processing
@@ -469,11 +470,11 @@ class ReconstructionCommand(object):
         The integral is the density along the path through objects.
         This is required for example when pixels have neutron count values.
 
-        @param imgs_angles :: stack of images (angular projections) as 3d numpy array. Every image will be
+        :param imgs_angles :: stack of images (angular projections) as 3d numpy array. Every image will be
         processed independently, using as reference intensity the maximum pixel value found across all the
         images.
 
-        @param preproc_cfg :: pre-processing configuration set up for a reconstruction
+        :param preproc_cfg :: pre-processing configuration set up for a reconstruction
 
         Returns :: projected data volume (image stack)
         """
@@ -507,8 +508,8 @@ class ReconstructionCommand(object):
         """
         Apply additional, optional, pre-processing steps/filters.
 
-        @param preproc_data :: input data as a 3d volume (projection images)
-        @param cfg :: pre-processing configuration
+        :param preproc_data :: input data as a 3d volume (projection images)
+        :param cfg :: pre-processing configuration
 
         Returns :: filtered data (stack of images)
         """
@@ -646,7 +647,7 @@ class ReconstructionCommand(object):
         if isinstance(norm_flat_img, np.ndarray):
 
             if 2 != len(norm_flat_img.
-                                shape) or norm_flat_img.shape != sample.shape[1:]:
+                        shape) or norm_flat_img.shape != sample.shape[1:]:
                 raise ValueError(
                     "Incorrect shape of the flat image ({0}) which should match the "
                     "shape of the sample images ({1})".format(
@@ -654,7 +655,7 @@ class ReconstructionCommand(object):
 
             self.tomo_print_timed_start(
                 " * Starting normalization by flat/dark images with pixel data type: {0}...".
-                    format(sample.dtype))
+                format(sample.dtype))
 
             norm_divide = None
 
@@ -676,11 +677,12 @@ class ReconstructionCommand(object):
             # true_divide produces float64, we assume that precision,
             # hence why we're not casting the input images to floats
             for idx in range(0, sample.shape[0]):
-                sample[idx, :, :] = np.true_divide(sample[idx, :, :] - norm_dark_img, norm_divide)
+                sample[idx, :, :] = np.true_divide(
+                    sample[idx, :, :] - norm_dark_img, norm_divide)
 
             self.tomo_print_timed_stop(
                 " * Finished normalization by flat/dark images with pixel data type: {0}.".
-                    format(sample.dtype))
+                format(sample.dtype))
         else:
             self.tomo_print(
                 " * Note: cannot apply normalization by flat/dark images because no valid flat image has been "
@@ -699,8 +701,8 @@ class ReconstructionCommand(object):
         provided in the pre-processing configuration. TODO: much
         of this method should be moved into filters.
 
-        @param data :: stack of images as a 3d numpy array
-        @param pre_cfg :: pre-processing configuration
+        :param data :: stack of images as a 3d numpy array
+        :param pre_cfg :: pre-processing configuration
 
         Returns :: filtered data (stack of images)
 
@@ -875,8 +877,8 @@ class ReconstructionCommand(object):
         """
         Rotate every image of a stack
 
-        @param data :: image stack as a 3d numpy array
-        @param cfg :: pre-processing configuration
+        :param data :: image stack as a 3d numpy array
+        :param cfg :: pre-processing configuration
 
         Returns :: rotated data (stack of images)
         """
@@ -896,8 +898,8 @@ class ReconstructionCommand(object):
         """
         Rotate every image of a stack
 
-        @param data :: image stack as a 3d numpy array
-        @param cfg :: pre-processing configuration
+        :param data :: image stack as a 3d numpy array
+        :param cfg :: pre-processing configuration
 
         Returns :: rotated data (stack of images)
         """
@@ -920,8 +922,8 @@ class ReconstructionCommand(object):
         """
         A 3D reconstruction
 
-        @param proj_data :: Input projected images
-        @param tool :: reconstruction tool to call/use
+        :param proj_data :: Input projected images
+        :param tool :: reconstruction tool to call/use
 
         Returns :: reconstructed volume
         """
@@ -979,10 +981,10 @@ class ReconstructionCommand(object):
     #     """
     #     Run a reconstruction with astra
 
-    #     @param sinogram :: sinogram data
-    #     @param angles :: angles of the image projections
-    #     @param depth :: number of rows in images/sinograms
-    #     @param alg_cfg :: tool/algorithm configuration
+    #     :param sinogram :: sinogram data
+    #     :param angles :: angles of the image projections
+    #     :param depth :: number of rows in images/sinograms
+    #     :param alg_cfg :: tool/algorithm configuration
     #     """
     #     # Some of these have issues depending on the GPU setup
     #     algs_avail = "[FP3D_CUDA], [BP3D_CUDA]], [FDK_CUDA], [SIRT3D_CUDA], [CGLS3D_CUDA]"
@@ -1031,9 +1033,9 @@ class ReconstructionCommand(object):
     #     """
     #     Run a reconstruction with astra, approach based on swpapping axes
 
-    #     @param proj_data :: projection images
-    #     @param proj_angles :: angles corresponding to the projection images
-    #     @param alg_cfg :: tool/algorithm configuration
+    #     :param proj_data :: projection images
+    #     :param proj_angles :: angles corresponding to the projection images
+    #     :param alg_cfg :: tool/algorithm configuration
     #     """
 
     #     def get_max_frames(algorithm):
@@ -1085,10 +1087,10 @@ class ReconstructionCommand(object):
         """
         Run a reconstruction with astra, simple handling of projected data/images
 
-        @param proj_data :: projection images
-        @param alg_cfg :: tool/algorithm configuration
-        @param cor :: center of rotation
-        @param proj_angles :: angles corresponding to the projection images
+        :param proj_data :: projection images
+        :param alg_cfg :: tool/algorithm configuration
+        :param cor :: center of rotation
+        :param proj_angles :: angles corresponding to the projection images
         """
         import tomorec.tool_imports as tti
         astra = tti.import_tomo_tool('astra')
@@ -1208,14 +1210,14 @@ class ReconstructionCommand(object):
         """
         Loads a stack, including sample, white and dark images.
 
-        @param sample_path :: path to sample images
+        :param sample_path :: path to sample images
 
-        @param img_format :: image format to expect/use (as a filename extension)
+        :param img_format :: image format to expect/use (as a filename extension)
 
-        @param flat_field_path :: (optional) path to open beam / white image(s).
+        :param flat_field_path :: (optional) path to open beam / white image(s).
         Can be a file or directory
 
-        @param dark_field_path :: (optional) path to dark field image(s).
+        :param dark_field_path :: (optional) path to dark field image(s).
         Can be a file or directory
 
         Returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image,
@@ -1243,9 +1245,9 @@ class ReconstructionCommand(object):
         """
         Save output reconstructed volume in different forms.
 
-        @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
-        @param cfg :: configuration of the reconstruction, including output paths and formats
-        @param save_horiz_slices :: Save images along the horizontal axis in addition to the vertical
+        :param recon_data :: reconstructed data volume. A sequence of images will be saved from this
+        :param cfg :: configuration of the reconstruction, including output paths and formats
+        :param save_horiz_slices :: Save images along the horizontal axis in addition to the vertical
         slices saved by defult. Useful for testing
         some tools
         """
@@ -1281,18 +1283,38 @@ class ReconstructionCommand(object):
                             preproc_data,
                             output_dir,
                             preproc_cfg,
-                            out_dtype='uint16'):
+                            out_dtype='uint16',
+                            constant_factor=True):
         """
         Save (pre-processed) images from a data array to image files.
 
-        @param output_dir :: where results are being saved, including the pre-proc images/slices
-        @param preproc_data :: data volume with pre-processed images
-        @param preproc_cfg :: pre-processing configuration set up for a reconstruction
-        @param out_dtype :: dtype used for the pixel type/depth in the output image files
+        :param constant_factor :: default True, multiply all output images by the same factor,
+                                in order to try and keep them with the same brightness
+        :param output_dir :: where results are being saved, including the pre-proc images/slices
+        :param preproc_data :: data volume with pre-processed images
+        :param preproc_cfg :: pre-processing configuration set up for a reconstruction
+        :param out_dtype :: dtype used for the pixel type/depth in the output image files
         """
 
         # DEBUG message
         # print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
+
+        if constant_factor:
+            min_pix = np.amin(preproc_data[0, :, :])
+            max_pix = np.amax(preproc_data[0, :, :])
+
+            # replace float infinities to one, which will just be scaled up
+            preproc_data[preproc_data == np.inf] = 1
+
+            # from bigger to smaller type, example: float32 => uint16
+            pix_range = max_pix - min_pix
+
+            scale_factor = (np.iinfo(out_dtype).max -
+                            np.iinfo(out_dtype).min) / pix_range
+        else:
+            # scale factor will be generated for each image
+            scale_factor = None
+
         if preproc_cfg.save_preproc_imgs:
             preproc_dir = os.path.join(output_dir,
                                        self._PREPROC_IMGS_SUBDIR_NAME)
@@ -1308,7 +1330,7 @@ class ReconstructionCommand(object):
                                  'out_preproc_proj_image' + str(idx).zfill(6)),
                     img_format=preproc_cfg.out_img_format,
                     dtype=out_dtype,
-                    scale_factor=None)
+                    scale_factor=scale_factor)
             self.tomo_print_timed_stop(
                 " * Saving pre-processed images finished.")
         else:
@@ -1325,10 +1347,10 @@ class ReconstructionCommand(object):
         """
         Save (pre-processed) images from a data array to image files.
 
-        @param output_dir :: where results are being saved, including the pre-proc images/slices
-        @param data :: data volume with pre-processed images
-        @param preproc_cfg :: pre-processing configuration set up for a reconstruction
-        @param out_dtype :: dtype used for the pixel type/depth in the output image files
+        :param output_dir :: where results are being saved, including the pre-proc images/slices
+        :param data :: data volume with pre-processed images
+        :param preproc_cfg :: pre-processing configuration set up for a reconstruction
+        :param out_dtype :: dtype used for the pixel type/depth in the output image files
         :param image_name:
         :param image_index:
         """
@@ -1336,11 +1358,13 @@ class ReconstructionCommand(object):
         # DEBUG message
         # print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
         if output_dir is not None:
-            preproc_dir = os.path.join(output_dir, self._PREPROC_IMGS_SUBDIR_NAME)
+            preproc_dir = os.path.join(
+                output_dir, self._PREPROC_IMGS_SUBDIR_NAME)
         else:
             preproc_dir = preproc_cfg.output_dir
 
-        self.tomo_print_timed_start(" * Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
+        self.tomo_print_timed_start(
+            " * Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
 
         tomoio.make_dirs_if_needed(preproc_dir)
 
