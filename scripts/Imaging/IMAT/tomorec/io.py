@@ -142,7 +142,7 @@ def write_image(img_data,
             min_pix, max_pix, scale_factor))
 
         img_data = np.clip(scale_factor * img_data, 0,
-                           np.finfo(img_data.dtype)) if scale_factor > 1 else img_data
+                           np.finfo(img_data.dtype).max) if scale_factor > 1 else img_data
         img_data = img_data.astype(dtype=dtype)
 
     # this rescale intensity would ignore the range of other images in the stack

@@ -446,8 +446,8 @@ class ReconstructionCommand(object):
         data = self.normalize_flat_dark(data, preproc_cfg, flat, dark)
         # data = self.normalize_air_region(data, preproc_cfg)
 
-        if not preproc_cfg.crop_before_normalize:
-            data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
+        # if not preproc_cfg.crop_before_normalize:
+        #     data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
 
         # data = self.apply_cut_off_and_others(data, preproc_cfg)
 
