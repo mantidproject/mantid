@@ -7,7 +7,7 @@
 #include "MantidQtMantidWidgets/DataSelector.h"
 #include "MantidQtDesignerPlugins/DesignerPlugin.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
