@@ -601,10 +601,12 @@ class ReconstructionCommand(object):
                 if isinstance(flat, np.ndarray):
                     flat = flat[top:bottom, left:right]
                     self.save_single_image(flat, preproc_cfg, scale_factor=1,
-                                           image_name='flat_with_subtracted_bg')
+                                           image_name='cropped_flat')
 
                 if isinstance(dark, np.ndarray):
                     dark = dark[top:bottom, left:right]
+                    self.save_single_image(dark, preproc_cfg, scale_factor=1,
+                                           image_name='cropped_dark')
 
                 self.tomo_print_timed_stop(
                     " * Finished image cropping step, with pixel data type: {0}, coordinates: {1}. "
@@ -672,6 +674,7 @@ class ReconstructionCommand(object):
             # prevent divide-by-zero issues by setting to a very small number
             norm_divide[norm_divide == 0] = 1e-6
 
+            self.save_single_image(norm_dark_img, preproc_cfg, scale_factor=1, image_name='dark_bg')
             self.save_single_image(norm_divide, preproc_cfg, scale_factor=1, image_name='flat_with_subtracted_bg')
 
             # normalise the sample images by subtracting the dark images background
