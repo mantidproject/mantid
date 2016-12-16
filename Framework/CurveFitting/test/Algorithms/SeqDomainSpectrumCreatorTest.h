@@ -9,7 +9,6 @@
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
@@ -245,12 +244,10 @@ public:
       const auto &x = outputWsMatrix->x(i);
       const auto &y = outputWsMatrix->y(i);
 
-      const auto &spectrumInfo = outputWsMatrix->spectrumInfo();
-
       TS_ASSERT_EQUALS(x, matrixWs->x(i));
       for (size_t j = 0; j < x.size(); ++j) {
         // If detector is not masked, there should be values, otherwise 0.
-        if (!spectrumInfo.isMasked(i)) {
+        if (!outputWsMatrix->getDetector(i)->isMasked()) {
           TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
         } else {
           TS_ASSERT_EQUALS(y[j], 0.0);
