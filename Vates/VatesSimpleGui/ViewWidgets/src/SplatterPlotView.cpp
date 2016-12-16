@@ -131,8 +131,7 @@ void SplatterPlotView::destroyView() {
 pqRenderView *SplatterPlotView::getView() { return this->m_view.data(); }
 
 void SplatterPlotView::render() {
-  pqPipelineSource *src = NULL;
-  src = pqActiveObjects::instance().activeSource();
+  pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   bool isPeaksWorkspace = this->isPeaksWorkspace(src);
   // Hedge for two things.
   // 1. If there is no active source

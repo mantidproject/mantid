@@ -151,6 +151,8 @@ public:
   void normaliseData(bool on) { m_shouldBeNormalised = on; }
   /// Get the max number of iterations
   int maxIterations() const;
+  /// Get the peak radius for peak functions
+  int getPeakRadius() const;
 
   /// Get the start X
   double startX() const;
@@ -413,6 +415,7 @@ protected:
   QtProperty *m_ignoreInvalidData;
   QtProperty *m_costFunction;
   QtProperty *m_maxIterations;
+  QtProperty *m_peakRadius;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_plotCompositeMembers;

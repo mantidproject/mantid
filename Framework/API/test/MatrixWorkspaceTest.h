@@ -263,8 +263,10 @@ public:
     }
 
     // Mask a spectra
-    workspace->maskWorkspaceIndex(1);
-    workspace->maskWorkspaceIndex(2);
+    workspace->getSpectrum(1).clearData();
+    workspace->getSpectrum(2).clearData();
+    workspace->mutableSpectrumInfo().setMasked(1, true);
+    workspace->mutableSpectrumInfo().setMasked(2, true);
 
     for (int i = 0; i < numHist; ++i) {
       double expectedValue(0.0);
@@ -292,8 +294,10 @@ public:
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
-    workspace->maskWorkspaceIndex(1);
-    workspace->maskWorkspaceIndex(2);
+    workspace->getSpectrum(1).clearData();
+    workspace->getSpectrum(2).clearData();
+    workspace->mutableSpectrumInfo().setMasked(1, true);
+    workspace->mutableSpectrumInfo().setMasked(2, true);
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {
@@ -521,55 +525,6 @@ public:
     }
     // Save that to the NXS file
     TS_ASSERT_THROWS_NOTHING(ws->saveSpectraMapNexus(th.file, spec););
-  }
-
-  /** Properly, this tests a method on Instrument, not MatrixWorkspace, but they
-   * are related.
-   */
-  void test_isDetectorMasked() {
-    auto ws = makeWorkspaceWithDetectors(100, 10);
-    Instrument_const_sptr inst = ws->getInstrument();
-    // Make sure the instrument is parametrized so that the test is thorough
-    TS_ASSERT(inst->isParametrized());
-    TS_ASSERT(!inst->isDetectorMasked(1));
-    TS_ASSERT(!inst->isDetectorMasked(19));
-    // Mask then check that it returns as masked
-    TS_ASSERT(ws->getSpectrum(19).hasDetectorID(19));
-    ws->maskWorkspaceIndex(19);
-    TS_ASSERT(inst->isDetectorMasked(19));
-  }
-
-  /** Check if any of a list of detectors are masked */
-  void test_isDetectorMasked_onASet() {
-    auto ws = makeWorkspaceWithDetectors(100, 10);
-    Instrument_const_sptr inst = ws->getInstrument();
-    // Make sure the instrument is parametrized so that the test is thorough
-    TS_ASSERT(inst->isParametrized());
-
-    // Mask detector IDs 8 and 9
-    ws->maskWorkspaceIndex(8);
-    ws->maskWorkspaceIndex(9);
-
-    std::set<detid_t> dets;
-    TSM_ASSERT("No detector IDs = not masked", !inst->isDetectorMasked(dets));
-    dets.insert(6);
-    TSM_ASSERT("Detector is not masked", !inst->isDetectorMasked(dets));
-    dets.insert(7);
-    TSM_ASSERT("Detectors are not masked", !inst->isDetectorMasked(dets));
-    dets.insert(8);
-    TSM_ASSERT("If any detector is not masked, return false",
-               !inst->isDetectorMasked(dets));
-    // Start again
-    dets.clear();
-    dets.insert(8);
-    TSM_ASSERT("If all detectors are not masked, return true",
-               inst->isDetectorMasked(dets));
-    dets.insert(9);
-    TSM_ASSERT("If all detectors are not masked, return true",
-               inst->isDetectorMasked(dets));
-    dets.insert(10);
-    TSM_ASSERT("If any detector is not masked, return false",
-               !inst->isDetectorMasked(dets));
   }
 
   void test_hasGroupedDetectors() {

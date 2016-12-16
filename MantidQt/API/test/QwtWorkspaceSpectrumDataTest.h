@@ -13,7 +13,7 @@ class QwtWorkspaceSpectrumDataTest : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    ws = WorkspaceCreationHelper::Create2DWorkspace(3, 4);
+    ws = WorkspaceCreationHelper::create2DWorkspace(3, 4);
     for (size_t i = 0; i < 3; i++) {
       for (size_t j = 0; j < 5; j++)
         ws->dataX(i)[j] = double(i) + double(j);

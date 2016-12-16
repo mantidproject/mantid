@@ -615,7 +615,7 @@ General
 |       |                             |                                                                     |
 |       |                             | Enabling the option will change the UI of the DataAnalysis_ tab to  |
 |       |                             | the new one described above, enabling fits of multiple datasets to  |
-|       |                             | be made.
+|       |                             | be made.                                                            |
 +-------+-----------------------------+---------------------------------------------------------------------+
 
 Feedback & Comments

@@ -56,6 +56,9 @@ struct MANTIDQT_CUSTOMINTERFACES_DLL TomoSystemSettings {
   /// path component for the reconstructed files (outputs)
   std::string m_outputPathCompReconst;
 
+  /// experiment reference from the Run tab
+  std::string m_experimentReference;
+
   static const std::string g_defSamplesDirPrefix;
   static const std::string g_defFlatsDirPrefix;
   static const std::string g_defDarksDirPrefix;

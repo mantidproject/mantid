@@ -44,7 +44,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         return 'ComputeIncoherentDOS'
 
     def summary(self):
-        return 'Calculates the neutron weighted generalised phonon density of states in the incoherent approximation from a measured powder INS MatrixWorkspace'
+        return 'Calculates the neutron weighted generalised phonon density of states '+\
+               'in the incoherent approximation from a measured powder INS MatrixWorkspace'
 
     def PyInit(self):
         validators = CompositeValidator()

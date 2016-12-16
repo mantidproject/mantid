@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 
 #include "MantidDataHandling/LoadCalFile.h"
@@ -89,10 +91,11 @@ public:
     TS_ASSERT_EQUALS(int(maskWS->getValue(101003)), 1);
     TS_ASSERT_EQUALS(int(maskWS->getValue(101008)), 1);
     TS_ASSERT_EQUALS(int(maskWS->getValue(715079)), 0);
-    TS_ASSERT(!maskWS->getInstrument()->getDetector(101001)->isMasked());
-    TS_ASSERT(maskWS->getInstrument()->getDetector(101003)->isMasked());
-    TS_ASSERT(maskWS->getInstrument()->getDetector(101008)->isMasked());
-    TS_ASSERT(!maskWS->getInstrument()->getDetector(715079)->isMasked());
+    const auto &detectorInfo = maskWS->detectorInfo();
+    TS_ASSERT(!detectorInfo.isMasked(detectorInfo.indexOf(101001)));
+    TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(101003)));
+    TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(101008)));
+    TS_ASSERT(!detectorInfo.isMasked(detectorInfo.indexOf(715079)));
     // Check if filename is saved
     TS_ASSERT_EQUALS(alg.getPropertyValue("CalFilename"),
                      maskWS->run().getProperty("Filename")->value());

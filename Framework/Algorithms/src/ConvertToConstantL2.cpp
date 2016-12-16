@@ -9,6 +9,8 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>

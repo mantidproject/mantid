@@ -187,9 +187,9 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     {
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");
-      y = 0.0;                        // leaving inf or nan would break the fit
-    } else if (!std::isfinite(error)) // nan or inf error
-    {
+      y = 0.0; // leaving inf or nan would break the fit
+    } else if (!std::isfinite(error)) {
+      // nan or inf error
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");
     } else if (error <= 0) {
@@ -197,6 +197,12 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
         weight = 1.0;
     } else {
       weight = 1.0 / error;
+      if (!std::isfinite(weight)) {
+        if (!m_ignoreInvalidData)
+          throw std::runtime_error(
+              "Error of a data point is probably too small.");
+        weight = 0.0;
+      }
     }
 
     values->setFitData(j, y);

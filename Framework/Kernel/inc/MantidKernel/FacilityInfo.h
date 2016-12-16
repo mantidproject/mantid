@@ -71,8 +71,6 @@ public:
   const std::vector<std::string> &archiveSearch() const {
     return m_archiveSearch;
   }
-  /// Returns the name of the default live listener
-  const std::string &liveListener() const { return m_liveListener; }
   /// Returns a list of instruments of this facility
   const std::vector<InstrumentInfo> &instruments() const {
     return m_instruments;
@@ -104,7 +102,6 @@ private:
   void fillExtensions(const Poco::XML::Element *elem);
   void fillArchiveNames(const Poco::XML::Element *elem);
   void fillInstruments(const Poco::XML::Element *elem);
-  void fillLiveListener(const Poco::XML::Element *elem);
   void fillHTTPProxy(const Poco::XML::Element *elem);
   void fillComputeResources(const Poco::XML::Element *elem);
   void fillNoFilePrefix(const Poco::XML::Element *elem);
@@ -122,8 +119,7 @@ private:
   std::vector<std::string>
       m_archiveSearch; ///< names of the archive search interface
   std::vector<InstrumentInfo>
-      m_instruments;          ///< list of instruments of this facility
-  std::string m_liveListener; ///< name of the default live listener
+      m_instruments;   ///< list of instruments of this facility
   bool m_noFilePrefix; ///< flag indicating if prefix is required in file names
   std::vector<ComputeResourceInfo> m_computeResInfos; ///< (remote) compute
   /// resources available in
