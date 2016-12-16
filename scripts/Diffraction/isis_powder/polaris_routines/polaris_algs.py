@@ -34,10 +34,10 @@ def generate_solid_angle_corrections(run_details, instrument):
     return corrections
 
 
-def get_run_details(chopper_on, sac_on, run_number, calibration_dir, mapping_path):
-    yaml_dict = yaml_parser.get_run_dictionary(run_number=run_number, file_path=mapping_path)
+def get_run_details(run_number, inst_settings):
+    yaml_dict = yaml_parser.get_run_dictionary(run_number=run_number, file_path=inst_settings.cal_mapping_file)
 
-    if chopper_on:
+    if inst_settings.chopper_on:
         chopper_config = yaml_dict["chopper_on"]
     else:
         chopper_config = yaml_dict["chopper_off"]
@@ -46,12 +46,13 @@ def get_run_details(chopper_on, sac_on, run_number, calibration_dir, mapping_pat
     empty_runs = chopper_config["empty_run_numbers"]
     vanadium_runs = chopper_config["vanadium_run_numbers"]
 
-    solid_angle_file_name = _generate_solid_angle_file_name(chopper_on=chopper_on,
+    solid_angle_file_name = _generate_solid_angle_file_name(chopper_on=inst_settings.chopper_on,
                                                             vanadium_run_string=vanadium_runs)
-    splined_vanadium_name = _generate_splined_van_name(chopper_on=chopper_on, sac_applied=sac_on,
+    splined_vanadium_name = _generate_splined_van_name(chopper_on=inst_settings.chopper_on,
+                                                       sac_applied=inst_settings.solid_angle_on,
                                                        vanadium_run_string=vanadium_runs)
 
-    in_calib_dir = os.path.join(calibration_dir, label)
+    in_calib_dir = os.path.join(inst_settings.calibration_dir, label)
     calibration_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])
     grouping_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])
     solid_angle_file_path = os.path.join(in_calib_dir, solid_angle_file_name)
@@ -97,6 +98,7 @@ def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
     masked_workspace_list = _apply_bragg_peaks_masking(bank_spectra, mask_list=bragg_masking_list)
     output = common.spline_vanadium_for_focusing(focused_vanadium_spectra=masked_workspace_list,
                                                  num_splines=spline_number)
+    common.remove_intermediate_workspace(masked_workspace_list)
     return output
 
 

@@ -46,8 +46,8 @@ def get_run_details(run_number_string, inst_settings):
     vanadium_run_numbers = mapping_dict["vanadium_run_numbers"]
 
     splined_vanadium_name = _generate_splined_van_name(absorb_on=inst_settings.absorb_corrections,
-                                                       long_mode=inst_settings.long_mode,
-                                                       vanadium_run_string=vanadium_run_numbers)
+                                                       vanadium_run_string=vanadium_run_numbers,
+                                                       long_mode_on=inst_settings.long_mode)
 
     calibration_dir = inst_settings.calibration_dir
     cycle_calibration_dir = os.path.join(calibration_dir, label)
@@ -101,12 +101,10 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
     return normalised_ws
 
 
-def _generate_splined_van_name(absorb_on, long_mode, vanadium_run_string):
+def _generate_splined_van_name(absorb_on, long_mode_on, vanadium_run_string):
     output_string = "SVan_" + str(vanadium_run_string)
-    if absorb_on:
-        output_string += "_absorb"
-    if long_mode:
-        output_string += "_long"
+    output_string += "_absorb" if absorb_on else ""
+    output_string += "_long" if long_mode_on else ""
 
     output_string += ".nxs"
     return output_string

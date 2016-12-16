@@ -46,19 +46,13 @@ class Polaris(AbstractInst):
     def get_default_group_names(self):
         return self._calibration_grouping_names
 
-    # Abstract implementation
-
     def get_run_details(self, run_number_string):
         input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
         first_run = input_run_number_list[0]
         if self._run_details_last_run_number == first_run:
             return self._run_details_cached_obj
 
-        # TODO use _inst_settings instead
-        run_details = polaris_algs.get_run_details(
-            chopper_on=self._inst_settings.chopper_on, sac_on=self._inst_settings.solid_angle_on,
-            run_number=first_run, calibration_dir=self._inst_settings.calibration_dir,
-            mapping_path=self._inst_settings.cal_mapping_file)
+        run_details = polaris_algs.get_run_details(run_number=first_run, inst_settings=self._inst_settings)
 
         # Hold obj in case same run range is requested
         self._run_details_last_run_number = first_run
@@ -118,7 +112,8 @@ class Polaris(AbstractInst):
         return d_spacing_group
 
     def crop_short_long_mode(self, ws_to_crop):
-        cropped_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=800, x_max=20000)
+        cropped_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_values[0],
+                                        x_max=self._inst_settings.raw_data_crop_values[1])
         return cropped_ws
 
     def crop_banks_to_user_tof(self, focused_banks):

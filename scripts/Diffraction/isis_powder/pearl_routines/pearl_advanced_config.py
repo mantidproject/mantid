@@ -14,9 +14,9 @@ long_mode_off_params = {
         "tt35_grouping": "pearl_group_12_1_TT35.cal"
     },
 
-    # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
     "monitor_lambda_crop_range": (0.03, 6.00),
     "monitor_integration_range": (0.6, 5.0),
+    # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
     "raw_data_tof_cropping": (0, 19995),
     "tof_cropping_ranges": [
         (1500, 19900),  # Bank 1
@@ -37,9 +37,9 @@ long_mode_off_params = {
 }
 
 long_mode_on_params = {
-    # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
     "monitor_lambda_crop_range": (5.9, 12.0),
     "monitor_integration_range": (6, 10),
+    # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
     "raw_data_tof_cropping": (20295, 39995),
     "tof_cropping_ranges": [
         (20300, 39990),  # Bank 1
@@ -61,20 +61,39 @@ long_mode_on_params = {
 
 
 variable_help = {
-    "file_names": {
-        "vanadium_absorb_file_name": "Takes the name of the calculated vanadium absorption corrections. This file "
-                                     " must be located in the top level of the calibration folder",
+    "long_mode_<on/off>_params": {
+        "file_names": {
+            "vanadium_absorb_file_name": "Takes the name of the calculated vanadium absorption corrections. This file "
+                                         " must be located in the top level of the calibration folder",
 
-        "tt88_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT88. "
-                              "This file must be located in the top level of the calibration folder.",
+            "tt88_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT88. "
+                                  "This file must be located in the top level of the calibration folder.",
 
-        "tt70_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT70. "
-                              "This file must be located in the top level of the calibration folder.",
+            "tt70_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT70. "
+                                  "This file must be located in the top level of the calibration folder.",
 
-        "tt35_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT35. "
-                              "This file must be located in the top level of the calibration folder.",
+            "tt35_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT35. "
+                                  "This file must be located in the top level of the calibration folder.",
+        },
 
+        "monitor_lambda_crop_range": "The range in wavelength to crop a monitor workspace to before calculating "
+                                     "the current normalisation",
+        "monitor_integration_range": "The minimum and maximum values to consider whilst integrating the monitor "
+                                     "workspace",
+        "raw_data_tof_cropping": "The crop values for to apply when loading raw data. This step is applied before any "
+                                 "processing takes place. This is to crop from 40,000 microseconds windows in the "
+                                 "raw data to 20,000 windows in PEARL",
+        "tof_cropping_ranges": "These values are used to determine the TOF range to crop a focused (not Vanadium "
+                               "Cal.) workspace to. These are applied on a bank by bank basis. They must be less than "
+                               "the values specified for raw_data_tof_cropping."
+    },
 
+    "general_params": {
+        "monitor_spectrum_number": "The spectrum number the monitor is located at in the workspace",
+        "monitor_spline_coefficient": "The coefficient to use whilst calculating a spline from the monitor."
+                                      "workspace. This is used to normalise the workspace current.",
+        "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during "
+                              "a vanadium calibration."
     }
 }
 

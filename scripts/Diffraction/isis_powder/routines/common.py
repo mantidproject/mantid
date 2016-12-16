@@ -6,8 +6,6 @@ from isis_powder.routines.common_enums import InputBatchingEnum
 
 # A small workaround to ensure when reading workspaces in a loop
 # the previous workspace does not got overridden
-global g_ads_workaround
-g_ads_workaround = {"read_ws": 0}
 
 
 def create_calibration_by_names(calibration_runs, startup_objects, grouping_file_name, group_names):
@@ -166,14 +164,15 @@ def _normalise_workspaces(ws_list, instrument, run_information):
 
 
 def _check_load_range(list_of_runs_to_load):
-    MAXIMUM_RANGE_LEN = 1000  # If more than this number of runs is entered probably wrong
-    if len(list_of_runs_to_load) > MAXIMUM_RANGE_LEN:
-        raise ValueError("More than " + str(MAXIMUM_RANGE_LEN) + " runs were selected."
+    maximum_range_len = 1000  # If more than this number of runs is entered probably wrong
+    if len(list_of_runs_to_load) > maximum_range_len:
+        raise ValueError("More than " + str(maximum_range_len) + " runs were selected."
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
-    input_ws_list = load_current_normalised_ws_list(calibration_runs, instrument, input_batching=InputBatchingEnum.Summed)
+    input_ws_list = load_current_normalised_ws_list(calibration_runs, instrument,
+                                                    input_batching=InputBatchingEnum.Summed)
     calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws_list[0], Target="dSpacing")
     mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
                                 GroupingFileName=out_grouping_file_name, GroupNames=group_names)

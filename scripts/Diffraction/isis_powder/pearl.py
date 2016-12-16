@@ -65,10 +65,12 @@ class Pearl(AbstractInst):
         return _generate_file_name(run_number=run_number)
 
     def generate_output_file_name(self, run_number):
-        output_name = "PEARL" + str(run_number)
+
+        output_name = "PRL" + str(run_number)
         # Append each mode of operation
         output_name += "_" + self._inst_settings.tt_mode
-        output_name += "_long" if self._inst_settings.absorb_corrections else ""
+        output_name += "_absorb" if self._inst_settings.absorb_corrections else ""
+        output_name += "_long" if self._inst_settings.long_mode else ""
         return output_name
 
     def attenuate_workspace(self, input_workspace):
