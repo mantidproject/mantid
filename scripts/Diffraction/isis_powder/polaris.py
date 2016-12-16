@@ -43,9 +43,6 @@ class Polaris(AbstractInst):
             do_absorb_corrections=self._inst_settings.do_absorb_corrections,
             gen_absorb_correction=self._inst_settings.gen_absorb_corrections)
 
-    def get_default_group_names(self):
-        return self._calibration_grouping_names
-
     def get_run_details(self, run_number_string):
         input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
         first_run = input_run_number_list[0]
@@ -68,14 +65,14 @@ class Polaris(AbstractInst):
         else:
             return "POL" + str(run_number)
 
-    def generate_output_file_name(self, run_number):
-        return self.generate_input_file_name(run_number=run_number)
+    def generate_output_file_name(self, run_number_string):
+        return self.generate_input_file_name(run_number=run_number_string)
 
     @staticmethod
     def can_auto_gen_vanadium_cal():
         return True
 
-    def normalise_ws(self, ws_to_correct, run_details=None):
+    def normalise_ws_current(self, ws_to_correct, run_details=None):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
         return normalised_ws
 

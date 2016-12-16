@@ -158,7 +158,7 @@ def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
 def _normalise_workspaces(ws_list, instrument, run_information):
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument.normalise_ws(ws_to_correct=ws, run_details=run_information))
+        output_list.append(instrument.normalise_ws_current(ws_to_correct=ws, run_details=run_information))
 
     return output_list
 

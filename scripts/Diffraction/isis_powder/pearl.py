@@ -42,11 +42,6 @@ class Pearl(AbstractInst):
                                                  do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     # Params #
-    def get_default_group_names(self):
-        return self._default_group_names
-
-    def _get_lambda_range(self):
-        return self._lambda_lower, self._lambda_upper
 
     def get_run_details(self, run_number_string):
         input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
@@ -64,9 +59,9 @@ class Pearl(AbstractInst):
     def generate_input_file_name(run_number):
         return _generate_file_name(run_number=run_number)
 
-    def generate_output_file_name(self, run_number):
+    def generate_output_file_name(self, run_number_string):
 
-        output_name = "PRL" + str(run_number)
+        output_name = "PRL" + str(run_number_string)
         # Append each mode of operation
         output_name += "_" + self._inst_settings.tt_mode
         output_name += "_absorb" if self._inst_settings.absorb_corrections else ""
@@ -77,7 +72,7 @@ class Pearl(AbstractInst):
         attenuation_path = self._attenuation_full_path
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
-    def normalise_ws(self, ws_to_correct, run_details=None):
+    def normalise_ws_current(self, ws_to_correct, run_details=None):
         monitor_ws = common.get_monitor_ws(ws_to_process=ws_to_correct, run_number_string=run_details.run_number,
                                            instrument=self)
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
