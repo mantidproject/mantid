@@ -100,7 +100,8 @@ def write_image(img_data,
                 filename,
                 img_format=None,
                 dtype=None,
-                rescale_intensity=False):
+                rescale_intensity=False,
+                scale_factor=None):
     """
     Output image data, given as a numpy array, to a file, in a given image format.
     Assumes that the output directory exists (must be checked before). The pixel
@@ -128,18 +129,18 @@ def write_image(img_data,
     min_pix = np.amin(img_data)
     max_pix = np.amax(img_data)
 
-    # The special case dtype = 'uint8' could be handled with bytescale:
-    # img_data = scipy.misc.bytescale(img_data)
+    # replace float infinities to one, which will just be scaled up
+    img_data[img_data == np.inf] = 1
 
     # from bigger to smaller type, example: float32 => uint16
     if dtype and img_data.dtype != dtype:
         pix_range = max_pix - float(min_pix)
-        scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / pix_range
+        if scale_factor is None:
+            scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / pix_range
 
-        too_verbose = False
-        if too_verbose:
-            print("pix min: {0}, max: {1}, scale_factor: {2}".format(
-                min_pix, max_pix, scale_factor))
+        print("pix min: {0}, max: {1}, scale_factor: {2}".format(
+            min_pix, max_pix, scale_factor))
+
         img_data = np.clip(scale_factor * img_data, 0,
                            np.finfo(img_data.dtype)) if scale_factor > 1 else img_data
         img_data = img_data.astype(dtype=dtype)
@@ -444,7 +445,7 @@ def read_stack_of_images(sample_path,
     sample_dtype = first_img.dtype
     # usual type in fits with 16-bit pixel depth
     if '>i2' == sample_dtype:
-        sample_dtype = np.uint16
+        sample_dtype = np.float16
         # we want the flat and dark to be float32 or we might get infinities
         # when loading
         flat_dtype = np.float32

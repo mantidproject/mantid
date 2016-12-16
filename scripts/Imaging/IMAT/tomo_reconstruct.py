@@ -274,6 +274,9 @@ def grab_preproc_options(args):
     pre_config.input_dir_flat = args.input_path_flat
     pre_config.input_dir_dark = args.input_path_dark
 
+    # temporary for now, but might be left here
+    pre_config.output_dir = args.output_path
+
     if args.in_img_format:
         pre_config.in_img_format = args.in_img_format
 

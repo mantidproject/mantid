@@ -439,17 +439,17 @@ class ReconstructionCommand(object):
 
         data, flat, dark = self.rotate_stack(data, preproc_cfg, flat, dark)
 
-        if preproc_cfg.crop_before_normalize:
-            data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
+        # if preproc_cfg.crop_before_normalize:
+        #     data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
 
         # NOTE flats and darks are cropped inside normalize_flat_dark
         data = self.normalize_flat_dark(data, preproc_cfg, flat, dark)
-        data = self.normalize_air_region(data, preproc_cfg)
+        # data = self.normalize_air_region(data, preproc_cfg)
 
         if not preproc_cfg.crop_before_normalize:
             data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
 
-        data = self.apply_cut_off_and_others(data, preproc_cfg)
+        # data = self.apply_cut_off_and_others(data, preproc_cfg)
 
         # discarding the flat and dark data here
         return data
@@ -569,85 +569,6 @@ class ReconstructionCommand(object):
 
         return preproc_data
 
-    def normalize_air_region(self, data, pre_cfg):
-        """
-        TODO move to filters.py
-        Normalize by beam intensity. This is not directly about proton
-        charg - not using the proton charge field as usually found in
-        experiment/nexus files. This uses an area of normalization, if
-        provided in the pre-processing configuration. TODO: much
-        of this method should be moved into filters.
-
-        @param data :: stack of images as a 3d numpy array
-        @param pre_cfg :: pre-processing configuration
-
-        Returns :: filtered data (stack of images)
-
-        """
-        self._check_data_stack(data)
-
-        if not pre_cfg or not isinstance(pre_cfg, tomocfg.PreProcConfig):
-            raise ValueError(
-                "Cannot normalize by air region without a valid pre-processing configuration"
-            )
-
-        if pre_cfg.normalize_air_region:
-            if not isinstance(pre_cfg.normalize_air_region, list) or\
-               4 != len(pre_cfg.normalize_air_region):
-                raise ValueError(
-                    "Wrong air region coordinates when trying to use them to normalize images: {0}".
-                    format(pre_cfg.normalize_air_region))
-
-            if not all(
-                    isinstance(crd, int)
-                    for crd in pre_cfg.normalize_air_region):
-                raise ValueError(
-                    "Cannot use non-integer coordinates to use the normalization region "
-                    "(air region). Got these coordinates: {0}".format(
-                        pre_cfg.normalize_air_region))
-
-            left = pre_cfg.normalize_air_region[0]
-            top = pre_cfg.normalize_air_region[1]
-            right = pre_cfg.normalize_air_region[2]
-            bottom = pre_cfg.normalize_air_region[3]
-
-            # skip if for example: 0, 0, 0, 0 (empty selection)
-            if top >= bottom or left >= right:
-                self.tomo_print(
-                    " * NOTE: NOT applying Normalise by Air Region. Reason: Empty Selection"
-                )
-                return data
-
-            self.tomo_print_timed_start(
-                " * Starting normalization by air region..."
-            )
-            air_sums = []
-            for idx in range(0, data.shape[0]):
-                air_data_sum = data[idx, top:bottom, left:right].sum()
-                air_sums.append(air_data_sum)
-
-            air_sums = np.true_divide(air_sums, np.amax(air_sums))
-
-            self.tomo_print(
-                " Air region sums (relative to maximum): " + str(air_sums),
-                priority=0)
-
-            for idx in range(0, data.shape[0]):
-                data[idx, :, :] = np.true_divide(data[idx, :, :],
-                                                 air_sums[idx])
-
-            avg = np.average(air_sums)
-            self.tomo_print_timed_stop(
-                " * Finished normalization by air region. Statistics of values in the air region, "
-                "average: {0}, max ratio: {1}, min ratio: {2}.".format(
-                    avg, np.max(air_sums) / avg, np.min(air_sums) / avg))
-
-        else:
-            self.tomo_print(
-                " * Note: NOT normalizing by air region", priority=2)
-
-        return data
-
     def crop_coords(self, sample, cfg, flat=None, dark=None):
         """
         Crop stack of images to a region (region of interest or similar), image by image
@@ -748,6 +669,8 @@ class ReconstructionCommand(object):
             # prevent divide-by-zero issues by setting to a very small number
             norm_divide[norm_divide == 0] = 1e-6
 
+            self.save_single_image(norm_divide, preproc_cfg, scale_factor=1)
+
             # normalise the sample images by subtracting the dark images background
             # and then dividing by the background normalised flat images
             # true_divide produces float64, we assume that precision,
@@ -755,8 +678,6 @@ class ReconstructionCommand(object):
             for idx in range(0, sample.shape[0]):
                 sample[idx, :, :] = np.true_divide(
                     sample[idx, :, :] - norm_dark_img, norm_divide)
-                # the divide wipes everything, i imagine wrong image data type, it's uint16, should be float32 or float16
-                print("Normalised image:", sample[idx, :, :], sample.dtype)
 
             self.tomo_print_timed_stop(
                 " * Finished normalization by flat/dark images with pixel data type: {0}.".
@@ -769,6 +690,85 @@ class ReconstructionCommand(object):
                 priority=2)
 
         return sample
+
+    def normalize_air_region(self, data, pre_cfg):
+        """
+        TODO move to filters.py
+        Normalize by beam intensity. This is not directly about proton
+        charg - not using the proton charge field as usually found in
+        experiment/nexus files. This uses an area of normalization, if
+        provided in the pre-processing configuration. TODO: much
+        of this method should be moved into filters.
+
+        @param data :: stack of images as a 3d numpy array
+        @param pre_cfg :: pre-processing configuration
+
+        Returns :: filtered data (stack of images)
+
+        """
+        self._check_data_stack(data)
+
+        if not pre_cfg or not isinstance(pre_cfg, tomocfg.PreProcConfig):
+            raise ValueError(
+                "Cannot normalize by air region without a valid pre-processing configuration"
+            )
+
+        if pre_cfg.normalize_air_region:
+            if not isinstance(pre_cfg.normalize_air_region, list) or\
+               4 != len(pre_cfg.normalize_air_region):
+                raise ValueError(
+                    "Wrong air region coordinates when trying to use them to normalize images: {0}".
+                    format(pre_cfg.normalize_air_region))
+
+            if not all(
+                    isinstance(crd, int)
+                    for crd in pre_cfg.normalize_air_region):
+                raise ValueError(
+                    "Cannot use non-integer coordinates to use the normalization region "
+                    "(air region). Got these coordinates: {0}".format(
+                        pre_cfg.normalize_air_region))
+
+            left = pre_cfg.normalize_air_region[0]
+            top = pre_cfg.normalize_air_region[1]
+            right = pre_cfg.normalize_air_region[2]
+            bottom = pre_cfg.normalize_air_region[3]
+
+            # skip if for example: 0, 0, 0, 0 (empty selection)
+            if top >= bottom or left >= right:
+                self.tomo_print(
+                    " * NOTE: NOT applying Normalise by Air Region. Reason: Empty Selection"
+                )
+                return data
+
+            self.tomo_print_timed_start(
+                " * Starting normalization by air region..."
+            )
+            air_sums = []
+            for idx in range(0, data.shape[0]):
+                air_data_sum = data[idx, top:bottom, left:right].sum()
+                air_sums.append(air_data_sum)
+
+            air_sums = np.true_divide(air_sums, np.amax(air_sums))
+
+            self.tomo_print(
+                " Air region sums (relative to maximum): " + str(air_sums),
+                priority=0)
+
+            for idx in range(0, data.shape[0]):
+                data[idx, :, :] = np.true_divide(data[idx, :, :],
+                                                 air_sums[idx])
+
+            avg = np.average(air_sums)
+            self.tomo_print_timed_stop(
+                " * Finished normalization by air region. Statistics of values in the air region, "
+                "average: {0}, max ratio: {1}, min ratio: {2}.".format(
+                    avg, np.max(air_sums) / avg, np.min(air_sums) / avg))
+
+        else:
+            self.tomo_print(
+                " * Note: NOT normalizing by air region", priority=2)
+
+        return data
 
     def apply_cut_off_and_others(self, data, cfg):
         """
@@ -1309,7 +1309,8 @@ class ReconstructionCommand(object):
                     os.path.join(preproc_dir,
                                  'out_preproc_proj_image' + str(idx).zfill(6)),
                     img_format=preproc_cfg.out_img_format,
-                    dtype=out_dtype)
+                    dtype=out_dtype,
+                    scale_factor=None)
             self.tomo_print_timed_stop(
                 " * Saving pre-processed images finished.")
         else:
@@ -1321,7 +1322,8 @@ class ReconstructionCommand(object):
                           output_dir=None,
                           out_dtype='uint16',
                           image_name='saved_image',
-                          image_index=0):
+                          image_index=0,
+                          scale_factor=None):
         """
         Save (pre-processed) images from a data array to image files.
 
@@ -1329,17 +1331,16 @@ class ReconstructionCommand(object):
         @param data :: data volume with pre-processed images
         @param preproc_cfg :: pre-processing configuration set up for a reconstruction
         @param out_dtype :: dtype used for the pixel type/depth in the output image files
-        :param image_index:
         :param image_name:
+        :param image_index:
         """
 
         # DEBUG message
         # print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
-        if output_dir is None:
-            preproc_dir = os.path.join(output_dir,
-                                   self._PREPROC_IMGS_SUBDIR_NAME)
+        if output_dir is not None:
+            preproc_dir = os.path.join(output_dir, self._PREPROC_IMGS_SUBDIR_NAME)
         else:
-            preproc_dir = output_dir
+            preproc_dir = preproc_cfg.output_dir
 
         self.tomo_print_timed_start(" * Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
 
@@ -1350,7 +1351,8 @@ class ReconstructionCommand(object):
             data[:, :],
             os.path.join(preproc_dir, image_name + str(image_index).zfill(6)),
             img_format=preproc_cfg.out_img_format,
-            dtype=out_dtype)
+            dtype=out_dtype,
+            scale_factor=scale_factor)
 
         self.tomo_print_timed_stop(
             " * Finished saving single image.")

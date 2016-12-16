@@ -102,6 +102,7 @@ class PreProcConfig(object):
         # Center of rotation
         self.cor = None
         self.save_preproc_imgs = True
+        self.output_dir = None
 
     def __str__(self):
 
