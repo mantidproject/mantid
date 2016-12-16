@@ -312,6 +312,8 @@ Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) const {
   case API::NumEventsNormalization:
     return m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
   }
+  // Should not reach here
+  return std::numeric_limits<signal_t>::quiet_NaN();
 }
 //------------------------------------------------------------------------------
 template <class Scalar>
