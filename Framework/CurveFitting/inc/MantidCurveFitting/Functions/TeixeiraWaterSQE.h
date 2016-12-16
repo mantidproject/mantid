@@ -4,10 +4,16 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
+#include "MantidCurveFitting/Functions/FunctionQDepends.h"
 // 3rd party library headers (N/A)
 // standard library headers (N/A)
+
+namespace API {
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+class Jacobian;
+}
 
 namespace Mantid {
 namespace CurveFitting {
@@ -41,23 +47,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 /**
  * @brief Teixeira's model to describe the translational diffusion of water
  */
-class DLLExport TeixeiraWaterSQE : public API::ParamFunction,
-                                   public API::IFunction1D {
+class DLLExport TeixeiraWaterSQE : public FunctionQDepends{
+
 public:
-  TeixeiraWaterSQE();
-
-  /// overwrite IFunction base class methods
-  void init() override;
-
-  /// overwrite IFunction base class methods
   std::string name() const override { return "TeixeiraWaterSQE"; }
-
-  /// overwrite IFunction base class methods
   const std::string category() const override { return "QuasiElastic"; }
-
-protected:
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
+  void functionDeriv1D(Mantid::API:: Jacobian *jacobian, const double *xValues,
+                       const size_t nData) override;
+
+protected:
+  void declareParameters() override;
 };
 
 } // namespace Functions
