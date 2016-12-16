@@ -97,7 +97,7 @@ DECLARE_WIDGET_PLUGIN(AlgorithmSelectorWidgetPlugin,
 DECLARE_WIDGET_PLUGIN(ScriptEditorPlugin, ScriptEditor,
                       "Widget for editing python script");
 
-DECLARE_WIDGET_PLUGIN(FileFinderPlugin, MantidQt::MantidWidgets::MWRunFiles,
+DECLARE_WIDGET_PLUGIN(FileFinderPlugin, MantidQt::API::MWRunFiles,
                       "Searches for the given files within the paths defined "
                       "by\nMantid's datasearch.directories property");
 
