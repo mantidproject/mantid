@@ -122,8 +122,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   vtkNew<vtkMDHWSignalArray<double>> signal;
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset,
-                          imageSize);
+  signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
   // update progress after a 1% change

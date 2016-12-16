@@ -48,8 +48,7 @@ public:
   void PrintSelf(ostream &os, vtkIndent indent) override;
 
   void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *ws,
-                       VisualNormalization normalization, std::size_t offset,
-                       vtkIdType size);
+                       VisualNormalization normalization, std::size_t offset);
 
   // Reimplemented virtuals -- see superclasses for descriptions:
   void Initialize() override;
@@ -117,7 +116,7 @@ private:
   void operator=(const vtkMDHWSignalArray &);     // Not implemented.
 
   std::size_t m_offset;
-  VisualNormalization m_normalization;
+  API::MDNormalization m_normalization;
   DataObjects::MDHistoWorkspace *m_ws;
   Scalar m_temporaryTuple[1];
 };
@@ -141,14 +140,24 @@ void vtkMDHWSignalArray<Scalar>::PrintSelf(ostream &os, vtkIndent indent) {
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::InitializeArray(
     Mantid::DataObjects::MDHistoWorkspace *ws,
-    Mantid::VATES::VisualNormalization normalization, std::size_t offset,
-    vtkIdType size) {
-  this->MaxId = size - 1;
-  this->Size = size;
+    Mantid::VATES::VisualNormalization normalization, std::size_t offset) {
   this->NumberOfComponents = 1;
   this->m_ws = ws;
-  this->m_normalization = normalization;
   this->m_offset = offset;
+
+  const auto nBinsX = m_ws->getXDimension()->getNBins();
+  const auto nBinsY = m_ws->getYDimension()->getNBins();
+  const auto nBinsZ = m_ws->getZDimension()->getNBins();
+  this->Size = nBinsX * nBinsY * nBinsZ;
+  this->MaxId = this->Size - 1;
+
+  if (normalization == AutoSelect) {
+    // enum to enum.
+    m_normalization =
+        static_cast<API::MDNormalization>(m_ws->displayNormalization());
+  } else {
+    m_normalization = static_cast<API::MDNormalization>(normalization);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -296,11 +305,11 @@ template <class Scalar>
 Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) const {
   auto pos = m_offset + idx;
   switch (m_normalization) {
-  case NoNormalization:
+  case API::NoNormalization:
     return m_ws->getSignalAt(pos);
-  case VolumeNormalization:
+  case API::VolumeNormalization:
     return m_ws->getSignalAt(pos) * m_ws->getInverseVolume();
-  case NumEventsNormalization:
+  case API::NumEventsNormalization:
     return m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
   }
 }
