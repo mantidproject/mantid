@@ -118,7 +118,7 @@ private:
 
   std::size_t m_offset;
   VisualNormalization m_normalization;
-  Mantid::DataObjects::MDHistoWorkspace *m_ws;
+  DataObjects::MDHistoWorkspace *m_ws;
   Scalar m_temporaryTuple[1];
 };
 
@@ -251,36 +251,14 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::ClearLookup() {
 //------------------------------------------------------------------------------
 template <class Scalar>
 double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
-  auto pos = m_offset + i;
-  switch (m_normalization) {
-  case API::NoNormalization:
-    m_temporaryTuple[0] = m_ws->getSignalAt(pos);
-    break;
-  case API::VolumeNormalization:
-    m_temporaryTuple[0] = m_ws->getSignalAt(pos) * m_ws->getInverseVolume();
-    break;
-  case API::NumEventsNormalization:
-    m_temporaryTuple[0] = m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
-    break;
-  }
+  this->GetTuple(i, m_temporaryTuple);
   return &m_temporaryTuple[0];
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i, double *tuple) {
-  auto pos = m_offset + i;
-  switch (m_normalization) {
-  case NoNormalization:
-    tuple[0] = m_ws->getSignalAt(pos);
-    break;
-  case VolumeNormalization:
-    tuple[0] = m_ws->getSignalAt(pos) * m_ws->getInverseVolume();
-    break;
-  case NumEventsNormalization:
-    tuple[0] = m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
-    break;
-  }
+  tuple[0] = this->GetValue(i);
 }
 
 //------------------------------------------------------------------------------
@@ -329,18 +307,7 @@ Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) const {
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
-  auto pos = m_offset + idx;
-  switch (m_normalization) {
-  case NoNormalization:
-    m_temporaryTuple[0] = m_ws->getSignalAt(pos);
-    break;
-  case VolumeNormalization:
-    m_temporaryTuple[0] = m_ws->getSignalAt(pos) * m_ws->getInverseVolume();
-    break;
-  case NumEventsNormalization:
-    m_temporaryTuple[0] = m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
-    break;
-  }
+  this->GetTypedTuple(idx, m_temporaryTuple);
   return m_temporaryTuple[0];
 }
 
@@ -348,18 +315,7 @@ Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTypedTuple(vtkIdType tupleId,
                                                Scalar *tuple) const {
-  auto pos = m_offset + tupleId;
-  switch (m_normalization) {
-  case NoNormalization:
-    tuple[0] = m_ws->getSignalAt(pos);
-    break;
-  case VolumeNormalization:
-    tuple[0] = m_ws->getSignalAt(pos) * m_ws->getInverseVolume();
-    break;
-  case NumEventsNormalization:
-    tuple[0] = m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
-    break;
-  }
+  tuple[0] = this->GetValue(tupleId);
 }
 
 //------------------------------------------------------------------------------
