@@ -1285,7 +1285,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 'incident energy.')
         self.declareProperty(name=_PROP_FLAT_BKG_SCALING,
                              defaultValue=1.0,
-                             validator=scalingFactor,
+                             validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
         self.declareProperty(name=_PROP_FLAT_BKG_WINDOW,
