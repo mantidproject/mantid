@@ -145,7 +145,8 @@ public:
     // Check that pixels that were out of range were masked
     const auto &oSpecInfo2 = ws2d_out->spectrumInfo();
     TS_ASSERT(oSpecInfo2.isMasked(5 + SANSInstrumentCreationHelper::nMonitors));
-    TS_ASSERT(!oSpecInfo2.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
+    TS_ASSERT(
+        !oSpecInfo2.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
