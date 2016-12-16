@@ -184,7 +184,13 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
 
     m_matWs->generateHistogram(sourceRow, xScale, yVals, err, true);
     for (size_t col = 0; col < numCols; col++) {
-      newData[index] = (float)yVals[col];
+      float value = static_cast<float>(yVals[col]);
+      if (std::isinf(value)) {
+        value = std::copysign(std::numeric_limits<decltype(value)>::max(), value);
+      } else if (std::isnan(value)) {
+        value = 0;
+      }
+      newData[index] = value;
       index++;
     }
   }
