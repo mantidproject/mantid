@@ -8,8 +8,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
-#include "MantidGeometry/IDetector.h"
-
 #include <QApplication>
 #include <QObject>
 #include <QPalette>
@@ -283,15 +281,10 @@ bool MantidMatrixModel::checkMonitorCache(int row) const {
     if (m_monCache.contains(row)) {
       isMon = m_monCache.value(row);
     } else {
-      try {
-        size_t wsIndex = static_cast<size_t>(row);
-        auto det = m_workspace->getDetector(wsIndex);
-        isMon = det->isMonitor();
-        m_monCache.insert(row, isMon);
-      } catch (std::exception &) {
-        m_monCache.insert(row, false);
-        isMon = false;
-      }
+      const auto &specInfo = m_workspace->spectrumInfo();
+      size_t wsIndex = static_cast<size_t>(row);
+      isMon = specInfo.hasDetectors(wsIndex) && specInfo.isMonitor(wsIndex);
+      m_monCache.insert(row, isMon);
     }
     return isMon;
   } else {
@@ -311,15 +304,10 @@ bool MantidMatrixModel::checkMaskedCache(int row) const {
     if (m_maskCache.contains(row)) {
       isMasked = m_maskCache.value(row);
     } else {
-      const auto &spectrumInfo = m_workspace->spectrumInfo();
+      const auto &specInfo = m_workspace->spectrumInfo();
       size_t wsIndex = static_cast<size_t>(row);
-      if (spectrumInfo.hasDetectors(wsIndex)) {
-        isMasked = spectrumInfo.isMasked(wsIndex);
-        m_maskCache.insert(row, isMasked);
-      } else {
-        m_maskCache.insert(row, false);
-        isMasked = false;
-      }
+      isMasked = specInfo.hasDetectors(wsIndex) && specInfo.isMasked(wsIndex);
+      m_maskCache.insert(row, isMasked);
     }
     return isMasked;
   } else {

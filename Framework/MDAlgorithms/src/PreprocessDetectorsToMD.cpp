@@ -253,7 +253,6 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
     Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();
     //     detMask[i]  = true;
 
-    // Check that we aren't dealing with monitor...
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
@@ -339,7 +338,6 @@ void PreprocessDetectorsToMD::updateMasksState(
   uint32_t liveDetectorsCount(0);
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
-    // Check that we aren't dealing with monitor...
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 

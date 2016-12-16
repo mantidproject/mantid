@@ -543,7 +543,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
-  const auto &outSpectrumInfo = outputWS->spectrumInfo();
+  auto &outSpectrumInfo = outputWS->mutableSpectrumInfo();
   // Loop over the histograms (detector spectra)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     double efixed = efixedProp;
@@ -581,7 +581,9 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       // detectors, this call is
       // the same as just zeroing out the data (calling clearData on the
       // spectrum)
-      outputWS->maskWorkspaceIndex(i);
+      outputWS->getSpectrum(i).clearData();
+      if (outSpectrumInfo.hasDetectors(i))
+        outSpectrumInfo.setMasked(i, true);
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());

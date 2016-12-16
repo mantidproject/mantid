@@ -7,7 +7,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <set>
 #include <numeric>
@@ -211,10 +210,12 @@ void MaskDetectors::exec() {
   }
 
   // Get a reference to the spectra-detector map to get hold of detector ID's
+  auto &spectrumInfo = WS->mutableSpectrumInfo();
   double prog = 0.0;
-  std::vector<size_t>::const_iterator wit;
-  for (wit = indexList.begin(); wit != indexList.end(); ++wit) {
-    WS->maskWorkspaceIndex(*wit);
+  for (const auto i : indexList) {
+    WS->getSpectrum(i).clearData();
+    if (spectrumInfo.hasDetectors(i))
+      spectrumInfo.setMasked(i, true);
 
     // Progress
     prog += (1.0 / static_cast<int>(indexList.size()));
