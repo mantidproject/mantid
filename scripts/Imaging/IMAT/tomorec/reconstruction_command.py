@@ -247,7 +247,7 @@ class ReconstructionCommand(object):
         # ----------------------------------------------------------------
 
         # Save pre-proc images, print inside
-        self.save_preproc_images(cfg.postproc_cfg.output_dir, preproc_data,
+        self.save_preproc_images(preproc_data, cfg.postproc_cfg.output_dir,
                                  cfg.preproc_cfg)
 
         # ----------------------------------------------------------------
@@ -398,12 +398,12 @@ class ReconstructionCommand(object):
                         str(data.dtype))
         preproc_data = self.apply_prep_filters(
             data, cfg.preproc_cfg, white, dark)
-        preproc_data = self.apply_line_projection(
-            preproc_data, cfg.preproc_cfg)
+        # preproc_data = self.apply_line_projection(
+        #     preproc_data, cfg.preproc_cfg)
 
         # pass the whole config because we need to tool's name
-        preproc_data = self.apply_final_preproc_corrections(preproc_data,
-                                                            cfg)
+        # preproc_data = self.apply_final_preproc_corrections(preproc_data,
+        #                                                     cfg)
 
         return preproc_data
 
@@ -1280,8 +1280,8 @@ class ReconstructionCommand(object):
             format(out_recon_dir))
 
     def save_preproc_images(self,
-                            output_dir,
                             preproc_data,
+                            output_dir,
                             preproc_cfg,
                             out_dtype='uint16'):
         """
@@ -1293,8 +1293,6 @@ class ReconstructionCommand(object):
         @param out_dtype :: dtype used for the pixel type/depth in the output image files
         """
 
-        min_pix = np.amin(preproc_data)
-        max_pix = np.amax(preproc_data)
         # DEBUG message
         # print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
         if preproc_cfg.save_preproc_imgs:
@@ -1308,8 +1306,6 @@ class ReconstructionCommand(object):
                 # rescale_intensity has issues with float64=>int16
                 tomoio.write_image(
                     preproc_data[idx, :, :],
-                    min_pix,
-                    max_pix,
                     os.path.join(preproc_dir,
                                  'out_preproc_proj_image' + str(idx).zfill(6)),
                     img_format=preproc_cfg.out_img_format,
@@ -1318,6 +1314,46 @@ class ReconstructionCommand(object):
                 " * Saving pre-processed images finished.")
         else:
             self.tomo_print(" * NOTE: NOT saving pre-processed images...")
+
+    def save_single_image(self,
+                          data,
+                          preproc_cfg,
+                          output_dir=None,
+                          out_dtype='uint16',
+                          image_name='saved_image',
+                          image_index=0):
+        """
+        Save (pre-processed) images from a data array to image files.
+
+        @param output_dir :: where results are being saved, including the pre-proc images/slices
+        @param data :: data volume with pre-processed images
+        @param preproc_cfg :: pre-processing configuration set up for a reconstruction
+        @param out_dtype :: dtype used for the pixel type/depth in the output image files
+        :param image_index:
+        :param image_name:
+        """
+
+        # DEBUG message
+        # print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
+        if output_dir is None:
+            preproc_dir = os.path.join(output_dir,
+                                   self._PREPROC_IMGS_SUBDIR_NAME)
+        else:
+            preproc_dir = output_dir
+
+        self.tomo_print_timed_start(" * Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
+
+        tomoio.make_dirs_if_needed(preproc_dir)
+
+        # rescale_intensity has issues with float64=>int16
+        tomoio.write_image(
+            data[:, :],
+            os.path.join(preproc_dir, image_name + str(image_index).zfill(6)),
+            img_format=preproc_cfg.out_img_format,
+            dtype=out_dtype)
+
+        self.tomo_print_timed_stop(
+            " * Finished saving single image.")
 
     def _check_data_stack(self, data):
         if not isinstance(data, np.ndarray):

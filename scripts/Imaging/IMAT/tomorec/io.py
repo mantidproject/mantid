@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+
 # Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -34,7 +35,8 @@ import numpy as np
 
 def _debug_print_memory_usage_linux(message=""):
     try:
-        # Windows doesn't seem to have resource package, so this will silently fail
+        # Windows doesn't seem to have resource package, so this will silently
+        # fail
         import resource
         print(" >> Memory usage " +
               str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + " KB, " +
@@ -91,12 +93,10 @@ def make_dirs_if_needed(dirname):
         os.makedirs(absname)
 
 
-#pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments
 
 
 def write_image(img_data,
-                min_pix,
-                max_pix,
                 filename,
                 img_format=None,
                 dtype=None,
@@ -125,13 +125,14 @@ def write_image(img_data,
         img_format = 'png'
     filename = filename + '.' + img_format
 
+    min_pix = np.amin(img_data)
+    max_pix = np.amax(img_data)
+
     # The special case dtype = 'uint8' could be handled with bytescale:
     # img_data = scipy.misc.bytescale(img_data)
 
     # from bigger to smaller type, example: float32 => uint16
     if dtype and img_data.dtype != dtype:
-        old_img_data = img_data
-        img_data = np.zeros(old_img_data.shape, dtype='float32')
         pix_range = max_pix - float(min_pix)
         scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / pix_range
 
@@ -139,11 +140,13 @@ def write_image(img_data,
         if too_verbose:
             print("pix min: {0}, max: {1}, scale_factor: {2}".format(
                 min_pix, max_pix, scale_factor))
-        img_data = scale_factor * (old_img_data - min_pix)
+        img_data = np.clip(scale_factor * img_data, 0,
+                           np.finfo(img_data.dtype)) if scale_factor > 1 else img_data
         img_data = img_data.astype(dtype=dtype)
 
     # this rescale intensity would ignore the range of other images in the stack
-    # in addition, it clips if the original values are below/above the destination type limits
+    # in addition, it clips if the original values are below/above the
+    # destination type limits
     if rescale_intensity:
         try:
             from skimage import exposure
@@ -152,7 +155,7 @@ def write_image(img_data,
                 "Could not find the exposure package (in skimage) "
                 "Error details: {0}".format(exc))
         img_data = exposure.rescale_intensity(
-            img_data, out_range=dtype)  #'uint16')
+            img_data, out_range=dtype)
 
     skio = _import_skimage_io()
     # Without this plugin tiff files don't seem to be generated correctly for some
@@ -217,7 +220,7 @@ def avg_image_files(path,
         except IOError as exc:
             print(
                 "Got I/O exception trying to open and load {0}: {1}. Ignoring and going on.".
-                format(ifile, str(exc)))
+                    format(ifile, str(exc)))
             continue
 
         accum = _agg_img(accum, hdu[0].data, agg_method=agg_method)
@@ -269,7 +272,7 @@ def _alphanum_key_split(path_str):
     return [
         int(c) if c.isdigit() else c
         for c in ALPHA_NUM_SPLIT_RE.split(path_str)
-    ]
+        ]
 
 
 def _read_img(filename, file_extension=None):
@@ -285,7 +288,7 @@ def _read_img(filename, file_extension=None):
         if len(imgs) < 1:
             raise RuntimeError(
                 "Could not load at least one FITS image/table file from: {0}".
-                format(filename))
+                    format(filename))
 
         # Input fits files always contain a single image
         img_arr = imgs[0].data
@@ -352,7 +355,7 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension,
     if len(files_match) <= 0:
         print(
             "Could not find any flat field / open beam image files in: {0}".
-            format(field_prefix))
+                format(field_prefix))
     else:
         imgs_stack = _read_listed_files(files_match, img_shape,
                                         file_extension, data_dtype)
@@ -371,8 +374,7 @@ def read_stack_of_images(sample_path,
                          file_extension='tiff',
                          file_prefix='',
                          flat_field_prefix='',
-                         dark_field_prefix='',
-                         verbose=True):
+                         dark_field_prefix=''):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -411,7 +413,7 @@ def read_stack_of_images(sample_path,
     if file_extension not in SUPPORTED_EXTS:
         raise ValueError(
             "File extension not supported: {0}. Supported extensions: {1}".
-            format(file_extension, SUPPORTED_EXTS))
+                format(file_extension, SUPPORTED_EXTS))
 
     sample_path = os.path.expanduser(sample_path)
 
@@ -423,45 +425,52 @@ def read_stack_of_images(sample_path,
     if len(files_match) <= 0:
         raise RuntimeError(
             "Could not find any image files in {0}, with prefix: {1}, extension: {2}".
-            format(sample_path, file_prefix, file_extension))
+                format(sample_path, file_prefix, file_extension))
 
     files_match.sort(key=_alphanum_key_split)
 
     print(" * Found {0} image files in {1}".format(
         len(files_match), sample_path))
 
-    # It is assumed that all images have the same size and properties as the first.
+    # It is assumed that all images have the same size and properties as the
+    # first.
     try:
         first_img = _read_img(files_match[0], file_extension)
     except RuntimeError as exc:
         raise RuntimeError(
             "Could not load at least one image file from: {0}. Details: {1}".
-            format(sample_path, str(exc)))
+                format(sample_path, str(exc)))
 
-    data_dtype = first_img.dtype
+    sample_dtype = first_img.dtype
     # usual type in fits with 16-bit pixel depth
-    if '>i2' == data_dtype:
-        data_dtype = np.uint16
+    if '>i2' == sample_dtype:
+        sample_dtype = np.uint16
+        # we want the flat and dark to be float32 or we might get infinities
+        # when loading
+        flat_dtype = np.float32
+        dark_dtype = np.float32
+    else:
+        raise ValueError("Unexpected image pixel data depth, found " + str(sample_dtype))
 
     img_shape = first_img.shape
     _debug_print_memory_usage_linux(", before sample loading.")
     sample_data = _read_listed_files(files_match, img_shape, file_extension,
-                                     data_dtype)
+                                     sample_dtype)
     _debug_print_memory_usage_linux(", after sample loading.")
-
-    _debug_print_memory_usage_linux(", before dark loading.")
-
-    flat_avg = get_flat_dark_stack(flat_field_path, flat_field_prefix,
-                                   flat_field_prefix, file_extension,
-                                   img_shape, data_dtype)
-    _debug_print_memory_usage_linux(", after dark loading.")
 
     _debug_print_memory_usage_linux(", before flat loading.")
 
+    flat_avg = get_flat_dark_stack(flat_field_path, flat_field_prefix,
+                                   flat_field_prefix, file_extension,
+                                   img_shape, flat_dtype)
+    _debug_print_memory_usage_linux(", after flat loading.")
+
+    _debug_print_memory_usage_linux(", before dark loading.")
     dark_avg = get_flat_dark_stack(dark_field_path, flat_field_prefix,
                                    dark_field_prefix, file_extension,
-                                   img_shape, data_dtype)
-    _debug_print_memory_usage_linux(", after flat loading.")
+                                   img_shape, dark_dtype)
+
+    _debug_print_memory_usage_linux(", after dark loading.")
 
     return sample_data, flat_avg, dark_avg
 

@@ -369,8 +369,7 @@ def main_tomo_rec():
     vers = sys.version_info
     if vers < (2, 7, 0):
         raise RuntimeError(
-            "Not running this test as it requires Python >= 2.7. Version found: {0}".
-                format(vers))
+            "Not running this test as it requires Python >= 2.7. Version found: {0}".format(vers))
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()
