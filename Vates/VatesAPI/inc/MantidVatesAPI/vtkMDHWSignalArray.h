@@ -260,7 +260,7 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::ClearLookup() {
 //------------------------------------------------------------------------------
 template <class Scalar>
 double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
-  this->GetTuple(i, m_temporaryTuple);
+  m_temporaryTuple[0] = this->GetValue(i);
   return &m_temporaryTuple[0];
 }
 
@@ -318,7 +318,7 @@ Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) const {
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
-  this->GetTypedTuple(idx, m_temporaryTuple);
+  m_temporaryTuple[0] = this->GetValue(idx);
   return m_temporaryTuple[0];
 }
 
