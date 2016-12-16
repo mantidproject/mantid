@@ -62,12 +62,12 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
         """
 
         corrected, fact = IndirectCylinderAbsorptionAbsorption(SampleWorkspace=self._red_ws,
-                                                      SampleChemicalFormula='H2-O',
-                                                      NumberWavelengths=2,
-                                                      Events=200,
-                                                      DefaultBeamSize=False,
-                                                      BeamHeight=2,
-                                                      BeamWidth=3)
+                                                               SampleChemicalFormula='H2-O',
+                                                               NumberWavelengths=10,
+                                                               Events=200,
+                                                               DefaultBeamSize=False,
+                                                               BeamHeight=2,
+                                                               BeamWidth=3)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -81,7 +81,7 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
                                                      CanWorkspace=self._can_ws,
                                                      SampleChemicalFormula='H2-O',
                                                      UseCanCorrections=False,
-                                                     Events=500)
+                                                     Events=200)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -97,7 +97,7 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
                                                      CanScaleFactor=0.8,
                                                      SampleChemicalFormula='H2-O',
                                                      UseCanCorrections=False,
-                                                     Events=500)
+                                                     Events=200)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -112,7 +112,7 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
                                                      SampleChemicalFormula='H2-O',
                                                      CanChemicalFormula='V',
                                                      UseCanCorrections=True,
-                                                     Events=500)
+                                                     Events=200)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)

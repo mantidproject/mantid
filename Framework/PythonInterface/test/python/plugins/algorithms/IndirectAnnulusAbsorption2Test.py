@@ -63,12 +63,12 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
         """
 
         corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
-                                                      SampleChemicalFormula='H2-O',
-                                                      NumberWavelengths=2,
-                                                      Events=200,
-                                                      DefaultBeamSize=False,
-                                                      BeamHeight=2,
-                                                      BeamWidth=3)
+                                                    SampleChemicalFormula='H2-O',
+                                                    NumberWavelengths=10,
+                                                    Events=200,
+                                                    DefaultBeamSize=False,
+                                                    BeamHeight=2,
+                                                    BeamWidth=3)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
