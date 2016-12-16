@@ -385,6 +385,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
             pass
         self.assertTrue(allFine)
 
+    def test_spectrumInfo(self):
+        specInfo = self._test_ws.spectrumInfo()
+        self.assertEquals(specInfo.isMasked(0), False)
+        self.assertEquals(specInfo.isMasked(1), False)
+
 if __name__ == '__main__':
     unittest.main()
     #Testing particular test from Mantid
