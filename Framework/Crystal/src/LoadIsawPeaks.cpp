@@ -576,8 +576,9 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       // Add the peak to workspace
       outWS->addPeak(peak);
     } catch (std::runtime_error &e) {
-      g_log.warning() << "Error reading peak SEQN " << seqNum << " : "
-                      << e.what() << '\n';
+      g_log.error() << "Error reading peak SEQN " << seqNum << " : " << e.what()
+                    << '\n';
+      throw std::runtime_error("Corrupted input file. ");
     }
 
     prog.report(in.tellg());
