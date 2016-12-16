@@ -4,8 +4,9 @@ file_names = {
 
 script_params = {
     "apply_solid_angle": False,
-    "raw_data_cropping_values": (800, 20000),
-    "spline_coefficient": 100
+    "raw_data_cropping_values": (750, 20000),
+    "spline_coefficient": 100,
+    "vanadium_cropping_values": (800, 19995)
 }
 
 tof_cropping_ranges = [

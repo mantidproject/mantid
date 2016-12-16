@@ -14,4 +14,5 @@ attr_mapping = [("apply_solid_angle",           "solid_angle_on"),
                 ("spline_coefficient",          "spline_coeff"),
                 ("tof_cropping_ranges",         "tof_cropping_values"),
                 ("output_directory",            "output_dir"),
-                ("user_name",                   "user_name")]
+                ("user_name",                   "user_name"),
+                ("vanadium_cropping_values",    "van_crop_values")]

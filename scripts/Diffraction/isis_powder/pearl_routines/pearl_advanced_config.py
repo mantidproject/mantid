@@ -18,6 +18,7 @@ long_mode_off_params = {
     "monitor_integration_range": (0.6, 5.0),
     # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
     "raw_data_tof_cropping": (0, 19995),
+    "vanadium_tof_cropping": (1400, 19990),
     "tof_cropping_ranges": [
         (1500, 19900),  # Bank 1
         (1500, 19900),  # Bank 2
@@ -40,7 +41,8 @@ long_mode_on_params = {
     "monitor_lambda_crop_range": (5.9, 12.0),
     "monitor_integration_range": (6, 10),
     # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
-    "raw_data_tof_cropping": (20295, 39995),
+    "raw_data_tof_cropping": (20280, 39995),
+    "vanadium_tof_cropping": (20295, 39993),
     "tof_cropping_ranges": [
         (20300, 39990),  # Bank 1
         (20300, 39990),  # Bank 2

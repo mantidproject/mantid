@@ -111,9 +111,14 @@ class Polaris(AbstractInst):
 
         return d_spacing_group
 
-    def crop_short_long_mode(self, ws_to_crop):
+    def crop_raw_to_expected_tof_range(self, ws_to_crop):
         cropped_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_values[0],
                                         x_max=self._inst_settings.raw_data_crop_values[1])
+        return cropped_ws
+
+    def crop_van_to_expected_tof_range(self, van_ws_to_crop):
+        cropped_ws = common.crop_in_tof(ws_to_crop=van_ws_to_crop, x_min=self._inst_settings.van_crop_values[0],
+                                        x_max=self._inst_settings.van_crop_values[-1])
         return cropped_ws
 
     def crop_banks_to_user_tof(self, focused_banks):

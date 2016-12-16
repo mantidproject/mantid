@@ -23,4 +23,5 @@ attr_mapping = [("attenuation_file_name",       "attenuation_file_name"),
                 ("tt_mode",                     "tt_mode"),
                 ("user_name",                   "user_name"),
                 ("vanadium_absorb_file",        "van_absorb_file"),
+                ("vanadium_tof_cropping",       "van_tof_cropping"),
                 ("vanadium_normalisation",      "van_norm")]

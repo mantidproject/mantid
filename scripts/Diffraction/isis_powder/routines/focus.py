@@ -33,7 +33,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     # Compensate for empty sample if specified
     input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,
                                                    empty_sample_ws_string=run_details.empty_runs)
-    input_workspace = instrument.crop_short_long_mode(ws_to_crop=input_workspace)
+    input_workspace = instrument.crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
     # Align / Focus
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,

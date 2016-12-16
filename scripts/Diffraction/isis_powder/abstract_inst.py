@@ -128,8 +128,11 @@ class AbstractInst(object):
     def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         return None
 
-    def crop_short_long_mode(self, ws_to_crop):
+    def crop_raw_to_expected_tof_range(self, ws_to_crop):
         return ws_to_crop
+
+    def crop_van_to_expected_tof_range(self, van_ws_to_crop):
+        return van_ws_to_crop
 
     def spline_vanadium_ws(self, focused_vanadium_ws):
         return None

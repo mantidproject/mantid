@@ -16,7 +16,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
                                                     instrument=instrument)
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
-    corrected_van_ws = instrument.crop_short_long_mode(ws_to_crop=corrected_van_ws)
+    corrected_van_ws = instrument.crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration_file_path)
@@ -32,6 +32,9 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
                                                    GroupingFileName=run_details.grouping_file_path)
 
     focused_spectra = common.extract_ws_spectra(focused_vanadium)
+    # Crop back to sane TOF as for PEARL at least 20,000-40,000 microseconds is extrapolated
+    # to 0-60,000 microseconds
+    focused_spectra = instrument.crop_van_to_expected_tof_range(focused_spectra)
     d_spacing_group = _save_focused_vanadium(instrument=instrument, run_details=run_details,
                                              van_spectra=focused_spectra)
     _create_vanadium_splines(focused_spectra, instrument, run_details)

@@ -111,10 +111,15 @@ class Pearl(AbstractInst):
     def crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)
 
-    def crop_short_long_mode(self, ws_to_crop):
+    def crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_vals[0],
                                     x_max=self._inst_settings.raw_data_crop_vals[-1])
         return out_ws
+
+    def crop_van_to_expected_tof_range(self, van_ws_to_crop):
+        cropped_ws = common.crop_in_tof(ws_to_crop=van_ws_to_crop, x_min=self._inst_settings.van_tof_cropping[0],
+                                        x_max=self._inst_settings.van_tof_cropping[-1])
+        return cropped_ws
 
     def generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
         return pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_match)

@@ -178,4 +178,7 @@ def _read_masking_file(masking_file_path):
             else:
                 line.rstrip()
                 bank_masking_list.append(line.split())
+
+    if bank_masking_list:
+        all_banks_masking_list.append(bank_masking_list)
     return all_banks_masking_list
