@@ -34,9 +34,8 @@ public:
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-
     signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
-                            offset, imageSize);
+                            offset);
 
     for (auto index = 0; index < imageSize; ++index) {
       double output1[1];
@@ -80,8 +79,7 @@ public:
             createIteratorWithNormalization(
                 Mantid::VATES::NumEventsNormalization, ws_sptr.get())));
     signal->InitializeArray(ws_sptr.get(),
-                            Mantid::VATES::NumEventsNormalization, offset,
-                            imageSize);
+                            Mantid::VATES::NumEventsNormalization, offset);
 
     vtkNew<vtkIdList> ptIds;
 
@@ -107,17 +105,13 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     std::size_t offset = 0;
-    const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
-    const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
-    const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
-    const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
     ws_sptr->setMDMaskAt(0, true);
     ws_sptr->setMDMaskAt(7, true);
     ws_sptr->setMDMaskAt(42, true);
 
     signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
-                            offset, imageSize);
+                            offset);
 
     vtkNew<vtkIdList> idList1, idList2;
 
@@ -131,13 +125,8 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     std::size_t offset = 0;
-    const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
-    const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
-    const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
-    const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-
     signal->InitializeArray(ws_sptr.get(), Mantid::VATES::VolumeNormalization,
-                            offset, imageSize);
+                            offset);
 
     vtkNew<vtkDoubleArray> doubleArray;
     doubleArray->SetNumberOfComponents(1);
@@ -157,13 +146,9 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(8.0, 3, 10, 5.0);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     std::size_t offset = 0;
-    const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
-    const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
-    const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
-    const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
     signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
-                            offset, imageSize);
+                            offset);
     TS_ASSERT(signal->LookupValue(1.0) == 0);
     TS_ASSERT(signal->LookupTypedValue(1.0) == 0);
   }
@@ -173,13 +158,8 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     std::size_t offset = 0;
-    const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
-    const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
-    const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
-    const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-
     signal->InitializeArray(ws_sptr.get(), Mantid::VATES::NoNormalization,
-                            offset, imageSize);
+                            offset);
 
     vtkNew<vtkIdList> idList1, idList2;
     signal->LookupValue(0.0, idList1.GetPointer());
@@ -210,8 +190,7 @@ public:
     imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
     m_signal->InitializeArray(ws_sptr.get(),
-                              Mantid::VATES::NumEventsNormalization, offset,
-                              imageSize);
+                              Mantid::VATES::NumEventsNormalization, offset);
   }
 
   void tearDown() override {}
