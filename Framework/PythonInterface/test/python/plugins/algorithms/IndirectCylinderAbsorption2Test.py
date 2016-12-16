@@ -61,13 +61,13 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
         Tests beam dimensions
         """
 
-        corrected, fact = IndirectCylinderAbsorptionAbsorption(SampleWorkspace=self._red_ws,
-                                                               SampleChemicalFormula='H2-O',
-                                                               NumberWavelengths=10,
-                                                               Events=200,
-                                                               DefaultBeamSize=False,
-                                                               BeamHeight=2,
-                                                               BeamWidth=3)
+        corrected, fact = IndirectCylinderAbsorption(SampleWorkspace=self._red_ws,
+                                                     SampleChemicalFormula='H2-O',
+                                                     NumberWavelengths=10,
+                                                     Events=200,
+                                                     DefaultBeamSize=False,
+                                                     BeamHeight=2,
+                                                     BeamWidth=3)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
