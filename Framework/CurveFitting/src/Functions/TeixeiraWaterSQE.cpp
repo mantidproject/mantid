@@ -72,17 +72,20 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
 
 /**
  * @brief analytical/numerical derivative with respect to fitting parameters
- * We carry out analytical derivative for parameter Height and numerical derivatives for parameters
+ * We carry out analytical derivative for parameter Height and numerical
+ * derivatives for parameters
  * DiffCoeff, Tau, and Centre, selecting sensible steps.
  */
-void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian, const double *xValues,
+void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian,
+                                       const double *xValues,
                                        const size_t nData) {
-  const double deltaF{0.1};  // increase parameter by this fraction
+  const double deltaF{0.1}; // increase parameter by this fraction
   const size_t nParam = this->nParams();
-  // cutoff defines the smallest change in the parameter when calculating the numerical derivative
+  // cutoff defines the smallest change in the parameter when calculating the
+  // numerical derivative
   std::map<std::string, double> cutoff;
-  cutoff["DiffCoeff"] = 0.2;  // 0.2x10^(-5)cm^2/s
-  cutoff["Tau"] = 0.2; // 0.2ps
+  cutoff["DiffCoeff"] = 0.2; // 0.2x10^(-5)cm^2/s
+  cutoff["Tau"] = 0.2;       // 0.2ps
   cutoff["Centre"] = 0.0001; // 0.1micro-eV
   std::vector<double> out(nData);
   this->applyTies();
@@ -90,23 +93,23 @@ void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian, const do
 
   for (size_t iP = 0; iP < nParam; iP++) {
     std::vector<double> derivative(nData);
-    if(this->isActive(iP)) {
+    if (this->isActive(iP)) {
       const double pVal = this->activeParameter(iP);
       const std::string pName = this->parameterName(iP);
-      if(pName=="Height") {
+      if (pName == "Height") {
         // exact derivative
         this->setActiveParameter(iP, 1.0);
         this->applyTies();
         this->function1D(&derivative[0], xValues, nData);
-      }
-      else {
+      } else {
         // numerical derivative
-        double delta = cutoff[pName] > fabs(pVal*deltaF) ? cutoff[pName] : pVal*deltaF;
-        this->setActiveParameter(iP, pVal+delta);
+        double delta =
+            cutoff[pName] > fabs(pVal * deltaF) ? cutoff[pName] : pVal * deltaF;
+        this->setActiveParameter(iP, pVal + delta);
         this->applyTies();
         this->function1D(&derivative[0], xValues, nData);
         for (size_t i = 0; i < nData; i++) {
-          derivative.at(i) = (derivative.at(i)-out.at(i))/delta;
+          derivative.at(i) = (derivative.at(i) - out.at(i)) / delta;
         }
       }
       this->setActiveParameter(iP, pVal); // restore the value of the parameter
