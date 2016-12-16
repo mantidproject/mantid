@@ -1290,8 +1290,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       auto param = ParameterFactory::create(type, name);
       param->fromString(paramValue);
       bool value = param->value<bool>();
-      m_detectorInfo->setMasked(m_detectorInfoWrapper->indexOf(det->getID()),
-                                value);
+      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), value);
     } else {
       pmap.add(tokens[1], comp, tokens[2], paramValue);
     }
