@@ -155,8 +155,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     m_parmap = boost::make_shared<ParameterMap>();
   }
   const auto numDets = sptr_instrument->getNumberDetectors();
-  if (sptr_instrument->hasDetectorInfo()) {
-    const auto &detInfo = sptr_instrument->detectorInfo();
+  if (instr->hasDetectorInfo()) {
+    const auto &detInfo = instr->detectorInfo();
     if (numDets != detInfo.size())
       throw std::runtime_error("ExperimentInfo::setInstrument: size mismatch "
                                "between DetectorInfo and number of detectors "
