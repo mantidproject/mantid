@@ -82,6 +82,8 @@ public:
   void setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);
   void setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);
 
+  const Geometry::IDetector &detector(const size_t index) const;
+
   // This does not really belong into DetectorInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
   Kernel::V3D sourcePosition() const;
