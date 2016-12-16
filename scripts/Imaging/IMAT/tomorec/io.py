@@ -445,7 +445,7 @@ def read_stack_of_images(sample_path,
     sample_dtype = first_img.dtype
     # usual type in fits with 16-bit pixel depth
     if '>i2' == sample_dtype:
-        sample_dtype = np.float16
+        sample_dtype = np.float32
         # we want the flat and dark to be float32 or we might get infinities
         # when loading
         flat_dtype = np.float32

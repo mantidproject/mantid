@@ -353,7 +353,6 @@ class ReconstructionCommand(object):
         # append to a readme/report that should have been pre-filled with the
         # initial configuration
         with open(filename, 'a') as oreadme:
-
             run_hdr = ("\n"
                        "--------------------------\n"
                        "Run/job details:\n"
@@ -445,12 +444,13 @@ class ReconstructionCommand(object):
 
         # NOTE flats and darks are cropped inside normalize_flat_dark
         data = self.normalize_flat_dark(data, preproc_cfg, flat, dark)
-        # data = self.normalize_air_region(data, preproc_cfg)
+        data = self.normalize_air_region(data, preproc_cfg)
 
-        if not preproc_cfg.crop_before_normalize:
-            data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
+        # if not preproc_cfg.crop_before_normalize:
+        #     data, flat, dark = self.crop_coords(data, preproc_cfg, flat, dark)
 
-        # data = self.apply_cut_off_and_others(data, preproc_cfg)
+        data = self.apply_cut_off_and_others(data, preproc_cfg)
+        data = self.median_filter(data, preproc_cfg)
 
         # discarding the flat and dark data here
         return data
@@ -495,7 +495,7 @@ class ReconstructionCommand(object):
             if False:
                 print(
                     "   Initial image max: {0}. Transformed to log scale, min: {1}, max: {2}.".
-                    format(max_img, np.amin(to_log), np.amax(to_log)))
+                        format(max_img, np.amin(to_log), np.amax(to_log)))
             imgs_angles[idx, :, :] = -np.log(to_log + 1e-6)
 
         self.tomo_print_timed_start(
@@ -520,24 +520,24 @@ class ReconstructionCommand(object):
 
         # Remove stripes in sinograms / ring artefacts in reconstructed volume
         preproc_cfg = cfg.preproc_cfg
-        if preproc_cfg .stripe_removal_method:
+        if preproc_cfg.stripe_removal_method:
             import prep as iprep
-            if 'wavelet-fourier' == preproc_cfg .stripe_removal_method.lower():
+            if 'wavelet-fourier' == preproc_cfg.stripe_removal_method.lower():
                 self.tomo_print_timed_start(
                     " * Starting removal of stripes/ring artifacts using the method '{0}'...".
-                    format(preproc_cfg .stripe_removal_method))
+                        format(preproc_cfg.stripe_removal_method))
 
-                #preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
+                # preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
                 preproc_data = iprep.filters.remove_stripes_ring_artifacts(
                     preproc_data, 'wavelet-fourier')
 
                 self.tomo_print_timed_start(
                     " * Finished removal of stripes/ring artifacts.")
 
-            elif 'titarenko' == preproc_cfg .stripe_removal_method.lower():
+            elif 'titarenko' == preproc_cfg.stripe_removal_method.lower():
                 self.tomo_print_timed_start(
                     " * Starting removal of stripes/ring artifacts, using the method '{0}'...".
-                    format(preproc_cfg .stripe_removal_method))
+                        format(preproc_cfg.stripe_removal_method))
 
                 preproc_data = tomopy.prep.stripe.remove_stripe_ti(
                     preproc_data)
@@ -547,7 +547,7 @@ class ReconstructionCommand(object):
             else:
                 self.tomo_print(
                     " * WARNING: stripe removal method '{0}' is unknown. Not applying it.".
-                    format(preproc_cfg .stripe_removal_method),
+                        format(preproc_cfg.stripe_removal_method),
                     priority=2)
         else:
             self.tomo_print(
@@ -588,7 +588,7 @@ class ReconstructionCommand(object):
             try:
                 self.tomo_print_timed_start(
                     " * Starting image cropping step, with pixel data type: {0}, coordinates: {1}. ...".
-                    format(sample.dtype, preproc_cfg.crop_coords))
+                        format(sample.dtype, preproc_cfg.crop_coords))
 
                 import prep as iprep
                 sample = iprep.filters.crop_vol(sample, preproc_cfg.crop_coords)
@@ -624,7 +624,7 @@ class ReconstructionCommand(object):
 
         return sample, flat, dark
 
-    def normalize_flat_dark(self, sample, preproc_cfg, norm_flat_img, norm_dark_img):
+    def normalize_flat_dark(self, sample, preproc_cfg, norm_flat_img, norm_dark_img=0):
         """
         Normalize by flat and dark images
 
@@ -651,7 +651,7 @@ class ReconstructionCommand(object):
         if isinstance(norm_flat_img, np.ndarray):
 
             if 2 != len(norm_flat_img.
-                        shape) or norm_flat_img.shape != sample.shape[1:]:
+                                shape) or norm_flat_img.shape != sample.shape[1:]:
                 raise ValueError(
                     "Incorrect shape of the flat image ({0}) which should match the "
                     "shape of the sample images ({1})".format(
@@ -659,7 +659,7 @@ class ReconstructionCommand(object):
 
             self.tomo_print_timed_start(
                 " * Starting normalization by flat/dark images with pixel data type: {0}...".
-                format(sample.dtype))
+                    format(sample.dtype))
 
             norm_divide = None
 
@@ -669,7 +669,6 @@ class ReconstructionCommand(object):
             else:
                 norm_divide = norm_flat_img
                 # set to 0 to not subtract anything as background
-                norm_dark_img = 0
 
             # prevent divide-by-zero issues by setting to a very small number
             norm_divide[norm_divide == 0] = 1e-6
@@ -684,12 +683,11 @@ class ReconstructionCommand(object):
 
             max_val = np.finfo(sample.dtype).max
             for idx in range(0, sample.shape[0]):
-                sample[idx, :, :] = np.clip(np.true_divide(
-                    sample[idx, :, :] - norm_dark_img, norm_divide), 0, max_val)
+                sample[idx, :, :] = np.true_divide(sample[idx, :, :] - norm_dark_img, norm_divide)
 
             self.tomo_print_timed_stop(
                 " * Finished normalization by flat/dark images with pixel data type: {0}.".
-                format(sample.dtype))
+                    format(sample.dtype))
         else:
             self.tomo_print(
                 " * Note: cannot apply normalization by flat/dark images because no valid flat image has been "
@@ -722,11 +720,11 @@ class ReconstructionCommand(object):
             )
 
         if pre_cfg.normalize_air_region:
-            if not isinstance(pre_cfg.normalize_air_region, list) or\
-               4 != len(pre_cfg.normalize_air_region):
+            if not isinstance(pre_cfg.normalize_air_region, list) or \
+                            4 != len(pre_cfg.normalize_air_region):
                 raise ValueError(
                     "Wrong air region coordinates when trying to use them to normalize images: {0}".
-                    format(pre_cfg.normalize_air_region))
+                        format(pre_cfg.normalize_air_region))
 
             if not all(
                     isinstance(crd, int)
@@ -757,10 +755,6 @@ class ReconstructionCommand(object):
                 air_sums.append(air_data_sum)
 
             air_sums = np.true_divide(air_sums, np.amax(air_sums))
-
-            self.tomo_print(
-                " Air region sums (relative to maximum): " + str(air_sums),
-                priority=0)
 
             for idx in range(0, data.shape[0]):
                 data[idx, :, :] = np.true_divide(data[idx, :, :],
@@ -818,20 +812,30 @@ class ReconstructionCommand(object):
             self.tomo_print(
                 " * Scale down not implemented in this version", priority=2)
 
-        if cfg.median_filter_size and cfg.median_filter_size > 1:
-            self.tomo_print_timed_start(
-                " * Starting noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
-                format(data.dtype, cfg.median_filter_size))
-            for idx in range(0, data.shape[0]):
-                data[idx] = scipy.ndimage.median_filter(
-                    data[idx], cfg.median_filter_size, mode='mirror')
-                #, mode='nearest')
-            self.tomo_print_timed_stop(
-                " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
-                format(data.dtype, cfg.median_filter_size))
         else:
             self.tomo_print(
                 " * Note: NOT applying noise filter /median.", priority=2)
+
+        return data
+
+    def median_filter(self, data, preproc_cfg):
+
+        self._check_data_stack(data)
+
+        if preproc_cfg.median_filter_size and preproc_cfg.median_filter_size > 1:
+            self.tomo_print_timed_start(
+                " * Starting noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
+                    format(data.dtype, preproc_cfg.median_filter_size))
+
+            for idx in range(0, data.shape[0]):
+                data[idx] = scipy.ndimage.median_filter(
+                    data[idx], preproc_cfg.median_filter_size, mode='mirror')  #, mode='nearest')
+            # data = scipy.ndimage.median_filter(data, preproc_cfg.median_filter_size, mode='mirror')
+            # , mode='nearest')
+
+            self.tomo_print_timed_stop(
+                " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
+                    format(data.dtype, preproc_cfg.median_filter_size))
 
         return data
 
@@ -861,7 +865,7 @@ class ReconstructionCommand(object):
 
         self.tomo_print_timed_start(
             " * Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
-            format(cfg.rotation * 90, sample.dtype))
+                format(cfg.rotation * 90, sample.dtype))
 
         # sanity check on sample data
         self._check_data_stack(sample)
@@ -876,7 +880,7 @@ class ReconstructionCommand(object):
 
         self.tomo_print_timed_stop(
             " * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}.".
-            format(cfg.rotation * 90, sample.dtype))
+                format(cfg.rotation * 90, sample.dtype))
 
         return sample, flat, dark
 
@@ -980,7 +984,7 @@ class ReconstructionCommand(object):
 
         self.tomo_print_timed_stop(
             " * Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
-            format(rec.shape, rec.dtype))
+                format(rec.shape, rec.dtype))
         self._debug_print_memory_usage_linux(", after reconstruction.")
         return rec
 
@@ -1058,25 +1062,25 @@ class ReconstructionCommand(object):
     # sinogram = np.swapaxes(sinogram, 0, 1)
 
     # Needs to be figured out better
-    #ctr = cor
-    #width = sinogram.shape[1]
-    #pad = 50
+    # ctr = cor
+    # width = sinogram.shape[1]
+    # pad = 50
 
-    #sino = np.nan_to_num(1./sinogram)
+    # sino = np.nan_to_num(1./sinogram)
 
     # pad the array so that the centre of rotation is in the middle
-    #alen = ctr
-    #blen = width - ctr
-    #mid = width / 2.0
+    # alen = ctr
+    # blen = width - ctr
+    # mid = width / 2.0
 
     # if ctr > mid:
-    #plow = pad
-    #phigh = (alen - blen) + pad
+    # plow = pad
+    # phigh = (alen - blen) + pad
     # else:
-    #plow = (blen - alen) + pad
-    #phigh = pad
+    # plow = (blen - alen) + pad
+    # phigh = pad
 
-    #logdata = np.log(sino+1)
+    # logdata = np.log(sino+1)
 
     # sinogram = np.tile(sinogram.reshape((1, ) + sinogram.shape), (8, 1, 1))
 
@@ -1175,14 +1179,14 @@ class ReconstructionCommand(object):
         if cfg.median_filter_size and cfg.median_filter_size > 1:
             self.tomo_print_timed_start(
                 " * Applying median_filter on reconstructed volume, with filtersize: {0}".
-                format(cfg.median_filter_size))
+                    format(cfg.median_filter_size))
 
             recon_data = scipy.ndimage.median_filter(recon_data,
                                                      cfg.median_filter_size)
 
             self.tomo_print_timed_stop(
                 " * Finished applying median_filter on reconstructed volume, with filtersize: {0}".
-                format(cfg.median_filter_size))
+                    format(cfg.median_filter_size))
         else:
             self.tomo_print(
                 " * Note: NOT applied median_filter on reconstructed volume",
@@ -1193,7 +1197,7 @@ class ReconstructionCommand(object):
 
             self.tomo_print_timed_start(
                 " * Applying N-dimensional median filter on reconstructed volume, with filter size: {0} ".
-                format(kernel_size))
+                    format(kernel_size))
 
             # Note this can be extremely slow
             recon_data = scipy.signal.medfilt(
@@ -1201,7 +1205,7 @@ class ReconstructionCommand(object):
 
             self.tomo_print_timed_stop(
                 " * Finished applying N-dimensional median filter on reconstructed volume, with filter size: {0} ".
-                format(kernel_size))
+                    format(kernel_size))
         else:
             self.tomo_print(
                 " * Note: NOT applied N-dimensional median filter on reconstructed volume"
@@ -1241,7 +1245,7 @@ class ReconstructionCommand(object):
             file_extension=img_format)
 
         if not isinstance(sample, np.ndarray) or not sample.shape \
-           or not isinstance(sample.shape, tuple) or 3 != len(sample.shape):
+                or not isinstance(sample.shape, tuple) or 3 != len(sample.shape):
             raise RuntimeError(
                 "Error reading sample images. Could not produce a 3-dimensional array "
                 "of data from the sample images. Got: {0}".format(sample))
@@ -1264,7 +1268,7 @@ class ReconstructionCommand(object):
         out_recon_dir = os.path.join(output_dir, 'reconstructed')
         self.tomo_print_timed_start(
             " * Starting saving slices of the reconstructed volume in: {0}...".
-            format(out_recon_dir))
+                format(out_recon_dir))
         tomoio.save_recon_as_vertical_slices(
             recon_data,
             out_recon_dir,
@@ -1284,7 +1288,7 @@ class ReconstructionCommand(object):
 
         self.tomo_print_timed_stop(
             " * Finished saving slices of the reconstructed volume in: {0}".
-            format(out_recon_dir))
+                format(out_recon_dir))
 
     def save_preproc_images(self,
                             preproc_data,
@@ -1324,7 +1328,7 @@ class ReconstructionCommand(object):
                                        self._PREPROC_IMGS_SUBDIR_NAME)
             self.tomo_print_timed_start(
                 " * Saving all pre-processed images (preproc_data) into {0} dtype: {1}".
-                format(preproc_dir, preproc_data.dtype))
+                    format(preproc_dir, preproc_data.dtype))
             tomoio.make_dirs_if_needed(preproc_dir)
             for idx in range(0, preproc_data.shape[0]):
                 # rescale_intensity has issues with float64=>int16
@@ -1390,12 +1394,12 @@ class ReconstructionCommand(object):
         if not isinstance(data, np.ndarray):
             raise ValueError(
                 "Invalid stack of images data. It is not a numpy array: {0}".
-                format(data))
+                    format(data))
 
         if 3 != len(data.shape):
             raise ValueError(
                 "Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
-                format(data.shape))
+                    format(data.shape))
 
     def find_center(self, cfg):
         self._check_paths_integrity(cfg)
