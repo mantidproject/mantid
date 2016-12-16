@@ -59,7 +59,7 @@ private:
         ThresholdRange_scptr(new NoThresholdRange), VolumeNormalization);
     factory.initialize(ws);
     auto dataset = factory.create(progressUpdate);
-    auto grid = vtkUnstructuredGrid::FastDownCast(dataset.Get());
+    auto grid = vtkUnstructuredGrid::SafeDownCast(dataset.Get());
     return vtkSmartPointer<vtkUnstructuredGrid>(grid);
   }
 

@@ -43,21 +43,21 @@ public:
         Mantid::VATES::VolumeNormalization, 0);
     inside.initialize(ws_sptr);
     auto insideData = inside.create(progressAction);
-    auto insideProduct = vtkStructuredGrid::FastDownCast(insideData.Get());
+    auto insideProduct = vtkStructuredGrid::SafeDownCast(insideData.Get());
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> below(
         ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)),
         Mantid::VATES::VolumeNormalization, 0);
     below.initialize(ws_sptr);
     auto belowData = below.create(progressAction);
-    auto belowProduct = vtkStructuredGrid::FastDownCast(belowData.Get());
+    auto belowProduct = vtkStructuredGrid::SafeDownCast(belowData.Get());
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> above(
         ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)),
         Mantid::VATES::VolumeNormalization, 0);
     above.initialize(ws_sptr);
     auto aboveData = above.create(progressAction);
-    auto aboveProduct = vtkStructuredGrid::FastDownCast(aboveData.Get());
+    auto aboveProduct = vtkStructuredGrid::SafeDownCast(aboveData.Get());
 
     TS_ASSERT_EQUALS((10 * 10 * 10), insideProduct->GetNumberOfCells());
     for (auto i = 0; i < insideProduct->GetNumberOfCells(); ++i) {

@@ -61,7 +61,7 @@ public:
         Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
     auto insideData = inside.create(progressUpdate);
-    auto insideProduct = vtkUnstructuredGrid::FastDownCast(insideData.Get());
+    auto insideProduct = vtkUnstructuredGrid::SafeDownCast(insideData.Get());
 
     TS_ASSERT_EQUALS(9, insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(10, insideProduct->GetNumberOfPoints());
@@ -83,7 +83,7 @@ public:
         Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
     auto aboveData = above.create(progressUpdate);
-    auto aboveProduct = vtkUnstructuredGrid::FastDownCast(aboveData.Get());
+    auto aboveProduct = vtkUnstructuredGrid::SafeDownCast(aboveData.Get());
 
     TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(10, aboveProduct->GetNumberOfPoints());
@@ -102,7 +102,7 @@ public:
         Mantid::VATES::VolumeNormalization);
     below.initialize(ws_sptr);
     auto belowData = below.create(progressUpdate);
-    auto belowProduct = vtkUnstructuredGrid::FastDownCast(belowData.Get());
+    auto belowProduct = vtkUnstructuredGrid::SafeDownCast(belowData.Get());
 
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(10, belowProduct->GetNumberOfPoints());
