@@ -249,17 +249,12 @@ public:
         makeWorkspaceWithDetectors(3, 1));
 
     // Initially un masked
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {
       TS_ASSERT_EQUALS(workspace->readY(i)[0], 1.0);
       TS_ASSERT_EQUALS(workspace->readE(i)[0], 1.0);
-
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
-      if (det) {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
-      } else {
-        TS_FAIL("No detector defined");
-      }
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
     }
 
     // Mask a spectra
@@ -268,6 +263,7 @@ public:
     workspace->mutableSpectrumInfo().setMasked(1, true);
     workspace->mutableSpectrumInfo().setMasked(2, true);
 
+    const auto &spectrumInfo2 = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {
       double expectedValue(0.0);
       bool expectedMasked(false);
@@ -279,14 +275,8 @@ public:
       }
       TS_ASSERT_EQUALS(workspace->readY(i)[0], expectedValue);
       TS_ASSERT_EQUALS(workspace->readE(i)[0], expectedValue);
-
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
-      if (det) {
-        TS_ASSERT_EQUALS(det->isMasked(), expectedMasked);
-      } else {
-        TS_FAIL("No detector defined");
-      }
+      TS_ASSERT(spectrumInfo2.hasDetectors(i));
+      TS_ASSERT_EQUALS(spectrumInfo2.isMasked(i), expectedMasked);
     }
   }
 
