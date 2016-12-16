@@ -10,10 +10,12 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
-#include "vtkNew.h"
-#include "vtkStructuredGrid.h"
-#include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
+#include "vtkFloatArray.h"
+#include "vtkNew.h"
+#include "vtkSMPTools.h"
+#include "vtkStructuredGrid.h"
+#include "vtkUnsignedCharArray.h"
 
 #include <cmath>
 
@@ -74,6 +76,23 @@ void vtkMDHistoHexFactory::validateWsNotNull() const {
 
 void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
 
+namespace {
+struct Worker {
+  vtkMDHWSignalArray<double> *m_signal;
+  vtkUnsignedCharArray *m_cga;
+  Worker(vtkMDHWSignalArray<double> *signal, vtkUnsignedCharArray *cga)
+      : m_signal(signal), m_cga(cga) {}
+  void operator()(vtkIdType begin, vtkIdType end) {
+    for (vtkIdType index = begin; index < end; ++index) {
+      if (!std::isfinite(m_signal->GetValue(index))) {
+        m_cga->SetValue(index, m_cga->GetValue(index) |
+                                   vtkDataSetAttributes::HIDDENCELL);
+      }
+    }
+  }
+};
+} // end anon namespace
+
 /** Method for creating a 3D or 4D data set
  *
  * @param timestep :: index of the time step (4th dimension) in the workspace.
@@ -124,20 +143,15 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
   signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+  auto cga = visualDataSet->AllocateCellGhostArray();
+  auto start = std::chrono::high_resolution_clock::now();
 
-  // update progress after a 1% change
-  vtkIdType progressIncrement = std::max(1, imageSize / 50);
-  for (vtkIdType index = 0; index < imageSize; ++index) {
-    if (index % progressIncrement == 0)
-      progressUpdate.eventRaised(static_cast<double>(index) * progressFactor);
-    double signalScalar = signal->GetValue(index);
-    bool maskValue = (!std::isfinite(signalScalar) ||
-                      !m_thresholdRange->inRange(signalScalar));
-    if (maskValue) {
-      visualDataSet->BlankCell(index);
-    }
-  }
+  Worker func(signal.GetPointer(), cga);
+  vtkSMPTools::For(0, imageSize, func);
 
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end - start;
+  std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
   vtkNew<vtkPoints> points;
 
   Mantid::coord_t in[2];
@@ -167,6 +181,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   // Array with the point IDs (only set where needed)
   progressFactor = 0.25 / static_cast<double>(nPointsZ);
   double progressOffset = 0.5;
+
+  start = std::chrono::high_resolution_clock::now();
   for (int z = 0; z < nPointsZ; z++) {
     // Report progress updates for the last 50%
     progressUpdate.eventRaised(double(z) * progressFactor + progressOffset);
@@ -184,7 +200,9 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
       }
     }
   }
-
+  end = std::chrono::high_resolution_clock::now();
+  elapsed_seconds = end - start;
+  std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
   visualDataSet->SetPoints(points.GetPointer());
   visualDataSet->Register(NULL);
   visualDataSet->Squeeze();
