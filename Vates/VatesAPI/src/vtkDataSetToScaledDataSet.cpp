@@ -85,9 +85,9 @@ vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
   vtkNew<vtkPoints> newPoints;
 
   vtkFloatArray *oldPointsArray =
-      vtkFloatArray::SafeDownCast(points->GetData());
+      vtkFloatArray::FastDownCast(points->GetData());
   vtkFloatArray *newPointsArray =
-      vtkFloatArray::SafeDownCast(newPoints->GetData());
+      vtkFloatArray::FastDownCast(newPoints->GetData());
 
   if (!oldPointsArray || !newPointsArray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");

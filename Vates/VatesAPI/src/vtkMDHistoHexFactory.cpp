@@ -162,7 +162,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const vtkIdType nPointsY = nBinsY + 1;
   const vtkIdType nPointsZ = nBinsZ + 1;
 
-  vtkFloatArray *pointsarray = vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *pointsarray = vtkFloatArray::FastDownCast(points->GetData());
   if (!pointsarray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (pointsarray->GetNumberOfComponents() != 3) {

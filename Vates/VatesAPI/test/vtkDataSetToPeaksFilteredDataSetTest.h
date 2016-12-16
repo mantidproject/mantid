@@ -70,7 +70,7 @@ private:
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
-    auto splatData = vtkUnstructuredGrid::SafeDownCast(product.Get());
+    auto splatData = vtkUnstructuredGrid::FastDownCast(product.Get());
     vtkSmartPointer<vtkUnstructuredGrid> grid(splatData);
     return grid;
   }

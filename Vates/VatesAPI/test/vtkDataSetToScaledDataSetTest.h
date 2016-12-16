@@ -39,7 +39,7 @@ private:
                             VolumeNormalization);
     factory.initialize(ws);
     auto product = factory.create(progressUpdate);
-    auto data = vtkUnstructuredGrid::SafeDownCast(product.Get());
+    auto data = vtkUnstructuredGrid::FastDownCast(product.Get());
     vtkSmartPointer<vtkUnstructuredGrid> grid(data);
     return grid;
   }

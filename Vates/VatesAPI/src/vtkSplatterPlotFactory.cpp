@@ -158,7 +158,7 @@ void vtkSplatterPlotFactory::doCreate(
 
   // Create the point list, one position for each point actually used
   vtkNew<vtkPoints> points;
-  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *pointsArray = vtkFloatArray::FastDownCast(points->GetData());
   if (!pointsArray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   }

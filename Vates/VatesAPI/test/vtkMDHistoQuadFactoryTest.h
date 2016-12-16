@@ -64,7 +64,7 @@ public:
     vtkMDHistoQuadFactory inside(pRange, Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
     auto product = inside.create(progressUpdate);
-    auto data = vtkDataSet::SafeDownCast(product.Get());
+    auto data = vtkDataSet::FastDownCast(product.Get());
     vtkSmartPointer<vtkDataSet> insideProduct(data);
 
     TS_ASSERT_EQUALS((10 * 10), insideProduct->GetNumberOfCells());
@@ -83,7 +83,7 @@ public:
     vtkMDHistoQuadFactory above(pRange, Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
     auto product = above.create(progressUpdate);
-    auto data = vtkDataSet::SafeDownCast(product.Get());
+    auto data = vtkDataSet::FastDownCast(product.Get());
     vtkSmartPointer<vtkDataSet> aboveProduct(data);
 
     // This changed from previously, in order to ensure that we do not pass on
@@ -107,7 +107,7 @@ public:
 
     below.initialize(ws_sptr);
     auto product = below.create(progressUpdate);
-    auto data = vtkUnstructuredGrid::SafeDownCast(product.Get());
+    auto data = vtkUnstructuredGrid::FastDownCast(product.Get());
     vtkSmartPointer<vtkDataSet> belowProduct(data);
 
     // This changed from previously, in order to ensure that we do not pass on

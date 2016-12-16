@@ -42,21 +42,21 @@ public:
         Mantid::VATES::VolumeNormalization);
     inside.initialize(ws_sptr);
     auto insideData = inside.create(progressUpdate);
-    auto insideProduct = vtkStructuredGrid::SafeDownCast(insideData.Get());
+    auto insideProduct = vtkStructuredGrid::FastDownCast(insideData.Get());
 
     vtkMDHistoHexFactory below(
         boost::make_shared<UserDefinedThresholdRange>(0, 0.5),
         Mantid::VATES::VolumeNormalization);
     below.initialize(ws_sptr);
     auto belowData = below.create(progressUpdate);
-    auto belowProduct = vtkStructuredGrid::SafeDownCast(belowData.Get());
+    auto belowProduct = vtkStructuredGrid::FastDownCast(belowData.Get());
 
     vtkMDHistoHexFactory above(
         boost::make_shared<UserDefinedThresholdRange>(2, 3),
         Mantid::VATES::VolumeNormalization);
     above.initialize(ws_sptr);
     auto aboveData = above.create(progressUpdate);
-    auto aboveProduct = vtkStructuredGrid::SafeDownCast(aboveData.Get());
+    auto aboveProduct = vtkStructuredGrid::FastDownCast(aboveData.Get());
 
     TS_ASSERT_EQUALS((10 * 10 * 10), insideProduct->GetNumberOfCells());
     for (auto i = 0; i < insideProduct->GetNumberOfCells(); ++i) {

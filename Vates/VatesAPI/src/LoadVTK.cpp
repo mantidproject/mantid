@@ -314,14 +314,14 @@ void LoadVTK::exec() {
   vtkSmartPointer<vtkStructuredPoints> readDataset;
   readDataset.TakeReference(reader->GetOutput());
 
-  vtkUnsignedShortArray *signals = vtkUnsignedShortArray::SafeDownCast(
+  vtkUnsignedShortArray *signals = vtkUnsignedShortArray::FastDownCast(
       readDataset->GetPointData()->GetArray(signalArrayName.c_str()));
   if (!signals) {
     throw std::invalid_argument("Signal array: " + signalArrayName +
                                 " does not exist");
   }
 
-  vtkUnsignedShortArray *errorsSQ = vtkUnsignedShortArray::SafeDownCast(
+  vtkUnsignedShortArray *errorsSQ = vtkUnsignedShortArray::FastDownCast(
       readDataset->GetPointData()->GetArray(errorSQArrayName.c_str()));
   if (!errorSQArrayName.empty() && !errorsSQ) {
     throw std::invalid_argument("Error squared array: " + errorSQArrayName +

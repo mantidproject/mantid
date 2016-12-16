@@ -214,7 +214,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
 
   // Get the original points
   vtkFloatArray *points =
-      vtkFloatArray::SafeDownCast(data->GetPoints()->GetData());
+      vtkFloatArray::FastDownCast(data->GetPoints()->GetData());
   if (!points) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (points->GetNumberOfComponents() != 3) {

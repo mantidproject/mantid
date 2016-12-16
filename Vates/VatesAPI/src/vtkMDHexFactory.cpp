@@ -81,7 +81,7 @@ void vtkMDHexFactory::doCreate(
 
   // Create 8 points per box.
   vtkNew<vtkPoints> points;
-  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *pointsArray = vtkFloatArray::FastDownCast(points->GetData());
   float *pointsPtr = pointsArray->WritePointer(0, numBoxes * 8 * 3);
 
   // One scalar per box
