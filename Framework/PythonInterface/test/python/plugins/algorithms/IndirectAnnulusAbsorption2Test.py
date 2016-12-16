@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import LoadNexusProcessed, IndirectAnnulusAbsorption
+from mantid.simpleapi import LoadNexusProcessed, IndirectAnnulusAbsorption, DeleteWorkspace
 from mantid.api import *
 
 
