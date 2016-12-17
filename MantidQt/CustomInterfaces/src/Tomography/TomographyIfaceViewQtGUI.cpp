@@ -1357,11 +1357,13 @@ void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
                      "Select location of scripts (scripts subdirectory/folder "
                      "in the Mantid installation",
                      false);
+  systemSettingsEdited();
 }
 
 void TomographyIfaceViewQtGUI::browseLocalExternalInterpreterClicked() {
   checkUserBrowseFile(m_uiTabSystemSettings.lineEdit_local_external_interpreter,
                       "Select interpreter executable", false);
+  systemSettingsEdited();
 }
 
 /**
@@ -1659,8 +1661,13 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   setts.m_local.m_reconScriptsPath =
       m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
 
+  setts.m_local.m_externalInterpreterPath =
+      m_uiTabSystemSettings.lineEdit_local_external_interpreter->text()
+          .toStdString();
+
   setts.m_experimentReference =
       m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
+
   return setts;
 }
 
@@ -1912,17 +1919,31 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  auto reply = QMessageBox::question(
-      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
-                                  "ALL</strong> System settings?<br>This "
-                                  "action cannot be undone!",
-      QMessageBox::Yes | QMessageBox::No);
+  const auto title = "Reset Confirmation";
+  const auto body = "Are you sure you want to <br><strong>RESET "
+                    "ALL</strong> System settings?<br>This "
+                    "action cannot be undone!";
   // default constructors with factory defaults
-  if (reply == QMessageBox::Yes) {
+  if (userConfirmation(title, body)) {
     // From factory defaults
     TomoSystemSettings defaults;
     updateSystemSettingsTabFields(defaults);
   }
+}
+
+/**
+ * Prompts the user for confirmation with a yes/no dialogue.
+ * The body can use HTML formatting.
+ *
+ * @param title The title that the message has
+ * @param body The body that the message has. This CAN use HTML formatting
+ */
+bool TomographyIfaceViewQtGUI::userConfirmation(const std::string &title,
+                                                const std::string &body) {
+  auto reply = QMessageBox::question(this, QString::fromStdString(title),
+                                     QString::fromStdString(body),
+                                     QMessageBox::Yes | QMessageBox::No);
+  return reply == QMessageBox::Yes;
 }
 
 /**

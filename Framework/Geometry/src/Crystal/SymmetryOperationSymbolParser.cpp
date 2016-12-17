@@ -98,7 +98,7 @@ std::string SymmetryOperationSymbolParser::getNormalizedIdentifier(
         if (matrix[r][c] < 0) {
           currentComponent << "-";
         } else {
-          if (currentComponent.str().size() > 0) {
+          if (!currentComponent.str().empty()) {
             currentComponent << "+";
           }
         }

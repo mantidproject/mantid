@@ -478,7 +478,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
     // If we can't find a workspace, find a file to load
     std::string path = FileFinder::Instance().getFullPath(dataRun);
 
-    if (path.size() == 0 || !Poco::File(path).exists()) {
+    if (path.empty() || !Poco::File(path).exists()) {
       try {
         std::vector<std::string> paths =
             FileFinder::Instance().findRuns(instrument + dataRun);
@@ -488,7 +488,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       }
     }
 
-    if (path.size() == 0 || !Poco::File(path).exists()) {
+    if (path.empty() || !Poco::File(path).exists()) {
       try {
         std::vector<std::string> paths =
             FileFinder::Instance().findRuns(dataRun);
