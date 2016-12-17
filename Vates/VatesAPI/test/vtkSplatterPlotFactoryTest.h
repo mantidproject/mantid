@@ -9,7 +9,6 @@
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
 #include "MockObjects.h"
@@ -37,15 +36,13 @@ public:
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
-    vtkSplatterPlotFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkSplatterPlotFactory factory("signal");
     TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.",
                       factory.create(progressUpdate), std::runtime_error);
   }
 
   void testInitializeWithNullWorkspaceThrows() {
-    vtkSplatterPlotFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkSplatterPlotFactory factory("signal");
     IMDEventWorkspace *ws = NULL;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.",
                       factory.initialize(Workspace_sptr(ws)),
@@ -60,8 +57,7 @@ public:
     size_t binning = 5;
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, binning);
-    vtkSplatterPlotFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkSplatterPlotFactory factory("signal");
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -98,8 +94,7 @@ public:
     size_t binning = 5;
     IMDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, binning);
-    vtkSplatterPlotFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkSplatterPlotFactory factory("signal");
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -133,8 +128,7 @@ public:
 
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
-    vtkSplatterPlotFactory factory(
-        boost::make_shared<UserDefinedThresholdRange>(0, 1), "signal");
+    vtkSplatterPlotFactory factory("signal");
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -168,8 +162,7 @@ public:
 
     MDEventWorkspace4Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
-    vtkSplatterPlotFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkSplatterPlotFactory factory("signal");
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -202,8 +195,7 @@ public:
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
-    vtkSplatterPlotFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkSplatterPlotFactory factory("signal");
     factory.initialize(ws);
     vtkDataSet *product = NULL;
 
