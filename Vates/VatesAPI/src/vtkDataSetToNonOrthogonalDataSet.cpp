@@ -240,20 +240,11 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   } else if (points->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
   }
-  float *end = points->GetPointer(points->GetNumberOfValues());
 
-  vtkIdType progressIncrement =
-      std::max(static_cast<vtkIdType>(1), points->GetNumberOfValues() / 25);
-
-  double progressFactor =
-      0.25 / static_cast<double>(points->GetNumberOfValues());
-
-  auto starttime = std::chrono::high_resolution_clock::now();
   Worker func(skew, points);
+  progress->eventRaised(0.67);
   vtkSMPTools::For(0, points->GetNumberOfTuples(), func);
-  auto endtime = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed_seconds = endtime - starttime;
-  std::cout << "elapsed time3: " << elapsed_seconds.count() << "s\n";
+  progress->eventRaised(1.0);
   this->updateMetaData(data);
 }
 

@@ -145,7 +145,7 @@ struct Worker2 {
  */
 vtkSmartPointer<vtkDataSet>
 vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
-                                   ProgressAction &progressUpdate) const {
+                                   ProgressAction &progress) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault from
   // algos modifying ws)
   ReadLock lock(*m_workspace);
@@ -185,14 +185,12 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
   auto cga = visualDataSet->AllocateCellGhostArray();
-  auto start = std::chrono::high_resolution_clock::now();
 
   Worker func(signal.GetPointer(), cga);
+  progress.eventRaised(0.0);
   vtkSMPTools::For(0, imageSize, func);
+  progress.eventRaised(0.33);
 
-  auto end = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end - start;
-  std::cout << "elapsed time1: " << elapsed_seconds.count() << "s\n";
   vtkNew<vtkPoints> points;
 
   const vtkIdType nPointsX = nBinsX + 1;
@@ -201,12 +199,9 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   points->SetNumberOfPoints(nPointsX * nPointsY * nPointsZ);
 
-  start = std::chrono::high_resolution_clock::now();
   Worker2 func2(*m_workspace, points.GetPointer());
   vtkSMPTools::For(0, nPointsZ, func2);
-  end = std::chrono::high_resolution_clock::now();
-  elapsed_seconds = end - start;
-  std::cout << "elapsed time2: " << elapsed_seconds.count() << "s\n";
+  progress.eventRaised(0.67);
 
   visualDataSet->SetPoints(points.GetPointer());
   visualDataSet->Register(NULL);
