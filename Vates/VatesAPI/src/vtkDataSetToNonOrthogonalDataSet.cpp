@@ -253,7 +253,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   vtkSMPTools::For(0, points->GetNumberOfTuples(), func);
   auto endtime = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_seconds = endtime - starttime;
-  std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+  std::cout << "elapsed time3: " << elapsed_seconds.count() << "s\n";
   this->updateMetaData(data);
 }
 
