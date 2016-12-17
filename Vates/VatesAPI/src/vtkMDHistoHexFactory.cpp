@@ -77,10 +77,11 @@ void vtkMDHistoHexFactory::validateWsNotNull() const {
 void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
 
 namespace {
-struct Worker {
+struct CellGhostArrayWorker {
   vtkMDHWSignalArray<double> *m_signal;
   vtkUnsignedCharArray *m_cga;
-  Worker(vtkMDHWSignalArray<double> *signal, vtkUnsignedCharArray *cga)
+  CellGhostArrayWorker(vtkMDHWSignalArray<double> *signal,
+                       vtkUnsignedCharArray *cga)
       : m_signal(signal), m_cga(cga) {}
   void operator()(vtkIdType begin, vtkIdType end) {
     for (vtkIdType index = begin; index < end; ++index) {
@@ -92,12 +93,12 @@ struct Worker {
   }
 };
 
-struct Worker2 {
+struct PointsWorker {
   vtkPoints *m_pts;
   coord_t incrementX, incrementY, incrementZ;
   coord_t minX, minY, minZ;
   vtkIdType nPointsX, nPointsY;
-  Worker2(Mantid::DataObjects::MDHistoWorkspace &ws, vtkPoints *pts)
+  PointsWorker(Mantid::DataObjects::MDHistoWorkspace &ws, vtkPoints *pts)
       : m_pts(pts) {
     int nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
     int nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
@@ -185,9 +186,9 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
   auto cga = visualDataSet->AllocateCellGhostArray();
 
-  Worker func(signal.GetPointer(), cga);
+  CellGhostArrayWorker cgafunc(signal.GetPointer(), cga);
   progress.eventRaised(0.0);
-  vtkSMPTools::For(0, imageSize, func);
+  vtkSMPTools::For(0, imageSize, cgafunc);
   progress.eventRaised(0.33);
 
   vtkNew<vtkPoints> points;
@@ -196,8 +197,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const vtkIdType nPointsZ = nBinsZ + 1;
   points->SetNumberOfPoints(nPointsX * nPointsY * nPointsZ);
 
-  Worker2 func2(*m_workspace, points.GetPointer());
-  vtkSMPTools::For(0, nPointsZ, func2);
+  PointsWorker ptsfunc(*m_workspace, points.GetPointer());
+  vtkSMPTools::For(0, nPointsZ, ptsfunc);
   progress.eventRaised(0.67);
 
   visualDataSet->SetPoints(points.GetPointer());
