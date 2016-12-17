@@ -172,7 +172,6 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   visualDataSet->SetDimensions(nBinsX + 1, nBinsY + 1, nBinsZ + 1);
 
   // Array with true where the voxel should be shown
-  // double progressFactor = 0.5 / static_cast<double>(imageSize);
 
   std::size_t offset = 0;
   if (nDims == 4) {
@@ -192,11 +191,9 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   progress.eventRaised(0.33);
 
   vtkNew<vtkPoints> points;
-
   const vtkIdType nPointsX = nBinsX + 1;
   const vtkIdType nPointsY = nBinsY + 1;
   const vtkIdType nPointsZ = nBinsZ + 1;
-
   points->SetNumberOfPoints(nPointsX * nPointsY * nPointsZ);
 
   Worker2 func2(*m_workspace, points.GetPointer());
