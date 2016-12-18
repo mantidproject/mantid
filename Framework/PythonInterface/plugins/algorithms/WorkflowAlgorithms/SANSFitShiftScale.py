@@ -143,9 +143,11 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         front_data_corrected, rear_data_corrected = error_correction.get_error_corrected(rear_data=q_low_angle,
                                                                                          front_data=q_high_angle,
                                                                                          q_min=q_min, q_max=q_max)
+        # If we have Nans in the data then perform a interpolated correction.
+        self.apply_nan_interpolation(front_data_corrected)
+        self.apply_nan_interpolation(rear_data_corrected)
 
         fit = self.createChildAlgorithm('Fit')
-
         # We currently have to put the front_data into the ADS so that the TabulatedFunction has access to it
         front_data_corrected = AnalysisDataService.addOrReplace('front_data_corrected', front_data_corrected)
         front_in_ads = AnalysisDataService.retrieve('front_data_corrected')
@@ -226,6 +228,36 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
 
         return min_q, max_q
 
+    def apply_nan_interpolation(self, workspace):
+        """
+        Applies linear interpolation for NaNs
+
+        This function is based on: http://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array?answertab=votes#tab-top  # noqa
+        """
+
+        def nan_checker(y):
+            return np.isnan(y), lambda z: z.nonzero()[0]
+
+        # Make sure that we are dealing with a 1D workspace
+        if workspace.getNumberHistograms() != 1:
+            raise RuntimeError("Trying to interpolate NaNs on a workspace with "
+                               "more than one histogram is not possible.")
+
+        signal = workspace.dataY(0)
+        error = workspace.dataE(0)
+
+        # If all elements are Nan then we cannot fix it
+        if all([np.isnan(element) for element in signal]) or all([np.isnan(element) for element in error]):
+            return
+
+        # Perform NaN interpolation on a signal of the workspace
+        nans, x = nan_checker(signal)
+        signal[nans] = np.interp(x(nans), x(~nans), signal[~nans])
+
+        # Perform NaN interpolation on a error of the signal of the workspace
+        nans, x = nan_checker(error)
+        error[nans] = np.interp(x(nans), x(~nans), error[~nans])
+
 
 class ErrorTransferFromModelToData(object):
     '''
@@ -278,5 +310,6 @@ class ErrorTransferFromModelToData(object):
         comment.setProperty('Workspace', ws)
         comment.setProperty('Text', message)
         comment.execute()
+
 
 AlgorithmFactory.subscribe(SANSFitShiftScale)
