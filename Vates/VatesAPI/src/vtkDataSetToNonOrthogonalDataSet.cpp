@@ -242,9 +242,11 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   }
 
   Worker func(skew, points);
-  progress->eventRaised(0.67);
+  if (progress)
+    progress->eventRaised(0.67);
   vtkSMPTools::For(0, points->GetNumberOfTuples(), func);
-  progress->eventRaised(1.0);
+  if (progress)
+    progress->eventRaised(1.0);
   this->updateMetaData(data);
 }
 
