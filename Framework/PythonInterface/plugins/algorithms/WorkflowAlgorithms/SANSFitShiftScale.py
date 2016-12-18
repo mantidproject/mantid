@@ -250,6 +250,10 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         if all([np.isnan(element) for element in signal]) or all([np.isnan(element) for element in error]):
             return
 
+        # If there are non to fix then don't touch the data
+        if not any([np.isnan(element) for element in signal]) and not any([np.isnan(element) for element in error]):
+            return
+
         # Perform NaN interpolation on a signal of the workspace
         nans, x = nan_checker(signal)
         signal[nans] = np.interp(x(nans), x(~nans), signal[~nans])
