@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -83,7 +84,6 @@ void MayersSampleCorrection::exec() {
   const auto sample = instrument->getSample();
   const auto beamLine = sample->getPos() - source->getPos();
   const auto frame = instrument->getReferenceFrame();
-  const double l1 = sample->getDistance(*source);
 
   // Sample
   const auto &sampleShape = inputWS->sample().getShape();
@@ -101,25 +101,25 @@ void MayersSampleCorrection::exec() {
   Progress prog(this, 0., 1., nhist);
   prog.setNotifyStep(0.01);
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
+        spectrumInfo.isMasked(i)) {
       continue;
     }
-    if (det->isMonitor() || det->isMasked())
-      continue;
+
+    const auto &det = spectrumInfo.detector(i);
 
     MayersSampleCorrectionStrategy::Parameters params;
     params.mscat = mscatOn;
-    params.l1 = l1;
-    params.l2 = det->getDistance(*sample);
-    params.twoTheta = det->getTwoTheta(sample->getPos(), beamLine);
-    params.phi = det->getPhi();
+    params.l1 = spectrumInfo.l1();
+    params.l2 = spectrumInfo.l2(i);
+    params.twoTheta = det.getTwoTheta(sample->getPos(), beamLine);
+    params.phi = det.getPhi();
     params.rho = sampleMaterial.numberDensity();
     params.sigmaAbs = sampleMaterial.absorbXSection();
     params.sigmaSc = sampleMaterial.totalScatterXSection();

@@ -214,7 +214,7 @@ public:
   static double calcConversion(const double l1, const Kernel::V3D &beamline,
                                const double beamline_norm,
                                const Kernel::V3D &samplePos,
-                               const IDetector_const_sptr &det,
+                               const Kernel::V3D &detectorPos,
                                const double offset);
 
   static double

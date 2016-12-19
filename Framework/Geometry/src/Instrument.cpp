@@ -858,14 +858,14 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) /
  *        the length of the distance between the two.
  * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
  * @param samplePos: position of the sample
- * @param det: Geometry object representing the detector (position of the pixel)
+ * @param detPos: position of the detector
  * @param offset: value (close to zero) that changes the factor := factor *
  *(1+offset).
  */
 double Instrument::calcConversion(const double l1, const Kernel::V3D &beamline,
                                   const double beamline_norm,
                                   const Kernel::V3D &samplePos,
-                                  const IDetector_const_sptr &det,
+                                  const Kernel::V3D &detPos,
                                   const double offset) {
   if (offset <=
       -1.) // not physically possible, means result is negative d-spacing
@@ -876,17 +876,12 @@ double Instrument::calcConversion(const double l1, const Kernel::V3D &beamline,
     throw std::logic_error(msg.str());
   }
 
-  // Get the sample-detector distance for this detector (in metres)
-
-  // The scattering angle for this detector (in radians).
-  Kernel::V3D detPos;
-  detPos = det->getPos();
-
   // Now detPos will be set with respect to samplePos
-  detPos -= samplePos;
+  Kernel::V3D relDetPos = detPos - samplePos;
   // 0.5*cos(2theta)
-  double l2 = detPos.norm();
-  double halfcosTwoTheta = detPos.scalar_prod(beamline) / (l2 * beamline_norm);
+  double l2 = relDetPos.norm();
+  double halfcosTwoTheta =
+      relDetPos.scalar_prod(beamline) / (l2 * beamline_norm);
   // This is sin(theta)
   double sinTheta = sqrt(0.5 - halfcosTwoTheta);
   const double numerator = (1.0 + offset);
@@ -913,8 +908,9 @@ double Instrument::calcConversion(
     } else {
       offset = 0.;
     }
-    factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(detector), offset);
+    factor +=
+        calcConversion(l1, beamline, beamline_norm, samplePos,
+                       instrument->getDetector(detector)->getPos(), offset);
   }
   return factor / static_cast<double>(detectors.size());
 }
