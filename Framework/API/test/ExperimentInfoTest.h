@@ -756,6 +756,19 @@ public:
     TS_ASSERT(target.detectorInfo().isMasked(0));
   }
 
+  void test_getInstrument_setInstrument_copy_on_write_not_broken() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+  }
+
 private:
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name,
                                   const std::string &value) {
