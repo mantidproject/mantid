@@ -107,7 +107,6 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         dataX = self.vanaws.readX(0)
         coefY = np.zeros(nhist)
         coefE = np.zeros(nhist)
-        detID_offset = self.get_detID_offset()
         peak_centre = eppws.column('PeakCentre')
         sigma = eppws.column('Sigma')
 
