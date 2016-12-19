@@ -131,7 +131,6 @@ double MCInteractionVolume::calculateAbsorption(
   if (m_env) {
     m_env->interceptSurfaces(afterScatter);
   }
-
   return calculateAttenuation(beforeScatter, lambdaBefore) *
          calculateAttenuation(afterScatter, lambdaAfter);
 }
