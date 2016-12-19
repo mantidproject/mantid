@@ -22,14 +22,11 @@ def _gaussian(x, height, x0, sigma):
     return height * numpy.exp(- x * x / sigma2)
 
 
-def _createPartialIN5Workspace():
+def _fillTemplateWorkspace(templateWS):
     '''
-    Creates an IN5 workspace with monitor and first 149 spectra.
+    Fills a workspace with somewhat sane data.
     '''
-    emptyWS = LoadEmptyInstrument(InstrumentName='IN5')
-    MaskDetectors(Workspace=emptyWS, StartWorkspaceIndex=151)
-    emptyWS = RemoveMaskedSpectra(InputWorkspace=emptyWS)
-    nHistograms = emptyWS.getNumberHistograms()
+    nHistograms = templateWS.getNumberHistograms()
     E_i = 23.0
     nBins = 128
     binWidth = 2.63
@@ -38,13 +35,13 @@ def _createPartialIN5Workspace():
     xs = numpy.empty(nHistograms*(nBins+1))
     ys = numpy.empty(nHistograms*nBins)
     es = numpy.empty(nHistograms*nBins)
-    in5 = emptyWS.getInstrument()
-    sample = in5.getSample()
-    l1 = sample.getDistance(in5.getSource())
-    l2 = float(in5.getStringParameter('l2')[0])
+    instrument = templateWS.getInstrument()
+    sample = instrument.getSample()
+    l1 = sample.getDistance(instrument.getSource())
+    l2 = float(instrument.getStringParameter('l2')[0])
     tofElastic = _timeOfFlight(E_i, l1+l2)
     tofBegin = tofElastic - elasticIndex * binWidth
-    monitor = in5.getDetector(0)
+    monitor = instrument.getDetector(0)
     monitorSampleDistance = sample.getDistance(monitor)
     tofElasticMonitor = tofBegin + monitorElasticIndex * binWidth
     tofMonitorDetector = _timeOfFlight(E_i, monitorSampleDistance+l2)
@@ -65,14 +62,14 @@ def _createPartialIN5Workspace():
             es[yIndexOffset+binIndex] = numpy.sqrt(y)
     fillBins(0, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
     for histogramIndex in range(1, nHistograms):
-        trueL2 = sample.getDistance(emptyWS.getDetector(histogramIndex))
+        trueL2 = sample.getDistance(templateWS.getDetector(histogramIndex))
         trueTOF = _timeOfFlight(E_i, l1+trueL2)
         fillBins(histogramIndex, trueTOF, elasticPeakHeight, bkgMonitor)
     ws = CreateWorkspace(DataX=xs,
                          DataY=ys,
                          DataE=es,
                          NSpec=nHistograms,
-                         ParentWorkspace=emptyWS)
+                         ParentWorkspace=templateWS)
     ws.getAxis(0).setUnit('TOF')
     ws.run().addProperty('Ei', E_i, True)
     ws.run().addProperty('wavelength', float(_wavelength(E_i)), True)
@@ -83,19 +80,29 @@ def _createPartialIN5Workspace():
 
 class DirectILLReductionTest(unittest.TestCase):
 
-    def setUp(self):
-        pass
+    _TEMPLATE_IN5_WS_NAME = '__IN5templateWS'
 
-    def tearDown(self):
-        for ws in mtd.getObjectNames():
-            if mtd.doesExist(ws):
-                DeleteWorkspace(Workspace = ws)
+    def setUp(self):
+        self._testIN5WS = CloneWorkspace(InputWorkspace=self._in5WStemplate,
+                                         OutputWorkspace='__IN5testWS')
+
+    @classmethod
+    def setUpClass(cls):
+        cls._in5WStemplate = LoadEmptyInstrument(InstrumentName='IN5',
+                                               OutputWorkspace=cls._TEMPLATE_IN5_WS_NAME)
+        MaskDetectors(Workspace=cls._in5WStemplate, StartWorkspaceIndex=151)
+        cls._in5WStemplate = RemoveMaskedSpectra(InputWorkspace=cls._in5WStemplate,
+                                              OutputWorkspace=cls._in5WStemplate)
+        cls._in5WStemplate = _fillTemplateWorkspace(cls._in5WStemplate)
+
+    @classmethod
+    def tearDownClass(cls):
+        mtd.clear()
 
     def test_det_diagnostics_no_bad_detectors(self):
-        ws = _createPartialIN5Workspace()
         outWSName = 'diagnostics'
         algProperties = {
-            'InputWorkspace': ws,
+            'InputWorkspace': self._testIN5WS,
             'ReductionType': 'Empty Container/Cadmium',
             'IndexType': 'Detector ID',
             'Monitor': '0',
@@ -108,21 +115,20 @@ class DirectILLReductionTest(unittest.TestCase):
         alg = run_algorithm('DirectILLReduction', **algProperties)
         diagnosticsWS = alg.getProperty('OutputDiagnosticsWorkspace').value
         self.assertEqual(diagnosticsWS.getNumberHistograms(),
-                         ws.getNumberHistograms() - 1)
+                         self._testIN5WS.getNumberHistograms() - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
         for i in range(diagnosticsWS.getNumberHistograms()):
             self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
 
     def test_det_diagnostics_noisy_background(self):
-        ws = _createPartialIN5Workspace()
-        nHistograms = ws.getNumberHistograms()
+        nHistograms = self._testIN5WS.getNumberHistograms()
         noisyWSIndices = [1, int(nHistograms / 5), nHistograms - 1]
         for i in noisyWSIndices:
-            ys = ws.dataY(i)
+            ys = self._testIN5WS.dataY(i)
             ys *= 2
         outWSName = 'diagnostics'
         algProperties = {
-            'InputWorkspace': ws,
+            'InputWorkspace': self._testIN5WS,
             'ReductionType': 'Empty Container/Cadmium',
             'IndexType': 'Detector ID',
             'Monitor': '0',
@@ -146,19 +152,18 @@ class DirectILLReductionTest(unittest.TestCase):
                 self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
 
     def test_det_diagnostics_bad_elastic_intensity(self):
-        ws = _createPartialIN5Workspace()
-        nHistograms = ws.getNumberHistograms()
+        nHistograms = self._testIN5WS.getNumberHistograms()
         noPeakIndices = [1, int(nHistograms / 6)]
         highPeakIndices = [int(nHistograms / 3), nHistograms - 1]
         for i in noPeakIndices:
-            ys = ws.dataY(i)
+            ys = self._testIN5WS.dataY(i)
             ys *= 0.01
         for i in highPeakIndices:
-            ys = ws.dataY(i)
+            ys = self._testIN5WS.dataY(i)
             ys *= 5
         outWSName = 'diagnostics'
         algProperties = {
-            'InputWorkspace': ws,
+            'InputWorkspace': self._testIN5WS,
             'ReductionType': 'Empty Container/Cadmium',
             'IndexType': 'Detector ID',
             'Monitor': '0',
@@ -176,15 +181,12 @@ class DirectILLReductionTest(unittest.TestCase):
                          nHistograms - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
         shouldBeMasked = noPeakIndices + highPeakIndices
-        print('These should be marked: {}'.format(shouldBeMasked))
         for i in range(diagnosticsWS.getNumberHistograms()):
             originalI = i + 1  # Monitor has been extracted.
             if originalI in shouldBeMasked:
-                print('Marked index: {}'.format(i))
                 self.assertEqual(diagnosticsWS.readY(i)[0], 1.0)
             else:
                 self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
-
 
 if __name__ == '__main__':
     unittest.main()
