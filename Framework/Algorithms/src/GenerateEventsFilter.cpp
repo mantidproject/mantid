@@ -216,7 +216,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
 
   // Output splitter information workspace
   std::string title = getProperty("TitleOfSplitters");
-  if (title.size() == 0) {
+  if (title.empty()) {
     // Using default
     title = "Splitters";
   }
@@ -263,8 +263,8 @@ void GenerateEventsFilter::processInputTime() {
   std::string s_inptf = this->getProperty("StopTime");
 
   // Default
-  bool defaultstart = (s_inpt0.size() == 0);
-  bool defaultstop = (s_inptf.size() == 0);
+  bool defaultstart = s_inpt0.empty();
+  bool defaultstop = s_inptf.empty();
 
   // Determine format
   bool instringformat = true;
@@ -1674,7 +1674,7 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
   }
 
   // Information
-  if (info.size() > 0) {
+  if (!info.empty()) {
     API::TableRow row = m_filterInfoWS->appendRow();
     row << wsindex << info;
   }

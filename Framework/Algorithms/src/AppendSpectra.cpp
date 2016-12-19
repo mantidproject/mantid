@@ -148,7 +148,7 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
       // check if we're outside the spectra of the first workspace
       const std::string inputLabel =
           i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
-      outputTextAxis->setLabel(i, (inputLabel.size() > 0) ? inputLabel : "");
+      outputTextAxis->setLabel(i, !inputLabel.empty() ? inputLabel : "");
 
     } else if (isNumericAxis) {
       // check if we're outside the spectra of the first workspace

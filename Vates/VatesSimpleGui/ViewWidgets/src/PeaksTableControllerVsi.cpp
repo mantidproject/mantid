@@ -73,7 +73,7 @@ PeaksTableControllerVsi::PeaksTableControllerVsi(
     boost::shared_ptr<CameraManager> cameraManager, QWidget *parent)
     : QWidget(parent), m_cameraManager(cameraManager),
       m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
-      m_peaksTabWidget(NULL), m_peakMarker(NULL),
+      m_peaksTabWidget(nullptr), m_peakMarker(nullptr),
       m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
   m_peakTransformSelector.registerCandidate(
       boost::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
@@ -376,9 +376,9 @@ void PeaksTableControllerVsi::createTable() {
 */
 void PeaksTableControllerVsi::removeLayout(QWidget *widget) {
   QLayout *layout = widget->layout();
-  if (layout != 0) {
+  if (layout) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != 0) {
+    while ((item = layout->takeAt(0))) {
       layout->removeItem(item);
       delete item->widget();
     }
@@ -397,7 +397,7 @@ void PeaksTableControllerVsi::removeTable() {
   if (m_peaksTabWidget) {
     m_peaksTabWidget->deleteLater();
   }
-  m_peaksTabWidget = NULL;
+  m_peaksTabWidget = nullptr;
 }
 
 /**
@@ -486,14 +486,16 @@ void PeaksTableControllerVsi::destroySinglePeakSource() {
         pqApplicationCore::instance()->getObjectBuilder();
     builder->destroy(m_peakMarker);
 
-    m_peakMarker = NULL;
+    m_peakMarker = nullptr;
   }
 }
 
 /**
  * On Single Peak Marker destroyed
  */
-void PeaksTableControllerVsi::onPeakMarkerDestroyed() { m_peakMarker = NULL; }
+void PeaksTableControllerVsi::onPeakMarkerDestroyed() {
+  m_peakMarker = nullptr;
+}
 
 /**
  * Reset the single peak source

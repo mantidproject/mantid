@@ -2,6 +2,7 @@
 #define MANTID_API_MATRIXWORKSPACEMDITERATORTEST_H_
 
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -120,9 +121,9 @@ public:
   void test_get_is_masked() {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     IMDIterator *it = ws->createIterator(NULL);
+    const auto &spectrumInfo = ws->spectrumInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      Mantid::Geometry::IDetector_const_sptr det = ws->getDetector(i);
-      TS_ASSERT_EQUALS(det->isMasked(), it->getIsMasked());
+      TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), it->getIsMasked());
       it->next();
     }
     delete it;
