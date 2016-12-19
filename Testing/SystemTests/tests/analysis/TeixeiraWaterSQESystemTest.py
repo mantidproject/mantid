@@ -7,6 +7,7 @@ import mantid
 import mantid.simpleapi as sm
 import re
 
+
 class GlobalFitTest(MantidStressTest):
     """Global fit of QENS data to the jump-diffusion model by Teixeira
        Fitting model. In this case:
@@ -21,8 +22,8 @@ class GlobalFitTest(MantidStressTest):
 
     def runTest(self):
 
-        data = sm.Load("/home/jbq/repositories/mantidproject/build/18231_TeixeiraWaterSQE/ExternalData/Testing/Data/SystemTest/irs26176_graphite002_red.nxs")
-        resolution = sm.Load("/home/jbq/repositories/mantidproject/build/18231_TeixeiraWaterSQE/ExternalData/Testing/Data/SystemTest/irs26173_graphite002_res.nxs")
+        data = sm.Load("irs26176_graphite002_red.nxs")
+        sm.Load("irs26173_graphite002_res.nxs", OutputWorkspace="resolution")
 
         single_model = """(composite=Convolution,NumDeriv=true;
         name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,
