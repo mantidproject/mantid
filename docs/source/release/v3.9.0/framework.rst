@@ -27,10 +27,29 @@ Improved
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` gained a new option: `Interpolation`.
   This controls the method used for interpolation. Availabile options are: `Linear` & `CSpline`.
 
+Renamed
+#######
+
+- CorrectFlightPaths has been renamed to :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>`.
+
 Deprecated
 ##########
 
-- :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>` has been renamed to ConvertToConstantL2.
+
+Removed
+#######
+
+The following (previously deprecated) algorithms versions have now been removed:
+
+ - CorrectFlightPaths v1
+ - LoadAscii v1
+ - LoadEventPreNexus v1
+ - LoadLogsForSNSPulsedMagnet v1
+ - Lorentzian1D v1
+ - ProcessDasNexusLog v1
+ - LoadILL v1
+ - SANSDirectBeamScaling v1
+
 
 MD Algorithms (VATES CLI)
 #########################
