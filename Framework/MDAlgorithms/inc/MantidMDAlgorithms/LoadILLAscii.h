@@ -40,7 +40,7 @@ namespace MDAlgorithms {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport LoadILLAscii : public API::IFileLoader<Kernel::FileDescriptor>,
-  public API::DeprecatedAlgorithm {
+                               public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

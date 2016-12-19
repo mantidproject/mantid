@@ -54,8 +54,9 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RefinePowderInstrumentParameters : public API::Algorithm,
-  public API::DeprecatedAlgorithm {
+class DLLExport RefinePowderInstrumentParameters
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   RefinePowderInstrumentParameters();
 

@@ -54,8 +54,7 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
  */
 RefinePowderInstrumentParameters::RefinePowderInstrumentParameters()
     : m_BestGSLChi2(0.0), m_MinSigma(0.0), m_MinNumFittedPeaks(0),
-      m_MaxNumberStoredParameters(0)
-{
+      m_MaxNumberStoredParameters(0) {
   this->useAlgorithm("RefinePowderInstrumentParameters", 3);
 }
 

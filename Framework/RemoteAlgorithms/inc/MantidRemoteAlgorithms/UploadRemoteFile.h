@@ -52,10 +52,13 @@ namespace RemoteAlgorithms {
     */
 
 class DLLExport UploadRemoteFile : public API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                   public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   UploadRemoteFile() { this->useAlgorithm("UploadRemoteFile", 2); }
+
+  /// Algorithm's name
+  const std::string name() const override { return "UploadRemoteFile"; }
 
   /// Summary of algorithms purpose
   const std::string summary() const override {

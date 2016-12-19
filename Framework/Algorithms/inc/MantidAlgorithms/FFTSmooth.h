@@ -37,7 +37,7 @@ namespace Algorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport FFTSmooth : public API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                            public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   FFTSmooth() { this->useAlgorithm("FFTSmooth", 2); }

@@ -8,9 +8,9 @@ namespace Mantid {
 namespace RemoteAlgorithms {
 
 class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                     public API::DeprecatedAlgorithm {
 public:
-  ///constructor
+  /// constructor
   DownloadRemoteFile();
 
   /// Algorithm's name

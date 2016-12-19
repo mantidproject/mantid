@@ -8,7 +8,7 @@ namespace Mantid {
 namespace RemoteAlgorithms {
 
 class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                         public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   StartRemoteTransaction() { this->useAlgorithm("StartRemoteTransaction", 2); }

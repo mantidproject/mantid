@@ -42,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport LoadNexusMonitors : public API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                    public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadNexusMonitors() { this->useAlgorithm("LoadNexusMonitors", 2); }

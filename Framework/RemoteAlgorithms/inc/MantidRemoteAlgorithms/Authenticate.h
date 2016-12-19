@@ -48,7 +48,7 @@ namespace RemoteAlgorithms {
     */
 
 class DLLExport Authenticate : public Mantid::API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                               public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   Authenticate();

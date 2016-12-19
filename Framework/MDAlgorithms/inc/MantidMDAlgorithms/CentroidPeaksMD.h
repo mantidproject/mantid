@@ -18,7 +18,7 @@ namespace MDAlgorithms {
  * @date 2011-06-01
  */
 class DLLExport CentroidPeaksMD : public API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                  public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   CentroidPeaksMD();

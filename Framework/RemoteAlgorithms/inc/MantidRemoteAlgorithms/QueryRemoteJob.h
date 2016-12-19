@@ -8,7 +8,7 @@ namespace Mantid {
 namespace RemoteAlgorithms {
 
 class DLLExport QueryRemoteJob : public Mantid::API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                 public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   QueryRemoteJob() { this->useAlgorithm("QueryRemoteJob", 2); }

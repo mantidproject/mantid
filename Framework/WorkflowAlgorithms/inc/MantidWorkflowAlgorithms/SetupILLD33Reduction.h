@@ -38,7 +38,7 @@ namespace WorkflowAlgorithms {
 */
 
 class DLLExport SetupILLD33Reduction : public API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                       public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SetupILLD33Reduction"; }

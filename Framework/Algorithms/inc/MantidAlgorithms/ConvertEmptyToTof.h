@@ -43,7 +43,7 @@ namespace Algorithms {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport ConvertEmptyToTof : public API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                    public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

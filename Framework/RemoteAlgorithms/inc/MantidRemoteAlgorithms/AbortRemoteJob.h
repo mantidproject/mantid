@@ -8,7 +8,7 @@ namespace Mantid {
 namespace RemoteAlgorithms {
 
 class DLLExport AbortRemoteJob : public Mantid::API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                 public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   AbortRemoteJob();

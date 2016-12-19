@@ -56,7 +56,7 @@ namespace RemoteAlgorithms {
     */
 
 class DLLExport SubmitRemoteJob : public Mantid::API::Algorithm,
-  public API::DeprecatedAlgorithm {
+                                  public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   SubmitRemoteJob() { this->useAlgorithm("SubmitRemoteJob", 2); }
