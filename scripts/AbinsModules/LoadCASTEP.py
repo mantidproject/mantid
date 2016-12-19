@@ -51,7 +51,7 @@ class LoadCASTEP(GeneralDFTProgram):
         @param f_handle: handle to the file.
         @return List of ions in file as list of tuple of (ion, mode number)
         """
-        file_data = {"atoms": []}
+        file_data = {"atoms": {}}
 
         while True:
             line = f_handle.readline()
@@ -75,16 +75,15 @@ class LoadCASTEP(GeneralDFTProgram):
                 for _ in range(self._num_atoms):
                     line = f_handle.readline()
                     line_data = line.strip().split()
+                    indx = int(line_data[0]) - 1 # -1 to convert to zero based indexing
 
                     symbol = line_data[4]
                     ion = {"symbol": symbol,
                            "fract_coord": np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])]),
-                           "atom": int(line_data[0]) - 1,
                            # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
-                           "sort": int(line_data[0]) - 1,
+                           "sort": indx,
                            "mass": float(line_data[5])}
-                    # -1 to convert to zero based indexing
-                    file_data["atoms"].append(ion)
+                    file_data["atoms"].update({"atom_%s" % indx: ion})
 
             if 'END header' in line:
                 if self._num_atoms is None or self._num_phonons is None:
@@ -100,12 +99,12 @@ class LoadCASTEP(GeneralDFTProgram):
         @param f_handle: handle to the file.
         """
 
-        _freq = []
+        freq = []
         for n in range(self._num_phonons):
             line = f_handle.readline()
-            _freq.append(float(line.strip().split()[1]))
+            freq.append(float(line.strip().split()[1]))
 
-        return _freq
+        return freq
 
     # noinspection PyMethodMayBeStatic
     def _parse_phonon_unit_cell_vectors(self, f_handle):
@@ -185,21 +184,21 @@ class LoadCASTEP(GeneralDFTProgram):
 
         # Header regex. Looks for lines in the following format:
         #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
-        _sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " \
+        sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " \
                            r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
-        _no_sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        no_sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
 
         if self._check_acoustic_sum():
-            header_regex_str = _sum_rule_header
+            header_regex_str = sum_rule_header
             self._sum_rule = True
         else:
-            header_regex_str = _no_sum_rule_header
+            header_regex_str = no_sum_rule_header
             self._sum_rule = False
 
-        _compiled_header_regex_str = re.compile(header_regex_str)
-        _compiled_no_sum_rule_header = re.compile(_no_sum_rule_header)
+        compiled_header_regex_str = re.compile(header_regex_str)
+        compiled_no_sum_rule_header = re.compile(no_sum_rule_header)
 
-        headers = {True: _compiled_header_regex_str, False: _compiled_no_sum_rule_header}
+        headers = {True: compiled_header_regex_str, False: compiled_no_sum_rule_header}
         eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
         block_count = 0
 
@@ -240,8 +239,8 @@ class LoadCASTEP(GeneralDFTProgram):
         self._recover_symmetry_points(data=file_data)
 
         # save stuff to hdf file
-        _data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
-        for name in _data_to_save:
+        data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
+        for name in data_to_save:
             self._clerk.add_data(name=name, value=file_data[name])
 
         self._clerk.add_file_attributes()

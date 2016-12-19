@@ -50,14 +50,13 @@ ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements"]
 
 # keywords which define data structure of AtomsData
-ALL_KEYWORDS_ATOMS_DATA = ["symbol", "fract_coord", "atom", "sort", "mass"]
-
+ALL_KEYWORDS_ATOMS_DATA = ["symbol", "fract_coord", "sort", "mass"]
 # keywords which define data structure for PowderData
 ALL_KEYWORDS_POWDER_DATA = ["b_tensors", "a_tensors"]
 
 # keywords which define data structure for SData
 ALL_KEYWORDS_S_DATA = ["data"]
-ALL_KEYWORDS_ATOMS_S_DATA = ["sort", "symbol", "s", "frequencies"]
+ALL_KEYWORDS_ATOMS_S_DATA = ["s", "frequencies"]
 
 FLOAT_ID = np.dtype(np.float64).num
 FLOAT_TYPE = np.dtype(np.float64)

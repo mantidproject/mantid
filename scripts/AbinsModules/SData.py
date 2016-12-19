@@ -36,9 +36,6 @@ class SData(GeneralData):
             if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
                 raise ValueError("Invalid structure of the dictionary.")
 
-            if not items[item]["symbol"] in AbinsConstants.ALL_SYMBOLS:
-                raise ValueError("Invalid symbol of element.")
-
         self._data = items
 
     def extract(self):

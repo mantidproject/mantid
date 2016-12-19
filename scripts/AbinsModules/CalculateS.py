@@ -1,5 +1,4 @@
 import numpy as np
-from mantid.kernel import logger
 
 try:
     # noinspection PyUnresolvedReferences
@@ -184,12 +183,7 @@ class CalculateS(object):
                 result.append(self._calculate_s_powder_1d_one_atom(atom=atom))
 
         for atom in range(num_atoms):
-
-            atoms_items["atom_%s" % atom] = {"frequencies": result[atom][0],
-                                             "s": result[atom][1],
-                                             "symbol": self._atoms_data[atom]["symbol"],
-                                             "sort": self._atoms_data[atom]["sort"]}
-
+            atoms_items["atom_%s" % atom] = {"frequencies": result[atom][0], "s": result[atom][1]}
             self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
 
         s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
@@ -201,6 +195,13 @@ class CalculateS(object):
         """
         @param msg:  message to print out
         """
+        # in order to avoid
+        #
+        # RuntimeError: Pickling of "mantid.kernel._kernel.Logger"
+        # instances is not enabled (http://www.boost.org/libs/python/doc/v2/pickle.html)
+        #
+        # logger has to be imported locally
+
         from mantid.kernel import logger
         logger.notice(msg)
 
@@ -540,14 +541,13 @@ class CalculateS(object):
         try:
 
             self._clerk.check_previous_data()
-
             data = self.load_formatted_data()
-            logger.notice(str(data) + " has been loaded from the HDF file.")
+            self._report_progress(str(data) + " has been loaded from the HDF file.")
 
         except (IOError, ValueError) as err:
 
-            logger.notice("Warning: " + str(err) + " Data has to be calculated.")
+            self._report_progress("Warning: " + str(err) + " Data has to be calculated.")
             data = self.calculate_data()
-            logger.notice(str(data) + " has been calculated.")
+            self._report_progress(str(data) + " has been calculated.")
 
         return data

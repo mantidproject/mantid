@@ -69,7 +69,8 @@ class CalculatePowder(object):
         #     dim -- size of displacement vector for one atom (dim = 3)
 
         # masses[num_atoms, num_freq]
-        masses = np.asarray([([atom["mass"]] * frequencies.size) for atom in atoms_data])
+
+        masses = np.asarray([([atoms_data["atom_%s" % atom]["mass"]] * frequencies.size) for atom in range(num_atoms)])
 
         # disp[num_atoms, num_freq, dim]
         disp = displacements[:, AbinsConstants.FIRST_OPTICAL_PHONON:]

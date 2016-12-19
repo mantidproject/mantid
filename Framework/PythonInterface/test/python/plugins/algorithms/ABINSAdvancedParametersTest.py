@@ -1,6 +1,5 @@
 import unittest
 import os
-from mantid import logger
 from mantid.simpleapi import mtd
 from mantid.simpleapi import ABINS, DeleteWorkspace
 

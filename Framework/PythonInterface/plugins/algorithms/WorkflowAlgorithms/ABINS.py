@@ -38,6 +38,8 @@ class ABINS(PythonAlgorithm):
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
+    _extracted_dft_data = None
+
 
     def category(self):
         return "Simulation"
@@ -188,8 +190,9 @@ class ABINS(PythonAlgorithm):
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
-        _data = dft_data.get_atoms_data().extract()
-        all_atoms_symbols = set([atom["symbol"] for atom in _data])
+        self._extracted_dft_data = dft_data.get_atoms_data().extract()
+        num_atoms = len(self._extracted_dft_data)
+        all_atoms_symbols = set([self._extracted_dft_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)])
 
         if len(self._atoms) == 0:  # case: all atoms
             atoms_symbol = all_atoms_symbols
@@ -272,7 +275,7 @@ class ABINS(PythonAlgorithm):
             freq.fill(0)
             constructed_freq = False
             for atom in range(num_atoms):
-                if atoms_data["atom_%s" % atom]["symbol"] == atom_symbol:
+                if self._extracted_dft_data["atom_%s" % atom]["symbol"] == atom_symbol:
                     temp_s_atom_data.fill(0)
                     for order in range(AbinsConstants.FUNDAMENTALS,
                                        self._num_quantum_order_events + AbinsConstants.S_LAST_INDEX):

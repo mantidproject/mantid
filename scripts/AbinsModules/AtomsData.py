@@ -11,7 +11,10 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Invalid number of atoms.")
         if num_atoms < 0:
             raise ValueError("Number of atoms cannot be negative.")
+
         self._num_atoms = num_atoms
+        self._num_atom = 0
+        self._data = {}
 
     def _append(self, item=None):
         """
@@ -40,15 +43,6 @@ class AtomsDaTa(GeneralData):
         if fract_coord.dtype.num != AbinsConstants.FLOAT_ID:
             raise ValueError("All coordinates should be real numbers.")
 
-        # "atom"
-        atom = item["atom"]
-        if not isinstance(atom, int):
-            raise ValueError("Number of atom should be integer.")
-        if atom < 0:
-            raise ValueError("Number of atom cannot be negative.")
-        if atom >= self._num_atoms:  # here = because we count from 0
-            raise ValueError("Number of atoms cannot be larger than the total number of atoms.")
-
         # "sort"
         sort = item["sort"]
         if not isinstance(sort, int):
@@ -65,7 +59,11 @@ class AtomsDaTa(GeneralData):
         if mass < 0:
             raise ValueError("Mass of atom cannot be negative.")
 
-        self._data.append(item)
+        if self._num_atom == self._num_atoms:
+            raise ValueError("Number of atom cannot be larger than total number of atoms in the system.")
+
+        self._data.update({"atom_%s" % self._num_atom: item})
+        self._num_atom += 1
 
     def set(self, items=None):
 
@@ -73,10 +71,19 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)" %
                              (len(items), self._num_atoms))
 
-        if isinstance(items, list):
-            self._data = []
-            for item in items:
-                self._append(item=item)
+        atoms_list = ["atom_%s" % atom for atom in range(self._num_atoms)]
+        for atom in atoms_list:
+            if atom not in items:
+                raise ValueError("Missing data for atom number %s." % atom)
+
+        if isinstance(items, dict):
+            self._data = {}
+            self._num_atom = 0
+            size = len(items)
+            for atom in range(size):
+                self._append(item=items["atom_%s" % atom])
+        else:
+            raise ValueError("Invalid type of data.")
 
     def extract(self):
         if len(self._data) == self._num_atoms:

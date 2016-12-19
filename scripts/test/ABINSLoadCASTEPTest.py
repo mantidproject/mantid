@@ -148,12 +148,12 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         atoms = data["datasets"]["atoms_data"]
         for item in range(len(correct_atoms)):
 
-            self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
-            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)  # delta in Hartree units
-            self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
-            self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
-                                               atoms[item]["fract_coord"]))
+            self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
+            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
+                                   delta=0.00001)  # delta in amu units
+            self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
+            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["fract_coord"]),
+                                               atoms["atom_%s" % item]["fract_coord"]))
 
         # check attributes
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
@@ -174,12 +174,12 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         for item in range(len(correct_atoms)):
 
-            self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
-            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)
-            self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
-            self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
-                                               atoms[item]["fract_coord"]))
+            self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
+            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
+                                   delta=0.00001)
+            self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
+            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["fract_coord"]),
+                                               atoms["atom_%s" % item]["fract_coord"]))
 
     def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
@@ -201,12 +201,12 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         for item in range(len(correct_atoms)):
 
-            self.assertEqual(correct_atoms[item]["sort"], atoms[item]["sort"])
-            self.assertAlmostEqual(correct_atoms[item]["mass"], atoms[item]["mass"], delta=2)
-            self.assertEqual(correct_atoms[item]["symbol"], atoms[item]["symbol"])
-            self.assertEqual(correct_atoms[item]["atom"], atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(correct_atoms[item]["fract_coord"]),
-                                               atoms[item]["fract_coord"]))
+            self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
+            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
+                                   delta=0.00001)
+            self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
+            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["fract_coord"]),
+                                               atoms["atom_%s" % item]["fract_coord"]))
 
     # noinspection PyMethodMayBeStatic
     def _get_reader_data(self, castep_reader=None):

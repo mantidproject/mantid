@@ -161,11 +161,6 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
             data_temp = data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS]
             self.assertEqual(True, np.allclose(good_temp, data_temp))
 
-            self.assertEqual(good_data["atom_%s" % el]["sort"],
-                             data["atom_%s" % el]["sort"])
-            self.assertEqual(good_data["atom_%s" % el]["symbol"],
-                             data["atom_%s" % el]["symbol"])
-
 
 if __name__ == '__main__':
     unittest.main()

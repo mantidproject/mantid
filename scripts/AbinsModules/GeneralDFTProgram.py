@@ -71,8 +71,12 @@ class GeneralDFTProgram(object):
 
               The following structured datasets should be also defined:
 
-                        "atoms"          - Python list with the information about ions. Each entry in the list is a
-                                          dictionary with the following entries:
+                        "atoms"          - Python dictionary with the information about ions. Each entry in the
+                                           dictionary has the following format 'atom_n'. Here n means number of
+                                           atom in the unit cell.
+
+                                           Each entry 'atom_n' in the  dictionary is a dictionary with the following
+                                           entries:
 
                                                "symbol" - chemical symbol of the element (for example hydrogen -> H)
 
@@ -85,12 +89,9 @@ class GeneralDFTProgram(object):
                                                "fract_coord" - equilibrium position of atom; it has a form of numpy
                                                                array with three floats
 
-                                               "atom" - number of atom in the unit cell
-
                                                "mass" - mass of atom
 
-
-              The attributes should be an dictionary with the following entries:
+              The attributes should be a dictionary with the following entries:
 
                         "hash"  - hash of a file with the phonon data. It should be a string representation of hash.
 
@@ -173,7 +174,7 @@ class GeneralDFTProgram(object):
             dft_data = self.load_formatted_data()
             logger.notice(str(dft_data) + " has been loaded from the HDF file.")
 
-        # if loading from *.hdf5 file failed than read data directly  from input DFT file and erase hdf file
+        # if loading from *.hdf5 file failed than read data directly from input DFT file and erase hdf file
         except (IOError, ValueError) as err:
 
             logger.notice(str(err))

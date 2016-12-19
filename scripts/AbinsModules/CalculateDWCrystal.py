@@ -46,48 +46,49 @@ class CalculateDWCrystal(object):
         """
         dw = DwCrystalData(temperature=self._temperature, num_atoms=self._num_atoms)
 
-        _data = self._abins_data.extract()
+        data = self._abins_data.extract()
+        num_atoms = len(data["atoms_data"])
+        mass_hartree_factor = np.asarray([1.0 / (data["atoms_data"]["atom_%s" % atom]["mass"] * 2)
+                                          for atom in range(num_atoms)])
+        frequencies_hartree = data["k_points_data"]["frequencies"]
+        temperature_hartree = self._temperature * AbinsConstants.K_2_HARTREE
 
-        _mass_hartree_factor = np.asarray([1.0 / (atom["mass"] * 2) for atom in _data["atoms_data"]])
-        _frequencies_hartree = _data["k_points_data"]["frequencies"]
-        _temperature_hartree = self._temperature * AbinsConstants.K_2_HARTREE
+        weights = data["k_points_data"]["weights"]
+        atomic_displacements = data["k_points_data"]["atomic_displacements"] / AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
 
-        _weights = _data["k_points_data"]["weights"]
-        _atomic_displacements = _data["k_points_data"]["atomic_displacements"] / AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+        coth_factor = 1.0 / (2.0 * temperature_hartree)  # coth( coth_factor * omega)
 
-        _coth_factor = 1.0 / (2.0 * _temperature_hartree)  # coth( _coth_factor * omega)
+        tanh = np.tanh(np.multiply(coth_factor, frequencies_hartree))
+        coth_over_omega = np.divide(1.0, np.multiply(tanh, frequencies_hartree))  # coth(...)/omega
 
-        _tanh = np.tanh(np.multiply(_coth_factor, _frequencies_hartree))
-        _coth_over_omega = np.divide(1.0, np.multiply(_tanh, _frequencies_hartree))  # coth(...)/omega
-
-        _item_k = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE)  # stores DW for one atom
-        _item_freq = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE)
+        item_k = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE)  # stores DW for one atom
+        item_freq = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE)
 
         for num in range(self._num_atoms):
-            _item_k.fill(0.0)  # erase stored information so that it can be filled with content for the next atom
+            item_k.fill(0.0)  # erase stored information so that it can be filled with content for the next atom
 
             for k in range(self._num_k):
 
                 # correction for acoustic modes at Gamma point
-                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < AbinsConstants.SMALL_K:
+                if np.linalg.norm(data["k_points_data"]["k_vectors"][k]) < AbinsConstants.SMALL_K:
                     start = 3
                 else:
                     start = 0
 
-                _item_freq.fill(0.0)
+                item_freq.fill(0.0)
 
                 for n_freq in range(start, self._num_freq):
 
-                    displacement = _atomic_displacements[k, num, n_freq, :]
+                    displacement = atomic_displacements[k, num, n_freq, :]
                     tensor = np.outer(displacement, displacement.conjugate()).real  # DW factors are real
-                    np.multiply(tensor, _coth_over_omega[k, n_freq], tensor)
-                    np.add(_item_freq, tensor, _item_freq)
+                    np.multiply(tensor, coth_over_omega[k, n_freq], tensor)
+                    np.add(item_freq, tensor, item_freq)
 
-                np.add(_item_k, np.multiply(_item_freq, _weights[k]), _item_k)
+                np.add(item_k, np.multiply(item_freq, weights[k]), item_k)
 
-            np.multiply(_item_k, _mass_hartree_factor[num], _item_k)
+            np.multiply(item_k, mass_hartree_factor[num], item_k)
             # noinspection PyProtectedMember
-            dw._append(item=_item_k, num_atom=num)
+            dw._append(item=item_k, num_atom=num)
         return dw
 
     def calculate_data(self):
