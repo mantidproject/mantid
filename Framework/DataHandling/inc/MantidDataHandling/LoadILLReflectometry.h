@@ -60,19 +60,18 @@ private:
   void exec() override;
 
   void initWorkspace(NeXus::NXEntry &entry,
-                     std::vector<std::vector<int>> monitorsData);
+                     std::vector<std::vector<int>> monitorsData, std::string &filename);
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
   void loadData(NeXus::NXEntry &entry,
-                                std::vector<std::vector<int>> monitorsData,
-                                std::string &filename);
+                                std::vector<std::vector<int>> monitorsData);
   void loadNexusEntriesIntoProperties(std::string nexusfilename);
   std::vector<int>loadSingleMonitor(NeXus::NXEntry &entry, std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
   //void centerDetector(double);
-  void placeDetector(NeXus::NXEntry &entry);
+  void placeDetector();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
