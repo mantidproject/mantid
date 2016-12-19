@@ -255,7 +255,7 @@ void TableColumn<Type>::read(size_t index, const std::string &text) {
 
 /// Read in from stream and set the value at the given index
 template <typename Type>
-void TableColumn<Type>::read(size_t index, std::istream & in) {
+void TableColumn<Type>::read(size_t index, std::istream &in) {
   in >> m_data[index];
 }
 
