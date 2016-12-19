@@ -199,6 +199,7 @@ public:
   void addQuat(const IComponent *comp, const std::string &name,
                const Kernel::Quat &value,
                const std::string *const pDescription = nullptr);
+  void forceUnsafeSetMasked(const IComponent *comp, bool value);
   //@}
 
   /// Does the named parameter exist for the given component and type

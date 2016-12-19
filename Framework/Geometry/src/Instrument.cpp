@@ -1023,7 +1023,7 @@ void Instrument::saveNexus(::NeXus::File *file,
       for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
         if (m_detectorInfo->isMasked(i)) {
           const auto *det = getBaseDetector(detIDs.at(i));
-          params.addBool(det, std::string("masked"), true);
+          params.forceUnsafeSetMasked(det, true);
         }
       }
     }
