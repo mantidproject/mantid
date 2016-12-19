@@ -531,9 +531,8 @@ Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
   } else {
     boost::shared_ptr<DetectorGroup> det_group =
         boost::make_shared<DetectorGroup>();
-    bool warn(false);
     for (const auto detID : det_ids) {
-      det_group->addDetector(this->getDetector(detID), warn);
+      det_group->addDetector(this->getDetector(detID));
     }
     return det_group;
   }

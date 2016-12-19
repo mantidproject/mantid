@@ -47,10 +47,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL DetectorGroup : public virtual IDetector {
 public:
   DetectorGroup();
-  DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
-                bool warnAboutMasked = false);
+  DetectorGroup(const std::vector<IDetector_const_sptr> &dets);
 
-  void addDetector(IDetector_const_sptr det, bool &warn);
+  void addDetector(IDetector_const_sptr det);
 
   // IDetector methods
   IDetector *cloneParameterized(const ParameterMap *) const override {

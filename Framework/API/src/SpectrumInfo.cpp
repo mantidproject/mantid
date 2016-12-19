@@ -201,7 +201,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
       }
     }
     m_lastDetector[thread] =
-        boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);
+        boost::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
 
   return *m_lastDetector[thread];

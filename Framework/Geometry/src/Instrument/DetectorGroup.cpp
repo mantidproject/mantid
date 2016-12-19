@@ -27,8 +27,7 @@ DetectorGroup::DetectorGroup()
 * generated if a one of the detectors in dets is masked.
 *  @throw std::invalid_argument If an empty vector is passed as argument
 */
-DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
-                             bool warnAboutMasked)
+DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets)
     : IDetector(), m_id(), m_detectors(), group_topology(undef) {
   if (dets.empty()) {
     g_log.error("Illegal attempt to create an empty DetectorGroup");
@@ -36,7 +35,7 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
   }
   std::vector<IDetector_const_sptr>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it) {
-    addDetector(*it, warnAboutMasked);
+    addDetector(*it);
   }
 }
 
@@ -44,28 +43,16 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
 *  @param det ::  A pointer to the detector to add
 *  @param warn :: Whether to issue warnings to the log
 */
-void DetectorGroup::addDetector(IDetector_const_sptr det, bool &warn) {
+void DetectorGroup::addDetector(IDetector_const_sptr det) {
   // the topology of the group become undefined and needs recalculation if new
   // detector has been added to the group
   group_topology = undef;
-  // Warn if adding a masked detector
-  if (warn && det->isMasked()) {
-    g_log.warning() << "Adding a detector (ID:" << det->getID()
-                    << ") that is flagged as masked.\n";
-    warn = false;
-  }
 
   // For now at least, the ID is the same as the first detector that is added
   if (m_detectors.empty())
     m_id = det->getID();
 
-  if ((!m_detectors.insert(DetCollection::value_type(det->getID(), det))
-            .second) &&
-      warn) {
-    g_log.warning() << "Detector with ID " << det->getID()
-                    << " is already in group.\n";
-    warn = false;
-  }
+  m_detectors.insert(DetCollection::value_type(det->getID(), det));
 }
 
 detid_t DetectorGroup::getID() const { return m_id; }
