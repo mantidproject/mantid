@@ -58,8 +58,7 @@ Usage
 
 **Example - Convert detector counts of an HB3A's measurement to HKL.**
 
-.. .. testcode:: ExConvertHB3AToHKL
-.. code-block:: python
+.. testcode:: ExConvertHB3AToHKL
 
   # Create input table workspaces for experiment information and virtual instrument parameters
   CollectHB3AExperimentInfo(ExperimentNumber='406', ScanList='298', PtLists='-1,22',
@@ -88,24 +87,23 @@ Usage
   print 'events[22, 53, 5] = %.1f' % events_array[22, 53, 5]
   print 'events[30, 40, 5] = %.1f' % events_array[30, 40, 5]
 
-..
-   .. testcleanup::  ExConvertHB3AToHKL
+.. testcleanup::  ExConvertHB3AToHKL
 
-     DeleteWorkspace(Workspace='QSampleMD')
-     DeleteWorkspace(Workspace='ExpInfoTable')
-     DeleteWorkspace(Workspace='VirtualInstrumentTable')
-     DeleteWorkspace(Workspace='HKLMD')
-     DeleteWorkspace(Workspace='HB3A_exp0406_scan0298')
-     DeleteWorkspace(Workspace='spicematrixws')
+  DeleteWorkspace(Workspace='QSampleMD')
+  DeleteWorkspace(Workspace='ExpInfoTable')
+  DeleteWorkspace(Workspace='VirtualInstrumentTable')
+  DeleteWorkspace(Workspace='HKLMD')
+  DeleteWorkspace(Workspace='HB3A_exp0406_scan0298')
+  DeleteWorkspace(Workspace='spicematrixws')
 
-..
-   Output:
 
-   .. testoutput:: ExConvertHB3AToHKL
+Output:
 
-     Output QSample and HKL workspaces have 1631 and 1631 events.
-     events[22, 53, 5] = 19.0
-     events[30, 40, 5] = 38.0
+.. testoutput:: ExConvertHB3AToHKL
+
+  Output QSample and HKL workspaces have 1631 and 1631 events.
+  events[22, 53, 5] = 19.0
+  events[30, 40, 5] = 38.0
 
 .. categories::
 
