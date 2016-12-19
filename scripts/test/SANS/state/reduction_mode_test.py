@@ -4,7 +4,7 @@ import mantid
 from sans.state.reduction_mode import (StateReductionMode, get_reduction_mode_builder)
 from sans.state.data import get_data_builder
 from sans.common.enums import (ISISReductionMode, ReductionDimensionality, FitModeForMerge,
-                                   SANSFacility, SANSInstrument, DetectorType)
+                               SANSFacility, SANSInstrument, DetectorType)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

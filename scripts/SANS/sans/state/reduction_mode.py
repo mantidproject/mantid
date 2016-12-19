@@ -8,7 +8,7 @@ import copy
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
                                    FloatWithNoneParameter, rename_descriptor_names)
 from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
-                                   SANSInstrument, DetectorType)
+                               SANSInstrument, DetectorType)
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.automatic_setters import (automatic_setters)
