@@ -30,6 +30,7 @@ set ( SRC_FILES
 	src/ImggAggregateWavelengths.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
+	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
 	src/LoadBBY.cpp
 	src/LoadCalFile.cpp
@@ -203,6 +204,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ImggAggregateWavelengths.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
+	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
 	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
@@ -374,6 +376,7 @@ set ( TEST_FILES
 	ISISDataArchiveTest.h
 	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
+	LoadAsciiTest.h
 	LoadAscii2Test.h
 	LoadBBYTest.h
 	LoadCalFileTest.h

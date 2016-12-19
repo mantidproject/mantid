@@ -41,8 +41,6 @@ Removed
 
 The following (previously deprecated) algorithms versions have now been removed:
 
- - CorrectFlightPaths v1
- - LoadAscii v1
  - LoadEventPreNexus v1
  - LoadLogsForSNSPulsedMagnet v1
  - Lorentzian1D v1
