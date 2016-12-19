@@ -61,6 +61,7 @@ Bugs Resolved
 - Fixed a bug where saving a plot created from columns of a table window are loaded back as a blank plot from a Mantid project.
 - Fix a bug where saving a tiled plot saved to a project file would be reloaded with different size plots.
 - Fixed a bug where minimised windows would not stay minimised after being serialised to a Mantid project
+- Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
 
 SliceViewer Improvements
 ------------------------
