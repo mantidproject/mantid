@@ -5,8 +5,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
@@ -106,16 +108,14 @@ void LoadIsawPeaks::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
-std::string
-LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
-                              Geometry::Instrument_const_sptr instr_old,
-                              Geometry::Instrument_const_sptr instr,
-                              double &T0) {
-  ParameterMap_sptr parMap1 = instr_old->getParameterMap();
+std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
+                                          std::string startChar,
+                                          Geometry::Instrument_const_sptr instr,
+                                          double &T0) {
 
   ParameterMap_sptr parMap = instr->getParameterMap();
 
-  while (in.good() && (startChar.size() < 1 || startChar != "7")) {
+  while (in.good() && (startChar.empty() || startChar != "7")) {
     readToEndOfLine(in, true);
     startChar = getWord(in, false);
   }
@@ -136,7 +136,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
     SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
-                                                parMap1);
+                                                parMap);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
@@ -144,7 +144,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
 
   readToEndOfLine(in, true);
   startChar = getWord(in, false);
-  while (in.good() && (startChar.size() < 1 || startChar != "5")) {
+  while (in.good() && (startChar.empty() || startChar != "5")) {
     readToEndOfLine(in, true);
     startChar = getWord(in, false);
   }
@@ -159,7 +159,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     std::string line;
     for (int i = 0; i < 16; i++) {
       std::string s = getWord(in, false);
-      if (s.size() < 1) {
+      if (s.empty()) {
         g_log.error() << "Not enough info to describe panel \n";
         throw std::length_error("Not enough info to describe panel ");
       }
@@ -196,7 +196,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     }
     bankName += SbankNum;
     boost::shared_ptr<const Geometry::IComponent> bank =
-        getCachedBankByName(bankName, instr_old);
+        getCachedBankByName(bankName, instr);
 
     if (!bank) {
       g_log.error() << "There is no bank " << bankName
@@ -216,7 +216,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     bankRot.inverse();
     Quat dRot = thisRot * bankRot;
 
-    boost::shared_ptr<const Geometry::RectangularDetector> bankR =
+    auto bankR =
         boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(bank);
 
     if (!bankR)
@@ -227,11 +227,10 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
       DetWScale = width / bankR->xsize() / 100;
       DetHtScale = height / bankR->ysize() / 100;
     }
-    std::vector<std::string> bankNames;
-    bankNames.push_back(bankName);
+    const std::vector<std::string> bankNames{bankName};
 
     SCDCalibratePanels::FixUpBankParameterMap(
-        bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap1, false);
+        bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap, false);
   }
   return startChar;
 }
@@ -294,13 +293,9 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // Populate the instrument parameters in this workspace - this works around a
   // bug
   tempWS->populateInstrumentParameters();
-  Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument();
-  auto instr = instr_old;
-  /*auto map = boost::make_shared<ParameterMap>();
-  auto instr = boost::make_shared<const Geometry::Instrument>(
-      instr_old->baseInstrument(), map);*/
+  Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
 
-  std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
+  std::string s = ApplyCalibInfo(in, "", instr, T0);
   outWS->setInstrument(instr);
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
@@ -565,7 +560,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       Peak peak = readPeak(outWS, s, in, seqNum, bankName, qSign);
 
       // Get the calculated goniometer matrix
-      Matrix<double> gonMat = uniGonio.getR();
+      const Matrix<double> &gonMat = uniGonio.getR();
 
       peak.setGoniometerMatrix(gonMat);
       peak.setRunNumber(run);
@@ -581,8 +576,9 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       // Add the peak to workspace
       outWS->addPeak(peak);
     } catch (std::runtime_error &e) {
-      g_log.warning() << "Error reading peak SEQN " << seqNum << " : "
-                      << e.what() << '\n';
+      g_log.error() << "Error reading peak SEQN " << seqNum << " : " << e.what()
+                    << '\n';
+      throw std::runtime_error("Corrupted input file. ");
     }
 
     prog.report(in.tellg());

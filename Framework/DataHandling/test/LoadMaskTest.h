@@ -10,6 +10,8 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -259,9 +261,10 @@ public:
     // masked
     std::vector<detid_t> maskSourceDet, maskTargDet;
 
+    const auto &spectrumInfo = source->spectrumInfo();
     size_t n_steps = source->getNumberHistograms();
     for (size_t i = 0; i < n_steps; ++i) {
-      bool source_masked = source->getDetector(i)->isMasked();
+      bool source_masked = spectrumInfo.isMasked(i);
       if (source_masked) {
         maskSourceDet.push_back(source->getDetector(i)->getID());
       }

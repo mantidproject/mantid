@@ -26,9 +26,9 @@ public:
       pbpv.initialize();
 
     MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);
@@ -81,9 +81,9 @@ public:
 
   void setUp() override {
     MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
     MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);

@@ -6,6 +6,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <iomanip>
+
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -86,13 +88,12 @@ void RefinePowderInstrumentParameters3::init() {
       "Algorithm to calculate the standard error of peak positions.");
 
   // Damping factor
-  declareProperty(
-      "Damping", 1.0,
-      "Damping factor for (1) minimizer 'damping'. (2) Monte Calro. ");
+  declareProperty("Damping", 1.0, "Damping factor for (1) minimizer 'Damped "
+                                  "Gauss-Newton'. (2) Monte Carlo. ");
 
   // Anealing temperature
   declareProperty("AnnealingTemperature", 1.0,
-                  "Starting aneealing temperature.");
+                  "Starting annealing temperature.");
 
   // Monte Carlo iterations
   declareProperty("MonteCarloIterations", 100,
@@ -275,7 +276,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
 
     // If empty string, fit is default to be false
     bool fit = false;
-    if (fitq.size() > 0) {
+    if (!fitq.empty()) {
       if (fitq[0] == 'F' || fitq[0] == 'f')
         fit = true;
     }

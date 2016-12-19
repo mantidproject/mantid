@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

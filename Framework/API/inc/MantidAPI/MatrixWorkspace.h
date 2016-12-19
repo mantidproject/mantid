@@ -8,11 +8,14 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid {
-//----------------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------------
+
+namespace Kernel {
+class DateAndTime;
+}
+
 namespace Geometry {
 class ParameterMap;
 }
@@ -421,9 +424,6 @@ public:
   bool isDistribution() const;
   void setDistribution(bool newValue);
 
-  /// Mask a given workspace index, setting the data and error values to zero
-  void maskWorkspaceIndex(const std::size_t index);
-
   // Methods to set and access masked bins
   void maskBin(const size_t &workspaceIndex, const size_t &binIndex,
                const double &weight = 1.0);
@@ -527,6 +527,10 @@ public:
   //=====================================================================================
   // End image methods
   //=====================================================================================
+
+  size_t numberOfDetectorGroups() const override;
+  const std::set<detid_t> &
+  detectorIDsInGroup(const size_t index) const override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

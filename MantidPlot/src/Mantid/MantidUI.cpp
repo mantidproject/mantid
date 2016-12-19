@@ -54,6 +54,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QListWidget>
 #include <QMdiArea>
@@ -843,8 +844,7 @@ void MantidUI::showVatesSimpleInterface() {
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
-        vsui->setupPluginMode();
-        // m_appWindow->setGeometry(m_vatesSubWindow, vsui);
+        vsui->setupPluginMode(wsType, instrumentName);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);

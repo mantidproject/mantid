@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -1198,8 +1199,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   } // mutex auto unlocks here
 
   // if there's a comment in the packet, log it at the info level
-  std::string comment = pkt.comment();
-  if (comment.size() > 0) {
+  const std::string &comment = pkt.comment();
+  if (!comment.empty()) {
     g_log.information() << "Annotation: " << comment << '\n';
   }
 

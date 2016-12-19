@@ -3,18 +3,14 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidGeometry/Instrument.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-
 // Forward decs
 class IReflMainWindowPresenter;
-class IReflSettingsTabView;
+class IReflSettingsPresenter;
 
 /** @class ReflSettingsTabPresenter
 
@@ -46,35 +42,22 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsTabPresenter
     : public IReflSettingsTabPresenter {
 public:
   /// Constructor
-  ReflSettingsTabPresenter(IReflSettingsTabView *view);
+  ReflSettingsTabPresenter(std::vector<IReflSettingsPresenter *> presenters);
   /// Destructor
   ~ReflSettingsTabPresenter() override;
-  /// Accept a main presenter
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
-  void notify(IReflSettingsTabPresenter::Flag flag) override;
-  void setInstrumentName(const std::string instName) override;
+  /// Set the instrument name
+  void setInstrumentName(const std::string &instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
+  std::string getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
+  std::string getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const override;
+  std::string getStitchOptions(int group) const override;
 
 private:
-  void createStitchHints();
-  void getExpDefaults();
-  void getInstDefaults();
-  IAlgorithm_sptr createReductionAlg();
-  Instrument_const_sptr createEmptyInstrument(std::string instName);
-  std::string getTransmissionRuns() const;
-
-  /// The view we are managing
-  IReflSettingsTabView *m_view;
-  /// The main presenter
-  IReflMainWindowPresenter *m_mainPresenter;
-  /// Name of the current instrument in use
-  std::string m_currentInstrumentName;
+  /// The presenters for each group as a vector
+  std::vector<IReflSettingsPresenter *> m_settingsPresenters;
 };
 }
 }

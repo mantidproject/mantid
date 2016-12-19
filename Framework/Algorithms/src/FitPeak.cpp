@@ -264,7 +264,7 @@ bool FitOneSinglePeak::hasSetupToFitPeak(std::string &errmsg) {
   if (!m_dataWS)
     errmsg += "Data workspace ";
 
-  if (errmsg.size() > 0) {
+  if (!errmsg.empty()) {
     errmsg = "These parameters have not been set for fitting peak: " + errmsg;
     return false;
   }
@@ -835,7 +835,7 @@ double FitOneSinglePeak::fitCompositeFunction(
   // Check fit result
   goodness = checkFittedPeak(peakfunc, goodness, errorreason);
 
-  if (errorreason.size() > 0)
+  if (!errorreason.empty())
     m_sstream << "Error reason of fit peak+background composite: "
               << errorreason << "\n";
 

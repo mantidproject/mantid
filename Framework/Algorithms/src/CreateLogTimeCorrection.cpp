@@ -69,7 +69,7 @@ void CreateLogTimeCorrection::exec() {
 
   string filename = getProperty("OutputFilename");
   g_log.information() << "Output file name is " << filename << ".\n";
-  if (filename.size() > 0) {
+  if (!filename.empty()) {
     writeCorrectionToFile(filename);
   }
 }

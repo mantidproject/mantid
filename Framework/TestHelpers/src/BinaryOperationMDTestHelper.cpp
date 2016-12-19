@@ -38,7 +38,7 @@ void setUpBinaryOperationMDTestHelper() {
       MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0, 2, 5, 10.0, 0.0);
   event_A = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
   event_B = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-  scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3.0);
+  scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(3.0);
   AnalysisDataService::Instance().addOrReplace("histo_A", histo_A);
   AnalysisDataService::Instance().addOrReplace("histo_B", histo_B);
   AnalysisDataService::Instance().addOrReplace("histo_masked", histo_masked);
@@ -97,7 +97,7 @@ MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName,
   IMDEventWorkspace_sptr event =
       MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
   WorkspaceSingleValue_sptr scalar =
-      WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);
+      WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
   AnalysisDataService::Instance().addOrReplace("histo", histo);
   AnalysisDataService::Instance().addOrReplace("event", event);
   AnalysisDataService::Instance().addOrReplace("scalar", scalar);
