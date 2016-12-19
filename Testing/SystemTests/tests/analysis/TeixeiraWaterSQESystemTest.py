@@ -84,7 +84,7 @@ class GlobalFitTest(MantidStressTest):
         for workspace in ["data", "resolution", "glofit_data_Parameters",
                           "glofit_data_Workspaces", "glofit_data_NormalisedCovarianceMatrix"]:
             if mantid.AnalysisDataService.doesExist(workspace):
-                sm.DeleteWorkspace(ws)
+                sm.DeleteWorkspace(workspace)
 
     def validate(self):
         return self._success
