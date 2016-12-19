@@ -42,6 +42,7 @@ CurveFitting
 - Systemtest, FittingBenchmarks, added for testing fit minimizer benchmarking scripts generating the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This Systemtest also demo how these tables can be created as a standard Mantid script.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates initial values of a fiting function in given intervals.
+- New property of :ref:`Fit <algm-Fit>` `Exclude` sets ranges that need to be excluded from a fit.
 
 Improved
 ########
