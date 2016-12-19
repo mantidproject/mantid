@@ -2,6 +2,8 @@
 #define UPLOADREMOTEFILE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
+
 namespace Mantid {
 namespace RemoteAlgorithms {
 /*** Upload a file to a remote compute resource
@@ -49,10 +51,12 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class DLLExport UploadRemoteFile : public API::Algorithm {
+class DLLExport UploadRemoteFile : public API::Algorithm,
+  public API::DeprecatedAlgorithm {
 public:
-  /// Algorithm's name
-  const std::string name() const override { return "UploadRemoteFile"; }
+  /// Constructor
+  UploadRemoteFile() { this->useAlgorithm("UploadRemoteFile", 2); }
+
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Uploads a file to the specified compute resource.";

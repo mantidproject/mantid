@@ -20,6 +20,11 @@ using namespace Mantid::API;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
+/// Empty constructor
+AbortRemoteJob::AbortRemoteJob() {
+  this->useAlgorithm("AbortRemoteJob", 2);
+}
+
 void AbortRemoteJob::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
