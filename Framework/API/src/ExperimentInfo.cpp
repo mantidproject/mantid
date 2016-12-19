@@ -141,6 +141,33 @@ const std::string ExperimentInfo::toString() const {
   return out.str();
 }
 
+// Helpers for setInstrument and getInstrument
+namespace {
+void checkDetectorInfoSize(const Instrument &instr,
+                           const Beamline::DetectorInfo &detInfo) {
+  const auto numDets = instr.getNumberDetectors();
+  if (numDets != detInfo.size())
+    throw std::runtime_error("ExperimentInfo: size mismatch between "
+                             "DetectorInfo and number of detectors in "
+                             "instrument");
+}
+
+std::unique_ptr<Beamline::DetectorInfo>
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
+  if (newInstr.hasDetectorInfo()) {
+    // We allocate a new DetectorInfo in case there is an Instrument holding a
+    // reference to our current DetectorInfo.
+    const auto &detInfo = newInstr.detectorInfo();
+    checkDetectorInfoSize(oldInstr, detInfo);
+    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
+  } else {
+    // If there is no DetectorInfo in the instrument we create a default one.
+    const auto numDets = oldInstr.getNumberDetectors();
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+  }
+}
+}
+
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
@@ -154,20 +181,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
-  const auto numDets = sptr_instrument->getNumberDetectors();
-  if (instr->hasDetectorInfo()) {
-    const auto &detInfo = instr->detectorInfo();
-    if (numDets != detInfo.size())
-      throw std::runtime_error("ExperimentInfo::setInstrument: size mismatch "
-                               "between DetectorInfo and number of detectors "
-                               "in instrument");
-    // We allocate a new DetectorInfo in case there is an Instrument holding a
-    // reference to our current DetectorInfo.
-    m_detectorInfo = boost::make_shared<Beamline::DetectorInfo>(detInfo);
-  } else {
-    // If there is no DetectorInfo in the instrument we create a default one.
-    m_detectorInfo = boost::make_shared<Beamline::DetectorInfo>(numDets);
-  }
+  m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -176,10 +190,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  if (sptr_instrument->getNumberDetectors() != m_detectorInfo->size())
-    throw std::runtime_error("ExperimentInfo::getInstrument: size mismatch "
-                             "between DetectorInfo and number of detectors in "
-                             "instrument");
+  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
