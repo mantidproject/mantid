@@ -97,18 +97,20 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
   return getDetector(index).getRotation();
 }
 
-/// Set the mask flag of the detector with given index.
+/// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const size_t index, bool masked) {
+  // Note that masking via the ParameterMap is actually thread safe, but it will
+  // not be with upcoming internal changes.
   m_pmap->addBool(&getDetector(index), "masked", masked);
 }
 
-/** Sets all mask flags to false (unmasked).
+/** Sets all mask flags to false (unmasked). Not thread safe.
  *
  * This method was introduced to help with refactoring and may be removed in the
  *future. */
 void DetectorInfo::clearMaskFlags() { m_pmap->clearParametersByName("masked"); }
 
-/// Set the absolute position of the detector with given index.
+/// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
   const auto &det = getDetector(index);
@@ -117,7 +119,7 @@ void DetectorInfo::setPosition(const size_t index,
   moveComponent(det, *m_pmap, position, positionType);
 }
 
-/// Set the absolute rotation of the detector with given index.
+/// Set the absolute rotation of the detector with given index. Not thread safe.
 void DetectorInfo::setRotation(const size_t index,
                                const Kernel::Quat &rotation) {
   const auto &det = getDetector(index);
@@ -126,7 +128,7 @@ void DetectorInfo::setRotation(const size_t index,
   rotateComponent(det, *m_pmap, rotation, rotationType);
 }
 
-/** Set the absolute position of the component `comp`.
+/** Set the absolute position of the component `comp`. Not thread safe.
  *
  * This may or may not be a detector. Even if it is not a detector it will
  * typically still influence detector positions. */
@@ -150,7 +152,7 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
   }
 }
 
-/** Set the absolute rotation of the component `comp`.
+/** Set the absolute rotation of the component `comp`. Not thread safe.
  *
  * This may or may not be a detector. Even if it is not a detector it will
  * typically still influence detector positions rotations. */
