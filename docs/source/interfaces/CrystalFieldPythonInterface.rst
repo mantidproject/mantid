@@ -332,6 +332,12 @@ If there are multiple ions define `CrystalField` objects for each ion separately
     cf2 = CrystalField('Pr', 'C2v', **params)
     cf = cf1 + cf2
 
+The expression that combines the `CrystalField` objects also defines the contributions of each site into the overall intensity.
+The higher the coefficient of the object in the expression the higher its relative contribution. For example::
+
+    cf = 2*cf1 + cf2
+
+means that the intensity of `cf1` should be twice that of `cf2`.
 
 Fitting
 -------
@@ -351,5 +357,47 @@ Then call `fit()` method::
     fit.fit()
     
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
+
+Finding Initial Parameters
+--------------------------
+
+If the initial values of the fitting parameters are not known they can be estimated using `estimate_parameters()` method.
+It randomly searches the parameter space in a given region such that the calculated spectra are as close to the
+fit data as possible. The method uses :ref:`EstimateFitParameters <algm-EstimateFitParameters>` internally. See
+algorithm's description for the available properties.
+Here is an example of a fit with initial estimation::
+
+    from CrystalField.fitting import makeWorkspace
+    from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+    # Create some crystal field data
+    origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=44.0, FWHM=1.1)
+    x, y = origin.getSpectrum()
+    ws = makeWorkspace(x, y)
+
+    # Define a CrystalField object with parameters slightly shifted.
+    cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+
+    # Set any ties on the field parameters.
+    cf.ties(B20=0.37737)
+    # Create a fit object
+    fit = CrystalFieldFit(cf, InputWorkspace=ws)
+    # Find initial values for the field parameters.
+    # You need to define the energy splitting and names of parameters to estimate.
+    # Optionally additional constraints can be set on tied parameters (eg, peak centres).
+    fit.estimate_parameters(EnergySplitting=50,
+                            Parameters=['B22', 'B40', 'B42', 'B44'],
+                            Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45',
+                            NSamples=1000)
+    print 'Returned', fit.get_number_estimates(), 'sets of parameters.'
+    # The first set (the smallest chi squared) is selected by default.
+    # Select a different parameter set if required
+    fit.select_estimated_parameters(3)
+    print cf['B22'], cf['B40'], cf['B42'], cf['B44']
+    # Run fit
+    fit.fit()
+
   
 .. categories:: Interfaces Indirect

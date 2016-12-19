@@ -100,7 +100,7 @@ private:
       Kernel::TimeSeriesProperty<bool> *status);
 
   /// Available commands.
-  enum commands { NONE = 0, BEGIN, END, CHANGE_PERIOD };
+  enum class commands { NONE = 0, BEGIN, END, CHANGE_PERIOD, ABORT };
 
   /// Typedef for a map of string commands to an enum of strongly typed
   /// commands.

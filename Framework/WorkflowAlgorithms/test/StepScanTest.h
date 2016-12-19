@@ -33,7 +33,7 @@ public:
     dummy.version();
     // End of dummy code
 
-    inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(3, 1);
+    inputWS = WorkspaceCreationHelper::createEventWorkspace2(3, 1);
     inputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     auto scan_index = new TimeSeriesProperty<int>("scan_index");
     scan_index->addValue("2010-01-01T00:00:00", 0);

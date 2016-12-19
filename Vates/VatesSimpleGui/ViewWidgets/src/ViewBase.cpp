@@ -67,7 +67,7 @@ ViewBase::ViewBase(QWidget *parent,
                    RebinnedSourcesManager *rebinnedSourcesManager)
     : QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
       m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
-      m_colorScaleLock(NULL) {}
+      m_colorScaleLock(nullptr) {}
 
 /**
  * This function creates a single standard ParaView view instance.
@@ -155,7 +155,7 @@ void ViewBase::clearRenderLayout(QFrame *frame) {
   QLayout *layout = frame->layout();
   if (layout) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != nullptr)
+    while ((item = layout->takeAt(0)))
       layout->removeItem(item);
     delete layout;
   }
@@ -167,7 +167,7 @@ void ViewBase::clearRenderLayout(QFrame *frame) {
  */
 void ViewBase::onColorMapChange(const Json::Value &model) {
   pqPipelineRepresentation *rep = this->getRep();
-  if (NULL == rep) {
+  if (!rep) {
     return;
   }
   // Work around a "bug" in pqScalarToColors::checkRange() where the lower
@@ -252,7 +252,7 @@ void ViewBase::setColorsForView(ColorSelectionWidget *colorScale) {
  * @return true if the pipeline source is derived from PeaksWorkspace
  */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src) {
-  if (NULL == src) {
+  if (!src) {
     return false;
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
@@ -433,7 +433,7 @@ long long ViewBase::getNumSources() {
  * @param dvp the vector property containing the "time" information
  */
 void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp) {
-  if (NULL == dvp) {
+  if (!dvp) {
     // This is a normal filter and therefore has no timesteps.
     // qDebug() << "No timestep vector, returning.";
     return;
@@ -584,7 +584,7 @@ void ViewBase::closeSubWindows() {}
  */
 pqPipelineRepresentation *ViewBase::getRep() {
   pqPipelineRepresentation *rep = this->getPvActiveRep();
-  if (NULL == rep) {
+  if (!rep) {
     rep = this->origRep;
   }
   return rep;
@@ -595,7 +595,7 @@ pqPipelineRepresentation *ViewBase::getRep() {
  * @return true if the source is a MDHistoWorkspace
  */
 bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
-  if (NULL == src) {
+  if (!src) {
     return false;
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
@@ -613,7 +613,7 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
  * @return true if the source is an internally rebinned workspace;
  */
 bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src) {
-  if (NULL == src) {
+  if (!src) {
     return false;
   }
 
@@ -691,7 +691,7 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name) {
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -887,7 +887,7 @@ void ViewBase::setAxesGrid(bool on) {
  * Check if there is an active source available
  * @returns true if there is an active source else false
  */
-bool ViewBase::hasActiveSource() { return this->getPvActiveSrc() != nullptr; }
+bool ViewBase::hasActiveSource() { return this->getPvActiveSrc(); }
 
 } // namespace SimpleGui
 } // namespace Vates

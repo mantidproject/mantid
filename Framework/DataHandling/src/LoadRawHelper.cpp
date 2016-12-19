@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -560,7 +561,7 @@ void LoadRawHelper::runLoadInstrument(
     runLoadInstrumentFromRaw(fileName, localWorkspace);
   } else {
     // If requested update the instrument to positions in the raw file
-    const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
+    const auto &pmap = localWorkspace->constInstrumentParameters();
     if (pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                       "det-pos-source")) {
       boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(

@@ -28,6 +28,7 @@
 #include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
 #include <Poco/String.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -753,7 +754,7 @@ Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
     const Poco::XML::Element *pLocElem) {
   if ((pLocElem->tagName()).compare("location") &&
       (pLocElem->tagName()).compare("locations")) {
-    std::string tagname = pLocElem->tagName();
+    const std::string &tagname = pLocElem->tagName();
     g_log.error("Argument to function getParentComponent must be a pointer to "
                 "an XML element with tag name location or locations.");
     throw std::logic_error(

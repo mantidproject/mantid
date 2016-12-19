@@ -3,6 +3,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/CalculateReflectometry.h"
@@ -15,6 +16,8 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
@@ -48,33 +51,32 @@ void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
 *  Adds the column headings to a table
 *  @param vertexes : Table to which the columns are written to.
 */
-void addColumnHeadings(
-    boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
-    std::string outputDimensions) {
+void addColumnHeadings(Mantid::DataObjects::TableWorkspace &vertexes,
+                       const std::string &outputDimensions) {
 
   if (outputDimensions == "Q (lab frame)") {
-    vertexes->addColumn("double", "Qx");
-    vertexes->addColumn("double", "Qy");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Qx");
+    vertexes.addColumn("double", "Qy");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
   if (outputDimensions == "P (lab frame)") {
-    vertexes->addColumn("double", "Pi+Pf");
-    vertexes->addColumn("double", "Pi-Pf");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Pi+Pf");
+    vertexes.addColumn("double", "Pi-Pf");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
   if (outputDimensions == "K (incident, final)") {
-    vertexes->addColumn("double", "Ki");
-    vertexes->addColumn("double", "Kf");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Ki");
+    vertexes.addColumn("double", "Kf");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
 }
 }
@@ -464,12 +466,14 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
   // Create a table for the output if we want to debug vertex positioning
-  addColumnHeadings(vertexes, outputDimensions);
+  addColumnHeadings(*vertexes, outputDimensions);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHistos; ++i) {
-    IDetector_const_sptr detector = inputWS->getDetector(i);
-    if (!detector || detector->isMasked() || detector->isMonitor()) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) ||
+        spectrumInfo.isMonitor(i)) {
       continue;
     }
+    const auto &detector = spectrumInfo.detector(i);
 
     // Compute polygon points
     const double theta = m_theta[i];
@@ -499,7 +503,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
         // Add this spectra-detector pair to the mapping
         specNumberMapping.push_back(
             outWS->getSpectrum(qIndex - 1).getSpectrumNo());
-        detIDMapping.push_back(detector->getID());
+        detIDMapping.push_back(detector.getID());
       }
       // Debugging
       if (dumpVertexes) {

@@ -54,6 +54,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QListWidget>
 #include <QMdiArea>
@@ -126,6 +127,17 @@ QString getLegendKey(const QString &wsName, const int spectrum) {
     return QString::fromStdString(axis->label(spectrum));
   }
   return QString();
+}
+
+/// Get all graph legend keys in one string
+QString getLegendKeys(const QString &wsName, const std::set<int> &spectra) {
+  QString legendText = wsName + '\n';
+  int curveIndex(0);
+  for (const auto &spec : spectra) {
+    legendText += "\\l(" + QString::number(++curveIndex) + ")" +
+                  getLegendKey(wsName, spec) + "\n";
+  }
+  return legendText;
 }
 
 /// Decide whether this graph in a multilayer plot should have an X axis label
@@ -321,15 +333,6 @@ void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 
 /// Updates the workspace tree
 void MantidUI::updateWorkspaces() { m_exploreMantid->refreshWorkspaces(); }
-
-/// Show / hide the AlgorithmDockWidget
-void MantidUI::showAlgWidget(bool on) {
-  if (on) {
-    m_exploreAlgorithms->show();
-  } else {
-    m_exploreAlgorithms->hide();
-  }
-}
 
 void MantidUI::addMenuItems(QMenu *menu) {
   actionToggleMantid = m_exploreMantid->toggleViewAction();
@@ -841,8 +844,7 @@ void MantidUI::showVatesSimpleInterface() {
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
-        vsui->setupPluginMode();
-        // m_appWindow->setGeometry(m_vatesSubWindow, vsui);
+        vsui->setupPluginMode(wsType, instrumentName);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);
@@ -3436,25 +3438,39 @@ MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, set<int>> &toPlot,
   multi->setCloseOnEmpty(true);
   multi->arrangeLayers(true, true);
 
+  QStringList legends; // Legends for each plot
+  legends.reserve(nSubplots);
   int row(0), col(0);
   if (nWorkspaces == 1) {
     // One workspace, each spectrum in its own subplot
     const auto &wsName = toPlot.begin().key();
     const auto &spectra = toPlot.begin().value();
     for (const auto &spec : spectra) {
+      const std::set<int> spectraSet{spec};
       plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col, wsName,
-                            std::set<int>{spec});
+                            spectraSet);
+      legends.append(getLegendKeys(wsName, spectraSet));
     }
   } else {
     // Each workspace in its own subplot
     for (auto iter = toPlot.constBegin(); iter != toPlot.constEnd(); ++iter) {
-      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col,
-                            iter.key(), iter.value());
+      const auto &wsName = iter.key();
+      const auto &spectra = iter.value();
+      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col, wsName,
+                            spectra);
+      legends.append(getLegendKeys(wsName, spectra));
     }
   }
 
   multi->setCommonAxisScales();
   multi->arrangeLayers(true, true);
+
+  // add legends last of all, so they are in the correct place
+  for (int index = 0; index < multi->layers(); ++index) {
+    auto *layer = multi->layer(index + 1); // MultiLayer has 1-based indices
+    layer->newLegend(legends[index]);
+  }
+
   // Check if window does not contain any curves and should be closed
   multi->maybeNeedToClose();
 
@@ -3491,34 +3507,31 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     }
   };
 
-  // Lambda to set legend and axis label hiding
-  const auto formatPlot = [&nRows, &nCols, &nPlots](
-      Graph *layer, const QString &legendText, const int row, const int col) {
-    const bool drawYAxisLabel = col == 0;
-    layer->newLegend(legendText);
-    if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
-      layer->setXAxisTitle(QString::null);
-    }
-    if (!drawYAxisLabel) {
-      layer->setYAxisTitle(QString::null);
-    }
-  };
+  // Lambda to set axis label hiding
+  const auto formatAxes =
+      [&nRows, &nCols, &nPlots](Graph *layer, const int row, const int col) {
+        const bool drawYAxisLabel = col == 0;
+        if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
+          layer->setXAxisTitle(QString::null);
+        }
+        if (!drawYAxisLabel) {
+          layer->setYAxisTitle(QString::null);
+        }
+      };
 
   const bool isFitResult = workspaceIsFitResult(wsName);
 
   const int layerIndex = row * nCols + col + 1; // layers numbered from 1
   auto *layer = multi->layer(layerIndex);
-  QString legendText = wsName + '\n';
-  int curveIndex(0);
   for (const int spec : spectra) {
     const auto plotType = isFitResult ? getCurveTypeForFitResult(spec)
                                       : GraphOptions::Unspecified;
     layer->insertCurve(wsName, spec, plotErrors, plotType, plotDist);
-    legendText += "\\l(" + QString::number(++curveIndex) + ")" +
-                  getLegendKey(wsName, spec) + "\n";
   }
+  m_appWindow->setPreferences(layer); // apply default style
+  layer->removeTitle();
   setInitialAutoscale(layer);
-  formatPlot(layer, legendText, row, col);
+  formatAxes(layer, row, col);
   incrementCounters(row, col);
 }
 
@@ -3942,17 +3955,23 @@ MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
                                      names, plotType);
 }
 
+/**
+ * Create a new MantidWSIndexDialog
+ * @param flags :: [input] Qt::WindowFlags enum as an integer
+ * @param wsNames :: [input] Names of workspaces
+ * @param showWaterfall :: [input] Whether to show "plot as waterfall" option
+ * @param showPlotAll :: [input] Whether to show "plot all" button
+ * @param showTiledOpt :: [input] Whether to show "tiled plot" option
+ * @returns :: New dialog
+ */
 MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
                                                           QStringList wsNames,
                                                           bool showWaterfall,
-                                                          bool showPlotAll) {
-  QList<QString> names;
-
-  for (auto &name : wsNames)
-    names.append(name);
-
+                                                          bool showPlotAll,
+                                                          bool showTiledOpt) {
   return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),
-                                 names, showWaterfall, showPlotAll);
+                                 wsNames, showWaterfall, showPlotAll,
+                                 showTiledOpt);
 }
 
 void MantidUI::showSurfacePlot() {

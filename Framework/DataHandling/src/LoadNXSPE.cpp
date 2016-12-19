@@ -1,10 +1,13 @@
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <nexus/NeXusFile.hpp>
@@ -18,6 +21,8 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
+
+#include <Poco/File.h>
 
 #include <map>
 #include <sstream>
@@ -215,6 +220,17 @@ void LoadNXSPE::exec() {
   }
 
   file.closeGroup(); // data group
+
+  file.openGroup("instrument", "NXinstrument");
+  entries = file.getEntries();
+  std::string instrument_name;
+  if (entries.count("name")) {
+    file.openData("name");
+    instrument_name = file.getStrData();
+    file.closeData();
+  }
+  file.closeGroup(); // instrument group
+
   file.closeGroup(); // Main entry
   file.close();
 
@@ -247,11 +263,11 @@ void LoadNXSPE::exec() {
   outputWS->mutableRun().setGoniometer(gm, true);
 
   // generate instrument
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument("NXSPE"));
-  outputWS->setInstrument(instrument);
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(
+      instrument_name.empty() ? "NXSPE" : instrument_name));
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
-  source->setPos(0.0, 0.0, -10.0);
+  source->setPos(0.0, 0.0, -10.);
   instrument->add(source);
   instrument->markAsSource(source);
   Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
@@ -277,10 +293,11 @@ void LoadNXSPE::exec() {
     instrument->add(det);
     instrument->markAsDetector(det);
   }
+  outputWS->setInstrument(instrument);
 
-  Geometry::ParameterMap &pmap = outputWS->instrumentParameters();
   std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
                                 itdataend, iterrorend;
+  auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
@@ -288,9 +305,7 @@ void LoadNXSPE::exec() {
     outputWS->dataX(i) = energies;
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
-      outputWS->dataY(i) = std::vector<double>(numBins, 0);
-      outputWS->dataE(i) = std::vector<double>(numBins, 0);
-      pmap.addBool(outputWS->getDetector(i)->getComponentID(), "masked", true);
+      spectrumInfo.setMasked(i, true);
     } else {
       outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
       outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);
@@ -298,6 +313,27 @@ void LoadNXSPE::exec() {
     itdata = (itdataend);
     iterror = (iterrorend);
     prog.report();
+  }
+
+  // If an instrument name is defined, load instrument parameter file for Emode
+  // NB. LoadParameterFile must be used on a workspace with an instrument
+  if (!instrument_name.empty()) {
+    std::string IDF_filename =
+        ExperimentInfo::getInstrumentFilename(instrument_name);
+    std::string instrument_parfile =
+        IDF_filename.substr(0, IDF_filename.find("_Definition")) +
+        "_Parameters.xml";
+    if (Poco::File(instrument_parfile).exists()) {
+      try {
+        IAlgorithm_sptr loadParamAlg =
+            createChildAlgorithm("LoadParameterFile");
+        loadParamAlg->setProperty("Filename", instrument_parfile);
+        loadParamAlg->setProperty("Workspace", outputWS);
+        loadParamAlg->execute();
+      } catch (...) {
+        g_log.information("Cannot load the instrument parameter file.");
+      }
+    }
   }
 
   setProperty("OutputWorkspace", outputWS);

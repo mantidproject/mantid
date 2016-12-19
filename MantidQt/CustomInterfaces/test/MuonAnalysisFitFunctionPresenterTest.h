@@ -13,6 +13,7 @@
 #include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
 
 using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
+using MantidQt::CustomInterfaces::Muon::MultiFitState;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionControl;
 using namespace testing;
@@ -63,8 +64,11 @@ public:
   MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
-  MOCK_METHOD1(setCompatibilityMode, void(bool));
+  MOCK_METHOD1(setMultiFittingMode, void(bool));
   MOCK_METHOD1(fitRawDataClicked, void(bool));
+  MOCK_METHOD0(doRemoveGuess, void());
+  MOCK_METHOD0(doPlotGuess, void());
+  MOCK_CONST_METHOD0(hasGuess, bool());
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
@@ -95,7 +99,8 @@ public:
     m_fitBrowser = new NiceMock<MockFitFunctionControl>();
     m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser,
                                                        m_funcBrowser);
-    m_presenter->setCompatibilityMode(false);
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
   }
 
   /// Run after each test to check expectations and remove mocks
@@ -146,13 +151,15 @@ public:
   }
 
   void test_handleFitFinished() {
-    m_presenter->setCompatibilityMode(false);
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
     doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
                                      false);
   }
 
-  void test_handleFitFinished_compatibilityMode() {
-    m_presenter->setCompatibilityMode(true);
+  void test_handleFitFinished_multiFitDisabled() {
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Disabled);
     doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
                                      true);
   }
@@ -207,14 +214,30 @@ public:
     m_presenter->handleDatasetIndexChanged(index);
   }
 
-  void test_setCompatibilityMode_On() {
-    EXPECT_CALL(*m_fitBrowser, setCompatibilityMode(true)).Times(1);
-    m_presenter->setCompatibilityMode(true);
+  void test_setMultiFitMode_On() {
+    EXPECT_CALL(*m_fitBrowser, setMultiFittingMode(true)).Times(1);
+    m_presenter->setMultiFitState(MultiFitState::Enabled);
   }
 
-  void test_setCompatibilityMode_Off() {
-    EXPECT_CALL(*m_fitBrowser, setCompatibilityMode(false)).Times(1);
-    m_presenter->setCompatibilityMode(false);
+  void test_setMultiFitMode_Off() {
+    EXPECT_CALL(*m_fitBrowser, setMultiFittingMode(false)).Times(1);
+    m_presenter->setMultiFitState(MultiFitState::Disabled);
+  }
+
+  void test_setFunctionInModel_multiFitOn_hasGuess() {
+    doTest_setFunctionInModel(MultiFitState::Enabled, true);
+  }
+
+  void test_setFunctionInModel_multiFitOn_noGuess() {
+    doTest_setFunctionInModel(MultiFitState::Enabled, false);
+  }
+
+  void test_setFunctionInModel_multiFitOff_hasGuess() {
+    doTest_setFunctionInModel(MultiFitState::Disabled, true);
+  }
+
+  void test_setFunctionInModel_multiFitOff_noGuess() {
+    doTest_setFunctionInModel(MultiFitState::Disabled, false);
   }
 
 private:
@@ -222,12 +245,29 @@ private:
   void doTest_HandleFitFinishedOrUndone(const QString &wsName,
                                         bool compatibility) {
     const int times = compatibility ? 0 : 1;
-    const auto function = createFunction();
+    const auto &function = createFunction();
     ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
     EXPECT_CALL(*m_fitBrowser, getFunction()).Times(times);
     EXPECT_CALL(*m_funcBrowser, updateMultiDatasetParameters(
                                     testing::Ref(*function))).Times(times);
     m_presenter->handleFitFinished(wsName);
+  }
+
+  /// Run a test of "setFunctionInModel" with the given options
+  void doTest_setFunctionInModel(MultiFitState multiState, bool hasGuess) {
+    m_presenter->setMultiFitState(multiState);
+    EXPECT_CALL(*m_fitBrowser, hasGuess())
+        .Times(AnyNumber())
+        .WillRepeatedly(Return(hasGuess));
+    const int times = multiState == MultiFitState::Enabled && hasGuess ? 1 : 0;
+    const auto &function = createFunction();
+    {
+      testing::InSequence s;
+      EXPECT_CALL(*m_fitBrowser, doRemoveGuess()).Times(times);
+      EXPECT_CALL(*m_fitBrowser, setFunction(function)).Times(1);
+      EXPECT_CALL(*m_fitBrowser, doPlotGuess()).Times(times);
+    }
+    m_presenter->setFunctionInModel(function);
   }
 
   MockFunctionBrowser *m_funcBrowser;

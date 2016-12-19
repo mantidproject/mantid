@@ -6,6 +6,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -224,7 +225,6 @@ void makeTestWorkspace(const int ndets, const int nbins,
   }
 
   Instrument_sptr instr(new Instrument);
-  space2D->setInstrument(instr);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
   instr->markAsSamplePos(samplePos);
 
@@ -234,6 +234,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
     Detector *d = new Detector(os.str(), i, 0);
     instr->markAsDetector(d);
   }
+  space2D->setInstrument(instr);
 
   // Register the workspace in the data service
   AnalysisDataService::Instance().add(ads_name, space2D);
@@ -359,7 +360,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(m_InoutWS));
 
-    const ParameterMap &pmap = WS->instrumentParameters();
+    const auto &pmap = WS->constInstrumentParameters();
 
     for (int j = 0; j < SmallTestDatFile::NDETECTS; ++j) {
 

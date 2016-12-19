@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 
 #include <cmath>
@@ -164,33 +165,53 @@ const std::string MatrixWorkspace::getTitle() const {
     return Workspace::getTitle();
 }
 
-/** Return a reference to the SpectrumInfo object. NOT THREAD-SAFE!
+/** Return a reference to the SpectrumInfo object.
  *
- * By default ThreadedContextCheck::Check enables a check of the OpenMP thread
- * number to actively fail when called from a threaded context. In cases where
- * the code is calling this in a threaded context but with different workspaces
- * this check can be disabled by setting contextCheck =
- * ThreadedContextCheck::Skip. This is not recommended and should be used with
- * extreme care. This flag is a temporary workaround and will be removed once
- * Instrument-2.0 is introduced.
- *
- * Currently this method is not thread-safe, and any modifications of the
- * instrument or instrument parameters such as mask flags will not be visible in
- * existing SpectrumInfo references. After modification, obtain a new reference
- * by calling this method again.
+ * Any modifications of the instrument or instrument parameters will invalidate
+ * this reference.
  */
-const SpectrumInfo &
-MatrixWorkspace::spectrumInfo(ThreadedContextCheck contextCheck) const {
-  if (contextCheck == ThreadedContextCheck::Check &&
-      PARALLEL_THREAD_NUMBER != 0)
-    throw std::runtime_error("MatrixWorkspace::spectrumInfo(): Thread ID is "
-                             "not 0. This indicates that the method is called "
-                             "in a threaded context. This is not allowed.");
+const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
+  if (!m_spectrumInfo) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (!m_spectrumInfo)
+      m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
+  }
+  return *m_spectrumInfo;
+}
 
-  // For now we *always* create a new SpectrumInfo since the instrument or
-  // parameters may have changed.
+/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
+ */
+SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
+  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
+  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
+  // modifications. This will trigger a copy if required. Note that the
+  // following happens internally:
+  // 1. make_unique creates a new SpectrumInfo, which calls
+  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
+  // count to the ParameterMap is typically not 1, so
+  // invalidateInstrumentReferences() is called.
+  // 2. invalidateInstrumentReferences() resets m_spectrumInfo, releasing any
+  // parameterized detectors and thus dropping any unneeded references to the
+  // ParameterMap.
+  // 3. Construction of SpectrumInfo continues and the result is assigned to
+  // m_spectrumInfo.
+
+  // No locking here since this non-const method is not thread safe.
   m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
   return *m_spectrumInfo;
+}
+
+/** Resets the SpectrumInfo object on modification of the Instrument.
+ *
+ * This needs to be called by any code that causes a reallocation of the
+ * instrument or the parameter map since currently SpectrumInfo buffers the
+ * result of MatrixWorkspace::getInstrument(). This method should be removed
+ * once SpectrumInfo is an independent object.
+ */
+void MatrixWorkspace::invalidateInstrumentReferences() const {
+  // None of the methods in ExperimentInfo that calls this is thread safe, so we
+  // do not need to bother with locking here.
+  m_spectrumInfo = nullptr;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
@@ -875,35 +896,6 @@ bool MatrixWorkspace::isCommonBins() const {
   return m_isCommonBinsFlag;
 }
 
-/**
-* Mask a given workspace index, setting the data and error values to zero
-* @param index :: The index within the workspace to mask
-*/
-void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
-  if (index >= this->getNumberHistograms()) {
-    throw Kernel::Exception::IndexError(
-        index, this->getNumberHistograms(),
-        "MatrixWorkspace::maskWorkspaceIndex,index");
-  }
-
-  auto &spec = this->getSpectrum(index);
-
-  // Virtual method clears the spectrum as appropriate
-  spec.clearData();
-
-  const auto dets = spec.getDetectorIDs();
-  for (auto detId : dets) {
-    try {
-      if (const Geometry::Detector *det =
-              dynamic_cast<const Geometry::Detector *>(
-                  sptr_instrument->getDetector(detId).get())) {
-        m_parmap->addBool(det, "masked", true); // Thread-safe method
-      }
-    } catch (Kernel::Exception::NotFoundError &) {
-    }
-  }
-}
-
 /** Called by the algorithm MaskBins to mask a single bin for the first time,
 * algorithms that later propagate the
 *  the mask from an input to the output should call flagMasked() instead. Here
@@ -1098,7 +1090,7 @@ Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
 * Returns the bin index of the given X value
 * @param xValue :: The X value to search for
 * @param index :: The index within the workspace to search within (default = 0)
-* @returns An index that
+* @returns An index to the bin containing X
 */
 size_t MatrixWorkspace::binIndexOf(const double xValue,
                                    const std::size_t index) const {
@@ -1106,24 +1098,35 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range(
         "MatrixWorkspace::binIndexOf - Index out of range.");
   }
-  const MantidVec &xValues = this->readX(index);
-  // Lower bound will test if the value is greater than the last but we need to
-  // see if X is valid at the start
-  if (xValue < xValues.front()) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than "
-                            "lowest in current range.");
+  const auto &xValues = this->x(index);
+  const bool ascendingOrder = xValues.front() < xValues.back();
+  const auto minX = ascendingOrder ? xValues.front() : xValues.back();
+  const auto maxX = ascendingOrder ? xValues.back() : xValues.front();
+  if (xValue < minX) {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower"
+                            " than lowest in current range.");
+  } else if (xValue > maxX) {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater"
+                            " than highest in current range.");
   }
-  auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
-  if (lowit == xValues.end()) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater "
-                            "than highest in current range.");
+  size_t hops;
+  if (ascendingOrder) {
+    auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
+    // If we are pointing at the first value then that means we still want to be
+    // in the first bin
+    if (lowit == xValues.cbegin()) {
+      ++lowit;
+    }
+    hops = std::distance(xValues.cbegin(), lowit);
+  } else {
+    auto lowit = std::upper_bound(xValues.crbegin(), xValues.crend(), xValue);
+    if (lowit == xValues.crend()) {
+      --lowit;
+    } else if (lowit == xValues.crbegin()) {
+      ++lowit;
+    }
+    hops = xValues.size() - std::distance(xValues.crbegin(), lowit);
   }
-  // If we are pointing at the first value then that means we still want to be
-  // in the first bin
-  if (lowit == xValues.begin()) {
-    ++lowit;
-  }
-  size_t hops = std::distance(xValues.begin(), lowit);
   // The bin index is offset by one from the number of hops between iterators as
   // they start at zero
   return hops - 1;
@@ -1908,6 +1911,19 @@ void MatrixWorkspace::setImageY(const MantidImage &image, size_t start,
 void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
                                 bool parallelExecution) {
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
+}
+
+/// Returns the number of detector groups. This is equal to the number of
+/// spectra.
+size_t MatrixWorkspace::numberOfDetectorGroups() const {
+  return getNumberHistograms();
+}
+
+/// Returns a set of detector IDs for a group. This is equal to the detector IDs
+/// of the spectrum at given index.
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
 }
 
 } // namespace API

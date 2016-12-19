@@ -2,8 +2,10 @@
 #define MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -257,24 +259,10 @@ public:
     }
 
     // Now mask all detectors in the workspace
-    // Geometry::ParameterMap& pmap = inputWS->instrumentParameters();
-    // std::vector<detid_t>::const_iterator it;
-    // Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-    // for (it = detectorList.begin(); it != detectorList.end(); ++it)
-    //{
-    //    try
-    //    {
-    //      if ( const Geometry::ComponentID det =
-    //      instrument->getDetector(*it)->getComponentID() )
-    //      pmap.addBool(det,"masked",true);
-    //    }
-    //    catch(Kernel::Exception::NotFoundError &)
-    //    {
-    //    }
-    //}
-    std::vector<size_t>::const_iterator wit;
-    for (wit = indexLis.begin(); wit != indexLis.end(); ++wit) {
-      inputWS->maskWorkspaceIndex(*wit);
+    auto &spectrumInfo = inputWS->mutableSpectrumInfo();
+    for (const auto i : indexLis) {
+      inputWS->getSpectrum(i).clearData();
+      spectrumInfo.setMasked(i, true);
     }
     // let's retrieve masks now
 

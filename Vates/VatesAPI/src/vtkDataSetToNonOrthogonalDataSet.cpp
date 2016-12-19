@@ -27,6 +27,7 @@
 #include <vtkPointData.h>
 #include "vtkNew.h"
 
+#include <algorithm>
 #include <boost/algorithm/string/find.hpp>
 #include <stdexcept>
 
@@ -74,21 +75,6 @@ namespace Mantid {
 namespace VATES {
 
 /**
- * This function constructs and executes the helper class.
- * @param dataset : The VTK data to modify
- * @param name : The MDWorkspace containing the information to construct.
- * @param workspaceProvider: The provider of one or multiple workspaces.
-
- */
-void vtkDataSetToNonOrthogonalDataSet::exec(
-    vtkDataSet *dataset, std::string name,
-    std::unique_ptr<WorkspaceProvider> workspaceProvider) {
-  vtkDataSetToNonOrthogonalDataSet temp(dataset, name,
-                                        std::move(workspaceProvider));
-  temp.execute();
-}
-
-/**
  * This is the private class constructor.
  * @param dataset : The VTK data to modify
  * @param name : The MDWorkspace containing the information to construct.
@@ -101,7 +87,7 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
       m_basisNorm(), m_basisX(1, 0, 0), m_basisY(0, 1, 0), m_basisZ(0, 0, 1),
       m_coordType(Kernel::HKL),
       m_workspaceProvider(std::move(workspaceProvider)) {
-  if (NULL == m_dataSet) {
+  if (!m_dataSet) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToNonOrthogonalDataSet with null VTK "
                              "dataset");
@@ -118,10 +104,10 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
  */
 vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 
-void vtkDataSetToNonOrthogonalDataSet::execute() {
+void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   // Downcast to a vtkPointSet
   vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
-  if (NULL == data) {
+  if (!data) {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
   }
 
@@ -228,15 +214,27 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
 
   // Get the original points
   vtkFloatArray *points =
-      vtkFloatArray::SafeDownCast(data->GetPoints()->GetData());
-  if (points == NULL) {
+      vtkFloatArray::FastDownCast(data->GetPoints()->GetData());
+  if (!points) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (points->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
   }
+  float *end = points->GetPointer(points->GetNumberOfValues());
 
-  float *end = points->GetPointer(points->GetNumberOfTuples() * 3);
+  vtkIdType progressIncrement =
+      std::max(static_cast<vtkIdType>(1), points->GetNumberOfValues() / 25);
+
+  double progressFactor =
+      0.25 / static_cast<double>(points->GetNumberOfValues());
+
   for (float *it = points->GetPointer(0); it < end; std::advance(it, 3)) {
+    if (progress) {
+      vtkIdType index = std::distance(points->GetPointer(0), it);
+      if (index % progressIncrement == 0)
+        progress->eventRaised(0.75 +
+                              static_cast<double>(index) * progressFactor);
+    }
     float v1 = it[0];
     float v2 = it[1];
     float v3 = it[2];

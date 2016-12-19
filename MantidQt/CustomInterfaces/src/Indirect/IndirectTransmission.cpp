@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectTransmission.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QFileInfo>
 

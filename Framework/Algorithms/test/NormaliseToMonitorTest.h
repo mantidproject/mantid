@@ -20,7 +20,7 @@ using Mantid::Geometry::Instrument;
 namespace {
 void setUpWorkspace(int histograms = 3, int bins = 10) {
   MatrixWorkspace_sptr input =
-      WorkspaceCreationHelper::Create2DWorkspace123(histograms, bins, 1);
+      WorkspaceCreationHelper::create2DWorkspace123(histograms, bins, 1);
   // Change the data in the monitor spectrum
   input->mutableY(0).assign(bins, 10.0);
   // Need to change bins
@@ -42,7 +42,6 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
   input->getSpectrum(1).setSpectrumNo(1);
   input->getSpectrum(2).setSpectrumNo(2);
   boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
-  input->setInstrument(instr);
   Mantid::Geometry::Detector *mon =
       new Mantid::Geometry::Detector("monitor", 0, NULL);
   instr->add(mon);
@@ -51,12 +50,13 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
       new Mantid::Geometry::Detector("NOTmonitor", 1, NULL);
   instr->add(det);
   instr->markAsDetector(det);
+  input->setInstrument(instr);
 
   AnalysisDataService::Instance().addOrReplace("normMon", input);
 
   // Create a single spectrum workspace to be the monitor one
   MatrixWorkspace_sptr monWS =
-      WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 20, 0.1, 0.5);
+      WorkspaceCreationHelper::create2DWorkspaceBinned(1, 20, 0.1, 0.5);
   monWS->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
   // Now need to set up a minimal instrument and spectra-detector map
@@ -395,7 +395,7 @@ public:
     // now deal with ws without monitors
     // create ws without monitors.
     MatrixWorkspace_sptr input =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     AnalysisDataService::Instance().add("someWS", input);

@@ -216,7 +216,7 @@ void PredictPeaks::exec() {
   const Sample &sample = inputExperimentInfo->sample();
 
   // Retrieve the OrientedLattice (UnitCell) from the workspace
-  OrientedLattice orientedLattice = sample.getOrientedLattice();
+  const OrientedLattice &orientedLattice = sample.getOrientedLattice();
 
   // Get the UB matrix from it
   Matrix<double> ub(3, 3, true);
@@ -432,7 +432,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
     p.setGoniometerMatrix(goniometerMatrix);
     // Save the run number found before.
     p.setRunNumber(m_runNumber);
-    p.setHKL(hkl);
+    p.setHKL(hkl * m_qConventionFactor);
 
     if (m_sfCalculator) {
       p.setIntensity(m_sfCalculator->getFSquared(hkl));

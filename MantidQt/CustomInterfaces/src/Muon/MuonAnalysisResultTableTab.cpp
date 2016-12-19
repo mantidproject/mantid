@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -18,8 +19,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <QFileInfo>
 #include <QLineEdit>
-#include <QFileDialog>
 #include <QHash>
 #include <QMessageBox>
 
@@ -383,12 +384,35 @@ bool MuonAnalysisResultTableTab::isFittedWs(const std::string &wsName) {
 void MuonAnalysisResultTableTab::refresh() {
   m_uiForm.individualFit->setChecked(true);
 
-  auto labels = getFitLabels();
+  const auto &labels = getFitLabels();
 
   m_uiForm.fitLabelCombo->clear();
   m_uiForm.fitLabelCombo->addItems(labels.first);
   m_uiForm.cmbFitLabelSimultaneous->clear();
   m_uiForm.cmbFitLabelSimultaneous->addItems(labels.second);
+
+  // Find width of widest string in a list
+  const auto &font = this->fontMetrics();
+  const auto maxWidth = [&font](const QStringList &strings) {
+    const QString extraSpace = "   "; // to make sure string will fit
+    int maximum = 0;
+    for (const auto &string : strings) {
+      const auto &width = font.boundingRect(string + extraSpace).width();
+      if (width > maximum) {
+        maximum = width;
+      }
+    }
+    return maximum;
+  };
+
+  // Expand the width of the drop-down (not the combobox itself) to fit the
+  // longest string
+  const auto &seqSize = maxWidth(labels.first);
+  m_uiForm.fitLabelCombo->view()->setMinimumWidth(seqSize);
+  m_uiForm.fitLabelCombo->view()->setTextElideMode(Qt::ElideNone);
+  const auto &simSize = maxWidth(labels.second);
+  m_uiForm.cmbFitLabelSimultaneous->view()->setMinimumWidth(simSize);
+  m_uiForm.cmbFitLabelSimultaneous->view()->setTextElideMode(Qt::ElideNone);
 
   m_uiForm.sequentialFit->setEnabled(m_uiForm.fitLabelCombo->count() != 0);
   m_uiForm.simultaneousFit->setEnabled(

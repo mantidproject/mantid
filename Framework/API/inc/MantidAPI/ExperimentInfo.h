@@ -13,11 +13,11 @@
 #include <mutex>
 
 namespace Mantid {
-//---------------------------------------------------------------------------
-// Forward declaration
-//---------------------------------------------------------------------------
 namespace Kernel {
 class Property;
+}
+namespace Beamline {
+class DetectorInfo;
 }
 namespace Geometry {
 class ParameterMap;
@@ -25,10 +25,8 @@ class XMLInstrumentParameter;
 }
 
 namespace API {
-//---------------------------------------------------------------------------
-// Forward declaration
-//---------------------------------------------------------------------------
 class ChopperModel;
+class DetectorInfo;
 class ModeratorModel;
 class Run;
 class Sample;
@@ -46,7 +44,7 @@ public:
   /// Default constructor
   ExperimentInfo();
   /// Virtual destructor
-  virtual ~ExperimentInfo() = default;
+  virtual ~ExperimentInfo();
   /// Copy constructor
   ExperimentInfo(const ExperimentInfo &);
   /// Copy everything from the given experiment object
@@ -58,7 +56,7 @@ public:
   virtual const std::string toString() const;
 
   /// Instrument accessors
-  virtual void setInstrument(const Geometry::Instrument_const_sptr &instr);
+  void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
   virtual Geometry::Instrument_const_sptr getInstrument() const;
 
@@ -80,8 +78,7 @@ public:
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
   /// Returns the detector IDs that make up the group that this ID is part of
-  virtual const std::vector<detid_t> &
-  getGroupMembers(const detid_t detID) const;
+  virtual const std::set<detid_t> &getGroupMembers(const detid_t detID) const;
   /// Get a detector or detector group from an ID
   virtual Geometry::IDetector_const_sptr
   getDetectorByID(const detid_t detID) const;
@@ -164,7 +161,16 @@ public:
   static std::string getInstrumentFilename(const std::string &instrumentName,
                                            const std::string &date = "");
 
+  const DetectorInfo &detectorInfo() const;
+  DetectorInfo &mutableDetectorInfo();
+
+  virtual size_t numberOfDetectorGroups() const;
+  virtual const std::set<detid_t> &detectorIDsInGroup(const size_t index) const;
+
 protected:
+  /// Called when instrument or parameter map is reset to notify child classes.
+  virtual void invalidateInstrumentReferences() const {}
+
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
@@ -200,9 +206,17 @@ private:
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
   /// Detector grouping information
-  det2group_map m_detgroups;
+  mutable std::vector<std::set<detid_t>> m_detgroups;
+  mutable std::unordered_map<detid_t, size_t> m_det2group;
+  void cacheDefaultDetectorGrouping() const; // Not thread-safe
+  mutable std::once_flag m_defaultDetectorGroupingCached;
+
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
+
+  boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
+  mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
+  mutable std::mutex m_detectorInfoMutex;
 };
 
 /// Shared pointer to ExperimentInfo

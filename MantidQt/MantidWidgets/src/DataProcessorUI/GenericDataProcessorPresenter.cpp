@@ -42,6 +42,8 @@ namespace MantidWidgets {
 * @param processor : A DataProcessorProcessingAlgorithm
 * @param postprocessor : A DataProcessorPostprocessingAlgorithm
 * workspaces
+* @param postprocessMap : A map containing instructions for post-processing.
+* This map links column name to properties of the post-processing algorithm
 * @param loader : The algorithm responsible for loading data
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
@@ -50,11 +52,13 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor), m_loader(loader),
-      m_postprocess(true), m_mainPresenter(), m_tableDirty(false) {
+      m_processor(processor), m_postprocessor(postprocessor),
+      m_postprocessMap(postprocessMap), m_loader(loader), m_postprocess(true),
+      m_mainPresenter(), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -189,6 +193,10 @@ Process selected data
 void GenericDataProcessorPresenter::process() {
 
   const auto items = m_manager->selectedData(true);
+
+  // Don't bother continuing if there are no items to process
+  if (items.size() == 0)
+    return;
 
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
@@ -326,6 +334,21 @@ void GenericDataProcessorPresenter::postProcessGroup(
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
+    }
+  }
+
+  // Options specified via post-process map
+  for (const auto &prop : m_postprocessMap) {
+    const std::string propName = prop.second;
+    const std::string propValueStr =
+        groupData.begin()->second[m_whitelist.colIndexFromColName(prop.first)];
+    if (!propValueStr.empty()) {
+      // Warning: we take minus the value of the properties because in
+      // Reflectometry this property refers to the rebin step, and they want a
+      // logarithmic binning. If other technique areas need to use a
+      // post-process map we'll need to re-think how to do this.
+      double propValue = boost::lexical_cast<double>(propValueStr);
+      alg->setPropertyValue(propName, std::to_string(-propValue));
     }
   }
 
@@ -637,7 +660,10 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
     /* The reduction is complete, try to populate the columns */
     for (int i = 0; i < m_columns - 1; i++) {
-      if (data.at(i).empty()) {
+
+      auto columnName = m_whitelist.colNameFromColIndex(i);
+
+      if (data.at(i).empty() && !m_preprocessMap.count(columnName)) {
 
         std::string propValue =
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
