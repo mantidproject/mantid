@@ -124,7 +124,7 @@ public:
     if (attName == "OptRuns") {
       OptRuns = value.asString();
 
-      if (OptRuns.size() < 1)
+      if (OptRuns.empty())
         return;
 
       if (OptRuns.at(0) != '/')

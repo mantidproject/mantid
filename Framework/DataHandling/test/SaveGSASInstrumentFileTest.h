@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/SaveGSASInstrumentFile.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
 

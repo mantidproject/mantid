@@ -107,7 +107,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                          size_t i0) {
   setParameters();
 
-  const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
+  const auto &X = m_matrixWorkspace->x(m_workspaceIndex);
 
   // find the fitting interval: from -> to
   size_t endIndex = 0;
@@ -162,8 +162,8 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
 
   // set the data to fit to
   assert(n == domain->size());
-  const Mantid::MantidVec &Y = m_matrixWorkspace->readY(m_workspaceIndex);
-  const Mantid::MantidVec &E = m_matrixWorkspace->readE(m_workspaceIndex);
+  const auto &Y = m_matrixWorkspace->y(m_workspaceIndex);
+  const auto &E = m_matrixWorkspace->e(m_workspaceIndex);
   if (endIndex > Y.size()) {
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
@@ -187,9 +187,9 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     {
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");
-      y = 0.0;                        // leaving inf or nan would break the fit
-    } else if (!std::isfinite(error)) // nan or inf error
-    {
+      y = 0.0; // leaving inf or nan would break the fit
+    } else if (!std::isfinite(error)) {
+      // nan or inf error
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");
     } else if (error <= 0) {
@@ -197,6 +197,12 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
         weight = 1.0;
     } else {
       weight = 1.0 / error;
+      if (!std::isfinite(weight)) {
+        if (!m_ignoreInvalidData)
+          throw std::runtime_error(
+              "Error of a data point is probably too small.");
+        weight = 0.0;
+      }
     }
 
     values->setFitData(j, y);
@@ -225,9 +231,9 @@ FitMW::createOutputWorkspace(const std::string &baseName,
   auto &mws = dynamic_cast<MatrixWorkspace &>(*ws);
 
   if (m_normalise && m_matrixWorkspace->isHistogramData()) {
-    const MantidVec &X = mws.readX(0);
-    MantidVec &Ycal = mws.dataY(1);
-    MantidVec &Diff = mws.dataY(2);
+    const auto &X = mws.x(0);
+    auto &Ycal = mws.mutableY(1);
+    auto &Diff = mws.mutableY(2);
     const size_t nData = values->size();
     for (size_t i = 0; i < nData; ++i) {
       double binWidth = X[i + 1] - X[i];

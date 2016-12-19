@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -239,17 +240,16 @@ private:
   void ABCtestWorkspace(std::string inputWSname, bool mask) {
     int nSpectra(12);
     Workspace2D_sptr ws2D =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(
             nSpectra, 2);
     ws2D->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(3, 2, 0));
 
-    Mantid::Geometry::ParameterMap &pmap = ws2D->instrumentParameters();
+    auto &detectorInfo = ws2D->mutableDetectorInfo();
     for (int i = 0; i < nSpectra; i++) {
       ws2D->getSpectrum(i).setDetectorID(i + 4);
       if (mask && (i % 4 == 0)) {
-        Mantid::Geometry::IDetector_const_sptr det = ws2D->getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
+        detectorInfo.setMasked(i, true);
       }
     }
 

@@ -10,6 +10,7 @@ namespace CustomInterfaces {
 class IReflMainWindowView;
 class IReflRunsTabPresenter;
 class IReflSettingsTabPresenter;
+class IReflSaveTabPresenter;
 
 /** @class ReflMainWindowPresenter
 
@@ -43,15 +44,16 @@ public:
   /// Constructor
   ReflMainWindowPresenter(IReflMainWindowView *view,
                           IReflRunsTabPresenter *runsPresenter,
-                          IReflSettingsTabPresenter *settingsPresenter);
+                          IReflSettingsTabPresenter *settingsPresenter,
+                          IReflSaveTabPresenter *savePresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
+  std::string getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
+  std::string getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const override;
+  std::string getStitchOptions(int group) const override;
 
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
@@ -76,6 +78,8 @@ private:
   IReflRunsTabPresenter *m_runsPresenter;
   /// The presenter of tab 'Settings'
   IReflSettingsTabPresenter *m_settingsPresenter;
+  /// The presenter of tab 'Save ASCII'
+  IReflSaveTabPresenter *m_savePresenter;
 };
 }
 }

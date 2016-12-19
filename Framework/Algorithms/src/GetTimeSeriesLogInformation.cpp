@@ -84,7 +84,7 @@ void GetTimeSeriesLogInformation::exec() {
   }
 
   string logname = getProperty("LogName");
-  if (logname.size() == 0)
+  if (logname.empty())
     throw runtime_error("Input log value cannot be an empty string. ");
 
   Kernel::Property *log = m_dataWS->run().getProperty(logname);

@@ -1,6 +1,5 @@
 #pylint: disable=C0103,R0904
 # N(DAV)TableWidget
-#
 
 from PyQt4 import QtGui, QtCore
 
@@ -186,7 +185,6 @@ class NTableWidget(QtGui.QTableWidget):
         # check
         assert isinstance(status, bool)
         assert self._statusColName is not None
-        print 'Status column name = ', self._statusColName
         index_status = self._myColumnNameList.index(self._statusColName)
 
         # loop over all the rows
@@ -294,6 +292,30 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def select_row(self, row_index, status=True):
+        """
+        Select a row
+        :param row_index:
+        :param status:
+        :return:
+        """
+        # get column  index
+        try:
+            status_col_index = self._myColumnNameList.index(self._statusColName)
+        except ValueError as e:
+            # status column name is not properly set up
+            return False, str(e)
+
+        # Loop over all rows. If any row's status is not same as target status, then set it
+        num_rows = self.rowCount()
+        assert isinstance(row_index, int) and 0 <= row_index < num_rows, 'Row number %s of type %s is not right.' \
+                                                                         '' % (str(row_index), type(row_index))
+
+        if self.get_cell_value(row_index, status_col_index) != status:
+            self.update_cell_value(row_index, status_col_index, status)
+
+        return
+
     def set_check_box(self, row, col, state):
         """ function to add a new select checkbox to a cell in a table row
         won't add a new checkbox if one already exists
@@ -397,7 +419,6 @@ class NTableWidget(QtGui.QTableWidget):
         self.remove_all_rows()
 
         # add rows back
-        print '[DB-BAT] Sort by column %d. Keys = ' % column_index, key_list, 'sort_order = ', sort_order
         for key_value in key_list:
             self.append_row(row_content_dict[key_value])
         # END-FOR
@@ -410,10 +431,11 @@ class NTableWidget(QtGui.QTableWidget):
         :param row:
         :param col:
         :param value:
-        :return:
+        :return: None
         """
         # Check
-        assert isinstance(row, int) and 0 <= row < self.rowCount()
+        assert isinstance(row, int) and 0 <= row < self.rowCount(),\
+            'Row %s (%s) must be an integer between 0 and %d.' % (str(row), type(row), self.rowCount())
         assert isinstance(col, int) and 0 <= col < self.columnCount()
 
         cell_item = self.item(row, col)

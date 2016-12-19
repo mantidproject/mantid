@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -156,13 +157,14 @@ MdViewerWidget::AllVSIViewsState::~AllVSIViewsState() {}
  * This constructor is used in the plugin mode operation of the VSI.
  */
 MdViewerWidget::MdViewerWidget()
-    : VatesViewerInterface(), currentView(NULL),
+    : VatesViewerInterface(), currentView(nullptr),
 
-      hiddenView(NULL), viewSwitched(false), dataLoader(NULL), lodAction(NULL),
-      screenShot(NULL), viewLayout(NULL), viewSettings(NULL),
-      useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD),
+      hiddenView(nullptr), viewSwitched(false), dataLoader(nullptr),
+      lodAction(nullptr), screenShot(nullptr), viewLayout(nullptr),
+      viewSettings(nullptr), useCurrentColorSettings(false),
+      initialView(ModeControlWidget::STANDARD),
       m_rebinAlgorithmDialogProvider(this),
-      m_rebinnedWorkspaceIdentifier("_tempvsi"), m_colorMapEditorPanel(NULL),
+      m_rebinnedWorkspaceIdentifier("_tempvsi"), m_colorMapEditorPanel(nullptr),
       m_gridAxesStartUpOn(true), m_allViews() {
   // this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -194,7 +196,7 @@ MdViewerWidget::MdViewerWidget(QWidget *parent)
   // We're in the standalone application mode
   this->internalSetup(false);
   this->setupUiAndConnections();
-  this->setupMainView();
+  this->setupMainView(ModeControlWidget::STANDARD);
 }
 
 MdViewerWidget::~MdViewerWidget() {}
@@ -208,7 +210,7 @@ void MdViewerWidget::internalSetup(bool pMode) {
   static int widgetNumber = 0;
   this->m_widgetName = QString("MdViewerWidget%1").arg(widgetNumber++);
   this->pluginMode = pMode;
-  this->rotPointDialog = NULL;
+  this->rotPointDialog = nullptr;
   this->lodThreshold = 5.0;
   this->viewSwitched = false;
 }
@@ -241,14 +243,12 @@ void MdViewerWidget::setupUiAndConnections() {
     m_colorMapEditorPanel->setUpPanel();
   }
 
-  // this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction *temp = new QAction(this);
   pqDeleteReaction *deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,
                          SIGNAL(deleteRequested(pqPipelineSource *)),
                          SLOT(deleteSource(pqPipelineSource *)));
 
-  // pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
   VsiApplyBehaviour *applyBehavior =
       new VsiApplyBehaviour(&m_colorScaleLock, this);
 
@@ -273,17 +273,17 @@ void MdViewerWidget::panelChanged() { this->currentView->renderAll(); }
  * event filter, tweaks the UI layout for the view and calls the routine that
  * sets up connections between ParaView and the main window widgets.
  */
-void MdViewerWidget::setupMainView() {
+void MdViewerWidget::setupMainView(ModeControlWidget::Views viewType) {
   // Commented this out to only use Mantid supplied readers
   // Initialize all readers available to ParaView. Now our application can load
   // all types of datasets supported by ParaView.
   // vtkSMProxyManager::GetProxyManager()->GetReaderFactory()->RegisterPrototypes("sources");
 
-  // Set the view at startup to STANDARD, the view will be changed, depending on
+  // Set the view at startup to view, the view will be changed, depending on
   // the workspace
-  this->currentView = this->createAndSetMainViewWidget(
-      this->ui.viewWidget, ModeControlWidget::STANDARD);
-  this->initialView = ModeControlWidget::STANDARD;
+  this->currentView =
+      this->createAndSetMainViewWidget(this->ui.viewWidget, viewType);
+  this->initialView = viewType;
   this->currentView->installEventFilter(this);
 
   // Create a layout to manage the view properly
@@ -475,7 +475,7 @@ void MdViewerWidget::onSwitchSources(std::string rebinnedWorkspaceName,
     // Set the splatterplot button explicitly
     this->currentView->setSplatterplot(true);
 
-    pqActiveObjects::instance().setActiveSource(NULL);
+    pqActiveObjects::instance().setActiveSource(nullptr);
     pqActiveObjects::instance().setActiveSource(rebinnedSource);
   } catch (const std::runtime_error &error) {
     g_log.warning() << error.what();
@@ -524,7 +524,7 @@ pqPipelineSource *MdViewerWidget::prepareRebinnedWorkspace(
 
   // It seems that the new source gets set as active before it is fully
   // constructed. We therefore reset it.
-  pqActiveObjects::instance().setActiveSource(NULL);
+  pqActiveObjects::instance().setActiveSource(nullptr);
   pqActiveObjects::instance().setActiveSource(newRebinnedSource);
 
   this->renderAndFinalSetup();
@@ -695,7 +695,10 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
     this->setColorForBackground();
     this->setColorMap();
 
-    this->ui.modeControlWidget->setToStandardView();
+    if (VatesViewerInterface::PEAKS != workspaceType) {
+      resetCurrentView(workspaceType, instrumentName);
+    }
+
     this->currentView->hide();
     // Set the auto log scale state
     this->currentView->initializeColorScale();
@@ -724,20 +727,8 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
   pqPipelineSource *source = this->currentView->setPluginSource(
       sourcePlugin, workspaceName, gridAxesOn);
   source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
-
   this->renderAndFinalSetup();
-
-  // Reset the current view to the correct initial view
-  // Note that we can only reset if a source plugin exists.
-  // Also note that we can only reset the current view to the
-  // correct initial after calling renderAndFinalSetup. We first
-  // need to load in the current view and then switch to be inline
-  // with the current architecture.
-  if (VatesViewerInterface::PEAKS != workspaceType) {
-    resetCurrentView(workspaceType, instrumentName);
-  }
-
-  // save
+  this->currentView->show();
 }
 
 /**
@@ -870,14 +861,12 @@ MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view,
   if (VatesViewerInterface::MDHW == workspaceType) {
     // Histo workspaces cannot have a splatter plot,
     if (view == ModeControlWidget::SPLATTERPLOT) {
-      g_log.notice()
-          << "The preferred initial view favours the splatterplot as initial "
-             "view, "
-          << "but an MDHisto workspace is being loaded. An MDHisto workspace "
-          << "cannot be loaded into a splatterplot view. Defaulted to standard "
-             "view. \n";
+      g_log.notice("The preferred initial view favours the splatterplot "
+                   "as initial view, but an MDHisto workspace is being "
+                   "loaded. A MDHisto workspace cannot be loaded into a "
+                   "splatterplot view. Defaulted to MultiSlice view.");
 
-      selectedView = ModeControlWidget::STANDARD;
+      selectedView = ModeControlWidget::MULTISLICE;
     } else {
       selectedView = view;
     }
@@ -892,12 +881,15 @@ MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view,
  * This function performs setup for the plugin mode of the Vates Simple
  * Interface. It calls a number of defined functions to complete the process.
  */
-void MdViewerWidget::setupPluginMode() {
+void MdViewerWidget::setupPluginMode(int WsType,
+                                     const std::string &instrumentName) {
   // Don't use the current color map at start up.
   this->useCurrentColorSettings = false;
   this->setupUiAndConnections();
   this->createMenus();
-  this->setupMainView();
+  ModeControlWidget::Views initialView =
+      this->getInitialView(WsType, instrumentName);
+  this->setupMainView(initialView);
 }
 
 /**
@@ -1146,7 +1138,7 @@ void MdViewerWidget::setColorForBackground() {
 void MdViewerWidget::checkForUpdates() {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
-  if (NULL == src) {
+  if (!src) {
     return;
   }
   vtkSMProxy *proxy = src->getProxy();
@@ -1242,10 +1234,7 @@ void MdViewerWidget::swapViews() {
   if (!this->hiddenView)
     g_log.error(
         "Inconsistency found when swapping views, the next view is NULL");
-
-  ViewBase *temp = this->currentView;
-  this->currentView = this->hiddenView;
-  this->hiddenView = temp;
+  std::swap(this->currentView, this->hiddenView);
 }
 
 /**
@@ -1390,7 +1379,7 @@ void MdViewerWidget::onLodToggled(bool state) {
  * setting the communication between it and the current view.
  */
 void MdViewerWidget::onRotationPoint() {
-  if (NULL == this->rotPointDialog) {
+  if (!this->rotPointDialog) {
     this->rotPointDialog = new RotationPointDialog(this);
     this->connectRotationPointDialog();
   }
@@ -1414,9 +1403,10 @@ void MdViewerWidget::onWikiHelp() {
  * switch view since the connection to the current view is destroyed.
  */
 void MdViewerWidget::disconnectDialogs() {
-  if (NULL != this->rotPointDialog) {
+  if (this->rotPointDialog) {
     this->rotPointDialog->close();
-    QObject::disconnect(this->rotPointDialog, 0, this->currentView, 0);
+    QObject::disconnect(this->rotPointDialog, nullptr, this->currentView,
+                        nullptr);
   }
 }
 
@@ -1455,7 +1445,7 @@ void MdViewerWidget::connectColorSelectionWidget() {
  * the current view.
  */
 void MdViewerWidget::connectRotationPointDialog() {
-  if (NULL != this->rotPointDialog) {
+  if (this->rotPointDialog) {
     QObject::connect(
         this->rotPointDialog, SIGNAL(sendCoordinates(double, double, double)),
         this->currentView, SLOT(onResetCenterToPoint(double, double, double)));
@@ -1496,7 +1486,7 @@ void MdViewerWidget::afterReplaceHandle(
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
   UNUSED_ARG(ws);
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
-  if (NULL != src) {
+  if (src) {
     // Have to mark the filter as modified to get it to update. Do this by
     // changing the requested workspace name to a dummy name and then change
     // back. However, push the change all the way down for it to work.
@@ -1526,7 +1516,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
   UNUSED_ARG(ws);
 
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
-  if (NULL != src) {
+  if (src) {
     long long numSources = this->currentView->getNumSources();
     if (numSources > 1) {
       pqObjectBuilder *builder =
@@ -1680,22 +1670,22 @@ void MdViewerWidget::saveViewState(ViewBase *view) {
   switch (vtype) {
   case ModeControlWidget::Views::STANDARD: {
     m_allViews.stateStandard.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   case ModeControlWidget::Views::THREESLICE: {
     m_allViews.stateThreeSlice.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   case ModeControlWidget::Views::MULTISLICE: {
     m_allViews.stateMulti.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   case ModeControlWidget::Views::SPLATTERPLOT: {
     m_allViews.stateSplatter.TakeReference(
-        view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+        view->getView()->getRenderViewProxy()->SaveXMLState(nullptr));
   } break;
   default:
-    view = NULL;
+    view = nullptr;
     break;
   }
 }
@@ -1719,25 +1709,25 @@ void MdViewerWidget::restoreViewState(ViewBase *view,
   case ModeControlWidget::STANDARD: {
     if (m_allViews.stateStandard)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateStandard.GetPointer(), NULL);
+          m_allViews.stateStandard.GetPointer(), nullptr);
   } break;
   case ModeControlWidget::THREESLICE: {
     if (m_allViews.stateThreeSlice)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateThreeSlice.GetPointer(), NULL);
+          m_allViews.stateThreeSlice.GetPointer(), nullptr);
   } break;
   case ModeControlWidget::MULTISLICE: {
     if (m_allViews.stateMulti)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateMulti.GetPointer(), NULL);
+          m_allViews.stateMulti.GetPointer(), nullptr);
   } break;
   case ModeControlWidget::SPLATTERPLOT: {
     if (m_allViews.stateSplatter)
       loaded = view->getView()->getRenderViewProxy()->LoadXMLState(
-          m_allViews.stateSplatter.GetPointer(), NULL);
+          m_allViews.stateSplatter.GetPointer(), nullptr);
   } break;
   default:
-    view = NULL;
+    view = nullptr;
     break;
   }
 

@@ -15,6 +15,8 @@
 
 #include <cfloat>
 
+constexpr double rad2deg = 180.0 / M_PI;
+
 namespace Mantid {
 namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
@@ -151,12 +153,13 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
   else if (emodeStr == "Indirect")
     emode = 2;
 
+  auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
-    IDetector_const_sptr detector = inputWS->getDetector(i);
     double twoTheta(0.0), efixed(0.0);
-    if (!detector->isMonitor()) {
-      twoTheta = 0.5 * inputWS->detectorTwoTheta(*detector);
-      efixed = getEfixed(detector, inputWS, emode); // get efixed
+    if (!spectrumInfo.isMonitor(i)) {
+      twoTheta = 0.5 * spectrumInfo.twoTheta(i);
+      efixed =
+          getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
     } else {
       twoTheta = 0.0;
       efixed = DBL_MIN;
@@ -229,14 +232,15 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   return outputWorkspace;
 }
 
-double ConvertSpectrumAxis2::getEfixed(IDetector_const_sptr detector,
-                                       MatrixWorkspace_const_sptr inputWS,
-                                       int emode) const {
+double
+ConvertSpectrumAxis2::getEfixed(const Mantid::Geometry::IDetector &detector,
+                                MatrixWorkspace_const_sptr inputWS,
+                                int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
-    g_log.debug() << "Detector: " << detector->getID() << " Efixed: " << efixed
+    g_log.debug() << "Detector: " << detector.getID() << " Efixed: " << efixed
                   << "\n";
   } else {
     if (emode == 1) {
@@ -247,20 +251,20 @@ double ConvertSpectrumAxis2::getEfixed(IDetector_const_sptr detector,
                                     "workspace. Please provide a value.");
       }
     } else if (emode == 2) {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
+      std::vector<double> efixedVec = detector.getNumberParameter("Efixed");
       if (efixedVec.empty()) {
-        int detid = detector->getID();
+        int detid = detector.getID();
         IDetector_const_sptr detectorSingle =
             inputWS->getInstrument()->getDetector(detid);
         efixedVec = detectorSingle->getNumberParameter("Efixed");
       }
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
-        g_log.debug() << "Detector: " << detector->getID()
+        g_log.debug() << "Detector: " << detector.getID()
                       << " EFixed: " << efixed << "\n";
       } else {
         g_log.warning() << "Efixed could not be found for detector "
-                        << detector->getID() << ", please provide a value\n";
+                        << detector.getID() << ", please provide a value\n";
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "detector. Please provide a value.");
       }

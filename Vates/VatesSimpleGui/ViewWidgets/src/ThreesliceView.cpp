@@ -66,9 +66,7 @@ void ThreeSliceView::render() {
 }
 
 void ThreeSliceView::makeThreeSlice() {
-  pqPipelineSource *src = NULL;
-  src = pqActiveObjects::instance().activeSource();
-
+  pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting PeaksWorkspaces
@@ -84,6 +82,10 @@ void ThreeSliceView::makeThreeSlice() {
   }
 
   this->origSrc = src;
+
+  if (this->origSrc == nullptr) {
+    return;
+  }
 
   pqDataRepresentation *drep = builder->createDataRepresentation(
       this->origSrc->getOutputPort(0), this->m_mainView);

@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
