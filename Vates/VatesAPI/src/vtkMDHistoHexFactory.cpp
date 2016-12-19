@@ -60,8 +60,7 @@ void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace) {
 }
 
 void vtkMDHistoHexFactory::validateWsNotNull() const {
-
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }
@@ -194,7 +193,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   progress.eventRaised(0.67);
 
   visualDataSet->SetPoints(points.GetPointer());
-  visualDataSet->Register(NULL);
+  visualDataSet->Register(nullptr);
   visualDataSet->Squeeze();
 
   // Hedge against empty data sets
@@ -217,7 +216,7 @@ vtkSmartPointer<vtkDataSet>
 vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
   auto product =
       tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
-  if (product != NULL) {
+  if (product) {
     return product;
   } else {
     // Create in 3D mode

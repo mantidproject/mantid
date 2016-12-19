@@ -71,12 +71,12 @@ vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
                                                 vtkPointSet *inputData,
                                                 vtkPointSet *outputData) {
 
-  if (NULL == inputData) {
+  if (!inputData) {
     throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with "
                              "NULL input vtkPointSet");
   }
 
-  if (outputData == NULL) {
+  if (!outputData) {
     outputData = inputData->NewInstance();
   }
 
@@ -85,11 +85,11 @@ vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
   vtkNew<vtkPoints> newPoints;
 
   vtkFloatArray *oldPointsArray =
-      vtkFloatArray::SafeDownCast(points->GetData());
+      vtkFloatArray::FastDownCast(points->GetData());
   vtkFloatArray *newPointsArray =
-      vtkFloatArray::SafeDownCast(newPoints->GetData());
+      vtkFloatArray::FastDownCast(newPoints->GetData());
 
-  if (oldPointsArray == NULL || newPointsArray == NULL) {
+  if (!oldPointsArray || !newPointsArray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (oldPointsArray->GetNumberOfComponents() != 3 ||
              newPointsArray->GetNumberOfComponents() != 3) {

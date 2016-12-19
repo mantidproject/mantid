@@ -454,7 +454,7 @@ bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
        rhsSpectrumInfo.isMasked(index))) {
     continueOp = false;
     out.getSpectrum(index).clearData();
-    outSpectrumInfo.setMasked(index, true);
+    PARALLEL_CRITICAL(setMasked) { outSpectrumInfo.setMasked(index, true); }
   }
   return continueOp;
 }

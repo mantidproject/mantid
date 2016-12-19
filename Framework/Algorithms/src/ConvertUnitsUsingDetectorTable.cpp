@@ -177,23 +177,18 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
   auto &spectrumInfo = outputWS->mutableSpectrumInfo();
 
-  // TODO: Check why this parallel stuff breaks
   // Loop over the histograms (detector spectra)
-  // PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
 
     // Lets find what row this spectrum Number appears in our detector table.
 
-    // PARALLEL_START_INTERUPT_REGION
-
     std::size_t wsid = i;
 
-    try {
-
+    if (spectrumInfo.hasDetectors(i)) {
       double deg2rad = M_PI / 180.;
 
-      auto det = outputWS->getDetector(i);
-      int specNo = det->getID();
+      auto &det = spectrumInfo.detector(i);
+      int specNo = det.getID();
 
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
@@ -256,7 +251,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
           spectrumInfo.setMasked(wsid, true);
       }
 
-    } catch (Exception::NotFoundError &) {
+    } else {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       // Since you usually (always?) get to here when there's no attached
@@ -267,9 +262,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
-    // PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
-  // PARALLEL_CHECK_INTERUPT_REGION
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Something went wrong for " << failedDetectorCount

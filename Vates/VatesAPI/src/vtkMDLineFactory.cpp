@@ -96,7 +96,7 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     vtkNew<vtkIdList> linePointList;
     linePointList->SetNumberOfIds(2);
 
-    Mantid::API::CoordTransform const *transform = NULL;
+    Mantid::API::CoordTransform const *transform = nullptr;
     if (m_useTransform) {
       transform = imdws->getTransformToOriginal();
     }
@@ -180,7 +180,7 @@ std::string vtkMDLineFactory::getFactoryTypeName() const {
 
 /// Template Method pattern to validate the factory before use.
 void vtkMDLineFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error(
         "vtkMDLineFactory has no workspace to run against");
   }

@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
@@ -222,8 +223,8 @@ void GetAllEi::exec() {
   auto monitorWS = buildWorkspaceToFit(inputWS, det1WSIndex);
 
   // recalculate delay time from chopper position to monitor position
-  auto detector1 = inputWS->getDetector(det1WSIndex);
-  double mon1Distance = detector1->getDistance(*moderator);
+  const auto &detector1 = inputWS->spectrumInfo().detector(det1WSIndex);
+  double mon1Distance = detector1.getDistance(*moderator);
   double TOF0 = mon1Distance / velocity;
 
   //--->> below is reserved until full chopper's implementation is available;
