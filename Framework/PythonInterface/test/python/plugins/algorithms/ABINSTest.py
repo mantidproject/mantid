@@ -69,19 +69,6 @@ class ABINSTest(unittest.TestCase):
         # produce reference data
         self._ref_wrk = {self._si2 + "_abins": ABINS(DFTprogram=self._dft_program,
                                                      PhononFile=self._si2 + ".phonon",
-                                                ExperimentalFile=self._experimental_file,
-                                                Temperature=self._temperature,
-                                                SampleForm=self._sample_form,
-                                                Instrument=self._instrument_name,
-                                                Atoms=self._atoms,
-                                                Scale=self._scale,
-                                                SumContributions=self._sum_contributions,
-                                                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                                                    ScaleByCrossSection=self._cross_section_factor,
-                                                    OutputWorkspace=self._si2 + "_ref"),
-
-                         self._squaricn + "_abins": ABINS(DFTprogram=self._dft_program,
-                                                     PhononFile=self._squaricn + ".phonon",
                                                      ExperimentalFile=self._experimental_file,
                                                      Temperature=self._temperature,
                                                      SampleForm=self._sample_form,
@@ -91,8 +78,21 @@ class ABINSTest(unittest.TestCase):
                                                      SumContributions=self._sum_contributions,
                                                      QuantumOrderEventsNumber=self._quantum_order_events_number,
                                                      ScaleByCrossSection=self._cross_section_factor,
-                                                     OutputWorkspace=self._squaricn + "_ref")
-                         }
+                                                     OutputWorkspace=self._si2 + "_ref"),
+
+                          self._squaricn + "_abins": ABINS(DFTprogram=self._dft_program,
+                                                           PhononFile=self._squaricn + ".phonon",
+                                                           ExperimentalFile=self._experimental_file,
+                                                           Temperature=self._temperature,
+                                                           SampleForm=self._sample_form,
+                                                           Instrument=self._instrument_name,
+                                                           Atoms=self._atoms,
+                                                           Scale=self._scale,
+                                                           SumContributions=self._sum_contributions,
+                                                           QuantumOrderEventsNumber=self._quantum_order_events_number,
+                                                           ScaleByCrossSection=self._cross_section_factor,
+                                                           OutputWorkspace=self._squaricn + "_ref")
+                          }
 
     def test_wrong_input(self):
         """Test if the correct behaviour of algorithm in case input is not valid"""

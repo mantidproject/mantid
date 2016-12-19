@@ -234,7 +234,8 @@ class LoadCASTEP(GeneralDFTProgram):
         file_data.update({"frequencies": np.asarray(frequencies),
                           "weights": np.asarray(weights),
                           "k_vectors": np.asarray(k_vectors),
-                          "atomic_displacements": np.asarray(eigenvectors)})
+                          "atomic_displacements": np.asarray(eigenvectors) * AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+                          })
 
         self._recover_symmetry_points(data=file_data)
 

@@ -730,7 +730,7 @@ class ABINS(PythonAlgorithm):
         if self.__class__._to_print:
             logger.notice("""
 
-                          ABINS is a plugin to Mantid which allows scientists to compare
+                          ABINS is a plugin for Mantid which allows scientists to compare
                           experimental and theoretical inelastic neutron scattering spectra (INS).
 
                           Authors:  Krzysztof Dymkowski
