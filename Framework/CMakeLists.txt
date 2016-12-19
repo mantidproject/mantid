@@ -70,8 +70,13 @@ add_subdirectory (Kernel)
 include_directories (HistogramData/inc)
 add_subdirectory (HistogramData)
 
+include_directories (Indexing/inc)
+add_subdirectory (Indexing)
+
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
+# Indexing has header-only dependency on Kernel, so Kernel comes after.
+set ( MANTIDLIBS ${MANTIDLIBS} Indexing )
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
 include_directories (Geometry/inc)
@@ -134,7 +139,7 @@ add_subdirectory (ScriptRepository)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel HistogramData Geometry API DataObjects
+set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Geometry API DataObjects
                      PythonKernelModule PythonGeometryModule PythonAPIModule
                      PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
