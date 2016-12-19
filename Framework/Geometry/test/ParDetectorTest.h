@@ -19,7 +19,6 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(!pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMasked());
     TS_ASSERT(!pdet->isMonitor());
   }
 
@@ -33,7 +32,6 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMasked());
     TS_ASSERT(!pdet->isMonitor());
   }
 
@@ -62,9 +60,10 @@ public:
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
 
-    TS_ASSERT(!pdet->isMasked());
-    pmap->addBool(&det, "masked", true);
-    TS_ASSERT(pdet->isMasked());
+    // Reading and writing masking should throw: Masking is now stored in
+    // DetectorInfo and ParameterMap should reject it.
+    TS_ASSERT_THROWS(pdet->isMasked(), std::runtime_error);
+    TS_ASSERT_THROWS(pmap->addBool(&det, "masked", true), std::runtime_error);
   }
 
   void testMonitor() {
