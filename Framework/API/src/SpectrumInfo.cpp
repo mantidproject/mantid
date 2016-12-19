@@ -1,22 +1,25 @@
 #include "MantidAPI/DetectorInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <boost/make_shared.hpp>
 #include <algorithm>
 
 namespace Mantid {
 namespace API {
 
-SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
-    : m_workspace(workspace), m_detectorInfo(workspace.detectorInfo()),
+SpectrumInfo::SpectrumInfo(const ExperimentInfo &experimentInfo)
+    : m_experimentInfo(experimentInfo),
+      m_detectorInfo(experimentInfo.detectorInfo()),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
-SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
-    : m_workspace(workspace),
-      m_mutableDetectorInfo(&workspace.mutableDetectorInfo()),
+SpectrumInfo::SpectrumInfo(ExperimentInfo &experimentInfo)
+    : m_experimentInfo(experimentInfo),
+      m_mutableDetectorInfo(&experimentInfo.mutableDetectorInfo()),
       m_detectorInfo(*m_mutableDetectorInfo),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
@@ -106,7 +109,7 @@ bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
   const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
-  for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
     const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
                                       validDetectorIDs.cend(), id);
     if (it != validDetectorIDs.cend() && *it == id) {
@@ -122,7 +125,7 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
   const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
-  for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
     const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
                                       validDetectorIDs.cend(), id);
     if (it != validDetectorIDs.cend() && *it == id) {
@@ -130,6 +133,17 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
     }
   }
   return count == 1;
+}
+
+/** Set the mask flag of the spectrum with given index. Not thread safe.
+ *
+ * Currently this simply sets the mask flags for the underlying detectors. */
+void SpectrumInfo::setMasked(const size_t index, bool masked) {
+  for (const auto &det : getDetectorVector(index)) {
+    const auto detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    m_mutableDetectorInfo->setMasked(detIndex, masked);
+  }
 }
 
 /// Return a const reference to the detector or detector group of the spectrum
@@ -161,7 +175,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   // Note: This function body has big overlap with the method
   // MatrixWorkspace::getDetector(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
-  const auto &dets = m_workspace.getSpectrum(index).getDetectorIDs();
+  const auto &dets = m_experimentInfo.detectorIDsInGroup(index);
   const size_t ndets = dets.size();
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
@@ -176,8 +190,15 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     // Else need to construct a DetectorGroup and use that
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &id : dets) {
-      const auto detIndex = m_detectorInfo.indexOf(id);
-      det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+      try {
+        const auto detIndex = m_detectorInfo.indexOf(id);
+        det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+      } catch (std::out_of_range &) {
+        // Workspaces can contain invalid detector IDs. Those IDs will be
+        // silently ignored here until this is fixed. Some valid IDs will exist
+        // if hasDetectors or hasUniqueDetectors has returned true, but there
+        // could still be invalid IDs.
+      }
     }
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);

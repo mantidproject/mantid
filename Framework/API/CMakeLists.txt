@@ -101,6 +101,7 @@ set ( SRC_FILES
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NearestNeighbourInfo.cpp
+	src/NearestNeighbours.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -112,6 +113,7 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
+	src/PropertyWithValue.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
@@ -286,6 +288,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NearestNeighbourInfo.h
+        inc/MantidAPI/NearestNeighbours.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -326,6 +329,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceHistory.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
+	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
 )
@@ -400,6 +404,7 @@ set ( TEST_FILES
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
 	NearestNeighbourInfoTest.h
+	NearestNeighboursTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h

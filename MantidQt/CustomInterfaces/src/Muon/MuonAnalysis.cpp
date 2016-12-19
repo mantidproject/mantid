@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,8 +17,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
@@ -565,7 +562,7 @@ void MuonAnalysis::runSaveGroupButton() {
   QString filter;
   filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*)";
-  QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(
+  QString groupingFile = QFileDialog::getSaveFileName(
       this, "Save Grouping file as", prevPath, filter);
 
   // Add extension if the groupingFile specified doesn't have one. (Solving
@@ -2208,8 +2205,20 @@ void MuonAnalysis::setAppendingRun(int inc) {
 void MuonAnalysis::changeRun(int amountToChange) {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
-  if ((currentFile.isEmpty()))
-    currentFile = m_previousFilenames[0];
+  if ((currentFile.isEmpty())) {
+    if (m_previousFilenames.isEmpty()) {
+      // not a valid file, and no previous valid files
+      QMessageBox::warning(this, tr("Muon Analysis"),
+                           tr("Unable to open the file.\n"
+                              "and no previous valid files available."),
+                           QMessageBox::Ok, QMessageBox::Ok);
+      allowLoading(true);
+      return;
+    } else {
+      // blank box - use previous run
+      currentFile = m_previousFilenames[0];
+    }
+  }
 
   QString run("");
   int runSize(-1);

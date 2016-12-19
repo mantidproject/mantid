@@ -9,6 +9,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <limits>
@@ -115,7 +116,7 @@ void RemoveLowResTOF::exec() {
   m_numberOfSpectra = m_inputWS->getNumberHistograms();
 
   std::string lowreswsname = getPropertyValue("LowResTOFWorkspace");
-  if (lowreswsname.size() > 0)
+  if (!lowreswsname.empty())
     m_outputLowResTOF = true;
   else
     m_outputLowResTOF = false;

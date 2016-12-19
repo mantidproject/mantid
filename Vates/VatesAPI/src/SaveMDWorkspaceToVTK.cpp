@@ -18,7 +18,7 @@ namespace VATES {
 DECLARE_ALGORITHM(SaveMDWorkspaceToVTK)
 
 SaveMDWorkspaceToVTK::SaveMDWorkspaceToVTK()
-    : saver(Mantid::Kernel::make_unique<SaveMDWorkspaceToVTKImpl>()) {}
+    : saver(Mantid::Kernel::make_unique<SaveMDWorkspaceToVTKImpl>(this)) {}
 
 SaveMDWorkspaceToVTK::~SaveMDWorkspaceToVTK() {}
 

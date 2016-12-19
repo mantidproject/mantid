@@ -9,6 +9,7 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
@@ -857,7 +858,7 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
   }
 
   PoldiAbstractDetector_sptr detector(new PoldiDeadWireDecorator(
-      workspace->getInstrument(), m_poldiInstrument->detector()));
+      workspace->detectorInfo(), m_poldiInstrument->detector()));
   std::vector<int> indices = detector->availableElements();
 
   // Create the grid for the diffractogram and corresponding domain/values

@@ -1,11 +1,9 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTRAYTRACER_H_
 #define MANTID_GEOMETRY_INSTRUMENTRAYTRACER_H_
 
-//-------------------------------------------------------------
-// Includes
-//-------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Track.h"
 #include <deque>
 #include <list>
 
@@ -14,9 +12,6 @@ namespace Kernel {
 class V3D;
 }
 namespace Geometry {
-//-------------------------------------------------------------
-// Forward declarations
-//-------------------------------------------------------------
 struct Link;
 class Track;
 /// Typedef for object intersections

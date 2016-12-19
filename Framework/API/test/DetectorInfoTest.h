@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
@@ -42,6 +43,8 @@ public:
     m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins,
                                  numberOfBins - 1);
   }
+
+  void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
 
   void test_sourcePosition() {
     TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(),
@@ -176,6 +179,20 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
   }
 
+  void test_setMasked() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    detectorInfo.setMasked(0, false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), false);
+    detectorInfo.setMasked(0, true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    // Make sure no other detectors are affected
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(4), false);
+  }
+
   void test_setRotation() {
     V3D e3{0, 0, 1};
     Quat r3(90.0, e3);
@@ -301,13 +318,16 @@ private:
     auto ws = Kernel::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
+    }
+    ws->setInstrument(inst);
+    auto &pmap = ws->instrumentParameters();
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
+      const auto &det = ws->getDetector(i);
       if (i % 2 == 0)
         pmap.addBool(det->getComponentID(), "masked", true);
     }

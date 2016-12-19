@@ -62,6 +62,7 @@
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
@@ -3285,6 +3286,20 @@ void Graph::addLegendItem() {
   }
 }
 
+/**
+ * Trim a table name from the legend key.
+ *
+ * Take a string that looks like 'Table-1_run-number' and convert it
+ * to just 'run-number'
+ *
+ * @param key :: the legend key to trim
+ * @return QString containing the trimmed value
+ */
+QString Graph::trimTableNameFromLegendKey(const QString &key) const {
+  int splitPos = key.indexOf("_");
+  return key.mid(splitPos + 1, key.size()).replace('_', '-');
+}
+
 QString Graph::yAxisTitleFromFirstCurve() {
   // I really don't like this...
   if (auto *firstCurve = dynamic_cast<MantidMatrixCurve *>(curve(0))) {
@@ -6036,6 +6051,10 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
       tsv >> tableName >> plotType;
 
       Table *table = app->table(tableName);
+
+      curveValues[1] = trimTableNameFromLegendKey(curveValues[1]);
+      curveValues[2] = trimTableNameFromLegendKey(curveValues[2]);
+
       if (table) {
         PlotCurve *c = NULL;
         if (plotType == GraphOptions::VectXYXY ||
@@ -6180,6 +6199,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
       Table *w = app->table(sl[3]);
       Table *errTable = app->table(sl[4]);
       if (w && errTable) {
+        sl[2] = trimTableNameFromLegendKey(sl[2]);
+        sl[3] = trimTableNameFromLegendKey(sl[3]);
+        sl[4] = trimTableNameFromLegendKey(sl[4]);
         addErrorBars(sl[2], sl[3], errTable, sl[4], sl[1].toInt(),
                      sl[5].toDouble(), sl[6].toInt(), QColor(sl[7]),
                      sl[8].toInt(), sl[10].toInt(), sl[9].toInt());

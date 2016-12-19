@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
@@ -323,6 +324,11 @@ void ConvFit::plotClicked() {
         const auto specNumber = m_uiForm.cbPlotType->currentIndex();
         IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                   specNumber, specNumber);
+        // Plot results for both Lorentzians if "Two Lorentzians"
+        if (m_uiForm.cbFitType->currentIndex() == 2) {
+          IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                    specNumber + 2, specNumber + 2);
+        }
       }
     }
   } else {
@@ -1539,14 +1545,16 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
     }
   }
   // Add another Lorentzian function parameter for two Lorentzian fit
-  if (functionName.compare("Two Lorentzian") == 0) {
+  if (functionName.compare("Two Lorentzians") == 0) {
     currentFitFunction = "Lorentzian";
+    IFunction_sptr func = FunctionFactory::Instance().createFunction(
+        currentFitFunction.toStdString());
+    for (size_t i = 0; i < func->nParams(); i++) {
+      parameters << QString::fromStdString(func->parameterName(i));
+    }
   }
   if (functionName.compare("Zero Lorentzians") == 0) {
     parameters.append("Zero");
-  } else {
-    IFunction_sptr func = FunctionFactory::Instance().createFunction(
-        currentFitFunction.toStdString());
   }
   return parameters;
 }

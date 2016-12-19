@@ -40,7 +40,7 @@ void TestGroupDataListener::start(
 /** Create the default empty event workspace */
 void TestGroupDataListener::createWorkspace() {
   // create a group
-  m_buffer = WorkspaceCreationHelper::CreateWorkspaceGroup(3, 2, 10, "tst");
+  m_buffer = WorkspaceCreationHelper::createWorkspaceGroup(3, 2, 10, "tst");
   // it must not be in the ADS
   API::AnalysisDataService::Instance().deepRemoveGroup("tst");
 }
