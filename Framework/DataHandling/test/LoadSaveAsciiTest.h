@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataHandling/SaveAscii.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -55,7 +55,7 @@ public:
     save.setPropertyValue("InputWorkspace", name);
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
-    LoadAscii load;
+    LoadAscii2 load;
     load.initialize();
     load.setPropertyValue("Filename", filename);
     load.setPropertyValue("OutputWorkspace", "LoadSaveAsciiWS_1");
