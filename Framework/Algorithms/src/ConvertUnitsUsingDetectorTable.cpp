@@ -184,12 +184,11 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
     std::size_t wsid = i;
 
-    try {
-
+    if (spectrumInfo.hasDetectors(i)) {
       double deg2rad = M_PI / 180.;
 
-      auto det = outputWS->getDetector(i);
-      int specNo = det->getID();
+      auto &det = spectrumInfo.detector(i);
+      int specNo = det.getID();
 
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
@@ -252,7 +251,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
           spectrumInfo.setMasked(wsid, true);
       }
 
-    } catch (Exception::NotFoundError &) {
+    } else {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       // Since you usually (always?) get to here when there's no attached
