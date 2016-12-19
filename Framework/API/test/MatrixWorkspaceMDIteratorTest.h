@@ -33,7 +33,6 @@ public:
       }
     }
     Instrument_sptr inst(new Instrument("TestInstrument"));
-    ws->setInstrument(inst);
     // We get a 1:1 map by default so the detector ID should match the spectrum
     // number
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
@@ -44,6 +43,7 @@ public:
       inst->markAsDetector(det);
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
     }
+    ws->setInstrument(inst);
     ws->replaceAxis(1, ax1);
 
     return ws;

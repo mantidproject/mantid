@@ -192,7 +192,6 @@ private:
 
     Mantid::Geometry::Instrument_sptr testInst(
         new Mantid::Geometry::Instrument);
-    ws->setInstrument(testInst);
     // Define a source and sample position
     // Define a source component
     Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent(
@@ -212,6 +211,7 @@ private:
     physicalPixel->setPos(0.5, 0, 5.0);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
+    ws->setInstrument(testInst);
 
     ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
