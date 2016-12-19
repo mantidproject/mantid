@@ -3,9 +3,8 @@ import mantid
 
 from sans.state.reduction_mode import (StateReductionMode, get_reduction_mode_builder)
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (ISISReductionMode, ReductionDimensionality, FitModeForMerge,
-                                   SANSFacility, SANSInstrument)
-from sans.common.constants import SANSConstants
+from sans.common.enums import (ISISReductionMode, ReductionDimensionality, FitModeForMerge,
+                                   SANSFacility, SANSInstrument, DetectorType)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -22,22 +21,22 @@ class StateReductionModeTest(unittest.TestCase):
         state.merge_scale = 34.6
         state.merge_fit_mode = FitModeForMerge.ShiftOnly
 
-        state.detector_names[SANSConstants.low_angle_bank] = "Test1"
-        state.detector_names[SANSConstants.high_angle_bank] = "Test2"
+        state.detector_names[DetectorType.to_string(DetectorType.LAB)] = "Test1"
+        state.detector_names[DetectorType.to_string(DetectorType.HAB)] = "Test2"
 
         # Assert
         merge_strategy = state.get_merge_strategy()
-        self.assertTrue(merge_strategy[0] is ISISReductionMode.Lab)
-        self.assertTrue(merge_strategy[1] is ISISReductionMode.Hab)
+        self.assertTrue(merge_strategy[0] is ISISReductionMode.LAB)
+        self.assertTrue(merge_strategy[1] is ISISReductionMode.HAB)
 
         all_reductions = state.get_all_reduction_modes()
         self.assertTrue(len(all_reductions) == 2)
-        self.assertTrue(all_reductions[0] is ISISReductionMode.Lab)
-        self.assertTrue(all_reductions[1] is ISISReductionMode.Hab)
+        self.assertTrue(all_reductions[0] is ISISReductionMode.LAB)
+        self.assertTrue(all_reductions[1] is ISISReductionMode.HAB)
 
-        result_lab = state.get_detector_name_for_reduction_mode(ISISReductionMode.Lab)
+        result_lab = state.get_detector_name_for_reduction_mode(ISISReductionMode.LAB)
         self.assertTrue(result_lab == "Test1")
-        result_hab = state.get_detector_name_for_reduction_mode(ISISReductionMode.Hab)
+        result_hab = state.get_detector_name_for_reduction_mode(ISISReductionMode.HAB)
         self.assertTrue(result_hab == "Test2")
 
         self.assertRaises(RuntimeError, state.get_detector_name_for_reduction_mode, "non_sense")
@@ -79,7 +78,7 @@ class StateReductionModeBuilderTest(unittest.TestCase):
         self.assertTrue(state.merge_shift == merge_shift)
         self.assertTrue(state.merge_scale == merge_scale)
         detector_names = state.detector_names
-        self.assertTrue(detector_names[SANSConstants.low_angle_bank] == "main-detector-bank")
+        self.assertTrue(detector_names[DetectorType.to_string(DetectorType.LAB)] == "main-detector-bank")
 
 
 if __name__ == '__main__':

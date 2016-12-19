@@ -7,9 +7,8 @@ import copy
 
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
                                    FloatWithNoneParameter, rename_descriptor_names)
-from sans.common.sans_type import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
-                                   SANSInstrument)
-from sans.common.constants import SANSConstants
+from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
+                                   SANSInstrument, DetectorType)
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.automatic_setters import (automatic_setters)
@@ -51,7 +50,7 @@ class StateReductionMode(StateReductionBase, StateBase):
 
     def __init__(self):
         super(StateReductionMode, self).__init__()
-        self.reduction_mode = ISISReductionMode.Lab
+        self.reduction_mode = ISISReductionMode.LAB
         self.reduction_dimensionality = ReductionDimensionality.OneDim
 
         # Set the shifts to defaults which essentially don't do anything.
@@ -62,20 +61,20 @@ class StateReductionMode(StateReductionBase, StateBase):
         self.merge_range_max = None
 
         # Set the detector names to empty strings
-        self.detector_names = {SANSConstants.low_angle_bank: "",
-                               SANSConstants.high_angle_bank: ""}
+        self.detector_names = {DetectorType.to_string(DetectorType.LAB): "",
+                               DetectorType.to_string(DetectorType.HAB): ""}
 
     def get_merge_strategy(self):
-        return [ISISReductionMode.Lab, ISISReductionMode.Hab]
+        return [ISISReductionMode.LAB, ISISReductionMode.HAB]
 
     def get_all_reduction_modes(self):
-        return [ISISReductionMode.Lab, ISISReductionMode.Hab]
+        return [ISISReductionMode.LAB, ISISReductionMode.HAB]
 
     def get_detector_name_for_reduction_mode(self, reduction_mode):
-        if reduction_mode is ISISReductionMode.Lab:
-            bank_type = SANSConstants.low_angle_bank
-        elif reduction_mode is ISISReductionMode.Hab:
-            bank_type = SANSConstants.high_angle_bank
+        if reduction_mode is ISISReductionMode.LAB:
+            bank_type = DetectorType.to_string(DetectorType.LAB)
+        elif reduction_mode is ISISReductionMode.HAB:
+            bank_type = DetectorType.to_string(DetectorType.HAB)
         else:
             raise RuntimeError("SANStateReductionISIS: There is no detector available for the"
                                " reduction mode {0}.".format(reduction_mode))
@@ -92,8 +91,8 @@ def setup_detectors_from_ipf(reduction_info, data_info):
     file_name = data_info.sample_scatter
     _, ipf_path = get_instrument_paths_for_sans_file(file_name)
 
-    detector_names = {SANSConstants.low_angle_bank: "low-angle-detector-name",
-                      SANSConstants.high_angle_bank: "high-angle-detector-name"}
+    detector_names = {DetectorType.to_string(DetectorType.LAB): "low-angle-detector-name",
+                      DetectorType.to_string(DetectorType.HAB): "high-angle-detector-name"}
 
     names_to_search = []
     names_to_search.extend(detector_names.values())

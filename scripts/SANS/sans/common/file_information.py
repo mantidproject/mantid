@@ -9,7 +9,7 @@ from abc import (ABCMeta, abstractmethod)
 from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
-from sans.common.sans_type import (SANSInstrument, convert_sans_instrument_to_string, SANSFileType)
+from sans.common.enums import (SANSInstrument, FileType)
 
 
 # -----------------------------------
@@ -52,9 +52,9 @@ def get_extension_for_file_type(file_info):
     :param file_info: a SANSFileInformation object.
     :return: the extension a stirng. This can be either nxs or raw.
     """
-    if file_info.get_type() is SANSFileType.ISISNexus or file_info.get_type() is SANSFileType.ISISNexusAdded:
+    if file_info.get_type() is FileType.ISISNexus or file_info.get_type() is FileType.ISISNexusAdded:
         extension = "nxs"
-    elif file_info.get_type() is SANSFileType.ISISRaw:
+    elif file_info.get_type() is FileType.ISISRaw:
         extension = "raw"
     else:
         raise RuntimeError("The file extension type for a file of type {0} is unknown"
@@ -155,7 +155,7 @@ def get_instrument_paths_for_sans_file(file_name):
 
     # Get the instrument
     instrument = file_information.get_instrument()
-    instrument_as_string = convert_sans_instrument_to_string(instrument)
+    instrument_as_string = SANSInstrument.to_string(instrument)
 
     # Get the idf file path
     idf_path = ExperimentInfo.getInstrumentFilename(instrument_as_string, measurement_time_as_string)
@@ -391,19 +391,6 @@ def get_date_for_raw(file_name):
     return get_raw_measurement_time(date, time)
 
 
-def get_instrument(instrument_name):
-    instrument_name = instrument_name.upper()
-    if instrument_name == "SANS2D":
-        instrument = SANSInstrument.SANS2D
-    elif instrument_name == "LARMOR":
-        instrument = SANSInstrument.LARMOR
-    elif instrument_name == "LOQ":
-        instrument = SANSInstrument.LOQ
-    else:
-        instrument = SANSInstrument.NoInstrument
-    return instrument
-
-
 # -----------------------------------------------
 # SANS file Information
 # -----------------------------------------------
@@ -448,7 +435,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         # Setup instrument name
         self._full_file_name = SANSFileInformation.get_full_file_name(self._file_name)
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
-        self._instrument_name = get_instrument(instrument_name)
+        self._instrument = SANSInstrument.from_string(instrument_name)
 
         # Setup date
         self._date = get_date_for_isis_nexus(self._full_file_name)
@@ -466,7 +453,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         return self._full_file_name
 
     def get_instrument(self):
-        return self._instrument_name
+        return self._instrument
 
     def get_date(self):
         return self._date
@@ -478,7 +465,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         return self._run_number
 
     def get_type(self):
-        return SANSFileType.ISISNexus
+        return FileType.ISISNexus
 
     def is_event_mode(self):
         return self._is_event_mode
@@ -490,7 +477,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         # Setup instrument name
         self._full_file_name = SANSFileInformation.get_full_file_name(self._file_name)
         instrument_name = get_instrument_name_for_raw(self._full_file_name)
-        self._instrument_name = get_instrument(instrument_name)
+        self._instrument = SANSInstrument.from_string(instrument_name)
 
         # Setup date
         self._date = get_date_for_raw(self._full_file_name)
@@ -505,7 +492,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         return self._full_file_name
 
     def get_instrument(self):
-        return self._instrument_name
+        return self._instrument
 
     def get_date(self):
         return self._date
@@ -517,7 +504,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         return self._run_number
 
     def get_type(self):
-        return SANSFileType.ISISRaw
+        return FileType.ISISRaw
 
 
 class SANSFileInformationFactory(object):

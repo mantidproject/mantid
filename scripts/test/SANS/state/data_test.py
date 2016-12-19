@@ -3,7 +3,7 @@ import mantid
 
 from sans.state.data import (StateData, get_data_builder)
 from state_test_helper import (assert_validate_error, assert_raises_nothing)
-from sans.common.sans_type import (SANSFacility, SANSInstrument)
+from sans.common.enums import (SANSFacility, SANSInstrument)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

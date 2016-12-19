@@ -3,7 +3,7 @@ import mantid
 
 from sans.state.scale import get_scale_builder
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (SANSFacility, SANSInstrument, SampleShape)
+from sans.common.enums import (SANSFacility, SANSInstrument, SampleShape)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

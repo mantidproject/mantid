@@ -1,7 +1,7 @@
 """ Defines the state of the geometry and unit scaling."""
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter, ClassTypeParameter)
-from sans.common.sans_type import (SampleShape, SANSInstrument)
+from sans.common.enums import (SampleShape, SANSInstrument)
 from sans.state.automatic_setters import (automatic_setters)
 
 

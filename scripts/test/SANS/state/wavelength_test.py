@@ -3,7 +3,7 @@ import mantid
 
 from sans.state.wavelength import (StateWavelength, get_wavelength_builder)
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (SANSFacility, SANSInstrument, RebinType, RangeStepType)
+from sans.common.enums import (SANSFacility, SANSInstrument, RebinType, RangeStepType)
 from state_test_helper import assert_validate_error, assert_raises_nothing
 
 

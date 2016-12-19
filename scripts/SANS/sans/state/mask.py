@@ -9,9 +9,8 @@ from sans.state.state_base import (StateBase, BoolParameter, StringListParameter
                                    DictParameter, PositiveIntegerListParameter, rename_descriptor_names)
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
 from sans.state.automatic_setters import (automatic_setters)
-from sans.common.constants import SANSConstants
 from sans.common.file_information import find_full_file_path
-from sans.common.sans_type import SANSInstrument
+from sans.common.enums import (SANSInstrument, DetectorType)
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
 
 
@@ -180,8 +179,8 @@ class StateMask(StateBase):
     def __init__(self):
         super(StateMask, self).__init__()
         # Setup the detectors
-        self.detectors = {SANSConstants.low_angle_bank: StateMaskDetector(),
-                          SANSConstants.high_angle_bank: StateMaskDetector()}
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector(),
+                          DetectorType.to_string(DetectorType.HAB): StateMaskDetector()}
 
         # IDF Path
         self.idf_path = ""

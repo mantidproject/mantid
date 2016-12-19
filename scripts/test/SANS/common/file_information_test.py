@@ -1,7 +1,7 @@
 import unittest
 import mantid
 
-from sans.common.file_information import (SANSFileInformationFactory, SANSFileInformation, SANSFileType,
+from sans.common.file_information import (SANSFileInformationFactory, SANSFileInformation, FileType,
                                           SANSInstrument, get_instrument_paths_for_sans_file)
 from mantid.kernel import DateAndTime
 
@@ -20,7 +20,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_number_of_periods() == 1)
         self.assertTrue(file_information.get_date() == DateAndTime("2013-10-25T14:21:19"))
         self.assertTrue(file_information.get_instrument() == SANSInstrument.SANS2D)
-        self.assertTrue(file_information.get_type() == SANSFileType.ISISNexus)
+        self.assertTrue(file_information.get_type() == FileType.ISISNexus)
         self.assertTrue(file_information.get_run_number() == 22024)
         self.assertFalse(file_information.is_event_mode())
 
@@ -37,7 +37,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_number_of_periods() == 1)
         self.assertTrue(file_information.get_date() == DateAndTime("2008-12-18T11:20:58"))
         self.assertTrue(file_information.get_instrument() == SANSInstrument.LOQ)
-        self.assertTrue(file_information.get_type() == SANSFileType.ISISRaw)
+        self.assertTrue(file_information.get_type() == FileType.ISISRaw)
         self.assertTrue(file_information.get_run_number() == 48094)
 
 

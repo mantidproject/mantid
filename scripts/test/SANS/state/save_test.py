@@ -3,7 +3,7 @@ import mantid
 
 from sans.state.save import (get_save_builder)
 from sans.state.data import (get_data_builder)
-from sans.common.sans_type import (SANSFacility, SaveType)
+from sans.common.enums import (SANSFacility, SaveType)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

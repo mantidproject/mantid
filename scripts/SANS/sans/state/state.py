@@ -6,7 +6,7 @@ import json
 import pickle
 import inspect
 import copy
-from sans.common.sans_type import SANSInstrument
+from sans.common.enums import SANSInstrument
 from sans.state.state_base import (StateBase, TypedParameter,
                                    rename_descriptor_names, validator_sub_state)
 from sans.state.data import StateData

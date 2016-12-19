@@ -1,8 +1,8 @@
 """Set of general purpose functions which are related to the SANSState approach."""
 
 from copy import deepcopy
-from sans.common.sans_type import (ReductionDimensionality, ISISReductionMode, OutputParts)
-from sans.common.constants import SANSConstants
+from sans.common.enums import (ReductionDimensionality, ISISReductionMode, OutputParts, DetectorType)
+from sans.common.constants import (ALL_PERIODS, REDUCED_WORKSPACE_NAME_IN_LOGS, EMPTY_NAME, REDUCED_CAN_TAG)
 from sans.common.general_functions import (add_to_sample_log, get_ads_workspace_references)
 from sans.common.log_tagger import (has_hash, get_hash_value, set_hash)
 from sans.common.xml_parsing import (get_monitor_names_from_idf_file, get_named_elements_from_ipf_file)
@@ -17,14 +17,14 @@ def add_workspace_name(workspace, state, reduction_mode):
     :param reduction_mode: the reduction mode, i.e. LAB, HAB, MERGED
     """
     reduced_workspace_name = get_output_workspace_name(state, reduction_mode)
-    add_to_sample_log(workspace, SANSConstants.reduced_workspace_name_in_logs, reduced_workspace_name, "String")
+    add_to_sample_log(workspace, REDUCED_WORKSPACE_NAME_IN_LOGS, reduced_workspace_name, "String")
 
 
 def get_output_workspace_name_from_workspace(workspace):
     run = workspace.run()
-    if not run.hasProperty(SANSConstants.reduced_workspace_name_in_logs):
+    if not run.hasProperty(REDUCED_WORKSPACE_NAME_IN_LOGS):
         raise RuntimeError("The workspace does not seem to contain an entry for the output workspace name.")
-    return run.getProperty(SANSConstants.reduced_workspace_name_in_logs).value
+    return run.getProperty(REDUCED_WORKSPACE_NAME_IN_LOGS).value
 
 
 def get_output_workspace_name(state, reduction_mode):
@@ -50,7 +50,7 @@ def get_output_workspace_name(state, reduction_mode):
     short_run_number_as_string = str(short_run_number)
 
     # 2. Multiperiod
-    if state.data.sample_scatter_period != SANSConstants.ALL_PERIODS:
+    if state.data.sample_scatter_period != ALL_PERIODS:
         period = data.sample_scatter_period
         period_as_string = "p"+str(period)
     else:
@@ -61,10 +61,10 @@ def get_output_workspace_name(state, reduction_mode):
     detectors = move.detectors
     if reduction_mode is ISISReductionMode.Merged:
         detector_name_short = "merged"
-    elif reduction_mode is ISISReductionMode.Hab:
-        detector_name_short = detectors[SANSConstants.high_angle_bank].detector_name_short
-    elif reduction_mode is ISISReductionMode.Lab:
-        detector_name_short = detectors[SANSConstants.low_angle_bank].detector_name_short
+    elif reduction_mode is ISISReductionMode.HAB:
+        detector_name_short = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+    elif reduction_mode is ISISReductionMode.LAB:
+        detector_name_short = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
     else:
         raise RuntimeError("SANSStateFunctions: Unknown reduction mode {0} cannot be used to "
                            "create an output name".format(reduction_mode))
@@ -176,12 +176,12 @@ def get_state_hash_for_can_reduction(state, partial_type=None):
     """
     def remove_sample_related_information(full_state):
         state_to_hash = deepcopy(full_state)
-        state_to_hash.data.sample_scatter = SANSConstants.dummy
-        state_to_hash.data.sample_scatter_period = SANSConstants.ALL_PERIODS
-        state_to_hash.data.sample_transmission = SANSConstants.dummy
-        state_to_hash.data.sample_transmission_period = SANSConstants.ALL_PERIODS
-        state_to_hash.data.sample_direct = SANSConstants.dummy
-        state_to_hash.data.sample_direct_period = SANSConstants.ALL_PERIODS
+        state_to_hash.data.sample_scatter = EMPTY_NAME
+        state_to_hash.data.sample_scatter_period = ALL_PERIODS
+        state_to_hash.data.sample_transmission = EMPTY_NAME
+        state_to_hash.data.sample_transmission_period = ALL_PERIODS
+        state_to_hash.data.sample_direct = EMPTY_NAME
+        state_to_hash.data.sample_direct_period = ALL_PERIODS
         state_to_hash.data.sample_scatter_run_number = 1
         return state_to_hash
     new_state = remove_sample_related_information(state)
@@ -199,7 +199,7 @@ def get_state_hash_for_can_reduction(state, partial_type=None):
 
 def get_workspace_from_ads_based_on_hash(hash_value):
     for workspace in get_ads_workspace_references():
-        if has_hash(SANSConstants.reduced_can_tag, hash_value, workspace):
+        if has_hash(REDUCED_CAN_TAG, hash_value, workspace):
             return workspace
 
 
@@ -233,7 +233,7 @@ def write_hash_into_reduced_can_workspace(state, workspace, partial_type=None):
     @param partial_type: if it is a partial type, then it needs to be specified here.
     """
     hashed_state = get_state_hash_for_can_reduction(state, partial_type=partial_type)
-    set_hash(SANSConstants.reduced_can_tag, hashed_state, workspace)
+    set_hash(REDUCED_CAN_TAG, hashed_state, workspace)
 
 
 def set_detector_names(state, ipf_path):
@@ -243,10 +243,12 @@ def set_detector_names(state, ipf_path):
     @param state: the state object
     @param ipf_path: the path to the Instrument Parameter File
     """
-    detector_names = {SANSConstants.low_angle_bank: "low-angle-detector-name",
-                      SANSConstants.high_angle_bank: "high-angle-detector-name"}
-    detector_names_short = {SANSConstants.low_angle_bank: "low-angle-detector-short-name",
-                            SANSConstants.high_angle_bank: "high-angle-detector-short-name"}
+    lab_keyword = DetectorType.to_string(DetectorType.LAB)
+    hab_keyword = DetectorType.to_string(DetectorType.HAB)
+    detector_names = {lab_keyword: "low-angle-detector-name",
+                      hab_keyword: "high-angle-detector-name"}
+    detector_names_short = {lab_keyword: "low-angle-detector-short-name",
+                            hab_keyword: "high-angle-detector-short-name"}
 
     names_to_search = []
     names_to_search.extend(detector_names.values())

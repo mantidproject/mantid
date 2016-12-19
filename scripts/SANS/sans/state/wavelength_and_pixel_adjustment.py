@@ -7,7 +7,7 @@ import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, StringParameter,
                                    ClassTypeParameter, PositiveFloatParameter, DictParameter)
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
-from sans.common.sans_type import (RangeStepType, DetectorType, convert_detector_type_to_string, SANSInstrument)
+from sans.common.enums import (RangeStepType, DetectorType, SANSInstrument)
 from sans.state.automatic_setters import (automatic_setters)
 
 
@@ -42,8 +42,8 @@ class StateWavelengthAndPixelAdjustment(StateBase):
 
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
-        self.adjustment_files = {convert_detector_type_to_string(DetectorType.Lab): StateAdjustmentFiles(),
-                                 convert_detector_type_to_string(DetectorType.Hab): StateAdjustmentFiles()}
+        self.adjustment_files = {DetectorType.to_string(DetectorType.LAB): StateAdjustmentFiles(),
+                                 DetectorType.to_string(DetectorType.HAB): StateAdjustmentFiles()}
 
     def validate(self):
         is_invalid = {}
@@ -65,8 +65,8 @@ class StateWavelengthAndPixelAdjustment(StateBase):
             is_invalid.update(entry)
 
         try:
-            self.adjustment_files[convert_detector_type_to_string(DetectorType.Lab)].validate()
-            self.adjustment_files[convert_detector_type_to_string(DetectorType.Hab)].validate()
+            self.adjustment_files[DetectorType.to_string(DetectorType.LAB)].validate()
+            self.adjustment_files[DetectorType.to_string(DetectorType.HAB)].validate()
         except ValueError as e:
             is_invalid.update({"adjustment_files": str(e)})
 

@@ -14,8 +14,8 @@ from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_
 from sans.state.adjustment import get_adjustment_builder
 from sans.state.convert_to_q import get_convert_to_q_builder
 
-from sans.common.sans_type import (SANSFacility, ISISReductionMode, ReductionDimensionality,
-                                   FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape)
+from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality,
+                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape)
 
 
 class TestDirector(object):

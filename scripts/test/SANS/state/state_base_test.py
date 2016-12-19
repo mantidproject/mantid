@@ -10,10 +10,10 @@ from sans.state.state_base import (StringParameter, BoolParameter, FloatParamete
                                    StringListParameter, PositiveIntegerListParameter, ClassTypeListParameter,
                                    StateBase, rename_descriptor_names, TypedParameter, validator_sub_state,
                                    create_deserialized_sans_state_from_property_manager)
-from sans.common.sans_type import sans_type
+from sans.common.enums import serializable_enum
 
 
-@sans_type("TypeA", "TypeB")
+@serializable_enum("TypeA", "TypeB")
 class TestType(object):
     pass
 

@@ -3,8 +3,7 @@ import mantid
 
 from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMove, get_move_builder)
 from sans.state.data import get_data_builder
-from sans.common.constants import SANSConstants
-from sans.common.sans_type import (CanonicalCoordinates, SANSFacility)
+from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType)
 from state_test_helper import assert_validate_error, assert_raises_nothing
 
 
@@ -14,37 +13,37 @@ from state_test_helper import assert_validate_error, assert_raises_nothing
 class StateMoveWorkspaceTest(unittest.TestCase):
     def test_that_raises_if_the_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors[SANSConstants.low_angle_bank].detector_name = "test"
-        state.detectors[SANSConstants.high_angle_bank].detector_name_short = "test"
-        state.detectors[SANSConstants.low_angle_bank].detector_name_short = "test"
+        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
+        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
+        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short = "test"
         assert_validate_error(self, ValueError, state)
-        state.detectors[SANSConstants.high_angle_bank].detector_name = "test"
+        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name = "test"
         assert_raises_nothing(self, state)
 
     def test_that_raises_if_the_short_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors[SANSConstants.high_angle_bank].detector_name = "test"
-        state.detectors[SANSConstants.low_angle_bank].detector_name = "test"
-        state.detectors[SANSConstants.high_angle_bank].detector_name_short = "test"
+        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name = "test"
+        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
+        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
         assert_validate_error(self, ValueError, state)
-        state.detectors[SANSConstants.low_angle_bank].detector_name_short = "test"
+        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short = "test"
         assert_raises_nothing(self, state)
 
     def test_that_general_isis_default_values_are_set_up(self):
         state = StateMove()
         self.assertTrue(state.sample_offset == 0.0)
         self.assertTrue(state.sample_offset_direction is CanonicalCoordinates.Z)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].x_translation_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].y_translation_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].z_translation_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].rotation_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].side_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].radius_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].x_tilt_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].y_tilt_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].z_tilt_correction == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].sample_centre_pos1 == 0.0)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].sample_centre_pos2 == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].y_translation_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].z_translation_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].rotation_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].side_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].radius_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_tilt_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].y_tilt_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].z_tilt_correction == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1 == 0.0)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos2 == 0.0)
 
 
 class StateMoveWorkspaceLOQTest(unittest.TestCase):
@@ -113,12 +112,12 @@ class StateMoveBuilderTest(unittest.TestCase):
         # Assert
         state = builder.build()
         self.assertTrue(state.center_position == value)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].x_translation_correction == value)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].detector_name_short == "HAB")
-        self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == "main-detector-bank")
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction == value)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short == "HAB")
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name == "main-detector-bank")
         self.assertTrue(state.monitor_names[str(2)] == "monitor2")
         self.assertTrue(len(state.monitor_names) == 2)
-        self.assertTrue(state.detectors[SANSConstants.low_angle_bank].sample_centre_pos1 == value)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 == value)
 
     def test_that_state_for_sans2d_can_be_built(self):
         # Arrange
@@ -135,9 +134,9 @@ class StateMoveBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].x_translation_correction == value)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].detector_name_short == "front")
-        self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == "rear-detector")
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction == value)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short == "front")
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name == "rear-detector")
         self.assertTrue(state.monitor_names[str(7)] == "monitor7")
         self.assertTrue(len(state.monitor_names) == 8)
 
@@ -156,9 +155,9 @@ class StateMoveBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].x_translation_correction == value)
-        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].detector_name_short == "front")
-        self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == "DetectorBench")
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction == value)
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short == "front")
+        self.assertTrue(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name == "DetectorBench")
         self.assertTrue(state.monitor_names[str(5)] == "monitor5")
         self.assertTrue(len(state.monitor_names) == 10)
 

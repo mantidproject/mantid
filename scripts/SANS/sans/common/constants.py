@@ -1,50 +1,42 @@
-""" The SANSConstants class holds constants which are used in the SANS reducer framework."""
+""" These constants  are used in the SANS reducer framework. We want a central place for them."""
 
 # pylint: disable=too-few-public-methods
 
+# ----------------------------------------
+# Proeprty names for Algorithms
+# ---------------------------------------
+MONITOR_SUFFIX = "_monitors"
+INPUT_WORKSPACE = "InputWorkspace"
 
-class SANSConstants(object):
-    """
-    The SANSConstants object is a convenient collection of constants which are used during the SANS reduction.
-    """
-    monitor_suffix = "_monitors"
-    input_workspace = "InputWorkspace"
+FILE_NAME = "Filename"
 
-    file_name = "Filename"
+OUTPUT_WORKSPACE = "OutputWorkspace"
+OUTPUT_WORKSPACE_GROUP = OUTPUT_WORKSPACE + "_"
 
-    output_workspace = "OutputWorkspace"
-    output_workspace_group = output_workspace + "_"
+OUTPUT_MONITOR_WORKSPACE = "MonitorWorkspace"
+OUTPUT_MONITOR_WORKSPACE_GROUP = OUTPUT_MONITOR_WORKSPACE + "_"
 
-    output_monitor_workspace = "MonitorWorkspace"
-    output_monitor_workspace_group = output_monitor_workspace + "_"
+WORKSPACE = "Workspace"
+EMPTY_NAME = "dummy"
 
-    workspace = "Workspace"
 
-    dummy = "dummy"
+# ----------------------------------------
+# Other
+# ---------------------------------------
+SANS_SUFFIX = "sans"
+TRANS_SUFFIX = "trans"
 
-    sans_suffix = "sans"
-    trans_suffix = "trans"
+high_angle_bank = "HAB"
+low_angle_bank = "LAB"
 
-    high_angle_bank = "HAB"
-    low_angle_bank = "LAB"
+SANS2D = "SANS2D"
+LARMOR = "LARMOR"
+LOQ = "LOQ"
 
-    sans2d = "SANS2D"
-    larmor = "LARMOR"
-    loq = "LOQ"
+REDUCED_WORKSPACE_NAME_IN_LOGS = "reduced_workspace_name"
+SANS_FILE_TAG = "sans_file_tag"
+REDUCED_CAN_TAG = "reduced_can_hash"
 
-    reduced_workspace_name_in_logs = "reduced_workspace_name"
-    sans_file_tag = "sans_file_tag"
-    reduced_can_tag = "reduced_can_hash"
+ALL_PERIODS = 0
 
-    # String names for SANSType
-    rebin = "Rebin"
-    intperpolating_rebin = "InterpolatingRebin"
-    range_step_lin = "lin"
-    range_step_log = "log"
-    sample = "Sample"
-    can = "Can"
-
-    ALL_PERIODS = 0
-
-    class Calibration(object):
-        calibration_workspace_tag = "sans_applied_calibration_file"
+CALIBRATION_WORKSPACE_TAG = "sans_applied_calibration_file"

@@ -2,7 +2,7 @@
 # pylint: disable=too-few-public-methods
 
 
-class SANSConfigurations(object):
+class Configurations(object):
 
     class LARMOR(object):
         # The full wavelength range of the instrument

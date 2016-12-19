@@ -6,7 +6,7 @@ from sans.state.data import (get_data_builder)
 from sans.state.calculate_transmission import StateCalculateTransmission
 from sans.state.normalize_to_monitor import StateNormalizeToMonitor
 from sans.state.wavelength_and_pixel_adjustment import StateWavelengthAndPixelAdjustment
-from sans.common.sans_type import (SANSFacility, SANSInstrument, FitType)
+from sans.common.enums import (SANSFacility, SANSInstrument, FitType)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -3,8 +3,7 @@ import mantid
 
 from sans.state.mask import (StateMask, get_mask_builder)
 from sans.state.data import get_data_builder
-from sans.common.constants import SANSConstants
-from sans.common.sans_type import (SANSFacility, SANSInstrument)
+from sans.common.enums import (SANSFacility, SANSInstrument, DetectorType)
 from state_test_helper import (assert_validate_error, assert_raises_nothing)
 
 
@@ -55,8 +54,10 @@ class StateMaskTest(unittest.TestCase):
                              "bin_mask_start": [1., 2., 4.], "bin_mask_stop": [2., 3., 5.],
                              "detector_name": "name", "detector_name_short": "name_short"}
 
-        StateMaskTest._set_detector(state, detector_settings, detector_entries, SANSConstants.low_angle_bank)
-        StateMaskTest._set_detector(state, detector_settings, detector_entries, SANSConstants.high_angle_bank)
+        StateMaskTest._set_detector(state, detector_settings, detector_entries,
+                                    DetectorType.to_string(DetectorType.LAB))
+        StateMaskTest._set_detector(state, detector_settings, detector_entries,
+                                    DetectorType.to_string(DetectorType.HAB))
 
         return state
 
@@ -214,7 +215,7 @@ class StateMaskBuilderTest(unittest.TestCase):
         self.assertTrue(state.bin_mask_general_stop[0] == end_time[0])
         self.assertTrue(state.bin_mask_general_stop[1] == end_time[1])
 
-        strip_mask = state.detectors[SANSConstants.low_angle_bank].single_vertical_strip_mask
+        strip_mask = state.detectors[DetectorType.to_string(DetectorType.LAB)].single_vertical_strip_mask
         self.assertTrue(len(strip_mask) == 3)
         self.assertTrue(strip_mask[2] == 3)
 

@@ -4,7 +4,7 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, PositiveFloatParameter, ClassTypeParameter, rename_descriptor_names)
-from sans.common.sans_type import (RebinType, RangeStepType, SANSInstrument)
+from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 from sans.state.automatic_setters import (automatic_setters)
 

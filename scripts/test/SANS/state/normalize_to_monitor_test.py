@@ -4,7 +4,7 @@ import mantid
 from sans.state.normalize_to_monitor import (StateNormalizeToMonitor, StateNormalizeToMonitorLOQ,
                                              get_normalize_to_monitor_builder)
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (RebinType, RangeStepType, SANSFacility)
+from sans.common.enums import (RebinType, RangeStepType, SANSFacility)
 from state_test_helper import assert_validate_error, assert_raises_nothing
 
 

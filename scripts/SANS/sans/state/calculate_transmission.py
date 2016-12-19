@@ -7,14 +7,13 @@ import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter, BoolParameter,
                                    PositiveFloatParameter, ClassTypeParameter, FloatParameter, DictParameter,
                                    StringListParameter, PositiveFloatWithNoneParameter)
-from sans.common.sans_type import (RebinType, RangeStepType, FitType, DataType, convert_reduction_data_type_to_string)
-from sans.common.configurations import SANSConfigurations
+from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
+from sans.common.configurations import Configurations
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message,
                                         is_not_none_and_first_larger_than_second, one_is_none)
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.common.sans_type import SANSInstrument
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -110,10 +109,12 @@ class StateCalculateTransmission(StateBase):
 
     def __init__(self):
         super(StateCalculateTransmission, self).__init__()
+        # The keys of this dictionaries are the spectrum number of the monitors (as a string)
         self.background_TOF_monitor_start = {}
         self.background_TOF_monitor_stop = {}
-        self.fit = {convert_reduction_data_type_to_string(DataType.Sample): StateTransmissionFit(),
-                    convert_reduction_data_type_to_string(DataType.Can): StateTransmissionFit()}
+
+        self.fit = {DataType.to_string(DataType.Sample): StateTransmissionFit(),
+                    DataType.to_string(DataType.Can): StateTransmissionFit()}
         self.use_full_wavelength_range = False
 
     def validate(self):  # noqa
@@ -263,8 +264,8 @@ class StateCalculateTransmission(StateBase):
         # -----
         # Fit
         # -----
-        self.fit[convert_reduction_data_type_to_string(DataType.Sample)].validate()
-        self.fit[convert_reduction_data_type_to_string(DataType.Can)].validate()
+        self.fit[DataType.to_string(DataType.Sample)].validate()
+        self.fit[DataType.to_string(DataType.Can)].validate()
 
         if is_invalid:
             raise ValueError("StateCalculateTransmission: The provided inputs are illegal. "
@@ -275,12 +276,12 @@ class StateCalculateTransmissionLOQ(StateCalculateTransmission):
     def __init__(self):
         super(StateCalculateTransmissionLOQ, self).__init__()
         # Set the LOQ full wavelength range
-        self.wavelength_full_range_low = SANSConfigurations.LOQ.wavelength_full_range_low
-        self.wavelength_full_range_high = SANSConfigurations.LOQ.wavelength_full_range_high
+        self.wavelength_full_range_low = Configurations.LOQ.wavelength_full_range_low
+        self.wavelength_full_range_high = Configurations.LOQ.wavelength_full_range_high
 
         # Set the LOQ default range for prompt peak correction
-        self.prompt_peak_correction_min = SANSConfigurations.LOQ.prompt_peak_correction_min
-        self.prompt_peak_correction_max = SANSConfigurations.LOQ.prompt_peak_correction_max
+        self.prompt_peak_correction_min = Configurations.LOQ.prompt_peak_correction_min
+        self.prompt_peak_correction_max = Configurations.LOQ.prompt_peak_correction_max
 
     def validate(self):
         super(StateCalculateTransmissionLOQ, self).validate()
@@ -290,8 +291,8 @@ class StateCalculateTransmissionSANS2D(StateCalculateTransmission):
     def __init__(self):
         super(StateCalculateTransmissionSANS2D, self).__init__()
         # Set the LOQ full wavelength range
-        self.wavelength_full_range_low = SANSConfigurations.SANS2D.wavelength_full_range_low
-        self.wavelength_full_range_high = SANSConfigurations.SANS2D.wavelength_full_range_high
+        self.wavelength_full_range_low = Configurations.SANS2D.wavelength_full_range_low
+        self.wavelength_full_range_high = Configurations.SANS2D.wavelength_full_range_high
 
     def validate(self):
         super(StateCalculateTransmissionSANS2D, self).validate()
@@ -301,8 +302,8 @@ class StateCalculateTransmissionLARMOR(StateCalculateTransmission):
     def __init__(self):
         super(StateCalculateTransmissionLARMOR, self).__init__()
         # Set the LOQ full wavelength range
-        self.wavelength_full_range_low = SANSConfigurations.LARMOR.wavelength_full_range_low
-        self.wavelength_full_range_high = SANSConfigurations.LARMOR.wavelength_full_range_high
+        self.wavelength_full_range_low = Configurations.LARMOR.wavelength_full_range_low
+        self.wavelength_full_range_high = Configurations.LARMOR.wavelength_full_range_high
 
     def validate(self):
         super(StateCalculateTransmissionLARMOR, self).validate()

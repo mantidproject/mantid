@@ -4,8 +4,7 @@ import mantid
 from sans.state.wavelength_and_pixel_adjustment import (StateWavelengthAndPixelAdjustment,
                                                         get_wavelength_and_pixel_adjustment_builder)
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (RebinType, RangeStepType, DetectorType, convert_detector_type_to_string,
-                                   SANSFacility, SANSInstrument)
+from sans.common.enums import (RebinType, RangeStepType, DetectorType, SANSFacility, SANSInstrument)
 from state_test_helper import assert_validate_error, assert_raises_nothing
 
 
@@ -38,8 +37,8 @@ class StateWavelengthAndPixelAdjustmentTest(unittest.TestCase):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-class StateReductionBuilderTest(unittest.TestCase):
-    def test_that_reduction_state_can_be_built(self):
+class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
+    def test_that_wavelength_and_pixel_adjustment_state_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
         data_builder = get_data_builder(facility)
@@ -60,10 +59,10 @@ class StateReductionBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertTrue(state.adjustment_files[convert_detector_type_to_string(
-                                                                     DetectorType.Hab)].pixel_adjustment_file == "test")
-        self.assertTrue(state.adjustment_files[convert_detector_type_to_string(
-                                                              DetectorType.Hab)].wavelength_adjustment_file == "test2")
+        self.assertTrue(state.adjustment_files[DetectorType.to_string(
+                                                                     DetectorType.HAB)].pixel_adjustment_file == "test")
+        self.assertTrue(state.adjustment_files[DetectorType.to_string(
+                                                              DetectorType.HAB)].wavelength_adjustment_file == "test2")
         self.assertTrue(state.wavelength_low == 1.5)
         self.assertTrue(state.wavelength_high == 2.7)
         self.assertTrue(state.wavelength_step == 0.5)

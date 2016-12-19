@@ -3,7 +3,7 @@ import mantid
 
 from sans.state.slice_event import (StateSliceEvent, get_slice_event_builder)
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (SANSFacility, SANSInstrument)
+from sans.common.enums import (SANSFacility, SANSInstrument)
 from state_test_helper import (assert_validate_error)
 
 

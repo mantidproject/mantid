@@ -4,7 +4,7 @@
 import copy
 from sans.state.state_base import (StateBase, BoolParameter, StringParameter,
                                    ClassTypeListParameter, rename_descriptor_names)
-from sans.common.sans_type import (SaveType, SANSInstrument)
+from sans.common.enums import (SaveType, SANSInstrument)
 from sans.state.automatic_setters import (automatic_setters)
 
 

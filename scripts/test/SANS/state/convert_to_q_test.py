@@ -3,7 +3,7 @@ import mantid
 
 from sans.state.convert_to_q import (StateConvertToQ, get_convert_to_q_builder)
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (RangeStepType, ReductionDimensionality, SANSFacility)
+from sans.common.enums import (RangeStepType, ReductionDimensionality, SANSFacility)
 from state_test_helper import (assert_validate_error, assert_raises_nothing)
 
 

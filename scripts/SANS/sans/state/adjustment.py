@@ -10,7 +10,7 @@ from sans.state.calculate_transmission import StateCalculateTransmission
 from sans.state.normalize_to_monitor import StateNormalizeToMonitor
 from sans.state.wavelength_and_pixel_adjustment import StateWavelengthAndPixelAdjustment
 from sans.state.automatic_setters import (automatic_setters)
-from sans.common.sans_type import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -7,8 +7,7 @@ import copy
 
 from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
                                    StringParameter, rename_descriptor_names)
-from sans.common.constants import (SANSConstants)
-from sans.common.sans_type import (Coordinates, CanonicalCoordinates, SANSInstrument)
+from sans.common.enums import (Coordinates, CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
@@ -90,8 +89,8 @@ class StateMove(StateBase):
         self.sample_offset_direction = CanonicalCoordinates.Z
 
         # Setup the detectors
-        self.detectors = {SANSConstants.low_angle_bank: StateMoveDetector(),
-                          SANSConstants.high_angle_bank: StateMoveDetector()}
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
+                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
 
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up

@@ -4,8 +4,7 @@ import mantid
 from sans.state.calculate_transmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
                                                get_calculate_transmission_builder)
 from sans.state.data import get_data_builder
-from sans.common.sans_type import (RebinType, RangeStepType, FitType, DataType, convert_reduction_data_type_to_string,
-                                   SANSFacility)
+from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility)
 from state_test_helper import assert_validate_error, assert_raises_nothing
 
 
@@ -51,9 +50,9 @@ class StateCalculateTransmissionTest(unittest.TestCase):
         if fit_entries is None:
             fit_entries = {}
         StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries,
-                                                convert_reduction_data_type_to_string(DataType.Sample))
+                                                DataType.to_string(DataType.Sample))
         StateCalculateTransmissionTest._set_fit(state, fit_settings, fit_entries,
-                                                convert_reduction_data_type_to_string(DataType.Can))
+                                                DataType.to_string(DataType.Can))
         return state
 
     @staticmethod
@@ -269,16 +268,16 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         self.assertTrue(state.background_TOF_roi_start == 1.4)
         self.assertTrue(state.background_TOF_roi_stop == 34.4)
 
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Sample)].fit_type is FitType.Linear)
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Sample)].polynomial_order == 0)
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Sample)].wavelength_low == 10.)
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Sample)].wavelength_high == 20.)
+        self.assertTrue(state.fit[DataType.to_string(DataType.Sample)].fit_type is FitType.Linear)
+        self.assertTrue(state.fit[DataType.to_string(DataType.Sample)].polynomial_order == 0)
+        self.assertTrue(state.fit[DataType.to_string(DataType.Sample)].wavelength_low == 10.)
+        self.assertTrue(state.fit[DataType.to_string(DataType.Sample)].wavelength_high == 20.)
 
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Can)].fit_type is
+        self.assertTrue(state.fit[DataType.to_string(DataType.Can)].fit_type is
                         FitType.Polynomial)
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Can)].polynomial_order == 3)
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Can)].wavelength_low == 10.)
-        self.assertTrue(state.fit[convert_reduction_data_type_to_string(DataType.Can)].wavelength_high == 20.)
+        self.assertTrue(state.fit[DataType.to_string(DataType.Can)].polynomial_order == 3)
+        self.assertTrue(state.fit[DataType.to_string(DataType.Can)].wavelength_low == 10.)
+        self.assertTrue(state.fit[DataType.to_string(DataType.Can)].wavelength_high == 20.)
 
 if __name__ == '__main__':
     unittest.main()

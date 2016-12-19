@@ -7,8 +7,8 @@ import copy
 
 from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter,
                                    ClassTypeParameter, rename_descriptor_names)
-from sans.common.sans_type import (SANSInstrument, SANSFacility)
-from sans.common.constants import SANSConstants
+from sans.common.enums import (SANSInstrument, SANSFacility)
+from sans.common.constants import ALL_PERIODS
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.state.automatic_setters import automatic_setters
@@ -19,7 +19,7 @@ from sans.state.automatic_setters import automatic_setters
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateData(StateBase):
-    ALL_PERIODS = SANSConstants.ALL_PERIODS
+    ALL_PERIODS = ALL_PERIODS
     sample_scatter = StringParameter()
     sample_scatter_period = PositiveIntegerParameter()
     sample_transmission = StringParameter()
