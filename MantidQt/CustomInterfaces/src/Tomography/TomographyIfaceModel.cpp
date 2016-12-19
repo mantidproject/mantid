@@ -1,18 +1,15 @@
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
 #include <Poco/Path.h>
-#include <Poco/Pipe.h>
-#include <Poco/PipeStream.h>
-#include <Poco/Process.h>
-#include <Poco/StreamCopier.h>
-
-#include <QMutex>
 
 #ifndef _WIN32
 // This is exclusively for kill/waitpid (interim solution, see below)
@@ -338,50 +335,53 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
  * --params..
  * - remote only has the script path: /scriptPathOnRemote/ --params..
  *
- * @param comp Compute resource for which the command line is being prepared
+ * @param local Is the resource local or remote
  * @param runnable Path to a runnable application (script, python module, etc.)
- * @param opt Command line options to the application
+ * @param args A vector that contains all the arguments
+ * @param allOpts The concatenated arguments in a single string
  */
-void TomographyIfaceModel::makeRunnableWithOptions(
-    const std::string &comp, std::string &runnable,
-    std::vector<std::string> &opt) const {
-
+void TomographyIfaceModel::prepareSubmissionArguments(
+    const bool local, std::string &runnable, std::vector<std::string> &args,
+    std::string &allOpts) {
   if (!m_currentToolSettings) {
     throw std::invalid_argument("Settings for tool not set up");
   }
-
   const std::string tool = usingTool();
-
   const std::string cmd = m_currentToolSettings->toCommand();
-
-  const bool local = (g_LocalResourceName == comp) ? true : false;
 
   std::string longOpt;
   // this gets the runnable from the whole string
   splitCmdLine(cmd, runnable, longOpt);
-  // Special case. Just pass on user inputs.
-  // this stops from appending all the filters and other options
+
+  // this is discarded for all tools but the custom command
+  std::string trailingCommands;
+  if (local) {
+    std::string execScriptPath;
+    splitCmdLine(longOpt, execScriptPath, trailingCommands);
+    args.emplace_back(execScriptPath);
+  }
+
   if (tool == g_customCmdTool) {
-    opt.resize(1);
-    // this will pass on all the arguments as a single member
-    opt[0] = longOpt;
+    // if it's local we need to append the trailingCommands, as the
+    // external interpreter and script path are already appended, the script
+    // path has to be in a separate argument member otherwise running the
+    // external interpreter fails if remote we just want to append all of the
+    // options, the script path is already appended
+    args.emplace_back(local ? trailingCommands : longOpt);
+    allOpts = constructSingleStringFromVector(args);
     return;
   }
 
-  if (local) {
-    std::string execScriptPath;
+  // appends the additional options tool name, algorithm name, filters, etc
+  makeTomoRecScriptOptions(local, args);
 
-    // this variable holds the input paths, but is discarded for now
-    // until the command line building overhaul
-    std::string discardedInputPaths;
-    // this gets the path to the python script tomo_reconstruct.py
-    splitCmdLine(longOpt, execScriptPath, discardedInputPaths);
+  checkIfToolIsSetupProperly(tool, cmd, args);
 
-    checkIfToolIsSetupProperly(tool, cmd);
-    opt.emplace_back(execScriptPath);
-  }
+  // used for remote submission
+  allOpts = constructSingleStringFromVector(args);
 
-  makeTomoRecScriptOptions(local, opt);
+  logMsg("Running " + usingTool() + ", with binary: " + runnable +
+         ", with parameters: " + allOpts);
 }
 
 /**
@@ -438,42 +438,8 @@ std::string TomographyIfaceModel::constructSingleStringFromVector(
   return allOpts;
 }
 
-/** Handling the job submission request relies on a submit algorithm.
- * @param compRes The resource to which the request will be made
- */
-void TomographyIfaceModel::doSubmitReconstructionJob(
-    const std::string &compRes) {
-  std::string run;
-  std::vector<std::string> args;
-  try {
-    makeRunnableWithOptions(compRes, run, args);
-  } catch (std::exception &e) {
-    g_log.error() << "Could not prepare the requested reconstruction job "
-                     "submission. There was an error: " +
-                         std::string(e.what());
-    throw;
-  }
-
-  if (run.empty()) {
-    throw std::runtime_error(
-        "The script or executable to run is not defined "
-        "(empty string). You need to setup the reconstruction tool.");
-  }
-
-  std::string allOpts = constructSingleStringFromVector(args);
-
-  logMsg("Running " + usingTool() + ", with binary: " + run +
-         ", with parameters: " + allOpts);
-
-  if (g_LocalResourceName == compRes) {
-    doRunReconstructionJobLocal(run, allOpts, args);
-  } else {
-    doRunReconstructionJobRemote(compRes, run, allOpts);
-  }
-}
-
-void TomographyIfaceModel::doRunReconstructionJobRemote(
-    const std::string &compRes, const std::string &run,
+void TomographyIfaceModel::doRemoteRunReconstructionJob(
+    const std::string &compRes, const std::string &runnable,
     const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -496,7 +462,7 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
   submitAlg->setProperty("ComputeResource", compRes);
   submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
   submitAlg->setProperty("TransactionID", tid);
-  submitAlg->setProperty("ScriptName", run);
+  submitAlg->setProperty("ScriptName", runnable);
   submitAlg->setProperty("ScriptParams", allOpts);
   try {
     submitAlg->execute();
@@ -507,55 +473,35 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
   }
 }
 
-void TomographyIfaceModel::doRunReconstructionJobLocal(
-    const std::string &run, const std::string &allOpts,
-    const std::vector<std::string> &args) {
+/** Starts the local thread with the external reconstruction process
+ * @param runnable Path to a runnable application (script, python module, etc.)
+ * @param args A vector that contains all the arguments
+ * @param allOpts The concatenated arguments in a single string
+ * @param thread This thread will be started after the worker is set up with the
+ *    runnable and the arguments
+ * @param worker The worker will only be set up with the runnable and arguments
+ */
+void TomographyIfaceModel::doLocalRunReconstructionJob(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts, TomographyThread &thread,
+    TomographyProcess &worker) {
 
-  // initialise to 0, if the launch fails then the id will not be changed
-  Poco::Process::PID pid = 0;
-  // Poco::Pipe outPipe;
-  // Poco::Pipe errPipe;
-  try {
-    Poco::ProcessHandle handle = Poco::Process::launch(run, args);
-    pid = handle.id();
-  } catch (Poco::SystemException &sexc) {
-    g_log.error() << "Execution failed. Could not run the tool. Error details: "
-                  << std::string(sexc.what());
-  }
+  // Can only run one reconstruction at a time
+  // Qt doesn't use exceptions so we can't make sure it ran here
+  worker.setup(runnable, args, allOpts);
+  thread.start();
+}
 
+void TomographyIfaceModel::addJobToStatus(const qint64 pid,
+                                          const std::string &runnable,
+                                          const std::string &allOpts) {
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
   info.id = boost::lexical_cast<std::string>(pid);
   info.name = pid > 0 ? "Mantid_Local" : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
-  info.cmdLine = run + " " + allOpts;
+  info.cmdLine = runnable + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
-
   doRefreshJobsInfo(g_LocalResourceName);
-}
-
-/** Converts the pipes to strings and prints them into the mantid logger stream
-*
-* @param outPipe Poco::Pipe that holds the output stream of the process
-* @param errPipe Poco::Pipe that holds the error stream of the process
-*/
-void TomographyIfaceModel::printProcessStreamsToMantidLog(
-    const Poco::Pipe &outPipe, const Poco::Pipe &errPipe) {
-  // if the launch is successful then print output streams
-  // into the g_log so the user can see the information/error
-  Poco::PipeInputStream outstr(outPipe);
-  Poco::PipeInputStream errstr(errPipe);
-  std::string outString;
-  std::string errString;
-  Poco::StreamCopier::copyToString(outstr, outString);
-  Poco::StreamCopier::copyToString(errstr, errString);
-
-  // print normal output stream if not empty
-  if (!outString.empty())
-    g_log.information(outString);
-
-  // print error output stream if not empty
-  if (!errString.empty())
-    g_log.error(errString);
 }
 
 void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
@@ -611,6 +557,17 @@ void TomographyIfaceModel::refreshLocalJobsInfo() {
       job.status = "Running";
     } else {
       job.status = "Done";
+    }
+  }
+}
+
+void TomographyIfaceModel::updateProcessInJobList(const qint64 pid,
+                                                  const int exitCode) {
+  // cast to string from qint64 so we can compare
+  const std::string processPID = std::to_string(pid);
+  for (auto &job : m_jobsStatusLocal) {
+    if (job.id == processPID && exitCode == 1) {
+      job.status = "Exit";
     }
   }
 }
@@ -689,9 +646,9 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  *
  * @return running status
  */
-bool TomographyIfaceModel::processIsRunning(int pid) {
+bool TomographyIfaceModel::processIsRunning(qint64 pid) const {
 #ifdef _WIN32
-  HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+  HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, static_cast<int>(pid));
   DWORD code;
   BOOL rc = GetExitCodeProcess(handle, &code);
   CloseHandle(handle);
@@ -700,8 +657,9 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
   // zombie/defunct processes
   while (waitpid(-1, 0, WNOHANG) > 0) {
   }
-  return (0 == kill(pid, 0));
+  return (0 == kill(static_cast<int>(pid), 0));
 #endif
+  // return Poco::Process::isRunning(pid);
 }
 
 /**
@@ -711,10 +669,12 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
  *
  * @param tool Name of the tool this warning applies to
  * @param cmd command/script/executable derived from the settings
+ * @param args All the arguments for the run
  */
 bool TomographyIfaceModel::checkIfToolIsSetupProperly(
-    const std::string &tool, const std::string &cmd) const {
-  if (tool.empty() || cmd.empty()) {
+    const std::string &tool, const std::string &cmd,
+    const std::vector<std::string> &args) const {
+  if (tool.empty() || cmd.empty() || args.empty()) {
     const std::string detail =
         "Please define the settings of this tool. "
         "You have not defined any settings for this tool: " +
@@ -733,7 +693,7 @@ bool TomographyIfaceModel::checkIfToolIsSetupProperly(
  * when the code is reorganized to use the tool settings objects better.
  */
 void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
-                                        std::string &run,
+                                        std::string &runnable,
                                         std::string &opts) const {
   if (cmd.empty())
     return;
@@ -742,7 +702,7 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
   if (std::string::npos == pos)
     return;
 
-  run = cmd.substr(0, pos);
+  runnable = cmd.substr(0, pos);
   opts = cmd.substr(pos + 1);
 }
 
@@ -807,8 +767,10 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
   }
 }
 
-void TomographyIfaceModel::logMsg(const std::string &msg) {
-  g_log.notice() << msg << '\n';
+void TomographyIfaceModel::logMsg(const std::string &msg) { g_log.notice(msg); }
+
+void TomographyIfaceModel::logErrMsg(const std::string &msg) {
+  g_log.error(msg);
 }
 
 /**

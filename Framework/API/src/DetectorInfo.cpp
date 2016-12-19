@@ -174,6 +174,11 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
   }
 }
 
+/// Return a const reference to the detector with given index.
+const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
+  return getDetector(index);
+}
+
 /// Returns the source position.
 Kernel::V3D DetectorInfo::sourcePosition() const {
   cacheSource();

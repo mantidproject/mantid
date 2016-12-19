@@ -1200,7 +1200,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
 
   // if there's a comment in the packet, log it at the info level
   const std::string &comment = pkt.comment();
-  if (comment.size() > 0) {
+  if (!comment.empty()) {
     g_log.information() << "Annotation: " << comment << '\n';
   }
 

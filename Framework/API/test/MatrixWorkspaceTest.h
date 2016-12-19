@@ -263,8 +263,10 @@ public:
     }
 
     // Mask a spectra
-    workspace->maskWorkspaceIndex(1);
-    workspace->maskWorkspaceIndex(2);
+    workspace->getSpectrum(1).clearData();
+    workspace->getSpectrum(2).clearData();
+    workspace->mutableSpectrumInfo().setMasked(1, true);
+    workspace->mutableSpectrumInfo().setMasked(2, true);
 
     for (int i = 0; i < numHist; ++i) {
       double expectedValue(0.0);
@@ -292,8 +294,10 @@ public:
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
-    workspace->maskWorkspaceIndex(1);
-    workspace->maskWorkspaceIndex(2);
+    workspace->getSpectrum(1).clearData();
+    workspace->getSpectrum(2).clearData();
+    workspace->mutableSpectrumInfo().setMasked(1, true);
+    workspace->mutableSpectrumInfo().setMasked(2, true);
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {

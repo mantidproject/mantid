@@ -655,6 +655,7 @@ set ( TEST_FILES
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateResolutionTest.h
+	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h

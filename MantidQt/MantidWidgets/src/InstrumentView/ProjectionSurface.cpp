@@ -316,11 +316,15 @@ void ProjectionSurface::updateView(bool picking) {
 }
 
 void ProjectionSurface::updateDetectors() {
+  // updating detectors should not reset the view rect
+  // cache the value here are reapply after updating the detectors
+  auto viewRectCache = m_viewRect;
   clear();
   this->init();
   // if integration range in the instrument actor has changed
   // update visiblity of peak markers
   setPeakVisibility();
+  m_viewRect = viewRectCache;
 }
 
 /// Send a redraw request to the surface owner

@@ -2,6 +2,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -255,7 +256,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
 void LoadVulcanCalFile::setupMaskWorkspace() {
 
   // Skip if bad pixel file is not given
-  if (m_badPixFilename.size() == 0)
+  if (m_badPixFilename.empty())
     return;
 
   // Open file
@@ -288,9 +289,11 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
 
   // Mask workspace index
   std::ostringstream msg;
+  auto &spectrumInfo = m_maskWS->mutableSpectrumInfo();
   for (size_t i = 0; i < m_maskWS->getNumberHistograms(); ++i) {
     if (m_maskWS->readY(i)[0] > 0.5) {
-      m_maskWS->maskWorkspaceIndex(i);
+      m_maskWS->getSpectrum(i).clearData();
+      spectrumInfo.setMasked(i, true);
       m_maskWS->dataY(i)[0] = 1.0;
       msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->readY(i)[0]
           << "\n";
@@ -628,6 +631,9 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
   int n, udet, select, group;
   double n_d, udet_d, offset, select_d, group_d;
 
+  SpectrumInfo *maskSpectrumInfo{nullptr};
+  if (maskWS)
+    maskSpectrumInfo = &maskWS->mutableSpectrumInfo();
   std::string str;
   while (getline(grFile, str)) {
     if (str.empty() || str[0] == '#')
@@ -674,7 +680,8 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
 
         if (select <= 0) {
           // Not selected, then mask this detector
-          maskWS->maskWorkspaceIndex(wi);
+          maskWS->getSpectrum(wi).clearData();
+          maskSpectrumInfo->setMasked(wi, true);
           maskWS->dataY(wi)[0] = 1.0;
         } else {
           // Selected, set the value to be 0

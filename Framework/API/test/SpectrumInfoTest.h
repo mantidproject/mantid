@@ -417,6 +417,61 @@ public:
     TS_ASSERT_THROWS(spectrumInfo.detector(0), std::out_of_range);
   }
 
+  void test_ExperimentInfo_basics() {
+    const ExperimentInfo expInfo(m_workspace);
+    const SpectrumInfo spectrumInfo(expInfo);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
+  void test_ExperimentInfo_from_grouped() {
+    const ExperimentInfo expInfo(m_grouped);
+    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 5);
+    const SpectrumInfo spectrumInfo(expInfo);
+    // We construct from a grouped workspace, but since that information is lost
+    // when constructing expInfo, so we should just see the masking of the
+    // underlying detectors.
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
+  void test_ExperimentInfo_grouped() {
+    ExperimentInfo expInfo(m_workspace);
+
+    // We cannot really test anything but a single group, since the grouping
+    // mechanism in ExperimentInfo is currently based on std::unordered_map, so
+    // we have no control over the order and thus cannot write asserts.
+    det2group_map mapping{{1, {1, 2}}};
+    expInfo.cacheDetectorGroupings(mapping);
+    const SpectrumInfo spectrumInfo(expInfo);
+    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
+
+    mapping = {{1, {1, 4}}};
+    expInfo.cacheDetectorGroupings(mapping);
+    const SpectrumInfo spectrumInfo2(expInfo);
+    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    TS_ASSERT_EQUALS(spectrumInfo2.isMasked(0), true);
+  }
+
+  void test_grouping_in_ExperimentInfo_ignored_for_MatrixWorkspace() {
+    det2group_map mapping{{1, {1, 2}}};
+    m_workspace.cacheDetectorGroupings(mapping);
+    TS_ASSERT_EQUALS(m_workspace.numberOfDetectorGroups(), 5);
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;

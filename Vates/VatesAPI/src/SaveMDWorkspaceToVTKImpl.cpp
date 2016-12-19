@@ -1,6 +1,5 @@
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/Normalization.h"
-
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 
@@ -18,6 +17,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
+#include "vtkCallbackCommand.h"
 #include "vtkFloatArray.h"
 #include "vtkNew.h"
 #include "vtkSmartPointer.h"
@@ -26,6 +26,7 @@
 #include "vtkXMLUnstructuredGridWriter.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/round.hpp>
 #include <memory>
 
 namespace {
@@ -60,7 +61,10 @@ namespace VATES {
 const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = "vts";
 const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = "vtu";
 
-SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() { setupMembers(); }
+SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent)
+    : m_progress(parent, 0.0, 1.0, 101) {
+  setupMembers();
+}
 
 /**
  * Save an MD workspace to a vts/vtu file.
@@ -195,6 +199,22 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
   return presenter;
 }
 
+void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
+                      void *clientData, void *vtkNotUsed(callData)) {
+  vtkXMLWriter *testFilter = dynamic_cast<vtkXMLWriter *>(caller);
+  if (!testFilter)
+    return;
+  const char *progressText = testFilter->GetProgressText();
+  if (progressText) {
+    reinterpret_cast<Kernel::ProgressBase *>(clientData)
+        ->report(boost::math::iround(testFilter->GetProgress() * 100.0),
+                 progressText);
+  } else {
+    reinterpret_cast<Kernel::ProgressBase *>(clientData)
+        ->report(boost::math::iround(testFilter->GetProgress() * 100.0));
+  }
+}
+
 /**
  * Write an unstructured grid or structured grid to a vtk file.
  * @param writer: a vtk xml writer
@@ -206,6 +226,10 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
     vtkXMLWriter *writer, vtkDataSet *dataSet, const std::string &filename,
     vtkXMLWriter::CompressorType compressor) const {
+  vtkNew<vtkCallbackCommand> progressCallback;
+  progressCallback->SetCallback(ProgressFunction);
+  writer->AddObserver(vtkCommand::ProgressEvent, progressCallback.GetPointer());
+  progressCallback->SetClientData(&m_progress);
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
   writer->SetCompressorType(compressor);

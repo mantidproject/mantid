@@ -521,16 +521,16 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
  *  @throw   NotFoundError If no detector is found for the detector ID given
  */
 IDetector_const_sptr
-Instrument::getDetectorG(const std::vector<detid_t> &det_ids) const {
+Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
   const size_t ndets(det_ids.size());
   if (ndets == 1) {
-    return this->getDetector(det_ids[0]);
+    return this->getDetector(*det_ids.begin());
   } else {
     boost::shared_ptr<DetectorGroup> det_group =
         boost::make_shared<DetectorGroup>();
     bool warn(false);
-    for (size_t i = 0; i < ndets; ++i) {
-      det_group->addDetector(this->getDetector(det_ids[i]), warn);
+    for (const auto detID : det_ids) {
+      det_group->addDetector(this->getDetector(detID), warn);
     }
     return det_group;
   }

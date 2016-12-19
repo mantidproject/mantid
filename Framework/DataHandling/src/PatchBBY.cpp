@@ -301,7 +301,7 @@ void PatchBBY::exec() {
   }
 
   std::string logContentNew = logContentNewBuffer.str();
-  if (logContentNew.size() == 0)
+  if (logContentNew.empty())
     throw std::invalid_argument("nothing to patch");
 
   // merge log content

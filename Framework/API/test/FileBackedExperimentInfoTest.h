@@ -117,8 +117,7 @@ public:
   void test_cacheDetectorGroupings() {
     auto fileBacked = createTestObject();
 
-    std::vector<Mantid::detid_t> group(2, 1);
-    group[1] = 2;
+    std::set<Mantid::detid_t> group{1, 2};
     Mantid::det2group_map mapping;
     mapping.emplace(1, group);
     fileBacked->cacheDetectorGroupings(mapping);
@@ -127,8 +126,7 @@ public:
   void test_getGroupMembers() {
     auto fileBacked = createTestObject();
 
-    std::vector<Mantid::detid_t> group(2, 1);
-    group[1] = 2;
+    std::set<Mantid::detid_t> group{1, 2};
     Mantid::det2group_map mapping;
     mapping.emplace(1, group);
     fileBacked->cacheDetectorGroupings(mapping);
@@ -140,6 +138,12 @@ public:
     auto fileBacked = createTestObject();
 
     TS_ASSERT(fileBacked->getDetectorByID(10100));
+  }
+
+  void test_detectorIDsInGroup() {
+    auto fileBacked = createTestObject();
+
+    TS_ASSERT_EQUALS(fileBacked->detectorIDsInGroup(0).size(), 1);
   }
 
   void test_ModeratorModelMethods() {

@@ -75,8 +75,7 @@ public:
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
   /// Returns the detector IDs that make up the group that this ID is part of
-  virtual const std::vector<detid_t> &
-  getGroupMembers(const detid_t detID) const;
+  virtual const std::set<detid_t> &getGroupMembers(const detid_t detID) const;
   /// Get a detector or detector group from an ID
   virtual Geometry::IDetector_const_sptr
   getDetectorByID(const detid_t detID) const;
@@ -162,6 +161,9 @@ public:
   const DetectorInfo &detectorInfo() const;
   DetectorInfo &mutableDetectorInfo();
 
+  virtual size_t numberOfDetectorGroups() const;
+  virtual const std::set<detid_t> &detectorIDsInGroup(const size_t index) const;
+
 protected:
   /// Called when instrument or parameter map is reset to notify child classes.
   virtual void invalidateInstrumentReferences() const {}
@@ -201,7 +203,11 @@ private:
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
   /// Detector grouping information
-  det2group_map m_detgroups;
+  mutable std::vector<std::set<detid_t>> m_detgroups;
+  mutable std::unordered_map<detid_t, size_t> m_det2group;
+  void cacheDefaultDetectorGrouping() const; // Not thread-safe
+  mutable std::once_flag m_defaultDetectorGroupingCached;
+
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
 
