@@ -53,8 +53,7 @@ public:
     TS_ASSERT_DELTA(0.0028357258, factor, 1e-8);
   }
 
-  void
-  test_Absorption_In_Sample_With_Hole_Container_Scatter_In_All_Segments() {
+  void test_Absorption_In_Sample_With_Hole_Container_Scatter_In_All_Segments() {
     using Mantid::Kernel::V3D;
     using namespace MonteCarloTesting;
     using namespace ::testing;

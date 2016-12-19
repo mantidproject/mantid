@@ -746,9 +746,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
     const double tolerance(1e-10);
-    TS_ASSERT_DELTA(-0.1 + 0.01*0.2, point.X(), tolerance);
-    TS_ASSERT_DELTA(-0.1 + 0.02*0.2, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-0.1 + 0.03*0.2, point.Z(), tolerance);
+    TS_ASSERT_DELTA(-0.1 + 0.01 * 0.2, point.X(), tolerance);
+    TS_ASSERT_DELTA(-0.1 + 0.02 * 0.2, point.Y(), tolerance);
+    TS_ASSERT_DELTA(-0.1 + 0.03 * 0.2, point.Z(), tolerance);
   }
 
   void testSolidAngleSphere()

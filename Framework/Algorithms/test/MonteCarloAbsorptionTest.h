@@ -118,7 +118,7 @@ public:
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
     const size_t middle_index(4);
-    
+
     TS_ASSERT_DELTA(0.0032600806, outputWS->y(0).front(), delta);
     TS_ASSERT_DELTA(0.00040160571, outputWS->y(0)[middle_index], delta);
     TS_ASSERT_DELTA(0.00027626768, outputWS->y(0).back(), delta);

@@ -35,7 +35,7 @@ public:
 
     MockRNG rng;
     auto mcabsorb = createTestObject();
-    // 3 random numbers per event expected    
+    // 3 random numbers per event expected
     EXPECT_CALL(rng, nextValue())
         .Times(Exactly(30))
         .WillRepeatedly(Return(0.5));

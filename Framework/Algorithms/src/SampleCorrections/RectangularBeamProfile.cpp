@@ -87,8 +87,8 @@ RectangularBeamProfile::defineActiveRegion(const API::Sample &sample) const {
   }
   // In the beam direction use the maximum sample extent other wise restrict
   // the active region to the width/height of beam
-  const auto & sampleMin(sampleBox.minPoint());
-  const auto & sampleMax(sampleBox.maxPoint());
+  const auto &sampleMin(sampleBox.minPoint());
+  const auto &sampleMax(sampleBox.maxPoint());
   V3D minPoint, maxPoint;
   minPoint[m_horIdx] = m_min[m_horIdx];
   maxPoint[m_horIdx] = m_min[m_horIdx] + m_width;
@@ -96,7 +96,7 @@ RectangularBeamProfile::defineActiveRegion(const API::Sample &sample) const {
   maxPoint[m_upIdx] = m_min[m_upIdx] + m_height;
   minPoint[m_beamIdx] = sampleMin[m_beamIdx];
   maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
-  
+
   return Geometry::BoundingBox(maxPoint.X(), maxPoint.Y(), maxPoint.Z(),
                                minPoint.X(), minPoint.Y(), minPoint.Z());
 }
