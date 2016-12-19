@@ -208,7 +208,7 @@ public:
   static FitMWTest *createSuite() { return new FitMWTest(); }
   static void destroySuite(FitMWTest *suite) {
     AnalysisDataService::Instance().clear();
-    delete suite; 
+    delete suite;
   }
 
   FitMWTest() {
@@ -815,7 +815,12 @@ public:
 
   void test_exclude() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { if (x >= 1.0 && x <= 2.0) return 2.0; return 1.0; }, 1, 0.0, 3., 0.5);
+        [](double x, int) {
+          if (x >= 1.0 && x <= 2.0)
+            return 2.0;
+          return 1.0;
+        },
+        1, 0.0, 3., 0.5);
 
     std::vector<double> exclude{1.0, 2.0};
     Fit fit;
@@ -847,7 +852,12 @@ public:
 
   void test_exclude_1() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { if (x >= 1.0 && x <= 2.0) return 2.0; return 1.0; }, 1, 0.0, 3., 0.5);
+        [](double x, int) {
+          if (x >= 1.0 && x <= 2.0)
+            return 2.0;
+          return 1.0;
+        },
+        1, 0.0, 3., 0.5);
 
     std::vector<double> exclude{-2.0, -1.0};
     Fit fit;
@@ -879,7 +889,12 @@ public:
 
   void test_exclude_2() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { if (x >= 1.0 && x <= 2.0) return 2.0; return 1.0; }, 1, 0.0, 3., 0.5);
+        [](double x, int) {
+          if (x >= 1.0 && x <= 2.0)
+            return 2.0;
+          return 1.0;
+        },
+        1, 0.0, 3., 0.5);
 
     std::vector<double> exclude{4.0, 5.0};
     Fit fit;
@@ -911,7 +926,12 @@ public:
 
   void test_exclude_3() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { if (x >= 1.0 && x <= 2.0) return 2.0; return 1.0; }, 1, 0.0, 3., 0.5);
+        [](double x, int) {
+          if (x >= 1.0 && x <= 2.0)
+            return 2.0;
+          return 1.0;
+        },
+        1, 0.0, 3., 0.5);
 
     std::vector<double> exclude{-2.0, -1.0, 4.0, 5.0};
     Fit fit;
@@ -985,20 +1005,26 @@ public:
     IFunction_sptr fun = fit.getProperty("Function");
     TS_ASSERT_EQUALS(fun->getParameter("A0"), 1);
 
-    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "out_Workspace");
     TS_ASSERT(out);
-    if (!out) return;
+    if (!out)
+      return;
 
     auto &diff = out->y(2);
-    for(size_t i = 0; i < diff.size(); ++i) {
+    for (size_t i = 0; i < diff.size(); ++i) {
       TS_ASSERT_EQUALS(diff[i], 0.0);
     }
-
   }
 
   void test_exclude_odd_number() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { if (x >= 1.0 && x <= 2.0) return 2.0; return 1.0; }, 1, 0.0, 3., 0.5);
+        [](double x, int) {
+          if (x >= 1.0 && x <= 2.0)
+            return 2.0;
+          return 1.0;
+        },
+        1, 0.0, 3., 0.5);
 
     std::vector<double> exclude{-2.0, -1.0, 4.0};
     Fit fit;
@@ -1013,7 +1039,6 @@ public:
     FitMW fitmw(&fit, "InputWorkspace");
     fitmw.declareDatasetProperties("", false);
     TS_ASSERT_THROWS(fitmw.createDomain(domain, values), std::runtime_error);
-
   }
 
   void test_exclude_sorted() {
