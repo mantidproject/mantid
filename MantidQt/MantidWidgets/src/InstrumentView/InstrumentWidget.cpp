@@ -1301,8 +1301,10 @@ void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
  */
 void InstrumentWidget::overlayShapesWorkspace(ITableWorkspace_sptr ws) {
   auto surface = getUnwrappedSurface();
-  surface->loadShapesFromTableWorkspace(ws);
-  updateInstrumentView();
+  if (surface) {
+    surface->loadShapesFromTableWorkspace(ws);
+    updateInstrumentView();
+  }
 }
 
 /**
@@ -1334,7 +1336,7 @@ boost::shared_ptr<UnwrappedSurface> InstrumentWidget::getUnwrappedSurface() {
   if (!surface) {
     QMessageBox::warning(
         this, "MantidPlot - Warning",
-        "Please change to an unwrapped view to see peak labels.");
+        "Please change to an unwrapped view to overlay a workspace.");
     return nullptr;
   }
   return surface;
