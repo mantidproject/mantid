@@ -108,6 +108,47 @@ class DirectILLReductionTest(unittest.TestCase):
     def tearDownClass(cls):
         mtd.clear()
 
+    def test_det_diagnostics_bad_elastic_intensity(self):
+        nHistograms = self._testIN5WS.getNumberHistograms()
+        noPeakIndices = [1, int(nHistograms / 6)]
+        highPeakIndices = [int(nHistograms / 3), nHistograms - 1]
+        for i in noPeakIndices:
+            ys = self._testIN5WS.dataY(i)
+            ys *= 0.01
+        for i in highPeakIndices:
+            ys = self._testIN5WS.dataY(i)
+            ys *= 5
+        outWSName = 'outWS'
+        diagnosticsWSName = 'diagnosticsWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Empty Container/Cadmium',
+            'IndexType': 'Detector ID',
+            'Monitor': '0',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'DetectorsAtL2': '128, 129',
+            'ElasticPeakDiagnosticsLowThreshold': 0.1,
+            'ElasticPeakDiagnosticsHighThreshold': 4.9,
+            'OutputDiagnosticsWorkspace': diagnosticsWSName,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        diagnosticsWS = mtd[diagnosticsWSName]
+        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName], diagnosticsWS)
+        self.assertEqual(diagnosticsWS.getNumberHistograms(),
+                         nHistograms - 1)
+        self.assertEqual(diagnosticsWS.blocksize(), 1)
+        shouldBeMasked = noPeakIndices + highPeakIndices
+        for i in range(diagnosticsWS.getNumberHistograms()):
+            originalI = i + 1  # Monitor has been extracted.
+            if originalI in shouldBeMasked:
+                self.assertEqual(diagnosticsWS.readY(i)[0], 1.0)
+            else:
+                self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
+        DeleteWorkspace(outWSName)
+        DeleteWorkspace(diagnosticsWS)
+
     def test_det_diagnostics_no_bad_detectors(self):
         outWSName = 'outWS'
         diagnosticsWSName = 'diagnostics'
@@ -123,16 +164,14 @@ class DirectILLReductionTest(unittest.TestCase):
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
-        ws = mtd[outWSName]
-        self._checkAlgorithmsInHistory(ws, 'MedianDetectorTest')
         diagnosticsWS = mtd[diagnosticsWSName]
-        self._checkAlgorithmsInHistory(diagnosticsWS, 'MedianDetectorTest')
+        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName], diagnosticsWS)
         self.assertEqual(diagnosticsWS.getNumberHistograms(),
                          self._testIN5WS.getNumberHistograms() - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
         for i in range(diagnosticsWS.getNumberHistograms()):
             self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
-        DeleteWorkspace(ws)
+        DeleteWorkspace(outWSName)
         DeleteWorkspace(diagnosticsWS)
 
     def test_det_diagnostics_noisy_background(self):
@@ -141,21 +180,23 @@ class DirectILLReductionTest(unittest.TestCase):
         for i in noisyWSIndices:
             ys = self._testIN5WS.dataY(i)
             ys *= 2
-        outWSName = 'diagnostics'
+        outWSName = 'outWS'
+        diagnosticsWSName = 'diagnostics'
         algProperties = {
             'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
             'IndexType': 'Detector ID',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'DetectorsAtL2': '128, 129',
             'NoisyBkgDiagnosticsHighThreshold': 1.9,
-            'OutputDiagnosticsWorkspace': outWSName,
-            'child': True,
+            'OutputDiagnosticsWorkspace': diagnosticsWSName,
             'rethrow': True
         }
-        alg = run_algorithm('DirectILLReduction', **algProperties)
-        diagnosticsWS = alg.getProperty('OutputDiagnosticsWorkspace').value
+        run_algorithm('DirectILLReduction', **algProperties)
+        diagnosticsWS = mtd[diagnosticsWSName]
+        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName], diagnosticsWS)
         self.assertEqual(diagnosticsWS.getNumberHistograms(),
                          nHistograms - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
@@ -165,43 +206,25 @@ class DirectILLReductionTest(unittest.TestCase):
                 self.assertEqual(diagnosticsWS.readY(i)[0], 1.0)
             else:
                 self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
+        DeleteWorkspace(outWSName)
+        DeleteWorkspace(diagnosticsWSName)
 
-    def test_det_diagnostics_bad_elastic_intensity(self):
-        nHistograms = self._testIN5WS.getNumberHistograms()
-        noPeakIndices = [1, int(nHistograms / 6)]
-        highPeakIndices = [int(nHistograms / 3), nHistograms - 1]
-        for i in noPeakIndices:
-            ys = self._testIN5WS.dataY(i)
-            ys *= 0.01
-        for i in highPeakIndices:
-            ys = self._testIN5WS.dataY(i)
-            ys *= 5
-        outWSName = 'diagnostics'
+    def test_det_diagnostics_output_when_disabled(self):
+        outWSName = 'outWS'
+        diagnosticsWSName = 'diagnosticsWS'
         algProperties = {
             'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
             'IndexType': 'Detector ID',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
-            'DetectorsAtL2': '128, 129',
-            'ElasticPeakDiagnosticsLowThreshold': 0.1,
-            'ElasticPeakDiagnosticsHighThreshold': 4.9,
-            'OutputDiagnosticsWorkspace': outWSName,
-            'child': True,
+            'Diagnostics': 'No Detector Diagnostics',
+            'OutputDiagnosticsWorkspace': diagnosticsWSName,
             'rethrow': True
         }
-        alg = run_algorithm('DirectILLReduction', **algProperties)
-        diagnosticsWS = alg.getProperty('OutputDiagnosticsWorkspace').value
-        self.assertEqual(diagnosticsWS.getNumberHistograms(),
-                         nHistograms - 1)
-        self.assertEqual(diagnosticsWS.blocksize(), 1)
-        shouldBeMasked = noPeakIndices + highPeakIndices
-        for i in range(diagnosticsWS.getNumberHistograms()):
-            originalI = i + 1  # Monitor has been extracted.
-            if originalI in shouldBeMasked:
-                self.assertEqual(diagnosticsWS.readY(i)[0], 1.0)
-            else:
-                self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertFalse(mtd.doesExist(diagnosticsWSName))
 
     def test_input_ws_not_deleted(self):
         outWSName = 'outWS'
@@ -306,6 +329,35 @@ class DirectILLReductionTest(unittest.TestCase):
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
         DeleteWorkspace(ws)
 
+    def test_user_mask(self):
+        numHistograms = self._testIN5WS.getNumberHistograms()
+        userMask = [0, int(3 * numHistograms / 5), numHistograms - 1]
+        maskString = '{0},'.format(userMask[0])
+        for i in userMask:
+            maskString += str(i) + ','
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Empty Container/Cadmium',
+            'IndexType': 'Detector ID',
+            'Monitor': '0',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'MaskedDetectors': maskString,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        outWS = mtd[outWSName]
+        self._checkAlgorithmsInHistory(outWS, 'MaskDetectors')
+        for i in range(outWS.getNumberHistograms()):
+            originalI = i + 1  # Monitor has been extracted.
+            if originalI in userMask:
+                self.assertTrue(outWS.getDetector(i).isMasked())
+            else:
+                self.assertFalse(outWS.getDetector(i).isMasked())
+        DeleteWorkspace(outWSName)
+
     def _checkAlgorithmsInHistory(self, ws, *arg):
         history = ws.getHistory()
         reductionHistory = history.getAlgorithmHistory(history.size() - 1)
@@ -313,6 +365,12 @@ class DirectILLReductionTest(unittest.TestCase):
         algNames = [alg.name() for alg in algHistories]
         for algName in arg:
             self.assertTrue(algName in algNames)
+
+    def _checkDiagnosticsAlgorithmsInHistory(self, outWS, diagnosticsWS):
+        self._checkAlgorithmsInHistory(outWS, 'MedianDetectorTest',
+                                       'MaskDetectors')
+        self._checkAlgorithmsInHistory(diagnosticsWS, 'MedianDetectorTest',
+                                       'ClearMaskFlag', 'Plus')
 
 if __name__ == '__main__':
     unittest.main()
