@@ -893,6 +893,7 @@ set ( TEST_FILES
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
+	UnwrapMonitorTest.h
 	UnwrapMonitorsInTOFTest.h
 	UnwrapSNSTest.h
 	VesuvioL1ThetaResolutionTest.h
