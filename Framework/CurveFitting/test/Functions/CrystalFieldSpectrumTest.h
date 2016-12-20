@@ -9,11 +9,13 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/SimpleChebfun.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -577,6 +579,112 @@ public:
     }
   }
 
+  void test_monte_carlo() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("FWHM", 1.0);
+    auto ws = createWorkspace(fun, 0, 50, 100);
+    auto mc = AlgorithmFactory::Instance().create("EstimateFitParameters", -1);
+    mc->initialize();
+    mc->setRethrows(true);
+    mc->setPropertyValue(
+        "Function",
+        "name=CrystalFieldSpectrum,Ion=Ce,"
+        "Symmetry=C2v,Temperature=44.0,FWHM=1.0,NPeaks=3,FixAllPeaks=1,"
+        "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
+    mc->setProperty("InputWorkspace", ws);
+    mc->setProperty("NSamples", 1000);
+    mc->setProperty("Constraints", "0<f2.PeakCentre<50");
+    mc->execute();
+    IFunction_sptr func = mc->getProperty("Function");
+
+    auto fit = AlgorithmFactory::Instance().create("Fit", -1);
+    fit->initialize();
+    fit->setProperty("Function", func);
+    fit->setProperty("InputWorkspace", ws);
+    fit->execute();
+    double chi2 = fit->getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi2, 100.0);
+  }
+
+  void test_change_number_of_fixed_params() {
+
+    std::string funDef =
+        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+        "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1);"
+        "name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+        "BextX=0,BextY=0,BextZ=0)";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    auto ws = createWorkspace(*fun, -20, 170, 100);
+
+    funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
+             "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,PeakShape="
+             "Lorentzian,FWHM=1.1,B44=-0.125,B40=-0.03,B42=-0.116,ties=(IB63="
+             "0,IB62=0,IB61=0,IB66=0,IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44="
+             "0,B22=3.977,B21=0,B20=0.37737,IB22=0,IB21=0,BextX=0,BextY=0,"
+             "BextZ=0,B66=0,B63=0,B62=0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,"
+             "BmolZ=0,BmolY=0,BmolX=0);name=CrystalFieldSpectrum,Ion=Pr,"
+             "Symmetry=C2v,Temperature=44.0,ToleranceEnergy=1.0,"
+             "ToleranceIntensity=6.0,PeakShape=Lorentzian,FWHM=1.1,B44=-0."
+             "125,B40=-0.03,B42=-0.116,ties=(IB63=0,IB62=0,IB61=0,IB66=0,"
+             "IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44=0,B22=3.977,B21=0,B20="
+             "0.37737,IB22=0,IB21=0,BextX=0,BextY=0,BextZ=0,B66=0,B63=0,B62="
+             "0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,BmolZ=0,BmolY=0,BmolX=0)";
+    fun = FunctionFactory::Instance().createInitialized(funDef);
+    auto fit = AlgorithmFactory::Instance().create("Fit", -1);
+    fit->setRethrows(true);
+    fit->initialize();
+    fit->setProperty("Function", fun);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("Output", "out");
+    TS_ASSERT_THROWS_NOTHING(fit->execute());
+  }
+
+  void test_ties_in_composite_function() {
+    std::string funDef =
+        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
+        "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
+        "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
+        "0.031787,B42=-0.11611;name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+        "Temperature="
+        "44.0,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
+        "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
+        "0.031787,B42=-0.11611;ties=(f1.IntensityScaling=2.0*f0."
+        "IntensityScaling,f0.f1.FWHM=f1.f2.FWHM/2)";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    {
+      auto index = fun->parameterIndex("f1.IntensityScaling");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(),
+                       "f1.IntensityScaling=2.0*f0.IntensityScaling");
+    }
+    {
+      auto index = fun->parameterIndex("f0.f1.FWHM");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(), "f0.f1.FWHM=f1.f2.FWHM/2");
+    }
+  }
+
 private:
   std::pair<double, double> getBounds(API::IFunction &fun,
                                       const std::string &parName) {
@@ -591,6 +699,18 @@ private:
                                " doesn't have boundary constraint");
     }
     return std::make_pair(bc->lower(), bc->upper());
+  }
+
+  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0,
+                                       double x1, size_t nbins) {
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+    FunctionDomain1DVector x(x0, x1, nbins);
+    FunctionValues y(x);
+    fun.function(x, y);
+    ws->dataX(0) = x.toVector();
+    ws->dataY(0) = y.toVector();
+    return ws;
   }
 };
 

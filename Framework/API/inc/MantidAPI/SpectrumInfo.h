@@ -18,7 +18,7 @@ class ParameterMap;
 namespace API {
 
 class DetectorInfo;
-class MatrixWorkspace;
+class ExperimentInfo;
 
 /** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
   part of Instrument-2.0. The aim is to provide a nearly identical interface
@@ -29,8 +29,10 @@ class MatrixWorkspace;
   spectra (which may correspond to one or more detectors), such as mask and
   monitor flags, L1, L2, and 2-theta.
 
-  This class is thread safe with OpenMP BUT NOT WITH ANY OTHER THREADING LIBRARY
-  such as Poco threads or Intel TBB.
+  This class is thread safe for read operations (const access) with OpenMP BUT
+  NOT WITH ANY OTHER THREADING LIBRARY such as Poco threads or Intel TBB. There
+  are no thread-safety guarantees for write operations (non-const access). Reads
+  concurrent with writes or concurrent writes are not allowed.
 
 
   @author Simon Heybrock
@@ -59,8 +61,8 @@ class MatrixWorkspace;
 */
 class MANTID_API_DLL SpectrumInfo {
 public:
-  SpectrumInfo(const MatrixWorkspace &workspace);
-  SpectrumInfo(MatrixWorkspace &workspace);
+  SpectrumInfo(const ExperimentInfo &experimentInfo);
+  SpectrumInfo(ExperimentInfo &experimentInfo);
   ~SpectrumInfo();
 
   bool isMonitor(const size_t index) const;
@@ -71,6 +73,8 @@ public:
   Kernel::V3D position(const size_t index) const;
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
+
+  void setMasked(const size_t index, bool masked);
 
   // This is likely to be deprecated/removed with the introduction of
   // Instrument-2.0: The concept of detector groups will probably be dropped so
@@ -88,7 +92,7 @@ private:
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
   getDetectorVector(const size_t index) const;
 
-  const MatrixWorkspace &m_workspace;
+  const ExperimentInfo &m_experimentInfo;
   DetectorInfo *m_mutableDetectorInfo{nullptr};
   const DetectorInfo &m_detectorInfo;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>

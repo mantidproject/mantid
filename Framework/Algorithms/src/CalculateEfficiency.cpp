@@ -311,8 +311,11 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
       }
     }
     auto indexList = ws.getIndicesFromDetectorIDs(detectorList);
-    for (const auto &idx : indexList)
-      ws.maskWorkspaceIndex(idx);
+    auto &spectrumInfo = ws.mutableSpectrumInfo();
+    for (const auto &idx : indexList) {
+      ws.getSpectrum(idx).clearData();
+      spectrumInfo.setMasked(idx, true);
+    }
   } catch (std::exception &) {
     g_log.warning("Expecting the component " + componentName +
                   " to be a CompAssembly, e.g., a bank. Component not masked!");

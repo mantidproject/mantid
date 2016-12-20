@@ -316,11 +316,15 @@ void ProjectionSurface::updateView(bool picking) {
 }
 
 void ProjectionSurface::updateDetectors() {
+  // updating detectors should not reset the view rect
+  // cache the value here are reapply after updating the detectors
+  auto viewRectCache = m_viewRect;
   clear();
   this->init();
   // if integration range in the instrument actor has changed
   // update visiblity of peak markers
   setPeakVisibility();
+  m_viewRect = viewRectCache;
 }
 
 /// Send a redraw request to the surface owner
@@ -591,6 +595,22 @@ void ProjectionSurface::startCreatingShape2D(const QString &type,
 void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor,
                                                const QColor &fillColor) {
   emit signalToStartCreatingFreeShape(borderColor, fillColor);
+}
+
+/**
+ * Save shapes drawn on the view to a table workspace
+ */
+void ProjectionSurface::saveShapesToTableWorkspace() {
+  m_maskShapes.saveToTableWorkspace();
+}
+
+/**
+ * Load shapes from a table workspace on to the view.
+ * @param ws :: table workspace to load shapes from
+ */
+void ProjectionSurface::loadShapesFromTableWorkspace(
+    Mantid::API::ITableWorkspace_const_sptr ws) {
+  m_maskShapes.loadFromTableWorkspace(ws);
 }
 
 /**

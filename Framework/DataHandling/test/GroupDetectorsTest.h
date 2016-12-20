@@ -5,6 +5,7 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/GroupDetectors.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"

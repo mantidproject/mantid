@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -223,11 +225,12 @@ public:
     TS_ASSERT(result);
     if (!result)
       return;
+    const auto &spectrumInfo = result->spectrumInfo();
     for (size_t i = 0; i < result->getNumberHistograms() / 4; i++) {
       TS_ASSERT_DELTA(result->readY(4 * i + 1)[0], 8 * i + 4, 1e-10);
       TS_ASSERT_DELTA(result->readY(4 * i + 2)[0], 8 * i + 4, 1e-10);
       TS_ASSERT_DELTA(result->readY(4 * i + 3)[0], 8 * i + 4, 1e-10);
-      TS_ASSERT(result->getDetector(4 * i)->isMasked());
+      TS_ASSERT(spectrumInfo.isMasked(4 * i));
     }
 
     // Remove workspace from the data service.
@@ -239,17 +242,16 @@ private:
   void ABCtestWorkspace(std::string inputWSname, bool mask) {
     int nSpectra(12);
     Workspace2D_sptr ws2D =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(
             nSpectra, 2);
     ws2D->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(3, 2, 0));
 
-    Mantid::Geometry::ParameterMap &pmap = ws2D->instrumentParameters();
+    auto &detectorInfo = ws2D->mutableDetectorInfo();
     for (int i = 0; i < nSpectra; i++) {
       ws2D->getSpectrum(i).setDetectorID(i + 4);
       if (mask && (i % 4 == 0)) {
-        Mantid::Geometry::IDetector_const_sptr det = ws2D->getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
+        detectorInfo.setMasked(i, true);
       }
     }
 

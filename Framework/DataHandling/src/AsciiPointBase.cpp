@@ -4,15 +4,15 @@ SaveILLCosmosAscii and SaveANSTOAscii export-only Acii-based save formats. It is
 based on a python script by Maximilian Skoda, written for the ISIS Reflectometry
 GUI
 */
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ListValidator.h"
 
+#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/make_shared.hpp>
 #include <cmath>
 #include <fstream>
 
@@ -30,6 +30,7 @@ void AsciiPointBase::init() {
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Save, ext()),
                   "The filename of the output file.");
+
   extraProps();
 }
 
@@ -46,7 +47,14 @@ void AsciiPointBase::exec() {
   }
   m_ws = getProperty("InputWorkspace");
   g_log.information("FILENAME: " + filename);
-
+  std::string sepOption = getProperty("Separator");
+  if (sepOption == "comma") {
+    m_sep = ',';
+  } else if (sepOption == "space") {
+    m_sep = ' ';
+  } else {
+    m_sep = '\t';
+  }
   std::vector<double> XData = header(file);
   extraHeaders(file);
   data(file, XData);
@@ -114,7 +122,7 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   bool nancheck = std::isnan(val);
   bool infcheck = std::isinf(val);
   if (leadingSep) {
-    file << sep();
+    file << m_sep;
   }
   if (!nancheck && !infcheck) {
     file << val;
@@ -127,5 +135,16 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   }
 }
 
+/** appends the separator property to the algorithm
+ */
+void AsciiPointBase::appendSeparatorProperty() {
+  std::vector<std::string> propOptions;
+  propOptions.push_back("comma");
+  propOptions.push_back("space");
+  propOptions.push_back("tab");
+  declareProperty("Separator", "tab",
+                  boost::make_shared<StringListValidator>(propOptions),
+                  "The separator used for splitting data columns.");
+}
 } // namespace DataHandling
 } // namespace Mantid

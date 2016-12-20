@@ -18,6 +18,7 @@ void SaveReflThreeColumnAscii::extraProps() {
   declareProperty("Title", "", "Text to be written to the Title field");
   declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
+  appendSeparatorProperty();
 }
 
 /** virtual method to add information to the file before the data

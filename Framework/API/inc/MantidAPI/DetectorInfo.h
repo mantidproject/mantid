@@ -13,6 +13,9 @@
 
 namespace Mantid {
 using detid_t = int32_t;
+namespace Beamline {
+class DetectorInfo;
+}
 namespace Geometry {
 class IComponent;
 class IDetector;
@@ -30,8 +33,10 @@ class SpectrumInfo;
   DetectorInfo provides easy access to commonly used parameters of individual
   detectors, such as mask and monitor flags, L1, L2, and 2-theta.
 
-  This class is thread safe with OpenMP BUT NOT WITH ANY OTHER THREADING LIBRARY
-  such as Poco threads or Intel TBB.
+  This class is thread safe for read operations (const access) with OpenMP BUT
+  NOT WITH ANY OTHER THREADING LIBRARY such as Poco threads or Intel TBB. There
+  are no thread-safety guarantees for write operations (non-const access). Reads
+  concurrent with writes or concurrent writes are not allowed.
 
 
   @author Simon Heybrock
@@ -60,8 +65,13 @@ class SpectrumInfo;
 */
 class MANTID_API_DLL DetectorInfo {
 public:
-  DetectorInfo(boost::shared_ptr<const Geometry::Instrument> instrument,
+  DetectorInfo(Beamline::DetectorInfo &detectorInfo,
+               boost::shared_ptr<const Geometry::Instrument> instrument,
                Geometry::ParameterMap *pmap = nullptr);
+
+  DetectorInfo &operator=(const DetectorInfo &rhs);
+
+  size_t size() const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
@@ -71,11 +81,16 @@ public:
   Kernel::V3D position(const size_t index) const;
   Kernel::Quat rotation(const size_t index) const;
 
+  void setMasked(const size_t index, bool masked);
+  void clearMaskFlags();
+
   void setPosition(const size_t index, const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
 
   void setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);
   void setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);
+
+  const Geometry::IDetector &detector(const size_t index) const;
 
   // This does not really belong into DetectorInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
@@ -85,6 +100,7 @@ public:
 
   const std::vector<detid_t> &detectorIDs() const;
   /// Returns the index of the detector with the given detector ID.
+  /// This will throw an out of range exception if the detector does not exist.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
 
   friend class SpectrumInfo;
@@ -107,6 +123,9 @@ private:
   void doCacheSource() const;
   void doCacheSample() const;
   void cacheL1() const;
+
+  /// Reference to the actual DetectorInfo object (non-wrapping part).
+  Beamline::DetectorInfo &m_detectorInfo;
 
   Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;

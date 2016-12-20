@@ -10,6 +10,7 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 namespace {
 // Provides a table that claims to have the given number of rows and columns.

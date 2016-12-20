@@ -1,4 +1,5 @@
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -368,7 +369,7 @@ void SCDCalibratePanels::exec() {
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
   TofWksp->setInstrument(inst);
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
-  DblMatrix UB = lattice.getUB();
+  const DblMatrix &UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
   peaksWs->sort(criteria);
   PARALLEL_FOR_IF(Kernel::threadSafe(*ColWksp, *RowWksp, *TofWksp))

@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ExtractMaskToTable.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -202,22 +203,19 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   std::vector<detid_t> maskeddetids;
 
   // Get on hold of instrument
-  Instrument_const_sptr instrument = m_dataWS->getInstrument();
-  if (!instrument)
+  const auto &detectorInfo = m_dataWS->detectorInfo();
+  if (detectorInfo.size() == 0)
     throw runtime_error("There is no instrument in input workspace.");
 
   // Extract
-  size_t numdets = instrument->getNumberDetectors();
-  vector<detid_t> detids = instrument->getDetectorIDs();
+  const vector<detid_t> &detids = detectorInfo.detectorIDs();
 
-  for (size_t i = 0; i < numdets; ++i) {
-    detid_t tmpdetid = detids[i];
-    IDetector_const_sptr tmpdetector = instrument->getDetector(tmpdetid);
-    bool masked = tmpdetector->isMasked();
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    bool masked = detectorInfo.isMasked(i);
     if (masked) {
-      maskeddetids.push_back(tmpdetid);
+      maskeddetids.push_back(detids[i]);
     }
-    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << tmpdetid
+    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
                   << ", Masked = " << masked << ".\n";
   }
 

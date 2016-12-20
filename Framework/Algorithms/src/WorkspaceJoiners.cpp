@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -75,6 +76,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   // For second loop we use the offset from the first
   const int64_t &nhist2 = ws2->getNumberHistograms();
   const auto &spectrumInfo = ws2->spectrumInfo();
+  auto &outSpectrumInfo = output->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws2, *output))
   for (int64_t j = 0; j < nhist2; ++j) {
     PARALLEL_START_INTERUPT_REGION
@@ -94,8 +96,12 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
       }
     }
     // Propagate spectrum masking
-    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
-      output->maskWorkspaceIndex(nhist1 + j);
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
+      output->getSpectrum(nhist1 + j).clearData();
+      PARALLEL_CRITICAL(setMasked) {
+        outSpectrumInfo.setMasked(nhist1 + j, true);
+      }
+    }
 
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
@@ -136,6 +142,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // For second loop we use the offset from the first
   const int64_t &nhist2 = event_ws2->getNumberHistograms();
   const auto &spectrumInfo = event_ws2->spectrumInfo();
+  auto &outSpectrumInfo = output->mutableSpectrumInfo();
   for (int64_t j = 0; j < nhist2; ++j) {
     // This is the workspace index at which we assign in the output
     int64_t output_wi = j + nhist1;
@@ -143,8 +150,12 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory
-    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
-      output->maskWorkspaceIndex(output_wi);
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
+      output->getSpectrum(output_wi).clearData();
+      PARALLEL_CRITICAL(setMaskedEvent) {
+        outSpectrumInfo.setMasked(output_wi, true);
+      }
+    }
 
     m_progress->report();
   }

@@ -93,7 +93,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.sample_edit = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
         # Unfortunately, can only use live if default instrument = gui-set instrument
         if self._instrument_name == config.getInstrument().name():
-            self._content.sample_edit.setProperty("liveButton","ShowIfCanConnect")
+            self._content.sample_edit.setProperty("liveButton","Show")
         self._content.sample_edit.setProperty("multipleFiles",True)
         self._content.sample_edit.setProperty("algorithmAndProperty","Load|Filename")
         self._content.sample_edit.setProperty("label",labeltext)

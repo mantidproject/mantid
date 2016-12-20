@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 '''
+from __future__ import (absolute_import, division, print_function)
 import datetime
 import imp
 import inspect
@@ -34,6 +35,7 @@ import sys
 import tempfile
 import time
 import unittest
+from six import PY3
 
 # Path to this file
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -140,7 +142,7 @@ class MantidStressTest(unittest.TestCase):
             for item in candidates:
                 if os.path.exists(item):
                     return True
-        except RuntimeError, e:
+        except RuntimeError as e:
             return False
                 
 
@@ -161,7 +163,7 @@ class MantidStressTest(unittest.TestCase):
         # check that all of the files exist
         for filename in reqFiles:
             if not self.__verifyRequiredFile(filename):
-                print "Missing required file: '%s'" % filename
+                print("Missing required file: '%s'" % filename)
                 foundAll = False
 
         if not foundAll:
@@ -177,7 +179,7 @@ class MantidStressTest(unittest.TestCase):
         from mantid.kernel import MemoryStats
         MB_avail = MemoryStats().availMem()/(1024.)
         if (MB_avail < required):
-            print "Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail,required)
+            print("Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail,required))
             sys.exit(TestRunner.SKIP_TEST)
 
     def execute(self):
@@ -244,9 +246,9 @@ class MantidStressTest(unittest.TestCase):
                 msg = "(whitespace striped from ends)"
             else:
                 msg = ""
-            print "******************* Difference in files", msg
-            print "\n".join(result)
-            print "*******************"
+            print("******************* Difference in files", msg)
+            print("\n".join(result))
+            print("*******************")
             return False
         else:
             return True
@@ -275,7 +277,7 @@ class MantidStressTest(unittest.TestCase):
 
             if not(self.validateWorkspaces(valPair,mismatchName)):
                 validationResult = False;
-                print 'Workspace {0} not equal to its reference file'.format(valNames[ik]);
+                print('Workspace {0} not equal to its reference file'.format(valNames[ik]));
         #end check All results
 
         return validationResult;
@@ -311,7 +313,7 @@ class MantidStressTest(unittest.TestCase):
             checker.setPropertyValue("Check"+d,"0")
         checker.execute()
         if checker.getPropertyValue("Result") != 'Success!':
-            print self.__class__.__name__
+            print(self.__class__.__name__)
             if mismatchName:
                 SaveNexus(InputWorkspace=valNames[0],Filename=self.__class__.__name__+mismatchName+'-mismatch.nxs')
             else:
@@ -445,6 +447,12 @@ class TestResult(object):
         self.output = ''
         self.err = ''
     
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __lt__(self, other):
+        return self.name < other.name
+
     def addItem(self, item):
         '''
         Add an item to the store, this should be a list containing 2 entries: [Name, Value]
@@ -487,10 +495,10 @@ class TextResultReporter(ResultReporter):
         Print the results to standard out
         '''
         nstars = 30
-        print '*' * nstars
+        print('*' * nstars)
         for t in result.resultLogs():
-            print '\t' + str(t[0]).ljust(15) + '->  ', str(t[1])
-        print '*' * nstars
+            print('\t' + str(t[0]).ljust(15) + '->  ', str(t[1]))
+        print('*' * nstars)
 
 #########################################################################
 # A class to report results as junit xml
@@ -545,7 +553,7 @@ class TestRunner(object):
         tmp_file.write(script.asString())
         tmp_file.close()
         cmd = exec_call + ' ' + tmp_file.name
-        print "Executing test script '%s'" % (cmd)
+        print("Executing test script '%s'" % (cmd))
         results = self.spawnSubProcess(cmd)
         os.remove(tmp_file.name)
         return results
@@ -623,7 +631,7 @@ class TestSuite(object):
         self._result.status = 'skipped'
 
     def execute(self, runner):
-        print time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname
+        print(time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname)
         if self._test_cls_name is not None:
           script = TestScript(self._test_dir, self._modname, self._test_cls_name)
           # Start the new process and wait until it finishes
@@ -653,7 +661,10 @@ class TestSuite(object):
         self._result.status = status
         self._result.addItem(['status', status])
         # Dump std out so we know what happened
-        print output
+        if PY3:
+            if isinstance(output, bytes):
+                output = output.decode()
+        print(output)
         self._result.output = output
         all_lines = output.split('\n')
         # Find the test results
@@ -694,7 +705,7 @@ class TestManager(object):
             self._tests = self.loadTestsFromDir(test_dir)
         else:
             if os.path.exists(test_loc) == False:
-                print 'Cannot find file ' + test_loc + '.py. Please check the path.'
+                print('Cannot find file ' + test_loc + '.py. Please check the path.')
                 exit(2)
             test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
             sys.path.append(test_dir)
@@ -702,7 +713,7 @@ class TestManager(object):
             self._tests = self.loadTestsFromModule(os.path.basename(test_loc))
 
         if len(self._tests) == 0:
-            print 'No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.'
+            print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
             exit(2)
 
         self._passedTests = 0
@@ -778,8 +789,8 @@ class TestManager(object):
                 if self.isValidTestClass(value):
                     test_name = key
                     tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
-        except Exception, exc:
-            print "Error importing module '%s': %s" % (modname, str(exc))
+        except Exception as exc:
+            print("Error importing module '%s': %s" % (modname, str(exc)))
             # Error loading the source, add fake unnamed test so that an error
             # will get generated when the tests are run and it will be counted properly
             tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
@@ -821,7 +832,7 @@ class MantidFrameworkConfig:
         # setup the rest of the magic directories
         self.__saveDir = save_dir
         if not os.path.exists(save_dir):
-            print "Making directory %s to save results" % save_dir
+            print("Making directory %s to save results" % save_dir)
             os.mkdir(save_dir)
 
         else:

@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/make_shared.hpp>
@@ -45,7 +46,8 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
-      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame) {}
+      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
+      m_detectorInfo(instr->m_detectorInfo) {}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -61,7 +63,8 @@ Instrument::Instrument(const Instrument &instr)
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
-      m_referenceFrame(instr.m_referenceFrame) {
+      m_referenceFrame(instr.m_referenceFrame),
+      m_detectorInfo(instr.m_detectorInfo) {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -513,53 +516,6 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   return false;
 }
 
-//--------------------------------------------------------------------------
-/** Is the detector with the given ID masked?
- *
- * @param detector_id :: detector ID to look for.
- * @return true if masked; false if not masked or if the detector was not found.
- */
-bool Instrument::isDetectorMasked(const detid_t &detector_id) const {
-  // With no parameter map, then no detector is EVER masked
-  if (!isParametrized())
-    return false;
-  // Find the (base) detector object in the map.
-  auto it = m_instr->m_detectorCache.find(detector_id);
-  if (it == m_instr->m_detectorCache.end())
-    return false;
-  // This is the detector
-  const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == nullptr)
-    return false;
-  // Access the parameter map directly.
-  Parameter_sptr maskedParam = m_map->get(det, "masked");
-  if (!maskedParam)
-    return false;
-  // If the parameter is defined, then yes, it is masked.
-  return maskedParam->value<bool>();
-}
-
-//--------------------------------------------------------------------------
-/** Is this group of detectors masked?
- *
- * This returns true (masked) if ALL of the detectors listed are masked.
- * It returns false (not masked) if there are no detectors in the list
- * It returns false (not masked) if any of the detectors are NOT masked.
- *
- * @param detector_ids :: set of detector IDs
- * @return true if masked.
- */
-bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const {
-  if (detector_ids.empty())
-    return false;
-
-  for (auto detector_id : detector_ids) {
-    if (!this->isDetectorMasked(detector_id))
-      return false;
-  }
-  return true;
-}
-
 /**
  * Returns a pointer to the geometrical object for the given set of IDs
  * @param det_ids :: A list of detector ids
@@ -567,16 +523,16 @@ bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const {
  *  @throw   NotFoundError If no detector is found for the detector ID given
  */
 IDetector_const_sptr
-Instrument::getDetectorG(const std::vector<detid_t> &det_ids) const {
+Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
   const size_t ndets(det_ids.size());
   if (ndets == 1) {
-    return this->getDetector(det_ids[0]);
+    return this->getDetector(*det_ids.begin());
   } else {
     boost::shared_ptr<DetectorGroup> det_group =
         boost::make_shared<DetectorGroup>();
     bool warn(false);
-    for (size_t i = 0; i < ndets; ++i) {
-      det_group->addDetector(this->getDetector(det_ids[i]), warn);
+    for (const auto detID : det_ids) {
+      det_group->addDetector(this->getDetector(detID), warn);
     }
     return det_group;
   }
@@ -902,14 +858,14 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) /
  *        the length of the distance between the two.
  * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
  * @param samplePos: position of the sample
- * @param det: Geometry object representing the detector (position of the pixel)
+ * @param detPos: position of the detector
  * @param offset: value (close to zero) that changes the factor := factor *
  *(1+offset).
  */
 double Instrument::calcConversion(const double l1, const Kernel::V3D &beamline,
                                   const double beamline_norm,
                                   const Kernel::V3D &samplePos,
-                                  const IDetector_const_sptr &det,
+                                  const Kernel::V3D &detPos,
                                   const double offset) {
   if (offset <=
       -1.) // not physically possible, means result is negative d-spacing
@@ -920,17 +876,12 @@ double Instrument::calcConversion(const double l1, const Kernel::V3D &beamline,
     throw std::logic_error(msg.str());
   }
 
-  // Get the sample-detector distance for this detector (in metres)
-
-  // The scattering angle for this detector (in radians).
-  Kernel::V3D detPos;
-  detPos = det->getPos();
-
   // Now detPos will be set with respect to samplePos
-  detPos -= samplePos;
+  Kernel::V3D relDetPos = detPos - samplePos;
   // 0.5*cos(2theta)
-  double l2 = detPos.norm();
-  double halfcosTwoTheta = detPos.scalar_prod(beamline) / (l2 * beamline_norm);
+  double l2 = relDetPos.norm();
+  double halfcosTwoTheta =
+      relDetPos.scalar_prod(beamline) / (l2 * beamline_norm);
   // This is sin(theta)
   double sinTheta = sqrt(0.5 - halfcosTwoTheta);
   const double numerator = (1.0 + offset);
@@ -957,8 +908,9 @@ double Instrument::calcConversion(
     } else {
       offset = 0.;
     }
-    factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(detector), offset);
+    factor +=
+        calcConversion(l1, beamline, beamline_norm, samplePos,
+                       instrument->getDetector(detector)->getPos(), offset);
   }
   return factor / static_cast<double>(detectors.size());
 }
@@ -1280,6 +1232,24 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     return Instrument::ContainsState::None;
 
 } // containsRectDetectors
+
+/// Only for use by ExperimentInfo. Returns returns true if this instrument
+/// contains a DetectorInfo.
+bool Instrument::hasDetectorInfo() const {
+  return static_cast<bool>(m_detectorInfo);
+}
+/// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
+const Beamline::DetectorInfo &Instrument::detectorInfo() const {
+  if (!hasDetectorInfo())
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
+  return *m_detectorInfo;
+}
+
+/// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+void Instrument::setDetectorInfo(
+    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
+  m_detectorInfo = std::move(detectorInfo);
+}
 
 } // namespace Geometry
 } // Namespace Mantid

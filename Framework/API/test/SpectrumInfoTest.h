@@ -14,6 +14,15 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+namespace {
+constexpr size_t GroupOfDets2And3 = 0;
+constexpr size_t GroupOfDets1And2 = 1;
+constexpr size_t GroupOfDets1And4 = 2;
+constexpr size_t GroupOfDets4And5 = 3;
+constexpr size_t GroupOfAllDets = 4;
+}
 
 class SpectrumInfoTest : public CxxTest::TestSuite {
 public:
@@ -30,11 +39,15 @@ public:
                                  numberOfBins);
 
     // Workspace has 5 detectors, 1 and 4 are masked, 4 and 5 are monitors.
-    m_grouped.getSpectrum(0).setDetectorIDs({2, 3}); // no mask
-    m_grouped.getSpectrum(1).setDetectorIDs({1, 2}); // partial mask
-    m_grouped.getSpectrum(2).setDetectorIDs({1, 4}); // masked, partial monitor
-    m_grouped.getSpectrum(3).setDetectorIDs({4, 5}); // full monitor
-    m_grouped.getSpectrum(4).setDetectorIDs({1, 2, 3, 4, 5}); // everything
+    m_grouped.getSpectrum(GroupOfDets2And3).setDetectorIDs({2, 3}); // no mask
+    m_grouped.getSpectrum(GroupOfDets1And2)
+        .setDetectorIDs({1, 2}); // partial mask
+    m_grouped.getSpectrum(GroupOfDets1And4)
+        .setDetectorIDs({1, 4}); // masked, partial monitor
+    m_grouped.getSpectrum(GroupOfDets4And5)
+        .setDetectorIDs({4, 5}); // full monitor
+    m_grouped.getSpectrum(GroupOfAllDets)
+        .setDetectorIDs({1, 2, 3, 4, 5}); // everything
   }
 
   void test_constructor() {
@@ -72,11 +85,11 @@ public:
     // This is adopting the old definition from DetectorGroup: Spectra with at
     // least one non-monitor detector are not monitors. Actually it might make
     // more sense to forbid such a grouping.
-    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(0), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(1), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(2), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(3), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(4), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(GroupOfDets2And3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(GroupOfDets1And2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(GroupOfDets1And4), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(GroupOfDets4And5), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMonitor(GroupOfAllDets), false);
   }
 
   void test_isMasked() {
@@ -90,11 +103,11 @@ public:
 
   void test_grouped_isMasked() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets2And3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And4), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets4And5), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), false);
   }
 
   void test_isMasked_unthreaded() {
@@ -131,9 +144,9 @@ public:
     const auto &spectrumInfo = m_grouped.spectrumInfo();
     double x2 = 5.0 * 5.0;
     double y2 = 2.0 * 2.0 * 0.05 * 0.05;
-    TS_ASSERT_EQUALS(spectrumInfo.l2(0),
+    TS_ASSERT_EQUALS(spectrumInfo.l2(GroupOfDets2And3),
                      (sqrt(x2 + 0 * 0 * y2) + sqrt(x2 + 1 * 1 * y2)) / 2.0);
-    TS_ASSERT_EQUALS(spectrumInfo.l2(1),
+    TS_ASSERT_EQUALS(spectrumInfo.l2(GroupOfDets1And2),
                      (sqrt(x2 + 0 * 0 * y2) + sqrt(x2 + 1 * 1 * y2)) / 2.0);
     // Other lengths are not sensible since the detectors include monitors
   }
@@ -164,8 +177,10 @@ public:
 
   void test_grouped_twoTheta() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973 / 2.0, 1e-6);
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(1), 0.0199973 / 2.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(GroupOfDets2And3), 0.0199973 / 2.0,
+                    1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(GroupOfDets1And2), 0.0199973 / 2.0,
+                    1e-6);
     // Other theta values are not sensible since the detectors include monitors
   }
 
@@ -182,8 +197,8 @@ public:
   // removed at some point.
   void test_grouped_twoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    auto det = m_grouped.getDetector(1);
-    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(1),
+    auto det = m_grouped.getDetector(GroupOfDets1And2);
+    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(GroupOfDets1And2),
                      m_grouped.detectorTwoTheta(*det));
   }
 
@@ -199,8 +214,10 @@ public:
 
   void test_grouped_signedTwoTheta() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(0), 0.0199973 / 2.0, 1e-6);
-    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(1), -0.0199973 / 2.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(GroupOfDets2And3),
+                    0.0199973 / 2.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(GroupOfDets1And2),
+                    -0.0199973 / 2.0, 1e-6);
     // Other theta values are not sensible since the detectors include monitors
   }
 
@@ -217,8 +234,8 @@ public:
   // be removed at some point.
   void test_grouped_signedTwoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    auto det = m_grouped.getDetector(1);
-    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(1),
+    auto det = m_grouped.getDetector(GroupOfDets1And2);
+    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(GroupOfDets1And2),
                      m_grouped.detectorSignedTwoTheta(*det));
   }
 
@@ -233,18 +250,21 @@ public:
 
   void test_grouped_position() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.position(0), V3D(0.0, 0.1 / 2.0, 5.0));
-    TS_ASSERT_EQUALS(spectrumInfo.position(1), V3D(0.0, -0.1 / 2.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets2And3),
+                     V3D(0.0, 0.1 / 2.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets1And2),
+                     V3D(0.0, -0.1 / 2.0, 5.0));
     // Other positions are not sensible since the detectors include monitors
   }
 
   void test_grouped_position_tracks_changes() {
     auto &detectorInfo = m_grouped.mutableDetectorInfo();
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    const auto oldPos = spectrumInfo.position(0);
+    const auto oldPos = detectorInfo.position(1);
     // Change Y pos from 0.0 to -0.1
     detectorInfo.setPosition(1, V3D(0.0, -0.1, 5.0));
-    TS_ASSERT_EQUALS(spectrumInfo.position(0), V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(GroupOfDets2And3),
+                     V3D(0.0, 0.0, 5.0));
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973, 1e-6);
     // Restore old position
     detectorInfo.setPosition(1, oldPos);
@@ -272,11 +292,11 @@ public:
 
   void test_grouped_hasDetectors() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT(spectrumInfo.hasDetectors(0));
-    TS_ASSERT(spectrumInfo.hasDetectors(1));
-    TS_ASSERT(spectrumInfo.hasDetectors(2));
-    TS_ASSERT(spectrumInfo.hasDetectors(3));
-    TS_ASSERT(spectrumInfo.hasDetectors(4));
+    TS_ASSERT(spectrumInfo.hasDetectors(GroupOfDets2And3));
+    TS_ASSERT(spectrumInfo.hasDetectors(GroupOfDets1And2));
+    TS_ASSERT(spectrumInfo.hasDetectors(GroupOfDets1And4));
+    TS_ASSERT(spectrumInfo.hasDetectors(GroupOfDets4And5));
+    TS_ASSERT(spectrumInfo.hasDetectors(GroupOfAllDets));
   }
 
   void test_hasDetectors_ignores_bad_IDs() {
@@ -310,11 +330,11 @@ public:
 
   void test_grouped_hasUniqueDetector() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
-    TS_ASSERT(!spectrumInfo.hasUniqueDetector(1));
-    TS_ASSERT(!spectrumInfo.hasUniqueDetector(2));
-    TS_ASSERT(!spectrumInfo.hasUniqueDetector(3));
-    TS_ASSERT(!spectrumInfo.hasUniqueDetector(4));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(GroupOfDets2And3));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(GroupOfDets1And2));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(GroupOfDets1And4));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(GroupOfDets4And5));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(GroupOfAllDets));
   }
 
   void test_hasUniqueDetector_ignores_bad_IDs() {
@@ -324,6 +344,62 @@ public:
     TS_ASSERT(spectrumInfo.hasUniqueDetector(1));
     // Restore old value
     m_workspace.getSpectrum(1).setDetectorID(2);
+  }
+
+  void test_setMasked() {
+    auto &spectrumInfo = m_workspace.mutableSpectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    spectrumInfo.setMasked(0, false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
+    spectrumInfo.setMasked(0, true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    // Make sure no other detectors are affected
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
+  void test_grouped_setMasked() {
+    auto &spectrumInfo = m_grouped.mutableSpectrumInfo();
+    spectrumInfo.setMasked(GroupOfAllDets, false);
+    // 4 includes all detectors so all other spectra are affected
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets2And3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And4), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets4And5), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), false);
+    spectrumInfo.setMasked(GroupOfDets2And3, true);
+    // Partial masking => false
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets2And3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And4), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets4And5), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), false);
+    // Restore initial state
+    spectrumInfo.setMasked(GroupOfAllDets, false);
+    spectrumInfo.setMasked(GroupOfDets1And4, true);
+  }
+
+  void test_grouped_setMasked_reverse_case() {
+    auto &spectrumInfo = m_grouped.mutableSpectrumInfo();
+    spectrumInfo.setMasked(GroupOfAllDets, true);
+    // 4 includes all detectors so all other spectra are affected
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets2And3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And2), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And4), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets4And5), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), true);
+    spectrumInfo.setMasked(GroupOfDets2And3, false);
+    // Partial masking => false
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets2And3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And4), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets4And5), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), false);
+    // Restore initial state
+    spectrumInfo.setMasked(GroupOfAllDets, false);
+    spectrumInfo.setMasked(GroupOfDets1And4, true);
   }
 
   void test_detector() {
@@ -341,6 +417,61 @@ public:
     TS_ASSERT_THROWS(spectrumInfo.detector(0), std::out_of_range);
   }
 
+  void test_ExperimentInfo_basics() {
+    const ExperimentInfo expInfo(m_workspace);
+    const SpectrumInfo spectrumInfo(expInfo);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
+  void test_ExperimentInfo_from_grouped() {
+    const ExperimentInfo expInfo(m_grouped);
+    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 5);
+    const SpectrumInfo spectrumInfo(expInfo);
+    // We construct from a grouped workspace, but since that information is lost
+    // when constructing expInfo, so we should just see the masking of the
+    // underlying detectors.
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
+  void test_ExperimentInfo_grouped() {
+    ExperimentInfo expInfo(m_workspace);
+
+    // We cannot really test anything but a single group, since the grouping
+    // mechanism in ExperimentInfo is currently based on std::unordered_map, so
+    // we have no control over the order and thus cannot write asserts.
+    det2group_map mapping{{1, {1, 2}}};
+    expInfo.cacheDetectorGroupings(mapping);
+    const SpectrumInfo spectrumInfo(expInfo);
+    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
+
+    mapping = {{1, {1, 4}}};
+    expInfo.cacheDetectorGroupings(mapping);
+    const SpectrumInfo spectrumInfo2(expInfo);
+    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    TS_ASSERT_EQUALS(spectrumInfo2.isMasked(0), true);
+  }
+
+  void test_grouping_in_ExperimentInfo_ignored_for_MatrixWorkspace() {
+    det2group_map mapping{{1, {1, 2}}};
+    m_workspace.cacheDetectorGroupings(mapping);
+    TS_ASSERT_EQUALS(m_workspace.numberOfDetectorGroups(), 5);
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;
@@ -350,16 +481,17 @@ private:
     auto ws = Kernel::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
-      if (i % 2 == 0)
-        pmap.addBool(det->getComponentID(), "masked", true);
     }
+    ws->setInstrument(inst);
+    auto &detectorInfo = ws->mutableDetectorInfo();
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
+      if (i % 2 == 0)
+        detectorInfo.setMasked(i, true);
     return std::move(ws);
   }
 
@@ -375,13 +507,9 @@ private:
         ws, includeMonitors, startYNegative, instrumentName);
 
     std::set<int64_t> toMask{0, 3};
-    ParameterMap &pmap = ws.instrumentParameters();
-    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      if (toMask.find(i) != toMask.end()) {
-        IDetector_const_sptr det = ws.getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
-      }
-    }
+    auto &detectorInfo = ws.mutableDetectorInfo();
+    for (const auto &i : toMask)
+      detectorInfo.setMasked(i, true);
     return ws;
   }
 };

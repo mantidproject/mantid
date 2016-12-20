@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "boost/pointer_cast.hpp"
 #include <cfloat>
 
@@ -78,7 +79,8 @@ MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace) {
   if (!workspace)
     throw std::invalid_argument("The workspace is empty.");
 
-  auto iterators = workspace->createIterators(PARALLEL_GET_MAX_THREADS, 0);
+  auto iterators =
+      workspace->createIterators(PARALLEL_GET_MAX_THREADS, nullptr);
 
   std::vector<QwtDoubleInterval> intervals(iterators.size());
   // cppcheck-suppress syntaxError

@@ -171,7 +171,7 @@ public:
   /// Test algorithm rejects an input workspace with uneven bin widths
   void testUnevenBinWidths() {
     constexpr size_t numSpectra(2);
-    auto workspace = WorkspaceCreationHelper::Create2DWorkspace(
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(
         static_cast<int>(numSpectra), 10);
 
     // Rebin the workspace to make bin widths uneven

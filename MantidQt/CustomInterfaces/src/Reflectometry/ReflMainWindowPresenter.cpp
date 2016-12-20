@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -10,16 +11,19 @@ namespace CustomInterfaces {
 * @param view :: [input] The view we are managing
 * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
 * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
+* @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
-    IReflSettingsTabPresenter *settingsPresenter)
+    IReflSettingsTabPresenter *settingsPresenter,
+    IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
-      m_settingsPresenter(settingsPresenter) {
+      m_settingsPresenter(settingsPresenter), m_savePresenter(savePresenter) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
-  m_settingsPresenter->acceptMainPresenter(this);
+  m_savePresenter->acceptMainPresenter(this);
+  // Settings tab does not need a main presenter
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
@@ -30,35 +34,44 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflMainWindowPresenter::getTransmissionOptions() const {
+std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 
   checkPtrValid(m_settingsPresenter);
 
-  return m_settingsPresenter->getTransmissionOptions();
+  return m_settingsPresenter->getTransmissionOptions(group);
 }
 
 /** Returns global processing options
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*options
 * @return :: Global processing options
 */
-std::string ReflMainWindowPresenter::getReductionOptions() const {
+std::string ReflMainWindowPresenter::getReductionOptions(int group) const {
 
   checkPtrValid(m_settingsPresenter);
 
   // Request global processing options to 'Settings' presenter
-  return m_settingsPresenter->getReductionOptions();
+  return m_settingsPresenter->getReductionOptions(group);
 }
 
 /** Returns global post-processing options
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*options
 * @return :: Global post-processing options
 */
-std::string ReflMainWindowPresenter::getStitchOptions() const {
+std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
 
   checkPtrValid(m_settingsPresenter);
 
   // Request global post-processing options to 'Settings' presenter
-  return m_settingsPresenter->getStitchOptions();
+  return m_settingsPresenter->getStitchOptions(group);
 }
 
 /**

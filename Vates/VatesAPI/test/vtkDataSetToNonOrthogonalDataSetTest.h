@@ -271,16 +271,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(converter.execute());
   }
 
-  void testStaticUseForSimpleDataSet() {
-    std::string wsName = createMantidWorkspace(false);
-    vtkSmartPointer<vtkUnstructuredGrid> ds;
-    ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = Mantid::Kernel::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-    TS_ASSERT_THROWS_NOTHING(vtkDataSetToNonOrthogonalDataSet::exec(
-        ds, wsName, std::move(workspaceProvider)));
-  }
-
   void testNonUnitySimpleDataset() {
     std::string wsName = createMantidWorkspace(true);
     vtkSmartPointer<vtkUnstructuredGrid> ds;
