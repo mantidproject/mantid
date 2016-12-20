@@ -531,7 +531,6 @@ public:
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     Instrument_sptr testInst(new Instrument);
-    ws->setInstrument(testInst);
     // Make it look like MARI (though not bin boundaries are different to the
     // real MARI file used before)
     // Define a source and sample position
@@ -551,6 +550,7 @@ public:
     physicalPixel->setPos(-0.34732, -3.28797, -2.29022);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
+    ws->setInstrument(testInst);
     ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;

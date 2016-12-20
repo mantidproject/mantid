@@ -70,21 +70,18 @@ void CalculateDIFC::exec() {
     outputWs->setTitle("DIFC workspace");
   }
 
-  Instrument_const_sptr instrument = inputWs->getInstrument();
-
   double l1;
   Kernel::V3D beamline, samplePos;
   double beamlineNorm;
 
-  instrument->getInstrumentParameters(l1, beamline, beamlineNorm, samplePos);
+  inputWs->getInstrument()->getInstrumentParameters(l1, beamline, beamlineNorm,
+                                                    samplePos);
 
-  // To get all the detector ID's
-  detid2det_map allDetectors;
-  instrument->getDetectors(allDetectors);
+  const auto &detectorInfo = inputWs->detectorInfo();
 
-  API::Progress progress(this, 0, 1, allDetectors.size());
+  API::Progress progress(this, 0, 1, detectorInfo.size());
   calculate(progress, outputWs, offsetsWs, l1, beamlineNorm, beamline,
-            samplePos, allDetectors);
+            samplePos, detectorInfo);
 
   setProperty("OutputWorkspace", outputWs);
 }
@@ -94,24 +91,24 @@ void CalculateDIFC::calculate(API::Progress &progress,
                               DataObjects::OffsetsWorkspace_sptr &offsetsWS,
                               double l1, double beamlineNorm,
                               Kernel::V3D &beamline, Kernel::V3D &samplePos,
-                              detid2det_map &allDetectors) {
+                              const API::DetectorInfo &detectorInfo) {
   SpecialWorkspace2D_sptr localWS =
       boost::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs);
 
+  const auto &detectorIDs = detectorInfo.detectorIDs();
+
   // Now go through all
-  detid2det_map::const_iterator it = allDetectors.begin();
-  for (; it != allDetectors.end(); ++it) {
-    Geometry::IDetector_const_sptr det = it->second;
-    if ((!det->isMasked()) && (!det->isMonitor())) {
-      const detid_t detID = it->first;
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if ((!detectorInfo.isMasked(i)) && (!detectorInfo.isMonitor(i))) {
       double offset = 0.;
       if (offsetsWS)
-        offset = offsetsWS->getValue(detID, 0.);
+        offset = offsetsWS->getValue(detectorIDs[i], 0.);
 
       double difc = Geometry::Instrument::calcConversion(
-          l1, beamline, beamlineNorm, samplePos, det, offset);
+          l1, beamline, beamlineNorm, samplePos, detectorInfo.position(i),
+          offset);
       difc = 1. / difc; // calcConversion gives 1/DIFC
-      localWS->setValue(detID, difc);
+      localWS->setValue(detectorIDs[i], difc);
     }
 
     progress.report("Calculate DIFC");

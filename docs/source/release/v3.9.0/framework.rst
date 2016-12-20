@@ -35,6 +35,22 @@ Renamed
 Deprecated
 ##########
 
+- :ref:`AbortRemoteJob	 <algm-AbortRemoteJob>` use version 2 instead.
+- :ref:`Authenticate	 <algm-Authenticate>` use version 2 instead.
+- :ref:`CentroidPeaksMD	 <algm-CentroidPeaksMD>` use version 2 instead.
+- :ref:`ConvertEmptyToTof	 <algm-ConvertEmptyToTof>`.
+- :ref:`ConvertUnitsUsingDetectorTable	 <algm-ConvertUnitsUsingDetectorTable>`.
+- :ref:`DownloadRemoteFile	 <algm-DownloadRemoteFile>` use version 2 instead.
+- :ref:`FFTSmooth	 <algm-FFTSmooth>` use version 2 instead.
+- :ref:`OneStepMDEW	 <algm-OneStepMDEW>`.
+- :ref:`QueryAllRemoteJobs	 <algm-QueryAllRemoteJobs>` use version 2 instead.
+- :ref:`RefinePowderInstrumentParameters	 <algm-RefinePowderInstrumentParameters>` use version 2 instead.
+- :ref:`SetupILLD33Reduction	 <algm-SetupILLD33Reduction>.
+- :ref:`StartRemoteTransaction	 <algm-StartRemoteTransaction>` use version 2 instead.
+- :ref:`LoadILLAscii	 <algm-LoadILLAscii>`.
+- :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` use version 2 instead.
+- :ref:`SubmitRemoteJob	 <algm-SubmitRemoteJob>` use version 2 instead.
+- :ref:`Transpose3D	 <algm-Transpose3D>` use TransposeMD instead.
 
 Removed
 #######

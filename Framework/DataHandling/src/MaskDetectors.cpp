@@ -4,6 +4,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -209,10 +210,12 @@ void MaskDetectors::exec() {
   }
 
   // Get a reference to the spectra-detector map to get hold of detector ID's
+  auto &spectrumInfo = WS->mutableSpectrumInfo();
   double prog = 0.0;
-  std::vector<size_t>::const_iterator wit;
-  for (wit = indexList.begin(); wit != indexList.end(); ++wit) {
-    WS->maskWorkspaceIndex(*wit);
+  for (const auto i : indexList) {
+    WS->getSpectrum(i).clearData();
+    if (spectrumInfo.hasDetectors(i))
+      spectrumInfo.setMasked(i, true);
 
     // Progress
     prog += (1.0 / static_cast<int>(indexList.size()));
@@ -426,33 +429,21 @@ void MaskDetectors::appendToIndexListFromWS(
   size_t endIndex = std::get<1>(range_info);
   bool range_constrained = std::get<2>(range_info);
 
+  const auto &spectrumInfo = sourceWS->spectrumInfo();
   if (range_constrained) {
     constrainIndexInRange(indexList, tmp_index, startIndex, endIndex);
 
     for (size_t i = startIndex; i <= endIndex; ++i) {
-      IDetector_const_sptr det;
-      try {
-        det = sourceWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
-        continue;
-      }
-      if (det->isMasked()) {
+      if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)) {
         tmp_index.push_back(i);
       }
     }
-
   } else {
     tmp_index.swap(indexList);
 
     endIndex = sourceWS->getNumberHistograms();
     for (size_t i = 0; i < endIndex; ++i) {
-      IDetector_const_sptr det;
-      try {
-        det = sourceWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
-        continue;
-      }
-      if (det->isMasked()) {
+      if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)) {
         tmp_index.push_back(i);
       }
     }
