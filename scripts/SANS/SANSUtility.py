@@ -862,14 +862,13 @@ def get_masked_det_ids(ws):
 
     @returns a list of IDs for masked detectors
     """
+    spectrumInfo = ws.spectrumInfo()
     for ws_index in range(ws.getNumberHistograms()):
-        try:
-            det = ws.getDetector(ws_index)
-        except RuntimeError:
+        if not spectrumInfo.hasDetectors(ws_index):
             # Skip the rest after finding the first spectra with no detectors,
             # which is a big speed increase for SANS2D.
             break
-        if det.isMasked():
+        if spectrumInfo.isMasked(ws_index):
             yield det.getID()
 
 
