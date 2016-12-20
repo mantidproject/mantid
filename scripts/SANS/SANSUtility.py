@@ -869,7 +869,7 @@ def get_masked_det_ids(ws):
             # which is a big speed increase for SANS2D.
             break
         if spectrumInfo.isMasked(ws_index):
-            yield det.getID()
+            yield ws.getDetector(ws_index).getID()
 
 
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
