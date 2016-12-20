@@ -221,7 +221,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         hab_range = range(5, 14)
         hab_range[6] = np.nan
         hab_range[7] = np.nan
-        self.do_test_scale_both(hab_range)
+        self.assertRaises(RuntimeError, self.do_test_scale_both, hab_range)
 
 
 class TestErrorTransferFromModelToData(unittest.TestCase):
