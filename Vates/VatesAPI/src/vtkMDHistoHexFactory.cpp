@@ -1,8 +1,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-
 #include "MantidVatesAPI/vtkMDHWSignalArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
@@ -120,14 +118,10 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     offset = timestep * indexMultiplier[2];
   }
 
-  std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-      dynamic_cast<MDHistoWorkspaceIterator *>(createIteratorWithNormalization(
-          m_normalizationOption, m_workspace.get())));
-
   vtkNew<vtkMDHWSignalArray<double>> signal;
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->InitializeArray(std::move(iterator), offset, imageSize);
+  signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
   // update progress after a 1% change
