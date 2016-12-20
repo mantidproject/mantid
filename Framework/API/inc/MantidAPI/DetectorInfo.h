@@ -13,6 +13,9 @@
 
 namespace Mantid {
 using detid_t = int32_t;
+namespace Beamline {
+class DetectorInfo;
+}
 namespace Geometry {
 class IComponent;
 class IDetector;
@@ -62,8 +65,11 @@ class SpectrumInfo;
 */
 class MANTID_API_DLL DetectorInfo {
 public:
-  DetectorInfo(boost::shared_ptr<const Geometry::Instrument> instrument,
+  DetectorInfo(Beamline::DetectorInfo &detectorInfo,
+               boost::shared_ptr<const Geometry::Instrument> instrument,
                Geometry::ParameterMap *pmap = nullptr);
+
+  DetectorInfo &operator=(const DetectorInfo &rhs);
 
   size_t size() const;
 
@@ -117,6 +123,9 @@ private:
   void doCacheSource() const;
   void doCacheSample() const;
   void cacheL1() const;
+
+  /// Reference to the actual DetectorInfo object (non-wrapping part).
+  Beamline::DetectorInfo &m_detectorInfo;
 
   Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
