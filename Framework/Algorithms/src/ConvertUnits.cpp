@@ -517,6 +517,9 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       (!parameters.empty()) &&
       find(parameters.begin(), parameters.end(), "Always") != parameters.end();
 
+  auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+  auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
+
   // Perform Sanity Validation before creating workspace
   double checkefixed = efixedProp;
   double checkl2;
@@ -528,12 +531,10 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
     // Convert the input unit to time-of-flight
-    auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-    auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    localFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                          emode, checkefixed, checkdelta);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    localOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                              emode, checkefixed, checkdelta);
   }
 
@@ -553,11 +554,6 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     double twoTheta;
     if (getDetectorValues(outSpectrumInfo, *outputUnit, emode, *outputWS,
                           signedTheta, i, efixed, l2, twoTheta)) {
-
-      // Make local copies of the units. This allows running the loop in
-      // parallel
-      auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-      auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
       /// @todo Don't yet consider hold-off (delta)
       const double delta = 0.0;

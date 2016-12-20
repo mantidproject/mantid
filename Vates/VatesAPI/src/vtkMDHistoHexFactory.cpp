@@ -1,8 +1,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-
 #include "MantidVatesAPI/vtkMDHWSignalArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
@@ -60,8 +58,7 @@ void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace) {
 }
 
 void vtkMDHistoHexFactory::validateWsNotNull() const {
-
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }
@@ -113,14 +110,10 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     offset = timestep * indexMultiplier[2];
   }
 
-  std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-      dynamic_cast<MDHistoWorkspaceIterator *>(createIteratorWithNormalization(
-          m_normalizationOption, m_workspace.get())));
-
   vtkNew<vtkMDHWSignalArray<double>> signal;
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->InitializeArray(std::move(iterator), offset, imageSize);
+  signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
   // update progress after a 1% change
@@ -153,8 +146,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const vtkIdType nPointsY = nBinsY + 1;
   const vtkIdType nPointsZ = nBinsZ + 1;
 
-  vtkFloatArray *pointsarray = vtkFloatArray::SafeDownCast(points->GetData());
-  if (pointsarray == NULL) {
+  vtkFloatArray *pointsarray = vtkFloatArray::FastDownCast(points->GetData());
+  if (!pointsarray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (pointsarray->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
@@ -182,7 +175,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   }
 
   visualDataSet->SetPoints(points.GetPointer());
-  visualDataSet->Register(NULL);
+  visualDataSet->Register(nullptr);
   visualDataSet->Squeeze();
 
   // Hedge against empty data sets
@@ -205,7 +198,7 @@ vtkSmartPointer<vtkDataSet>
 vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
   auto product =
       tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
-  if (product != NULL) {
+  if (product) {
     return product;
   } else {
     // Create in 3D mode

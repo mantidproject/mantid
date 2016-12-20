@@ -78,7 +78,7 @@ void vtkMDHexFactory::doCreate(
 
   // Create 8 points per box.
   vtkNew<vtkPoints> points;
-  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *pointsArray = vtkFloatArray::FastDownCast(points->GetData());
   float *pointsPtr = pointsArray->WritePointer(0, numBoxes * 8 * 3);
 
   // One scalar per box
@@ -201,7 +201,7 @@ vtkSmartPointer<vtkDataSet>
 vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
   this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(
       m_workspace, progressUpdating, false);
-  if (this->dataSet != NULL) {
+  if (this->dataSet) {
     return this->dataSet;
   } else {
     IMDEventWorkspace_sptr imdws =

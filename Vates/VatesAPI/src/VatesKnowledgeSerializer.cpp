@@ -56,7 +56,7 @@ std::string VatesKnowledgeSerializer::createXMLString() const {
     throw std::runtime_error("No workspace name provided on workspace.");
   }
   // Check to see if a function has been provided.
-  if (m_spFunction != NULL) {
+  if (m_spFunction) {
     return std::string(
         MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart() +
         m_wsNameXML + m_wsLocationXML + m_geomXML +
@@ -81,7 +81,7 @@ const std::string &VatesKnowledgeSerializer::getWorkspaceGeometry() const {
 }
 
 bool VatesKnowledgeSerializer::hasFunctionInfo() const {
-  return NULL != m_spFunction.get();
+  return static_cast<bool>(m_spFunction);
 }
 
 bool VatesKnowledgeSerializer::hasGeometryInfo() const {

@@ -2,12 +2,17 @@
 #define STARTREMOTETRANSACTION_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm {
+class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm,
+                                         public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  StartRemoteTransaction() { this->useAlgorithm("StartRemoteTransaction", 2); }
+
   /// Algorithm's name
   const std::string name() const override { return "StartRemoteTransaction"; }
   /// Summary of algorithms purpose

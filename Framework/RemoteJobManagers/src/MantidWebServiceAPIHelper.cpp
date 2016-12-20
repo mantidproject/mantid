@@ -211,7 +211,7 @@ void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
   path += extraPath;
 
   uri.setPath(path);
-  if (method == Poco::Net::HTTPRequest::HTTP_GET && queryString.size() > 0) {
+  if (method == Poco::Net::HTTPRequest::HTTP_GET && !queryString.empty()) {
     uri.setQuery(queryString);
   }
 

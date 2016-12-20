@@ -230,15 +230,13 @@ int vtkMDEWSource::RequestInformation(
     vtkInformation *vtkNotUsed(request),
     vtkInformationVector **vtkNotUsed(inputVector),
     vtkInformationVector *outputVector) {
-  if (m_presenter == NULL && !m_wsName.empty()) {
+  if (!m_presenter && !m_wsName.empty()) {
     std::unique_ptr<MDLoadingView> view =
         Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
     m_presenter = Mantid::Kernel::make_unique<MDEWInMemoryLoadingPresenter>(
         std::move(view),
         new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
-    if (!m_presenter->canReadFile()) {
-      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
-    } else {
+    if (m_presenter->canReadFile()) {
       // If the MDEvent workspace has had top level splitting applied to it,
       // then use the a deptgit stah of 1
       auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
@@ -249,6 +247,8 @@ int vtkMDEWSource::RequestInformation(
 
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
+    } else {
+      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
     }
   }
   return 1;

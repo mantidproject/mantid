@@ -161,7 +161,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
 
     // Get the transformation that takes the points in the TRANSFORMED space
     // back into the ORIGINAL (not-rotated) space.
-    Mantid::API::CoordTransform const *transform = NULL;
+    Mantid::API::CoordTransform const *transform = nullptr;
     if (m_useTransform)
       transform = m_workspace->getTransformToOriginal();
 
@@ -239,7 +239,7 @@ void vtkMDHistoQuadFactory::initialize(
 }
 
 void vtkMDHistoQuadFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }

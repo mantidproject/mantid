@@ -135,7 +135,7 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   return count == 1;
 }
 
-/** Set the mask flag of the spectrum with given index.
+/** Set the mask flag of the spectrum with given index. Not thread safe.
  *
  * Currently this simply sets the mask flags for the underlying detectors. */
 void SpectrumInfo::setMasked(const size_t index, bool masked) {
