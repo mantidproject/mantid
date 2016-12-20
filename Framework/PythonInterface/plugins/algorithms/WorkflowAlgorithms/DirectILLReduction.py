@@ -1433,6 +1433,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                 subalgLogging)
         elif self.getProperty(_PROP_INPUT_WS).value:
             mainWS = self.getProperty(_PROP_INPUT_WS).value
+            wsCleanup.protect(mainWS)
         return mainWS
 
     def _normalize(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup,

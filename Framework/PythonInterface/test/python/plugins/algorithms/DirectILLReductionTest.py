@@ -109,25 +109,31 @@ class DirectILLReductionTest(unittest.TestCase):
         mtd.clear()
 
     def test_det_diagnostics_no_bad_detectors(self):
-        outWSName = 'diagnostics'
+        outWSName = 'outWS'
+        diagnosticsWSName = 'diagnostics'
         algProperties = {
             'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
             'IndexType': 'Detector ID',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'DetectorsAtL2': '128, 129',
-            'OutputDiagnosticsWorkspace': outWSName,
-            'child': True,
+            'OutputDiagnosticsWorkspace': diagnosticsWSName,
             'rethrow': True
         }
-        alg = run_algorithm('DirectILLReduction', **algProperties)
-        diagnosticsWS = alg.getProperty('OutputDiagnosticsWorkspace').value
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self._checkAlgorithmsInHistory(ws, 'MedianDetectorTest')
+        diagnosticsWS = mtd[diagnosticsWSName]
+        self._checkAlgorithmsInHistory(diagnosticsWS, 'MedianDetectorTest')
         self.assertEqual(diagnosticsWS.getNumberHistograms(),
                          self._testIN5WS.getNumberHistograms() - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
         for i in range(diagnosticsWS.getNumberHistograms()):
             self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
+        DeleteWorkspace(ws)
+        DeleteWorkspace(diagnosticsWS)
 
     def test_det_diagnostics_noisy_background(self):
         nHistograms = self._testIN5WS.getNumberHistograms()
@@ -196,6 +202,26 @@ class DirectILLReductionTest(unittest.TestCase):
                 self.assertEqual(diagnosticsWS.readY(i)[0], 1.0)
             else:
                 self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
+
+    def test_input_ws_not_deleted(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'ReductionType': 'Empty Container/Cadmium',
+            'Normalisation': 'No Normalisation',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        try:
+            self._testIN5WS.getNumberHistograms()
+        except RuntimeError:
+            self.fail('Workspace used as InputWorkspace has been deleted.')
+        finally:
+            DeleteWorkspace(outWSName)
 
     def test_rebinning_manual_mode(self):
         rebinningBegin = -2.3
