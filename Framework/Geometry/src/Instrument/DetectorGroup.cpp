@@ -23,8 +23,6 @@ DetectorGroup::DetectorGroup()
 /** Constructor that takes a list of detectors to add
 *  @param dets :: The vector of IDetector pointers that this virtual detector
 * will hold
-*  @param warnAboutMasked :: If true a log message at warning level will be
-* generated if a one of the detectors in dets is masked.
 *  @throw std::invalid_argument If an empty vector is passed as argument
 */
 DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets)
@@ -41,7 +39,6 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets)
 
 /** Add a detector to the collection
 *  @param det ::  A pointer to the detector to add
-*  @param warn :: Whether to issue warnings to the log
 */
 void DetectorGroup::addDetector(IDetector_const_sptr det) {
   // the topology of the group become undefined and needs recalculation if new
