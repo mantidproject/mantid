@@ -16,6 +16,7 @@
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::LogFilterGenerator;
 using Mantid::Kernel::DateAndTime;
+using Mantid::Kernel::LogFilter;
 using Mantid::Kernel::TimeSeriesProperty;
 
 class LogFilterGeneratorTest : public CxxTest::TestSuite {
