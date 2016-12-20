@@ -1,10 +1,14 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import *
+from mantid.simpleapi import (CloneWorkspace, CreateWorkspace, DeleteWorkspace,
+                              LoadEmptyInstrument, MaskDetectors, mtd,
+                              RemoveMaskedSpectra)
 import numpy
+import numpy.testing
 from scipy import constants
 from testhelpers import run_algorithm
 import unittest
+
 
 def _timeOfFlight(energy, length):
     velocity = numpy.sqrt(2 * energy * 1e-3 * constants.e / constants.m_n)
@@ -49,6 +53,7 @@ def _fillTemplateWorkspace(templateWS):
     elasticPeakHeight = 1723.0
     bkg = 2
     bkgMonitor = 1
+
     def fillBins(histogramIndex, elasticTOF, elasticPeakHeight, bkg):
         xIndexOffset = histogramIndex*(nBins+1)
         yIndexOffset = histogramIndex*nBins
@@ -60,11 +65,12 @@ def _fillTemplateWorkspace(templateWS):
                                 elasticPeakSigma)) + bkg
             ys[yIndexOffset+binIndex] = y
             es[yIndexOffset+binIndex] = numpy.sqrt(y)
+
     fillBins(0, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
     for histogramIndex in range(1, nHistograms):
         trueL2 = sample.getDistance(templateWS.getDetector(histogramIndex))
         trueTOF = _timeOfFlight(E_i, l1+trueL2)
-        fillBins(histogramIndex, trueTOF, elasticPeakHeight, bkgMonitor)
+        fillBins(histogramIndex, trueTOF, elasticPeakHeight, bkg)
     ws = CreateWorkspace(DataX=xs,
                          DataY=ys,
                          DataE=es,
@@ -73,7 +79,8 @@ def _fillTemplateWorkspace(templateWS):
     ws.getAxis(0).setUnit('TOF')
     ws.run().addProperty('Ei', E_i, True)
     ws.run().addProperty('wavelength', float(_wavelength(E_i)), True)
-    pulseInterval = tofMonitorDetector + (monitorElasticIndex - elasticIndex) * binWidth
+    pulseInterval = \
+        tofMonitorDetector + (monitorElasticIndex - elasticIndex) * binWidth
     ws.run().addProperty('pulse_interval', float(pulseInterval * 1e-6), True)
     return ws
 
@@ -88,11 +95,13 @@ class DirectILLReductionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._in5WStemplate = LoadEmptyInstrument(InstrumentName='IN5',
-                                               OutputWorkspace=cls._TEMPLATE_IN5_WS_NAME)
+        cls._in5WStemplate = \
+            LoadEmptyInstrument(InstrumentName='IN5',
+                                OutputWorkspace=cls._TEMPLATE_IN5_WS_NAME)
         MaskDetectors(Workspace=cls._in5WStemplate, StartWorkspaceIndex=151)
-        cls._in5WStemplate = RemoveMaskedSpectra(InputWorkspace=cls._in5WStemplate,
-                                              OutputWorkspace=cls._in5WStemplate)
+        cls._in5WStemplate = \
+            RemoveMaskedSpectra(InputWorkspace=cls._in5WStemplate,
+                                OutputWorkspace=cls._in5WStemplate)
         cls._in5WStemplate = _fillTemplateWorkspace(cls._in5WStemplate)
 
     @classmethod
@@ -187,6 +196,97 @@ class DirectILLReductionTest(unittest.TestCase):
                 self.assertEqual(diagnosticsWS.readY(i)[0], 1.0)
             else:
                 self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
+
+    def test_rebinning_manual_mode(self):
+        rebinningBegin = -2.3
+        rebinningEnd = 4.2
+        binWidth = 0.66
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'Reductiontype': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Manual Rebinning',
+            'EnergyRebinningParams': '{0}, {1}, {2}'.format(rebinningBegin,
+                                                            binWidth,
+                                                            rebinningEnd),
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self._checkAlgorithmsInHistory(ws, 'Rebin')
+        for i in range(ws.getNumberHistograms()):
+            xs = ws.readX(i)
+            self.assertAlmostEqual(xs[0], rebinningBegin)
+            self.assertAlmostEqual(xs[-1], rebinningEnd)
+            for j in range(len(xs) - 2):
+                # Skip the last bin which is smaller.
+                self.assertAlmostEqual(xs[j+1] - xs[j], binWidth)
+
+    def test_rebinning_manul_mode_fails_without_params(self):
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'Reductiontype': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Manual Rebinning',
+            'child': True,
+            'rethrow': True
+        }
+        self.assertRaises(RuntimeError, run_algorithm, 'DirectILLReduction',
+                          **algProperties)
+
+    def test_rebinning_to_elastic_bin_width(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'Reductiontype': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self._checkAlgorithmsInHistory(ws, 'BinWidthAtX', 'Rebin')
+        binWidth = ws.readX(0)[1] - ws.readX(0)[0]
+        xs = ws.extractX()
+        numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
+        DeleteWorkspace(ws)
+
+    def test_rebinning_to_median_bin_width(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'Reductiontype': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Rebin to Median Bin Width',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self._checkAlgorithmsInHistory(ws, 'MedianBinWidth', 'Rebin')
+        binWidth = ws.readX(0)[1] - ws.readX(0)[0]
+        xs = ws.extractX()
+        numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
+        DeleteWorkspace(ws)
+
+    def _checkAlgorithmsInHistory(self, ws, *arg):
+        history = ws.getHistory()
+        reductionHistory = history.getAlgorithmHistory(history.size() - 1)
+        algHistories = reductionHistory.getChildHistories()
+        algNames = [alg.name() for alg in algHistories]
+        for algName in arg:
+            self.assertTrue(algName in algNames)
 
 if __name__ == '__main__':
     unittest.main()

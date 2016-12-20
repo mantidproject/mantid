@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
 
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction,\
-    FileProperty, InstrumentValidator, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd,\
-    PropertyMode, WorkspaceProperty, WorkspaceUnitValidator
-from mantid.kernel import CompositeValidator, Direct, Direction,\
-    FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty,\
-    IntBoundedValidator, IntMandatoryValidator, StringListValidator,\
-    UnitConversion
-from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
-    ClearMaskFlag, CloneWorkspace, ComputeCalibrationCoefVan,\
-    ConvertToConstantL2, ConvertUnits, CorrectKiKf,\
-    CreateSingleValuedWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser,\
-    Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MaskDetectors,\
-    MedianDetectorTest, MergeRuns, Minus, Multiply, NormaliseToMonitor,\
-    Plus, Rebin, Scale
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction,
+                        FileProperty, InstrumentValidator,
+                        ITableWorkspaceProperty, MatrixWorkspaceProperty,
+                        mtd, PropertyMode, WorkspaceProperty,
+                        WorkspaceUnitValidator)
+from mantid.kernel import (CompositeValidator, Direct, Direction,
+                           EnabledWhenProperty, FloatArrayProperty,
+                           FloatBoundedValidator, IntArrayBoundedValidator,
+                           IntArrayProperty, IntBoundedValidator,
+                           IntMandatoryValidator, PropertyCriterion,
+                           StringListValidator, UnitConversion)
+from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
+                              CalculateFlatBackground, ClearMaskFlag,
+                              CloneWorkspace, ComputeCalibrationCoefVan,
+                              ConvertToConstantL2, ConvertUnits, CorrectKiKf,
+                              CreateSingleValuedWorkspace, DeleteWorkspace,
+                              DetectorEfficiencyCorUser, Divide,
+                              ExtractMonitors, FindEPP, GetEiMonDet, Load,
+                              MaskDetectors, MedianBinWidth,
+                              MedianDetectorTest, MergeRuns, Minus, Multiply,
+                              NormaliseToMonitor, Plus, Rebin, Scale)
 import numpy
 from os import path
 
@@ -37,8 +44,6 @@ _NORM_METHOD_TIME = 'Acquisition Time'
 _SUBALG_LOGGING_OFF = 'No Subalgorithm Logging'
 _SUBALG_LOGGING_ON = 'Allow Subalgorithm Logging'
 
-_PROP_BINNING_Q = 'QBinning'
-_PROP_BINNING_W = 'WBinning'
 _PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgDiagnosticsHighThreshold'
 _PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgDiagnosticsLowThreshold'
 _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgDiagnosticsErrorThreshold'
@@ -72,11 +77,20 @@ _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
 _PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakDiagnosticsLowThreshold'
 _PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST = \
     'ElasticPeakDiagnosticsErrorThreshold'
+_PROP_REBINNING_MODE_W = 'EnergyRebinningMode'
+_PROP_REBINNING_PARAMS_Q = 'QRebinningParams'
+_PROP_REBINNING_PARAMS_W = 'EnergyRebinningParams'
 _PROP_REDUCTION_TYPE = 'ReductionType'
 _PROP_TRANSMISSION = 'Transmission'
 _PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
 _PROP_USER_MASK = 'MaskedDetectors'
 _PROP_VANA_WS = 'VanadiumWorkspace'
+
+_PROPGROUP_REBINNING = 'Rebinning for SofQW'
+
+_REBIN_AUTO_ELASTIC_PEAK = 'Rebin to Bin Width at Elastic Peak'
+_REBIN_AUTO_MEDIAN_BIN_WIDTH = 'Rebin to Median Bin Width'
+_REBIN_MANUAL = 'Manual Rebinning'
 
 _REDUCTION_TYPE_EC_CD = 'Empty Container/Cadmium'
 _REDUCTION_TYPE_SAMPLE = 'Sample'
@@ -797,13 +811,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      wsCleanup, subalgLogging)
 
         # Rebinning.
-        # TODO automatize binning in w. Do we need rebinning in q as well?
-        params = self.getProperty(_PROP_BINNING_W).value
-        if params:
-            rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
-            wsCleanup.cleanup(mainWS)
-            mainWS = rebinnedWS
-            del(rebinnedWS)
+        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
+                                subalgLogging)
 
         # Detector efficiency correction.
         mainWS = self._correctByDetectorEfficiency(mainWS, wsNames,
@@ -1039,14 +1048,30 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Sample transmission for empty container ' +
                                  'subtraction.')
-        self.declareProperty(name=_PROP_BINNING_Q,
-                             defaultValue='',
+        self.declareProperty(name=_PROP_REBINNING_MODE_W,
+                             defaultValue=_REBIN_AUTO_ELASTIC_PEAK,
+                             validator=StringListValidator([
+                                 _REBIN_AUTO_ELASTIC_PEAK,
+                                 _REBIN_AUTO_MEDIAN_BIN_WIDTH,
+                                 _REBIN_MANUAL]),
                              direction=Direction.Input,
-                             doc='Rebinning in q.')
-        self.declareProperty(name=_PROP_BINNING_W,
-                             defaultValue='',
-                             direction=Direction.Input,
-                             doc='Rebinning in w.')
+                             doc='Energy rebinnin mode.')
+        self.setPropertySettings(_PROP_REBINNING_MODE_W, EnabledWhenProperty(
+            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
+            _REDUCTION_TYPE_SAMPLE))
+        self.setPropertyGroup(_PROP_REBINNING_MODE_W, _PROPGROUP_REBINNING)
+        self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_W),
+                             doc='Manual energy rebinning parameters.')
+        self.setPropertySettings(_PROP_REBINNING_PARAMS_W, EnabledWhenProperty(
+            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
+            _REDUCTION_TYPE_SAMPLE))
+        self.setPropertyGroup(_PROP_REBINNING_PARAMS_W, _PROPGROUP_REBINNING)
+        self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_Q),
+                             doc='Rebinning parameters for q.')
+        self.setPropertySettings(_PROP_REBINNING_PARAMS_Q, EnabledWhenProperty(
+            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
+            _REDUCTION_TYPE_SAMPLE))
+        self.setPropertyGroup(_PROP_REBINNING_PARAMS_Q, _PROPGROUP_REBINNING)
         # Rest of the output properties.
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_OUTPUT_DET_EPP_WS,
@@ -1091,6 +1116,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if fileGiven == wsGiven:
             issues[_PROP_INPUT_FILE] = \
                 'Must give either an input file or an input workspace.'
+        reductionType = self.getProperty(_PROP_REDUCTION_TYPE)
+        if reductionType == _REDUCTION_TYPE_SAMPLE:
+            if self.getProperty(_PROP_REBINNING_PARAMS_Q):
+                issues[_PROP_REBINNING_PARAMS_Q] = _PROP_REBINNING_PARAMS_Q + \
+                    ' is mandatory when ' + _PROP_REDUCTION_TYPE + ' is ' + \
+                    _REDUCTION_TYPE_SAMPLE + '.'
         return issues
 
     def _applyUserMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
@@ -1450,6 +1481,33 @@ class DirectILLReduction(DataProcessorAlgorithm):
             wsCleanup.cleanup(mainWS)
             return vanaNormalizedWS
         return mainWS
+
+    def _rebinInW(self, mainWS, wsNames, wsCleanup, report,
+                  subalgLogging):
+        '''
+        Rebins the horizontal axis of a workspace.
+        '''
+        mode = self.getProperty(_PROP_REBINNING_MODE_W).value
+        if mode == _REBIN_AUTO_ELASTIC_PEAK:
+            binWidth = BinWidthAtX(InputWorkspace=mainWS,
+                                   X=0.0,
+                                   Rounding='10^n')
+            params = [binWidth]
+            report.notice('Rebinned energy axis to bin width {}.'
+                          .format(binWidth))
+        elif mode == _REBIN_AUTO_MEDIAN_BIN_WIDTH:
+            binWidth = MedianBinWidth(InputWorkspace=mainWS,
+                                      Rounding='10^n')
+            params = [binWidth]
+            report.notice('Rebinned energy axis to bin width {}.'
+                          .format(binWidth))
+        elif mode == _REBIN_MANUAL:
+            params = self.getProperty(_PROP_REBINNING_PARAMS_W).value
+        else:
+            raise RuntimeError('Unknown ' + _PROP_REBINNING_MODE_W)
+        rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return rebinnedWS
 
     def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
         '''
