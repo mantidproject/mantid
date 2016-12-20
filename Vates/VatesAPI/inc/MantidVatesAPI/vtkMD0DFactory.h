@@ -5,7 +5,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 
 namespace Mantid {
 namespace VATES {
