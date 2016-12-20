@@ -116,36 +116,44 @@ public:
 
     // Generate "random" sequence
     MockRNG rng;
-    Sequence rand;
     // Selects first component
-    EXPECT_CALL(rng, nextInt(_, _)).InSequence(rand).WillOnce(Return(1));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.70));
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.55))
+        .WillOnce(Return(0.65))
+        .WillOnce(Return(0.70));
     V3D comp1Point;
     TS_ASSERT_THROWS_NOTHING(comp1Point = kit->generatePoint(rng, maxAttempts));
     TS_ASSERT(kit->isValid(comp1Point));
+    Mock::VerifyAndClearExpectations(&rng);
 
     // Selects second component
-    EXPECT_CALL(rng, nextInt(_, _)).InSequence(rand).WillOnce(Return(2));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.70));
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.55))
+        .WillOnce(Return(0.65))
+        .WillOnce(Return(0.70));
     V3D comp2Point;
     TS_ASSERT_THROWS_NOTHING(comp2Point = kit->generatePoint(rng, maxAttempts));
     TS_ASSERT(comp2Point != comp1Point);
     TS_ASSERT(kit->isValid(comp2Point));
+    Mock::VerifyAndClearExpectations(&rng);
 
     // Selects third component
-    EXPECT_CALL(rng, nextInt(_, _)).InSequence(rand).WillOnce(Return(3));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.70));
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(3));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.55))
+        .WillOnce(Return(0.65))
+        .WillOnce(Return(0.70));
     V3D comp3Point;
     TS_ASSERT_THROWS_NOTHING(comp3Point = kit->generatePoint(rng, maxAttempts));
     TS_ASSERT(comp3Point != comp2Point);
     TS_ASSERT(comp3Point != comp1Point);
     TS_ASSERT(kit->isValid(comp3Point));
+    Mock::VerifyAndClearExpectations(&rng);
   }
 
   void testGeneratePointRespectsActiveRegion() {
@@ -157,16 +165,18 @@ public:
 
     // Generate "random" sequence
     MockRNG rng;
-    Sequence rand;
-    // Selects first component
-    EXPECT_CALL(rng, nextInt(_, _)).InSequence(rand).WillOnce(Return(1));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.70));
-    V3D comp1Point;
-    TS_ASSERT_THROWS_NOTHING(
-        comp1Point = kit->generatePoint(rng, kit->boundingBox(), maxAttempts));
-    TS_ASSERT(kit->isValid(comp1Point));
+    // Sequence will try to select one of the non-container pieces
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.5))
+        .WillOnce(Return(0.5))
+        .WillOnce(Return(0.5));
+    // Restrict region to can
+    TS_ASSERT_THROWS(kit->generatePoint(rng, kit->container()->getBoundingBox(),
+                                        maxAttempts),
+                     std::runtime_error);
+    Mock::VerifyAndClearExpectations(&rng);
   }
 
 private:
