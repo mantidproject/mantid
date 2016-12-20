@@ -739,6 +739,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS, monWS = self._separateMons(mainWS, wsNames,
                                            wsCleanup, subalgLogging)
 
+        # Apply user mask.
+        mainWS = self._applyUserMask(mainWS, wsNames,
+                                     wsCleanup, subalgLogging)
+
         # Time-independent background.
         mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames,
                                          wsCleanup, subalgLogging)
@@ -755,9 +759,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # Detector diagnostics, if requested.
         mainWS = self._detDiagnostics(mainWS, bkgWS, detEPPWS, wsNames,
                                       wsCleanup, report, subalgLogging)
-        # Apply user mask.
-        mainWS = self._applyUserMask(mainWS, wsNames,
-                                     wsCleanup, subalgLogging)
 
         # Calibrate incident energy, if requested.
         mainWS, monWS = self._calibrateEi(mainWS, detEPPWS, monWS, monEPPWS,
