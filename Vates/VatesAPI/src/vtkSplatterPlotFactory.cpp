@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/Normalization.h"
 
 #include <vtkCellData.h>
+#include <vtkCellType.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
 #include <vtkNew.h>
@@ -211,6 +212,12 @@ void vtkSplatterPlotFactory::doCreate(
   // Add points and scalars
   visualDataSet->SetPoints(points.GetPointer());
   visualDataSet->GetPointData()->SetScalars(signal.GetPointer());
+  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+
+  visualDataSet->Allocate(points->GetNumberOfPoints());
+  for (vtkIdType ptId = 0; ptId < points->GetNumberOfPoints(); ++ptId) {
+    visualDataSet->InsertNextCell(VTK_VERTEX, 1, &ptId);
+  }
 }
 
 /**

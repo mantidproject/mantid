@@ -284,6 +284,14 @@ void SplatterPlotView::onThresholdButtonClicked() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->m_threshSource = builder->createFilter(
       "filters", MantidQt::API::MdConstants::Threshold, this->m_splatSource);
+
+  pqDataRepresentation *filter = builder->createDataRepresentation(
+      this->m_threshSource->getOutputPort(0), this->m_view);
+
+  auto filterProxy = filter->getProxy();
+  vtkSMPropertyHelper(filterProxy, "Representation").Set("Point Gaussian");
+  vtkSMPropertyHelper(filterProxy, "Opacity").Set(0.5);
+  vtkSMPropertyHelper(filterProxy, "GaussianRadius").Set(0.005);
   emit this->lockColorControls();
 }
 
