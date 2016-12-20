@@ -240,11 +240,6 @@ private:
           new Mantid::Kernel::PropertyWithValue<double>("Ei", Ei));
     }
 
-    if (Ef > 0) {
-      Mantid::Geometry::ParameterMap pmap(ws->instrumentParameters());
-      pmap.addDouble(physicalPixel, "Efixed", Ef);
-      ws->replaceInstrumentParameters(pmap);
-    }
     Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
     ws->mutableSample().setOrientedLattice(&latt);
 
