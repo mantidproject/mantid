@@ -111,6 +111,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         # Perform the ElasticWindow algorithms
         for input_ws in input_workspace_names:
+
             logger.information('Running ElasticWindow for workspace: %s' % input_ws)
             progress.report('ElasticWindow for workspace: %s' % input_ws)
 
@@ -355,7 +356,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         # Can't find log file
         logger.warning('No sample units found for run: %s' % run_name)
-        return None
+        return None, None
 
 
 # Register algorithm with Mantid
