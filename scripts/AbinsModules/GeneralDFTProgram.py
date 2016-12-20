@@ -6,7 +6,6 @@ from KpointsData import KpointsData
 from AtomsData import AtomsDaTa
 from AbinsData import AbinsData
 import AbinsParameters
-import AbinsConstants
 
 
 # noinspection PyMethodMayBeStatic
@@ -20,6 +19,7 @@ class GeneralDFTProgram(object):
         self._num_k = None
         self._num_atoms = None
         self._sample_form = None
+        self._dft_program = None
         self._clerk = IOmodule(input_filename=input_dft_filename, group_name=AbinsParameters.dft_group)
 
     def read_phonon_file(self):
@@ -165,6 +165,17 @@ class GeneralDFTProgram(object):
         result_data = AbinsData()
         result_data.set(k_points_data=k_points, atoms_data=atoms)
         return result_data
+
+    def save_dft_data(self, data=None):
+        """
+        Saves DFT data to an HDF5 file.
+        :param data: dictionary with data to be saved.
+        """
+        for name in data:
+            self._clerk.add_data(name=name, value=data[name])
+        self._clerk.add_file_attributes()
+        self._clerk.add_attribute("DFT_program", self._dft_program)
+        self._clerk.save()
 
     def get_formatted_data(self):
 

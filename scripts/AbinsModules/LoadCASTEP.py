@@ -22,6 +22,7 @@ class LoadCASTEP(GeneralDFTProgram):
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
         self._sum_rule = None
+        self._dft_program = "CASTEP"
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
@@ -241,12 +242,7 @@ class LoadCASTEP(GeneralDFTProgram):
 
         # save stuff to hdf file
         data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
-        for name in data_to_save:
-            self._clerk.add_data(name=name, value=file_data[name])
-
-        self._clerk.add_file_attributes()
-        self._clerk.add_attribute("DFT_program", "CASTEP")
-
-        self._clerk.save()
+        data = {key: file_data[key] for key in data_to_save}
+        self.save_dft_data(data=data)
 
         return self._rearrange_data(data=file_data)
