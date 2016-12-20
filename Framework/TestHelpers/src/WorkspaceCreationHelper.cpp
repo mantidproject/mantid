@@ -506,8 +506,6 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  workspace->setInstrument(instrument);
-
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
@@ -520,6 +518,7 @@ void createInstrumentForWorkspaceWithDistances(
     workspace->getSpectrum(i).clearDetectorIDs();
     workspace->getSpectrum(i).addDetectorID(det->getID());
   }
+  workspace->setInstrument(instrument);
 }
 
 //================================================================================================================

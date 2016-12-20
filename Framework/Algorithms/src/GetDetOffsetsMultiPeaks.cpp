@@ -304,7 +304,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   // Fit windows
   std::string fitwinwsname = getPropertyValue("FitwindowTableWorkspace");
   g_log.notice() << "FitWindowTableWorkspace name: " << fitwinwsname << "\n";
-  if (fitwinwsname.size() > 0) {
+  if (!fitwinwsname.empty()) {
     // Use fit window workspace for each spectrum
     TableWorkspace_sptr fitwintablews = getProperty("FitwindowTableWorkspace");
     importFitWindowTableWorkspace(fitwintablews);
@@ -361,7 +361,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
 
   // Input resolution
   std::string reswsname = getPropertyValue("InputResolutionWorkspace");
-  if (reswsname.size() == 0)
+  if (reswsname.empty())
     m_hasInputResolution = false;
   else {
     m_inputResolutionWS = getProperty("InputResolutionWorkspace");
