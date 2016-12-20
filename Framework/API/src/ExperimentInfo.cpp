@@ -1324,8 +1324,7 @@ void ExperimentInfo::populateWithParameter(
     if (!det)
       throw std::runtime_error(
           "Found masking for a non-detector component. This is not possible");
-    m_detectorInfo->setMasked(m_detectorInfoWrapper->indexOf(det->getID()),
-                              paramValue);
+    m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), paramValue);
   } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
              name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
