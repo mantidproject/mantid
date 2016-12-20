@@ -150,38 +150,38 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 run_numbers.append(run_no)
 
                 # Get the sample environment unit
-                sample = self._get_sample_units(input_ws)
+                sample,unit = self._get_sample_units(input_ws)
                 if sample is not None:
                     sample_param.append(sample)
                 else:
                     # No need to output a temperature workspace if there are no temperatures
                     self._elt_workspace = ''
 
-            logger.information('Creating Q and Q^2 workspaces')
-            progress.report('Creating Q workspaces')
+        logger.information('Creating Q and Q^2 workspaces')
+        progress.report('Creating Q workspaces')
 
-            if len(input_workspace_names) == 1:
-                # Just rename single workspaces
-                rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
-                rename_alg.setProperty("InputWorkspace", q_workspaces[0])
-                rename_alg.setProperty("OutputWorkspace", self._q_workspace)
-                rename_alg.execute()
-                rename_alg.setProperty("InputWorkspace", q2_workspaces[0])
-                rename_alg.setProperty("OutputWorkspace", self._q2_workspace)
-                rename_alg.execute()
-            else:
-                # Append the spectra of the first two workspaces
-                append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
-                append_alg.setProperty("InputWorkspace1", q_workspaces[0])
-                append_alg.setProperty("InputWorkspace2", q_workspaces[1])
-                append_alg.setProperty("OutputWorkspace", self._q_workspace)
-                append_alg.execute()
-                mtd.addOrReplace(self._q_workspace, append_alg.getProperty("OutputWorkspace").value)
-                append_alg.setProperty("InputWorkspace1", q2_workspaces[0])
-                append_alg.setProperty("InputWorkspace2", q2_workspaces[1])
-                append_alg.setProperty("OutputWorkspace", self._q2_workspace)
-                append_alg.execute()
-                mtd.addOrReplace(self._q2_workspace, append_alg.getProperty("OutputWorkspace").value)
+        if len(input_workspace_names) == 1:
+            # Just rename single workspaces
+            rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
+            rename_alg.setProperty("InputWorkspace", q_workspaces[0])
+            rename_alg.setProperty("OutputWorkspace", self._q_workspace)
+            rename_alg.execute()
+            rename_alg.setProperty("InputWorkspace", q2_workspaces[0])
+            rename_alg.setProperty("OutputWorkspace", self._q2_workspace)
+            rename_alg.execute()
+        else:
+            # Append the spectra of the first two workspaces
+            append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
+            append_alg.setProperty("InputWorkspace1", q_workspaces[0])
+            append_alg.setProperty("InputWorkspace2", q_workspaces[1])
+            append_alg.setProperty("OutputWorkspace", self._q_workspace)
+            append_alg.execute()
+            mtd.addOrReplace(self._q_workspace, append_alg.getProperty("OutputWorkspace").value)
+            append_alg.setProperty("InputWorkspace1", q2_workspaces[0])
+            append_alg.setProperty("InputWorkspace2", q2_workspaces[1])
+            append_alg.setProperty("OutputWorkspace", self._q2_workspace)
+            append_alg.execute()
+            mtd.addOrReplace(self._q2_workspace, append_alg.getProperty("OutputWorkspace").value)
 
             # Append to the spectra of each remaining workspace
             for idx in range(2, len(input_workspace_names)):
@@ -196,24 +196,24 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 append_alg.execute()
                 mtd.addOrReplace(self._q2_workspace, append_alg.getProperty("OutputWorkspace").value)
 
-                # Delete the output workspaces from the ElasticWindow algorithms
-                delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
-                for q_ws in q_workspaces:
-                    delete_alg.setProperty("Workspace", q_ws)
-                    delete_alg.execute()
-                for q2_ws in q2_workspaces:
-                    delete_alg.setProperty("Workspace", q2_ws)
-                    delete_alg.execute()
+            # Delete the output workspaces from the ElasticWindow algorithms
+            delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
+            for q_ws in q_workspaces:
+                delete_alg.setProperty("Workspace", q_ws)
+                delete_alg.execute()
+            for q2_ws in q2_workspaces:
+                delete_alg.setProperty("Workspace", q2_ws)
+                delete_alg.execute()
 
-            # Set the vertical axis units
-            v_axis_is_sample = len(input_workspace_names) == len(sample_param)
+        # Set the vertical axis units
+        v_axis_is_sample = len(input_workspace_names) == len(sample_param)
 
-            if v_axis_is_sample:
-                logger.notice('Vertical axis is in temperature')
-                unit = ('Temperature', 'K')
-            else:
-                logger.notice('Vertical axis is in run number')
-                unit = ('Run No', 'last 3 digits')
+        if v_axis_is_sample:
+            logger.notice('Vertical axis is in units of %s' % unit)
+            unit = (self._sample_log_name, unit)
+        else:
+            logger.notice('Vertical axis is in run number')
+            unit = ('Run No', 'last 3 digits')
 
         # Create a new vertical axis for the Q and Q**2 workspaces
         q_ws_axis = NumericAxis.create(len(input_workspace_names))
@@ -331,7 +331,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             sample = value_action[self._sample_log_value](tmp)
             unit = run[self._sample_log_name].units
             logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
-            return sample
+            return sample, unit
 
         else:
             # Logs not in workspace, try loading from file
@@ -347,7 +347,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                     sample = tmp[len(tmp) - 1]
                     unit = run[self._sample_log_name].units
                     logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
-                    return sample
+                    return sample, unit
                 else:
                     logger.warning('Log entry %s for run %s not found' % (self._sample_log_name, run_name))
             else:
