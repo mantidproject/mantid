@@ -1,4 +1,6 @@
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -148,6 +150,7 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   */
 void EstimateResolutionDiffraction::estimateDetectorResolution() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const auto &detectorInfo = m_inputWS->detectorInfo();
   const auto l1 = spectrumInfo.l1();
   g_log.notice() << "L1 = " << l1 << "\n";
   const V3D samplepos = spectrumInfo.samplePosition();
@@ -187,7 +190,12 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
         spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     double theta = 0.5 * twotheta;
 
-    double solidangle = det.solidAngle(samplepos);
+    double solidangle = 0.0;
+    for (const auto detID : m_inputWS->getSpectrum(i).getDetectorIDs()) {
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index))
+        solidangle += detectorInfo.detector(index).solidAngle(samplepos);
+    }
     double deltatheta = sqrt(solidangle);
 
     // Resolution
