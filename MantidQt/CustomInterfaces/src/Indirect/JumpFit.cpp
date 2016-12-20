@@ -130,7 +130,7 @@ void JumpFit::run() {
   m_fitAlg->initialize();
 
   m_fitAlg->setProperty("Function", functionString);
-  m_fitAlg->setProperty("InputWorkspace", sample);
+  m_fitAlg->setProperty("InputWorkspace", sample+"_HWHM");
   m_fitAlg->setProperty("WorkspaceIndex", width);
   m_fitAlg->setProperty("IgnoreInvalidData", true);
   m_fitAlg->setProperty("StartX", startX);
@@ -226,12 +226,12 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
   scaleAlg->initialize();
   scaleAlg->setProperty("InputWorkspace", filename.toStdString());
-  scaleAlg->setProperty("OutputWorkspace", filename.toStdString());
+  scaleAlg->setProperty("OutputWorkspace", filename.toStdString()+"_HWHM");
   scaleAlg->setProperty("Factor", 0.5);
   scaleAlg->execute();
 
   auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
-      filename.toStdString());
+      filename.toStdString()+"_HWHM");
   auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
   findAllWidths(mws);
@@ -242,16 +242,16 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
     m_uiForm.cbWidth->setEnabled(true);
 
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-
+    QString sample = filename + "_HWHM";
     m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", filename,
+    m_uiForm.ppPlot->addSpectrum("Sample", sample,
                                  m_spectraList[currentWidth]);
 
     QPair<double, double> res;
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
 
     // Use the values from the instrument parameter file if we can
-    if (getResolutionRangeFromWs(filename, res))
+    if (getResolutionRangeFromWs(sample, res))
       setRangeSelector(qRangeSelector, m_properties["QMin"],
                        m_properties["QMax"], res);
     else
@@ -320,8 +320,7 @@ void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
  * @param text :: The name spectrum index to plot
  */
 void JumpFit::handleWidthChange(const QString &text) {
-  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  QString samplePath = m_uiForm.dsSample->getFullFilePath();
+  QString sampleName = (m_uiForm.dsSample->getCurrentDataName()+"_HWHM");
 
   if (!sampleName.isEmpty() && m_spectraList.size() > 0) {
     if (validate()) {
@@ -366,7 +365,7 @@ void JumpFit::updateProperties(QtProperty *prop, double val) {
 /**
  * Gets a list of parameters for a given fit function.
  *
- * @return List fo parameters
+ * @return List of parameters
  */
 QStringList JumpFit::getFunctionParameters(const QString &functionName) {
   QStringList parameters;
@@ -421,10 +420,10 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
 void JumpFit::clearPlot() {
   m_uiForm.ppPlot->clear();
   const std::string sampleName =
-      m_uiForm.dsSample->getCurrentDataName().toStdString();
+      (m_uiForm.dsSample->getCurrentDataName().toStdString());
   if (sampleName.compare("") != 0) {
     MatrixWorkspace_sptr sample =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName + "_HWHM");
     if (sample && m_spectraList.size() > 0) {
       m_uiForm.cbWidth->setEnabled(true);
 
@@ -453,7 +452,7 @@ void JumpFit::generatePlotGuess() {
 
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
-  const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString()+"_HWHM";
   const auto startX = m_dblManager->value(m_properties["QMin"]);
   const auto endX = m_dblManager->value(m_properties["QMax"]);
 
