@@ -56,7 +56,7 @@ The value of the momentum transfer :math:`Q` is contained in the loaded data
 .. testcode:: SingleSpectrumTeixeiraWaterSQE
 
     from __future__ import (absolute_import, division, print_function)
-    resolution=Load("irs26173_graphite_res.nxs")
+    resolution=Load("irs26173_graphite002_res.nxs")
     data=Load("irs26176_graphite002_red")
     function="""
     (composite=Convolution,FixResolution=false,NumDeriv=true;
