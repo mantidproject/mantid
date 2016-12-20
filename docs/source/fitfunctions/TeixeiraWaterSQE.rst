@@ -57,7 +57,7 @@ The value of the momentum transfer :math:`Q` is contained in the loaded data
 
     from __future__ import (absolute_import, division, print_function)
     resolution=Load("irs26173_graphite002_res.nxs")
-    data=Load("irs26176_graphite002_red")
+    data=Load("irs26176_graphite002_red.nxs")
     function="""
     (composite=Convolution,FixResolution=false,NumDeriv=true;
       name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,Scaling=1,XScaling=1,ties=(Scaling=1,XScaling=1);
