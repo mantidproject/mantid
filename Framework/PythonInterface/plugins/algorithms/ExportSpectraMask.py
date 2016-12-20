@@ -33,6 +33,7 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
 
     no_detectors = 0
     masks = []
+    specInfo = pws.spectrumInfo()
     for i in range(nhist):
         # set provisional spectra ID
         ms = i+1
@@ -46,14 +47,13 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
             masks.append(ms)
             continue
         try:
-            det = pws.getDetector(i)
+            if specInfo.isMasked(i):
+                masks.append(ms)
 #pylint: disable=W0703
         except Exception:
             no_detectors = no_detectors +1
             masks.append(ms)
             continue
-        if det.isMasked():
-            masks.append(ms)
 
     filename=''
     if len(fileName)==0 :
