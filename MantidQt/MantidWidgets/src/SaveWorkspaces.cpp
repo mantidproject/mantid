@@ -270,8 +270,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if (algorithm != "SaveNISTDAT" &&
-        algorithm != "SaveNXcanSAS") {
+    if (algorithm != "SaveNISTDAT" && algorithm != "SaveNXcanSAS") {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";
     }
