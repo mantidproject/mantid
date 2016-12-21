@@ -45,7 +45,6 @@ set ( SRC_FILES
 	src/LoadEventNexus.cpp
 	src/ProcessBankData.cpp
 	src/BankPulseTimes.cpp
-	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFITS.cpp
 	src/LoadFullprofResolution.cpp
@@ -53,7 +52,6 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
-	src/LoadILL.cpp
 	src/LoadILLIndirect.cpp
 	src/LoadILLTOF.cpp
 	src/LoadILLReflectometry.cpp
@@ -65,7 +63,6 @@ set ( SRC_FILES
 	src/LoadIsawDetCal.cpp
 	src/LoadLLB.cpp
 	src/LoadLog.cpp
-	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadMLZ.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
@@ -119,7 +116,6 @@ set ( SRC_FILES
 	src/NexusTester.cpp
 	src/PDLoadCharacterizations.cpp
 	src/PatchBBY.cpp
-	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
@@ -223,7 +219,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/ProcessBankData.h
 	inc/MantidDataHandling/BankPulseTimes.h
-	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFITS.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
@@ -231,7 +226,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadILLIndirect.h
 	inc/MantidDataHandling/LoadILLTOF.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
@@ -243,7 +237,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLog.h
-	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadMLZ.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
@@ -293,7 +286,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/PatchBBY.h
-	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
@@ -384,8 +376,8 @@ set ( TEST_FILES
 	ISISDataArchiveTest.h
 	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
-	LoadAscii2Test.h
 	LoadAsciiTest.h
+	LoadAscii2Test.h
 	LoadBBYTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
@@ -397,7 +389,6 @@ set ( TEST_FILES
 	LoadEmptyInstrumentTest.h
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
-	LoadEventPreNexusTest.h
 	LoadFITSTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSASInstrumentFileTest.h
@@ -458,7 +449,6 @@ set ( TEST_FILES
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
 	PDLoadCharacterizationsTest.h
-	ProcessDasNexusLogTest.h
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
