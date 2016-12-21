@@ -38,12 +38,10 @@ namespace DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectors)
 
-using namespace Kernel;
 using namespace API;
+using namespace Kernel;
 using namespace DataObjects;
-using Geometry::Instrument_const_sptr;
-using Geometry::IDetector_const_sptr;
-using namespace DataObjects;
+using namespace Geometry;
 
 /*
  * Define input arguments
@@ -93,6 +91,8 @@ void MaskDetectors::init() {
       "Default is number of histograms in target workspace if other masks are"
       " present "
       "or ignored if not.");
+  declareProperty(make_unique<ArrayProperty<std::string>>("ComponentList"),
+       "An ArrayProperty containing a list of component names to mask");
 }
 
 /*
@@ -119,6 +119,10 @@ void MaskDetectors::exec() {
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
   std::vector<specnum_t> spectraList = getProperty("SpectraList");
   std::vector<detid_t> detectorList = getProperty("DetectorList");
+  std::vector<std::string> componentList = getProperty("ComponentList");
+  if (!componentList.empty()) {
+    appendToDetectorListFromComponentList(detectorList, componentList, WS);
+  }
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
   auto ranges_info = getRanges(WS);
@@ -494,6 +498,63 @@ void MaskDetectors::appendToIndexListFromMaskWS(
   }
   tmp_index.swap(indexList);
 } // appendToIndexListFromWS
+
+/**
+ * Append the detector IDs of detectors found recursively in the list of components.
+ *
+ * @param detectorList :: An existing list of detector IDs
+ * @param componentList :: List of component names
+ * @param WS :: Workspace instrument of which to use
+ */
+void MaskDetectors::appendToDetectorListFromComponentList(std::vector<detid_t> &detectorList,
+                                           const std::vector<std::string> &componentList,
+                                           const API::MatrixWorkspace_const_sptr WS) {
+  const auto instrument = WS->getInstrument();
+  if (!instrument) {
+    g_log.error() << "No instrument in input workspace. Ignoring ComponentList\n";
+    return;
+  }
+  std::set<detid_t> detectorIDs;
+  for (const auto &compName : componentList) {
+    std::vector<boost::shared_ptr<const IComponent>> components;
+    if (compName.find('/') != std::string::npos) {
+      auto component = instrument->getComponentByName(compName);
+      if (component) {
+        components.emplace_back(component);
+      }
+    } else {
+      components = instrument->getAllComponentsWithName(compName);
+    }
+    if (components.empty()) {
+      g_log.error() << "Component " << compName << " not found in input workspace.\n";
+      continue;
+    }
+    for (const auto &comp : components) {
+      const auto assembly =
+          boost::dynamic_pointer_cast<const ICompAssembly>(comp);
+      const auto detector =
+          boost::dynamic_pointer_cast<const IDetector>(comp);
+      if (detector) {
+        detectorIDs.emplace(detector->getID());
+      } else if (assembly) {
+        std::vector<IComponent_const_sptr> childComponents;
+        const bool recursively = true;
+        assembly->getChildren(childComponents, recursively);
+        for (const auto &childComp : childComponents) {
+          const auto childDetector =
+              boost::dynamic_pointer_cast<const IDetector>(childComp);
+          if (childDetector) {
+            detectorIDs.emplace(childDetector->getID());
+          }
+        }
+      }
+    }
+  }
+  const auto oldSize = detectorList.size();
+  detectorList.resize(detectorList.size() + detectorIDs.size());
+  auto appendBegin = detectorList.begin() + oldSize;
+  std::copy(detectorIDs.cbegin(), detectorIDs.cend(), appendBegin);
+} // appendToDetectorListFromComponentList
 
 } // namespace DataHandling
 } // namespace Mantid

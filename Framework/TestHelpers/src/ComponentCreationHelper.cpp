@@ -286,7 +286,7 @@ Instrument_sptr createTestInstrumentCylindrical(
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
         std::ostringstream lexer;
-        lexer << "pixel-(" << j << "," << i << ")";
+        lexer << "pixel-(" << j << ";" << i << ")";
         Detector *physicalPixel =
             new Detector(lexer.str(), pixelID, pixelShape, bank);
         const double xpos = j * (cylRadius * 2.0);
