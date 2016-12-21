@@ -4,11 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>
+#include <iomanip>
 
 using Mantid::CurveFitting::Algorithms::RefinePowderInstrumentParameters;
 using namespace Mantid;

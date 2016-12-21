@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -108,6 +109,7 @@ void GetDetectorOffsets::exec() {
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0, 1.0, nspec);
+  auto &spectrumInfo = maskWS->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
   for (int wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
@@ -134,7 +136,8 @@ void GetDetectorOffsets::exec() {
         const size_t workspaceIndex = mapEntry->second;
         if (mask == 1.) {
           // Being masked
-          maskWS->maskWorkspaceIndex(workspaceIndex);
+          maskWS->getSpectrum(workspaceIndex).clearData();
+          spectrumInfo.setMasked(workspaceIndex, true);
           maskWS->mutableY(workspaceIndex)[0] = mask;
         } else {
           // Using the detector

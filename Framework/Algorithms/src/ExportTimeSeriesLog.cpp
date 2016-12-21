@@ -122,7 +122,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
   std::vector<Kernel::DateAndTime> times;
   std::vector<double> values;
 
-  if (logname.size() > 0) {
+  if (!logname.empty()) {
     // Log
     Kernel::TimeSeriesProperty<double> *tlog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(

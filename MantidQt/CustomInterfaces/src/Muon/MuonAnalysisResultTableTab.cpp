@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -18,8 +19,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <QFileInfo>
 #include <QLineEdit>
-#include <QFileDialog>
 #include <QHash>
 #include <QMessageBox>
 

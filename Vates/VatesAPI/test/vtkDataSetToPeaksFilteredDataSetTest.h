@@ -13,8 +13,6 @@
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
@@ -65,8 +63,7 @@ private:
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(10, -10.0, 10.0, 1);
-    vtkSplatterPlotFactory factory(
-        boost::make_shared<UserDefinedThresholdRange>(0, 1), "signal");
+    vtkSplatterPlotFactory factory("signal");
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));

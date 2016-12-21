@@ -90,7 +90,7 @@ public:
   void renderWorkspace(QString workspaceName, int workspaceType,
                        std::string instrumentName) override;
   /// See MantidQt::API::VatesViewerInterface
-  void setupPluginMode() override;
+  void setupPluginMode(int WsType, const std::string &instrumentName) override;
   /// Load the state of the window from a Mantid project file
   void loadFromProject(const std::string &lines) override;
   /// Save the state of the window to a Mantid project file
@@ -214,7 +214,7 @@ private:
   /// Set the signals/slots for the ParaView components based on the view.
   void setParaViewComponentsForView();
   /// Run the necessary setup for the main view.
-  void setupMainView();
+  void setupMainView(ModeControlWidget::Views viewType);
   /// Creates the UI and mode switch connection.
   void setupUiAndConnections();
   /// Create the requested view.

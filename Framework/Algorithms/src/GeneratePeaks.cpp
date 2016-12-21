@@ -166,7 +166,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
                                          std::string &bkgdfunctype) {
   // Function parameters
   std::string paramwsname = getPropertyValue("PeakParametersWorkspace");
-  if (paramwsname.size() > 0) {
+  if (!paramwsname.empty()) {
     // Using parameter table workspace has a higher priority
     m_useFuncParamWS = true;
     m_funcParamWS = getProperty("PeakParametersWorkspace");

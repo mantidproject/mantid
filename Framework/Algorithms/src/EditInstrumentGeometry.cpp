@@ -300,9 +300,6 @@ void EditInstrumentGeometry::exec() {
   instrument->markAsSource(source);
   source->setPos(0.0, 0.0, -1.0 * l1);
 
-  // Add the new instrument
-  workspace->setInstrument(instrument);
-
   // Add/copy detector information
   auto indexInfo = workspace->indexInfo();
   std::vector<detid_t> detIDs;
@@ -339,6 +336,9 @@ void EditInstrumentGeometry::exec() {
   } // ENDFOR workspace index
   indexInfo.setDetectorIDs(std::move(detIDs));
   workspace->setIndexInfo(indexInfo);
+
+  // Add the new instrument
+  workspace->setInstrument(instrument);
 }
 
 } // namespace Mantid

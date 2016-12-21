@@ -8,8 +8,9 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
@@ -51,6 +52,7 @@ public:
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
   MOCK_CONST_METHOD0(getAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
+  MOCK_CONST_METHOD0(getSelectedGroup, int());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
   MOCK_METHOD0(setTableCommandsProxy, void());
   MOCK_METHOD0(setRowCommandsProxy, void());
@@ -60,10 +62,10 @@ public:
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
-  IReflRunsTabPresenter *getPresenter() const override { return nullptr; }
+  IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 };
 
-class MockSettingsTabView : public IReflSettingsTabView {
+class MockSettingsView : public IReflSettingsView {
 public:
   // Global options
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
@@ -96,7 +98,7 @@ public:
   createStitchHints(const std::map<std::string, std::string> &hints) override {
     UNUSED_ARG(hints);
   };
-  IReflSettingsTabPresenter *getPresenter() const override { return nullptr; }
+  IReflSettingsPresenter *getPresenter() const override { return nullptr; }
 };
 
 class MockSaveTabView : public IReflSaveTabView {
@@ -147,21 +149,24 @@ public:
   ~MockRunsTabPresenter() override{};
 };
 
-class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
+class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  // Other calls we don't care about
-  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
-    UNUSED_ARG(presenter);
-  };
-  void notify(IReflSettingsTabPresenter::Flag flag) override {
-    UNUSED_ARG(flag);
-  };
-  void setInstrumentName(const std::string instName) override {
+  MOCK_METHOD1(setInstrumentName, void(const std::string &));
+  void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
+  ~MockSettingsPresenter() override{};
+};
+
+class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
+public:
+  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
+  void setInstrumentName(const std::string &instName) override {
     UNUSED_ARG(instName);
-  }
+  };
   ~MockSettingsTabPresenter() override{};
 };
 
@@ -176,9 +181,9 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
-  MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,

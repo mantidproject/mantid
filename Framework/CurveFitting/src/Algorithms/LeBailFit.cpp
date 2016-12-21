@@ -15,7 +15,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <cctype>
 #include <fstream>
+#include <iomanip>
 
 const int OBSDATAINDEX(0);
 const int CALDATAINDEX(1);
@@ -206,7 +208,8 @@ void LeBailFit::init() {
   setPropertySettings("Minimizer", Kernel::make_unique<VisibleWhenProperty>(
                                        "Function", IS_EQUAL_TO, "LeBailFit"));
 
-  declareProperty("Damping", 1.0, "Damping factor if minizer is 'Damping'");
+  declareProperty("Damping", 1.0,
+                  "Damping factor if minimizer is 'Damped Gauss-Newton'");
   setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
                                      "Function", IS_EQUAL_TO, "LeBailFit"));
   setPropertySettings("Damping", Kernel::make_unique<VisibleWhenProperty>(
@@ -1179,7 +1182,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
     // Remove extra white spaces
     boost::algorithm::trim(parname);
 
-    if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos")) {
+    if (!parname.empty() && (parname[0] == 'A' || parname == "Bkpos")) {
       // Insert parameter name starting with A or Bkpos (special case for
       // FullprofPolynomial)
       parmap.emplace(parname, parvalue);

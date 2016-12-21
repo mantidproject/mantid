@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class GroupWorkspacesTest : public CxxTest::TestSuite {
@@ -202,12 +203,12 @@ private:
 
   void addTestMatrixWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    ads.add(name, WorkspaceCreationHelper::Create2DWorkspace(1, 1));
+    ads.add(name, WorkspaceCreationHelper::create2DWorkspace(1, 1));
   }
 
   void addTestEventWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    ads.add(name, WorkspaceCreationHelper::CreateEventWorkspace());
+    ads.add(name, WorkspaceCreationHelper::createEventWorkspace());
   }
 
   void addTestTableWorkspaceToADS(const std::string &name) {

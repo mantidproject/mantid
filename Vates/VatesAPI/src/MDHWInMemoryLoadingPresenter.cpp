@@ -2,7 +2,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
@@ -11,6 +10,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <qwt_double_interval.h>
 
+#include "tbb/tbb.h"
 #include "vtkStructuredGrid.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkUnstructuredGrid.h"
@@ -35,10 +35,10 @@ MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }
-  if (NULL == repository) {
+  if (!repository) {
     throw std::invalid_argument("The repository is NULL");
   }
-  if (nullptr == m_view) {
+  if (!m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }
@@ -53,14 +53,13 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   if (!m_repository->canProvideWorkspace(m_wsName)) {
     // The workspace does not exist.
     bCanReadIt = false;
-  } else if (NULL ==
-             boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
-                 m_repository->fetchWorkspace(m_wsName)).get()) {
+  } else if (boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+                 m_repository->fetchWorkspace(m_wsName))) {
     // The workspace can be found, but is not an IMDHistoWorkspace.
-    bCanReadIt = false;
+    bCanReadIt = true;
   } else {
     // The workspace is present, and is of the correct type.
-    bCanReadIt = true;
+    bCanReadIt = false;
   }
   return bCanReadIt;
 }
@@ -84,27 +83,44 @@ private:
   const unsigned char *InputCellGhostArray;
 };
 
-void ComputeScalarRange(vtkStructuredGrid *grid, double *cellRange) {
-  auto cga = grid->GetCellGhostArray();
-  CellVisibility isCellVisible(cga ? cga->GetPointer(0) : nullptr);
-  vtkDataArray *cellScalars = grid->GetCellData()->GetScalars();
-  double minvalue = VTK_DOUBLE_MAX;
-  double maxvalue = VTK_DOUBLE_MIN;
-  int num = boost::numeric_cast<int>(grid->GetNumberOfCells());
-#if defined(_OPENMP) && _OPENMP >= 200805
-  PRAGMA_OMP(parallel for reduction(min : minvalue) reduction(max : maxvalue))
-#endif
-  for (int id = 0; id < num; id++) {
-    if (isCellVisible(id)) {
-      double s = cellScalars->GetComponent(id, 0);
-      minvalue = std::min(minvalue, s);
-      maxvalue = std::max(maxvalue, s);
+struct MinAndMax {
+  double m_minimum = VTK_DOUBLE_MAX;
+  double m_maximum = VTK_DOUBLE_MIN;
+  vtkDataArray *m_cellScalars;
+  CellVisibility m_isCellVisible;
+  MinAndMax(vtkDataArray *cellScalars, const unsigned char *cellGhostArray)
+      : m_cellScalars(cellScalars), m_isCellVisible(cellGhostArray) {}
+  MinAndMax(MinAndMax &rhs, tbb::split)
+      : m_cellScalars(rhs.m_cellScalars), m_isCellVisible(rhs.m_isCellVisible) {
+  }
+  void operator()(const tbb::blocked_range<int> &r) {
+    for (int id = r.begin(); id != r.end(); ++id) {
+      if (m_isCellVisible(id)) {
+        double s = m_cellScalars->GetComponent(id, 0);
+        m_minimum = std::min(m_minimum, s);
+        m_maximum = std::max(m_maximum, s);
+      }
     }
   }
-  cellRange[0] = minvalue;
-  cellRange[1] = maxvalue;
+  void join(MinAndMax &rhs) {
+    m_minimum = std::min(m_minimum, rhs.m_minimum);
+    m_maximum = std::max(m_maximum, rhs.m_maximum);
+  }
+};
+
+void ComputeScalarRange(vtkStructuredGrid *grid, double *cellRange) {
+  vtkDataArray *cellScalars = grid->GetCellData()->GetScalars();
+  auto cga = grid->GetCellGhostArray();
+  MinAndMax minandmax(cellScalars, cga ? cga->GetPointer(0) : nullptr);
+
+  int num = boost::numeric_cast<int>(grid->GetNumberOfCells());
+  tbb::parallel_reduce(tbb::blocked_range<int>(0, num), minandmax);
+
+  cellRange[0] = minandmax.m_minimum;
+  cellRange[1] = minandmax.m_maximum;
 }
 }
+
 /*
 Executes the underlying algorithm to create the MVP model.
 @param factory : visualisation factory to use.
@@ -139,9 +155,9 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
   // Until this is addressed in VTK, we are better of doing the calculation
   // ourselves.
   // 600x600x600 vtkStructuredGrid, every other cell blank
-  // structuredGrid->GetScalarRange(range) : 2.36625s
-  // structuredGrid->GetCellData()->GetScalars()->GetRange(range) : 1.01453s
-  // ComputeScalarRange(structuredGrid,range): 0.086104s
+  // structuredGrid->GetScalarRange(range) : 2.267s
+  // structuredGrid->GetCellData()->GetScalars()->GetRange(range) : 1.023s
+  // ComputeScalarRange(structuredGrid,range): 0.075s
   double range[2];
   if (auto structuredGrid = vtkStructuredGrid::SafeDownCast(visualDataSet)) {
     ComputeScalarRange(structuredGrid, range);

@@ -42,7 +42,7 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
                     const double dx, const bool singleMassSpectrum,
                     const bool addFoilChanger) {
   bool isHist(false);
-  auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+  auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
       ones(), static_cast<int>(nhist), x0, x1, dx, isHist);
   ws2d->getAxis(0)->setUnit("TOF");
   if (singleMassSpectrum) {

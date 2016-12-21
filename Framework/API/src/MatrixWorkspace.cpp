@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
 
@@ -966,35 +967,6 @@ bool MatrixWorkspace::isCommonBins() const {
   }
 
   return m_isCommonBinsFlag;
-}
-
-/**
-* Mask a given workspace index, setting the data and error values to zero
-* @param index :: The index within the workspace to mask
-*/
-void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
-  if (index >= this->getNumberHistograms()) {
-    throw Kernel::Exception::IndexError(
-        index, this->getNumberHistograms(),
-        "MatrixWorkspace::maskWorkspaceIndex,index");
-  }
-
-  auto &spec = this->getSpectrum(index);
-
-  // Virtual method clears the spectrum as appropriate
-  spec.clearData();
-
-  const auto dets = spec.getDetectorIDs();
-  for (auto detId : dets) {
-    try {
-      if (const Geometry::Detector *det =
-              dynamic_cast<const Geometry::Detector *>(
-                  sptr_instrument->getDetector(detId).get())) {
-        m_parmap->addBool(det, "masked", true); // Thread-safe method
-      }
-    } catch (Kernel::Exception::NotFoundError &) {
-    }
-  }
 }
 
 /** Called by the algorithm MaskBins to mask a single bin for the first time,
@@ -2022,6 +1994,19 @@ specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
 /// Private helper method for IndexInfo
 const std::set<detid_t> &
 MatrixWorkspace::detectorIDs(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
+}
+
+/// Returns the number of detector groups. This is equal to the number of
+/// spectra.
+size_t MatrixWorkspace::numberOfDetectorGroups() const {
+  return getNumberHistograms();
+}
+
+/// Returns a set of detector IDs for a group. This is equal to the detector IDs
+/// of the spectrum at given index.
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
 }
 

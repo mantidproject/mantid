@@ -79,10 +79,10 @@ Mantid::API::MatrixWorkspace_sptr
 provide1DWorkspace(NXcanSASTestParameters &parameters) {
   Mantid::API::MatrixWorkspace_sptr ws;
   if (parameters.hasDx) {
-    ws = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(
+    ws = WorkspaceCreationHelper::create1DWorkspaceConstantWithXerror(
         parameters.size, parameters.value, parameters.error, parameters.xerror);
   } else {
-    ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
+    ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
         parameters.size, parameters.value, parameters.error);
   }
 
@@ -114,7 +114,7 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 
 Mantid::API::MatrixWorkspace_sptr
 getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters) {
-  auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
+  auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
       parameters.size, parameters.value, parameters.error);
   ws->setTitle(parameters.name);
   ws->getAxis(0)->unit() =

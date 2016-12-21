@@ -59,7 +59,7 @@ SplatterPlotView::SplatterPlotView(
     bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager),
       m_cameraManager(boost::make_shared<CameraManager>()),
-      m_peaksTableController(NULL), m_peaksWorkspaceNameDelimiter(";") {
+      m_peaksTableController(nullptr), m_peaksWorkspaceNameDelimiter(";") {
   this->m_noOverlay = false;
   this->m_ui.setupUi(this);
 
@@ -131,14 +131,13 @@ void SplatterPlotView::destroyView() {
 pqRenderView *SplatterPlotView::getView() { return this->m_view.data(); }
 
 void SplatterPlotView::render() {
-  pqPipelineSource *src = NULL;
-  src = pqActiveObjects::instance().activeSource();
+  pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   bool isPeaksWorkspace = this->isPeaksWorkspace(src);
   // Hedge for two things.
   // 1. If there is no active source
   // 2. If we are loading a peak workspace without haveing
   //    a splatterplot source in place
-  bool isBadInput = !src || (isPeaksWorkspace && this->m_splatSource == NULL);
+  bool isBadInput = !src || (isPeaksWorkspace && !this->m_splatSource);
   if (isBadInput) {
     g_log.warning() << "SplatterPlotView: Could not render source. You are "
                        "either loading an active source "
@@ -151,7 +150,7 @@ void SplatterPlotView::render() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
-  if (!this->isPeaksWorkspace(src) && NULL != this->m_splatSource) {
+  if (!this->isPeaksWorkspace(src) && this->m_splatSource) {
     QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
                          QApplication::tr("SplatterPlot mode does not allow "
                                           "more that one MDEventWorkspace to "
@@ -303,8 +302,8 @@ void SplatterPlotView::checkView(ModeControlWidget::Views initialView) {
 void SplatterPlotView::onPickModeToggled(bool state) {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   if (state) {
-    pqPipelineSource *src = NULL;
-    if (NULL != this->m_threshSource) {
+    pqPipelineSource *src = nullptr;
+    if (this->m_threshSource) {
       src = this->m_threshSource;
     } else {
       src = this->m_splatSource;
@@ -351,7 +350,7 @@ void SplatterPlotView::readAndSendCoordinates() {
   vtkSMDoubleVectorProperty *coords =
       vtkSMDoubleVectorProperty::SafeDownCast(pList[0]->GetProperty("Center"));
 
-  if (NULL != coords) {
+  if (coords) {
     // Get coordinate type
     int peakViewCoords =
         vtkSMPropertyHelper(
@@ -622,7 +621,7 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource *filter) {
  * We need to do this, since PV can destroy the filter in a general
  * destorySources command.
  */
-void SplatterPlotView::onPeaksFilterDestroyed() { m_peaksFilter = NULL; }
+void SplatterPlotView::onPeaksFilterDestroyed() { m_peaksFilter = nullptr; }
 
 /**
  * Destroy all sources in the splatterplot view. We need to delete the filters

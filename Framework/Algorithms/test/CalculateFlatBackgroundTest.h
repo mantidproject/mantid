@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/Minus.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -679,7 +680,6 @@ private:
         new Geometry::Instrument("testInst"));
     // testInst->setReferenceFrame(boost::shared_ptr<Geometry::ReferenceFrame>(new
     // Geometry::ReferenceFrame(Geometry::PointingAlong::Y,Geometry::X,Geometry::Left,"")));
-    WS->setInstrument(testInst);
 
     const double pixelRadius(0.05);
     Geometry::Object_sptr pixelShape =
@@ -699,6 +699,7 @@ private:
       testInst->markAsMonitor(physicalPixel);
       WS->getSpectrum(i).addDetectorID(physicalPixel->getID());
     }
+    WS->setInstrument(testInst);
   }
 
   /// Creates a  workspace with a single special value in each spectrum.

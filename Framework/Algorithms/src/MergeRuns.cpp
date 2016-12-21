@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"

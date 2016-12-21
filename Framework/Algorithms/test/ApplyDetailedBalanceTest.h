@@ -92,7 +92,7 @@ public:
   }
 
   void test_event() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     evin->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");

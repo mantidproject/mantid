@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -305,7 +306,7 @@ void FilterEvents::processAlgorithmProperties() {
   if (m_isSplittersRelativeTime) {
     // Using relative time
     std::string start_time_str = getProperty("FilterStartTime");
-    if (start_time_str.size() > 0) {
+    if (!start_time_str.empty()) {
       // User specifies the filter starting time
       Kernel::DateAndTime temp_shift_time(start_time_str);
       m_filterStartTime = temp_shift_time;

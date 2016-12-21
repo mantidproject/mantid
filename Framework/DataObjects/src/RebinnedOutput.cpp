@@ -1,8 +1,11 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 
 #include <algorithm>
+#include <iterator>
+#include <sstream>
 
 namespace Mantid {
 namespace DataObjects {
