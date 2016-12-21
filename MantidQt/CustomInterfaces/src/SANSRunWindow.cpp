@@ -4446,7 +4446,8 @@ bool SANSRunWindow::areSettingsValid(States type) {
   // We currently do not allow a 2D reduction with a merged flag and fitting
   // because we can only fit 1D functions
   auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
-  auto hasFitEnabled = m_uiForm.frontDetShiftCB->isChecked() || m_uiForm.frontDetRescaleCB->isChecked();
+  auto hasFitEnabled = m_uiForm.frontDetShiftCB->isChecked() ||
+                       m_uiForm.frontDetRescaleCB->isChecked();
   if (type == States::TwoD && isMergedReduction && hasFitEnabled) {
     isValid = false;
     message +=
