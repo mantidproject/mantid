@@ -289,10 +289,8 @@ void SplatterPlotView::onThresholdButtonClicked() {
   this->m_threshSource = builder->createFilter(
       "filters", MantidQt::API::MdConstants::Threshold, this->m_splatSource);
   auto filterProxy =
-      builder
-          ->createDataRepresentation(this->m_threshSource->getOutputPort(0),
-                                     this->m_view)
-          ->getProxy();
+      builder->createDataRepresentation(this->m_threshSource->getOutputPort(0),
+                                        this->m_view)->getProxy();
   vtkSMPropertyHelper(filterProxy, "Representation")
       .Set(g_defaultRepresentation);
   vtkSMPropertyHelper(filterProxy, "Opacity").Set(g_defaultOpacity);
