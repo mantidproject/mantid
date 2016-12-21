@@ -14,6 +14,8 @@ namespace Mantid {
 
 namespace Indexing {
 class IndexInfo;
+}
+
 namespace Kernel {
 class DateAndTime;
 }

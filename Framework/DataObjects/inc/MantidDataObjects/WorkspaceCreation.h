@@ -3,6 +3,7 @@
 
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/make_unique.h"
 
 #include <memory>
 #include <type_traits>
