@@ -147,7 +147,21 @@ double BoundingBox::angularWidth(const Kernel::V3D &observer) const {
   }
   return thetaMax;
 }
-//
+
+/**
+ * Generate a random point within this box assuming the 3 numbers given
+ * are random numbers in the range (0,1) & selected from a flat distribution.
+ * @param r1 Flat random number in range (0,1)
+ * @param r2 Flat random number in range (0,1)
+ * @param r3 Flat random number in range (0,1)
+ * @return A new point within the box such that isPointInside(pt) == true
+ */
+Kernel::V3D BoundingBox::generatePointInside(double r1, double r2,
+                                             double r3) const {
+  return V3D(xMin() + r1 * (xMax() - xMin()), yMin() + r2 * (yMax() - yMin()),
+             zMin() + r3 * (zMax() - zMin()));
+}
+
 void BoundingBox::getFullBox(std::vector<Kernel::V3D> &box,
                              const Kernel::V3D &observer) const {
   box.resize(8);
@@ -160,6 +174,7 @@ void BoundingBox::getFullBox(std::vector<Kernel::V3D> &box,
   box[6] = Kernel::V3D(xMax(), yMin(), zMax()) - observer;
   box[7] = Kernel::V3D(xMax(), yMax(), zMax()) - observer;
 }
+
 void BoundingBox::setBoxAlignment(const Kernel::V3D &R0,
                                   const std::vector<Kernel::V3D> &orts) {
   this->coord_system.resize(4);
@@ -169,6 +184,7 @@ void BoundingBox::setBoxAlignment(const Kernel::V3D &R0,
   coord_system[3] = orts[2];
   is_axis_aligned = false;
 }
+
 void BoundingBox::nullify() {
   this->m_null = true;
   for (int i = 0; i < 3; i++) {
@@ -176,7 +192,7 @@ void BoundingBox::nullify() {
     this->m_maxPoint[i] = -FLT_MAX;
   }
 }
-//
+
 void BoundingBox::realign(std::vector<Kernel::V3D> const *const pCS) {
   if (pCS) {
     this->coord_system.resize(pCS->size());
@@ -224,6 +240,7 @@ void BoundingBox::realign(std::vector<Kernel::V3D> const *const pCS) {
   this->zMin() = zMin;
   this->zMax() = zMax;
 }
+
 /**
  * Enlarges this bounding box so that it encompasses that given.
  * @param other :: The bounding box that should be encompassed

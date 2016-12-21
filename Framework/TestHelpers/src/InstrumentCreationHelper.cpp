@@ -18,7 +18,6 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   auto instrument = boost::make_shared<Instrument>(instrumentName);
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
-  workspace.setInstrument(instrument);
 
   const double pixelRadius(0.05);
   Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
@@ -87,5 +86,6 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   Component *chop_pos = new Component("chopper-position",
                                       Kernel::V3D(0, 0, -10), instrument.get());
   instrument->add(chop_pos);
+  workspace.setInstrument(instrument);
 }
 }

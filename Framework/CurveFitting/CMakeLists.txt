@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/Functions/FlatBackground.cpp
 	src/Functions/FullprofPolynomial.cpp
 	src/Functions/FunctionGenerator.cpp
+	src/Functions/FunctionQDepends.cpp
 	src/Functions/GausDecay.cpp
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
@@ -92,7 +93,6 @@ set ( SRC_FILES
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
-	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
 	src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
@@ -231,6 +231,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/FlatBackground.h
 	inc/MantidCurveFitting/Functions/FullprofPolynomial.h
 	inc/MantidCurveFitting/Functions/FunctionGenerator.h
+	inc/MantidCurveFitting/Functions/FunctionQDepends.h
 	inc/MantidCurveFitting/Functions/GausDecay.h
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
@@ -245,7 +246,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
-	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
 	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
@@ -376,6 +376,7 @@ set ( TEST_FILES
 	Functions/ExpDecayTest.h
 	Functions/FlatBackgroundTest.h
 	Functions/FullprofPolynomialTest.h
+	Functions/FunctionQDependsTest.h
 	Functions/GausDecayTest.h
 	Functions/GausOscTest.h
 	Functions/GaussianComptonProfileTest.h
@@ -387,7 +388,6 @@ set ( TEST_FILES
     Functions/KerenTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
-	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
 	Functions/MultivariateGaussianComptonProfileTest.h
