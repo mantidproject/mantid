@@ -107,7 +107,6 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
  * @returns True if waterfall plot selected
  */
 bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
-  //return m_waterfallOpt ? m_waterfallOpt->isChecked() : false;
   return(m_plotOptions->currentText() == "Waterfall Plot");
 }
 
@@ -116,7 +115,6 @@ bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
  * @returns True if tiled plot selected
  */
 bool MantidWSIndexWidget::isTiledPlotSelected() const {
-  //return m_tiledOpt ? m_tiledOpt->isChecked() : false;
   return(m_plotOptions->currentText() == "Tiled Plot");
 }
 

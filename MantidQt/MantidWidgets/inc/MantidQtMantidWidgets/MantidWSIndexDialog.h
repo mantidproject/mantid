@@ -324,7 +324,6 @@ private:
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox;
   QHBoxLayout *m_optionsBox;
-  // QCheckBox *m_waterfallOpt, *m_tiledOpt;
   QComboBox *m_plotOptions;
 
   /// A list of names of workspaces which are to be plotted.
