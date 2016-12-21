@@ -1,31 +1,31 @@
 #ifndef CURVEFITTING_FITMWTEST_H_
 #define CURVEFITTING_FITMWTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/Functions/UserFunction.h"
-#include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Polynomial.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/SeqDomain.h"
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/PropertyManager.h"
 
 #include <sstream>
 
@@ -1041,20 +1041,11 @@ public:
     TS_ASSERT_THROWS(fitmw.createDomain(domain, values), std::runtime_error);
   }
 
-  void test_exclude_sorted() {
+  void test_exclude_overlapped() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) {
-          if (x >= 0.0 && x <= 1.0)
-            return 2.0;
-          if (x >= 4.0 && x <= 6.0)
-            return 3.0;
-          if (x >= 9.0 && x <= 10.0)
-            return 4.0;
-          return 1.0;
-        },
-        1, 0.0, 10., 1.0);
+        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
-    std::vector<double> exclude{9.0, 1.0, 4.0, -1.0, 6.5, 11.0};
+    std::vector<double> exclude{-1.0, 1.0, 0.0, 1.0, 9.0, 11.0, 7.5, 9.0};
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=FlatBackground");
@@ -1072,18 +1063,168 @@ public:
     TS_ASSERT_EQUALS(values->getFitWeight(1), 0);
     TS_ASSERT_EQUALS(values->getFitWeight(2), 1);
     TS_ASSERT_EQUALS(values->getFitWeight(3), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(4), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(5), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(6), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(7), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(8), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(9), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(10), 0);
+  }
+
+  void test_exclude_overlapped_1() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+
+    std::vector<double> exclude{6.0, 8.1, 2.1, 4.3, 4.2, 6.7};
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=FlatBackground");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Exclude", exclude);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+
+    FitMW fitmw(&fit, "InputWorkspace");
+    fitmw.declareDatasetProperties("", false);
+    fitmw.createDomain(domain, values);
+
+    TS_ASSERT_EQUALS(values->getFitWeight(0), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(1), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(2), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(3), 0);
     TS_ASSERT_EQUALS(values->getFitWeight(4), 0);
     TS_ASSERT_EQUALS(values->getFitWeight(5), 0);
     TS_ASSERT_EQUALS(values->getFitWeight(6), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(7), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(8), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(9), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(10), 1);
+  }
+
+  void test_exclude_overlapped_2() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+
+    std::vector<double> exclude{0.0, 2.0, 2.0, 4.0};
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=FlatBackground");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Exclude", exclude);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+
+    FitMW fitmw(&fit, "InputWorkspace");
+    fitmw.declareDatasetProperties("", false);
+    fitmw.createDomain(domain, values);
+
+    TS_ASSERT_EQUALS(values->getFitWeight(0), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(1), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(2), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(3), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(4), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(5), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(6), 1);
     TS_ASSERT_EQUALS(values->getFitWeight(7), 1);
     TS_ASSERT_EQUALS(values->getFitWeight(8), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(9), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(10), 1);
+  }
+
+  void test_exclude_jump_into_excluded() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+
+    std::vector<double> exclude{0.0, 4.1, 4.3, 11.0};
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=FlatBackground");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Exclude", exclude);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+
+    FitMW fitmw(&fit, "InputWorkspace");
+    fitmw.declareDatasetProperties("", false);
+    fitmw.createDomain(domain, values);
+
+    TS_ASSERT_EQUALS(values->getFitWeight(0), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(1), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(2), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(3), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(4), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(5), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(6), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(7), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(8), 0);
     TS_ASSERT_EQUALS(values->getFitWeight(9), 0);
     TS_ASSERT_EQUALS(values->getFitWeight(10), 0);
+  }
 
-    fit.execute();
+  void test_exclude_jump_over_few_ranges() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
 
-    IFunction_sptr fun = fit.getProperty("Function");
-    TS_ASSERT_EQUALS(fun->getParameter("A0"), 1);
+    std::vector<double> exclude{0.0, 4.1, 4.2, 4.3, 4.4, 4.5, 6.0, 11.0};
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=FlatBackground");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Exclude", exclude);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+
+    FitMW fitmw(&fit, "InputWorkspace");
+    fitmw.declareDatasetProperties("", false);
+    fitmw.createDomain(domain, values);
+
+    TS_ASSERT_EQUALS(values->getFitWeight(0), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(1), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(2), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(3), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(4), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(5), 1);
+    TS_ASSERT_EQUALS(values->getFitWeight(6), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(7), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(8), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(9), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(10), 0);
+  }
+
+  void test_exclude_jump_over_few_ranges_into_excluded() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double, int) { return 0.0; }, 1, 0.0, 10., 1.0);
+
+    std::vector<double> exclude{0.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.9, 11.0};
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=FlatBackground");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Exclude", exclude);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+
+    FitMW fitmw(&fit, "InputWorkspace");
+    fitmw.declareDatasetProperties("", false);
+    fitmw.createDomain(domain, values);
+
+    TS_ASSERT_EQUALS(values->getFitWeight(0), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(1), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(2), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(3), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(4), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(5), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(6), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(7), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(8), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(9), 0);
+    TS_ASSERT_EQUALS(values->getFitWeight(10), 0);
   }
 };
 

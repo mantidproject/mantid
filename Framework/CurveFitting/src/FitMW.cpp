@@ -37,6 +37,12 @@ using API::Jacobian;
 namespace {
 
 /// Helper calss that finds if a point should be excluded from fit.
+/// It keeps the boundaries of the relevant exclusion region for
+/// the last checked value. A relevant region is the one which either
+/// includes the value or the nearest one with the left boundary greater
+/// than the value.
+/// The class also keeps the index of the region (its left boundary) for
+/// efficient search.
 class ExcludeRangeFinder {
   /// Index of current excluded range
   size_t m_exclIndex;
@@ -46,6 +52,8 @@ class ExcludeRangeFinder {
   double m_endExcludeRange;
   /// Reference to a list of exclusion ranges.
   const std::vector<double> &m_exclude;
+  /// Size of m_exclude.
+  const size_t m_size;
 
 public:
   /// Constructor.
@@ -54,21 +62,58 @@ public:
   /// @param endX :: The end of the overall fit interval.
   ExcludeRangeFinder(const std::vector<double> &exclude, double startX,
                      double endX)
-      : m_exclIndex(0), m_startExcludedRange(endX), m_endExcludeRange(endX),
-        m_exclude(exclude) {
+      : m_exclIndex(exclude.size()), m_startExcludedRange(),
+        m_endExcludeRange(), m_exclude(exclude), m_size(exclude.size()) {
+    // m_exclIndex is initialised with exclude.size() to be the default when
+    // there are no exclusion ranges defined.
     if (!m_exclude.empty()) {
       if (startX < m_exclude.back() && endX > m_exclude.front()) {
+        // In this case there are some ranges, the index starts with 0
+        // and first range is found.
+        m_exclIndex = 0;
         findNextExcludedRange(startX);
       }
     }
   }
+
+  /// Check if an x-value lies in an exclusion range.
+  /// @param value :: A value to check.
+  /// @returns true if the value lies in an exclusion range and should be
+  /// excluded from fit.
+  bool isExcluded(double value) {
+    if (m_exclIndex < m_size) {
+      if (value < m_startExcludedRange) {
+        // If a value is below the start of the current interval
+        // it is not in any other interval by the workings of
+        // findNextExcludedRange
+        return false;
+      } else if (value <= m_endExcludeRange) {
+        // value is inside
+        return true;
+      } else {
+        // Value is past the current range. Find the next one or set the index
+        // to m_exclude.size() to stop further searches.
+        findNextExcludedRange(value);
+        // The value can find itself inside another range.
+        return isExcluded(value);
+      }
+    }
+    return false;
+  }
+
+private:
   /// Find the range from m_exclude that may contain points x >= p .
   /// @param p :: An x value to use in the seach.
   void findNextExcludedRange(double p) {
     if (p >= m_exclude.back()) {
-      m_exclIndex = m_exclude.size();
+      // If the value is past the last point stop any searches or checks.
+      m_exclIndex = m_size;
       return;
     }
+    // Starting with the current index m_exclIndex find the first value in
+    // m_exclude that is greater than p. If this point is a start than the
+    // end will be the following point. If it's an end then the start is
+    // the previous point. Keep index m_exclIndex pointing to the start.
     for (auto it = m_exclude.begin() + m_exclIndex; it != m_exclude.end();
          ++it) {
       if (*it > p) {
@@ -87,21 +132,84 @@ public:
         break;
       }
     }
-  }
-
-  /// Check if an x-value lies in an exclusion range.
-  /// @param value :: A value to check.
-  bool isExcluded(double value) {
-    if (m_exclIndex < m_exclude.size() && value >= m_startExcludedRange &&
-        value <= m_endExcludeRange) {
-      return true;
-    } else if (m_exclIndex < m_exclude.size()) {
-      findNextExcludedRange(value);
-    }
-    return false;
+    // No need for additional checks as p < m_exclude.back()
+    // and m_exclude[m_exclIndex] < p due to conditions at the calls
+    // so the break statement will always be reached.
   }
 };
+
+/// Helper struct for helping with joining exclusion ranges.
+/// Endge points of the ranges can be wrapped in this struct
+/// and sorted together without loosing their function.
+struct RangePoint {
+  enum Kind : char { Openning, Closing };
+  /// The kind of the point: either openning or closing the range.
+  Kind kind;
+  /// The value of the point.
+  double value;
+  /// Comparison of two points.
+  /// @param point :: Another point to compare with.
+  bool operator<(const RangePoint &point) {
+    if (this->value == point.value) {
+      // If an Openning and Closing points have the same value
+      // the Openning one should go first (be "smaller").
+      // This way the procedure of joinOverlappingRanges will join
+      // the ranges that meet at these points.
+      return this->kind == Openning;
+    }
+    return this->value < point.value;
+  }
+};
+
+/// Find any overlapping ranges in a vector and join them.
+/// @param[in,out] exclude :: A vector with the ranges some of which may
+/// overlap. On output all overlapping ranges are joined and the vector contains
+/// increasing series of doubles (an even number of them).
+void joinOverlappingRanges(std::vector<double> &exclude) {
+  if (exclude.empty()) {
+    return;
+  }
+  // The situation here is similar to matching brackets in an expression.
+  // If we sort all the points in the input vector remembering their kind
+  // then a separate exclusion region starts with the first openning bracket
+  // and ends with the matching closing bracket. All brackets (points) inside
+  // them can be dropped.
+
+  // Wrap the points into helper struct RangePoint
+  std::vector<RangePoint> points;
+  points.reserve(exclude.size());
+  for (auto point = exclude.begin(); point != exclude.end(); point += 2) {
+    points.push_back(RangePoint{RangePoint::Openning, *point});
+    points.push_back(RangePoint{RangePoint::Closing, *(point + 1)});
+  }
+  // Sort the points according to the operator defined in RangePoint.
+  std::sort(points.begin(), points.end());
+
+  // Clear the argument vector.
+  exclude.clear();
+  // Start the level counter which shows the number of unmatched openning
+  // brackets.
+  size_t level(0);
+  for (auto &point : points) {
+    if (point.kind == RangePoint::Openning) {
+      if (level == 0) {
+        // First openning bracket starts a new exclusion range.
+        exclude.push_back(point.value);
+      }
+      // Each openning bracket increases the level
+      ++level;
+    } else {
+      if (level == 1) {
+        // The bracket that makes level 0 is an end of a range.
+        exclude.push_back(point.value);
+      }
+      // Each closing bracket decreases the level
+      --level;
+    }
+  }
 }
+
+} // namespace
 
 /**
  * Constructor.
@@ -127,7 +235,9 @@ FitMW::FitMW(FitMW::DomainType domainType)
       m_normalise(false) {}
 
 /**
- * Set all parameters
+ * Set all parameters.
+ * @throws std::runtime_error if the Exclude property has an odd number of
+ * entries.
  */
 void FitMW::setParameters() const {
   IMWDomainCreator::setParameters();
@@ -145,7 +255,7 @@ void FitMW::setParameters() const {
                                "It has to be even as each pair specifies a "
                                "start and an end of an interval to exclude.");
     }
-    std::sort(m_exclude.begin(), m_exclude.end());
+    joinOverlappingRanges(m_exclude);
   }
 }
 

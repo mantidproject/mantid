@@ -215,7 +215,9 @@ Excluding data from fit
 
 Regions of a 1D data set can be excluded from fit with the `Exclude` property. It is a list of
 pairs of real numbers which define the regions to exclude. In the following example the regions
-under the peaks are excluded thus fitting only the background::
+under the peaks are excluded thus fitting only the background
+
+.. code-block:: python
 
     x = np.linspace(-10, 10, 100)
     y = np.exp(-4*(x+3)**2) + np.exp(-4*(x-3)**2) + 0.1 - 0.001*x**2

@@ -96,7 +96,7 @@ private:
   mutable size_t m_maxSize;
   /// Option to normalise the data
   mutable bool m_normalise;
-  /// Ranges that must be excluded form fir
+  /// Ranges that must be excluded from fit
   mutable std::vector<double> m_exclude;
 };
 
