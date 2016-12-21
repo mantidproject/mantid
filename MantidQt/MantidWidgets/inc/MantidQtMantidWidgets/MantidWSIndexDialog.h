@@ -6,6 +6,7 @@
 //----------------------------------
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDialog>
 #include <QLabel>
 #include <QLineEdit>
@@ -323,7 +324,8 @@ private:
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox;
   QHBoxLayout *m_optionsBox;
-  QCheckBox *m_waterfallOpt, *m_tiledOpt;
+  // QCheckBox *m_waterfallOpt, *m_tiledOpt;
+  QComboBox *m_plotOptions;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;

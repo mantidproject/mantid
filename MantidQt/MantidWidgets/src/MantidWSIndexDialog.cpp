@@ -22,8 +22,8 @@ namespace MantidWidgets {
  * @param parent :: The owning dialog
  * @param flags :: Window flags that are passed the the QWidget constructor
  * @param wsNames :: the names of the workspaces to be plotted
- * @param showWaterfallOption :: If true the waterfall checkbox is created
- * @param showTiledOption :: If true the "Tiled" checkbox is created
+ * @param showWaterfallOption :: true if waterfall plot enabled
+ * @param showTiledOption :: true if tiled plot enabled
  */
 MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,
@@ -31,9 +31,8 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          const bool showTiledOption)
     : QWidget(parent, flags), m_spectra(false),
       m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
-      m_waterfallOpt(nullptr), m_tiledOpt(nullptr), m_wsNames(wsNames),
-      m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
-      m_spectraIdChoice() {
+      m_plotOptions(), m_wsNames(wsNames), m_wsIndexIntervals(),
+      m_spectraNumIntervals(), m_wsIndexChoice(), m_spectraIdChoice() {
   checkForSpectraAxes();
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();
@@ -108,7 +107,8 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
  * @returns True if waterfall plot selected
  */
 bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
-  return m_waterfallOpt ? m_waterfallOpt->isChecked() : false;
+  //return m_waterfallOpt ? m_waterfallOpt->isChecked() : false;
+  return(m_plotOptions->currentText() == "Waterfall Plot");
 }
 
 /**
@@ -116,7 +116,8 @@ bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
  * @returns True if tiled plot selected
  */
 bool MantidWSIndexWidget::isTiledPlotSelected() const {
-  return m_tiledOpt ? m_tiledOpt->isChecked() : false;
+  //return m_tiledOpt ? m_tiledOpt->isChecked() : false;
+  return(m_plotOptions->currentText() == "Tiled Plot");
 }
 
 /**
@@ -243,14 +244,17 @@ void MantidWSIndexWidget::initSpectraBox() {
  */
 void MantidWSIndexWidget::initOptionsBoxes() {
   m_optionsBox = new QHBoxLayout;
-  if (m_waterfall) {
-    m_waterfallOpt = new QCheckBox("Waterfall Plot");
-    m_optionsBox->addWidget(m_waterfallOpt);
-  }
 
-  if (m_tiled) {
-    m_tiledOpt = new QCheckBox("Tiled Plot");
-    m_optionsBox->addWidget(m_tiledOpt);
+  if (m_waterfall || m_tiled) {
+    m_plotOptions = new QComboBox();
+    m_plotOptions->addItem(tr("1D Plot"));
+    if (m_waterfall) {
+      m_plotOptions->addItem(tr("Waterfall Plot"));
+    }
+    if (m_tiled) {
+      m_plotOptions->addItem(tr("Tiled Plot"));
+    }
+    m_optionsBox->addWidget(m_plotOptions);
   }
 
   m_outer->addItem(m_optionsBox);
