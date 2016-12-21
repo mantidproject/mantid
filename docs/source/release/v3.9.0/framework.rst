@@ -28,10 +28,14 @@ Improved
    * an `Interpolation` option has been added. Availabile options are: `Linear` & `CSpline`.
    * the method of selecting the scattering point has ben updated to give better agreement with numerical algorithms such as :ref:`CylinderAbsorption <algm-CylinderAbsorption>`.
 
+Renamed
+#######
+
+- CorrectFlightPaths has been renamed to :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>`.
+
 Deprecated
 ##########
 
-- :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>` has been renamed to ConvertToConstantL2.
 - :ref:`AbortRemoteJob	 <algm-AbortRemoteJob>` use version 2 instead.
 - :ref:`Authenticate	 <algm-Authenticate>` use version 2 instead.
 - :ref:`CentroidPeaksMD	 <algm-CentroidPeaksMD>` use version 2 instead.
@@ -48,6 +52,19 @@ Deprecated
 - :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` use version 2 instead.
 - :ref:`SubmitRemoteJob	 <algm-SubmitRemoteJob>` use version 2 instead.
 - :ref:`Transpose3D	 <algm-Transpose3D>` use TransposeMD instead.
+
+Removed
+#######
+
+The following (previously deprecated) algorithms versions have now been removed:
+
+ - LoadEventPreNexus v1
+ - LoadLogsForSNSPulsedMagnet v1
+ - Lorentzian1D v1
+ - ProcessDasNexusLog v1
+ - LoadILL v1
+ - SANSDirectBeamScaling v1
+
 
 MD Algorithms (VATES CLI)
 #########################
