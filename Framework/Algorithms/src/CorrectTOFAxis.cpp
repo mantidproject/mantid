@@ -137,9 +137,7 @@ void mapIndices(const std::vector<int> &spectra, const Map &indexMap,
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CorrectTOFAxis::name() const {
-  return "CorrectTOFAxis";
-}
+const std::string CorrectTOFAxis::name() const { return "CorrectTOFAxis"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CorrectTOFAxis::version() const { return 1; }
@@ -330,8 +328,7 @@ void CorrectTOFAxis::exec() {
  *  corrected workspace.
  *  @param outputWs The corrected workspace
  */
-void CorrectTOFAxis::useReferenceWorkspace(
-    API::MatrixWorkspace_sptr outputWs) {
+void CorrectTOFAxis::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs) {
   const int64_t histogramCount =
       static_cast<int64_t>(m_referenceWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_referenceWs, *outputWs))
@@ -412,7 +409,7 @@ void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
  *         of the detectors' elastic peak
  */
 void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
-                                        double &l2, double &epp) {
+                                     double &l2, double &epp) {
   auto peakPositionColumn =
       m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
   auto fitStatusColumn =

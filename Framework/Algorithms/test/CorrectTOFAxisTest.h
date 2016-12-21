@@ -20,9 +20,7 @@ class CorrectTOFAxisTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CorrectTOFAxisTest *createSuite() {
-    return new CorrectTOFAxisTest();
-  }
+  static CorrectTOFAxisTest *createSuite() { return new CorrectTOFAxisTest(); }
   static void destroySuite(CorrectTOFAxisTest *suite) { delete suite; }
 
   void test_CorrectionUsingReferenceWorkspace() {
