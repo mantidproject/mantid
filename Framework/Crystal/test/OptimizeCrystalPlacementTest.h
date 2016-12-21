@@ -74,7 +74,7 @@ public:
   }
 
   void test_basic() {
-    auto modPeaksNoFix = calculatePlacementUnfixed();
+    auto modPeaksNoFix = calculateBasicPlacement();
     Matrix<double> goniomMat, origGon5638Mat;
     const auto rotx = PeakHKLErrors::RotationMatrixAboutRegAxis(0.5, 'x');
     const auto roty = PeakHKLErrors::RotationMatrixAboutRegAxis(-1, 'y');
@@ -111,7 +111,7 @@ public:
   }
 
   void test_tilt() {
-    auto modPeaksNoFix = calculatePlacementUnfixed();
+    auto modPeaksNoFix = calculateBasicPlacement();
     const auto rotx = PeakHKLErrors::RotationMatrixAboutRegAxis(0.5, 'x');
     const auto roty = PeakHKLErrors::RotationMatrixAboutRegAxis(-1, 'y');
 
@@ -182,7 +182,7 @@ public:
   }
 
   void test_SamplePosition() {
-    auto modPeaksNoFix = calculatePlacementUnfixed();
+    auto modPeaksNoFix = calculateBasicPlacement();
     const auto &peak = modPeaksNoFix->getPeak(0);
     auto inst = peak.getInstrument();
     const V3D sampPos(.0003, -.00025, .00015);
@@ -211,11 +211,12 @@ public:
 
 private:
   // Helper method to load peaks and optimize them in the basic
-  // case
-  PeaksWorkspace_sptr calculatePlacementUnfixed() {
-    auto peaksFileWS = loadTestPeaksInput();
-    auto resultsNoFix = runOptimizePlacement(peaksFileWS);
-    return resultsNoFix.first;
+  // case. Caches the result the first time it is called
+  PeaksWorkspace_sptr calculateBasicPlacement() {
+    if (!m_inputPeaksWS) {
+      m_inputPeaksWS = loadTestPeaksInput();
+    }
+    return runOptimizePlacement(m_inputPeaksWS).first;
   }
 
   PeaksWorkspace_sptr loadTestPeaksInput() {
@@ -238,6 +239,8 @@ private:
     Workspace_sptr ows = loadUB.getProperty("InputWorkspace");
     return boost::dynamic_pointer_cast<PeaksWorkspace>(ows);
   }
+
+  PeaksWorkspace_sptr m_inputPeaksWS;
 };
 
 #endif /* OPTIMIZECRYSTALPLACEMENTTEST_H_ */
