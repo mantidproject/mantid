@@ -64,6 +64,8 @@ public:
       std::function<const std::set<specnum_t> &(const size_t)> getDetectorIDs);
 
   IndexInfo(const IndexInfo &other);
+  // Assignment is not needed currently, disabling this for now.
+  IndexInfo &operator=(const IndexInfo &) = delete;
 
   size_t size() const;
 
