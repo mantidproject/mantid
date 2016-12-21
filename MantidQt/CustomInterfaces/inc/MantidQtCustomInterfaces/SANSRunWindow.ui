@@ -752,7 +752,34 @@
              <string>Save</string>
             </property>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="6" rowspan="2">
+             <item row="2" column="0" rowspan="2">
+              <widget class="QLabel" name="label_64">
+               <property name="toolTip">
+                <string>Select one or more file formats</string>
+               </property>
+               <property name="text">
+                <string>Formats:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1" colspan="6">
+              <widget class="QLineEdit" name="outfile_edit">
+               <property name="toolTip">
+                <string>Save the output workspace to this file</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1" colspan="4">
+              <widget class="QPushButton" name="saveDefault_btn">
+               <property name="toolTip">
+                <string>Save the workspace from a single run file reduction</string>
+               </property>
+               <property name="text">
+                <string>Save Result</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="7" rowspan="2">
               <widget class="QPushButton" name="saveFilename_btn">
                <property name="minimumSize">
                 <size>
@@ -769,16 +796,6 @@
               </widget>
              </item>
              <item row="3" column="5">
-              <widget class="QCheckBox" name="saveRKH_check">
-               <property name="toolTip">
-                <string>Select one or more file formats</string>
-               </property>
-               <property name="text">
-                <string>RKH</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="4">
               <widget class="QCheckBox" name="saveCan_check">
                <property name="toolTip">
                 <string>Select one or more file formats</string>
@@ -788,16 +805,14 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="saveNex_check">
+             <item row="3" column="3">
+              <widget class="QCheckBox" name="saveNXcanSAS_check">
                <property name="toolTip">
-                <string>Select one or more file formats.
- The Nexus format can be used to save 1D and 2D data. 
-Consider using NxCanSAS format since this can be 
- imported into SasView.</string>
+                <string>Select one or more file formats. 
+The NXcanSAS format can be used to save 1D and 2D data. </string>
                </property>
                <property name="text">
-                <string>Nexus</string>
+                <string>NXcanSAS</string>
                </property>
               </widget>
              </item>
@@ -808,50 +823,6 @@ Consider using NxCanSAS format since this can be
                </property>
                <property name="text">
                 <string>Filename:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" rowspan="2">
-              <widget class="QLabel" name="label_64">
-               <property name="toolTip">
-                <string>Select one or more file formats</string>
-               </property>
-               <property name="text">
-                <string>Formats:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1" colspan="3">
-              <widget class="QPushButton" name="saveDefault_btn">
-               <property name="toolTip">
-                <string>Save the workspace from a single run file reduction</string>
-               </property>
-               <property name="text">
-                <string>Save Result</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1" colspan="5">
-              <widget class="QLineEdit" name="outfile_edit">
-               <property name="toolTip">
-                <string>Save the output workspace to this file</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="5" colspan="2">
-              <widget class="QPushButton" name="saveSel_btn">
-               <property name="toolTip">
-                <string>Save multiple workspaces</string>
-               </property>
-               <property name="text">
-                <string>Save Other</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="3">
-              <widget class="QCheckBox" name="saveNIST_Qxy_check">
-               <property name="text">
-                <string>NIST Qxy</string>
                </property>
               </widget>
              </item>
@@ -869,24 +840,30 @@ Zero Error</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="6">
-              <widget class="QCheckBox" name="saveCSV_check">
+             <item row="4" column="6" colspan="2">
+              <widget class="QPushButton" name="saveSel_btn">
                <property name="toolTip">
-                <string>Select one or more file formats</string>
+                <string>Save multiple workspaces</string>
                </property>
                <property name="text">
-                <string>CSV</string>
+                <string>Save Other</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QCheckBox" name="saveNIST_Qxy_check">
+               <property name="text">
+                <string>NIST Qxy</string>
                </property>
               </widget>
              </item>
              <item row="3" column="2">
-              <widget class="QCheckBox" name="saveNXcanSAS_check">
+              <widget class="QCheckBox" name="saveRKH_check">
                <property name="toolTip">
-                <string>Select one or more file formats. 
-The NXcanSAS format can be used to save 1D and 2D data. </string>
+                <string>Select one or more file formats</string>
                </property>
                <property name="text">
-                <string>NxCanSAS</string>
+                <string>RKH</string>
                </property>
               </widget>
              </item>
@@ -2357,7 +2334,7 @@ intermediate ranges are there for comparison</string>
           <item>
            <widget class="QGroupBox" name="q_resolution_group_box">
             <property name="title">
-             <string>QResolution</string>
+             <string>&amp;QResolution</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -4711,10 +4688,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>oneDBtn</tabstop>
   <tabstop>twoDBtn</tabstop>
   <tabstop>saveFilename_btn</tabstop>
-  <tabstop>saveCSV_check</tabstop>
-  <tabstop>saveRKH_check</tabstop>
   <tabstop>saveCan_check</tabstop>
-  <tabstop>saveNex_check</tabstop>
   <tabstop>saveDefault_btn</tabstop>
   <tabstop>outfile_edit</tabstop>
   <tabstop>saveSel_btn</tabstop>
