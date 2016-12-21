@@ -35,7 +35,7 @@ Whether the *ReferenceSpectra* input property refers to workspace indices, spect
 Usage
 -----
 
-**Example - TOFAxisCorrection by specifying the elatic bin**
+**Example - CorrectTOFAxis by specifying the elatic bin**
 
 .. testcode:: ExElasticBin
 
@@ -70,7 +70,7 @@ Usage
         BinWidth=binWidth)
     
     # Do the correction.
-    correctedWs = TOFAxisCorrection(ws,
+    correctedWs = CorrectTOFAxis(ws,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
         ElasticBinIndex=elasticBinIndex,
@@ -95,7 +95,7 @@ Output:
     DeltaE at bin centre 100: -0.0000
     DeltaE at bin centre 101: 0.0891
 
-**Example - TOFAxisCorrection using EPP table**
+**Example - CorrectTOFAxis using EPP table**
 
 .. testcode:: ExEPPTable
 
@@ -130,7 +130,7 @@ Output:
     EPPTable = FindEPP(ws)
     
     # Do the correction.
-    correctedWs = TOFAxisCorrection(ws,
+    correctedWs = CorrectTOFAxis(ws,
         EPPTable=EPPTable,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
@@ -151,7 +151,7 @@ Output:
     Corrected TOF for the elastic peak: 1232.7
     Actual elastic TOF: 1233.1
 
-**Example - TOFAxisCorrection using a reference workspace**
+**Example - CorrectTOFAxis using a reference workspace**
 
 .. testcode:: ExReferenceWS
 
@@ -199,14 +199,14 @@ Output:
     EPPTable = FindEPP(ws1)
     
     # Do the correction.
-    correctedWs1 = TOFAxisCorrection(ws1,
+    correctedWs1 = CorrectTOFAxis(ws1,
         EPPTable=EPPTable,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
         IncidentEnergy=Ei)
     
     # Correct the second workspace by using the first as a reference.
-    correctedWs2 = TOFAxisCorrection(ws2,
+    correctedWs2 = CorrectTOFAxis(ws2,
         ReferenceWorkspace=correctedWs1)
     
     # Check results

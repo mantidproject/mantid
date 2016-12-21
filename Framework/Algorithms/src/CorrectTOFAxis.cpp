@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/TOFAxisCorrection.h"
+#include "MantidAlgorithms/CorrectTOFAxis.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -22,7 +22,7 @@ using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(TOFAxisCorrection)
+DECLARE_ALGORITHM(CorrectTOFAxis)
 
 namespace {
 /** A private namespace holding some column names for FindEPP algorithm's output
@@ -49,7 +49,7 @@ const static std::string SPECTRUM_NUMBER("Spectrum Number");
 const static std::string WORKSPACE_INDEX("Workspace Index");
 } // namespace IndexTypes
 
-/** A private namespace listing the properties of TOFAxisCorrection.
+/** A private namespace listing the properties of CorrectTOFAxis.
  */
 namespace PropertyNames {
 const static std::string ELASTIC_BIN_INDEX("ElasticBinIndex");
@@ -137,20 +137,20 @@ void mapIndices(const std::vector<int> &spectra, const Map &indexMap,
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string TOFAxisCorrection::name() const {
-  return "TOFAxisCorrection";
+const std::string CorrectTOFAxis::name() const {
+  return "CorrectTOFAxis";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int TOFAxisCorrection::version() const { return 1; }
+int CorrectTOFAxis::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string TOFAxisCorrection::category() const {
+const std::string CorrectTOFAxis::category() const {
   return "Inelastic\\Corrections";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string TOFAxisCorrection::summary() const {
+const std::string CorrectTOFAxis::summary() const {
   return "Corrects the time-of-flight axis with regards to the incident energy "
          "and the L1+L2 distance or a reference workspace.";
 }
@@ -158,7 +158,7 @@ const std::string TOFAxisCorrection::summary() const {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void TOFAxisCorrection::init() {
+void CorrectTOFAxis::init() {
   auto tofWorkspace = boost::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
@@ -208,7 +208,7 @@ void TOFAxisCorrection::init() {
 /** Validate the algorithm's input properties.
  *  Also does some setup for the exec() method.
  */
-std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
+std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
   std::map<std::string, std::string> issues;
   m_inputWs = getProperty(PropertyNames::INPUT_WORKSPACE);
   m_referenceWs = getProperty(PropertyNames::REFERENCE_WORKSPACE);
@@ -310,7 +310,7 @@ std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void TOFAxisCorrection::exec() {
+void CorrectTOFAxis::exec() {
   m_inputWs = getProperty(PropertyNames::INPUT_WORKSPACE);
   API::MatrixWorkspace_sptr outputWs =
       getProperty(PropertyNames::OUTPUT_WORKSPACE);
@@ -330,7 +330,7 @@ void TOFAxisCorrection::exec() {
  *  corrected workspace.
  *  @param outputWs The corrected workspace
  */
-void TOFAxisCorrection::useReferenceWorkspace(
+void CorrectTOFAxis::useReferenceWorkspace(
     API::MatrixWorkspace_sptr outputWs) {
   const int64_t histogramCount =
       static_cast<int64_t>(m_referenceWs->getNumberHistograms());
@@ -363,7 +363,7 @@ void TOFAxisCorrection::useReferenceWorkspace(
  *  specifically, also adjusts the 'Ei' and 'wavelength' sample logs.
  *  @param outputWs The corrected workspace
  */
-void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
+void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
   double l2 = 0;
@@ -411,7 +411,7 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
  *  @param epp An output parameter for the average position
  *         of the detectors' elastic peak
  */
-void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
+void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
                                         double &l2, double &epp) {
   auto peakPositionColumn =
       m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
@@ -459,7 +459,7 @@ void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
   g_log.information() << "Average EPP: " << epp << ".\n";
 }
 
-double TOFAxisCorrection::averageL2(const API::SpectrumInfo &spectrumInfo) {
+double CorrectTOFAxis::averageL2(const API::SpectrumInfo &spectrumInfo) {
   double l2Sum = 0;
   size_t n = 0;
   const int64_t indexCount = static_cast<int64_t>(m_workspaceIndices.size());
@@ -490,7 +490,7 @@ double TOFAxisCorrection::averageL2(const API::SpectrumInfo &spectrumInfo) {
 /** Transform spectrum numbers or detector IDs to workspace indices.
  *  @return The transformed workspace indices.
  */
-std::vector<size_t> TOFAxisCorrection::referenceWorkspaceIndices() const {
+std::vector<size_t> CorrectTOFAxis::referenceWorkspaceIndices() const {
   const std::vector<int> indices =
       getProperty(PropertyNames::REFERENCE_SPECTRA);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);

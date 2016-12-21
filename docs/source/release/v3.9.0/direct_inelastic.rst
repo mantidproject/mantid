@@ -21,7 +21,7 @@ Algorithms
 ##########
 
 - A utility algorithm :ref:`WorkflowAlgorithmRunner <algm-WorkflowAlgorithmRunner>` has been added to manage the running of certain data reduction workflows at ILL.
-- New algorithm :ref:`TOFAxisCorrection <algm-TOFAxisCorrection>` enables the adjustment of the time-of-flight axis according to incident energy or reference workspace.
+- New algorithm :ref:`CorrectTOFAxis <algm-CorrectTOFAxis>` enables the adjustment of the time-of-flight axis according to incident energy or reference workspace.
 
 Crystal Field
 -------------

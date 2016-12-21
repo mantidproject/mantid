@@ -66,6 +66,7 @@ set ( SRC_FILES
 	src/CorelliCrossCorrelate.cpp
 	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
+        src/CorrectTOFAxis.cpp
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
@@ -276,7 +277,6 @@ set ( SRC_FILES
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
-	src/TOFAxisCorrection.cpp
 	src/TOFSANSResolution.cpp
 	src/TOFSANSResolutionByPixel.cpp
 	src/TOFSANSResolutionByPixelCalculator.cpp
@@ -376,6 +376,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CorelliCrossCorrelate.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
+        inc/MantidAlgorithms/CorrectTOFAxis.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
@@ -591,7 +592,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
-	inc/MantidAlgorithms/TOFAxisCorrection.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h
@@ -697,6 +697,7 @@ set ( TEST_FILES
 	CopySampleTest.h
 	CorelliCrossCorrelateTest.h
 	CorrectKiKfTest.h
+        CorrectTOFAxisTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
@@ -885,7 +886,6 @@ set ( TEST_FILES
 	SumNeighboursTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
-	TOFAxisCorrectionTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h
 	TOFSANSResolutionByPixelTest.h
 	TimeAtSampleStrategyDirectTest.h

@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_TOFAXISCORRECTION_H_
-#define MANTID_ALGORITHMS_TOFAXISCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_CORRECTTOFAXIS_H_
+#define MANTID_ALGORITHMS_CORRECTTOFAXIS_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
@@ -15,7 +15,7 @@ class SpectrumInfo;
 
 namespace Algorithms {
 
-/** TOFAxisCorrection : Corrects the time-of-flight axis with regards to
+/** CorrectTOFAxis : Corrects the time-of-flight axis with regards to
   the incident energy and the L1+L2 distance or a reference workspace.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -39,7 +39,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL TOFAxisCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorrectTOFAxis : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -67,4 +67,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_TOFAXISCORRECTION_H_ */
+#endif /* MANTID_ALGORITHMS_CORRECTTOFAXIS_H_ */

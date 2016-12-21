@@ -1,9 +1,9 @@
-#ifndef MANTID_ALGORITHMS_TOFAXISCORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_TOFAXISCORRECTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_
+#define MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/TOFAxisCorrection.h"
+#include "MantidAlgorithms/CorrectTOFAxis.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -12,18 +12,18 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::TOFAxisCorrection;
+using Mantid::Algorithms::CorrectTOFAxis;
 using namespace Mantid::API;
 using namespace WorkspaceCreationHelper;
 
-class TOFAxisCorrectionTest : public CxxTest::TestSuite {
+class CorrectTOFAxisTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TOFAxisCorrectionTest *createSuite() {
-    return new TOFAxisCorrectionTest();
+  static CorrectTOFAxisTest *createSuite() {
+    return new CorrectTOFAxisTest();
   }
-  static void destroySuite(TOFAxisCorrectionTest *suite) { delete suite; }
+  static void destroySuite(CorrectTOFAxisTest *suite) { delete suite; }
 
   void test_CorrectionUsingReferenceWorkspace() {
     const size_t blocksize = 16;
@@ -36,7 +36,7 @@ public:
     const double referenceEi = incidentEnergy(referenceTOF, length);
     const double referenceWavelength = wavelength(referenceEi, length);
     auto referenceWs = createInputWorkspace(blocksize, x0, dx, referenceTOF);
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -82,7 +82,7 @@ public:
     const double actualWavelength = wavelength(actualEi, length);
     const double TOFShift = actualElasticTOF - eppTOF;
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -114,7 +114,7 @@ public:
     const double actualElasticTOF = tof(actualEi, length);
     const double actualWavelength = wavelength(actualEi, length);
     const double TOFShift = actualElasticTOF - eppTOF;
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -132,7 +132,7 @@ public:
   }
 
   void test_FailureIfNoInputPropertiesSet() {
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }
@@ -143,7 +143,7 @@ public:
     const double dx = 0.33;
     const double eppTOF = x0 + blocksize / 4 * dx + dx / 2;
     auto inputWs = createInputWorkspace(blocksize, x0, dx, eppTOF);
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -158,7 +158,7 @@ public:
     const double TOF = x0 + blocksize * dx / 2;
     auto inputWs = createInputWorkspace(blocksize, x0, dx, TOF);
     auto referenceWs = createInputWorkspace(blocksize - 1, x0, dx, TOF);
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -176,7 +176,7 @@ public:
     const double eppTOF = x0 + static_cast<double>(elasticBin) * dx + dx / 2;
     auto inputWs = createInputWorkspace(blocksize, x0, dx, eppTOF);
     inputWs->mutableRun().removeProperty("EI");
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -201,7 +201,7 @@ public:
       row.peakCentre = eppTOF;
     }
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -214,7 +214,7 @@ public:
   }
 
   void test_Init() {
-    TOFAxisCorrection alg;
+    CorrectTOFAxis alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -229,7 +229,7 @@ public:
         createInputWorkspaceWithoutSampleLogs(blocksize, x0, dx, TOF);
     const double referenceTOF = 1.06 * TOF;
     auto referenceWs = createInputWorkspace(blocksize, x0, dx, referenceTOF);
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -272,7 +272,7 @@ public:
       row.peakCentre = eppTOF;
     }
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
-    auto alg = createTOFAxisCorrectionAlgorithm();
+    auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
@@ -313,8 +313,8 @@ private:
     }
   }
 
-  static std::unique_ptr<TOFAxisCorrection> createTOFAxisCorrectionAlgorithm() {
-    std::unique_ptr<TOFAxisCorrection> alg(new TOFAxisCorrection);
+  static std::unique_ptr<CorrectTOFAxis> createCorrectTOFAxisAlgorithm() {
+    std::unique_ptr<CorrectTOFAxis> alg(new CorrectTOFAxis);
     alg->setChild(true);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
@@ -401,4 +401,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_TOFAXISCORRECTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_ */
