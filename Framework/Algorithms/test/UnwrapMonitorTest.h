@@ -35,18 +35,9 @@ private:
     algo.setProperty("LRef", lref);
   }
 
-public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static UnwrapMonitorTest *createSuite() { return new UnwrapMonitorTest(); }
-  static void destroySuite(UnwrapMonitorTest *suite) { delete suite; }
-
-  void testLrefLessThanLd() {
-    // setup
-    MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
-    UnwrapMonitor algo;
-    setupAlgorithm(algo, inWS, 11.0);
-
+  // Run the algorithm and do some basic checks. Returns the output workspace.
+  MatrixWorkspace_const_sptr runAlgorithm(UnwrapMonitor &algo,
+                                          const MatrixWorkspace_sptr inWS) {
     // run the algorithm
     TS_ASSERT(algo.execute());
     TS_ASSERT(algo.isExecuted());
@@ -57,13 +48,28 @@ public:
     TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
                      outWS->getNumberHistograms()); // shouldn't drop histograms
 
-    // Check some x values
+    return outWS;
+  }
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static UnwrapMonitorTest *createSuite() { return new UnwrapMonitorTest(); }
+  static void destroySuite(UnwrapMonitorTest *suite) { delete suite; }
+
+  void testLrefLessThanLd() {
+    // setup and run the algorithm (includes basic checks)
+    MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
+    UnwrapMonitor algo;
+    setupAlgorithm(algo, inWS, 11.0);
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
+
+    // specific checks
     const Mantid::MantidVec outX = outWS->readX(0);
     TS_ASSERT_EQUALS(outX.size(), 23);
     TS_ASSERT_DELTA(outX.front(), 0.0, 1e-6);
     TS_ASSERT_DELTA(outX.back(), 0.017982, 1e-6);
 
-    // Check some y values
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 22);
     TS_ASSERT_DELTA(outY[3], 0.0, 1e-6);
@@ -77,21 +83,13 @@ public:
   }
 
   void testLrefGreaterThanLd() {
-    // setup
+    // setup and run the algorithm (includes basic checks)
     const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
     setupAlgorithm(algo, inWS, 17.0);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
-    // run the algorithm
-    TS_ASSERT(algo.execute());
-    TS_ASSERT(algo.isExecuted());
-
-    // verify the output workspace
-    const MatrixWorkspace_const_sptr outWS =
-        algo.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
-                     outWS->getNumberHistograms()); // shouldn't drop histograms
-
+    // specific checks
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 44);
 
@@ -100,21 +98,13 @@ public:
   }
 
   void testLrefEqualsLd() {
-    // setup
+    // setup and run the algorithm (includes basic checks)
     const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
     setupAlgorithm(algo, inWS, 15.0);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
-    // run the algorithm
-    TS_ASSERT(algo.execute());
-    TS_ASSERT(algo.isExecuted());
-
-    // verify the output workspace
-    const MatrixWorkspace_const_sptr outWS =
-        algo.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
-                     outWS->getNumberHistograms()); // shouldn't drop histograms
-
+    // specific checks
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 49);
 
@@ -123,21 +113,13 @@ public:
   }
 
   void testMinPossibleLref() {
-    // setup
+    // setup and run the algorithm (includes basic checks)
     const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
     setupAlgorithm(algo, inWS, 0.01);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
-    // run the algorithm
-    TS_ASSERT(algo.execute());
-    TS_ASSERT(algo.isExecuted());
-
-    // verify the output workspace
-    const MatrixWorkspace_const_sptr outWS =
-        algo.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
-                     outWS->getNumberHistograms()); // shouldn't drop histograms
-
+    // specific checks
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 50);
     TS_ASSERT_DELTA(outY[0], 100.0, 1e-6);
@@ -148,21 +130,13 @@ public:
   }
 
   void testLargeLref() {
-    // setup
+    // setup and run the algorithm (includes basic checks)
     const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
     setupAlgorithm(algo, inWS, 100.0);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
-    // run the algorithm
-    TS_ASSERT(algo.execute());
-    TS_ASSERT(algo.isExecuted());
-
-    // verify the output workspace
-    const MatrixWorkspace_const_sptr outWS =
-        algo.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
-                     outWS->getNumberHistograms()); // shouldn't drop histograms
-
+    // specific checks
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 10);
 
