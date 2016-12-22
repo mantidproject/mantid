@@ -16,41 +16,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
 class UnwrapMonitorTest : public CxxTest::TestSuite {
-private:
-  const MatrixWorkspace_sptr makeFakeWorkspace() {
-    Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            2, 3, 50);
-    testWS->getAxis(0)->setUnit("TOF");
-    return testWS;
-  }
-
-  void setupAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_sptr inWS,
-                      const double lref) {
-    if (!algo.isInitialized())
-      algo.initialize();
-    algo.setChild(true);
-    algo.setProperty("InputWorkspace", inWS);
-    algo.setPropertyValue("OutputWorkspace", "outWS");
-    algo.setProperty("LRef", lref);
-  }
-
-  // Run the algorithm and do some basic checks. Returns the output workspace.
-  MatrixWorkspace_const_sptr runAlgorithm(UnwrapMonitor &algo,
-                                          const MatrixWorkspace_sptr inWS) {
-    // run the algorithm
-    TS_ASSERT(algo.execute());
-    TS_ASSERT(algo.isExecuted());
-
-    // verify the output workspace
-    const MatrixWorkspace_const_sptr outWS =
-        algo.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
-                     outWS->getNumberHistograms()); // shouldn't drop histograms
-
-    return outWS;
-  }
-
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -142,6 +107,41 @@ public:
 
     const double joinWavelength = algo.getProperty("JoinWavelength");
     TS_ASSERT_DELTA(joinWavelength, 0.0, 1e-6);
+  }
+
+private:
+  const MatrixWorkspace_sptr makeFakeWorkspace() {
+    Workspace2D_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            2, 3, 50);
+    testWS->getAxis(0)->setUnit("TOF");
+    return testWS;
+  }
+
+  void setupAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_sptr inWS,
+                      const double lref) {
+    if (!algo.isInitialized())
+      algo.initialize();
+    algo.setChild(true);
+    algo.setProperty("InputWorkspace", inWS);
+    algo.setPropertyValue("OutputWorkspace", "outWS");
+    algo.setProperty("LRef", lref);
+  }
+
+  // Run the algorithm and do some basic checks. Returns the output workspace.
+  MatrixWorkspace_const_sptr runAlgorithm(UnwrapMonitor &algo,
+                                          const MatrixWorkspace_sptr inWS) {
+    // run the algorithm
+    TS_ASSERT(algo.execute());
+    TS_ASSERT(algo.isExecuted());
+
+    // verify the output workspace
+    const MatrixWorkspace_const_sptr outWS =
+        algo.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
+                     outWS->getNumberHistograms()); // shouldn't drop histograms
+
+    return outWS;
   }
 };
 
