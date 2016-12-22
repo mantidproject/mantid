@@ -32,8 +32,9 @@ public:
     // specific checks
     const Mantid::MantidVec outX = outWS->readX(0);
     TS_ASSERT_EQUALS(outX.size(), 23);
-    TS_ASSERT_DELTA(outX.front(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(outX.back(), 0.017982, 1e-6);
+    TS_ASSERT_DELTA(outX[0], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outX[11], 0.008991, 1e-6);
+    TS_ASSERT_DELTA(outX[22], 0.017982, 1e-6);
 
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 22);
@@ -55,8 +56,18 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
+    const Mantid::MantidVec outX = outWS->readX(0);
+    TS_ASSERT_EQUALS(outX.size(), 45);
+    TS_ASSERT_DELTA(outX[0], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outX[22], 0.005818, 1e-6);
+    TS_ASSERT_DELTA(outX[44], 0.011635, 1e-6);
+
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 44);
+    TS_ASSERT_DELTA(outY[0], 2.005348, 1e-6);
+    TS_ASSERT_DELTA(outY[22], 2.005348, 1e-6);
+    TS_ASSERT_DELTA(outY[42], 2.005348, 1e-6);
+    TS_ASSERT_DELTA(outY[43], 1.770053, 1e-6);
 
     const double joinWavelength = algo.getProperty("JoinWavelength");
     TS_ASSERT_DELTA(joinWavelength, 0.001582, 1e-6);
@@ -70,8 +81,18 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
+    const Mantid::MantidVec outX = outWS->readX(0);
+    TS_ASSERT_EQUALS(outX.size(), 50);
+    TS_ASSERT_DELTA(outX[0], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outX[25], 0.006728, 1e-6);
+    TS_ASSERT_DELTA(outX[49], 0.013187, 1e-6);
+
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 49);
+    TS_ASSERT_DELTA(outY[0], 2.040816, 1e-6);
+    TS_ASSERT_DELTA(outY[25], 2.040816, 1e-6);
+    TS_ASSERT_DELTA(outY[47], 2.040816, 1e-6);
+    TS_ASSERT_DELTA(outY[48], 0.040816, 1e-6);
 
     const double joinWavelength = algo.getProperty("JoinWavelength");
     TS_ASSERT_DELTA(joinWavelength, 0.000264, 1e-6);
@@ -85,10 +106,18 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
+    const Mantid::MantidVec outX = outWS->readX(0);
+    TS_ASSERT_EQUALS(outX.size(), 51);
+    TS_ASSERT_DELTA(outX[0], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outX[25], 9.890085, 1e-6);
+    TS_ASSERT_DELTA(outX[50], 19.780170, 1e-6);
+
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 50);
     TS_ASSERT_DELTA(outY[0], 100.0, 1e-6);
     TS_ASSERT_DELTA(outY[1], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outY[25], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outY[49], 0.0, 1e-6);
 
     const double joinWavelength = algo.getProperty("JoinWavelength");
     TS_ASSERT_DELTA(joinWavelength, 0.0, 1e-6);
@@ -102,8 +131,17 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
+    const Mantid::MantidVec outX = outWS->readX(0);
+    TS_ASSERT_EQUALS(outX.size(), 11);
+    TS_ASSERT_DELTA(outX[0], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outX[5], 0.000989, 1e-6);
+    TS_ASSERT_DELTA(outX[10], 0.001978, 1e-6);
+
     const Mantid::MantidVec outY = outWS->readY(0);
     TS_ASSERT_EQUALS(outY.size(), 10);
+    TS_ASSERT_DELTA(outY[0], 1.5, 1e-6);
+    TS_ASSERT_DELTA(outY[5], 1.5, 1e-6);
+    TS_ASSERT_DELTA(outY[9], 0.5, 1e-6);
 
     const double joinWavelength = algo.getProperty("JoinWavelength");
     TS_ASSERT_DELTA(joinWavelength, 0.0, 1e-6);
