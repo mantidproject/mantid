@@ -1,12 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/HistoWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -134,16 +133,13 @@ void Rebin::exec() {
   // workspace independent determination of length
   const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
-  //-------------------------------------------------------
-
   bool fullBinsOnly = getProperty("FullBinsOnly");
 
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rbParams, XValues_new.mutableRawData(), true, fullBinsOnly);
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(
+      rbParams, XValues_new.mutableRawData(), true, fullBinsOnly));
 
-  //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventInputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
@@ -162,18 +158,10 @@ void Rebin::exec() {
       eventOutputWS->setAllX(XValues_new);
     } else {
       //--------- Different output, OR you're inplace but not preserving Events
-      //--- create a Workspace2D -------
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << eventInputWS->getName() << ".\n";
-
-      // Create a Workspace2D
-      // This creates a new Workspace2D through a torturous route using the
-      // WorkspaceFactory.
-      // The Workspace2D is created with an EMPTY CONSTRUCTOR
-      outputWS = WorkspaceFactory::Instance().create("Workspace2D", histnumber,
-                                                     ntcnew, ntcnew - 1);
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        true);
+      outputWS = DataObjects::create<DataObjects::Workspace2D>(
+          *inputWS, histnumber, XValues_new);
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, histnumber);
@@ -182,10 +170,6 @@ void Rebin::exec() {
       PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
       for (int i = 0; i < histnumber; ++i) {
         PARALLEL_START_INTERUPT_REGION
-
-        // Set the X axis for each output histogram
-        outputWS->setBinEdges(i, XValues_new);
-
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
@@ -239,8 +223,8 @@ void Rebin::exec() {
 
     // make output Workspace the same type is the input, but with new length of
     // signal array
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS, histnumber,
-                                                        ntcnew, ntcnew - 1);
+    outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber,
+                                                        XValues_new);
 
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
@@ -267,10 +251,6 @@ void Rebin::exec() {
         g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
-
-      // Populate the output workspace X values
-      outputWS->setBinEdges(hist, XValues_new);
-
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
     }

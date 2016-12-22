@@ -382,7 +382,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_10">
                  <item row="0" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatterSample" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="scatterSample" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -398,7 +398,7 @@
                   </widget>
                  </item>
                  <item row="1" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatCan" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="scatCan" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -439,7 +439,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_11">
                  <item row="0" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transmis" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="transmis" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -458,7 +458,7 @@
                   </widget>
                  </item>
                  <item row="1" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCan" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="transCan" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -499,7 +499,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_12">
                  <item row="0" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="direct" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="direct" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -518,7 +518,7 @@
                   </widget>
                  </item>
                  <item row="1" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dirCan" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="dirCan" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -1824,7 +1824,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile" native="true">
+              <widget class="MantidQt::API::MWRunFiles" name="floodRearFile" native="true">
                <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
@@ -1854,7 +1854,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile" native="true">
+              <widget class="MantidQt::API::MWRunFiles" name="floodFrontFile" native="true">
                <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
@@ -3692,7 +3692,7 @@ p, li { white-space: pre-wrap; }
                     <item>
                      <widget class="QLabel" name="label_14">
                       <property name="text">
-                       <string>Tolerance 
+                       <string>Tolerance
 [um]</string>
                       </property>
                       <property name="alignment">
@@ -4386,7 +4386,7 @@ p, li { white-space: pre-wrap; }
            <number>6</number>
           </property>
           <item row="0" column="0">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="file_run_edit" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -4644,9 +4644,9 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::MessageDisplay</class>

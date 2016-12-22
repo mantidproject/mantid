@@ -2171,8 +2171,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
 *  @param RunStep name of the RunStep Python object
 *  @param output where the number will be displayed
 */
-void SANSRunWindow::readNumberOfEntries(
-    const QString &RunStep, MantidWidgets::MWRunFiles *const output) {
+void SANSRunWindow::readNumberOfEntries(const QString &RunStep,
+                                        API::MWRunFiles *const output) {
   QString periods = runReduceScriptFunction("print i.ReductionSingleton()." +
                                             RunStep + ".periods_in_file");
   output->setNumberOfEntries(periods.toInt());
@@ -3406,8 +3406,8 @@ void SANSRunWindow::resetDefaultOutput(const QString &wsName) {
 * present) file
 *  @param assignFn this is different for can or sample
 */
-bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles &trans,
-                                     MantidWidgets::MWRunFiles &direct,
+bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
+                                     API::MWRunFiles &direct,
                                      const QString &assignFn) {
   // need something to place between names printed by Python that won't be
   // intepreted as the names or removed as white space
@@ -3455,7 +3455,7 @@ bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles &trans,
  * @param[in] assignFn the Python command to run
  * @return true if there were no Python errors, false otherwise
  */
-bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles &runFile,
+bool SANSRunWindow::assignDetBankRun(API::MWRunFiles &runFile,
                                      const QString &assignFn) {
   // need something to place between names printed by Python that won't be
   // intepreted as the names or removed as white space
@@ -4437,13 +4437,17 @@ bool SANSRunWindow::areSettingsValid(States type) {
   QString message;
   // ------------ GUI INPUT CHECKS ------------
 
-  // We currently do not allow a 2D reduction with a merged flag
+  // We currently do not allow a 2D reduction with a merged flag and fitting
+  // because we can only fit 1D functions
   auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
-  if (type == States::TwoD && isMergedReduction) {
+  auto hasFitEnabled = m_uiForm.frontDetShiftCB->isChecked() ||
+                       m_uiForm.frontDetRescaleCB->isChecked();
+  if (type == States::TwoD && isMergedReduction && hasFitEnabled) {
     isValid = false;
     message +=
-        "A merged Detector Bank selection is currently not supported for 2D "
-        "reductions.\n";
+        "A merged reduction with fitting is currently not supported for 2D "
+        "reductions. You can run a merged reduction wihthout fitting enabled"
+        " for 2D reductions.\n";
   }
 
   // R_MAX -- can be only >0 or -1

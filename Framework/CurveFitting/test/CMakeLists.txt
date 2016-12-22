@@ -19,6 +19,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             HistogramData
+            Indexing
             Kernel
             ${GSL_LIBRARIES}
             ${Boost_LIBRARIES}
