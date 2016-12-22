@@ -184,9 +184,9 @@ void SetSample::exec() {
  * @param args The dictionary of flags for the environment
  * @return A pointer to the new sample environment
  */
-const Geometry::SampleEnvironment *
-SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
-                                const Kernel::PropertyManager_sptr &args) {
+const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
+    API::MatrixWorkspace_sptr &workspace,
+    const Kernel::PropertyManager_const_sptr &args) {
   using Geometry::SampleEnvironmentSpecFileFinder;
   using Geometry::SampleEnvironmentFactory;
   using Kernel::ConfigService;
@@ -233,7 +233,7 @@ SetSample::setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
  * @return A string containing the XML definition of the shape
  */
 void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
-                               Kernel::PropertyManager_sptr &args,
+                               const Kernel::PropertyManager_const_sptr &args,
                                const Geometry::SampleEnvironment *sampleEnv) {
   using Geometry::Container;
   /* The sample geometry can be specified in two ways:
@@ -244,7 +244,7 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
 
   // Try known shapes or CSG first if supplied
   if (args) {
-    auto refFrame = workspace->getInstrument()->getReferenceFrame();
+    const auto refFrame = workspace->getInstrument()->getReferenceFrame();
     const auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       runSetSampleShape(workspace, xml);

@@ -50,9 +50,9 @@ private:
 
   const Geometry::SampleEnvironment *
   setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
-                       const Kernel::PropertyManager_sptr &args);
+                       const Kernel::PropertyManager_const_sptr &args);
   void setSampleShape(API::MatrixWorkspace_sptr &workspace,
-                      Kernel::PropertyManager_sptr &args,
+                      const Kernel::PropertyManager_const_sptr &args,
                       const Geometry::SampleEnvironment *sampleEnv);
   std::string
   tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
