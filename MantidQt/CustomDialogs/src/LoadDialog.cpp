@@ -2,7 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtCustomDialogs/LoadDialog.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 // Qt
 #include <QCheckBox>
@@ -311,7 +311,7 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
                                          QWidget *parent) {
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
-  using MantidQt::MantidWidgets::MWRunFiles;
+  using MantidQt::API::MWRunFiles;
 
   QString propName = QString::fromStdString(prop->name());
   QWidget *inputWidget(NULL);
