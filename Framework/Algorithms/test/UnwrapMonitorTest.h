@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/Axis.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
@@ -24,10 +23,9 @@ public:
 
   void testLrefLessThanLd() {
     // setup and run the algorithm (includes basic checks)
-    MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
-    setupAlgorithm(algo, inWS, 11.0);
-    MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(algo, 11.0);
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
     const Mantid::MantidVec outX = outWS->readX(0);
@@ -50,9 +48,8 @@ public:
 
   void testLrefGreaterThanLd() {
     // setup and run the algorithm (includes basic checks)
-    const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
-    setupAlgorithm(algo, inWS, 17.0);
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(algo, 17.0);
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
@@ -75,9 +72,8 @@ public:
 
   void testLrefEqualsLd() {
     // setup and run the algorithm (includes basic checks)
-    const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
-    setupAlgorithm(algo, inWS, 15.0);
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(algo, 15.0);
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
@@ -100,9 +96,8 @@ public:
 
   void testMinPossibleLref() {
     // setup and run the algorithm (includes basic checks)
-    const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
-    setupAlgorithm(algo, inWS, 0.01);
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(algo, 0.01);
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
@@ -125,9 +120,8 @@ public:
 
   void testLargeLref() {
     // setup and run the algorithm (includes basic checks)
-    const MatrixWorkspace_sptr inWS = this->makeFakeWorkspace();
     UnwrapMonitor algo;
-    setupAlgorithm(algo, inWS, 100.0);
+    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(algo, 100.0);
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(algo, inWS);
 
     // specific checks
@@ -149,26 +143,34 @@ public:
 
 private:
   const MatrixWorkspace_sptr makeFakeWorkspace() {
-    Workspace2D_sptr testWS =
+    const MatrixWorkspace_sptr testWS =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             2, 3, 50);
     testWS->getAxis(0)->setUnit("TOF");
     return testWS;
   }
 
-  void setupAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_sptr inWS,
-                      const double lref) {
+  // Initialise the algorithm and set the properties. Creates a fake workspace
+  // for the input and returns it.
+  MatrixWorkspace_const_sptr setupAlgorithm(UnwrapMonitor &algo,
+                                            const double lref) {
+    // create the workspace
+    const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+
+    // set up the algorithm
     if (!algo.isInitialized())
       algo.initialize();
     algo.setChild(true);
     algo.setProperty("InputWorkspace", inWS);
     algo.setPropertyValue("OutputWorkspace", "outWS");
     algo.setProperty("LRef", lref);
+
+    return inWS;
   }
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
-  MatrixWorkspace_const_sptr runAlgorithm(UnwrapMonitor &algo,
-                                          const MatrixWorkspace_sptr inWS) {
+  MatrixWorkspace_const_sptr
+  runAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_const_sptr inWS) {
     // run the algorithm
     TS_ASSERT(algo.execute());
     TS_ASSERT(algo.isExecuted());
