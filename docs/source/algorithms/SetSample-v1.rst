@@ -24,7 +24,7 @@ relate to the respective argument.
 Environment
 ###########
 
-Specifies the sample enviorment kit to be used. There are two required keywords:
+Specifies the sample environment kit to be used. There are two required keywords:
 
 - ``Name``: The name of the predefined kit
 - ``Container``: The id of the container within the predefined kit
