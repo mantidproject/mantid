@@ -31,16 +31,13 @@ namespace Mantid {
 namespace VATES {
 
 /*Constructor
-  @param thresholdRange : Threshold range strategy
   @param normalizationOption : Info object setting how normalization should be
   done.
   @param maxDepth : Maximum depth to search to
   */
-vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange,
-                                 const VisualNormalization normalizationOption,
+vtkMDHexFactory::vtkMDHexFactory(const VisualNormalization normalizationOption,
                                  const size_t maxDepth)
-    : m_thresholdRange(thresholdRange),
-      m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
+    : m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
       slice(false), m_time(0) {}
 
 /// Destructor
@@ -120,8 +117,7 @@ void vtkMDHexFactory::doCreate(
       API::IMDNode *box = boxes[i];
       Mantid::signal_t signal_normalized = (box->*normFunction)();
 
-      if (std::isfinite(signal_normalized) &&
-          m_thresholdRange->inRange(signal_normalized)) {
+      if (std::isfinite(signal_normalized)) {
         // Cache the signal and using of it
         signalCache[i] = static_cast<float>(signal_normalized);
         useBox[i] = true;
@@ -302,10 +298,6 @@ IMDEventWorkspace, attempts to use any run-time successor set.
 void vtkMDHexFactory::initialize(Mantid::API::Workspace_sptr ws) {
   IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 3>(ws, false);
   m_workspace = imdws;
-
-  // Setup range values according to whatever strategy object has been injected.
-  m_thresholdRange->setWorkspace(ws);
-  m_thresholdRange->calculate();
 }
 
 /// Validate the current object.

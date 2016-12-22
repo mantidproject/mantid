@@ -27,10 +27,8 @@ namespace Mantid {
 namespace VATES {
 /// Constructor
 vtkMDQuadFactory::vtkMDQuadFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normalizationOption)
-    : m_thresholdRange(thresholdRange),
-      m_normalizationOption(normalizationOption) {}
+    : m_normalizationOption(normalizationOption) {}
 
 /// Destructor
 vtkMDQuadFactory::~vtkMDQuadFactory() {}
@@ -110,7 +108,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
       progressUpdating.eventRaised(progressFactor * double(iBox));
 
       Mantid::signal_t signal = it->getNormalizedSignal();
-      if (std::isfinite(signal) && m_thresholdRange->inRange(signal)) {
+      if (std::isfinite(signal)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 

@@ -451,7 +451,8 @@ void LoadEventPreNexus2::createOutputWorkspace(
   if (!this->spectra_list.empty())
     nSpec = this->spectra_list.size();
   auto tmp = createWorkspace<EventWorkspace>(nSpec, 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(localWorkspace, tmp, true);
+  WorkspaceFactory::Instance().initializeFromParent(*localWorkspace, *tmp,
+                                                    true);
   localWorkspace = std::move(tmp);
 }
 

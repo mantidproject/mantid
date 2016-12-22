@@ -93,7 +93,6 @@ set ( SRC_FILES
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
-	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
 	src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
@@ -247,7 +246,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
-	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
 	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
@@ -390,7 +388,6 @@ set ( TEST_FILES
     Functions/KerenTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
-	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
 	Functions/MultivariateGaussianComptonProfileTest.h
