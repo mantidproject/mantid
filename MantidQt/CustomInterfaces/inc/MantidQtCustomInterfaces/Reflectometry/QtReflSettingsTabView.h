@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_
 
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "ui_ReflSettingsTabWidget.h"
 #include <memory>
 
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QtReflSettingsTabView : public QWidget, public IReflSettingsTabView {
+class MANTIDQT_CUSTOMINTERFACES_DLL QtReflSettingsTabView : public QWidget {
   Q_OBJECT
 public:
   /// Constructor
@@ -43,61 +43,7 @@ public:
   /// Destructor
   ~QtReflSettingsTabView() override;
   /// Returns the presenter managing this view
-  IReflSettingsTabPresenter *getPresenter() const override;
-  /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const override;
-  /// Return selected analysis mode
-  std::string getAnalysisMode() const override;
-  /// Return direct beam
-  std::string getDirectBeam() const override;
-  /// Return transmission runs
-  std::string getTransmissionRuns() const override;
-  /// Return selected polarisation corrections
-  std::string getPolarisationCorrections() const override;
-  /// Return CRho
-  std::string getCRho() const override;
-  /// Return CAlpha
-  std::string getCAlpha() const override;
-  /// Return CAp
-  std::string getCAp() const override;
-  /// Return Cpp
-  std::string getCPp() const override;
-  /// Return momentum transfer limits
-  std::string getMomentumTransferStep() const override;
-  /// Return scale factor
-  std::string getScaleFactor() const override;
-  /// Return integrated monitors option
-  std::string getIntMonCheck() const override;
-  /// Return monitor integral wavelength min
-  std::string getMonitorIntegralMin() const override;
-  /// Return monitor integral wavelength max
-  std::string getMonitorIntegralMax() const override;
-  /// Return monitor background wavelength min
-  std::string getMonitorBackgroundMin() const override;
-  /// Return monitor background wavelength max
-  std::string getMonitorBackgroundMax() const override;
-  /// Return wavelength min
-  std::string getLambdaMin() const override;
-  /// Return wavelength max
-  std::string getLambdaMax() const override;
-  /// Return I0MonitorIndex
-  std::string getI0MonitorIndex() const override;
-  /// Return processing instructions
-  std::string getProcessingInstructions() const override;
-  /// Set default values for experiment and instrument settings
-  void setExpDefaults(const std::vector<std::string> &) const override;
-  void setInstDefaults(const std::vector<double> &) const override;
-
-  /// Creates hints for 'Stitch1DMany'
-  void
-  createStitchHints(const std::map<std::string, std::string> &hints) override;
-  /// Sets enabled status for polarisation corrections and parameters
-  void setPolarisationOptionsEnabled(bool enable) const override;
-
-public slots:
-  /// Request presenter to obtain default values for settings
-  void requestExpDefaults() const;
-  void requestInstDefaults() const;
+  IReflSettingsTabPresenter *getPresenter() const;
 
 private:
   /// Initialise the interface

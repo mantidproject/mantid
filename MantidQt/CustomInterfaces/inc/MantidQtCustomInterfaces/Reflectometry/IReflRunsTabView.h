@@ -71,6 +71,7 @@ public:
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
   virtual std::string getTransferMethod() const = 0;
+  virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>

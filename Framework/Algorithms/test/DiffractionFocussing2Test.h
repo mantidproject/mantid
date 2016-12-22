@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"

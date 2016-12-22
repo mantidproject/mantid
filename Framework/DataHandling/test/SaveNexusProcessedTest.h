@@ -14,7 +14,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/LoadMuonNexus.h"

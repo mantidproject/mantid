@@ -97,6 +97,12 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_download_spice_data)
         self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_change_data_access_mode)
+        self.connect(self.ui.pushButton_applyCalibratedSampleDistance, QtCore.SIGNAL('clicked()'),
+                     self.do_set_user_detector_distance)
+        self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
+                     self.do_set_user_detector_center)
+        self.connect(self.ui.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
+                     self.do_set_user_wave_length)
 
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
@@ -277,16 +283,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
                      self.do_load_nth_project)
-
-        # TODO/NOW/ISSUE - Implement
-        """
-        lineEdit_userDetSampleDistance, pushButton_applyCalibratedSampleDistance,
-        add more to --> lineEdit_infoDetSampleDistance
-        pushButton_applyUserWavelength: add more to --> lineEdit_infoWavelength
-
-        lineEdit_detCenterPixHorizontal, lineEdit_detCenterPixVertical,
-        pushButton_applyUserDetCenter, lineEdit_infoDetCenter
-        """
 
         # Validator ... (NEXT)
 
@@ -469,8 +465,14 @@ class MainWindow(QtGui.QMainWindow):
         project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
         # NEXT ISSUE - consider to allow incremental project saving technique
         if os.path.exists(project_file_name):
-            self.pop_one_button_dialog('Project file %s does exist. Choose another name.' % project_file_name)
-            return
+            yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
+                                           'an incremental save.' % project_file_name)
+            if yes:
+                print '[INFO] Save project in incremental way.'
+            else:
+                print '[INFO] Saving activity is cancelled.'
+        else:
+            print '[INFO] Saving current project to %s.' % project_file_name
 
         # gather some useful information
         ui_dict = dict()
@@ -509,22 +511,6 @@ class MainWindow(QtGui.QMainWindow):
         # END-IF
 
         self.load_project(project_file_name)
-
-        # # load project
-        # ui_dict = self._myControl.load_project(project_file_name)
-        #
-        # # set the UI parameters to GUI
-        # try:
-        #     self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-        #     self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-        #     self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-        #     self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
-        #
-        #     # now try to call some actions
-        #     self.do_apply_setup()
-        #     self.do_set_experiment()
-        # except KeyError:
-        #     print '[Error] Some field cannot be found.'
 
         return
 
@@ -588,8 +574,9 @@ class MainWindow(QtGui.QMainWindow):
         :param QCloseEvent:
         :return:
         """
-        print '[QCloseEvent=]', str(QCloseEvent)
         self.menu_quit()
+
+        return
 
     def do_accept_ub(self):
         """ Accept the calculated UB matrix and thus put to controller
@@ -735,7 +722,9 @@ class MainWindow(QtGui.QMainWindow):
         data_server = str(self.ui.lineEdit_url.text()).strip()
 
         # set to my controller
-        self._myControl.set_local_data_dir(local_data_dir)
+        status, err_msg = self._myControl.set_local_data_dir(local_data_dir)
+        if not status:
+            raise RuntimeError(err_msg)
         self._myControl.set_working_directory(working_dir)
         self._myControl.set_server_url(data_server, check_link=False)
 
@@ -982,7 +971,6 @@ class MainWindow(QtGui.QMainWindow):
         convert merged workspace in Q-sample frame to HKL frame
         :return:
         """
-        # TODO/NOW/ - TEST: Convert to HKL
         # get experiment number
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
@@ -1414,8 +1402,6 @@ class MainWindow(QtGui.QMainWindow):
         if len(row_number_list) == 0:
             self.pop_one_button_dialog('No scan is selected for scan')
             return
-        else:
-            print '[DB...BAT] IntegratePeaks: selected rows: ', row_number_list
 
         # get experiment number
         status, ret_obj = gutil.parse_integers_editors(self.ui.lineEdit_exp, allow_blank=False)
@@ -1877,8 +1863,6 @@ class MainWindow(QtGui.QMainWindow):
         Merge several scans to a single MDWorkspace and give suggestion for re-binning
         :return:
         """
-        # TODO/NOW/ISSUE - Test this!
-
         # find the selected scans
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
         if len(selected_rows) < 2:
@@ -1969,7 +1953,6 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 merge_status = 'Failed. Reason: %s' % ret_tup
                 merged_name = 'x'
-                print merge_status
 
             # update table
             self.ui.tableWidget_mergeScans.set_status(row_number, merge_status)
@@ -2069,9 +2052,8 @@ class MainWindow(QtGui.QMainWindow):
 
         dlg = refineubfftsetup.RefineUBFFTSetupDialog(self)
         if dlg.exec_():
-            min_d, max_d, tolerance = dlg.get_values()
-            print '[DB...BAT]', min_d, max_d, tolerance
             # Do stuff with values
+            min_d, max_d, tolerance = dlg.get_values()
         else:
             # case for cancel
             return
@@ -2377,25 +2359,56 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
-        if status is True:
+        if status:
+            # new experiment number
             exp_number = ret_obj[0]
+            # current experiment to be replaced: warning
             curr_exp_number = self._myControl.get_experiment()
             if curr_exp_number is not None and exp_number != curr_exp_number:
                 self.pop_one_button_dialog('Changing experiment to %d.  Clean previous experiment %d\'s result'
                                            ' in Mantid manually.' % (exp_number, curr_exp_number))
+            # set the new experiment number
             self._myControl.set_exp_number(exp_number)
             self.ui.lineEdit_exp.setStyleSheet('color: black')
-
             self.setWindowTitle('%s: Experiment %d' % (self._baseTitle, exp_number))
 
-            # TODO/NOW/ISSUE - if the current data directory is empty or as /HFIR/HB3A/, reset data directory
+            # try to set the default
+            default_data_dir = '/HFIR/HB3A/exp%d/Datafiles' % exp_number
+            if os.path.exists(default_data_dir):
+                self.ui.lineEdit_localSpiceDir.setText(default_data_dir)
 
         else:
             err_msg = ret_obj
             self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
             self.ui.lineEdit_exp.setStyleSheet('color: red')
+            return
 
         self.ui.tabWidget.setCurrentIndex(0)
+
+        # set the instrument geometry constants
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_defaultSampleDetDistance,
+                                                     self.ui.lineEdit_pixelSizeX,
+                                                     self.ui.lineEdit_pixelSizeY],
+                                                    allow_blank=False)
+        if status:
+            default_det_sample_distance, pixel_x_size, pixel_y_size = ret_obj
+            self._myControl.set_default_detector_sample_distance(default_det_sample_distance)
+            self._myControl.set_default_pixel_size(pixel_x_size, pixel_y_size)
+        else:
+            self.pop_one_button_dialog('[ERROR] Unable to parse default instrument geometry constants '
+                                       'due to %s.' % str(ret_obj))
+            return
+
+        # set the detector center
+        det_center_str = str(self.ui.lineEdit_defaultDetCenter.text())
+        try:
+            terms = det_center_str.split(',')
+            center_row = int(terms[0])
+            center_col = int(terms[1])
+            self._myControl.set_detector_center(exp_number, center_row, center_col, default=True)
+        except (IndexError, ValueError) as error:
+            self.pop_one_button_dialog('[ERROR] Unable to parse default detector center %s due to %s.'
+                                       '' % (det_center_str, str(error)))
 
         return
 
@@ -2463,7 +2476,7 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    print 'Error to get UB matrix: %s' % str(key_err)
+                    print '[Error] unable to get UB matrix: %s' % str(key_err)
                     self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
@@ -2494,19 +2507,20 @@ class MainWindow(QtGui.QMainWindow):
     def do_setup_dir_default(self):
         """
         Set up default directory for storing data and working
+        If directory /HFIR/HB3A exists, it means that the user can access HFIR archive server
         :return:
         """
         home_dir = os.path.expanduser('~')
 
-        # TODO/NOW/ISSUE - make this one work for server-based
-        # example: os.path.exists('/HFIR/HB3A/exp322') won't take long time to find out the server is off.
-
         # Data cache directory
-        data_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
-        self.ui.lineEdit_localSpiceDir.setText(data_cache_dir)
-        self.ui.lineEdit_localSrcDir.setText(data_cache_dir)
+        project_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
+        if os.path.exists('/HFIR/HB3A/'):
+            self.ui.lineEdit_localSrcDir.setText('/HFIR/HB3A/')
+        else:
+            self.ui.lineEdit_localSpiceDir.setText(project_cache_dir)
 
-        work_dir = os.path.join(data_cache_dir, 'Workspace')
+        # working directory
+        work_dir = os.path.join(project_cache_dir, 'Workspace')
         self.ui.lineEdit_workDir.setText(work_dir)
 
         return
@@ -2545,6 +2559,84 @@ class MainWindow(QtGui.QMainWindow):
         ub_matrix = gutil.convert_str_to_matrix(ub_str, (3, 3))
 
         return ub_matrix
+
+    def do_set_user_detector_distance(self):
+        """
+        Set up the user-defined detector distance for loading instrument with data
+        :return:
+        """
+        user_det_distance_str = str(self.ui.lineEdit_userDetSampleDistance.text()).strip()
+        if len(user_det_distance_str) == 0:
+            return
+
+        # convert to float
+        try:
+            user_det_distance = float(user_det_distance_str)
+        except ValueError:
+            self.pop_one_button_dialog('User detector-sample distance %s must be a float.' % user_det_distance_str)
+            return
+
+        # check distance value because it cannot be too far
+        default_det_distance = float(str(self.ui.lineEdit_defaultSampleDetDistance.text()))
+        distance_tol = float(str(self.ui.lineEdit_sampleDetDistTol.text()))
+        if abs((user_det_distance - default_det_distance) / default_det_distance) > distance_tol:
+            self.pop_one_button_dialog('User specified sample-detector distance is not reasonable.')
+            return
+
+        # set to controller
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
+        self._myControl.set_detector_sample_distance(exp_number, user_det_distance)
+
+        # update the GUI for information
+        self.ui.lineEdit_infoDetSampleDistance.setText('%.5f' % user_det_distance)
+
+        return
+
+    def do_set_user_wave_length(self):
+        """
+
+        :return:
+        """
+        try:
+            exp_number = int(str(self.ui.lineEdit_exp.text()))
+            user_lambda = float(str(self.ui.lineEdit_userWaveLength.text()))
+        except ValueError:
+            self.pop_one_button_dialog('Unable to set user wave length with value %s.'
+                                       '' % str(self.ui.lineEdit_infoWavelength.text()))
+            return
+
+        self._myControl.set_user_wave_length(exp_number, user_lambda)
+
+        # set back to GUI
+        self.ui.lineEdit_infoWavelength.setText('%.5f' % user_lambda)
+
+        return
+
+    def do_set_user_detector_center(self):
+        """
+        set the user-defined detector center
+        :return:
+        """
+        # get information
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_detCenterPixHorizontal,
+                                                        self.ui.lineEdit_detCenterPixVertical],
+                                                       allow_blank=True)
+
+        if not status:
+            self.pop_one_button_dialog(str(ret_obj))
+            return
+
+        assert isinstance(ret_obj, list) and len(ret_obj) == 3, 'Error!'
+        exp_number, user_center_row, user_center_col = ret_obj
+        assert isinstance(exp_number, int), 'Experiment number must be set up.'
+
+        self._myControl.set_detector_center(exp_number, user_center_row, user_center_col)
+
+        # apply to the GUI
+        self.ui.lineEdit_infoDetCenter.setText('%d, %d' % (user_center_row, user_center_col))
+
+        return
 
     def do_show_spice_file(self):
         """
@@ -2717,8 +2809,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             raise RuntimeError('None radio button is selected for UB')
 
-        print '[DB...BAT] UB to set: ', ub_matrix
-
         # set to in-use UB matrix and control
         self.ui.tableWidget_ubInUse.set_from_matrix(ub_matrix)
 
@@ -2807,17 +2897,11 @@ class MainWindow(QtGui.QMainWindow):
         assert len(ret_obj) == 5
         md_file_name, weight_peak_centers, weight_peak_intensities, avg_peak_centre, avg_peak_intensity = ret_obj
 
-        print 'Write file to %s' % md_file_name
-        for i_peak in xrange(len(weight_peak_centers)):
-            peak_i = weight_peak_centers[i_peak]
-            print '%f, %f, %f' % (peak_i[0], peak_i[1], peak_i[2])
-        print
-        print avg_peak_centre
-
         # Plot
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
 
+        print '[INFO] Write file to %s' % md_file_name
         self._my3DWindow.add_plot_by_file(md_file_name)
         self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
         self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
@@ -3405,8 +3489,6 @@ class MainWindow(QtGui.QMainWindow):
 
             # gather values for updating
             intensity = sig_value
-            print '[DB...BAT] UpdatePeakIntegrationValue: Row %d: peak center %s of type %s.' \
-                  '' % (row_number, str(peak_centre), type(peak_centre))
 
             # check intensity value
             is_error = False
@@ -3494,8 +3576,6 @@ class MainWindow(QtGui.QMainWindow):
         except RuntimeError as run_err:
             self.pop_one_button_dialog(str(run_err))
             return
-        else:
-            print '[DB...BAT] UpdateMergeInformation: Row = ', row_number
 
         # set intensity, state to table
         if mode == 0:

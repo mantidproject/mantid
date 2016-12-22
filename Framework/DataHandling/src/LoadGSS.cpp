@@ -509,7 +509,6 @@ void LoadGSS::createInstrumentGeometry(
   // Create a new instrument and set its name
   Geometry::Instrument_sptr instrument(
       new Geometry::Instrument(instrumentname));
-  workspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   Geometry::ObjComponent *samplepos =
@@ -557,6 +556,7 @@ void LoadGSS::createInstrumentGeometry(
     instrument->markAsDetector(detector);
 
   } // ENDFOR (i: spectrum)
+  workspace->setInstrument(instrument);
 }
 
 } // namespace

@@ -3,7 +3,6 @@
 
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -40,8 +39,7 @@ class DLLExport vtkMDLineFactory : public vtkDataSetFactory {
 
 public:
   /// Constructor
-  vtkMDLineFactory(ThresholdRange_scptr thresholdRange,
-                   const VisualNormalization normalizationOption);
+  vtkMDLineFactory(const VisualNormalization normalizationOption);
 
   /// Destructor
   ~vtkMDLineFactory() override;
@@ -61,9 +59,6 @@ protected:
   void validate() const override;
 
 private:
-  /// ThresholdRange functor.
-  ThresholdRange_scptr m_thresholdRange;
-
   /// Name of the scalar.
   const VisualNormalization m_normalizationOption;
 

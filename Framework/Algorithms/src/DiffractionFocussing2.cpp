@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -559,6 +560,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  const auto &spectrumInfo = m_matrixInputW->spectrumInfo();
 
   groupAtWorkspaceIndex.resize(nHist);
   for (int wi = 0; wi < nHist;
@@ -569,10 +571,8 @@ void DiffractionFocussing2::determineRebinParameters() {
     if (group == -1)
       continue;
 
-    // the spectrum is the real thing we want to work with
-    const auto &spec = m_matrixInputW->getSpectrum(wi);
     if (checkForMask) {
-      if (instrument->isDetectorMasked(spec.getDetectorIDs())) {
+      if (spectrumInfo.isMasked(wi)) {
         groupAtWorkspaceIndex[wi] = -1;
         continue;
       }
@@ -586,7 +586,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
-    auto &X = spec.x();
+    auto &X = m_matrixInputW->x(wi);
     double temp = X.front();
     if (temp < (min)) // New Xmin found
       (gpit->second).first = temp;

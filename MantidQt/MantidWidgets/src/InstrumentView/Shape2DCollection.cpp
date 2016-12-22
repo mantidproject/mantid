@@ -1,4 +1,8 @@
 #include "MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <QPainter>
 #include <QMouseEvent>
@@ -622,6 +626,56 @@ void Shape2DCollection::changeBorderColor(const QColor &color) {
 }
 
 /**
+ * Save this shape collection to a table workspace
+ *
+ * This will create a table workspace called MaskShapes with one column for the
+ * index of the shape and one containing the serialised parameters of the shape
+ */
+void Shape2DCollection::saveToTableWorkspace() {
+  using namespace Mantid::API;
+  auto table = WorkspaceFactory::Instance().createTable();
+  table->addColumn("str", "Index");
+  table->addColumn("str", "Parameters");
+
+  size_t count = 0;
+  for (auto shape : m_shapes) {
+    auto shapeStr = shape->saveToProject();
+    TableRow row = table->appendRow();
+    row << std::to_string(count) << shapeStr;
+    ++count;
+  }
+
+  AnalysisDataService::Instance().addOrReplace("MaskShapes", table);
+}
+
+/**
+ * Load a collection of shapes from a table workspace
+ *
+ * This expects a table workspace with a column called parameters from which to
+ * load collection of shapes from.
+ *
+ * @param ws :: table workspace to load shapes from.
+ */
+void Shape2DCollection::loadFromTableWorkspace(
+    Mantid::API::ITableWorkspace_const_sptr ws) {
+  using namespace Mantid::API;
+  auto columnNames = ws->getColumnNames();
+
+  // Check if the column exists
+  if (std::find(columnNames.cbegin(), columnNames.cend(), "Parameters") ==
+      columnNames.cend())
+    return;
+
+  ConstColumnVector<std::string> col = ws->getVector("Parameters");
+  for (size_t i = 0; i < ws->rowCount(); ++i) {
+    const auto params = col[i];
+    auto shape = Shape2D::loadFromProject(params);
+    m_shapes.append(shape);
+  }
+  emit shapeCreated();
+}
+
+/**
 * Add a Shape2D object allowing free drawing.
 * @param poly :: Initial shape.
 * @param borderColor :: The border colour.
@@ -672,7 +726,8 @@ void Shape2DCollection::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
   for (auto shapeLines : tsv.sections("shape")) {
     Shape2D *shape = Shape2D::loadFromProject(shapeLines);
-    addShape(shape, false);
+    m_shapes.push_back(shape);
+    emit shapeCreated();
   }
 }
 

@@ -48,7 +48,7 @@ Mantid::Kernel::Logger g_log("RebinnedSourcesManager");
 
 RebinnedSourcesManager::RebinnedSourcesManager(QWidget *parent)
     : QWidget(parent), m_tempPostfix("_rebinned_vsi"), m_tempPrefix(""),
-      m_inputSource(NULL), m_rebinnedSource(NULL) {
+      m_inputSource(nullptr), m_rebinnedSource(nullptr) {
   observeAdd();
   observeAfterReplace();
   observePreDelete();
@@ -380,8 +380,8 @@ void RebinnedSourcesManager::processWorkspaceNames(std::string &inputWorkspace,
   // duration of the rebinning itself
   m_newWorkspacePairBuffer.clear();
   m_newRebinnedWorkspacePairBuffer.clear();
-  m_inputSource = NULL;
-  m_rebinnedSource = NULL;
+  m_inputSource = nullptr;
+  m_rebinnedSource = nullptr;
 
   // If the workspace is the original workspace or it is a freshly loaded, i.e.
   // it is not being tracked
@@ -445,10 +445,9 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
   pqPipelineSource *endOfSource2Pipeline = source2;
 
   while (filter1) {
-    vtkSMProxy *proxy1 = NULL;
-    proxy1 = filter1->getProxy();
-    pqPipelineSource *newPipelineElement = NULL;
-    pqPipelineFilter *newFilter = NULL;
+    vtkSMProxy *proxy1 = filter1->getProxy();
+    pqPipelineSource *newPipelineElement = nullptr;
+    pqPipelineFilter *newFilter = nullptr;
     // Move source2 to its end.
     while (endOfSource2Pipeline->getNumberOfConsumers() > 0) {
       endOfSource2Pipeline = endOfSource2Pipeline->getConsumer(0);
@@ -471,7 +470,7 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
     if (filter1->getNumberOfConsumers() > 0) {
       filter1 = qobject_cast<pqPipelineFilter *>(filter1->getConsumer(0));
     } else {
-      filter1 = NULL;
+      filter1 = nullptr;
     }
   }
   emit triggerAcceptForNewFilters();
@@ -538,11 +537,11 @@ void RebinnedSourcesManager::copySafe(vtkSMProxy *dest, vtkSMProxy *source) {
       }
 
       vtkSMProxy *srcValue = srcPP->GetProxy(0);
-      vtkSMProxy *destValue = NULL;
+      vtkSMProxy *destValue = nullptr;
 
       // find srcValue type in destPLD and that's the proxy to use as destValue.
       for (unsigned int cc = 0;
-           srcValue != NULL && cc < destPLD->GetNumberOfProxyTypes(); cc++) {
+           srcValue != nullptr && cc < destPLD->GetNumberOfProxyTypes(); cc++) {
         if (srcValue->GetXMLName() && destPLD->GetProxyName(cc) &&
             strcmp(srcValue->GetXMLName(), destPLD->GetProxyName(cc)) == 0 &&
             srcValue->GetXMLGroup() && destPLD->GetProxyGroup(cc) &&
@@ -756,7 +755,7 @@ RebinnedSourcesManager::createKeyPairForSource(pqPipelineSource *source) {
  * @param source A pointer to the source
  */
 void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource *source) {
-  if (NULL != source) {
+  if (source) {
     // Go to the end of the source and work your way back
     pqPipelineSource *tempSource = source;
 
