@@ -91,8 +91,9 @@ void MaskDetectors::init() {
       "Default is number of histograms in target workspace if other masks are"
       " present "
       "or ignored if not.");
-  declareProperty(make_unique<ArrayProperty<std::string>>("ComponentList"),
-       "An ArrayProperty containing a list of component names to mask");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>("ComponentList"),
+      "An ArrayProperty containing a list of component names to mask");
 }
 
 /*
@@ -500,18 +501,21 @@ void MaskDetectors::appendToIndexListFromMaskWS(
 } // appendToIndexListFromWS
 
 /**
- * Append the detector IDs of detectors found recursively in the list of components.
+ * Append the detector IDs of detectors found recursively in the list of
+ * components.
  *
  * @param detectorList :: An existing list of detector IDs
  * @param componentList :: List of component names
  * @param WS :: Workspace instrument of which to use
  */
-void MaskDetectors::appendToDetectorListFromComponentList(std::vector<detid_t> &detectorList,
-                                           const std::vector<std::string> &componentList,
-                                           const API::MatrixWorkspace_const_sptr WS) {
+void MaskDetectors::appendToDetectorListFromComponentList(
+    std::vector<detid_t> &detectorList,
+    const std::vector<std::string> &componentList,
+    const API::MatrixWorkspace_const_sptr WS) {
   const auto instrument = WS->getInstrument();
   if (!instrument) {
-    g_log.error() << "No instrument in input workspace. Ignoring ComponentList\n";
+    g_log.error()
+        << "No instrument in input workspace. Ignoring ComponentList\n";
     return;
   }
   std::set<detid_t> detectorIDs;
@@ -526,14 +530,14 @@ void MaskDetectors::appendToDetectorListFromComponentList(std::vector<detid_t> &
       components = instrument->getAllComponentsWithName(compName);
     }
     if (components.empty()) {
-      g_log.error() << "Component " << compName << " not found in input workspace.\n";
+      g_log.error() << "Component " << compName
+                    << " not found in input workspace.\n";
       continue;
     }
     for (const auto &comp : components) {
       const auto assembly =
           boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-      const auto detector =
-          boost::dynamic_pointer_cast<const IDetector>(comp);
+      const auto detector = boost::dynamic_pointer_cast<const IDetector>(comp);
       if (detector) {
         detectorIDs.emplace(detector->getID());
       } else if (assembly) {

@@ -261,7 +261,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(masker.initialize())
     TS_ASSERT(masker.isInitialized())
     TS_ASSERT_THROWS_NOTHING(masker.setProperty("Workspace", "testSpace"))
-    TS_ASSERT_THROWS_NOTHING(masker.setProperty("ComponentList", "bank1/pixel-(0;1), bank3/pixel-(1;1)"))
+    TS_ASSERT_THROWS_NOTHING(masker.setProperty(
+        "ComponentList", "bank1/pixel-(0;1), bank3/pixel-(1;1)"))
     const detid_t maskedPixel1 = 7;
     const detid_t maskedPixel2 = 26;
     TS_ASSERT_THROWS_NOTHING(masker.execute())
