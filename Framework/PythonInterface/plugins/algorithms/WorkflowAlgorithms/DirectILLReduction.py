@@ -14,13 +14,15 @@ from mantid.kernel import (CompositeValidator, Direct, Direction,
 from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
                               CalculateFlatBackground, ClearMaskFlag,
                               CloneWorkspace, ComputeCalibrationCoefVan,
-                              ConvertToConstantL2, ConvertUnits, CorrectKiKf,
+                              ConvertSpectrumAxis, ConvertToConstantL2,
+                              ConvertUnits, CorrectKiKf,
                               CreateSingleValuedWorkspace, DeleteWorkspace,
                               DetectorEfficiencyCorUser, Divide,
                               ExtractMonitors, FindEPP, GetEiMonDet, Load,
                               MaskDetectors, MedianBinWidth,
                               MedianDetectorTest, MergeRuns, Minus, Multiply,
-                              NormaliseToMonitor, Plus, Rebin, Scale)
+                              NormaliseToMonitor, Plus, Rebin, Scale,
+                              SofQWNormalisedPolygon)
 import numpy
 from os import path
 
@@ -72,6 +74,7 @@ _PROP_OUTPUT_DIAGNOSTICS_WS = 'OutputDiagnosticsWorkspace'
 _PROP_OUTPUT_FLAT_BKG_WS = 'OutputFlatBkgWorkspace'
 _PROP_OUTPUT_INCIDENT_ENERGY_WS = 'OutputIncidentEnergyWorkspace'
 _PROP_OUTPUT_MON_EPP_WS = 'OutputMonitorEPPWorkspace'
+_PROP_OUTPUT_THETA_W_WS = 'OutputThetaDeltaEWorkspace'
 _PROP_OUTPUT_WS = 'OutputWorkspace'
 _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
 _PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakDiagnosticsLowThreshold'
@@ -821,6 +824,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # TODO Self-shielding corrections
 
+        self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup,
+                                       subalgLogging)
+
+        mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, subalgLogging)
+
         self._finalize(mainWS, wsCleanup, report)
 
     def PyInit(self):
@@ -1080,18 +1088,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for elastic peak positions.')
+        self.declareProperty(ITableWorkspaceProperty(
+            name=_PROP_OUTPUT_MON_EPP_WS,
+            defaultValue='',
+            direction=Direction.Output,
+            optional=PropertyMode.Optional),
+            doc='Output workspace for monitor elastic peak positions.')
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_INCIDENT_ENERGY_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for calibrated inciden energy.')
-        self.declareProperty(ITableWorkspaceProperty(
-            name=_PROP_OUTPUT_MON_EPP_WS,
-            defaultValue='',
-            direction=Direction.Output,
-            optional=PropertyMode.Optional),
-            doc='Output workspace for elastic peak positions.')
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_FLAT_BKG_WS,
             defaultValue='',
@@ -1104,6 +1112,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for detector diagnostics.')
+        self.declareProperty(WorkspaceProperty(
+            name=_PROP_OUTPUT_THETA_W_WS,
+            defaultValue='',
+            direction=Direction.Output,
+            optional=PropertyMode.Optional),
+            doc='Output workspace for reduced S(theta, DeltaE).')
+
 
     def validateInputs(self):
         '''
@@ -1117,9 +1132,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if fileGiven == wsGiven:
             issues[_PROP_INPUT_FILE] = \
                 'Must give either an input file or an input workspace.'
-        reductionType = self.getProperty(_PROP_REDUCTION_TYPE)
+        reductionType = self.getProperty(_PROP_REDUCTION_TYPE).value
         if reductionType == _REDUCTION_TYPE_SAMPLE:
-            if self.getProperty(_PROP_REBINNING_PARAMS_Q):
+            if self.getProperty(_PROP_REBINNING_PARAMS_Q).isDefault:
                 issues[_PROP_REBINNING_PARAMS_Q] = _PROP_REBINNING_PARAMS_Q + \
                     ' is mandatory when ' + _PROP_REDUCTION_TYPE + ' is ' + \
                     _REDUCTION_TYPE_SAMPLE + '.'
@@ -1484,6 +1499,22 @@ class DirectILLReduction(DataProcessorAlgorithm):
             return vanaNormalizedWS
         return mainWS
 
+    def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,
+                                  subalgLogging):
+        '''
+        If requested, converts the spectrum axis to theta and save the result
+        into the proper output property.
+        '''
+        thetaWSName = self.getProperty(_PROP_OUTPUT_THETA_W_WS).valueAsStr
+        if thetaWSName:
+            thetaWSName = self.getProperty(_PROP_OUTPUT_THETA_W_WS).value
+            thetaWS = ConvertSpectrumAxis(InputWorkspace=mainWS,
+                                          OutputWorkspace=thetaWSName,
+                                          Target='Theta',
+                                          EMode='Direct',
+                                          EnableLogging=subalgLogging)
+            self.setProperty(_PROP_OUTPUT_THETA_W_WS, thetaWS)
+
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report,
                   subalgLogging):
         '''
@@ -1493,13 +1524,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if mode == _REBIN_AUTO_ELASTIC_PEAK:
             binWidth = BinWidthAtX(InputWorkspace=mainWS,
                                    X=0.0,
-                                   Rounding='10^n')
+                                   Rounding='10^n',
+                                   EnableLogging=subalgLogging)
             params = [binWidth]
             report.notice('Rebinned energy axis to bin width {}.'
                           .format(binWidth))
         elif mode == _REBIN_AUTO_MEDIAN_BIN_WIDTH:
             binWidth = MedianBinWidth(InputWorkspace=mainWS,
-                                      Rounding='10^n')
+                                      Rounding='10^n',
+                                      EnableLogging=subalgLogging)
             params = [binWidth]
             report.notice('Rebinned energy axis to bin width {}.'
                           .format(binWidth))
@@ -1524,7 +1557,27 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         return detWS, monWS
 
+    def _sOfQW(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Runs the SofQWNormalisedPolygon algorithm.
+        '''
+        sOfQWWSName = wsNames.withSuffix('sofqw')
+        qBinning = self.getProperty(_PROP_REBINNING_PARAMS_Q).value
+        Ei = mainWS.run().getLogData('Ei').value
+        sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
+                                         OutputWorkspace=sOfQWWSName,
+                                         QAxisBinning=qBinning,
+                                         EMode='Direct',
+                                         EFixed=Ei,
+                                         ReplaceNaNs=False,
+                                         EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return sOfQWWS
+
     def _subtractEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Subtracts the empty container workspace optionally using a cadmium run.
+        '''
         ecInWS = self.getProperty(_PROP_EC_WS).value
         if ecInWS:
             cdInWS = self.getProperty(_PROP_CD_WS).value
