@@ -712,6 +712,7 @@ set ( TEST_FILES
 	CreateWorkspaceTest.h
 	CropToComponentTest.h
 	CropWorkspaceTest.h
+	CrossCorrelateTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
 	DeleteLogTest.h
