@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "qwt_scale_draw.h"
 #include "qwt_plot.h"
+#include <functional>
 
 
 class EXPORT_OPT_MANTIDQT_API QwtScaleDrawNonOrthogonal: public QwtScaleDraw
@@ -30,6 +31,10 @@ private:
   QPointF fromScreenToXyz(QPoint screen) const;
   QPointF fromMixedCoordinatesToHkl(double x, double y) const;
   QPointF fromMixedCoordinatesToXyz(double x, double y) const;
+
+  void convertTicksToXyz(QwtValueList& majorTicksXyz, QwtValueList& minorTicksXyz,
+                         const QwtValueList& majorTicksHkl, const QwtValueList& minorTicksHkl,
+                         std::function<void(double)> func);
 
 
   Mantid::coord_t m_fromHklToXyz[9];

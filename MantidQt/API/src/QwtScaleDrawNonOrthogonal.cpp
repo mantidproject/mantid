@@ -11,22 +11,6 @@
 #include <qmatrix.h>
 #define QwtMatrix QMatrix
 
-namespace {
-  template<typename Func>
-  void convertTicksToXyz(QwtValueList& majorTicksXyz, QwtValueList& minorTicksXyz,
-                         const QwtValueList& majorTicksHkl, const QwtValueList& minorTicksHkl, Func& func) {
-    for (auto& tick : majorTicksHkl) {
-      double majorTickXyz = static_cast<double>(func(tick));
-      majorTicksXyz.append(majorTickXyz);
-    }
-    for (auto& tick : minorTicksHkl) {
-      double minorTickXyz = static_cast<double>(func(tick));
-      minorTicksXyz.append(minorTickXyz);
-    }
-  }
-
-}
-
 
 QwtScaleDrawNonOrthogonal::QwtScaleDrawNonOrthogonal(QwtPlot* plot, ScreenDimension screenDimension, Mantid::API::IMDWorkspace_sptr workspace, size_t dimX,
                                                      size_t dimY, Mantid::Kernel::VMD slicePoint) :m_plot(plot), m_screenDimension(screenDimension),
@@ -93,10 +77,26 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter * painter, const QPalette & palett
   const auto& minorTicksHkl = scaleDivHkl.ticks(QwtScaleDiv::MinorTick);
   QwtValueList majorTicksXyz();
   QwtValueList minorTicksXyz();
-  auto convert = m_screenDimension == ScreenDimension::X ?
-                [bottomInXyz, this](double tick) {return this->fromMixedCoordinatesToXyz(tick, bottomInXyz).x();} :
-                [leftInXyz, this](double tick) {return this->fromMixedCoordinatesToXyz(leftInXyz, tick).y();};
-  convertTicksToXyz(majorTicksXyz, minorTicksXyz, majorTicksHkl, minorTicksHkl, convert);
+
+  if (m_screenDimension == ScreenDimension::X) {
+    for (auto& tick : majorTicksHkl) {
+      double majorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(tick, bottomInXyz).x());
+      majorTicksXyz.append(majorTickXyz);
+    }
+    for (auto& tick : minorTicksHkl) {
+      double minorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(tick, bottomInXyz).x());
+      minorTicksXyz.append(minorTickXyz);
+    }
+  } else {
+    for (auto& tick : majorTicksHkl) {
+      double majorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(leftInXyz, tick).y());
+      majorTicksXyz.append(majorTickXyz);
+    }
+    for (auto& tick : minorTicksHkl) {
+      double minorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(leftInXyz, tick).y());
+      minorTicksXyz.append(minorTickXyz);
+   }
+  }
 
 
   // ***********
@@ -219,7 +219,6 @@ QPointF QwtScaleDrawNonOrthogonal::fromMixedCoordinatesToHkl(double x, double y)
 QPointF QwtScaleDrawNonOrthogonal::fromMixedCoordinatesToXyz(double x, double y) const {
 
 }
-
 
 
 void QwtScaleDrawNonOrthogonal::setTransformationMatrices(Mantid::API::IMDWorkspace_sptr workspace) {
