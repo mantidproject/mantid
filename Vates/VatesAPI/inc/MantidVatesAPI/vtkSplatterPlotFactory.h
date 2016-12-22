@@ -7,7 +7,6 @@
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
@@ -55,8 +54,7 @@ typedef Mantid::signal_t (Mantid::API::IMDNode::*SigFuncIMDNodePtr)() const;
 class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory {
 public:
   /// Constructor
-  vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange,
-                         const std::string &scalarName,
+  vtkSplatterPlotFactory(const std::string &scalarName,
                          const size_t numPoints = 150000,
                          const double percentToUse = 5.0);
 
@@ -116,9 +114,6 @@ private:
 
   /// Add metadata
   void addMetadata() const;
-
-  /// Threshold range strategy.
-  ThresholdRange_scptr m_thresholdRange;
 
   /// Scalar name to provide on dataset.
   const std::string m_scalarName;

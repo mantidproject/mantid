@@ -2,9 +2,9 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidVatesAPI/vtkMDHWSignalArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -28,10 +28,8 @@ namespace Mantid {
 namespace VATES {
 
 vtkMDHistoHexFactory::vtkMDHistoHexFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normalizationOption)
-    : m_normalizationOption(normalizationOption),
-      m_thresholdRange(thresholdRange) {}
+    : m_normalizationOption(normalizationOption) {}
 
 /**
 Assigment operator
@@ -42,7 +40,6 @@ vtkMDHistoHexFactory &vtkMDHistoHexFactory::
 operator=(const vtkMDHistoHexFactory &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
-    this->m_thresholdRange = other.m_thresholdRange;
     this->m_workspace = other.m_workspace;
   }
   return *this;
@@ -54,21 +51,15 @@ Copy Constructor
 */
 vtkMDHistoHexFactory::vtkMDHistoHexFactory(const vtkMDHistoHexFactory &other) {
   this->m_normalizationOption = other.m_normalizationOption;
-  this->m_thresholdRange = other.m_thresholdRange;
   this->m_workspace = other.m_workspace;
 }
 
 void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
-
-  // Setup range values according to whatever strategy object has been injected.
-  m_thresholdRange->setWorkspace(workspace);
-  m_thresholdRange->calculate();
 }
 
 void vtkMDHistoHexFactory::validateWsNotNull() const {
-
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }
@@ -120,14 +111,10 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     offset = timestep * indexMultiplier[2];
   }
 
-  std::unique_ptr<MDHistoWorkspaceIterator> iterator(
-      dynamic_cast<MDHistoWorkspaceIterator *>(createIteratorWithNormalization(
-          m_normalizationOption, m_workspace.get())));
-
   vtkNew<vtkMDHWSignalArray<double>> signal;
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->InitializeArray(std::move(iterator), offset, imageSize);
+  signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
   // update progress after a 1% change
@@ -139,9 +126,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
       nextProgressUpdate += progressIncrement;
     }
     double signalScalar = signal->GetValue(index);
-    bool maskValue = (!std::isfinite(signalScalar) ||
-                      !m_thresholdRange->inRange(signalScalar));
-    if (maskValue) {
+    if (!std::isfinite(signalScalar)) {
       visualDataSet->BlankCell(index);
     }
   }
@@ -164,8 +149,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const vtkIdType nPointsY = nBinsY + 1;
   const vtkIdType nPointsZ = nBinsZ + 1;
 
-  vtkFloatArray *pointsarray = vtkFloatArray::SafeDownCast(points->GetData());
-  if (pointsarray == NULL) {
+  vtkFloatArray *pointsarray = vtkFloatArray::FastDownCast(points->GetData());
+  if (!pointsarray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (pointsarray->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
@@ -193,7 +178,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   }
 
   visualDataSet->SetPoints(points.GetPointer());
-  visualDataSet->Register(NULL);
+  visualDataSet->Register(nullptr);
   visualDataSet->Squeeze();
 
   // Hedge against empty data sets
@@ -216,7 +201,7 @@ vtkSmartPointer<vtkDataSet>
 vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
   auto product =
       tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
-  if (product != NULL) {
+  if (product) {
     return product;
   } else {
     // Create in 3D mode

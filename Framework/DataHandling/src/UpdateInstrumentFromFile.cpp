@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
-#include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadRawHelper.h"

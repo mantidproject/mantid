@@ -310,6 +310,22 @@ public:
     TS_ASSERT_EQUALS(ids, sorted_ids);
   }
 
+  void test_assignment() {
+    auto ws1 = makeWorkspace(2);
+    auto ws2 = makeWorkspace(2);
+    TS_ASSERT_THROWS_NOTHING(ws2->mutableDetectorInfo() = ws1->detectorInfo());
+    // TODO Beamline::DetectorInfo is currently not containing data, so there is
+    // nothing we can check here. Once the class is getting populated add more
+    // checks here.
+  }
+
+  void test_assignment_mismatch() {
+    auto ws1 = makeWorkspace(1);
+    auto ws2 = makeWorkspace(2);
+    TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(),
+                     std::runtime_error);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;
@@ -318,13 +334,16 @@ private:
     auto ws = Kernel::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
+    }
+    ws->setInstrument(inst);
+    auto &pmap = ws->instrumentParameters();
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
+      const auto &det = ws->getDetector(i);
       if (i % 2 == 0)
         pmap.addBool(det->getComponentID(), "masked", true);
     }

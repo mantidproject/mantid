@@ -87,7 +87,7 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
       m_basisNorm(), m_basisX(1, 0, 0), m_basisY(0, 1, 0), m_basisZ(0, 0, 1),
       m_coordType(Kernel::HKL),
       m_workspaceProvider(std::move(workspaceProvider)) {
-  if (NULL == m_dataSet) {
+  if (!m_dataSet) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToNonOrthogonalDataSet with null VTK "
                              "dataset");
@@ -107,7 +107,7 @@ vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   // Downcast to a vtkPointSet
   vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
-  if (NULL == data) {
+  if (!data) {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
   }
 
@@ -214,8 +214,8 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
 
   // Get the original points
   vtkFloatArray *points =
-      vtkFloatArray::SafeDownCast(data->GetPoints()->GetData());
-  if (points == NULL) {
+      vtkFloatArray::FastDownCast(data->GetPoints()->GetData());
+  if (!points) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (points->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");

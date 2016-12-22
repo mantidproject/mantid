@@ -32,7 +32,6 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include <vtkCellData.h>
@@ -47,8 +46,7 @@ template <typename TimeMapper>
 class DLLExport vtkMDHistoHex4DFactory : public vtkMDHistoHexFactory {
 public:
   /// Constructor
-  vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange,
-                         const VisualNormalization normalizationOption,
+  vtkMDHistoHex4DFactory(const VisualNormalization normalizationOption,
                          const double timestep);
 
   /// Assignment operator

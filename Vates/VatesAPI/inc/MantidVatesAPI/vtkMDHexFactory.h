@@ -5,7 +5,6 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
@@ -58,8 +57,7 @@ class DLLExport vtkMDHexFactory : public vtkDataSetFactory {
 
 public:
   /// Constructor
-  vtkMDHexFactory(ThresholdRange_scptr thresholdRange,
-                  const VisualNormalization normalizationOption,
+  vtkMDHexFactory(const VisualNormalization normalizationOption,
                   const size_t maxDepth = 1000);
 
   /// Destructor
@@ -91,9 +89,6 @@ private:
 
   /// Template Method pattern to validate the factory before use.
   void validate() const override;
-
-  /// Threshold range strategy.
-  ThresholdRange_scptr m_thresholdRange;
 
   /// Normalization option and info.
   const VisualNormalization m_normalizationOption;
