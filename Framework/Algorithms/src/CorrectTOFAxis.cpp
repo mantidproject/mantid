@@ -197,10 +197,10 @@ void CorrectTOFAxis::init() {
   declareProperty(
       PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt,
       "Bin index of the nominal elastic TOF channel.", Direction::Input);
-  declareProperty(PropertyNames::FIXED_ENERGY, EMPTY_DBL(),
-                  mustBePositiveDouble,
-                  "Incident energy if the 'EI' sample log is not present/incorrect.",
-                  Direction::Input);
+  declareProperty(
+      PropertyNames::FIXED_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
+      "Incident energy if the 'EI' sample log is not present/incorrect.",
+      Direction::Input);
 }
 
 /** Validate the algorithm's input properties.
