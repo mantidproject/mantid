@@ -28,8 +28,8 @@ std::string ArrayOrderedPairsValidator<TYPE>::checkValidity(
   error << "";
   // Check the number of entries is even
   if (value.size() % 2 != 0) {
-    error << "Array has an odd number of entries (" << std::to_string(value.size())
-          << ").";
+    error << "Array has an odd number of entries ("
+          << std::to_string(value.size()) << ").";
   } else {
     // Check that each pair is ordered.
     for (auto it = value.begin(); it != value.end(); it += 2) {
