@@ -7,10 +7,11 @@
 #include <stdexcept>
 #include <string>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/RemoveBins.h"
-#include "MantidAPI/AnalysisDataService.h" #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
