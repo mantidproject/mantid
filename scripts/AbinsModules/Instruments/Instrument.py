@@ -3,7 +3,7 @@ class Instrument(object):
 
     _name = None
 
-    def _calculate_q_powder(self, frequencies=None):
+    def calculate_q_powder(self, frequencies=None):
         """
         Calculates q vectors.
 

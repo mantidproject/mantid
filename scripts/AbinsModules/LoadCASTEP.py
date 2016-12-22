@@ -76,8 +76,7 @@ class LoadCASTEP(GeneralDFTProgram):
                 for _ in range(self._num_atoms):
                     line = f_handle.readline()
                     line_data = line.strip().split()
-                    indx = int(line_data[0]) - 1 # -1 to convert to zero based indexing
-
+                    indx = int(line_data[0]) - 1  # -1 to convert to zero based indexing
                     symbol = line_data[4]
                     ion = {"symbol": symbol,
                            "fract_coord": np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])]),
@@ -172,21 +171,16 @@ class LoadCASTEP(GeneralDFTProgram):
         """
         Reads frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
         from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
-        displacements, information about Gamma-[pint calculation (True/False) hash of the phonon file (hash) to <>.hdf5
+        displacements, hash of the phonon file (hash) to <>.hdf5
 
-        @return dictionary with the frequencies for each k_point (frequencies),
-                weights of k_points (weights),
-                k_vectors (k_vectors),
-                amplitudes of atom distortions for each k-point (eigenvectors) and
-                whether we have Gamma point calculations or calculations
-                for the whole Brillouin Zone ("gamma_calculations")
+        @return  object of type AbinsData.
         """
         file_data = {}
 
         # Header regex. Looks for lines in the following format:
         #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
         sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " \
-                           r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
+                          r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
         no_sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
 
         if self._check_acoustic_sum():

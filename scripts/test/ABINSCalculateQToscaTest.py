@@ -39,7 +39,7 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         # noinspection PyTypeChecker
         correct_q_data = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * AbinsParameters.tosca_cos_scattering_angle
 
-        q2 = self._tosca_instrument._calculate_q_powder(freq)
+        q2 = self._tosca_instrument.calculate_q_powder(freq)
 
         # noinspection PyTypeChecker
         self.assertEqual(True, np.allclose(correct_q_data, q2))

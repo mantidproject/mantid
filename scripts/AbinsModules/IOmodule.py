@@ -61,8 +61,8 @@ class IOmodule(object):
         Checks if input DFT file and content of HDF file are consistent.
         @return: True if consistent, otherwise False.
         """
-        _saved_hash = self.load(list_of_attributes=["hash"])
-        return self._hash_input_filename == _saved_hash["attributes"]["hash"]
+        saved_hash = self.load(list_of_attributes=["hash"])
+        return self._hash_input_filename == saved_hash["attributes"]["hash"]
 
     def _valid_advanced_parameters(self):
         """
@@ -332,26 +332,26 @@ class IOmodule(object):
             raise ValueError("Invalid name of the dataset.")
 
         if name in group:
-            _hdf_group = group[name]
+            hdf_group = group[name]
         else:
             raise ValueError("Invalid name of the dataset.")
 
         # noinspection PyUnresolvedReferences,PyProtectedMember
-        if isinstance(_hdf_group, h5py._hl.dataset.Dataset):
-            return _hdf_group.value
-        elif all([self._get_subgrp_name(path=_hdf_group[el].name).isdigit() for el in _hdf_group.keys()]):
-            _structured_dataset_list = []
+        if isinstance(hdf_group, h5py._hl.dataset.Dataset):
+            return hdf_group.value
+        elif all([self._get_subgrp_name(path=hdf_group[el].name).isdigit() for el in hdf_group.keys()]):
+            structured_dataset_list = []
             # here we make an assumption about keys which have a numeric values; we assume that always : 1, 2, 3... Max
-            _num_keys = len(_hdf_group.keys())
-            for item in range(_num_keys):
-                _structured_dataset_list.append(
+            num_keys = len(hdf_group.keys())
+            for item in range(num_keys):
+                structured_dataset_list.append(
                     self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
-                                                                    path=_hdf_group.name + "/%s" % item))
-            return self._convert_unicode_to_str(object_to_check=_structured_dataset_list)
+                                                                    path=hdf_group.name + "/%s" % item))
+            return self._convert_unicode_to_str(object_to_check=structured_dataset_list)
         else:
             return self._convert_unicode_to_str(
                 object_to_check=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
-                                                                                path=_hdf_group.name+"/"))
+                                                                                path=hdf_group.name+"/"))
 
     def _recursively_load_dict_contents_from_group(self, hdf_file=None, path=None):
         """

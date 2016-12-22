@@ -139,10 +139,11 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
                                       replace("'",  '"').
                                       replace("0. ", "0.0"))
 
-        for el in range(len(correct_data)):
+        temp = np.asarray(correct_data["frequencies"])
+        correct_data["frequencies"] = temp
 
-            temp = np.asarray(correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS])
-            correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS] = temp
+        # we need to - 1 because one entry is "frequencies"
+        for el in range(len(correct_data) - 1):
 
             temp = np.asarray(correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS])
             correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS] = temp
@@ -151,16 +152,16 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     def _check_data(self, good_data=None, data=None):
 
-        for el in range(len(good_data)):
+        good_temp = good_data["frequencies"]
+        data_temp = data["frequencies"]
+        self.assertEqual(True, np.allclose(good_temp, data_temp))
+
+        # we need to - 1 because one entry is "frequencies"
+        for el in range(len(good_data) -1):
 
             good_temp = good_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS]
             data_temp = data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS]
             self.assertEqual(True, np.allclose(good_temp, data_temp))
-
-            good_temp = good_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS]
-            data_temp = data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS]
-            self.assertEqual(True, np.allclose(good_temp, data_temp))
-
 
 if __name__ == '__main__':
     unittest.main()

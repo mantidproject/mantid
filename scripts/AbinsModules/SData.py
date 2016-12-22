@@ -1,5 +1,7 @@
+import numpy as np
 from GeneralData import GeneralData
 import AbinsConstants
+import AbinsParameters
 
 
 class SData(GeneralData):
@@ -29,12 +31,27 @@ class SData(GeneralData):
             raise ValueError("New value of S  should have a form of a dict.")
 
         for item in items:
+            if "atom" in item:
 
-            if not isinstance(items[item], dict):
-                raise ValueError("New value of item from S data should have a form of dictionary.")
+                if not isinstance(items[item], dict):
+                    raise ValueError("New value of item from S data should have a form of dictionary.")
 
-            if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
-                raise ValueError("Invalid structure of the dictionary.")
+                if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
+                    raise ValueError("Invalid structure of the dictionary.")
+
+            elif "frequencies" == item:
+
+                bins = np.arange(start=AbinsParameters.min_wavenumber,
+                                 stop=AbinsParameters.max_wavenumber,
+                                 step=AbinsParameters.bin_width,
+                                 dtype=AbinsConstants.FLOAT_TYPE)
+
+                if not np.array_equal(items[item], bins[1:]):
+                    raise ValueError("Invalid frequencies.")
+
+            else:
+
+                raise ValueError("Invalid keyword " + item)
 
         self._data = items
 

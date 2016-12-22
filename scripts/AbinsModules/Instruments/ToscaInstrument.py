@@ -15,7 +15,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         self._k_points_data = None
         super(ToscaInstrument, self).__init__()
 
-    def _calculate_q_powder(self, frequencies=None):
+    def calculate_q_powder(self, frequencies=None):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """

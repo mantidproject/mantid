@@ -59,7 +59,12 @@ class CalculatePowder(object):
         displacements = k_data["atomic_displacements"]
         num_atoms = displacements.shape[0]
         atoms_data = data["atoms_data"]
-        frequencies = k_data["frequencies"][AbinsConstants.FIRST_OPTICAL_PHONON:]  # frequencies in cm^-1
+
+        if k_data["frequencies"].size == 3 * num_atoms:  # use case: crystal
+            first_frequency = AbinsConstants.FIRST_OPTICAL_PHONON
+        else:  # use case: molecule
+            first_frequency = AbinsConstants.FIRST_MOLECULAR_VIBRATION
+        frequencies = k_data["frequencies"][first_frequency:]
 
         powder = PowderData(num_atoms=num_atoms)
 

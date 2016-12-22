@@ -61,8 +61,8 @@ class CalculateS(object):
 
         if instrument_name in AbinsConstants.ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
-            _instrument_producer = InstrumentProducer()
-            self._instrument = _instrument_producer.produce_instrument(name=self._instrument_name)
+            instrument_producer = InstrumentProducer()
+            self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
 
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
@@ -90,6 +90,11 @@ class CalculateS(object):
                                  AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
+        self._bins = np.arange(start=AbinsParameters.min_wavenumber,
+                               stop=AbinsParameters.max_wavenumber,
+                               step=AbinsParameters.bin_width,
+                               dtype=AbinsConstants.FLOAT_TYPE)
+
         self._powder_atoms_data = None
         self._a_traces = None
         self._b_traces = None
@@ -101,15 +106,15 @@ class CalculateS(object):
         # Powder case: calculate A and B tensors
         if self._sample_form == "Powder":
 
-            _powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
-            _powder_data = _powder_calculator.get_formatted_data()
-            _s_data = self._calculate_s_powder_1d(powder_data=_powder_data)
+            powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
+            powder_data = powder_calculator.get_formatted_data()
+            s_data = self._calculate_s_powder_1d(powder_data=powder_data)
 
         # Crystal case: calculate DW
         else:
             raise ValueError("SingleCrystal case not implemented yet.")
 
-        return _s_data
+        return s_data
 
     def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None):
         """
@@ -122,9 +127,19 @@ class CalculateS(object):
         threshold = max(np.max(a=s) * AbinsParameters.s_relative_threshold, AbinsParameters.s_absolute_threshold)
 
         indices = s > threshold
-        s = s[indices]
-        freq = freq[indices]
-        coeff = coeff[indices]
+        # noinspection PyUnresolvedReferences
+        if indices.any():
+
+            s = s[indices]
+            freq = freq[indices]
+            coeff = coeff[indices]
+
+        else:
+
+            s = np.zeros(shape=AbinsConstants.MIN_SIZE, dtype=AbinsConstants.FLOAT_TYPE)
+            s.fill(AbinsConstants.S_THRESHOLD)
+            freq = freq[:AbinsConstants.MIN_SIZE]
+            coeff = coeff[:AbinsConstants.MIN_SIZE]
 
         return s, freq, coeff
 
@@ -169,7 +184,12 @@ class CalculateS(object):
         abins_data_extracted = self._abins_data.extract()
         self._atoms_data = abins_data_extracted["atoms_data"]
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
-        self._fundamentals_freq = k_points_data["frequencies"][0][AbinsConstants.FIRST_OPTICAL_PHONON:]
+
+        if k_points_data["frequencies"][0].size == 3 * num_atoms:  # use case: crystal
+            first_frequency = AbinsConstants.FIRST_OPTICAL_PHONON
+        else:  # use case: molecule
+            first_frequency = AbinsConstants.FIRST_MOLECULAR_VIBRATION
+        self._fundamentals_freq = k_points_data["frequencies"][0][first_frequency:]
 
         atoms_items = dict()
         atoms = range(num_atoms)
@@ -183,8 +203,9 @@ class CalculateS(object):
                 result.append(self._calculate_s_powder_1d_one_atom(atom=atom))
 
         for atom in range(num_atoms):
-            atoms_items["atom_%s" % atom] = {"frequencies": result[atom][0], "s": result[atom][1]}
+            atoms_items["atom_%s" % atom] = {"s": result[atom]}
             self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
+        atoms_items.update({"frequencies": self._bins[1:]})
 
         s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
         s_data.set(items=atoms_items)
@@ -195,7 +216,7 @@ class CalculateS(object):
         """
         @param msg:  message to print out
         """
-        # in order to avoid
+        # In order to avoid
         #
         # RuntimeError: Pickling of "mantid.kernel._kernel.Logger"
         # instances is not enabled (http://www.boost.org/libs/python/doc/v2/pickle.html)
@@ -211,7 +232,6 @@ class CalculateS(object):
         @return: s, and corresponding frequencies for all quantum events taken into account
         """
         s = {}
-        s_frequencies = {}
 
         local_freq = np.copy(self._fundamentals_freq)
         local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=AbinsConstants.INT_TYPE)
@@ -220,37 +240,12 @@ class CalculateS(object):
         for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
             # in case there is large number of transitions chop it into chunks and process chunk by chunk
-            if local_freq.size * self._fundamentals_freq.size > AbinsConstants.LARGE_SIZE:
+            if local_freq.size * self._fundamentals_freq.size > AbinsParameters.optimal_size:
 
-                fund_size = self._fundamentals_freq.size
-                l_size = local_freq.size
-                opt_size = float(AbinsParameters.optimal_size)
+                chunked_fundamentals, chunked_fundamentals_coeff = self._prepare_chunks(local_freq=local_freq,
+                                                                                        order=order, s=s)
 
-                chunk_size = max(1.0, np.floor(opt_size / l_size))
-                chunk_num = int(np.ceil(float(fund_size) / chunk_size))
-                new_dim = int(chunk_num * chunk_size)
-                new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsConstants.FLOAT_TYPE)
-                new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsConstants.INT_TYPE)
-                new_fundamentals[:fund_size] = self._fundamentals_freq
-                new_fundamentals_coeff[:fund_size] = fund_coeff
-
-                new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
-                new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
-
-                total_size = int(np.ceil((AbinsParameters.max_wavenumber - AbinsParameters.min_wavenumber) /
-                                         AbinsParameters.bin_width)) - 1
-
-                # large number of transition energies so always  freq.size > partial_broad_freq.size
-                rebined_broad_freq = np.arange(start=AbinsParameters.min_wavenumber,
-                                               stop=AbinsParameters.max_wavenumber,
-                                               step=AbinsParameters.bin_width,
-                                               dtype=AbinsConstants.FLOAT_TYPE)
-
-                for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
-                    s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
-                    s_frequencies["order_%s" % lg_order] = rebined_broad_freq
-
-                for fund_chunk, fund_coeff_chunk in zip(new_fundamentals, new_fundamentals_coeff):
+                for fund_chunk, fund_coeff_chunk in zip(chunked_fundamentals, chunked_fundamentals_coeff):
 
                     part_local_freq = np.copy(local_freq)
                     part_local_coeff = np.copy(local_coeff)
@@ -258,80 +253,99 @@ class CalculateS(object):
                     # number of transitions can only go up
                     for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
-                        part_local_freq, part_local_coeff = self._freq_generator.construct_freq_combinations(
-                            previous_array=part_local_freq,
-                            previous_coefficients=part_local_coeff,
-                            fundamentals_array=fund_chunk,
-                            fundamentals_coefficients=fund_coeff_chunk,
-                            quantum_order=lg_order)
+                        part_local_freq, part_local_coeff, part_broad_spectrum = self._helper_1d_atom(
+                            atom=atom, local_freq=part_local_freq, local_coeff=part_local_coeff,
+                            fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order)
 
-                        # noinspection PyProtectedMember
-                        q2 = self._instrument._calculate_q_powder(frequencies=part_local_freq)
+                        s["order_%s" % lg_order] = s["order_%s" % lg_order] + part_broad_spectrum
 
-                        part_value_dft = \
-                            self._calculate_order[lg_order](q2=q2,
-                                                            frequencies=part_local_freq,
-                                                            indices=part_local_coeff,
-                                                            a_tensor=self._powder_atoms_data["a_tensors"][atom],
-                                                            a_trace=self._a_traces[atom],
-                                                            b_tensor=self._powder_atoms_data["b_tensors"][atom],
-                                                            b_trace=self._b_traces[atom])
-
-                        part_value_dft, part_local_freq, part_local_coeff = \
-                            self._calculate_s_over_threshold(s=part_value_dft,
-                                                             freq=part_local_freq,
-                                                             coeff=part_local_coeff)
-
-                        part_freq, part_spectrum = self._rebin_data(array_x=part_local_freq, array_y=part_value_dft)
-
-                        part_freq, part_broad_spectrum = \
-                            self._instrument.convolve_with_resolution_function(frequencies=part_freq,
-                                                                               s_dft=part_spectrum)
-
-                        part_broad_freq, part_broad_spectrum = \
-                            self._rebin_data(array_x=part_freq, array_y=part_broad_spectrum)
-
-                        if part_broad_spectrum.size > 0:
-                            s["order_%s" % lg_order] = s["order_%s" % lg_order] + part_broad_spectrum
-
-                return s_frequencies, s
+                return s
 
             # if relatively small array of transitions then process it in one shot
             else:
 
-                local_freq, local_coeff = self._freq_generator.construct_freq_combinations(
-                    previous_array=local_freq,
-                    previous_coefficients=local_coeff,
-                    fundamentals_array=self._fundamentals_freq,
-                    fundamentals_coefficients=fund_coeff,
-                    quantum_order=order)
+                local_freq, local_coeff, s["order_%s" % order] = self._helper_1d_atom(
+                    atom=atom, local_freq=local_freq, local_coeff=local_coeff,
+                    fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
 
-                # noinspection PyProtectedMember
-                q2 = self._instrument._calculate_q_powder(frequencies=local_freq)
+        return s
 
-                value_dft = self._calculate_order[order](q2=q2,
-                                                         frequencies=local_freq,
-                                                         indices=local_coeff,
-                                                         a_tensor=self._powder_atoms_data["a_tensors"][atom],
-                                                         a_trace=self._a_traces[atom],
-                                                         b_tensor=self._powder_atoms_data["b_tensors"][atom],
-                                                         b_trace=self._b_traces[atom])
+    def _prepare_chunks(self, local_freq=None, order=None, s=None):
+        """
+        Helper function for _calculate_s_powder_1d_one_atom in case transitions energies have to be created from
+        fundamentals chunks (chunk by chunk).
+        :param local_freq: frequency from the previous transition
+        :param order:  order of quantum event
+        :param s:  dictionary with s data
+        :return: 2D numpy array with fundamentals chunks, 2D array with corresponding coefficients
+        """
+        fund_size = self._fundamentals_freq.size
+        l_size = local_freq.size
+        opt_size = float(AbinsParameters.optimal_size)
 
-                value_dft, local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
-                                                                                      freq=local_freq,
-                                                                                      coeff=local_coeff)
+        chunk_size = max(1.0, np.floor(opt_size / (l_size * 2**(AbinsConstants.MAX_ORDER - order))))
+        chunk_num = int(np.ceil(float(fund_size) / chunk_size))
+        new_dim = int(chunk_num * chunk_size)
+        new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsConstants.FLOAT_TYPE)
+        new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsConstants.INT_TYPE)
+        new_fundamentals[:fund_size] = self._fundamentals_freq
+        new_fundamentals_coeff[:fund_size] = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size,
+                                                       dtype=AbinsConstants.INT_TYPE)
 
-                rebined_freq, rebined_spectrum = self._rebin_data(array_x=local_freq, array_y=value_dft)
+        new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
+        new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
-                freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebined_freq,
-                                                                                          s_dft=rebined_spectrum)
+        total_size = self._bins.size - 1
+        for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+            s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
 
-                rebined_broad_freq, rebined_broad_spectrum = self._rebin_data(array_x=freq, array_y=broad_spectrum)
+        return new_fundamentals,  new_fundamentals_coeff
 
-            s["order_%s" % order] = rebined_broad_spectrum
-            s_frequencies["order_%s" % order] = rebined_broad_freq
+    def _helper_1d_atom(self, atom=None, local_freq=None, local_coeff=None, fundamentals_freq=None, fund_coeff=None,
+                        order=None):
+        """
+        Helper function for _calculate_s_powder_1d_one_atom.
+        :param atom: number of atom
+        :param local_freq: frequency from the previous transition
+        :param local_coeff: coefficients from the previous transition
+        :param fundamentals_freq: fundamental frequencies
+        :param fund_coeff: fundamental coefficients
+        :param order: order of quantum event
+        """
+        local_freq, local_coeff = self._freq_generator.construct_freq_combinations(
+            previous_array=local_freq,
+            previous_coefficients=local_coeff,
+            fundamentals_array=fundamentals_freq,
+            fundamentals_coefficients=fund_coeff,
+            quantum_order=order)
 
-        return s_frequencies, s
+        if local_freq.any():  # check if local_freq has non-zero values
+
+            q2 = self._instrument.calculate_q_powder(frequencies=local_freq)
+
+            value_dft = self._calculate_order[order](q2=q2,
+                                                     frequencies=local_freq,
+                                                     indices=local_coeff,
+                                                     a_tensor=self._powder_atoms_data["a_tensors"][atom],
+                                                     a_trace=self._a_traces[atom],
+                                                     b_tensor=self._powder_atoms_data["b_tensors"][atom],
+                                                     b_trace=self._b_traces[atom])
+
+            value_dft, local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
+                                                                                  freq=local_freq,
+                                                                                  coeff=local_coeff)
+
+            rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
+
+            freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebined_freq,
+                                                                                      s_dft=rebined_spectrum)
+
+            rebined_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
+            rebined_broad_spectrum = self._fix_empty_array(array_y=rebined_broad_spectrum)
+        else:
+            rebined_broad_spectrum = self._fix_empty_array()
+
+        return local_freq, local_coeff, rebined_broad_spectrum
 
     # noinspection PyUnusedLocal
     def _calculate_order_one(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
@@ -456,28 +470,55 @@ class CalculateS(object):
     def _calculate_s_crystal(self, crystal_data=None):
 
         if not isinstance(crystal_data, CrystalData):
+
             raise ValueError("Input parameter should be of type CrystalData.")
             # TODO: implement calculation of S for the single crystal scenario
 
-    def _rebin_data(self, array_x=None, array_y=None):
+    def _rebin_data_full(self, array_x=None, array_y=None):
         """
-        Rebins S data so that all quantum events have the same x-axis.
+        Rebins S data so that all quantum events have the same x-axis. The size of rebined data is equal to _bins.size.
         @param array_x: numpy array with frequencies
         @param array_y: numpy array with S
         @return: rebined frequencies, rebined S
         """
+        inds = np.digitize(array_x, self._bins)
+        output_array_y = np.asarray(a=[array_y[inds == i].sum() for i in range(1, self._bins.size)],
+                                    dtype=AbinsConstants.FLOAT_TYPE)
 
-        bins = np.arange(start=AbinsParameters.min_wavenumber,
-                         stop=AbinsParameters.max_wavenumber,
-                         step=AbinsParameters.bin_width,
-                         dtype=AbinsConstants.FLOAT_TYPE)
-        if bins.size > array_x.size:
-            return array_x, array_y
+        return output_array_y
+
+    def _rebin_data_opt(self, array_x=None, array_y=None):
+        """
+        Rebins S data in optimised way: the size of rebined data may be smaller then _bins.size.
+        @param array_x: numpy array with frequencies
+        @param array_y: numpy array with S
+        @return: rebined frequencies, rebined S
+        """
+        if self._bins.size > array_x.size:
+            output_array_x = array_x
+            output_array_y = array_y
         else:
+            inds = np.digitize(array_x, self._bins)
+            output_array_x = self._bins[1:]
+            output_array_y = np.asarray(a=[array_y[inds == i].sum() for i in range(1, self._bins.size)],
+                                        dtype=AbinsConstants.FLOAT_TYPE)
 
-            inds = np.digitize(array_x, bins)
-            rebined_y = np.asarray([array_y[inds == i].sum() for i in range(1, bins.size)])
-            return bins[1:], rebined_y
+        return output_array_x, output_array_y
+
+    def _fix_empty_array(self, array_y=None):
+        """
+        Fixes empty numpy arrays which occur in case of heavier atoms.
+        :return: numpy array filled with zeros of dimension _bins.size - 1
+        """
+        if array_y is None:
+            # number of frequencies = self._bins.size - 1
+            output_y = np.zeros(shape=self._bins.size - 1, dtype=AbinsConstants.FLOAT_TYPE)
+        elif array_y.any():
+            output_y = self._rebin_data_full(array_x=self._bins[1:], array_y=array_y)
+        else:
+            output_y = np.zeros(shape=self._bins.size - 1, dtype=AbinsConstants.FLOAT_TYPE)
+
+        return output_y
 
     def calculate_data(self):
         """
@@ -509,21 +550,16 @@ class CalculateS(object):
                          S Data from hdf file which corresponds only to requested quantum order events will be
                          loaded.""")
 
-            temp_data = {}
+            temp_data = {"frequencies": data["datasets"]["data"]["frequencies"]}
 
             # load atoms_data
-            n_atom = len(data["datasets"]["data"])
+            n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
             for i in range(n_atom):
-                sort = data["datasets"]["data"]["atom_%s" % i]["sort"]
-                symbol = data["datasets"]["data"]["atom_%s" % i]["symbol"]
-                temp_data["atom_%s" % i] = {"sort": sort,  "symbol":  symbol, "s": {}, "frequencies": {}}
+                temp_data["atom_%s" % i] = {"s": dict()}
                 for j in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
                     temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
-                    temp_data["atom_%s" % i]["s"]["order_%s" % j] = temp_val
-
-                    temp_val = data["datasets"]["data"]["atom_%s" % i]["frequencies"]["order_%s" % j]
-                    temp_data["atom_%s" % i]["frequencies"]["order_%s" % j] = temp_val
+                    temp_data["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
 
             # reduce the data which is loaded to only this data which is required by the user
             data["datasets"]["data"] = temp_data

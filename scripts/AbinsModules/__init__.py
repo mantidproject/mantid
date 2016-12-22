@@ -17,8 +17,6 @@ algorithms and data objects that are:
 
 """
 
-
-
 from IOmodule import IOmodule
 
 # Frequency generator
@@ -27,6 +25,7 @@ from FrequencyPowderGenerator import FrequencyPowderGenerator
 # Loading modules
 from GeneralDFTProgram import GeneralDFTProgram
 from LoadCASTEP import LoadCASTEP
+from LoadCRYSTAL import LoadCRYSTAL
 
 # Calculating modules
 from CalculatePowder import CalculatePowder

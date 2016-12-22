@@ -24,7 +24,7 @@ class NoneInstrument(Instrument):
         self._k_points_data = k_points_data
 
 
-    def _calculate_q_powder(self=None):
+    def calculate_q_powder(self=None):
         """
         Calculates squared Q vectors for None instrument.
         """

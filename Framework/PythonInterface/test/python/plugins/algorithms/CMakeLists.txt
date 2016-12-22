@@ -3,7 +3,7 @@
 ##
 
 set ( TEST_PY_FILES
-  ABINSTest.py
+  ABINSBasicTest.py
   ABINSAdvancedParametersTest.py
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py

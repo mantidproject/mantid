@@ -14,6 +14,7 @@ from scipy import constants
 FUNDAMENTALS = 1  # value of fundamental parameter  (n = 1)
 FIRST_OVERTONE = 1 + FUNDAMENTALS  # value of first overtone (n = 2)
 FIRST_OPTICAL_PHONON = 3  # index of the first optical phonon
+FIRST_MOLECULAR_VIBRATION = 0  # index of the first vibration for molecule
 FUNDAMENTALS_DIM = 1
 
 # In Python first element starts at 0-th index. This is a shift to index which has to be included
@@ -56,7 +57,7 @@ ALL_KEYWORDS_POWDER_DATA = ["b_tensors", "a_tensors"]
 
 # keywords which define data structure for SData
 ALL_KEYWORDS_S_DATA = ["data"]
-ALL_KEYWORDS_ATOMS_S_DATA = ["s", "frequencies"]
+ALL_KEYWORDS_ATOMS_S_DATA = ["s"]
 
 FLOAT_ID = np.dtype(np.float64).num
 FLOAT_TYPE = np.dtype(np.float64)
@@ -121,9 +122,11 @@ QUANTUM_ORDER_TWO = 2
 QUANTUM_ORDER_THREE = 3
 QUANTUM_ORDER_FOUR = 4
 
-LARGE_SIZE = 10000000  # if resulting S is bigger than that switch to processing in loop to save memory
+MIN_SIZE = 2  # minimal size of an array
 
 # values of S below that are considered to be zero
 S_THRESHOLD = 10e-8
+
+MAX_ORDER = 4  # max quantum order event
 
 NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher

@@ -13,7 +13,7 @@ from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, S
                              DeleteWorkspace, Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
-from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters, AbinsConstants
+from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, AbinsConstants
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -40,7 +40,6 @@ class ABINS(PythonAlgorithm):
     _num_quantum_order_events = None
     _extracted_dft_data = None
 
-
     def category(self):
         return "Simulation"
 
@@ -62,7 +61,7 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(FileProperty("PhononFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
-                             extensions=["phonon"]),
+                             extensions=["phonon", "out"]),
                              doc="File with the data from a phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -117,6 +116,8 @@ class ABINS(PythonAlgorithm):
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
         self._make_preamble()
+        input_file_validators = {"CASTEP":self._validate_castep_input_file,
+                                 "CRYSTAL": self._validate_crystal_input_file}
 
         issues = dict()
 
@@ -130,13 +131,9 @@ class ABINS(PythonAlgorithm):
 
         dft_program = self.getProperty("DFTprogram").value
         phonon_filename = self.getProperty("PhononFile").value
-
-        if dft_program == "CASTEP":
-            output = self._validate_castep_input_file(filename=phonon_filename)
-            if output["Invalid"]:
-                issues["PhononFile"] = output["Comment"]
-        elif dft_program == "CRYSTAL":
-            issues["DFTprogram"] = "Support for CRYSTAL DFT program not implemented yet."
+        output = input_file_validators[dft_program](filename=phonon_filename)
+        if output["Invalid"]:
+            issues["PhononFile"] = output["Comment"]
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
         # list of special keywords which cannot be used in the name of workspace
@@ -147,6 +144,7 @@ class ABINS(PythonAlgorithm):
         elif workspace_name == "":
             issues["OutputWorkspace"] = "Please specify name of workspace."
         for word in forbidden_keywords:
+
             if word in workspace_name:
                 issues["OutputWorkspace"] = "Keyword: " + word + " cannot be used in the name of workspace."
                 break
@@ -168,25 +166,16 @@ class ABINS(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read DFT data
-        if self._dft_program == "CASTEP":
-
-            dft_reader = LoadCASTEP(input_dft_filename=self._phonon_file)
-
-        else:
-
-            raise RuntimeError("Currently only output files from CASTEP are supported.")
-
+        dft_loaders = {"CASTEP": LoadCASTEP, "CRYSTAL": LoadCRYSTAL}
+        dft_reader = dft_loaders[self._dft_program](input_dft_filename=self._phonon_file)
         dft_data = dft_reader.get_formatted_data()
-
         prog_reporter.report("Phonon data has been read.")
 
         # 3) calculate S
         s_calculator = CalculateS(filename=self._phonon_file, temperature=self._temperature,
                                   sample_form=self._sample_form, abins_data=dft_data, instrument_name=self._instrument,
                                   quantum_order_num=self._num_quantum_order_events)
-
         s_data = s_calculator.get_formatted_data()
-
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
@@ -252,19 +241,10 @@ class ABINS(PythonAlgorithm):
         @return: workspaces for list of atoms types, S for the particular type of atom
         """
         s_data_extracted = s_data.extract()
-        first_atom = 0
-        freq_dic = s_data_extracted["atom_%s" % first_atom]["frequencies"]
-        max_size = freq_dic["order_%s" % AbinsConstants.FUNDAMENTALS].size
-        items = freq_dic.keys()
-        items.remove("order_%s" % AbinsConstants.FUNDAMENTALS)
-        for item in items:
-            if max_size < freq_dic[item].size:
-                max_size = freq_dic[item].size
-        freq = np.zeros((self._num_quantum_order_events, max_size))
-
+        freq = np.tile(s_data_extracted["frequencies"], (self._num_quantum_order_events, 1))
         s_atom_data = np.copy(freq)
-        atoms_data = s_data_extracted
-        num_atoms = len(atoms_data)
+
+        num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
         result_workspaces = []
         temp_s_atom_data = np.copy(s_atom_data)
 
@@ -272,27 +252,23 @@ class ABINS(PythonAlgorithm):
             # create partial workspaces for the given type of atom
             atom_workspaces = []
             s_atom_data.fill(0.0)
-            freq.fill(0)
-            constructed_freq = False
+
             for atom in range(num_atoms):
                 if self._extracted_dft_data["atom_%s" % atom]["symbol"] == atom_symbol:
+
                     temp_s_atom_data.fill(0)
+
                     for order in range(AbinsConstants.FUNDAMENTALS,
                                        self._num_quantum_order_events + AbinsConstants.S_LAST_INDEX):
 
                         order_indx = order - AbinsConstants.PYTHON_INDEX_SHIFT
+                        temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
+                        temp_s_atom_data[order_indx] = temp_s_order
 
-                        if not constructed_freq:
-                            temp_freq_order = atoms_data["atom_%s" % atom]["frequencies"]["order_%s" % order]
-                            freq[order_indx, :temp_freq_order.size] = temp_freq_order
-
-                        temp_s_order = atoms_data["atom_%s" % atom]["s"]["order_%s" % order]
-                        temp_s_atom_data[order_indx, :temp_s_order.size] = temp_s_order
-                    constructed_freq = True
                     np.add(s_atom_data, temp_s_atom_data, s_atom_data)  # sum S over the atoms of the same type
 
             atom_workspaces.append(self._create_workspace(atom_name=atom_symbol,
-                                                          frequencies=np.copy(freq),
+                                                          frequencies=freq,
                                                           s_points=np.copy(s_atom_data)))
 
             # create total workspace for the given type of atom
@@ -625,7 +601,24 @@ class ABINS(PythonAlgorithm):
         @param filename: name of file.
         @return: True if file is valid otherwise false.
         """
-        pass
+        logger.information("Validate CRYSTAL phonon file: ")
+
+        output = {"Invalid": False, "Comment": ""}
+        msg_err = "Invalid %s file. " % filename
+        msg_rename = "Please rename your file and try again."
+
+        # check name of file
+        if "." not in filename:
+            return dict(Invalid=True, Comment=msg_err + " One dot '.' is expected in the name of file! " + msg_rename)
+
+        if filename.count(".") != 1:
+            return dict(Invalid=True, Comment=msg_err + " Only one dot should be in the name of file! " + msg_rename)
+
+        if filename[filename.find(".") + 1:].lower() != "out":
+            return dict(Invalid=True, Comment=msg_err + " The expected extension of file is out "
+                                                        "(case of letter does not matter)! " + msg_rename)
+
+        return output
 
     def _validate_castep_input_file(self, filename=None):
         """

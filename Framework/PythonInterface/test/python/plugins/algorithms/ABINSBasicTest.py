@@ -10,11 +10,11 @@ def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSTest because Python is too old.")
+        logger.warning("Skipping ABINSBasicTest because Python is too old.")
 
     is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
     if is_numpy_old:
-        logger.warning("Skipping ABINSTest because numpy is too old.")
+        logger.warning("Skipping ABINSBasicTest because numpy is too old.")
 
     return is_python_old or is_numpy_old
 
@@ -34,7 +34,7 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_modules)
-class ABINSTest(unittest.TestCase):
+class ABINSBasicTest(unittest.TestCase):
 
     _si2 = "Si2-sc_ABINS"
     _squaricn = "squaricn_sum_ABINS"
@@ -45,7 +45,7 @@ class ABINSTest(unittest.TestCase):
 
         # remove workspaces
         DeleteWorkspace(self._squaricn + "_ref")
-        DeleteWorkspace(self._si2 + "_ref")
+        # DeleteWorkspace(self._si2 + "_ref")
 
     def setUp(self):
 
@@ -67,31 +67,18 @@ class ABINSTest(unittest.TestCase):
         self._tolerance = 0.0001
 
         # produce reference data
-        self._ref_wrk = {self._si2 + "_abins": ABINS(DFTprogram=self._dft_program,
-                                                     PhononFile=self._si2 + ".phonon",
-                                                     ExperimentalFile=self._experimental_file,
-                                                     Temperature=self._temperature,
-                                                     SampleForm=self._sample_form,
-                                                     Instrument=self._instrument_name,
-                                                     Atoms=self._atoms,
-                                                     Scale=self._scale,
-                                                     SumContributions=self._sum_contributions,
-                                                     QuantumOrderEventsNumber=self._quantum_order_events_number,
-                                                     ScaleByCrossSection=self._cross_section_factor,
-                                                     OutputWorkspace=self._si2 + "_ref"),
-
-                          self._squaricn + "_abins": ABINS(DFTprogram=self._dft_program,
-                                                           PhononFile=self._squaricn + ".phonon",
-                                                           ExperimentalFile=self._experimental_file,
-                                                           Temperature=self._temperature,
-                                                           SampleForm=self._sample_form,
-                                                           Instrument=self._instrument_name,
-                                                           Atoms=self._atoms,
-                                                           Scale=self._scale,
-                                                           SumContributions=self._sum_contributions,
-                                                           QuantumOrderEventsNumber=self._quantum_order_events_number,
-                                                           ScaleByCrossSection=self._cross_section_factor,
-                                                           OutputWorkspace=self._squaricn + "_ref")
+        self._ref_wrk = {self._squaricn + "_abins": ABINS(DFTprogram=self._dft_program,
+                                                          PhononFile=self._squaricn + ".phonon",
+                                                          ExperimentalFile=self._experimental_file,
+                                                          Temperature=self._temperature,
+                                                          SampleForm=self._sample_form,
+                                                          Instrument=self._instrument_name,
+                                                          Atoms=self._atoms,
+                                                          Scale=self._scale,
+                                                          SumContributions=self._sum_contributions,
+                                                          QuantumOrderEventsNumber=self._quantum_order_events_number,
+                                                          ScaleByCrossSection=self._cross_section_factor,
+                                                          OutputWorkspace=self._squaricn + "_ref")
                           }
 
     def test_wrong_input(self):
@@ -134,7 +121,7 @@ class ABINSTest(unittest.TestCase):
            In that case ABINS should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
         # In _si2 there is no C atoms
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._si2 + ".phonon", Atoms="C",
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self._squaricn + ".phonon", Atoms="N",
                           OutputWorkspace=self._workspace_name)
 
     def test_scale(self):
@@ -206,90 +193,6 @@ class ABINSTest(unittest.TestCase):
         (result, messages) = CompareWorkspaces(self._ref_wrk[self._squaricn + "_abins"], wsk_all_atoms_default,
                                                Tolerance=self._tolerance)
         self.assertEqual(result, True)
-
-    # main tests
-    def test_good_cases_from_scratch(self):
-        """
-        Test case when simulation is started from scratch.
-        @return:
-        """
-        self._good_case_from_scratch(self._squaricn)
-        self._good_case_from_scratch(self._si2)
-
-    def _good_case_from_scratch(self, filename):
-        # calculate workspaces
-        wrk_calculated = ABINS(DFTprogram=self._dft_program,
-                               PhononFile=filename + ".phonon",
-                               Temperature=self._temperature,
-                               SampleForm=self._sample_form,
-                               Instrument=self._instrument_name,
-                               Atoms=self._atoms,
-                               SumContributions=self._sum_contributions,
-                               QuantumOrderEventsNumber=self._quantum_order_events_number,
-                               ScaleByCrossSection=self._cross_section_factor,
-                               OutputWorkspace=filename + "_scratch")
-
-        (result, messages) = CompareWorkspaces(self._ref_wrk[filename + "_abins"],
-                                               wrk_calculated, Tolerance=self._tolerance)
-        self.assertEqual(True, result)
-
-    def test_good_cases_restart(self):
-        self._good_case_restart(self._squaricn)
-        self._good_case_restart(self._si2)
-
-    def _good_case_restart(self, filename):
-        """
-        Test case of restart. The considered testing scenario looks as follows. First the user performs the simulation
-        for T=20K (first run). Then the user changes T to 10K (second run). For T=10K  S has to be
-        recalculated. After that the user performs simulation with the same parameters as initial simulation, e.g.,
-        T=10K (third run). In the third run all required data will be read from hdf file. It is checked if workspace for
-        the initial run and third run is the same (should be the same). It is also checked if the workspace from the
-        second run is valid. In this test it is checked if previously calculated data is read correctly from an hdf
-        file.
-        """
-
-        # restart without any changes
-        temperature_for_test = 20  # 20K
-        wrk_name = filename
-
-        wrk_initial = ABINS(DFTprogram=self._dft_program,
-                            PhononFile=filename + ".phonon",
-                            Temperature=temperature_for_test,
-                            SampleForm=self._sample_form,
-                            Instrument=self._instrument_name,
-                            Atoms=self._atoms,
-                            SumContributions=self._sum_contributions,
-                            QuantumOrderEventsNumber=self._quantum_order_events_number,
-                            ScaleByCrossSection=self._cross_section_factor,
-                            OutputWorkspace=wrk_name + "init")
-
-        wrk_mod = ABINS(DFTprogram=self._dft_program,
-                        PhononFile=filename + ".phonon",
-                        Temperature=self._temperature,
-                        SampleForm=self._sample_form,
-                        Instrument=self._instrument_name,
-                        Atoms=self._atoms,
-                        SumContributions=self._sum_contributions,
-                        QuantumOrderEventsNumber=self._quantum_order_events_number,
-                        ScaleByCrossSection=self._cross_section_factor,
-                        OutputWorkspace=wrk_name + "_mod")
-
-        wrk_restart = ABINS(DFTprogram=self._dft_program,
-                            PhononFile=filename + ".phonon",
-                            Temperature=temperature_for_test,
-                            SampleForm=self._sample_form,
-                            Instrument=self._instrument_name,
-                            Atoms=self._atoms,
-                            SumContributions=self._sum_contributions,
-                            QuantumOrderEventsNumber=self._quantum_order_events_number,
-                            ScaleByCrossSection=self._cross_section_factor,
-                            OutputWorkspace=wrk_name + "restart")
-
-        (result, messages) = CompareWorkspaces(wrk_initial, wrk_restart, Tolerance=self._tolerance)
-        self.assertEqual(True, result)
-
-        (result, messages) = CompareWorkspaces(self._ref_wrk[filename + "_abins"], wrk_mod, Tolerance=self._tolerance)
-        self.assertEqual(True, result)
 
 
 if __name__ == "__main__":
