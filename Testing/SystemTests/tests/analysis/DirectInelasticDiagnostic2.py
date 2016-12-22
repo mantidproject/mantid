@@ -71,8 +71,9 @@ class DirectInelasticDiagnostic2(MantidStressTest):
         self.saved_diag_file = os.path.join(config['defaultsave.directory'],
                                             'CurrentDirectInelasticDiag2.txt')
         handle = file(self.saved_diag_file, 'w')
+        spectrumInfo = sample.spectrumInfo()
         for index in range(sample.getNumberHistograms()):
-            if sample.getDetector(index).isMasked():
+            if spectrumInfo.isMasked(index):
                 spec_no = sample.getSpectrum(index).getSpectrumNo()
                 handle.write(str(spec_no) + '\n')
         handle.close()

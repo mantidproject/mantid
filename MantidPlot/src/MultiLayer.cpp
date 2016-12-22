@@ -66,6 +66,7 @@
 
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidKernel/Strings.h"
 #include <MantidQtMantidWidgets/MantidTreeWidget.h>
 
 #include "Mantid/MantidMDCurveDialog.h"
@@ -1811,18 +1812,7 @@ MultiLayer::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
       if (gtsv.selectLine("ggeometry")) {
         int x = 0, y = 0, w = 0, h = 0;
-        gtsv >> x >> y;
-
-        w = multiLayer->canvas->width();
-        w -= multiLayer->left_margin;
-        w -= multiLayer->right_margin;
-        w -= (multiLayer->d_cols - 1) * multiLayer->colsSpace;
-
-        h = multiLayer->canvas->height();
-        h -= multiLayer->top_margin;
-        h -= multiLayer->left_margin;
-        h -= (multiLayer->d_rows - 1) * multiLayer->rowsSpace;
-        h -= LayerButton::btnSize();
+        gtsv >> x >> y >> w >> h;
 
         if (isWaterfall)
           h -= LayerButton::btnSize(); // need an extra offset for the buttons
@@ -1895,5 +1885,6 @@ void MultiLayer::setCommonAxisScales() {
     auto *plot = layer(i)->plotWidget();
     plot->setAxisScale(AXIS_X, lowestX, highestX);
     plot->setAxisScale(AXIS_Y, lowestY, highestY);
+    layer(i)->replot();
   }
 }

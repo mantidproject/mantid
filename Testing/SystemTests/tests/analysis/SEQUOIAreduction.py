@@ -206,7 +206,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 MaskDetectors(Workspace="OWST",MaskedWorkspace="VAN")
             if do_powder:
                 if i==0:
-                    dummy_mapping=self.createanglelist("OWST",anglemin,anglemax,anglestep)
+                    self.createanglelist("OWST",anglemin,anglemax,anglestep)
                 GroupDetectors( InputWorkspace="OWST",OutputWorkspace="OWST",
                                 MapFile=os.path.join(self.customDataDir,"group.map"),Behaviour="Sum")
                 SolidAngle(InputWorkspace="OWST",OutputWorkspace="sa")

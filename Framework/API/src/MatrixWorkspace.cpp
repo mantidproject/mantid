@@ -14,10 +14,13 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <cmath>
 
+#include <functional>
 #include <numeric>
 
 using Mantid::Kernel::DateAndTime;
@@ -40,10 +43,25 @@ const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 /// Default constructor
-MatrixWorkspace::MatrixWorkspace() = default;
+MatrixWorkspace::MatrixWorkspace()
+    : IMDWorkspace(), ExperimentInfo(), m_axes(),
+      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
+          std::bind(&MatrixWorkspace::getNumberHistograms, this),
+          std::bind(&MatrixWorkspace::spectrumNumber, this,
+                    std::placeholders::_1),
+          std::bind(&MatrixWorkspace::detectorIDs, this,
+                    std::placeholders::_1))),
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
+      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other) {
+    : IMDWorkspace(other), ExperimentInfo(other),
+      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
+          std::bind(&MatrixWorkspace::getNumberHistograms, this),
+          std::bind(&MatrixWorkspace::spectrumNumber, this,
+                    std::placeholders::_1),
+          std::bind(&MatrixWorkspace::detectorIDs, this,
+                    std::placeholders::_1))) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = other.m_axes[i]->clone(this);
@@ -68,6 +86,31 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 MatrixWorkspace::~MatrixWorkspace() {
   for (auto &axis : m_axes) {
     delete axis;
+  }
+}
+
+/** Returns a const reference to the IndexInfo object of the workspace.
+ *
+ * Used for access to spectrum number and detector ID information of spectra. */
+const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
+  return *m_indexInfo;
+}
+
+/** Sets the IndexInfo object of the workspace.
+ *
+ * Used for setting spectrum number and detector ID information of spectra */
+void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
+  // Comparing the *local* size of the indexInfo.
+  if (indexInfo.size() != getNumberHistograms())
+    throw std::runtime_error("MatrixWorkspace::setIndexInfo: IndexInfo size "
+                             "does not match number of histograms in "
+                             "workspace");
+
+  for (size_t i = 0; i < getNumberHistograms(); ++i) {
+    auto &spectrum = getSpectrum(i);
+    spectrum.setSpectrumNo(indexInfo.spectrumNumber(i));
+    auto ids = indexInfo.detectorIDs(i);
+    spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
   }
 }
 
@@ -138,6 +181,37 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   m_isInitialized = true;
 }
 
+void MatrixWorkspace::initialize(const std::size_t &NVectors,
+                                 const HistogramData::Histogram &histogram) {
+  // Check validity of arguments
+  if (NVectors == 0 || histogram.x().size() == 0) {
+    throw std::out_of_range(
+        "All arguments to init must be positive and non-zero");
+  }
+
+  // Bypass the initialization if the workspace has already been initialized.
+  if (m_isInitialized)
+    return;
+
+  // Invoke init() method of the derived class inside a try/catch clause
+  try {
+    this->init(NVectors, histogram);
+  } catch (std::runtime_error &) {
+    throw;
+  }
+
+  // Indicate that this workspace has been initialized to prevent duplicate
+  // attempts.
+  m_isInitialized = true;
+}
+
+void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
+                                 const HistogramData::Histogram &histogram) {
+  initialize(indexInfo.size(), histogram);
+  setIndexInfo(indexInfo);
+}
+
+//---------------------------------------------------------------------------------------
 /** Set the title of the workspace
 *
 *  @param t :: The title
@@ -895,35 +969,6 @@ bool MatrixWorkspace::isCommonBins() const {
   return m_isCommonBinsFlag;
 }
 
-/**
-* Mask a given workspace index, setting the data and error values to zero
-* @param index :: The index within the workspace to mask
-*/
-void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
-  if (index >= this->getNumberHistograms()) {
-    throw Kernel::Exception::IndexError(
-        index, this->getNumberHistograms(),
-        "MatrixWorkspace::maskWorkspaceIndex,index");
-  }
-
-  auto &spec = this->getSpectrum(index);
-
-  // Virtual method clears the spectrum as appropriate
-  spec.clearData();
-
-  const auto dets = spec.getDetectorIDs();
-  for (auto detId : dets) {
-    try {
-      if (const Geometry::Detector *det =
-              dynamic_cast<const Geometry::Detector *>(
-                  sptr_instrument->getDetector(detId).get())) {
-        m_parmap->addBool(det, "masked", true); // Thread-safe method
-      }
-    } catch (Kernel::Exception::NotFoundError &) {
-    }
-  }
-}
-
 /** Called by the algorithm MaskBins to mask a single bin for the first time,
 * algorithms that later propagate the
 *  the mask from an input to the output should call flagMasked() instead. Here
@@ -1118,7 +1163,7 @@ Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
 * Returns the bin index of the given X value
 * @param xValue :: The X value to search for
 * @param index :: The index within the workspace to search within (default = 0)
-* @returns An index that
+* @returns An index to the bin containing X
 */
 size_t MatrixWorkspace::binIndexOf(const double xValue,
                                    const std::size_t index) const {
@@ -1126,24 +1171,35 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range(
         "MatrixWorkspace::binIndexOf - Index out of range.");
   }
-  const MantidVec &xValues = this->readX(index);
-  // Lower bound will test if the value is greater than the last but we need to
-  // see if X is valid at the start
-  if (xValue < xValues.front()) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than "
-                            "lowest in current range.");
+  const auto &xValues = this->x(index);
+  const bool ascendingOrder = xValues.front() < xValues.back();
+  const auto minX = ascendingOrder ? xValues.front() : xValues.back();
+  const auto maxX = ascendingOrder ? xValues.back() : xValues.front();
+  if (xValue < minX) {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower"
+                            " than lowest in current range.");
+  } else if (xValue > maxX) {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater"
+                            " than highest in current range.");
   }
-  auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
-  if (lowit == xValues.end()) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater "
-                            "than highest in current range.");
+  size_t hops;
+  if (ascendingOrder) {
+    auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
+    // If we are pointing at the first value then that means we still want to be
+    // in the first bin
+    if (lowit == xValues.cbegin()) {
+      ++lowit;
+    }
+    hops = std::distance(xValues.cbegin(), lowit);
+  } else {
+    auto lowit = std::upper_bound(xValues.crbegin(), xValues.crend(), xValue);
+    if (lowit == xValues.crend()) {
+      --lowit;
+    } else if (lowit == xValues.crbegin()) {
+      ++lowit;
+    }
+    hops = xValues.size() - std::distance(xValues.crbegin(), lowit);
   }
-  // If we are pointing at the first value then that means we still want to be
-  // in the first bin
-  if (lowit == xValues.begin()) {
-    ++lowit;
-  }
-  size_t hops = std::distance(xValues.begin(), lowit);
   // The bin index is offset by one from the number of hops between iterators as
   // they start at zero
   return hops - 1;
@@ -1928,6 +1984,30 @@ void MatrixWorkspace::setImageY(const MantidImage &image, size_t start,
 void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
                                 bool parallelExecution) {
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
+}
+
+/// Private helper method for IndexInfo
+specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
+  return getSpectrum(index).getSpectrumNo();
+}
+
+/// Private helper method for IndexInfo
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDs(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
+}
+
+/// Returns the number of detector groups. This is equal to the number of
+/// spectra.
+size_t MatrixWorkspace::numberOfDetectorGroups() const {
+  return getNumberHistograms();
+}
+
+/// Returns a set of detector IDs for a group. This is equal to the detector IDs
+/// of the spectrum at given index.
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
 }
 
 } // namespace API

@@ -97,15 +97,17 @@ class SANSPatchSensitivity(PythonAlgorithm):
         # Array that will be fit
         id_to_fit =[]
 
+        patchDetInfo = patch_ws.detectorInfo()
+        inputDetInfo = in_ws.detectorInfo()
         for pixel_idx in range(tube_in_input_ws.nelements()):
             pixel_in_input_ws = tube_in_input_ws[pixel_idx]
             # ID will be the same in both WS
             detector_id = pixel_in_input_ws.getID()
-            pixel_in_patch_ws  = patch_ws.getInstrument().getDetector(detector_id)
+            detector_idx = detector_id - 1 # See note on hack below
 
-            if pixel_in_patch_ws.isMasked():
+            if patchDetInfo.isMasked(detector_idx):
                 id_to_fit.append(detector_id)
-            elif not pixel_in_input_ws.isMasked():
+            elif not inputDetInfo.isMasked(detector_idx):
                 id_to_calculate_fit.append(detector_id)
                 y_to_calculate_fit.append(in_ws.readY(detector_id).sum())
                 e_to_calculate_fit.append(in_ws.readE(detector_id).sum())

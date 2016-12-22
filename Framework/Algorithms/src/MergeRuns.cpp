@@ -5,13 +5,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 using Mantid::HistogramData::HistogramX;
 
@@ -139,7 +140,7 @@ void MergeRuns::exec() {
       MatrixWorkspace_sptr addee;
       // Only do a rebinning if the bins don't already match - otherwise can
       // just add (see the 'else')
-      if (!WorkspaceHelpers::matchingBins(outWS, *it, true)) {
+      if (!WorkspaceHelpers::matchingBins(*outWS, **it, true)) {
         std::vector<double> rebinParams;
         this->calculateRebinParams(outWS, *it, rebinParams);
 
@@ -310,9 +311,7 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-  auto outWS = createWorkspace<EventWorkspace>(
-      m_outputSize, inputWS->x(0).size(), inputWS->y(0).size());
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outWS, false);
+  auto outWS = create<EventWorkspace>(*inputWS, m_outputSize);
   const auto inputSize = inputWS->getNumberHistograms();
   for (size_t i = 0; i < inputSize; ++i)
     outWS->getSpectrum(i) = inputWS->getSpectrum(i);
@@ -346,8 +345,7 @@ void MergeRuns::execEvent() {
   }
 
   // Set the final workspace to the output property
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
+  setProperty("OutputWorkspace", std::move(outWS));
 }
 
 //------------------------------------------------------------------------------------------------
@@ -481,7 +479,7 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
       throw;
     }
     // Check that it has common binning
-    if (!WorkspaceHelpers::commonBoundaries(inWS.back())) {
+    if (!WorkspaceHelpers::commonBoundaries(*inWS.back())) {
       g_log.error("Input workspaces must have common binning for all spectra");
       throw std::invalid_argument(
           "Input workspaces must have common binning for all spectra");

@@ -11,6 +11,7 @@
 
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -321,7 +322,7 @@ void MDWSDescription::getMinMax(std::vector<double> &min,
 /** Method checks if the workspace is expected to be processed in powder mode */
 bool MDWSDescription::isPowder() const {
   return (this->AlgID == "|Q|") ||
-         (this->AlgID.size() == 0 && !m_InWS->sample().hasOrientedLattice());
+         (this->AlgID.empty() && !m_InWS->sample().hasOrientedLattice());
 }
 
 /** Returns symbolic representation of current Emode */

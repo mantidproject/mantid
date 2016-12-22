@@ -114,6 +114,14 @@ void PlotPeakByLogValue::init() {
   declareProperty("MaxIterations", 500,
                   "Stop after this number of iterations if a good fit is not "
                   "found");
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
   declareProperty("CreateOutput", false, "Set to true to create output "
                                          "workspaces with the results of the "
@@ -292,6 +300,7 @@ void PlotPeakByLogValue::exec() {
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
         fit->setPropertyValue("MaxIterations",
                               getPropertyValue("MaxIterations"));
+        fit->setPropertyValue("PeakRadius", getPropertyValue("PeakRadius"));
         fit->setProperty("CalcErrors", true);
         fit->setProperty("CreateOutput", createFitOutput);
         if (!histogramFit) {
@@ -545,7 +554,7 @@ PlotPeakByLogValue::makeNames() const {
       } else if (index.size() > 1 && index[0] == 'i') { // workspace index
         wi = boost::lexical_cast<int>(index.substr(1));
         spec = -1; // undefined yet
-      } else if (index.size() > 0 && index[0] == 'v') {
+      } else if (!index.empty() && index[0] == 'v') {
         if (index.size() > 1) { // there is some text after 'v'
           tokenizer range(index.substr(1), ":",
                           tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
@@ -636,7 +645,7 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
     Mantid::API::WorkspaceProperty<> *wsProp =
         dynamic_cast<Mantid::API::WorkspaceProperty<> *>(minimizerProp);
     if (wsProp) {
-      std::string wsPropValue = minimizerProp->value();
+      const std::string &wsPropValue = minimizerProp->value();
       if (wsPropValue != "") {
         std::string wsPropName = minimizerProp->name();
         m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);

@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -61,43 +60,6 @@ public:
         numEventsNormalization, Mantid::VATES::NumEventsNormalization);
     TSM_ASSERT_EQUALS("The visual normalization should be VolumeNormalization.",
                       volumeNormalization, Mantid::VATES::VolumeNormalization);
-  }
-
-  void test_that_vector_of_threshold_strings_has_all_values() {
-    // Arrange
-    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-
-    // Act
-    const auto thresholds =
-        saveMDToVTK.getAllowedThresholdsInStringRepresentation();
-
-    // Assert
-    TSM_ASSERT_EQUALS("There should be 2 normalization options",
-                      thresholds.size(), 2);
-    TSM_ASSERT_EQUALS(
-        "First normalization should be IgnoreZerosThresholdRange.",
-        thresholds[0], "IgnoreZerosThresholdRange");
-    TSM_ASSERT_EQUALS("Second normalization should be NoThresholdRange.",
-                      thresholds[1], "NoThresholdRange");
-  }
-
-  void test_string_representation_converts_to_TresholdRange() {
-    // Arrange
-    Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-    auto thresholds = saveMDToVTK.getAllowedThresholdsInStringRepresentation();
-    // Act
-    auto ignoreZerosThresholdRange =
-        saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
-    auto noThresholdRange =
-        saveMDToVTK.translateStringToThresholdRange(thresholds[1]);
-    // Assert
-    TSM_ASSERT(
-        "Should be a IgnoreZerosTresholdRange",
-        boost::dynamic_pointer_cast<Mantid::VATES::IgnoreZerosThresholdRange>(
-            ignoreZerosThresholdRange));
-    TSM_ASSERT("Should be a NoTresholdRange",
-               boost::dynamic_pointer_cast<Mantid::VATES::ThresholdRange>(
-                   noThresholdRange));
   }
 
   void test_detects_when_not_3D_workspace() {
@@ -208,13 +170,7 @@ private:
         saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
     const auto normalization =
         saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
-
-    const auto thresholds =
-        saveMDToVTK.getAllowedThresholdsInStringRepresentation();
-    const auto threshold =
-        saveMDToVTK.translateStringToThresholdRange(thresholds[0]);
-
-    saveMDToVTK.saveMDWorkspace(workspace, filename, normalization, threshold,
+    saveMDToVTK.saveMDWorkspace(workspace, filename, normalization,
                                 recursionDepth, "NONE");
   }
 

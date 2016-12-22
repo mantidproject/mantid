@@ -11,7 +11,7 @@ class SaveMDWorkspaceToVTKTest : public CxxTest::TestSuite {
 public:
   void test_that_wrong_workspace_type_throws() {
     // Arrange
-    auto workspace = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     Mantid::VATES::SaveMDWorkspaceToVTK alg;
     alg.setChild(true);
@@ -20,7 +20,6 @@ public:
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("Filename", "test_file_name");
     alg.setProperty("Normalization", "AutoSelect");
-    alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
     alg.setProperty("CompressorType", "NONE");
 
@@ -45,7 +44,6 @@ public:
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("Filename", "test_file_name");
     alg.setProperty("Normalization", "AutoSelect");
-    alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
     alg.setProperty("CompressorType", "NONE");
 
@@ -75,7 +73,6 @@ public:
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("Filename", fullFilename);
     alg.setProperty("Normalization", "AutoSelect");
-    alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
     alg.setProperty("CompressorType", "NONE");
 

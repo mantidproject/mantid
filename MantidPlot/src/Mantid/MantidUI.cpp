@@ -53,7 +53,9 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/LogFilterGenerator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QListWidget>
 #include <QMdiArea>
@@ -126,6 +128,17 @@ QString getLegendKey(const QString &wsName, const int spectrum) {
     return QString::fromStdString(axis->label(spectrum));
   }
   return QString();
+}
+
+/// Get all graph legend keys in one string
+QString getLegendKeys(const QString &wsName, const std::set<int> &spectra) {
+  QString legendText = wsName + '\n';
+  int curveIndex(0);
+  for (const auto &spec : spectra) {
+    legendText += "\\l(" + QString::number(++curveIndex) + ")" +
+                  getLegendKey(wsName, spec) + "\n";
+  }
+  return legendText;
 }
 
 /// Decide whether this graph in a multilayer plot should have an X axis label
@@ -321,15 +334,6 @@ void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 
 /// Updates the workspace tree
 void MantidUI::updateWorkspaces() { m_exploreMantid->refreshWorkspaces(); }
-
-/// Show / hide the AlgorithmDockWidget
-void MantidUI::showAlgWidget(bool on) {
-  if (on) {
-    m_exploreAlgorithms->show();
-  } else {
-    m_exploreAlgorithms->hide();
-  }
-}
 
 void MantidUI::addMenuItems(QMenu *menu) {
   actionToggleMantid = m_exploreMantid->toggleViewAction();
@@ -841,8 +845,7 @@ void MantidUI::showVatesSimpleInterface() {
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
-        vsui->setupPluginMode();
-        // m_appWindow->setGeometry(m_vatesSubWindow, vsui);
+        vsui->setupPluginMode(wsType, instrumentName);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);
@@ -2398,12 +2401,29 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
 */
 void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
                                   int filter) {
-  // if you need to add a final filter valure to the end of the filter to match
+  // if you need to add a final filter value to the end of the filter to match
   // the extent of the data, then set this to the index of the row to add the
   // value
   int addFinalFilterValueIndex = 0;
   Mantid::Kernel::DateAndTime lastFilterTime;
 
+  // Convert input int into enum value
+  const Mantid::API::LogFilterGenerator::FilterType filterType = [&filter]() {
+    switch (filter) {
+    case 0:
+      return Mantid::API::LogFilterGenerator::FilterType::None;
+    case 1:
+      return Mantid::API::LogFilterGenerator::FilterType::Status;
+    case 2:
+      return Mantid::API::LogFilterGenerator::FilterType::Period;
+    case 3:
+      return Mantid::API::LogFilterGenerator::FilterType::StatusAndPeriod;
+    default:
+      return Mantid::API::LogFilterGenerator::FilterType::None;
+    }
+  }();
+
+  // Make sure the workspace exists and contains the log
   MatrixWorkspace_const_sptr ws =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws)
@@ -2414,12 +2434,14 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   if (!logData)
     return;
 
-  Mantid::Kernel::LogFilter flt(logData);
+  // Generate the filter
+  Mantid::API::LogFilterGenerator filterGenerator(filterType, ws);
+  const auto &flt = filterGenerator.generateFilter(logName.toStdString());
 
   // Get a map of time/value. This greatly speeds up display.
   // NOTE: valueAsMap() skips repeated values.
   std::map<DateAndTime, double> time_value_map =
-      flt.data()->valueAsCorrectMap();
+      flt->data()->valueAsCorrectMap();
   int rowcount = static_cast<int>(time_value_map.size());
   int colCount = 2;
 
@@ -2469,9 +2491,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     t->setColumnType(0, Table::Numeric);
   }
 
-  // The time when the first data was recorded.
-  auto firstTime = time_value_map.begin()->first;
-
   // Make the column header with the units, if any
   QString column1 = label.section("-", 1);
   if (logData->units() != "")
@@ -2481,65 +2500,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   int iValueCurve = 0;
 
-  // Applying filters
-  if (filter > 0) {
-    Mantid::Kernel::TimeSeriesProperty<bool> *f = 0;
-    if (filter == 1 || filter == 3) {
-      // one of the filters is the running status
-      try {
-        f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(
-            ws->run().getLogData("running"));
-        if (f)
-          flt.addFilter(*f);
-        else {
-          t->setconfirmcloseFlag(false);
-          t->setAttribute(Qt::WA_DeleteOnClose);
-          t->close();
-          importNumSeriesLog(wsName, logName, 0);
-          return;
-        }
-        // If filter records start later than the data we add a value at the
-        // filter's front
-        if (f->firstTime() > firstTime) {
-          // add a "not running" value to the status filter
-          Mantid::Kernel::TimeSeriesProperty<bool> atStart("tmp");
-          atStart.addValue(firstTime, false);
-          atStart.addValue(f->firstTime(), f->firstValue());
-          flt.addFilter(atStart);
-        }
-      } catch (...) {
-        t->setconfirmcloseFlag(false);
-        t->setAttribute(Qt::WA_DeleteOnClose);
-        t->close();
-        importNumSeriesLog(wsName, logName, 0);
-        return;
-      }
-    }
-
-    if (filter == 2 || filter == 3) {
-      std::vector<Mantid::Kernel::Property *> ps = ws->run().getLogData();
-      for (std::vector<Mantid::Kernel::Property *>::const_iterator it =
-               ps.begin();
-           it != ps.end(); ++it)
-        if ((*it)->name().find("period ") == 0) {
-          try {
-            f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
-            if (f)
-              flt.addFilter(*f);
-            else {
-              importNumSeriesLog(wsName, logName, 0);
-              return;
-            }
-          } catch (...) {
-            importNumSeriesLog(wsName, logName, 0);
-            return;
-          }
-
-          break;
-        }
-    }
-
-    if (flt.filter()) {
+  // Applying filter column to table
+  if (filterType != Mantid::API::LogFilterGenerator::FilterType::None) {
+    if (flt->filter()) {
       // Valid filter was found
       t->addColumns(2);
       t->setColName(2, "FTime");
@@ -2555,29 +2518,30 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
       t->setColPlotDesignation(2, Table::X);
       t->setColName(3, "Filter");
 
-      if (flt.filter()->size() > rowcount) {
-        t->addRows(flt.filter()->size() - rowcount);
+      if (flt->filter()->size() > rowcount) {
+        t->addRows(flt->filter()->size() - rowcount);
       }
 
-      if (flt.data()->size() > rowcount) {
-        t->addRows(flt.data()->size() - rowcount);
+      if (flt->data()->size() > rowcount) {
+        t->addRows(flt->data()->size() - rowcount);
       }
 
-      for (int i = 0; i < flt.filter()->size(); i++) {
-        if (flt.filter()->nthInterval(i).begin() >
+      for (int i = 0; i < flt->filter()->size(); i++) {
+        if (flt->filter()->nthInterval(i).begin() >
             0) // protect against bizarre values we sometimes get
         {
-          std::string time_string = extractLogTime(
-              flt.filter()->nthInterval(i).begin(), useAbsoluteDate, startTime);
+          std::string time_string =
+              extractLogTime(flt->filter()->nthInterval(i).begin(),
+                             useAbsoluteDate, startTime);
 
           t->setText(i, 2, QString::fromStdString(time_string));
-          t->setCell(i, 3, !flt.filter()->nthValue(i));
-          if ((i + 1 == flt.filter()->size()) &&
-              (!flt.filter()->nthValue(
+          t->setCell(i, 3, !flt->filter()->nthValue(i));
+          if ((i + 1 == flt->filter()->size()) &&
+              (!flt->filter()->nthValue(
                   i))) // last filter value and set to be filtering
           {
             addFinalFilterValueIndex = i + 1;
-            lastFilterTime = flt.filter()->nthInterval(i).begin();
+            lastFilterTime = flt->filter()->nthInterval(i).begin();
           }
         }
       }
@@ -2605,13 +2569,13 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   try {
     // Set the filter strings
-    if (filter && flt.filter() && lastTime < flt.filter()->lastTime()) {
+    if (filter && flt->filter() && lastTime < flt->filter()->lastTime()) {
       rowcount = static_cast<int>(time_value_map.size());
       if (rowcount == t->numRows())
         t->addRows(1);
 
       std::string time_string =
-          extractLogTime(flt.filter()->lastTime(), useAbsoluteDate, startTime);
+          extractLogTime(flt->filter()->lastTime(), useAbsoluteDate, startTime);
 
       t->setText(rowcount, 0, QString::fromStdString(time_string));
       t->setCell(rowcount, 1, lastValue);
@@ -2647,7 +2611,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     return;
 
   QStringList colNames;
-  if (filter && flt.filter()) {
+  if (filter && flt->filter()) {
     colNames << t->colName(3);
   }
   colNames << t->colName(1);
@@ -2660,7 +2624,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   // Set x-axis label format
   if (useAbsoluteDate) {
     Mantid::Kernel::DateAndTime label_as_ptime =
-        flt.data()->nthInterval(0).begin();
+        flt->data()->nthInterval(0).begin();
     QDateTime dt = QDateTime::fromTime_t(uint(label_as_ptime.to_localtime_t()));
     QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
     g->setLabelsDateTimeFormat(2, ScaleDraw::Date, format);
@@ -2674,7 +2638,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   QPen pn = QPen(Qt::black);
   g->setCurvePen(iValueCurve, pn);
 
-  if (filter && flt.filter()) {
+  if (filter && flt->filter()) {
     int iFilterCurve = 1;
     QwtPlotCurve *c = g->curve(iFilterCurve);
     if (c) {
@@ -3436,25 +3400,39 @@ MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, set<int>> &toPlot,
   multi->setCloseOnEmpty(true);
   multi->arrangeLayers(true, true);
 
+  QStringList legends; // Legends for each plot
+  legends.reserve(nSubplots);
   int row(0), col(0);
   if (nWorkspaces == 1) {
     // One workspace, each spectrum in its own subplot
     const auto &wsName = toPlot.begin().key();
     const auto &spectra = toPlot.begin().value();
     for (const auto &spec : spectra) {
+      const std::set<int> spectraSet{spec};
       plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col, wsName,
-                            std::set<int>{spec});
+                            spectraSet);
+      legends.append(getLegendKeys(wsName, spectraSet));
     }
   } else {
     // Each workspace in its own subplot
     for (auto iter = toPlot.constBegin(); iter != toPlot.constEnd(); ++iter) {
-      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col,
-                            iter.key(), iter.value());
+      const auto &wsName = iter.key();
+      const auto &spectra = iter.value();
+      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col, wsName,
+                            spectra);
+      legends.append(getLegendKeys(wsName, spectra));
     }
   }
 
   multi->setCommonAxisScales();
   multi->arrangeLayers(true, true);
+
+  // add legends last of all, so they are in the correct place
+  for (int index = 0; index < multi->layers(); ++index) {
+    auto *layer = multi->layer(index + 1); // MultiLayer has 1-based indices
+    layer->newLegend(legends[index]);
+  }
+
   // Check if window does not contain any curves and should be closed
   multi->maybeNeedToClose();
 
@@ -3491,34 +3469,31 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     }
   };
 
-  // Lambda to set legend and axis label hiding
-  const auto formatPlot = [&nRows, &nCols, &nPlots](
-      Graph *layer, const QString &legendText, const int row, const int col) {
-    const bool drawYAxisLabel = col == 0;
-    layer->newLegend(legendText);
-    if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
-      layer->setXAxisTitle(QString::null);
-    }
-    if (!drawYAxisLabel) {
-      layer->setYAxisTitle(QString::null);
-    }
-  };
+  // Lambda to set axis label hiding
+  const auto formatAxes =
+      [&nRows, &nCols, &nPlots](Graph *layer, const int row, const int col) {
+        const bool drawYAxisLabel = col == 0;
+        if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
+          layer->setXAxisTitle(QString::null);
+        }
+        if (!drawYAxisLabel) {
+          layer->setYAxisTitle(QString::null);
+        }
+      };
 
   const bool isFitResult = workspaceIsFitResult(wsName);
 
   const int layerIndex = row * nCols + col + 1; // layers numbered from 1
   auto *layer = multi->layer(layerIndex);
-  QString legendText = wsName + '\n';
-  int curveIndex(0);
   for (const int spec : spectra) {
     const auto plotType = isFitResult ? getCurveTypeForFitResult(spec)
                                       : GraphOptions::Unspecified;
     layer->insertCurve(wsName, spec, plotErrors, plotType, plotDist);
-    legendText += "\\l(" + QString::number(++curveIndex) + ")" +
-                  getLegendKey(wsName, spec) + "\n";
   }
+  m_appWindow->setPreferences(layer); // apply default style
+  layer->removeTitle();
   setInitialAutoscale(layer);
-  formatPlot(layer, legendText, row, col);
+  formatAxes(layer, row, col);
   incrementCounters(row, col);
 }
 
@@ -3942,17 +3917,23 @@ MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
                                      names, plotType);
 }
 
+/**
+ * Create a new MantidWSIndexDialog
+ * @param flags :: [input] Qt::WindowFlags enum as an integer
+ * @param wsNames :: [input] Names of workspaces
+ * @param showWaterfall :: [input] Whether to show "plot as waterfall" option
+ * @param showPlotAll :: [input] Whether to show "plot all" button
+ * @param showTiledOpt :: [input] Whether to show "tiled plot" option
+ * @returns :: New dialog
+ */
 MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
                                                           QStringList wsNames,
                                                           bool showWaterfall,
-                                                          bool showPlotAll) {
-  QList<QString> names;
-
-  for (auto &name : wsNames)
-    names.append(name);
-
+                                                          bool showPlotAll,
+                                                          bool showTiledOpt) {
   return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),
-                                 names, showWaterfall, showPlotAll);
+                                 wsNames, showWaterfall, showPlotAll,
+                                 showTiledOpt);
 }
 
 void MantidUI::showSurfacePlot() {

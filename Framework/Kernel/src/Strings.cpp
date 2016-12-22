@@ -275,26 +275,31 @@ std::string removeSpace(const std::string &CLine) {
 
 //------------------------------------------------------------------------------------------------
 /**
+  *  Reads a line from the stream of max length spc.
+  *  Trailing comments are removed. (with # or ! character)
+  *  @param fh :: already open file handle
+  *  @return String read.
+  */
+std::string getLine(std::istream &fh) {
+  std::string line;
+  getLine(fh, line);
+  return line;
+}
+
+//------------------------------------------------------------------------------------------------
+/**
  *  Reads a line from the stream of max length spc.
  *  Trailing comments are removed. (with # or ! character)
  *  @param fh :: already open file handle
- *  @param spc :: max number of characters to read
- *  @return String read.
+ *  @param Line :: string read
  */
-std::string getLine(std::istream &fh, const int spc) {
-  auto ss = new char[spc + 1];
-  std::string Line;
-  if (fh.good()) {
-    fh.getline(ss, spc, '\n');
-    ss[spc] = 0; // incase line failed to read completely
-    Line = ss;
+void getLine(std::istream &fh, std::string &Line) {
+  if (std::getline(fh, Line)) {
     // remove trailing comments
-    std::string::size_type pos = Line.find_first_of("#!");
+    auto pos = Line.find_first_of("#!");
     if (pos != std::string::npos)
       Line.erase(pos);
   }
-  delete[] ss;
-  return Line;
 }
 
 /**

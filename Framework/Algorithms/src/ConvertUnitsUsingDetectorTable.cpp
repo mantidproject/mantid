@@ -4,6 +4,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -174,23 +175,20 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
-  // TODO: Check why this parallel stuff breaks
+  auto &spectrumInfo = outputWS->mutableSpectrumInfo();
+
   // Loop over the histograms (detector spectra)
-  // PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
 
     // Lets find what row this spectrum Number appears in our detector table.
 
-    // PARALLEL_START_INTERUPT_REGION
-
     std::size_t wsid = i;
 
-    try {
-
+    if (spectrumInfo.hasDetectors(i)) {
       double deg2rad = M_PI / 180.;
 
-      auto det = outputWS->getDetector(i);
-      int specNo = det->getID();
+      auto &det = spectrumInfo.detector(i);
+      int specNo = det.getID();
 
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
@@ -248,23 +246,23 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
       } else {
         // Not found
         failedDetectorCount++;
-        outputWS->maskWorkspaceIndex(wsid);
+        outputWS->getSpectrum(wsid).clearData();
+        if (spectrumInfo.hasDetectors(wsid))
+          spectrumInfo.setMasked(wsid, true);
       }
 
-    } catch (Exception::NotFoundError &) {
+    } else {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       // Since you usually (always?) get to here when there's no attached
       // detectors, this call is
       // the same as just zeroing out the data (calling clearData on the
       // spectrum)
-      outputWS->maskWorkspaceIndex(i);
+      outputWS->getSpectrum(i).clearData();
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
-    // PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
-  // PARALLEL_CHECK_INTERUPT_REGION
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Something went wrong for " << failedDetectorCount

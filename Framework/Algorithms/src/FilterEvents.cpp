@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -10,6 +11,7 @@
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -304,7 +306,7 @@ void FilterEvents::processAlgorithmProperties() {
   if (m_isSplittersRelativeTime) {
     // Using relative time
     std::string start_time_str = getProperty("FilterStartTime");
-    if (start_time_str.size() > 0) {
+    if (!start_time_str.empty()) {
       // User specifies the filter starting time
       Kernel::DateAndTime temp_shift_time(start_time_str);
       m_filterStartTime = temp_shift_time;
@@ -500,15 +502,8 @@ void FilterEvents::createOutputWorkspaces() {
         add2output = false;
     }
 
-    // Generate one of the output workspaces & Copy geometry over. But we
-    // don't
-    // copy the data.
-    DataObjects::EventWorkspace_sptr optws =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-            API::WorkspaceFactory::Instance().create(
-                "EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
-    API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws,
-                                                           false);
+    boost::shared_ptr<EventWorkspace> optws =
+        create<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWS.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace

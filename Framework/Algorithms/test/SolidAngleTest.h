@@ -6,9 +6,11 @@
 
 #include "MantidAlgorithms/SolidAngle.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -39,8 +41,6 @@ public:
       space2D->setBinEdges(j, x);
       space2D->setCounts(j, a);
       space2D->setCountVariances(j, e);
-      // Just set the spectrum number to match the index
-      space2D->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service
@@ -60,9 +60,7 @@ public:
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // Mark one detector dead to test that it leads to zero solid angle
-    IDetector_const_sptr det143 = space2D->getDetector(143);
-    ParameterMap &pmap = space2D->instrumentParameters();
-    pmap.addBool(det143.get(), "masked", true);
+    space2D->mutableSpectrumInfo().setMasked(143, true);
   }
 
   void testInit() {

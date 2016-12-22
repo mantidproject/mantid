@@ -1,10 +1,26 @@
 # pylint: disable=invalid-name
-"""
+import numpy
+import os
+import re
+
+from mantid.kernel import V3D
+from mantid.api import (MatrixWorkspace, ITableWorkspace)
+from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace, config)
+from tube_spec import TubeSpec
+from ideal_tube import IdealTube
+from tube_calib_fit_params import TubeCalibFitParams
+from tube_calib import getCalibration
+
+# Need to avoid flake8 warning but we can't do that with this
+# buried directly in the string
+CALIBRATE_SIGNATURE = "ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak]" # noqa
+
+__doc__ = _MODULE_DOC="""
 =========================
 Definition of Calibration
 =========================
 
-.. autofunction:: tube.calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak])
+.. autofunction:: calibrate({0})
 
 =========
 Use Cases
@@ -48,19 +64,7 @@ Other Useful Methods
 
 .. autofunction:: tube.readCalibrationFile
 
-"""
-
-import numpy
-import os
-import re
-
-from mantid.kernel import V3D
-from mantid.api import (MatrixWorkspace, ITableWorkspace)
-from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace, config)
-from tube_spec import TubeSpec
-from ideal_tube import IdealTube
-from tube_calib_fit_params import TubeCalibFitParams
-from tube_calib import getCalibration
+""".format(CALIBRATE_SIGNATURE)
 
 
 def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):

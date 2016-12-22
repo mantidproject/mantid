@@ -66,7 +66,7 @@ public:
 
     // valid workspace with 10 bins
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     TS_ASSERT_THROWS_NOTHING(castedFunction->setWorkspace(ws));
     TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 10);
   }
@@ -116,7 +116,7 @@ public:
     /* Luckily, these are exactly the data described by this function,
      * using A1 = 1.0, so this is used as a test */
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
 
     IFunction_sptr function = FunctionFactory::Instance().createFunction(
         "PoldiSpectrumLinearBackground");

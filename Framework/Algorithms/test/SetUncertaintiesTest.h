@@ -25,7 +25,7 @@ public:
   */
   API::MatrixWorkspace_sptr runAlg(const std::string &mode) {
     // random data mostly works
-    auto inWksp = WorkspaceCreationHelper::Create1DWorkspaceRand(30);
+    auto inWksp = WorkspaceCreationHelper::create1DWorkspaceRand(30);
     // Ensure first elements of random workspace are zero so test don't
     // pass randomly
     auto &E = inWksp->mutableE(0);
@@ -111,7 +111,7 @@ public:
     constexpr size_t wsSize(1000000);
 
     // random data mostly works
-    inputWs = WorkspaceCreationHelper::Create1DWorkspaceRand(wsSize);
+    inputWs = WorkspaceCreationHelper::create1DWorkspaceRand(wsSize);
     algZero.setProperty("InputWorkspace", inputWs);
     algZero.setProperty("SetError", "zero");
     algZero.setProperty("OutputWorkspace", wsName);

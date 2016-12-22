@@ -1,9 +1,6 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENT_H_
 #define MANTID_GEOMETRY_INSTRUMENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/IDetector.h"
@@ -19,11 +16,11 @@ namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
+namespace Beamline {
+class DetectorInfo;
+}
 namespace Geometry {
 
-//------------------------------------------------------------------
-// Forward declarations
-//------------------------------------------------------------------
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -86,11 +83,9 @@ public:
   const IDetector *getBaseDetector(const detid_t &detector_id) const;
   bool isMonitor(const detid_t &detector_id) const;
   bool isMonitor(const std::set<detid_t> &detector_ids) const;
-  bool isDetectorMasked(const detid_t &detector_id) const;
-  bool isDetectorMasked(const std::set<detid_t> &detector_ids) const;
 
   /// Returns a pointer to the geometrical object for the given set of IDs
-  IDetector_const_sptr getDetectorG(const std::vector<detid_t> &det_ids) const;
+  IDetector_const_sptr getDetectorG(const std::set<detid_t> &det_ids) const;
 
   /// Returns a list of Detectors for the given detectors ids
   std::vector<IDetector_const_sptr>
@@ -219,7 +214,7 @@ public:
   static double calcConversion(const double l1, const Kernel::V3D &beamline,
                                const double beamline_norm,
                                const Kernel::V3D &samplePos,
-                               const IDetector_const_sptr &det,
+                               const Kernel::V3D &detectorPos,
                                const double offset);
 
   static double
@@ -252,6 +247,11 @@ public:
   /// Check whether instrument contains rectangular detectors.
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
+
+  bool hasDetectorInfo() const;
+  const Beamline::DetectorInfo &detectorInfo() const;
+  void
+  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -329,6 +329,10 @@ private:
 
   /// Pointer to the reference frame object.
   boost::shared_ptr<ReferenceFrame> m_referenceFrame;
+
+  /// Pointer to the DetectorInfo object. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 };
 
 } // namespace Geometry

@@ -3,13 +3,18 @@
 
 #include "InstrumentWidgetTypes.h"
 #include "MantidGLWidget.h"
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/IMaskWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+
+#include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -152,6 +157,7 @@ signals:
   void requestSelectComponent(const QString &);
   void preDeletingHandle();
   void clearingHandle();
+  void maskedWorkspaceOverlayed();
 
 protected:
   /// Implements AlgorithmObserver's finish handler
@@ -287,7 +293,16 @@ private:
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void clearADSHandle() override;
-
+  /// overlay a peaks workspace on the projection surface
+  void overlayPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr ws);
+  /// overlay a masked workspace on the projection surface
+  void overlayMaskedWorkspace(Mantid::API::IMaskWorkspace_sptr ws);
+  /// overlay a table workspace with shape parameters on the projection surface
+  void overlayShapesWorkspace(Mantid::API::ITableWorkspace_sptr);
+  /// get a workspace from the ADS
+  Mantid::API::Workspace_sptr getWorkspaceFromADS(const std::string &name);
+  /// get a handle to the unwrapped surface
+  boost::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
   /// Load tabs on the widget form a project file
   void loadTabs(const std::string &lines) const;
   /// Save tabs on the widget to a string

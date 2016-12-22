@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -17,9 +18,10 @@ namespace API {
  * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
  * is not null. */
 DetectorInfo::DetectorInfo(
+    Beamline::DetectorInfo &detectorInfo,
     boost::shared_ptr<const Geometry::Instrument> instrument,
     Geometry::ParameterMap *pmap)
-    : m_pmap(pmap), m_instrument(instrument),
+    : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
@@ -31,6 +33,22 @@ DetectorInfo::DetectorInfo(
   for (size_t i = 0; i < m_detectorIDs.size(); ++i)
     m_detIDToIndex[m_detectorIDs[i]] = i;
 }
+
+/// Assigns the contents of the non-wrapping part of `rhs` to this.
+DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
+  if (detectorIDs() != rhs.detectorIDs())
+    throw std::runtime_error("DetectorInfo::operator=: Detector IDs in "
+                             "assignment do not match. Assignment not "
+                             "possible");
+  // Do NOT assign anything in the "wrapping" part of DetectorInfo. We simply
+  // assign the underlying Beamline::DetectorInfo.
+  m_detectorInfo = rhs.m_detectorInfo;
+  return *this;
+}
+
+/// Returns the size of the DetectorInfo, i.e., the number of detectors in the
+/// instrument.
+size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -93,7 +111,20 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
   return getDetector(index).getRotation();
 }
 
-/// Set the absolute position of the detector with given index.
+/// Set the mask flag of the detector with given index. Not thread safe.
+void DetectorInfo::setMasked(const size_t index, bool masked) {
+  // Note that masking via the ParameterMap is actually thread safe, but it will
+  // not be with upcoming internal changes.
+  m_pmap->addBool(&getDetector(index), "masked", masked);
+}
+
+/** Sets all mask flags to false (unmasked). Not thread safe.
+ *
+ * This method was introduced to help with refactoring and may be removed in the
+ *future. */
+void DetectorInfo::clearMaskFlags() { m_pmap->clearParametersByName("masked"); }
+
+/// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
   const auto &det = getDetector(index);
@@ -102,7 +133,7 @@ void DetectorInfo::setPosition(const size_t index,
   moveComponent(det, *m_pmap, position, positionType);
 }
 
-/// Set the absolute rotation of the detector with given index.
+/// Set the absolute rotation of the detector with given index. Not thread safe.
 void DetectorInfo::setRotation(const size_t index,
                                const Kernel::Quat &rotation) {
   const auto &det = getDetector(index);
@@ -111,7 +142,7 @@ void DetectorInfo::setRotation(const size_t index,
   rotateComponent(det, *m_pmap, rotation, rotationType);
 }
 
-/** Set the absolute position of the component `comp`.
+/** Set the absolute position of the component `comp`. Not thread safe.
  *
  * This may or may not be a detector. Even if it is not a detector it will
  * typically still influence detector positions. */
@@ -135,7 +166,7 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
   }
 }
 
-/** Set the absolute rotation of the component `comp`.
+/** Set the absolute rotation of the component `comp`. Not thread safe.
  *
  * This may or may not be a detector. Even if it is not a detector it will
  * typically still influence detector positions rotations. */
@@ -157,6 +188,11 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
   }
+}
+
+/// Return a const reference to the detector with given index.
+const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
+  return getDetector(index);
 }
 
 /// Returns the source position.

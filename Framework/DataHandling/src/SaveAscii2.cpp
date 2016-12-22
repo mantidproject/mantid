@@ -129,14 +129,14 @@ void SaveAscii2::exec() {
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
-  if (metaDataString.size() != 0) {
+  if (!metaDataString.empty()) {
     m_metaData = stringListToVector(metaDataString);
     auto containsSpectrumNumber =
         findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
     if (containsSpectrumNumber) {
       try {
         m_specToIndexMap = m_ws->getSpectrumToWorkspaceIndexMap();
-      } catch (std::runtime_error) {
+      } catch (const std::runtime_error &) {
         throw std::runtime_error("SpectrumNumber is present in "
                                  "SpectrumMetaData but the workspace does not "
                                  "have a SpectrumAxis.");
@@ -256,7 +256,7 @@ void SaveAscii2::exec() {
     file << '\n';
   }
   // populate the meta data map
-  if (m_metaData.size() > 0) {
+  if (!m_metaData.empty()) {
     populateAllMetaData();
   }
   if (idx.empty()) {

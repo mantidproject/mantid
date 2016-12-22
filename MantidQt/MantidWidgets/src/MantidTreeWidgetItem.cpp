@@ -2,6 +2,7 @@
 #include "MantidQtMantidWidgets/MantidTreeWidget.h"
 
 #include <MantidAPI/Workspace.h>
+#include "MantidAPI/WorkspaceHistory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

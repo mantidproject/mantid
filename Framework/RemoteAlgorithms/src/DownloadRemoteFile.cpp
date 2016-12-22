@@ -1,4 +1,5 @@
 #include "MantidRemoteAlgorithms/DownloadRemoteFile.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/MaskedProperty.h"
@@ -20,6 +21,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 // A reference to the logger is provided by the base class, it is called g_log.
+
+DownloadRemoteFile::DownloadRemoteFile() {
+  this->useAlgorithm("DownloadRemoteFile", 2);
+}
 
 void DownloadRemoteFile::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....

@@ -13,11 +13,15 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
+#include "MantidBeamline/DetectorInfo.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -25,6 +29,7 @@
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
+#include <Poco/SAX/Attributes.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <nexus/NeXusException.hpp>
@@ -45,7 +50,8 @@ Kernel::Logger g_log("ExperimentInfo");
 ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
-      sptr_instrument(new Instrument()) {}
+      sptr_instrument(new Instrument()),
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {}
 
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
@@ -73,6 +79,7 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
+  *m_detectorInfo = *other->m_detectorInfo;
 }
 
 /** Clone this ExperimentInfo class into a new one
@@ -134,12 +141,39 @@ const std::string ExperimentInfo::toString() const {
   return out.str();
 }
 
+// Helpers for setInstrument and getInstrument
+namespace {
+void checkDetectorInfoSize(const Instrument &instr,
+                           const Beamline::DetectorInfo &detInfo) {
+  const auto numDets = instr.getNumberDetectors();
+  if (numDets != detInfo.size())
+    throw std::runtime_error("ExperimentInfo: size mismatch between "
+                             "DetectorInfo and number of detectors in "
+                             "instrument");
+}
+
+std::unique_ptr<Beamline::DetectorInfo>
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
+  if (newInstr.hasDetectorInfo()) {
+    // We allocate a new DetectorInfo in case there is an Instrument holding a
+    // reference to our current DetectorInfo.
+    const auto &detInfo = newInstr.detectorInfo();
+    checkDetectorInfoSize(oldInstr, detInfo);
+    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
+  } else {
+    // If there is no DetectorInfo in the instrument we create a default one.
+    const auto numDets = oldInstr.getNumberDetectors();
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+  }
+}
+}
+
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     m_parmap = instr->getParameterMap();
@@ -147,6 +181,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
+  m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -155,8 +190,11 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
-                                                         m_parmap);
+  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
+  auto instrument = Geometry::ParComponentFactory::createInstrument(
+      sptr_instrument, m_parmap);
+  instrument->setDetectorInfo(m_detectorInfo);
+  return instrument;
 }
 
 /**  Returns a new copy of the instrument parameters
@@ -174,7 +212,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
       invalidateInstrumentReferences();
-      m_detectorInfo = nullptr;
+      m_detectorInfoWrapper = nullptr;
     }
     if (!m_parmap.unique()) {
       ParameterMap_sptr oldData = m_parmap;
@@ -313,24 +351,28 @@ void ExperimentInfo::populateInstrumentParameters() {
 
 /**
  * Replaces current parameter map with a copy of the given map
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap const reference to parameter map whose copy replaces the current
  * parameter map
  */
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
 }
 
 /**
  * exchanges contents of current parameter map with contents of other map)
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap reference to parameter map which would exchange its contents with
  * current map
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
 }
 
@@ -342,15 +384,21 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
  * group.
  */
 void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
-  m_detgroups = mapping;
+  m_detgroups.clear();
+  for (const auto &item : mapping) {
+    m_det2group[item.first] = m_detgroups.size();
+    m_detgroups.push_back(item.second);
+  }
+  // Create default grouping if `mapping` is empty.
+  cacheDefaultDetectorGrouping();
 }
 
 /// Returns the detector IDs that make up the group that this ID is part of
-const std::vector<detid_t> &
+const std::set<detid_t> &
 ExperimentInfo::getGroupMembers(const detid_t detID) const {
-  auto iter = m_detgroups.find(detID);
-  if (iter != m_detgroups.end()) {
-    return iter->second;
+  auto iter = m_det2group.find(detID);
+  if (iter != m_det2group.end()) {
+    return m_detgroups[iter->second];
   } else {
     throw std::runtime_error(
         "ExperimentInfo::getGroupMembers - Unable to find ID " +
@@ -369,7 +417,7 @@ ExperimentInfo::getDetectorByID(const detid_t detID) const {
   if (m_detgroups.empty()) {
     return getInstrument()->getDetector(detID);
   } else {
-    const std::vector<detid_t> &ids = this->getGroupMembers(detID);
+    const auto &ids = this->getGroupMembers(detID);
     return getInstrument()->getDetectorG(ids);
   }
 }
@@ -887,12 +935,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
  * this reference.
  */
 const DetectorInfo &ExperimentInfo::detectorInfo() const {
-  if (!m_detectorInfo) {
+  if (!m_detectorInfoWrapper) {
     std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
-    if (!m_detectorInfo)
-      m_detectorInfo = Kernel::make_unique<DetectorInfo>(getInstrument());
+    if (!m_detectorInfoWrapper)
+      m_detectorInfoWrapper =
+          Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument());
   }
-  return *m_detectorInfo;
+  return *m_detectorInfoWrapper;
 }
 
 /** Return a non-const reference to the DetectorInfo object. Not thread safe.
@@ -902,18 +951,66 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
 
   // We get the non-const ParameterMap reference *first* such that no copy is
   // triggered unless really necessary. The call to `instrumentParameters`
-  // releases the old m_detectorInfo to drop the reference count to the
+  // releases the old m_detectorInfoWrapper to drop the reference count to the
   // ParameterMap by 1 (DetectorInfo contains a parameterized Instrument, so the
-  // reference count to the ParameterMap is at least 2 if m_detectorInfo is not
-  // nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then the
-  // ExperimentInfo is not the sole owner of the ParameterMap a copy is
+  // reference count to the ParameterMap is at least 2 if m_detectorInfoWrapper
+  // is not nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then
+  // the ExperimentInfo is not the sole owner of the ParameterMap a copy is
   // triggered.
   auto pmap = &instrumentParameters();
   // Here `getInstrument` creates a parameterized instrument, increasing the
   // reference count to the ParameterMap. This has do be done *after* getting
   // the ParameterMap.
-  m_detectorInfo = Kernel::make_unique<DetectorInfo>(getInstrument(), pmap);
-  return *m_detectorInfo;
+  m_detectorInfoWrapper =
+      Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
+  return *m_detectorInfoWrapper;
+}
+
+/** Returns the number of detector groups.
+ *
+ * This is a virtual method. The default implementation returns grouping
+ * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
+ * more common case is handled by the overload of this method in
+ * MatrixWorkspace. The purpose of this method is to be able to construct
+ * SpectrumInfo based on an ExperimentInfo object, including grouping
+ * information. Grouping information can be cached in ExperimentInfo, or can be
+ * obtained from child classes (MatrixWorkspace). */
+size_t ExperimentInfo::numberOfDetectorGroups() const {
+  std::call_once(m_defaultDetectorGroupingCached,
+                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
+
+  return m_detgroups.size();
+}
+
+/** Returns a set of detector IDs for a group.
+ *
+ * This is a virtual method. The default implementation returns grouping
+ * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
+ * more common case is handled by the overload of this method in
+ * MatrixWorkspace. The purpose of this method is to be able to construct
+ * SpectrumInfo based on an ExperimentInfo object, including grouping
+ * information. Grouping information can be cached in ExperimentInfo, or can be
+ * obtained from child classes (MatrixWorkspace). */
+const std::set<detid_t> &
+ExperimentInfo::detectorIDsInGroup(const size_t index) const {
+  std::call_once(m_defaultDetectorGroupingCached,
+                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
+
+  return m_detgroups.at(index);
+}
+
+/** Sets up a default detector grouping.
+ *
+ * The purpose of this method is to work around potential issues of MDWorkspaces
+ * that do not have grouping information. In such cases a default 1:1
+ * mapping/grouping is generated by this method. See also issue #18252. */
+void ExperimentInfo::cacheDefaultDetectorGrouping() const {
+  if (!m_detgroups.empty())
+    return;
+  for (const auto detID : sptr_instrument->getDetectorIDs()) {
+    m_det2group[detID] = m_detgroups.size();
+    m_detgroups.push_back({detID});
+  }
 }
 
 /** Save the object to an open NeXus file.

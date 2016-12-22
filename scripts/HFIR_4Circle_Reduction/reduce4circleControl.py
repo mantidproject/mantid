@@ -9,17 +9,18 @@
 #
 ################################################################################
 import csv
-import math
 import random
 
 from fourcircle_utility import *
-from peakprocesshelper import PeakProcessHelper
+from peakprocesshelper import PeakProcessRecord
 import fputility
+import project_manager
 
 import mantid
-import mantid.simpleapi as api
+import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
+
 
 DebugMode = True
 
@@ -55,8 +56,18 @@ class CWSCDReductionControl(object):
         # Some set up
         self._expNumber = None
 
+        # instrument default constants
+        self._defaultDetectorSampleDistance = None
+        # geometry of pixel
+        self._defaultPixelSizeX = None
+        self._defaultPixelSizeY = None
+        # user-defined wave length
+        self._userWavelengthDict = dict()
+        # default peak center
+        self._defaultDetectorCenter = None
+
         # Container for MDEventWorkspace for each Pt.
-        self._myPtMDDict = dict()
+        self._myMDWsList = list()
         # Container for loaded workspaces
         self._mySpiceTableDict = {}
         # Container for loaded raw pt workspace
@@ -91,8 +102,10 @@ class CWSCDReductionControl(object):
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
+        self._detSampleDistanceDict = dict()
+        self._detCenterDict = dict()
 
-        #register startup
+        # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
 
         return
@@ -170,7 +183,7 @@ class CWSCDReductionControl(object):
             ))
 
         # mask detectors
-        api.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
+        mantidsimple.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
 
         return
 
@@ -181,53 +194,49 @@ class CWSCDReductionControl(object):
         sin_theta = q * wavelength/(4*math.pi)
         theta = math.asin(sin_theta)
         corrected_intensity = peak_intensity * math.sin(2*theta) * step_omega
-        print '[DB] Lorentz correction: I * sin(2*theta) * delta(omega) = %.5f * sin(2*%.5f) * %.5f =' \
-              ' %.5f; q = %.5f.' % (peak_intensity, theta*180/math.pi, step_omega, corrected_intensity, q)
 
         return corrected_intensity
 
-    def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
-        """
-        Calculate center of peak by weighting the peak centers of multiple Pt (slice from 3D peak)
+    def find_peak(self, exp_number, scan_number, pt_number_list=None):
+        """ Find 1 peak in sample Q space for UB matrix
         :param exp_number:
         :param scan_number:
-        :param pt_numbers:
-        :return: 2-tuple: boolean, peak center (3-tuple of float)
+        :param pt_number_list:
+        :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
+
+        This part will be redo as 11847_Load_HB3A_Experiment
         """
         # Check & set pt. numbers
-        assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not %s.' \
-                                            '' % (str(exp_number), str(type(exp_number)))
-        assert isinstance(scan_number, int), 'Scan number %s must be an integer but not %s.' \
-                                             '' % (str(scan_number), str(type(scan_number)))
-        if pt_numbers is None:
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        if pt_number_list is None:
             status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-            assert status
-        else:
-            pt_number_list = pt_numbers
+            assert status, 'Unable to get Pt numbers from scan %d.' % scan_number
         assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
 
         # Check whether the MDEventWorkspace used to find peaks exists
         if self.has_merged_data(exp_number, scan_number, pt_number_list):
             pass
         else:
-            return False, 'Exp %d Scan %d: data must be merged already.' % (exp_number, scan_number)
+            raise RuntimeError('Data must be merged before')
 
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
         peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-        api.FindPeaksMD(InputWorkspace=merged_ws_name,
-                        MaxPeaks=10,
-                        PeakDistanceThreshold=5.,
-                        DensityThresholdFactor=0.1,
-                        OutputWorkspace=peak_ws_name)
+        mantidsimple.FindPeaksMD(InputWorkspace=merged_ws_name,
+                                 MaxPeaks=10,
+                                 PeakDistanceThreshold=5.,
+                                 DensityThresholdFactor=0.1,
+                                 OutputWorkspace=peak_ws_name)
         assert AnalysisDataService.doesExist(peak_ws_name)
 
-        # calculate the peaks with weight
-        helper = PeakProcessHelper(exp_number, scan_number, peak_ws_name)
-        helper.calculate_peak_center()
-        peak_center = helper.get_peak_centre()
-        # set the merged peak information to data structure
-        self._myPeakInfoDict[(exp_number, scan_number)] = helper
+        # add peak to UB matrix workspace to manager
+        self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
+
+        # add the merged workspace to list to manage
+        self._add_merged_ws(exp_number, scan_number, pt_number_list)
+
+        peak_center = self._myPeakInfoDict[(exp_number, scan_number)].get_peak_centre()
 
         return True, peak_center
 
@@ -251,20 +260,19 @@ class CWSCDReductionControl(object):
         if num_peak_info < 2:
             return False, 'Too few peaks are input to calculate UB matrix.  Must be >= 2.'
         for peak_info in peak_info_list:
-            if isinstance(peak_info, PeakProcessHelper) is False:
+            if isinstance(peak_info, PeakProcessRecord) is False:
                 raise NotImplementedError('Input PeakList is of type %s.' % str(type(peak_info_list[0])))
-            assert isinstance(peak_info, PeakProcessHelper)
+            assert isinstance(peak_info, PeakProcessRecord)
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_UB_Peak'
-        zero_hkl = False
-        hkl_to_int = True
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, zero_hkl, hkl_to_int)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name,
+                                    index_from_spice=True, hkl_to_int=True)
 
         # Calculate UB matrix
         try:
-            api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
-                                 a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
+            mantidsimple.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
+                                          a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
         except ValueError as val_err:
             return False, str(val_err)
 
@@ -299,7 +307,7 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number
         :param scan_number:
         :param over_write:
-        :return:
+        :return: 2-tuple: status (successful or failed), string (file name or error message
         """
         # Check
         if exp_number is None:
@@ -317,7 +325,7 @@ class CWSCDReductionControl(object):
 
         # Download
         try:
-            api.DownloadFile(Address=file_url, Filename=file_name)
+            mantidsimple.DownloadFile(Address=file_url, Filename=file_name)
         except RuntimeError as run_err:
             return False, str(run_err)
 
@@ -350,8 +358,8 @@ class CWSCDReductionControl(object):
 
         # Download
         try:
-            api.DownloadFile(Address=det_file_url,
-                             Filename=local_xml_file_name)
+            mantidsimple.DownloadFile(Address=det_file_url,
+                                      Filename=local_xml_file_name)
         except RuntimeError as run_err:
             return False, 'Unable to download Detector XML file %s from %s ' \
                           'due to %s.' % (local_xml_file_name, det_file_url, str(run_err))
@@ -359,6 +367,9 @@ class CWSCDReductionControl(object):
         # Check file exist?
         if os.path.exists(local_xml_file_name) is False:
             return False, "Unable to locate downloaded file %s." % local_xml_file_name
+
+        # NEXT ISSUE - This is a temporary fix for unsupported strings in XML
+        os.system("sed -i -e 's/0<x<1/0 x 1/g' %s" % local_xml_file_name)
 
         return True, local_xml_file_name
 
@@ -392,7 +403,8 @@ class CWSCDReductionControl(object):
                 error_message = ret_obj
                 return False, error_message
             else:
-                spice_table = self._mySpiceTableDict[(self._expNumber, scan_no)]
+                # spice_table = self._mySpiceTableDict[(self._expNumber, scan_no)]
+                spice_table = self._get_spice_workspace(self._expNumber, scan_no)
                 assert spice_table
             pt_no_list = self._get_pt_list_from_spice_table(spice_table)
 
@@ -453,7 +465,11 @@ class CWSCDReductionControl(object):
         if pt_number is None:
             # no pt number, then check SPICE file
             spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-            file_name = os.path.join(self._dataDir, spice_file_name)
+            try:
+                file_name = os.path.join(self._dataDir, spice_file_name)
+            except AttributeError:
+                raise AttributeError('Unable to create SPICE file name from directory %s and file name %s.'
+                                     '' % (self._dataDir, spice_file_name))
         else:
             # pt number given, then check
             xml_file_name = get_det_xml_file_name(self._instrumentName, exp_number, scan_number,
@@ -492,20 +508,26 @@ class CWSCDReductionControl(object):
         """
         # check
         assert isinstance(exp_number, int), 'Experiment number must be an integer but not %s.' % str(type(exp_number))
-        assert exp_number in self._myUBMatrixDict, 'Experiment number %d has no UB matrix set up. Here ' \
-                                                   'are list of experiments that have UB matrix set up: ' \
-                                                   '%s.' % (exp_number, str(self._myUBMatrixDict.keys()))
+        if exp_number not in self._myUBMatrixDict:
+            err_msg = 'Experiment number %d has no UB matrix set up. Here ' \
+                      'are list of experiments that have UB matrix set up: %s.' \
+                      '' % (exp_number, str(self._myUBMatrixDict.keys()))
+            raise KeyError(err_msg)
 
         return self._myUBMatrixDict[exp_number]
 
-    @staticmethod
-    def get_wave_length(exp_number, scan_number_list):
+    def get_wave_length(self, exp_number, scan_number_list):
         """
         Get the wavelength.
         Exception: RuntimeError if there are more than 1 wavelength found with all given scan numbers
+        :param exp_number:
         :param scan_number_list:
         :return:
         """
+        # check whether there is use wave length
+        if exp_number in self._userWavelengthDict:
+            return self._userWavelengthDict[exp_number]
+
         # get the SPICE workspace
         wave_length_set = set()
 
@@ -536,6 +558,11 @@ class CWSCDReductionControl(object):
         spice_table_name = get_spice_table_name(exp_number, scan_number)
         spice_table = AnalysisDataService.retrieve(spice_table_name)
 
+        if spice_table.rowCount() == 0:
+            raise RuntimeError('Spice table %s is empty.')
+        elif spice_table.rowCount() == 0:
+            raise RuntimeError('Only 1 row in Spice table %s. All motors are stationary.' % spice_table)
+
         # get the motors values
         omega_vec = get_log_data(spice_table, 'omega')
         omega_dev, omega_step, omega_step_dev = get_step_motor_parameters(omega_vec)
@@ -555,14 +582,13 @@ class CWSCDReductionControl(object):
         return move_tup[1]
 
     def export_to_fullprof(self, exp_number, scan_number_list, user_header,
-                           fullprof_file_name):
+                           export_absorption, fullprof_file_name):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
         :param scan_number_list:
-        :param scan_kindex_dict:
-        :param k_shift_dict:
         :param user_header:
+        :param export_absorption:
         :param fullprof_file_name:
         :return: 2-tuples. status and return object (file content or error message)
         """
@@ -599,10 +625,14 @@ class CWSCDReductionControl(object):
         # form peaks
         peaks = list()
         no_shift = len(scan_kindex_dict) == 0
+
+        # get ub matrix
+        ub_matrix = self.get_ub_matrix(exp_number)
+
         for scan_number in scan_number_list:
             peak_dict = dict()
             try:
-                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_current_hkl()
+                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_hkl(user_hkl=True)
             except RuntimeError as run_err:
                 return False, str('Peak index error: %s.' % run_err)
 
@@ -612,6 +642,18 @@ class CWSCDReductionControl(object):
                 peak_dict['kindex'] = 0
             else:
                 peak_dict['kindex'] = scan_kindex_dict[scan_number]
+
+            if export_absorption:
+                # calculate absorption correction
+                import absorption
+
+                spice_ub = convert_mantid_ub_to_spice(ub_matrix)
+                up_cart, us_cart = absorption.calculate_absorption_correction_2(
+                    exp_number, scan_number, spice_ub)
+                peak_dict['up'] = up_cart
+                peak_dict['us'] = us_cart
+
+            # append peak (in dict) to peaks
             peaks.append(peak_dict)
         # END-FOR (scan_number)
 
@@ -619,7 +661,7 @@ class CWSCDReductionControl(object):
             file_content = fputility.write_scd_fullprof_kvector(
                 user_header=user_header, wave_length=exp_wave_length,
                 k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                fp_file_name=fullprof_file_name)
+                fp_file_name=fullprof_file_name, with_absorption=export_absorption)
         except AssertionError as error:
             return False, 'AssertionError: %s.' % str(error)
         except RuntimeError as error:
@@ -643,54 +685,13 @@ class CWSCDReductionControl(object):
         md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list)
         temp_out_ws = base_file_name
 
-        api.ConvertCWSDMDtoHKL(InputWorkspace=md_ws_name,
-                               UBMatrix='1., 0., 0., 0., 1., 0., 0., 0., 1',
-                               OutputWorkspace=temp_out_ws,
-                               QSampleFileName=out_file_name)
-        api.DeleteWorkspace(Workspace=temp_out_ws)
+        mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=md_ws_name,
+                                        UBMatrix='1., 0., 0., 0., 1., 0., 0., 0., 1',
+                                        OutputWorkspace=temp_out_ws,
+                                        QSampleFileName=out_file_name)
+        mantidsimple.DeleteWorkspace(Workspace=temp_out_ws)
 
         return out_file_name
-
-    def find_peak(self, exp_number, scan_number, pt_number_list=None):
-        """ Find 1 peak in sample Q space for UB matrix
-        :param exp_number:
-        :param scan_number:
-        :param pt_number_list:
-        :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
-
-        This part will be redo as 11847_Load_HB3A_Experiment
-        """
-        # Check & set pt. numbers
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        if pt_number_list is None:
-            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-            assert status
-        assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
-
-        # Check whether the MDEventWorkspace used to find peaks exists
-        if self.has_merged_data(exp_number, scan_number, pt_number_list):
-            pass
-        else:
-            raise RuntimeError('Data must be merged before')
-
-        # Find peak in Q-space
-        merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
-        peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-        api.FindPeaksMD(InputWorkspace=merged_ws_name,
-                        MaxPeaks=10,
-                        PeakDistanceThreshold=5.,
-                        DensityThresholdFactor=0.1,
-                        OutputWorkspace=peak_ws_name)
-        assert AnalysisDataService.doesExist(peak_ws_name)
-
-        # add peak to UB matrix workspace to manager
-        self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
-
-        # add the merged workspace to list to manage
-        self._add_merged_ws(exp_number, scan_number, pt_number_list)
-
-        return True, ''
 
     def get_experiment(self):
         """
@@ -721,9 +722,11 @@ class CWSCDReductionControl(object):
 
         # Get column for Pt.
         col_name_list = table_ws.getColumnNames()
-        i_pt = col_name_list.index('Pt.')
-        if i_pt < 0 or i_pt >= len(col_name_list):
+        if 'Pt.' not in col_name_list:
             return False, 'No column with name Pt. can be found in SPICE table.'
+
+        i_pt = col_name_list.index('Pt.')
+        assert 0 <= i_pt < len(col_name_list), 'Impossible to have assertion error!'
 
         pt_number_list = []
         num_rows = table_ws.rowCount()
@@ -750,7 +753,7 @@ class CWSCDReductionControl(object):
         array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
         for i in xrange(DET_X_SIZE):
             for j in xrange(DET_Y_SIZE):
-                array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
+                array2d[i][j] = raw_ws.readY(j * DET_X_SIZE + i)[0]
 
         # Flip the 2D array to look detector from sample
         array2d = numpy.flipud(array2d)
@@ -855,12 +858,16 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number
         :param scan_number:
         :param pt_number:
-        :return: PeakInfo instance
+        :return: PeakInfo instance or None
         """
         # Check for type
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int) or pt_number is None
+        assert isinstance(exp_number, int), 'Experiment %s must be an integer but not of type %s.' \
+                                            '' % (str(exp_number), type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number %s must be an integer but not of type %s.' \
+                                             '' % (str(scan_number), type(scan_number))
+        assert isinstance(pt_number, int) or pt_number is None, 'Pt number %s must be an integer or None, but ' \
+                                                                'it is of type %s now.' % (str(pt_number),
+                                                                                           type(pt_number))
 
         # construct key
         if pt_number is None:
@@ -869,9 +876,12 @@ class CWSCDReductionControl(object):
             p_key = (exp_number, scan_number, pt_number)
 
         # Check for existence
-        assert p_key in self._myPeakInfoDict, 'Exp/Scan/Pt %s does not exist in PeakInfo dictionary.' % str(p_key)
+        if p_key in self._myPeakInfoDict:
+            ret_value = self._myPeakInfoDict[p_key]
+        else:
+            ret_value = None
 
-        return self._myPeakInfoDict[p_key]
+        return ret_value
 
     def get_peaks_integrated_intensities(self, exp_number, scan_number, pt_list):
         """
@@ -941,11 +951,11 @@ class CWSCDReductionControl(object):
             # use given name
             mask_ws_name = str(mask_tag)
 
-        api.LoadMask(Instrument='HB3A',
-                     InputFile=mask_file_name,
-                     OutputWorkspace=mask_ws_name)
-        api.InvertMask(InputWorkspace=mask_ws_name,
-                       OutputWorkspace=mask_ws_name)
+        mantidsimple.LoadMask(Instrument='HB3A',
+                              InputFile=mask_file_name,
+                              OutputWorkspace=mask_ws_name)
+        mantidsimple.InvertMask(InputWorkspace=mask_ws_name,
+                                OutputWorkspace=mask_ws_name)
 
         return True, mask_ws_name
 
@@ -962,7 +972,9 @@ class CWSCDReductionControl(object):
 
         for key in self._mySpiceTableDict.keys():
             if key[0] == exp_number:
-                ws_names_str += '%s,' % self._mySpiceTableDict[key].name()
+                exp_number, scan_number = key
+                spice_table_name = get_spice_table_name(exp_number, scan_number)
+                ws_names_str += '%s,' % spice_table_name  # self._mySpiceTableDict[key].name()
 
         # Check
         if len(ws_names_str) == 0:
@@ -972,8 +984,8 @@ class CWSCDReductionControl(object):
         ws_names_str = ws_names_str[:-1]
 
         # Group
-        api.GroupWorkspaces(InputWorkspaces=ws_names_str,
-                            OutputWorkspace=group_name)
+        mantidsimple.GroupWorkspaces(InputWorkspaces=ws_names_str,
+                                     OutputWorkspace=group_name)
 
         return
 
@@ -1050,10 +1062,11 @@ class CWSCDReductionControl(object):
 
         return p_key in self._myPeakInfoDict
 
-    def index_peak(self, ub_matrix, scan_number):
+    def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
         :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
+        :param allow_magnetic: flag to allow magnetic reflections
         :return: boolean, object (list of HKL or error message)
         """
         # Check
@@ -1074,7 +1087,7 @@ class CWSCDReductionControl(object):
 
         # Create a temporary peak workspace for indexing
         temp_index_ws_name = 'TempIndexExp%dScan%dPeak' % (exp_number, scan_number)
-        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=temp_index_ws_name)
+        mantidsimple.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=temp_index_ws_name)
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         temp_index_ws.addPeak(peak_ws.getPeak(0))
@@ -1086,13 +1099,18 @@ class CWSCDReductionControl(object):
         ub_1d = ub_matrix.reshape(9,)
 
         # Set UB
-        api.SetUB(Workspace=temp_index_ws_name, UB=ub_1d)
+        mantidsimple.SetUB(Workspace=temp_index_ws_name, UB=ub_1d)
 
         # Note: IndexPeaks and CalculatePeaksHKL do the same job
         #       while IndexPeaks has more control on the output
-        num_peak_index, error = api.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
-                                               Tolerance=0.4,
-                                               RoundHKLs=False)
+        if allow_magnetic:
+            tol = 0.5
+        else:
+            tol = 0.3
+
+        num_peak_index, error = mantidsimple.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
+                                                        Tolerance=tol,
+                                                        RoundHKLs=False)
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         if num_peak_index == 0:
@@ -1102,12 +1120,13 @@ class CWSCDReductionControl(object):
                                'considered. Contact developer for this issue.')
         else:
             hkl_v3d = temp_index_ws.getPeak(0).getHKL()
-            hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
+            hkl = numpy.array([hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()])
 
-        peak_info.set_indexed_hkl(hkl)
+        # set HKL to peak
+        peak_info.set_hkl(hkl[0], hkl[1], hkl[2])
 
         # delete temporary workspace
-        api.DeleteWorkspace(Workspace=temp_index_ws_name)
+        mantidsimple.DeleteWorkspace(Workspace=temp_index_ws_name)
 
         return True, (hkl, error)
 
@@ -1155,6 +1174,11 @@ class CWSCDReductionControl(object):
             if mask_ws_name is None:
                 # get default mask workspace name
                 mask_ws_name = get_mask_ws_name(exp, scan)
+            elif not AnalysisDataService.doesExist(mask_ws_name):
+                # the appointed mask workspace has not been loaded
+                # then load it from saved mask
+                self.check_generate_mask_workspace(exp, scan, mask_ws_name)
+
             assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
                                                                 '' % mask_ws_name
 
@@ -1172,15 +1196,15 @@ class CWSCDReductionControl(object):
             norm_by_mon = True
 
         # integrate peak of a scan
-        api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-                               OutputWorkspace=integrated_peak_ws_name,
-                               PeakRadius=peak_radius,
-                               PeakCentre=peak_centre_str,
-                               MergePeaks=merge_peaks,
-                               NormalizeByMonitor=norm_by_mon,
-                               NormalizeByTime=norm_by_time,
-                               MaskWorkspace=mask_ws_name,
-                               ScaleFactor=scale_factor)
+        mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
+                                        OutputWorkspace=integrated_peak_ws_name,
+                                        PeakRadius=peak_radius,
+                                        PeakCentre=peak_centre_str,
+                                        MergePeaks=merge_peaks,
+                                        NormalizeByMonitor=norm_by_mon,
+                                        NormalizeByTime=norm_by_time,
+                                        MaskWorkspace=mask_ws_name,
+                                        ScaleFactor=scale_factor)
 
         # process the output workspace
         pt_dict = dict()
@@ -1252,7 +1276,7 @@ class CWSCDReductionControl(object):
             final_peak_center[i] = sum_peak_center[i] * (1./sum_bin_counts)
         #final_peak_center = sum_peak_center * (1./sum_bin_counts)
 
-        print 'Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
+        print '[INFO] Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
 
         # Integrate peaks
         total_intensity = 0.
@@ -1261,9 +1285,9 @@ class CWSCDReductionControl(object):
             md_ws_name = get_single_pt_md_name(exp_no, scan_no, pt_no)
             peak_ws_name = get_peak_ws_name(exp_no, scan_no, pt_no)
             out_ws_name = peak_ws_name + '_integrated'
-            api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-                                   PeaksWorkspace=peak_ws_name,
-                                   OutputWorkspace=out_ws_name)
+            mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
+                                            PeaksWorkspace=peak_ws_name,
+                                            OutputWorkspace=out_ws_name)
             out_peak_ws = AnalysisDataService.retrieve(out_ws_name)
             peak = out_peak_ws.getPeak(0)
             intensity = peak.getIntensity()
@@ -1303,17 +1327,17 @@ class CWSCDReductionControl(object):
         # create an empty peak workspace
         if AnalysisDataService.doesExist('spicematrixws') is False:
             raise RuntimeError('Workspace spicematrixws does not exist.')
-        api.LoadInstrument(Workspace='', InstrumentName='HB3A')
+        mantidsimple.LoadInstrument(Workspace='', InstrumentName='HB3A')
         target_peak_ws_name = 'MyPeakWS'
-        api.CreatePeaksWorkspace(InstrumentWorkspace='spicematrixws', OutputWorkspace=target_peak_ws_name)
+        mantidsimple.CreatePeaksWorkspace(InstrumentWorkspace='spicematrixws', OutputWorkspace=target_peak_ws_name)
         target_peak_ws = AnalysisDataService.retrieve(target_peak_ws_name)
         # copy a peak
         temp_peak_ws_name = 'peak1'
-        api.FindPeaksMD(InputWorkspace='MergedSan0017_QSample',
-                        PeakDistanceThreshold=0.5,
-                        MaxPeaks=10,
-                        DensityThresholdFactor=100,
-                        OutputWorkspace=temp_peak_ws_name)
+        mantidsimple.FindPeaksMD(InputWorkspace='MergedSan0017_QSample',
+                                 PeakDistanceThreshold=0.5,
+                                 MaxPeaks=10,
+                                 DensityThresholdFactor=100,
+                                 OutputWorkspace=temp_peak_ws_name)
 
         src_peak_ws = AnalysisDataService.retrieve(temp_peak_ws_name)
         centre_peak = src_peak_ws.getPeak(0)
@@ -1321,15 +1345,15 @@ class CWSCDReductionControl(object):
         target_peak_ws.removePeak(0)
 
         # Integrate peak
-        api.IntegratePeaksMD(InputWorkspace='MergedSan0017_QSample',
-                             PeakRadius=1.5,
-                             BackgroundInnerRadius=1.5,
-                             BackgroundOuterRadius=3,
-                             PeaksWorkspace=target_peak_ws_name,
-                             OutputWorkspace='SinglePeak1',
-                             IntegrateIfOnEdge=False,
-                             AdaptiveQBackground=True,
-                             Cylinder=False)
+        mantidsimple.IntegratePeaksMD(InputWorkspace='MergedSan0017_QSample',
+                                      PeakRadius=1.5,
+                                      BackgroundInnerRadius=1.5,
+                                      BackgroundOuterRadius=3,
+                                      PeaksWorkspace=target_peak_ws_name,
+                                      OutputWorkspace='SinglePeak1',
+                                      IntegrateIfOnEdge=False,
+                                      AdaptiveQBackground=True,
+                                      Cylinder=False)
 
         raise RuntimeError('Implement ASAP!')
 
@@ -1381,7 +1405,6 @@ class CWSCDReductionControl(object):
         # Default for exp_no
         if exp_no is None:
             exp_no = self._expNumber
-        print '[DB...BAD] Load Spice Scan File Exp Number = %d, Stored Exp. Number = %d' % (exp_no, self._expNumber)
 
         # Check whether the workspace has been loaded
         assert isinstance(exp_no, int)
@@ -1390,22 +1413,27 @@ class CWSCDReductionControl(object):
         if (exp_no, scan_no) in self._mySpiceTableDict:
             return True, out_ws_name
 
-        # Form standard name for a SPICE file if name is not given
-        if spice_file_name is None:
-            spice_file_name = os.path.join(self._dataDir,
-                                           get_spice_file_name(self._instrumentName, exp_no, scan_no))
+        # load the SPICE table data if the target workspace does not exist
+        if not AnalysisDataService.doesExist(out_ws_name):
+            # Form standard name for a SPICE file if name is not given
+            if spice_file_name is None:
+                spice_file_name = os.path.join(self._dataDir,
+                                               get_spice_file_name(self._instrumentName, exp_no, scan_no))
 
-        # Download SPICE file if necessary
-        if os.path.exists(spice_file_name) is False:
-            self.download_spice_file(exp_no, scan_no, over_write=True)
+            # Download SPICE file if necessary
+            if os.path.exists(spice_file_name) is False:
+                self.download_spice_file(exp_no, scan_no, over_write=True)
 
-        try:
-            spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
-                                                                OutputWorkspace=out_ws_name,
-                                                                RunInfoWorkspace='TempInfo')
-            api.DeleteWorkspace(Workspace=info_matrix_ws)
-        except RuntimeError as run_err:
-            return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(run_err))
+            try:
+                spice_table_ws, info_matrix_ws = mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
+                                                                             OutputWorkspace=out_ws_name,
+                                                                             RunInfoWorkspace='TempInfo')
+                mantidsimple.DeleteWorkspace(Workspace=info_matrix_ws)
+            except RuntimeError as run_err:
+                return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(run_err))
+        else:
+            spice_table_ws = AnalysisDataService.retrieve(out_ws_name)
+        # END-IF
 
         # Store
         self._add_spice_workspace(exp_no, scan_no, spice_table_ws)
@@ -1437,17 +1465,19 @@ class CWSCDReductionControl(object):
 
         # retrieve and check SPICE table workspace
         spice_table_ws = self._get_spice_workspace(exp_no, scan_no)
-        assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace)
+        assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace), 'SPICE table workspace must be a ' \
+                                                                              'TableWorkspace but not %s.' \
+                                                                              '' % type(spice_table_ws)
         spice_table_name = spice_table_ws.name()
 
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
         try:
-            api.LoadSpiceXML2DDet(Filename=xml_file_name,
-                                  OutputWorkspace=pt_ws_name,
-                                  DetectorGeometry='256,256',
-                                  SpiceTableWorkspace=spice_table_name,
-                                  PtNumber=pt_no)
+            mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
+                                           OutputWorkspace=pt_ws_name,
+                                           DetectorGeometry='256,256',
+                                           SpiceTableWorkspace=spice_table_name,
+                                           PtNumber=pt_no)
         except RuntimeError as run_err:
             return False, str(run_err)
 
@@ -1458,7 +1488,111 @@ class CWSCDReductionControl(object):
 
         return True, pt_ws_name
 
-    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, target_frame):
+    def merge_multiple_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
+        """
+        Merge multiple scans
+        :param scan_md_ws_list: List of MDWorkspace, each of which is for a scan.
+        :param scan_peak_centre_list: list of peak centres for all scans.
+        :param merged_ws_name:
+        :return:
+        """
+        # check validity
+        assert isinstance(scan_md_ws_list, list), 'Scan MDWorkspace name list cannot be of type %s.' \
+                                                  '' % type(scan_md_ws_list)
+        assert isinstance(scan_peak_centre_list, list), 'Scan peak center list cannot be of type %s.' \
+                                                        '' % type(scan_peak_centre_list)
+        assert len(scan_md_ws_list) >= 2 and len(scan_md_ws_list) == len(scan_peak_centre_list),\
+            'Number of MDWorkspace %d and peak centers %d are not correct.' % (len(scan_md_ws_list),
+                                                                               len(scan_peak_centre_list))
+        assert isinstance(merged_ws_name, str), 'Target MDWorkspace name for merged scans %s (%s) must ' \
+                                                'be a string.' % (str(merged_ws_name), type(merged_ws_name))
+
+        # get the workspace
+        ws_name_list = ''
+        for i_ws, ws_name in enumerate(scan_md_ws_list):
+            if i_ws != 0:
+                ws_name_list += ', '
+            ws_name_list += ws_name
+        # END-FOR
+
+        # merge
+        mantidsimple.MergeMD(InputWorkspaces=ws_name_list,
+                             OutputWorkspace=merged_ws_name)
+
+        # get the unit of MD workspace
+        md_ws = AnalysisDataService.retrieve(scan_md_ws_list[0])
+        frame = md_ws.getDimension(0).getMDFrame().name()
+
+        # calculating the new binning boundaries. It will not affect the merge result. but only for user's reference.
+        axis0_range = list()
+        axis1_range = list()
+        axis2_range = list()
+        for i_peak, peak in enumerate(scan_peak_centre_list):
+            if i_peak == 0:
+                axis0_range = [peak[0], peak[0], 0.]
+                axis1_range = [peak[1], peak[1], 0.]
+                axis2_range = [peak[2], peak[2], 0.]
+            else:
+                # axis 0
+                if peak[0] < axis0_range[0]:
+                    axis0_range[0] = peak[0]
+                elif peak[0] > axis0_range[1]:
+                    axis0_range[1] = peak[0]
+
+                # axis 1
+                if peak[1] < axis1_range[0]:
+                    axis1_range[0] = peak[1]
+                elif peak[1] > axis1_range[1]:
+                    axis1_range[1] = peak[1]
+
+                # axis 2
+                if peak[2] < axis2_range[0]:
+                    axis2_range[0] = peak[2]
+                elif peak[2] > axis2_range[1]:
+                    axis2_range[1] = peak[2]
+        # END-FOR
+
+        axis0_range[2] = axis0_range[1] - axis0_range[0]
+        axis1_range[2] = axis1_range[1] - axis1_range[0]
+        axis2_range[2] = axis2_range[1] - axis2_range[0]
+
+        # edit the message to BinMD for the merged scans
+        binning_script = 'Peak centers are :\n'
+        for peak_center in scan_peak_centre_list:
+            binning_script += '\t%.5f, %.5f, %.5f\n' % (peak_center[0], peak_center[1], peak_center[2])
+
+        if frame == 'HKL':
+            # HKL space
+            binning_script += 'BinMD(InputWorkspace=%s, ' \
+                              'AlignedDim0=\'H,%.5f,%.5f,100\', ' \
+                              'AlignedDim1=\'K,%.5f,%.5f,100\', ' \
+                              'AlignedDim2=\'L,%.5f,%.5f,100\', ' \
+                              'OutputWorkspace=%s)' % (merged_ws_name, axis0_range[0]-1, axis0_range[1] + 1,
+                                                       axis1_range[0] - 1, axis1_range[1] + 1,
+                                                       axis2_range[0] - 1, axis2_range[1] + 1,
+                                                       merged_ws_name + '_Histogram')
+        elif frame == 'QSample':
+            # Q-space
+            binning_script += 'BinMD(InputWorkspace=%s, ' \
+                              'AlignedDim0=\'Q_sample_x,%.5f,%.5f,100\', ' \
+                              'AlignedDim1=\'Q_sample_y,%.5f,%.5f,100\', ' \
+                              'AlignedDim2=\'Q_sample_z,%.5f,%.5f,100\', ' \
+                              'OutputWorkspace=%s)' % (merged_ws_name, axis0_range[0]-1, axis0_range[1] + 1,
+                                                       axis1_range[0] - 1, axis1_range[1] + 1,
+                                                       axis2_range[0] - 1, axis2_range[1] + 1,
+                                                       merged_ws_name + '_Histogram')
+        # END-IF
+
+        binning_script += '\nNote: Here the resolution is 100.  You may modify it and view by SliceViewer.'
+
+        binning_script += '\n\nRange: \n'
+        binning_script += 'Axis 0: %.5f, %5f (%.5f)\n' % (axis0_range[0], axis0_range[1], axis0_range[2])
+        binning_script += 'Axis 1: %.5f, %5f (%.5f)\n' % (axis1_range[0], axis1_range[1], axis1_range[2])
+        binning_script += 'Axis 2: %.5f, %5f (%.5f)\n' % (axis2_range[0], axis2_range[1], axis2_range[2])
+
+        return binning_script
+
+    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list):
         """
         Merge Pts in Scan
         All the workspaces generated as internal results will be grouped
@@ -1469,7 +1603,6 @@ class CWSCDReductionControl(object):
         :param exp_no:
         :param scan_no:
         :param pt_num_list: If empty, then merge all Pt. in the scan
-        :param target_frame: string, either 'hkl' or 'q-sample'
         :return: (boolean, error message) # (merged workspace name, workspace group name)
         """
         # Check
@@ -1477,7 +1610,6 @@ class CWSCDReductionControl(object):
             exp_no = self._expNumber
         assert isinstance(exp_no, int) and isinstance(scan_no, int)
         assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
-        assert isinstance(target_frame, str)
 
         # Get list of Pt.
         if len(pt_num_list) > 0:
@@ -1506,62 +1638,113 @@ class CWSCDReductionControl(object):
         if pt_list_str == '-1':
             return False, err_msg
 
-        # Collect HB3A Exp/Scan information
-        # construct a configuration with 1 scan and multiple Pts.
-        scan_info_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
-        try:
-            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
-                                          ScanList='%d' % scan_no,
-                                          PtLists=pt_list_str,
-                                          DataDirectory=self._dataDir,
-                                          GenerateVirtualInstrument=False,
-                                          OutputWorkspace=scan_info_ws_name,
-                                          DetectorTableWorkspace='MockDetTable')
-        except RuntimeError as rt_error:
-            return False, 'Unable to merge scan %d dur to %s.' % (scan_no, str(rt_error))
-        else:
-            assert AnalysisDataService.doesExist(scan_info_ws_name)
-
-        # Convert to Q-sample
+        # create output workspace's name
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
         if AnalysisDataService.doesExist(out_q_name) is False:
+            # collect HB3A Exp/Scan information
+            # - construct a configuration with 1 scan and multiple Pts.
+            scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)
             try:
-                api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_ws_name,
-                                             CreateVirtualInstrument=False,
-                                             OutputWorkspace=out_q_name,
-                                             Directory=self._dataDir)
+                # collect HB3A exp info only need corrected detector position to build virtual instrument.
+                # so it is not necessary to specify the detector center now as virtual instrument
+                # is abandoned due to speed issue.
+                mantidsimple.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
+                                                       ScanList='%d' % scan_no,
+                                                       PtLists=pt_list_str,
+                                                       DataDirectory=self._dataDir,
+                                                       GenerateVirtualInstrument=False,
+                                                       OutputWorkspace=scan_info_table_name,
+                                                       DetectorTableWorkspace='MockDetTable')
+            except RuntimeError as rt_error:
+                return False, 'Unable to merge scan %d dur to %s.' % (scan_no, str(rt_error))
+            else:
+                # check
+                assert AnalysisDataService.doesExist(scan_info_table_name), 'Workspace %s does not exist.' \
+                                                                            '' % scan_info_table_name
+            # END-TRY-EXCEPT
+
+            # create MD workspace in Q-sample
+            try:
+                # set up the basic algorithm parameters
+                alg_args = dict()
+                alg_args['InputWorkspace'] = scan_info_table_name
+                alg_args['CreateVirtualInstrument'] = False
+                alg_args['OutputWorkspace'] = out_q_name
+                alg_args['Directory'] = self._dataDir
+
+                # Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
+                # calculate the sample-detector distance shift if it is defined
+                if exp_no in self._detSampleDistanceDict:
+                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[exp_no] - \
+                                                              self._defaultDetectorSampleDistance
+                # calculate the shift of detector center
+                if exp_no in self._detCenterDict:
+                    user_center_row, user_center_col = self._detCenterDict[exp_no]
+                    delta_row = user_center_row - self._defaultDetectorCenter[0]
+                    delta_col = user_center_col - self._defaultDetectorCenter[1]
+                    # use LoadSpiceXML2DDet's unit test as a template
+                    shift_x = float(delta_col) * self._defaultPixelSizeX
+                    shift_y = float(delta_row) * self._defaultPixelSizeY * -1.
+                    # set to argument
+                    alg_args['DetectorCenterXShift'] = shift_x
+                    alg_args['DetectorCenterYShift'] = shift_y
+
+                # set up the user-defined wave length
+                if exp_no in self._userWavelengthDict:
+                    alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
+
+                # call:
+                mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
+
+                self._myMDWsList.append(out_q_name)
             except RuntimeError as e:
                 err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
                 return False, err_msg
-
-        # Optionally converted to HKL space # Target frame
-        if target_frame.lower().startswith('hkl'):
-            # retrieve UB matrix stored and convert to a 1-D array
-            assert exp_no in self._myUBMatrixDict
-            ub_matrix_1d = self._myUBMatrixDict[exp_no].reshape(9,)
-            # convert to HKL
-            out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
-            try:
-                api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
-                                       UBMatrix=ub_matrix_1d,
-                                       OutputWorkspace=out_hkl_name)
-
-            except RuntimeError as e:
-                err_msg += 'Failed to reduce scan %d due to %s' % (scan_no, str(e))
+            except ValueError as e:
+                err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s.' % (scan_no, str(e))
                 return False, err_msg
-
-            # set up output
-            out_ws_name = out_hkl_name
-
-        elif target_frame.lower().startswith('q-sample'):
-            # Q-sample
-            out_ws_name = out_q_name
+            # END-TRY
 
         else:
-            # Unsupported
-            raise RuntimeError('Target frame %s is not supported.' % target_frame)
+            # analysis data service has the target MD workspace. do not load again
+            if out_q_name not in self._myMDWsList:
+                self._myMDWsList.append(out_q_name)
+        # END-IF-ELSE
 
-        return True, (out_ws_name, '')
+        return True, (out_q_name, '')
+
+    def convert_merged_ws_to_hkl(self, exp_number, scan_number, pt_num_list):
+        """
+        convert a merged scan in MDEventWorkspace to HKL
+        :param exp_number:
+        :param scan_number:
+        :param pt_num_list:
+        :return:
+        """
+        # check inputs' validity
+        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
+        assert isinstance(scan_number, int), 'Scan number must be an integer.'
+
+        # retrieve UB matrix stored and convert to a 1-D array
+        if exp_number not in self._myUBMatrixDict:
+            raise RuntimeError('There is no UB matrix associated with experiment %d.' % exp_number)
+        else:
+            ub_matrix_1d = self._myUBMatrixDict[exp_number].reshape(9,)
+
+        # convert to HKL
+        input_md_qsample_ws = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list=pt_num_list)
+        out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_number, scan_number, pt_num_list)
+        try:
+            mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=input_md_qsample_ws,
+                                            UBMatrix=ub_matrix_1d,
+                                            OutputWorkspace=out_hkl_name)
+
+        except RuntimeError as e:
+            err_msg = 'Failed to reduce scan %d from MDWorkspace %s due to %s' % (scan_number, input_md_qsample_ws,
+                                                                                  str(e))
+            return False, err_msg
+
+        return True, out_hkl_name
 
     def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
         """
@@ -1583,13 +1766,82 @@ class CWSCDReductionControl(object):
         ll_y = int(lower_left_corner[1])
         ur_x = int(upper_right_corner[0])
         ur_y = int(upper_right_corner[1])
-        assert ll_x < ur_x and ll_y < ur_y
+        assert ll_x < ur_x and ll_y < ur_y, 'Lower left corner (%.5f, %.5f) vs. upper right corner ' \
+                                            '(%.5f, %.5f)' % (ll_x, ll_y, ur_x, ur_y)
 
         # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
         # then it is better and easier to support client to search this ROI by experiment number
         # and only the latest is saved by this key
         self._roiDict[(exp_number, scan_number)] = ((ll_x, ll_y), (ur_x, ur_y))
         self._roiDict[exp_number] = ((ll_x, ll_y), (ur_x, ur_y))
+
+        return
+
+    def set_detector_center(self, exp_number, center_row, center_col, default=False):
+        """
+        Set detector center
+        :param exp_number:
+        :param center_row:
+        :param center_col:
+        :param default:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+        assert center_row is None or (isinstance(center_row, int) and center_row >= 0), \
+            'Center row number must either None or non-negative integer.'
+        assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
+            'Center column number must be either Noe or non-negative integer.'
+
+        if default:
+            self._defaultDetectorCenter = (center_row, center_col)
+        else:
+            self._detCenterDict[exp_number] = (center_row, center_col)
+
+        return
+
+    def set_detector_sample_distance(self, exp_number, sample_det_distance):
+        """
+        set instrument's detector - sample distance
+        :param exp_number:
+        :param sample_det_distance:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+        assert isinstance(sample_det_distance, float) and sample_det_distance > 0, \
+            'Sample - detector distance must be a positive float.'
+
+        # set
+        self._detSampleDistanceDict[exp_number] = sample_det_distance
+
+        return
+
+    def set_default_detector_sample_distance(self, default_det_sample_distance):
+        """
+        set default detector-sample distance
+        :param default_det_sample_distance:
+        :return:
+        """
+        assert isinstance(default_det_sample_distance, float) and default_det_sample_distance > 0,\
+            'Wrong %s' % str(default_det_sample_distance)
+
+        self._defaultDetectorSampleDistance = default_det_sample_distance
+
+        return
+
+    def set_default_pixel_size(self, pixel_x_size, pixel_y_size):
+        """
+        set default pixel size
+        :param pixel_x_size:
+        :param pixel_y_size:
+        :return:
+        """
+        assert isinstance(pixel_x_size, float) and pixel_x_size > 0, 'Pixel size-X %s is bad!' % str(pixel_x_size)
+        assert isinstance(pixel_y_size, float) and pixel_y_size > 0, 'Pixel size-Y %s is bad!' % str(pixel_y_size)
+
+        self._defaultPixelSizeX = pixel_x_size
+        self._defaultPixelSizeY = pixel_y_size
 
         return
 
@@ -1663,8 +1915,8 @@ class CWSCDReductionControl(object):
             except OSError as os_err:
                 return False, str(os_err)
 
-        # Check whether the target is writable
-        if os.access(local_dir, os.W_OK) is False:
+        # Check whether the target is writable: if and only if the data directory is not from data server
+        if not local_dir.startswith('/HFIR/HB3A/') and os.access(local_dir, os.W_OK) is False:
             return False, 'Specified local data directory %s is not writable.' % local_dir
 
         # Successful
@@ -1689,6 +1941,23 @@ class CWSCDReductionControl(object):
 
         # Set up
         self._myUBMatrixDict[exp_number] = ub_matrix
+
+        return
+
+    def set_user_wave_length(self, exp_number, wave_length):
+        """
+        set the user wave length for future operation
+        :param exp_number:
+        :param wave_length:
+        :return:
+        """
+        assert isinstance(exp_number, int)
+        assert isinstance(wave_length, float) and wave_length > 0, 'Wave length %s must be a positive float but ' \
+                                                                   'not %s.' % (str(wave_length), type(wave_length))
+
+        self._userWavelengthDict[exp_number] = wave_length
+
+        return
 
     def set_working_directory(self, work_dir):
         """
@@ -1723,14 +1992,13 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def refine_ub_matrix_indexed_peaks(self, peak_info_list, set_hkl_int):
-        """ Refine UB matrix by indexed peaks
+    def refine_ub_matrix_indexed_peaks(self, peak_info_list):
+        """ Refine UB matrix by SPICE-indexed peaks
         Requirements: input is a list of PeakInfo objects and there are at least 3
                         non-degenerate peaks
         Guarantees: UB matrix is refined.  Refined UB matrix and lattice parameters
                     with errors are returned
         :param peak_info_list: list of PeakInfo
-        :param set_hkl_int: set HKL to nearest integer
         :return: 2-tuple: (True, (ub matrix, lattice parameters, lattice parameters errors))
                           (False, error message)
         """
@@ -1740,11 +2008,11 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'TempUBIndexedPeaks'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
 
         # Calculate UB matrix
         try:
-            api.FindUBUsingIndexedPeaks(PeaksWorkspace=ub_peak_ws_name, Tolerance=0.5)
+            mantidsimple.FindUBUsingIndexedPeaks(PeaksWorkspace=ub_peak_ws_name, Tolerance=0.5)
         except RuntimeError as e:
             return False, 'Unable to refine UB matrix due to %s.' % str(e)
 
@@ -1753,45 +2021,74 @@ class CWSCDReductionControl(object):
 
         return
 
-    def refine_ub_matrix_by_lattice(self, peak_info_list, set_hkl_int,  ub_matrix_str, unit_cell_type):
+    def read_spice_file(self, exp_number, scan_number):
+        """
+        Read SPICE file
+        :param exp_number: experiment number
+        :param scan_number: scan number
+        :return: a list of string for each line
+        """
+        # check inputs' validity
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be a positive integer.'
+        assert isinstance(scan_number, int) and scan_number > 0, 'Scan number must be a positive integer.'
+
+        # get the local SPICE file
+        status, ret_string = self.download_spice_file(exp_number, scan_number, over_write=False)
+        assert status, ret_string
+        spice_file_name = ret_string
+
+        # read the SPICE file
+        spice_file = open(spice_file_name, 'r')
+        spice_line_list = spice_file.readlines()
+        spice_file.close()
+
+        return spice_line_list
+
+    def refine_ub_matrix_by_lattice(self, peak_info_list, ub_matrix_str, unit_cell_type):
         """
         Refine UB matrix by fixing unit cell type
+        Requirements:
+          1. PeakProcessRecord in peak_info_list must have right HKL set as user specified
+          2. the index of the peaks that are used for refinement are given in PeakProcessRecord's user specified HKL
+
         :param peak_info_list:
-        :param set_hkl_int:
         :param ub_matrix_str:
         :param unit_cell_type:
         :return:
         """
         # check inputs and return if not good
-        assert isinstance(peak_info_list, list)
+        assert isinstance(peak_info_list, list), 'peak_info_list must be a list but not %s.' % type(peak_info_list)
         if len(peak_info_list) < 6:
             return False, 'There must be at least 6 peaks for refining UB. Now only %d is given.' % len(peak_info_list)
-        assert isinstance(ub_matrix_str, str)
+
+        assert isinstance(ub_matrix_str, str), 'UB matrix must be input in form of string but not %s.' \
+                                               '' % type(ub_matrix_str)
         if len(ub_matrix_str.split(',')) != 9:
             return False, 'UB matrix string must have 9 values. Now given %d as %s.' % (len(ub_matrix_str.split(',')),
                                                                                         ub_matrix_str)
-        assert isinstance(unit_cell_type, str) and len(unit_cell_type) >= 5
+        assert isinstance(unit_cell_type, str) and len(unit_cell_type) >= 5,\
+            'Unit cell type must be given as a string but not %s.' % type(unit_cell_type)
 
         # construct a new workspace by combining all single peaks
         ub_peak_ws_name = 'TempRefineUBLatticePeaks'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
 
         # set UB matrix from input string. It is UB(0, 0), UB(0, 1), UB(0, 2), UB(1, 0), ..., UB(3, 3)
-        api.SetUB(Workspace=ub_peak_ws_name,
-                  UB=ub_matrix_str)
+        mantidsimple.SetUB(Workspace=ub_peak_ws_name,
+                           UB=ub_matrix_str)
 
         # optimize UB matrix by constraining lattice parameter to unit cell type
-        api.OptimizeLatticeForCellType(PeaksWorkspace=ub_peak_ws_name,
-                                       CellType=unit_cell_type,
-                                       Apply=True,
-                                       OutputDirectory=self._workDir)
+        mantidsimple.OptimizeLatticeForCellType(PeaksWorkspace=ub_peak_ws_name,
+                                                CellType=unit_cell_type,
+                                                Apply=True,
+                                                OutputDirectory=self._workDir)
 
         # get refined ub matrix
         self._refinedUBTup = self._get_refined_ub_data(ub_peak_ws_name)
 
         return True, ''
 
-    def refine_ub_matrix_least_info(self, peak_info_list, d_min, d_max):
+    def refine_ub_matrix_least_info(self, peak_info_list, d_min, d_max, tolerance):
         """
         Refine UB matrix with least information from user, i.e., using FindUBFFT
         Requirements: at least 6 PeakInfo objects are given
@@ -1799,18 +2096,26 @@ class CWSCDReductionControl(object):
         :return:
         """
         # Check
-        assert isinstance(peak_info_list, list) and len(peak_info_list) >= 6
-        assert 0 < d_min < d_max
+        assert isinstance(peak_info_list, list), 'peak_info_list must be a list but not of type %s.' \
+                                                 '' % type(peak_info_list)
+        assert isinstance(d_min, float) and isinstance(d_max, float), 'd_min and d_max must be float but not ' \
+                                                                      '%s and %s.' % (type(d_min), type(d_max))
+
+        if len(peak_info_list) < 6:
+            raise RuntimeError('There must be at least 6 peaks to refine UB matrix by FFT. Only %d peaks '
+                               'are given.' % len(peak_info_list))
+        if not (0 < d_min < d_max):
+            raise RuntimeError('It is required to have 0 < d_min (%f) < d_max (%f).' % (d_min, d_max))
 
         # Build a new PeaksWorkspace
         peak_ws_name = 'TempUBFFTPeaks'
-        self._build_peaks_workspace(peak_info_list, peak_ws_name, True, False)
+        self._build_peaks_workspace(peak_info_list, peak_ws_name)
 
         # Refine
-        api.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
-                           Tolerance=0.15,
-                           MinD=d_min,
-                           MaxD=d_max)
+        mantidsimple.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
+                                    Tolerance=tolerance,
+                                    MinD=d_min,
+                                    MaxD=d_max)
 
         # Get result
         self._refinedUBTup = self._get_refined_ub_data(peak_ws_name)
@@ -1841,22 +2146,23 @@ class CWSCDReductionControl(object):
         return result_tuple
 
     @staticmethod
-    def _build_peaks_workspace(peak_info_list, peak_ws_name, zero_hkl, hkl_to_int):
-        """ From a list of PeakInfo, using the averaged peak centre of each of them
+    def _build_peaks_workspace(peak_info_list, peak_ws_name):
+        """
+        From a list of PeakInfo, using the averaged peak centre of each of them
         to build a new PeaksWorkspace
-        Requirements: a list of PeakInfo
+        Requirements: a list of PeakInfo with HKL specified by user
         Guarantees: a PeaksWorkspace is created in AnalysisDataService.
-        :param peak_info_list:
+        :param peak_info_list: peak information list.  only peak center in Q-sample is required
         :param peak_ws_name:
         :return:
         """
         # check
-        assert isinstance(peak_info_list, list)
-        assert len(peak_info_list) > 0
-        assert isinstance(peak_ws_name, str)
+        assert isinstance(peak_info_list, list), 'Peak Info List must be a list.'
+        assert len(peak_info_list) > 0, 'Peak Info List cannot be empty.'
+        assert isinstance(peak_ws_name, str), 'Peak workspace name must be a string.'
 
         # create an empty
-        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
+        mantidsimple.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
         assert AnalysisDataService.doesExist(peak_ws_name)
         peak_ws = AnalysisDataService.retrieve(peak_ws_name)
 
@@ -1867,24 +2173,15 @@ class CWSCDReductionControl(object):
             peak_info_i = peak_info_list[i_peak_info]
             peak_ws_i = peak_info_i.get_peak_workspace()
             assert peak_ws_i.getNumberPeaks() > 0
-            # get any peak to add
+
+            # get any peak to add. assuming that each peak workspace has one and only one peak
             peak_temp = peak_ws_i.getPeak(0)
             peak_ws.addPeak(peak_temp)
-
-            # set the peak in ub peak workspace right
             peak_i = peak_ws.getPeak(i_peak_info)
-            # user HKL
-            if zero_hkl is True:
-                h = k = l = 0.
-            else:
-                h, k, l = peak_info_i.get_spice_hkl()
-                if hkl_to_int:
-                    # convert hkl to integer
-                    h = float(math.copysign(1, h)*int(abs(h)+0.5))
-                    k = float(math.copysign(1, k)*int(abs(k)+0.5))
-                    l = float(math.copysign(1, l)*int(abs(l)+0.5))
-            # END-IF
-            peak_i.setHKL(h, k, l)
+
+            # set the peak indexing to each pear
+            index_h, index_k, index_l = peak_info_i.get_hkl(user_hkl=True)
+            peak_i.setHKL(index_h, index_k, index_l)
             # q-sample
             q_x, q_y, q_z = peak_info_i.get_peak_centre()
             q_sample = V3D(q_x, q_y, q_z)
@@ -1955,33 +2252,6 @@ class CWSCDReductionControl(object):
 
         return True
 
-    def set_hkl_to_peak(self, exp_number, scan_number, pt_number):
-        """
-        Get HKL as _h, _k, _l from MDEventWorkspace.  It is for HB3A only
-        :return:
-        """
-        status, peak_info = self.get_peak_info(exp_number, scan_number, pt_number)
-        if status is False:
-            err_msg = peak_info
-            return False, err_msg
-
-        md_ws = self._myPtMDDict[(exp_number, scan_number, pt_number)]
-        assert md_ws.getNumExperimentInfo() == 1
-        exp_info = md_ws.getExperimentInfo(0)
-
-        try:
-            m_h = float(exp_info.run().getProperty('_h').value)
-            m_k = float(exp_info.run().getProperty('_k').value)
-            m_l = float(exp_info.run().getProperty('_l').value)
-        except RuntimeError as error:
-            return False, 'Unable to retrieve HKL due to %s.' % (str(error))
-
-        peak_ws = peak_info.get_peak_workspace()
-        peak = peak_ws.getPeak(0)
-        peak.setHKL(m_h, m_k, m_l)
-
-        return True, (m_h, m_k, m_l)
-
     def set_k_shift(self, scan_number_list, k_index):
         """ Set k-shift vector
         :param scan_number_list:
@@ -2045,7 +2315,6 @@ class CWSCDReductionControl(object):
         :param scan_number:
         :param peak_ws_name:
         :param md_ws_name:
-        :param peak_centre: calculated peak center
         :return: (boolean, PeakInfo/string)
         """
         # check
@@ -2055,7 +2324,7 @@ class CWSCDReductionControl(object):
         assert isinstance(md_ws_name, str)
 
         # create a PeakInfo instance if it does not exist
-        peak_info = PeakProcessHelper(exp_number, scan_number, peak_ws_name)
+        peak_info = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
         self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
 
         # set the other information
@@ -2070,20 +2339,27 @@ class CWSCDReductionControl(object):
         assert isinstance(exp_no, int)
         assert isinstance(scan_no, int)
         assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace)
-        self._mySpiceTableDict[(exp_no, scan_no)] = spice_table_ws
+        self._mySpiceTableDict[(exp_no, scan_no)] = str(spice_table_ws)
 
         return
 
-    def _get_spice_workspace(self, exp_no, scan_no):
+    @staticmethod
+    def _get_spice_workspace(exp_no, scan_no):
         """ Get SPICE's scan table workspace
         :param exp_no:
         :param scan_no:
         :return: Table workspace or None
         """
-        try:
-            ws = self._mySpiceTableDict[(exp_no, scan_no)]
-        except KeyError:
-            return None
+        # try:
+        #     ws = self._mySpiceTableDict[(exp_no, scan_no)]
+        # except KeyError:
+        #     return None
+
+        spice_ws_name = get_spice_table_name(exp_no, scan_no)
+        if AnalysisDataService.doesExist(spice_ws_name):
+            ws = AnalysisDataService.retrieve(spice_ws_name)
+        else:
+            raise KeyError('Spice table workspace %s does not exist in ADS.' % spice_ws_name)
 
         return ws
 
@@ -2171,10 +2447,10 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number
         :param start_scan:
         :param end_scan:
-        :return: a list. first item is max_count
+        :return: 3-tuple (status, scan_summary list, error message)
         """
         # Check
-        assert isinstance(exp_number, int)
+        assert isinstance(exp_number, int), 'Experiment number must be an integer but not %s.' % type(exp_number)
         if isinstance(start_scan, int) is False:
             start_scan = 1
         if isinstance(end_scan , int) is False:
@@ -2182,6 +2458,8 @@ class CWSCDReductionControl(object):
 
         # Output workspace
         scan_sum_list = list()
+
+        error_message = ''
 
         # Download and
         for scan_number in xrange(start_scan, end_scan):
@@ -2195,9 +2473,10 @@ class CWSCDReductionControl(object):
 
                 # download file and load
                 try:
-                    api.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
+                    mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print 'Unable to download scan %d due to %s.' % (scan_number, str(download_error))
+                    print '[ERROR] Unable to download scan %d from %s due to %s.' % (scan_number,spice_file_url,
+                                                                                     str(download_error))
                     break
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
@@ -2206,21 +2485,33 @@ class CWSCDReductionControl(object):
             # Load SPICE file and retrieve information
             try:
                 spice_table_ws_name = 'TempTable'
-                api.LoadSpiceAscii(Filename=spice_file_name,
-                                   OutputWorkspace=spice_table_ws_name,
-                                   RunInfoWorkspace='TempInfo')
+                mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
+                                            OutputWorkspace=spice_table_ws_name,
+                                            RunInfoWorkspace='TempInfo')
                 spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
                 num_rows = spice_table_ws.rowCount()
+
+                if num_rows == 0:
+                    # it is an empty table
+                    error_message += 'Scan %d: empty spice table.\n' % scan_number
+                    continue
+
                 col_name_list = spice_table_ws.getColumnNames()
                 h_col_index = col_name_list.index('h')
                 k_col_index = col_name_list.index('k')
                 l_col_index = col_name_list.index('l')
                 col_2theta_index = col_name_list.index('2theta')
                 m1_col_index = col_name_list.index('m1')
+                # optional as T-Sample
+                if 'tsample' in col_name_list:
+                    tsample_col_index = col_name_list.index('tsample')
+                else:
+                    tsample_col_index = None
 
                 max_count = 0
                 max_row = 0
                 max_h = max_k = max_l = 0
+                max_tsample = 0.
 
                 two_theta = m1 = -1
 
@@ -2234,6 +2525,11 @@ class CWSCDReductionControl(object):
                         max_l = spice_table_ws.cell(i_row, l_col_index)
                         two_theta = spice_table_ws.cell(i_row, col_2theta_index)
                         m1 = spice_table_ws.cell(i_row, m1_col_index)
+                        # t-sample is not a mandatory sample log in SPICE
+                        if tsample_col_index is None:
+                            max_tsample = 0.
+                        else:
+                            max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
                 # END-FOR
 
                 # calculate wavelength
@@ -2245,19 +2541,71 @@ class CWSCDReductionControl(object):
 
                 # appending to list
                 scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,
-                                      q_range])
+                                      q_range, max_tsample])
 
             except RuntimeError as e:
-                print e
-                return False, str(e)
+                return False, None, str(e)
             except ValueError as e:
-                return False, 'Unable to locate column h, k, or l. See %s.' % str(e)
-
+                # Unable to import a SPICE file without necessary information
+                error_message += 'Scan %d: unable to locate column h, k, or l. See %s.' % (scan_number, str(e))
         # END-FOR (scan_number)
+
+        if error_message != '':
+            print '[Error]\n%s' % error_message
 
         self._scanSummaryList = scan_sum_list
 
-        return True, scan_sum_list
+        return True, scan_sum_list, error_message
+
+    def export_project(self, project_file_name, ui_dict):
+        """ Export project
+        - the data structure and information will be written to a ProjectManager file
+        :param project_file_name:
+        :param ui_dict:
+        :return:
+        """
+        # check inputs' validity
+        assert isinstance(project_file_name, str), 'Project file name must be a string but not of type ' \
+                                                   '%s.' % type(project_file_name)
+
+        project = project_manager.ProjectManager(mode='export', project_file_path=project_file_name)
+
+        project.add_workspaces(self._myMDWsList)
+        project.set('data dir', self._dataDir)
+        project.set('gui parameters', ui_dict)
+
+        project.export(overwrite=False)
+
+        return
+
+    def load_project(self, project_file_name):
+        """
+        Load project from a project file suite
+        :param project_file_name:
+        :return:
+        """
+        # check validity
+        assert isinstance(project_file_name, str), 'Project file name must be a string but not of type ' \
+                                                   '%s.' % type(project_file_name)
+
+        print '[INFO] Load project from %s.' % project_file_name
+
+        # instantiate a project manager instance and load the project
+        saved_project = project_manager.ProjectManager(mode='import', project_file_path=project_file_name)
+        saved_project.load()
+
+        # set current value
+        try:
+            self._dataDir = saved_project.get('data dir')
+        except KeyError:
+            self._dataDir = None
+
+        try:
+            ui_dict = saved_project.get('gui parameters')
+        except KeyError:
+            ui_dict = dict()
+
+        return ui_dict
 
 
 def convert_spice_ub_to_mantid(spice_ub):
@@ -2277,3 +2625,20 @@ def convert_spice_ub_to_mantid(spice_ub):
         mantid_ub[2][i] = -1.*spice_ub[1][i]
 
     return mantid_ub
+
+
+def convert_mantid_ub_to_spice(mantid_ub):
+    """
+    """
+    spice_ub = numpy.ndarray((3, 3), 'float')
+    # row 0
+    for i in range(3):
+        spice_ub[0, i] = mantid_ub[0, i]
+    # row 1
+    for i in range(3):
+        spice_ub[2, i] = mantid_ub[1, i]
+    # row 2
+    for i in range(3):
+        spice_ub[1, i] = -1.*mantid_ub[2, i]
+
+    return spice_ub

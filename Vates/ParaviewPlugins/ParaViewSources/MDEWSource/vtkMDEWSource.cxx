@@ -22,7 +22,6 @@
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/optional.hpp>
@@ -175,16 +174,14 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
-    ThresholdRange_scptr thresholdRange =
-        boost::make_shared<IgnoreZerosThresholdRange>();
-    auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
-        thresholdRange, m_normalization);
+    auto hexahedronFactory =
+        Mantid::Kernel::make_unique<vtkMDHexFactory>(m_normalization);
 
-    hexahedronFactory->setSuccessor(
-                         Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-                             thresholdRange, m_normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
-            thresholdRange, m_normalization))
+    hexahedronFactory
+        ->setSuccessor(
+            Mantid::Kernel::make_unique<vtkMDQuadFactory>(m_normalization))
+        .setSuccessor(
+            Mantid::Kernel::make_unique<vtkMDLineFactory>(m_normalization))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     hexahedronFactory->setTime(m_time);
@@ -210,7 +207,8 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     try
     {
       auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
+      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
+                                     &drawingProgressUpdate);
     }
     catch (std::invalid_argument &e)
     {
@@ -232,15 +230,13 @@ int vtkMDEWSource::RequestInformation(
     vtkInformation *vtkNotUsed(request),
     vtkInformationVector **vtkNotUsed(inputVector),
     vtkInformationVector *outputVector) {
-  if (m_presenter == NULL && !m_wsName.empty()) {
+  if (!m_presenter && !m_wsName.empty()) {
     std::unique_ptr<MDLoadingView> view =
         Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
     m_presenter = Mantid::Kernel::make_unique<MDEWInMemoryLoadingPresenter>(
         std::move(view),
         new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
-    if (!m_presenter->canReadFile()) {
-      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
-    } else {
+    if (m_presenter->canReadFile()) {
       // If the MDEvent workspace has had top level splitting applied to it,
       // then use the a deptgit stah of 1
       auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
@@ -251,6 +247,8 @@ int vtkMDEWSource::RequestInformation(
 
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
+    } else {
+      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
     }
   }
   return 1;
@@ -316,7 +314,7 @@ Setter for the algorithm progress.
 void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& message)
 {
   this->SetProgressText(message.c_str());
-  this->SetProgress(progress);
+  this->UpdateProgress(progress);
 }
 
 /*

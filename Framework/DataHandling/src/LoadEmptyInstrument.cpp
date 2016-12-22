@@ -124,7 +124,7 @@ void LoadEmptyInstrument::exec() {
     outWS = WorkspaceFactory::Instance().create("EventWorkspace",
                                                 number_spectra, 2, 1);
     // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(ws, outWS, true);
+    WorkspaceFactory::Instance().initializeFromParent(*ws, *outWS, true);
   } else {
     // Now create the outputworkspace and copy over the instrument object
     outWS = WorkspaceFactory::Instance().create(ws, number_spectra, 2, 1);

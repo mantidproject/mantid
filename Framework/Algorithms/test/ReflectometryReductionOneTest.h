@@ -11,6 +11,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -237,7 +238,7 @@ public:
   }
   void test_post_processing_rebin_step_with_params_not_provided() {
     auto alg = construct_standard_algorithm();
-    auto inWS = Create2DWorkspace154(1, 10, true);
+    auto inWS = create2DWorkspace154(1, 10, true);
     // this instrument does not have a "slit-gap" property
     // defined in the IPF, so CalculateResolution should throw.
     inWS->setInstrument(m_tinyReflWS->getInstrument());
@@ -250,7 +251,7 @@ public:
   }
   void test_post_processing_rebin_step_with_partial_params_provided() {
     auto alg = construct_standard_algorithm();
-    auto inWS = Create2DWorkspace154(1, 10, true);
+    auto inWS = create2DWorkspace154(1, 10, true);
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
     alg->setProperty("InputWorkspace", inWS);
@@ -268,7 +269,7 @@ public:
   }
   void test_post_processing_rebin_step_with_logarithmic_rebinning() {
     auto alg = construct_standard_algorithm();
-    auto inWS = Create2DWorkspace154(1, 10, true);
+    auto inWS = create2DWorkspace154(1, 10, true);
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
     alg->setProperty("InputWorkspace", inWS);
@@ -290,7 +291,7 @@ public:
   }
   void test_post_processing_rebin_step_with_linear_rebinning() {
     auto alg = construct_standard_algorithm();
-    auto inWS = Create2DWorkspace154(1, 10, true);
+    auto inWS = create2DWorkspace154(1, 10, true);
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
     alg->setProperty("InputWorkspace", inWS);

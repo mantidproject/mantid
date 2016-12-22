@@ -6,9 +6,11 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
+
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -142,15 +144,6 @@ public:
   virtual TomoSystemSettings systemSettings() const = 0;
 
   /**
-   * Get the current reconstruction tool settings set by the
-   * user. This is about tool specific options (like reconstruction
-   * method, etc.).
-   *
-   * @return Settings for the set of supported tools.
-   */
-  virtual TomoReconToolsUserSettings reconToolsSettings() const = 0;
-
-  /**
    * The filters settings defined by the user. These options are
    * general pre-/post-processing options.
    *
@@ -174,20 +167,6 @@ public:
    * @return name of the tool as a human readable string
    */
   virtual std::string currentReconTool() const = 0;
-
-  /**
-   * Method/algorithm selected from the TomoPy list.
-   *
-   * @return name of the method as used in TomoPy
-   */
-  virtual std::string astraMethod() const = 0;
-
-  /**
-   * Method/algorithm selected from the Astra list.
-   *
-   * @return name of the method as used in Astra Toolbox
-   */
-  virtual std::string tomopyMethod() const = 0;
 
   /**
    * Updates buttons and banners related to the current login
@@ -288,9 +267,9 @@ public:
   /**
    * Show a tool specific configuration dialog for the user to set it up
    *
-   * @param name human readable name of the tool, as a string
+   * @param dialog The pointer to the current dialog
    */
-  virtual void showToolConfig(const std::string &name) = 0;
+  virtual void showToolConfig(TomoToolConfigDialogBase &dialog) = 0;
 
   /**
    * Refresh the table, tree etc. that displays info on the running/finished
@@ -340,6 +319,16 @@ public:
    * @param alg algorithm initialized and ready to run.
    */
   virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) = 0;
+
+  /**
+   * Prompts the user for confirmation with a yes/no dialogue.
+   * The body can use HTML formatting.
+   *
+   * @param title The title that the message has
+   * @param body The body that the message has. This CAN use HTML formatting
+   */
+  virtual bool userConfirmation(const std::string &title,
+                                const std::string &body) = 0;
 };
 
 } // namespace CustomInterfaces

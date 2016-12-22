@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace Geometry {

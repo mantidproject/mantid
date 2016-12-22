@@ -3,6 +3,7 @@ import os
 import urllib2
 import socket
 import numpy
+import math
 
 from mantid.api import AnalysisDataService
 
@@ -135,7 +136,8 @@ def get_hb3a_wavelength(m1_motor_pos):
     :param m1_motor_pos:
     :return: wavelength.  None for no mapping
     """
-    assert isinstance(m1_motor_pos, float), 'Motor m1\'s position must be float.'
+    assert isinstance(m1_motor_pos, float), 'Motor m1\'s position %s must be a float but not %s.' \
+                                            '' % (str(m1_motor_pos), type(m1_motor_pos))
 
     # hard-coded HB3A m1 position and wavelength mapping
     m1_pos_list = [(-25.870, 1.003),
@@ -411,7 +413,8 @@ def get_spice_table_name(exp_number, scan_number):
     :param scan_number:
     :return:
     """
-    table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+    # table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+    table_name = 'HB3A_exp%04d_scan%04d' % (exp_number, scan_number)
 
     return table_name
 
@@ -499,6 +502,8 @@ def get_step_motor_parameters(log_value_vector):
     std_dev = numpy.std(log_value_vector)
 
     step_vector = log_value_vector[1:] - log_value_vector[:-1]
+    assert len(step_vector) > 0, 'Log value vector size = %d. Step vector size = 0 is not allowed.' \
+                                 '' % len(log_value_vector)
     step_dev = numpy.std(step_vector)
     step = sum(step_vector)/len(step_vector)
 
@@ -649,16 +654,93 @@ def load_hb3a_md_data(file_name):
     return xyz_points, intensities
 
 
-def round_hkl(hkl):
+def round_hkl_1(hkl):
     """
     Round HKL to nearest integer
     :param hkl:
     :return:
     """
-    print type(hkl)
-
     mi_h = round(hkl[0])
     mi_k = round(hkl[1])
     mi_l = round(hkl[2])
 
     return mi_h, mi_k, mi_l
+
+
+def round_hkl(index_h, index_k, index_l):
+    """
+
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :return:
+    """
+    index_h = math.copysign(1, index_h) * int(abs(index_h) + 0.5)
+    index_k = math.copysign(1, index_k) * int(abs(index_k) + 0.5)
+    index_l = math.copysign(1, index_l) * int(abs(index_l) + 0.5)
+
+    return index_h, index_k, index_l
+
+
+def round_miller_index(value, tol):
+    """
+    round a peak index (h, k, or l) with some tolerance
+    :param value:
+    :param tol:
+    :return:
+    """
+    round_int = math.copysign(1, value) * int(abs(value) + 0.5)
+    if abs(round_int - value) >= tol:
+        # it is likely a magnetic peak
+        round_int = int(value * 100) * 0.01
+
+    return round_int
+
+
+def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
+    """
+    Convert index (HKL) to integer by considering magnetic peaks
+    if any index is not close to an integer (default to 0.2), then it is treated as a magnetic peak's HKL
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :param magnetic_tolerance: tolerance to magnetic peak's indexing
+    :return:
+    """
+    # check inputs' validity
+    assert isinstance(magnetic_tolerance, float) and 0. < magnetic_tolerance <= 0.5
+
+    #
+    index_h_r = round_miller_index(index_h, magnetic_tolerance)
+    index_k_r = round_miller_index(index_k, magnetic_tolerance)
+    index_l_r = round_miller_index(index_l, magnetic_tolerance)
+
+    round_error = math.sqrt((index_h - index_h_r) ** 2 +
+                            (index_k - index_k_r) ** 2 +
+                            (index_l - index_l_r) ** 2)
+
+    return (index_h_r, index_k_r, index_l_r), round_error
+
+
+def is_peak_nuclear(index_h, index_k, index_l, magnetic_tolerance=0.2):
+    """
+    Check whether a peak is a nuclear peak by checking its index close enough to integers
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :param magnetic_tolerance:
+    :return:
+    """
+    round_h = math.copysign(1, index_h) * int(abs(index_h) + 0.5)
+    if abs(round_h - index_h) >= magnetic_tolerance:
+        return False
+
+    round_k = math.copysign(1, index_k) * int(abs(index_k) + 0.5)
+    if abs(round_k - index_k) >= magnetic_tolerance:
+        return False
+
+    round_l = math.copysign(1, index_l) * int(abs(index_l) + 0.5)
+    if abs(round_l - index_l) >= magnetic_tolerance:
+        return False
+
+    return True
