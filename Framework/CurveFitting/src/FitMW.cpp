@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
+#include "MantidKernel/ArrayOrderedPairsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
@@ -105,7 +106,7 @@ private:
   /// Find the range from m_exclude that may contain points x >= p .
   /// @param p :: An x value to use in the seach.
   void findNextExcludedRange(double p) {
-    if (p >= m_exclude.back()) {
+    if (p > m_exclude.back()) {
       // If the value is past the last point stop any searches or checks.
       m_exclIndex = m_size;
       return;
@@ -116,7 +117,7 @@ private:
     // the previous point. Keep index m_exclIndex pointing to the start.
     for (auto it = m_exclude.begin() + m_exclIndex; it != m_exclude.end();
          ++it) {
-      if (*it > p) {
+      if (*it >= p) {
         m_exclIndex = static_cast<size_t>(std::distance(m_exclude.begin(), it));
         if (m_exclIndex % 2 == 0) {
           // A number at an even position in m_exclude starts an exclude
@@ -287,9 +288,12 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
           "width).");
     }
     if (!m_manager->existsProperty(m_excludePropertyName)) {
-      declareProperty(new ArrayProperty<double>(m_excludePropertyName),
-                      "A list of pairs of doubles that specify ranges that "
-                      "must be excluded from fit.");
+      auto mustBeOrderedPairs =
+          boost::make_shared<ArrayOrderedPairsValidator<double>>();
+      declareProperty(
+          new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
+          "A list of pairs of doubles that specify ranges that "
+          "must be excluded from fit.");
     }
   }
 }
