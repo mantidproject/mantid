@@ -31,6 +31,55 @@ using Kernel::Quat;
 using Kernel::V3D;
 
 namespace {
+/// Private namespace storing property name strings
+namespace PropertyNames {
+/// Input workspace property name
+const std::string INPUT_WORKSPACE("InputWorkspace");
+/// Geometry property name
+const std::string GEOMETRY("Geometry");
+/// Material property name
+const std::string MATERIAL("Material");
+/// Environment property name
+const std::string ENVIRONMENT("Environment");
+}
+/// Private namespace storing sample environment args
+namespace SEArgs {
+/// Static Name string
+const std::string NAME("Name");
+/// Static Container string
+const std::string CONTAINER("Container");
+}
+/// Provate namespace storing geometry args
+namespace GeometryArgs {
+/// Static Shape string
+const std::string SHAPE("Shape");
+}
+
+/// Private namespace storing sample environment args
+namespace ShapeArgs {
+/// Static FlatPlate string
+const std::string FLAT_PLATE("FlatPlate");
+/// Static Cylinder string
+const std::string CYLINDER("Cylinder");
+/// Static HollowCylinder string
+const std::string HOLLOW_CYLINDER("HollowCylinder");
+/// Static CSG string
+const std::string CSG("CSG");
+/// Static Width string
+const std::string WIDTH("Width");
+/// Static Height string
+const std::string HEIGHT("Height");
+/// Static Thick string
+const std::string THICK("Thick");
+/// Static Center string
+const std::string CENTER("Center");
+/// Static Radius string
+const std::string RADIUS("Radius");
+/// Static InnerRadius string
+const std::string INNER_RADIUS("InnerRadius");
+/// Static OuterRadius string
+const std::string OUTER_RADIUS("OuterRadius");
+}
 
 /**
   * Return the centre coordinates of the base of a cylinder given the
@@ -94,28 +143,61 @@ const std::string SetSample::summary() const {
 
 /// Validate the inputs against each other @see Algorithm::validateInputs
 std::map<std::string, std::string> SetSample::validateInputs() {
-  using Kernel::PropertyManager_sptr;
+  using Kernel::PropertyManager;
+  using Kernel::PropertyManager_const_sptr;
   std::map<std::string, std::string> errors;
 
+  auto existsAndNotEmptyString =
+      [](const PropertyManager &pm, const std::string &name) {
+        if (pm.existsProperty(name)) {
+          const auto value = pm.getPropertyValue(name);
+          if (value.empty())
+            return false;
+          else
+            return true;
+        }
+        return false;
+      };
+
+  auto existsAndNegative =
+      [](const PropertyManager &pm, const std::string &name) {
+        if (pm.existsProperty(name)) {
+          const double value = pm.getProperty(name);
+          if (value < 0.0) {
+            return true;
+          }
+        }
+        return false;
+      };
+
   // Validate Environment
-  PropertyManager_sptr environArgs = getProperty("Environment");
+  const PropertyManager_const_sptr environArgs =
+      getProperty(PropertyNames::ENVIRONMENT);
   if (environArgs) {
-    if (!environArgs->existsProperty("Name")) {
-      errors["Environment"] = "Environment flags must contain a 'Name' entry.";
-    } else {
-      std::string name = environArgs->getPropertyValue("Name");
-      if (name.empty()) {
-        errors["Environment"] = "Environment 'Name' flag is an empty string!";
-      }
+    if (!existsAndNotEmptyString(*environArgs, SEArgs::NAME)) {
+      errors[PropertyNames::ENVIRONMENT] =
+          "Environment flags require a non-empty 'Name' entry.";
     }
 
-    if (!environArgs->existsProperty("Container")) {
-      errors["Environment"] =
-          "Environment flags must contain a 'Container' entry.";
-    } else {
-      std::string name = environArgs->getPropertyValue("Container");
-      if (name.empty()) {
-        errors["Environment"] = "Environment 'Can' flag is an empty string!";
+    if (!existsAndNotEmptyString(*environArgs, SEArgs::CONTAINER)) {
+      errors[PropertyNames::ENVIRONMENT] =
+          "Environment flags require a non-empty 'Container' entry.";
+    }
+  }
+
+  //  // Validate as much of the shape information as possible
+  const PropertyManager_const_sptr geomArgs =
+      getProperty(PropertyNames::GEOMETRY);
+  if (geomArgs) {
+    if (existsAndNotEmptyString(*geomArgs, GeometryArgs::SHAPE)) {
+      const std::array<const std::string *, 6> positiveValues = {
+          &ShapeArgs::HEIGHT,       &ShapeArgs::WIDTH,
+          &ShapeArgs::THICK,        &ShapeArgs::RADIUS,
+          &ShapeArgs::INNER_RADIUS, &ShapeArgs::OUTER_RADIUS};
+      for (const auto &arg : positiveValues) {
+        if (existsAndNegative(*geomArgs, *arg)) {
+          errors[PropertyNames::GEOMETRY] = *arg + " argument < 0.0";
+        }
       }
     }
   }
@@ -132,18 +214,18 @@ void SetSample::init() {
   using Kernel::PropertyManagerProperty;
 
   // Inputs
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::InOut),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      PropertyNames::INPUT_WORKSPACE, "", Direction::InOut),
                   "A workspace whose sample properties will be updated");
   declareProperty(Kernel::make_unique<PropertyManagerProperty>(
-                      "Geometry", Direction::Input),
+                      PropertyNames::GEOMETRY, Direction::Input),
                   "A dictionary of geometry parameters for the sample.");
   declareProperty(Kernel::make_unique<PropertyManagerProperty>(
-                      "Material", Direction::Input),
+                      PropertyNames::MATERIAL, Direction::Input),
                   "A dictionary of material parameters for the sample. See "
                   "SetSampleMaterial for all accepted parameters");
   declareProperty(
-      Kernel::make_unique<PropertyManagerProperty>("Environment",
+      Kernel::make_unique<PropertyManagerProperty>(PropertyNames::ENVIRONMENT,
                                                    Direction::Input),
       "A dictionary of parameters to configure the sample environment");
 }
@@ -155,10 +237,10 @@ void SetSample::exec() {
   using API::MatrixWorkspace_sptr;
   using Kernel::PropertyManager_sptr;
 
-  MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
-  PropertyManager_sptr environArgs = getProperty("Environment");
-  PropertyManager_sptr geometryArgs = getProperty("Geometry");
-  PropertyManager_sptr materialArgs = getProperty("Material");
+  MatrixWorkspace_sptr workspace = getProperty(PropertyNames::INPUT_WORKSPACE);
+  PropertyManager_sptr environArgs = getProperty(PropertyNames::ENVIRONMENT);
+  PropertyManager_sptr geometryArgs = getProperty(PropertyNames::GEOMETRY);
+  PropertyManager_sptr materialArgs = getProperty(PropertyNames::MATERIAL);
 
   // The order here is important. Se the environment first. If this
   // defines a sample geometry then we can process the Geometry flags
@@ -191,8 +273,8 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   using Geometry::SampleEnvironmentFactory;
   using Kernel::ConfigService;
 
-  const std::string envName = args->getPropertyValue("Name");
-  const std::string canName = args->getPropertyValue("Container");
+  const std::string envName = args->getPropertyValue(SEArgs::NAME);
+  const std::string canName = args->getPropertyValue(SEArgs::CONTAINER);
   // The specifications need to be qualified by the facility and instrument.
   // Check instrument for name and then lookup facility if facility
   // is unknown then set to default facility & instrument.
@@ -295,18 +377,19 @@ std::string
 SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
                                     const Geometry::ReferenceFrame &refFrame) {
   std::string result;
-  if (!args.existsProperty("Shape")) {
+  if (!args.existsProperty(GeometryArgs::SHAPE)) {
     return result;
   }
 
-  const auto shape = args.getPropertyValue("Shape");
-  if (shape == "CSG") {
+  const auto shape = args.getPropertyValue(GeometryArgs::SHAPE);
+  if (shape == ShapeArgs::CSG) {
     result = args.getPropertyValue("Value");
-  } else if (shape == "FlatPlate") {
+  } else if (shape == ShapeArgs::FLAT_PLATE) {
     result = createFlatPlateXML(args, refFrame);
-  } else if (boost::algorithm::ends_with(shape, "Cylinder")) {
+  } else if (boost::algorithm::ends_with(shape, ShapeArgs::CYLINDER)) {
     result = createCylinderLikeXML(
-        args, refFrame, boost::algorithm::starts_with(shape, "Hollow"));
+        args, refFrame,
+        boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
   } else {
     throw std::invalid_argument(
         "Unknown 'Shape' argument provided in "
@@ -337,9 +420,9 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
     v[refFrame.pointingAlongBeam()] = z;
     return v;
   };
-  const double widthInCM = args.getProperty("Width");
-  const double heightInCM = args.getProperty("Height");
-  const double thickInCM = args.getProperty("Thick");
+  const double widthInCM = args.getProperty(ShapeArgs::WIDTH);
+  const double heightInCM = args.getProperty(ShapeArgs::HEIGHT);
+  const double thickInCM = args.getProperty(ShapeArgs::THICK);
   // Convert to half-"width" in metres
   const double szX = (widthInCM * 5e-3);
   const double szY = (heightInCM * 5e-3);
@@ -362,7 +445,7 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
     lbb.rotate(rotation);
     rfb.rotate(rotation);
   }
-  std::vector<double> center = args.getProperty("Center");
+  std::vector<double> center = args.getProperty(ShapeArgs::CENTER);
   const V3D centrePos(center[0] * 0.01, center[1] * 0.01, center[2] * 0.01);
   // translate to true center after rotation
   lfb += centrePos;
@@ -396,11 +479,11 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
                                  const Geometry::ReferenceFrame &refFrame,
                                  bool hollow) const {
   const std::string tag = hollow ? "hollow-cylinder" : "cylinder";
-  double height = args.getProperty("Height");
-  double innerRadius = hollow ? args.getProperty("InnerRadius") : 0.0;
-  double outerRadius =
-      hollow ? args.getProperty("OuterRadius") : args.getProperty("Radius");
-  std::vector<double> centre = args.getProperty("Center");
+  double height = args.getProperty(ShapeArgs::HEIGHT);
+  double innerRadius = hollow ? args.getProperty(ShapeArgs::INNER_RADIUS) : 0.0;
+  double outerRadius = hollow ? args.getProperty(ShapeArgs::OUTER_RADIUS)
+                              : args.getProperty("Radius");
+  std::vector<double> centre = args.getProperty(ShapeArgs::CENTER);
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;
@@ -436,7 +519,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
 void SetSample::runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
                                   const std::string &xml) {
   auto alg = createChildAlgorithm("CreateSampleShape");
-  alg->setProperty("InputWorkspace", workspace);
+  alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
   alg->setProperty("ShapeXML", xml);
   alg->executeAsChildAlg();
 }
@@ -452,7 +535,7 @@ void SetSample::runChildAlgorithm(const std::string &name,
                                   API::MatrixWorkspace_sptr &workspace,
                                   const Kernel::PropertyManager &args) {
   auto alg = createChildAlgorithm(name);
-  alg->setProperty("InputWorkspace", workspace);
+  alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
   alg->updatePropertyValues(args);
   alg->executeAsChildAlg();
 }

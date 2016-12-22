@@ -92,8 +92,7 @@ public:
     sampleShape->setID("mysample");
     inputWS->mutableSample().setShape(*sampleShape);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     alg->setProperty("Material", createMaterialProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -116,8 +115,7 @@ public:
     sampleShape->setMaterial(alum);
     inputWS->mutableSample().setShape(*sampleShape);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     alg->setProperty("Geometry", createGenericGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -144,8 +142,7 @@ public:
     auto &config = ConfigService::Instance();
     const auto defaultDirs = config.getString("instrumentDefinition.directory");
     config.setString("instrumentDefinition.directory", m_testRoot);
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     alg->setProperty("Environment", createEnvironmentProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -176,8 +173,7 @@ public:
     auto &config = ConfigService::Instance();
     const auto defaultDirs = config.getString("instrumentDefinition.directory");
     config.setString("instrumentDefinition.directory", m_testRoot);
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     alg->setProperty("Environment", createEnvironmentProps());
     alg->setProperty("Geometry", createOverrideGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -204,8 +200,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     setTestReferenceFrame(inputWS);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     alg->setProperty("Geometry", createFlatPlateGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -228,8 +223,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     setTestReferenceFrame(inputWS);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     const double angle(45.0);
     alg->setProperty("Geometry", createFlatPlateGeometryProps(angle));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -256,8 +250,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     setTestReferenceFrame(inputWS);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     alg->setProperty("Geometry", createCylinderGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -279,8 +272,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     setTestReferenceFrame(inputWS);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
     alg->setProperty("Geometry", createHollowCylinderGeometryProps());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -303,8 +295,7 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
 
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
@@ -318,8 +309,7 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
 
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
@@ -333,8 +323,7 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
-    auto alg = createAlgorithm();
-    alg->setProperty("InputWorkspace", inputWS);
+    auto alg = createAlgorithm(inputWS);
 
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
@@ -348,16 +337,93 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
+  void test_Negative_FlatPlate_Dimensions_Give_Validation_Errors() {
+    using Mantid::API::IAlgorithm;
+    using Mantid::Kernel::PropertyManager;
+    using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+
+    auto alg = createAlgorithm();
+    auto args = boost::make_shared<PropertyManager>();
+    args->declareProperty(
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    std::array<const std::string, 3> dimensions = {"Width", "Height", "Thick"};
+    const std::string geometryProp("Geometry");
+    for (const auto &dim : dimensions) {
+      args->declareProperty(
+          Mantid::Kernel::make_unique<DoubleProperty>(dim, -1.0), "");
+      alg->setProperty(geometryProp, args);
+      TS_ASSERT(validateErrorProduced(*alg, geometryProp));
+      args->removeProperty(dim);
+    }
+  }
+
+  void test_Negative_Cylinder_Dimensions_Give_Validation_Errors() {
+    using Mantid::Kernel::PropertyManager;
+    using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+
+    auto alg = createAlgorithm();
+    auto args = boost::make_shared<PropertyManager>();
+    args->declareProperty(
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    std::array<const std::string, 2> dimensions = {"Radius", "Height"};
+    const std::string geometryProp("Geometry");
+    for (const auto &dim : dimensions) {
+      args->declareProperty(
+          Mantid::Kernel::make_unique<DoubleProperty>(dim, -1.0), "");
+      alg->setProperty(geometryProp, args);
+      TS_ASSERT(validateErrorProduced(*alg, geometryProp));
+      args->removeProperty(dim);
+    }
+  }
+
+  void test_Negative_HollowCylinder_Dimensions_Give_Validation_Errors() {
+    using Mantid::API::IAlgorithm;
+    using Mantid::Kernel::PropertyManager;
+    using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+
+    auto alg = createAlgorithm();
+    auto args = boost::make_shared<PropertyManager>();
+    args->declareProperty(
+        Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
+    std::array<const std::string, 3> dimensions = {"InnerRadius", "OuterRadius",
+                                                   "Height"};
+    const std::string geometryProp("Geometry");
+    for (const auto &dim : dimensions) {
+      args->declareProperty(
+          Mantid::Kernel::make_unique<DoubleProperty>(dim, -1.0), "");
+      alg->setProperty(geometryProp, args);
+      TS_ASSERT(validateErrorProduced(*alg, geometryProp));
+      args->removeProperty(dim);
+    }
+  }
+
   //----------------------------------------------------------------------------
   // Non-test methods
   //----------------------------------------------------------------------------
 private:
-  Mantid::API::IAlgorithm_uptr createAlgorithm() {
+  Mantid::API::IAlgorithm_uptr
+  createAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS =
+                      Mantid::API::MatrixWorkspace_sptr()) {
     auto alg = Mantid::Kernel::make_unique<SetSample>();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
+    if (inputWS) {
+      alg->setProperty("InputWorkspace", inputWS);
+    }
     return std::move(alg);
+  }
+
+  bool validateErrorProduced(Mantid::API::IAlgorithm &alg,
+                             const std::string &name) {
+    const auto errors = alg.validateInputs();
+    if (errors.find(name) != errors.end())
+      return true;
+    else
+      return false;
   }
 
   void setTestReferenceFrame(Mantid::API::MatrixWorkspace_sptr workspace) {
