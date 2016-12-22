@@ -150,7 +150,7 @@ struct RangePoint {
   double value;
   /// Comparison of two points.
   /// @param point :: Another point to compare with.
-  bool operator<(const RangePoint &point) {
+  bool operator<(const RangePoint &point) const {
     if (this->value == point.value) {
       // If an Openning and Closing points have the same value
       // the Openning one should go first (be "smaller").
