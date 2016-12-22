@@ -31,7 +31,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Focussed diffraction workspace to be exported to GSAS file. ")
 
-        self.declareProperty(FileProperty("BinFilename","", FileAction.Load, ['.dat']),
+        self.declareProperty(FileProperty("BinFilename", "", FileAction.Load, ['.dat']),
                              "Name of a data file containing the bin boundaries in Log(TOF). ")
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
@@ -64,23 +64,28 @@ class SaveVulcanGSS(PythonAlgorithm):
         if inputws.isHistogramData() is False:
             raise NotImplementedError("InputWorkspace must be histogram, but not point data.")
 
-        # Load reference bin file
-        vec_refT = self._loadRefLogBinFile(logtoffilename)
+        # rebin the input workspace if TOF binning file is given
+        if len(logtoffilename) > 0:
+            # Load reference bin file
+            vec_refT = self._loadRefLogBinFile(logtoffilename)
 
-        # Rebin
-        gsaws = self._rebinVdrive(inputws, vec_refT, outputwsname)
+            # Rebin
+            gsa_ws = self._rebinVdrive(inputws, vec_refT, outputwsname)
+        else:
+            # no binning file is specified. do nothing
+            gsa_ws = inputws
 
         # Generate GSAS file
-        outputws = self._saveGSAS(gsaws, outgssfilename)
+        output_ws = self._saveGSAS(gsa_ws, outgssfilename)
 
         # Convert header and bank information
         ipts = self.getPropertyValue("IPTS")
-        parmfname = self.getPropertyValue("GSSParmFileName")
-        newheader = self._genVulcanGSSHeader(outputws, outgssfilename, ipts, parmfname)
-        self._rewriteGSSFile(outgssfilename, newheader)
+        parm_file_name = self.getPropertyValue("GSSParmFileName")
+        new_header = self._generate_vulcan_gda_header(output_ws, outgssfilename, ipts, parm_file_name)
+        self._rewrite_gda_file(outgssfilename, new_header)
 
         # Set property
-        self.setProperty("OutputWorkspace", outputws)
+        self.setProperty("OutputWorkspace", output_ws)
 
         return
 
@@ -125,6 +130,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         # Create a complicated bin parameter
         params = []
+        dx = None
         for ibin in range(len(vec_refT)-1):
             x0 = vec_refT[ibin]
             xf = vec_refT[ibin+1]
@@ -133,6 +139,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             params.append(dx)
 
         # last bin
+        assert dx is not None, 'Vector of refT has less than 2 values.  It is not supported.'
         x0 = vec_refT[-1]
         xf = 2*dx + x0
         params.extend([x0, 2*dx, xf])
@@ -173,8 +180,12 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return gsaws
 
-    def _rewriteGSSFile(self, gssfilename, newheader):
-        """ Re-write GSAS file including header and header for each bank
+    def _rewrite_gda_file(self, gssfilename, newheader):
+        """
+        Re-write GSAS file including header and header for each bank
+        :param gssfilename:
+        :param newheader:
+        :return:
         """
         # Get all lines
         gfile = open(gssfilename, "r")
@@ -223,7 +234,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return
 
-    def _genVulcanGSSHeader(self, ws, gssfilename, ipts, parmfname):
+    def _generate_vulcan_gda_header(self, ws, gssfilename, ipts, parmfname):
         """
         """
         from datetime import datetime
@@ -255,7 +266,7 @@ class SaveVulcanGSS(PythonAlgorithm):
                 total_nanosecond_start =  int(delta.total_seconds()*int(1.0E9)) + int(runstart_ns)
             except AttributeError:
                 total_seconds = delta.days*24*3600 + delta.seconds
-                total_nanosecond_start = total_seconds * int(1.0E9)  + int(runstart_ns)
+                total_nanosecond_start = total_seconds * int(1.0E9) + int(runstart_ns)
             total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
         else:
             # not both property is found
@@ -269,21 +280,21 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         if len(title) > 80:
             title = title[0:80]
-        newheader += "%-80s\n" % (title)
+        newheader += "%-80s\n" % title
 
-        newheader += "%-80s\n" % ( "Instrument parameter file: %s" %(parmfname) )
+        newheader += "%-80s\n" % ("Instrument parameter file: %s" % parmfname)
 
-        newheader += "%-80s\n" % ( "#IPTS: %s" % (str(ipts)) )
+        newheader += "%-80s\n" % ("#IPTS: %s" % str(ipts))
 
-        newheader += "%-80s\n" % ( "#binned by: Mantid" )
+        newheader += "%-80s\n" % "#binned by: Mantid"
 
-        newheader += "%-80s\n" % ( "#GSAS file name: %s" % (os.path.basename(gssfilename)) )
+        newheader += "%-80s\n" % ("#GSAS file name: %s" % os.path.basename(gssfilename))
 
-        newheader += "%-80s\n" % ( "#GSAS IPARM file: %s" % (parmfname) )
+        newheader += "%-80s\n" % ("#GSAS IPARM file: %s" % parmfname)
 
-        newheader += "%-80s\n" % ( "#Pulsestart:    %d" % (total_nanosecond_start) )
+        newheader += "%-80s\n" % ("#Pulsestart:    %d" % total_nanosecond_start)
 
-        newheader += "%-80s\n" % ( "#Pulsestop:     %d" % (total_nanosecond_stop) )
+        newheader += "%-80s\n" % ("#Pulsestop:     %d" % total_nanosecond_stop)
 
         return newheader
 
