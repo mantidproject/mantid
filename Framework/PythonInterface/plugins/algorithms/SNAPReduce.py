@@ -226,22 +226,25 @@ class SNAPReduce(DataProcessorAlgorithm):
     def _getMaskWSname(self):
         masking = self.getProperty("Masking").value
         maskWSname = None
-        if masking == 'Custom - xml masking file':
-            maskWSname = 'CustomMask'
-            LoadMask(InputFile=self.getProperty('MaskingFilename').value,
-                     Instrument='SNAP', OutputWorkspace=maskWSname)
-        elif masking == 'Horizontal':
-            maskWSname = 'HorizontalMask'
-            if not mtd.doesExist('HorizontalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Horizontal_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace=maskWSname)
-        elif masking == 'Vertical':
-            maskWSname = 'VerticalMask'
-            if not mtd.doesExist('VerticalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Vertical_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace=maskWSname)
+        maskFile = None
+
+        # none and workspace are special
+        if masking == 'None':
+            pass
         elif masking == "Masking Workspace":
             maskWSname = str(self.getProperty("MaskingWorkspace").value)
+
+        # deal with files
+        elif masking == 'Custom - xml masking file':
+            maskWSname = 'CustomMask'
+            maskFile = self.getProperty('MaskingFilename').value
+        elif masking == 'Horizontal' or masking == 'Vertical':
+            maskWSname = masking + 'Mask' # append the work 'Mask' for the wksp name
+            if not mtd.doesExist(maskWSname): # only load if it isn't already loaded
+                maskFile = '/SNS/SNAP/shared/libs/%s_Mask.xml' % masking
+
+        if maskFile is not None:
+            LoadMask(InputFile=maskFile, Instrument='SNAP', OutputWorkspace=maskWSname)
 
         return maskWSname
 
