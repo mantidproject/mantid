@@ -20,7 +20,7 @@ If *ReferenceWorkspace* is set, this algorithm copies the X axis as well as the 
 Calculating new TOF axis
 ########################
 
-If no *ReferenceWorkspace* is given, the algorithm takes the L1 distance :math:`l_1` from the instrument attached to *InputWorkspace* and calculates the average L2 distance :math:`l_2` using the histograms specified by *ReferenceSpectra*. The algorithm also needs to know the TOF :math:`t_{elastic}` corresponding to the zero-energy transfer. This is either taken from the first spectrum in *InputWorkspace* as the bin centre of the bin specified by *ElasticBinIndex*, or calculated from the elastic peak positions given in *EPPTable*. *EPPTable* should be in the format returned by the :ref:`algm-FindEPP` algorithm. In this case the algorithm averages the `PeakCentre` column for histograms listed in *ReferenceSpectra*. Finally, the algorithm needs the incident energy :math:`E_i` which can be either specified by *IncidentEnergy* or is taken from the sample logs of *InputWorkspace*. In case *IncidentEnergy* is specified, the 'Ei' and 'wavelength' sample logs of *OutputWorkspace* are updated accordingly.
+If no *ReferenceWorkspace* is given, the algorithm takes the L1 distance :math:`l_1` from the instrument attached to *InputWorkspace* and calculates the average L2 distance :math:`l_2` using the histograms specified by *ReferenceSpectra*. The algorithm also needs to know the TOF :math:`t_{elastic}` corresponding to the zero-energy transfer. This is either taken from the first spectrum in *InputWorkspace* as the bin centre of the bin specified by *ElasticBinIndex*, or calculated from the elastic peak positions given in *EPPTable*. *EPPTable* should be in the format returned by the :ref:`algm-FindEPP` algorithm. In this case the algorithm averages the `PeakCentre` column for histograms listed in *ReferenceSpectra*. Finally, the algorithm needs the incident energy :math:`E_i` which can be either specified by *EFixed* or is taken from the sample logs of *InputWorkspace*. In case *EFixed* is specified, the 'Ei' and 'wavelength' sample logs of *OutputWorkspace* are updated accordingly.
 
 The TOF shift :math:`\Delta t` is calculated by
 
@@ -74,7 +74,7 @@ Usage
         IndexType='Workspace Index',
         ReferenceSpectra='0',
         ElasticBinIndex=elasticBinIndex,
-        IncidentEnergy=Ei)
+        EFixed=Ei)
     
     # Convert TOF to energy transfer.
     convertedWs = ConvertUnits(correctedWs,
@@ -134,7 +134,7 @@ Output:
         EPPTable=EPPTable,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
-        IncidentEnergy=Ei)
+        EFixed=Ei)
     
     # Check results.
     print('Original TOF for the elastic peak: {0:0.1f}'.format(
@@ -203,7 +203,7 @@ Output:
         EPPTable=EPPTable,
         IndexType='Workspace Index',
         ReferenceSpectra='0',
-        IncidentEnergy=Ei)
+        EFixed=Ei)
     
     # Correct the second workspace by using the first as a reference.
     correctedWs2 = CorrectTOFAxis(ws2,

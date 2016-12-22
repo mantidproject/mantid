@@ -88,7 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("IncidentEnergy", actualEi))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -121,7 +121,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("IncidentEnergy", actualEi))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 

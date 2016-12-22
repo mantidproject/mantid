@@ -54,7 +54,7 @@ const static std::string WORKSPACE_INDEX("Workspace Index");
 namespace PropertyNames {
 const static std::string ELASTIC_BIN_INDEX("ElasticBinIndex");
 const static std::string EPP_TABLE("EPPTable");
-const static std::string INCIDENT_ENERGY("IncidentEnergy");
+const static std::string FIXED_ENERGY("EFixed");
 const static std::string INDEX_TYPE("IndexType");
 const static std::string INPUT_WORKSPACE("InputWorkspace");
 const static std::string OUTPUT_WORKSPACE("OutputWorkspace");
@@ -197,9 +197,9 @@ void CorrectTOFAxis::init() {
   declareProperty(
       PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt,
       "Bin index of the nominal elastic TOF channel.", Direction::Input);
-  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(),
+  declareProperty(PropertyNames::FIXED_ENERGY, EMPTY_DBL(),
                   mustBePositiveDouble,
-                  "Incident energy if EI sample log is not present/incorrect.",
+                  "Incident energy if the 'EI' sample log is not present/incorrect.",
                   Direction::Input);
 }
 
@@ -296,7 +296,7 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
     }
   }
 
-  if (getPointerToProperty(PropertyNames::INCIDENT_ENERGY)->isDefault()) {
+  if (getPointerToProperty(PropertyNames::FIXED_ENERGY)->isDefault()) {
     if (!m_inputWs->run().hasProperty(SampleLog::INCIDENT_ENERGY)) {
       issues[PropertyNames::INPUT_WORKSPACE] =
           "'Ei' is missing from the sample logs.";
@@ -372,7 +372,7 @@ void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
     epp = m_inputWs->points(0)[m_elasticBinIndex];
     l2 = averageL2(spectrumInfo);
   }
-  double Ei = getProperty(PropertyNames::INCIDENT_ENERGY);
+  double Ei = getProperty(PropertyNames::FIXED_ENERGY);
   if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
   } else {
