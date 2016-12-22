@@ -4,7 +4,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidVatesAPI/vtkMDHWSignalArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
