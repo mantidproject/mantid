@@ -10,11 +10,13 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 set ( EXPORT_FILES
   src/Exports/EventList.cpp
   src/Exports/EventWorkspace.cpp
+  src/Exports/EventWorkspaceProperty.cpp
   src/Exports/Workspace2D.cpp
   src/Exports/RebinnedOutput.cpp
   src/Exports/SpecialWorkspace2D.cpp
   src/Exports/GroupingWorkspace.cpp
   src/Exports/MaskWorkspace.cpp
+  src/Exports/MaskWorkspaceProperty.cpp
   src/Exports/OffsetsWorkspace.cpp
   src/Exports/MDEventWorkspace.cpp
   src/Exports/MDHistoWorkspace.cpp
