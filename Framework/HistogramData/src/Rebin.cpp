@@ -52,9 +52,8 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
       auto delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
 
-      auto factor = 1 / owidth;
-      ynew[inew] += yold[iold] * delta * factor;
-      enew[inew] += eold[iold] * eold[iold] * delta * factor;
+      ynew[inew] += yold[iold] * delta / owidth;
+      enew[inew] += eold[iold] * eold[iold] * delta / owidth;
 
       if (xn_high > xo_high) {
         iold++;

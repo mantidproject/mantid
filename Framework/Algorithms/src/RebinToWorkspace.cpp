@@ -62,6 +62,7 @@ void RebinToWorkspace::exec() {
   runRebin->setPropertyValue("OutputWorkspace", "rebin_out");
   runRebin->setProperty("params", rb_params);
   runRebin->setProperty("PreserveEvents", PreserveEvents);
+  runRebin->setProperty("IgnoreBinErrors", true);
   runRebin->executeAsChildAlg();
   progress(1);
   MatrixWorkspace_sptr ws = runRebin->getProperty("OutputWorkspace");
