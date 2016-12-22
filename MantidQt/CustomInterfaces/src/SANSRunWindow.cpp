@@ -4443,13 +4443,17 @@ bool SANSRunWindow::areSettingsValid(States type) {
   QString message;
   // ------------ GUI INPUT CHECKS ------------
 
-  // We currently do not allow a 2D reduction with a merged flag
+  // We currently do not allow a 2D reduction with a merged flag and fitting
+  // because we can only fit 1D functions
   auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
-  if (type == States::TwoD && isMergedReduction) {
+  auto hasFitEnabled = m_uiForm.frontDetShiftCB->isChecked() ||
+                       m_uiForm.frontDetRescaleCB->isChecked();
+  if (type == States::TwoD && isMergedReduction && hasFitEnabled) {
     isValid = false;
     message +=
-        "A merged Detector Bank selection is currently not supported for 2D "
-        "reductions.\n";
+        "A merged reduction with fitting is currently not supported for 2D "
+        "reductions. You can run a merged reduction wihthout fitting enabled"
+        " for 2D reductions.\n";
   }
 
   // R_MAX -- can be only >0 or -1
