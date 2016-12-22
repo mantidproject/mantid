@@ -30,6 +30,7 @@
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtAPI/QwtScaleDrawNonOrthogonal.h"
 #include "MantidQtAPI/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
@@ -689,9 +690,13 @@ void SliceViewer::updateDimensionSliceWidgets() {
 
 //------------------------------------------
 void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
+  m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
+
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
     m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    applyNonOrthogonalAxisScaleDraw();
   } else {
+    applyOrthogonalAxisScaleDraw();
     m_data = Kernel::make_unique<API::QwtRasterDataMD>();
   }
 
@@ -2417,13 +2422,13 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
 }
 
 void SliceViewer::disableAxisForNonorthogonal(bool disable, int axesPosition) {
-  m_plot->axisScaleDraw(axesPosition)
-      ->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Labels, !disable);
-  m_plot->axisScaleDraw(axesPosition)
-      ->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Ticks, !disable);
-  m_plot->axisScaleDraw(axesPosition)
-      ->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Backbone,
-                        !disable);
+//  m_plot->axisScaleDraw(axesPosition)
+//      ->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Labels, !disable);
+//  m_plot->axisScaleDraw(axesPosition)
+//      ->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Ticks, !disable);
+//  m_plot->axisScaleDraw(axesPosition)
+//      ->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Backbone,
+//                        !disable);
 }
 /**
 * Convenience function for removing all displayed peaks workspaces.
@@ -2886,6 +2891,24 @@ std::string SliceViewer::saveDimensionWidgets() const {
 
   return tsv.outputLines();
 }
+
+/// Apply the non orthogonal axis scale draw
+void SliceViewer::applyNonOrthogonalAxisScaleDraw() {
+  auto* axis0 = new QwtScaleDrawNonOrthogonal(m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::X, m_ws, m_dimX, m_dimY, m_slicePoint);
+  auto* axis1 = new QwtScaleDrawNonOrthogonal(m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::Y, m_ws, m_dimX, m_dimY, m_slicePoint);
+  m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
+  m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+
+}
+
+/// Apply the orthogonal axis scale draw
+void SliceViewer::applyOrthogonalAxisScaleDraw() {
+  auto* axis0 = new QwtScaleDraw();
+  auto* axis1 = new QwtScaleDraw();
+  m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
+  m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+}
+
 
 } // namespace
 }

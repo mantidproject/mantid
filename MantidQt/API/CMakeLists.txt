@@ -35,6 +35,7 @@
 	src/PythonThreading.cpp
         src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
+        src/QwtScaleDrawNonOrthogonal.cpp
         src/QwtRasterDataMD.cpp
         src/QwtRasterDataMDNonOrthogonal.cpp
 	src/QwtWorkspaceBinData.cpp
@@ -115,6 +116,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/PythonSystemHeader.h
 	inc/MantidQtAPI/PythonThreading.h
         inc/MantidQtAPI/QScienceSpinBox.h
+        inc/MantidQtAPI/QwtScaleDrawNonOrthogonal.h
         inc/MantidQtAPI/QwtRasterDataMD.h
         inc/MantidQtAPI/QwtRasterDataMDNonOrthogonal.h
         inc/MantidQtAPI/QwtWorkspaceBinData.h

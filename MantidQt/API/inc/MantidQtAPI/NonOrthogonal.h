@@ -37,9 +37,9 @@ transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
 
 template <typename T>
 void transformLookpointToWorkspaceCoordGeneric(T &lookPoint,
-                                               Mantid::coord_t skewMatrix[9],
-                                               size_t &dimX, size_t &dimY,
-                                               size_t &dimSlice) {
+                                               const Mantid::coord_t skewMatrix[9],
+                                               const size_t &dimX, const size_t &dimY,
+                                               const size_t &dimSlice) {
   auto sliceDimResult =
       (lookPoint[dimSlice] - skewMatrix[3 * dimSlice + dimX] * lookPoint[dimX] -
        skewMatrix[3 * dimSlice + dimY] * lookPoint[dimY]) /
