@@ -151,10 +151,7 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       [](const PropertyManager &pm, const std::string &name) {
         if (pm.existsProperty(name)) {
           const auto value = pm.getPropertyValue(name);
-          if (value.empty())
-            return false;
-          else
-            return true;
+          return !value.empty();
         }
         return false;
       };
@@ -185,7 +182,7 @@ std::map<std::string, std::string> SetSample::validateInputs() {
     }
   }
 
-  //  // Validate as much of the shape information as possible
+  // Validate as much of the shape information as possible
   const PropertyManager_const_sptr geomArgs =
       getProperty(PropertyNames::GEOMETRY);
   if (geomArgs) {
