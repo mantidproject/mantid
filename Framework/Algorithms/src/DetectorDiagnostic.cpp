@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
@@ -522,12 +523,11 @@ DataObjects::MaskWorkspace_sptr
 DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
   // Create a new workspace for the results, copy from the input to ensure that
   // we copy over the instrument and current masking
-  auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>();
-  maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, maskWS, false);
+  auto maskWS =
+      create<DataObjects::MaskWorkspace>(*inputWS, HistogramData::Points(1));
   maskWS->setTitle(inputWS->getTitle());
 
-  return maskWS;
+  return std::move(maskWS);
 }
 
 std::vector<std::vector<size_t>>

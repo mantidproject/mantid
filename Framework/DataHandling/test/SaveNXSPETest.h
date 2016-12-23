@@ -153,13 +153,6 @@ private:
             dummy, dummy, dummy);
     inputWS->setInstrument(testInst);
 
-    // Associate detectors with the workspace
-    for (size_t j = 0; j < inputWS->getNumberHistograms(); ++j) {
-      // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j)
-          .setSpectrumNo(static_cast<Mantid::specnum_t>(j + 1));
-    }
-
     // mask the detector
     inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 

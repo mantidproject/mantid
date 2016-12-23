@@ -30,7 +30,8 @@
 #include "vtkVariant.h"
 #include "vtkVariantCast.h"
 
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidVatesAPI/Normalization.h"
 
 namespace Mantid {
 namespace VATES {
@@ -46,9 +47,8 @@ public:
   // clang-format on
   void PrintSelf(ostream &os, vtkIndent indent) override;
 
-  void InitializeArray(
-      std::unique_ptr<Mantid::DataObjects::MDHistoWorkspaceIterator> iterator,
-      std::size_t offset, vtkIdType size);
+  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *ws,
+                       VisualNormalization normalization, std::size_t offset);
 
   // Reimplemented virtuals -- see superclasses for descriptions:
   void Initialize() override;
@@ -116,7 +116,8 @@ private:
   void operator=(const vtkMDHWSignalArray &);     // Not implemented.
 
   std::size_t m_offset;
-  std::unique_ptr<Mantid::DataObjects::MDHistoWorkspaceIterator> m_iterator;
+  API::MDNormalization m_normalization;
+  DataObjects::MDHistoWorkspace *m_ws;
   Scalar m_temporaryTuple[1];
 };
 
@@ -138,13 +139,25 @@ void vtkMDHWSignalArray<Scalar>::PrintSelf(ostream &os, vtkIndent indent) {
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::InitializeArray(
-    std::unique_ptr<Mantid::DataObjects::MDHistoWorkspaceIterator> iterator,
-    std::size_t offset, vtkIdType size) {
-  this->MaxId = size - 1;
-  this->Size = size;
+    Mantid::DataObjects::MDHistoWorkspace *ws,
+    Mantid::VATES::VisualNormalization normalization, std::size_t offset) {
   this->NumberOfComponents = 1;
-  this->m_iterator = std::move(iterator);
+  this->m_ws = ws;
   this->m_offset = offset;
+
+  const auto nBinsX = m_ws->getXDimension()->getNBins();
+  const auto nBinsY = m_ws->getYDimension()->getNBins();
+  const auto nBinsZ = m_ws->getZDimension()->getNBins();
+  this->Size = nBinsX * nBinsY * nBinsZ;
+  this->MaxId = this->Size - 1;
+
+  if (normalization == AutoSelect) {
+    // enum to enum.
+    m_normalization =
+        static_cast<API::MDNormalization>(m_ws->displayNormalization());
+  } else {
+    m_normalization = static_cast<API::MDNormalization>(normalization);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -247,16 +260,14 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::ClearLookup() {
 //------------------------------------------------------------------------------
 template <class Scalar>
 double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
-  m_iterator->jumpTo(m_offset + i);
-  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
+  m_temporaryTuple[0] = this->GetValue(i);
   return &m_temporaryTuple[0];
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i, double *tuple) {
-  m_iterator->jumpTo(m_offset + i);
-  tuple[0] = m_iterator->getNormalizedSignal();
+  tuple[0] = this->GetValue(i);
 }
 
 //------------------------------------------------------------------------------
@@ -292,14 +303,22 @@ vtkIdType vtkMDHWSignalArray<Scalar>::Lookup(const Scalar &val,
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) const {
-  m_iterator->jumpTo(m_offset + idx);
-  return m_iterator->getNormalizedSignal();
+  auto pos = m_offset + idx;
+  switch (m_normalization) {
+  case API::NoNormalization:
+    return m_ws->getSignalAt(pos);
+  case API::VolumeNormalization:
+    return m_ws->getSignalAt(pos) * m_ws->getInverseVolume();
+  case API::NumEventsNormalization:
+    return m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
+  }
+  // Should not reach here
+  return std::numeric_limits<signal_t>::quiet_NaN();
 }
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
-  m_iterator->jumpTo(m_offset + idx);
-  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
+  m_temporaryTuple[0] = this->GetValue(idx);
   return m_temporaryTuple[0];
 }
 
@@ -307,8 +326,7 @@ Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTypedTuple(vtkIdType tupleId,
                                                Scalar *tuple) const {
-  m_iterator->jumpTo(m_offset + tupleId);
-  tuple[0] = m_iterator->getNormalizedSignal();
+  tuple[0] = this->GetValue(tupleId);
 }
 
 //------------------------------------------------------------------------------

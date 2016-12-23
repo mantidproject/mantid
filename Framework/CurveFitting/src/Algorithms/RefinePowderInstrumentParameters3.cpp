@@ -276,7 +276,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
 
     // If empty string, fit is default to be false
     bool fit = false;
-    if (fitq.size() > 0) {
+    if (!fitq.empty()) {
       if (fitq[0] == 'F' || fitq[0] == 'f')
         fit = true;
     }

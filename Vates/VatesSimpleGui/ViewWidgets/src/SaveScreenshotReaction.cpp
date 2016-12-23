@@ -81,7 +81,7 @@ void SaveScreenshotReaction::saveScreenshot() {
   filters += ";;PPM image (*.ppm)";
   filters += ";;JPG image (*.jpg)";
   filters += ";;PDF file (*.pdf)";
-  pqFileDialog file_dialog(NULL, pqCoreUtilities::mainWidget(),
+  pqFileDialog file_dialog(nullptr, pqCoreUtilities::mainWidget(),
                            tr("Save Screenshot:"), QString(), filters);
   file_dialog.setRecentlyUsedExtension(lastUsedExt);
   file_dialog.setObjectName("FileSaveScreenshotDialog");
@@ -141,7 +141,7 @@ void SaveScreenshotReaction::saveScreenshot(const QString &filename,
     img.TakeReference(view->captureImage(size));
   }
 
-  if (img.GetPointer() == NULL) {
+  if (!img.GetPointer()) {
     qCritical() << "Save Image failed.";
   } else {
     pqImageUtil::saveImage(img, filename, quality);

@@ -112,7 +112,7 @@ void GroupDetectors2::exec() {
   const size_t numInHists = inputWS->getNumberHistograms();
   // Bin boundaries need to be the same, so do the full check on whether they
   // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error()
         << "Can only group if the histograms have common bin boundaries\n";
     throw std::invalid_argument(
@@ -219,7 +219,7 @@ void GroupDetectors2::execEvent() {
           "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
           inputWS->x(0).size(), inputWS->blocksize()));
   // Copy geometry over.
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, true);
 
   // prepare to move the requested histograms into groups, first estimate how
   // long for progress reporting. +1 in the demonator gets rid of any divide by
