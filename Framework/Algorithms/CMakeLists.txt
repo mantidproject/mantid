@@ -376,7 +376,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CorelliCrossCorrelate.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
-        inc/MantidAlgorithms/CorrectTOFAxis.h
+	inc/MantidAlgorithms/CorrectTOFAxis.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
@@ -697,7 +697,7 @@ set ( TEST_FILES
 	CopySampleTest.h
 	CorelliCrossCorrelateTest.h
 	CorrectKiKfTest.h
-        CorrectTOFAxisTest.h
+	CorrectTOFAxisTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
