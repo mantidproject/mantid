@@ -191,9 +191,9 @@ std::map<std::string, std::string> SetSample::validateInputs() {
   if (geomArgs) {
     if (existsAndNotEmptyString(*geomArgs, GeometryArgs::SHAPE)) {
       const std::array<const std::string *, 6> positiveValues = {
-          &ShapeArgs::HEIGHT,       &ShapeArgs::WIDTH,
-          &ShapeArgs::THICK,        &ShapeArgs::RADIUS,
-          &ShapeArgs::INNER_RADIUS, &ShapeArgs::OUTER_RADIUS};
+          {&ShapeArgs::HEIGHT, &ShapeArgs::WIDTH, &ShapeArgs::THICK,
+           &ShapeArgs::RADIUS, &ShapeArgs::INNER_RADIUS,
+           &ShapeArgs::OUTER_RADIUS}};
       for (const auto &arg : positiveValues) {
         if (existsAndNegative(*geomArgs, *arg)) {
           errors[PropertyNames::GEOMETRY] = *arg + " argument < 0.0";

@@ -347,7 +347,8 @@ public:
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
-    std::array<const std::string, 3> dimensions = {"Width", "Height", "Thick"};
+    std::array<const std::string, 3> dimensions = {
+        {"Width", "Height", "Thick"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
       args->declareProperty(
@@ -367,7 +368,7 @@ public:
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Shape", "Cylinder"), "");
-    std::array<const std::string, 2> dimensions = {"Radius", "Height"};
+    std::array<const std::string, 2> dimensions = {{"Radius", "Height"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
       args->declareProperty(
@@ -388,8 +389,8 @@ public:
     auto args = boost::make_shared<PropertyManager>();
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Shape", "FlatPlate"), "");
-    std::array<const std::string, 3> dimensions = {"InnerRadius", "OuterRadius",
-                                                   "Height"};
+    std::array<const std::string, 3> dimensions = {
+        {"InnerRadius", "OuterRadius", "Height"}};
     const std::string geometryProp("Geometry");
     for (const auto &dim : dimensions) {
       args->declareProperty(
