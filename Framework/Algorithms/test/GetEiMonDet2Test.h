@@ -389,8 +389,12 @@ private:
     const double pulseInterval = std::floor(time_of_flight(velocity(EI)) / 2);
     const double timeAtMonitor = 0.34 * pulseInterval;
     auto peaks = peakCentres(timeAtMonitor, realEi, pulseInterval);
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i != peaks.size(); ++i) {
+      eppRows[i] = EPPTableRow(peaks[i], 1.0, 1.0,
+                               EPPTableRow::FitStatus::SUCCESS);
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     if (pulseIntervalInput == PulseIntervalInputs::AS_SAMLPE_LOG) {
       ws->mutableRun().addProperty("pulse_interval", pulseInterval * 1e-6);
