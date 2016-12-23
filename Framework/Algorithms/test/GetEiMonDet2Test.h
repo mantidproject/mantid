@@ -391,8 +391,8 @@ private:
     auto peaks = peakCentres(timeAtMonitor, realEi, pulseInterval);
     std::vector<EPPTableRow> eppRows(peaks.size());
     for (size_t i = 0; i != peaks.size(); ++i) {
-      eppRows[i] = EPPTableRow(peaks[i], 1.0, 1.0,
-                               EPPTableRow::FitStatus::SUCCESS);
+      eppRows[i] =
+          EPPTableRow(peaks[i], 1.0, 1.0, EPPTableRow::FitStatus::SUCCESS);
     }
     auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
