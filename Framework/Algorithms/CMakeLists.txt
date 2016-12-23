@@ -65,6 +65,7 @@ set ( SRC_FILES
 	src/CopySample.cpp
 	src/CorelliCrossCorrelate.cpp
 	src/CorrectKiKf.cpp
+	src/CorrectTOFAxis.cpp
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
@@ -372,6 +373,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorelliCrossCorrelate.h
 	inc/MantidAlgorithms/CorrectKiKf.h
+	inc/MantidAlgorithms/CorrectTOFAxis.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
@@ -692,6 +694,7 @@ set ( TEST_FILES
 	CopySampleTest.h
 	CorelliCrossCorrelateTest.h
 	CorrectKiKfTest.h
+	CorrectTOFAxisTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
