@@ -2,9 +2,10 @@
 #define VATES_API_SAVE_MD_WORKSPACE_TO_VTK_IMPL_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidVatesAPI/SaveMDWorkspaceToVTK.h"
 
 #include <map>
 #include <vtkSmartPointer.h>
@@ -44,12 +45,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveMDWorkspaceToVTKImpl {
 public:
-  SaveMDWorkspaceToVTKImpl();
+  SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent = nullptr);
   ~SaveMDWorkspaceToVTKImpl() {}
   void saveMDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
                        const std::string &filename,
-                       VisualNormalization normalization,
-                       ThresholdRange_scptr thresholdRange, int recursionDepth,
+                       VisualNormalization normalization, int recursionDepth,
                        const std::string &compressorType) const;
 
   const static std::string structuredGridExtension;
@@ -57,18 +57,13 @@ public:
 
   std::vector<std::string>
   getAllowedNormalizationsInStringRepresentation() const;
-  std::vector<std::string> getAllowedThresholdsInStringRepresentation() const;
   VisualNormalization
   translateStringToVisualNormalization(const std::string normalization) const;
-  ThresholdRange_scptr
-  translateStringToThresholdRange(const std::string thresholdRange) const;
-
   bool is3DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
 
 private:
+  mutable API::Progress m_progress;
   std::map<std::string, VisualNormalization> m_normalizations;
-  std::vector<std::string> m_thresholds;
-
   void setupMembers();
   bool is4DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
   int writeDataSetToVTKFile(vtkXMLWriter *writer, vtkDataSet *dataSet,
@@ -83,7 +78,6 @@ private:
       Mantid::API::IMDWorkspace_sptr workspace, bool isHistoWorkspace) const;
   std::unique_ptr<vtkDataSetFactory>
   getDataSetFactoryChain(bool isHistWorkspace,
-                         ThresholdRange_scptr thresholdRange,
                          VisualNormalization normalization, double time) const;
   std::unique_ptr<MDLoadingPresenter>
   getPresenter(bool isHistoWorkspace, Mantid::API::IMDWorkspace_sptr workspace,

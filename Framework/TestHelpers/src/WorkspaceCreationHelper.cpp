@@ -18,6 +18,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -228,13 +229,9 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     workspace->setInstrument(instrument);
   }
 
-  ParameterMap &pmap = workspace->instrumentParameters();
-  for (int i = 0; i < nhist; ++i) {
-    if (maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end()) {
-      IDetector_const_sptr det = workspace->getDetector(i);
-      pmap.addBool(det.get(), "masked", true);
-    }
-  }
+  auto &spectrumInfo = workspace->mutableSpectrumInfo();
+  for (const auto index : maskedWorkspaceIndices)
+    spectrumInfo.setMasked(index, true);
   return workspace;
 }
 
@@ -514,8 +511,6 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  workspace->setInstrument(instrument);
-
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
@@ -528,6 +523,7 @@ void createInstrumentForWorkspaceWithDistances(
     workspace->getSpectrum(i).clearDetectorIDs();
     workspace->getSpectrum(i).addDetectorID(det->getID());
   }
+  workspace->setInstrument(instrument);
 }
 
 //================================================================================================================

@@ -174,7 +174,7 @@ InstrumentInfo::liveListenerInfo(std::string name) const {
 }
 
 bool InstrumentInfo::hasLiveListenerInfo() const {
-  return m_listeners.size() > 0;
+  return !m_listeners.empty();
 }
 
 const std::vector<LiveListenerInfo> &
@@ -254,7 +254,7 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
     if (pNL->length() > 0) {
       Poco::XML::Text *txt = dynamic_cast<Poco::XML::Text *>(pNL->item(0));
       if (txt) {
-        std::string tech = txt->getData();
+        const std::string &tech = txt->getData();
         if (!tech.empty()) {
           m_technique.insert(tech);
         }

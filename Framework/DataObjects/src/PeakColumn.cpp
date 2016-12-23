@@ -197,6 +197,17 @@ void PeakColumn::read(size_t index, const std::string &text) {
     throw std::runtime_error("Unexpected column " + m_name + " being set.");
 }
 
+/** Read in from stream and convert to a number in the PeaksWorkspace
+ *
+ * @param index :: index of the peak to modify
+ * @param in :: input stream
+ */
+void PeakColumn::read(const size_t index, std::istream &in) {
+  std::string s;
+  in >> s;
+  read(index, s);
+}
+
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
 bool PeakColumn::getReadOnly() const {

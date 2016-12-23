@@ -54,7 +54,7 @@ public:
     TS_ASSERT(algorithm.isInitialized())
   }
 
-  void testSuccessOnMinimumInput() {
+  void testSuccessOnMinimalInput() {
     const double realEi = 0.97 * EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
@@ -115,6 +115,7 @@ public:
     MatrixWorkspace_sptr detectorWs =
         spectrumExtraction.getProperty("OutputWorkspace");
     GetEiMonDet2 algorithm;
+    algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
@@ -122,7 +123,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
     TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("IndexType", "SpectrumNumber"))
+        algorithm.setProperty("IndexType", "Spectrum Number"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "2"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("NominalIncidentEnergy", EI))
     TS_ASSERT_THROWS_NOTHING(
@@ -137,6 +138,14 @@ public:
     TS_ASSERT_DELTA(
         static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
         realEi, 1e-6)
+  }
+
+  void testSuccessOnPulseIntervalInProperties() {
+    runPulseIntervalInputsTest(PulseIntervalInputs::AS_PROPERTY);
+  }
+
+  void testSuccessOnPulseIntervalInSampleLogs() {
+    runPulseIntervalInputsTest(PulseIntervalInputs::AS_SAMLPE_LOG);
   }
 
   void testFailureOnAllDetectorsMasked() {
@@ -157,7 +166,7 @@ public:
     maskDetectors.execute();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
   }
 
@@ -179,7 +188,7 @@ public:
     maskDetectors.execute();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
   }
 
@@ -198,7 +207,7 @@ public:
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
   }
 
@@ -215,7 +224,7 @@ public:
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
   }
 
@@ -230,6 +239,7 @@ public:
     auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
+    algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
@@ -237,7 +247,7 @@ public:
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "1"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
   }
 
@@ -259,7 +269,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("IndexType", "WorkspaceIndex"))
+        algorithm.setProperty("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "-1"))
     const std::string exceptionMessage("Monitor cannot be negative.");
@@ -268,7 +278,7 @@ public:
     TS_ASSERT(!algorithm.isExecuted())
   }
 
-  void testFailuroOnNonexistentDetectorIndex() {
+  void testFailureOnNonexistentDetectorIndex() {
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
@@ -279,6 +289,7 @@ public:
     auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
+    algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
@@ -286,11 +297,11 @@ public:
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "42"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
   }
 
-  void testFailuroOnNonexistentMonitorIndex() {
+  void testFailureOnNonexistentMonitorIndex() {
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
@@ -301,6 +312,7 @@ public:
     auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
+    algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
@@ -308,8 +320,12 @@ public:
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "42"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
+  }
+
+  void testFailureOnPulseIntervalMissing() {
+    runPulseIntervalInputsTest(PulseIntervalInputs::NONE);
   }
 
 private:
@@ -355,6 +371,7 @@ private:
   // Mininum setup for GetEiMonDet2.
   void setupSimple(MatrixWorkspace_sptr ws, ITableWorkspace_sptr eppTable,
                    GetEiMonDet2 &algorithm) {
+    algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
@@ -362,6 +379,47 @@ private:
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
+  }
+
+  enum class PulseIntervalInputs { AS_PROPERTY, AS_SAMLPE_LOG, NONE };
+
+  void
+  runPulseIntervalInputsTest(const PulseIntervalInputs pulseIntervalInput) {
+    const double realEi = 1.18 * EI;
+    const double pulseInterval = std::floor(time_of_flight(velocity(EI)) / 2);
+    const double timeAtMonitor = 0.34 * pulseInterval;
+    auto peaks = peakCentres(timeAtMonitor, realEi, pulseInterval);
+    std::vector<bool> successes(peaks.size(), true);
+    auto eppTable = createEPPTable(peaks, successes);
+    auto ws = createWorkspace();
+    if (pulseIntervalInput == PulseIntervalInputs::AS_SAMLPE_LOG) {
+      ws->mutableRun().addProperty("pulse_interval", pulseInterval * 1e-6);
+    }
+    GetEiMonDet2 algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorEPPTable", eppTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("IndexType", "Spectrum Number"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "2"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Monitor", 1))
+    if (pulseIntervalInput == PulseIntervalInputs::AS_PROPERTY) {
+      TS_ASSERT_THROWS_NOTHING(
+          algorithm.setProperty("PulseInterval", pulseInterval));
+    }
+    if (pulseIntervalInput == PulseIntervalInputs::NONE) {
+      TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
+      TS_ASSERT(!algorithm.isExecuted())
+    } else {
+      TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+      TS_ASSERT(algorithm.isExecuted())
+      TS_ASSERT_DELTA(static_cast<decltype(realEi)>(
+                          algorithm.getProperty("IncidentEnergy")),
+                      realEi, 1e-6)
+    }
   }
 };
 

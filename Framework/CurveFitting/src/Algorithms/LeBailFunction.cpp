@@ -106,7 +106,7 @@ LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
 
   // Reset output elements to zero
   std::vector<double> out(xvalues.size(), 0);
-  auto xvals = xvalues.rawData();
+  const auto &xvals = xvalues.rawData();
 
   // Peaks
   if (calpeaks) {
@@ -799,12 +799,9 @@ void LeBailFunction::groupPeaks(
 
         if (thispeak_rightbound < rightpeak_leftbound) {
           // this peak and its right peak are well separated.
-          // finish this group by a copy
-          vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroupcopy =
-              peakgroup;
-          peakgroupvec.push_back(peakgroupcopy);
-          //  clear for the next group
-          peakgroup.clear();
+          // finish this group by swapping values
+          peakgroupvec.push_back(std::move(peakgroup));
+          peakgroup = {};
         } else {
           // this peak and its right peak are close enough to be in same group.
           // do nothing
@@ -812,9 +809,7 @@ void LeBailFunction::groupPeaks(
         }
       } else {
         // Rightmost peak.  Finish the current peak
-        vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroupcopy =
-            peakgroup;
-        peakgroupvec.push_back(peakgroupcopy);
+        peakgroupvec.push_back(peakgroup);
       }
 
       ++ipk;
@@ -827,17 +822,14 @@ void LeBailFunction::groupPeaks(
                           << "peak over at maximum TOF = " << xmax << ".\n";
 
       if (!peakgroup.empty()) {
-        vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroupcopy =
-            peakgroup;
-        peakgroupvec.push_back(peakgroupcopy);
+        peakgroupvec.push_back(peakgroup);
       }
     } // FIRST out of boundary
   }   // ENDWHILE
 
   while (ipk < m_numPeaks) {
     // Group peaks out of uppper boundary to a separate vector of peaks
-    IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
-    outboundpeakvec.push_back(thispeak);
+    outboundpeakvec.push_back(m_dspPeakVec[ipk].second);
     ipk += 1;
   }
 
