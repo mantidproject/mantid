@@ -91,14 +91,13 @@ public:
       }
     }
     Goniometer instGoniom(goniomMat);
-    std::vector<double> chiphiOmega = instGoniom.getEulerAngles("YZY");
     auto resultsFix5637 = runOptimizePlacement(
         modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637"}});
     auto fitInfoFix5637 = resultsFix5637.second;
     const auto angles5638 = Goniometer(origGon5638Mat).getEulerAngles("YZY");
 
     for (size_t i = 0; i < fitInfoFix5637->rowCount(); ++i) {
-      std::string nm = fitInfoFix5637->String(i, 0);
+      const std::string nm = fitInfoFix5637->String(i, 0);
       double d = 0.0;
       if (nm == "chi5638")
         d = angles5638[1] - fitInfoFix5637->Double(i, 1);
@@ -137,7 +136,6 @@ public:
       auto &peak = modPeaksNoFix->getPeak(i);
       const int runNum = peak.getRunNumber();
 
-      Matrix<double> GG;
       if (runNum == 5637) {
         if (origGon5637Mat.numRows() == 0) {
           origGon5637Mat = peak.getGoniometerMatrix();
@@ -149,7 +147,7 @@ public:
 
     const auto angles5638 = Goniometer(origGon5638Mat).getEulerAngles("YZY");
     const auto angles5637 = Goniometer(origGon5637Mat).getEulerAngles("YZY");
-    auto resultsTiltFixBoth = runOptimizePlacement(
+    const auto resultsTiltFixBoth = runOptimizePlacement(
         modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"},
                         {"OptimizeGoniometerTilt", "1"}});
 
