@@ -129,8 +129,8 @@ About Input Parameters
 mask detectors, including
 
 -  Workspace indices
--  Spectra
--  Detects
+-  Spectrum numbers
+-  Detector IDs
 -  Instrument components
 -  MaskWorkspace
 -  General :ref:`MatrixWorkspace <MatrixWorkspace>` other than
@@ -169,7 +169,7 @@ Usage
 -----
 
 Example 1: specifying spectrum numbers
-##########################################
+######################################
 
 .. testcode:: ExMaskSpec
 
@@ -234,7 +234,7 @@ Output
 
 
 Example 2: specifying detector IDs
-######################################
+##################################
 
 .. testcode:: ExMaskIDs
 
@@ -274,7 +274,7 @@ Output
 
 
 Example 3: specifying workspace indices
-###########################################
+#######################################
 
 .. testcode:: ExMaskWI
 
@@ -357,7 +357,7 @@ Example 4: specifying instrument components
   Detectors from 200 to 300 are masked.
 
 Example 5: specifying a masking workspace
-##################################################
+#########################################
 
 .. testcode:: ExMaskMask
 
@@ -443,7 +443,7 @@ Output
   Detector 105 is masked: False
   
 Example 7: constraining the masking range
-######################################
+#########################################
 
 .. testcode:: ExMaskConstrainInRange
 
