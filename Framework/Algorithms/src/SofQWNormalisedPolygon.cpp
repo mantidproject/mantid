@@ -6,11 +6,13 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -64,21 +66,21 @@ void SofQWNormalisedPolygon::init() {
 void SofQWNormalisedPolygon::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     throw std::invalid_argument(
         "The input workspace must have common binning across all spectra");
   }
 
   RebinnedOutput_sptr outputWS =
-      this->setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout);
+      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout);
   g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();
   const size_t nHistos = inputWS->getNumberHistograms();
 
   // Holds the spectrum-detector mapping
-  std::vector<specnum_t> specNumberMapping;
-  std::vector<detid_t> detIDMapping;
+  std::vector<std::vector<detid_t>> detIDMapping(
+      outputWS->getNumberHistograms());
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
@@ -102,6 +104,7 @@ void SofQWNormalisedPolygon::exec() {
   const auto &X = inputWS->x(0);
   int emode = m_EmodeProperties.m_emode;
 
+  const auto &inputIndices = inputWS->indexInfo();
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -130,7 +133,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiUpper = phi + phiHalfWidth;
 
     const double efixed = m_EmodeProperties.getEFixed(spectrumInfo.detector(i));
-    const specnum_t specNo = inputWS->getSpectrum(i).getSpectrumNo();
+    const specnum_t specNo = inputIndices.spectrumNumber(i);
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -167,9 +170,7 @@ void SofQWNormalisedPolygon::exec() {
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
-          specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
-          detIDMapping.push_back(spectrumInfo.detector(i).getID());
+          detIDMapping[qIndex - 1].push_back(spectrumInfo.detector(i).getID());
         }
       }
     }
@@ -185,8 +186,9 @@ void SofQWNormalisedPolygon::exec() {
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
 
   // Set the output spectrum-detector mapping
-  SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
-  outputWS->updateSpectraUsing(outputDetectorMap);
+  auto outputIndices = outputWS->indexInfo();
+  outputIndices.setDetectorIDs(std::move(detIDMapping));
+  outputWS->setIndexInfo(outputIndices);
 
   // Replace any NaNs in outputWorkspace with zeroes
   if (this->getProperty("ReplaceNaNs")) {
@@ -397,32 +399,19 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
  *  @return A pointer to the newly-created workspace
  */
 RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
-    API::MatrixWorkspace_const_sptr inputWorkspace,
+    const API::MatrixWorkspace &inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
-  // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->sharedX(0));
-  const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
-  // Create the output workspace
-  MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
-      "RebinnedOutput", yLength - 1, xLength, xLength - 1);
-  RebinnedOutput_sptr outputWorkspace =
-      boost::static_pointer_cast<RebinnedOutput>(temp);
-  WorkspaceFactory::Instance().initializeFromParent(inputWorkspace,
-                                                    outputWorkspace, true);
+  // Create output workspace, bin edges are same as in inputWorkspace index 0
+  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1);
 
   // Create a binned numeric axis to replace the default vertical one
   Axis *const verticalAxis = new BinEdgeAxis(newAxis);
   outputWorkspace->replaceAxis(1, verticalAxis);
-
-  // Now set the axis values
-  for (int i = 0; i < yLength - 1; ++i) {
-    outputWorkspace->setBinEdges(i, xAxis);
-  }
 
   // Set the axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -434,7 +423,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
   outputWorkspace->setYUnit("");
   outputWorkspace->setYUnitLabel("Intensity");
 
-  return outputWorkspace;
+  return std::move(outputWorkspace);
 }
 
 } // namespace Mantid

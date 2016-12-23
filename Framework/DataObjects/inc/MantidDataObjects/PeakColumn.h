@@ -40,6 +40,9 @@ public:
 
   void read(size_t index, const std::string &text) override;
 
+  /// Sets item from a stream
+  void read(const size_t index, std::istream &in) override;
+
   /// Specialized type check
   bool isBool() const override;
 

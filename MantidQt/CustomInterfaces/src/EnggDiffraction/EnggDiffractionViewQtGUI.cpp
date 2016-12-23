@@ -4,7 +4,7 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
