@@ -44,7 +44,7 @@ public:
   vtkSmartPointer<vtkDataSet>
   create(ProgressAction &progressUpdating) const override;
 
-  void initialize(Mantid::API::Workspace_sptr) override;
+  void initialize(const Mantid::API::Workspace_sptr &) override;
 
   std::string getFactoryTypeName() const override { return "vtkMD0DFactory"; }
 

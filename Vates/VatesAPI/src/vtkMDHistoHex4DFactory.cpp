@@ -47,7 +47,7 @@ vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(
 
 template <typename TimeMapper>
 void vtkMDHistoHex4DFactory<TimeMapper>::initialize(
-    Mantid::API::Workspace_sptr workspace) {
+    const Mantid::API::Workspace_sptr &workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 4>(workspace);
   if (m_workspace) {
     double tMax = m_workspace->getTDimension()->getMaximum();

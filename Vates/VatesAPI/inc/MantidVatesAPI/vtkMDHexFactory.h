@@ -68,7 +68,7 @@ public:
   create(ProgressAction &progressUpdate) const override;
 
   /// Initalize with a target workspace.
-  void initialize(Mantid::API::Workspace_sptr) override;
+  void initialize(const Mantid::API::Workspace_sptr &) override;
 
   /// Get the name of the type.
   std::string getFactoryTypeName() const override { return "vtkMDHexFactory"; }
@@ -79,10 +79,11 @@ public:
   void setTime(double timeStep);
 
 private:
-  coord_t getNextBinBoundary(Mantid::API::IMDEventWorkspace_sptr imdws) const;
-
   coord_t
-  getPreviousBinBoundary(Mantid::API::IMDEventWorkspace_sptr imdws) const;
+  getNextBinBoundary(const Mantid::API::IMDEventWorkspace_sptr &imdws) const;
+
+  coord_t getPreviousBinBoundary(
+      const Mantid::API::IMDEventWorkspace_sptr &imdws) const;
 
   template <typename MDE, size_t nd>
   void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;

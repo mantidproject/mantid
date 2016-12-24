@@ -141,7 +141,7 @@ public:
       create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
   MOCK_CONST_METHOD0(createMeshOnly, vtkDataSet *());
   MOCK_CONST_METHOD0(createScalarArray, vtkFloatArray *());
-  MOCK_METHOD1(initialize, void(Mantid::API::Workspace_sptr));
+  MOCK_METHOD1(initialize, void(const Mantid::API::Workspace_sptr &));
   MOCK_METHOD1(setSuccessorProxy, void(vtkDataSetFactory *));
   MOCK_CONST_METHOD0(hasSuccessor, bool());
   MOCK_CONST_METHOD0(validate, void());

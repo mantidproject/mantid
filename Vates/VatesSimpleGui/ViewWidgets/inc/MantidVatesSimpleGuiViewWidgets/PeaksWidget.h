@@ -26,7 +26,7 @@ signals:
   void sortPeaks(const std::string &columnToSortBy, const bool sortAscending,
                  Mantid::API::IPeaksWorkspace_sptr ws);
 public slots:
-  void onCurrentChanged(QModelIndex current, QModelIndex);
+  void onCurrentChanged(const QModelIndex &current, const QModelIndex &);
   void onPeaksSorted(const std::string &columnToSortBy,
                      const bool sortAscending);
 

@@ -32,7 +32,7 @@ public:
   bool hasPeaks();
   void showFullTable();
   void removeTable();
-  std::string getConcatenatedWorkspaceNames(std::string delimiter);
+  std::string getConcatenatedWorkspaceNames(const std::string &delimiter);
   void
   updatePeaksWorkspaces(const QList<QPointer<pqPipelineSource>> &peakSources,
                         pqPipelineSource *splatSource);
@@ -43,7 +43,7 @@ public slots:
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row);
   void onPeaksSorted(const std::string &columnToSortBy,
                      const bool sortAscending,
-                     Mantid::API::IPeaksWorkspace_sptr ws);
+                     const Mantid::API::IPeaksWorkspace *ws);
   void destroySinglePeakSource();
   void onPeakMarkerDestroyed();
 

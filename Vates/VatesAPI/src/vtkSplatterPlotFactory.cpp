@@ -243,7 +243,7 @@ void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
  * scalar data.
  */
 void vtkSplatterPlotFactory::doCreateMDHisto(
-    IMDHistoWorkspace_sptr workspace) const {
+    const IMDHistoWorkspace_sptr &workspace) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault
   // from algos modifying wworkspace)
   ReadLock lock(*workspace);
@@ -349,10 +349,9 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
  * @param z The z coordinate.
  * @returns The scalar signal.
  */
-signal_t
-vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,
-                                            bool do4D, const int x, const int y,
-                                            const int z) const {
+signal_t vtkSplatterPlotFactory::extractScalarSignal(
+    const IMDHistoWorkspace_sptr &workspace, bool do4D, const int x,
+    const int y, const int z) const {
   signal_t signalScalar;
 
   if (do4D) {
@@ -373,7 +372,7 @@ vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,
  * @returns Is the workspace 4D?
  */
 bool vtkSplatterPlotFactory::doMDHisto4D(
-    IMDHistoWorkspace_sptr workspace) const {
+    const IMDHistoWorkspace_sptr &workspace) const {
   bool do4D = false;
 
   bool bExactMatch = true;
@@ -441,7 +440,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
 
   // Set the instrument
-  m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
+  m_instrument = m_metaDataExtractor->extractInstrument(m_workspace.get());
   double *range = nullptr;
 
   if (dataSet) {
@@ -480,7 +479,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
  * not an IMDEventWorkspace, throws an invalid argument exception.
  * @param ws : Workspace to use.
  */
-void vtkSplatterPlotFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkSplatterPlotFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   this->m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
   this->validate();
 }
@@ -532,7 +531,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
     m_metadataJsonManager->setMinValue(m_minValue);
     m_metadataJsonManager->setMaxValue(m_maxValue);
     m_metadataJsonManager->setInstrument(
-        m_metaDataExtractor->extractInstrument(m_workspace));
+        m_metaDataExtractor->extractInstrument(m_workspace.get()));
     m_metadataJsonManager->setSpecialCoordinates(
         static_cast<int>(m_workspace->getSpecialCoordinateSystem()));
 

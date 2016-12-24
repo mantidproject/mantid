@@ -70,7 +70,7 @@ public:
   virtual vtkSmartPointer<vtkDataSet> create(ProgressAction &) const = 0;
 
   /// Initalize with a target workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr) = 0;
+  virtual void initialize(const Mantid::API::Workspace_sptr &) = 0;
 
   /// Create the product in one step.
   virtual vtkSmartPointer<vtkDataSet> oneStepCreate(Mantid::API::Workspace_sptr,
