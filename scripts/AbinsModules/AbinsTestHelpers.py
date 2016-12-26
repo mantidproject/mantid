@@ -1,12 +1,11 @@
 import re
 import platform
-import mantid
 import AbinsConstants
 import os
+from mantid.api import FileFinder
 
 
 # Module with helper functions used to create tests.
-
 def version_as_tuple(string=None):
     """
     Calculates numerical representation of package version as a tuple.
@@ -50,12 +49,7 @@ def find_file(filename=None):
     :param filename: name of file to find
     :return: full path for the file with the testing data
     """
-    folders = mantid.config.getDataSearchDirs()
-    for folder in folders:
-        full_path = os.path.join(folder, filename)
-        if os.path.isfile(full_path):
-            return full_path
-    raise ValueError("File with testing data not found.")
+    return FileFinder.Instance().getFullPath(filename)
 
 
 def remove_output_files(list_of_names=None):
