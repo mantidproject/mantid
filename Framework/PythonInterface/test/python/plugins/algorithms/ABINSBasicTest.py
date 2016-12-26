@@ -1,7 +1,7 @@
 import unittest
 from mantid import logger
-from mantid.simpleapi import mtd
-from mantid.simpleapi import ABINS, Scale, CompareWorkspaces, Load, DeleteWorkspace
+from mantid.simpleapi import mtd, ABINS, Scale, CompareWorkspaces, Load, DeleteWorkspace
+from mantid.api import MatrixWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 import numpy as np
 
@@ -38,48 +38,25 @@ class ABINSBasicTest(unittest.TestCase):
 
     _si2 = "Si2-sc_ABINS"
     _squaricn = "squaricn_sum_ABINS"
+    _dft_program = "CASTEP"
+    _temperature = 10.0  # temperature 10 K
+    _scale = 1.0
+    _sample_form = "Powder"
+    _instrument_name = "TOSCA"
+    _atoms = ""  # if no atoms are specified then all atoms are taken into account
+    _sum_contributions = True
+
+    # this is a string; once it is read it is converted internally to  integer
+    _quantum_order_events_number = str(AbinsConstants.FUNDAMENTALS)
+
+    _cross_section_factor = "Incoherent"
+    _workspace_name = "output_workspace"
+    _tolerance = 0.0001
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["ABINS", "explicit", "restart",  "default", "total",
-                                                            "no_scale", "exp"])
-
-        # remove workspaces
-        DeleteWorkspace(self._squaricn + "_ref")
-        # DeleteWorkspace(self._si2 + "_ref")
-
-    def setUp(self):
-
-        # set all parameters for tests
-        self._dft_program = "CASTEP"
-        self._experimental_file = ""
-        self._temperature = 10.0  # temperature 10 K
-        self._scale = 1.0
-        self._sample_form = "Powder"
-        self._instrument_name = "TOSCA"
-        self._atoms = ""  # if no atoms are specified then all atoms are taken into account
-        self._sum_contributions = True
-
-        # this is a string; once it is read it is converted internally to  integer
-        self._quantum_order_events_number = str(AbinsConstants.FUNDAMENTALS)
-
-        self._cross_section_factor = "Incoherent"
-        self._workspace_name = "output_workspace"
-        self._tolerance = 0.0001
-
-        # produce reference data
-        self._ref_wrk = {self._squaricn + "_abins": ABINS(DFTprogram=self._dft_program,
-                                                          PhononFile=self._squaricn + ".phonon",
-                                                          ExperimentalFile=self._experimental_file,
-                                                          Temperature=self._temperature,
-                                                          SampleForm=self._sample_form,
-                                                          Instrument=self._instrument_name,
-                                                          Atoms=self._atoms,
-                                                          Scale=self._scale,
-                                                          SumContributions=self._sum_contributions,
-                                                          QuantumOrderEventsNumber=self._quantum_order_events_number,
-                                                          ScaleByCrossSection=self._cross_section_factor,
-                                                          OutputWorkspace=self._squaricn + "_ref")
-                          }
+        AbinsTestHelpers.remove_output_files(list_of_names=["ABINS", "explicit",  "default", "total",
+                                                            "scale", "exp"])
+        mtd.clear()
 
     def test_wrong_input(self):
         """Test if the correct behaviour of algorithm in case input is not valid"""
@@ -89,6 +66,10 @@ class ABINSBasicTest(unittest.TestCase):
 
         # wrong extension of phonon file in case of CASTEP
         self.assertRaises(RuntimeError, ABINS, PhononFile="Si2-sc.wrong_phonon", OutputWorkspace=self._workspace_name)
+
+        # wrong extension of phonon file in case of CRYSTAL
+        self.assertRaises(RuntimeError, ABINS, DFTprogram="CRYSTAL", PhononFile="MgO.wrong_out",
+                          OutputWorkspace=self._workspace_name)
 
         # two dots in filename
         self.assertRaises(RuntimeError, ABINS, PhononFile="Si2.sc.phonon", OutputWorkspace=self._workspace_name)
@@ -120,7 +101,7 @@ class ABINSBasicTest(unittest.TestCase):
         """Test scenario in which  a user requests to create workspaces for atoms which do not exist in the system.
            In that case ABINS should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
-        # In _si2 there is no C atoms
+        # In _squaricn there is no C atoms
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._squaricn + ".phonon", Atoms="N",
                           OutputWorkspace=self._workspace_name)
 
@@ -129,6 +110,18 @@ class ABINSBasicTest(unittest.TestCase):
         Test if scaling is correct.
         @return:
         """
+        wrk_ref = ABINS(DFTprogram=self._dft_program,
+                        PhononFile=self._squaricn + ".phonon",
+                        Temperature=self._temperature,
+                        SampleForm=self._sample_form,
+                        Instrument=self._instrument_name,
+                        Atoms=self._atoms,
+                        Scale=self._scale,
+                        SumContributions=self._sum_contributions,
+                        QuantumOrderEventsNumber=self._quantum_order_events_number,
+                        ScaleByCrossSection=self._cross_section_factor,
+                        OutputWorkspace=self._squaricn + "_ref")
+
         wrk = ABINS(DFTprogram=self._dft_program,
                     PhononFile=self._squaricn + ".phonon",
                     Temperature=self._temperature,
@@ -139,9 +132,9 @@ class ABINSBasicTest(unittest.TestCase):
                     QuantumOrderEventsNumber=self._quantum_order_events_number,
                     Scale=10,
                     ScaleByCrossSection=self._cross_section_factor,
-                    OutputWorkspace="squaricn_no_scale")
+                    OutputWorkspace="squaricn_scale")
 
-        ref = Scale(self._ref_wrk[self._squaricn + "_abins"], Factor=10)
+        ref = Scale(wrk_ref, Factor=10)
 
         (result, messages) = CompareWorkspaces(wrk, ref, Tolerance=self._tolerance)
         self.assertEqual(result, True)
@@ -175,6 +168,22 @@ class ABINSBasicTest(unittest.TestCase):
 
     def test_partial(self):
         # By default workspaces for all atoms should be created. Test this default behaviour.
+
+        experimental_file = ""
+
+        wrk_ref = ABINS(DFTprogram=self._dft_program,
+                        PhononFile=self._squaricn + ".phonon",
+                        ExperimentalFile=experimental_file,
+                        Temperature=self._temperature,
+                        SampleForm=self._sample_form,
+                        Instrument=self._instrument_name,
+                        Atoms=self._atoms,
+                        Scale=self._scale,
+                        SumContributions=self._sum_contributions,
+                        QuantumOrderEventsNumber=self._quantum_order_events_number,
+                        ScaleByCrossSection=self._cross_section_factor,
+                        OutputWorkspace=self._squaricn + "_ref")
+
         wks_all_atoms_explicitly = ABINS(PhononFile=self._squaricn + ".phonon",
                                          Atoms="H, C, O",
                                          SumContributions=self._sum_contributions,
@@ -190,7 +199,7 @@ class ABINSBasicTest(unittest.TestCase):
                                                Tolerance=self._tolerance)
         self.assertEqual(result, True)
 
-        (result, messages) = CompareWorkspaces(self._ref_wrk[self._squaricn + "_abins"], wsk_all_atoms_default,
+        (result, messages) = CompareWorkspaces(wrk_ref, wsk_all_atoms_default,
                                                Tolerance=self._tolerance)
         self.assertEqual(result, True)
 
