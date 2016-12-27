@@ -73,6 +73,12 @@ class IOmodule(object):
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
         return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
 
+    def get_previous_dft_program(self):
+        """
+        :return: name of DFT program which  was used in the previous calculation.
+        """
+        return self.load(list_of_attributes=["DFT_program"])["attributes"]["DFT_program"]
+
     def check_previous_data(self):
         """
         Checks if currently used DFT file is the same as in the previous calculations. Also checks if currently used

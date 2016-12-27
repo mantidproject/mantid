@@ -181,8 +181,12 @@ class GeneralDFTProgram(object):
 
         # try to load DFT data from *.hdf5 file
         try:
+            if self._dft_program != self._clerk.get_previous_dft_program():
+                raise ValueError("Different DFT program was used in the previous calculation. Data in the hdf file "
+                                 "will be erased.")
 
             self._clerk.check_previous_data()
+
             dft_data = self.load_formatted_data()
             logger.notice(str(dft_data) + " has been loaded from the HDF file.")
 
