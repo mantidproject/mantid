@@ -1,15 +1,10 @@
-#ifndef MANTID_DATAHANDLING_LOADILLTOF_H_
-#define MANTID_DATAHANDLING_LOADILLTOF_H_
+#ifndef MANTID_DATAHANDLING_LOADILLTOF2_H_
+#define MANTID_DATAHANDLING_LOADILLTOF2_H_
 
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/Progress.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -37,20 +32,19 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILLTOF : public API::IFileLoader<Kernel::NexusDescriptor>,
-                             public API::DeprecatedAlgorithm {
+class DLLExport LoadILLTOF2 : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
-  LoadILLTOF();
+  LoadILLTOF2();
   /// Algorithm's name
   const std::string name() const override { return "LoadILLTOF"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Loads an ILL ToF NeXus file.";
+    return "Loads an ILL TOF NeXus file.";
   }
 
   /// Algorithm's version
-  int version() const override { return (1); }
+  int version() const override { return 2; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
@@ -58,65 +52,56 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  const static std::vector<std::string> SUPPORTED_INSTRUMENTS;
+
   // Initialisation code
   void init() override;
   // Execution code
   void exec() override;
 
-  int getEPPFromVanadium(const std::string &,
-                         Mantid::API::MatrixWorkspace_sptr);
   void loadInstrumentDetails(NeXus::NXEntry &);
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
   void initWorkSpace(NeXus::NXEntry &entry,
                      const std::vector<std::vector<int>> &);
   void initInstrumentSpecific();
-  void addAllNexusFieldsAsProperties(std::string filename);
+  void addAllNexusFieldsAsProperties(const std::string &filename);
   void addEnergyToRun();
+  void addFacility();
   void addPulseInterval();
 
-  int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
   void loadTimeDetails(NeXus::NXEntry &entry);
-  void
-  loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
-                           const std::vector<std::vector<int>> &,
-                           int vanaCalculatedDetectorElasticPeakPosition = -1);
-  void loadSpectra(size_t &spec, size_t numberOfMonitors, size_t numberOfTubes,
-                   std::vector<Mantid::detid_t> &detectorIDs, NeXus::NXInt data,
-                   Mantid::API::Progress progress);
+  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
+                                const std::vector<std::vector<int>> &);
+  void loadSpectra(size_t &spec, const size_t numberOfMonitors,
+                   const size_t numberOfTubes,
+                   const std::vector<Mantid::detid_t> &detectorIDs,
+                   NeXus::NXInt data, Mantid::API::Progress progress);
 
   void runLoadInstrument();
 
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
-  int validateVanadium(const std::string &);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  //	NeXus::NXRoot m_dataRoot;
-  //	NeXus::NXRoot m_vanaRoot;
-
-  std::string m_instrumentName; ///< Name of the instrument
-  std::string m_instrumentPath; ///< Name of the instrument path
+  std::string m_instrumentName = ""; ///< Name of the instrument
+  std::string m_instrumentPath = ""; ///< Name of the instrument path
 
   // Variables describing the data in the detector
-  size_t m_numberOfTubes;         // number of tubes - X
-  size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
-  size_t m_numberOfChannels;      // time channels - Z
-  size_t m_numberOfHistograms;
+  size_t m_numberOfTubes = 0;         // number of tubes - X
+  size_t m_numberOfPixelsPerTube = 0; // number of pixels per tube - Y
+  size_t m_numberOfChannels = 0;      // time channels - Z
+  size_t m_numberOfHistograms = 0;
 
   /* Values parsed from the nexus file */
-  int m_monitorElasticPeakPosition;
-  double m_wavelength;
-  double m_channelWidth;
+  double m_wavelength = 0;
+  double m_channelWidth = 0;
+  double m_timeOfFlightDelay = 0;
 
-  double m_l1; //=2.0;
-  double m_l2; //=4.0;
-
-  std::vector<std::string> m_supportedInstruments;
   LoadHelper m_loader;
 };
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LOADILLTOF_H_*/
+#endif /*MANTID_DATAHANDLING_LOADILLTOF2_H_*/
