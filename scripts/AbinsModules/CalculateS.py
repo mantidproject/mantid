@@ -166,13 +166,55 @@ class CalculateS(object):
                     "atomic_displacements": np.asarray([k_data["atomic_displacements"][gamma_pkt_index]])}
         return k_points
 
+    def _calculate_s_powder_2d(self, powder_data=None):
+        """
+        Calculates 2D S for the powder case.
+        :param powder_data: object of type PowderData with with A and B tensors
+        :return:  object of type SData with 2D dynamical structure factors for the powder case
+        """
+        pass
+
     def _calculate_s_powder_1d(self, powder_data=None):
         """
-        Calculates S for the powder case.
+        Calculates 1D S for the powder case.
 
         @param powder_data: object of type PowderData with mean square displacements and Debye-Waller factors for
                             the case of powder
-        @return: object of type SData with dynamical structure factors for the powder case
+        @return: object of type SData with 1D dynamical structure factors for the powder case
+        """
+        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data.set(self._calculate_s_powder_1d_core(powder_data=powder_data))
+
+        return s_data
+
+    def _calculate_s_powder_1d_core(self, powder_data=None):
+        """
+        Helper function for _calculate_s_powder_1d.
+        :param powder_data:  object of type PowderData with A and B tensors
+        :return: Python dictionary with S data
+        """
+        atoms_items = dict()
+        num_atoms, atoms = self._prepare_data(powder_data=powder_data)
+
+        if PATHOS_FOUND:
+            p_local = ProcessingPool(ncpus=AbinsParameters.atoms_threads)
+            result = p_local.map(self._calculate_s_powder_1d_one_atom, atoms)
+        else:
+            result = []
+            for atom in atoms:
+                result.append(self._calculate_s_powder_1d_one_atom(atom=atom))
+
+        for atom in range(num_atoms):
+            atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
+            self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
+        atoms_items.update({"frequencies": self._bins[1:]})
+        return atoms_items
+
+    def _prepare_data(self,  powder_data=None):
+        """
+        Sets all necessary fields for 1D calculations. Sorts atom indices to improve parallelism.
+        :param powder_data: object of type PowderData with A and B tensors
+        :return: number of atoms, sorted atom indices
         """
         if not isinstance(powder_data, PowderData):
             raise ValueError("Input parameter 'powder_data' should be of type PowderData.")
@@ -191,26 +233,14 @@ class CalculateS(object):
             first_frequency = AbinsConstants.FIRST_MOLECULAR_VIBRATION
         self._fundamentals_freq = k_points_data["frequencies"][0][first_frequency:]
 
-        atoms_items = dict()
-        atoms = range(num_atoms)
+        # sort atoms over atom type so that parallelisation is more efficient
+        symbols = []
+        unsorted_atoms = range(num_atoms)
+        for i in unsorted_atoms:
+            symbols.append(self._atoms_data["atom_%s" % i]["symbol"])
+        symbols, sorted_atoms = (list(x) for x in zip(*sorted(zip(symbols, unsorted_atoms))))
 
-        if PATHOS_FOUND:
-            p_local = ProcessingPool(ncpus=AbinsParameters.atoms_threads)
-            result = p_local.map(self._calculate_s_powder_1d_one_atom, atoms)
-        else:
-            result = []
-            for atom in atoms:
-                result.append(self._calculate_s_powder_1d_one_atom(atom=atom))
-
-        for atom in range(num_atoms):
-            atoms_items["atom_%s" % atom] = {"s": result[atom]}
-            self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
-        atoms_items.update({"frequencies": self._bins[1:]})
-
-        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set(items=atoms_items)
-
-        return s_data
+        return len(sorted_atoms), sorted_atoms
 
     def _report_progress(self, msg):
         """
@@ -257,7 +287,7 @@ class CalculateS(object):
                             atom=atom, local_freq=part_local_freq, local_coeff=part_local_coeff,
                             fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order)
 
-                        s["order_%s" % lg_order] = s["order_%s" % lg_order] + part_broad_spectrum
+                        s["order_%s" % lg_order] += part_broad_spectrum
 
                 return s
 
