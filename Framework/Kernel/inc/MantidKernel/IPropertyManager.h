@@ -323,7 +323,7 @@ protected:
   */
   void declareProperty(
       const std::string &name, const char *value, const std::string &doc,
-      IValidator_sptr validator = IValidator_sptr(new NullValidator),
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
       const unsigned int direction = Direction::Input) {
     // Simply call templated method, converting character array to a string
     declareProperty(name, std::string(value), std::move(validator), doc,
