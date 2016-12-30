@@ -117,7 +117,7 @@ protected:
   /**
    Run checks based on the non-integrated dimensionality, which are only run
    if the factory is set to apply these checks.
-   @param  workspace : workspace to check.
+   @param  imdws : workspace to check.
    @param  bExactMatch : run an exact match on non-integarated dimensionality if
    TRUE, otherwise is less than or equal to ExpectedDimensions.
    @return whether the checks pass or fail.
