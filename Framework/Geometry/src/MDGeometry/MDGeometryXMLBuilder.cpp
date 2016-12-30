@@ -25,12 +25,13 @@ namespace Geometry {
 */
 struct CompareIMDDimension_const_sptr {
 private:
-  IMDDimension_const_sptr _a;
+  std::string m_dimensionId;
+
 public:
-  explicit CompareIMDDimension_const_sptr(IMDDimension_const_sptr a)
-      : _a(std::move(a)) {}
+  explicit CompareIMDDimension_const_sptr(const IMDDimension_const_sptr &a)
+      : m_dimensionId(a->getDimensionId()) {}
   bool operator()(const IMDDimension_const_sptr &b) {
-    return _a->getDimensionId() == b->getDimensionId();
+    return m_dimensionId == b->getDimensionId();
   }
 };
 

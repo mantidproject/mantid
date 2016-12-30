@@ -54,7 +54,7 @@ public:
   const Mantid::Kernel::UnitLabel getUnits() const override {
     throw std::runtime_error("Not implemented");
   }
-  std::string getDimensionId() const override { return m_id; }
+  const std::string &getDimensionId() const override { return m_id; }
   coord_t getMaximum() const override { return 10; }
   coord_t getMinimum() const override { return 0; };
   size_t getNBins() const override { return m_nbins; };
