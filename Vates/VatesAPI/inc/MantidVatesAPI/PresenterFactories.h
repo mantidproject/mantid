@@ -14,10 +14,7 @@ class WorkspaceProvider;
 class DLLExport EmptyWorkspaceNamePolicy {
 protected:
   const std::string &
-  getWorkspaceName(const Mantid::API::IMDWorkspace & /*workspace*/) {
-    static std::string name{"__EmptyWorkspaceNamePolicy"};
-    return name;
-  }
+  getWorkspaceName(const Mantid::API::IMDWorkspace & /*workspace*/);
 };
 
 class DLLExport NonEmptyWorkspaceNamePolicy {
