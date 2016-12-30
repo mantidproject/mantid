@@ -38,6 +38,7 @@ protected:
 template <class Presenter, class WorkspaceNamePolicy>
 class DLLExport InMemoryPresenterFactory : private WorkspaceNamePolicy {
   using WorkspaceNamePolicy::getWorkspaceName;
+
 public:
   std::unique_ptr<Presenter>
   create(std::unique_ptr<MDLoadingView> view,

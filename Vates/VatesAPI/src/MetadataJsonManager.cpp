@@ -3,8 +3,6 @@
 #include <json/writer.h>
 #include <json/reader.h>
 
-#include <utility>
-
 namespace Mantid {
 namespace VATES {
 // Note that we need to have a non-empty default string

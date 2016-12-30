@@ -48,8 +48,7 @@ public slots:
   void onPeakMarkerDestroyed();
 
 private:
-  void addWorkspace(pqPipelineSource *source,
-                    pqPipelineSource *splatSource);
+  void addWorkspace(pqPipelineSource *source, pqPipelineSource *splatSource);
   std::vector<std::string>
   extractFrameFromSource(pqPipelineSource *splatSource);
   void generateSinglePeaksSource(double position1, double position2,
