@@ -97,7 +97,7 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     }
   }();
   // Define a time slice.
-  auto time = selectTimeSliceValue(workspace);
+  auto time = selectTimeSliceValue(*workspace);
 
   // Get presenter and data set factory set up
   auto factoryChain =
@@ -270,10 +270,10 @@ void SaveMDWorkspaceToVTKImpl::setupMembers() {
  * @return either the first time entry in case of a 4D workspace or else 0.0
  */
 double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(
-    const Mantid::API::IMDWorkspace_sptr &workspace) const {
+    const Mantid::API::IMDWorkspace &workspace) const {
   double time = 0.0;
-  if (is4DWorkspace(*workspace)) {
-    auto timeLikeDimension = workspace->getDimension(3);
+  if (is4DWorkspace(workspace)) {
+    auto timeLikeDimension = workspace.getDimension(3);
     time = static_cast<double>(timeLikeDimension->getMinimum());
   }
   return time;

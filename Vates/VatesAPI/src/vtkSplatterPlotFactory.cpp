@@ -243,22 +243,22 @@ void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
  * scalar data.
  */
 void vtkSplatterPlotFactory::doCreateMDHisto(
-    const IMDHistoWorkspace_sptr &workspace) const {
+    const IMDHistoWorkspace &workspace) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault
   // from algos modifying wworkspace)
-  ReadLock lock(*workspace);
+  ReadLock lock(workspace);
 
   // Get the geometric information of the bins
-  const int nBinsX = static_cast<int>(workspace->getXDimension()->getNBins());
-  const int nBinsY = static_cast<int>(workspace->getYDimension()->getNBins());
-  const int nBinsZ = static_cast<int>(workspace->getZDimension()->getNBins());
+  const int nBinsX = static_cast<int>(workspace.getXDimension()->getNBins());
+  const int nBinsY = static_cast<int>(workspace.getYDimension()->getNBins());
+  const int nBinsZ = static_cast<int>(workspace.getZDimension()->getNBins());
 
-  const coord_t maxX = workspace->getXDimension()->getMaximum();
-  const coord_t minX = workspace->getXDimension()->getMinimum();
-  const coord_t maxY = workspace->getYDimension()->getMaximum();
-  const coord_t minY = workspace->getYDimension()->getMinimum();
-  const coord_t maxZ = workspace->getZDimension()->getMaximum();
-  const coord_t minZ = workspace->getZDimension()->getMinimum();
+  const coord_t maxX = workspace.getXDimension()->getMaximum();
+  const coord_t minX = workspace.getXDimension()->getMinimum();
+  const coord_t maxY = workspace.getYDimension()->getMaximum();
+  const coord_t minY = workspace.getYDimension()->getMinimum();
+  const coord_t maxZ = workspace.getZDimension()->getMaximum();
+  const coord_t minZ = workspace.getZDimension()->getMinimum();
 
   coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
   coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
@@ -285,13 +285,13 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   vtkNew<vtkVertex> vertex;
 
   // Check if the workspace requires 4D handling.
-  bool do4D = doMDHisto4D(workspace);
+  bool do4D = doMDHisto4D(&workspace);
 
   // Get the transformation that takes the points in the TRANSFORMED space back
   // into the ORIGINAL (not-rotated) space.
   Mantid::API::CoordTransform const *transform = nullptr;
   if (m_useTransform) {
-    transform = workspace->getTransformToOriginal();
+    transform = workspace.getTransformToOriginal();
   }
 
   Mantid::coord_t in[3];
@@ -349,17 +349,18 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
  * @param z The z coordinate.
  * @returns The scalar signal.
  */
-signal_t vtkSplatterPlotFactory::extractScalarSignal(
-    const IMDHistoWorkspace_sptr &workspace, bool do4D, const int x,
-    const int y, const int z) const {
+signal_t
+vtkSplatterPlotFactory::extractScalarSignal(const IMDHistoWorkspace &workspace,
+                                            bool do4D, const int x, const int y,
+                                            const int z) const {
   signal_t signalScalar;
 
   if (do4D) {
-    signalScalar = workspace->getSignalNormalizedAt(
+    signalScalar = workspace.getSignalNormalizedAt(
         static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z),
         static_cast<size_t>(m_time));
   } else {
-    signalScalar = workspace->getSignalNormalizedAt(
+    signalScalar = workspace.getSignalNormalizedAt(
         static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z));
   }
 
@@ -372,19 +373,13 @@ signal_t vtkSplatterPlotFactory::extractScalarSignal(
  * @returns Is the workspace 4D?
  */
 bool vtkSplatterPlotFactory::doMDHisto4D(
-    const IMDHistoWorkspace_sptr &workspace) const {
-  bool do4D = false;
-
+    const IMDHistoWorkspace *workspace) const {
   bool bExactMatch = true;
-
-  IMDHistoWorkspace_sptr workspace4D =
-      castAndCheck<IMDHistoWorkspace, 4>(workspace, bExactMatch);
-
-  if (workspace4D) {
-    do4D = true;
+  if (workspace &&
+      checkWorkspace<IMDHistoWorkspace, 4>(*workspace, bExactMatch)) {
+    return true;
   }
-
-  return do4D;
+  return false;
 }
 
 /**
@@ -462,7 +457,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
     // Macro to call the right instance of the
     CALL_MDEVENT_FUNCTION(this->doCreate, eventWorkspace);
   } else {
-    this->doCreateMDHisto(histoWorkspace);
+    this->doCreateMDHisto(*histoWorkspace);
   }
 
   // Add metadata in json format

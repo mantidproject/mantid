@@ -69,8 +69,7 @@ private:
   int writeDataSetToVTKFile(vtkXMLWriter *writer, vtkDataSet *dataSet,
                             const std::string &filename,
                             vtkXMLWriter::CompressorType compressor) const;
-  double
-  selectTimeSliceValue(const Mantid::API::IMDWorkspace_sptr &workspace) const;
+  double selectTimeSliceValue(const Mantid::API::IMDWorkspace &workspace) const;
   std::string getFullFilename(std::string filename,
                               bool isHistoWorkspace) const;
   vtkSmartPointer<vtkXMLWriter> getXMLWriter(bool isHistoWorkspace) const;
