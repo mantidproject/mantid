@@ -49,15 +49,15 @@ public slots:
 
 private:
   void addWorkspace(pqPipelineSource *source,
-                    QPointer<pqPipelineSource> splatSource);
+                    pqPipelineSource *splatSource);
   std::vector<std::string>
-  extractFrameFromSource(QPointer<pqPipelineSource> splatSource);
+  extractFrameFromSource(pqPipelineSource *splatSource);
   void generateSinglePeaksSource(double position1, double position2,
                                  double position3, double radius);
   void resetSinglePeaksSource(double position1, double position2,
                               double position3, double radius);
   bool checkMatchingSources(pqPipelineSource *source,
-                            QPointer<pqPipelineSource> splatSource);
+                            pqPipelineSource *splatSource);
   double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape);
   void removeLayout(QWidget *widget);
   void createTable();

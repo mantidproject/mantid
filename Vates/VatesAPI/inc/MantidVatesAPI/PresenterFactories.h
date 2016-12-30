@@ -13,15 +13,18 @@ class WorkspaceProvider;
 
 class DLLExport EmptyWorkspaceNamePolicy {
 protected:
-  std::string getWorkspaceName(Mantid::API::IMDWorkspace_sptr) {
-    return "__EmptyWorkspaceNamePolicy";
+  const std::string &
+  getWorkspaceName(const Mantid::API::IMDWorkspace & /*workspace*/) {
+    static std::string name{"__EmptyWorkspaceNamePolicy"};
+    return name;
   }
 };
 
 class DLLExport NonEmptyWorkspaceNamePolicy {
 protected:
-  std::string getWorkspaceName(Mantid::API::IMDWorkspace_sptr workspace) {
-    return workspace->name();
+  const std::string &
+  getWorkspaceName(const Mantid::API::IMDWorkspace &workspace) {
+    return workspace.getName();
   }
 };
 
@@ -35,7 +38,6 @@ protected:
 template <class Presenter, class WorkspaceNamePolicy>
 class DLLExport InMemoryPresenterFactory : private WorkspaceNamePolicy {
   using WorkspaceNamePolicy::getWorkspaceName;
-
 public:
   std::unique_ptr<Presenter>
   create(std::unique_ptr<MDLoadingView> view,
@@ -43,7 +45,7 @@ public:
          std::unique_ptr<WorkspaceProvider> workspaceProvider) {
     return Mantid::Kernel::make_unique<Presenter>(std::move(view),
                                                   workspaceProvider.release(),
-                                                  getWorkspaceName(workspace));
+                                                  getWorkspaceName(*workspace));
   }
 };
 }

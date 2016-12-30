@@ -115,7 +115,7 @@ std::vector<bool> PeaksTableControllerVsi::getViewablePeaks() {
  * @param splatSource A pointer to the splatter source
  */
 void PeaksTableControllerVsi::addWorkspace(
-    pqPipelineSource *source, QPointer<pqPipelineSource> splatSource) {
+    pqPipelineSource *source, pqPipelineSource* splatSource) {
   try {
     if (!source || !splatSource) {
       throw std::invalid_argument(
@@ -271,7 +271,7 @@ void PeaksTableControllerVsi::updateViewableArea() {
  * @param splatSource A pointer to a splatter plot source.
  */
 std::vector<std::string> PeaksTableControllerVsi::extractFrameFromSource(
-    QPointer<pqPipelineSource> splatSource) {
+    pqPipelineSource *splatSource) {
   pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(splatSource);
 
   if (!filter) {
