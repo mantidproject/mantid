@@ -22,7 +22,7 @@ class HelperTestingClass(object):
 
     def set_dft_program(self, dft_program=None):
 
-        if dft_program in AbinsConstants.all_supported_dft_programs:
+        if dft_program in AbinsConstants.ALL_SUPPORTED_DFT_PROGRAMS:
             self._dft_program = dft_program
         else:
             raise RuntimeError("Unsupported DFT program: %s " % dft_program)

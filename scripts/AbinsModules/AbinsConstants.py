@@ -132,4 +132,4 @@ MAX_ORDER = 4  # max quantum order event
 NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher
 
 
-all_supported_dft_programs = ["CRYSTAL", "CASTEP"]
+ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
