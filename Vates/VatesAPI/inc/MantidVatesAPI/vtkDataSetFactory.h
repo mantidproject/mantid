@@ -202,51 +202,50 @@ protected:
       }
     }
     return imdws;
-    }
+  }
 
-    /**
-    Common creation implementation whereby delegation to successor is attempted
-    if
-    appropriate.
-    @param workspace : workspace to cast and create from.
-    @param progressUpdate : object used to pass progress information back up the
-    stack.
-    @param bExactMatch : Check for an exact match if true.
-    @return TRUE if delegation to successors has occured. Otherwise returns
-    false.
-    */
-    template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-    vtkSmartPointer<vtkDataSet>
-    tryDelegatingCreation(Mantid::API::Workspace_sptr workspace,
-                          ProgressAction &progressUpdate,
-                          bool bExactMatch = true) const {
-      boost::shared_ptr<IMDWorkspaceType> imdws =
-          castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace,
-                                                              bExactMatch);
-      if (!imdws) {
-        if (this->hasSuccessor()) {
-          return m_successor->create(progressUpdate);
-        } else {
-          std::string message =
-              this->getFactoryTypeName() + " has no successor";
-          throw std::runtime_error(message);
-        }
+  /**
+  Common creation implementation whereby delegation to successor is attempted
+  if
+  appropriate.
+  @param workspace : workspace to cast and create from.
+  @param progressUpdate : object used to pass progress information back up the
+  stack.
+  @param bExactMatch : Check for an exact match if true.
+  @return TRUE if delegation to successors has occured. Otherwise returns
+  false.
+  */
+  template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
+  vtkSmartPointer<vtkDataSet>
+  tryDelegatingCreation(Mantid::API::Workspace_sptr workspace,
+                        ProgressAction &progressUpdate,
+                        bool bExactMatch = true) const {
+    boost::shared_ptr<IMDWorkspaceType> imdws =
+        castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace,
+                                                            bExactMatch);
+    if (!imdws) {
+      if (this->hasSuccessor()) {
+        return m_successor->create(progressUpdate);
+      } else {
+        std::string message = this->getFactoryTypeName() + " has no successor";
+        throw std::runtime_error(message);
       }
-      return nullptr;
     }
+    return nullptr;
+  }
 
-    /// Template Method pattern to validate the factory before use.
-    virtual void validate() const = 0;
+  /// Template Method pattern to validate the factory before use.
+  virtual void validate() const = 0;
 
-    /// Checks successor when set and throws if bad
-    void checkSuccessor() const override;
+  /// Checks successor when set and throws if bad
+  void checkSuccessor() const override;
 
-    /// Flag indicating whether a transformation should be used.
-    bool m_useTransform;
+  /// Flag indicating whether a transformation should be used.
+  bool m_useTransform;
 
-  private:
-    /// Dimensionality checking flag
-    bool m_bCheckDimensionality;
+private:
+  /// Dimensionality checking flag
+  bool m_bCheckDimensionality;
 };
 
 typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
