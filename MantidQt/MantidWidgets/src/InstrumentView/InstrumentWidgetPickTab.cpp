@@ -1584,7 +1584,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     alg->setProperty("DataE", E);
     alg->setProperty("NSpec", static_cast<int>(X.size() / nbins));
     alg->setProperty("UnitX", unitX);
-    alg->setPropertyValue("ParentWorkspace", parentWorkspace->name());
+    alg->setPropertyValue("ParentWorkspace", parentWorkspace->getName());
     alg->execute();
 
     if (!detids.empty()) {
@@ -1697,7 +1697,7 @@ void DetectorPlotController::addPeak(double x, double y) {
     std::string peakTableName;
     bool newPeaksWorkspace = false;
     if (tw) {
-      peakTableName = tw->name();
+      peakTableName = tw->getName();
     } else {
       peakTableName = "SingleCrystalPeakTable";
       // This does need to get the instrument from the workspace as it's doing
@@ -1735,7 +1735,7 @@ void DetectorPlotController::addPeak(double x, double y) {
     // Run the AddPeak algorithm
     auto alg =
         Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
-    alg->setPropertyValue("RunWorkspace", ws->name());
+    alg->setPropertyValue("RunWorkspace", ws->getName());
     alg->setPropertyValue("PeaksWorkspace", peakTableName);
     alg->setProperty("DetectorID", m_currentDetID);
     alg->setProperty("TOF", x);

@@ -101,7 +101,7 @@ public: // for the time being
   // functions
   API::MatrixWorkspace_const_sptr getInWS() const { return m_InWS; }
   void setWS(API::MatrixWorkspace_sptr otherMatrixWS);
-  std::string getWSName() const { return m_InWS->name(); }
+  const std::string &getWSName() const { return m_InWS->getName(); }
   bool isPowder() const;
   bool isQ3DMode() const;
   bool hasLattice() const;

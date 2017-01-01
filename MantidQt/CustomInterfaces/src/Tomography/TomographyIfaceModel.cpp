@@ -760,7 +760,7 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
 
   // draw image from workspace
   if (wsg && ws &&
-      Mantid::API::AnalysisDataService::Instance().doesExist(ws->name())) {
+      Mantid::API::AnalysisDataService::Instance().doesExist(ws->getName())) {
     return wsg;
   } else {
     return WorkspaceGroup_sptr();

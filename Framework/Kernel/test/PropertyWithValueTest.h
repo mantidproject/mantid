@@ -164,17 +164,23 @@ public:
 
 private:
   class DataObjectOne : public DataItem {
-    const std::string name() const override { return "MyName1"; };
+    const std::string &getName() const override { return m_name; };
     const std::string id() const override { return "DataObjectOne"; }
     bool threadSafe() const override { return true; }
-    const std::string toString() const override { return name(); }
+    const std::string toString() const override { return m_name; }
+
+  private:
+    std::string m_name{"MyName1"};
   };
 
   class DataObjectTwo : public DataItem {
-    const std::string name() const override { return "MyName2"; };
+    const std::string &getName() const override { return m_name; };
     const std::string id() const override { return "DataObjectTwo"; }
     bool threadSafe() const override { return true; }
-    const std::string toString() const override { return name(); }
+    const std::string toString() const override { return m_name; }
+
+  private:
+    std::string m_name{"MyName2"};
   };
 
 public:

@@ -209,7 +209,7 @@ void Stitch1DMany::exec() {
       std::string outName = groupName;
 
       for (auto &groupWorkspace : groupWorkspaces) {
-        const std::string wsName = groupWorkspace->getItem(i)->name();
+        const std::string &wsName = groupWorkspace->getItem(i)->getName();
         toProcess.push_back(wsName);
         outName += "_" + wsName;
       }

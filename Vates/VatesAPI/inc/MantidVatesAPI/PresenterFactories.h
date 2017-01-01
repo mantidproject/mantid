@@ -21,7 +21,7 @@ protected:
 class DLLExport NonEmptyWorkspaceNamePolicy {
 protected:
   std::string getWorkspaceName(Mantid::API::IMDWorkspace_sptr workspace) {
-    return workspace->name();
+    return workspace->getName();
   }
 };
 

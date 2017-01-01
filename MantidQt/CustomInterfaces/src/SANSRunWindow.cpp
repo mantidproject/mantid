@@ -1671,12 +1671,12 @@ void SANSRunWindow::setGeometryDetails() {
 
   if (boost::dynamic_pointer_cast<const IEventWorkspace>(ws)) {
     // EventWorkspaces have their monitors loaded into a separate workspace.
-    const std::string monitorWsName = ws->name() + "_monitors";
+    const std::string monitorWsName = ws->getName() + "_monitors";
 
     if (!ADS.doesExist(monitorWsName)) {
       g_log.error() << "Expected a sister monitor workspace called \""
                     << monitorWsName << "\" "
-                    << "for the EventWorkspace \"" << ws->name()
+                    << "for the EventWorkspace \"" << ws->getName()
                     << "\", but could not find one "
                     << "so unable to set geometry details.\n";
       return;
@@ -1703,7 +1703,7 @@ void SANSRunWindow::setGeometryDetails() {
     g_log.error() << "The reported incident monitor spectrum number \""
                   << monitorSpectrum
                   << "\" does not have a corresponding workspace index in \""
-                  << monitorWs->name()
+                  << monitorWs->getName()
                   << "\", so unable to set geometry details.\n";
     return;
   }
@@ -1847,7 +1847,7 @@ void SANSRunWindow::setSANS2DGeometry(
   QString code_to_run =
       QString("print ','.join([str(a) for a in "
               "i.ReductionSingleton().instrument.getDetValues('%1')])")
-          .arg(QString::fromStdString(workspace->name()));
+          .arg(QString::fromStdString(workspace->getName()));
 
   QStringList logvalues = runReduceScriptFunction(code_to_run).split(",");
 
