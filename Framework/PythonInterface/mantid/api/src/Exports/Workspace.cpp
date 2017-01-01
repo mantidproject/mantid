@@ -33,9 +33,9 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
 
 void export_Workspace() {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
-      .def("getName", &Workspace::getName,
-           return_value_policy<copy_const_reference>(), arg("self"),
-           "Returns the name of the workspace. This could be an empty string")
+      //.def("getName", &Workspace::getName,
+      //     return_value_policy<copy_const_reference>(), arg("self"),
+      //     "Returns the name of the workspace. This could be an empty string")
       .def("getTitle", &Workspace::getTitle, arg("self"),
            "Returns the title of the workspace")
       .def("setTitle", &Workspace::setTitle, (arg("self"), arg("title")),

@@ -888,7 +888,7 @@ class DirectEnergyConversion(object):
         """
         Mask and group detectors based on input parameters
         """
-        ws_name = result_ws.getName()
+        ws_name = result_ws.name()
         if spec_masks is not None:
             MaskDetectors(Workspace=ws_name, MaskedWorkspace=spec_masks)
         if map_file is not None:
@@ -966,7 +966,7 @@ class DirectEnergyConversion(object):
 
         int_range = self.norm_mon_integration_range
         if self._debug_mode:
-            kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
+            kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.name()}
         else:
             kwargs = {}
 
@@ -1020,7 +1020,7 @@ class DirectEnergyConversion(object):
                                    .format(ws.name(),run.run_number()))
         #
 
-        kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
+        kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.name()}
 
         mon_spect = self.prop_man.mon2_norm_spec
         mon_index = int(mon_ws.getIndexFromSpectrumNumber(mon_spect))
@@ -1158,7 +1158,7 @@ class DirectEnergyConversion(object):
                               EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
-                    src_name = monitor_ws.getInstrument().getSource().getName()
+                    src_name = monitor_ws.getInstrument().getSource().name()
                 #pylint: disable=bare-except
                 except:
                     src_name = None
@@ -1232,9 +1232,9 @@ class DirectEnergyConversion(object):
                                   'warning')
                 return
             else:
-                save_file = workspace.getName()
+                save_file = workspace.name()
         elif os.path.isdir(save_file):
-            save_file = os.path.join(save_file, workspace.getName())
+            save_file = os.path.join(save_file, workspace.name())
         elif save_file == '':
             raise ValueError('Empty filename is not allowed for saving')
         else:
@@ -1599,10 +1599,10 @@ class DirectEnergyConversion(object):
             else:
                 self._propMan = PropertyManager(instr)
         else:
-            old_name = self._propMan.instrument.getName()
+            old_name = self._propMan.instrument.name()
 #pylint: disable=protected-access
             if isinstance(instr,geometry._geometry.Instrument):
-                new_name = self._propMan.instrument.getName()
+                new_name = self._propMan.instrument.name()
             elif isinstance(instr,PropertyManager):
                 new_name = instr.instr_name
             else:
@@ -1618,7 +1618,7 @@ class DirectEnergyConversion(object):
     def setup_instrument_properties(self, workspace=None,reload_instrument=False):
         if workspace is not None:
             instrument = workspace.getInstrument()
-            name = instrument.getName()
+            name = instrument.name()
             if name != self.prop_man.instr_name:
                 self.prop_man = PropertyManager(name,workspace)
 

@@ -87,14 +87,14 @@ class DakotaChiSquaredTest(unittest.TestCase):
     		alg=mantid.simpleapi.DakotaChiSquared(self.datafile,self.simfile,self.chifile)
     		self.assertEquals(len(alg),2)
     		self.assertEquals(alg[0],4.5)
-    		self.assertEquals(alg[1].getName(),"alg")
+    		self.assertEquals(alg[1].name(),"alg")
     		self.assertEquals(alg[1].blocksize(),5)
     		self.assertEquals(alg[1].getNumberHistograms(),1)
     		self.assertEquals(alg[1].dataY(0)[3],1.5)
     		mantid.api.AnalysisDataService.remove("alg")
     		alg1=mantid.simpleapi.DakotaChiSquared(self.datafile,self.simfile,self.chifile,ResidualsWorkspace="res")
     		self.assertEquals(alg1[0],4.5)
-    		self.assertEquals(alg1[1].getName(),"res")
+    		self.assertEquals(alg1[1].name(),"res")
     		mantid.api.AnalysisDataService.remove("res")
     	except:
     		assert False, "Raised an exception"
