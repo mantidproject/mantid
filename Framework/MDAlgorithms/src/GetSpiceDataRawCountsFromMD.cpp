@@ -462,9 +462,8 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
       std::stringstream ess;
       ess << "Workspace " << mdws->getName() << "'s " << iexp
           << "-th ExperimentInfo with "
-             "run number "
-          << thisrunnumber << " does not have specified property "
-          << samplelogname;
+             "run number " << thisrunnumber
+          << " does not have specified property " << samplelogname;
       throw std::runtime_error(ess.str());
     }
     // Get experiment value
