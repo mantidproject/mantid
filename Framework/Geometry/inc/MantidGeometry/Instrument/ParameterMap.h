@@ -17,6 +17,9 @@ namespace Mantid {
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 }
+namespace Beamline {
+class DetectorInfo;
+}
 namespace Geometry {
 class BoundingBox;
 
@@ -340,6 +343,11 @@ public:
   pmap_it end() { return m_map.end(); }
   pmap_cit end() const { return m_map.end(); }
 
+  bool hasDetectorInfo() const;
+  const Beamline::DetectorInfo &detectorInfo() const;
+  void
+  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+
 private:
   boost::shared_ptr<Parameter> create(const std::string &className,
                                       const std::string &name) const;
@@ -366,6 +374,10 @@ private:
   /// internal cache map for cached bounding boxes
   std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
       m_boundingBoxMap;
+
+  /// Pointer to the DetectorInfo object. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 };
 
 /// ParameterMap shared pointer typedef

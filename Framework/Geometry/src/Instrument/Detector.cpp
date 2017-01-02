@@ -155,5 +155,14 @@ bool Detector::isMonitor() const {
  */
 void Detector::markAsMonitor(const bool flag) { m_isMonitor = flag; }
 
+/// Helper for legacy access mode. Returns a reference to the ParameterMap.
+const ParameterMap &Detector::parameterMap() const { return *m_map; }
+
+/// Helper for legacy access mode. Returns the index of the detector.
+size_t Detector::index() const { return m_index; }
+
+/// Helper for legacy access mode. Sets the index of the detector.
+void Detector::setIndex(const size_t index) { m_index = index; }
+
 } // Namespace Geometry
 } // Namespace Mantid

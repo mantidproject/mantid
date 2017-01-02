@@ -84,7 +84,13 @@ public:
     return ObjComponent::getRelativePos();
   }
 
+  const ParameterMap &parameterMap() const override;
+  size_t index() const override;
+  void setIndex(const size_t index) override;
+
 private:
+  /// Linear index of the detector in the instrument
+  size_t m_index{static_cast<size_t>(-1)};
   /// The detector id
   const detid_t m_id;
   /// Flags if this is a monitor

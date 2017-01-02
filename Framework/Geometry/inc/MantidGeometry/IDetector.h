@@ -109,6 +109,13 @@ public:
   /// single; returns the centre of a detector
   virtual det_topology getTopology(Kernel::V3D &center) const = 0;
 
+  /// Helper for legacy access mode. Returns a reference to the ParameterMap.
+  virtual const ParameterMap &parameterMap() const = 0;
+  /// Helper for legacy access mode. Returns the index of the detector.
+  virtual size_t index() const = 0;
+  /// Helper for legacy access mode. Sets the index of the detector.
+  virtual void setIndex(const size_t index) = 0;
+
   /// (Empty) Constructor.
   /// prevent Warning C4436 and many failing unit tests on MSVC 2015.
   IDetector() {} // NOLINT

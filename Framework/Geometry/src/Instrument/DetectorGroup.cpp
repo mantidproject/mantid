@@ -476,5 +476,21 @@ const Kernel::Material DetectorGroup::material() const {
   return Kernel::Material();
 }
 
+/// Helper for legacy access mode. Always throws for DetectorGroup.
+const ParameterMap &DetectorGroup::parameterMap() const {
+  throw std::runtime_error("A DetectorGroup cannot have a ParameterMap");
+}
+
+/// Helper for legacy access mode. Always throws for DetectorGroup.
+size_t DetectorGroup::index() const {
+  throw std::runtime_error("A DetectorGroup cannot have an index");
+}
+
+/// Helper for legacy access mode. Always throws for DetectorGroup.
+void DetectorGroup::setIndex(const size_t index) {
+  UNUSED_ARG(index);
+  throw std::runtime_error("A DetectorGroup cannot have an index");
+}
+
 } // namespace Geometry
 } // namespace Mantid

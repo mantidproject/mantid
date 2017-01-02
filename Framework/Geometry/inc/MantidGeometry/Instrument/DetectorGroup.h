@@ -184,6 +184,10 @@ public:
     return const_cast<const DetectorGroup *>(this);
   }
 
+  const ParameterMap &parameterMap() const override;
+  size_t index() const override;
+  void setIndex(const size_t index) override;
+
 protected:
   /// The ID of this effective detector
   int m_id;

@@ -465,20 +465,24 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
 *  @throw   NotFoundError If no detector is found for the detector ID given
 */
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
-  if (m_map) {
-    IDetector_const_sptr baseDet = m_instr->getDetector(detector_id);
-    return ParComponentFactory::createDetector(baseDet.get(), m_map);
-  } else {
-    auto it = m_detectorCache.find(detector_id);
-    if (it == m_detectorCache.end()) {
-      std::stringstream readInt;
-      readInt << detector_id;
-      throw Kernel::Exception::NotFoundError(
-          "Instrument: Detector with ID " + readInt.str() + " not found.", "");
-    }
-
-    return it->second;
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  auto it = baseInstr.m_detectorCache.find(detector_id);
+  if (it == baseInstr.m_detectorCache.end()) {
+    std::stringstream readInt;
+    readInt << detector_id;
+    throw Kernel::Exception::NotFoundError(
+        "Instrument: Detector with ID " + readInt.str() + " not found.", "");
   }
+  IDetector_const_sptr baseDet = it->second;
+
+  if (!m_map)
+    return baseDet;
+
+  auto det = ParComponentFactory::createDetector(baseDet.get(), m_map);
+  // Set the linear detector index, used for legacy accessors to obtain data
+  // from Beamline::DetectorInfo, which is stored in the ParameterMap.
+  det->setIndex(std::distance(baseInstr.m_detectorCache.begin(), it));
+  return det;
 }
 
 /**	Gets a pointer to the base (non-parametrized) detector from its ID
@@ -1259,6 +1263,8 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
+  if (m_map_nonconst)
+    m_map_nonconst->setDetectorInfo(detectorInfo);
   m_detectorInfo = std::move(detectorInfo);
 }
 
