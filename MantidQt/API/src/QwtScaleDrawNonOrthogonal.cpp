@@ -37,6 +37,13 @@ QwtScaleDrawNonOrthogonal::QwtScaleDrawNonOrthogonal(QwtPlot* plot, ScreenDimens
 
   // Set up the transformation matrix
   setTransformationMatrices(workspace);
+
+  // Set up the angles
+  // set the angles for the two dimensions
+  auto angles = MantidQt::API::getGridLineAnglesInRadian(m_fromHklToXyz,
+                                                         m_dimX, m_dimY);
+  m_angleX = static_cast<double>(angles.first);
+  m_angleY = static_cast<double>(angles.second);
 }
 
 void QwtScaleDrawNonOrthogonal::draw(QPainter * painter, const QPalette & palette) const  {
@@ -48,7 +55,6 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter * painter, const QPalette & palett
   // Get the bottom and left side of the screen in Xyz
   const auto bottomInXyz = getScreenBottomInXyz();
   const auto leftInXyz = getScreenLeftInXyz();
-
 
   // Calculate the min_hkl and max_hkl
   double minHkl = 0;
@@ -75,26 +81,26 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter * painter, const QPalette & palett
   // Transform the scale for tick marks back to xyz. We need to pass the point where to draw in xyz.
   const auto& majorTicksHkl = scaleDivHkl.ticks(QwtScaleDiv::MajorTick);
   const auto& minorTicksHkl = scaleDivHkl.ticks(QwtScaleDiv::MinorTick);
-  QwtValueList majorTicksXyz();
-  QwtValueList minorTicksXyz();
+  QwtValueList majorTicksXyz;
+  QwtValueList minorTicksXyz;
 
   if (m_screenDimension == ScreenDimension::X) {
     for (auto& tick : majorTicksHkl) {
-      double majorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(tick, bottomInXyz).x());
-      majorTicksXyz.append(majorTickXyz);
+      double majorTickXyz = static_cast<double>(fromXtickInHklToXyz(tick));
+      majorTicksXyz.push_back(majorTickXyz);
     }
     for (auto& tick : minorTicksHkl) {
-      double minorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(tick, bottomInXyz).x());
-      minorTicksXyz.append(minorTickXyz);
+      double minorTickXyz = static_cast<double>(fromXtickInHklToXyz(tick));
+      minorTicksXyz.push_back(minorTickXyz);
     }
   } else {
     for (auto& tick : majorTicksHkl) {
-      double majorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(leftInXyz, tick).y());
-      majorTicksXyz.append(majorTickXyz);
+      double majorTickXyz = static_cast<double>(fromYtickInHklToXyz(tick));
+      majorTicksXyz.push_back(majorTickXyz);
     }
     for (auto& tick : minorTicksHkl) {
-      double minorTickXyz = static_cast<double>(fromMixedCoordinatesToXyz(leftInXyz, tick).y());
-      minorTicksXyz.append(minorTickXyz);
+      double minorTickXyz = static_cast<double>(fromYtickInHklToXyz(tick));
+      minorTicksXyz.push_back(minorTickXyz);
    }
   }
 
@@ -102,12 +108,14 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter * painter, const QPalette & palett
   // ***********
   // Draw labels
   // ***********
+  const auto& majorTicksOld = scaleDivHkl.ticks(QwtScaleDiv::MajorTick);
+
   if ( hasComponent(QwtAbstractScaleDraw::Labels) ) {
       painter->save();
       painter->setPen(palette.color(QPalette::Text)); // ignore pen style
       for (int i = 0; i < (int)majorTicksHkl.count(); ++i)
       {
-        drawLabelNonOrthogonal(painter, majorTicksHkl[i], majorTicksHkl[i]);
+        drawLabelNonOrthogonal(painter, majorTicksHkl[i], majorTicksXyz[i]);
       }
 
       painter->restore();
@@ -123,18 +131,18 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter * painter, const QPalette & palett
       pen.setColor(palette.color(QPalette::Foreground));
       painter->setPen(pen);
 
-      QwtScaleDiv::TickType tickTypes[2]{QwtScaleDiv::MinorTick, QwtScaleDiv::MajorTick};
-      for (auto& tickType : tickTypes) {
-        const QwtValueList &ticks = scaleDivEntries.ticks(tickType);
-        for (int i = 0; i < (int)ticks.count(); i++) {
-            const double v = ticks[i];
-            if ( scaleDivEntries.contains(v) )
-                drawTick(painter, v, tickLength(tickType));
-        }
+      // Draw major ticks
+      for (int i = 0; i < (int)majorTicksXyz.count(); i++) {
+        drawTick(painter, majorTicksXyz[i], tickLength(QwtScaleDiv::MajorTick));
       }
-      painter->restore();
-  }
 
+      // Draw minor ticks
+      for (int i = 0; i < (int)minorTicksXyz.count(); i++) {
+        drawTick(painter, minorTicksXyz[i], tickLength(QwtScaleDiv::MinorTick));
+      }
+
+    painter->restore();
+  }
 
   // **************
   // Draw backbone
@@ -152,7 +160,11 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter * painter, const QPalette & palett
   // ****************
   // Apply grid lines
   // ****************
-
+  if (m_screenDimension == ScreenDimension::X) {
+    applyGridLinesX(majorTicksXyz);
+  } else {
+    applyGridLinesY(majorTicksXyz);
+  };
 }
 
 
@@ -183,6 +195,52 @@ void QwtScaleDrawNonOrthogonal::drawLabelNonOrthogonal(QPainter *painter, double
 }
 
 
+void QwtScaleDrawNonOrthogonal::applyGridLinesX(const QwtValueList& majorTicksXyz) const {
+    int heightScreen = m_plot->canvas()->height();
+    auto angle = m_angleY;
+
+    // We need the -1 since we the angle is defined in the mathematical positive
+    // sense but we are taking the angle against the y axis in the mathematical
+    // negative sense.
+    angle *= -1.f;
+    auto offset = angle == 0. ? 0. : heightScreen * std::tan(angle);
+
+    QPen gridPen(QColor(200, 100, 100, 100)); // grey
+    gridPen.setWidth(3);
+    gridPen.setCapStyle(Qt::FlatCap);
+    gridPen.setStyle(Qt::DashLine);
+
+    QPainter painter(m_plot->canvas());
+    painter.setPen(gridPen);
+    for (auto& tick : majorTicksXyz) {
+        auto tickScreen = m_plot->transform(QwtPlot::xBottom, tick);
+        auto start = QPointF(tickScreen, heightScreen);
+        auto end = QPointF(tickScreen + offset, 0);
+        painter.drawLine(start, end);
+    }
+}
+
+
+void QwtScaleDrawNonOrthogonal::applyGridLinesY(const QwtValueList& majorTicksXyz) const {
+    int widthScreen = m_plot->canvas()->width();
+    auto angle = m_angleX;
+
+    auto offset = angle == 0. ? 0. : widthScreen * std::tan(angle);
+    QPen gridPen(QColor(200, 100, 100, 100)); // grey
+    gridPen.setWidth(3);
+    gridPen.setCapStyle(Qt::FlatCap);
+    gridPen.setStyle(Qt::DashLine);
+
+    QPainter painter(m_plot->canvas());
+    for (auto& tick : majorTicksXyz) {
+        auto tickScreen = m_plot->transform(QwtPlot::yLeft, tick);
+        auto start = QPointF(0, tickScreen);
+        auto end = QPointF(widthScreen, tickScreen - offset);
+        painter.setPen(gridPen);
+        painter.drawLine(start, end);
+    }
+}
+
 
 /** Tranform from plot coordinates to pixel coordinates
  * @param coords :: coordinate point in plot coordinates
@@ -193,6 +251,7 @@ QPoint QwtScaleDrawNonOrthogonal::fromXyzToScreen(QPointF xyz) const {
   auto yScreen = m_plot->transform(QwtPlot::yLeft, xyz.y());
   return QPoint(xScreen, yScreen);
 }
+
 
 /** Inverse transform: from pixels to plot coords
  * @param pixels :: location in pixels
@@ -216,8 +275,54 @@ QPointF QwtScaleDrawNonOrthogonal::fromMixedCoordinatesToHkl(double x, double y)
 }
 
 
-QPointF QwtScaleDrawNonOrthogonal::fromMixedCoordinatesToXyz(double x, double y) const {
+double QwtScaleDrawNonOrthogonal::fromXtickInHklToXyz(double tick) const {
+    // First we convert everything to hkl. Here the m_dimY coordiante
+    // is in xyz, so we need to bring it to hkl
+    auto tickPointHkl = m_slicePoint;
+    tickPointHkl[m_dimX] = static_cast<float>(tick);
+    auto heightScreenInXyz = m_plot->invTransform(QwtPlot::yLeft, m_plot->canvas()->height());
+    tickPointHkl[m_dimY] = static_cast<float>(heightScreenInXyz);
 
+    tickPointHkl[m_dimY] = (tickPointHkl[m_dimY] -
+                            m_fromHklToXyz[3 * m_dimY + m_dimX] * tickPointHkl[m_dimX] -
+                            m_fromHklToXyz[3 * m_dimY + m_missingDimension] * tickPointHkl[m_missingDimension]) /
+                            m_fromHklToXyz[3 * m_dimY + m_dimY];
+
+    // convert from hkl to xyz
+    auto tickPointXyz = fromHklToXyz(tickPointHkl);
+    return tickPointXyz[m_dimX];
+}
+
+
+double QwtScaleDrawNonOrthogonal::fromYtickInHklToXyz(double tick) const {
+    // First we convert everything to hkl. Here the m_dimX coordiante
+    // is in xyz, so we need to bring it to hkl
+    auto tickPointHkl = m_slicePoint;
+    tickPointHkl[m_dimY] = static_cast<float>(tick);
+
+    auto widthScreenInXyz = m_plot->invTransform(QwtPlot::xBottom, 0);
+    tickPointHkl[m_dimX] = static_cast<float>(widthScreenInXyz);
+
+    tickPointHkl[m_dimX] = (tickPointHkl[m_dimX] -
+                            m_fromHklToXyz[3 * m_dimX + m_dimY] * tickPointHkl[m_dimY] -
+                            m_fromHklToXyz[3 * m_dimX + m_missingDimension] * tickPointHkl[m_missingDimension]) /
+                            m_fromHklToXyz[3 * m_dimX + m_dimX];
+
+    // convert from hkl to xyz
+    auto tickPointXyz = fromHklToXyz(tickPointHkl);
+    return tickPointXyz[m_dimY];
+}
+
+
+Mantid::Kernel::VMD QwtScaleDrawNonOrthogonal::fromHklToXyz(const Mantid::Kernel::VMD& hkl) const {
+    Mantid::Kernel::VMD xyz(hkl);
+    for (int i = 0; i < 3; ++i) {
+        xyz[i] = 0;
+        for (int j = 0; j < 3; ++j) {
+            xyz[i] += m_fromHklToXyz[j + i*3]*hkl[j];
+        }
+    }
+    return xyz;
 }
 
 

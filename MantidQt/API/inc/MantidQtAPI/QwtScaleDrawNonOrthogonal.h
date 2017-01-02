@@ -30,12 +30,17 @@ private:
   QPoint fromXyzToScreen(QPointF xyz) const;
   QPointF fromScreenToXyz(QPoint screen) const;
   QPointF fromMixedCoordinatesToHkl(double x, double y) const;
-  QPointF fromMixedCoordinatesToXyz(double x, double y) const;
+  double fromXtickInHklToXyz(double tick) const;
+  double fromYtickInHklToXyz(double tick) const;
+
+  Mantid::Kernel::VMD fromHklToXyz(const Mantid::Kernel::VMD& hkl) const;
 
   void convertTicksToXyz(QwtValueList& majorTicksXyz, QwtValueList& minorTicksXyz,
                          const QwtValueList& majorTicksHkl, const QwtValueList& minorTicksHkl,
                          std::function<void(double)> func);
 
+  void applyGridLinesX(const QwtValueList& majorTicksXyz) const;
+  void applyGridLinesY(const QwtValueList& majorTicksXyz) const;
 
   Mantid::coord_t m_fromHklToXyz[9];
   Mantid::coord_t m_fromXyzToHkl[9];
@@ -50,6 +55,8 @@ private:
   size_t m_dimY;
   size_t m_missingDimension;
   Mantid::Kernel::VMD m_slicePoint;
+  double m_angleX;
+  double m_angleY;
 
 };
 
