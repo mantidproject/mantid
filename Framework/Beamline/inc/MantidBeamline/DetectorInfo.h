@@ -64,7 +64,6 @@ public:
   void setMasked(const size_t index, bool masked);
 
 private:
-  size_t m_size;
   Kernel::cow_ptr<std::vector<bool>> m_isMasked;
 };
 
