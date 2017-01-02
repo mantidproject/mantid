@@ -69,7 +69,7 @@ If you want to check if a variable points to something that is an MDHistoWorkspa
                            NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
    if isinstance(ws, IMDHistoWorkspace):
-    print ws.getName() + " is a " + ws.id()
+    print ws.name() + " is a " + ws.id()
 
 Output:
 
@@ -96,7 +96,7 @@ For a full list of the available properties and operation look at the :py:obj:`I
    for i in range(ws.getNumDims()):
       dimension = ws.getDimension(i)
       print "\tDimension {0} Name: {1}".format(i,
-         dimension.getName())
+         dimension.name())
 
 .. testoutput:: MDHistoWorkspaceProperties
    :hide:
@@ -124,7 +124,7 @@ As a generic multi dimensional container being able to access information about 
      dimension = ws.getDimension(i)
      print "\tDimension {0} Name: {1} id: {2} Range: {3}-{4} {5}".format(i,
          dimension.getDimensionId(),
-         dimension.getName(),
+         dimension.name(),
          dimension.getMinimum(),
          dimension.getMaximum(),
          dimension.getUnits())
