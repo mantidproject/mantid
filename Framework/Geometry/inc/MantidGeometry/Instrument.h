@@ -11,6 +11,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
@@ -266,7 +267,7 @@ private:
                        std::vector<IObjComponent_const_sptr> &lst) const;
 
   /// Map which holds detector-IDs and pointers to detector components
-  std::map<detid_t, IDetector_const_sptr> m_detectorCache;
+  std::vector<std::pair<detid_t, IDetector_const_sptr>> m_detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

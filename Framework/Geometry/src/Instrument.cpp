@@ -186,8 +186,7 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
   if (m_map) {
     // Get the base instrument detectors
     out_map.clear();
-    const detid2det_map &in_dets =
-        static_cast<const Instrument *>(m_base)->m_detectorCache;
+    const auto &in_dets = m_instr->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
       out_map.emplace(in_det.first, ParComponentFactory::createDetector(
@@ -195,7 +194,8 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     }
   } else {
     // You can just return the detector cache directly.
-    out_map = m_detectorCache;
+    out_map.clear();
+    out_map.insert(m_detectorCache.begin(), m_detectorCache.end());
   }
 }
 
@@ -204,13 +204,12 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
 std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   std::vector<detid_t> out;
   if (m_map) {
-    const detid2det_map &in_dets =
-        static_cast<const Instrument *>(m_base)->m_detectorCache;
+    const auto &in_dets = m_instr->m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !in_det.second->isMonitor())
         out.push_back(in_det.first);
   } else {
-    const detid2det_map &in_dets = m_detectorCache;
+    const auto &in_dets = m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !in_det.second->isMonitor())
         out.push_back(in_det.first);
@@ -223,7 +222,7 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   std::size_t numDetIDs(0);
 
   if (m_map) {
-    numDetIDs = static_cast<const Instrument *>(m_base)->m_detectorCache.size();
+    numDetIDs = m_instr->m_detectorCache.size();
   } else {
     numDetIDs = m_detectorCache.size();
   }
@@ -232,13 +231,12 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   {
     std::size_t monitors(0);
     if (m_map) {
-      const detid2det_map &in_dets =
-          static_cast<const Instrument *>(m_base)->m_detectorCache;
+      const auto &in_dets = m_instr->m_detectorCache;
       for (const auto &in_det : in_dets)
         if (in_det.second->isMonitor())
           monitors += 1;
     } else {
-      const detid2det_map &in_dets = m_detectorCache;
+      const auto &in_dets = m_detectorCache;
       for (const auto &in_det : in_dets)
         if (in_det.second->isMonitor())
           monitors += 1;
@@ -255,11 +253,7 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
  * @param max :: set to the max detector ID
  */
 void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
-  const detid2det_map *in_dets;
-  if (m_map)
-    in_dets = &(static_cast<const Instrument *>(m_base)->m_detectorCache);
-  else
-    in_dets = &this->m_detectorCache;
+  const auto *in_dets = m_map ? &m_instr->m_detectorCache : &m_detectorCache;
 
   if (in_dets->empty())
     throw std::runtime_error(
@@ -454,6 +448,27 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
   return retVec;
 }
 
+namespace {
+std::vector<std::pair<detid_t, IDetector_const_sptr>>::const_iterator
+lower_bound(const std::vector<std::pair<detid_t, IDetector_const_sptr>> &map,
+            const detid_t key) {
+  return std::lower_bound(map.begin(), map.end(),
+                          std::make_pair(key, IDetector_const_sptr(nullptr)),
+                          [](const std::pair<detid_t, IDetector_const_sptr> &a,
+                             const std::pair<detid_t, IDetector_const_sptr> &b)
+                              -> bool { return a.first < b.first; });
+}
+
+std::vector<std::pair<detid_t, IDetector_const_sptr>>::const_iterator
+find(const std::vector<std::pair<detid_t, IDetector_const_sptr>> &map,
+     const detid_t key) {
+  const auto it = lower_bound(map, key);
+  if (it->first == key)
+    return it;
+  return map.end();
+}
+}
+
 /**	Gets a pointer to the detector from its ID
 *  Note that for getting the detector associated with a spectrum, the
 * MatrixWorkspace::getDetector
@@ -466,7 +481,7 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
 */
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   const auto &baseInstr = m_map ? *m_instr : *this;
-  auto it = baseInstr.m_detectorCache.find(detector_id);
+  const auto it = find(baseInstr.m_detectorCache, detector_id);
   if (it == baseInstr.m_detectorCache.end()) {
     std::stringstream readInt;
     readInt << detector_id;
@@ -491,7 +506,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   *  @returns A const pointer to the detector object
   */
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
-  auto it = m_instr->m_detectorCache.find(detector_id);
+  auto it = find(m_instr->m_detectorCache, detector_id);
   if (it == m_instr->m_detectorCache.end()) {
     return nullptr;
   }
@@ -500,7 +515,7 @@ const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
 
 bool Instrument::isMonitor(const detid_t &detector_id) const {
   // Find the (base) detector object in the map.
-  auto it = m_instr->m_detectorCache.find(detector_id);
+  auto it = find(m_instr->m_detectorCache, detector_id);
   if (it == m_instr->m_detectorCache.end())
     return false;
   // This is the detector
@@ -670,9 +685,8 @@ void Instrument::markAsDetector(const IDetector *det) {
 
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  auto it = m_detectorCache.end();
-  m_detectorCache.insert(it, std::map<int, IDetector_const_sptr>::value_type(
-                                 det->getID(), det_sptr));
+  auto it = lower_bound(m_detectorCache, det->getID());
+  m_detectorCache.emplace(it, det->getID(), det_sptr);
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -713,7 +727,8 @@ void Instrument::removeDetector(IDetector *det) {
 
   const detid_t id = det->getID();
   // Remove the detector from the detector cache
-  m_detectorCache.erase(id);
+  const auto it = find(m_detectorCache, id);
+  m_detectorCache.erase(it);
   // Also need to remove from monitor cache if appropriate
   if (det->isMonitor()) {
     auto it = std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
