@@ -8,6 +8,7 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/Progress.h"
 
 namespace Mantid {
@@ -36,7 +37,8 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILLTOF : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadILLTOF : public API::IFileLoader<Kernel::NexusDescriptor>,
+                             public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadILLTOF();
