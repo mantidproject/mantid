@@ -42,9 +42,9 @@ void export_IMDDimension() {
   register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 
   class_<IMDDimension, boost::noncopyable>("IMDDimension", no_init)
-      .def("getName", &IMDDimension::getName, arg("self"),
-           "Return the name of the dimension as can be displayed "
-           "along the axis")
+      .add_property("name", &IMDDimension::getName,
+                    "Return the name of the dimension as can be displayed "
+                    "along the axis")
       .def("getMaximum", &IMDDimension::getMaximum, arg("self"),
            "Return the maximum extent of this dimension")
       .def("getMinimum", &IMDDimension::getMinimum, arg("self"),

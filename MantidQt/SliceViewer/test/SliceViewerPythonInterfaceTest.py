@@ -376,7 +376,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def _getPlotXAxisName(self, lv, ws):
         index = lv.getXAxisDimensionIndex()
         dim = ws.getDimension(index)
-        return dim.getName()
+        return dim.name
 
     def test_mdhistoAutoAxisAssignmentWhenNoIntegration(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
