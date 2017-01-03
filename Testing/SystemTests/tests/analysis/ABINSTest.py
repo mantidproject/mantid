@@ -129,6 +129,9 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
         self.case_from_scratch()
 
     def validate(self):
+
+        self.tolerance = 1e-2
+
         return self._ouput_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
