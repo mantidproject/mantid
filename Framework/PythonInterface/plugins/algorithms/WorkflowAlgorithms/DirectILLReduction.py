@@ -16,13 +16,14 @@ from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
                               CloneWorkspace, ComputeCalibrationCoefVan,
                               ConvertSpectrumAxis, ConvertToConstantL2,
                               ConvertUnits, CorrectKiKf, CorrectTOFAxis,
+                              CreateEmptyTableWorkspace,
                               CreateSingleValuedWorkspace, DeleteWorkspace,
                               DetectorEfficiencyCorUser, Divide,
                               ExtractMonitors, FindEPP, GetEiMonDet,
-                              GroupDetectors, Load, MaskDetectors,
+                              GroupDetectors, Integration, Load, MaskDetectors,
                               MedianBinWidth, MedianDetectorTest, MergeRuns,
                               Minus, Multiply, NormaliseToMonitor, Plus, Rebin,
-                              Scale, SofQWNormalisedPolygon)
+                              Scale, SofQWNormalisedPolygon, SolidAngle)
 import numpy
 from os import path
 from scipy import constants
@@ -72,6 +73,7 @@ _PROP_MON_INDEX = 'Monitor'
 _PROP_NORMALISATION = 'Normalisation'
 _PROP_OUTPUT_DET_EPP_WS = 'OutputEPPWorkspace'
 _PROP_OUTPUT_DIAGNOSTICS_WS = 'OutputDiagnosticsWorkspace'
+_PROP_OUTPUT_DIAGNOSTICS_REPORT_WS = 'OutputDiagnosticsReportWorkspace'
 _PROP_OUTPUT_FLAT_BKG_WS = 'OutputFlatBkgWorkspace'
 _PROP_OUTPUT_INCIDENT_ENERGY_WS = 'OutputIncidentEnergyWorkspace'
 _PROP_OUTPUT_MON_EPP_WS = 'OutputMonitorEPPWorkspace'
@@ -284,6 +286,23 @@ def _createDetectorGroups(ws):
     return groups
 
 
+def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
+                                  reportWSName):
+    PLOT_TYPE_X = 1
+    PLOT_TYPE_Y = 2
+    reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName)
+    reportWS.addColumn('int', 'WorkspaceIndex', PLOT_TYPE_X)
+    reportWS.addColumn('double', 'ElasticIntensity', PLOT_TYPE_Y)
+    reportWS.addColumn('double', 'FlatBkg', PLOT_TYPE_Y)
+    reportWS.addColumn('int', 'Diagnosed', PLOT_TYPE_Y)
+    for i in range(elasticIntensityWS.getNumberHistograms()):
+        elasticIntensity = elasticIntensityWS.readY(i)[0]
+        bkg = bkgWS.readY(i)[0]
+        diagnosed = int(diagnosticsWS.readY(i)[0])
+        row = (i, elasticIntensity, bkg, diagnosed)
+        reportWS.addRow(row)
+
+
 def _groupsToGroupingPattern(groups):
     '''
     Returns a grouping pattern suitable for the GroupDetectors algorithm.
@@ -446,7 +465,7 @@ def _medianEPP(eppWS, eppIndices):
 
 def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                        sigmaMultiplier, noisyBkgSettings, wsNames,
-                       wsCleanup, report, algorithmLogging):
+                       wsCleanup, report, reportWSName, algorithmLogging):
     '''
     Returns a diagnostics workspace.
     '''
@@ -456,17 +475,36 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                                        OutputWorkspace=constantL2WSName,
                                        EnableLogging=algorithmLogging)
     medianEPPCentre, medianEPPSigma = _medianEPP(eppWS, eppIndices)
-    elasticPeakDiagnosticsWSName = \
-        wsNames.withSuffix('diagnostics_elastic_peak')
     integrationBegin = medianEPPCentre - sigmaMultiplier * medianEPPSigma
     integrationEnd = medianEPPCentre + sigmaMultiplier * medianEPPSigma
+    integratedElasticPeaksWSName = \
+        wsNames.withSuffix('integrated_elastic_peak')
+    integratedElasticPeaksWS = \
+        Integration(InputWorkspace=constantL2WS,
+                    OutputWorkspace=integratedElasticPeaksWSName,
+                    RangeLower=integrationBegin,
+                    RangeUpper=integrationEnd,
+                    IncludePartialBins=True,
+                    EnableLogging=algorithmLogging)
+    solidAngleWSName = wsNames.withSuffix('detector_solid_angles')
+    solidAngleWS = SolidAngle(InputWorkspace=ws,
+                              OutputWorkspace=solidAngleWSName,
+                              EnableLogging=algorithmLogging)
+    solidAngleCorrectedElasticPeaksWSName = \
+        wsNames.withSuffix('solid_angle_corrected_elastic_peak')
+    solidAngleCorrectedElasticPeaksWS = \
+        Divide(LHSWorkspace=integratedElasticPeaksWS,
+               RHSWorkspace=solidAngleWS,
+               OutputWorkspace=solidAngleCorrectedElasticPeaksWSName,
+               EnableLogging=algorithmLogging)
+    elasticPeakDiagnosticsWSName = \
+        wsNames.withSuffix('diagnostics_elastic_peak')    
     elasticPeakDiagnostics, nFailures = \
-        MedianDetectorTest(InputWorkspace=constantL2WS,
+        MedianDetectorTest(InputWorkspace=solidAngleCorrectedElasticPeaksWS,
                            OutputWorkspace=elasticPeakDiagnosticsWSName,
                            SignificanceTest=peakSettings.significanceTest,
                            LowThreshold=peakSettings.lowThreshold,
                            HighThreshold=peakSettings.highThreshold,
-                           CorrectForSolidAngle=True,
                            RangeLower=integrationBegin,
                            RangeUpper=integrationEnd,
                            EnableLogging=algorithmLogging)
@@ -488,6 +526,11 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                          RHSWorkspace=noisyBkgDiagnostics,
                          OutputWorkspace=combinedDiagnosticsWSName,
                          EnableLogging=algorithmLogging)
+    if reportWSName:
+        _createDiagnosticsReportTable(solidAngleCorrectedElasticPeaksWS,
+                                      bkgWS,
+                                      diagnosticsWS,
+                                      reportWSName)
     wsCleanup.cleanup(constantL2WS)
     wsCleanup.cleanup(elasticPeakDiagnostics)
     wsCleanup.cleanup(noisyBkgDiagnostics)
@@ -1138,6 +1181,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for detector diagnostics.')
+        self.declareProperty(ITableWorkspaceProperty(
+            name=_PROP_OUTPUT_DIAGNOSTICS_REPORT_WS,
+            defaultValue='',
+            direction=Direction.Output,
+            optional=PropertyMode.Optional),
+            doc='Output table workspace for detector diagnostics reporting.')
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_THETA_W_WS,
             defaultValue='',
@@ -1411,6 +1460,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 detectorsAtL2 = self.getProperty(_PROP_DETS_AT_L2).value
                 detectorsAtL2 = \
                     self._convertListToWorkspaceIndices(detectorsAtL2, mainWS)
+                diagnosticsReportWSName = \
+                    self.getProperty(
+                        _PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr
                 diagnosticsWS = _diagnoseDetectors(mainWS,
                                                    bkgWS,
                                                    detEPPWS,
@@ -1421,6 +1473,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                    wsNames,
                                                    wsCleanup,
                                                    report,
+                                                   diagnosticsReportWSName,
                                                    subalgLogging)
             else:
                 diagnosticsWS = diagnosticsInWS
