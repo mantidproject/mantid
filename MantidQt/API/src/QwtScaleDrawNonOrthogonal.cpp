@@ -115,7 +115,6 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter *painter,
   // ***********
   // Draw labels
   // ***********
-  const auto &majorTicksOld = scaleDivHkl.ticks(QwtScaleDiv::MajorTick);
 
   if (hasComponent(QwtAbstractScaleDraw::Labels)) {
     painter->save();
