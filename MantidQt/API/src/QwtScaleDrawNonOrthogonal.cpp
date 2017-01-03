@@ -247,7 +247,7 @@ void QwtScaleDrawNonOrthogonal::applyGridLinesY(
 }
 
 /** Tranform from plot coordinates to pixel coordinates
- * @param coords :: coordinate point in plot coordinates
+ * @param xyz :: coordinate point in plot coordinates
  * @return pixel coordinates
 */
 QPoint QwtScaleDrawNonOrthogonal::fromXyzToScreen(QPointF xyz) const {
@@ -257,7 +257,7 @@ QPoint QwtScaleDrawNonOrthogonal::fromXyzToScreen(QPointF xyz) const {
 }
 
 /** Inverse transform: from pixels to plot coords
- * @param pixels :: location in pixels
+ * @param screen :: location in pixels
  * @return plot coordinates (float)
 */
 QPointF QwtScaleDrawNonOrthogonal::fromScreenToXyz(QPoint screen) const {
