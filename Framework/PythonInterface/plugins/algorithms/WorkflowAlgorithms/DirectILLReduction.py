@@ -1373,9 +1373,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                    ' given. TOF axis will not be adjusted.')
                 return mainWS
             index = mainWS.run().getLogData('Detector.elasticpeak').value
-        # TODO There seems to be a bug in CorrectTOFAxis parameter validation.
-        #      No IndexType or ReferenceSpectra should be needed when
-        #      ElasticBinIndex is given.
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
                                      IndexType='Workspace Index',
