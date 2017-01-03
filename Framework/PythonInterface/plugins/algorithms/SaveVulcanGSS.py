@@ -1,6 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-from six.moves import range #pylint: disable=redefined-builtin
+from six.moves import range  #pylint: disable=redefined-builtin
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -29,7 +29,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         """ Declare properties
         """
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
-                             "Focussed diffraction workspace to be exported to GSAS file. ")
+                             "Focused diffraction workspace to be exported to GSAS file. ")
 
         self.declareProperty(FileProperty("BinFilename", "", FileAction.Load, ['.dat']),
                              "Name of a data file containing the bin boundaries in Log(TOF). ")
@@ -50,13 +50,13 @@ class SaveVulcanGSS(PythonAlgorithm):
         """ Main Execution Body
         """
         # Properties
-        inputwsname = self.getPropertyValue("InputWorkspace")
+        input_workspace = self.getPropertyValue("InputWorkspace")
         logtoffilename = self.getPropertyValue("BinFilename")
         outgssfilename = self.getPropertyValue("GSSFilename")
         outputwsname = self.getPropertyValue("OutputWorkspace")
 
         # Check properties
-        inputws = AnalysisDataService.retrieve(inputwsname)
+        inputws = AnalysisDataService.retrieve(input_workspace)
         if inputws is None:
             raise NotImplementedError("Inputworkspace does not exist.")
         if inputws.getAxis(0).getUnit().unitID() != "TOF":
