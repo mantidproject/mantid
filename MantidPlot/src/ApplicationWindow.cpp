@@ -14371,7 +14371,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
 
   d_current_folder = newFolder;
 
-  resultsLog->clear();
   resultsLog->appendInformation(currentFolder()->logInfo());
 
   lv->clear();
