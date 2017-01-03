@@ -690,7 +690,6 @@ void Instrument::markAsDetector(const IDetector *det) {
   // Silently ignore detector IDs that are already marked as detectors, even if
   // the actual detector is different.
   if ((it == m_detectorCache.end()) || (it->first != det->getID())) {
-    //printf("inserting %d\n", det->getID());
     m_detectorCache.emplace(it, det->getID(), det_sptr);
   }
 }
@@ -715,9 +714,9 @@ void Instrument::markAsDetectorFinalize() {
   // in this final sort by using stable_sort and removing duplicates. This will
   // effectively favor the first detector with a certain ID that was added.
   std::stable_sort(m_detectorCache.begin(), m_detectorCache.end(),
-            [](const std::pair<detid_t, IDetector_const_sptr> &a,
-               const std::pair<detid_t, IDetector_const_sptr> &b)
-                -> bool { return a.first < b.first; });
+                   [](const std::pair<detid_t, IDetector_const_sptr> &a,
+                      const std::pair<detid_t, IDetector_const_sptr> &b)
+                       -> bool { return a.first < b.first; });
   m_detectorCache.erase(
       std::unique(m_detectorCache.begin(), m_detectorCache.end(),
                   [](const std::pair<detid_t, IDetector_const_sptr> &a,
