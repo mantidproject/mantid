@@ -449,21 +449,22 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
 }
 
 namespace {
-std::vector<std::pair<detid_t, IDetector_const_sptr>>::const_iterator
-lower_bound(const std::vector<std::pair<detid_t, IDetector_const_sptr>> &map,
-            const detid_t key) {
-  return std::lower_bound(map.begin(), map.end(),
-                          std::make_pair(key, IDetector_const_sptr(nullptr)),
-                          [](const std::pair<detid_t, IDetector_const_sptr> &a,
-                             const std::pair<detid_t, IDetector_const_sptr> &b)
-                              -> bool { return a.first < b.first; });
+// Helpers for accessing m_detectorCache, which is a vector of pairs used as a
+// map. Lookup is by first element in a pair. Templated to support const and
+// non-const.
+template <class T>
+auto lower_bound(T &map, const detid_t key) -> decltype(map.begin()) {
+  return std::lower_bound(
+      map.begin(), map.end(),
+      std::make_pair(key, IDetector_const_sptr(nullptr)),
+      [](const typename T::value_type &a, const typename T::value_type &b)
+          -> bool { return a.first < b.first; });
 }
 
-std::vector<std::pair<detid_t, IDetector_const_sptr>>::const_iterator
-find(const std::vector<std::pair<detid_t, IDetector_const_sptr>> &map,
-     const detid_t key) {
-  const auto it = lower_bound(map, key);
-  if (it->first == key)
+template <class T>
+auto find(T &map, const detid_t key) -> decltype(map.begin()) {
+  auto it = lower_bound(map, key);
+  if ((it != map.end()) && (it->first == key))
     return it;
   return map.end();
 }
@@ -496,7 +497,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   auto det = ParComponentFactory::createDetector(baseDet.get(), m_map);
   // Set the linear detector index, used for legacy accessors to obtain data
   // from Beamline::DetectorInfo, which is stored in the ParameterMap.
-  det->setIndex(std::distance(baseInstr.m_detectorCache.begin(), it));
+  det->setIndex(std::distance(baseInstr.m_detectorCache.cbegin(), it));
   return det;
 }
 
