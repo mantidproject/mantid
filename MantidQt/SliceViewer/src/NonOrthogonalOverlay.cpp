@@ -182,13 +182,6 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &numberPen,
     painter.setPen(gridPen);
     painter.drawLine(start, end);
 
-    // Set the label on the x axis
-    auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
-    auto pointInNonOrthogonalCoordinates = skewMatrixApply(
-        pointInOrthogonalCoordinates.x(), pointInOrthogonalCoordinates.y());
-    label = QString::number(pointInNonOrthogonalCoordinates.x(), 'e', 2);
-    painter.setPen(numberPen);
-    painter.drawText(start, label);
   }
 }
 
@@ -224,14 +217,6 @@ void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &numberPen,
     auto end = QPointF(widthScreen, yValue - yOffsetForXLine);
     painter.setPen(gridPen);
     painter.drawLine(start, end);
-
-    // Set the label on the y axis
-    auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
-    auto pointInNonOrthogonalCoordinates = skewMatrixApply(
-        pointInOrthogonalCoordinates.x(), pointInOrthogonalCoordinates.y());
-    label = QString::number(pointInNonOrthogonalCoordinates.y(), 'e', 2);
-    painter.setPen(numberPen);
-    painter.drawText(QPointF(label.size(), yValue), label);
   }
 }
 
