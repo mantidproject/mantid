@@ -687,7 +687,43 @@ void Instrument::markAsDetector(const IDetector *det) {
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   auto it = lower_bound(m_detectorCache, det->getID());
-  m_detectorCache.emplace(it, det->getID(), det_sptr);
+  // Silently ignore detector IDs that are already marked as detectors, even if
+  // the actual detector is different.
+  if ((it == m_detectorCache.end()) || (it->first != det->getID())) {
+    //printf("inserting %d\n", det->getID());
+    m_detectorCache.emplace(it, det->getID(), det_sptr);
+  }
+}
+
+/// As markAsDetector but without the required sorting. Must call
+/// markAsDetectorFinalize before accessing detectors.
+void Instrument::markAsDetectorIncomplete(const IDetector *det) {
+  if (m_map)
+    throw std::runtime_error("Instrument::markAsDetector() called on a "
+                             "parametrized Instrument object.");
+
+  // Create a (non-deleting) shared pointer to it
+  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
+  m_detectorCache.emplace_back(det->getID(), det_sptr);
+}
+
+/// Sorts the detector cache. Called after all detectors have been marked via
+/// markAsDetectorIncomplete.
+void Instrument::markAsDetectorFinalize() {
+  // markAsDetector silently ignores detector IDs that are already marked as
+  // detectors, even if the actual detector is different. We mimic this behavior
+  // in this final sort by using stable_sort and removing duplicates. This will
+  // effectively favor the first detector with a certain ID that was added.
+  std::stable_sort(m_detectorCache.begin(), m_detectorCache.end(),
+            [](const std::pair<detid_t, IDetector_const_sptr> &a,
+               const std::pair<detid_t, IDetector_const_sptr> &b)
+                -> bool { return a.first < b.first; });
+  m_detectorCache.erase(
+      std::unique(m_detectorCache.begin(), m_detectorCache.end(),
+                  [](const std::pair<detid_t, IDetector_const_sptr> &a,
+                     const std::pair<detid_t, IDetector_const_sptr> &b)
+                      -> bool { return a.first == b.first; }),
+      m_detectorCache.end());
 }
 
 /** Mark a Component which has already been added to the Instrument class

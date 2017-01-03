@@ -116,6 +116,8 @@ public:
   /// child comp.)
   /// to be a Detector component by adding it to _detectorCache
   void markAsDetector(const IDetector *);
+  void markAsDetectorIncomplete(const IDetector *);
+  void markAsDetectorFinalize();
 
   /// mark a Component which has already been added to the Instrument (as a
   /// child comp.)
