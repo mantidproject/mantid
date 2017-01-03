@@ -558,11 +558,9 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace,
     if instrument in ['IN4', 'IN6']:
         pulseInterval = \
             detWorkspace.getRun().getLogData('pulse_interval').value
-        # TODO Remove the IndexType hack when the GetEiMonDet pull request
-        #      is merged.
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorEPPTable=detEPPWorkspace,
-                             IndexType=indexType.replace(' ', ''),
+                             IndexType=indexType,
                              Detectors=eiCalibrationDets,
                              MonitorWorkspace=monWorkspace,
                              MonitorEppTable=monEPPWorkspace,
