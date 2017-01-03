@@ -110,8 +110,14 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
 ParameterTie *IFunction::tie(const std::string &parName,
                              const std::string &expr, bool isDefault) {
   auto ti = new ParameterTie(this, parName, expr, isDefault);
-  addTie(ti);
   this->fix(getParameterIndex(*ti));
+  if (ti->isConstant()) {
+	  setParameter(parName, ti->eval());
+	  delete ti;
+	  ti = nullptr;
+  } else {
+	  addTie(ti);
+  }
   return ti;
 }
 
@@ -154,16 +160,20 @@ void IFunction::removeTie(const std::string &parName) {
 void IFunction::writeTies(std::ostringstream &ostr) const {
   // collect the non-default ties
   std::string ties;
+  bool hasTies = false;
   for (size_t i = 0; i < nParams(); i++) {
+    std::ostringstream tieStream;
     const ParameterTie *tie = getTie(i);
     if (tie && !tie->isDefault()) {
-      std::string tmp = tie->asString(this);
-      if (!tmp.empty()) {
-        if (!ties.empty()) {
-          ties += ",";
-        }
-        ties += tmp;
+      tieStream << tie->asString(this);
+    } else if (isFixed(i)) {
+      tieStream << parameterName(i) << "=" << getParameter(i);
+    }
+    if (!tieStream.str().empty()) {
+      if (!ties.empty()) {
+        ties += ",";
       }
+      ties += tieStream.str();
     }
   }
   // print the ties
@@ -213,7 +223,7 @@ std::string IFunction::asString() const {
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
     const ParameterTie *tie = getTie(i);
-    if (!tie || !tie->isDefault()) {
+    if (!isFixed(i) || (tie && tie->isDefault())) {
       ostr << ',' << parameterName(i) << '=' << getParameter(i);
     }
   }
