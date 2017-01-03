@@ -281,7 +281,7 @@ void IntegrateEllipsoids::init() {
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
-                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**"
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
   declareProperty("AdaptiveQMultiplier", 0.0,
@@ -436,17 +436,15 @@ void IntegrateEllipsoids::exec() {
       // modulus of Q
       double lenQpeak = 0.0;
       if (adaptiveQMultiplier != 0.0) {
-        lenQpeak = 0.0;
         for (size_t d = 0; d < 3; d++) {
           lenQpeak += peak_q[d] * peak_q[d];
         }
         lenQpeak = std::sqrt(lenQpeak);
       }
-      double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
+      const double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
       if (adaptiveRadius <= 0.0) {
         g_log.error() << "Error: Radius for integration sphere of peak " << i
                       << " is negative =  " << adaptiveRadius << '\n';
-        adaptiveRadius = 0.;
         peaks[i].setIntensity(0.0);
         peaks[i].setSigmaIntensity(0.0);
         PeakRadiusVector[i] = 0.0;
@@ -454,9 +452,9 @@ void IntegrateEllipsoids::exec() {
         BackgroundOuterRadiusVector[i] = 0.0;
         continue;
       }
-      double adaptiveBack_inner_radius =
+      const double adaptiveBack_inner_radius =
           adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
-      double adaptiveBack_outer_radius =
+      const double adaptiveBack_outer_radius =
           adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
       PeakRadiusVector[i] = adaptiveRadius;
       BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;

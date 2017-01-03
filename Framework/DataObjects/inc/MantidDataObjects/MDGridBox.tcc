@@ -1087,7 +1087,8 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
 TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
                                       const coord_t radiusSquared,
                                       signal_t &signal,
-                                      signal_t &errorSquared, const coord_t innerRadiusSquared) const {
+                                      signal_t &errorSquared, 
+                                      const coord_t innerRadiusSquared) const {
   // We start by looking at the vertices at every corner of every box contained,
   // to see which boxes are partially contained/fully contained.
 
@@ -1215,7 +1216,8 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
       coord_t out[nd];
       radiusTransform.apply(boxCenter, out);
 
-      if (out[0] < diagonalSquared * 0.72 + radiusSquared || out[0] < diagonalSquared * 0.72 + innerRadiusSquared) {
+      if (out[0] < diagonalSquared * 0.72 + radiusSquared || 
+          out[0] < diagonalSquared * 0.72 + innerRadiusSquared) {
         // If the center is closer than the size of the box, then it MIGHT be
         // touching.
         // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).

@@ -89,7 +89,7 @@ void IntegratePeaksMD2::init() {
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
-                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**"
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
   declareProperty("Cylinder", false,
