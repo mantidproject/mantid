@@ -143,8 +143,6 @@ public:
 
   /// Returns a list containing the detector ids of monitors
   std::vector<detid_t> getMonitors() const;
-  /// Returns the number of monitors
-  size_t numMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;

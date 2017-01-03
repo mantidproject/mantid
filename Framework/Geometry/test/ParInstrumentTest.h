@@ -88,9 +88,9 @@ public:
                      instrument->getComponentByID(id3)->getName());
   }
 
-  void test_numMonitors() {
+  void test_getMonitors() {
     Instrument pinstrument(instrument, pmap);
-    TS_ASSERT_EQUALS(pinstrument.numMonitors(), 1)
+    TS_ASSERT_EQUALS(pinstrument.getMonitors().size(), 1)
   }
 
 private:

@@ -789,18 +789,6 @@ std::vector<detid_t> Instrument::getMonitors() const {
 }
 
 /**
- * Returns the number of monitors attached to this instrument
- * @returns The number of monitors within the instrument
- */
-size_t Instrument::numMonitors() const {
-  if (m_map) {
-    return static_cast<const Instrument *>(m_base)->m_monitorCache.size();
-  } else {
-    return m_monitorCache.size();
-  }
-}
-
-/**
  * Get the bounding box for this instrument. It is simply the sum of the
  * bounding boxes of its children excluding the source
  * @param assemblyBox :: [Out] The resulting bounding box is stored here.
