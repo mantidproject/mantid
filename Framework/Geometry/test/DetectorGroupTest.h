@@ -81,8 +81,6 @@ public:
     TS_ASSERT_DELTA(m_detGroup->getDistance(m_origin), 4.24614987, 1e-08);
   }
 
-  void testMasked() { TS_ASSERT(!m_detGroup->isMasked()); }
-
   void testIsMonitor() {
     boost::shared_ptr<DetectorGroup> monitorGroup =
         ComponentCreationHelper::createGroupOfTwoMonitors();
@@ -97,7 +95,6 @@ public:
         ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
     auto d = boost::make_shared<Detector>("d", 6, nullptr);
     d->setPos(6.0, 3.0, 2.0);
-    TS_ASSERT(!detg->isMasked());
     detg->addDetector(d);
     TS_ASSERT_EQUALS(detg->getID(), 1);
     TS_ASSERT_DELTA(detg->getPos()[0], 3.5, 1e-08);

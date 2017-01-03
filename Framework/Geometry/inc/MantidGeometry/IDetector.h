@@ -100,8 +100,6 @@ public:
   /// Gives the phi of this detector offset from y=0 by offset.
   virtual double getPhiOffset(const double &offset) const = 0;
 
-  /// Indicates whether the detector has been masked
-  virtual bool isMasked() const = 0;
   /// Indicates whether this is a monitor detector
   virtual bool isMonitor() const = 0;
 

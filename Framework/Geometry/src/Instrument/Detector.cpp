@@ -122,20 +122,6 @@ det_topology Detector::getTopology(V3D &center) const {
   return rect;
 }
 
-/** Returns true if the detector is masked. Only Parametrized instruments
- * can have masked detectors.
- *  @return false
- */
-bool Detector::isMasked() const {
-  if (m_map) {
-    Parameter_sptr par = m_map->get(m_base, "masked");
-    if (par)
-      return par->value<bool>();
-  }
-  // If you get to here, instead of the Detector method, then it isn't masked
-  return false;
-}
-
 /// Is the detector a monitor?
 ///@return true if it is a monitor
 bool Detector::isMonitor() const {

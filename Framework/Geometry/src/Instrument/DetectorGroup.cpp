@@ -201,22 +201,6 @@ double DetectorGroup::solidAngle(const V3D &observer) const {
   return result;
 }
 
-/** Are ALL the detectors in this group masked?
- *  @return True if every one of the detectors in this group is masked, false
- * otherwise.
- */
-bool DetectorGroup::isMasked() const {
-  bool isMasked = true;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if (!(*it).second->isMasked()) {
-      isMasked = false;
-      break;
-    }
-  }
-  return isMasked;
-}
-
 /** Return true if any detector in the group is parametrized.
  *
  */

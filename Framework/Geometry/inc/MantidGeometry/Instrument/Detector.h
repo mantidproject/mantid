@@ -69,7 +69,6 @@ public:
                            const Kernel::V3D &instrumentUp) const override;
   double getPhi() const override;
   double getPhiOffset(const double &offset) const override;
-  bool isMasked() const override;
   bool isMonitor() const override;
   // end IDetector methods
   void markAsMonitor(const bool flag = true);

@@ -62,7 +62,7 @@ public:
 
     // Reading and writing masking should throw: Masking is now stored in
     // DetectorInfo and ParameterMap should reject it.
-    TS_ASSERT_THROWS(pdet->isMasked(), std::runtime_error);
+    TS_ASSERT_THROWS(pmap->get(&det, "masked"), std::runtime_error);
     TS_ASSERT_THROWS(pmap->addBool(&det, "masked", true), std::runtime_error);
   }
 

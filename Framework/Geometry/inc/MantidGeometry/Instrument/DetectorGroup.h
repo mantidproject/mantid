@@ -67,7 +67,6 @@ public:
   double getPhiOffset(const double &offset) const override;
   double solidAngle(const Kernel::V3D &observer) const override;
   bool isParametrized() const override;
-  bool isMasked() const override;
   bool isMonitor() const override;
   bool isValid(const Kernel::V3D &point) const override;
   bool isOnSide(const Kernel::V3D &point) const override;
