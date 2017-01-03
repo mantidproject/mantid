@@ -509,7 +509,7 @@ def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
 
 
 def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace,
-                              monEPPWorkspace, indexType, eiCalibrationDets,
+                              monEPPWorkspace, eiCalibrationDets,
                               eiCalibrationMon, wsNames, log,
                               algorithmLogging):
     '''
@@ -522,7 +522,7 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace,
             detWorkspace.getRun().getLogData('pulse_interval').value
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorEPPTable=detEPPWorkspace,
-                             IndexType=indexType,
+                             IndexType='Workspace Index',
                              Detectors=eiCalibrationDets,
                              MonitorWorkspace=monWorkspace,
                              MonitorEppTable=monEPPWorkspace,
@@ -1205,15 +1205,16 @@ class DirectILLReduction(DataProcessorAlgorithm):
             if not eiInWS:
                 eiCalibrationDets = \
                     self.getProperty(_PROP_DETS_AT_L2).value
+                eiCalibrationDets = \
+                    self._convertListToWorkspaceIndices(eiCalibrationDets,
+                                                        mainWS)
                 monIndex = self.getProperty(_PROP_MON_INDEX).value
                 monIndex = self._convertToWorkspaceIndex(monIndex, monWS)
-                indexType = self.getProperty(_PROP_INDEX_TYPE).value
                 eiCalibrationWS = \
                     _calibratedIncidentEnergy(mainWS,
                                               detEPPWS,
                                               monWS,
                                               monEPPWS,
-                                              indexType,
                                               eiCalibrationDets,
                                               monIndex,
                                               wsNames,
@@ -1247,6 +1248,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  eiCalibrationWS)
             wsCleanup.cleanup(eiCalibrationWS)
         return mainWS, monWS
+
+    def _convertListToWorkspaceIndices(self, indices, ws):
+        return [self._convertToWorkspaceIndex(i, ws) for i in indices]
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
         '''
@@ -1405,6 +1409,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                               highThreshold,
                                                               significanceTest)
                 detectorsAtL2 = self.getProperty(_PROP_DETS_AT_L2).value
+                detectorsAtL2 = \
+                    self._convertListToWorkspaceIndices(detectorsAtL2, mainWS)
                 diagnosticsWS = _diagnoseDetectors(mainWS,
                                                    bkgWS,
                                                    detEPPWS,
