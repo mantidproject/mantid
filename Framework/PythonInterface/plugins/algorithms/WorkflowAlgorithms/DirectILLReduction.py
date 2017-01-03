@@ -9,13 +9,13 @@ from mantid.kernel import (CompositeValidator, Direct, Direction,
                            EnabledWhenProperty, FloatArrayProperty,
                            FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, IntBoundedValidator,
-                           IntMandatoryValidator, PropertyCriterion,
+                           IntMandatoryValidator, Property, PropertyCriterion,
                            StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
                               CalculateFlatBackground, ClearMaskFlag,
                               CloneWorkspace, ComputeCalibrationCoefVan,
                               ConvertSpectrumAxis, ConvertToConstantL2,
-                              ConvertUnits, CorrectKiKf,
+                              ConvertUnits, CorrectKiKf, CorrectTOFAxis,
                               CreateSingleValuedWorkspace, DeleteWorkspace,
                               DetectorEfficiencyCorUser, Divide,
                               ExtractMonitors, FindEPP, GetEiMonDet,
@@ -56,6 +56,7 @@ _PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 _PROP_DET_DIAGNOSTICS = 'Diagnostics'
 _PROP_DETS_AT_L2 = 'DetectorsAtL2'
 _PROP_EC_WS = 'EmptyContainerWorkspace'
+_PROP_ELASTIC_BIN_INDEX = 'ElasticBinIndex'
 _PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER = 'ElasticPeakWidthInSigmas'
 _PROP_EPP_WS = 'EPPWorkspace'
 _PROP_FLAT_BKG_SCALING = 'FlatBkgScaling'
@@ -64,7 +65,6 @@ _PROP_FLAT_BKG_WS = 'FlatBkgWorkspace'
 _PROP_INCIDENT_ENERGY_CALIBRATION = 'IncidentEnergyCalibration'
 _PROP_INCIDENT_ENERGY_WS = 'IncidentEnergyWorkspace'
 _PROP_INDEX_TYPE = 'IndexType'
-_PROP_INITIAL_ELASTIC_PEAK_REFERENCE = 'InitialElasticPeakReference'
 _PROP_INPUT_FILE = 'InputFile'
 _PROP_INPUT_WS = 'InputWorkspace'
 _PROP_MON_EPP_WS = 'MonitorEPPWorkspace'
@@ -85,12 +85,14 @@ _PROP_REBINNING_MODE_W = 'EnergyRebinningMode'
 _PROP_REBINNING_PARAMS_Q = 'QRebinningParams'
 _PROP_REBINNING_PARAMS_W = 'EnergyRebinningParams'
 _PROP_REDUCTION_TYPE = 'ReductionType'
+_PROP_REFERENCE_TOF_AXIS_WS = 'ReferenceTOFAxisWorkspace'
 _PROP_TRANSMISSION = 'Transmission'
 _PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
 _PROP_USER_MASK = 'MaskedDetectors'
 _PROP_VANA_WS = 'VanadiumWorkspace'
 
 _PROPGROUP_REBINNING = 'Rebinning for SofQW'
+_PROPGROUP_TOF_AXIS_CORRECTION = 'TOF Axis Correction for Elastic Channel'
 
 _REBIN_AUTO_ELASTIC_PEAK = 'Rebin to Bin Width at Elastic Peak'
 _REBIN_AUTO_MEDIAN_BIN_WIDTH = 'Rebin to Median Bin Width'
@@ -293,63 +295,23 @@ def _groupsToGroupingPattern(groups):
         pattern = pattern[:-1] + ','
     return pattern[:-1]
 
-def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log,
-               algorithmLogging):
+def _loadFiles(inputFilename, wsNames, wsCleanup, algorithmLogging):
     '''
     Loads files specified by filenames, merging them into a single
     workspace.
     '''
-    # TODO Stop this epp reference madness when LoadILLTOF v.2 is available.
     # TODO Explore ways of loading data file-by-file and merging pairwise.
     #      Should save some memory (IN5!).
     rawWSName = wsNames.withSuffix('raw')
-    if eppReference:
-        if mtd.doesExist(str(eppReference)):
-            ws = Load(Filename=inputFilename,
-                      OutputWorkspace=rawWSName,
-                      WorkspaceVanadium=eppReference,
-                      EnableLogging=algorithmLogging)
-        else:
-            ws = Load(Filename=inputFilename,
-                      OutputWorkspace=rawWSName,
-                      FilenameVanadium=eppReference,
-                      EnableLogging=algorithmLogging)
-    else:
-        # For multiple files, we need an EPP reference workspace
-        # anyway, so we'll use the first file the user wants to
-        # load.
-        head, tail = path.split(inputFilename)
-        # Loop over known MultipleFileProperty file list
-        # specifiers.
-        for separator in [':', ',', '-', '+']:
-            referenceFilename, sep, rest = tail.partition(separator)
-            if referenceFilename:
-                break
-        if referenceFilename:
-            referenceFilename = path.join(head, referenceFilename)
-            log.information('Using ' + referenceFilename +
-                            ' as initial EPP reference.')
-            eppReferenceWSName = wsNames.withSuffix('initial_epp_reference')
-            Load(Filename=referenceFilename,
-                 OutputWorkspace=eppReferenceWSName,
+    rawWS = Load(Filename=inputFilename,
+                 OutputWorkspace=rawWSName,
                  EnableLogging=algorithmLogging)
-            ws = Load(Filename=inputFilename,
-                      OutputWorkspace=rawWSName,
-                      WorkspaceVanadium=eppReferenceWSName,
-                      EnableLogging=algorithmLogging)
-            wsCleanup.cleanup(eppReferenceWSName)
-        else:
-            # Single file, no EPP reference.
-            ws = Load(Filename=inputFilename,
-                      OutputWorkspace=rawWSName,
-                      EnableLogging=algorithmLogging)
-    # Now merge the loaded files
     mergedWSName = wsNames.withSuffix('merged')
-    ws = MergeRuns(InputWorkspaces=ws,
-                   OutputWorkspace=mergedWSName,
-                   EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(rawWSName)
-    return ws
+    mergedWS = MergeRuns(InputWorkspaces=rawWS,
+                         OutputWorkspace=mergedWSName,
+                         EnableLogging=algorithmLogging)
+    wsCleanup.cleanup(rawWS)
+    return mergedWS
 
 
 def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
@@ -846,6 +808,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self._normalizeToVana(mainWS, wsNames, wsCleanup,
                                        subalgLogging)
 
+        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup,
+                                      subalgLogging)
+
         # Convert units from TOF to energy.
         mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup,
                                           subalgLogging)
@@ -928,11 +893,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
-        self.declareProperty(name=_PROP_INITIAL_ELASTIC_PEAK_REFERENCE,
-                             defaultValue='',
-                             direction=Direction.Input,
-                             doc="Reference file or workspace for " +
-                                 "initial 'EPP' sample log entry.")
         self.declareProperty(name=_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                              defaultValue=3.0,
                              validator=positiveFloat,
@@ -1100,6 +1060,29 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Sample transmission for empty container ' +
                                  'subtraction.')
+        self.declareProperty(MatrixWorkspaceProperty(
+                             name=_PROP_REFERENCE_TOF_AXIS_WS,
+                             defaultValue='',
+                             validator=WorkspaceUnitValidator('TOF'),
+                             optional=PropertyMode.Optional,
+                             direction=Direction.Input),
+                             doc='Workspace from which to copy the TOF axis.')
+        self.setPropertySettings(_PROP_REFERENCE_TOF_AXIS_WS,
+            EnabledWhenProperty(
+            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
+            _REDUCTION_TYPE_SAMPLE))
+        self.setPropertyGroup(_PROP_REFERENCE_TOF_AXIS_WS,
+                              _PROPGROUP_TOF_AXIS_CORRECTION)
+        self.declareProperty(name=_PROP_ELASTIC_BIN_INDEX,
+                             defaultValue=Property.EMPTY_INT,
+                             validator=IntBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc='Bin index of the elastic channel.')
+        self.setPropertySettings(_PROP_ELASTIC_BIN_INDEX, EnabledWhenProperty(
+            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
+            _REDUCTION_TYPE_SAMPLE))
+        self.setPropertyGroup(_PROP_ELASTIC_BIN_INDEX,
+                              _PROPGROUP_TOF_AXIS_CORRECTION)
         self.declareProperty(name=_PROP_REBINNING_MODE_W,
                              defaultValue=_REBIN_AUTO_ELASTIC_PEAK,
                              validator=StringListValidator([
@@ -1318,6 +1301,37 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         return correctedWS
 
+    def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        correctedWSName = wsNames.withSuffix('tof_axis_corrected')
+        referenceWS = self.getProperty(_PROP_REFERENCE_TOF_AXIS_WS).value
+        if referenceWS:
+            correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
+                                         OutputWorkspace=correctedWSName,
+                                         ReferenceWorkspace=referenceWS,
+                                         EnableLogging=subalgLogging)
+            wsCleanup.cleanup(mainWS)
+            return correctedWS
+        if not self.getProperty(_PROP_ELASTIC_BIN_INDEX).isDefault:
+            index = self.getProperty(_PROP_ELASTIC_BIN_INDEX).value
+        else:
+            if not mainWS.run().hasProperty('Detector.elasticpeak'):
+                self.log().warning('No ' + _PROP_REFERENCE_TOF_AXIS_WS +
+                                   ' or ' + _PROP_ELASTIC_BIN_INDEX +
+                                   ' given. TOF axis will not be adjusted.')
+                return mainWS
+            index = mainWS.run().getLogData('Detector.elasticpeak').value
+        # TODO There seems to be a bug in CorrectTOFAxis parameter validation.
+        #      No IndexType or ReferenceSpectra should be needed when
+        #      ElasticBinIndex is given.
+        correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
+                                     OutputWorkspace=correctedWSName,
+                                     IndexType='Workspace Index',
+                                     ReferenceSpectra='0',
+                                     ElasticBinIndex=index,
+                                     EnableLogging=True)
+        wsCleanup.cleanup(mainWS)
+        return correctedWS
+
     def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
         '''
         Creates an EPP table for a detector workspace.
@@ -1498,13 +1512,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         '''
         inputFile = self.getProperty(_PROP_INPUT_FILE).value
         if inputFile:
-            eppReference = \
-                self.getProperty(_PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
             mainWS = _loadFiles(inputFile,
-                                eppReference,
                                 wsNames,
                                 wsCleanup,
-                                self.log(),
                                 subalgLogging)
         elif self.getProperty(_PROP_INPUT_WS).value:
             mainWS = self.getProperty(_PROP_INPUT_WS).value
