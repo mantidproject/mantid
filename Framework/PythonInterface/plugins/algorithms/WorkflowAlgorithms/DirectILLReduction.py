@@ -18,13 +18,14 @@ from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
                               ConvertUnits, CorrectKiKf,
                               CreateSingleValuedWorkspace, DeleteWorkspace,
                               DetectorEfficiencyCorUser, Divide,
-                              ExtractMonitors, FindEPP, GetEiMonDet, Load,
-                              MaskDetectors, MedianBinWidth,
-                              MedianDetectorTest, MergeRuns, Minus, Multiply,
-                              NormaliseToMonitor, Plus, Rebin, Scale,
-                              SofQWNormalisedPolygon)
+                              ExtractMonitors, FindEPP, GetEiMonDet,
+                              GroupDetectors, Load, MaskDetectors,
+                              MedianBinWidth, MedianDetectorTest, MergeRuns,
+                              Minus, Multiply, NormaliseToMonitor, Plus, Rebin,
+                              Scale, SofQWNormalisedPolygon)
 import numpy
 from os import path
+from scipy import constants
 
 _CLEANUP_DELETE = 'Delete Intermediate Workspaces'
 _CLEANUP_KEEP = 'Keep Intermediate Workspaces'
@@ -250,6 +251,47 @@ class _Report:
             elif loggingLevel == _Report._LEVEL_ERROR:
                 log.error(entry.contents())
 
+
+def _createDetectorGroups(ws):
+    '''
+    Finds detectors with (almost) same theta and groups them. Masked detectors
+    are ignored.
+    '''
+    numHistograms = ws.getNumberHistograms()
+    assignedDets = list()
+    groups = list()
+    for i in range(numHistograms):
+        if i in assignedDets:
+            continue
+        det1 = ws.getDetector(i)
+        if det1.isMasked():
+            continue
+        currentGroup = [det1.getID()]
+        twoTheta1 = ws.detectorTwoTheta(det1)
+        for j in range(i + 1, numHistograms):
+            if j in assignedDets:
+                continue
+            det2 = ws.getDetector(j)
+            if det2.isMasked():
+                continue
+            twoTheta2 = ws.detectorTwoTheta(det2)
+            if abs(twoTheta1 - twoTheta2) < 0.01 / 180.0 * constants.pi:
+                currentGroup.append(det2.getID())
+                assignedDets.append(j)
+        groups.append(currentGroup)
+    return groups
+
+
+def _groupsToGroupingPattern(groups):
+    '''
+    Returns a grouping pattern suitable for the GroupDetectors algorithm.
+    '''
+    pattern = ''
+    for group in groups:
+        for index in group:
+            pattern += str(index) + '+'
+        pattern = pattern[:-1] + ','
+    return pattern[:-1]
 
 def _loadFiles(inputFilename, eppReference, wsNames, wsCleanup, log,
                algorithmLogging):
@@ -823,6 +865,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                    wsCleanup, subalgLogging)
 
         # TODO Self-shielding corrections
+
+        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup,
+                                      subalgLogging)
 
         self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup,
                                        subalgLogging)
@@ -1432,6 +1477,22 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanup(monBkgWS)
         wsCleanup.cleanup(monWS)
         return bkgSubtractedMonWS
+
+    def _groupDetectors(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Groups detectors with similar thetas.
+        '''
+        groups = _createDetectorGroups(mainWS)
+        groupingPattern = _groupsToGroupingPattern(groups)
+        groupedWSName = wsNames.withSuffix('grouped_detectors')
+        groupedWS = GroupDetectors(InputWorkspace=mainWS,
+                                   OutputWorkspace=groupedWSName,
+                                   GroupingPattern=groupingPattern,
+                                   KeepUngroupedSpectra=False,
+                                   Behaviour='Sum',
+                                   EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return groupedWS
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
         '''
