@@ -28,6 +28,7 @@ Improved
    * an `Interpolation` option has been added. Availabile options are: `Linear` & `CSpline`.
    * the method of selecting the scattering point has ben updated to give better agreement with numerical algorithms such as :ref:`CylinderAbsorption <algm-CylinderAbsorption>`.
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
+- :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 
 Renamed
 #######
