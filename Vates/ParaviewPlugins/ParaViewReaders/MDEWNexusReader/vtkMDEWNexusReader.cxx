@@ -17,7 +17,6 @@
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
@@ -104,15 +103,14 @@ int vtkMDEWNexusReader::RequestData(
   FilterUpdateProgressAction<vtkMDEWNexusReader> drawingProgressAction(
       this, "Drawing...");
 
-  ThresholdRange_scptr thresholdRange =
-      boost::make_shared<IgnoreZerosThresholdRange>();
-  auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
-      thresholdRange, m_normalization);
+  auto hexahedronFactory =
+      Mantid::Kernel::make_unique<vtkMDHexFactory>(m_normalization);
 
-  hexahedronFactory->setSuccessor(Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-                                      thresholdRange, m_normalization))
-      .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
-          thresholdRange, m_normalization));
+  hexahedronFactory
+      ->setSuccessor(
+          Mantid::Kernel::make_unique<vtkMDQuadFactory>(m_normalization))
+      .setSuccessor(
+          Mantid::Kernel::make_unique<vtkMDLineFactory>(m_normalization));
 
   hexahedronFactory->setTime(m_time);
   vtkDataSet *product = m_presenter->execute(

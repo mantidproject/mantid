@@ -43,17 +43,15 @@ namespace Mantid {
 namespace VATES {
 /**
  * Constructor
- * @param thresholdRange : Threshold range strategy
  * @param scalarName : Name for scalar signal array.
  * @param numPoints : Total number of points to create.
  * @param percentToUse : Cutoff for the densest boxes.
  */
-vtkSplatterPlotFactory::vtkSplatterPlotFactory(
-    ThresholdRange_scptr thresholdRange, const std::string &scalarName,
-    const size_t numPoints, const double percentToUse)
-    : m_thresholdRange(thresholdRange), m_scalarName(scalarName),
-      m_numPoints(numPoints), m_buildSortedList(true), m_wsName(""),
-      slice(false), m_time(0.0), m_minValue(0.1), m_maxValue(0.1),
+vtkSplatterPlotFactory::vtkSplatterPlotFactory(const std::string &scalarName,
+                                               const size_t numPoints,
+                                               const double percentToUse)
+    : m_scalarName(scalarName), m_numPoints(numPoints), m_buildSortedList(true),
+      m_wsName(""), slice(false), m_time(0.0), m_minValue(0.1), m_maxValue(0.1),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()) {
@@ -158,7 +156,7 @@ void vtkSplatterPlotFactory::doCreate(
 
   // Create the point list, one position for each point actually used
   vtkNew<vtkPoints> points;
-  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *pointsArray = vtkFloatArray::FastDownCast(points->GetData());
   if (!pointsArray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   }
@@ -291,7 +289,7 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
 
   // Get the transformation that takes the points in the TRANSFORMED space back
   // into the ORIGINAL (not-rotated) space.
-  Mantid::API::CoordTransform const *transform = NULL;
+  Mantid::API::CoordTransform const *transform = nullptr;
   if (m_useTransform) {
     transform = workspace->getTransformToOriginal();
   }
@@ -314,7 +312,6 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
         // Make sure that the signal is not bad and is in the range and larger
         // than 0
         if (std::isfinite(signalScalar) &&
-            m_thresholdRange->inRange(signalScalar) &&
             (signalScalar > static_cast<signal_t>(0.0))) {
           in[0] = (minX + (static_cast<coord_t>(x) + 0.5f) * incrementX);
           // Create the transformed value if required

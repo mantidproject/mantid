@@ -83,7 +83,7 @@ void HFIRDarkCurrentSubtraction::exec() {
     output_message += darkWSName + '\n';
   } else {
     // Load the dark current if we don't have it already
-    if (darkWSName.size() == 0) {
+    if (darkWSName.empty()) {
       darkWSName = "__dark_current_" + path.getBaseName();
       setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
     }

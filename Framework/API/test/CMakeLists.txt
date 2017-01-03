@@ -16,6 +16,7 @@ if ( CXXTEST_FOUND )
             API
             Geometry
             HistogramData
+            Indexing
             Kernel
             Nexus
             ${JSONCPP_LIBRARIES}

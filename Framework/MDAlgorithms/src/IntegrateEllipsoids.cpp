@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -340,9 +341,7 @@ void IntegrateEllipsoids::exec() {
       g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                   "edge for IntegrateIfOnEdge option");
     }
-    // Get the instrument and its detectors
-    Geometry::Instrument_const_sptr inst = in_peak_ws->getInstrument();
-    calculateE1(inst); // fill E1Vec for use in detectorQ
+    calculateE1(in_peak_ws->detectorInfo()); // fill E1Vec for use in detectorQ
   }
 
   Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
@@ -628,17 +627,15 @@ void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
  *
  * @param inst: instrument
  */
-void IntegrateEllipsoids::calculateE1(Geometry::Instrument_const_sptr inst) {
-  std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
-
-  for (auto &detectorID : detectorIDs) {
-    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(detectorID);
-    if (det->isMonitor())
+void IntegrateEllipsoids::calculateE1(const API::DetectorInfo &detectorInfo) {
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (detectorInfo.isMonitor(i))
       continue; // skip monitor
-    if (!det->isMasked())
+    if (!detectorInfo.isMasked(i))
       continue; // edge is masked so don't check if not masked
-    double tt1 = det->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-    double ph1 = det->getPhi();                                // phi
+    const auto &det = detectorInfo.detector(i);
+    double tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    double ph1 = det.getPhi();                                // phi
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize

@@ -16,7 +16,7 @@ namespace MantidQt {
 //------------------------------------------------------------------------------
 // Mantid Forward declarations
 //------------------------------------------------------------------------------
-namespace MantidWidgets {
+namespace API {
 class MWRunFiles;
 }
 

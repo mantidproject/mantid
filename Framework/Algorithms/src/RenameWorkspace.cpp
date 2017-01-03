@@ -112,7 +112,7 @@ void RenameWorkspace::exec() {
   if (monWS) {
     std::string monWSName = monWS->getName();
     // rename the monitor workspace accordingly
-    if (monWSName.size() == 0) {
+    if (monWSName.empty()) {
       // workspace will always have name after added to ADS, so apparently not
       // the case
       AnalysisDataService::Instance().add(outputwsName + "_monitors", monWS);

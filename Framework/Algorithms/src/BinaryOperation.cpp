@@ -398,7 +398,7 @@ std::string BinaryOperation::checkSizeCompatibility(
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
   // the first spectrum
-  if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+  if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
     return "X arrays must match when performing this operation on a 2D "
            "workspaces.";
   }
@@ -454,7 +454,7 @@ bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
        rhsSpectrumInfo.isMasked(index))) {
     continueOp = false;
     out.getSpectrum(index).clearData();
-    outSpectrumInfo.setMasked(index, true);
+    PARALLEL_CRITICAL(setMasked) { outSpectrumInfo.setMasked(index, true); }
   }
   return continueOp;
 }

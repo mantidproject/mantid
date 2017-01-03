@@ -6,7 +6,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/AlignDetectors.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"

@@ -256,7 +256,7 @@ void OptimizeCrystalPlacement::exec() {
     message += "will be 'changed'";
     g_log.notice(message);
   }
-  if (OptRunNums.size() > 0 && !omitRuns)
+  if (!OptRunNums.empty() && !omitRuns)
     FuncArg += ",OptRuns=" + OptRunNums;
 
   //------------- Add initial parameter values to FuncArg -----------

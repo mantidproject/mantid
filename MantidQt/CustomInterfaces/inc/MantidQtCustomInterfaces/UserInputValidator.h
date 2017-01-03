@@ -2,11 +2,11 @@
 #define MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
 
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 #include "MantidQtMantidWidgets/DataSelector.h"
 
+using MantidQt::API::MWRunFiles;
 using MantidQt::MantidWidgets::WorkspaceSelector;
-using MantidQt::MantidWidgets::MWRunFiles;
 using MantidQt::MantidWidgets::DataSelector;
 
 class QLineEdit;
