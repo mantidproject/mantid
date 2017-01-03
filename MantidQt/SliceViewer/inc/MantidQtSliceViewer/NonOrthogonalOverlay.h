@@ -70,12 +70,10 @@ private:
   QPoint transform(QPointF coords) const;
   QPointF invTransform(QPoint pixels) const;
 
-  void drawYLines(QPainter &painter, QPen &numberPen, QPen &gridPen,
-                  int widthScreen, int heightScreen, int numberOfGridLines,
-                  double angle);
-  void drawXLines(QPainter &painter, QPen &numberPen, QPen &gridPen,
-                  int widthScreen, int heightScreen, int numberOfGridLines,
-                  double angle);
+  void drawYLines(QPainter &painter, QPen &gridPen, int widthScreen,
+                  int heightScreen, int numberOfGridLines, double angle);
+  void drawXLines(QPainter &painter, QPen &gridPen, int widthScreen,
+                  int heightScreen, int numberOfGridLines, double angle);
 
   void setSkewMatrix();
 

@@ -124,8 +124,6 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
   if (m_enabled) {
     QPainter painter(this);
 
-    QPen numberPen(QColor(160, 160, 160, 255));
-
     QPen gridPen(QColor(100, 100, 100, 100)); // grey
     gridPen.setWidth(1);
     gridPen.setCapStyle(Qt::FlatCap);
@@ -135,17 +133,16 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     const auto heightScreen = height();
 
     const int numberOfGridLines = 10;
-    drawYLines(painter, numberPen, gridPen, widthScreen, heightScreen,
-               numberOfGridLines, m_angleY);
-    drawXLines(painter, numberPen, gridPen, widthScreen, heightScreen,
-               numberOfGridLines, m_angleX);
+    drawYLines(painter, gridPen, widthScreen, heightScreen, numberOfGridLines,
+               m_angleY);
+    drawXLines(painter, gridPen, widthScreen, heightScreen, numberOfGridLines,
+               m_angleX);
   }
 }
 
-void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &numberPen,
-                                      QPen &gridPen, int widthScreen,
-                                      int heightScreen, int numberOfGridLines,
-                                      double angle) {
+void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
+                                      int widthScreen, int heightScreen,
+                                      int numberOfGridLines, double angle) {
   // Draw Y grid lines - in a orthogonal world these lines will be parallel to
   // the Y axes.
   const auto increment = widthScreen / numberOfGridLines;
@@ -184,10 +181,9 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &numberPen,
   }
 }
 
-void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &numberPen,
-                                      QPen &gridPen, int widthScreen,
-                                      int heightScreen, int numberOfGridLines,
-                                      double angle) {
+void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen,
+                                      int widthScreen, int heightScreen,
+                                      int numberOfGridLines, double angle) {
 
   // Draw X grid lines - in a orthogonal world these lines will be parallel to
   // the X axes.
