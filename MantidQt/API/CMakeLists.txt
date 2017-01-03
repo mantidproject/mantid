@@ -5,6 +5,7 @@
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
+        src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
@@ -25,6 +26,7 @@
 	src/MdSettings.cpp
 	src/Message.cpp
 	src/NonOrthogonal.cpp
+	src/MWRunFiles.cpp
 	src/OptionsPropertyWidget.cpp
 	src/pixmaps.cpp
 	src/PlotAxis.cpp
@@ -70,6 +72,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidWidget.h
   inc/MantidQtAPI/NonOrthogonal.h
+  inc/MantidQtAPI/MWRunFiles.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
@@ -134,11 +137,18 @@ set ( INC_FILES
 
 set ( UI_FILES
   inc/MantidQtAPI/ManageUserDirectories.ui
+  inc/MantidQtAPI/MWRunFiles.ui
   inc/MantidQtAPI/ScriptRepositoryView.ui
+)
+
+# Python unit tests
+set ( TEST_PY_FILES
+  test/MWRunFilesTest.py
 )
 
 set( TEST_FILES
    BatchAlgorithmRunnerTest.h
+   FileDialogHandlerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
    NonOrthogonalTest.h

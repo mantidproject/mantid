@@ -149,11 +149,6 @@ private:
     inputWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
 
-    // the following is largely about associating detectors with the workspace
-    for (int j = 0; j < NHIST; ++j) {
-      // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j).setSpectrumNo(j + 1);
-    }
     // we do not need to deal with analysisi data service here in test to avoid
     // holding the workspace there after the test
     AnalysisDataService::Instance().add(input, inputWS);
@@ -167,13 +162,6 @@ private:
     loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.setPropertyValue("Workspace", input);
     loader.execute();
-
-    // mask the detector
-    Geometry::ParameterMap *m_Pmap = &(inputWS->instrumentParameters());
-    boost::shared_ptr<const Instrument> instru = inputWS->getInstrument();
-    Geometry::IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
-    TS_ASSERT(toMask);
-    m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
     inputWS->setDistribution(true);

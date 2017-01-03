@@ -22,7 +22,6 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/MdSettings.h"
@@ -1339,7 +1338,7 @@ QString SliceViewer::ensurePngExtension(const QString &fname) const {
 void SliceViewer::saveImage(const QString &filename) {
   QString fileselection;
   if (filename.isEmpty()) {
-    fileselection = MantidQt::API::FileDialogHandler::getSaveFileName(
+    fileselection = QFileDialog::getSaveFileName(
         this, tr("Pick a file to which to save the image"),
         QFileInfo(m_lastSavedFile).absoluteFilePath(),
         tr("PNG files(*.png *.png)"));

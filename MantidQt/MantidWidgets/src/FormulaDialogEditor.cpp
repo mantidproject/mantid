@@ -1,7 +1,6 @@
 #include "MantidQtMantidWidgets/FormulaDialogEditor.h"
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
 
-#include <QFileDialog>
 #include <QSettings>
 
 namespace MantidQt {

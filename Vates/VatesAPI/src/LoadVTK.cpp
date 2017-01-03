@@ -112,8 +112,7 @@ int LoadVTK::version() const { return 1; }
 const std::string LoadVTK::category() const { return "MDAlgorithms"; }
 
 void LoadVTK::init() {
-  std::vector<std::string> exts;
-  exts.push_back("vtk");
+  std::vector<std::string> exts{"vtk"};
   this->declareProperty(
       Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
                                         exts),
@@ -187,18 +186,7 @@ void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals,
   double *destinationSignals = outputWS->getSignalArray();
   double *destinationErrorsSQ = outputWS->getErrorSquaredArray();
 
-  if (errorsSQ == NULL) {
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int64_t i = 0; i < nPoints; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      // cppcheck-suppress unreadVariable
-      destinationSignals[i] = signals->GetValue(i);
-      if (i % frequency == 0)
-        prog.report();
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-  } else {
+  if (errorsSQ) {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < nPoints; ++i) {
       PARALLEL_START_INTERUPT_REGION
@@ -210,8 +198,18 @@ void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals,
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
+  } else {
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int64_t i = 0; i < nPoints; ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      // cppcheck-suppress unreadVariable
+      destinationSignals[i] = signals->GetValue(i);
+      if (i % frequency == 0)
+        prog.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
-
   prog.report("Complete");
   this->setProperty("OutputWorkspace", outputWS);
 }
@@ -257,16 +255,16 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
   ws->addDimension(dimZ);
   ws->initialize();
 
-  if (errorsSQ == NULL) {
+  if (errorsSQ) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int64_t i = 0; i < nPoints; ++i) {
       PARALLEL_START_INTERUPT_REGION
       double coordinates[3];
       readDataset->GetPoint(i, coordinates);
       float signal = signals->GetValue(i);
-
+      float errorSQ = errorsSQ->GetValue(i);
       if (signal > lowerBounds) {
-        MDLeanEvent<3> event(signal, 0, coordinates);
+        MDLeanEvent<3> event(signal, errorSQ, coordinates);
         ws->addEvent(event);
       }
       if (i % frequency == 0)
@@ -281,9 +279,9 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
       double coordinates[3];
       readDataset->GetPoint(i, coordinates);
       float signal = signals->GetValue(i);
-      float errorSQ = errorsSQ->GetValue(i);
+
       if (signal > lowerBounds) {
-        MDLeanEvent<3> event(signal, errorSQ, coordinates);
+        MDLeanEvent<3> event(signal, 0, coordinates);
         ws->addEvent(event);
       }
       if (i % frequency == 0)
@@ -316,16 +314,16 @@ void LoadVTK::exec() {
   vtkSmartPointer<vtkStructuredPoints> readDataset;
   readDataset.TakeReference(reader->GetOutput());
 
-  vtkUnsignedShortArray *signals = vtkUnsignedShortArray::SafeDownCast(
+  vtkUnsignedShortArray *signals = vtkUnsignedShortArray::FastDownCast(
       readDataset->GetPointData()->GetArray(signalArrayName.c_str()));
-  if (signals == NULL) {
+  if (!signals) {
     throw std::invalid_argument("Signal array: " + signalArrayName +
                                 " does not exist");
   }
 
-  vtkUnsignedShortArray *errorsSQ = vtkUnsignedShortArray::SafeDownCast(
+  vtkUnsignedShortArray *errorsSQ = vtkUnsignedShortArray::FastDownCast(
       readDataset->GetPointData()->GetArray(errorSQArrayName.c_str()));
-  if (!errorSQArrayName.empty() && errorsSQ == NULL) {
+  if (!errorSQArrayName.empty() && !errorsSQ) {
     throw std::invalid_argument("Error squared array: " + errorSQArrayName +
                                 " does not exist");
   }

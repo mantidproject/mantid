@@ -104,7 +104,7 @@ std::string CrystalFieldSpectrum::asString() const {
   std::vector<std::string> attr = this->getAttributeNames();
   for (const auto &attName : attr) {
     std::string attValue = this->getAttribute(attName).value();
-    if (!attValue.empty() && attValue != "\"\"") {
+    if (!attValue.empty() && attValue != "\"\"" && attValue != "()") {
       ostr << ',' << attName << '=' << attValue;
     }
   }

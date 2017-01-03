@@ -194,6 +194,10 @@ void GenericDataProcessorPresenter::process() {
 
   const auto items = m_manager->selectedData(true);
 
+  // Don't bother continuing if there are no items to process
+  if (items.size() == 0)
+    return;
+
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
   int maxProgress = (int)(items.size());

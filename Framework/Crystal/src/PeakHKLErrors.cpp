@@ -65,10 +65,10 @@ void PeakHKLErrors::setUpOptRuns() {
 
   std::vector<std::string> OptRunNums;
   std::string OptRunstemp(OptRuns);
-  if (OptRuns.size() > 0 && OptRuns.at(0) == '/')
+  if (!OptRuns.empty() && OptRuns.at(0) == '/')
     OptRunstemp = OptRunstemp.substr(1, OptRunstemp.size() - 1);
 
-  if (OptRunstemp.size() > 0 && OptRunstemp.at(OptRunstemp.size() - 1) == '/')
+  if (!OptRunstemp.empty() && OptRunstemp.at(OptRunstemp.size() - 1) == '/')
     OptRunstemp = OptRunstemp.substr(0, OptRunstemp.size() - 1);
 
   boost::split(OptRunNums, OptRunstemp, boost::is_any_of("/"));

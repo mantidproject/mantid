@@ -89,6 +89,8 @@ public slots:
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
+  /// Apply the threshold filter to the current dataset.
+  void onThresholdButtonClicked();
   /// Perform operations when rendering is done.
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
