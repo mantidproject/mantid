@@ -2883,21 +2883,23 @@ std::string SliceViewer::saveDimensionWidgets() const {
 
 /// Apply the non orthogonal axis scale draw
 void SliceViewer::applyNonOrthogonalAxisScaleDraw() {
-  auto* axis0 = new QwtScaleDrawNonOrthogonal(m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::X, m_ws, m_dimX, m_dimY, m_slicePoint);
-  auto* axis1 = new QwtScaleDrawNonOrthogonal(m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::Y, m_ws, m_dimX, m_dimY, m_slicePoint);
+  auto *axis0 = new QwtScaleDrawNonOrthogonal(
+      m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::X, m_ws, m_dimX,
+      m_dimY, m_slicePoint);
+  auto *axis1 = new QwtScaleDrawNonOrthogonal(
+      m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::Y, m_ws, m_dimX,
+      m_dimY, m_slicePoint);
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
-
 }
 
 /// Apply the orthogonal axis scale draw
 void SliceViewer::applyOrthogonalAxisScaleDraw() {
-  auto* axis0 = new QwtScaleDraw();
-  auto* axis1 = new QwtScaleDraw();
+  auto *axis0 = new QwtScaleDraw();
+  auto *axis1 = new QwtScaleDraw();
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
 }
-
 
 } // namespace
 }

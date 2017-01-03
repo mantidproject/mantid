@@ -181,7 +181,6 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &numberPen,
     auto end = QPointF(xValue + xOffsetForYLine, 0);
     painter.setPen(gridPen);
     painter.drawLine(start, end);
-
   }
 }
 

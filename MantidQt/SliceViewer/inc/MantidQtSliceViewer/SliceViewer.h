@@ -261,7 +261,7 @@ private:
 
   /// Extracts and applies the color scaling for the current slice
   void applyColorScalingForCurrentSliceIfRequired();
-  
+
   /// Apply the non orthogonal axis scale draw
   void applyNonOrthogonalAxisScaleDraw();
 
