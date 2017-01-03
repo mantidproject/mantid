@@ -441,7 +441,8 @@ void IntegrateEllipsoids::exec() {
         }
         lenQpeak = std::sqrt(lenQpeak);
       }
-      const double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
+      const double adaptiveRadius =
+          adaptiveQMultiplier * lenQpeak + peak_radius;
       if (adaptiveRadius <= 0.0) {
         g_log.error() << "Error: Radius for integration sphere of peak " << i
                       << " is negative =  " << adaptiveRadius << '\n';
