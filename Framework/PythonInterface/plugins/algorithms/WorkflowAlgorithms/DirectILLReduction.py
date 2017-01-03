@@ -25,7 +25,6 @@ from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
                               Minus, Multiply, NormaliseToMonitor, Plus, Rebin,
                               Scale, SofQWNormalisedPolygon, SolidAngle)
 import numpy
-from os import path
 from scipy import constants
 
 _CLEANUP_DELETE = 'Delete Intermediate Workspaces'
@@ -314,6 +313,7 @@ def _groupsToGroupingPattern(groups):
         pattern = pattern[:-1] + ','
     return pattern[:-1]
 
+
 def _loadFiles(inputFilename, wsNames, wsCleanup, algorithmLogging):
     '''
     Loads files specified by filenames, merging them into a single
@@ -498,7 +498,7 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                OutputWorkspace=solidAngleCorrectedElasticPeaksWSName,
                EnableLogging=algorithmLogging)
     elasticPeakDiagnosticsWSName = \
-        wsNames.withSuffix('diagnostics_elastic_peak')    
+        wsNames.withSuffix('diagnostics_elastic_peak')
     elasticPeakDiagnostics, nFailures = \
         MedianDetectorTest(InputWorkspace=solidAngleCorrectedElasticPeaksWS,
                            OutputWorkspace=elasticPeakDiagnosticsWSName,
@@ -1111,9 +1111,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input),
                              doc='Workspace from which to copy the TOF axis.')
         self.setPropertySettings(_PROP_REFERENCE_TOF_AXIS_WS,
-            EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+                                 EnabledWhenProperty(
+                                     _PROP_REDUCTION_TYPE,
+                                     PropertyCriterion.IsEqualTo,
+                                     _REDUCTION_TYPE_SAMPLE))
         self.setPropertyGroup(_PROP_REFERENCE_TOF_AXIS_WS,
                               _PROPGROUP_TOF_AXIS_CORRECTION)
         self.declareProperty(name=_PROP_ELASTIC_BIN_INDEX,
@@ -1193,7 +1194,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for reduced S(theta, DeltaE).')
-
 
     def validateInputs(self):
         '''
