@@ -95,6 +95,8 @@ Improved
 Python
 ------
 
+- The function `IMDDimension::getName()` has been deprecated. Use the propery `IMDDimension::name` instead.
+
 Python Algorithms
 #################
 
