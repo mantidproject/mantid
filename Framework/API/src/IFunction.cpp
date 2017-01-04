@@ -205,7 +205,6 @@ std::string IFunction::asString() const {
   }
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
     if (!isFixed(i)) {
       ostr << ',' << parameterName(i) << '=' << getParameter(i);
     }
