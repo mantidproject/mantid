@@ -86,6 +86,9 @@ class CalculatePowder(object):
         # b_tensors[num_atoms, num_freq, dim, dim]
         b_tensors = np.einsum('ijkl,ij->ijkl', np.einsum('lki, lkj->lkij', disp, disp).real, factor)
 
+        indices = b_tensors < AbinsConstants.THRESHOLD
+        b_tensors[indices] = AbinsConstants.THRESHOLD
+
         # a_tensors[num_atoms, dim, dim]
         a_tensors = np.sum(a=b_tensors, axis=1)
 

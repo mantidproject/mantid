@@ -13,7 +13,7 @@ class HelperTestingClass(object):
         self._sum_contributions = True
         self._cross_section_factor = "Incoherent"
         self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out"}
-        self._ouput_name = "output_workspace"
+        self._output_name = "output_workspace"
         self._ref = "reference_workspace"
 
         self._dft_program = None
@@ -51,7 +51,7 @@ class HelperTestingClass(object):
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions,
               QuantumOrderEventsNumber=str(self._quantum_order_event),
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._ouput_name)
+              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
 
     def case_restart_diff_t(self):
         """
@@ -83,7 +83,7 @@ class HelperTestingClass(object):
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions,
               QuantumOrderEventsNumber=str(self._quantum_order_event),
-              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._ouput_name)
+              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
 
     def case_restart_diff_order(self, order=None):
         """
@@ -93,12 +93,12 @@ class HelperTestingClass(object):
         :param order: number of quantum order event for which restart should be done.
         """
         self.case_from_scratch()
-        DeleteWorkspace(self._ouput_name)
+        DeleteWorkspace(self._output_name)
         ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions,
               QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
-              OutputWorkspace=self._ouput_name)
+              OutputWorkspace=self._output_name)
 
     def __del__(self):
         """
@@ -132,7 +132,7 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
 
         self.tolerance = 1e-2
 
-        return self._ouput_name, self.ref_result
+        return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -157,8 +157,8 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     def validate(self):
 
         self.tolerance = 1e-2
-        
-        return self._ouput_name, self.ref_result
+
+        return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -181,7 +181,7 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
         self.case_restart_diff_t()
 
     def validate(self):
-        return self._ouput_name, self.ref_result
+        return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -204,7 +204,7 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
 
     def validate(self):
-        return self._ouput_name, self.ref_result
+        return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -228,7 +228,7 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_ONE)
 
     def validate(self):
-        return self._ouput_name, self.ref_result
+        return self._output_name, self.ref_result
 
 
 # TODO: add test for 2D S MAP
