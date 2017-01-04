@@ -95,7 +95,7 @@ Improved
 Python
 ------
 
-- The duplicate function `Workspace::getName()` has been removed. Use `Workspace::name()` instead.
+- The duplicate function `Workspace::getName()` has been deprecated. Use `Workspace::name()` instead.
 
 Python Algorithms
 #################
