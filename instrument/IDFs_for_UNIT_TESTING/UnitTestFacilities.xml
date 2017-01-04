@@ -3,10 +3,12 @@
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
+  <livedata listener="MockLiveListener"/>
+
   <instrument name="MINITOPAZ">
     <technique>Test Neutron Diffraction</technique>
     <livedata>
-      <connection name="default" address="127.0.0.1:0" listener="MockILiveListener" />
+      <connection name="default" address="127.0.0.1:0" listener="MockLiveListener" />
     </livedata>
   </instrument>
 
@@ -31,9 +33,13 @@
     <livedata>
       <connection name="default" listener="FakeEventDataListener" address="127.0.0.1:0" />
     </livedata>
+  </instrument>
+
   <instrument name="HRPDTEST">
     <technique>Test Listener</technique>
-    <livedata listener="ISISKafkaEventListener" address="127.0.0.1:0" />
+    <livedata>
+      <connection name="default" listener="ISISKafkaEventListener" address="127.0.0.1:0" />
+    </livedata>
   </instrument>
 
 </facility>
