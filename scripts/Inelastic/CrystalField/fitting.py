@@ -164,6 +164,13 @@ class CrystalField(object):
         self._setDefaultTies()
         self.chi2 = None
 
+        # Physical Properties defaults (for calculation only).
+        self._physpropUnit = 'SI'
+        self._suscInverseFlag = False
+        self._hdir = [0., 0., 1.]
+        self._hmag = 1.
+        self._physpropTemperature = 1.
+
     def makePeaksFunction(self, i):
         """Form a definition string for the CrystalFieldPeaks function
         @param i: Index of a spectrum.
@@ -222,6 +229,35 @@ class CrystalField(object):
         if len(constraints) > 0:
             out += ',constraints=(%s)' % constraints
         return out
+
+    def makePhysicalPropertiesFunction(self, typeid):
+        """Form a definition string for one of the crystal field physical properties functions
+        @param typeid: the physical property to calculate as an integer key:
+                     1=heat capacity, 2=magnetic susceptibility, 3=magnetisation, 4=M(T)
+        """
+        try:
+            typeid = int(typeid) - 1
+            if typeid < 0 or typeid > 3:
+                raise ValueError
+        except ValueError:
+            raise ValueError("typeid must be an integer between 1 and 4")
+        types = ['CrystalFieldHeatCapacity', 'CrystalFieldSusceptibility',
+                 'CrystalFieldMagnetisation', 'CrystalFieldMoment']
+        out = 'name=%s,Ion=%s,Symmetry=%s' % (types[typeid],self._ion, self._symmetry)
+        if typeid > 0:
+            out += ',Unit=%s' % (self._physpropUnit)
+            if 'powder' in self._hdir:
+                out += ',powder=1'
+            else:
+                out += ',Hdir=(%s)' % (','.join([str(hh) for hh in self._hdir]))
+            if typeid == 2:  # Corresponds to magnetisation since we use typeid-1
+                out += ',Temperature=%s' % (self._physpropTemperature)
+            else:
+                out += ',inverse=%s' % (1 if self._suscInverseFlag else 0)
+                out += (',Hmag=%s' % (self._hmag)) if typeid==4 else ''
+        out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        return out
+
 
     def _makeMultiAttributes(self):
         """
@@ -565,6 +601,211 @@ class CrystalField(object):
         self._spectra[i] = self._calcSpectrum(i, wksp, 0)
         return self._spectra[i]
 
+    def getHeatCapacity(self, workspace=None, ws_index=0):
+        """
+        Get the heat cacpacity calculated with the current crystal field parameters
+
+        Examples:
+
+            cf.getHeatCapacity()    # Returns the heat capacity from 1 < T < 300 K in 1 K steps
+            cf.getHeatCapacity(ws)  # Returns the heat capacity with temperatures given by ws.
+            cf.getHeatCapacity(ws, ws_index)  # Use the spectrum indicated by ws_index for x-values
+
+        @param workspace: Either a Mantid workspace whose x-values will be used as the temperatures
+                          to calculate the heat capacity; or a list of numpy ndarray of temperatures.
+                          Temperatures are in Kelvin.
+        @param ws_index:  The index of a spectrum in workspace to use (default=0).
+        """
+        return self._getPhysProp(1, workspace, ws_index)
+
+    def getSusceptibility(self, *args, **kwargs):
+        """
+        Get the magnetic susceptibility calculated with the current crystal field parameters.
+        The susceptibility is calculated using Van Vleck's formula (2nd order perturbation theory)
+
+        Examples:
+
+            cf.getSusceptibility()      # Returns the susceptibility || [001] for 1<T<300 K in 1 K steps
+            cf.getSusceptibility(T)     # Returns the susceptibility with temperatures given by T.
+            cf.getSusceptibility(ws, 0) # Use x-axis of spectrum 0 of workspace ws as temperature
+            cf.getSusceptibility(T, [1, 1, 1])  # Returns the susceptibility along [111].
+            cf.getSusceptibility(T, 'powder')   # Returns the powder averaged susceptibility
+            cf.getSusceptibility(T, 'cgs')      # Returns the susceptibility || [001] in cgs normalisation
+            cf.getSusceptibility(..., Inverse=True)  # Calculates the inverse susceptibility instead
+            cf.getSusceptibility(Temperature=ws, ws_index=0, Hdir=[1, 1, 0], Unit='SI', Inverse=True)
+
+        @param Temperature: Either a Mantid workspace whose x-values will be used as the temperatures
+                            to calculate the heat capacity; or a list or numpy ndarray of temperatures.
+                            Temperatures are in Kelvin.
+        @param ws_index: The index of a spectrum to use (default=0) if using a workspace for x.
+        @param Hdir: The magnetic field direction to calculate the susceptibility along. Either a 
+                     Cartesian vector with z along the quantisation axis of the CF parameters, or the
+                     string 'powder' (case insensitive) to get the powder averaged susceptibility
+                     default: [0, 0, 1]
+        @param Unit: Either the string 'cgs' or 'SI' (case insensitive) to indicate whether to output
+                     the result in the SI or cgs definition of the susceptibility (chi_SI = 4*pi*chi_cgs).
+                     default: 'SI'
+        @param Inverse: Whether to calculate the susceptibility (Inverse=False, default) or inverse
+                        susceptibility (Inverse=True).
+        """
+
+        # Sets defaults / parses keyword arguments
+        workspace = kwargs['Temperature'] if 'Temperature' in kwargs.keys() else None
+        ws_index = kwargs['ws_index'] if 'ws_index' in kwargs.keys() else 0
+        self._physpropUnit = kwargs['Unit'] if 'Unit' in kwargs.keys() else 'SI'
+        self._hdir = kwargs['Hdir'] if 'Hdir' in kwargs.keys() else [0., 0., 1.]
+        self._suscInverseFlag = kwargs['Inverse'] if 'Inverse' in kwargs.keys() else False
+        
+        # Parses argument list
+        if len(args) > 0:
+            workspace = args[0]
+            cum_id = 1
+            if 'mantid' in str(type(workspace)) and len(args) > cum_id:
+                ws_index = args[cum_id]
+                cum_id = 2
+            if len(args) > cum_id:
+                if isinstance(args[cum_id], basestring):
+                    if 'powder' in args[cum_id].lower():
+                        self._hdir = 'powder'
+                    else:
+                        self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+                else:
+                    self._hdir = args[cum_id]
+                cum_id += 1
+            if len(args) > cum_id:
+                self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+
+        # Error checking
+        if 'cgs' not in self._physpropUnit.lower() and 'SI' not in self._physpropUnit.upper():
+            raise ValueError('Unit %s not recognised' % (self._physpropUnit))
+        else:
+            self._physpropUnit = 'cgs' if 'cgs' in self._physpropUnit.lower() else 'SI'
+        try:
+            if isinstance(self._hdir, basestring):
+                if 'powder' in self._hdir.lower():
+                    self._hdir = 'powder'
+                else:
+                    raise TypeError()
+            else:
+                self._hdir = np.array(self._hdir)
+                if len(self._hdir) != 3:
+                    raise TypeError()
+                self._hdir / self._hdir  # Catches most cases where elements not numeric...
+        except TypeError:
+            raise ValueError('Magnetic field direction %s not recognised' % (str(self._hdir)))
+        
+        return self._getPhysProp(2, workspace, ws_index)
+
+    def getMagnetisation(self, *args, **kwargs):
+        """
+        Get the magnetic moment calculated with the current crystal field parameters.
+        The moment is calculated by adding a Zeeman term to the CF Hamiltonian and then diagonlising
+        the result. This function calculates either M(H) [default] or M(T), but can only calculate
+        a 1D function (e.g. not M(H,T) simultaneously).
+
+        Examples:
+
+            cf.getMagnetisation()       # Returns M(H) for H||[001] from 0 to 30 T in 0.1 T steps
+            cf.getMagnetisation(H)      # Returns M(H) for H||[001] at specified values of H (in Tesla)
+            cf.getMagnetisation(ws, 0)  # Use x-axis of spectrum 0 of ws as applied field magnitude.
+            cf.getMagnetisation(H, [1, 1, 1])  # Returns the magnetic moment along [111].
+            cf.getMagnetisation(H, 'powder')   # Returns the powder averaged M(H)
+            cf.getMagnetisation(H, 'cgs')      # Returns the moment || [001] in cgs units (emu/mol)
+            cf.getMagnetisation(Temperature=T) # Returns M(T) for H=1T || [001] at specified T (in K)
+            cf.getMagnetisation(10, [1, 1, 0], Temperature=T) # Returns M(T) for H=10T || [110].
+            cf.getMagnetisation(..., Inverse=True)  # Calculates 1/M instead (keyword only)
+            cf.getMagnetisation(Hmag=ws, ws_index=0, Hdir=[1, 1, 0], Unit='SI', Temperature=T, Inverse=True)
+
+        @param Hmag: The magnitude of the applied magnetic field in Tesla, specified either as a Mantid
+                     workspace whose x-values will be used; or a list or numpy ndarray of field points. 
+                     If Temperature is specified as a list / array / workspace, Hmag must be scalar.
+                     (default: 0-30T in 0.1T steps, or 1T if temperature vector specified)
+        @param Temperature: The temperature in Kelvin at which to calculate the moment. 
+                            Temperature is a keyword argument only. Can be a list, ndarray or workspace.
+                            If Hmag is a list / array / workspace, Temperature must be scalar.
+                            (default=1K)
+        @param ws_index: The index of a spectrum to use (default=0) if using a workspace for x.
+        @param Hdir: The magnetic field direction to calculate the susceptibility along. Either a 
+                     Cartesian vector with z along the quantisation axis of the CF parameters, or the
+                     string 'powder' (case insensitive) to get the powder averaged susceptibility
+                     default: [0, 0, 1]
+        @param Unit: Any one of the strings 'bohr', 'SI' or 'cgs' (case insensitive) to indicate whether 
+                     to output in atomic (bohr magneton/ion), SI (Am^2/mol) or cgs (emu/mol) units.
+                     default: 'bohr'
+        @param Inverse: Whether to calculate the susceptibility (Inverse=False, default) or inverse
+                        susceptibility (Inverse=True). Inverse is a keyword argument only.
+        """
+
+        # Sets defaults / parses keyword arguments
+        workspace = None
+        ws_index = kwargs['ws_index'] if 'ws_index' in kwargs.keys() else 0
+        hmag = kwargs['Hmag'] if 'Hmag' in kwargs.keys() else 1.
+        temperature = kwargs['Temperature'] if 'Temperature' in kwargs.keys() else 1.
+        self._physpropUnit = kwargs['Unit'] if 'Unit' in kwargs.keys() else 'bohr'
+        self._hdir = kwargs['Hdir'] if 'Hdir' in kwargs.keys() else [0., 0., 1.]
+        self._suscInverseFlag = kwargs['Inverse'] if 'Inverse' in kwargs.keys() else False
+
+        # Checks whether to calculate M(H) or M(T)
+        hmag_isscalar = (not hasattr(hmag, '__len__') or len(hmag) == 1) 
+        hmag_isvector = (hasattr(hmag, '__len__') and len(hmag) > 1)
+        t_isscalar = (not hasattr(temperature, '__len__') or len(temperature) == 1) 
+        t_isvector = (hasattr(temperature, '__len__') and len(temperature) > 1)
+        if hmag_isscalar and (t_isvector or 'mantid' in str(type(temperature))): 
+            typeid = 4
+            workspace = temperature
+            self._hmag = hmag[0] if hasattr(hmag, '__len__') else hmag
+        else:
+            typeid = 3
+            if t_isscalar and (hmag_isvector or 'mantid' in str(type(hmag))):
+                workspace = hmag
+            self._physpropTemperature = temperature[0] if hasattr(temperature, '__len__') else temperature
+
+        # Parses argument list
+        if len(args) > 0:
+            cum_id = 1
+            if typeid == 4:
+                self._hmag = args[0]
+            else:
+                workspace = args[0]
+                if 'mantid' in str(type(workspace)) and len(args) > cum_id:
+                    ws_index = args[cum_id]
+                    cum_id = 2
+            if len(args) > cum_id:
+                if isinstance(args[cum_id], basestring):
+                    if 'powder' in args[cum_id].lower():
+                        self._hdir = 'powder'
+                    else:
+                        self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+                else:
+                    self._hdir = args[cum_id]
+                cum_id += 1
+            if len(args) > cum_id:
+                self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+
+        # Error checking
+        if typeid == 3 and not t_isscalar:
+            raise ValueError('For M(H) calculation, the temperature must be scalar')
+        if typeid == 4 and not hmag_isscalar:
+            raise ValueError('For M(T) calculation, the field magnitude Hmag must be scalar')
+        if 'cgs' in self._physpropUnit.lower() or 'bohr' in self._physpropUnit.lower():
+            self._physpropUnit = 'cgs' if 'cgs' in self._physpropUnit.lower() else 'bohr'
+        elif 'SI' in self._physpropUnit.upper():
+            self._physpropUnit = 'SI'
+        else:
+            raise ValueError('Unit %s not recognised' % (self._physpropUnit))
+        try:
+            if isinstance(self._hdir, basestring) and 'powder' in self._hdir.lower():
+                self._hdir = 'powder'
+            else:
+                self._hdir = np.array(self._hdir)
+                if len(self._hdir) != 3:
+                    raise TypeError()
+                self._hdir / self._hdir  # Catches most cases where elements not numeric...
+        except TypeError:
+            raise ValueError('Magnetic field direction %s not recognised' % (str(self._hdir)))
+        
+        return self._getPhysProp(typeid, workspace, ws_index)
+
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         from mantidplot import plotSpectrum
@@ -721,6 +962,18 @@ class CrystalField(object):
     def __rmul__(self, factor):
         return self.__mul__(factor)
 
+    def __eq__(self, other):
+        if isinstance(other, CrystalField):
+            if (len(self._fieldParameters) != len(other._fieldParameters)
+                or self._ion != other._ion or self._symmetry != other._symmetry):
+                return False
+            try:
+                return all([self[ky]==other[ky] for ky in self._fieldParameters.keys()])
+            except KeyError:
+                return False
+        else:
+            raise TypeError('Cannot compare type %s to CrystalField' % other.__class__.__name__)
+
     def _getTemperature(self, i):
         """Get temperature value for i-th spectrum."""
         if self._temperature is None:
@@ -754,6 +1007,28 @@ class CrystalField(object):
         if isinstance(self.peaks, list):
             return self.peaks[i]
         return self.peaks
+
+    def _getPhysProp(self, typeid, workspace, ws_index):
+        """
+        Returns a physical properties calculation
+        @param typeid: the physical property to calculate as an integer key:
+                     1=heat capacity, 2=magnetic susceptibility, 3=magnetisation, 4=M(T)
+        @param workspace: workspace or array/list of x-values.
+        @param ws_index:  An index of a spectrum in workspace to use.
+        """
+        defaultX = [np.linspace(1, 300, 300), np.linspace(1, 300, 300), np.linspace(0, 30, 300),
+                    np.linspace(0, 30, 300)]
+
+        if workspace is None:
+            xArray = defaultX[typeid-1]
+        elif isinstance(workspace, list) or isinstance(workspace, np.ndarray):
+            xArray = workspace
+        else:
+            return self._calcPhysProp(typeid, workspace, ws_index)
+            
+        yArray = np.zeros_like(xArray)
+        wksp = makeWorkspace(xArray, yArray)
+        return self._calcPhysProp(typeid, wksp, ws_index)
 
     def _calcEigensystem(self):
         """Calculate the eigensystem: energies and wavefunctions.
@@ -791,6 +1066,32 @@ class CrystalField(object):
         alg.initialize()
         alg.setChild(True)
         alg.setProperty('Function', self.makeSpectrumFunction(i))
+        alg.setProperty("InputWorkspace", workspace)
+        alg.setProperty('WorkspaceIndex', ws_index)
+        alg.setProperty('OutputWorkspace', 'dummy')
+        alg.execute()
+        fun = alg.getProperty('Function').value
+        if not self._isMultiSpectra():
+            self.update(fun)
+        out = alg.getProperty('OutputWorkspace').value
+        # Create copies of the x and y because `out` goes out of scope when this method returns
+        # and x and y get deallocated
+        return np.array(out.readX(0)), np.array(out.readY(1))
+
+    def _calcPhysProp(self, typeid, workspace, ws_index):
+        """
+        Calculate a physical property
+
+        @param typeid: the physical property to calculate as an integer key:
+                     1=heat capacity, 2=magnetic susceptibility, 3=magnetisation, 4=M(T)
+        @param workspace: A workspace used to evaluate the physical property
+        @param ws_index:  An index of a spectrum in workspace to use.
+        """
+        from mantid.api import AlgorithmManager
+        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+        alg.initialize()
+        alg.setChild(True)
+        alg.setProperty('Function', self.makePhysicalPropertiesFunction(typeid))
         alg.setProperty("InputWorkspace", workspace)
         alg.setProperty('WorkspaceIndex', ws_index)
         alg.setProperty('OutputWorkspace', 'dummy')

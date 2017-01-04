@@ -9,15 +9,16 @@ CrystalFieldMagnetisation
 Description
 -----------
 
-This function calculates the crystal field contribution to the magnetisation as a function of applied magnetic
-in a specified direction, in either atomic (:math:`\mu_B/`/ion), SI (math:`\mathrm{Am}^2`/mol) or cgs (emu/mol) units.
+This function calculates the crystal field (molar) *magnetic moment* as a function of applied magnetic field in a specified 
+direction, in either atomic (:math:`\mu_B/`/ion), SI (:math:`\mathrm{Am}^2`/mol) or cgs (emu/mol) units. Strictly, to obtain
+the *magnetisation*, one should divide by the molar volume of the material.
 It is a part of crystal field computation in Mantid and under active development. 
 More documentation will follow as the development progresses.
 
 Theory
 ------
 
-The magnetisation is the expectation value of the magnetic moment operator :math:`\mathbf{\mu} = g_J \mathbf{J}`:
+The function calculates the expectation value of the magnetic moment operator :math:`\mathbf{\mu} = g_J \mathbf{J}`:
 
 .. math:: M(H) = \frac{1}{Z} \sum_n \langle V_n(H) | g_J \mathbf{J} | V_n(H) \rangle \exp(-\beta E_n(H))
 

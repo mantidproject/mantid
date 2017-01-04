@@ -49,6 +49,28 @@ void calculate(double *out, const double *xValues, const size_t nData,
   }
 }
 
+// Powder averaging - sum over calculations along x, y, z
+void calculate_powder(double *out, const double *xValues, const size_t nData,
+                      const ComplexFortranMatrix &ham, const int nre,
+                      const double Hmag, const double convfact) {
+  for (size_t j = 0; j < nData; j++) {
+    out[j] = 0.;
+  }
+  DoubleFortranVector Hd(1, 3);
+  std::vector<double> tmp(nData, 0.);
+  for (int i = 1; i <= 3; i++) {
+    Hd.zero();
+    Hd(i) = 1.;
+    calculate(&tmp[0], xValues, nData, ham, nre, Hd, Hmag, convfact);
+    for (size_t j = 0; j < nData; j++) {
+      out[j] += tmp[j];
+    }
+  }
+  for (size_t j = 0; j < nData; j++) {
+    out[j] /= 3.;
+  }
+}
+
 }
 
 DECLARE_FUNCTION(CrystalFieldMoment)
@@ -59,22 +81,24 @@ CrystalFieldMoment::CrystalFieldMoment()
   declareAttribute("Hmag", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
   declareAttribute("inverse", Attribute(false));
+  declareAttribute("powder", Attribute(false));
 }
 
 // Sets the base crystal field Hamiltonian matrix
 void CrystalFieldMoment::set_hamiltonian(const ComplexFortranMatrix &ham_in,
-                                                const int nre_in) {
+                                         const int nre_in) {
   setDirect = true;
   ham = ham_in;
   nre = nre_in;
 }
 
 void CrystalFieldMoment::function1D(double *out,
-                                           const double *xValues,
-                                           const size_t nData) const {
+                                    const double *xValues,
+                                    const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
   auto Hmag = getAttribute("Hmag").asDouble();
+  auto powder = getAttribute("powder").asBool();
   double Hnorm = sqrt(Hdir[0]*Hdir[0] + Hdir[1]*Hdir[1] + Hdir[2]*Hdir[2]);
   DoubleFortranVector H(1, 3);
   for (auto i = 0; i < 3; i++) {
@@ -97,11 +121,19 @@ void CrystalFieldMoment::function1D(double *out,
     int nre_ = 0; 
     calculateEigenSystem(en_, wf_, ham_, hz_, nre_);
     ham_ += hz_;
-    calculate(out, xValues, nData, ham_, nre_, H, Hmag, convfact);
+    if (powder) {
+      calculate_powder(out, xValues, nData, ham_, nre_, Hmag, convfact);
+    } else {
+      calculate(out, xValues, nData, ham_, nre_, H, Hmag, convfact);
+    }
   }
   else {
     // Use stored values
-    calculate(out, xValues, nData, ham, nre, H, Hmag, convfact);
+    if (powder) {
+      calculate_powder(out, xValues, nData, ham, nre, Hmag, convfact);
+    } else {
+      calculate(out, xValues, nData, ham, nre, H, Hmag, convfact);
+    }
   }
   if (getAttribute("inverse").asBool()) {
     for (size_t i = 0; i < nData; i++) {

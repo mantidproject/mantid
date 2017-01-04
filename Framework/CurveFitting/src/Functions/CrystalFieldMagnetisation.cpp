@@ -49,6 +49,29 @@ void calculate(double *out, const double *xValues, const size_t nData,
   }
 }
 
+// Calculate powder average - Mpowder = (Mx + My + Mz)/3
+void calculate_powder(double *out, const double *xValues, const size_t nData,
+                      const ComplexFortranMatrix &ham, const int nre,
+                      const double T, const double convfact) {
+  for (size_t j = 0; j < nData; j++) {
+    out[j] = 0.;
+  }
+  // Loop over the x, y, z directions
+  DoubleFortranVector Hmag(1, 3);
+  std::vector<double> tmp(nData, 0.);
+  for (int i = 1; i <= 3; i++) {
+    Hmag.zero();
+    Hmag(i) = 1.;
+    calculate(&tmp[0], xValues, nData, ham, nre, Hmag, T, convfact);
+    for (size_t j = 0; j < nData; j++) {
+      out[j] += tmp[j];
+    }
+  }
+  for (size_t j = 0; j < nData; j++) {
+    out[j] /= 3.;
+  }
+}
+
 }
 
 DECLARE_FUNCTION(CrystalFieldMagnetisation)
@@ -58,6 +81,7 @@ CrystalFieldMagnetisation::CrystalFieldMagnetisation()
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
+  declareAttribute("powder", Attribute(false));
 }
 
 // Sets the base crystal field Hamiltonian matrix
@@ -74,6 +98,7 @@ void CrystalFieldMagnetisation::function1D(double *out,
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
   auto T = getAttribute("Temperature").asDouble();
+  auto powder = getAttribute("powder").asBool();
   double Hnorm = sqrt(Hdir[0]*Hdir[0] + Hdir[1]*Hdir[1] + Hdir[2]*Hdir[2]);
   DoubleFortranVector H(1, 3);
   for (auto i = 0; i < 3; i++) {
@@ -96,11 +121,19 @@ void CrystalFieldMagnetisation::function1D(double *out,
     int nre_ = 0; 
     calculateEigenSystem(en_, wf_, ham_, hz_, nre_);
     ham_ += hz_;
-    calculate(out, xValues, nData, ham_, nre_, H, T, convfact);
+    if (powder) {
+      calculate_powder(out, xValues, nData, ham_, nre_, T, convfact);
+    } else {
+      calculate(out, xValues, nData, ham_, nre_, H, T, convfact);
+    }
   }
   else {
     // Use stored values
-    calculate(out, xValues, nData, ham, nre, H, T, convfact);
+    if (powder) {
+      calculate_powder(out, xValues, nData, ham, nre, T, convfact);
+    } else {
+      calculate(out, xValues, nData, ham, nre, H, T, convfact);
+    }
   }
 }
 

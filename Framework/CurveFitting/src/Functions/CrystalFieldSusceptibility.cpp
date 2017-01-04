@@ -65,6 +65,29 @@ void calculate(double *out, const double *xValues, const size_t nData,
   }
 }
 
+// Calculate powder average - Mpowder = (Mx + My + Mz)/3
+void calculate_powder(double *out, const double *xValues, const size_t nData,
+                      const DoubleFortranVector &en, 
+                      const ComplexFortranMatrix &wf, const int nre) {
+  for (size_t j = 0; j < nData; j++) {
+    out[j] = 0.;
+  }
+  // Loop over the x, y, z directions
+  std::vector<double> H;
+  std::vector<double> tmp(nData, 0.);
+  for (int i = 0; i < 3; i++) {
+    H.assign(3, 0.);
+    H[i] = 1.;
+    calculate(&tmp[0], xValues, nData, en, wf, nre, H);
+    for (size_t j = 0; j < nData; j++) {
+      out[j] += tmp[j];
+    }
+  }
+  for (size_t j = 0; j < nData; j++) {
+    out[j] /= 3.;
+  }
+}
+
 }
 
 DECLARE_FUNCTION(CrystalFieldSusceptibility)
@@ -74,6 +97,7 @@ CrystalFieldSusceptibility::CrystalFieldSusceptibility()
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Unit", Attribute("SI"));
   declareAttribute("inverse", Attribute(false));
+  declareAttribute("powder", Attribute(false));
 }
 
 // Sets the eigenvectors / values directly
@@ -90,6 +114,7 @@ void CrystalFieldSusceptibility::function1D(double *out,
                                           const double *xValues,
                                           const size_t nData) const {
   auto H = getAttribute("Hdir").asVector();
+  auto powder = getAttribute("powder").asBool();
   double Hnorm = sqrt(H[0]*H[0] + H[1]*H[1] + H[2]*H[2]);
   for (auto i = 0; i < 3; i++) {
     H[i] /= Hnorm;
@@ -101,11 +126,19 @@ void CrystalFieldSusceptibility::function1D(double *out,
     ComplexFortranMatrix wf_;
     int nre_ = 0; 
     calculateEigenSystem(en_, wf_, nre_);
-    calculate(out, xValues, nData, en_, wf_, nre_, H);
+    if (powder) {
+      calculate_powder(out, xValues, nData, en_, wf_, nre_);
+    } else {
+      calculate(out, xValues, nData, en_, wf_, nre_, H);
+    }
   }
   else {
     // Use stored values
-    calculate(out, xValues, nData, en, wf, nre, H);
+    if (powder) {
+      calculate_powder(out, xValues, nData, en, wf, nre);
+    } else {
+      calculate(out, xValues, nData, en, wf, nre, H);
+    }
   }
   // In cgs units, the definition of the permeability constant omits the 4pi
   if (boost::iequals(getAttribute("Unit").asString(), "cgs")) {
