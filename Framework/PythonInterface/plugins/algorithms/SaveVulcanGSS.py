@@ -31,8 +31,8 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Focused diffraction workspace to be exported to GSAS file. ")
 
-        self.declareProperty(FileProperty("BinFilename", "", FileAction.Load, ['.dat']),
-                             "Name of a data file containing the bin boundaries in Log(TOF). ")
+        self.declareProperty(FileProperty("BinFilename", "", FileAction.OptionalLoad, ['.dat']),
+                             "Name of a data file containing the bin boundaries in Log(TOF).")
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              "Name of rebinned matrix workspace. ")
@@ -51,7 +51,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         # Properties
         input_workspace = self.getPropertyValue("InputWorkspace")
-        logtoffilename = self.getPropertyValue("BinFilename")
+        log_tof_file_name = self.getPropertyValue("BinFilename")
         outgssfilename = self.getPropertyValue("GSSFilename")
         outputwsname = self.getPropertyValue("OutputWorkspace")
 
@@ -65,9 +65,9 @@ class SaveVulcanGSS(PythonAlgorithm):
             raise NotImplementedError("InputWorkspace must be histogram, but not point data.")
 
         # rebin the input workspace if TOF binning file is given
-        if len(logtoffilename) > 0:
+        if len(log_tof_file_name) > 0:
             # Load reference bin file
-            vec_refT = self._loadRefLogBinFile(logtoffilename)
+            vec_refT = self._loadRefLogBinFile(log_tof_file_name)
 
             # Rebin
             gsa_ws = self._rebinVdrive(inputws, vec_refT, outputwsname)
