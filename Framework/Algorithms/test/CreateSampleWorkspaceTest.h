@@ -466,15 +466,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
-    TS_ASSERT(outWS->spectrumInfo.isMonitor(0));
+    TS_ASSERT(outWS->spectrumInfo().isMonitor(0));
     TS_ASSERT_DELTA(outWS->readY(0)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(0)[50], 10.3, 0.0001);
 
-    TS_ASSERT(outWS->spectrumInfo.isMonitor(1));
+    TS_ASSERT(outWS->spectrumInfo().isMonitor(1));
     TS_ASSERT_DELTA(outWS->readY(1)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(1)[50], 10.3, 0.0001);
 
-    TS_ASSERT(!outWS->spectrumInfo.isMonitor(2));
+    TS_ASSERT(!outWS->spectrumInfo().isMonitor(2));
     TS_ASSERT_DELTA(outWS->readY(2)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(2)[50], 10.3, 0.0001);
 
@@ -497,15 +497,15 @@ public:
 
     TS_ASSERT_EQUALS(ews->getNumberEvents(), 191900);
 
-    TS_ASSERT(ews->spectrumInfo.isMonitor(0));
+    TS_ASSERT(ews->spectrumInfo().isMonitor(0));
     TS_ASSERT_DELTA(ews->readY(0)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(0)[60], 7, 0.0001);
 
-    TS_ASSERT(ews->spectrumInfo.isMonitor(1));
+    TS_ASSERT(ews->spectrumInfo().isMonitor(1));
     TS_ASSERT_DELTA(ews->readY(1)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(1)[60], 7, 0.0001);
 
-    TS_ASSERT(!ews->spectrumInfo.isMonitor(2));
+    TS_ASSERT(!ews->spectrumInfo().isMonitor(2));
     TS_ASSERT_DELTA(ews->readY(2)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(2)[60], 7, 0.0001);
 
