@@ -931,36 +931,10 @@ QString ComponentInfoController::displayPeakAngles(
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
 
-  auto pos1 = peak1->getDetector()->getPos();
-  auto pos2 = peak2->getDetector()->getPos();
-
-  // get which way is "up". e.g. y unit vector if this is a cylindrical y
-  // projection
-  auto instWidget = m_tab->getInstrumentWidget();
-  auto surfaceType = instWidget->getSurfaceType();
-  auto axis = instWidget->getSurfaceAxis(surfaceType);
-
-  // get beam direction
-  auto instrument = peak1->getInstrument();
-  auto sample = instrument->getSample()->getPos();
-  auto source = instrument->getSource()->getPos();
-  auto L1 = (sample - source);
-  auto normal = axis.cross_prod(L1);
-
-  // always compute the angle from the right most peak
-  // relative to the coordinates of the sample
-  if (pos1.scalar_prod(normal) > pos2.scalar_prod(normal))
-    std::swap(pos1, pos2);
-
-  // compute the angle between -180 and +180
-  auto angle = pos2.angle(pos1);
-  auto refRight = axis.cross_prod(pos1);
-  angle = std::copysign(angle, pos2.scalar_prod(refRight));
+  auto pos1 = peak1->getQLabFrame();
+  auto pos2 = peak2->getQLabFrame();
+  auto angle = pos1.angle(pos2);
   angle *= double_constants::radian;
-
-  // correct the angle to the range to be 0 < theta < 360
-  if (angle < 0)
-    angle = 360 + angle;
 
   text << "Angle: " << angle << "\n";
 
