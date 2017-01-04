@@ -2,10 +2,12 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -111,24 +113,12 @@ void SofQWCentre::exec() {
   m_EmodeProperties.initCachedValues(*inputWorkspace, this);
   int emode = m_EmodeProperties.m_emode;
 
-  // Get a pointer to the instrument contained in the workspace
-  Instrument_const_sptr instrument = inputWorkspace->getInstrument();
-
-  // Get the distance between the source and the sample (assume in metres)
-  IComponent_const_sptr source = instrument->getSource();
-  IComponent_const_sptr sample = instrument->getSample();
-  V3D beamDir = sample->getPos() - source->getPos();
+  const auto &detectorInfo = inputWorkspace->detectorInfo();
+  const auto &spectrumInfo = inputWorkspace->spectrumInfo();
+  V3D beamDir = detectorInfo.samplePosition() - detectorInfo.sourcePosition();
   beamDir.normalize();
-
-  try {
-    double l1 = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << '\n';
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance",
-        inputWorkspace->getTitle());
-  }
+  double l1 = detectorInfo.l1();
+  g_log.debug() << "Source-sample distance: " << l1 << '\n';
 
   // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
   const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
@@ -142,39 +132,30 @@ void SofQWCentre::exec() {
   Progress prog(this, 0.0, 1.0, numHists);
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     try {
-      // Now get the detector object for this histogram
-      IDetector_const_sptr spectrumDet = inputWorkspace->getDetector(i);
-      if (spectrumDet->isMonitor())
+      if (spectrumInfo.isMonitor(i))
         continue;
 
-      const double efixed = m_EmodeProperties.getEFixed(*spectrumDet);
+      const auto &spectrumDet = spectrumInfo.detector(i);
+      const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
 
       // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda
       // does not hold. In order to
       // be completely general we must calculate the momentum transfer by
       // calculating the incident and final
       // wave vectors and then use |q| = sqrt[(ki - kf)*(ki - kf)]
-      DetectorGroup_const_sptr detGroup =
-          boost::dynamic_pointer_cast<const DetectorGroup>(spectrumDet);
-      std::vector<IDetector_const_sptr> detectors;
-      if (detGroup) {
-        detectors = detGroup->getDetectors();
-      } else {
-        detectors.push_back(spectrumDet);
-      }
 
-      const size_t numDets = detectors.size();
-      // cache to reduce number of static casts
-      const double numDets_d = static_cast<double>(numDets);
+      const auto &detIDs = inputWorkspace->getSpectrum(i).getDetectorIDs();
+      const double numDets_d = static_cast<double>(detIDs.size());
       const auto &Y = inputWorkspace->y(i);
       const auto &E = inputWorkspace->e(i);
       const auto &X = inputWorkspace->x(i);
 
       // Loop over the detectors and for each bin calculate Q
-      for (size_t idet = 0; idet < numDets; ++idet) {
-        IDetector_const_sptr det = detectors[idet];
+      for (const auto detID : detIDs) {
+        auto idet = detectorInfo.indexOf(detID);
         // Calculate kf vector direction and then Q for each energy bin
-        V3D scatterDir = (det->getPos() - sample->getPos());
+        V3D scatterDir =
+            (detectorInfo.position(idet) - detectorInfo.samplePosition());
         scatterDir.normalize();
         for (size_t j = 0; j < numBins; ++j) {
           const double deltaE = 0.5 * (X[j] + X[j + 1]);
@@ -227,7 +208,7 @@ void SofQWCentre::exec() {
           // Add this spectra-detector pair to the mapping
           specNumberMapping.push_back(
               outputWorkspace->getSpectrum(qIndex).getSpectrumNo());
-          detIDMapping.push_back(det->getID());
+          detIDMapping.push_back(detID);
 
           // And add the data and it's error to that bin, taking into account
           // the number of detectors contributing to this bin
