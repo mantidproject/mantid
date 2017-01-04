@@ -517,30 +517,16 @@ double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
   // minimum
   // reasonalbe size for the bin is the width of one detector.
 
-  double width;
-  size_t i = 0;
-  while (true) {
-    i++;
-
-    // this should never happen because it was done in
-    // getBoundariesOfInstrument,
-    // but it is here to avoid risk of infiniti loop
-    if (i >= inWS->getNumberHistograms())
-      throw std::invalid_argument(
-          "Did not find any non monitor detector position");
-
-    auto det = inWS->getDetector(i);
-    if (det->isMonitor())
+  const auto &spectrumInfo = inWS->spectrumInfo();
+  for(size_t i=0; i<inWS->getNumberHistograms() ; ++i) {
+    if (spectrumInfo.isMonitor(i))
       continue;
-
     Geometry::BoundingBox bbox;
-    det->getBoundingBox(bbox);
-
-    width = bbox.width().norm();
-    break;
+    spectrumInfo.detector(i).getBoundingBox(bbox);
+    return bbox.width().norm();
   }
-
-  return width;
+  // this should never happen because it was done in getBoundariesOfInstrument,
+  throw std::invalid_argument("Did not find any non monitor detector position");
 }
 
 double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS) {
