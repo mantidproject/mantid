@@ -156,7 +156,7 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
 
     def validate(self):
 
-        self.tolerance = 1e-2
+        self.tolerance = 1e-1
 
         return self._output_name, self.ref_result
 
