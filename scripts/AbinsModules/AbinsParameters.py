@@ -55,6 +55,10 @@ s_absolute_threshold = 10e-8
 optimal_size = 5000000  # this is used to create optimal size of chunk energies for which S is calculated
 # Actual chunk of energies < optimal_size
 
-atoms_threads = 3  # number of threads used in parallelization calculations over atoms
-
+atoms_threads = 3  # number of threads used in parallel calculations over atoms
+q_threads = 1  # number of threads used in parallel calculations over q2
 # ABINS internal parameters end ###########################
+
+q2_start = 0.0  # beginning of q2 interval
+q2_end = 30  # end of q2 interval
+q2_step = 0.1  # sampling of q2
