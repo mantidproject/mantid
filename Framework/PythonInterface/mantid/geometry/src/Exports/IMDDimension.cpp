@@ -55,9 +55,9 @@ void export_IMDDimension() {
   register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 
   class_<IMDDimension, boost::noncopyable>("IMDDimension", no_init)
-      .def(
-          "getName", &getName, arg("self"),
-          "Return the name of the dimension as can be displayed along the axis")
+      .def("getName", &getName, arg("self"), "Return the name of the dimension "
+                                             "as can be displayed along the "
+                                             "axis")
       .add_property("name", &IMDDimension::getName,
                     "Return the name of the dimension as can be displayed "
                     "along the axis")
