@@ -80,10 +80,20 @@ public:
     int32_t frameNumber(2);
     float frameTime(1.f), protonCharge(0.5f);
     bool endOfFrame(false), endOfRun(false);
-    // No SE events
+
+    // Sample environment event
+    std::vector<flatbuffers::Offset<ISISStream::SEEvent>> sEEventsVector;
+    auto sEValue = ISISStream::CreateDoubleValue(builder, 42.0);
+    auto nameOffset = builder.CreateString("SampleLog1");
+    auto sEEventOffset = ISISStream::CreateSEEvent(builder, nameOffset, 2.0,
+                                                   ISISStream::SEValue_DoubleValue, sEValue.Union());
+    sEEventsVector.push_back(sEEventOffset);
+
+    auto messageSEEvents = builder.CreateVector(sEEventsVector);
+
     auto messageFramePart = ISISStream::CreateFramePart(
         builder, frameNumber, frameTime, ISISStream::RunState_RUNNING,
-        protonCharge, m_nextPeriod, endOfFrame, endOfRun, messageNEvents);
+        protonCharge, m_nextPeriod, endOfFrame, endOfRun, messageNEvents, messageSEEvents);
     auto messageFlatbuf = ISISStream::CreateEventMessage(
         builder, ISISStream::MessageTypes_FramePart, messageFramePart.Union());
     builder.Finish(messageFlatbuf);
