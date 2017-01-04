@@ -208,7 +208,7 @@ void QwtScaleDrawNonOrthogonal::applyGridLinesX(
   // sense but we are taking the angle against the y axis in the mathematical
   // negative sense.
   angle *= -1.f;
-  auto offset = angle == 0. ? 0. : heightScreen * std::tan(angle);
+  auto offset = angle == 0. ? 0. : heightScreen * tan(angle);
 
   QPen gridPen(QColor(200, 100, 100, 100)); // grey
   gridPen.setWidth(3);
@@ -230,7 +230,7 @@ void QwtScaleDrawNonOrthogonal::applyGridLinesY(
   int widthScreen = m_plot->canvas()->width();
   auto angle = m_angleX;
 
-  auto offset = angle == 0. ? 0. : widthScreen * std::tan(angle);
+  auto offset = angle == 0. ? 0. : widthScreen * tan(angle);
   QPen gridPen(QColor(200, 100, 100, 100)); // grey
   gridPen.setWidth(3);
   gridPen.setCapStyle(Qt::FlatCap);

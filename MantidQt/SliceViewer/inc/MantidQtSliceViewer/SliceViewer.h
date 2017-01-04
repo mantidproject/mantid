@@ -389,6 +389,8 @@ private:
   /// NonOrthogonal Fields
   std::unique_ptr<CoordinateTransform> m_coordinateTransform;
   bool m_firstNonOrthogonalWorkspaceOpen;
+  bool m_nonOrthogonalDefault; // sets whether nonOrthogonalview should be shown
+                               // as a default
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;
