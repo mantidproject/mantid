@@ -21,8 +21,7 @@ TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
 }
 
 bool TestGroupDataListener::connect(
-    const Poco::Net::SocketAddress &,
-    const Mantid::API::ILiveListener::ConnectionArgs &args) {
+    const Poco::Net::SocketAddress &) {
   // Do nothing.
   return true;
 }
