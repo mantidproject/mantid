@@ -1,26 +1,27 @@
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/Jacobian.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/Expression.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -111,7 +112,7 @@ ParameterTie *IFunction::tie(const std::string &parName,
                              const std::string &expr, bool isDefault) {
   auto ti = new ParameterTie(this, parName, expr, isDefault);
   this->fix(getParameterIndex(*ti));
-  if (ti->isConstant()) {
+  if (!isDefault && ti->isConstant()) {
 	  setParameter(parName, ti->eval());
 	  delete ti;
 	  ti = nullptr;
@@ -156,52 +157,34 @@ void IFunction::removeTie(const std::string &parName) {
   this->removeTie(i);
 }
 
-/// Write the list of ties to a stream
-void IFunction::writeTies(std::ostringstream &ostr) const {
-  // collect the non-default ties
-  std::string ties;
-  bool hasTies = false;
-  for (size_t i = 0; i < nParams(); i++) {
-    std::ostringstream tieStream;
-    const ParameterTie *tie = getTie(i);
-    if (tie && !tie->isDefault()) {
+/// Write a parameter tie to a string
+/// @param iParam :: An index of a parameter.
+/// @return A tie string for the parameter.
+std::string IFunction::writeTie(size_t iParam) const {
+  std::ostringstream tieStream;
+  const ParameterTie *tie = getTie(iParam);
+  if (tie) {
+    if (!tie->isDefault()) {
       tieStream << tie->asString(this);
-    } else if (isFixed(i)) {
-      tieStream << parameterName(i) << "=" << getParameter(i);
     }
-    if (!tieStream.str().empty()) {
-      if (!ties.empty()) {
-        ties += ",";
-      }
-      ties += tieStream.str();
-    }
+  } else if (isFixed(iParam)) {
+    tieStream << parameterName(iParam) << "=" << getParameter(iParam);
   }
-  // print the ties
-  if (!ties.empty()) {
-    ostr << ",ties=(" << ties << ")";
-  }
+  return tieStream.str();
 }
 
-/// Write the list of constraints to a stream
-void IFunction::writeConstraints(std::ostringstream &ostr) const {
-  // collect non-default constraints
-  std::string constraints;
-  for (size_t i = 0; i < nParams(); i++) {
-    const IConstraint *c = getConstraint(i);
-    if (c && !c->isDefault()) {
-      std::string tmp = c->asString();
-      if (!tmp.empty()) {
-        if (!constraints.empty()) {
-          constraints += ",";
-        }
-        constraints += tmp;
-      }
+/// Write a parameter constraint to a string
+/// @param iParam :: An index of a parameter.
+/// @return A constraint string for the parameter.
+std::string IFunction::writeConstraint(size_t iParam) const {
+  const IConstraint *c = getConstraint(iParam);
+  if (c && !c->isDefault()) {
+    std::string constraint = c->asString();
+    if (!constraint.empty()) {
+      return constraint;
     }
   }
-  // print constraints
-  if (!constraints.empty()) {
-    ostr << ",constraints=(" << constraints << ")";
-  }
+  return "";
 }
 
 /**
@@ -223,12 +206,39 @@ std::string IFunction::asString() const {
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
     const ParameterTie *tie = getTie(i);
-    if (!isFixed(i) || (tie && tie->isDefault())) {
+    if (!isFixed(i)) {
       ostr << ',' << parameterName(i) << '=' << getParameter(i);
     }
   }
-  writeConstraints(ostr);
-  writeTies(ostr);
+
+  // collect non-default constraints
+  std::vector<std::string> constraints;
+  for (size_t i = 0; i < nParams(); i++) {
+    auto constraint = writeConstraint(i);
+    if (!constraint.empty()) {
+      constraints.push_back(constraint);
+    }
+  }
+  // print constraints
+  if (!constraints.empty()) {
+    ostr << ",constraints=("
+         << Kernel::Strings::join(constraints.begin(), constraints.end(), ",")
+         << ")";
+  }
+
+  // collect the non-default ties
+  std::vector<std::string> ties;
+  for (size_t i = 0; i < nParams(); i++) {
+    auto tie = writeTie(i);
+    if (!tie.empty()) {
+      ties.push_back(tie);
+    }
+  }
+  // print the ties
+  if (!ties.empty()) {
+    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
+         << ")";
+  }
   return ostr.str();
 }
 

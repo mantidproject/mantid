@@ -356,17 +356,17 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 12);
 
-    TS_ASSERT_EQUALS(mfun->getParameter(0), 0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(0), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(1), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(2), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter(3), 1.2);
-    TS_ASSERT_EQUALS(mfun->getParameter(4), 1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(4), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(5), 2.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(6), 2.2);
-    TS_ASSERT_EQUALS(mfun->getParameter(7), 2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(6), 0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(7), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(8), 2.4);
     TS_ASSERT_EQUALS(mfun->getParameter(9), 3.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(10), 3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(10), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(11), 3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterName(0), "f0.a");
@@ -382,17 +382,17 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterName(10), "f3.h");
     TS_ASSERT_EQUALS(mfun->parameterName(11), "f3.s");
 
-    TS_ASSERT_EQUALS(mfun->getParameter("f0.a"), 0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter("f0.a"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f0.b"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f1.c"), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter("f1.h"), 1.2);
-    TS_ASSERT_EQUALS(mfun->getParameter("f1.s"), 1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter("f1.s"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f2.c0"), 2.1);
-    TS_ASSERT_EQUALS(mfun->getParameter("f2.c1"), 2.2);
-    TS_ASSERT_EQUALS(mfun->getParameter("f2.c2"), 2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c1"), 0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c2"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f2.c3"), 2.4);
     TS_ASSERT_EQUALS(mfun->getParameter("f3.c"), 3.1);
-    TS_ASSERT_EQUALS(mfun->getParameter("f3.h"), 3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter("f3.h"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f3.s"), 3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterIndex("f0.a"), 0);
@@ -461,17 +461,17 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 12);
 
-    TS_ASSERT_EQUALS(mfun->getParameter(0), 0.8);
-    TS_ASSERT_EQUALS(mfun->getParameter(1), 0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(0), -1);
+    TS_ASSERT_EQUALS(mfun->getParameter(1), -2);
     TS_ASSERT_EQUALS(mfun->getParameter(2), 100);
     TS_ASSERT_EQUALS(mfun->getParameter(3), 101);
-    TS_ASSERT_EQUALS(mfun->getParameter(4), 1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(4), -3);
     TS_ASSERT_EQUALS(mfun->getParameter(5), 102);
-    TS_ASSERT_EQUALS(mfun->getParameter(6), 2.2);
-    TS_ASSERT_EQUALS(mfun->getParameter(7), 2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(6), -4);
+    TS_ASSERT_EQUALS(mfun->getParameter(7), -5);
     TS_ASSERT_EQUALS(mfun->getParameter(8), 103);
     TS_ASSERT_EQUALS(mfun->getParameter(9), 104);
-    TS_ASSERT_EQUALS(mfun->getParameter(10), 3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(10), -6);
     TS_ASSERT_EQUALS(mfun->getParameter(11), 105);
 
     delete mfun;
@@ -658,7 +658,7 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 12);
 
-    TS_ASSERT_DIFFERS(mfun->getParameter(0), 154);
+    TS_ASSERT_EQUALS(mfun->getParameter(0), 154);
     TS_ASSERT_EQUALS(mfun->getParameter(1), 77);
     TS_ASSERT_EQUALS(mfun->getParameter(2), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter(3), 1.2);

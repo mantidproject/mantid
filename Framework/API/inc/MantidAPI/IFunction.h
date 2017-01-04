@@ -564,10 +564,10 @@ protected:
   void storeReadOnlyAttribute(const std::string &name,
                               const API::IFunction::Attribute &value) const;
 
-  /// Write the list of ties to a stream
-  void writeTies(std::ostringstream &ostr) const;
-  /// Write the list of constraints to a stream
-  void writeConstraints(std::ostringstream &ostr) const;
+  /// Write a parameter tie to a string
+  virtual std::string writeTie(size_t iParam) const;
+  /// Write a parameter constraint to a string
+  virtual std::string writeConstraint(size_t iParam) const;
 
   friend class ParameterTie;
   friend class CompositeFunction;

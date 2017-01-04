@@ -186,7 +186,7 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const std::vector<double> &yVec,
                               double fwhmVariation) {
   size_t nGoodPeaks = calculateNPeaks(centresAndIntensities);
-  size_t maxNPeaks = spectrum.nFunctions() - iFirst;
+  size_t maxNPeaks = calculateMaxNPeaks(nGoodPeaks);
   bool mustUpdateWidth = !xVec.empty();
 
   for (size_t i = 0; i < maxNPeaks; ++i) {
