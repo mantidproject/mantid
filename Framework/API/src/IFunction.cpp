@@ -113,11 +113,11 @@ ParameterTie *IFunction::tie(const std::string &parName,
   auto ti = new ParameterTie(this, parName, expr, isDefault);
   this->fix(getParameterIndex(*ti));
   if (!isDefault && ti->isConstant()) {
-	  setParameter(parName, ti->eval());
-	  delete ti;
-	  ti = nullptr;
+    setParameter(parName, ti->eval());
+    delete ti;
+    ti = nullptr;
   } else {
-	  addTie(ti);
+    addTie(ti);
   }
   return ti;
 }
