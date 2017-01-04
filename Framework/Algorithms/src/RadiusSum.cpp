@@ -518,7 +518,7 @@ double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
   // reasonalbe size for the bin is the width of one detector.
 
   const auto &spectrumInfo = inWS->spectrumInfo();
-  for(size_t i=0; i<inWS->getNumberHistograms() ; ++i) {
+  for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
     if (spectrumInfo.isMonitor(i))
       continue;
     Geometry::BoundingBox bbox;
