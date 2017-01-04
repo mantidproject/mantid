@@ -58,6 +58,8 @@ ALL_KEYWORDS_POWDER_DATA = ["b_tensors", "a_tensors"]
 # keywords which define data structure for SData
 ALL_KEYWORDS_S_DATA = ["data"]
 ALL_KEYWORDS_ATOMS_S_DATA = ["s"]
+S_LABEL = "s"
+ATOM_LABEL = "atom"
 
 FLOAT_ID = np.dtype(np.float64).num
 FLOAT_TYPE = np.dtype(np.float64)
@@ -126,6 +128,7 @@ MIN_SIZE = 2  # minimal size of an array
 
 # values of S below that are considered to be zero
 S_THRESHOLD = 10e-8
+THRESHOLD = 10e-8
 
 MAX_ORDER = 4  # max quantum order event
 
@@ -133,3 +136,8 @@ NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher
 
 
 ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
+
+ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
+TWO_DIMENSIONAL_INSTRUMENTS = ["TwoDMap"]
+
+FIRST_BIN_INDEX = 1
