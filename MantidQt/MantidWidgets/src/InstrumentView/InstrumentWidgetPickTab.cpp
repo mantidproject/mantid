@@ -239,7 +239,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakAlign = new QPushButton();
   m_peakAlign->setCheckable(true);
   m_peakAlign->setAutoExclusive(true);
-  m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-compare.png"));
+  m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-plane.png"));
   m_peakAlign->setToolTip("Crystal peak alignment tool");
 
   QGridLayout *toolBox = new QGridLayout();
