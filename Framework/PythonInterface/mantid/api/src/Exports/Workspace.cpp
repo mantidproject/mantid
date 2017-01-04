@@ -39,9 +39,9 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
  * @return name of the workspace.
  */
 std::string getName(Workspace &self) {
-    PyErr_Warn(PyExc_DeprecationWarning,
-               ".getName() is deprecated. Use .name() instead.");
-    return self.getName();
+  PyErr_Warn(PyExc_DeprecationWarning,
+             ".getName() is deprecated. Use .name() instead.");
+  return self.getName();
 }
 
 void export_Workspace() {
