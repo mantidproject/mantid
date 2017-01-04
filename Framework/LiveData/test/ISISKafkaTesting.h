@@ -3,6 +3,7 @@
 
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/DateAndTime.h"
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF(conversion)
@@ -121,8 +122,8 @@ public:
     assert(buffer);
 
     // Convert date to time_t
-    std::tm tmb;
-    strptime(m_startTime.c_str(), "%Y-%m-%dT%H:%M:%S", &tmb);
+    auto mantidTime = Mantid::Kernel::DateAndTime(m_startTime, false);
+    auto tmb = mantidTime.to_tm();
     uint64_t startTime = static_cast<uint64_t>(std::mktime(&tmb));
 
     // Serialize data with flatbuffers
