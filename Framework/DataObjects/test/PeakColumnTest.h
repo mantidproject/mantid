@@ -117,20 +117,45 @@ public:
     TS_ASSERT(readOnly);
   }
 
-  void test_read_hkl() {
-    PeakColumn pc(m_peaks, "h");
-    TestingNumpunctFacet numpunct;
-    std::locale testLocale(std::locale::classic(), &numpunct);
-    std::istringstream in("-3%0");
-    in.imbue(testLocale);
-    pc.read(0, in);
-    std::cout << in.str() << '\n';
-    TS_ASSERT_EQUALS(m_peaks[0].getH(), -3.0)
+  void test_read_locale_awerness() {
+    const std::vector<std::string> columnNames{"h", "k", "l", "RunNumber"};
+    const std::vector<double> columnValues{-2.0, 5.0, 12.0, 143290.0};
+    const TestingNumpunctFacet numpunct;
+    const std::locale testLocale(std::locale::classic(), &numpunct);
+    for (size_t i = 0; i < columnNames.size(); ++i) {
+      PeakColumn pc(m_peaks, columnNames[i]);
+      // Use a fake punctuation facet for numeric formatting.
+      std::ostringstream out;
+      out.imbue(testLocale);
+      // Force some decimals to the numbers.
+      out << std::fixed;
+      out << std::setprecision(2);
+      out << columnValues[i];
+      std::istringstream in(out.str());
+      in.imbue(testLocale);
+      pc.read(0, in);
+      switch (i) {
+      case 0:
+        TS_ASSERT_EQUALS(m_peaks[0].getH(), columnValues[i])
+        break;
+      case 1:
+        TS_ASSERT_EQUALS(m_peaks[0].getK(), columnValues[i])
+        break;
+      case 2:
+        TS_ASSERT_EQUALS(m_peaks[0].getL(), columnValues[i])
+        break;
+      case 3:
+        TS_ASSERT_EQUALS(m_peaks[0].getRunNumber(), columnValues[i])
+        break;
+      }
+    }
   }
 
 private:
+  /// A locale facet mocking non-english numerical punctuation.
   class TestingNumpunctFacet : public std::numpunct<char> {
   public:
+    /// Informs locales not to delete this facet.
     TestingNumpunctFacet() : std::numpunct<char>(1) {}
   private:
     char_type do_decimal_point() const override {
