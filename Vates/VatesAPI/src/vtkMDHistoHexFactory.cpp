@@ -1,19 +1,19 @@
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidVatesAPI/vtkMDHWSignalArray.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ReadLock.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkMDHWSignalArray.h"
 #include "MantidVatesAPI/vtkNullStructuredGrid.h"
-#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidKernel/ReadLock.h"
 
+#include "vtkDoubleArray.h"
+#include "vtkFloatArray.h"
 #include "vtkNew.h"
 #include "vtkStructuredGrid.h"
-#include "vtkFloatArray.h"
-#include "vtkDoubleArray.h"
 
 #include <cmath>
 
@@ -118,9 +118,12 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   // update progress after a 1% change
   vtkIdType progressIncrement = std::max(1, imageSize / 50);
+  vtkIdType nextProgressUpdate = 0;
   for (vtkIdType index = 0; index < imageSize; ++index) {
-    if (index % progressIncrement == 0)
+    if (nextProgressUpdate < index) {
       progressUpdate.eventRaised(static_cast<double>(index) * progressFactor);
+      nextProgressUpdate += progressIncrement;
+    }
     double signalScalar = signal->GetValue(index);
     if (!std::isfinite(signalScalar)) {
       visualDataSet->BlankCell(index);
@@ -128,7 +131,6 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   }
 
   vtkNew<vtkPoints> points;
-
   Mantid::coord_t in[2];
 
   const coord_t maxX = m_workspace->getXDimension()->getMaximum();

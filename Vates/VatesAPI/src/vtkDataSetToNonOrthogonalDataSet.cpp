@@ -222,18 +222,20 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   }
   float *end = points->GetPointer(points->GetNumberOfValues());
 
-  vtkIdType progressIncrement =
-      std::max(static_cast<vtkIdType>(1), points->GetNumberOfValues() / 25);
-
   double progressFactor =
       0.25 / static_cast<double>(points->GetNumberOfValues());
+  vtkIdType nextProgressUpdate = 0;
+  vtkIdType progressIncrement =
+      std::max(static_cast<vtkIdType>(1), points->GetNumberOfValues() / 25);
 
   for (float *it = points->GetPointer(0); it < end; std::advance(it, 3)) {
     if (progress) {
       vtkIdType index = std::distance(points->GetPointer(0), it);
-      if (index % progressIncrement == 0)
+      if (nextProgressUpdate < index) {
         progress->eventRaised(0.75 +
                               static_cast<double>(index) * progressFactor);
+        nextProgressUpdate += progressIncrement;
+      }
     }
     float v1 = it[0];
     float v2 = it[1];
