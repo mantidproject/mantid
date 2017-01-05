@@ -100,22 +100,22 @@ void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian,
         // exact derivative
         this->setActiveParameter(iP, 1.0);
         this->applyTies();
-        this->function1D(&derivative[0], xValues, nData);
+        this->function1D(derivative.data(), xValues, nData);
       } else {
         // numerical derivative
         double delta =
             cutoff[pName] > fabs(pVal * deltaF) ? cutoff[pName] : pVal * deltaF;
         this->setActiveParameter(iP, pVal + delta);
         this->applyTies();
-        this->function1D(&derivative[0], xValues, nData);
+        this->function1D(derivative.data(), xValues, nData);
         for (size_t i = 0; i < nData; i++) {
-          derivative.at(i) = (derivative.at(i) - out.at(i)) / delta;
+          derivative[i] = (derivative[i] - out[i]) / delta;
         }
       }
       this->setActiveParameter(iP, pVal); // restore the value of the parameter
       // fill the jacobian for this parameter
       for (size_t i = 0; i < nData; i++) {
-        jacobian->set(i, iP, derivative.at(i));
+        jacobian->set(i, iP, derivative[i]);
       }
     }
   }
