@@ -33,13 +33,13 @@ public:
     Linear_sptr lin = boost::make_shared<Linear>();
     lin->initialize();
     // set up linear function
-    TS_ASSERT_THROWS(lin->setParameter("X", 1.0), std::invalid_argument);
-    TS_ASSERT_THROWS(lin->setParameter("Y9", 1.0), std::invalid_argument);
+    TS_ASSERT_THROWS(lin->setAttributeValue("y", 1.0), std::invalid_argument);
+    TS_ASSERT_THROWS(lin->setAttributeValue("y9", 1.0), std::invalid_argument);
 
     const double y0 = 0.0;
     const double y1 = 1.0;
-    lin->setParameter("Y0", y0);
-    lin->setParameter("Y1", y1);
+    lin->setAttributeValue("y0", y0);
+    lin->setAttributeValue("y1", y1);
 
     const std::size_t numPoints = 100;
     std::array<double, numPoints> xValues;

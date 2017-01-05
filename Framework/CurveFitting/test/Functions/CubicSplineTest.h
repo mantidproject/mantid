@@ -37,15 +37,16 @@ public:
 
     TS_ASSERT_EQUALS(cspline->getAttribute("n").asInt(), 10);
 
-    // Check that resizing the spline has initialised the attributes/parameters
+    // Check that resizing the spline has initialised the attributes
     for (int i = 0; i < 10; ++i) {
       auto index = std::to_string(i);
 
       std::string xAttrName = "x" + index;
-      std::string yAttrName = "Y" + index;
+      std::string yAttrName = "y" + index;
 
       TS_ASSERT_EQUALS(cspline->getAttribute(xAttrName).asDouble(), i);
-      TS_ASSERT_EQUALS(cspline->getParameter(yAttrName), 0);
+      // y values are all initially 0.0
+      TS_ASSERT_EQUALS(cspline->getAttribute(yAttrName).asDouble(), 0.0);
     }
   }
 
@@ -173,7 +174,7 @@ private:
     // calculate a reference set to check against
     for (int i = 0; i < nData; ++i) {
       cspline->setAttributeValue("x" + std::to_string(i), i * xModify);
-      cspline->setParameter(static_cast<size_t>(i),
+      cspline->setAttributeValue("y" + std::to_string(i),
                             splineYFunction(i * xModify));
     }
   }

@@ -277,7 +277,8 @@ void SplineInterpolation::setInterpolationPoints(
       throw std::range_error("SplineInterpolation: x index out of range.");
     }
     // Call parent setParameter implementation
-    m_interp_type->ParamFunction::setParameter(i, yIn[i], true);
+    std::string yName = "y" + std::to_string(i);
+    m_interp_type->setAttributeValue(yName, yIn[i]);
   }
 }
 

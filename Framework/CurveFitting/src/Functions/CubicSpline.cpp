@@ -41,9 +41,9 @@ void CubicSpline::init() {
   declareAttribute("x1", Attribute(1.0));
   declareAttribute("x2", Attribute(2.0));
 
-  declareParameter("Y0", 0);
-  declareParameter("Y1", 0);
-  declareParameter("Y2", 0);
+  declareAttribute("y0", Attribute(0.0));
+  declareAttribute("y1", Attribute(0.0));
+  declareAttribute("y2", Attribute(0.0));
 }
 
 /** Execute the function
@@ -79,7 +79,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
     std::string num = std::to_string(i);
 
     std::string xName = "x" + num;
-    std::string yName = "Y" + num;
+    std::string yName = "y" + num;
 
     x[i] = getAttribute(xName).asDouble();
 
@@ -91,7 +91,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
       continue;
     }
 
-    y[i] = getParameter(yName);
+    y[i] = getAttribute(yName).asDouble();
   }
 
   // pass values to GSL objects
@@ -234,11 +234,11 @@ void CubicSpline::setAttribute(const std::string &attName,
         std::string num = std::to_string(i);
 
         std::string newXName = "x" + num;
-        std::string newYName = "Y" + num;
+        std::string newYName = "y" + num;
 
         declareAttribute(newXName,
                          Attribute(oldX + static_cast<double>(i - oldN + 1)));
-        declareParameter(newYName, 0);
+        declareAttribute(newYName, Attribute(0.0));
       }
 
     } else if (n < oldN) {
