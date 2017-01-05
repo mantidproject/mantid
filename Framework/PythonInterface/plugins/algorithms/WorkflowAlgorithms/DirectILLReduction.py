@@ -65,6 +65,7 @@ _PROP_CONTAINER_OUTER_RADIUS = 'ContainerOuterRadius'
 _PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 _PROP_DET_DIAGNOSTICS = 'Diagnostics'
 _PROP_DETS_AT_L2 = 'DetectorsAtL2'
+_PROP_EC_SCALING_FACTOR = 'EmptyContainerScalingFactor'
 _PROP_EC_WS = 'EmptyContainerWorkspace'
 _PROP_ELASTIC_BIN_INDEX = 'ElasticBinIndex'
 _PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER = 'ElasticPeakWidthInSigmas'
@@ -114,6 +115,7 @@ _PROP_VANA_WS = 'VanadiumWorkspace'
 _PROPGROUP_BEAM = 'Incident neutron beam properties'
 _PROPGROUP_CONTAINER = 'Container Material Properties'
 _PROPGROUP_CYLINDER_CONTAINER = 'Cylindrical Container Properties'
+_PROPGROUP_EC = 'Empty Container Subtraction'
 _PROPGROUP_REBINNING = 'Rebinning for SofQW'
 _PROPGROUP_SAMPLE = 'Sample Material Properties'
 _PROPGROUP_SLAB_CONTAINER = 'Flat Container Properties'
@@ -654,14 +656,25 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
     return calibratedWS
 
 
-def _applySelfShieldingCorrections(ws, ecWS, correctionsWS, wsNames, 
+def _applyEC(ws, ecWS, ecScaling, wsNames, algorithmLogging):
+    subtractedWSName = wsNames.withSuffix('ec_subtracted')
+    subtractedWS = ApplyPaalmanPingsCorrection(
+        SampleWorkspace=ws,
+        CanWorkspace=ecWS,
+        CanScaleFactor=ecScaling,
+        OutputWorkspace=subtractedWSName,
+        EnableLogging=subalgLogging)
+    return subtractedWS
+
+
+def _applySelfShieldingCorrections(ws, ecWS, ecScaling, correctionsWS, wsNames, 
                                    algorithmLogging):
     correctedWSName = wsNames.withSuffix('self_shielding_applied')
     correctedWS = ApplyPaalmanPingsCorrection(
         SampleWorkspace=ws,
         CorrectionsWorkspace=correctionsWS,
         CanWorkspace=ecWS,
-        CanScaleFactor=1.0,
+        CanScaleFactor=ecScaling,
         OutputWorkspace=correctedWSName,
         EnableLogging=subalgLogging)
     return correctedWS
@@ -914,7 +927,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                       subalgLogging)
 
         # Self shielding and empty container subtraction, if requested.
-        mainWS = self._selfShielding(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._selfShieldingAndEC(mainWS, wsNames, wsCleanup,
+                                          subalgLogging)
 
         # Reduction for vanadium ends here.
         if reductionType == _REDUCTION_TYPE_VANA:
@@ -1033,14 +1047,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Reduced vanadium workspace.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=_PROP_EC_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Reduced empty container workspace.')
+            doc='Reduced vanadium workspace.')        
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_CD_WS,
             defaultValue='',
@@ -1183,11 +1190,21 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Normalisation method.')
         self.declareProperty(MatrixWorkspaceProperty(
-            name=_PROP_SELF_SHIELDING_CORRECTION_WS,
+            name=_PROP_EC_WS,
             defaultValue='',
+            validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='A workspace containing self shielding corrections.')
+            doc='Reduced empty container workspace.')
+        self.setPropertyGroup(_PROP_EC_WS,
+                              _PROPGROUP_EC)
+        self.declareProperty(name=_PROP_EC_SCALING_FACTOR,
+                             defaultValue=1.0,
+                             validator=scalingFactor,
+                             direction=Direction.Input,
+                             doc='Scaling factor for empty container.')
+        self.setPropertyGroup(_PROP_EC_SCALING_FACTOR,
+                              _PROPGROUP_EC)
         self.declareProperty(name=_PROP_SELF_SHIELDING_CORRECTION,
                              defaultValue=_SELF_SHIELDING_OFF,
                              validator=StringListValidator([
@@ -1196,6 +1213,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  _SELF_SHIELDING_CYLINDER]),
                              direction=Direction.Input,
                              doc='Self shielding correction.')
+        self.declareProperty(MatrixWorkspaceProperty(
+            name=_PROP_SELF_SHIELDING_CORRECTION_WS,
+            defaultValue='',
+            direction=Direction.Input,
+            optional=PropertyMode.Optional),
+            doc='A workspace containing self shielding corrections.')
         self.declareProperty(name=_PROP_SAMPLE_CHEMICAL_FORMULA,
                              defaultValue='',
                              direction=Direction.Input,
@@ -1926,15 +1949,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         return rebinnedWS
 
-    def _selfShielding(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _selfShieldingAndEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
         '''
         Calculates and applies self shielding corrections and empty can
         subtraction.
         '''
-        selfShieldingWS = \
-            self.getProperty(_PROP_SELF_SHIELDING_CORRECTION_WS).value
+        ecWS = self.getProperty(_PROP_EC_WS).value
         selfShielding = self.getProperty(_PROP_SELF_SHIELDING_CORRECTION).value
-        if not selfShieldingWS and selfShielding == _SELF_SHIELDING_OFF:
+        if not ecWS and selfShielding == _SELF_SHIELDING_OFF:
+            # No EC, no self-shielding -> nothing to do.
             return mainWS
         wavelengthWSName = wsNames.withSuffix('in_wavelength')
         wavelengthWS = ConvertUnits(InputWorkspace=mainWS,
@@ -1942,9 +1965,31 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                     Target='Wavelength',
                                     EMode='Direct',
                                     EnableLogging=subalgLogging)
-        ecWS = self.getProperty(_PROP_EC_WS).value
+        selfShieldingWS = \
+            self.getProperty(_PROP_SELF_SHIELDING_CORRECTION_WS).value
         if ecWS:
-            if not selfShieldingWS:
+            ecScaling = self.getProperty(_PROP_EC_SCALING_FACTOR).value
+            tofCorrectedECWSName = wsNames.withSuffix('ec_tof_corrected')
+            tofCorrectedECWS = CorrectTOFAxis(
+                InputWorkspace=ecWS,
+                OutputWorkspace=torCorrectedECWSName,
+                ReferenceWorkspace=mainWS,
+                IndexType='Workspace Index',
+                ReferenceSpectra='0',
+                EnableLogging=subalgLogging)
+            wavelengthECWSName = wsNames.withSuffix('ec_in_wavelength')
+            wavelengthECWS = \
+                ConvertUnits(InputWorkspace=tofCorrectedECWS,
+                             OutputWorkspace=wavelengthECWSName,
+                             Target='Wavelength',
+                             EMode='Direct',
+                             EnableLogging=subalgLogging)
+            wsCleanup.cleanup(tofCorrectedECWS)
+            if selfShielding == _SELF_SHIELDING_OFF:
+                # Apply EC subtraction only.
+                _applyEC(wavelengthWS, wavelengthECWS, ecScaling, wsNames,
+                         subalgLogging)
+            elif not selfShieldingWS:
                 sampleChemicalFormula = \
                     self.getProperty(_PROP_SAMPLE_CHEMICAL_FORMULA).value
                 sampleNumberDensity = \
@@ -1953,22 +1998,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                     self.getProperty(_PROP_CONTAINER_CHEMICAL_FORMULA).value
                 containerNumberDensity = \
                     self.getProperty(_PROP_CONTAINER_NUMBER_DENSITY).value
-                tofCorrectedECWSName = wsNames.withSuffix('ec_tof_corrected')
-                tofCorrectedECWS = CorrectTOFAxis(
-                    InputWorkspace=ecWS,
-                    OutputWorkspace=torCorrectedECWSName,
-                    ReferenceWorkspace=mainWS,
-                    IndexType='Workspace Index',
-                    ReferenceSpectra='0',
-                    EnableLogging=subalgLogging)
-                wavelengthECWSName = wsNames.withSuffix('ec_in_wavelength')
-                wavelengthECWS = \
-                    ConvertUnits(InputWorkspace=tofCorrectedECWS,
-                                 OutputWorkspace=wavelengthECWSName,
-                                 Target='Wavelength',
-                                 EMode='Direct',
-                                 EnableLogging=subalgLogging)
-                wsCleanup.cleanup(tofCorrectedECWS)
                 if selfShielding == _SELF_SHIELDING_CYLINDER:
                     sampleInnerR = \
                         self.getProperty(_PROP_SAMPLE_INNER_RADIUS).value
@@ -2017,6 +2046,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                       subalgLogging)
             _applySelfShieldingCorrections(wavelengthWS,
                                            wavelengthECWS,
+                                           ecScaling,
                                            selfShieldingWS,
                                            wsNames,
                                            subalgLogging)
