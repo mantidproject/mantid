@@ -989,8 +989,6 @@ void ComponentInfoController::displyAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
     const Mantid::Geometry::IPeak *peak)
 {
-  std::stringstream text;
-
   if (planePeaks.size() < 3)
     return;
 
@@ -998,25 +996,46 @@ void ComponentInfoController::displyAlignPeaksInfo(
   auto pos2 = planePeaks[1];
   auto pos3 = planePeaks[2];
 
-  auto i = pos2 - pos1;
-  i.normalize();
-  auto j = pos3 - pos1;
-  j.normalize();
-  auto k = i.cross_prod(j);
-  k.normalize();
+  // find vectors in plane & plane normal
+  auto u = pos2 - pos1;
+  auto v = pos3 - pos1;
+  auto n = u.cross_prod(v);
 
-  // orthogonalize
-  j = i.cross_prod(k);
+  // find projection of beam direction onto plane
+  // this is so we always orientate to a common reference direction
+  auto instrument = peak->getInstrument();
+  auto samplePos = instrument->getSample()->getPos();
+  auto sourcePos = instrument->getSource()->getPos();
+  auto beam = samplePos - sourcePos;
+  auto proj = beam - n* (beam.scalar_prod(n) / (pow(n.norm(), 2)) );
 
-  auto pos4 = peak->getDetPos();
-  auto x = pos4.scalar_prod(i);
-  auto y = pos4.scalar_prod(j);
-  auto z = pos4.scalar_prod(k);
+  // update in-plane vectors
+  u = proj;
+  v = u.cross_prod(n);
 
-  double r, theta, phi;
-  Mantid::Kernel::V3D(x, y, z).getSpherical(r, theta, phi);
+  u.normalize();
+  v.normalize();
+  n.normalize();
 
-  text << "r: " << r << " theta: " << theta << " phi: " << phi << "\n";
+  // now compute in plane & out of plane angles
+  auto pos4 = peak->getQLabFrame();
+  auto x = pos4.scalar_prod(u);
+  auto y = pos4.scalar_prod(v);
+  auto z = pos4.scalar_prod(n);
+
+  Mantid::Kernel::V3D p(x, y, z);
+  // compute the elevation angle from the plane
+  auto R = p.norm();
+  auto theta = (R != 0) ? asin(z / R) : 0.0;
+  // compute in-plane angle
+  auto phi = atan2(y, x);
+
+  // convert angles to degrees
+  theta *= double_constants::radian;
+  phi *= double_constants::radian;
+
+  std::stringstream text;
+  text <<  " theta: " << theta << " phi: " << phi << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
