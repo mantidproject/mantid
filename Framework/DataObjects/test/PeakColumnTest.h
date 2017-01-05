@@ -9,6 +9,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
+#include <locale>
 
 using namespace Mantid::DataObjects;
 
@@ -116,7 +117,33 @@ public:
     TS_ASSERT(readOnly);
   }
 
+  void test_read_hkl() {
+    PeakColumn pc(m_peaks, "h");
+    TestingNumpunctFacet numpunct;
+    std::locale testLocale(std::locale::classic(), &numpunct);
+    std::istringstream in("-3%0");
+    in.imbue(testLocale);
+    pc.read(0, in);
+    std::cout << in.str() << '\n';
+    TS_ASSERT_EQUALS(m_peaks[0].getH(), -3.0)
+  }
+
 private:
+  class TestingNumpunctFacet : public std::numpunct<char> {
+  public:
+    TestingNumpunctFacet() : std::numpunct<char>(1) {}
+  private:
+    char_type do_decimal_point() const override {
+      return '%';
+    }
+    char_type do_thousands_sep() const override {
+      return '@';
+    }
+    string_type do_grouping() const override {
+      return "\03";
+    }
+  };
+
   Mantid::Geometry::Instrument_sptr m_inst;
   std::vector<Peak> m_peaks;
 };
