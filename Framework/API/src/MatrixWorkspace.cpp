@@ -16,9 +16,11 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <cmath>
 
+#include <functional>
 #include <numeric>
 
 using Mantid::Kernel::DateAndTime;
@@ -41,10 +43,25 @@ const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 /// Default constructor
-MatrixWorkspace::MatrixWorkspace() = default;
+MatrixWorkspace::MatrixWorkspace()
+    : IMDWorkspace(), ExperimentInfo(), m_axes(),
+      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
+          std::bind(&MatrixWorkspace::getNumberHistograms, this),
+          std::bind(&MatrixWorkspace::spectrumNumber, this,
+                    std::placeholders::_1),
+          std::bind(&MatrixWorkspace::detectorIDs, this,
+                    std::placeholders::_1))),
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
+      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other) {
+    : IMDWorkspace(other), ExperimentInfo(other),
+      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
+          std::bind(&MatrixWorkspace::getNumberHistograms, this),
+          std::bind(&MatrixWorkspace::spectrumNumber, this,
+                    std::placeholders::_1),
+          std::bind(&MatrixWorkspace::detectorIDs, this,
+                    std::placeholders::_1))) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = other.m_axes[i]->clone(this);
@@ -69,6 +86,31 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 MatrixWorkspace::~MatrixWorkspace() {
   for (auto &axis : m_axes) {
     delete axis;
+  }
+}
+
+/** Returns a const reference to the IndexInfo object of the workspace.
+ *
+ * Used for access to spectrum number and detector ID information of spectra. */
+const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
+  return *m_indexInfo;
+}
+
+/** Sets the IndexInfo object of the workspace.
+ *
+ * Used for setting spectrum number and detector ID information of spectra */
+void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
+  // Comparing the *local* size of the indexInfo.
+  if (indexInfo.size() != getNumberHistograms())
+    throw std::runtime_error("MatrixWorkspace::setIndexInfo: IndexInfo size "
+                             "does not match number of histograms in "
+                             "workspace");
+
+  for (size_t i = 0; i < getNumberHistograms(); ++i) {
+    auto &spectrum = getSpectrum(i);
+    spectrum.setSpectrumNo(indexInfo.spectrumNumber(i));
+    auto ids = indexInfo.detectorIDs(i);
+    spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
   }
 }
 
@@ -139,6 +181,37 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   m_isInitialized = true;
 }
 
+void MatrixWorkspace::initialize(const std::size_t &NVectors,
+                                 const HistogramData::Histogram &histogram) {
+  // Check validity of arguments
+  if (NVectors == 0 || histogram.x().size() == 0) {
+    throw std::out_of_range(
+        "All arguments to init must be positive and non-zero");
+  }
+
+  // Bypass the initialization if the workspace has already been initialized.
+  if (m_isInitialized)
+    return;
+
+  // Invoke init() method of the derived class inside a try/catch clause
+  try {
+    this->init(NVectors, histogram);
+  } catch (std::runtime_error &) {
+    throw;
+  }
+
+  // Indicate that this workspace has been initialized to prevent duplicate
+  // attempts.
+  m_isInitialized = true;
+}
+
+void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
+                                 const HistogramData::Histogram &histogram) {
+  initialize(indexInfo.size(), histogram);
+  setIndexInfo(indexInfo);
+}
+
+//---------------------------------------------------------------------------------------
 /** Set the title of the workspace
 *
 *  @param t :: The title
@@ -681,7 +754,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
   }
   // Else need to construct a DetectorGroup and return that
   auto dets_ptr = localInstrument->getDetectors(dets);
-  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr, false);
+  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector
@@ -1911,6 +1984,17 @@ void MatrixWorkspace::setImageY(const MantidImage &image, size_t start,
 void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
                                 bool parallelExecution) {
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
+}
+
+/// Private helper method for IndexInfo
+specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
+  return getSpectrum(index).getSpectrumNo();
+}
+
+/// Private helper method for IndexInfo
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDs(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
 }
 
 /// Returns the number of detector groups. This is equal to the number of
