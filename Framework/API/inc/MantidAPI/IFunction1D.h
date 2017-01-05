@@ -79,6 +79,14 @@ public:
   virtual void functionDeriv1D(Jacobian *jacobian, const double *xValues,
                                const size_t nData);
 
+  /// Function for evaluation and not for fitting
+  virtual void function1DEval(double *out, const double *xValues,
+                              const size_t nData) const;
+
+  /// Derivatives of function for evaluation and not for fitting
+  virtual void derivative1DEval(double *out, const double *xValues,
+                              const size_t nData, const size_t order) const;
+
 protected:
   /// Calculate histogram data for the given bin boundaries.
   virtual void histogram1D(double *out, double left, const double *right,

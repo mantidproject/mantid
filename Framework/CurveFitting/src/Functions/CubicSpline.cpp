@@ -36,7 +36,12 @@ void CubicSpline::init() {
   // setup class with a default set of attributes
   declareAttribute("n", Attribute(m_min_points));
 
-  // declare corresponding attributes and parameters
+  // declare parameters
+  declareParameter("Y0", 0.0);
+  declareParameter("Y1", 0.0);
+  declareParameter("Y2", 0.0);
+
+  // declare corresponding attributes
   declareAttribute("x0", Attribute(0.0));
   declareAttribute("x1", Attribute(1.0));
   declareAttribute("x2", Attribute(2.0));
@@ -46,7 +51,7 @@ void CubicSpline::init() {
   declareAttribute("y2", Attribute(0.0));
 }
 
-/** Execute the function
+/** Execute the function (attributes)
  *
  * @param out :: The array to store the calculated y values
  * @param xValues :: The array of x values to interpolate
@@ -61,20 +66,40 @@ void CubicSpline::function1D(double *out, const double *xValues,
   boost::scoped_array<double> y(new double[n]);
 
   // setup the reference points and calculate
-  setupInput(x, y, n);
+  setupInputWithParameters(x, y, n);
 
   calculateSpline(out, xValues, nData);
 }
 
-/** Sets up the spline object by with the parameters and attributes
+/** Execute the function (attributes)
+ *
+ * @param out :: The array to store the calculated y values
+ * @param xValues :: The array of x values to interpolate
+ * @param nData :: The size of the arrays
+ */
+void CubicSpline::function1DEval(double *out, const double *xValues,
+                             const size_t nData) const {
+  // check if spline needs recalculating
+  int n = getAttribute("n").asInt();
+
+  boost::scoped_array<double> x(new double[n]);
+  boost::scoped_array<double> y(new double[n]);
+
+  // setup the reference points and calculate
+  setupInputWithAttributes(x, y, n);
+
+  calculateSpline(out, xValues, nData);
+}
+
+/** Sets up the spline object using attributes
  *
  * @param x :: The array of x values defining the spline
  * @param y :: The array of y values defining the spline
  * @param n :: The size of the arrays
  */
-void CubicSpline::setupInput(boost::scoped_array<double> &x,
+void CubicSpline::setupInputWithAttributes(boost::scoped_array<double> &x,
                              boost::scoped_array<double> &y, int n) const {
-  // Populate data points from the input attributes and parameters
+  // Populate data points from the input attributes
   for (int i = 0; i < n; ++i) {
     std::string num = std::to_string(i);
 
@@ -85,7 +110,39 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
 
     // if x[i] is out of order with its neighbours
     if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-      g_log.warning() << "Spline x parameters are not in ascending order. "
+      g_log.warning() << "Spline x attributes are not in ascending order. "
+                         "Only x values will be sorted.\n";
+      std::sort(x.get(), x.get() + n);
+      continue;
+    }
+
+    y[i] = getAttribute(yName).asDouble();
+  }
+
+  // pass values to GSL objects
+  initGSLObjects(x, y, n);
+}
+
+/** Sets up the spline object using parameters
+ *
+ * @param x :: The array of x values defining the spline
+ * @param y :: The array of y values defining the spline
+ * @param n :: The size of the arrays
+ */
+void CubicSpline::setupInputWithParameters(boost::scoped_array<double> &x,
+                             boost::scoped_array<double> &y, int n) const {
+  // Populate data points from the input attributes and parameters
+  for (int i = 0; i < n; ++i) {
+    std::string num = std::to_string(i);
+
+    std::string xName = "x" + num;
+    std::string yName = "Y" + num;
+
+    x[i] = getAttribute(xName).asDouble();
+
+    // if x[i] is out of order with its neighbours
+    if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
+      g_log.warning() << "Spline x attributes are not in ascending order. "
                          "Only x values will be sorted.\n";
       std::sort(x.get(), x.get() + n);
       continue;
@@ -105,7 +162,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
  * @param nData :: The size of the arrays
  * @param order :: The order of the derivatives o calculate
  */
-void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
+void CubicSpline::derivative1DEval(double *out, const double *xValues, size_t nData,
                                const size_t order) const {
   int n = getAttribute("n").asInt();
 
@@ -113,7 +170,7 @@ void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
   boost::scoped_array<double> y(new double[n]);
 
   // setup the reference points and calculate
-  setupInput(x, y, n);
+  setupInputWithAttributes(x, y, n);
   calculateDerivative(out, xValues, nData, order);
 }
 

@@ -64,6 +64,25 @@ void IFunction1D::derivative1D(double *out, const double *xValues, size_t nData,
       "Derivative is not implemented for this function.");
 }
 
+void IFunction1D::function1DEval(double *out, const double *xValues,
+                                 size_t nData) const {
+  UNUSED_ARG(out);
+  UNUSED_ARG(xValues);
+  UNUSED_ARG(nData);
+  throw Kernel::Exception::NotImplementedError(
+      "Function evaluation (only for attributes) is not implemented for this function.");
+}
+
+void IFunction1D::derivative1DEval(double *out, const double *xValues, size_t nData,
+                               const size_t order) const {
+  UNUSED_ARG(out);
+  UNUSED_ARG(xValues);
+  UNUSED_ARG(nData);
+  UNUSED_ARG(order);
+  throw Kernel::Exception::NotImplementedError(
+      "Derivative evaluation (only for attributes) is not implemented for this function.");
+}
+
 void IFunction1D::functionDeriv1D(Jacobian *jacobian, const double *xValues,
                                   const size_t nData) {
   FunctionDomain1DView domain(xValues, nData);

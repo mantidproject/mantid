@@ -17,8 +17,16 @@ using namespace API;
 DECLARE_FUNCTION(LinearBackground)
 
 void LinearBackground::init() {
+  // default parameters
   declareParameter("A0", 0.0, "coefficient for constant term");
   declareParameter("A1", 0.0, "coefficient for linear term");
+
+  // default attributes
+  // minimum number of points is 2 (point data)
+  declareAttribute("n", Attribute(2));
+
+  declareAttribute("y0", Attribute(0.0));
+  declareAttribute("y1", Attribute(0.0));
 }
 
 void LinearBackground::function1D(double *out, const double *xValues,
@@ -124,6 +132,87 @@ void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left,
     jacobian->set(i, 1, 0.5 * (xr * xr - xl * xl));
     xl = xr;
   }
+}
+
+void LinearBackground::function1DEval(double *out, const double *xValues,
+                        const size_t nData) const {
+  const double y1 = getAttribute("y1").asDouble();
+  const double x1 = getAttribute("x1").asDouble();
+
+  const double constant_term = y1 - getSlope() * x1;
+
+  for (size_t i = 0; i < nData; i++) {
+    out[i] = constant_term + getSlope() * xValues[i];
+  }
+}
+
+// for interpolation and not for fitting
+void LinearBackground::derivative1DEval(double *out, const double *xValues,
+                          const size_t nData, const size_t order) const {
+  // silience unused warning
+  (void)xValues;
+
+  // throw error if the order is not the 1st or 2nd derivative
+  if (order < 1)
+    g_log.warning() << "Linear : order of derivative must be 1 or greater";
+
+  if (order == 1) {
+    std::fill_n(out, nData, getSlope());
+  } else {
+    std::fill_n(out, nData, 0.0);
+  }
+}
+
+/** Set an attribute for the function
+ *
+ * @param attName :: The name of the attribute to set
+ * @param att :: The attribute to set
+ */
+void LinearBackground::setAttribute(const std::string &attName,
+                          const API::IFunction::Attribute &att) {
+
+  if (attName == "n") {
+    // get the new and old number of data points
+    int n = att.asInt();
+    int oldN = getAttribute("n").asInt();
+
+    // check that the number of data points is in a valid range
+    if (n > oldN) {
+      // get the name of the last x data point
+      std::string oldXName = "x" + std::to_string(oldN - 1);
+      double oldX = getAttribute(oldXName).asDouble();
+
+      // create blank a number of new blank parameters and attributes
+      for (int i = oldN; i < n; ++i) {
+        std::string num = std::to_string(i);
+
+        std::string newXName = "x" + num;
+        std::string newYName = "y" + num;
+
+        declareAttribute(newXName,
+                         Attribute(oldX + static_cast<double>(i - oldN + 1)));
+        declareAttribute(newYName, Attribute(0.0));
+      }
+    } else if (n < oldN) {
+      throw std::invalid_argument(
+          "Linear : Can't decrease the number of attributes");
+    }
+  }
+
+  storeAttributeValue(attName, att);
+}
+
+/** Get slope of the linear function (only first two points needed)
+ *
+ * @return slope :: The slope of the linear function
+ */
+double LinearBackground::getSlope() const {
+  const double y0 = getAttribute("y0").asDouble();
+  const double y1 = getAttribute("y1").asDouble();
+  const double x0 = getAttribute("x0").asDouble();
+  const double x1 = getAttribute("x1").asDouble();
+
+  return (y1 - y0) / (x1 - x0);
 }
 
 } // namespace Functions

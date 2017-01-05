@@ -126,7 +126,7 @@ void SplineInterpolation::exec() {
   int binsNo = static_cast<int>(iws->blocksize());
 
   if (type == true && binsNo == 2) {
-    m_interp_type = boost::make_shared<Linear>();
+    m_interp_type = boost::make_shared<LinearBackground>();
     g_log.information() << "Linear interpolation for 2 points.\n";
   } else {
     m_interp_type = boost::make_shared<CubicSpline>();
@@ -297,7 +297,7 @@ void SplineInterpolation::calculateDerivatives(
   double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
 
   // calculate the derivatives
-  m_interp_type->derivative1D(yValues, xValues, nData, order);
+  m_interp_type->derivative1DEval(yValues, xValues, nData, order);
 }
 
 /** Calculate the interpolation of the input points against the spline
@@ -315,11 +315,11 @@ void SplineInterpolation::calculateSpline(
   double *yValues = &(outputWorkspace->mutableY(row)[0]);
 
   // calculate the interpolation
-  m_interp_type->function1D(yValues, xValues, nData);
+  m_interp_type->function1DEval(yValues, xValues, nData);
 }
 
 /** Check if the supplied x value falls within the interpolation range.
- * This is in particular important for the Linear function and not for
+ * This is in particular important for the LinearBackground function and not for
  * the CubicSpline
  *
  * @param inputWorkspace :: The input workspace

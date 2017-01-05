@@ -57,7 +57,9 @@ public:
   const std::string category() const override { return "Background"; }
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
-  void derivative1D(double *out, const double *xValues, size_t nData,
+  void function1DEval(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void derivative1DEval(double *out, const double *xValues, size_t nData,
                     const size_t order) const override;
 
   /// Set a value to attribute attName
@@ -85,8 +87,10 @@ private:
   /// Reallocate the spline object to use n data points
   void reallocGSLObjects(const int n);
 
-  /// Method to setup the gsl function
-  void setupInput(boost::scoped_array<double> &x,
+  /// Methods to setup the gsl function
+  void setupInputWithAttributes(boost::scoped_array<double> &x,
+                  boost::scoped_array<double> &y, int n) const;
+  void setupInputWithParameters(boost::scoped_array<double> &x,
                   boost::scoped_array<double> &y, int n) const;
 
   /// Calculate the spline

@@ -90,7 +90,6 @@ set ( SRC_FILES
 	src/Functions/InelasticIsoRotDiff.cpp
 	src/Functions/IsoRotDiff.cpp
         src/Functions/Keren.cpp
-        src/Functions/Linear.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
@@ -245,7 +244,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/InelasticIsoRotDiff.h
 	inc/MantidCurveFitting/Functions/IsoRotDiff.h
         inc/MantidCurveFitting/Functions/Keren.h
-        inc/MantidCurveFitting/Functions/Linear.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
@@ -390,7 +388,6 @@ set ( TEST_FILES
         Functions/InelasticIsoRotDiffTest.h
         Functions/IsoRotDiffTest.h
         Functions/KerenTest.h
-        Functions/LinearTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
 	Functions/Lorentzian1DTest.h

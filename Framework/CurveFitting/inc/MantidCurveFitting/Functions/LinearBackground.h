@@ -55,7 +55,7 @@ public:
   void fit(const std::vector<double> &X, const std::vector<double> &Y) override;
 
 protected:
-  /// overwrite IFunction base class method, which declare function parameters
+  /// Overwrite IFunction base class method, which declare function parameters
   void init() override;
   /// Calculate histogram data.
   void histogram1D(double *out, double left, const double *right,
@@ -64,6 +64,18 @@ protected:
   void histogramDerivative1D(API::Jacobian *jacobian, double left,
                              const double *right,
                              const size_t nBins) const override;
+  /// Evaluate function attributes
+  void function1DEval(double *out, const double *xValues,
+                  const size_t nData) const override;
+  /// Derivatives of function with attributes
+  void derivative1DEval(double *out, const double *xValues, const size_t nData,
+                    const size_t order = 1) const override;
+
+  /// Set a value to attribute attName
+  void setAttribute(const std::string &attName, const Attribute &) override;
+
+  /// get slope of the linear function
+  double getSlope() const;
 };
 
 } // namespace Functions

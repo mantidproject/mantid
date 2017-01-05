@@ -175,7 +175,7 @@ private:
     for (int i = 0; i < nData; ++i) {
       cspline->setAttributeValue("x" + std::to_string(i), i * xModify);
       cspline->setAttributeValue("y" + std::to_string(i),
-                            splineYFunction(i * xModify));
+                                 splineYFunction(i * xModify));
     }
   }
 };
