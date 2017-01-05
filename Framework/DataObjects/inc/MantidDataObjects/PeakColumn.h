@@ -80,6 +80,7 @@ private:
   typedef boost::variant<double, int, std::string, Kernel::V3D> CacheValueType;
   ///
   mutable std::list<CacheValueType> m_oldRows;
+  void setPeakHKLOrRunNumber(const size_t index, const double val);
 };
 
 } // namespace Mantid
