@@ -1,11 +1,8 @@
-// SetScalingPSD
 // @author Ronald Fowler
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -87,7 +84,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
   std::map<int, double> scaleMap;
   std::map<int, double>::iterator its;
 
-  Instrument_const_sptr instrument = m_workspace->getInstrument();
+  const auto &detectorInfo = m_workspace->detectorInfo();
   if (scalingFile.find(".sca") != std::string::npos ||
       scalingFile.find(".SCA") != std::string::npos) {
     // read a .sca text format file
@@ -141,17 +138,18 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
       truPos.spherical(fabs(l2), theta, phi);
       truepos.push_back(truPos);
       //
-      Geometry::IDetector_const_sptr det;
+      size_t index;
       try {
-        det = instrument->getDetector(detIndex);
-      } catch (Kernel::Exception::NotFoundError &) {
+        // detIndex is what Mantid usually calls detectorID
+        index = detectorInfo.indexOf(detIndex);
+      } catch (std::out_of_range &) {
         continue;
       }
-      Kernel::V3D detPos = det->getPos();
+      Kernel::V3D detPos = detectorInfo.position(index);
       Kernel::V3D shift = truPos - detPos;
 
       // scaling applied to dets that are not monitors and have sequential IDs
-      if (detIdLast == detIndex - 1 && !det->isMonitor()) {
+      if (detIdLast == detIndex - 1 && !detectorInfo.isMonitor(index)) {
         Kernel::V3D diffI = detPos - detPosLast;
         Kernel::V3D diffT = truPos - truPosLast;
         double scale = diffT.norm() / diffI.norm();
@@ -189,16 +187,17 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
     Progress prog(this, 0.0, 0.5, detectorCount);
     for (int i = 0; i < detectorCount; i++) {
       int detIndex = detID[i];
-      Geometry::IDetector_const_sptr det;
+      size_t index;
       try {
-        det = instrument->getDetector(detIndex);
-      } catch (Kernel::Exception::NotFoundError &) {
+        // detIndex is what Mantid usually calls detectorID
+        index = detectorInfo.indexOf(detIndex);
+      } catch (std::out_of_range &) {
         continue;
       }
-      Kernel::V3D detPos = det->getPos();
+      Kernel::V3D detPos = detectorInfo.position(index);
       Kernel::V3D shift = truepos[i] - detPos;
 
-      if (detIdLast == detIndex - 1 && !det->isMonitor()) {
+      if (detIdLast == detIndex - 1 && !detectorInfo.isMonitor(index)) {
         Kernel::V3D diffI = detPos - detPosLast;
         Kernel::V3D diffT = truepos[i] - truPosLast;
         double scale = diffT.norm() / diffI.norm();
