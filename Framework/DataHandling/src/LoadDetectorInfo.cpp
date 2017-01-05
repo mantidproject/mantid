@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
@@ -123,6 +124,7 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
 
   // start loop over file
   auto &pmap = m_workspace->instrumentParameters();
+  const auto &detectorInfo = m_workspace->detectorInfo();
   while (getline(datFile, line)) {
     if (line.empty() || line[0] == '#')
       continue;
@@ -136,13 +138,13 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
     // offset value is be subtracted so store negative
     delta *= -1.0f;
 
-    IDetector_const_sptr det;
+    size_t index;
     try {
-      det = m_baseInstrument->getDetector(detID);
-    } catch (Exception::NotFoundError &) {
+      index = detectorInfo.indexOf(detID);
+    } catch (std::out_of_range &) {
       continue;
     }
-    if (det->isMonitor() || code == 1)
+    if (detectorInfo.isMonitor(index) || code == 1)
       continue;
 
     // drop 10 float columns
@@ -153,7 +155,8 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
     float pressure(0.0), thickness(0.0);
     is >> pressure >> thickness;
 
-    updateParameterMap(pmap, det, l2, theta, phi, delta, pressure, thickness);
+    updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
+                       delta, pressure, thickness);
   }
 }
 
@@ -187,16 +190,17 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
 
   // Start loop over detectors
   auto &pmap = m_workspace->instrumentParameters();
+  const auto &detectorInfo = m_workspace->detectorInfo();
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = static_cast<detid_t>(iraw.udet[i]);
     int code = iraw.code[i];
-    IDetector_const_sptr det;
+    size_t index;
     try {
-      det = m_baseInstrument->getDetector(detID);
-    } catch (Exception::NotFoundError &) {
+      index = detectorInfo.indexOf(detID);
+    } catch (std::out_of_range &) {
       continue;
     }
-    if (det->isMonitor() || code == 1)
+    if (detectorInfo.isMonitor(index) || code == 1)
       continue;
 
     // Positions
@@ -212,7 +216,8 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
     float pressure = iraw.ut[i + pressureTabNum * numDets];
     float thickness = iraw.ut[i + thicknessTabNum * numDets];
 
-    updateParameterMap(pmap, det, l2, theta, phi, delta, pressure, thickness);
+    updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
+                       delta, pressure, thickness);
   }
 }
 
@@ -248,17 +253,18 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
 
   // Start loop over detectors
   auto &pmap = m_workspace->instrumentParameters();
+  const auto &detectorInfo = m_workspace->detectorInfo();
   int numDets = static_cast<int>(detInfo.ids.size());
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = detInfo.ids[i];
     int code = detInfo.codes[i];
-    IDetector_const_sptr det;
+    size_t index;
     try {
-      det = m_baseInstrument->getDetector(detID);
-    } catch (Exception::NotFoundError &) {
+      index = detectorInfo.indexOf(detID);
+    } catch (std::out_of_range &) {
       continue;
     }
-    if (det->isMonitor() || code == 1)
+    if (detectorInfo.isMonitor(index) || code == 1)
       continue;
 
     // Positions
@@ -274,7 +280,8 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
     double pressure = detInfo.pressures[i];
     double thickness = detInfo.thicknesses[i];
 
-    updateParameterMap(pmap, det, l2, theta, phi, delta, pressure, thickness);
+    updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
+                       delta, pressure, thickness);
   }
 }
 
@@ -386,7 +393,7 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
 /**
  *
  * @param pmap A reference to the ParameterMap instance to update
- * @param det A pointer to the detector whose parameters should be updated
+ * @param det A reference to the detector whose parameters should be updated
  * @param l2 The new l2 value
  * @param theta The new theta value
  * @param phi The new phi value
@@ -394,17 +401,19 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
  * @param pressure The new pressure value
  * @param thickness The new thickness value
  */
-void LoadDetectorInfo::updateParameterMap(
-    Geometry::ParameterMap &pmap, const Geometry::IDetector_const_sptr &det,
-    const double l2, const double theta, const double phi, const double delay,
-    const double pressure, const double thickness) const {
+void LoadDetectorInfo::updateParameterMap(Geometry::ParameterMap &pmap,
+                                          const Geometry::IDetector &det,
+                                          const double l2, const double theta,
+                                          const double phi, const double delay,
+                                          const double pressure,
+                                          const double thickness) const {
   // store detector params that are different to instrument level
   if (fabs(delay - m_instDelta) > 1e-06)
-    pmap.addDouble(det->getComponentID(), DELAY_PARAM, delay);
+    pmap.addDouble(det.getComponentID(), DELAY_PARAM, delay);
   if (fabs(pressure - m_instPressure) > 1e-06)
-    pmap.addDouble(det->getComponentID(), PRESSURE_PARAM, pressure);
+    pmap.addDouble(det.getComponentID(), PRESSURE_PARAM, pressure);
   if (fabs(thickness - m_instThickness) > 1e-06)
-    pmap.addDouble(det->getComponentID(), THICKNESS_PARAM, thickness);
+    pmap.addDouble(det.getComponentID(), THICKNESS_PARAM, thickness);
 
   // move
   if (m_moveDets) {
@@ -412,7 +421,7 @@ void LoadDetectorInfo::updateParameterMap(
     newPos.spherical(l2, theta, phi);
     // The sample position may not be at 0,0,0
     newPos += m_samplePos;
-    ComponentHelper::moveComponent(*det, pmap, newPos,
+    ComponentHelper::moveComponent(det, pmap, newPos,
                                    ComponentHelper::Absolute);
   }
 }
