@@ -76,10 +76,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3696)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(7000)[0], 2.0, 1.0E-5);
     // Check if filename is saved
     TS_ASSERT_EQUALS(load.getPropertyValue("InputFile"),
                      gws->run().getProperty("Filename")->value());
@@ -109,10 +109,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3696)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(7000)[0], 2.0, 1.0E-5);
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
@@ -158,10 +158,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(5)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(16)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(5)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(16)[0], 2.0, 1.0E-5);
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
@@ -207,10 +207,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(31)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(32)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(39)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(31)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(32)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(39)[0], 2.0, 1.0E-5);
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
@@ -292,12 +292,12 @@ public:
     auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(2)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3)[0], 3.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(4)[0], 3.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(5)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(2)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(4)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(5)[0], 3.0, 1.0E-5);
 
     API::AnalysisDataService::Instance().remove(ws);
   }
@@ -335,13 +335,13 @@ public:
     auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(2)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(4)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(5)[0], 3.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(6)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(2)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(4)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(5)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(6)[0], 3.0, 1.0E-5);
 
     API::AnalysisDataService::Instance().remove(ws);
   }
