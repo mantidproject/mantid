@@ -99,7 +99,6 @@ _PROP_REBINNING_PARAMS_Q = 'QRebinningParams'
 _PROP_REBINNING_PARAMS_W = 'EnergyRebinningParams'
 _PROP_REDUCTION_TYPE = 'ReductionType'
 _PROP_REFERENCE_TOF_AXIS_WS = 'ReferenceTOFAxisWorkspace'
-_PROP_TRANSMISSION = 'Transmission'
 _PROP_SAMPLE_ANGLE = 'SampleAngle'
 _PROP_SAMPLE_CHEMICAL_FORMULA = 'SampleChemicalFormula'
 _PROP_SAMPLE_NUMBER_DENSITY = 'SampleNumberDensity'
@@ -725,47 +724,6 @@ def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
     return normalizedWS
 
 
-def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup,
-                      algorithmLogging):
-    '''
-    Subtracts cadmium corrected emtpy container.
-    '''
-    # TODO This function is deprecated.
-    # out = (in - Cd) / transmission - (EC - Cd)
-    transmissionWSName = wsNames.withSuffix('transmission')
-    transmissionWS = \
-        CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
-                                    DataValue=transmission,
-                                    EnableLogging=algorithmLogging)
-    cdSubtractedECWSName = wsNames.withSuffix('Cd_subtracted_EC')
-    cdSubtractedECWS = Minus(LHSWorkspace=ecWS,
-                             RHSWorkspace=cdWS,
-                             OutputWorkspace=cdSubtractedECWSName,
-                             EnableLogging=algorithmLogging)
-    cdSubtractedWSName = wsNames.withSuffix('Cd_subtracted')
-    cdSubtractedWS = Minus(LHSWorkspace=ws,
-                           RHSWorkspace=cdWS,
-                           OutputWorkspace=cdSubtractedWSName,
-                           EnableLogging=algorithmLogging)
-    correctedCdSubtractedWSName = \
-        wsNames.withSuffix('transmission_corrected_Cd_subtracted')
-    correctedCdSubtractedWS = \
-        Divide(LHSWorkspace=cdSubtractedWS,
-               RHSWorkspace=transmissionWS,
-               OutputWorkspace=correctedCdSubtractedWSName,
-               EnableLogging=algorithmLogging)
-    ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
-    ecSubtractedWS = Minus(LHSWorkspace=correctedCdSubtractedWS,
-                           RHSWorkspace=cdSubtractedECWS,
-                           OutputWorkspace=ecSubtractedWSName,
-                           EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(cdSubtractedECWS,
-                      cdSubtractedWS,
-                      correctedCdSubtractedWS,
-                      EnableLogging=algorithmLogging)
-    return ecSubtractedWS
-
-
 def _selfShieldingCorrectionsCylinder(ws, ecWS, sampleChemicalFormula,
                                       sampleNumberDensity,
                                       containerChemicalFormula,
@@ -862,32 +820,6 @@ def _selfShieldingCorrectionsSlabNoEC(ws, sampleChemicalFormula,
     return selfShieldingWS
 
 
-def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup, algorithmLogging):
-    '''
-    Subtracts empty container.
-    '''
-    # TODO This function is deprecated.
-    # out = in - transmission * EC
-    transmissionWSName = wsNames.withSuffix('transmission')
-    transmissionWS = \
-        CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
-                                    DataValue=transmission,
-                                    EnableLogging=algorithmLogging)
-    correctedECWSName = wsNames.withSuffix('transmission_corrected_EC')
-    correctedECWS = Multiply(LHSWorkspace=ecWS,
-                             RHSWorkspace=transmissionWS,
-                             OutputWorkspace=correctedECWSName,
-                             EnableLogging=algorithmLogging)
-    ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
-    ecSubtractedWS = Minus(LHSWorkspace=ws,
-                           RHSWorkspace=correctedECWS,
-                           OutputWorkspace=ecSubtractedWSName,
-                           EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(transmissionWS)
-    wsCleanup.cleanup(correctedECWS)
-    return ecSubtractedWS
-
-
 def _rebin(ws, params, wsNames, algorithmLogging):
     '''
     Rebins a workspace.
@@ -981,12 +913,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup,
                                       subalgLogging)
 
+        # Self shielding and empty container subtraction, if requested.
         mainWS = self._selfShielding(mainWS, wsNames, wsCleanup, subalgLogging)
-
-        # Empty container subtraction, if requested.
-        # TODO _subtractEC() will probably be gone by self shielding
-        #      corrections.
-        #mainWS = self._subtractEC(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Reduction for vanadium ends here.
         if reductionType == _REDUCTION_TYPE_VANA:
@@ -1254,12 +1182,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  _NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method.')
-        self.declareProperty(name=_PROP_TRANSMISSION,
-                             defaultValue=1.0,
-                             validator=scalingFactor,
-                             direction=Direction.Input,
-                             doc='Sample transmission for empty container ' +
-                                 'subtraction.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
@@ -2179,33 +2101,5 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                          EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return sOfQWWS
-
-    def _subtractEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Subtracts the empty container workspace optionally using a cadmium run.
-        '''
-        # TODO this method is deprecated
-        ecInWS = self.getProperty(_PROP_EC_WS).value
-        if ecInWS:
-            cdInWS = self.getProperty(_PROP_CD_WS).value
-            transmission = self.getProperty(_PROP_TRANSMISSION).value
-            if cdInWS:
-                ecSubtractedWS = _subtractECWithCd(mainWS,
-                                                   ecInWS,
-                                                   cdInWS,
-                                                   transmission,
-                                                   wsNames,
-                                                   wsCleanup,
-                                                   subalgLogging)
-            else:
-                ecSubtractedWS = _subtractEC(mainWS,
-                                             ecInWS,
-                                             transmission,
-                                             wsNames,
-                                             wsCleanup,
-                                             subalgLogging)
-            wsCleanup.cleanup(mainWS)
-            return ecSubtractedWS
-        return mainWS
 
 AlgorithmFactory.subscribe(DirectILLReduction)
