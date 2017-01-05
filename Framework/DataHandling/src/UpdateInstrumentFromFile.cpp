@@ -416,7 +416,8 @@ void UpdateInstrumentFromFile::setDetectorPositions(
 
 /**
  * Set the new detector position given the r,theta and phi.
- * @param det :: A pointer to the detector
+ * @param detectorInfo :: Reference to the DetectorInfo
+ * @param index :: Index into detectorInfo
  * @param l2 :: A single l2
  * @param theta :: A single theta
  * @param phi :: A single phi
