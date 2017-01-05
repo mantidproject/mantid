@@ -178,12 +178,8 @@ class IntegratePeaksThread(QThread):
             assert isinstance(scan_tup, tuple) and len(scan_tup) == 3
             scan_number, pt_number_list, merged = scan_tup
 
-            print '[DB...BAT] IntegratePeakThread: Scan %d' % scan_number
-
             # emit signal for run start (mode 0)
             mode = int(0)
-            print '[DB...BAT] IntegratePeakThread: Sent out signal (1): %d, %d, %f' % (self._expNumber, scan_number,
-                                                                                       float(index))
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(index), [0., 0., 0.], mode)
 
             # merge if not merged
@@ -214,7 +210,7 @@ class IntegratePeaksThread(QThread):
                 # self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
             else:
                 # merged
-                print '[DB...BAT] Scan %s is merged (in thread)!' % scan_number
+                pass
             # END-IF
 
             # calculate peak center
@@ -245,9 +241,6 @@ class IntegratePeaksThread(QThread):
                                                                           self._selectedMaskName)
 
             # integrate peak
-            print '[DB...BAD] Normalization: %s; Use Mask = %s, Mask Workspace = %s.' % (
-                self._normalizeType, str(self._maskDetector), self._selectedMaskName
-            )
             try:
                 status, ret_obj = self._mainWindow.controller.integrate_scan_peaks(exp=self._expNumber,
                                                                                    scan=scan_number,
@@ -258,9 +251,8 @@ class IntegratePeaksThread(QThread):
                                                                                    normalization=self._normalizeType,
                                                                                    mask_ws_name=self._selectedMaskName)
             except ValueError as val_err:
-                print '[DB] Unable to integrate scan %d due to %s.' % (scan_number, str(val_err))
                 status = False
-                ret_obj = '%s.' % str(val_err)
+                ret_obj = 'Unable to integrate scan {0} due to {1}.'.format(scan_number, str(val_err))
 
             # handle integration error
             if status:
@@ -284,8 +276,6 @@ class IntegratePeaksThread(QThread):
             mode = 1
             # center_i
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), list(peak_centre), mode)
-            print '[DB...BAT] IntegratePeakThread: Sent out signal (2): %d, %d, %f' % (self._expNumber, scan_number,
-                                                                                       float(intensity_i))
         # END-FOR
 
         # terminate the process
