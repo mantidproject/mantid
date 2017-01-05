@@ -157,16 +157,11 @@ private:
   public:
     /// Informs locales not to delete this facet.
     TestingNumpunctFacet() : std::numpunct<char>(1) {}
+
   private:
-    char_type do_decimal_point() const override {
-      return '%';
-    }
-    char_type do_thousands_sep() const override {
-      return '@';
-    }
-    string_type do_grouping() const override {
-      return "\03";
-    }
+    char_type do_decimal_point() const override { return '%'; }
+    char_type do_thousands_sep() const override { return '@'; }
+    string_type do_grouping() const override { return "\03"; }
   };
 
   Mantid::Geometry::Instrument_sptr m_inst;

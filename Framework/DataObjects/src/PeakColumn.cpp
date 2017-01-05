@@ -191,8 +191,7 @@ void PeakColumn::read(const size_t index, std::istream &in) {
   double val;
   try {
     in >> val;
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     g_log.error() << "Could not convert input to a number.\n";
     return;
   }
