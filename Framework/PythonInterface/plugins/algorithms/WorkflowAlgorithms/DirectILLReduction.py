@@ -55,7 +55,6 @@ _PROP_BEAM_WIDTH = 'BeamWidth'
 _PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgDiagnosticsHighThreshold'
 _PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgDiagnosticsLowThreshold'
 _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgDiagnosticsErrorThreshold'
-_PROP_CD_WS = 'CadmiumWorkspace'
 _PROP_CLEANUP_MODE = 'Cleanup'
 _PROP_CONTAINER_BACK_THICKNESS = 'ContainerBackThickness'
 _PROP_CONTAINER_CHEMICAL_FORMULA = 'ContainerChemicalFormula'
@@ -125,7 +124,7 @@ _REBIN_AUTO_ELASTIC_PEAK = 'Rebin to Bin Width at Elastic Peak'
 _REBIN_AUTO_MEDIAN_BIN_WIDTH = 'Rebin to Median Bin Width'
 _REBIN_MANUAL = 'Manual Rebinning'
 
-_REDUCTION_TYPE_EC_CD = 'Empty Container/Cadmium'
+_REDUCTION_TYPE_EC = 'Empty Container'
 _REDUCTION_TYPE_SAMPLE = 'Sample'
 _REDUCTION_TYPE_VANA = 'Vanadium'
 
@@ -917,7 +916,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  wsCleanup, subalgLogging)
 
         # Reduction for empty container and cadmium ends here.
-        if reductionType == _REDUCTION_TYPE_EC_CD:
+        if reductionType == _REDUCTION_TYPE_EC:
             self._finalize(mainWS, wsCleanup, report)
             return
 
@@ -1017,7 +1016,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([
                                  _REDUCTION_TYPE_SAMPLE,
                                  _REDUCTION_TYPE_VANA,
-                                 _REDUCTION_TYPE_EC_CD]),
+                                 _REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of the reduction workflow and output.')
         self.declareProperty(name=_PROP_CLEANUP_MODE,
@@ -1048,13 +1047,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced vanadium workspace.')        
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=_PROP_CD_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Reduced cadmium workspace.')
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_EPP_WS,
             defaultValue='',
@@ -2050,7 +2042,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                            selfShieldingWS,
                                            wsNames,
                                            subalgLogging)
-        else:
+        else:  # No ecWS.
             if not selfShieldingWS:
                 if selfShielding == _SELF_SHIELDING_CYLINDER:
                     sampleInnerR = \
