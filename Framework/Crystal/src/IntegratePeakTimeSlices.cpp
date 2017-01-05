@@ -1339,7 +1339,6 @@ void DataModeHandler::setHeightHalfWidthInfo(
   double TotRy0 = 0;
   double TotCx = 0;
   double TotCy = 0;
-  double IntOffset = std::min<double>(highX - lowX, highY - lowY);
   for (int i = 0; i < N; i++) {
     if (C[i] > maxCount - offset) {
       TotMax += C[i];
