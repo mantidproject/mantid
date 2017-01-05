@@ -2289,6 +2289,7 @@ TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   size_t index = 0;
   while (index < m_filter.size()) {
     DateAndTime start, stop;
+    // cppcheck-suppress knownConditionTrueFalse
     if (index == 0) {
       if (m_filter[0].second) {
         start = m_filter[0].first;

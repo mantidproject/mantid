@@ -743,10 +743,10 @@ bool ImggAggregateWavelengths::isSupportedExtension(
   const std::vector<std::string> formatExtensionsShort{"fit"};
   const std::vector<std::string> formatExtensionsLong{"fits"};
 
-  bool found = (formatExtensionsShort.end() !=
+  bool found = (formatExtensionsShort.cend() !=
                 std::find(formatExtensionsShort.cbegin(),
                           formatExtensionsShort.cend(), extShort)) ||
-               (formatExtensionsLong.end() !=
+               (formatExtensionsLong.cend() !=
                 std::find(formatExtensionsLong.cbegin(),
                           formatExtensionsLong.cend(), extLong));
   return found;
