@@ -210,10 +210,12 @@ void ConvertToYSpace::exec() {
       g_log.warning("No detector defined for index=" + std::to_string(i) +
                     ". Zeroing spectrum.");
       m_outputWS->getSpectrum(i).clearData();
-      spectrumInfo.setMasked(i, true);
-      if (m_qOutputWS) {
-        m_qOutputWS->getSpectrum(i).clearData();
-        qSpectrumInfo->setMasked(i, true);
+      PARALLEL_CRITICAL(setMasked) {
+        spectrumInfo.setMasked(i, true);
+        if (m_qOutputWS) {
+          m_qOutputWS->getSpectrum(i).clearData();
+          qSpectrumInfo->setMasked(i, true);
+        }
       }
     }
 

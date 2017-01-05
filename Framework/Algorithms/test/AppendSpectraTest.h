@@ -97,8 +97,8 @@ public:
                      in2->getAxis(1)->spectraNo(2));
 
     // Check masking
-    TS_ASSERT_EQUALS(output->getDetector(maskTop)->isMasked(), true);
-    TS_ASSERT_EQUALS(output->getDetector(10 + maskBottom)->isMasked(), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(maskTop), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(10 + maskBottom), true);
   }
 
   //----------------------------------------------------------------------------------------------

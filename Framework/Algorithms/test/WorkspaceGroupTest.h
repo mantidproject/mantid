@@ -181,8 +181,6 @@ public:
     Workspace2D_sptr work_in2 =
         WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, 1);
     Instrument_sptr instr(new Instrument);
-    work_in1->setInstrument(instr);
-    work_in2->setInstrument(instr);
 
     // set some dead detectors
     Counts yDead(nBins, 0);
@@ -198,6 +196,8 @@ public:
       instr->add(det);
       instr->markAsDetector(det);
     }
+    work_in1->setInstrument(instr);
+    work_in2->setInstrument(instr);
 
     for (int i = 0; i < nBins; i++) {
       if (i % 2 == 0) {

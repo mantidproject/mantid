@@ -93,7 +93,7 @@ private:
 
   /// Create the output workspace
   DataObjects::RebinnedOutput_sptr
-  setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+  setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace,
                        const std::vector<double> &binParams,
                        std::vector<double> &newAxis);
 

@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_CONVERTEMPTYTOTOF_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -41,7 +42,8 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ConvertEmptyToTof : public API::Algorithm {
+class DLLExport ConvertEmptyToTof : public API::Algorithm,
+                                    public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

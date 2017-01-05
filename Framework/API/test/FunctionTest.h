@@ -59,6 +59,7 @@ public:
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
+  void init(const size_t &, const HistogramData::Histogram &) override {}
 
 private:
   std::vector<MocSpectrum> m_spectra;

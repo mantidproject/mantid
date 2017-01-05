@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CalculateDIFC.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CalculateDIFC;
@@ -81,9 +82,10 @@ public:
 
     auto offsetsWS =
         OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
+    const auto &spectrumInfo = offsetsWS->spectrumInfo();
     for (int i = 0; i < NUM_SPEC; ++i) {
-      IDetector_const_sptr det = inputWS->getDetector(i);
-      offsetsWS->setValue(det->getID(), OFFSET);
+      const auto &det = spectrumInfo.detector(i);
+      offsetsWS->setValue(det.getID(), OFFSET);
     }
 
     runTest(inputWS, offsetsWS, outWSName);

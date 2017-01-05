@@ -3,7 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidAPI/IMDWorkspace.h"
@@ -46,8 +45,7 @@ National Laboratory & European Spallation Source
 class DLLExport vtkMDHistoQuadFactory : public vtkDataSetFactory {
 public:
   /// Constructor
-  vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange,
-                        const VisualNormalization normalizationOption);
+  vtkMDHistoQuadFactory(const VisualNormalization normalizationOption);
 
   /// Assignment operator
   vtkMDHistoQuadFactory &operator=(const vtkMDHistoQuadFactory &other);
@@ -79,8 +77,6 @@ private:
   Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
 
   VisualNormalization m_normalizationOption;
-
-  mutable ThresholdRange_scptr m_thresholdRange;
 };
 }
 }

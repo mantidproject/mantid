@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/Strings.h"
 
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -1821,6 +1822,54 @@ int Object::getPointInObject(Kernel::V3D &point) const {
   }
 
   return 0;
+}
+
+/**
+ * Generate a random point within the object. The method simply generates a
+ * point within the bounding box and tests if this is a valid point within
+ * the object: if so the point is return otherwise a new point is selected.
+ * @param rng  A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The generated point
+ */
+V3D Object::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                  const size_t maxAttempts) const {
+  const auto &bbox = getBoundingBox();
+  if (bbox.isNull()) {
+    throw std::runtime_error("Object::generatePointInObject() - Invalid "
+                             "bounding box. Cannot generate new point.");
+  }
+  return generatePointInObject(rng, bbox, maxAttempts);
+}
+
+/**
+ * Generate a random point within the object that is also bound by the
+ * activeRegion box.
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param activeRegion Restrict point generation to this sub-region of the
+ * object
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The newly generated point
+ */
+V3D Object::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                  const BoundingBox &activeRegion,
+                                  const size_t maxAttempts) const {
+  size_t attempts(0);
+  while (attempts < maxAttempts) {
+    const double r1 = rng.nextValue();
+    const double r2 = rng.nextValue();
+    const double r3 = rng.nextValue();
+    auto pt = activeRegion.generatePointInside(r1, r2, r3);
+    if (this->isValid(pt))
+      return pt;
+    else
+      ++attempts;
+  };
+  throw std::runtime_error("Object::generatePointInObject() - Unable to "
+                           "generate point in object after " +
+                           std::to_string(maxAttempts) + " attempts");
 }
 
 /**
