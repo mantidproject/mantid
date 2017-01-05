@@ -1239,6 +1239,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
         # Run fit
         fit.fit()
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < 100.0)
 
     def test_monte_carlo_multi_spectrum(self):
@@ -1264,7 +1265,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         # Run fit
         fit.fit()
         self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertTrue(cf.chi2 < 200.0)
 
     def test_multi_ion_intensity_scaling(self):
         from CrystalField import CrystalField, CrystalFieldFit
