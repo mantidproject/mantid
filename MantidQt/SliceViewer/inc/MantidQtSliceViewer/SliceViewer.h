@@ -171,6 +171,7 @@ public slots:
   // Change in view slots
   void checkForHKLDimension();
   void switchQWTRaster(bool useNonOrthogonal);
+  void switchAxis();
   void changedShownDim(int index, int dim, int oldDim);
   void updateDisplaySlot(int index, double value);
   void resetZoom();

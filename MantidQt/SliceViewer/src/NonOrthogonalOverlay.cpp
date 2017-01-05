@@ -117,6 +117,18 @@ void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
   }
 }
 
+void NonOrthogonalOverlay::updateXGridlines(QwtValueList xAxisTicks,
+                                            double xAngle) {
+  m_xAxisTicks = xAxisTicks;
+  m_xAngle = xAngle;
+}
+
+void NonOrthogonalOverlay::updateYGridlines(QwtValueList yAxisTicks,
+                                            double yAngle) {
+  m_yAxisTicks = yAxisTicks;
+  m_yAngle = yAngle;
+}
+
 //----------------------------------------------------------------------------------------------
 /// Paint the overlay
 void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
@@ -133,84 +145,36 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     const auto heightScreen = height();
 
     const int numberOfGridLines = 10;
-    drawYLines(painter, gridPen, widthScreen, heightScreen, numberOfGridLines,
-               m_angleY);
-    drawXLines(painter, gridPen, widthScreen, heightScreen, numberOfGridLines,
-               m_angleX);
+    drawYLines(painter, gridPen, widthScreen, heightScreen, m_yAxisTicks,
+               m_yAngle);
+    drawXLines(painter, gridPen, widthScreen, heightScreen, m_xAxisTicks,
+               m_xAngle);
   }
 }
 
 void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
                                       int widthScreen, int heightScreen,
-                                      int numberOfGridLines, double angle) {
-  // Draw Y grid lines - in a orthogonal world these lines will be parallel to
-  // the Y axes.
-  const auto increment = widthScreen / numberOfGridLines;
-
-  // We need the -1 since we the angle is defined in the mathematical positive
-  // sense but we are taking the angle against the y axis in the mathematical
-  // negative sense.
-  angle *= -1.f;
-  auto xOffsetForYLine = angle == 0. ? 0. : heightScreen * std::tan(angle);
-
-  // We need to make sure that the we don't have a blank area. This "blankness"
-  // is determined by the angle. The extra lines which need to be drawn are
-  // given by
-  // lineSpacing/(x offset of line on the top), ie. increment/xOffsetForYLine
-  int additionalLinesToDraw =
-      static_cast<int>(std::abs(std::ceil(xOffsetForYLine / increment)));
-  int index = 0;
-  if (angle < 0) {
-    // If the angle is positive, then we need to add more lines at the left side
-    // of the screen
-    numberOfGridLines += additionalLinesToDraw;
-
-  } else {
-    // IF the angle is negative, then we need to add more lines at the right
-    // side of the screen
-    index -= additionalLinesToDraw;
-  }
-
-  QString label;
-  for (; index < numberOfGridLines; ++index) {
-    const auto xValue = increment * index;
-    auto start = QPointF(xValue, heightScreen);
-    auto end = QPointF(xValue + xOffsetForYLine, 0);
-    painter.setPen(gridPen);
+                                      QwtValueList yAxisTicks, double yAngle) {
+  auto offset = yAngle == 0. ? 0. : widthScreen * tan(yAngle);
+  painter.setPen(gridPen);
+  for (auto &tick : yAxisTicks) {
+    auto tickScreen = m_plot->transform(QwtPlot::yLeft, tick);
+    auto start = QPointF(0, tickScreen);
+    auto end = QPointF(widthScreen, tickScreen - offset);
     painter.drawLine(start, end);
   }
 }
 
 void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen,
                                       int widthScreen, int heightScreen,
-                                      int numberOfGridLines, double angle) {
-
-  // Draw X grid lines - in a orthogonal world these lines will be parallel to
-  // the X axes.
-  const auto increment = heightScreen / numberOfGridLines;
-
-  auto yOffsetForXLine = angle == 0. ? 0. : widthScreen * std::tan(angle);
-
-  int additionalLinesToDraw =
-      static_cast<int>(std::abs(std::ceil(yOffsetForXLine / increment)));
-
-  int index = 0;
-  if (angle > 0) {
-    // If the angle is positive, then we need to add more lines at the bottom of
-    // the screen
-    numberOfGridLines += additionalLinesToDraw;
-  } else {
-    // If the angle is negative then we need to add more lines at the top of the
-    // screen
-    index -= additionalLinesToDraw;
-  }
-
-  QString label;
-  for (; index < numberOfGridLines; ++index) {
-    const auto yValue = increment * index;
-    auto start = QPointF(0, yValue);
-    auto end = QPointF(widthScreen, yValue - yOffsetForXLine);
-    painter.setPen(gridPen);
+                                      QwtValueList xAxisTicks, double xAngle) {
+  xAngle *= -1.f;
+  auto offset = xAngle == 0. ? 0. : heightScreen * tan(xAngle);
+  painter.setPen(gridPen);
+  for (auto &tick : xAxisTicks) {
+    auto tickScreen = m_plot->transform(QwtPlot::xBottom, tick);
+    auto start = QPointF(tickScreen, heightScreen);
+    auto end = QPointF(tickScreen + offset, 0);
     painter.drawLine(start, end);
   }
 }

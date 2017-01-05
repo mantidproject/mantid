@@ -5,6 +5,7 @@
 #include <QtCore/QtCore>
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
+#include <qwt_valuelist.h>
 #include <qpainter.h>
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
@@ -60,6 +61,13 @@ public:
 
   void disable();
 
+  void updateXGridlines(QwtValueList xAxisTicks, double xAngle);
+  void updateYGridlines(QwtValueList yAxisTicks, double yAngle);
+  QwtValueList m_xAxisTicks;
+  double m_xAngle;
+  QwtValueList m_yAxisTicks;
+  double m_yAngle;
+
 private:
   QSize sizeHint() const override;
   QSize size() const;
@@ -71,9 +79,10 @@ private:
   QPointF invTransform(QPoint pixels) const;
 
   void drawYLines(QPainter &painter, QPen &gridPen, int widthScreen,
-                  int heightScreen, int numberOfGridLines, double angle);
+                  int heightScreen, QwtValueList yAxisTicks, double yAngle);
+
   void drawXLines(QPainter &painter, QPen &gridPen, int widthScreen,
-                  int heightScreen, int numberOfGridLines, double angle);
+                  int heightScreen, QwtValueList xAxisTicks, double xAngle);
 
   void setSkewMatrix();
 

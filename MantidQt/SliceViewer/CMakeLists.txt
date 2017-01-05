@@ -30,6 +30,7 @@ set ( SRC_FILES
 	src/XYLimitsDialog.cpp
 	src/LinePlotOptions.cpp
 	src/NonOrthogonalOverlay.cpp
+	src/QwtScaleDrawNonOrthogonal.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -76,6 +77,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/XYLimitsDialog.h
 	inc/MantidQtSliceViewer/ZoomableOnDemand.h
 	inc/MantidQtSliceViewer/ZoomablePeaksView.h
+	inc/MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h
 )
 
 set ( MOC_FILES 

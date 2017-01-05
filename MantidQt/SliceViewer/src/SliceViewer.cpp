@@ -29,7 +29,6 @@
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtAPI/NonOrthogonal.h"
-#include "MantidQtAPI/QwtScaleDrawNonOrthogonal.h"
 #include "MantidQtAPI/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
@@ -44,6 +43,7 @@
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/SliceViewerFunctions.h"
+#include "MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
 #include <qwt_plot_panner.h>
@@ -728,6 +728,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // disconnect and reconnect here
   QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
                    SLOT(checkForHKLDimension()));
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+                   SLOT(switchAxis()));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
                    SLOT(switchQWTRaster(bool)));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
@@ -2886,14 +2888,23 @@ std::string SliceViewer::saveDimensionWidgets() const {
   return tsv.outputLines();
 }
 
+void SliceViewer::switchAxis() {
+  auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+  if (isHKL) {
+    applyNonOrthogonalAxisScaleDraw();
+  } else {
+    applyOrthogonalAxisScaleDraw();
+  }
+}
+
 /// Apply the non orthogonal axis scale draw
 void SliceViewer::applyNonOrthogonalAxisScaleDraw() {
   auto *axis0 = new QwtScaleDrawNonOrthogonal(
       m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::X, m_ws, m_dimX,
-      m_dimY, m_slicePoint);
+      m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
   auto *axis1 = new QwtScaleDrawNonOrthogonal(
       m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::Y, m_ws, m_dimX,
-      m_dimY, m_slicePoint);
+      m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
 }
