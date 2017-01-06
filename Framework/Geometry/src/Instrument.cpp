@@ -1299,6 +1299,14 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
 
 } // containsRectDetectors
 
+/// Temporary helper for refactoring. Argument is index, *not* ID!
+bool Instrument::isMonitor(const size_t index) const {
+  if (m_map)
+    return m_instr->m_detectorCache[index].second->isMonitor();
+  else
+    return m_detectorCache[index].second->isMonitor();
+}
+
 /// Only for use by ExperimentInfo. Returns returns true if this instrument
 /// contains a DetectorInfo.
 bool Instrument::hasDetectorInfo() const {

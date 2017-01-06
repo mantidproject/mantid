@@ -251,6 +251,8 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
+  bool isMonitor(const size_t index) const;
+
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
   void
