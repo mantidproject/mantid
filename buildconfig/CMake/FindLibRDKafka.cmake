@@ -20,22 +20,53 @@
 find_path(LibRDKafka_ROOT_DIR
         NAMES include/librdkafka/rdkafkacpp.h
         PATHS /usr/local
-        )
-
-find_library(LibRDKafka_LIBRARIES
-        NAMES rdkafka++
-        HINTS ${LibRDKafka_ROOT_DIR}/lib
-        )
-
-find_library(LibRDKafka_C_LIBRARIES
-        NAMES rdkafka
-        HINTS ${LibRDKafka_ROOT_DIR}/lib
-        )
-
+        )   
 find_path(LibRDKafka_INCLUDE_DIR
         NAMES librdkafka/rdkafkacpp.h
         HINTS ${LibRDKafka_ROOT_DIR}/include
         )
+find_library(LibRDKafka
+        NAMES rdkafka++ librdkafkacpp
+        HINTS ${LibRDKafka_ROOT_DIR}/lib
+        )
+find_library(LibRDKafka_DEBUG
+        NAMES librdkafkacpp_D
+        HINTS ${LibRDKafka_ROOT_DIR}/lib
+        )
+find_library(LibRDKafka_C
+        NAMES rdkafka librdkafka
+        HINTS ${LibRDKafka_ROOT_DIR}/lib
+        )
+find_library(LibRDKafka_C_DEBUG
+        NAMES librdkafka_D
+        HINTS ${LIBRDKafka_ROOT_DIR}/lib
+        )
+        
+if( LibRDKafka_DEBUG )
+
+set( LibRDKafka_LIBRARIES optimized ${LibRDKafka}
+                          debug ${LibRDKafka_DEBUG}
+)
+
+else ()
+
+set( LibRDKafka_LIBRARIES ${LibRDKafka}
+)
+
+endif ()
+
+if( LibRDKafka_C_DEBUG )
+
+set( LibRDKafka_C_LIBRARIES optimized ${LibRDKafka_C}
+                            debug ${LibRDKafka_C_DEBUG}
+)
+
+else ()
+
+set( LibRDKafka_C_LIBRARIES ${LibRDKafka_C} 
+)
+
+endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibRDKafka DEFAULT_MSG
