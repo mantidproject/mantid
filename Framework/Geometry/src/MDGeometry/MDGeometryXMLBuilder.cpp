@@ -16,25 +16,6 @@
 namespace Mantid {
 namespace Geometry {
 
-/*
- @class CompareIMDDimension_const_sptr
- @brief Helper comparitor. Compares IMDDimensions constant shared pointers on
- the basis of their id.
- @author Owen Arnold
- @date May 2011
-*/
-struct CompareIMDDimension_const_sptr {
-private:
-  std::string m_dimensionId;
-
-public:
-  explicit CompareIMDDimension_const_sptr(const IMDDimension_const_sptr &a)
-      : m_dimensionId(a->getDimensionId()) {}
-  bool operator()(const IMDDimension_const_sptr &b) {
-    return m_dimensionId == b->getDimensionId();
-  }
-};
-
 /**
  Add an ordinary dimension.
  @param dimensionToAdd :: The dimension to add to the geometry.
@@ -45,10 +26,13 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
     IMDDimension_const_sptr dimensionToAdd) const {
   bool bAdded = false; // Addition fails by default.
   if (dimensionToAdd) {
-    CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
-    auto location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(),
-                                 comparitor);
-    if (location == m_vecDimensions.end()) {
+    const std::string dimensionId = dimensionToAdd->getDimensionId();
+    auto location =
+        std::find_if(m_vecDimensions.cbegin(), m_vecDimensions.cend(),
+                     [&dimensionId](const IMDDimension_const_sptr &b) {
+                       return dimensionId == b->getDimensionId();
+                     });
+    if (location == m_vecDimensions.cend()) {
       m_vecDimensions.push_back(std::move(dimensionToAdd));
       bAdded = true;
       m_changed = true;

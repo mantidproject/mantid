@@ -153,7 +153,6 @@ protected:
    @return  correctly cast shared pointer or an empty shared pointer if cast or
    checks fail.
    */
-
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
   boost::shared_ptr<IMDWorkspaceType>
   castAndCheck(Mantid::API::Workspace_sptr workspace,

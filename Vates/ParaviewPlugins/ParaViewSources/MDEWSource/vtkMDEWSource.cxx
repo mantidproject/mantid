@@ -57,7 +57,7 @@ void vtkMDEWSource::SetDepth(int depth) {
   @param name : workspace name to extract from ADS.
 */
 void vtkMDEWSource::SetWsName(const std::string &name) {
-  if (m_wsName != name && name != "") {
+  if (m_wsName != name && !name.empty()) {
     m_wsName = name;
     this->Modified();
   }
@@ -185,8 +185,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **,
     product = m_presenter->execute(
         hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
 
-    //-------------------------------------------------------- Corrects problem
-    // whereby boundaries not set propertly in PV.
+    // Corrects problem whereby boundaries not set propertly in PV.
     auto box = vtkSmartPointer<vtkBox>::New();
     box->SetBounds(product->GetBounds());
     auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();
