@@ -754,7 +754,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
   }
   // Else need to construct a DetectorGroup and return that
   auto dets_ptr = localInstrument->getDetectors(dets);
-  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr, false);
+  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector

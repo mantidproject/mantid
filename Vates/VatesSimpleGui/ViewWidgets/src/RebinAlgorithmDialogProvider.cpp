@@ -132,13 +132,11 @@ MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
   // This is an optional message displayed at the top of the GUI.
   QString optional_msg(algorithm.summary().c_str());
 
-  MantidQt::API::AlgorithmDialog *dialog = nullptr;
-
   MantidQt::API::InterfaceManager interfaceManager;
   presets.insert(m_lblInputWorkspace, QString::fromStdString(inputWorkspace));
   presets.insert(m_lblOutputWorkspace, QString::fromStdString(outputWorkspace));
 
-  dialog = interfaceManager.createDialogFromName(
+  auto dialog = interfaceManager.createDialogFromName(
       QString::fromStdString(algorithmType), -1, m_parent, false, presets);
 
   // The parent so that the dialog appears on top of it

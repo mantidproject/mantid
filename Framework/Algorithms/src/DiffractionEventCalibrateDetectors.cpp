@@ -408,7 +408,6 @@ void DiffractionEventCalibrateDetectors::exec() {
     std::cout << tim << " to CreateGroupingWorkspace\n";
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *s = nullptr;
     gsl_vector *ss, *x;
     gsl_multimin_function minex_func;
 
@@ -436,7 +435,7 @@ void DiffractionEventCalibrateDetectors::exec() {
     minex_func.f = &Mantid::Algorithms::gsl_costFunction;
     minex_func.params = &par;
 
-    s = gsl_multimin_fminimizer_alloc(T, nopt);
+    gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc(T, nopt);
     gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
 
     do {

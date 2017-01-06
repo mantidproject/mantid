@@ -10,10 +10,12 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
-#include "vtkNew.h"
-#include "vtkStructuredGrid.h"
-#include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
+#include "vtkFloatArray.h"
+#include "vtkNew.h"
+#include "vtkSMPTools.h"
+#include "vtkStructuredGrid.h"
+#include "vtkUnsignedCharArray.h"
 
 #include <cmath>
 
@@ -66,6 +68,66 @@ void vtkMDHistoHexFactory::validateWsNotNull() const {
 
 void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
 
+namespace {
+struct CellGhostArrayWorker {
+  vtkMDHWSignalArray<double> *m_signal;
+  vtkUnsignedCharArray *m_cga;
+  CellGhostArrayWorker(vtkMDHWSignalArray<double> *signal,
+                       vtkUnsignedCharArray *cga)
+      : m_signal(signal), m_cga(cga) {}
+  void operator()(vtkIdType begin, vtkIdType end) {
+    for (vtkIdType index = begin; index < end; ++index) {
+      if (!std::isfinite(m_signal->GetValue(index))) {
+        m_cga->SetValue(index, m_cga->GetValue(index) |
+                                   vtkDataSetAttributes::HIDDENCELL);
+      }
+    }
+  }
+};
+
+struct PointsWorker {
+  vtkPoints *m_pts;
+  coord_t incrementX, incrementY, incrementZ;
+  coord_t minX, minY, minZ;
+  vtkIdType nPointsX, nPointsY;
+  PointsWorker(Mantid::DataObjects::MDHistoWorkspace &ws, vtkPoints *pts)
+      : m_pts(pts) {
+    int nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
+    int nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
+    int nBinsZ = static_cast<int>(ws.getZDimension()->getNBins());
+
+    minX = ws.getXDimension()->getMinimum();
+    minY = ws.getYDimension()->getMinimum();
+    minZ = ws.getZDimension()->getMinimum();
+    coord_t maxX = ws.getXDimension()->getMaximum();
+    coord_t maxY = ws.getYDimension()->getMaximum();
+    coord_t maxZ = ws.getZDimension()->getMaximum();
+
+    incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
+    incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
+    incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
+
+    nPointsX = nBinsX + 1;
+    nPointsY = nBinsY + 1;
+  }
+  void operator()(vtkIdType begin, vtkIdType end) {
+    float in[3];
+    vtkIdType pos = begin * nPointsX * nPointsY;
+    for (int z = static_cast<int>(begin); z < static_cast<int>(end); ++z) {
+      in[2] = minZ + static_cast<coord_t>(z) * incrementZ;
+      for (int y = 0; y < nPointsY; ++y) {
+        in[1] = minY + static_cast<coord_t>(y) * incrementY;
+        for (int x = 0; x < nPointsX; ++x) {
+          in[0] = minX + static_cast<coord_t>(x) * incrementX;
+          m_pts->SetPoint(pos, in);
+          ++pos;
+        }
+      }
+    }
+  }
+};
+} // end anon namespace
+
 /** Method for creating a 3D or 4D data set
  *
  * @param timestep :: index of the time step (4th dimension) in the workspace.
@@ -76,7 +138,7 @@ void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
  */
 vtkSmartPointer<vtkDataSet>
 vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
-                                   ProgressAction &progressUpdate) const {
+                                   ProgressAction &progress) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault from
   // algos modifying ws)
   ReadLock lock(*m_workspace);
@@ -99,12 +161,10 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-  vtkSmartPointer<vtkStructuredGrid> visualDataSet =
-      vtkSmartPointer<vtkStructuredGrid>::New();
+  auto visualDataSet = vtkSmartPointer<vtkStructuredGrid>::New();
   visualDataSet->SetDimensions(nBinsX + 1, nBinsY + 1, nBinsZ + 1);
 
   // Array with true where the voxel should be shown
-  double progressFactor = 0.5 / static_cast<double>(imageSize);
 
   std::size_t offset = 0;
   if (nDims == 4) {
@@ -116,64 +176,22 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
   signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+  auto cga = visualDataSet->AllocateCellGhostArray();
 
-  // update progress after a 1% change
-  vtkIdType progressIncrement = std::max(1, imageSize / 50);
-  for (vtkIdType index = 0; index < imageSize; ++index) {
-    if (index % progressIncrement == 0)
-      progressUpdate.eventRaised(static_cast<double>(index) * progressFactor);
-    double signalScalar = signal->GetValue(index);
-    if (!std::isfinite(signalScalar)) {
-      visualDataSet->BlankCell(index);
-    }
-  }
+  CellGhostArrayWorker cgafunc(signal.GetPointer(), cga);
+  progress.eventRaised(0.0);
+  vtkSMPTools::For(0, imageSize, cgafunc);
+  progress.eventRaised(0.33);
 
   vtkNew<vtkPoints> points;
-
-  Mantid::coord_t in[2];
-
-  const coord_t maxX = m_workspace->getXDimension()->getMaximum();
-  const coord_t minX = m_workspace->getXDimension()->getMinimum();
-  const coord_t maxY = m_workspace->getYDimension()->getMaximum();
-  const coord_t minY = m_workspace->getYDimension()->getMinimum();
-  const coord_t maxZ = m_workspace->getZDimension()->getMaximum();
-  const coord_t minZ = m_workspace->getZDimension()->getMinimum();
-
-  const coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
-  const coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
-  const coord_t incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
-
   const vtkIdType nPointsX = nBinsX + 1;
   const vtkIdType nPointsY = nBinsY + 1;
   const vtkIdType nPointsZ = nBinsZ + 1;
+  points->SetNumberOfPoints(nPointsX * nPointsY * nPointsZ);
 
-  vtkFloatArray *pointsarray = vtkFloatArray::FastDownCast(points->GetData());
-  if (!pointsarray) {
-    throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
-  } else if (pointsarray->GetNumberOfComponents() != 3) {
-    throw std::runtime_error("points array must have 3 components.");
-  }
-  float *it = pointsarray->WritePointer(0, nPointsX * nPointsY * nPointsZ * 3);
-  // Array with the point IDs (only set where needed)
-  progressFactor = 0.25 / static_cast<double>(nPointsZ);
-  double progressOffset = 0.5;
-  for (int z = 0; z < nPointsZ; z++) {
-    // Report progress updates for the last 50%
-    progressUpdate.eventRaised(double(z) * progressFactor + progressOffset);
-    in[1] = (minZ + (static_cast<coord_t>(z) *
-                     incrementZ)); // Calculate increment in z;
-    for (int y = 0; y < nPointsY; y++) {
-      in[0] = (minY + (static_cast<coord_t>(y) *
-                       incrementY)); // Calculate increment in y;
-      for (int x = 0; x < nPointsX; x++) {
-        it[0] = (minX + (static_cast<coord_t>(x) *
-                         incrementX)); // Calculate increment in x;
-        it[1] = in[0];
-        it[2] = in[1];
-        std::advance(it, 3);
-      }
-    }
-  }
+  PointsWorker ptsfunc(*m_workspace, points.GetPointer());
+  vtkSMPTools::For(0, nPointsZ, ptsfunc);
+  progress.eventRaised(0.67);
 
   visualDataSet->SetPoints(points.GetPointer());
   visualDataSet->Register(nullptr);

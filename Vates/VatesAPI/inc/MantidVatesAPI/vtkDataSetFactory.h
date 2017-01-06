@@ -184,7 +184,7 @@ protected:
   boost::shared_ptr<IMDWorkspaceType>
   doInitialize(Mantid::API::Workspace_sptr workspace,
                bool bExactMatch = true) const {
-    if (workspace == NULL) {
+    if (!workspace) {
       std::string message = this->getFactoryTypeName() +
                             " initialize cannot operate on a null workspace";
       throw std::invalid_argument(message);

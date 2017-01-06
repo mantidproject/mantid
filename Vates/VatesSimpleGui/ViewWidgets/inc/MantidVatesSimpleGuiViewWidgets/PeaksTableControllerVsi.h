@@ -26,7 +26,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTableControllerVsi
   Q_OBJECT
 public:
   PeaksTableControllerVsi(boost::shared_ptr<CameraManager> cameraManager,
-                          QWidget *parent = 0);
+                          QWidget *parent = nullptr);
   ~PeaksTableControllerVsi() override;
   std::vector<bool> getViewablePeaks();
   bool hasPeaks();
