@@ -131,7 +131,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_run_num" native="true">
+         <widget class="MantidQt::API::MWRunFiles" name="MWRunFiles_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -189,7 +189,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_cropped_run_num" native="true">
+         <widget class="MantidQt::API::MWRunFiles" name="MWRunFiles_cropped_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -305,7 +305,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="MWRunFiles_texture_run_num" native="true">
+         <widget class="MantidQt::API::MWRunFiles" name="MWRunFiles_texture_run_num" native="true">
           <property name="text" stdset="0">
            <string/>
           </property>
@@ -644,9 +644,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

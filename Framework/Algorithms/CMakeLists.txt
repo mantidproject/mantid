@@ -18,9 +18,9 @@ set ( SRC_FILES
 	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
-	src/CalculateCountRate.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
+	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
@@ -64,8 +64,8 @@ set ( SRC_FILES
 	src/CopyLogs.cpp
 	src/CopySample.cpp
 	src/CorelliCrossCorrelate.cpp
-	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
+	src/CorrectTOFAxis.cpp
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
@@ -152,6 +152,7 @@ set ( SRC_FILES
 	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
+	src/InterpolationOption.cpp
 	src/InvertMask.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
@@ -237,7 +238,6 @@ set ( SRC_FILES
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
-	src/SANSDirectBeamScaling.cpp
 	src/SampleCorrections/MCAbsorptionStrategy.cpp
 	src/SampleCorrections/MCInteractionVolume.cpp
 	src/SampleCorrections/MayersSampleCorrection.cpp
@@ -326,9 +326,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
-	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
+	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
@@ -372,8 +372,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorelliCrossCorrelate.h
-	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
+	inc/MantidAlgorithms/CorrectTOFAxis.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
@@ -461,6 +461,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
+	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
@@ -549,7 +550,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
-	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
 	inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
 	inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
@@ -646,13 +646,14 @@ set ( TEST_FILES
 	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
-	CalculateCountRateTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateResolutionTest.h
+	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
@@ -693,6 +694,7 @@ set ( TEST_FILES
 	CopySampleTest.h
 	CorelliCrossCorrelateTest.h
 	CorrectKiKfTest.h
+	CorrectTOFAxisTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
@@ -772,6 +774,7 @@ set ( TEST_FILES
 	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
+	InterpolationOptionTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
@@ -889,6 +892,7 @@ set ( TEST_FILES
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
+	UnwrapMonitorTest.h
 	UnwrapMonitorsInTOFTest.h
 	UnwrapSNSTest.h
 	VesuvioL1ThetaResolutionTest.h

@@ -174,7 +174,7 @@ createDetectorGroupWith5CylindricalDetectors() {
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       ic++;
     }
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -258,7 +258,7 @@ boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
     det->markAsMonitor();
     groupMembers[i] = det;
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------

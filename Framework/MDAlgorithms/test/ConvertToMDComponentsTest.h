@@ -3,6 +3,8 @@
 // tests for different parts of ConvertToMD exec functions
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -342,9 +344,10 @@ public:
       // detectorList.push_back(spDet->getID());
     }
 
-    std::vector<size_t>::const_iterator wit;
-    for (wit = indexLis.begin(); wit != indexLis.end(); ++wit) {
-      inputWS->maskWorkspaceIndex(*wit);
+    auto &spectrumInfo = inputWS->mutableSpectrumInfo();
+    for (const auto i : indexLis) {
+      inputWS->getSpectrum(i).clearData();
+      spectrumInfo.setMasked(i, true);
     }
   }
 };

@@ -1,17 +1,22 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/VectorHelper.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -131,7 +136,7 @@ void CalculateCoverageDGS::init() {
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     declareProperty(dim, options[i - 1],
                     boost::make_shared<StringListValidator>(options),
                     "Dimension to bin or integrate");
@@ -161,14 +166,13 @@ void CalculateCoverageDGS::exec() {
       getProperty("InputWorkspace");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // cache two theta and phi
-  auto instrument = inputWS->getInstrument();
-  std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
+  const auto &detectorInfo = inputWS->detectorInfo();
   std::vector<double> tt, phi;
-  for (auto &id : detIDS) {
-    auto detector = instrument->getDetector(id);
-    if (!detector->isMasked()) {
-      tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
-      phi.push_back(detector->getPhi());
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMasked(i) && !detectorInfo.isMonitor(i)) {
+      const auto &detector = detectorInfo.detector(i);
+      tt.push_back(detector.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
+      phi.push_back(detector.getPhi());
     }
   }
 
@@ -196,7 +200,7 @@ void CalculateCoverageDGS::exec() {
   size_t q1NumBins = 1, q2NumBins = 1, q3NumBins = 1, dENumBins = 1;
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     std::string dimensioni = getProperty(dim);
     if (dimensioni == "Q1") {
       affineMat[i - 1][0] = 1.;

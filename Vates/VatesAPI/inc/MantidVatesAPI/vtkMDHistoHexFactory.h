@@ -33,7 +33,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include <vtkFloatArray.h>
 #include <vtkCellData.h>
 #include <vtkHexahedron.h>
@@ -45,8 +44,7 @@ namespace VATES {
 class DLLExport vtkMDHistoHexFactory : public vtkDataSetFactory {
 public:
   /// Constructor
-  vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange,
-                       const VisualNormalization normalizationOption);
+  vtkMDHistoHexFactory(const VisualNormalization normalizationOption);
 
   /// Assignment operator
   vtkMDHistoHexFactory &operator=(const vtkMDHistoHexFactory &other);
@@ -83,9 +81,6 @@ protected:
 
   /// Normalization option
   VisualNormalization m_normalizationOption;
-
-  /// Threshold range.
-  mutable ThresholdRange_scptr m_thresholdRange;
 };
 }
 }

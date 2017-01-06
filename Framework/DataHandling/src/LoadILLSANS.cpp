@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/UnitFactory.h"
@@ -252,18 +253,12 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       std::vector<double> positionsBinning;
       positionsBinning.reserve(vectorSize);
 
-      for (size_t i = 0; i < vectorSize; i++)
-        positionsBinning.push_back(static_cast<double>(i));
+      const HistogramData::BinEdges histoBinEdges(
+          vectorSize, HistogramData::LinearGenerator(0.0, 1.0));
+      const HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
-      // Assign X
-      m_localWorkspace->dataX(firstIndex)
-          .assign(positionsBinning.begin(), positionsBinning.end());
-      // Assign Y
-      m_localWorkspace->dataY(firstIndex).assign(data(), data() + data.dim2());
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(firstIndex);
-      std::transform(data(), data() + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
+      m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges),
+                                     std::move(histoCounts));
 
       // Add average monitor counts to a property:
       double averageMonitorCounts =
@@ -298,30 +293,20 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
                 << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
-  size_t numberOfTubes = data.dim1();
-  size_t numberOfPixelsPerTube = data.dim0();
+  const size_t numberOfTubes = data.dim1();
+  const size_t numberOfPixelsPerTube = data.dim0();
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  m_localWorkspace->dataX(firstIndex)
-      .assign(timeBinning.begin(), timeBinning.end());
-
   size_t spec = firstIndex;
-  for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
-    for (size_t j = 0; j < numberOfPixelsPerTube;
-         ++j) { // iterate pixels in the tube 256
-      if (spec > firstIndex) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstIndex);
-      }
-      // Assign Y
-      int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + data.dim2());
 
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
-      std::transform(data_p, data_p + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
+  const HistogramData::BinEdges binEdges(timeBinning);
+
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
+      int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
+      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
+      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
 
       ++spec;
       progress.report();
@@ -350,31 +335,20 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
                 << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
-  size_t numberOfTubes = data.dim0();
-  size_t numberOfPixelsPerTube = data.dim1();
+  const size_t numberOfTubes = data.dim0();
+  const size_t numberOfPixelsPerTube = data.dim1();
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  m_localWorkspace->dataX(firstIndex)
-      .assign(timeBinning.begin(), timeBinning.end());
-
+  const HistogramData::BinEdges binEdges(timeBinning);
   size_t spec = firstIndex;
-  for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
-    for (size_t j = 0; j < numberOfPixelsPerTube;
-         ++j) { // iterate pixels in the tube 256
-      if (spec > firstIndex) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstIndex);
-      }
-      // Assign Y
+
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + data.dim2());
+      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
 
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
-      std::transform(data_p, data_p + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
-
+      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
       ++spec;
       progress.report();
     }
@@ -570,14 +544,6 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
-
-  // Put the detector distances:
-  //	std::string detectorPath(instrumentNamePath + "/detector");
-  //	// Just for Sample - RearDetector
-  //	double sampleDetectorDistance =
-  // m_loader.getDoubleFromNexusPath(entry,detectorPath + "/det2_calc");
-  //	runDetails.addProperty("sample_detector_distance",
-  // sampleDetectorDistance);
 }
 
 /**
@@ -597,15 +563,12 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
   for (std::size_t i = 0; i < nHist; ++i) {
     Geometry::IDetector_const_sptr det = m_localWorkspace->getDetector(i);
     if (!det->isMonitor()) {
-      const MantidVec &lambdaBinning = m_localWorkspace->readX(i);
+      const auto &lambdaBinning = m_localWorkspace->x(i);
       Kernel::V3D detPos = det->getPos();
       double r, theta, phi;
       detPos.getSpherical(r, theta, phi);
       double v1 = calculateQ(*(lambdaBinning.begin()), theta);
       double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
-      // std::cout << "i=" << i << " theta="<<theta << " lambda_i=" <<
-      // *(lambdaBinning.begin()) << " lambda_f=" << *(lambdaBinning.end()-1) <<
-      // " v1=" << v1 << " v2=" << v2 << '\n';
       if (i == 0) {
         min = v1;
         max = v1;

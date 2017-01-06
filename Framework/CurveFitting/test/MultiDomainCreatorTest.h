@@ -22,6 +22,7 @@
 #include <algorithm>
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;

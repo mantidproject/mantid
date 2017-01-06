@@ -25,8 +25,7 @@ DECLARE_ALGORITHM(PlusMD)
  * @param ws ::  MDEventWorkspace being added to
  */
 template <typename MDE, size_t nd>
-void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  typename MDEventWorkspace<MDE, nd>::sptr ws1 = ws;
+void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 =
       boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
   if (!ws1 || !ws2)

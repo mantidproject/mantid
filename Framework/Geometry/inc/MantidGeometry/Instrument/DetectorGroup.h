@@ -47,10 +47,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL DetectorGroup : public virtual IDetector {
 public:
   DetectorGroup();
-  DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
-                bool warnAboutMasked = false);
+  DetectorGroup(const std::vector<IDetector_const_sptr> &dets);
 
-  void addDetector(IDetector_const_sptr det, bool &warn);
+  void addDetector(IDetector_const_sptr det);
 
   // IDetector methods
   IDetector *cloneParameterized(const ParameterMap *) const override {
@@ -68,7 +67,6 @@ public:
   double getPhiOffset(const double &offset) const override;
   double solidAngle(const Kernel::V3D &observer) const override;
   bool isParametrized() const override;
-  bool isMasked() const override;
   bool isMonitor() const override;
   bool isValid(const Kernel::V3D &point) const override;
   bool isOnSide(const Kernel::V3D &point) const override;
@@ -184,6 +182,10 @@ public:
   IComponent const *getBaseComponent() const override {
     return const_cast<const DetectorGroup *>(this);
   }
+
+  const ParameterMap &parameterMap() const override;
+  size_t index() const override;
+  void setIndex(const size_t index) override;
 
 protected:
   /// The ID of this effective detector

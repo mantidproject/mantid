@@ -14,6 +14,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
@@ -96,11 +97,17 @@ public:
   MOCK_CONST_METHOD1(getSpectrum,
                      const Mantid::API::IEventList &(const std::size_t));
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
+  MOCK_METHOD2(init,
+               void(const size_t &, const Mantid::HistogramData::Histogram &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
 
 private:
   MockIEventWorkspace *doClone() const override {
+    throw std::runtime_error(
+        "Cloning of MockIEventWorkspace is not implemented.");
+  }
+  MockIEventWorkspace *doCloneEmpty() const override {
     throw std::runtime_error(
         "Cloning of MockIEventWorkspace is not implemented.");
   }

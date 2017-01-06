@@ -168,11 +168,9 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         returns number of not masked detectors
         """
         num = 0
-        instrument = workspace.getInstrument()
-        offset = workspace.getSpectrum(0).getDetectorIDs()[0]
+        spectrumInfo = workspace.spectrumInfo()
         for idx in range(workspace.getNumberHistograms()):
-            det = instrument.getDetector(idx + offset)        # for DNS first det ID=1
-            if not det.isMasked():
+            if not spectrumInfo.isMasked(idx):
                 num += 1
         return num
 

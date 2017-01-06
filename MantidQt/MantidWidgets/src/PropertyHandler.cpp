@@ -136,8 +136,7 @@ public:
 protected:
   /// Create string property
   QtProperty *apply(const std::string &str) const override {
-    QtProperty *prop = NULL;
-    prop = m_browser->addStringProperty(m_name);
+    QtProperty *prop = m_browser->addStringProperty(m_name);
     m_browser->setStringPropertyValue(prop, QString::fromStdString(str));
     return prop;
   }

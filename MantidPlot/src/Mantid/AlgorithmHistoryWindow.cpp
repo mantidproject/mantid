@@ -1,22 +1,23 @@
 #include "AlgorithmHistoryWindow.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Workspace.h"
 
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 
-#include <QLineEdit>
-#include <QLabel>
-#include <QFileDialog>
-#include <QDateTime>
-#include <QFormLayout>
-#include <QMenu>
 #include <QAction>
-#include <QMessageBox>
 #include <QApplication>
 #include <QClipboard>
-#include <QTextStream>
-#include <QTemporaryFile>
+#include <QDateTime>
 #include <QDir>
+#include <QFileDialog>
+#include <QFormLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenu>
+#include <QMessageBox>
+#include <QTemporaryFile>
+#include <QTextStream>
 
 #include <numeric>
 #include <fstream>
@@ -391,7 +392,7 @@ void AlgorithmHistoryWindow::writeToScriptFile() {
   } else {
     scriptDir = prevDir;
   }
-  QString filePath = MantidQt::API::FileDialogHandler::getSaveFileName(
+  QString filePath = QFileDialog::getSaveFileName(
       this, tr("Save Script As "), scriptDir, tr("Script files (*.py)"));
   // An empty string indicates they clicked cancel
   if (filePath.isEmpty())

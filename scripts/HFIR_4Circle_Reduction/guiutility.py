@@ -424,7 +424,7 @@ def show_message(parent=None, message='show message here!'):
     show message
     :param parent:
     :param message:
-    :return:
+    :return: True for accepting.  False for rejecting or cancelling
     """
     dialog = DisplayDialog(parent)
     dialog.show_message(message)

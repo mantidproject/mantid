@@ -6,6 +6,7 @@
 #include "MantidAPI/FunctionFactory.h"
 
 #include <cmath>
+#include <limits>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -132,7 +133,16 @@ double Voigt::centre() const { return getParameter(LORENTZ_POS); }
  * Return the value of the "LorentzAmp" parameter
  * @return value of height of peak
  */
-double Voigt::height() const { return 2.0 * getParameter(LORENTZ_AMP) / 3.0; }
+double Voigt::height() const {
+  if (getParameter(LORENTZ_AMP) == 0.0 || getParameter(LORENTZ_FWHM) == 0.0 ||
+      getParameter(GAUSSIAN_FWHM) == 0.0) {
+    return 0.0;
+  }
+  double pos = getParameter(LORENTZ_POS);
+  double h;
+  functionLocal(&h, &pos, 1);
+  return h;
+}
 
 /**
  * Gives the FWHM of the peak. This is estimated as
@@ -156,7 +166,22 @@ void Voigt::setCentre(const double value) {
  * @param value :: The new value for the centre of the peak
  */
 void Voigt::setHeight(const double value) {
-  this->setParameter(LORENTZ_AMP, 1.5 * value);
+  auto lorentzFwhm = getParameter(LORENTZ_FWHM);
+  if (lorentzFwhm == 0.0) {
+    lorentzFwhm = std::numeric_limits<double>::epsilon();
+    setParameter(LORENTZ_FWHM, lorentzFwhm);
+  }
+  auto lorentzAmp = getParameter(LORENTZ_AMP);
+  if (lorentzAmp == 0.0) {
+    lorentzAmp = std::numeric_limits<double>::epsilon();
+    setParameter(LORENTZ_AMP, lorentzAmp);
+  }
+  auto gaussFwhm = getParameter(GAUSSIAN_FWHM);
+  if (gaussFwhm == 0.0) {
+    setParameter(GAUSSIAN_FWHM, std::numeric_limits<double>::epsilon());
+  }
+  auto h = height();
+  this->setParameter(LORENTZ_AMP, lorentzAmp * value / h);
 }
 
 /**
@@ -164,8 +189,44 @@ void Voigt::setHeight(const double value) {
  * @param value :: The new value for the FWHM of the peak
  */
 void Voigt::setFwhm(const double value) {
-  this->setParameter(LORENTZ_FWHM, 0.5 * value);
-  this->setParameter(GAUSSIAN_FWHM, 0.5 * value);
+  auto lorentzFwhm = getParameter(LORENTZ_FWHM);
+  if (lorentzFwhm == 0.0) {
+    lorentzFwhm = std::numeric_limits<double>::epsilon();
+  }
+  auto gaussFwhm = getParameter(GAUSSIAN_FWHM);
+  if (gaussFwhm == 0.0) {
+    gaussFwhm = std::numeric_limits<double>::epsilon();
+  }
+  auto ratio = lorentzFwhm / (lorentzFwhm + gaussFwhm);
+  this->setParameter(LORENTZ_FWHM, ratio * value);
+  this->setParameter(GAUSSIAN_FWHM, (1.0 - ratio) * value);
+}
+
+/**
+ * Returns the integral intensity of the peak
+ */
+double Voigt::intensity() const {
+  if (getParameter(GAUSSIAN_FWHM) == 0.0) {
+    return 0.0;
+  }
+  return M_PI * getParameter(LORENTZ_AMP) * getParameter(LORENTZ_FWHM) / 2.0;
+}
+
+/**
+ * Sets the integral intensity of the peak
+ * @param value :: The new value for the intensity.
+ */
+void Voigt::setIntensity(const double value) {
+  auto lorentzFWHM = getParameter(LORENTZ_FWHM);
+  if (lorentzFWHM == 0.0) {
+    lorentzFWHM = std::numeric_limits<double>::epsilon();
+    setParameter(LORENTZ_FWHM, lorentzFWHM);
+  }
+  auto gaussFwhm = getParameter(GAUSSIAN_FWHM);
+  if (gaussFwhm == 0.0) {
+    setParameter(GAUSSIAN_FWHM, std::numeric_limits<double>::epsilon());
+  }
+  setParameter(LORENTZ_AMP, 2.0 * value / (M_PI * lorentzFWHM));
 }
 
 } // namespace Functions

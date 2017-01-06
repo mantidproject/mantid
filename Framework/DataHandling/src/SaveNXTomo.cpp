@@ -4,6 +4,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 
@@ -368,9 +369,6 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   writeLogValues(workspace, nxFile, numFiles);
   writeIntensityValue(workspace, nxFile, numFiles);
   writeImageKeyValue(workspace, nxFile, numFiles);
-
-  ++numFiles;
-
   delete[] dataArr;
 }
 

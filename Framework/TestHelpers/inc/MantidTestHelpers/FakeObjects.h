@@ -32,7 +32,6 @@
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace Mantid;
 
 //===================================================================================================================
@@ -52,13 +51,13 @@ public:
     m_histogram.setCountStandardDeviations(0);
   }
 
-  void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override {
     m_histogram.setX(X);
   }
   MantidVec &dataX() override { return m_histogram.dataX(); }
   const MantidVec &dataX() const override { return m_histogram.dataX(); }
   const MantidVec &readX() const override { return m_histogram.readX(); }
-  cow_ptr<HistogramData::HistogramX> ptrX() const override {
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override {
     return m_histogram.ptrX();
   }
 
@@ -128,6 +127,21 @@ public:
     m_axes[0] = new Mantid::API::RefAxis(j, this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
+  void init(const size_t &numspec,
+            const HistogramData::Histogram &histogram) override {
+    spec = numspec;
+    vec.resize(spec, SpectrumTester(histogram.xMode(), histogram.yMode()));
+    for (size_t i = 0; i < spec; i++) {
+      vec[i].setHistogram(histogram);
+      vec[i].addDetectorID(detid_t(i));
+      vec[i].setSpectrumNo(specnum_t(i + 1));
+    }
+
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
+  }
   size_t size() const override { return vec.size() * blocksize(); }
   size_t blocksize() const override {
     return vec.empty() ? 0 : vec[0].dataY().size();
@@ -146,6 +160,9 @@ public:
 private:
   WorkspaceTester *doClone() const override {
     return new WorkspaceTester(*this);
+  }
+  WorkspaceTester *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
   }
   std::vector<SpectrumTester> vec;
   size_t spec;
@@ -243,7 +260,7 @@ public:
     throw std::runtime_error("find not implemented");
   }
 
-  void find(V3D, size_t &, const size_t &) override {
+  void find(Kernel::V3D, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 

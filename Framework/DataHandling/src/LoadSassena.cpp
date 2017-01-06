@@ -6,6 +6,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"

@@ -14,7 +14,7 @@ Improvements
 
 - The previously inaccurate instrument definition for IN4 at ILL has been updated. The instrument geometry should now be more correct.
 
-`Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
+- :ref:`LoadILLTOF <algm-LoadILLTOF>` has been upgraded to version 2. The new version loads the TOF axis as defined by the 'time_of_flight' field in the NeXus file. Consequently, the *FilenameVanadium* and *WorkspaceVanadium* input properties were removed and no 'EPP' entry is added to the sample logs anymore.
 
 New features
 ------------
@@ -23,8 +23,12 @@ Algorithms
 ##########
 
 - A utility algorithm :ref:`WorkflowAlgorithmRunner <algm-WorkflowAlgorithmRunner>` has been added to manage the running of certain data reduction workflows at ILL.
+- New algorithm :ref:`CorrectTOFAxis <algm-CorrectTOFAxis>` enables the adjustment of the time-of-flight axis according to incident energy or reference workspace.
 
 Crystal Field
 -------------
 
 - The peak widths can be fixed to or varied around values obtained from experimental or calculated instrument resolution function.
+- The initial field parameters can be estimated using a Monte Carlo seach algorithm.
+
+`Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_

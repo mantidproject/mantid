@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -44,17 +45,13 @@ bool MDHWNexusLoadingPresenter::canReadFile() const {
   if (!canLoadFileBasedOnExtension(m_filename, ".nxs")) {
     return 0;
   }
-  ::NeXus::File *file = NULL;
-
-  file = new ::NeXus::File(this->m_filename);
+  auto file = Kernel::make_unique<::NeXus::File>(this->m_filename);
   // MDHistoWorkspace file has a different name for the entry
   try {
     file->openGroup("MDHistoWorkspace", "NXentry");
-    file->close();
     return 1;
   } catch (::NeXus::Exception &) {
     // If the entry name does not match, then it can't read the file.
-    file->close();
     return 0;
   }
   return 0;

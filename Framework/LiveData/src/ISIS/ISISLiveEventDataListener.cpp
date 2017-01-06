@@ -8,6 +8,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -182,8 +183,8 @@ boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
                 1));
 
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer[i],
-                                                           temp, false);
+    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[i],
+                                                           *temp, false);
 
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
@@ -363,7 +364,7 @@ void ISISLiveEventDataListener::initEventBuffer(
 
       // Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(
-          m_eventBuffer[0], m_eventBuffer[i], false);
+          *m_eventBuffer[0], *m_eventBuffer[i], false);
     }
   }
 }

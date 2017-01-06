@@ -6,6 +6,7 @@
 #include "boost/bind.hpp"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"

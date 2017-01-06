@@ -110,7 +110,7 @@ public:
    */
   static MatrixWorkspace_sptr create_2d_workspace() {
     MatrixWorkspace_sptr goodWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, 5, -0.3, 0.12);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, 5, -0.3, 0.12);
     NumericAxis *yAxis = new NumericAxis(5);
 
     for (int i = 0; i < 5; ++i) {

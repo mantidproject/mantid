@@ -80,8 +80,7 @@ public:
     Mantid::Kernel::StringTokenizer elements(
         text, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
-    for (const auto &it : elements) {
-      std::string element(it);
+    for (const auto &element : elements) {
       try {
         newValues.push_back(boost::lexical_cast<Type>(element));
       } catch (boost::bad_lexical_cast &) {
@@ -91,6 +90,13 @@ public:
     }
 
     m_data.at(index) = newValues;
+  }
+
+  /// Set item from a stream
+  void read(const size_t index, std::istream &in) override {
+    std::string s;
+    in >> s;
+    read(index, s);
   }
 
   /// Specialized type check

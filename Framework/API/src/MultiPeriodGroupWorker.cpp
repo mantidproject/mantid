@@ -1,10 +1,12 @@
 #include "MantidAPI/MultiPeriodGroupWorker.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 
@@ -94,8 +96,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     }
   }
 
-  if ((vecMultiPeriodWorkspaceGroups.size() != 0) &&
-      (vecWorkspaceGroups.size() != 0)) {
+  if (!vecMultiPeriodWorkspaceGroups.empty() && !vecWorkspaceGroups.empty()) {
     throw std::invalid_argument(
         "The input contains a mix of multi-period and other workspaces.");
   }

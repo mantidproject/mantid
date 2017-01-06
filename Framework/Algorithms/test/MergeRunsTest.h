@@ -13,7 +13,6 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -27,8 +26,6 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::DataHandling::LoadEventPreNexus;
-
 class MergeRunsTest : public CxxTest::TestSuite {
 
 private:
@@ -55,9 +52,9 @@ private:
   /// matrixworkspaces. BUT WITHOUT MULTIPERIOD LOGS.
   WorkspaceGroup_sptr create_good_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a1");
     // b->setName("b1");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -74,9 +71,9 @@ private:
   /// matrixworkspaces. BUT WITHOUT MULTIPERIOD LOGS AT ZERO.
   WorkspaceGroup_sptr create_good_zerod_multiperiod_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a2");
     // b->setName("b2");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -99,9 +96,9 @@ private:
   /// 5
   WorkspaceGroup_sptr create_corrupted_multiperiod_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a4");
     // b->setName("b4");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -124,9 +121,9 @@ private:
   /// matrixworkspaces.
   WorkspaceGroup_sptr create_good_multiperiod_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a3");
     // b->setName("b3");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -263,17 +260,17 @@ public:
 
   MergeRunsTest() {
     AnalysisDataService::Instance().add(
-        "in1", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 1));
+        "in1", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
     AnalysisDataService::Instance().add(
-        "in2", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 1));
+        "in2", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
     AnalysisDataService::Instance().add(
-        "in3", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 1));
+        "in3", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
     AnalysisDataService::Instance().add(
-        "in4", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 5, 20));
+        "in4", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 20));
     AnalysisDataService::Instance().add(
-        "in5", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 5, 3.5, 2));
+        "in5", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 3.5, 2));
     AnalysisDataService::Instance().add(
-        "in6", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 3, 2, 2));
+        "in6", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 3, 2, 2));
   }
 
   void checkOutput(std::string wsname) {
@@ -334,48 +331,48 @@ public:
 
   void EventSetup() {
     ev1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(3, 10, 100, 0.0, 1.0, 3);
+        WorkspaceCreationHelper::createEventWorkspace(3, 10, 100, 0.0, 1.0, 3);
     AnalysisDataService::Instance().addOrReplace(
         "ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(ev1)); // 100 ev
     AnalysisDataService::Instance().addOrReplace(
         "ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(
-                   WorkspaceCreationHelper::CreateEventWorkspace(
+                   WorkspaceCreationHelper::createEventWorkspace(
                        3, 10, 100, 0.0, 1.0, 2))); // 200 ev
     AnalysisDataService::Instance().addOrReplace(
         "ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(
-                   WorkspaceCreationHelper::CreateEventWorkspace(
+                   WorkspaceCreationHelper::createEventWorkspace(
                        3, 10, 100, 0.0, 1.0, 2, 100))); // 200 events per
                                                         // spectrum, but the
                                                         // spectra are at
                                                         // different pixel ids
     // Make one with weird units
     MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::CreateEventWorkspace(3, 10, 100, 0.0, 1.0, 2,
+        WorkspaceCreationHelper::createEventWorkspace(3, 10, 100, 0.0, 1.0, 2,
                                                       100));
     ev4->setYUnit("Microfurlongs per Megafortnights");
     AnalysisDataService::Instance().addOrReplace("ev4_weird_units", ev4);
     AnalysisDataService::Instance().addOrReplace(
         "ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(
-                   WorkspaceCreationHelper::CreateEventWorkspace(
+                   WorkspaceCreationHelper::createEventWorkspace(
                        5, 10, 100, 0.0, 1.0, 2, 100))); // 200 events per
                                                         // spectrum, but the
                                                         // spectra are at
                                                         // different pixel ids
-    ev6 = WorkspaceCreationHelper::CreateEventWorkspace(6, 10, 100, 0.0, 1.0,
+    ev6 = WorkspaceCreationHelper::createEventWorkspace(6, 10, 100, 0.0, 1.0,
                                                         3); // ids 0-5
     AnalysisDataService::Instance().addOrReplace(
         "ev6", boost::dynamic_pointer_cast<MatrixWorkspace>(ev6));
     // a 2d workspace with the value 2 in each bin
     AnalysisDataService::Instance().addOrReplace(
         "in2D",
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
+        WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0, 1.0));
 
     std::vector<std::vector<int>> groups;
 
     groups.clear();
     groups.push_back(makeVector(3, 0, 1, 2));
     groups.push_back(makeVector(3, 3, 4, 5));
-    evg1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100);
+    evg1 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
         "evg1", boost::dynamic_pointer_cast<MatrixWorkspace>(evg1));
 
@@ -391,7 +388,7 @@ public:
     groups.push_back(makeVector(2, 3, 4));
     groups.push_back(makeVector(3, 0, 1, 2));
     groups.push_back(makeVector(1, 15));
-    evg2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100);
+    evg2 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
         "evg2", boost::dynamic_pointer_cast<MatrixWorkspace>(evg2));
   }
@@ -736,7 +733,7 @@ public:
     TS_ASSERT_THROWS(merge2.execute(), std::runtime_error);
     TS_ASSERT(!merge2.isExecuted());
     MatrixWorkspace_sptr badIn =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     badIn->mutableX(0) = 2.0;
     AnalysisDataService::Instance().add("badIn", badIn);
     TS_ASSERT_THROWS_ANYTHING(
