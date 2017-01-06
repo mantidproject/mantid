@@ -890,22 +890,14 @@ void ProjectionSurface::loadFromProject(const std::string &lines) {
 
     API::TSVSerialiser alignmentInfo(alignmentLines);
 
-    QPointF origin;
-    size_t index = 0;
-    while(alignmentInfo.selectLine("Marker", index)) {
-      alignmentInfo >> origin;
-      m_selectedAlignmentMarkers.push_back(origin);
-      ++index;
-    }
+    auto parseV3D = [](API::TSVSerialiser &parser) {
+      double x, y, z;
+      parser >> x >> y >> z;
+      return Mantid::Kernel::V3D(x, y, z);
+    };
 
-    index = 0;
-    double x, y, z;
-    while(alignmentInfo.selectLine("Qlab"), index) {
-      alignmentInfo >> x >> y >> z;
-      Mantid::Kernel::V3D qLab(x, y, z);
-      m_selectedAlignmentPlane.push_back(qLab);
-      ++index;
-    }
+    alignmentInfo.parseLines("Marker", m_selectedAlignmentMarkers);
+    alignmentInfo.parseLines("Qlab", m_selectedAlignmentPlane, parseV3D);
 
     if (m_selectedAlignmentPlane.size() >= 3 && m_selectedAlignmentPeak)
       emit alignPeaks(m_selectedAlignmentPlane, m_selectedAlignmentPeak);
