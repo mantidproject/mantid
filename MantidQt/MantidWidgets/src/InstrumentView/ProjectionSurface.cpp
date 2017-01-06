@@ -882,6 +882,34 @@ void ProjectionSurface::loadFromProject(const std::string &lines) {
     tsv >> shapesLines;
     m_maskShapes.loadFromProject(shapesLines);
   }
+
+  // read alignment info
+  if (tsv.selectSection("AlignmentInfo")) {
+    std::string alignmentLines;
+    tsv >> alignmentLines;
+
+    API::TSVSerialiser alignmentInfo(alignmentLines);
+
+    QPointF origin;
+    size_t index = 0;
+    while(alignmentInfo.selectLine("Marker", index)) {
+      alignmentInfo >> origin;
+      m_selectedAlignmentMarkers.push_back(origin);
+      ++index;
+    }
+
+    index = 0;
+    double x, y, z;
+    while(alignmentInfo.selectLine("Qlab"), index) {
+      alignmentInfo >> x >> y >> z;
+      Mantid::Kernel::V3D qLab(x, y, z);
+      m_selectedAlignmentPlane.push_back(qLab);
+      ++index;
+    }
+
+    if (m_selectedAlignmentPlane.size() >= 3 && m_selectedAlignmentPeak)
+      emit alignPeaks(m_selectedAlignmentPlane, m_selectedAlignmentPeak);
+  }
 }
 
 /** Save the state of the projection surface to a Mantid project file
@@ -891,6 +919,17 @@ std::string ProjectionSurface::saveToProject() const {
   API::TSVSerialiser tsv;
   tsv.writeLine("BackgroundColor") << m_backgroundColor;
   tsv.writeSection("shapes", m_maskShapes.saveToProject());
+
+  API::TSVSerialiser alignmentInfo;
+  for (auto origin : m_selectedAlignmentMarkers) {
+    alignmentInfo.writeLine("Marker") << origin;
+  }
+
+  for (auto qLab: m_selectedAlignmentPlane) {
+    alignmentInfo.writeLine("Qlab") << qLab.X() << qLab.Y() << qLab.Z();
+  }
+
+  tsv.writeSection("AlignmentInfo", alignmentInfo.outputLines());
   return tsv.outputLines();
 }
 
