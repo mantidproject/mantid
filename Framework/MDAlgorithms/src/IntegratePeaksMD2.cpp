@@ -90,7 +90,7 @@ void IntegratePeaksMD2::init() {
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
-                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**"
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
   declareProperty("Cylinder", false,
@@ -376,32 +376,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                   BackgroundOuterRadius) *
                                  (adaptiveQBackgroundMultiplier * lenQpeak +
                                   BackgroundOuterRadius)),
-            bgSignal, bgErrorSquared);
-
-        // Evaluate the signal inside "BackgroundInnerRadius"
-        signal_t interiorSignal = 0;
-        signal_t interiorErrorSquared = 0;
-
-        // Integrate this 3rd radius, if needed
-        if (BackgroundInnerRadius != PeakRadius) {
-          ws->getBox()->integrateSphere(
-              sphere,
-              static_cast<coord_t>((adaptiveQBackgroundMultiplier * lenQpeak +
-                                    BackgroundInnerRadius) *
-                                   (adaptiveQBackgroundMultiplier * lenQpeak +
-                                    BackgroundInnerRadius)),
-              interiorSignal, interiorErrorSquared);
-        } else {
-          // PeakRadius == BackgroundInnerRadius, so use the previous value
-          interiorSignal = signal;
-          interiorErrorSquared = errorSquared;
-        }
-        // Subtract the peak part to get the intensity in the shell
-        // (BackgroundInnerRadius < r < BackgroundOuterRadius)
-        bgSignal -= interiorSignal;
-        // We can subtract the error (instead of adding) because the two values
-        // are 100% dependent; this is the same as integrating a shell.
-        bgErrorSquared -= interiorErrorSquared;
+            bgSignal, bgErrorSquared,
+            static_cast<coord_t>((adaptiveQBackgroundMultiplier * lenQpeak +
+                                  BackgroundInnerRadius) *
+                                 (adaptiveQBackgroundMultiplier * lenQpeak +
+                                  BackgroundInnerRadius)));
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
         double ratio = (PeakRadius / BackgroundOuterRadius);

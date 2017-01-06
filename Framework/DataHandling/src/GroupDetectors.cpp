@@ -59,7 +59,7 @@ void GroupDetectors::exec() {
   }
 
   // Bin boundaries need to be the same, so check if they actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(WS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*WS)) {
     g_log.error("Can only group if the histograms have common bin boundaries");
     throw std::runtime_error(
         "Can only group if the histograms have common bin boundaries");

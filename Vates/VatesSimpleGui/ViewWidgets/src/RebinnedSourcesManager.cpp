@@ -552,7 +552,7 @@ void RebinnedSourcesManager::copySafe(vtkSMProxy *dest, vtkSMProxy *source) {
       }
 
       if (destValue) {
-        Q_ASSERT(srcValue != NULL);
+        Q_ASSERT(srcValue != nullptr);
         copySafe(destValue, srcValue);
         destPP->SetProxy(0, destValue);
       }

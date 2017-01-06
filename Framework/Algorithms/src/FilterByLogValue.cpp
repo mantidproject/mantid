@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/FilterByLogValue.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -206,14 +206,7 @@ void FilterByLogValue::exec() {
     this->setProperty("OutputWorkspace", inputWS);
   } else {
     // Make a brand new EventWorkspace for the output
-    // ------------------------------------------------------
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // But we don't copy the data.
+    outputWS = create<EventWorkspace>(*inputWS);
 
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()

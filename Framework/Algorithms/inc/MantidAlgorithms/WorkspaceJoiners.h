@@ -50,20 +50,20 @@ public:
   }
 
 protected:
-  API::MatrixWorkspace_sptr execWS2D(API::MatrixWorkspace_const_sptr ws1,
-                                     API::MatrixWorkspace_const_sptr ws2);
+  API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1,
+                                     const API::MatrixWorkspace &ws2);
   API::MatrixWorkspace_sptr execEvent();
 
   using Mantid::API::Algorithm::validateInputs;
-  void validateInputs(API::MatrixWorkspace_const_sptr ws1,
-                      API::MatrixWorkspace_const_sptr ws2);
-  void getMinMax(API::MatrixWorkspace_const_sptr ws, specnum_t &min,
+  void validateInputs(const API::MatrixWorkspace &ws1,
+                      const API::MatrixWorkspace &ws2);
+  void getMinMax(const API::MatrixWorkspace &ws, specnum_t &min,
                  specnum_t &max);
 
   /// Abstract method to be implemented in concrete algorithm classes
-  virtual void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
-                                  API::MatrixWorkspace_const_sptr ws2,
-                                  API::MatrixWorkspace_sptr output) = 0;
+  virtual void fixSpectrumNumbers(const API::MatrixWorkspace &ws1,
+                                  const API::MatrixWorkspace &ws2,
+                                  API::MatrixWorkspace &output) = 0;
 
   API::Progress *m_progress; ///< Progress reporting object
   DataObjects::EventWorkspace_const_sptr

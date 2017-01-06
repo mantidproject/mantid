@@ -57,7 +57,7 @@ bool DetectorInfo::isMonitor(const size_t index) const {
 
 /// Returns true if the detector is a masked.
 bool DetectorInfo::isMasked(const size_t index) const {
-  return getDetector(index).isMasked();
+  return m_detectorInfo.isMasked(index);
 }
 
 /** Returns L2 (distance from sample to spectrum).
@@ -113,16 +113,17 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
 
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const size_t index, bool masked) {
-  // Note that masking via the ParameterMap is actually thread safe, but it will
-  // not be with upcoming internal changes.
-  m_pmap->addBool(&getDetector(index), "masked", masked);
+  m_detectorInfo.setMasked(index, masked);
 }
 
 /** Sets all mask flags to false (unmasked). Not thread safe.
  *
  * This method was introduced to help with refactoring and may be removed in the
  *future. */
-void DetectorInfo::clearMaskFlags() { m_pmap->clearParametersByName("masked"); }
+void DetectorInfo::clearMaskFlags() {
+  for (size_t i = 0; i < size(); ++i)
+    m_detectorInfo.setMasked(i, false);
+}
 
 /// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const size_t index,

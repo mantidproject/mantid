@@ -88,7 +88,8 @@ void Divide::performBinaryOperation(const MantidVec &lhsX,
 void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
                             const API::MatrixWorkspace_const_sptr rhs,
                             API::MatrixWorkspace_sptr out) {
-  if (rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+  if (rhs->YUnit().empty() ||
+      !WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
     // Do nothing
   }
   // If the Y units match, then the output will be a distribution and will be
@@ -221,7 +222,7 @@ std::string Divide::checkSizeCompatibility(
   if (m_matchXSize) {
     // Past this point, for a 2D WS operation, we require the X arrays to match.
     // Note this only checks the first spectrum
-    if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+    if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
       return "X arrays must match when dividing 2D workspaces.";
     }
   }

@@ -122,6 +122,7 @@ void Qxy::exec() {
   Progress prog(this, 0.05, 1.0, numSpec);
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
+  const auto &detectorInfo = inputWorkspace->detectorInfo();
 
   // the samplePos is often not (0, 0, 0) because the instruments components are
   // moved to account for the beam centre
@@ -165,7 +166,12 @@ void Qxy::exec() {
 
     // the solid angle of the detector as seen by the sample is used for
     // normalisation later on
-    double angle = spectrumInfo.detector(i).solidAngle(samplePos);
+    double angle = 0.0;
+    for (const auto detID : inputWorkspace->getSpectrum(i).getDetectorIDs()) {
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index))
+        angle += detectorInfo.detector(index).solidAngle(samplePos);
+    }
 
     // some bins are masked completely or partially, the following vector will
     // contain the fractions
