@@ -121,12 +121,34 @@ void NonOrthogonalOverlay::updateXGridlines(QwtValueList xAxisTicks,
                                             double xAngle) {
   m_xAxisTicks = xAxisTicks;
   m_xAngle = xAngle;
+  auto size = xAxisTicks.size();
+  if (m_xAngle != 0 && size >= 1) {
+    double firstTick;
+    double diff;
+    firstTick = xAxisTicks.at(0);
+    diff = xAxisTicks.at(1) - firstTick;
+    for (auto j = 0; j < size * 2; j++) {
+      auto tick = firstTick - diff * j;
+      m_xAxisTicks.append(tick);
+    }
+  }
 }
 
 void NonOrthogonalOverlay::updateYGridlines(QwtValueList yAxisTicks,
                                             double yAngle) {
   m_yAxisTicks = yAxisTicks;
   m_yAngle = yAngle;
+  auto size = yAxisTicks.size();
+  if (m_yAngle != 0 && size >= 1) {
+    double firstTick;
+    double diff;
+    firstTick = yAxisTicks.at(0);
+    diff = yAxisTicks.at(1) - firstTick;
+    for (auto j = 0; j < size * 2; j++) {
+      auto tick = firstTick - diff * j;
+      m_yAxisTicks.append(tick);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -155,6 +177,7 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
 void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
                                       int widthScreen, int heightScreen,
                                       QwtValueList yAxisTicks, double yAngle) {
+
   auto offset = yAngle == 0. ? 0. : widthScreen * tan(yAngle);
   painter.setPen(gridPen);
   for (auto &tick : yAxisTicks) {
