@@ -83,7 +83,7 @@ public:
    * @param container :: the output vector to store values in
    */
   template <typename T>
-  void parseLines(const std::string &name, std::vector<T>& container) {
+  void parseLines(const std::string &name, std::vector<T> &container) {
 
     auto extractor = [](TSVSerialiser &tsv) {
       T value;
@@ -105,10 +105,10 @@ public:
    * @param extractor :: function to use to extract values from each line
    */
   template <typename T, typename Extractor>
-  void parseLines(const std::string &name, std::vector<T>& container,
-                  Extractor&& extractorFunc) {
+  void parseLines(const std::string &name, std::vector<T> &container,
+                  Extractor &&extractorFunc) {
     size_t index = 0;
-    while(selectLine(name, index)) {
+    while (selectLine(name, index)) {
       auto value = std::forward<Extractor>(extractorFunc)(*this);
       container.push_back(value);
       ++index;

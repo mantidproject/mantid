@@ -562,13 +562,10 @@ void InstrumentWidgetPickTab::initSurface() {
       this,
       SLOT(comparePeaks(
           std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)));
-  connect(
-      surface,
-      SIGNAL(alignPeaks(
-          const std::vector<Mantid::Kernel::V3D>&, const Mantid::Geometry::IPeak *)),
-      this,
-      SLOT(alignPeaks(
-          const std::vector<Mantid::Kernel::V3D>, const Mantid::Geometry::IPeak *)));
+  connect(surface, SIGNAL(alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
+                                     const Mantid::Geometry::IPeak *)),
+          this, SLOT(alignPeaks(const std::vector<Mantid::Kernel::V3D>,
+                                const Mantid::Geometry::IPeak *)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
@@ -701,8 +698,9 @@ void InstrumentWidgetPickTab::comparePeaks(const std::pair<
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
-void InstrumentWidgetPickTab::alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
-                                         const Mantid::Geometry::IPeak* peak) {
+void InstrumentWidgetPickTab::alignPeaks(
+    const std::vector<Mantid::Kernel::V3D> &planePeaks,
+    const Mantid::Geometry::IPeak *peak) {
   m_infoController->displyAlignPeaksInfo(planePeaks, peak);
 }
 
@@ -987,8 +985,7 @@ void ComponentInfoController::displayComparePeaksInfo(
 
 void ComponentInfoController::displyAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *peak)
-{
+    const Mantid::Geometry::IPeak *peak) {
   if (planePeaks.size() < 3)
     return;
 
@@ -1007,7 +1004,7 @@ void ComponentInfoController::displyAlignPeaksInfo(
   auto samplePos = instrument->getSample()->getPos();
   auto sourcePos = instrument->getSource()->getPos();
   auto beam = samplePos - sourcePos;
-  auto proj = beam - n* (beam.scalar_prod(n) / (pow(n.norm(), 2)) );
+  auto proj = beam - n * (beam.scalar_prod(n) / (pow(n.norm(), 2)));
 
   // update in-plane vectors
   u = proj;
@@ -1035,7 +1032,7 @@ void ComponentInfoController::displyAlignPeaksInfo(
   phi *= double_constants::radian;
 
   std::stringstream text;
-  text <<  " theta: " << theta << " phi: " << phi << "\n";
+  text << " theta: " << theta << " phi: " << phi << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }

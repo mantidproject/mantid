@@ -276,8 +276,8 @@ signals:
   void peaksWorkspaceDeleted();
   void comparePeaks(
       const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &);
-  void alignPeaks(const std::vector<Mantid::Kernel::V3D>&,
-                  const Mantid::Geometry::IPeak*);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
+                  const Mantid::Geometry::IPeak *);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -349,7 +349,7 @@ protected:
 
   std::vector<Mantid::Kernel::V3D> m_selectedAlignmentPlane;
   std::vector<QPointF> m_selectedAlignmentMarkers;
-  Mantid::Geometry::IPeak* m_selectedAlignmentPeak;
+  Mantid::Geometry::IPeak *m_selectedAlignmentPeak;
   /// use with a new PeakOverlay.
 
 private:

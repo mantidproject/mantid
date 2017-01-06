@@ -40,7 +40,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
       m_viewRect(), m_selectRect(), m_interactionMode(MoveMode),
       m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false),
-      m_peakShapesStyle(0),m_selectedAlignmentPeak(nullptr), m_viewChanged(true), m_redrawPicking(true) {
+      m_peakShapesStyle(0), m_selectedAlignmentPeak(nullptr),
+      m_viewChanged(true), m_redrawPicking(true) {
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
   connect(&m_maskShapes, SIGNAL(shapeCreated()), this, SIGNAL(shapeCreated()));
   connect(&m_maskShapes, SIGNAL(shapeSelected()), this,
@@ -583,8 +584,7 @@ void ProjectionSurface::drawSelectionRect(QPainter &painter) const {
  * Draw the peak alignment marker objects on the surface
  * @param painter :: The QPainter object to draw the markers with
  */
-void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const
-{
+void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const {
   QTransform transform;
   auto windowRect = getSurfaceBounds();
   windowRect.findTransform(transform, painter.viewport());
@@ -682,8 +682,7 @@ void ProjectionSurface::clearPeakOverlays() {
   clearAlignmentPlane();
 }
 
-void ProjectionSurface::clearAlignmentPlane()
-{
+void ProjectionSurface::clearAlignmentPlane() {
   m_selectedAlignmentPlane.clear();
   m_selectedAlignmentMarkers.clear();
   m_selectedAlignmentPeak = nullptr;
@@ -823,8 +822,7 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
   }
 }
 
-void ProjectionSurface::alignPeaks(const QRect &rect)
-{
+void ProjectionSurface::alignPeaks(const QRect &rect) {
   PeakMarker2D *marker = nullptr;
   Mantid::Geometry::IPeak *peak = nullptr;
   QPointF origin;
@@ -839,7 +837,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect)
     }
   }
 
-  if(m_selectedAlignmentPlane.size() < 3 && peak) {
+  if (m_selectedAlignmentPlane.size() < 3 && peak) {
     m_selectedAlignmentPlane.push_back(peak->getQLabFrame());
     m_selectedAlignmentMarkers.push_back(origin);
   } else if (peak) {
@@ -917,7 +915,7 @@ std::string ProjectionSurface::saveToProject() const {
     alignmentInfo.writeLine("Marker") << origin;
   }
 
-  for (auto qLab: m_selectedAlignmentPlane) {
+  for (auto qLab : m_selectedAlignmentPlane) {
     alignmentInfo.writeLine("Qlab") << qLab.X() << qLab.Y() << qLab.Z();
   }
 
