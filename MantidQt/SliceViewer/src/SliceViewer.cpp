@@ -1652,9 +1652,6 @@ void SliceViewer::updateDisplay(bool resetAxes) {
   // Peaks overlays may need redrawing
   updatePeaksOverlay();
 
-  // Set the SlicePoint on the nonOrthogonal overlay
-  m_nonOrthogonalOverlay->setSlicePoint(m_slicePoint);
-
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
 }
@@ -2395,8 +2392,7 @@ void SliceViewer::setNonOrthogonalbtn() {
   if (canShowSkewedWS) {
     m_nonOrthogonalOverlay->enable();
     auto slicePoint = getSlicePoint();
-    m_nonOrthogonalOverlay->calculateAxesSkew(&m_ws, m_dimX, m_dimY,
-                                              slicePoint);
+
   } else {
     m_nonOrthogonalOverlay->disable();
   }

@@ -21,27 +21,7 @@ namespace SliceViewer {
 /** Constructor
  */
 NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
-    : QWidget(parent), m_plot(plot), m_angleX(0.), m_angleY(0.) {
-  m_fromHklToOrthogonal[0] = 1.0;
-  m_fromHklToOrthogonal[1] = 0.0;
-  m_fromHklToOrthogonal[2] = 0.0;
-  m_fromHklToOrthogonal[3] = 0.0;
-  m_fromHklToOrthogonal[4] = 1.0;
-  m_fromHklToOrthogonal[5] = 0.0;
-  m_fromHklToOrthogonal[6] = 0.0;
-  m_fromHklToOrthogonal[7] = 0.0;
-  m_fromHklToOrthogonal[8] = 1.0;
-
-  m_fromOrthogonalToHkl[0] = 1.0;
-  m_fromOrthogonalToHkl[1] = 0.0;
-  m_fromOrthogonalToHkl[2] = 0.0;
-  m_fromOrthogonalToHkl[3] = 0.0;
-  m_fromOrthogonalToHkl[4] = 1.0;
-  m_fromOrthogonalToHkl[5] = 0.0;
-  m_fromOrthogonalToHkl[6] = 0.0;
-  m_fromOrthogonalToHkl[7] = 0.0;
-  m_fromOrthogonalToHkl[8] = 1.0;
-}
+    : QWidget(parent), m_plot(plot), m_xAngle(0.), m_yAngle(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -76,45 +56,6 @@ QPointF NonOrthogonalOverlay::invTransform(QPoint pixels) const {
   auto xA = m_plot->invTransform(QwtPlot::xBottom, pixels.x());
   auto yA = m_plot->invTransform(QwtPlot::yLeft, pixels.y());
   return QPointF(xA, yA);
-}
-
-void NonOrthogonalOverlay::setSkewMatrix() {
-  Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
-  API::provideSkewMatrix(skewMatrix, *m_ws);
-  API::transformFromDoubleToCoordT(skewMatrix, m_fromOrthogonalToHkl);
-  skewMatrix.Invert();
-  API::transformFromDoubleToCoordT(skewMatrix, m_fromHklToOrthogonal);
-
-  // set the angles for the two dimensions
-  auto angles = MantidQt::API::getGridLineAnglesInRadian(m_fromHklToOrthogonal,
-                                                         m_dimX, m_dimY);
-  m_angleX = static_cast<double>(angles.first);
-  m_angleY = static_cast<double>(angles.second);
-}
-
-QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
-  VMD coords = m_slicePoint;
-  coords[m_dimX] = static_cast<Mantid::Kernel::VMD_t>(x);
-  coords[m_dimY] = static_cast<Mantid::Kernel::VMD_t>(y);
-  API::transformLookpointToWorkspaceCoordGeneric(
-      coords, m_fromOrthogonalToHkl, m_dimX, m_dimY, m_missingHKLDim);
-  auto xNew = coords[m_dimX];
-  auto yNew = coords[m_dimY];
-  return QPointF(xNew, yNew);
-}
-
-void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
-                                             size_t dimX, size_t dimY,
-                                             Mantid::Kernel::VMD slicePoint) {
-  m_ws = ws;
-  m_dimX = dimX;
-  m_dimY = dimY;
-  m_missingHKLDim = API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
-  m_slicePoint = slicePoint;
-
-  if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {
-    setSkewMatrix();
-  }
 }
 
 void NonOrthogonalOverlay::updateXGridlines(QwtValueList xAxisTicks,
@@ -167,16 +108,14 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     const auto heightScreen = height();
 
     const int numberOfGridLines = 10;
-    drawYLines(painter, gridPen, widthScreen, heightScreen, m_yAxisTicks,
-               m_yAngle);
-    drawXLines(painter, gridPen, widthScreen, heightScreen, m_xAxisTicks,
-               m_xAngle);
+    drawYLines(painter, gridPen, widthScreen, m_yAxisTicks, m_yAngle);
+    drawXLines(painter, gridPen, heightScreen, m_xAxisTicks, m_xAngle);
   }
 }
 
 void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
-                                      int widthScreen, int heightScreen,
-                                      QwtValueList yAxisTicks, double yAngle) {
+                                      int widthScreen, QwtValueList yAxisTicks,
+                                      double yAngle) {
 
   auto offset = yAngle == 0. ? 0. : widthScreen * tan(yAngle);
   painter.setPen(gridPen);
@@ -189,8 +128,8 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
 }
 
 void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen,
-                                      int widthScreen, int heightScreen,
-                                      QwtValueList xAxisTicks, double xAngle) {
+                                      int heightScreen, QwtValueList xAxisTicks,
+                                      double xAngle) {
   xAngle *= -1.f;
   auto offset = xAngle == 0. ? 0. : heightScreen * tan(xAngle);
   painter.setPen(gridPen);
@@ -200,10 +139,6 @@ void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen,
     auto end = QPointF(tickScreen + offset, 0);
     painter.drawLine(start, end);
   }
-}
-
-void NonOrthogonalOverlay::setSlicePoint(Mantid::Kernel::VMD slicePoint) {
-  m_slicePoint = slicePoint;
 }
 
 void NonOrthogonalOverlay::enable() { m_enabled = true; }

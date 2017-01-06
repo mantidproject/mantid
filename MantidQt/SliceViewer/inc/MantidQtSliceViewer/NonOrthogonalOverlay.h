@@ -52,21 +52,12 @@ public:
   NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent);
   ~NonOrthogonalOverlay() override;
 
-  void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
-                         size_t dimY, Mantid::Kernel::VMD slicePoint);
-
-  void setSlicePoint(Mantid::Kernel::VMD slicePoint);
-
   void enable();
 
   void disable();
 
   void updateXGridlines(QwtValueList xAxisTicks, double xAngle);
   void updateYGridlines(QwtValueList yAxisTicks, double yAngle);
-  QwtValueList m_xAxisTicks;
-  double m_xAngle;
-  QwtValueList m_yAxisTicks;
-  double m_yAngle;
 
 private:
   QSize sizeHint() const override;
@@ -79,14 +70,10 @@ private:
   QPointF invTransform(QPoint pixels) const;
 
   void drawYLines(QPainter &painter, QPen &gridPen, int widthScreen,
-                  int heightScreen, QwtValueList yAxisTicks, double yAngle);
+                  QwtValueList yAxisTicks, double yAngle);
 
-  void drawXLines(QPainter &painter, QPen &gridPen, int widthScreen,
-                  int heightScreen, QwtValueList xAxisTicks, double xAngle);
-
-  void setSkewMatrix();
-
-  QPointF skewMatrixApply(double x, double y);
+  void drawXLines(QPainter &painter, QPen &gridPen, int heightScreen,
+                  QwtValueList xAxisTicks, double xAngle);
 
   void paintEvent(QPaintEvent *event) override;
 
@@ -95,19 +82,10 @@ private:
   QwtPlot *m_plot;
   Mantid::API::IMDWorkspace_sptr *m_ws;
 
-  Mantid::coord_t m_fromHklToOrthogonal[9];
-  Mantid::coord_t m_fromOrthogonalToHkl[9];
-
-  size_t m_dimY;
-  size_t m_dimX;
-  size_t m_missingHKLDim;
-  Mantid::Kernel::VMD m_slicePoint;
-
-  /// Width of the line (in coordinates of the plot)
-  double m_width;
-
-  double m_angleX;
-  double m_angleY;
+  QwtValueList m_xAxisTicks;
+  double m_xAngle;
+  QwtValueList m_yAxisTicks;
+  double m_yAngle;
 };
 
 } // namespace SliceViewer
