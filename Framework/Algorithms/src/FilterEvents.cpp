@@ -41,7 +41,7 @@ DECLARE_ALGORITHM(FilterEvents)
 FilterEvents::FilterEvents()
     : m_eventWS(), m_splittersWorkspace(), m_matrixSplitterWS(),
       m_detCorrectWorkspace(), m_useTableSplitters(false), m_workGroupIndexes(),
-      m_splitters(), m_outputWS(), m_wsNames(), m_detTofOffsets(),
+      m_splitters(), m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(),
       m_detTofFactors(), m_FilterByPulseTime(false), m_informationWS(),
       m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
@@ -206,7 +206,7 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-  for (miter = m_outputWS.begin(); miter != m_outputWS.end(); ++miter) {
+  for (miter = m_outputWorkspacesMap.begin(); miter != m_outputWorkspacesMap.end(); ++miter) {
     outputwsnames.push_back(miter->second->name());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
@@ -504,7 +504,7 @@ void FilterEvents::createOutputWorkspaces() {
 
     boost::shared_ptr<EventWorkspace> optws =
         create<DataObjects::EventWorkspace>(*m_eventWS);
-    m_outputWS.emplace(wsgroup, optws);
+    m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace
     if (m_hasInfoWS) {
@@ -809,7 +809,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (auto &ws : m_outputWS) {
+        for (auto &ws : m_outputWorkspacesMap) {
           int index = ws.first;
           auto &output_el = ws.second->getSpectrum(iws);
           outputs.emplace(index, &output_el);
@@ -846,12 +846,12 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
   auto lognames = this->getTimeSeriesLogNames();
   g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = "
-                << lognames.size() << " to " << m_outputWS.size()
+                << lognames.size() << " to " << m_outputWorkspacesMap.size()
                 << " outptu workspaces. \n";
 
-  double numws = static_cast<double>(m_outputWS.size());
+  double numws = static_cast<double>(m_outputWorkspacesMap.size());
   double outwsindex = 0.;
-  for (auto &ws : m_outputWS) {
+  for (auto &ws : m_outputWorkspacesMap) {
     int wsindex = ws.first;
     DataObjects::EventWorkspace_sptr opws = ws.second;
 
@@ -872,6 +872,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     }
 
     // Split log
+    // FIXME-TODO: SHALL WE MOVE THIS PART OUTSIDE OF THIS METHOD?
     size_t numlogs = lognames.size();
     for (size_t ilog = 0; ilog < numlogs; ++ilog) {
       this->splitLog(opws, lognames[ilog], splitters);
@@ -903,7 +904,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (auto &ws : m_outputWS) {
+        for (auto &ws : m_outputWorkspacesMap) {
           int index = ws.first;
           auto &output_el = ws.second->getSpectrum(iws);
           outputs.emplace(index, &output_el);

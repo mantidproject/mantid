@@ -125,7 +125,7 @@ private:
 
   std::set<int> m_workGroupIndexes;
   Kernel::TimeSplitterType m_splitters;
-  std::map<int, DataObjects::EventWorkspace_sptr> m_outputWS;
+  std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
   std::vector<std::string> m_wsNames;
 
   std::vector<double> m_detTofOffsets;
