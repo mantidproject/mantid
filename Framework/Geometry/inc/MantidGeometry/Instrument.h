@@ -11,6 +11,7 @@
 
 #include <string>
 #include <map>
+#include <tuple>
 #include <vector>
 
 namespace Mantid {
@@ -251,7 +252,7 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
-  bool isMonitor(const size_t index) const;
+  bool isMonitorViaIndex(const size_t index) const;
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
@@ -270,8 +271,9 @@ private:
   void appendPlottable(const CompAssembly &ca,
                        std::vector<IObjComponent_const_sptr> &lst) const;
 
-  /// Map which holds detector-IDs and pointers to detector components
-  std::vector<std::pair<detid_t, IDetector_const_sptr>> m_detectorCache;
+  /// Map which holds detector-IDs and pointers to detector components, and
+  /// monitor flags.
+  std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

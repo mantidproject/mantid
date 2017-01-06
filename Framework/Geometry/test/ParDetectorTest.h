@@ -19,7 +19,6 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(!pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMonitor());
   }
 
   void testNameParentConstructor() {
@@ -32,7 +31,6 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMonitor());
   }
 
   void testId() {

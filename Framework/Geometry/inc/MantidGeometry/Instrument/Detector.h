@@ -70,7 +70,6 @@ public:
                            const Kernel::V3D &instrumentUp) const override;
   double getPhi() const override;
   double getPhiOffset(const double &offset) const override;
-  bool isMonitor() const override;
   // end IDetector methods
   /** returns the detector's topology, namely, the meaning of the detector's
      angular measurements.
@@ -87,18 +86,11 @@ public:
   size_t index() const override;
   void setIndex(const size_t index) override;
 
-  // Temporary workaround for refactor: Instrument needs markAsMonitor
-  friend class Instrument;
-
 private:
-  void markAsMonitor(const bool flag = true);
-
   /// Linear index of the detector in the instrument
   size_t m_index{static_cast<size_t>(-1)};
   /// The detector id
   const detid_t m_id;
-  /// Flags if this is a monitor
-  bool m_isMonitor;
 
 protected:
   /// Constructor for parametrized version
