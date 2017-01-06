@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace Geometry {
+class Instrument;
 
 /**
  * This class represents a detector - i.e. a single pixel in an instrument.
@@ -71,7 +72,6 @@ public:
   double getPhiOffset(const double &offset) const override;
   bool isMonitor() const override;
   // end IDetector methods
-  void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's
      angular measurements.
       It is different in cartesian and cylindrical (surrounding the beam)
@@ -87,7 +87,12 @@ public:
   size_t index() const override;
   void setIndex(const size_t index) override;
 
+  // Temporary workaround for refactor: Instrument needs markAsMonitor
+  friend class Instrument;
+
 private:
+  void markAsMonitor(const bool flag = true);
+
   /// Linear index of the detector in the instrument
   size_t m_index{static_cast<size_t>(-1)};
   /// The detector id

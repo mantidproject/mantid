@@ -48,15 +48,6 @@ public:
     TS_ASSERT_EQUALS(det.type(), "DetectorComponent");
   }
 
-  void testMonitor() {
-    Detector det("det", 0, 0);
-    TS_ASSERT(!det.isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor());
-    TS_ASSERT(det.isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor(false));
-    TS_ASSERT(!det.isMonitor());
-  }
-
   void testGetNumberParameter() {
     Detector det("det", 0, 0);
     TS_ASSERT_EQUALS(det.getNumberParameter("testparam").size(), 0);
