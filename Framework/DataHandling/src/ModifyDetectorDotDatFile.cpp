@@ -100,9 +100,6 @@ void ModifyDetectorDotDatFile::exec() {
   // Copy column title line
   getline(in, str);
   out << str << "\n";
-
-  int i = 0;
-
   // Format details
   int pOffset = 3; // Precision of Offset
   int pOther = 5;  // Precision of Other floats
@@ -159,7 +156,6 @@ void ModifyDetectorDotDatFile::exec() {
         std::string prefix = oss.str();
         std::string suffix = str.substr(width, std::string::npos);
         out << prefix << suffix << "\n";
-        i++;
       } catch (std::out_of_range &) { // Detector not found, don't modify
         out << str << "\n";
       }

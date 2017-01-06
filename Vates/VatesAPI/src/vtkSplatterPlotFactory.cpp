@@ -297,17 +297,14 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   Mantid::coord_t in[3];
   Mantid::coord_t out[3];
 
-  signal_t signalScalar;
-
-  size_t index = 0;
-
   for (int z = 0; z < nBinsZ; z++) {
     in[2] = (minZ + (static_cast<coord_t>(z) + 0.5f) * incrementZ);
     for (int y = 0; y < nBinsY; y++) {
       in[1] = (minY + (static_cast<coord_t>(y) + 0.5f) * incrementY);
       for (int x = 0; x < nBinsX; x++) {
         // Get the signalScalar
-        signalScalar = this->extractScalarSignal(workspace, do4D, x, y, z);
+        signal_t signalScalar =
+            this->extractScalarSignal(workspace, do4D, x, y, z);
 
         // Make sure that the signal is not bad and is in the range and larger
         // than 0
@@ -330,7 +327,6 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
 
           visualDataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
         }
-        index++;
       }
     }
   }
@@ -518,9 +514,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
   const double defaultValue = 0.1;
 
   if (this->dataSet) {
-    double *range = nullptr;
-    range = dataSet->GetScalarRange();
-
+    double *range = dataSet->GetScalarRange();
     if (range) {
       m_minValue = range[0];
       m_maxValue = range[1];
