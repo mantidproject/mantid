@@ -106,10 +106,10 @@ public:
    */
   template <typename T, typename Extractor>
   void parseLines(const std::string &name, std::vector<T> &container,
-                  Extractor &&extractorFunc) {
+                  Extractor &&extractor) {
     size_t index = 0;
     while (selectLine(name, index)) {
-      auto value = std::forward<Extractor>(extractorFunc)(*this);
+      auto value = std::forward<Extractor>(extractor)(*this);
       container.push_back(value);
       ++index;
     }
