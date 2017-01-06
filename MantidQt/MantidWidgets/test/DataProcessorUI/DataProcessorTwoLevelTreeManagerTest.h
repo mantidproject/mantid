@@ -319,6 +319,19 @@ public:
     TS_ASSERT_EQUALS(data[1][1], fourthRow);
   }
 
+  void test_new_table_clears_model() {
+    NiceMock<MockDataProcessorPresenter> presenter;
+    auto table = reflTable();
+    auto whitelist = reflWhitelist();
+    DataProcessorTwoLevelTreeManager manager(&presenter, whitelist);
+
+    TS_ASSERT_THROWS_NOTHING(manager.newTable(table, whitelist));
+    TS_ASSERT_EQUALS(manager.getTableWorkspace()->rowCount(), 4);
+
+    TS_ASSERT_THROWS_NOTHING(manager.newTable(whitelist));
+    TS_ASSERT_EQUALS(manager.getTableWorkspace()->rowCount(), 0);
+  }
+
   void test_transfer_fails_no_group() {
     NiceMock<MockDataProcessorPresenter> presenter;
     DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());

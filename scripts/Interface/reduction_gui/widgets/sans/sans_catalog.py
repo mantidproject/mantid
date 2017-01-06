@@ -1,14 +1,16 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-import os
+from PyQt4 import QtGui, QtCore
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.ui_data_catalog
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
+
 class Catalog(BaseScriptElement):
     def __init__(self):
         pass
+
 
 class SANSCatalogWidget(BaseWidget):
     """
@@ -52,7 +54,8 @@ class SANSCatalogWidget(BaseWidget):
         self.connect(self._content.browse_button, QtCore.SIGNAL("clicked()"), self._browse_directory)
         self.connect(self._content.directory_edit, QtCore.SIGNAL("returnPressed()"), self._update_content)
         self._content.directory_edit.setText(self._settings.catalog_data_path)
-        self._content.directory_edit.setToolTip("Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: /SNS/EQSANS/IPTS-1234/data")
+        self._content.directory_edit.setToolTip("Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: "
+                                                "/SNS/EQSANS/IPTS-1234/data")
         self._update_content(False)
 
     def tableWidgetContext(self, point):
@@ -126,6 +129,7 @@ class SANSCatalogWidget(BaseWidget):
 
         if self._catalog_cls is not None:
             dc = self._catalog_cls()
+
             def _add_item(data):
                 row = dc.size()
                 self._content.data_set_table.insertRow(row)
@@ -164,8 +168,8 @@ class SANSCatalogWidget(BaseWidget):
         self._content.data_set_table.resizeColumnsToContents()
 
     def _browse_directory(self):
-        dir = QtGui.QFileDialog.getExistingDirectory(self, "Open Directory",\
-                                                    self._settings.data_path)
+        dir = QtGui.QFileDialog.getExistingDirectory(self, "Open Directory",
+                                                     self._settings.data_path)
         if dir:
                 # Store the location of the loaded file
             self._settings.data_path = str(dir)
@@ -177,7 +181,7 @@ class SANSCatalogWidget(BaseWidget):
             Update the catalog according to the new data path
         """
         if not self._settings.catalog_data_path == str(self._content.directory_edit.text())\
-            and len(self._settings.data_path)>0:
+                and len(self._settings.data_path)>0:
             self._content.directory_edit.setText(self._settings.catalog_data_path)
             self._update_content(False)
 

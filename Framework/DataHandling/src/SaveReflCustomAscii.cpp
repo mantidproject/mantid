@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveReflCustomAscii.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <fstream>
@@ -24,6 +22,7 @@ void SaveReflCustomAscii::extraProps() {
       "WriteDeltaQ", false,
       "If true, the error on DeltaQ will be written as the fourth column.");
   declareProperty("Subtitle", false, "If true, subtitle added to header.");
+  appendSeparatorProperty();
 }
 
 /** virtual method to add information to the file before the data

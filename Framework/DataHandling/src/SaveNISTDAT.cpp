@@ -58,6 +58,9 @@ void SaveNISTDAT::exec() {
       const MantidVec &EIn = inputWS->readE(i);
 
       for (size_t j = 0; j < XIn.size() - 1; j++) {
+        // Don't write out Q bins without data
+        if (YIn[j] == 0 && EIn[j] == 0)
+          continue;
         // Exclude NaNs
         if (YIn[j] == YIn[j]) {
           out_File << (XIn[j] + XIn[j + 1]) / 2.0;

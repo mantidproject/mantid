@@ -8,6 +8,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -101,7 +103,7 @@ void He3TubeEfficiency::exec() {
   }
 
   // Get the detector parameters
-  this->paraMap = &(this->inputWS->instrumentParameters());
+  this->paraMap = &(this->inputWS->constInstrumentParameters());
 
   // Store some information about the instrument setup that will not change
   this->samplePos = this->inputWS->getInstrument()->getSample()->getPos();
@@ -117,7 +119,7 @@ void He3TubeEfficiency::exec() {
   std::size_t numHists = this->inputWS->getNumberHistograms();
   this->progress = new API::Progress(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -422,7 +424,7 @@ void He3TubeEfficiency::execEvent() {
 
   std::size_t numHistograms = outputWS->getNumberHistograms();
   this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

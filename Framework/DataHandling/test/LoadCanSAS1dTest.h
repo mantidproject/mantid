@@ -1,15 +1,13 @@
 #ifndef LOADCANSAS1DTEST_H
 #define LOADCANSAS1DTEST_H
 
-//------------------------------------------------
-// Includes
-//------------------------------------------------
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include <Poco/Path.h>
 
 class LoadCanSAS1dTest : public CxxTest::TestSuite {

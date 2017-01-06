@@ -107,7 +107,7 @@ std::set<QString> PeaksWorkspaceWidget::getShownColumns() {
   return result;
 }
 
-void PeaksWorkspaceWidget::setShownColumns(std::set<QString> &cols) {
+void PeaksWorkspaceWidget::setShownColumns(const std::set<QString> &cols) {
   auto numCols = ui.tblPeaks->model()->columnCount();
   for (auto i = 0; i < numCols; ++i) {
     const QString name = ui.tblPeaks->model()

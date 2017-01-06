@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class StepScanWorkflowAlgorithm(stresstesting.MantidStressTest):
     '''Tests the StepScan workflow algorithm'''
 

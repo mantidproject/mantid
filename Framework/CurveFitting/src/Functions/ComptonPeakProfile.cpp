@@ -1,10 +1,8 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
 
@@ -39,9 +37,6 @@ ComptonPeakProfile::ComptonPeakProfile()
     : API::ParamFunction(), API::IFunction1D(), m_wsIndex(0), m_mass(0.0),
       m_voigtCutOff(5000.), m_gauss(), m_voigt(), m_efixed(0.0),
       m_hwhmLorentz(0.0) {}
-
-//-------------------------------------- Private methods
-//-----------------------------------------
 
 /// A string identifier for this function
 std::string ComptonPeakProfile::name() const { return "ComptonPeakProfile"; }

@@ -38,7 +38,7 @@ public:
     // data
     Workspace2D_sptr work_in =
         // the x values look like this -1, 2, 5, 8, 11, 14, 17, 20, 23, 26
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
 
     Instrument_sptr instr(new Instrument);
     work_in->setInstrument(instr);
@@ -153,7 +153,7 @@ public:
 
   void testExec_Event() {
     // Make a workspace with 50 pixels, 200 events per pixel.
-    EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr work_in = WorkspaceCreationHelper::createEventWorkspace(
         50, 100, 100, 0.0, 1.0, 2, 1);
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(10);

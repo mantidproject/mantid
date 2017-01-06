@@ -4,6 +4,8 @@
 #include "MantidMDAlgorithms/LoadSQW.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidDataObjects/MDBoxBase.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Sample.h"
 
 #include <cxxtest/TestSuite.h>
 

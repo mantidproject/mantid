@@ -22,6 +22,10 @@ public:
   Mantid::API::MDNormalization getNormalization() const;
   void setNormalization(Mantid::API::MDNormalization method);
   bool isLogScaledY() const;
+  /// Load the state of the line options from a Mantid project file
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the line options to a Mantid project file
+  std::string saveToProject() const;
 
 public slots:
   void radPlot_changed();

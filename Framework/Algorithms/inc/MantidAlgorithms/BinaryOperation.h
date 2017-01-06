@@ -1,11 +1,9 @@
 #ifndef MANTID_ALGORITHMS_BINARYOPERATION_H_
 #define MANTID_ALGORITHMS_BINARYOPERATION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventList.h"
@@ -114,10 +112,10 @@ protected:
   /// masked. If so then the output spectra has zeroed data
   /// and is also masked. The function returns true if further processing is not
   /// required on the spectra.
-  virtual bool propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs,
-                                    const API::MatrixWorkspace_const_sptr rhs,
+  virtual bool propagateSpectraMask(const API::SpectrumInfo &lhsSpectrumInfo,
+                                    const API::SpectrumInfo &rhsSpectrumInfo,
                                     const int64_t index,
-                                    API::MatrixWorkspace_sptr out);
+                                    API::MatrixWorkspace &out);
 
   /** Carries out the binary operation on a single spectrum, with another
    *spectrum as the right-hand operand.
@@ -285,12 +283,6 @@ private:
 
   void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs,
                          API::MatrixWorkspace_sptr out);
-  /// Apply masking requested by propagateSpectraMasks.
-  void applyMaskingToOutput(API::MatrixWorkspace_sptr out);
-
-  /// A store for accumulated spectra that should be masked in the output
-  /// workspace
-  std::vector<int64_t> m_indicesToMask;
   /// Progress reporting
   API::Progress *m_progress;
 };

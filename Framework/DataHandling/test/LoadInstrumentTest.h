@@ -619,7 +619,7 @@ private:
         i->getComponentByName("bank_90degnew");
     TS_ASSERT_EQUALS(comp->getName(), "bank_90degnew");
 
-    ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
 
     // It's "X0" in parameter file
     // IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
@@ -646,7 +646,7 @@ public:
   MatrixWorkspace_sptr ws;
 
   void setUp() override {
-    ws = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
+    ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
   }
 
   void doTest(std::string filename, size_t numTimes = 1) {

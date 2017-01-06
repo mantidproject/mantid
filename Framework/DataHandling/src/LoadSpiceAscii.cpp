@@ -5,6 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -284,7 +285,8 @@ void LoadSpiceAscii::parseSPICEAscii(
       } else {
         // Not supported
         std::stringstream wss;
-        wss << "Line " << line << " cannot be parsed. It is ignored then.";
+        wss << "File " << filename << ": line \"" << line
+            << "\" cannot be parsed. It is ignored then.";
         g_log.warning(wss.str());
       }
     } // If for run info

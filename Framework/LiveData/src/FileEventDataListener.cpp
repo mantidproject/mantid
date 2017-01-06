@@ -1,4 +1,5 @@
 #include "MantidLiveData/FileEventDataListener.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
@@ -83,8 +84,7 @@ FileEventDataListener::~FileEventDataListener() {
 }
 
 bool FileEventDataListener::connect(
-    const Poco::Net::SocketAddress &,
-    const Mantid::API::ILiveListener::ConnectionArgs &) {
+    const Poco::Net::SocketAddress &) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }

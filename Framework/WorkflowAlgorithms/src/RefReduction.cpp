@@ -1,9 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/RefReduction.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"

@@ -3,10 +3,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/IPropertyManager.h"
 
 using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;
@@ -42,7 +42,7 @@ Workspace2D::~Workspace2D() {
 // http://social.msdn.microsoft.com/Forums/en-US/2fe4cfc7-ca5c-4665-8026-42e0ba634214/visual-studio-$
 
 #ifdef _MSC_VER
-  PARALLEL_FOR1(this)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int64_t i = 0; i < static_cast<int64_t>(m_noVectors); i++) {
 #else
   for (size_t i = 0; i < m_noVectors; ++i) {
@@ -317,10 +317,6 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 
 } // namespace DataObjects
 } // NamespaceMantid
-
-///\cond TEMPLATE
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid {
 namespace Kernel {

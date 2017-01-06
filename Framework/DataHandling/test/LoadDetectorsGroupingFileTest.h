@@ -4,6 +4,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"

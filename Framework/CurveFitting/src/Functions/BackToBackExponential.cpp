@@ -6,7 +6,6 @@
 
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
 #include <limits>
 
@@ -64,7 +63,7 @@ void BackToBackExponential::setHeight(const double h) {
   if (area <= 0.0) {
     area = 1e-6;
   }
-  if (boost::math::isnan(area) || boost::math::isinf(area)) {
+  if (!std::isfinite(area)) {
     area = std::numeric_limits<double>::max() / 2;
   }
   setParameter(0, area);

@@ -41,6 +41,9 @@ Steps for other instruments
 
      6. Run :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, the Input workspace is the one from step 3 earlier.  For DReference you can enter a comma seperated list of the d-spacing values of the known peaks.
      7. The output is an OffsetsWorspace, and a workspace with the number of peaks found in each spectra,  The output offsets workspace that can be used directly in :ref:`DiffractionFocussing <algm-DiffractionFocussing>`, or saved using :ref:`SaveCalFile <algm-SaveCalFile>`.  You can also save it as a :ref:`CalFile` from :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, by defining the GroupingFileName parameter.
+
+
+Additionally :ref:`PDCalibration <algm-PDCalibration>` can be used to fit peaks directly in TOF instead of converting to d-spacing. This algorithm produces a calibration table which can be passed to :ref:`AlignDetectors <algm-AlignDetectors>`. The algorithms :ref:`LoadDiffCal <algm-LoadDiffCal>` and :ref:`SaveDiffCal <algm-SaveDiffCal>` can be used to read and write the calibration table to file.
      
 .. figure:: /images/PG3_Calibrate.png
   :width: 400px
@@ -77,7 +80,7 @@ Adjusting the Instrument Definition
 
 This approach attempts to correct the instrument component positions based on the calibration data. It can be more involved than applying the correction during focussing.
 
-1. Perform a calibration using :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` or :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`.  Only these algorithms can export the `DiffractionCalibrationWorkspace <algm-DiffractionCalibrationWorkspace>` required.
+1. Perform a calibration using :ref:`CalibrateRectangularDetectors <algm-CalibrateRectangularDetectors>` or :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`.  Only these algorithms can export the :ref:`Diffraction Calibration Workspace <DiffractionCalibrationWorkspace>` required.
 2. Run :ref:`AlignComponents <algm-AlignComponents>` this will move aspects of the instrument to optimize the offsets.  It can move any named aspect of the instrument including the sample and source positions.  You will likely need to run this several times, perhaps focussing on a single bank at a time, and then the source and sample positions in order to  get a good alignment.
 3. Then either:
    * :ref:`ExportGeometry <algm-ExportGeometry>` will export the resulting geometry into a format that can be used to create a new XML instrument definition.  The Mantid team at ORNL have tools to automate this for common instruments at the SNS.

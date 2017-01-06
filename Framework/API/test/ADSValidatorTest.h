@@ -6,6 +6,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
+#include <boost/make_shared.hpp>
 
 using Mantid::API::ADSValidator;
 using Mantid::API::AnalysisDataService;

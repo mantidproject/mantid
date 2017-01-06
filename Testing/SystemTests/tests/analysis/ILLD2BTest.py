@@ -6,6 +6,7 @@ import mantid.simpleapi
 
 import unittest
 
+
 class ILLD2BLoadTest(unittest.TestCase):
 
     ws_name = "d2b_ws"
@@ -25,8 +26,6 @@ class ILLD2BLoadTest(unittest.TestCase):
         wsOut = mtd[self.ws_name]
         self.assertEqual(wsOut.getNEvents(), 409600)
 
-
-
     def _run_load(self, dataFile):
         """
         ILL Loader
@@ -39,6 +38,7 @@ class ILLD2BLoadTest(unittest.TestCase):
         self.assertTrue(isinstance(mtd[name], IMDEventWorkspace))
 
 #====================================================================================
+
 
 class ILLD2BTest(stresstesting.MantidStressTest):
 

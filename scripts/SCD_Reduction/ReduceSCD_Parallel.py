@@ -40,7 +40,7 @@ import threading
 import time
 import ReduceDictionary
 
-sys.path.append("/opt/mantidnightly/bin")
+sys.path.append("/opt/mantidnightly/bin") # noqa
 #sys.path.append("/opt/Mantid/bin")
 
 from mantid.simpleapi import *
@@ -54,6 +54,8 @@ start_time = time.time()
 # ProcessThread is a simple local class.  Each instance of ProcessThread is
 # a thread that starts a command line process to reduce one run.
 #
+
+
 class ProcessThread ( threading.Thread ):
     command = ""
 
@@ -123,7 +125,7 @@ for r_num in run_nums:
     if slurm_queue_name is not None:
         console_file = output_directory + "/" + str(r_num) + "_output.txt"
         cmd =  'srun -p ' + slurm_queue_name + \
-           ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
+            ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
     procList[index].setCommand( cmd )
     index = index + 1
 
@@ -262,7 +264,7 @@ if not use_cylindrical_integration:
 # corresponding matrix and integrate file
 #
 if not use_cylindrical_integration:
-    if (not cell_type is None) and (not centering is None) :
+    if (cell_type is not None) and (centering is not None) :
         conv_name = output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
         if output_nexus:
             conventional_integrate_file = conv_name + ".nxs"
@@ -270,8 +272,8 @@ if not use_cylindrical_integration:
             conventional_integrate_file = conv_name + ".integrate"
         conventional_matrix_file = conv_name + ".mat"
 
-        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,\
-                      AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
+        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,
+                          AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
         if output_nexus:
             SaveNexus( InputWorkspace=peaks_ws, Filename=conventional_integrate_file )
         else:
@@ -279,7 +281,7 @@ if not use_cylindrical_integration:
         SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
 
 if use_cylindrical_integration:
-    if (not cell_type is None) or (not centering is None):
+    if (cell_type is not None) or (centering is not None):
         print "WARNING: Cylindrical profiles are NOT transformed!!!"
   # Combine *.profiles files
     filename = output_directory + '/' + exp_name + '.profiles'

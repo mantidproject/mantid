@@ -5,6 +5,7 @@
 """
 import stresstesting
 
+
 class ReuseExistingCalibration(stresstesting.MantidStressTest):
     det_pos_first_run = None
     det_pos_second_run = None
@@ -14,6 +15,7 @@ class ReuseExistingCalibration(stresstesting.MantidStressTest):
 
     def runTest(self):
         import mantid.simpleapi as ms
+
         def do_reduction(calibration):
             # load data
             data = ms.Load("HRP39180.RAW")

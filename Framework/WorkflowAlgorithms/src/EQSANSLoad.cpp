@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -9,6 +6,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"

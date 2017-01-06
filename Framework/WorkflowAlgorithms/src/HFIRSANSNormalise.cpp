@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/HFIRSANSNormalise.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/algorithm/string.hpp>

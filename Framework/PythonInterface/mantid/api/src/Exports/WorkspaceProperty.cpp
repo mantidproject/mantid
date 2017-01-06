@@ -1,6 +1,6 @@
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/Workspace.h"
 #include <boost/python/enum.hpp>
 
 using Mantid::API::Workspace;

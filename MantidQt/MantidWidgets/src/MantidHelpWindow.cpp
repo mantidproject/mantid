@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/MantidHelpWindow.h"
 #include "MantidQtMantidWidgets/pqHelpWindow.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RegistrationHelper.h"
@@ -8,7 +9,6 @@
 #include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
 #include <QHelpEngine>
@@ -122,7 +122,7 @@ void MantidHelpWindow::showHelp(const QString &url) {
 
 void MantidHelpWindow::openWebpage(const QUrl &url) {
   g_log.debug() << "open url \"" << url.toString().toStdString() << "\"\n";
-  QDesktopServices::openUrl(url);
+  MantidDesktopServices::openUrl(url);
 }
 
 void MantidHelpWindow::showPage(const QString &url) {
@@ -423,7 +423,7 @@ void MantidHelpWindow::determineFileLocs() {
   // determine cache file location
   m_cacheFile = COLLECTION_FILE.toStdString();
   QString dataLoc =
-      QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+      MantidDesktopServices::storageLocation(QDesktopServices::DataLocation);
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);
     m_cacheFile = path.absolute().toString();

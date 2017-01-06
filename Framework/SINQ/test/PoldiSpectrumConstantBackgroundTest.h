@@ -37,7 +37,7 @@ public:
         "PoldiSpectrumConstantBackground");
     TS_ASSERT(function);
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
 
     TS_ASSERT_THROWS_NOTHING(function->setWorkspace(ws));
     function->setParameter(0, 10.0);
@@ -56,7 +56,7 @@ public:
         "PoldiSpectrumConstantBackground");
     TS_ASSERT(function);
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(20, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(20, 2);
 
     TS_ASSERT_THROWS_NOTHING(function->setWorkspace(ws));
     function->setParameter(0, 10.0);

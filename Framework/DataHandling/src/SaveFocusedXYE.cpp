@@ -1,6 +1,3 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -8,6 +5,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Unit.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
@@ -21,9 +19,6 @@ DECLARE_ALGORITHM(SaveFocusedXYE)
 
 SaveFocusedXYE::SaveFocusedXYE() : API::Algorithm(), m_headerType(XYE) {}
 
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /**
  * Initialise the algorithm
  */

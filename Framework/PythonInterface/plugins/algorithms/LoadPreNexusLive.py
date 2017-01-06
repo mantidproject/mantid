@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid import mtd
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
     FileProperty, WorkspaceProperty
@@ -34,7 +35,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
             filenames = [name for name in filenames
                          if runNumber in name]
             if len(filenames) <= 0:
-                raise RuntimeError("Failed to find live file '%s'" \
+                raise RuntimeError("Failed to find live file '%s'"
                                    % runNumber)
 
         return os.path.join(livepath, filenames[-1])

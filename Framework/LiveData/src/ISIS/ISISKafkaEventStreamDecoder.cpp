@@ -3,9 +3,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -27,6 +30,65 @@ Mantid::Kernel::Logger g_log("ISISKafkaEventStreamDecoder");
 std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 std::string RUN_NUMBER_PROPERTY = "run_number";
 std::string RUN_START_PROPERTY = "run_start";
+
+/**
+ * Append sample log data to existing log or create a new log if one with specified name does not already exist
+ *
+ * @tparam T : Type of the log value
+ * @param mutableRunInfo : Log manager containing the existing sample logs
+ * @param name : Name of the sample log
+ * @param time : Time at which the value was measured
+ * @param value : Sample log measured value
+ */
+template <typename T>
+void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name, const Mantid::Kernel::DateAndTime &time,
+                 T value) {
+  if (mutableRunInfo.hasProperty(name)) {
+    auto property = mutableRunInfo.getTimeSeriesProperty<T>(name);
+    property->addValue(time, value);
+  } else {
+    auto property = new Mantid::Kernel::TimeSeriesProperty<T>(name);
+    property->addValue(time, value);
+    mutableRunInfo.addLogData(property);
+  }
+}
+
+/**
+ * Get sample environment log data from the flatbuffer and append it to the workspace
+ *
+ * @param seData : flatbuffer offset of the sample environment log data
+ * @param nSEEvents : number of sample environment log values in the flatbuffer
+ * @param mutableRunInfo : Log manager containing the existing sample logs
+ */
+void addSampleEnvLogs(
+  const flatbuffers::Vector<flatbuffers::Offset<ISISStream::SEEvent>> &seData, flatbuffers::uoffset_t nSEEvents,
+  Mantid::API::Run &mutableRunInfo) {
+  for (decltype(nSEEvents) i = 0; i < nSEEvents; ++i) {
+    auto seEvent = seData[i];
+    auto name = seEvent->name()->str();
+
+    // Convert time from seconds since start of run to an absolute datetime
+    auto time = mutableRunInfo.startTime() + seEvent->time_offset();
+
+    // If sample log with this name already exists then append to it
+    // otherwise create a new log
+    if (seEvent->value_type() == ISISStream::SEValue_IntValue) {
+      auto value = static_cast<const ISISStream::IntValue *>(seEvent->value());
+      appendToLog<int32_t>(mutableRunInfo, name, time, value->value());
+    } else if (seEvent->value_type() == ISISStream::SEValue_LongValue) {
+      auto value = static_cast<const ISISStream::LongValue *>(seEvent->value());
+      appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
+    } else if (seEvent->value_type() == ISISStream::SEValue_DoubleValue) {
+      auto value = static_cast<const ISISStream::DoubleValue *>(seEvent->value());
+      appendToLog<double>(mutableRunInfo, name, time, value->value());
+    } else if (seEvent->value_type() == ISISStream::SEValue_StringValue) {
+      auto value = static_cast<const ISISStream::StringValue *>(seEvent->value());
+      appendToLog<std::string>(mutableRunInfo, name, time, value->value()->str());
+    } else {
+      g_log.warning() << "SEValue for log named '" << name << "' was not of recognised type" << std::endl;
+    }
+  }
+}
 }
 
 namespace Mantid {
@@ -169,9 +231,11 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       DateAndTime pulseTime =
           m_runStart + static_cast<double>(frameData->frame_time());
       const auto eventData = frameData->n_events();
+      const auto &seData = *(frameData->se_events());
       const auto &tofData = *(eventData->tof());
       const auto &specData = *(eventData->spec());
       auto nevents = tofData.size();
+      auto nSEEvents = seData.size();
       std::lock_guard<std::mutex> lock(m_mutex);
       auto &periodBuffer = *m_localEvents[frameData->period()];
       auto &mutableRunInfo = periodBuffer.mutableRun();
@@ -181,6 +245,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
         auto &spectrum = periodBuffer.getSpectrum(m_specToIdx[specData[i]]);
         spectrum.addEventQuickly(TofEvent(tofData[i], pulseTime));
       }
+      addSampleEnvLogs(seData, nSEEvents, mutableRunInfo);
     }
   }
   g_log.debug("Event capture finished");
@@ -235,7 +300,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
     loadInstrument(instName->c_str(), eventBuffer);
   else
     g_log.warning(
-        "Empty instrument name recieved. Continuing without instrument");
+        "Empty instrument name received. Continuing without instrument");
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times

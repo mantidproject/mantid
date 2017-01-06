@@ -66,6 +66,7 @@ set ( EXPORT_FILES
   src/Exports/IFunction.cpp
   src/Exports/IFunction1D.cpp
   src/Exports/IPeakFunction.cpp
+  src/Exports/CompositeFunction.cpp
   src/Exports/Jacobian.cpp
   src/Exports/FunctionFactory.cpp
   src/Exports/Progress.cpp

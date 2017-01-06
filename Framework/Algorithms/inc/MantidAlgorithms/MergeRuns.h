@@ -1,10 +1,12 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include <list>
+#include <vector>
+#include <boost/shared_ptr.hpp>
+#include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
@@ -66,8 +68,6 @@ namespace Algorithms {
 */
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
-  MergeRuns();
-  ~MergeRuns() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MergeRuns"; }
   /// Summary of algorithms purpose
@@ -150,14 +150,16 @@ private:
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 
   /// List of input EVENT workspaces
   std::vector<Mantid::DataObjects::EventWorkspace_sptr> m_inEventWS;
   /// List of input matrix workspace
   std::list<API::MatrixWorkspace_sptr> m_inMatrixWS;
   /// Addition tables for event workspaces
-  std::vector<boost::shared_ptr<AdditionTable>> m_tables;
+  std::vector<AdditionTable> m_tables;
+  /// Total number of histograms in the output workspace
+  size_t m_outputSize = 0;
 };
 
 } // namespace Algorithm

@@ -106,9 +106,20 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
           SLOT(eraseFree(const QPolygonF &)));
 
   // create and connect the peak eraser controller
-  InputControllerErase *eraseController = new InputControllerErase(this);
+  auto eraseIcon = new QPixmap(":/PickTools/eraser.png");
+  InputControllerSelection *eraseController =
+      new InputControllerSelection(this, eraseIcon);
   setInputController(ErasePeakMode, eraseController);
-  connect(eraseController, SIGNAL(erase(QRect)), this, SLOT(erasePeaks(QRect)));
+  connect(eraseController, SIGNAL(selection(QRect)), this,
+          SLOT(erasePeaks(QRect)));
+
+  // create and connect the peak compare controller
+  auto selectIcon = new QPixmap(":/PickTools/selection-pointer.png");
+  InputControllerSelection *compareController =
+      new InputControllerSelection(this, selectIcon);
+  setInputController(ComparePeakMode, compareController);
+  connect(compareController, SIGNAL(selection(QRect)), this,
+          SLOT(comparePeaks(QRect)));
 }
 
 ProjectionSurface::~ProjectionSurface() {
@@ -191,34 +202,20 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
 
     if (!picking) {
       QPainter painter(widget);
-      RectF windowRect = getSurfaceBounds();
-      m_maskShapes.setWindow(windowRect, painter.viewport());
-      m_maskShapes.draw(painter);
-      for (int i = 0; i < m_peakShapes.size(); ++i) {
-        m_peakShapes[i]->setWindow(windowRect, painter.viewport());
-        m_peakShapes[i]->draw(painter);
-      }
+      drawMaskShapes(painter);
+      drawPeakMarkers(painter);
+      drawPeakComparisonLine(painter);
       painter.end();
     }
   } else if (!picking) {
     QPainter painter(widget);
     painter.drawImage(0, 0, **image);
 
-    RectF windowRect = getSurfaceBounds();
-    m_maskShapes.setWindow(windowRect, painter.viewport());
-    m_maskShapes.draw(painter);
+    drawMaskShapes(painter);
+    drawPeakMarkers(painter);
+    drawPeakComparisonLine(painter);
+    drawSelectionRect(painter);
 
-    for (int i = 0; i < m_peakShapes.size(); ++i) {
-      m_peakShapes[i]->setWindow(windowRect, painter.viewport());
-      m_peakShapes[i]->draw(painter);
-    }
-
-    // draw the selection rectangle
-    if (!m_selectRect.isNull()) {
-      painter.setPen(Qt::blue);
-      // painter.setCompositionMode(QPainter::CompositionMode_Xor);
-      painter.drawRect(m_selectRect);
-    }
     getController()->onPaint(painter);
     painter.end();
     // Discard any error generated here
@@ -258,21 +255,11 @@ void ProjectionSurface::drawSimple(QWidget *widget) const {
   QPainter painter(widget);
   painter.drawImage(0, 0, *m_viewImage);
 
-  RectF windowRect = getSurfaceBounds();
-  m_maskShapes.setWindow(windowRect, painter.viewport());
-  m_maskShapes.draw(painter);
+  drawMaskShapes(painter);
+  drawPeakMarkers(painter);
+  drawPeakComparisonLine(painter);
+  drawSelectionRect(painter);
 
-  for (int i = 0; i < m_peakShapes.size(); ++i) {
-    m_peakShapes[i]->setWindow(windowRect, painter.viewport());
-    m_peakShapes[i]->draw(painter);
-  }
-
-  // draw the selection rectangle
-  if (!m_selectRect.isNull()) {
-    painter.setPen(Qt::blue);
-    // painter.setCompositionMode(QPainter::CompositionMode_Xor);
-    painter.drawRect(m_selectRect);
-  }
   getController()->onPaint(painter);
   painter.end();
 }
@@ -460,6 +447,8 @@ QString ProjectionSurface::getInfoText() const {
   case DrawFreeMode:
     return "Draw by holding the left button down. "
            "Erase with the right button.";
+  case ComparePeakMode:
+    return "Click on one peak, then click on another to compare peaks.";
   case ErasePeakMode:
     return "Click and move the mouse to erase peaks. "
            "Rotate the wheel to resize the cursor.";
@@ -523,6 +512,58 @@ void ProjectionSurface::setPeakVisibility() const {
     foreach (PeakOverlay *po, m_peakShapes) {
       po->setPeakVisibility(xmin, xmax, unitID);
     }
+  }
+}
+
+/**
+ * Draw a line between peak markers being compared
+ * @param painter :: The QPainter object to draw the line with
+ */
+void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const {
+  if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
+    QTransform transform;
+    auto windowRect = getSurfaceBounds();
+    windowRect.findTransform(transform, painter.viewport());
+    auto p1 = transform.map(m_selectedMarkers.first);
+    auto p2 = transform.map(m_selectedMarkers.second);
+
+    painter.setPen(Qt::red);
+    painter.drawLine(p1, p2);
+  }
+}
+
+/**
+ * Draw the peak marker objects on the surface
+ * @param painter :: The QPainter object to draw the markers with
+ */
+void ProjectionSurface::drawPeakMarkers(QPainter &painter) const {
+  auto windowRect = getSurfaceBounds();
+  for (int i = 0; i < m_peakShapes.size(); ++i) {
+    m_peakShapes[i]->setWindow(windowRect, painter.viewport());
+    m_peakShapes[i]->draw(painter);
+  }
+}
+
+/**
+ * Draw the mask shapes on the surface
+ * @param painter :: The QPainter object to draw the masks with
+ */
+void ProjectionSurface::drawMaskShapes(QPainter &painter) const {
+  RectF windowRect = getSurfaceBounds();
+  m_maskShapes.setWindow(windowRect, painter.viewport());
+  m_maskShapes.draw(painter);
+}
+
+/**
+ * Draw the selection rectangle on the surface
+ * @param painter :: The QPainter object to draw the rectangle with
+ */
+void ProjectionSurface::drawSelectionRect(QPainter &painter) const {
+  // draw the selection rectangle
+  if (!m_selectRect.isNull()) {
+    painter.setPen(Qt::blue);
+    // painter.setCompositionMode(QPainter::CompositionMode_Xor);
+    painter.drawRect(m_selectRect);
   }
 }
 
@@ -698,6 +739,47 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
   foreach (PeakOverlay *po, m_peakShapes) {
     po->selectIn(rect);
     po->removeSelectedShapes();
+  }
+}
+
+void ProjectionSurface::comparePeaks(const QRect &rect) {
+  // Find the selected peak across all of the peak overlays.
+  // If more than one peak was found in the selection area just
+  // take the first peak.
+  PeakMarker2D *marker = nullptr;
+  Mantid::Geometry::IPeak *peak = nullptr;
+  QPointF origin;
+  foreach (PeakOverlay *po, m_peakShapes) {
+    po->selectIn(rect);
+    const auto markers = po->getSelectedPeakMarkers();
+    if (markers.length() > 0) {
+      marker = markers.first();
+      origin = marker->origin();
+      peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
+      break;
+    }
+  }
+
+  if (!m_selectedPeaks.first) {
+    // No peaks have been selected yet
+    m_selectedPeaks.first = peak;
+    m_selectedMarkers.first = origin;
+  } else if (!m_selectedPeaks.second) {
+    // Two peaks have now been selected
+    m_selectedPeaks.second = peak;
+    m_selectedMarkers.second = origin;
+  } else if (m_selectedPeaks.first && m_selectedPeaks.second) {
+    // Two peaks have already been selected. Clear the pair and store
+    // the new peak as the first entry
+    m_selectedPeaks.first = peak;
+    m_selectedMarkers.first = origin;
+    m_selectedPeaks.second = nullptr;
+    m_selectedMarkers.second = QPointF();
+  }
+
+  // Only emit the signal to update when we have two peaks
+  if (m_selectedPeaks.first && m_selectedPeaks.second) {
+    emit comparePeaks(m_selectedPeaks);
   }
 }
 

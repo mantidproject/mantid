@@ -1,18 +1,13 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Property.h"
-//#include "MantidKernel/Exception.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
-//#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <numeric>
 
@@ -420,15 +415,14 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS) {
   const double commonSum =
       std::accumulate(WS->readX(0).begin(), WS->readX(0).end(), 0.);
   // If this results in infinity or NaN, then we can't tell - return false
-  if (commonSum == std::numeric_limits<double>::infinity() ||
-      commonSum != commonSum)
+  if (!std::isfinite(commonSum))
     return false;
   const size_t numHist = WS->getNumberHistograms();
   for (size_t j = 1; j < numHist; ++j) {
     const double sum =
         std::accumulate(WS->readX(j).begin(), WS->readX(j).end(), 0.);
     // If this results in infinity or NaN, then we can't tell - return false
-    if (sum == std::numeric_limits<double>::infinity() || sum != sum)
+    if (!std::isfinite(sum))
       return false;
 
     if (std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7) {

@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSSensitivityCorrection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -8,6 +5,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"

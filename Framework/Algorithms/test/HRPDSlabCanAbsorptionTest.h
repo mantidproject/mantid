@@ -7,6 +7,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;
@@ -29,7 +30,7 @@ public:
       atten.initialize();
 
     MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.25, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.25, 0.5);
     // Needs to have units of wavelength
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");

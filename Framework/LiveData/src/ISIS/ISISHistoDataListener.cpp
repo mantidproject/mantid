@@ -5,6 +5,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -88,8 +89,7 @@ void ISISHistoDataListener::IDCReporter(int status, int code,
   *  @return True if the connection was successfully established
   */
 bool ISISHistoDataListener::connect(
-    const Poco::Net::SocketAddress &address,
-    const API::ILiveListener::ConnectionArgs &args) {
+    const Poco::Net::SocketAddress &address) {
 
   m_daeName = address.toString();
   // remove the port part

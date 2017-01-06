@@ -67,6 +67,9 @@ public:
   /// Record the point that the user is currently pointing at with the mouse
   void setPointedAtPoint(QPoint point);
 
+  /// Get the pointed currently being pointed at
+  QPoint getPointedAtPoint() const { return m_mousePoint; }
+
 private:
   /// Show information about the point (x, y) on the graph, in the info table
   void showInfoList(double x, double y);
@@ -87,6 +90,7 @@ private:
   double m_maxX;
   double m_minY;
   double m_maxY;
+  QPoint m_mousePoint;
 
   static std::vector<QColor> g_curveColors;
 };

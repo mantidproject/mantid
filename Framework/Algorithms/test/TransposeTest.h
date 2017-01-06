@@ -2,7 +2,6 @@
 #define TRANSPOSETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -18,6 +17,14 @@ using namespace Mantid::DataObjects;
 
 class TransposeTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TransposeTest *createSuite() { return new TransposeTest(); }
+  static void destroySuite(TransposeTest *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
   void testMetaInfo() {
     transpose = new Transpose();
     TS_ASSERT_EQUALS(transpose->name(), "Transpose");
@@ -85,16 +92,16 @@ public:
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit(), inputWS->getAxis(1)->unit());
 
     // Values
-    TS_ASSERT_EQUALS(inputWS->readY(0)[0], outputWS->readY(0)[0]);
-    TS_ASSERT_EQUALS(inputWS->readY(nHist - 1)[nBins - 1],
-                     outputWS->readY(nBins - 1)[nHist - 1]);
+    TS_ASSERT_EQUALS(inputWS->y(0)[0], outputWS->y(0)[0]);
+    TS_ASSERT_EQUALS(inputWS->y(nHist - 1)[nBins - 1],
+                     outputWS->y(nBins - 1)[nHist - 1]);
 
     delete transpose;
   }
 
   void testRebinnedOutput() {
     RebinnedOutput_sptr inputWS =
-        WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = inputWS->getName();
     AnalysisDataService::Instance().addOrReplace(inName, inputWS);
     std::string outName = "rebinTrans";
@@ -116,13 +123,13 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), inputWS->blocksize());
 
     // Value
-    TS_ASSERT_EQUALS(outputWS->dataY(3)[1], inputWS->dataY(1)[3]);
-    TS_ASSERT_DELTA(outputWS->dataE(3)[1], inputWS->dataE(1)[3], 1.e-5);
+    TS_ASSERT_EQUALS(outputWS->mutableY(3)[1], inputWS->mutableY(1)[3]);
+    TS_ASSERT_DELTA(outputWS->mutableE(3)[1], inputWS->mutableE(1)[3], 1.e-5);
     TS_ASSERT_EQUALS(outputWS->dataF(0).size(), 4);
     TS_ASSERT_EQUALS(outputWS->dataF(3)[1], inputWS->dataF(1)[3]);
     // Check a nan
-    bool inNan = boost::math::isnan(inputWS->dataY(0)[5]);
-    bool outNan = boost::math::isnan(outputWS->dataY(5)[0]);
+    bool inNan = boost::math::isnan(inputWS->mutableY(0)[5]);
+    bool outNan = boost::math::isnan(outputWS->mutableY(5)[0]);
     TS_ASSERT_EQUALS(outNan, inNan);
 
     delete transpose;
@@ -130,5 +137,67 @@ public:
 
 private:
   Transpose *transpose;
+};
+
+class TransposeTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TransposeTestPerformance *createSuite() {
+    return new TransposeTestPerformance();
+  }
+  static void destroySuite(TransposeTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  TransposeTestPerformance() {
+
+    // set up testExecPerformance
+    IAlgorithm *loader;
+    loader = new Mantid::DataHandling::LoadRaw3;
+    loader->initialize();
+    loader->setPropertyValue("Filename", "IRS21360.raw");
+    loader->setPropertyValue("OutputWorkspace", "transpose_irs_r");
+    loader->setPropertyValue("SpectrumMin", "3");
+    loader->setPropertyValue("SpectrumMax", "13");
+
+    TS_ASSERT_THROWS_NOTHING(loader->execute());
+    TS_ASSERT(loader->isExecuted());
+
+    delete loader;
+
+    // set up testRebinnedOutputPerformance
+    RebinnedOutput_sptr inputWS =
+        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
+    std::string inName = rebinned_inputWS;
+    AnalysisDataService::Instance().addOrReplace(inName, inputWS);
+  }
+
+  void testExecPerformance() {
+    // Input workspace
+    Transpose transpose;
+    MatrixWorkspace_const_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "transpose_irs_r");
+    transpose.initialize();
+
+    transpose.setPropertyValue("InputWorkspace", "transpose_irs_r");
+    transpose.setPropertyValue("OutputWorkspace", "transpose_irs_t");
+    TS_ASSERT_THROWS_NOTHING(transpose.execute());
+    TS_ASSERT(transpose.isExecuted());
+  }
+
+  void testRebinnedOutputPerformance() {
+    Transpose transpose;
+    transpose.initialize();
+    transpose.setPropertyValue("InputWorkspace", rebinned_inputWS);
+    transpose.setPropertyValue("OutputWorkspace", rebinned_outputWS);
+    TS_ASSERT_THROWS_NOTHING(transpose.execute());
+    TS_ASSERT(transpose.isExecuted());
+  }
+
+  const std::string rebinned_inputWS = "rebinned_inputWS";
+  const std::string rebinned_outputWS = "rebinned_outputWS";
 };
 #endif

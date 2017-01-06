@@ -85,7 +85,7 @@ void FilterByXValue::exec() {
 
   Progress prog(this, 0.0, 1.0, numSpec);
   // Loop over the workspace, removing the events that don't pass the filter
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
 

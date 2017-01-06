@@ -97,7 +97,7 @@ void WienerSmooth::exec() {
   // create full output workspace by copying all settings from tinputWS
   // blocksize is taken form first
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
-      inputWS, nOutputSpectra, first->readX(0).size(), first->readY(0).size());
+      inputWS, nOutputSpectra, first->x(0).size(), first->y(0).size());
 
   // TODO: ideally axis cloning should be done via API::Axis interface but it's
   // not possible
@@ -120,9 +120,7 @@ void WienerSmooth::exec() {
     auto next = outIndex == 0 ? first : smoothSingleSpectrum(inputWS, inIndex);
 
     // copy the values
-    outputWS->dataX(outIndex) = next->readX(0);
-    outputWS->dataY(outIndex) = next->readY(0);
-    outputWS->dataE(outIndex) = next->readE(0);
+    outputWS->setHistogram(outIndex, next->histogram(0));
 
     // set the axis value
     if (isSpectra) {
@@ -166,19 +164,22 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     // add a fake value to the end to make size even
     inputWS = copyInput(inputWS, wsIndex);
     wsIndex = 0;
-    auto &X = inputWS->dataX(wsIndex);
-    auto &Y = inputWS->dataY(wsIndex);
-    auto &E = inputWS->dataE(wsIndex);
+
+    auto &X = inputWS->x(wsIndex);
+    auto &Y = inputWS->y(wsIndex);
+    auto &E = inputWS->e(wsIndex);
     double dx = X[dataSize - 1] - X[dataSize - 2];
-    X.push_back(X.back() + dx);
-    Y.push_back(Y.back());
-    E.push_back(E.back());
+    auto histogram = inputWS->histogram(wsIndex);
+    histogram.resize(histogram.size() + 1);
+    histogram.mutableX().back() = X.back() + dx;
+    histogram.mutableY().back() = Y.back();
+    histogram.mutableE().back() = E.back();
+    inputWS->setHistogram(wsIndex, histogram);
   }
 
   // the input vectors
-  auto &X = inputWS->readX(wsIndex);
-  auto &Y = inputWS->readY(wsIndex);
-  auto &E = inputWS->readE(wsIndex);
+  auto &X = inputWS->x(wsIndex);
+  auto &Y = inputWS->y(wsIndex);
 
   // Digital fourier transform works best for data oscillating around 0.
   // Fit a spline with a small number of break points to the data.
@@ -244,7 +245,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   // spectrum 2 of the transformed workspace has the transform modulus which is
   // a square
   // root of the power spectrum
-  auto &powerSpec = fourierOut->dataY(2);
+  auto &powerSpec = fourierOut->mutableY(2);
   // convert the modulus to power spectrum wich is the base of the Wiener filter
   std::transform(powerSpec.begin(), powerSpec.end(), powerSpec.begin(),
                  PowerSpectrum());
@@ -335,8 +336,8 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   }
 
   // multiply the fourier transform by the filter
-  auto &re = fourierOut->dataY(0);
-  auto &im = fourierOut->dataY(1);
+  auto &re = fourierOut->mutableY(0);
+  auto &im = fourierOut->mutableY(1);
 
   std::transform(re.begin(), re.end(), wf.begin(), re.begin(),
                  std::multiplies<double>());
@@ -352,8 +353,8 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   fourier->execute();
 
   API::MatrixWorkspace_sptr out = fourier->getProperty("OutputWorkspace");
-  auto &background = fitOut->readY(1);
-  auto &y = out->dataY(0);
+  auto &background = fitOut->y(1);
+  auto &y = out->mutableY(0);
 
   if (y.size() != background.size()) {
     throw std::logic_error("Logic error: inconsistent arrays");
@@ -365,13 +366,19 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 
   // copy the x-values and errors from the original spectrum
   // remove the last values for odd-sized inputs
+
   if (isOddSize) {
-    out->dataX(0).assign(X.begin(), X.end() - 1);
-    out->dataE(0).assign(E.begin(), E.end() - 1);
-    out->dataY(0).resize(Y.size() - 1);
+    auto histogram = out->histogram(0);
+    histogram.setSharedX(inputWS->sharedX(wsIndex));
+    histogram.setSharedE(inputWS->sharedE(wsIndex));
+
+    auto newSize = histogram.y().size() - 1;
+    histogram.resize(newSize);
+
+    out->setHistogram(0, histogram);
   } else {
-    out->mutableX(0) = X;
-    out->dataE(0).assign(E.begin(), E.end());
+    out->setSharedX(0, inputWS->sharedX(wsIndex));
+    out->setSharedE(0, inputWS->sharedE(wsIndex));
   }
 
   return out;
@@ -380,13 +387,13 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 /**
  * Get the start and end of the x-interval.
  * @param X :: The x-vector of a spectrum.
- * @param isHistogram :: Is the x-vector comming form a histogram? If it's true
- * the bin
- *   centres are used.
+ * @param isHistogram :: Is the x-vector coming form a histogram? If it's true
+ * the bin centers are used.
  * @return :: A pair of start x and end x.
  */
-std::pair<double, double> WienerSmooth::getStartEnd(const MantidVec &X,
-                                                    bool isHistogram) const {
+std::pair<double, double>
+WienerSmooth::getStartEnd(const Mantid::HistogramData::HistogramX &X,
+                          bool isHistogram) const {
   const size_t n = X.size();
   if (n < 3) {
     // 3 is the smallest number for this method to work without breaking

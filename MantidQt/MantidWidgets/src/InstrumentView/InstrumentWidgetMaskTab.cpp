@@ -39,7 +39,6 @@
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
-#include <QFileDialog>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -754,8 +753,8 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
 }
 
 void InstrumentWidgetMaskTab::saveIncludeGroupToFile() {
-  QString fname = m_instrWidget->getSaveFileName(
-      "Save grouping file", "XML files (*.xml);;All (*.* *)");
+  QString fname = m_instrWidget->getSaveFileName("Save grouping file",
+                                                 "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
     QList<int> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
@@ -764,8 +763,8 @@ void InstrumentWidgetMaskTab::saveIncludeGroupToFile() {
 }
 
 void InstrumentWidgetMaskTab::saveExcludeGroupToFile() {
-  QString fname = m_instrWidget->getSaveFileName(
-      "Save grouping file", "XML files (*.xml);;All (*.* *)");
+  QString fname = m_instrWidget->getSaveFileName("Save grouping file",
+                                                 "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
     QList<int> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
@@ -845,7 +844,7 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
     QApplication::restoreOverrideCursor();
     QString fileName = m_instrWidget->getSaveFileName(
         "Select location and name for the mask file",
-        "XML files (*.xml);;All (*.* *)");
+        "XML files (*.xml);;All (*)");
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (!fileName.isEmpty()) {

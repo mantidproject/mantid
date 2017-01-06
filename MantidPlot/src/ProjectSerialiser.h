@@ -90,6 +90,8 @@ private:
   QString saveFolderFooter();
   /// Save any currently loaded workspaces
   QString saveWorkspaces();
+  /// Save additional windows
+  QString saveAdditionalWindows();
 
   // Loading Functions
 
@@ -114,6 +116,13 @@ private:
   void populateMantidTreeWidget(const QString &lines);
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
+  /// Load additional windows (e.g. slice viewer)
+  void loadAdditionalWindows(const std::string &lines, const int fileVersion);
+
+  // Misc functions
+
+  /// Create a handle to a new QMdiSubWindow instance
+  QMdiSubWindow *setupQMdiSubWindow() const;
 };
 }
 }

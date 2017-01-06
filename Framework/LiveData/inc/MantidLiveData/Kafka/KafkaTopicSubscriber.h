@@ -2,6 +2,7 @@
 #define MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_
 
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
+#include "KafkaRebalanceCb.h"
 #include <memory>
 
 // -----------------------------------------------------------------------------
@@ -50,6 +51,7 @@ public:
 
 private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
+  KafkaRebalanceCb m_rebalanceCb;
   std::string m_brokerAddr;
   std::string m_topicName;
 };

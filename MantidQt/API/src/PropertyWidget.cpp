@@ -11,6 +11,7 @@
 #include <cfloat>
 
 #include <algorithm>
+#include <sstream>
 
 #include <QLineEdit>
 

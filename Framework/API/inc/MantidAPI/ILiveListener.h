@@ -44,13 +44,6 @@ class Workspace;
 class MANTID_API_DLL ILiveListener : public Kernel::PropertyManager {
 public:
   //----------------------------------------------------------------------
-  // ConnectionArgs - Stores additional connection parameters
-  //----------------------------------------------------------------------
-  struct ConnectionArgs {
-    std::string instrumentName; /// Name of the instrument
-  };
-
-  //----------------------------------------------------------------------
   // Static properties
   //----------------------------------------------------------------------
 
@@ -71,8 +64,7 @@ public:
    * required for the connection
    * @return True if the connection was successfully established
    */
-  virtual bool connect(const Poco::Net::SocketAddress &address,
-                       const ConnectionArgs &args) = 0;
+  virtual bool connect(const Poco::Net::SocketAddress &address) = 0;
 
   /** Commence the collection of data from the DAS. Must be called before
    * extractData().

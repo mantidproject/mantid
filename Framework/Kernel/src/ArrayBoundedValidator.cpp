@@ -1,5 +1,8 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 
+#include <boost/make_shared.hpp>
+#include <sstream>
+
 namespace Mantid {
 namespace Kernel {
 
@@ -134,8 +137,11 @@ template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearUpper() {
 
 // Required explicit instantiations
 template class ArrayBoundedValidator<double>;
-template class ArrayBoundedValidator<int>;
+template class ArrayBoundedValidator<int32_t>;
+template class ArrayBoundedValidator<int64_t>;
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class ArrayBoundedValidator<long>;
+#endif
 
 } // Kernel
 } // Mantid

@@ -18,6 +18,8 @@
 #include <Poco/Net/HTTPBasicCredentials.h>
 #include <Poco/StreamCopier.h>
 
+#include <boost/algorithm/string/trim.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
@@ -34,8 +36,7 @@ SINQHMListener::SINQHMListener()
   rank = 0;
 }
 
-bool SINQHMListener::connect(const Poco::Net::SocketAddress &address,
-                             const API::ILiveListener::ConnectionArgs &) {
+bool SINQHMListener::connect(const Poco::Net::SocketAddress &address) {
   std::string host = address.toString();
   std::string::size_type i = host.find(':');
   if (i != std::string::npos) {

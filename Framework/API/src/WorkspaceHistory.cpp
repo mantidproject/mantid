@@ -1,13 +1,12 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/HistoryView.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 #include "Poco/DateTime.h"

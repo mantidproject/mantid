@@ -151,6 +151,7 @@ void GraphDisplay::setRangeScale(double rangeScale) {
  *               the mouse.
  */
 void GraphDisplay::setPointedAtPoint(QPoint point) {
+  m_mousePoint = point;
   if (m_dataSource == 0) {
     return;
   }

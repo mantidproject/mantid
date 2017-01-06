@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -10,14 +12,11 @@ class MolDyn(PythonAlgorithm):
 
     _mtd_plot = None
 
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\DataHandling;Simulation'
 
-
     def summary(self):
         return 'Imports and processes simulated functions from nMOLDYN.'
-
 
     def PyInit(self):
         self.declareProperty('Data', '',
@@ -39,13 +38,12 @@ class MolDyn(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc='Output workspace name')
 
-
     def validateInputs(self):
         issues = dict()
 
         try:
             self._get_version_and_data_path()
-        except ValueError, vex:
+        except ValueError as vex:
             issues['Data'] = str(vex)
 
         res_ws = self.getPropertyValue('Resolution')
@@ -55,7 +53,6 @@ class MolDyn(PythonAlgorithm):
             issues['MaxEnergy'] = 'MaxEnergy must be set when convolving with an instrument resolution'
 
         return issues
-
 
     #pylint: disable=too-many-branches
     def PyExec(self):
@@ -129,7 +126,6 @@ class MolDyn(PythonAlgorithm):
         # Set the output workspace
         self.setProperty('OutputWorkspace', output_ws_name)
 
-
     def _get_version_and_data_path(self):
         """
         Inspects the Data parameter to determine th eversion of nMoldyn it is
@@ -154,7 +150,6 @@ class MolDyn(PythonAlgorithm):
                 raise RuntimeError('Unknown input data')
 
         return (version, data, extension)
-
 
     def _create_res_ws(self, num_sample_hist):
         """
@@ -200,7 +195,6 @@ class MolDyn(PythonAlgorithm):
 
         return resolution_ws
 
-
     def _convolve_with_res(self, resolution_ws, function_ws_name):
         """
         Performs convolution with an instrument resolution workspace.
@@ -216,7 +210,6 @@ class MolDyn(PythonAlgorithm):
         ConvolveWorkspaces(OutputWorkspace=function_ws_name,
                            Workspace1=function_ws_name,
                            Workspace2=resolution_ws)
-
 
     def _plot_spectra(self, ws_name):
         """

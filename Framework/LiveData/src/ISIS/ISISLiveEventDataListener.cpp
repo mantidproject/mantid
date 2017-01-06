@@ -5,8 +5,10 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -74,8 +76,7 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener() {
 
 // connect the listener to DAE
 bool ISISLiveEventDataListener::connect(
-    const Poco::Net::SocketAddress &address,
-    const Mantid::API::ILiveListener::ConnectionArgs &) {
+    const Poco::Net::SocketAddress &address) {
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port

@@ -38,7 +38,7 @@ class ISISKafkaEventStreamDecoder;
  */
 class DLLExport ISISKafkaEventListener : public API::LiveListener {
 public:
-  ISISKafkaEventListener() = default;
+  ISISKafkaEventListener();
   /// Destructor. Should handle termination of any socket connections.
   ~ISISKafkaEventListener() override = default;
 
@@ -47,7 +47,7 @@ public:
   //----------------------------------------------------------------------
 
   /// The name of this listener
-  std::string name() const override { return "ISISKafaEventListener"; }
+  std::string name() const override { return "ISISKafkaEventListener"; }
   /// Does this listener support requests for (recent) past data
   bool supportsHistory() const override { return false; }
   /// Does this listener buffer events (true) or histogram data (false)
@@ -57,8 +57,7 @@ public:
   // Actions
   //----------------------------------------------------------------------
 
-  bool connect(const Poco::Net::SocketAddress &address,
-               const API::ILiveListener::ConnectionArgs &args) override;
+  bool connect(const Poco::Net::SocketAddress &address) override;
   void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 

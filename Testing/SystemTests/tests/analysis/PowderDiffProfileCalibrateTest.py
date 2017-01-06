@@ -44,7 +44,6 @@ class VulcanExamineProfile(stresstesting.MantidStressTest):
                                     BackgroundWorkspace = 'Arg_Si_Background',
                                     OutputWorkspace     = 'Arg_Si_Calculated')
 
-
         # load output gsas file and the golden one
         Load(Filename = "Arg_Si_ref.nxs", OutputWorkspace = "Arg_Si_golden")
 
@@ -55,6 +54,7 @@ class VulcanExamineProfile(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance=1.0e-6
         return ('Arg_Si_Calculated','Arg_Si_golden')
+
 
 class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
     """ System test for sequential refinement
@@ -135,7 +135,6 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
                                         BackgroundType = "FullprofPolynomial",
                                         ProjectID = "IDx890")
 
-
         # Refine step 2
         api.RefinePowderDiffProfileSeq( InputWorkspace      = "VULCAN_22946_NOM",
                                         SeqControlInfoWorkspace = "RecordIDx890Table",
@@ -182,6 +181,7 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
         self.tolerance=1.0e-6
         return ('VULCAN_22946_Calculated', 'VULCAN_22946_Calculated')
 
+
 class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
     """ System test for sequential refinement
     """
@@ -208,7 +208,6 @@ class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
                                         ParametersToRefine = "Alph1",
                                         NumRefineCycles = 200,
                                         ProjectID = "IDx890")
-
 
     def validateMethod(self):
         """ Return None as running is all that we want at this moment.

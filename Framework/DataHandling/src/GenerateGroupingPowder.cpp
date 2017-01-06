@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -38,7 +39,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GenerateGroupingPowder)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string GenerateGroupingPowder::name() const {
   return "GenerateGroupingPowder";
@@ -52,9 +52,6 @@ const std::string GenerateGroupingPowder::category() const {
   return "DataHandling\\Grouping;Transforms\\Grouping;Diffraction\\Utility";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void GenerateGroupingPowder::init() {
@@ -72,7 +69,6 @@ void GenerateGroupingPowder::init() {
       "be created as well.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void GenerateGroupingPowder::exec() {

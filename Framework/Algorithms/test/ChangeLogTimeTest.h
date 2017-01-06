@@ -5,6 +5,8 @@
 #include "MantidAlgorithms/ChangeLogTime.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 
 using std::string;
 using namespace Mantid::Algorithms;

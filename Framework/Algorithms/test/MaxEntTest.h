@@ -7,6 +7,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/MaxEnt.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -44,7 +45,7 @@ public:
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 5;
     int nBins = 10;
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -78,7 +79,7 @@ public:
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 6;
     int nBins = 10;
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -111,7 +112,7 @@ public:
 
   void test_bad_complex_data() {
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -156,9 +157,13 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 50);
-    TS_ASSERT_DELTA(data->y(0)[25], 0.3112, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[26], 0.4893, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[27], 0.6485, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.2774, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.4541, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.6121, 0.0001);
+
+    // Test that the algorithm converged
+    TS_ASSERT_EQUALS(chi->y(0).back(), 0);
+    TS_ASSERT_EQUALS(angle->y(0).back(), 0);
   }
 
   void test_sine() {
@@ -189,9 +194,12 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_DELTA(data->y(0)[25], 0.8961, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[26], 0.8257, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[27], 0.7218, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.8936, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.8237, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.7205, 0.0001);
+    // Test that the algorithm converged
+    TS_ASSERT_EQUALS(chi->y(0).back(), 0);
+    TS_ASSERT_EQUALS(angle->y(0).back(), 0);
   }
 
   void test_sine_cosine_neg() {
@@ -205,7 +213,7 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ComplexData", true);
-    alg->setProperty("A", 1.0);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -218,12 +226,12 @@ public:
     TS_ASSERT(data);
 
     // Test some values
-    TS_ASSERT_DELTA(data->y(0)[35], 0.8489, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[36], 0.6727, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[37], 0.4058, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[35], 0.3288, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[36], 0.6133, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[37], 0.8149, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8315, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6707, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[37], 0.3977, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3246, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6098, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.8090, 0.0001);
   }
 
   void test_sine_cosine_pos() {
@@ -271,7 +279,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ComplexData", true);
     alg->setProperty("ComplexImage", false);
-    alg->setProperty("A", 1.0);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -285,12 +293,12 @@ public:
 
     // Test some values (should be close to those obtained in the previous two
     // tests)
-    TS_ASSERT_DELTA(data->y(0)[35], 0.8071, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[36], 0.6858, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[37], 0.4156, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[35], 0.3305, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[36], 0.6008, 0.0001);
-    TS_ASSERT_DELTA(data->y(1)[37], 0.7955, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8412, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6741, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[37], 0.4062, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3272, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6102, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.8098, 0.0001);
   }
 
   void test_resolution_factor() {
@@ -304,7 +312,7 @@ public:
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("A", 0.1);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 50.);
     alg->setProperty("ResolutionFactor", "3");
     alg->setPropertyValue("ReconstructedImage", "image");
@@ -320,17 +328,20 @@ public:
     TS_ASSERT(data);
     TS_ASSERT(image);
 
+    // Test number of histograms and bins
     TS_ASSERT_EQUALS(data->blocksize(), npoints * 3);
     TS_ASSERT_EQUALS(image->blocksize(), npoints * 3);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(image->getNumberHistograms(), 2);
+    // Check that all X bins have been populated
+    TS_ASSERT_EQUALS(data->readX(0).size(), data->readY(0).size());
 
     // Test some values
-    TS_ASSERT_DELTA(image->y(0)[70], 6.7631, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[70], 6.8835, 0.0001);
     // Fails on RHEL and Ubuntu with delta 0.0001
-    TS_ASSERT_DELTA(image->y(0)[71], 1.3452, 0.001);
-    TS_ASSERT_DELTA(image->y(1)[78], 0.2293, 0.0001);
-    TS_ASSERT_DELTA(image->y(1)[79], 0.8566, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[71], 1.3045, 0.001);
+    TS_ASSERT_DELTA(image->y(1)[78], 0.0999, 0.0001);
+    TS_ASSERT_DELTA(image->y(1)[79], 0.4176, 0.0001);
   }
 
   void test_output_label() {
@@ -411,9 +422,9 @@ public:
    */
   void testValidateInputsWithWSGroup() {
     auto ws1 = boost::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+        WorkspaceCreationHelper::create2DWorkspace(5, 10));
     auto ws2 = boost::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+        WorkspaceCreationHelper::create2DWorkspace(5, 10));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
     auto group = boost::make_shared<WorkspaceGroup>();
@@ -444,7 +455,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ComplexData", true);
     alg->setProperty("AutoShift", true);
-    alg->setProperty("A", 1.0);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -484,6 +495,81 @@ public:
     alg->setChild(true);
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", ws),
                      std::invalid_argument);
+  }
+
+  void test_histogram_workspace() {
+    const size_t size = 10;
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size + 1, size));
+    // We don't care about values, we just want to test the number of
+    // X points in the image
+    // For histogram input workspaces we should get the original number
+    // of points minus one
+    for (size_t i = 0; i < size; i++) {
+      double value = static_cast<double>(i);
+      ws->dataX(0)[i] = value;
+      ws->dataY(0)[i] = value;
+      ws->dataE(0)[i] = value;
+    }
+    ws->dataX(0)[size] = static_cast<double>(size);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setProperty("AutoShift", false);
+    alg->setProperty("A", 1.0);
+    alg->setProperty("ChiTarget", 102.);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+
+    TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size() - 1);
+    TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
+    TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
+  }
+
+  void test_pointdata_workspace() {
+    const size_t size = 10;
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+    // We don't care about values, we just want to test the number of
+    // X points in the image
+    // For histogram input workspaces we should get the original number
+    // of points minus one
+    for (size_t i = 0; i < size; i++) {
+      double value = static_cast<double>(i);
+      ws->dataX(0)[i] = value;
+      ws->dataY(0)[i] = value;
+      ws->dataE(0)[i] = value;
+    }
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("ComplexData", false);
+    alg->setProperty("AutoShift", false);
+    alg->setProperty("A", 1.0);
+    alg->setProperty("ChiTarget", 102.);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+    MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
+    MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
+
+    TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size());
+    TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
+    TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
   }
 
   MatrixWorkspace_sptr createWorkspaceReal(size_t maxt, double phase) {
@@ -571,7 +657,7 @@ public:
   static void destroySuite(MaxEntTestPerformance *suite) { delete suite; }
 
   MaxEntTestPerformance() {
-    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 100);
+    input = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 100);
     alg = AlgorithmManager::Instance().create("MaxEnt");
   }
 

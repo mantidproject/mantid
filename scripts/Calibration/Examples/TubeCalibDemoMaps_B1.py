@@ -45,8 +45,8 @@ print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
 # also put peaks into PeakFile
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,\
-    fitPar=fitPar, outputPeak=True)
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
+                                             fitPar=fitPar, outputPeak=True)
 print "Got calibration (new positions of detectors) "
 
 # == Apply the Calibation ==

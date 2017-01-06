@@ -17,6 +17,8 @@ import mantid.simpleapi as ms
 from mantid import *
 
 #====================================Helper Functions=======================================
+
+
 def setUp():
     test_ws = ms.LoadVesuvio(Filename="15039-15045", InstrumentParFile="IP0004_10.par",
                              Mode="SingleDifference", SpectrumList="135-136")
@@ -25,11 +27,13 @@ def setUp():
 
     return test_ws, test_container_ws
 
+
 def tearDown():
     workspace_names =['__Correction','__Corrected','__Output','__LinearFit']
     for name in workspace_names:
         if mtd.doesExist(name):
             mtd.remove(name)
+
 
 def _is_old_boost_version():
     # It appears that a difference in boost version is causing different
@@ -43,6 +47,7 @@ def _is_old_boost_version():
             return True
 
     return False
+
 
 def _create_algorithm(**kwargs):
     alg = AlgorithmManager.createUnmanaged("VesuvioCorrections")
@@ -80,6 +85,7 @@ def _create_dummy_fit_parameters_ws_index_1():
     params.addRow(['Cost function value', 3.19573, 0.0])
 
     return params
+
 
 def _create_dummy_fit_parameters_ws_index_2():
     params = ms.CreateEmptyTableWorkspace(OutputWorkspace='__VesuvioCorrections_test_fit_params')
@@ -155,7 +161,6 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 458)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
-
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
@@ -279,7 +284,6 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
 
-
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 3)
@@ -291,13 +295,11 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 220)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 325)
 
-
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.621675084409
         _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
-
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
@@ -339,7 +341,6 @@ class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 458)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
 
-
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 4)
@@ -351,13 +352,11 @@ class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 325)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 220)
 
-
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.629463673633
         _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
-
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
@@ -403,7 +402,6 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
         _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, 458)
         _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
 
-
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
         _validate_group_structure(self, corrected_wsg, 4)
@@ -415,13 +413,11 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, 325)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, 220)
 
-
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.619602892622
         _validate_matrix_peak_height(self, output_ws, output_expected_peak, 325)
-
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
@@ -442,8 +438,10 @@ class TestRunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             Masses=_create_dummy_masses(),
                                             MassProfiles=_create_dummy_profiles())
+
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
+
 
 class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
 
@@ -454,6 +452,7 @@ class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             MassProfiles=_create_dummy_profiles())
+
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
@@ -467,6 +466,7 @@ class TestRunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
         self._algorithm = _create_algorithm(InputWorkspace=test_ws,
                                             FitParameters=_create_dummy_fit_parameters_ws_index_1(),
                                             Masses=_create_dummy_masses())
+
     def validate(self):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
@@ -484,6 +484,7 @@ def _validate_group_structure(self, ws_group, expected_entries):
     num_entries = ws_group.getNumberOfEntries()
     self.assertEqual(num_entries, expected_entries)
 
+
 def _validate_matrix_structure(self, matrix_ws, expected_hist, expected_bins):
     """
     Checks that a workspace is a matrix workspace and has the correct number of histograms and bins
@@ -496,6 +497,7 @@ def _validate_matrix_structure(self, matrix_ws, expected_hist, expected_bins):
     num_bins = matrix_ws.blocksize()
     self.assertEqual(num_hists, expected_hist)
     self.assertEqual(num_bins, expected_bins)
+
 
 def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
     """
@@ -512,6 +514,7 @@ def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
 
 #=======================================Values===========================================
 
+
 def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolerance=0.05):
     """
     Checks that a table workspace has the expected values from top to bottom
@@ -527,6 +530,8 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
             self.assertTrue(abs_difference <= abs(tolerance_value))
 
 #pylint: disable=too-many-arguments
+
+
 def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin, ws_index=0, tolerance=0.05):
     """
     Checks that the heightest peak value is as expected

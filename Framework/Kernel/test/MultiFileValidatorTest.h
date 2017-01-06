@@ -125,6 +125,20 @@ public:
         file_val.isValid(std::vector<std::vector<std::string>>()).empty(),
         false);
   }
+
+  void testFailsOnNonExistingFiles() {
+    std::vector<std::string> vec{"foo"};
+    MultiFileValidator file_val(vec);
+    std::vector<std::vector<std::string>> file{{"myJunkFile.foo"}};
+    TS_ASSERT(!file_val.isValid(file).empty());
+  }
+
+  void testPassesOnNonExistingFiles() {
+    std::vector<std::string> vec{"foo"};
+    MultiFileValidator file_val(vec, false);
+    std::vector<std::vector<std::string>> file{{"myJunkFile.foo"}};
+    TS_ASSERT(file_val.isValid(file).empty());
+  }
 };
 
 #endif /*MULTIFILEVALIDATORTEST_H_*/

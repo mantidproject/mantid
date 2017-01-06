@@ -14,7 +14,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -175,7 +175,7 @@ public:
                       3.0, histoIt->getNormalizedSignal());
     histoIt->jumpTo(2);
     TSM_ASSERT("Should return NaN here as data at the iterator are masked",
-               boost::math::isnan(histoIt->getNormalizedSignal()));
+               std::isnan(histoIt->getNormalizedSignal()));
     histoIt->jumpTo(3);
     TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
                       " are unmasked",

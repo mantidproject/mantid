@@ -2,12 +2,16 @@
 
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -31,7 +35,6 @@ bool compareMomentum(const Mantid::Kernel::VMD &v1,
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormSCD)
 
-//----------------------------------------------------------------------------------------------
 /**
  * Constructor
  */
@@ -59,7 +62,6 @@ const std::string MDNormSCD::summary() const {
 /// Algorithm's name for use in the GUI and help. @see Algorithm::name
 const std::string MDNormSCD::name() const { return "MDNormSCD"; }
 
-//----------------------------------------------------------------------------------------------
 /**
   * Initialize the algorithm's properties.
   */
@@ -107,7 +109,6 @@ void MDNormSCD::init() {
                   "A name for the output normalization MDHistoWorkspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * Execute the algorithm.
  */
@@ -115,8 +116,10 @@ void MDNormSCD::exec() {
   cacheInputs();
   auto outputWS = binInputWS();
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  outputWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
   createNormalizationWS(*outputWS);
+  m_normWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty("OutputNormalizationWorkspace", m_normWS);
 
   // Check for other dimensions if we could measure anything in the original
@@ -403,7 +406,7 @@ void MDNormSCD::calculateNormalization(
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
-  PARALLEL_FOR1(integrFlux)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*integrFlux))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
 

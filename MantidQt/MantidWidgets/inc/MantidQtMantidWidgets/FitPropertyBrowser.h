@@ -16,6 +16,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
 /* Forward declarations */
 
@@ -54,7 +55,8 @@ class PropertyHandler;
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser
     : public QDockWidget,
       public Mantid::API::AlgorithmObserver,
-      public MantidQt::API::WorkspaceObserver {
+      public MantidQt::API::WorkspaceObserver,
+      public IWorkspaceFitControl {
   Q_OBJECT
 public:
   /// Constructor
@@ -124,13 +126,13 @@ public:
   /// Get the input workspace name
   std::string workspaceName() const;
   /// Set the input workspace name
-  virtual void setWorkspaceName(const QString &wsName);
+  virtual void setWorkspaceName(const QString &wsName) override;
   /// Get workspace index
   int workspaceIndex() const;
   /// Set workspace index
-  void setWorkspaceIndex(int i);
+  void setWorkspaceIndex(int i) override;
   /// Get the output name
-  std::string outputName() const;
+  virtual std::string outputName() const;
   /// Set the output name
   void setOutputName(const std::string &);
   /// Get the minimizer
@@ -149,15 +151,17 @@ public:
   void normaliseData(bool on) { m_shouldBeNormalised = on; }
   /// Get the max number of iterations
   int maxIterations() const;
+  /// Get the peak radius for peak functions
+  int getPeakRadius() const;
 
   /// Get the start X
   double startX() const;
   /// Set the start X
-  void setStartX(double);
+  void setStartX(double start) override;
   /// Get the end X
   double endX() const;
   /// Set the end X
-  void setEndX(double);
+  void setEndX(double end) override;
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString &lv = "");
   /// Get LogValue
@@ -221,7 +225,7 @@ public:
   bool plotCompositeMembers() const;
 
   /// Returns true if the fit should be done against binned (bunched) data.
-  bool rawData() const;
+  bool rawData() const override;
 
   void setADSObserveEnabled(bool enabled);
 
@@ -238,6 +242,9 @@ public:
   /// Create a MatrixWorkspace from a TableWorkspace
   Mantid::API::Workspace_sptr createMatrixFromTableWorkspace() const;
 
+  /// Allow or disallow sequential fits (depending on whether other conditions
+  /// are met)
+  void allowSequentialFits(bool allow) override;
 public slots:
   virtual void fit();
   virtual void sequentialFit();
@@ -280,17 +287,21 @@ signals:
 
   /// signal which can optionally be caught for customization after a fit has
   /// been done
-  void fittingDone(QString);
+  void fittingDone(const QString &);
   void functionFactoryUpdateReceived();
+  void errorsEnabled(bool enabled);
+  void fitUndone();
+  void functionLoaded(const QString &);
 
 protected slots:
   /// Get the registered function names
   virtual void populateFunctionNames();
+  /// Called when a bool property is changed
+  virtual void boolChanged(QtProperty *prop);
 
 private slots:
 
   void enumChanged(QtProperty *prop);
-  void boolChanged(QtProperty *prop);
   void intChanged(QtProperty *prop);
   virtual void doubleChanged(QtProperty *prop);
   /// Called when one of the parameter values gets changed
@@ -375,6 +386,10 @@ protected:
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
+  /// Create CompositeFunction from string
+  void createCompositeFunction(const QString &str = "");
+  /// Create CompositeFunction from pointer
+  void createCompositeFunction(const Mantid::API::IFunction_sptr func);
 
   /// Property managers:
   QtGroupPropertyManager *m_groupManager;
@@ -400,6 +415,7 @@ protected:
   QtProperty *m_ignoreInvalidData;
   QtProperty *m_costFunction;
   QtProperty *m_maxIterations;
+  QtProperty *m_peakRadius;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_plotCompositeMembers;
@@ -462,8 +478,6 @@ private:
   /// load and save function
   void loadFunction(const QString &funcString);
   void saveFunction(const QString &fnName);
-  /// Create CompositeFunction
-  void createCompositeFunction(const QString &str = "");
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr) const;
   /// Find QtBrowserItem for a property prop among the chidren of

@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "ISISKafkaTesting.h"
 
 #include <Poco/Path.h>
@@ -229,6 +230,8 @@ private:
       const auto &sid = spec.getDetectorIDs();
       TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
     }
+    TS_ASSERT(eventWksp.run().hasProperty("SampleLog1"));
+    TS_ASSERT_DELTA(eventWksp.run().getLogAsSingleValue("SampleLog1"), 42.0, 0.01);
   }
 
   void checkWorkspaceEventData(

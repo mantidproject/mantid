@@ -1,14 +1,10 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidAPI/SampleShapeValidator.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Objects/Object.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {
-//-----------------------------------------------------------------------------
-// Public methods
-//-----------------------------------------------------------------------------
 
 /// @return A string identifier for the type of validator
 std::string SampleShapeValidator::getType() const { return "SampleShape"; }
@@ -17,10 +13,6 @@ std::string SampleShapeValidator::getType() const { return "SampleShape"; }
 Kernel::IValidator_sptr SampleShapeValidator::clone() const {
   return boost::make_shared<SampleShapeValidator>();
 }
-
-//-----------------------------------------------------------------------------
-// Private methods
-//-----------------------------------------------------------------------------
 
 /**
  * Checks that the workspace has a valid sample shape defined

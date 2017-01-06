@@ -3,6 +3,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
 
@@ -105,7 +106,7 @@ void SplineInterpolation::exec() {
 
     // compare the data set against our spline
     calculateSpline(mwspt, outputWorkspace, i);
-    outputWorkspace->setX(i, mws->refX(0));
+    outputWorkspace->setSharedX(i, mws->sharedX(0));
 
     // check if we want derivatives
     if (order > 0) {
@@ -115,7 +116,7 @@ void SplineInterpolation::exec() {
       // calculate the derivatives for each order chosen
       for (int j = 0; j < order; ++j) {
         vAxis->setValue(j, j + 1);
-        derivs[i]->setX(j, mws->refX(0));
+        derivs[i]->setSharedX(j, mws->sharedX(0));
         calculateDerivatives(mwspt, derivs[i], j + 1);
       }
 
@@ -169,8 +170,8 @@ SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
 MatrixWorkspace_sptr
 SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
   if (workspace->isHistogramData()) {
-    size_t histNo = workspace->getNumberHistograms();
-    size_t size = workspace->readY(0).size();
+    const size_t histNo = workspace->getNumberHistograms();
+    const size_t size = workspace->y(0).size();
 
     // make a new workspace for the point data
     MatrixWorkspace_sptr pointWorkspace =
@@ -178,16 +179,14 @@ SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
 
     // loop over each histogram
     for (size_t i = 0; i < histNo; ++i) {
-      const auto &xValues = workspace->readX(i);
-      const auto &yValues = workspace->readY(i);
+      const auto &xValues = workspace->x(i);
+      pointWorkspace->setSharedY(i, workspace->sharedY(i));
 
-      auto &newXValues = pointWorkspace->dataX(i);
-      auto &newYValues = pointWorkspace->dataY(i);
+      auto &newXValues = pointWorkspace->mutableX(i);
 
       // set x values to be average of bin bounds
       for (size_t j = 0; j < size; ++j) {
         newXValues[j] = (xValues[j] + xValues[j + 1]) / 2;
-        newYValues[j] = yValues[j];
       }
     }
 
@@ -205,8 +204,8 @@ SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
  */
 void SplineInterpolation::setInterpolationPoints(
     MatrixWorkspace_const_sptr inputWorkspace, const int row) const {
-  const auto &xIn = inputWorkspace->readX(row);
-  const auto &yIn = inputWorkspace->readY(row);
+  const auto &xIn = inputWorkspace->x(row);
+  const auto &yIn = inputWorkspace->y(row);
   int size = static_cast<int>(xIn.size());
 
   // pass x attributes and y parameters to CubicSpline
@@ -228,9 +227,9 @@ void SplineInterpolation::calculateDerivatives(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     API::MatrixWorkspace_sptr outputWorkspace, int order) const {
   // get x and y parameters from workspaces
-  size_t nData = inputWorkspace->readY(0).size();
-  const double *xValues = inputWorkspace->readX(0).data();
-  double *yValues = outputWorkspace->dataY(order - 1).data();
+  const size_t nData = inputWorkspace->y(0).size();
+  const double *xValues = &(inputWorkspace->x(0)[0]);
+  double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
 
   // calculate the derivatives
   m_cspline->derivative1D(yValues, xValues, nData, order);
@@ -246,9 +245,9 @@ void SplineInterpolation::calculateSpline(
     MatrixWorkspace_const_sptr inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, int row) const {
   // setup input parameters
-  size_t nData = inputWorkspace->readY(0).size();
-  const double *xValues = inputWorkspace->readX(0).data();
-  double *yValues = outputWorkspace->dataY(row).data();
+  const size_t nData = inputWorkspace->y(0).size();
+  const double *xValues = &(inputWorkspace->x(0)[0]);
+  double *yValues = &(outputWorkspace->mutableY(row)[0]);
 
   // calculate the interpolation
   m_cspline->function1D(yValues, xValues, nData);

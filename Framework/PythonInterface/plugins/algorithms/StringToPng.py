@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from six import u
 import mantid
 
+
 class StringToPng(mantid.api.PythonAlgorithm):
 
     def category(self):

@@ -5,6 +5,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
@@ -18,10 +19,16 @@
 #include "MantidVatesAPI/Common.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <vtkPVChangeOfBasisHelper.h>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
+
+namespace {
+Mantid::Kernel::Logger g_log("MDHWLoadingPresenter");
+}
 
 namespace Mantid {
 namespace VATES {

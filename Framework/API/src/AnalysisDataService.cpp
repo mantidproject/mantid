@@ -1,5 +1,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include <sstream>
 
 namespace Mantid {
 namespace API {
@@ -154,7 +155,7 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
   Workspace_sptr ws;
   try {
     ws = retrieve(name);
-  } catch (Kernel::Exception::NotFoundError) {
+  } catch (const Kernel::Exception::NotFoundError &) {
     // do nothing - remove will do what's needed
   }
   Kernel::DataService<API::Workspace>::remove(name);
@@ -258,7 +259,7 @@ AnalysisDataServiceImpl::topLevelItems() const {
       if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
         group->reportMembers(groupMembers);
       }
-    } catch (std::exception &) {
+    } catch (const std::exception &) {
     }
   }
 

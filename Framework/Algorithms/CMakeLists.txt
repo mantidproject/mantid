@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
+	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
@@ -50,6 +51,7 @@ set ( SRC_FILES
 	src/ConvertSpectrumAxis.cpp
 	src/ConvertSpectrumAxis2.cpp
 	src/ConvertTableToMatrixWorkspace.cpp
+	src/ConvertToConstantL2.cpp
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
@@ -150,9 +152,11 @@ set ( SRC_FILES
 	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
+	src/InterpolationOption.cpp
 	src/InvertMask.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
+	src/MagFormFactorCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
@@ -168,6 +172,7 @@ set ( SRC_FILES
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
+	src/MergeRuns/SampleLogsBehaviour.cpp
 	src/Min.cpp
 	src/Minus.cpp
 	src/ModeratorTzero.cpp
@@ -282,6 +287,7 @@ set ( SRC_FILES
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
 	src/UnwrapMonitor.cpp
+	src/UnwrapMonitorsInTOF.cpp
 	src/UnwrapSNS.cpp
 	src/UpdateScriptRepository.cpp
 	src/VesuvioL1ThetaResolution.cpp
@@ -289,6 +295,7 @@ set ( SRC_FILES
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
 	src/WienerSmooth.cpp
+	src/WorkflowAlgorithmRunner.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
@@ -322,6 +329,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
+	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
@@ -352,6 +360,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis2.h
 	inc/MantidAlgorithms/ConvertTableToMatrixWorkspace.h
+	inc/MantidAlgorithms/ConvertToConstantL2.h
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
@@ -453,9 +462,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
+	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
+	inc/MantidAlgorithms/MagFormFactorCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -474,6 +485,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
+	inc/MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/ModeratorTzero.h
@@ -592,6 +604,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
+	inc/MantidAlgorithms/UnwrapMonitorsInTOF.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/UpdateScriptRepository.h
 	inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
@@ -599,6 +612,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/WienerSmooth.h
+	inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
@@ -616,8 +630,6 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set ( TEST_FILES
-	# CountEventsInPulsesTest.h
-	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
 	AddNoteTest.h
 	AddPeakTest.h
@@ -638,6 +650,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
@@ -668,6 +681,7 @@ set ( TEST_FILES
 	ConvertSpectrumAxis2Test.h
 	ConvertSpectrumAxisTest.h
 	ConvertTableToMatrixWorkspaceTest.h
+	ConvertToConstantL2Test.h
 	ConvertToDistributionTest.h
 	ConvertToEventWorkspaceTest.h
 	ConvertToHistogramTest.h
@@ -680,7 +694,6 @@ set ( TEST_FILES
 	CopyLogsTest.h
 	CopySampleTest.h
 	CorelliCrossCorrelateTest.h
-	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
@@ -761,11 +774,13 @@ set ( TEST_FILES
 	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
+	InterpolationOptionTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
 	MCAbsorptionStrategyTest.h
 	MCInteractionVolumeTest.h
+	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxEnt/MaxentCalculatorTest.h
@@ -859,6 +874,7 @@ set ( TEST_FILES
 	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
+	Stitch1DManyTest.h
 	Stitch1DTest.h
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h
@@ -876,12 +892,14 @@ set ( TEST_FILES
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
+	UnwrapMonitorsInTOFTest.h
 	UnwrapSNSTest.h
 	VesuvioL1ThetaResolutionTest.h
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
 	WienerSmoothTest.h
+	WorkflowAlgorithmRunnerTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
 )

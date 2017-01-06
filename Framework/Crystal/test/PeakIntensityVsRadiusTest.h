@@ -2,6 +2,7 @@
 #define MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_
 
 #include "MantidCrystal/PeakIntensityVsRadius.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -153,14 +154,12 @@ public:
     // Check the results
     TSM_ASSERT_EQUALS("Two peaks", ws->getNumberHistograms(), 2);
     TSM_ASSERT_EQUALS("16 radii specified", ws->blocksize(), 16);
-    TS_ASSERT_DELTA(ws->dataX(0)[1], 0.1, 1e-6);
-    TS_ASSERT_DELTA(ws->dataX(0)[2], 0.2, 1e-6);
+    TS_ASSERT_DELTA(ws->x(0)[1], 0.1, 1e-6);
+    TS_ASSERT_DELTA(ws->x(0)[2], 0.2, 1e-6);
 
-    TS_ASSERT_LESS_THAN(ws->dataY(0)[5], 1000);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->dataY(0)[12], 1000,
-                     1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->dataY(0)[15], 1000,
-                     1e-6);
+    TS_ASSERT_LESS_THAN(ws->y(0)[5], 1000);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
 
   void test_VariableBackground() {
@@ -170,14 +169,12 @@ public:
 
     // Points before 0.5 are approximately zero because the background shell is
     // in the peak.
-    TS_ASSERT_DELTA(ws->dataY(0)[0], 0, 10);
-    TS_ASSERT_DELTA(ws->dataY(0)[1], 0, 10);
-    TS_ASSERT_DELTA(ws->dataY(0)[2], 0, 10);
-    TS_ASSERT_DELTA(ws->dataY(0)[3], 0, 10);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->dataY(0)[12], 1000,
-                     1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->dataY(0)[15], 1000,
-                     1e-6);
+    TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
 
   void test_FixedBackground() {
@@ -188,14 +185,12 @@ public:
 
     // Points before 0.5 are approximately zero because the background shell is
     // in the peak.
-    TS_ASSERT_DELTA(ws->dataY(0)[0], 0, 10);
-    TS_ASSERT_DELTA(ws->dataY(0)[1], 0, 10);
-    TS_ASSERT_DELTA(ws->dataY(0)[2], 0, 10);
-    TS_ASSERT_DELTA(ws->dataY(0)[3], 0, 10);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->dataY(0)[12], 1000,
-                     1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->dataY(0)[15], 1000,
-                     1e-6);
+    TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
+    TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
 };
 

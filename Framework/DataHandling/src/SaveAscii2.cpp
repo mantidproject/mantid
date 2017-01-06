@@ -136,7 +136,7 @@ void SaveAscii2::exec() {
     if (containsSpectrumNumber) {
       try {
         m_specToIndexMap = m_ws->getSpectrumToWorkspaceIndexMap();
-      } catch (std::runtime_error) {
+      } catch (const std::runtime_error &) {
         throw std::runtime_error("SpectrumNumber is present in "
                                  "SpectrumMetaData but the workspace does not "
                                  "have a SpectrumAxis.");

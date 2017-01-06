@@ -1,11 +1,13 @@
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
 
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
@@ -21,7 +23,6 @@ using namespace Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 
@@ -72,7 +73,7 @@ void MonitorEfficiencyCorUser::exec() {
 
   // Loop over the histograms (detector spectra)
   double factor = 1 / eff0;
-  PARALLEL_FOR2(m_outputWS, m_inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_outputWS->setHistogram(i, m_inputWS->histogram(i) * factor);

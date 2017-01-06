@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -518,10 +519,6 @@ bool SaveNexusProcessed::processGroups() {
   }
 
   nexusFile->closeNexusFile();
-  // We finished successfully.
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
 
   return true;
 }

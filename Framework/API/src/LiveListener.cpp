@@ -3,7 +3,7 @@
 namespace Mantid {
 namespace API {
 
-/// @copydoc ILiveListener::dataReset
+/// @copydoc LiveListener::dataReset
 bool LiveListener::dataReset() {
   const bool retval = m_dataReset;
   // Should this be done here or should extractData do it?

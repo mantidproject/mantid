@@ -9,7 +9,7 @@ import os
 import math
 import sys
 import numpy as np
-sys.path.append("/opt/mantidnightly/bin")
+sys.path.append("/opt/mantidnightly/bin") # noqa
 from mantid.simpleapi import *
 
 # Make a ./plots subdirectory for the plot files.
@@ -108,4 +108,3 @@ for i in range(WSROW.getNumberHistograms()):
                  (IDnum, numPeaks, rmsd_col_mm, rmsd_row_mm, rmsd_combined_mm))
 
 print '\nAll done!'
-

@@ -46,6 +46,9 @@ public:
 
   IBeamProfile::Ray
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const override;
+  IBeamProfile::Ray
+  generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                const Geometry::BoundingBox &bounds) const override;
 
 private:
   const unsigned short m_upIdx;

@@ -93,9 +93,9 @@ double MagneticIon::analyticalFormFactor(const double qsqr) const {
     double j0exp, j2exp = 0.;
     j0exp = j0[0] * std::exp(-j0[1] * q2) + j0[2] * std::exp(-j0[3] * q2) +
             j0[4] * std::exp(-j0[5] * q2);
-    if (g != 2.) {
-      j2exp = (j0[0] * std::exp(-j0[1] * q2) + j0[2] * std::exp(-j0[3] * q2) +
-               j0[4] * std::exp(-j0[5] * q2)) *
+    if (fabs(g - 2.) > 0.01) {
+      j2exp = (j2[0] * std::exp(-j2[1] * q2) + j2[2] * std::exp(-j2[3] * q2) +
+               j2[4] * std::exp(-j2[5] * q2)) *
               q2;
     }
     // Handles the case of 5d where we need an extra Dexp(-delta*Q^2) term
@@ -106,7 +106,20 @@ double MagneticIon::analyticalFormFactor(const double qsqr) const {
       j0exp += j0[6];
       j2exp += j2[6] * q2;
     }
-    return j0exp + (1 - 2. / g) * j2exp;
+    // We want equation 11.110 of Lovesey 1984 (Theory of Neutron Scattering
+    // from Condensed Matter) not eq. 11.120. The "g" in eq 11.120 is an
+    // effective g-factor indicating an experimentally determined orbital
+    // angular momentum contribution.
+    // The "g" here is the Lande g-factor which is a theoretically determined
+    // value of the coupling between spin and orbital angular momenta in
+    // isolated rare earth ions.
+    // So in substituting the Lande g-factor into equation 11.110, we get
+    // a minus sign instead of the plus sign in equation 11.120.
+    // Both equations are also reproduced in:
+    // http://www.neutron.ethz.ch/research/resources/magnetic-form-factors.html
+    // Equation 11.110 is that given for transition metal ions, and eq 11.120
+    // that for rare earth ions.
+    return j0exp - (1 - (2. / g)) * j2exp;
   } else
     return 0.; // Outside simple model range
 }
@@ -515,6 +528,12 @@ constexpr double j_Yb3[4][8] = {
     {0.157, 18.555, 0.8484, 6.54, 0.888, 2.037, 0.0318, 0.0498},      // <j2>
     {-0.2121, 8.197, 0.0325, 3.153, 0.1975, 0.884, 0.0093, 0.0435},   // <j4>
     {-0.0345, 5.007, -0.0677, 2.02, 0.0985, 0.549, -0.0076, 0.0359}}; // <j6>
+/// From ILL data booklet. https://www.ill.eu/sites/ccsl/ffacts/ffachtml.html
+constexpr double j_Pr3[4][8] = {
+    {0.0504, 24.9989, 0.2572, 12.0377, 0.7142, 5.0039, -0.0219, -1.}, // <j0>
+    {0.8734, 18.9876, 1.5594, 6.0872, 0.8142, 2.4150, 0.0111, -1.},   // <j2>
+    {-0.3970, 10.9919, 0.0818, 5.9897, 0.3656, 1.5021, 0.0110, -1.},  // <j4>
+    {-0.0224, 7.9931, -0.1202, 3.9406, 0.1299, 0.8938, 0.0051, -1.}}; // <j6>
 constexpr double j_U3[4][8] = {
     {0.5058, 23.288, 1.3464, 7.003, -0.8724, 4.868, 0.0192, 0.1507}, // <j0>
     {4.1582, 16.534, 2.4675, 5.952, -0.0252, 0.765, 0.0057, 0.0822}, // <j2>
@@ -1041,6 +1060,9 @@ void createIonLookup(IonIndex &ion_map) {
   static const MagneticIon Yb3("Yb", static_cast<uint16_t>(3), j_Yb3[0],
                                j_Yb3[1], j_Yb3[2], j_Yb3[3], 8. / 7);
   ion_map["Yb3"] = Yb3;
+  static const MagneticIon Pr3("Pr", static_cast<uint16_t>(3), j_Pr3[0],
+                               j_Pr3[1], j_Pr3[2], j_Pr3[3], 0.8);
+  ion_map["Pr3"] = Pr3;
   static const MagneticIon U3("U", static_cast<uint16_t>(3), j_U3[0], j_U3[1],
                               j_U3[2], j_U3[3], 8. / 11);
   ion_map["U3"] = U3;
@@ -1294,6 +1316,21 @@ std::vector<double> getJL(const std::string &symbol, const uint16_t charge,
     throw std::runtime_error(msg.str());
   }
   return v;
+}
+
+/**
+ * Returns a std::vector<std::string> of the keys of ion_map
+ * (a list of all ions programmed into this class)
+ * @return
+ */
+std::vector<std::string> getMagneticIonList() {
+  const IonIndex &ionIndex = ionMap();
+  std::vector<std::string> keys;
+  keys.reserve(ionIndex.size());
+  for (auto kv : ionIndex) {
+    keys.push_back(kv.first);
+  }
+  return keys;
 }
 
 } // namespace PhysicalConstants

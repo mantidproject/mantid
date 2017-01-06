@@ -89,6 +89,9 @@
       </item>
       <item row="1" column="1">
        <widget class="QCheckBox" name="ckLoadLogFiles">
+        <property name="toolTip">
+         <string>Load log files</string>
+        </property>
         <property name="text">
          <string>Load Log Files</string>
         </property>
@@ -819,6 +822,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckSaveSPE">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Save file in SPE format.</string>
           </property>
@@ -832,6 +838,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckSaveNexus">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Save file in Nexus format.</string>
           </property>
@@ -842,6 +851,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckSaveNXSPE">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>NXSPE</string>
           </property>
@@ -849,6 +861,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckSaveASCII">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>ASCII</string>
           </property>
@@ -856,6 +871,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckSaveAclimax">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Aclimax</string>
           </property>
@@ -863,8 +881,24 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckSaveDaveGrp">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>DaveGrp</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbSave">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Save workspaces in selected formats</string>
+          </property>
+          <property name="text">
+           <string>Save</string>
           </property>
          </widget>
         </item>
@@ -884,11 +918,12 @@
         </item>
         <item>
          <widget class="QComboBox" name="cbPlotType">
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Select the type of plot</string>
+          </property>
           <item>
            <property name="text">
             <string>Spectra</string>
@@ -899,6 +934,19 @@
             <string>Contour</string>
            </property>
           </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbPlot">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Produce a plot of the result</string>
+          </property>
+          <property name="text">
+           <string>Plot</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -932,6 +980,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="ckCm1Units">
+          <property name="toolTip">
+           <string>Change the units of the results workspace to cm-1</string>
+          </property>
           <property name="text">
            <string>Output in cm-1</string>
           </property>
@@ -989,7 +1040,6 @@
   <tabstop>ckSaveNXSPE</tabstop>
   <tabstop>ckSaveASCII</tabstop>
   <tabstop>ckSaveAclimax</tabstop>
-  <tabstop>ckSaveDaveGrp</tabstop>
  </tabstops>
  <resources/>
  <connections>
