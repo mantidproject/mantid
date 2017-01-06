@@ -89,7 +89,7 @@ void TeixeiraWaterSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian,
   cutoff["Centre"] = 0.0001; // 0.1micro-eV
   std::vector<double> out(nData);
   this->applyTies();
-  this->function1D(&out[0], xValues, nData);
+  this->function1D(out.data(), xValues, nData);
 
   for (size_t iP = 0; iP < nParam; iP++) {
     std::vector<double> derivative(nData);
