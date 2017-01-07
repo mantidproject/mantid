@@ -117,7 +117,10 @@ _PROP_VANA_WS = 'VanadiumWorkspace'
 
 _PROPGROUP_CONTAINER = 'Container Material Properties'
 _PROPGROUP_CYLINDER_CONTAINER = 'Cylindrical Container Properties'
+_PROPGROUP_DET_DIAGNOSTICS = 'Detector Diagnostics and Masking'
 _PROPGROUP_EC = 'Empty Container Subtraction'
+_PROPGROUP_FLAT_BKG = 'Flat Time-Independent Background'
+_PROPGROUP_OPTIONAL_OUTPUT = 'Optional Output'
 _PROPGROUP_REBINNING = 'Rebinning for SofQW'
 _PROPGROUP_SAMPLE = 'Sample Material Properties'
 _PROPGROUP_SLAB_CONTAINER = 'Flat Container Properties'
@@ -1089,6 +1092,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced vanadium workspace.')
+        self._enabledBySampleReduction(_PROP_VANA_WS)
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_EPP_WS,
             defaultValue='',
@@ -1147,23 +1151,27 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
+        self.setPropertyGroup(_PROP_FLAT_BKG_SCALING, _PROPGROUP_FLAT_BKG)
         self.declareProperty(name=_PROP_FLAT_BKG_WINDOW,
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Running average window width (in bins) ' +
                                  'for flat background.')
+        self.setPropertyGroup(_PROP_FLAT_BKG_WINDOW, _PROPGROUP_FLAT_BKG)
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_FLAT_BKG_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Workspace from which to get flat background data.')
+        self.setPropertyGroup(_PROP_FLAT_BKG_WS, _PROPGROUP_FLAT_BKG)
         self.declareProperty(IntArrayProperty(name=_PROP_USER_MASK,
                                               values='',
                                               validator=positiveIntArray,
                                               direction=Direction.Input),
                              doc='List of spectra to mask.')
+        self.setPropertyGroup(_PROP_USER_MASK, _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_DET_DIAGNOSTICS,
                              defaultValue=_DIAGNOSTICS_YES,
                              validator=StringListValidator([
@@ -1172,6 +1180,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='If true, run detector diagnostics or ' +
                                  'apply ' + _PROP_DIAGNOSTICS_WS + '.')
+        self.setPropertyGroup(_PROP_DET_DIAGNOSTICS,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_DIAGNOSTICS_WS,
             defaultValue='',
@@ -1179,42 +1189,56 @@ class DirectILLReduction(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace obtained from another ' +
                 'reduction run.')
+        self.setPropertyGroup(_PROP_DET_DIAGNOSTICS,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.1,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in elastic peak diagnostics.')
+        self.setPropertyGroup(_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=3.0,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in elastic peak diagnostics.')
+        self.setPropertyGroup(_PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Error bar multiplier for significance ' +
                                  'test in the elastic peak diagnostics.')
+        self.setPropertyGroup(_PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in noisy background diagnostics.')
+        self.setPropertyGroup(_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=33.3,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in noisy background diagnostics.')
+        self.setPropertyGroup(_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Error bar multiplier for significance ' +
                                  'test in the noisy background diagnostics.')
+        self.setPropertyGroup(_PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_NORMALISATION,
                              defaultValue=_NORM_METHOD_MON,
                              validator=StringListValidator([
@@ -1230,11 +1254,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced empty container workspace.')
-        self.setPropertySettings(_PROP_EC_WS,
-                                 EnabledWhenProperty(_PROP_REDUCTION_TYPE,
-                                                     PropertyCriterion
-                                                     .IsNotEqualTo,
-                                                     _REDUCTION_TYPE_EC))
+        self._enabledByNonECReduction(_PROP_EC_WS)
         self.setPropertyGroup(_PROP_EC_WS,
                               _PROPGROUP_EC)
         self.declareProperty(name=_PROP_EC_SCALING_FACTOR,
@@ -1243,11 +1263,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Scaling factor (transmission, if no self ' +
                                  'shielding is applied) for empty container.')
-        self.setPropertySettings(_PROP_EC_SCALING_FACTOR,
-                                 EnabledWhenProperty(_PROP_REDUCTION_TYPE,
-                                                     PropertyCriterion
-                                                     .IsNotEqualTo,
-                                                     _REDUCTION_TYPE_EC))
+        self._enabledByNonECReduction(_PROP_EC_SCALING_FACTOR)
         self.setPropertyGroup(_PROP_EC_SCALING_FACTOR,
                               _PROPGROUP_EC)
         self.declareProperty(name=_PROP_SELF_SHIELDING_CORRECTION,
@@ -1258,11 +1274,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable of disable self shielding ' +
                                  'correction.')
-        self.setPropertySettings(_PROP_SELF_SHIELDING_CORRECTION,
-                                 EnabledWhenProperty(_PROP_REDUCTION_TYPE,
-                                                     PropertyCriterion
-                                                     .IsNotEqualTo,
-                                                     _REDUCTION_TYPE_EC))
+        self._enabledByNonECReduction(_PROP_SELF_SHIELDING_CORRECTION)
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
@@ -1409,11 +1421,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              optional=PropertyMode.Optional,
                              direction=Direction.Input),
                              doc='Workspace from which to copy the TOF axis.')
-        self.setPropertySettings(_PROP_REFERENCE_TOF_AXIS_WS,
-                                 EnabledWhenProperty(
-                                     _PROP_REDUCTION_TYPE,
-                                     PropertyCriterion.IsEqualTo,
-                                     _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REFERENCE_TOF_AXIS_WS)
         self.setPropertyGroup(_PROP_REFERENCE_TOF_AXIS_WS,
                               _PROPGROUP_TOF_AXIS_CORRECTION)
         self.declareProperty(name=_PROP_ELASTIC_BIN_INDEX,
@@ -1421,9 +1429,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=0),
                              direction=Direction.Input,
                              doc='Bin index of the elastic channel.')
-        self.setPropertySettings(_PROP_ELASTIC_BIN_INDEX, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_ELASTIC_BIN_INDEX)
         self.setPropertyGroup(_PROP_ELASTIC_BIN_INDEX,
                               _PROPGROUP_TOF_AXIS_CORRECTION)
         self.declareProperty(name=_PROP_REBINNING_MODE_W,
@@ -1434,21 +1440,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  _REBIN_MANUAL]),
                              direction=Direction.Input,
                              doc='Energy rebinnin mode.')
-        self.setPropertySettings(_PROP_REBINNING_MODE_W, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REBINNING_MODE_W)
         self.setPropertyGroup(_PROP_REBINNING_MODE_W, _PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
-        self.setPropertySettings(_PROP_REBINNING_PARAMS_W, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_W)
         self.setPropertyGroup(_PROP_REBINNING_PARAMS_W, _PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_Q),
                              doc='Rebinning parameters for q.')
-        self.setPropertySettings(_PROP_REBINNING_PARAMS_Q, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_Q)
         self.setPropertyGroup(_PROP_REBINNING_PARAMS_Q, _PROPGROUP_REBINNING)
         # Rest of the output properties.
         self.declareProperty(ITableWorkspaceProperty(
@@ -1457,48 +1457,67 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for elastic peak positions.')
+        self.setPropertyGroup(_PROP_OUTPUT_DET_EPP_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_OUTPUT_MON_EPP_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for monitor elastic peak positions.')
+        self.setPropertyGroup(_PROP_OUTPUT_MON_EPP_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_INCIDENT_ENERGY_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for calibrated inciden energy.')
+        self.setPropertyGroup(_PROP_OUTPUT_INCIDENT_ENERGY_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_FLAT_BKG_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for flat background.')
+        self.setPropertyGroup(_PROP_OUTPUT_FLAT_BKG_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_DIAGNOSTICS_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for detector diagnostics.')
+        self.setPropertyGroup(_PROP_OUTPUT_DIAGNOSTICS_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_OUTPUT_DIAGNOSTICS_REPORT_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output table workspace for detector diagnostics reporting.')
+        self.setPropertyGroup(_PROP_OUTPUT_DIAGNOSTICS_REPORT_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for self shielding corrections.')
+        self._enabledByNonECReduction(
+            _PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS)
+        self.setPropertyGroup(_PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_THETA_W_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for reduced S(theta, DeltaE).')
+        self._enabledBySampleReduction(_PROP_OUTPUT_THETA_W_WS)
+        self.setPropertyGroup(_PROP_OUTPUT_THETA_W_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
 
     def validateInputs(self):
         '''
@@ -1847,7 +1866,30 @@ class DirectILLReduction(DataProcessorAlgorithm):
             return diagnosedWS
         return mainWS
 
+    def _enabledByNonECReduction(self, prop):
+        '''
+        Enables a property if reduction type is Vanadium or Sample.
+        '''
+        self.setPropertySettings(prop,
+                                 EnabledWhenProperty(
+                                     _PROP_REDUCTION_TYPE,
+                                     PropertyCriterion.IsNotEqualTo,
+                                     _REDUCTION_TYPE_EC))
+
+    def _enabledBySampleReduction(self, prop):
+        '''
+        Enables a property if reduction type is Sample.
+        '''
+        self.setPropertySettings(prop,
+                                 EnabledWhenProperty(
+                                     _PROP_REDUCTION_TYPE,
+                                     PropertyCriterion.IsEqualTo,
+                                     _REDUCTION_TYPE_SAMPLE))
+
     def _enabledBySelfShieldingCorrection(self, prop):
+        '''
+        Enables a property if self-shielding corrections are enabled.
+        '''
         self.setPropertySettings(prop,
                                  EnabledWhenProperty(
                                      _PROP_SELF_SHIELDING_CORRECTION,
