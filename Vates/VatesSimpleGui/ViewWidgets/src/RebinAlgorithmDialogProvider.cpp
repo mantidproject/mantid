@@ -132,13 +132,11 @@ MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
   // This is an optional message displayed at the top of the GUI.
   QString optional_msg(algorithm->summary().c_str());
 
-  MantidQt::API::AlgorithmDialog *dialog = NULL;
-
   MantidQt::API::InterfaceManager interfaceManager;
   presets.insert(m_lblInputWorkspace, QString::fromStdString(inputWorkspace));
   presets.insert(m_lblOutputWorkspace, QString::fromStdString(outputWorkspace));
 
-  dialog = interfaceManager.createDialogFromName(
+  auto dialog = interfaceManager.createDialogFromName(
       QString::fromStdString(algorithmType), -1, m_parent, false, presets);
 
   // The parent so that the dialog appears on top of it
@@ -146,7 +144,7 @@ MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
   dialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
   // Set the QDialog window flags to ensure the dialog ends up on top
-  Qt::WindowFlags flags = 0;
+  Qt::WindowFlags flags = nullptr;
   flags |= Qt::Dialog;
   flags |= Qt::WindowContextHelpButtonHint;
   dialog->setWindowFlags(flags);

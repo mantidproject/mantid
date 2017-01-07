@@ -3630,7 +3630,7 @@ MdiSubWindow *ApplicationWindow::window(const QString &name) {
 }
 
 Table *ApplicationWindow::table(const QString &name) {
-  int pos = name.lastIndexOf("_");
+  int pos = name.indexOf("_");
   QString caption = name.left(pos);
 
   Folder *f = projectFolder();
@@ -6086,6 +6086,9 @@ void ApplicationWindow::loadDataFileByName(QString fn) {
   if (fnInfo.suffix() == "py") {
     // We have a python file, just load it into script window
     loadScript(fn, true);
+  } else if (fnInfo.suffix() == "mantid") {
+    // We have a mantid project file, pass on to project loading
+    open(fn);
   } else if (mantidUI) {
     // Run Load algorithm on file
     QHash<QString, QString> params;

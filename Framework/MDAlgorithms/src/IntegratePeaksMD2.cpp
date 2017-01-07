@@ -13,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Utils.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Column.h"
@@ -89,7 +90,7 @@ void IntegratePeaksMD2::init() {
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
-                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**"
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
   declareProperty("Cylinder", false,
@@ -170,9 +171,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                 "edge for IntegrateIfOnEdge option");
   }
 
-  // Get the instrument and its detectors
-  Geometry::Instrument_const_sptr inst = inPeakWS->getInstrument();
-  calculateE1(inst); // fill E1Vec for use in detectorQ
+  calculateE1(inPeakWS->detectorInfo()); // fill E1Vec for use in detectorQ
   Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse =
       ws->getSpecialCoordinateSystem();
 
@@ -377,32 +376,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                   BackgroundOuterRadius) *
                                  (adaptiveQBackgroundMultiplier * lenQpeak +
                                   BackgroundOuterRadius)),
-            bgSignal, bgErrorSquared);
-
-        // Evaluate the signal inside "BackgroundInnerRadius"
-        signal_t interiorSignal = 0;
-        signal_t interiorErrorSquared = 0;
-
-        // Integrate this 3rd radius, if needed
-        if (BackgroundInnerRadius != PeakRadius) {
-          ws->getBox()->integrateSphere(
-              sphere,
-              static_cast<coord_t>((adaptiveQBackgroundMultiplier * lenQpeak +
-                                    BackgroundInnerRadius) *
-                                   (adaptiveQBackgroundMultiplier * lenQpeak +
-                                    BackgroundInnerRadius)),
-              interiorSignal, interiorErrorSquared);
-        } else {
-          // PeakRadius == BackgroundInnerRadius, so use the previous value
-          interiorSignal = signal;
-          interiorErrorSquared = errorSquared;
-        }
-        // Subtract the peak part to get the intensity in the shell
-        // (BackgroundInnerRadius < r < BackgroundOuterRadius)
-        bgSignal -= interiorSignal;
-        // We can subtract the error (instead of adding) because the two values
-        // are 100% dependent; this is the same as integrating a shell.
-        bgErrorSquared -= interiorErrorSquared;
+            bgSignal, bgErrorSquared,
+            static_cast<coord_t>((adaptiveQBackgroundMultiplier * lenQpeak +
+                                  BackgroundInnerRadius) *
+                                 (adaptiveQBackgroundMultiplier * lenQpeak +
+                                  BackgroundInnerRadius)));
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
         double ratio = (PeakRadius / BackgroundOuterRadius);
@@ -703,17 +681,15 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param inst: instrument
  */
-void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
-  std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
-
-  for (auto &detectorID : detectorIDs) {
-    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(detectorID);
-    if (det->isMonitor())
+void IntegratePeaksMD2::calculateE1(const API::DetectorInfo &detectorInfo) {
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (detectorInfo.isMonitor(i))
       continue; // skip monitor
-    if (!det->isMasked())
+    if (!detectorInfo.isMasked(i))
       continue; // edge is masked so don't check if not masked
-    double tt1 = det->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-    double ph1 = det->getPhi();                                // phi
+    const auto &det = detectorInfo.detector(i);
+    double tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    double ph1 = det.getPhi();                                // phi
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize

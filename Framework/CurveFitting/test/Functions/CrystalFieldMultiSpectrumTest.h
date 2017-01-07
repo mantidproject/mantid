@@ -148,14 +148,14 @@ public:
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 2.0 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 59.5010, 0.001);
     out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.001 * c_mbsr);
     TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.3734 * 3.3 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 98.1627, 0.001);
     AnalysisDataService::Instance().clear();
   }
 
@@ -369,6 +369,48 @@ public:
     fit->execute();
     double chi2 = fit->getProperty("OutputChi2overDoF");
     TS_ASSERT_LESS_THAN(chi2, 100.0);
+  }
+
+  void test_ties_in_composite_function() {
+    std::string funDef =
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,Symmetry=C2v,Temperatures=(44.0,"
+        "50),FWHMs=(1.1,0.9),B44=-0.115325956893,B40=0.0844136192563,B42=-0."
+        "459507287606,B22=4.36779676967;name=CrystalFieldMultiSpectrum,Ion=Pr,"
+        "Symmetry=C2v,Temperatures=(44.0,50),FWHMs=(1.1,0.9),B44=-0."
+        "115325956893,B40=0.0844136192563,B42=-0.459507287606,B22=4."
+        "36779676967;ties=(f1.IntensityScaling0=2.0*f0.IntensityScaling0,f1."
+        "IntensityScaling1=2.0*f0.IntensityScaling1,f0.f0.f1.FWHM=f1.f0.f1."
+        "FWHM/2)";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    {
+      auto index = fun->parameterIndex("f1.IntensityScaling0");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(),
+                       "f1.IntensityScaling0=2.0*f0.IntensityScaling0");
+    }
+    {
+      auto index = fun->parameterIndex("f1.IntensityScaling1");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(),
+                       "f1.IntensityScaling1=2.0*f0.IntensityScaling1");
+    }
+    {
+      auto index = fun->parameterIndex("f0.f0.f1.FWHM");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(), "f0.f0.f1.FWHM=f1.f0.f1.FWHM/2");
+    }
   }
 
 private:

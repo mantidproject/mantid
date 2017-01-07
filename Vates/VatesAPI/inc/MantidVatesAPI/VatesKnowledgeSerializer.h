@@ -1,6 +1,7 @@
 #ifndef VATES_KNOWLEDGE_SERIALIZER_H
 #define VATES_KNOWLEDGE_SERIALIZER_H
 
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
 

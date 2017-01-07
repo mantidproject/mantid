@@ -138,6 +138,8 @@ public:
   }
   /// Read in a string and set the value at the given index
   void read(size_t index, const std::string &text) override;
+  /// Read in from stream and set the value at the given index
+  void read(const size_t index, std::istream &in) override;
   /// Type check
   bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
   /// Memory used by the column
@@ -249,6 +251,12 @@ template <typename Type>
 void TableColumn<Type>::read(size_t index, const std::string &text) {
   std::istringstream istr(text);
   istr >> m_data[index];
+}
+
+/// Read in from stream and set the value at the given index
+template <typename Type>
+void TableColumn<Type>::read(size_t index, std::istream &in) {
+  in >> m_data[index];
 }
 
 namespace {

@@ -35,10 +35,10 @@ MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }
-  if (NULL == repository) {
+  if (!repository) {
     throw std::invalid_argument("The repository is NULL");
   }
-  if (nullptr == m_view) {
+  if (!m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }
@@ -53,14 +53,13 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   if (!m_repository->canProvideWorkspace(m_wsName)) {
     // The workspace does not exist.
     bCanReadIt = false;
-  } else if (NULL ==
-             boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
-                 m_repository->fetchWorkspace(m_wsName)).get()) {
+  } else if (boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+                 m_repository->fetchWorkspace(m_wsName))) {
     // The workspace can be found, but is not an IMDHistoWorkspace.
-    bCanReadIt = false;
+    bCanReadIt = true;
   } else {
     // The workspace is present, and is of the correct type.
-    bCanReadIt = true;
+    bCanReadIt = false;
   }
   return bCanReadIt;
 }

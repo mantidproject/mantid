@@ -265,11 +265,11 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
 
   pyInput += "plotSpectrum(['";
   pyInput += workspaceNames.join("','");
-  pyInput += "'], range(";
+  pyInput += "'], list(range(";
   pyInput += QString::number(specStart);
   pyInput += ",";
   pyInput += QString::number(specEnd + 1);
-  pyInput += "), error_bars = True)\n";
+  pyInput += ")), error_bars = True)\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }

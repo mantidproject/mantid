@@ -6,7 +6,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include <vtkNew.h>
 
@@ -43,8 +42,7 @@ namespace VATES {
 class DLLExport vtkMDHistoLineFactory : public vtkDataSetFactory {
 public:
   /// Constructor
-  vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange,
-                        const VisualNormalization normalizationOption);
+  vtkMDHistoLineFactory(const VisualNormalization normalizationOption);
 
   /// Assignment operator
   vtkMDHistoLineFactory &operator=(const vtkMDHistoLineFactory &other);
@@ -74,8 +72,6 @@ private:
   Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
 
   VisualNormalization m_normalizationOption;
-
-  mutable ThresholdRange_scptr m_thresholdRange;
 };
 }
 }

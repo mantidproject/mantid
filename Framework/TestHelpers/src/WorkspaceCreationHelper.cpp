@@ -18,6 +18,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -50,6 +51,11 @@ using Mantid::MantidVecPtr;
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
 }
+
+EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
+                         const double height_, const FitStatus fitStatus_)
+    : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0),
+      height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
@@ -223,13 +229,9 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     workspace->setInstrument(instrument);
   }
 
-  ParameterMap &pmap = workspace->instrumentParameters();
-  for (int i = 0; i < nhist; ++i) {
-    if (maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end()) {
-      IDetector_const_sptr det = workspace->getDetector(i);
-      pmap.addBool(det.get(), "masked", true);
-    }
-  }
+  auto &spectrumInfo = workspace->mutableSpectrumInfo();
+  for (const auto index : maskedWorkspaceIndices)
+    spectrumInfo.setMasked(index, true);
   return workspace;
 }
 
@@ -509,8 +511,6 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  workspace->setInstrument(instrument);
-
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
@@ -523,6 +523,7 @@ void createInstrumentForWorkspaceWithDistances(
     workspace->getSpectrum(i).clearDetectorIDs();
     workspace->getSpectrum(i).addDetectorID(det->getID());
   }
+  workspace->setInstrument(instrument);
 }
 
 //================================================================================================================
@@ -1312,4 +1313,32 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
     }
   }
 }
+
+ITableWorkspace_sptr
+createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
+  ITableWorkspace_sptr ws = boost::make_shared<TableWorkspace>(rows.size());
+  auto wsIndexColumn = ws->addColumn("int", "WorkspaceIndex");
+  auto centreColumn = ws->addColumn("double", "PeakCentre");
+  auto centreErrorColumn = ws->addColumn("double", "PeakCentreError");
+  auto sigmaColumn = ws->addColumn("double", "Sigma");
+  auto sigmaErrorColumn = ws->addColumn("double", "SigmaError");
+  auto heightColumn = ws->addColumn("double", "Height");
+  auto heightErrorColumn = ws->addColumn("double", "HeightError");
+  auto chiSqColumn = ws->addColumn("double", "chiSq");
+  auto statusColumn = ws->addColumn("str", "FitStatus");
+  for (size_t i = 0; i != rows.size(); ++i) {
+    const auto &row = rows[i];
+    wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    centreColumn->cell<double>(i) = row.peakCentre;
+    centreErrorColumn->cell<double>(i) = row.peakCentreError;
+    sigmaColumn->cell<double>(i) = row.sigma;
+    sigmaErrorColumn->cell<double>(i) = row.sigmaError;
+    heightColumn->cell<double>(i) = row.height;
+    heightErrorColumn->cell<double>(i) = row.heightError;
+    chiSqColumn->cell<double>(i) = row.chiSq;
+    statusColumn->cell<std::string>(i) =
+        row.fitStatus == EPPTableRow::FitStatus::SUCCESS ? "success" : "failed";
+  }
+  return ws;
 }
+} // namespace WorkspaceCreationHelper

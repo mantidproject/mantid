@@ -12,16 +12,14 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
-// Qt classes forward declarations
-class QMutex;
-
-namespace Poco {
-class Pipe;
-}
+// Include instead of forward declare so we have definition of qint64
+#include <QMutex>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class TomographyProcess;
+class TomographyThread;
 /**
 Tomography GUI. Model for the interface (as in the MVP
 (Model-View-Presenter) pattern). In principle, in a strict MVP setup,
@@ -149,11 +147,26 @@ public:
                         std::vector<std::string> &status,
                         std::vector<std::string> &cmds);
   /// Submit a new job to the (remote or local) compute resource
-  void doSubmitReconstructionJob(const std::string &compRes);
+  void prepareSubmissionArguments(const bool local, std::string &runnable,
+                                  std::vector<std::string> &args,
+                                  std::string &allOpts);
+
+  void doLocalRunReconstructionJob(
+      const std::string &runnable, const std::vector<std::string> &args,
+      const std::string &allOpts,
+      MantidQt::CustomInterfaces::TomographyThread &thread,
+      MantidQt::CustomInterfaces::TomographyProcess &worker);
+
+  void doRemoteRunReconstructionJob(const std::string &compRes,
+                                    const std::string &runnable,
+                                    const std::string &allOpts);
 
   /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
                     const std::vector<std::string> &id);
+
+  void addJobToStatus(const qint64 pid, const std::string &runnable,
+                      const std::string &allOpts);
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
@@ -179,6 +192,7 @@ public:
 
   /// Log this message through the system logging
   void logMsg(const std::string &msg);
+  void logErrMsg(const std::string &msg);
 
   /// for clean destruction
   void cleanup();
@@ -186,6 +200,8 @@ public:
   std::string localComputeResource() const { return g_LocalResourceName; }
 
   void setTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
+  void updateProcessInJobList(const qint64 pid, const int exitCode);
+  void terminateProcess();
 
   // Names of reconstruction tools
   static const std::string g_TomoPyTool;
@@ -208,25 +224,14 @@ protected: // protected to expose everything to testing
   std::string
   constructSingleStringFromVector(const std::vector<std::string> args) const;
 
-  void doRunReconstructionJobLocal(const std::string &run,
-                                   const std::string &allOpts,
-                                   const std::vector<std::string> &args);
-
-  void doRunReconstructionJobRemote(const std::string &compRes,
-                                    const std::string &run,
-                                    const std::string &allOpts);
-
   /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
   std::string validateCompResource(const std::string &res) const;
 
-  /// makes the command line string to run on the remote/local
-  void makeRunnableWithOptions(const std::string &comp, std::string &run,
-                               std::vector<std::string> &opt) const;
-
   bool checkIfToolIsSetupProperly(const std::string &tool,
-                                  const std::string &cmd) const;
+                                  const std::string &cmd,
+                                  const std::vector<std::string> &args) const;
 
   void makeTomoRecScriptOptions(const bool local,
                                 std::vector<std::string> &opts) const;
@@ -236,7 +241,7 @@ protected: // protected to expose everything to testing
                            const bool local,
                            std::vector<std::string> &opts) const;
 
-  void splitCmdLine(const std::string &cmd, std::string &run,
+  void splitCmdLine(const std::string &cmd, std::string &runnable,
                     std::string &opts) const;
 
   /// process the tool name to be appropriate for the command line arg
@@ -250,7 +255,7 @@ protected: // protected to expose everything to testing
   std::string buildOutReconstructionDir(const std::string &samplesDir,
                                         bool) const;
 
-  bool processIsRunning(int pid);
+  bool processIsRunning(qint64 pid) const;
 
   std::string
   buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
@@ -258,10 +263,6 @@ protected: // protected to expose everything to testing
 
   std::string
   buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
-
-  /// Prints the streams from the Poco::launch process into mantid
-  void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe,
-                                      const Poco::Pipe &errPipe);
 
 private:
   /// facility for the remote compute resource
@@ -291,6 +292,7 @@ private:
   /// reconstruction tools available on SCARF
   std::vector<std::string> m_SCARFtools;
 
+  // Paths for the sample, flat and dark images
   TomoPathsConfig m_pathsConfig;
 
   // System settting including several paths and parameters (local and remote)

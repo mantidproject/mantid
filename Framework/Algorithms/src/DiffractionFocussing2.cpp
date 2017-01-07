@@ -6,10 +6,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/Group.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <cfloat>
 #include <iterator>
@@ -190,10 +194,6 @@ void DiffractionFocussing2::exec() {
     // This is the output spectrum
     auto &outSpec = out->getSpectrum(outWorkspaceIndex);
 
-    // Also set the spectrum number to the group number
-    outSpec.setSpectrumNo(group);
-    outSpec.clearDetectorIDs();
-
     // Get the references to Y and E output and rebin
     // TODO can only be changed once rebin implemented in HistogramData
     auto &Yout = outSpec.dataY();
@@ -204,7 +204,7 @@ void DiffractionFocussing2::exec() {
     MantidVec groupWgt(nPoints, 0.0);
 
     // loop through the contributing histograms
-    std::vector<size_t> indices = m_wsIndices[group];
+    const std::vector<size_t> &indices = m_wsIndices[outWorkspaceIndex];
     const size_t groupSize = indices.size();
     for (size_t i = 0; i < groupSize; i++) {
       size_t inWorkspaceIndex = indices[i];
@@ -215,7 +215,6 @@ void DiffractionFocussing2::exec() {
       auto &Yin = inSpec.y();
       auto &Ein = inSpec.e();
 
-      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
       try {
         // TODO This should be implemented in Histogram as rebin
         Mantid::Kernel::VectorHelper::rebinHistogram(
@@ -318,6 +317,10 @@ void DiffractionFocussing2::exec() {
   } // end of loop for groups
   PARALLEL_CHECK_INTERUPT_REGION
 
+  out->setIndexInfo(Indexing::group(m_matrixInputW->indexInfo(),
+                                    std::move(m_validGroups),
+                                    std::move(m_wsIndices)));
+
   delete prog;
 
   setProperty("OutputWorkspace", out);
@@ -334,13 +337,7 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
-  DataObjects::EventWorkspace_sptr out;
-  out = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                               m_validGroups.size(), 2, 1));
-  // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(m_matrixInputW, out,
-                                                         true);
+  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size());
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);
@@ -358,8 +355,7 @@ void DiffractionFocussing2::execEvent() {
   vector<size_t> size_required(this->m_validGroups.size(), 0);
   int totalHistProcess = 0;
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
-    const int group = this->m_validGroups[iGroup];
-    const vector<size_t> &indices = this->m_wsIndices[group];
+    const vector<size_t> &indices = this->m_wsIndices[iGroup];
 
     totalHistProcess += static_cast<int>(indices.size());
     for (auto index : indices) {
@@ -391,8 +387,7 @@ void DiffractionFocussing2::execEvent() {
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
     EventList &groupEL = out->getSpectrum(0);
-    const int group = m_validGroups[0];
-    const std::vector<size_t> &indices = this->m_wsIndices[group];
+    const std::vector<size_t> &indices = this->m_wsIndices[0];
 
     int chunkSize = 200;
 
@@ -434,8 +429,7 @@ void DiffractionFocussing2::execEvent() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERUPT_REGION
-      const int group = this->m_validGroups[iGroup];
-      const std::vector<size_t> &indices = this->m_wsIndices[group];
+      const std::vector<size_t> &indices = this->m_wsIndices[iGroup];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
         out->getSpectrum(iGroup) += m_eventW->getSpectrum(wi);
@@ -487,8 +481,7 @@ void DiffractionFocussing2::execEvent() {
                          "groups. Histogram will be empty.\n";
   }
   out->clearMRU();
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(out));
+  setProperty("OutputWorkspace", std::move(out));
   delete prog;
 }
 
@@ -559,6 +552,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  const auto &spectrumInfo = m_matrixInputW->spectrumInfo();
 
   groupAtWorkspaceIndex.resize(nHist);
   for (int wi = 0; wi < nHist;
@@ -569,10 +563,8 @@ void DiffractionFocussing2::determineRebinParameters() {
     if (group == -1)
       continue;
 
-    // the spectrum is the real thing we want to work with
-    const auto &spec = m_matrixInputW->getSpectrum(wi);
     if (checkForMask) {
-      if (instrument->isDetectorMasked(spec.getDetectorIDs())) {
+      if (spectrumInfo.isMasked(wi)) {
         groupAtWorkspaceIndex[wi] = -1;
         continue;
       }
@@ -586,7 +578,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
-    auto &X = spec.x();
+    auto &X = m_matrixInputW->x(wi);
     double temp = X.front();
     if (temp < (min)) // New Xmin found
       (gpit->second).first = temp;
@@ -671,6 +663,11 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
       totalHistProcess += this->m_wsIndices[i].size();
     }
   }
+
+  m_wsIndices.erase(
+      std::remove_if(m_wsIndices.begin(), m_wsIndices.end(),
+                     [](const std::vector<size_t> &v) { return v.empty(); }),
+      m_wsIndices.end());
 
   return totalHistProcess;
 }
