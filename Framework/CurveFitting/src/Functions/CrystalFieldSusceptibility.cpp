@@ -28,7 +28,8 @@ ComplexType conj(const ComplexMatrixValueConverter &conv) {
 // Does the actual calculation of the susceptibility
 void calculate(double *out, const double *xValues, const size_t nData,
                const DoubleFortranVector &en, const ComplexFortranMatrix &wf, 
-               const int nre, const std::vector<double> &H) {
+               const int nre, const std::vector<double> &H,
+               const double convfact) {
   // Some constants
   const double k_B = PhysicalConstants::BoltzmannConstant; // in meV/K
   const double eps = 1.e-6; // for degeneracy calculations
@@ -51,6 +52,8 @@ void calculate(double *out, const double *xValues, const size_t nData,
     }
   }
   // Now calculates the temperature dependence.
+  mu *= convfact;
+  mu2 *= convfact;
   for (size_t iT = 0; iT < nData; iT++) {
     double expfact; 
     double Z = 0.;
@@ -68,7 +71,8 @@ void calculate(double *out, const double *xValues, const size_t nData,
 // Calculate powder average - Mpowder = (Mx + My + Mz)/3
 void calculate_powder(double *out, const double *xValues, const size_t nData,
                       const DoubleFortranVector &en, 
-                      const ComplexFortranMatrix &wf, const int nre) {
+                      const ComplexFortranMatrix &wf, const int nre,
+                      const double convfact) {
   for (size_t j = 0; j < nData; j++) {
     out[j] = 0.;
   }
@@ -78,7 +82,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
   for (int i = 0; i < 3; i++) {
     H.assign(3, 0.);
     H[i] = 1.;
-    calculate(&tmp[0], xValues, nData, en, wf, nre, H);
+    calculate(&tmp[0], xValues, nData, en, wf, nre, H, convfact);
     for (size_t j = 0; j < nData; j++) {
       out[j] += tmp[j];
     }
@@ -95,7 +99,7 @@ DECLARE_FUNCTION(CrystalFieldSusceptibility)
 CrystalFieldSusceptibility::CrystalFieldSusceptibility()
     : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
-  declareAttribute("Unit", Attribute("SI"));
+  declareAttribute("Unit", Attribute("cgs"));
   declareAttribute("inverse", Attribute(false));
   declareAttribute("powder", Attribute(false));
 }
@@ -119,6 +123,22 @@ void CrystalFieldSusceptibility::function1D(double *out,
   for (auto i = 0; i < 3; i++) {
     H[i] /= Hnorm;
   }
+  // Get the unit conversion factor.
+  auto unit = getAttribute("Unit").asString();
+  const double NAMUB2cgs = 0.03232776; // N_A * muB(erg/G) * muB(meV/G)
+  // The constant above is in strange units because we need the output
+  // to be in erg/G^2/mol==cm^3/mol, but in the calculation all energies
+  // are in meV and the expression for chi has a energy denominator.
+  const double NAMUB2si = 4.062426e-7; // N_A * muB(J/T) * muB(meV/T) * mu0
+  // Again, for SI units, we need to have one of the muB in meV not J.
+  // The additional factor of mu0 is due to the different definitions of
+  // the magnetisation, B- and H-fields in the SI and cgs systems.
+  double convfact = boost::iequals(unit, "bohr") ? 0.057883818 :
+                    (boost::iequals(unit, "SI") ? NAMUB2si : NAMUB2cgs);
+  // Note the constant for "bohr" is the bohr magneton in meV/T, this will
+  // give the susceptibility in "atomic" units of uB/T/ion.
+  // Note that chi_SI = (4pi*10^-6)chi_cgs
+  // Default unit is cgs (cm^3/mol).
   if (!setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
@@ -127,24 +147,17 @@ void CrystalFieldSusceptibility::function1D(double *out,
     int nre_ = 0; 
     calculateEigenSystem(en_, wf_, nre_);
     if (powder) {
-      calculate_powder(out, xValues, nData, en_, wf_, nre_);
+      calculate_powder(out, xValues, nData, en_, wf_, nre_, convfact);
     } else {
-      calculate(out, xValues, nData, en_, wf_, nre_, H);
+      calculate(out, xValues, nData, en_, wf_, nre_, H, convfact);
     }
   }
   else {
     // Use stored values
     if (powder) {
-      calculate_powder(out, xValues, nData, en, wf, nre);
+      calculate_powder(out, xValues, nData, en, wf, nre, convfact);
     } else {
-      calculate(out, xValues, nData, en, wf, nre, H);
-    }
-  }
-  // In cgs units, the definition of the permeability constant omits the 4pi
-  if (boost::iequals(getAttribute("Unit").asString(), "cgs")) {
-    const double fourpi = 4 * M_PI;
-    for (size_t i = 0; i < nData; i++) {
-      out[i] /= fourpi;
+      calculate(out, xValues, nData, en, wf, nre, H, convfact);
     }
   }
   if (getAttribute("inverse").asBool()) {

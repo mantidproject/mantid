@@ -164,7 +164,7 @@ public:
                   "50,1,10,1),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
                   "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
                   "PhysicalProperties=(0,1,2,3,4)," // INS, Cp, chi, M(H), M(T)
-                  "Hdir3=(1,1,1), Hmag4=1,"
+                  "Hdir3=(1,1,1), Hmag4=1, Unit4=cgs,"
                   "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3";
     auto ws = createWorkspace();
     auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
@@ -199,10 +199,10 @@ public:
         "Workspace_2");
     TS_ASSERT(out2);
     TS_ASSERT_EQUALS(out2->getNumberHistograms(), 3);
-
-    TS_ASSERT_DELTA(out2->readY(1)[50], 0.0730738, 0.000001);
-    TS_ASSERT_DELTA(out2->readY(1)[60], 0.0720761, 0.000001);
-    TS_ASSERT_DELTA(out2->readY(1)[70], 0.0714346, 0.000001);
+    // Susceptibility default outputs in cgs units.
+    TS_ASSERT_DELTA(out2->readY(1)[50], 0.00236231, 0.0000001);
+    TS_ASSERT_DELTA(out2->readY(1)[60], 0.00233006, 0.0000001);
+    TS_ASSERT_DELTA(out2->readY(1)[70], 0.00230932, 0.0000001);
     // Test the magnetisation calculation
     auto out3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_3");
@@ -212,14 +212,15 @@ public:
     TS_ASSERT_DELTA(out3->readY(1)[5], 0.28307, 0.0001);
     TS_ASSERT_DELTA(out3->readY(1)[10], 0.53932, 0.0001);
     // Test the moment vs temperature calculation
-    const double mu_B = 0.057883818012; // meV/T
     auto out4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_4");
     TS_ASSERT(out4);
     TS_ASSERT_EQUALS(out4->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out4->readY(1)[51] / mu_B, out2->readY(1)[51], 1e-4);
-    TS_ASSERT_DELTA(out4->readY(1)[61] / mu_B, out2->readY(1)[61], 1e-4);
-    TS_ASSERT_DELTA(out4->readY(1)[71] / mu_B, out2->readY(1)[71], 1e-4);
+    // SI and cgs susceptibility differ by factor of 10. 
+    // Dataset 2 in cgs, dataset 4 in SI.
+    TS_ASSERT_DELTA(out4->readY(1)[51], out2->readY(1)[51], 1e-4);
+    TS_ASSERT_DELTA(out4->readY(1)[61], out2->readY(1)[61], 1e-4);
+    TS_ASSERT_DELTA(out4->readY(1)[71], out2->readY(1)[71], 1e-4);
     AnalysisDataService::Instance().clear();
   }
 

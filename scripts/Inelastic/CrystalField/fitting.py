@@ -254,7 +254,7 @@ class CrystalField(object):
                 out += ',Temperature=%s' % (self._physpropTemperature)
             else:
                 out += ',inverse=%s' % (1 if self._suscInverseFlag else 0)
-                out += (',Hmag=%s' % (self._hmag)) if typeid==4 else ''
+                out += (',Hmag=%s' % (self._hmag)) if typeid==3 else ''
         out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
         return out
 
@@ -618,6 +618,20 @@ class CrystalField(object):
         """
         return self._getPhysProp(1, workspace, ws_index)
 
+    def _checkmagunits(self, unit, default=None):
+        """ Checks that unit string is valid and converts to correct case.
+        """
+        if 'cgs' in unit.lower():
+            return 'cgs'
+        elif 'bohr' in unit.lower():
+            return 'bohr'
+        elif 'SI' in unit.upper():
+            return 'SI'
+        elif default is not None:
+            return default
+        else:
+            raise ValueError('Unit %s not recognised' % (self._physpropUnit))
+
     def getSusceptibility(self, *args, **kwargs):
         """
         Get the magnetic susceptibility calculated with the current crystal field parameters.
@@ -642,9 +656,9 @@ class CrystalField(object):
                      Cartesian vector with z along the quantisation axis of the CF parameters, or the
                      string 'powder' (case insensitive) to get the powder averaged susceptibility
                      default: [0, 0, 1]
-        @param Unit: Either the string 'cgs' or 'SI' (case insensitive) to indicate whether to output
-                     the result in the SI or cgs definition of the susceptibility (chi_SI = 4*pi*chi_cgs).
-                     default: 'SI'
+        @param Unit: Any one of the strings 'bohr', 'SI' or 'cgs' (case insensitive) to indicate whether 
+                     to output in atomic (bohr magneton/Tesla/ion), SI (m^3/mol) or cgs (cm^3/mol) units.
+                     default: 'cgs'
         @param Inverse: Whether to calculate the susceptibility (Inverse=False, default) or inverse
                         susceptibility (Inverse=True).
         """
@@ -652,7 +666,7 @@ class CrystalField(object):
         # Sets defaults / parses keyword arguments
         workspace = kwargs['Temperature'] if 'Temperature' in kwargs.keys() else None
         ws_index = kwargs['ws_index'] if 'ws_index' in kwargs.keys() else 0
-        self._physpropUnit = kwargs['Unit'] if 'Unit' in kwargs.keys() else 'SI'
+        self._physpropUnit = kwargs['Unit'] if 'Unit' in kwargs.keys() else 'cgs'
         self._hdir = kwargs['Hdir'] if 'Hdir' in kwargs.keys() else [0., 0., 1.]
         self._suscInverseFlag = kwargs['Inverse'] if 'Inverse' in kwargs.keys() else False
         
@@ -668,18 +682,15 @@ class CrystalField(object):
                     if 'powder' in args[cum_id].lower():
                         self._hdir = 'powder'
                     else:
-                        self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+                        self._physpropUnit = self._checkmagunits(args[cum_id], 'cgs')
                 else:
                     self._hdir = args[cum_id]
                 cum_id += 1
             if len(args) > cum_id:
-                self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+                self._physpropUnit = self._checkmagunits(args[cum_id], 'cgs')
 
         # Error checking
-        if 'cgs' not in self._physpropUnit.lower() and 'SI' not in self._physpropUnit.upper():
-            raise ValueError('Unit %s not recognised' % (self._physpropUnit))
-        else:
-            self._physpropUnit = 'cgs' if 'cgs' in self._physpropUnit.lower() else 'SI'
+        self._physpropUnit = self._checkmagunits(self._physpropUnit, 'cgs')
         try:
             if isinstance(self._hdir, basestring):
                 if 'powder' in self._hdir.lower():
@@ -696,7 +707,7 @@ class CrystalField(object):
         
         return self._getPhysProp(2, workspace, ws_index)
 
-    def getMagnetisation(self, *args, **kwargs):
+    def getMagneticMoment(self, *args, **kwargs):
         """
         Get the magnetic moment calculated with the current crystal field parameters.
         The moment is calculated by adding a Zeeman term to the CF Hamiltonian and then diagonlising
@@ -705,16 +716,16 @@ class CrystalField(object):
 
         Examples:
 
-            cf.getMagnetisation()       # Returns M(H) for H||[001] from 0 to 30 T in 0.1 T steps
-            cf.getMagnetisation(H)      # Returns M(H) for H||[001] at specified values of H (in Tesla)
-            cf.getMagnetisation(ws, 0)  # Use x-axis of spectrum 0 of ws as applied field magnitude.
-            cf.getMagnetisation(H, [1, 1, 1])  # Returns the magnetic moment along [111].
-            cf.getMagnetisation(H, 'powder')   # Returns the powder averaged M(H)
-            cf.getMagnetisation(H, 'cgs')      # Returns the moment || [001] in cgs units (emu/mol)
-            cf.getMagnetisation(Temperature=T) # Returns M(T) for H=1T || [001] at specified T (in K)
-            cf.getMagnetisation(10, [1, 1, 0], Temperature=T) # Returns M(T) for H=10T || [110].
-            cf.getMagnetisation(..., Inverse=True)  # Calculates 1/M instead (keyword only)
-            cf.getMagnetisation(Hmag=ws, ws_index=0, Hdir=[1, 1, 0], Unit='SI', Temperature=T, Inverse=True)
+            cf.getMagneticMoment()       # Returns M(H) for H||[001] from 0 to 30 T in 0.1 T steps
+            cf.getMagneticMoment(H)      # Returns M(H) for H||[001] at specified values of H (in Tesla)
+            cf.getMagneticMoment(ws, 0)  # Use x-axis of spectrum 0 of ws as applied field magnitude.
+            cf.getMagneticMoment(H, [1, 1, 1])  # Returns the magnetic moment along [111].
+            cf.getMagneticMoment(H, 'powder')   # Returns the powder averaged M(H)
+            cf.getMagneticMoment(H, 'cgs')      # Returns the moment || [001] in cgs units (emu/mol)
+            cf.getMagneticMoment(Temperature=T) # Returns M(T) for H=1T || [001] at specified T (in K)
+            cf.getMagneticMoment(10, [1, 1, 0], Temperature=T) # Returns M(T) for H=10T || [110].
+            cf.getMagneticMoment(..., Inverse=True)  # Calculates 1/M instead (keyword only)
+            cf.getMagneticMoment(Hmag=ws, ws_index=0, Hdir=[1, 1, 0], Unit='SI', Temperature=T, Inverse=True)
 
         @param Hmag: The magnitude of the applied magnetic field in Tesla, specified either as a Mantid
                      workspace whose x-values will be used; or a list or numpy ndarray of field points. 
@@ -775,24 +786,19 @@ class CrystalField(object):
                     if 'powder' in args[cum_id].lower():
                         self._hdir = 'powder'
                     else:
-                        self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+                        self._physpropUnit = self._checkmagunits(args[cum_id], 'bohr')
                 else:
                     self._hdir = args[cum_id]
                 cum_id += 1
             if len(args) > cum_id:
-                self._physpropUnit = 'cgs' if 'cgs' in args[cum_id].lower() else 'SI'
+                self._physpropUnit = self._checkmagunits(args[cum_id], 'bohr')
 
         # Error checking
         if typeid == 3 and not t_isscalar:
             raise ValueError('For M(H) calculation, the temperature must be scalar')
         if typeid == 4 and not hmag_isscalar:
             raise ValueError('For M(T) calculation, the field magnitude Hmag must be scalar')
-        if 'cgs' in self._physpropUnit.lower() or 'bohr' in self._physpropUnit.lower():
-            self._physpropUnit = 'cgs' if 'cgs' in self._physpropUnit.lower() else 'bohr'
-        elif 'SI' in self._physpropUnit.upper():
-            self._physpropUnit = 'SI'
-        else:
-            raise ValueError('Unit %s not recognised' % (self._physpropUnit))
+        self._physpropUnit = self._checkmagunits(self._physpropUnit, 'cgs')
         try:
             if isinstance(self._hdir, basestring) and 'powder' in self._hdir.lower():
                 self._hdir = 'powder'

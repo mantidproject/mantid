@@ -23,7 +23,7 @@ namespace {
 void calculate(double *out, const double *xValues, const size_t nData,
                const ComplexFortranMatrix &ham, const int nre,
                const DoubleFortranVector Hmag, const double T,
-               const double convfact) {
+               const double convfact, const bool iscgs) {
   const double beta = 1 / (PhysicalConstants::BoltzmannConstant * T);
   // x-data is the applied field magnitude. We need to recalculate
   // the Zeeman term and diagonalise the Hamiltonian at each x-point.
@@ -33,6 +33,9 @@ void calculate(double *out, const double *xValues, const size_t nData,
     ComplexFortranMatrix ev;
     DoubleFortranVector H = Hmag;
     H *= xValues[iH];
+    if (iscgs) {
+      H *= 0.0001;  // Converts from Gauss to Tesla.
+    }
     calculateZeemanEigensystem(en, ev, ham, nre, H);
     // Calculates the diagonal of the magnetic moment operator <wf|mu|wf>
     DoubleFortranVector moment;
@@ -52,7 +55,7 @@ void calculate(double *out, const double *xValues, const size_t nData,
 // Calculate powder average - Mpowder = (Mx + My + Mz)/3
 void calculate_powder(double *out, const double *xValues, const size_t nData,
                       const ComplexFortranMatrix &ham, const int nre,
-                      const double T, const double convfact) {
+                      const double T, const double convfact, const bool cgs) {
   for (size_t j = 0; j < nData; j++) {
     out[j] = 0.;
   }
@@ -62,7 +65,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
   for (int i = 1; i <= 3; i++) {
     Hmag.zero();
     Hmag(i) = 1.;
-    calculate(&tmp[0], xValues, nData, ham, nre, Hmag, T, convfact);
+    calculate(&tmp[0], xValues, nData, ham, nre, Hmag, T, convfact, cgs);
     for (size_t j = 0; j < nData; j++) {
       out[j] += tmp[j];
     }
@@ -106,11 +109,13 @@ void CrystalFieldMagnetisation::function1D(double *out,
   }
   auto unit = getAttribute("Unit").asString();
   const double NAMUB = 5.5849397;  // N_A*mu_B - J/T/mol
-  // Converts to different units - SI is in J/T/mol or Am^2/mol. cgs in emu/mol.
+  // Converts to different units - SI is in J/T/mol or Am^2/mol. 
+  // cgs is in erg/Gauss/mol (emu/mol). The value of uB in erg/G is 1000x in J/T
   // NB. Atomic ("bohr") units gives magnetisation in uB/ion, but other units
   // give the molar magnetisation.
   double convfact = boost::iequals(unit, "SI") ? NAMUB : 
                     (boost::iequals(unit, "cgs") ? NAMUB*1000. : 1.);
+  const bool iscgs = boost::iequals(unit, "cgs");
   if (!setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
@@ -122,17 +127,17 @@ void CrystalFieldMagnetisation::function1D(double *out,
     calculateEigenSystem(en_, wf_, ham_, hz_, nre_);
     ham_ += hz_;
     if (powder) {
-      calculate_powder(out, xValues, nData, ham_, nre_, T, convfact);
+      calculate_powder(out, xValues, nData, ham_, nre_, T, convfact, iscgs);
     } else {
-      calculate(out, xValues, nData, ham_, nre_, H, T, convfact);
+      calculate(out, xValues, nData, ham_, nre_, H, T, convfact, iscgs);
     }
   }
   else {
     // Use stored values
     if (powder) {
-      calculate_powder(out, xValues, nData, ham, nre, T, convfact);
+      calculate_powder(out, xValues, nData, ham, nre, T, convfact, iscgs);
     } else {
-      calculate(out, xValues, nData, ham, nre, H, T, convfact);
+      calculate(out, xValues, nData, ham, nre, H, T, convfact, iscgs);
     }
   }
 }

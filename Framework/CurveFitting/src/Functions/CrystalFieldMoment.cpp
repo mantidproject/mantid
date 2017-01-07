@@ -111,6 +111,9 @@ void CrystalFieldMoment::function1D(double *out,
   // other units give the molar magnetisation.
   double convfact = boost::iequals(unit, "SI") ? NAMUB : 
                     (boost::iequals(unit, "cgs") ? NAMUB*1000. : 1.);
+  if (boost::iequals(unit, "cgs")) {
+    Hmag *= 0.0001;  // Converts field from Gauss to Tesla (calcs in SI).
+  }
   if (!setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.

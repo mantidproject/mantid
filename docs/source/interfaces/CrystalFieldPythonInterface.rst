@@ -430,8 +430,8 @@ To calculate the heat capacity use::
 All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in J/mol/K. 
 The theory is described in :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`.
 
-The susceptibility is calculated using Van Vleck's formula, and requires in addition knowledge of the applied field
-direction (default is `[0, 0, 1]` where the field is along the crystal field quantisation direction)::
+The molar susceptibility is calculated using Van Vleck's formula, and requires in addition knowledge of the applied 
+field direction (default is `[0, 0, 1]` where the field is along the crystal field quantisation direction)::
 
     chi_v = cf.getSusceptibility(T, Hdir=[1, 1, 1])
 
@@ -441,29 +441,44 @@ for a powder averaged field direction use::
 
     chi_v_powder = cf.getSusceptibility(T, Hdir='powder')
 
-By default the susceptibility is calculated as the SI volume susceptibility (dimensionless). You can additionally
-specify to calculate the result in the cgs system instead (SI value divided by 4pi)::
+The powder averaging is done by taking the mean of the susceptibility (or magnetisation) along the :math:`x`,
+:math:`y` and :math:`z` directions (e.g. :math:`\chi^{\mathrm{pow}} = (\chi^x + \chi^y + \chi^z)/3`).
 
-    chi_v_cgs = cf.getSusceptibility(T, Hdir=[1, 1, 0], Unit='cgs')
+Note that the function calculates the *molar* magnetic susceptibility, and by default outputs it in *cgs* units
+(:math:`\mathrm{cm}^3/\mathrm{mol}` or emu/mol). To obtain the result in SI units (:math:`\mathrm{m}^3/`mathrm{mol}`)
+use::
+
+    chi_v_cgs = cf.getSusceptibility(T, Hdir=[1, 1, 0], Unit='SI')
+
+In addition, "atomic" units (:math:`\mu_B/\mathrm{T}/\mathrm{ion}`) can also be obtained using::
+
+    chi_v_bohr = cf.getSusceptibility(T, Unit='bohr')
 
 The theory is described in the :ref:`CrystalFieldSusceptibility <func-CrystalFieldSusceptibility>` function page.
 
-The magnetisation is calculated by adding a Zeeman interaction to the crystal field Hamiltonian and diagonalising the 
-combined matrix, from which the expectation of the magnetic moment operator is calculated. The magnetisation can
+The magnetic moment is calculated by adding a Zeeman interaction to the crystal field Hamiltonian and diagonalising 
+the combined matrix, from which the expectation of the magnetic moment operator is calculated. The moment can
 be calculated as a function of temperature or applied field magnitude::
 
-    moment_t = cf.getMagnetisation(Temperature=T, Hdir=[1, 1, 1], Hmag=0.1) # Calcs M(T) with at 0.1T field || [111]
+    moment_t = cf.getMagneticMoment(Temperature=T, Hdir=[1, 1, 1], Hmag=0.1) # Calcs M(T) with at 0.1T field||[111]
     H = np.linspace(0, 30, 121)
-    moment_h = cf.getMagnetisation(Hmag=H, Hdir='powder', Temperature=10)   # Calcs M(H) at 10K for powder sample
+    moment_h = cf.getMagneticMoment(Hmag=H, Hdir='powder', Temperature=10)   # Calcs M(H) at 10K for powder sample
 
 By default, the magnetisation is calculated in atomic units of bohr magnetons per magnetic ion. Alternatively, the 
-SI or cgs molar magnetisation can be calculated::
+SI or cgs molar magnetic moments can be calculated::
 
-    moment_SI = cf.getMagnetisation(H, [1, 1, 1], Unit='SI')          # M(H) in Am^2/mol at 1K for H||[111]
-    moment_cgs = cf.getMagnetisation(0.1, Temperature=T, Unit='cgs')  # M(T) in emu/mol in a field of 0.1T || [001]
+    moment_SI = cf.getMagneticMoment(H, [1, 1, 1], Unit='SI')         # M(H) in Am^2/mol at 1K for H||[111]
+    moment_cgs = cf.getMagneticMoment(100, Temperature=T, Unit='cgs') # M(T) in emu/mol in a field of 100G || [001]
 
-By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details
-and a description of the theory, see the :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>` page.
+Please note that if cgs units are used, then the magnetic field must be specified in *Gauss* rather than *Tesla*
+(1T == 10000G). Note also that the cgs unit "emu/mol" in this case is "erg/Gauss/mol" quantifying a molar magnetic
+moment. 
+
+Finally, please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
+should divide this by the molar volume of the material. 
+By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details 
+and a description of the theory, see the :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>` and 
+:ref:`CrystalFieldMoment <func-CrystalFieldMoment>` pages.
 
 Fitting Physical Properties
 ---------------------------
