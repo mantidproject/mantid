@@ -34,7 +34,7 @@ class ABINSCalculateQTwoDMapTest(unittest.TestCase):
         _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")
         producer = InstrumentProducer()
         self._none_instrument = producer.produce_instrument("None")
-        self._filename = path.abspath(os.path.join(_core, "Si2-sc_Q_test.phonon"))
+        self._filename = path.abspath(os.path.join(_core, "_si2-sc_Q_test.phonon"))
         self._sample_form = "Powder"
         self._raw_data = KpointsData(num_k=1, num_atoms=2)
         self._raw_data.set({"k_vectors": np.asarray([[0.2, 0.1, 0.2]]),
@@ -65,7 +65,7 @@ class ABINSCalculateQTwoDMapTest(unittest.TestCase):
         self.assertEqual(True, np.allclose(correct_q_data, q_vectors.extract()))
 
         # check loading data
-        loaded_q = q_calculator.load_data()
+        loaded_q = q_calculator.load_formatted_data()
 
         # noinspection PyTypeChecker
         self.assertEqual(True, np.allclose(correct_q_data, loaded_q.extract()))

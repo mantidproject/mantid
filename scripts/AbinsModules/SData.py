@@ -31,13 +31,17 @@ class SData(GeneralData):
             raise ValueError("New value of S  should have a form of a dict.")
 
         for item in items:
-            if "atom" in item:
+            if AbinsConstants.ATOM_LABEL in item:
 
                 if not isinstance(items[item], dict):
                     raise ValueError("New value of item from S data should have a form of dictionary.")
 
                 if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
                     raise ValueError("Invalid structure of the dictionary.")
+
+                for order in items[item][AbinsConstants.S_LABEL]:
+                    if not isinstance(items[item][AbinsConstants.S_LABEL][order], np.ndarray):
+                        raise ValueError("Numpy array was expected.")
 
             elif "frequencies" == item:
 

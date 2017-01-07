@@ -2,34 +2,44 @@ import numpy as np
 import math
 
 from Instrument import Instrument
-from AbinsModules import AbinsParameters
+from AbinsModules import AbinsParameters, AbinsConstants
 from AbinsModules.KpointsData import KpointsData
 
 
 class TwoDMap(Instrument):
     def __init__(self, name):
-        self._name = name
-        self._k_points_data = None
-        self._sigma = AbinsParameters.delta_width
+
         super(TwoDMap, self).__init__()
-
-    def collect_K_data(self, k_points_data=None):
-        """
-        Collect k-points data from DFT calculations.
-        @param k_points_data: object of type KpointsData with data from DFT calculations
-        """
-
-        if not isinstance(k_points_data, KpointsData):
-            raise ValueError("Invalid value of k-points data.")
-
-        self._k_points_data = k_points_data
-
-    def _calculate_q_powder(self, frequencies=None):
-        """
-        Calculates squared Q vectors for None instrument.
-        """
+        self._name = name
+        self._sigma = AbinsParameters.delta_width
         q_points = self._make_q_point_mesh()
-        return np.multiply(q_points, q_points)
+        temp_q_powder = np.ravel(np.multiply(q_points, q_points))
+        self._q_powder, self._q_powder_multipliticies = self._calculate_multiplicities(q_powder=temp_q_powder)
+
+    def calculate_q_powder(self, input_data=None):
+        """
+        Returns Q powder data for index input_data.
+        :param input_data: index of Q2
+        """
+        if isinstance(input_data, (int, long)) and 0 <= input_data < self._q_powder.size:
+
+            return self._q_powder[input_data]
+        else:
+            raise ValueError("Invalid Q index.")
+
+    def _calculate_multiplicities(self, q_powder=None):
+
+        ones = np.ones(shape=q_powder, dtype=AbinsConstants.FLOAT_TYPE)
+        bins = np.arange(start=AbinsParameters.q2_start, step=AbinsParameters.q2_step, stop=AbinsParameters.q2_end,
+                         dtype=AbinsConstants.FLOAT_TYPE)
+        indices = np.digitize(q_powdern, bins=bins)
+        multiplicities =np.asarray(a=[ones[indices == i].sum() for i in range(AbinsConstants.FIRST_BIN_INDEX, bins)],
+                                   dtype=AbinsConstants.FLOAT_TYPE)
+
+        return bins[AbinsConstants.FIRST_BIN_INDEX:], multiplicities
+
+    def get_q_powder_size(self):
+        return self._q_powder.size
 
     def _make_q_point_mesh(self):
         """
@@ -41,7 +51,7 @@ class TwoDMap(Instrument):
             i1max = (AbinsParameters.q_mesh[0] - 1) / 2
         else:
             i1min = -(AbinsParameters.q_mesh[0] / 2 - 1)
-        i1max = AbinsParameters.q_mesh[0] / 2
+            i1max = AbinsParameters.q_mesh[0] / 2
 
         if AbinsParameters.q_mesh[1] % 2:
             i2min = - (AbinsParameters.q_mesh[1] - 1) / 2
@@ -58,24 +68,24 @@ class TwoDMap(Instrument):
             i3min = -(AbinsParameters.q_mesh[2] / 2 - 1)
             i3max = AbinsParameters.q_mesh[2] / 2
 
-        _dimensions = 3
-        _total_q_num = AbinsParameters.q_mesh[0] * AbinsParameters.q_mesh[1] * AbinsParameters.q_mesh[2]
-        _q_point_mesh = np.zeros((_total_q_num, _dimensions), dtype=AbinsParameters.float_type)
-        _n_q = 0
+        dimensions = 3
+        total_q_num = AbinsParameters.q_mesh[0] * AbinsParameters.q_mesh[1] * AbinsParameters.q_mesh[2]
+        q_point_mesh = np.zeros((total_q_num, dimensions), dtype=AbinsParameters.float_type)
+        n_q = 0
 
-        for _i1 in range(i1min, i1max + 1):
-            for _i2 in range(i2min, i2max + 1):
-                for _i3 in range(i3min, i3max + 1):
-                    _q_point_mesh[_n_q, :] = [float(_i1) / float(AbinsParameters.q_mesh[0]),
-                                              float(_i2) / float(AbinsParameters.q_mesh[1]),
-                                              float(_i3) / float(AbinsParameters.q_mesh[2])]
-                _n_q += 1
+        for i1 in range(i1min, i1max + 1):
+            for i2 in range(i2min, i2max + 1):
+                for i3 in range(i3min, i3max + 1):
+                    q_point_mesh[n_q, :] = [float(i1) / float(AbinsParameters.q_mesh[0]),
+                                            float(i2) / float(AbinsParameters.q_mesh[1]),
+                                            float(i3) / float(AbinsParameters.q_mesh[2])]
+                n_q += 1
 
         _num_k = self._k_points_data.extract()["frequencies"].shape[0]
-        q_points = np.zeros((_num_k, _total_q_num, _dimensions), dtype=AbinsParameters.float_type)
+        q_points = np.zeros((_num_k, total_q_num, dimensions), dtype=AbinsParameters.float_type)
 
         for _k in range(_num_k):
-            q_points[_k, :, :] = _q_point_mesh  # no need to use np.copy here
+            q_points[_k, :, :] = q_point_mesh  # no need to use np.copy here
 
         return q_points
 
@@ -88,43 +98,31 @@ class TwoDMap(Instrument):
         @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
         """
 
-        # noinspection PyTypeChecker
-        all_points = points_per_peak * frequencies.shape[0]
+        if AbinsParameters.pkt_per_peak == 1:
 
-        broadened_spectrum = np.zeros(all_points, dtype=AbinsParameters.float_type)
-        start_broaden = start * points_per_peak
-        for indx, freq in np.ndenumerate(frequencies[start:]):
+            points_freq = frequencies
+            broadened_spectrum = s_dft
 
-            start = indx[0] * points_per_peak + start_broaden
-            broadened_spectrum[start:start + points_per_peak] = np.convolve(s_dft[indx[0]],
-                                                                            self._dirac_delta(center=freq))
+        else:
 
-        return broadened_spectrum
+            # freq_num: number of transition energies for the given quantum order event
 
-    def produce_abscissa(self, frequencies=None, points_per_peak=None, start=None):
-        """
-        Creates abscissa for convoluted spectrum in case of TOSCA.
-        @param frequencies:  DFT frequencies for which frequencies which correspond to broadened
-                             spectrum should be regenerated (frequencies in cm-1)
-        @param points_per_peak:  number of points for each peak of broadened spectrum
-        @return: abscissa for convoluted S
-        @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
-        """
-        all_points = points_per_peak * frequencies.shape[0]
-        abscissa = np.zeros(all_points, dtype=AbinsParameters.float_type)
-        # noinspection PyTypeChecker
-        start_broaden = start * points_per_peak
+            # frequencies_matrix[freq_num, AbinsParameters.pkt_per_peak]
+            frequencies_matrix = np.array([frequencies, ] * AbinsParameters.pkt_per_peak).transpose()
 
-        for indx, freq in np.ndenumerate(frequencies[start:]):
+            # delta_val[freq_num, AbinsParameters.pkt_per_peak]
+            delta_val = self._dirac_delta(center=frequencies_matrix)
 
-            points_freq = np.array(np.linspace(freq - AbinsParameters.fwhm * self._sigma,
-                                               freq + AbinsParameters.fwhm * self._sigma,
-                                               num=points_per_peak))
+            # s_dft_matrix[freq_num, AbinsParameters.pkt_per_peak]
+            s_dft_matrix = np.array([s_dft, ] * AbinsParameters.pkt_per_peak).transpose()
 
-            start = indx[0] * points_per_peak + start_broaden
-            abscissa[start:start + points_per_peak] = points_freq
+            # temp_spectrum[freq_num, AbinsParameters.pkt_per_peak]
+            temp_spectrum = s_dft_matrix * delta_val
 
-        return abscissa
+            points_freq = np.ravel(broad_freq)
+            broadened_spectrum = np.ravel(temp_spectrum)
+
+        return points_freq, broadened_spectrum
 
     def _dirac_delta(self, center=None):
 

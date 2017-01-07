@@ -15,11 +15,13 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         self._k_points_data = None
         super(ToscaInstrument, self).__init__()
 
-    def calculate_q_powder(self, frequencies=None):
+    def calculate_q_powder(self, input_data=None):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
+        :param input_data: frequencies which should be used to construct Q2
         """
-        k2_i = (frequencies + AbinsParameters.tosca_final_neutron_energy) * AbinsConstants.TOSCA_CONSTANT
+
+        k2_i = (input_data + AbinsParameters.tosca_final_neutron_energy) * AbinsConstants.TOSCA_CONSTANT
         k2_f = AbinsParameters.tosca_final_neutron_energy * AbinsConstants.TOSCA_CONSTANT
         result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.tosca_cos_scattering_angle
         return result
@@ -90,6 +92,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         return points_freq, broadened_spectrum
 
+    # noinspection PyMethodMayBeStatic
     def _gaussian(self, sigma=None, points=None, center=None):
         """
         @param sigma: sigma defines width of Gaussian

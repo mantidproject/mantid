@@ -3,15 +3,15 @@ class Instrument(object):
 
     _name = None
 
-    def calculate_q_powder(self, frequencies=None):
+    def calculate_q_powder(self, input_data=None):
         """
         Calculates q vectors.
 
 
-        @param frequencies: frequencies for which Q2 should be calculated
+        @param  input_data: data from which Q2 should be calculated
         @return:  numpy array with Q data
         """
-        ""
+
         return None
 
     def collect_K_data(self, k_points_data=None):

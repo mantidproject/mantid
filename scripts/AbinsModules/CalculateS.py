@@ -172,7 +172,37 @@ class CalculateS(object):
         :param powder_data: object of type PowderData with with A and B tensors
         :return:  object of type SData with 2D dynamical structure factors for the powder case
         """
-        pass
+        if self._instrument_name not in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+            raise ValueError("Instrument for 2D S map was expected.")
+
+        q2_size = self._instrument.get_q_powder_size()
+        q2_indices = range(q2_size)
+        if PATHOS_FOUND:
+            p_local = ProcessingPool(ncpus=AbinsParameters.q_threads)
+            result = p_local.map(self._calculate_s_powder_core, powder_data, q2_indices)
+        else:
+            result = []
+            for q2_i in q2_indices:
+                result.append(self._calculate_s_powder_core(powder_data=powder_data, q_indx=q2_i))
+
+        num_atoms = powder_data.extract()["a_tensors"].shape[0]
+
+        atoms_items = dict()
+        for atom_i in range(num_atoms):
+            atoms_items["atom_%s" % atom] = {"s": dict()}
+            for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+                atoms_items["atom_%s" % atom]["s"] = \
+                    {"order_%s" % order:  np.zeros(shape=(q2_size, self._bins.size - AbinsConstants.FIRST_BIN_INDEX),
+                                                   dtype=AbinsConstants.FLOAT_TYPE)}
+                for q2_i in q2_indices:
+                    atoms_items["atom_%s" % atom]["s"]["order_%s" % order][q2_i] = \
+                        result[q2_i][atom]["atom_%s" % atom]["order_%s" % order]
+
+        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
+        data = self._calculate_s_powder_core(powder_data=powder_data)
+        data.update({"frequencies": self._bins[AbinsConstants.FIRST_BIN_INDEX:]})
+
+        return s_data
 
     def _calculate_s_powder_1d(self, powder_data=None):
         """
@@ -183,11 +213,13 @@ class CalculateS(object):
         @return: object of type SData with 1D dynamical structure factors for the powder case
         """
         s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set(self._calculate_s_powder_1d_core(powder_data=powder_data))
+        data = self._calculate_s_powder_core(powder_data=powder_data)
+        data.update({"frequencies": self._bins[AbinsConstants.FIRST_BIN_INDEX:]})
+        s_data.set(items=data)
 
         return s_data
 
-    def _calculate_s_powder_1d_core(self, powder_data=None):
+    def _calculate_s_powder_core(self, powder_data=None, q_indx=None):
         """
         Helper function for _calculate_s_powder_1d.
         :param powder_data:  object of type PowderData with A and B tensors
@@ -195,19 +227,19 @@ class CalculateS(object):
         """
         atoms_items = dict()
         num_atoms, atoms = self._prepare_data(powder_data=powder_data)
+        q_indices = num_atoms * [q_indx]
 
         if PATHOS_FOUND:
             p_local = ProcessingPool(ncpus=AbinsParameters.atoms_threads)
-            result = p_local.map(self._calculate_s_powder_1d_one_atom, atoms)
+            result = p_local.map(self._calculate_s_powder_one_atom, atoms, q_indices)
         else:
             result = []
             for atom in atoms:
-                result.append(self._calculate_s_powder_1d_one_atom(atom=atom))
+                result.append(self._calculate_s_powder_one_atom(atom=atom, q_indx=q_indices))
 
         for atom in range(num_atoms):
             atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
             self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
-        atoms_items.update({"frequencies": self._bins[1:]})
         return atoms_items
 
     def _prepare_data(self,  powder_data=None):
@@ -256,7 +288,7 @@ class CalculateS(object):
         from mantid.kernel import logger
         logger.notice(msg)
 
-    def _calculate_s_powder_1d_one_atom(self, atom=None):
+    def _calculate_s_powder_one_atom(self, atom=None, q_indx=None):
         """
         @param atom: number of atom
         @return: s, and corresponding frequencies for all quantum events taken into account
@@ -283,9 +315,9 @@ class CalculateS(object):
                     # number of transitions can only go up
                     for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
-                        part_local_freq, part_local_coeff, part_broad_spectrum = self._helper_1d_atom(
+                        part_local_freq, part_local_coeff, part_broad_spectrum = self._helper_atom(
                             atom=atom, local_freq=part_local_freq, local_coeff=part_local_coeff,
-                            fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order)
+                            fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order, q_indx=q_indx)
 
                         s["order_%s" % lg_order] += part_broad_spectrum
 
@@ -294,9 +326,9 @@ class CalculateS(object):
             # if relatively small array of transitions then process it in one shot
             else:
 
-                local_freq, local_coeff, s["order_%s" % order] = self._helper_1d_atom(
+                local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(
                     atom=atom, local_freq=local_freq, local_coeff=local_coeff,
-                    fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
+                    fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order, q_indx=q_indx)
 
         return s
 
@@ -325,14 +357,14 @@ class CalculateS(object):
         new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
         new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
-        total_size = self._bins.size - 1
+        total_size = self._bins.size - AbinsConstants.FIRST_BIN_INDEX
         for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
             s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
 
         return new_fundamentals,  new_fundamentals_coeff
 
-    def _helper_1d_atom(self, atom=None, local_freq=None, local_coeff=None, fundamentals_freq=None, fund_coeff=None,
-                        order=None):
+    def _helper_atom(self, atom=None, local_freq=None, local_coeff=None, fundamentals_freq=None, fund_coeff=None,
+                     order=None, q_indx=None):
         """
         Helper function for _calculate_s_powder_1d_one_atom.
         :param atom: number of atom
@@ -351,7 +383,12 @@ class CalculateS(object):
 
         if local_freq.any():  # check if local_freq has non-zero values
 
-            q2 = self._instrument.calculate_q_powder(frequencies=local_freq)
+            if self._instrument_name in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+            elif self._instrument_name in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+                q2 = self._instrument.calculate_q_powder(input_data=q_indx)
+            else:
+                raise ValueError("Unsupported instrument.")
 
             value_dft = self._calculate_order[order](q2=q2,
                                                      frequencies=local_freq,
@@ -511,8 +548,9 @@ class CalculateS(object):
         @param array_y: numpy array with S
         @return: rebined frequencies, rebined S
         """
-        inds = np.digitize(array_x, self._bins)
-        output_array_y = np.asarray(a=[array_y[inds == i].sum() for i in range(1, self._bins.size)],
+        inds = np.digitize(x=array_x, bins=self._bins)
+        output_array_y = np.asarray(a=[array_y[inds == i].sum()
+                                       for i in range(AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
                                     dtype=AbinsConstants.FLOAT_TYPE)
 
         return output_array_y
@@ -528,9 +566,10 @@ class CalculateS(object):
             output_array_x = array_x
             output_array_y = array_y
         else:
-            inds = np.digitize(array_x, self._bins)
-            output_array_x = self._bins[1:]
-            output_array_y = np.asarray(a=[array_y[inds == i].sum() for i in range(1, self._bins.size)],
+            inds = np.digitize(x=array_x, bins=self._bins)
+            output_array_x = self._bins[AbinsConstants.FIRST_BIN_INDEX:]
+            output_array_y = np.asarray(a=[array_y[inds == i].sum()
+                                           for i in range(AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
                                         dtype=AbinsConstants.FLOAT_TYPE)
 
         return output_array_x, output_array_y
@@ -538,15 +577,16 @@ class CalculateS(object):
     def _fix_empty_array(self, array_y=None):
         """
         Fixes empty numpy arrays which occur in case of heavier atoms.
-        :return: numpy array filled with zeros of dimension _bins.size - 1
+        :return: numpy array filled with zeros of dimension _bins.size - AbinsConstants.FIRST_BIN_INDEX
         """
         if array_y is None:
-            # number of frequencies = self._bins.size - 1
-            output_y = np.zeros(shape=self._bins.size - 1, dtype=AbinsConstants.FLOAT_TYPE)
+            # number of frequencies = self._bins.size - AbinsConstants.FIRST_BIN_INDEX
+            output_y = np.zeros(shape=self._bins.size - AbinsConstants.FIRST_BIN_INDEX, dtype=AbinsConstants.FLOAT_TYPE)
         elif array_y.any():
-            output_y = self._rebin_data_full(array_x=self._bins[1:], array_y=array_y)
+            output_y = self._rebin_data_full(array_x=self._bins[AbinsConstants.FIRST_BIN_INDEX:], array_y=array_y)
         else:
-            output_y = np.zeros(shape=self._bins.size - 1, dtype=AbinsConstants.FLOAT_TYPE)
+            output_y = np.zeros(shape=self._bins.size - AbinsConstants.FIRST_BIN_INDEX,
+                                dtype=AbinsConstants.FLOAT_TYPE)
 
         return output_y
 
