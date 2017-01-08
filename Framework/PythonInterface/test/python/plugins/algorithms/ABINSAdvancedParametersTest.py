@@ -50,7 +50,7 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
                 os.remove(filename)
         try:
             DeleteWorkspace(self._wrk_name)
-        except:  # nothing bad happened if there is no workspace to delete
+        except :  # nothing bad happened if there is no workspace to delete
             pass
 
     def test_wrong_fwhm(self):
@@ -250,15 +250,29 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.optimal_size = 50.0
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
-    def test_wrong_num_threads(self):
+    def test_wrong_atom_threads(self):
         if PATHOS_FOUND:
             AbinsParameters.atoms_threads = -1
             self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
+    def test_wrong_q_threads(self):
+        if PATHOS_FOUND:
+            AbinsParameters.q_threads = -1
+            self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon",
+                              OutputWorkspace=self._wrk_name)
+
+    def test_wrong_q_mesh(self):
+
+        AbinsParameters.q_mesh = (1, 2, 4)  # tuple instead of a list
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+
+        AbinsParameters.q_mesh = [1.0, 2.0, 4.0]  # list of floats instead of integers
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+
     def test_good_case(self):
 
         good_names = [self._wrk_name, self._wrk_name + "_Si", self._wrk_name + "_Si_total"]
-        wrk = ABINS(PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+        ABINS(PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
         names = mtd.getObjectNames()
         self.assertAlmostEqual(0, cmp(good_names, names))
 

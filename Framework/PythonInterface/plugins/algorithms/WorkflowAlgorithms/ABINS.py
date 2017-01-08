@@ -20,7 +20,7 @@ from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, A
 class ABINS(PythonAlgorithm):
 
     # static variables of class ABINS
-    _to_print = True # static variable used to print preamble
+    _to_print = True  # static variable used to print preamble
     # ----------------------------------------------------------------------------------------
 
     # this variables should be treated as instance fields
@@ -593,7 +593,21 @@ class ABINS(PythonAlgorithm):
         if PATHOS_FOUND:
             atoms_threads = AbinsParameters.atoms_threads
             if not (isinstance(atoms_threads, (int, long)) and 1 <= atoms_threads <= mp.cpu_count()):
-                raise RuntimeError("Invalid number of threads for parallelization over atoms " + message_end)
+                raise RuntimeError("Invalid number of threads for parallelisation over atoms " + message_end)
+
+            q_threads = AbinsParameters.q_threads
+            if not (isinstance(q_threads, (int, long)) and 1 <= q_threads <= mp.cpu_count()):
+                raise RuntimeError("Invalid number of threads for parallelisation over q " + message_end)
+
+            if atoms_threads * q_threads > mp.cpu_count():
+                raise RuntimeError("User asked for more threads than available.")
+
+        # q_mesh
+        q_mesh = AbinsParameters.q_mesh
+        if not isinstance(q_mesh, list):
+            raise RuntimeError("Q mesh is expected to be a list.")
+        if not all([isinstance(i, int) for i in q_mesh]):
+            raise RuntimeError("Q mesh should be a list of integers.")
 
     def _validate_crystal_input_file(self, filename=None):
         """
