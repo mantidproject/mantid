@@ -543,8 +543,6 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                            SignificanceTest=peakSettings.significanceTest,
                            LowThreshold=peakSettings.lowThreshold,
                            HighThreshold=peakSettings.highThreshold,
-                           RangeLower=integrationBegin,
-                           RangeUpper=integrationEnd,
                            EnableLogging=algorithmLogging)
     # 2. Diagnose backgrounds.
     noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
