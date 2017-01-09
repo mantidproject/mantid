@@ -1,6 +1,7 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -740,6 +741,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
     TS_ASSERT(eiCastNonConst != NULL);
     TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
+  }
+
+  void test_getInstrument_setInstrument_copies_masking() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    TS_ASSERT(target.detectorInfo().isMasked(0));
+  }
+
+  void test_getInstrument_setInstrument_copy_on_write_not_broken() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
   }
 
 private:

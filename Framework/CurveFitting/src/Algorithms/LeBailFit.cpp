@@ -1406,8 +1406,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 4. Set axis
   m_outputWS->getAxis(0)->setUnit("TOF");
 
-  API::TextAxis *tAxis = nullptr;
-  tAxis = new API::TextAxis(nspec);
+  API::TextAxis *tAxis = new API::TextAxis(nspec);
   tAxis->setLabel(0, "Data");
   tAxis->setLabel(1, "Calc");
   tAxis->setLabel(2, "Diff");

@@ -128,7 +128,7 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
   // Peak radius
   Mantid::Geometry::PeakShape_sptr shape(
       peaksWorkspace->getPeakPtr(row)->getPeakShape().clone());
-  radius = getMaxRadius(shape);
+  radius = getMaxRadius(*shape);
 }
 
 /**
@@ -137,11 +137,11 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
  * @returns The maximal radius of the peak.
  */
 double ConcretePeaksPresenterVsi::getMaxRadius(
-    Mantid::Geometry::PeakShape_sptr shape) const {
+    const Mantid::Geometry::PeakShape &shape) const {
   const double defaultRadius = 1.0;
 
   boost::optional<double> radius =
-      shape->radius(Mantid::Geometry::PeakShape::Radius);
+      shape.radius(Mantid::Geometry::PeakShape::Radius);
   if (radius) {
     return radius.get();
   } else {

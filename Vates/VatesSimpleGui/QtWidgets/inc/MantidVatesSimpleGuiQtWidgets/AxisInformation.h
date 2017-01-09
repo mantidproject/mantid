@@ -57,7 +57,7 @@ public:
    * Get the title of the associated axis.
    * @return the axis title
    */
-  std::string getTitle() { return this->title; }
+  const std::string &getTitle() { return this->title; }
 
   /**
    * Set the maximum extent of the associated axis.
@@ -73,12 +73,12 @@ public:
    * Set the title of the associated axis.
    * @param title the axis title to apply
    */
-  void setTitle(std::string title) { this->title = title; }
+  void setTitle(const std::string &title) { this->title = title; }
 
 private:
-  std::string title; ///< The axis title (or label)
   double minimum;    ///< The minimum extent of the axis
   double maximum;    ///< The maximum extent of the axis
+  std::string title; ///< The axis title (or label)
 };
 }
 }

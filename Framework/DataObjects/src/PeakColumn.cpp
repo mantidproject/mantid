@@ -165,36 +165,18 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
  */
 void PeakColumn::read(size_t index, const std::string &text) {
   // Don't modify read-only ones
-  if (this->getReadOnly())
+  if (this->getReadOnly() || index >= m_peaks.size())
     return;
-
-  // Avoid going out of bounds
-  if (size_t(index) >= m_peaks.size())
-    return;
-
-  // Reference to the peak in the workspace
-  Peak &peak = m_peaks[index];
 
   // Convert to a double
   double val = 0;
   int success = Strings::convert(text, val);
-  int ival = static_cast<int>(val);
 
   if (success == 0) {
     g_log.error() << "Could not convert string '" << text << "' to a number.\n";
     return;
   }
-
-  if (m_name == "h")
-    peak.setH(val);
-  else if (m_name == "k")
-    peak.setK(val);
-  else if (m_name == "l")
-    peak.setL(val);
-  else if (m_name == "RunNumber")
-    peak.setRunNumber(ival);
-  else
-    throw std::runtime_error("Unexpected column " + m_name + " being set.");
+  setPeakHKLOrRunNumber(index, val);
 }
 
 /** Read in from stream and convert to a number in the PeaksWorkspace
@@ -203,9 +185,19 @@ void PeakColumn::read(size_t index, const std::string &text) {
  * @param in :: input stream
  */
 void PeakColumn::read(const size_t index, std::istream &in) {
-  std::string s;
-  in >> s;
-  read(index, s);
+  if (this->getReadOnly() || index >= m_peaks.size())
+    return;
+
+  double val;
+  try {
+    in >> val;
+  } catch (std::exception &e) {
+    g_log.error() << "Could not convert input to a number. " << e.what()
+                  << '\n';
+    return;
+  }
+
+  setPeakHKLOrRunNumber(index, val);
 }
 
 //-------------------------------------------------------------------------------------
@@ -330,6 +322,20 @@ double PeakColumn::toDouble(size_t /*index*/) const {
 void PeakColumn::fromDouble(size_t /*index*/, double /*value*/) {
   throw std::runtime_error("fromDouble() not implemented, PeakColumn is has no "
                            "general write access");
+}
+
+void PeakColumn::setPeakHKLOrRunNumber(const size_t index, const double val) {
+  Peak &peak = m_peaks[index];
+  if (m_name == "h")
+    peak.setH(val);
+  else if (m_name == "k")
+    peak.setK(val);
+  else if (m_name == "l")
+    peak.setL(val);
+  else if (m_name == "RunNumber")
+    peak.setRunNumber(static_cast<int>(val));
+  else
+    throw std::runtime_error("Unexpected column " + m_name + " being set.");
 }
 
 } // namespace Mantid

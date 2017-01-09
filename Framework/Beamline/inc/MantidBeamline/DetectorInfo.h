@@ -2,6 +2,7 @@
 #define MANTID_BEAMLINE_DETECTORINFO_H_
 
 #include "MantidBeamline/DllConfig.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Beamline {
@@ -59,8 +60,11 @@ public:
 
   size_t size() const;
 
+  bool isMasked(const size_t index) const;
+  void setMasked(const size_t index, bool masked);
+
 private:
-  size_t m_size;
+  Kernel::cow_ptr<std::vector<bool>> m_isMasked;
 };
 
 } // namespace Beamline
