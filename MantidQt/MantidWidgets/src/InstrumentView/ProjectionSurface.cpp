@@ -846,7 +846,8 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
   PeakMarker2D *marker = nullptr;
   Mantid::Geometry::IPeak *peak = nullptr;
   QPointF origin;
-  foreach (PeakOverlay *po, m_peakShapes) {
+
+  for (auto po : m_peakShapes) {
     po->selectIn(rect);
     const auto markers = po->getSelectedPeakMarkers();
     if (markers.length() > 0) {
@@ -858,7 +859,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
   }
 
   if (m_selectedAlignmentPlane.size() < 3 && peak) {
-    m_selectedAlignmentPlane.push_back(peak->getQLabFrame());
+    m_selectedAlignmentPlane.push_back(peak->getQSampleFrame());
     m_selectedAlignmentMarkers.push_back(origin);
   } else if (peak) {
     m_selectedAlignmentPeak = peak;

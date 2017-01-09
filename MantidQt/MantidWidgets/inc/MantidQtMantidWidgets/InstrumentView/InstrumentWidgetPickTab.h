@@ -191,8 +191,8 @@ public slots:
   void displayInfo(size_t pickID);
   void displayComparePeaksInfo(
       std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
-  void displyAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
-                            const Mantid::Geometry::IPeak *peak);
+  void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                             const Mantid::Geometry::IPeak *peak);
   void clear();
 
 private:

@@ -701,7 +701,7 @@ void InstrumentWidgetPickTab::comparePeaks(const std::pair<
 void InstrumentWidgetPickTab::alignPeaks(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
     const Mantid::Geometry::IPeak *peak) {
-  m_infoController->displyAlignPeaksInfo(planePeaks, peak);
+  m_infoController->displayAlignPeaksInfo(planePeaks, peak);
 }
 
 /**
@@ -983,7 +983,7 @@ void ComponentInfoController::displayComparePeaksInfo(
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
 
-void ComponentInfoController::displyAlignPeaksInfo(
+void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
     const Mantid::Geometry::IPeak *peak) {
   if (planePeaks.size() < 3)
@@ -1015,7 +1015,7 @@ void ComponentInfoController::displyAlignPeaksInfo(
   n.normalize();
 
   // now compute in plane & out of plane angles
-  auto pos4 = peak->getQLabFrame();
+  auto pos4 = peak->getQSampleFrame();
   auto x = pos4.scalar_prod(u);
   auto y = pos4.scalar_prod(v);
   auto z = pos4.scalar_prod(n);
