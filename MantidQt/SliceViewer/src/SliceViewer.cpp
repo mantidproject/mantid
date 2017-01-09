@@ -89,7 +89,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL) {
+      m_peaksSliderWidget(NULL), m_lastRatioState(Guess) {
 
   ui.setupUi(this);
   std::string enableNonOrthogonal;
@@ -451,13 +451,12 @@ void SliceViewer::initMenus() {
   group = new QActionGroup(this);
 
   action = new QAction(QPixmap(), "Lock Aspect Ratios (Guess)", this);
-  action->setCheckable(false);
+  action->setCheckable(true);
   action->setChecked(true); // This is our default
   action->setActionGroup(group);
   m_lockAspectRatiosActionGuess = action;
   connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioGuess()));
   m_menuView->addAction(action);
-
 
   action = new QAction(QPixmap(), "Lock Aspect Ratios (All)", this);
   action->setCheckable(true);
@@ -466,14 +465,12 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioAll()));
   m_menuView->addAction(action);
 
-
   action = new QAction(QPixmap(), "Unlock Aspect Ratios (All)", this);
   action->setCheckable(true);
   action->setActionGroup(group);
   m_lockAspectRatiosActionUnlock = action;
   connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioUnlock()));
   m_menuView->addAction(action);
-  
 
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
@@ -737,7 +734,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
                    SLOT(switchQWTRaster(bool)));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
                    SLOT(setNonOrthogonalbtn()));
-  emit setNonOrthogonalbtn();
+  // emit setNonOrthogonalbtn();
   m_firstNonOrthogonalWorkspaceOpen = true;
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
@@ -2421,25 +2418,31 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
   ui.btnSnapToGrid->setDisabled(checked);
   ui.btnClearLine->setDisabled(checked);
   ui.btnPeakOverlay->setDisabled(checked);
-  if (m_lockAspectRatiosActionGuess->isChecked() && checked) { 
-	  //disable this only if nonOrthogonal button is selected
-	  m_lockAspectRatiosActionGuess->setChecked(!checked);
-	  changeAspectRatioAll();
 
+  if (m_lockAspectRatiosActionAll->isChecked() && checked) {
+    m_lastRatioState = All;
+  }
+
+  if (m_lockAspectRatiosActionGuess->isChecked() && checked) {
+    // disable this only if nonOrthogonal button is selected
+    m_lockAspectRatiosActionGuess->setChecked(!checked);
+    m_lastRatioState = Guess;
+    changeAspectRatioAll();
   }
   m_lockAspectRatiosActionGuess->setEnabled(!checked);
 
   if (m_lockAspectRatiosActionUnlock->isChecked() && checked) {
-	  //disable this only if nonOrthogonal button is selected
-	  m_lockAspectRatiosActionUnlock->setChecked(!checked);
-	  changeAspectRatioAll();
+    // disable this only if nonOrthogonal button is selected
+    m_lockAspectRatiosActionUnlock->setChecked(!checked);
+    m_lastRatioState = Unlock;
+    changeAspectRatioAll();
   }
   m_lockAspectRatiosActionUnlock->setEnabled(!checked);
-  
-  if (!m_lockAspectRatiosActionAll->isChecked() && checked) {
-	  //set this as active only if nonOrthogonal button is selected
-	  m_lockAspectRatiosActionAll->setChecked(checked);
+
+  if (!checked) {
+    setAspectRatio(m_lastRatioState);
   }
+
   m_nonOrthogonalOverlay->update();
   m_plot->updateLayout();
 }

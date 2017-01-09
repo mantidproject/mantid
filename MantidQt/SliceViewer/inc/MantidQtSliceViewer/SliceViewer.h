@@ -412,6 +412,7 @@ private:
   static const QString NumEventsNormalizationKey;
 
   AspectRatioType m_aspectRatioType;
+  AspectRatioType m_lastRatioState;
 };
 
 } // namespace SliceViewer
