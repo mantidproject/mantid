@@ -203,7 +203,6 @@ void QwtScaleDrawNonOrthogonal::drawLabelNonOrthogonal(QPainter *painter,
 
 void QwtScaleDrawNonOrthogonal::applyGridLinesX(
     const QwtValueList &majorTicksXyz) const {
-  int heightScreen = m_plot->canvas()->height();
   auto angle = m_angleY;
   m_gridPlot->updateXGridlines(majorTicksXyz, angle);
   // We need the -1 since we the angle is defined in the mathematical positive
@@ -213,7 +212,6 @@ void QwtScaleDrawNonOrthogonal::applyGridLinesX(
 
 void QwtScaleDrawNonOrthogonal::applyGridLinesY(
     const QwtValueList &majorTicksXyz) const {
-  int widthScreen = m_plot->canvas()->width();
   auto angle = m_angleX;
   m_gridPlot->updateYGridlines(majorTicksXyz, angle);
 }
