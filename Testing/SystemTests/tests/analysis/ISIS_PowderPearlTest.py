@@ -65,7 +65,7 @@ def _get_input_dir():
 
 
 def _get_output_dir():
-    return os.path.join(DIRS[0], "PEARL", "SystemTestOutput")
+    return os.path.join(DIRS[0], "PEARL", "SystemTest_Output")
 
 
 def _run_vanadium_calibration():

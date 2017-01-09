@@ -72,7 +72,7 @@ def _run_vanadium_calibration():
 def _run_focus():
     run_number = 95599
     polaris_obj = setup_polaris_instrument()
-    return polaris_obj.focus(run_number=run_number, input_mode="Individual")
+    return polaris_obj.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True)
 
 
 def _calibration_validation(cls, results):

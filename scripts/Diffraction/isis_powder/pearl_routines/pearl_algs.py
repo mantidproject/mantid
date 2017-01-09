@@ -6,7 +6,6 @@ import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
 from isis_powder.routines import yaml_parser
 from isis_powder.routines.RunDetails import RunDetails
-from isis_powder.pearl_routines import pearl_advanced_config
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
