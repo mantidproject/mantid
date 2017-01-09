@@ -12,8 +12,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-using ButtonOpts = MWRunFiles::ButtonOpts;
-using LiveButtonOpts = MWRunFiles::LiveButtonOpts;
+using ButtonOpts = API::MWRunFiles::ButtonOpts;
+using LiveButtonOpts = API::MWRunFiles::LiveButtonOpts;
 
 /**
 This class defines a widget for selecting a workspace of file path by using a

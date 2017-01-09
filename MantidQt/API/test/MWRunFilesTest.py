@@ -14,7 +14,7 @@ class MWRunFilesTest(unittest.TestCase):
     python interpreter"""
 
     def setUp(self):
-        self.mwrunfiles = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
+        self.mwrunfiles = mantidqtpython.MantidQt.API.MWRunFiles()
 
     def tearDown(self):
         """ Close the created widget """
@@ -28,7 +28,7 @@ class MWRunFilesTest(unittest.TestCase):
         app.exec_()
 
     def test_creation(self):
-        self.assertTrue(isinstance(self.mwrunfiles,mantidqtpython.MantidQt.MantidWidgets.MWRunFiles), "Created object is not an instance of MWRunFiles")
+        self.assertTrue(isinstance(self.mwrunfiles,mantidqtpython.MantidQt.API.MWRunFiles), "Created object is not an instance of MWRunFiles")
 
     def test_lineedit_text(self):
         self.assertEqual(len(self.mwrunfiles.text()), 0)
