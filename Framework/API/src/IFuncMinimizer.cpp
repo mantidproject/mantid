@@ -21,7 +21,9 @@ bool IFuncMinimizer::minimize(size_t maxIterations) {
   do {
     if (!iterate(iter)) {
       success = m_errorString.empty() || m_errorString == "success";
-      m_errorString = "success";
+      if (success) {
+        m_errorString = "success";
+      }
       break;
     }
     iter++;
