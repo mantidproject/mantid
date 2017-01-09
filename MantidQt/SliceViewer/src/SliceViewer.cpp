@@ -451,12 +451,13 @@ void SliceViewer::initMenus() {
   group = new QActionGroup(this);
 
   action = new QAction(QPixmap(), "Lock Aspect Ratios (Guess)", this);
-  action->setCheckable(true);
+  action->setCheckable(false);
   action->setChecked(true); // This is our default
   action->setActionGroup(group);
   m_lockAspectRatiosActionGuess = action;
   connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioGuess()));
   m_menuView->addAction(action);
+
 
   action = new QAction(QPixmap(), "Lock Aspect Ratios (All)", this);
   action->setCheckable(true);
@@ -465,12 +466,14 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioAll()));
   m_menuView->addAction(action);
 
+
   action = new QAction(QPixmap(), "Unlock Aspect Ratios (All)", this);
   action->setCheckable(true);
   action->setActionGroup(group);
   m_lockAspectRatiosActionUnlock = action;
   connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioUnlock()));
   m_menuView->addAction(action);
+  
 
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
@@ -2418,6 +2421,25 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
   ui.btnSnapToGrid->setDisabled(checked);
   ui.btnClearLine->setDisabled(checked);
   ui.btnPeakOverlay->setDisabled(checked);
+  if (m_lockAspectRatiosActionGuess->isChecked() && checked) { 
+	  //disable this only if nonOrthogonal button is selected
+	  m_lockAspectRatiosActionGuess->setChecked(!checked);
+	  changeAspectRatioAll();
+
+  }
+  m_lockAspectRatiosActionGuess->setEnabled(!checked);
+
+  if (m_lockAspectRatiosActionUnlock->isChecked() && checked) {
+	  //disable this only if nonOrthogonal button is selected
+	  m_lockAspectRatiosActionUnlock->setChecked(!checked);
+	  changeAspectRatioAll();
+  }
+  m_lockAspectRatiosActionUnlock->setEnabled(!checked);
+  
+  if (!m_lockAspectRatiosActionAll->isChecked() && checked) {
+	  //set this as active only if nonOrthogonal button is selected
+	  m_lockAspectRatiosActionAll->setChecked(checked);
+  }
   m_nonOrthogonalOverlay->update();
   m_plot->updateLayout();
 }
