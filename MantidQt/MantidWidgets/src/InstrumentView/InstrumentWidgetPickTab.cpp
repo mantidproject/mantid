@@ -931,8 +931,8 @@ QString ComponentInfoController::displayPeakAngles(
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
 
-  auto pos1 = peak1->getQLabFrame();
-  auto pos2 = peak2->getQLabFrame();
+  auto pos1 = peak1->getQSampleFrame();
+  auto pos2 = peak2->getQSampleFrame();
   auto angle = pos1.angle(pos2);
   angle *= double_constants::radian;
 
