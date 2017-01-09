@@ -6,6 +6,7 @@ import numpy as np
 
 from SANSStitch import QErrorCorrectionForMergedWorkspaces
 
+
 class SANSStitchTest(unittest.TestCase):
     def test_initalize(self):
         alg = AlgorithmManager.create('SANSStitch')
@@ -50,7 +51,7 @@ class SANSStitchTest(unittest.TestCase):
         errors = alg.validateInputs()
         self.assertTrue('ScaleFactor' in errors)
 
-    def test_workspace_entries_must_be_q1d(self):
+    def test_workspace_entries_must_be_q1d_if_fitting_is_enabled(self):
         # create an input workspace that has multiple spectra
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
@@ -107,7 +108,6 @@ class SANSStitchTest(unittest.TestCase):
         self.assertTrue('HABNormCan' in errors)
         self.assertTrue('LABNormCan' in errors)
 
-
     def test_stitch_2d_restricted_to_none(self):
         # create an input workspace that has multiple spectra
         create_alg = AlgorithmManager.create('CreateWorkspace')
@@ -161,7 +161,6 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('Mode', 'None')
         errors = alg.validateInputs()
         self.assertEqual(0, len(errors))
-
 
     def test_scale_none(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
@@ -229,8 +228,6 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('OutputWorkspace', 'dummy_name')
         # This would throw at the point of fitting in NaNs or infs where present
         alg.execute()
-
-
 
     def test_scale_none_with_can(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
@@ -369,7 +366,6 @@ class SANSStitchTest(unittest.TestCase):
         self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)),
                         msg='All data should be scaled and shifted to the LAB scale=1 shift=-5')
 
-
     def test_scale_only_without_can(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
@@ -387,7 +383,7 @@ class SANSStitchTest(unittest.TestCase):
         # LAB as linear function y=x+0
         create_alg.setProperty('DataY', range(0, 9))
         create_alg.execute()
-        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+        lab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         # FLAT NORM
         create_alg.setProperty('DataY', [1] * 9)
@@ -414,6 +410,67 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)),
                         msg='All data should be scaled and shifted to the LAB scale=1 shift=-5')
+
+    def test_that_can_merge_2D_reduction_when_fitting_set_to_none(self):
+        # create an input workspace that has multiple spectra
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('DataX', range(0, 2))
+        create_alg.setProperty('NSpec', 2)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setProperty('VerticalAxisUnit', 'MomentumTransfer')
+        create_alg.setProperty('VerticalAxisValues', range(0, 2))
+
+        # hab counts
+        create_alg.setProperty('DataY', [1, 1, 1, 1])
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        hab_counts = create_alg.getProperty('OutputWorkspace').value
+
+        # hab norm
+        create_alg.setProperty('DataY', [2, 2, 2, 2])
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        hab_norm = create_alg.getProperty('OutputWorkspace').value
+
+        # lab counts
+        create_alg.setProperty('DataY', [3, 3, 3, 3])
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        lab_counts = create_alg.getProperty('OutputWorkspace').value
+
+        # lab norm
+        create_alg.setProperty('DataY', [4, 4, 4, 4])
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        lab_norm = create_alg.getProperty('OutputWorkspace').value
+
+        # Basic algorithm setup
+        alg = AlgorithmManager.create('SANSStitch')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('HABCountsSample', hab_counts)
+        alg.setProperty('LABCountsSample', lab_counts)
+        alg.setProperty('HABNormSample', hab_norm)
+        alg.setProperty('LABNormSample', lab_norm)
+        alg.setProperty('ProcessCan', False)
+        alg.setProperty('ShiftFactor', 0.0)
+        alg.setProperty('ScaleFactor', 1.0)
+        alg.setProperty('Mode', 'None')
+        alg.setProperty('OutputWorkspace', 'dummy_name')
+        errors = alg.validateInputs()
+        self.assertEqual(0, len(errors))
+
+        alg.execute()
+        out_ws = alg.getProperty('OutputWorkspace').value
+        self.assertTrue(isinstance(out_ws, MatrixWorkspace))
+        self.assertTrue(out_ws.getNumberHistograms() == 2)
+        expected_entries = (1. + 3.) /(2. + 4.)
+        delta = 1e-5
+        for index in range(0, 2):
+            for element in out_ws.dataY(index):
+                self.assertTrue(abs(expected_entries - element) < delta)
 
 
 class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):

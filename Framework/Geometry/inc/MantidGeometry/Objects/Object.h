@@ -15,17 +15,18 @@ namespace Mantid {
 // Forward declarations
 //----------------------------------------------------------------------
 namespace Kernel {
-class V3D;
+class PseudoRandomNumberGenerator;
 class Material;
+class V3D;
 }
 
 namespace Geometry {
-class Rule;
+class CacheGeometryHandler;
 class CompGrp;
+class GeometryHandler;
+class Rule;
 class Surface;
 class Track;
-class GeometryHandler;
-class CacheGeometryHandler;
 class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
@@ -152,6 +153,13 @@ public:
   void setNullBoundingBox();
   // find internal point to object
   int getPointInObject(Kernel::V3D &point) const;
+
+  /// Select a random point within the object
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const size_t) const;
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const BoundingBox &activeRegion,
+                                    const size_t) const;
 
   // Rendering member functions
   void draw() const;

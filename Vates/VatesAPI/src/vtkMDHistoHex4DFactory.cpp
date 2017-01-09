@@ -15,10 +15,8 @@ namespace VATES {
 
 template <typename TimeMapper>
 vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normalization, const double timestep)
-    : vtkMDHistoHexFactory(thresholdRange, normalization),
-      m_timestep(timestep) {}
+    : vtkMDHistoHexFactory(normalization), m_timestep(timestep) {}
 
 /**
 Assigment operator
@@ -30,7 +28,6 @@ vtkMDHistoHex4DFactory<TimeMapper> &vtkMDHistoHex4DFactory<TimeMapper>::
 operator=(const vtkMDHistoHex4DFactory<TimeMapper> &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
-    this->m_thresholdRange = other.m_thresholdRange;
     this->m_workspace = other.m_workspace;
     this->m_timestep = other.m_timestep;
     this->m_timeMapper = other.m_timeMapper;
@@ -50,7 +47,7 @@ vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(
 
 template <typename TimeMapper>
 void vtkMDHistoHex4DFactory<TimeMapper>::initialize(
-    Mantid::API::Workspace_sptr workspace) {
+    const Mantid::API::Workspace_sptr &workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 4>(workspace);
   if (m_workspace) {
     double tMax = m_workspace->getTDimension()->getMaximum();
@@ -58,11 +55,6 @@ void vtkMDHistoHex4DFactory<TimeMapper>::initialize(
     size_t nbins = m_workspace->getTDimension()->getNBins();
 
     m_timeMapper = TimeMapper::construct(tMin, tMax, nbins);
-
-    // Setup range values according to whatever strategy object has been
-    // injected.
-    m_thresholdRange->setWorkspace(workspace);
-    m_thresholdRange->calculate();
   }
 }
 

@@ -1987,8 +1987,7 @@ void SliceViewer::openFromXML(const QString &xml) {
         "SliceViewer::openFromXML(): No root element in XML string.");
 
   // ------- Find the workspace ------------
-  Poco::XML::Element *cur = NULL;
-  cur = pRootElem->getChildElement("MDWorkspaceName");
+  Poco::XML::Element *cur = pRootElem->getChildElement("MDWorkspaceName");
   if (!cur)
     throw std::runtime_error(
         "SliceViewer::openFromXML(): No MDWorkspaceName element.");

@@ -68,7 +68,6 @@ class MatrixWorkspaceTest(unittest.TestCase):
         det = self._test_ws.getDetector(0)
         self.assertTrue(isinstance(det, Detector))
         self.assertEquals(det.getID(), 1)
-        self.assertFalse(det.isMasked())
         self.assertAlmostEqual(math.pi, det.getTwoTheta(V3D(0,0,11), V3D(0,0,1)))
 
     def test_spectrum_retrieval(self):
@@ -384,6 +383,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
         except ValueError:
             pass
         self.assertTrue(allFine)
+
+    def test_spectrumInfo(self):
+        specInfo = self._test_ws.spectrumInfo()
+        self.assertEquals(specInfo.isMasked(0), False)
+        self.assertEquals(specInfo.isMasked(1), False)
 
 if __name__ == '__main__':
     unittest.main()

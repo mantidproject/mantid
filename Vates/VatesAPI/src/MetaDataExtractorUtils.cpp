@@ -31,11 +31,11 @@ MetaDataExtractorUtils::~MetaDataExtractorUtils() {}
  * @returns The instrument name or an empty string.
  */
 std::string MetaDataExtractorUtils::extractInstrument(
-    Mantid::API::IMDWorkspace_sptr workspace) {
-  Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
-  Mantid::API::IMDHistoWorkspace_sptr histoWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
+    const Mantid::API::IMDWorkspace *workspace) {
+  auto eventWorkspace =
+      dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace);
+  auto histoWorkspace =
+      dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(workspace);
 
   std::string instrument = "";
 
@@ -74,8 +74,8 @@ std::string MetaDataExtractorUtils::extractInstrument(
  * @param workspace Rreference to an IMD workspace
  * @returns The minimum and maximum value of the workspace dataset.
  */
-QwtDoubleInterval
-MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace) {
+QwtDoubleInterval MetaDataExtractorUtils::getMinAndMax(
+    const Mantid::API::IMDWorkspace *workspace) {
   if (!workspace)
     throw std::invalid_argument("The workspace is empty.");
 
