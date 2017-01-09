@@ -1311,6 +1311,12 @@ void TomographyROIViewQtWidget::closeEvent(QCloseEvent *event) {
 }
 
 void TomographyROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
+  if (str.isEmpty()) {
+    // the process string is empty, it is likely the process crashed or was
+    // unable to execute properly
+    return;
+  }
+
   std::string output = str.toStdString();
 
   // -- to not be on the null character

@@ -104,8 +104,8 @@ signals:
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
-  void readWorkerStdOut(const QString &s);
-  void readWorkerStdErr(const QString &s);
+  void readWorkerStdOut(const QString &workerString);
+  void readWorkerStdErr(const QString &workerString);
   void addProcessToJobList();
   void reconProcessFailedToStart();
   void workerFinished(const qint64 pid, const int exitCode);
@@ -166,8 +166,8 @@ private:
   QTimer *m_keepAliveTimer;
 
   std::unique_ptr<TomographyThread> m_workerThread;
-  std::string m_workerOutputCache;
-  std::string m_workerErrorCache;
+  QString m_workerOutputCache;
+  QString m_workerErrorCache;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 

@@ -239,10 +239,6 @@ void TomographyIfaceViewQtGUI::imageOrStackLoadedInRoi(
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsEditedByUser);
 }
 
-void TomographyIfaceViewQtGUI::externalProcessFinished(const std::string &str) {
-  emit externalProcessFinished(QString::fromStdString(str));
-}
-
 void TomographyIfaceViewQtGUI::runExternalProcess(
     const std::string &exec, const std::vector<std::string> &args) {
   m_extExec = exec;
@@ -1904,6 +1900,10 @@ void TomographyIfaceViewQtGUI::closeEvent(QCloseEvent *event) {
 void TomographyIfaceViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Tomographic_Reconstruction"));
+}
+
+void TomographyIfaceViewQtGUI::emitExternalProcessFinished(const QString &str) {
+  emit externalProcessFinished(str);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
