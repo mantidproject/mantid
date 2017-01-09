@@ -1,6 +1,7 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -420,13 +421,31 @@ public:
     TS_ASSERT(det);
 
     // Set a mapping
-    std::vector<Mantid::detid_t> group{1, 2};
+    std::set<Mantid::detid_t> group{1, 2};
     Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
     TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
     TS_ASSERT(det);
     TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
+  }
+
+  void test_detectorIDsInGroup() {
+    using namespace Mantid;
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithParameter(*exptInfo, "a", "b");
+
+    std::set<detid_t> dets;
+    TS_ASSERT_THROWS_NOTHING(dets = exptInfo->detectorIDsInGroup(0));
+    TS_ASSERT_EQUALS(dets, std::set<detid_t>{1});
+
+    // Set a mapping
+    std::set<detid_t> group{1, 2};
+    Mantid::det2group_map mapping{{1, group}};
+    exptInfo->cacheDetectorGroupings(mapping);
+
+    TS_ASSERT_THROWS_NOTHING(dets = exptInfo->detectorIDsInGroup(0));
+    TS_ASSERT_EQUALS(dets, group);
   }
 
   void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {
@@ -446,10 +465,10 @@ public:
   test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
     ExperimentInfo expt;
     Mantid::det2group_map mappings;
-    mappings.emplace(1, std::vector<Mantid::detid_t>(1, 2));
+    mappings.emplace(1, std::set<Mantid::detid_t>{2});
     expt.cacheDetectorGroupings(mappings);
 
-    std::vector<Mantid::detid_t> ids;
+    std::set<Mantid::detid_t> ids;
     TS_ASSERT_THROWS_NOTHING(ids = expt.getGroupMembers(1));
   }
 
@@ -722,6 +741,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
     TS_ASSERT(eiCastNonConst != NULL);
     TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
+  }
+
+  void test_getInstrument_setInstrument_copies_masking() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    TS_ASSERT(target.detectorInfo().isMasked(0));
+  }
+
+  void test_getInstrument_setInstrument_copy_on_write_not_broken() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
   }
 
 private:

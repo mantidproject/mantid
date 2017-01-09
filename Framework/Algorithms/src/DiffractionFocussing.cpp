@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <fstream>
 #include <limits>
@@ -133,14 +131,17 @@ void DiffractionFocussing::exec() {
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
       tmpW, resultIndeces.size(), newSize + 1, newSize);
 
+  std::vector<specnum_t> specNums;
+  const auto &tmpIndices = tmpW->indexInfo();
   for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
        hist++) {
     int64_t i = resultIndeces[hist];
     outputW->setHistogram(hist, tmpW->histogram(i));
-    auto &inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
-    inSpec.setSpectrumNo(-1);
+    specNums.push_back(tmpIndices.spectrumNumber(i));
   }
+  auto outputIndices = outputW->indexInfo();
+  outputIndices.setSpectrumNumbers(std::move(specNums));
+  outputW->setIndexInfo(outputIndices);
 
   progress(1.);
 

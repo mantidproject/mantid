@@ -109,7 +109,7 @@ void ConvertCWSDExpToMomentum::exec() {
 
   // background
   std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
-  if (bkgdwsname.size() > 0) {
+  if (!bkgdwsname.empty()) {
     m_removeBackground = true;
     m_backgroundWS = getProperty("BackgroundWorkspace");
     // check background
@@ -233,7 +233,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
 
   // Check whether to add / or \ to m_dataDir
   std::string sep;
-  if (m_dataDir.size() > 0) {
+  if (!m_dataDir.empty()) {
 // Determine system
 #if _WIN64
     const bool isWindows = true;
@@ -245,6 +245,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
 
     if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
+      // cppcheck-suppress knownConditionTrueFalse
     } else if (!isWindows && *m_dataDir.rbegin() != '/')
       sep = "/";
   }
@@ -255,7 +256,6 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     g_log.warning("There are more than 1 experiment to import. "
                   "Make sure that all of them have the same instrument.");
   }
-  size_t numFileNotLoaded(0);
 
   // Loop through all data files in the experiment
   for (size_t ir = 0; ir < numrows; ++ir) {
@@ -279,7 +279,6 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     spicews = loadSpiceData(filename, loaded, errmsg);
     if (!loaded) {
       g_log.error(errmsg);
-      ++numFileNotLoaded;
       continue;
     }
     if (m_removeBackground) {
@@ -560,7 +559,7 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
 
   errmsg = errss.str();
 
-  return (errmsg.size() == 0);
+  return (errmsg.empty());
 }
 
 //----------------------------------------------------------------------------------------------
