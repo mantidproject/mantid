@@ -166,6 +166,14 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
     const auto numDets = oldInstr.getNumberDetectors();
+    // Currently monitors flags are stored in the detector cache of the base
+    // instrument. The copy being made here is strictly speaking duplicating
+    // that data, but with future refactoring this will no longer be the case.
+    // Note that monitors will not change after creating a workspace.
+    // Instrument::markAsMonitor works only for the base instrument and it is
+    // not possible to obtain a non-const reference to the base instrument in a
+    // workspace. Thus we do not need to worry about the two copies of monitor
+    // flags running out of sync.
     std::vector<size_t> monitors;
     for (size_t i = 0; i < numDets; ++i)
       if (newInstr.isMonitorViaIndex(i))

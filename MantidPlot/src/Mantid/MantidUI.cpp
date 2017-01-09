@@ -55,6 +55,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/LogFilterGenerator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QListWidget>
@@ -1273,6 +1274,7 @@ Table *MantidUI::createDetectorTable(
                                  // value should be displayed
   QVector<QList<QVariant>> tableColValues;
   tableColValues.resize(nrows);
+  const auto &spectrumInfo = ws->spectrumInfo();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like
@@ -1317,31 +1319,34 @@ Table *MantidUI::createDetectorTable(
       }
 
       // Geometry
-      IDetector_const_sptr det = ws->getDetector(wsIndex);
+      if (!spectrumInfo.hasDetectors(wsIndex))
+        throw std::runtime_error("No detectors found.");
       if (!signedThetaParamRetrieved) {
         const std::vector<std::string> &parameters =
-            det->getStringParameter("show-signed-theta", true); // recursive
+            spectrumInfo.detector(wsIndex)
+                .getStringParameter("show-signed-theta", true); // recursive
         showSignedTwoTheta = (!parameters.empty() &&
                               find(parameters.begin(), parameters.end(),
                                    "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
-      // We want the position of the detector relative to the sample
-      Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
       double R(0.0), theta(0.0), phi(0.0);
-      pos.getSpherical(R, theta, phi);
-      // Need to get R, theta through these methods to be correct for grouped
-      // detectors
-      R = det->getDistance(*sample);
+      // R and theta used as dummy variables
+      // Note: phi is the angle around Z, not necessarily the beam direction.
+      spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
+      // R is actually L2 (same as R if sample is at (0,0,0))
+      R = spectrumInfo.l2(wsIndex);
+      // Theta is actually 'twoTheta' (twice the scattering angle), if Z is the
+      // beam direction this corresponds to theta in spherical coordinates.
       try {
-        theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
-                                   : ws->detectorTwoTheta(*det);
+        theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex)
+                                   : spectrumInfo.twoTheta(wsIndex);
         theta *= 180.0 / M_PI; // To degrees
       } catch (const Mantid::Kernel::Exception::InstrumentDefinitionError &ex) {
         // Log the error and leave theta as it is
         g_log.error(ex.what());
       }
-      QString isMonitor = det->isMonitor() ? "yes" : "no";
+      QString isMonitor = spectrumInfo.isMonitor(wsIndex) ? "yes" : "no";
 
       colValues << QVariant(specNo) << QVariant(detIds);
       // Y/E
@@ -1354,8 +1359,10 @@ Table *MantidUI::createDetectorTable(
 
         try {
           // Get unsigned theta and efixed value
+          IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
+                                   Mantid::NoDeleting());
           double efixed = ws->getEFixed(det);
-          double usignTheta = ws->detectorTwoTheta(*det) * 0.5;
+          double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
           double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
           colValues << QVariant(q);
