@@ -107,7 +107,6 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     const auto widthScreen = width();
     const auto heightScreen = height();
 
-    const int numberOfGridLines = 10;
     drawYLines(painter, gridPen, widthScreen, m_yAxisTicks, m_yAngle);
     drawXLines(painter, gridPen, heightScreen, m_xAxisTicks, m_xAngle);
   }
