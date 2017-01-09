@@ -24,6 +24,18 @@ public:
     TS_ASSERT_EQUALS(detInfo->size(), 1);
   }
 
+  void test_constructor_with_monitors() {
+    std::unique_ptr<DetectorInfo> info;
+    std::vector<size_t> mons{0, 2};
+    TS_ASSERT_THROWS_NOTHING(info = Kernel::make_unique<DetectorInfo>(3, mons));
+    TS_ASSERT_EQUALS(info->size(), 3);
+    TS_ASSERT_THROWS_NOTHING(DetectorInfo(3, {}));
+    TS_ASSERT_THROWS_NOTHING(DetectorInfo(3, {0}));
+    TS_ASSERT_THROWS_NOTHING(DetectorInfo(3, {0, 1, 2}));
+    TS_ASSERT_THROWS_NOTHING(DetectorInfo(3, {0, 0, 0}));
+    TS_ASSERT_THROWS(DetectorInfo(3, {3}), std::out_of_range);
+  }
+
   void test_copy() {
     const DetectorInfo source(7);
     const auto copy(source);
@@ -50,6 +62,29 @@ public:
     assignee = std::move(source);
     TS_ASSERT_EQUALS(assignee.size(), 7);
     // TODO once DetectorInfo has moveable fields, check that they are cleared.
+  }
+
+  void test_no_monitors() {
+    DetectorInfo info(3);
+    TS_ASSERT(!info.isMonitor(0));
+    TS_ASSERT(!info.isMonitor(1));
+    TS_ASSERT(!info.isMonitor(2));
+  }
+
+  void test_monitors() {
+    std::vector<size_t> monitors{0, 2};
+    DetectorInfo info(3, monitors);
+    TS_ASSERT(info.isMonitor(0));
+    TS_ASSERT(!info.isMonitor(1));
+    TS_ASSERT(info.isMonitor(2));
+  }
+
+  void test_duplicate_monitors_ignored() {
+    std::vector<size_t> monitors{0, 0, 2, 2};
+    DetectorInfo info(3, monitors);
+    TS_ASSERT(info.isMonitor(0));
+    TS_ASSERT(!info.isMonitor(1));
+    TS_ASSERT(info.isMonitor(2));
   }
 
   void test_masking() {

@@ -12,7 +12,7 @@ DetectorInfo::DetectorInfo(const size_t numberOfDetectors,
                            const std::vector<size_t> &monitorIndices)
     : DetectorInfo(numberOfDetectors) {
   for (const auto i : monitorIndices)
-    m_isMonitor.access()[i] = true;
+    m_isMonitor.access().at(i) = true;
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
