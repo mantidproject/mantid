@@ -231,7 +231,7 @@ void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
   m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
-                                       *worker);
+                                       *worker, "Auto COR");
 }
 
 void TomographyIfacePresenter::emitExternalProcessOutput(const qint64 pid,
@@ -713,7 +713,7 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
 
   m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
-                                       *worker);
+                                       *worker, "Reconstruction");
 }
 
 /** Simply reset the switch that tracks if a recon is running and
@@ -737,10 +737,11 @@ void TomographyIfacePresenter::addProcessToJobList() {
   const qint64 pid = worker->getPID();
   const auto runnable = worker->getRunnable();
   const auto args = worker->getArgs();
+  const auto workerName = worker->getName();
 
   m_workerThread->setProcessPID(pid);
 
-  m_model->addJobToStatus(pid, runnable, args);
+  m_model->addJobToStatus(pid, runnable, args, workerName);
 
   // update here that the reconstruction is running
   m_reconRunning = true;
