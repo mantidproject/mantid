@@ -50,11 +50,11 @@ ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
 """
 
 # find first the package/subpackages in the path of this file.
-# import sys
-# import os
-# from os import path
+import sys
+import os
+from os import path
 # So insert in the path the directory that contains this file
-# sys.path.insert(0, os.path.split(path.dirname(__file__))[0])  # noqa
+sys.path.insert(0, os.path.split(path.dirname(__file__))[0])  # noqa
 
 from tomorec import reconstruction_command as tomocmd
 import tomorec.configs as tomocfg
@@ -274,9 +274,6 @@ def grab_preproc_options(args):
     pre_config.input_dir_flat = args.input_path_flat
     pre_config.input_dir_dark = args.input_path_dark
 
-    # temporary for now, but might be left here
-    pre_config.output_dir = args.output_path
-
     if args.in_img_format:
         pre_config.in_img_format = args.in_img_format
 
@@ -368,11 +365,15 @@ def main_tomo_rec():
     # several dependencies (numpy, scipy) are too out-of-date in standard Python 2.6
     # distributions, as found for example on rhel6
 
-    import sys
     vers = sys.version_info
     if vers < (2, 7, 0):
         raise RuntimeError(
-            "Not running this test as it requires Python >= 2.7. Version found: {0}".format(vers))
+            "Not running this test as it requires Python >= 2.7. Version found: {0}".
+            format(vers))
+
+    import inspect
+
+    import IMAT.tomorec.io as tomoio
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()
@@ -386,31 +387,24 @@ def main_tomo_rec():
     cfg = tomocfg.ReconstructionConfig(preproc_config, alg_config,
                                        postproc_config)
 
+    # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
-
     # start the whole execution timer
-    # cmd.tomo_total_timer()
+    cmd.tomo_total_timer()
 
-    import pydevd
-    pydevd.settrace('localhost', port=61845, stdoutToServer=True, stderrToServer=True)
-
-    if args.find_cor:
-        # cmd.tomo_print(" >>> Finding COR <<<")
-        # cmd.find_center(cfg)
-        pass
+    if (args.find_cor):
+        cmd.tomo_print(" >>> Finding COR <<<")
+        cmd.find_center(cfg)
     else:
-        import os
-        import inspect
-        import tomorec.io as tomoio
         # Save myself early. Save command this command line script and all packages/subpackages
         tomoio.self_save_zipped_scripts(
             args.output_path,
             os.path.abspath(inspect.getsourcefile(lambda: 0)))
-        # cmd.tomo_print(" >>> Running reconstruction <<<")
+        cmd.tomo_print(" >>> Running reconstruction <<<")
         cmd.do_recon(cfg, cmd_line=cmd_line)
 
     # end the whole execution timer
-    # cmd.tomo_total_timer()
+    cmd.tomo_total_timer()
 
 
 if __name__ == '__main__':

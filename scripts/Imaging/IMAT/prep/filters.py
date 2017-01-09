@@ -21,18 +21,6 @@
 import numpy as np
 
 
-def _debug_print_memory_usage_linux(message=""):
-    try:
-        # Windows doesn't seem to have resource package, so this will silently fail
-        import resource
-        print(" >> Memory usage " +
-              str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + " KB, " +
-              str(int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) / 1024) +
-              " MB", message)
-    except Exception:
-        pass
-
-
 def scale_down(data_vol, block_size, method='average'):
     """
     Downscale to for example shrink 1Kx1K images to 512x512
@@ -102,16 +90,14 @@ def crop_vol(data_vol, coords):
     elif not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError("Wrong data volume when trying to crop: {0}".format(
             data_vol))
-
     # move into named variables for ease of use
     left = coords[0]
     top = coords[1]
     right = coords[2]
     bottom = coords[3]
 
-    _debug_print_memory_usage_linux(", before crop")
-
-    if not any(coords) or top >= bottom or left >= right:
+    cropped_data = None
+    if not any(coords) or top > bottom or left > right:
         # skip if for example: 0, 0, 0, 0 (empty selection)
         print(" ! No coordinates given, not cropping the images")
         return data_vol
@@ -121,8 +107,6 @@ def crop_vol(data_vol, coords):
             "these coordinates: {0}".format(coords))
     else:
         cropped_data = data_vol[:, top:bottom, left:right]
-
-    _debug_print_memory_usage_linux(", after crop")
 
     return cropped_data
 
@@ -180,12 +164,12 @@ def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
     Applies a circular mask on a 3D volume. The mask is applied along the z axis (first
     dimension of the numpy shape)
 
-    :param data_vol :: 3D data volume
-    :param ratio :: radius of the mask relative to the radius of the smallest from the
+    @param data_vol :: 3D data volume
+    @param ratio :: radius of the mask relative to the radius of the smallest from the
     x and y dimensions/edges
-    :param mask_out_val :: value to use when masking out pixels outside of the mask radius
+    @param mask_out_val :: value to use when masking out pixels outside of the mask radius
 
-    :return :: masked volume
+    Returns :: masked volume
     """
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError(
@@ -221,4 +205,4 @@ def _calc_mask(ydim, xdim, ratio):
                               + radius_x]
 
     small_radius2 *= ratio * ratio
-    return (y_mask * y_mask + x_mask * x_mask) < small_radius2
+    return (y_mask * y_mask + x_mask * x_mask) < (small_radius2)
