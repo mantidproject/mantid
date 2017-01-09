@@ -101,16 +101,16 @@ public:
         .WillOnce(Return("MultiDetectorAnalysis"));
     EXPECT_CALL(mockView, getCRho())
         .Times(Exactly(1))
-        .WillOnce(Return("\"2.5,0.4,1.1\""));
+        .WillOnce(Return("2.5,0.4,1.1"));
     EXPECT_CALL(mockView, getCAlpha())
         .Times(Exactly(1))
-        .WillOnce(Return("\"0.6,0.9,1.2\""));
+        .WillOnce(Return("0.6,0.9,1.2"));
     EXPECT_CALL(mockView, getCAp())
         .Times(Exactly(1))
-        .WillOnce(Return("\"100.0,17.0,44.0\""));
+        .WillOnce(Return("100.0,17.0,44.0"));
     EXPECT_CALL(mockView, getCPp())
         .Times(Exactly(1))
-        .WillOnce(Return("\"0.54,0.33,1.81\""));
+        .WillOnce(Return("0.54,0.33,1.81"));
     EXPECT_CALL(mockView, getDirectBeam())
         .Times(Exactly(1))
         .WillOnce(Return("\"0,3\""));
@@ -219,11 +219,13 @@ public:
     presenter.setInstrumentName("POLREF");
 
     std::vector<std::string> defaults = {
-        "PointDetectorAnalysis", "None",
-        "\"1.006831,-0.011467,0.002244,-0.000095\"",
-        "\"1.017526,-0.017183,0.003136,-0.000140\"",
-        "\"0.917940,0.038265,-0.006645,0.000282\"",
-        "\"0.972762,0.001828,-0.000261,0.0\"", "1"};
+        "PointDetectorAnalysis",
+        "None",
+        "1.006831,-0.011467,0.002244,-0.000095",
+        "1.017526,-0.017183,0.003136,-0.000140",
+        "0.917940,0.038265,-0.006645,0.000282",
+        "0.972762,0.001828,-0.000261,0.0",
+        "1"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);

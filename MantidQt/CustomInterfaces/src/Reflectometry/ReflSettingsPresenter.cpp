@@ -1,12 +1,12 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
-#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
+#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
@@ -127,28 +127,28 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
   // Add CRho
   auto crho = m_view->getCRho();
   if (!crho.empty()) {
-    quoteWrap(crho);
+    wrapWithQuotes(crho);
     options.push_back("CRho=" + crho);
   }
 
   // Add CAlpha
   auto calpha = m_view->getCAlpha();
   if (!calpha.empty()) {
-    quoteWrap(calpha);
+    wrapWithQuotes(calpha);
     options.push_back("CAlpha=" + calpha);
   }
 
   // Add CAp
   auto cap = m_view->getCAp();
   if (!cap.empty()) {
-    quoteWrap(cap);
+    wrapWithQuotes(cap);
     options.push_back("CAp=" + cap);
   }
 
   // Add CPp
   auto cpp = m_view->getCPp();
   if (!cpp.empty()) {
-    quoteWrap(cpp);
+    wrapWithQuotes(cpp);
     options.push_back("CPp=" + cpp);
   }
 
@@ -300,19 +300,19 @@ void ReflSettingsPresenter::getExpDefaults() {
 
   auto cRho = inst->getStringParameter("crho");
   if (!cRho.empty())
-    defaults[2] = "\"" + cRho[0] + "\"";
+    defaults[2] = cRho[0];
 
   auto cAlpha = inst->getStringParameter("calpha");
   if (!cAlpha.empty())
-    defaults[3] = "\"" + cAlpha[0] + "\"";
+    defaults[3] = cAlpha[0];
 
   auto cAp = inst->getStringParameter("cAp");
   if (!cAp.empty())
-    defaults[4] = "\"" + cAp[0] + "\"";
+    defaults[4] = cAp[0];
 
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
-    defaults[5] = "\"" + cPp[0] + "\"";
+    defaults[5] = cPp[0];
 
   defaults[6] = alg->getPropertyValue("ScaleFactor");
 
@@ -322,7 +322,7 @@ void ReflSettingsPresenter::getExpDefaults() {
 /** Wraps string with quote marks if it does not already have them
 * @param str :: [input] The string to be wrapped
 */
-void ReflSettingsPresenter::quoteWrap(std::string &str) const {
+void ReflSettingsPresenter::wrapWithQuotes(std::string &str) const {
   if (str.front() != '\"')
     str = "\"" + str;
   if (str.back() != '\"')
