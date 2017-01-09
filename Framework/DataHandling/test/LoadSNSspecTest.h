@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadSNSspec.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;

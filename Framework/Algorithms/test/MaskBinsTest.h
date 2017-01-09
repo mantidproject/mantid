@@ -5,7 +5,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/MaskBins.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -34,7 +33,7 @@ public:
     const std::string resultWorkspaceName("masked");
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
     ads.add(workspaceName,
-            WorkspaceCreationHelper::Create2DWorkspaceBinned(5, 25, 0.0));
+            WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
 
     TS_ASSERT_THROWS_NOTHING(
         masker.setPropertyValue("InputWorkspace", workspaceName));
@@ -90,7 +89,7 @@ public:
     // Create a dummy workspace
     const std::string workspaceName("raggedMask");
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0);
     // Now change one set of bin boundaries so that the don't match the others
     WS->mutableX(1) += -10;
     AnalysisDataService::Instance().add(workspaceName, WS);
@@ -129,7 +128,7 @@ public:
     // Create a dummy workspace
     const std::string workspaceName("raggedMask");
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 10, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -150,7 +149,7 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -182,7 +181,7 @@ public:
 
     int nBins = 10;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -224,7 +223,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -259,7 +258,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -299,7 +298,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
     std::size_t events_before = WS->getNumberEvents();
 
@@ -334,7 +333,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
     std::size_t events_before = WS->getNumberEvents();
 

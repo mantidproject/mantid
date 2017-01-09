@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/RefRoi.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "Poco/String.h"
 
@@ -77,7 +75,7 @@ void RefRoi::exec() {
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Bin boundaries need to be the same, so do the full check on whether they
   // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error()
         << "Can only group if the histograms have common bin boundaries\n";
     throw std::invalid_argument(

@@ -6,6 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::API;
@@ -224,7 +225,7 @@ public:
   }
   MatrixWorkspace_sptr createWorkspace() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(4, 4, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
 
     return inputWS;
   }

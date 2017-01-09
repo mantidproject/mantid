@@ -164,7 +164,7 @@ void parseISISStringToVector(const std::string &ins,
       temps.insert(temps.begin() + 1, "-");
       splitstrings.erase(splitstrings.begin() + index);
       for (size_t ic = 0; ic < 3; ic++) {
-        if (temps[ic].size() > 0) {
+        if (!temps[ic].empty()) {
           splitstrings.insert(splitstrings.begin() + index, temps[ic]);
           index++;
         }

@@ -442,12 +442,12 @@ void EQSANSLoad::exec() {
   // live data reduction (when it's implemented...)
   const std::string fileName = getPropertyValue("Filename");
   EventWorkspace_sptr inputEventWS = getProperty("InputWorkspace");
-  if (fileName.size() == 0 && !inputEventWS) {
+  if (fileName.empty() && !inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
                      "input workspace must be provided\n";
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided");
-  } else if (fileName.size() > 0 && inputEventWS) {
+  } else if (!fileName.empty() && inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
                      "input workspace must be provided, but not both\n";
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
@@ -607,7 +607,7 @@ void EQSANSLoad::exec() {
 
   // Process the config file
   bool use_config = getProperty("UseConfig");
-  if (use_config && config_file.size() > 0) {
+  if (use_config && !config_file.empty()) {
     // Special case to force reading the beam center from the config file
     // We're adding this to be compatible with the original EQSANS load
     // written in python

@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
@@ -15,7 +12,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -112,7 +112,7 @@ void GroupDetectors2::exec() {
   const size_t numInHists = inputWS->getNumberHistograms();
   // Bin boundaries need to be the same, so do the full check on whether they
   // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error()
         << "Can only group if the histograms have common bin boundaries\n";
     throw std::invalid_argument(
@@ -219,7 +219,7 @@ void GroupDetectors2::execEvent() {
           "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
           inputWS->x(0).size(), inputWS->blocksize()));
   // Copy geometry over.
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, true);
 
   // prepare to move the requested histograms into groups, first estimate how
   // long for progress reporting. +1 in the demonator gets rid of any divide by
@@ -925,6 +925,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
@@ -942,7 +943,6 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    const auto &spectrumInfo = inputWS->spectrumInfo();
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
@@ -1021,6 +1021,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
@@ -1044,12 +1045,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
 
       // detectors to add to the output spectrum
       outEL.addDetectorIDs(fromEL.getDetectorIDs());
-      try {
-        Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
-        if (!det->isMasked())
-          ++nonMaskedSpectra;
-      } catch (Exception::NotFoundError &) {
-        // If a detector cannot be found, it cannot be masked
+      if (!isMaskedDetector(spectrumInfo, originalWI)) {
         ++nonMaskedSpectra;
       }
     }

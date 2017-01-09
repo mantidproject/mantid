@@ -44,7 +44,6 @@
 #include <QBitmap>
 #include <QClipboard>
 #include <QCursor>
-#include <QFileDialog>
 #include <QImageWriter>
 #include <QMessageBox>
 #include <QPixmap>

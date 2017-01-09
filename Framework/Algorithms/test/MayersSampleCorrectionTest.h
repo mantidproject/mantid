@@ -109,12 +109,12 @@ private:
     using Mantid::Kernel::Material;
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
-    using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+    using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
     const int nhist(1), nbins(100);
     const double xstart(99.5), deltax(1.0);
     // Filled Y with 2.0 and E with sqrt(2)
-    auto testWS = Create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
+    auto testWS = create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
 
     const int nbanks(1);
     // Ids 1->9
@@ -147,7 +147,7 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceWithNoInstrument() {
     const int nhist(1), nbins(1);
     const double xstart(99.5), deltax(1.0);
-    return WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins,
+    return WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins,
                                                             xstart, deltax);
   }
 
@@ -156,11 +156,11 @@ private:
     using Mantid::Geometry::ObjComponent;
     using Mantid::Geometry::Object;
     using Mantid::Kernel::V3D;
-    using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+    using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
     const int nhist(1), nbins(1);
     const double xstart(99.5), deltax(1.0);
-    auto testWS = Create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
+    auto testWS = create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
 
     const int nbanks(1);
     auto testInst = createTestInstrumentCylindrical(nbanks, V3D(0., 0., -14.));

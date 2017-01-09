@@ -2,6 +2,7 @@
 #define PARAMETERMAPTEST_H_
 
 #include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

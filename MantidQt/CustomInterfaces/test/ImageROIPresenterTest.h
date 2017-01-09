@@ -3,6 +3,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
 #include "MantidTestHelpers/FakeObjects.h"
 

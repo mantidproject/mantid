@@ -12,7 +12,9 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/LiveListenerInfo.h"
 #include <QtGui>
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
@@ -21,6 +23,7 @@ using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
 using Mantid::Kernel::DateAndTime;
+using Mantid::Kernel::ConfigService;
 
 namespace {
 class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
@@ -68,6 +71,9 @@ typedef Mantid::Kernel::SingletonHolder<
 namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(StartLiveDataDialog)
+
+// Initialize static members
+const QString StartLiveDataDialog::CUSTOM_CONNECTION = "[Custom]";
 
 //----------------------
 // Public member functions
@@ -174,13 +180,22 @@ void StartLiveDataDialog::initLayout() {
     }
   }
 
+  //=========== Load Listener Class Names =============
+  // Add available listeners to combo box
+  ui.cmbConnListener->clear();
+  std::vector<std::string> listeners =
+      Mantid::API::LiveListenerFactory::Instance().getKeys();
+  for (const auto &listener : listeners) {
+    ui.cmbConnListener->addItem(QString::fromStdString(listener));
+  }
+
+  //=========== Update UI Elements =============
   radioPostProcessClicked();
-  setDefaultAccumulationMethod(ui.cmbInstrument->currentText());
   updateUiElements(ui.cmbInstrument->currentText());
-
-  //=========== Listener's properties =============
-
-  initListenerPropLayout(ui.cmbInstrument->currentText());
+  updateConnectionChoices(ui.cmbInstrument->currentText());
+  updateConnectionDetails(ui.cmbConnection->currentText());
+  setDefaultAccumulationMethod(ui.cmbConnListener->currentText());
+  initListenerPropLayout(ui.cmbConnListener->currentText());
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this,
@@ -211,12 +226,17 @@ void StartLiveDataDialog::initLayout() {
   connect(ui.chkPreserveEvents, SIGNAL(toggled(bool)), this,
           SLOT(chkPreserveEventsToggled()));
 
-  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(setDefaultAccumulationMethod(const QString &)));
-  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(initListenerPropLayout(const QString &)));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(setDefaultAccumulationMethod(const QString &)));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(initListenerPropLayout(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateUiElements(const QString &)));
+  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(updateConnectionChoices(const QString &)));
+
+  connect(ui.cmbConnection, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(updateConnectionDetails(const QString &)));
 
   QLayout *buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
@@ -226,6 +246,11 @@ void StartLiveDataDialog::initLayout() {
 /// Parse input when the dialog is accepted
 void StartLiveDataDialog::parseInput() {
   storePropertyValue("Instrument", ui.cmbInstrument->currentText());
+
+  // "Connection" property does not need to be set, since these override it
+  storePropertyValue("Listener", ui.cmbConnListener->currentText());
+  storePropertyValue("Address", ui.edtConnAddress->text());
+
   storePropertyValue("AccumulationMethod",
                      ui.cmbAccumulationMethod->currentText());
 
@@ -323,10 +348,11 @@ void StartLiveDataDialog::changePostProcessingAlgorithm() {
 //------------------------------------------------------------------------------
 /** Slot called when picking a different instrument.
  *  Disables the 'Add' option if the listener is going to pass back histograms.
- *  @param inst :: The instrument name.
+ *  @param listener :: The listener class name.
  */
-void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &inst) {
-  if (inst.isEmpty())
+void StartLiveDataDialog::setDefaultAccumulationMethod(
+    const QString &listener) {
+  if (listener.isEmpty())
     return;
   try {
     // Make sure 'Add' is enabled ahead of the check (the check may throw)
@@ -338,12 +364,14 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &inst) {
     // Check whether this listener will give back events. If not, disable 'Add'
     // as an option
     // The 'false' 2nd argument means don't connect the created listener
+    Mantid::Kernel::LiveListenerInfo info(listener.toStdString());
     if (!Mantid::API::LiveListenerFactory::Instance()
-             .create(inst.toStdString(), false)
+             .create(info, false)
              ->buffersEvents()) {
       // If 'Add' is currently selected, select 'Replace' instead
       if (ui.cmbAccumulationMethod->currentIndex() == addIndex) {
-        ui.cmbAccumulationMethod->setItemText(-1, "Replace");
+        int replaceIndex = ui.cmbAccumulationMethod->findText("Replace");
+        ui.cmbAccumulationMethod->setCurrentIndex(replaceIndex);
       }
       // Disable the 'Add' option in the combobox. It just wouldn't make sense.
       ui.cmbAccumulationMethod->setItemData(addIndex, false, Qt::UserRole - 1);
@@ -390,7 +418,12 @@ void StartLiveDataDialog::accept() {
   AlgorithmDialog::accept(); // accept executes the algorithm
 }
 
-void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
+/**
+ * Update the Listener Properties group box for the current LiveListener.
+ *
+ * @param listener Name of the LiveListener class that is selected
+ */
+void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
   // remove previous listener's properties
   auto props = m_algorithm->getPropertiesInGroup("ListenerProperties");
   for (auto prop = props.begin(); prop != props.end(); ++prop) {
@@ -401,7 +434,9 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
   }
 
   // update algorithm's properties
-  m_algorithm->setPropertyValue("Instrument", inst.toStdString());
+  m_algorithm->setPropertyValue("Instrument",
+                                ui.cmbInstrument->currentText().toStdString());
+  m_algorithm->setPropertyValue("Listener", listener.toStdString());
   // create or clear the layout
   QLayout *layout = ui.listenerProps->layout();
   if (!layout) {
@@ -438,6 +473,62 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
     tie(propWidget, propName, gridLayout);
   }
   ui.listenerProps->setVisible(true);
+}
+
+/**
+ * Slot to update list of available connections when instrument is changed
+ *
+ * @param inst_name Name of selected instrument
+ */
+void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
+  // Reset the connections listed
+  ui.cmbConnection->clear();
+  ui.cmbConnection->addItem(CUSTOM_CONNECTION);
+
+  // Add available LiveListenerInfo names based on selected instrument
+  const auto &inst =
+      ConfigService::Instance().getInstrument(inst_name.toStdString());
+  for (const auto &listener : inst.liveListenerInfoList()) {
+    ui.cmbConnection->addItem(QString::fromStdString(listener.name()));
+  }
+
+  // Select default item
+  auto selectName = QString::fromStdString(inst.liveListenerInfo().name());
+  auto index = ui.cmbConnection->findText(selectName);
+  ui.cmbConnection->setCurrentIndex(index);
+}
+
+/**
+ * Slot to update connection parameters when connection selected
+ *
+ * @param connection Name of selected live listener connection
+ */
+void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
+  // Custom connections just enable editting connection parameters
+  if (connection == CUSTOM_CONNECTION) {
+    ui.cmbConnListener->setEnabled(true);
+    ui.edtConnAddress->setEnabled(true);
+    return;
+  }
+
+  // User shouldn't be able to edit values loaded from Facilities.xml
+  ui.cmbConnListener->setEnabled(false);
+  ui.edtConnAddress->setEnabled(false);
+
+  // Get live listener for select instrument and connection
+  const auto &inst = ConfigService::Instance().getInstrument(
+      ui.cmbInstrument->currentText().toStdString());
+  const auto &info = inst.liveListenerInfo(connection.toStdString());
+
+  // Select correct listener
+  auto listener = QString::fromStdString(info.listener());
+  auto index = ui.cmbConnListener->findText(listener);
+  ui.cmbConnListener->setCurrentIndex(index);
+
+  // Set address text box
+  auto address = QString::fromStdString(info.address());
+  ui.edtConnAddress->setText(address);
+  ui.edtConnAddress->home(false); // display long lines from beginning, not end
 }
 }
 }

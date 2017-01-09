@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/SolidAngle.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -81,6 +82,7 @@ void SolidAngle::exec() {
   setProperty("OutputWorkspace", outputWS);
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &detectorInfo = inputWS->detectorInfo();
   const Kernel::V3D samplePos = spectrumInfo.samplePosition();
   g_log.debug() << "Sample position is " << samplePos << '\n';
 
@@ -96,10 +98,12 @@ void SolidAngle::exec() {
     if (spectrumInfo.hasDetectors(i)) {
       // Copy over the spectrum number & detector IDs
       outputWS->getSpectrum(j).copyInfoFrom(inputWS->getSpectrum(i));
-      // Solid angle should be zero if detector is masked ('dead')
-      const double solidAngle =
-          spectrumInfo.isMasked(i) ? 0.0 : spectrumInfo.detector(i)
-                                               .solidAngle(samplePos);
+      double solidAngle = 0.0;
+      for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
+        const auto index = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(index))
+          solidAngle += detectorInfo.detector(index).solidAngle(samplePos);
+      }
 
       outputWS->mutableX(j)[0] = inputWS->x(i).front();
       outputWS->mutableX(j)[1] = inputWS->x(i).back();

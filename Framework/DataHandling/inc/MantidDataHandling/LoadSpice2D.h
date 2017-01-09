@@ -1,9 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LoadSpice2D_H
 #define MANTID_DATAHANDLING_LoadSpice2D_H
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/XmlHandler.h"
@@ -11,8 +9,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-
-//----------------------------------------------------------------------
 
 namespace Poco {
 namespace XML {

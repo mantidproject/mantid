@@ -8,11 +8,18 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid {
-//----------------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------------
+
+namespace Indexing {
+class IndexInfo;
+}
+
+namespace Kernel {
+class DateAndTime;
+}
+
 namespace Geometry {
 class ParameterMap;
 }
@@ -67,9 +74,12 @@ public:
   // axes.
   friend class WorkspaceFactoryImpl;
 
-  /// Initialize
   void initialize(const std::size_t &NVectors, const std::size_t &XLength,
                   const std::size_t &YLength);
+  void initialize(const std::size_t &NVectors,
+                  const HistogramData::Histogram &histogram);
+  void initialize(const Indexing::IndexInfo &indexInfo,
+                  const HistogramData::Histogram &histogram);
 
   MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
   /// Delete
@@ -77,6 +87,14 @@ public:
 
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
+
+  /// Returns a default-initialized clone of the workspace
+  MatrixWorkspace_uptr cloneEmpty() const {
+    return MatrixWorkspace_uptr(doCloneEmpty());
+  }
+
+  const Indexing::IndexInfo &indexInfo() const;
+  void setIndexInfo(const Indexing::IndexInfo &indexInfo);
 
   using IMDWorkspace::toString;
   /// String description of state
@@ -421,9 +439,6 @@ public:
   bool isDistribution() const;
   void setDistribution(bool newValue);
 
-  /// Mask a given workspace index, setting the data and error values to zero
-  void maskWorkspaceIndex(const std::size_t index);
-
   // Methods to set and access masked bins
   void maskBin(const size_t &workspaceIndex, const size_t &binIndex,
                const double &weight = 1.0);
@@ -528,6 +543,10 @@ public:
   // End image methods
   //=====================================================================================
 
+  size_t numberOfDetectorGroups() const override;
+  const std::set<detid_t> &
+  detectorIDsInGroup(const size_t index) const override;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
@@ -538,6 +557,8 @@ protected:
   /// be overloaded.
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength) = 0;
+  virtual void init(const std::size_t &NVectors,
+                    const HistogramData::Histogram &histogram) = 0;
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
@@ -550,6 +571,7 @@ protected:
 
 private:
   MatrixWorkspace *doClone() const override = 0;
+  virtual MatrixWorkspace *doCloneEmpty() const = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr
@@ -559,6 +581,13 @@ private:
   /// Copy data from an image.
   void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t),
                 const MantidImage &image, size_t start, bool parallelExecution);
+
+  // Helper functions for IndexInfo, as a workaround while spectrum numbers and
+  // detector IDs are still stored in ISpectrum.
+  specnum_t spectrumNumber(const size_t index) const;
+  const std::set<detid_t> &detectorIDs(const size_t index) const;
+
+  std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
 
   /// Has this workspace been initialised?
   bool m_isInitialized{false};
