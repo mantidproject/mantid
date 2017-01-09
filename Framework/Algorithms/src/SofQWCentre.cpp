@@ -151,76 +151,77 @@ void SofQWCentre::exec() {
 
     // Loop over the detectors and for each bin calculate Q
     for (const auto detID : detIDs) {
-      size_t idet;
       try {
-        idet = detectorInfo.indexOf(detID);
+        size_t idet = detectorInfo.indexOf(detID);
+        // Calculate kf vector direction and then Q for each energy bin
+        V3D scatterDir =
+            (detectorInfo.position(idet) - detectorInfo.samplePosition());
+        scatterDir.normalize();
+        for (size_t j = 0; j < numBins; ++j) {
+          const double deltaE = 0.5 * (X[j] + X[j + 1]);
+          // Compute ki and kf wave vectors and therefore q = ki - kf
+          double ei(0.0), ef(0.0);
+          if (emode == 1) {
+            ei = efixed;
+            ef = efixed - deltaE;
+            if (ef < 0) {
+              std::string mess =
+                  "Energy transfer requested in Direct mode exceeds incident "
+                  "energy.\n Found for det ID: " +
+                  std::to_string(idet) + " bin No " + std::to_string(j) +
+                  " with Ei=" + boost::lexical_cast<std::string>(efixed) +
+                  " and energy transfer: " +
+                  boost::lexical_cast<std::string>(deltaE);
+              throw std::runtime_error(mess);
+            }
+          } else {
+            ei = efixed + deltaE;
+            ef = efixed;
+            if (ef < 0) {
+              std::string mess =
+                  "Incident energy of a neutron is negative. Are you trying to "
+                  "process Direct data in Indirect mode?\n Found for det ID: " +
+                  std::to_string(idet) + " bin No " + std::to_string(j) +
+                  " with efied=" + boost::lexical_cast<std::string>(efixed) +
+                  " and energy transfer: " +
+                  boost::lexical_cast<std::string>(deltaE);
+              throw std::runtime_error(mess);
+            }
+          }
+
+          if (ei < 0)
+            throw std::runtime_error(
+                "Negative incident energy. Check binning.");
+
+          const V3D ki = beamDir * sqrt(energyToK * ei);
+          const V3D kf = scatterDir * (sqrt(energyToK * (ef)));
+          const double q = (ki - kf).norm();
+
+          // Test whether it's in range of the Q axis
+          if (q < verticalAxis.front() || q > verticalAxis.back())
+            continue;
+          // Find which q bin this point lies in
+          const MantidVec::difference_type qIndex =
+              std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) -
+              verticalAxis.begin() - 1;
+
+          // Add this spectra-detector pair to the mapping
+          specNumberMapping.push_back(
+              outputWorkspace->getSpectrum(qIndex).getSpectrumNo());
+          detIDMapping.push_back(detID);
+
+          // And add the data and it's error to that bin, taking into account
+          // the number of detectors contributing to this bin
+          outputWorkspace->mutableY(qIndex)[j] += Y[j] / numDets_d;
+          // Standard error on the average
+          outputWorkspace->mutableE(qIndex)[j] =
+              sqrt((pow(outputWorkspace->e(qIndex)[j], 2) + pow(E[j], 2)) /
+                   numDets_d);
+        }
       } catch (std::out_of_range &) {
         // Skip invalid detector IDs
         numDets_d -= 1.0;
         continue;
-      }
-      // Calculate kf vector direction and then Q for each energy bin
-      V3D scatterDir =
-          (detectorInfo.position(idet) - detectorInfo.samplePosition());
-      scatterDir.normalize();
-      for (size_t j = 0; j < numBins; ++j) {
-        const double deltaE = 0.5 * (X[j] + X[j + 1]);
-        // Compute ki and kf wave vectors and therefore q = ki - kf
-        double ei(0.0), ef(0.0);
-        if (emode == 1) {
-          ei = efixed;
-          ef = efixed - deltaE;
-          if (ef < 0) {
-            std::string mess =
-                "Energy transfer requested in Direct mode exceeds incident "
-                "energy.\n Found for det ID: " +
-                std::to_string(idet) + " bin No " + std::to_string(j) +
-                " with Ei=" + boost::lexical_cast<std::string>(efixed) +
-                " and energy transfer: " +
-                boost::lexical_cast<std::string>(deltaE);
-            throw std::runtime_error(mess);
-          }
-        } else {
-          ei = efixed + deltaE;
-          ef = efixed;
-          if (ef < 0) {
-            std::string mess =
-                "Incident energy of a neutron is negative. Are you trying to "
-                "process Direct data in Indirect mode?\n Found for det ID: " +
-                std::to_string(idet) + " bin No " + std::to_string(j) +
-                " with efied=" + boost::lexical_cast<std::string>(efixed) +
-                " and energy transfer: " +
-                boost::lexical_cast<std::string>(deltaE);
-            throw std::runtime_error(mess);
-          }
-        }
-
-        if (ei < 0)
-          throw std::runtime_error("Negative incident energy. Check binning.");
-
-        const V3D ki = beamDir * sqrt(energyToK * ei);
-        const V3D kf = scatterDir * (sqrt(energyToK * (ef)));
-        const double q = (ki - kf).norm();
-
-        // Test whether it's in range of the Q axis
-        if (q < verticalAxis.front() || q > verticalAxis.back())
-          continue;
-        // Find which q bin this point lies in
-        const MantidVec::difference_type qIndex =
-            std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) -
-            verticalAxis.begin() - 1;
-
-        // Add this spectra-detector pair to the mapping
-        specNumberMapping.push_back(
-            outputWorkspace->getSpectrum(qIndex).getSpectrumNo());
-        detIDMapping.push_back(detID);
-
-        // And add the data and it's error to that bin, taking into account
-        // the number of detectors contributing to this bin
-        outputWorkspace->mutableY(qIndex)[j] += Y[j] / numDets_d;
-        // Standard error on the average
-        outputWorkspace->mutableE(qIndex)[j] = sqrt(
-            (pow(outputWorkspace->e(qIndex)[j], 2) + pow(E[j], 2)) / numDets_d);
       }
     }
     prog.report();
