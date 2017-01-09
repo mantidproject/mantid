@@ -2,7 +2,8 @@ import numpy as np
 import math
 
 from Instrument import Instrument
-from AbinsModules import AbinsParameters, AbinsConstants
+from AbinsModules import AbinsParameters
+from AbinsModules import AbinsConstants
 from AbinsModules.KpointsData import KpointsData
 
 
@@ -13,8 +14,8 @@ class TwoDMap(Instrument):
         self._name = name
         self._sigma = AbinsParameters.delta_width
         q_points = self._make_q_point_mesh()
-        temp_q_powder = np.ravel(np.multiply(q_points, q_points))
-        self._q_powder, self._q_powder_multipliticies = self._calculate_multiplicities(q_powder=temp_q_powder)
+        temp_q_powder = np.ravel(q_points * q_points)
+        self._calculate_multiplicities(q_powder=temp_q_powder)
 
     def calculate_q_powder(self, input_data=None):
         """
@@ -25,22 +26,45 @@ class TwoDMap(Instrument):
 
             return self._q_powder[input_data]
         else:
-            raise ValueError("Invalid Q index.")
+            raise ValueError("Invalid Q index. (q_index = %s )" % input_data)
 
+    # noinspection PyMethodMayBeStatic
     def _calculate_multiplicities(self, q_powder=None):
+        """
+        Calculates how many times each element of Q2 occurs.
+        :param q_powder: 1D array with Q2
+        """
 
-        ones = np.ones(shape=q_powder, dtype=AbinsConstants.FLOAT_TYPE)
+        ones = np.ones(shape=q_powder.size, dtype=AbinsConstants.FLOAT_TYPE)
         bins = np.arange(start=AbinsParameters.q2_start, step=AbinsParameters.q2_step, stop=AbinsParameters.q2_end,
                          dtype=AbinsConstants.FLOAT_TYPE)
-        indices = np.digitize(q_powdern, bins=bins)
-        multiplicities =np.asarray(a=[ones[indices == i].sum() for i in range(AbinsConstants.FIRST_BIN_INDEX, bins)],
-                                   dtype=AbinsConstants.FLOAT_TYPE)
 
-        return bins[AbinsConstants.FIRST_BIN_INDEX:], multiplicities
+        if q_powder.size > bins.size:
+
+            indices = np.digitize(q_powder, bins=bins)
+            multiplicities = np.asarray(a=[ones[indices == i].sum()
+                                           for i in range(AbinsConstants.FIRST_BIN_INDEX, bins.size)],
+                                        dtype=AbinsConstants.FLOAT_TYPE)
+            q2_rebined = bins[AbinsConstants.FIRST_BIN_INDEX:]
+
+        else:
+
+            multiplicities = ones
+            q2_rebined = q_powder
+
+        self._q_powder_multiplicities = multiplicities
+        self._q_powder = q2_rebined
 
     def get_q_powder_size(self):
         return self._q_powder.size
 
+    def get_q(self):
+        return self._q_powder
+
+    def get_multiplicities(self):
+        return self._q_powder_multiplicities
+
+    # noinspection PyMethodMayBeStatic
     def _make_q_point_mesh(self):
         """
         Constructs Q vectors from Q grid.
@@ -70,7 +94,7 @@ class TwoDMap(Instrument):
 
         dimensions = 3
         total_q_num = AbinsParameters.q_mesh[0] * AbinsParameters.q_mesh[1] * AbinsParameters.q_mesh[2]
-        q_point_mesh = np.zeros((total_q_num, dimensions), dtype=AbinsParameters.float_type)
+        q_point_mesh = np.zeros((total_q_num, dimensions), dtype=AbinsConstants.FLOAT_TYPE)
         n_q = 0
 
         for i1 in range(i1min, i1max + 1):
@@ -81,13 +105,7 @@ class TwoDMap(Instrument):
                                             float(i3) / float(AbinsParameters.q_mesh[2])]
                 n_q += 1
 
-        _num_k = self._k_points_data.extract()["frequencies"].shape[0]
-        q_points = np.zeros((_num_k, total_q_num, dimensions), dtype=AbinsParameters.float_type)
-
-        for _k in range(_num_k):
-            q_points[_k, :, :] = q_point_mesh  # no need to use np.copy here
-
-        return q_points
+        return q_point_mesh
 
     def convolve_with_resolution_function(self, frequencies=None, s_dft=None, points_per_peak=None, start=None):
         """
@@ -104,39 +122,61 @@ class TwoDMap(Instrument):
             broadened_spectrum = s_dft
 
         else:
-
             # freq_num: number of transition energies for the given quantum order event
+
+            # sigma[freq_num]
+            sigma = np.zeros(shape=frequencies.size, dtype=AbinsConstants.FLOAT_TYPE)
+            sigma.fill(self._sigma)
+
+            # start[freq_num]
+            start = frequencies - AbinsParameters.fwhm * sigma
+
+            # stop[freq_num]
+            stop = frequencies + AbinsParameters.fwhm * sigma
+
+            # step[freq_num]
+            step = (stop - start) / float((AbinsParameters.pkt_per_peak - 1))
+
+            # matrix_step[freq_num, AbinsParameters.pkt_per_peak]
+            matrix_step = np.array([step, ] * AbinsParameters.pkt_per_peak).transpose()
+
+            # matrix_start[freq_num, AbinsParameters.pkt_per_peak]
+            matrix_start = np.array([start, ] * AbinsParameters.pkt_per_peak).transpose()
+
+            # broad_freq[freq_num, AbinsParameters.pkt_per_peak]
+            broad_freq = (np.arange(0, AbinsParameters.pkt_per_peak) * matrix_step) + matrix_start
+            broad_freq[..., -1] = stop
+
+            # sigma_matrix[freq_num, AbinsParameters.pkt_per_peak]
+            sigma_matrix = np.array([sigma, ] * AbinsParameters.pkt_per_peak).transpose()
 
             # frequencies_matrix[freq_num, AbinsParameters.pkt_per_peak]
             frequencies_matrix = np.array([frequencies, ] * AbinsParameters.pkt_per_peak).transpose()
 
-            # delta_val[freq_num, AbinsParameters.pkt_per_peak]
-            delta_val = self._dirac_delta(center=frequencies_matrix)
+            # gaussian_val[freq_num, AbinsParameters.pkt_per_peak]
+            dirac_val = self._dirac_delta(sigma=sigma_matrix, points=broad_freq, center=frequencies_matrix)
 
             # s_dft_matrix[freq_num, AbinsParameters.pkt_per_peak]
             s_dft_matrix = np.array([s_dft, ] * AbinsParameters.pkt_per_peak).transpose()
 
             # temp_spectrum[freq_num, AbinsParameters.pkt_per_peak]
-            temp_spectrum = s_dft_matrix * delta_val
+            temp_spectrum = s_dft_matrix * dirac_val
 
             points_freq = np.ravel(broad_freq)
             broadened_spectrum = np.ravel(temp_spectrum)
 
         return points_freq, broadened_spectrum
 
-    def _dirac_delta(self, center=None):
+    # noinspection PyMethodMayBeStatic
+    def _dirac_delta(self, sigma=None, points=None, center=None):
 
         """
         Dirac delta is implemented as a very narrow Gaussian function.
         @param center: center of Gaussian
         @return: numpy array with calculated Gaussian values
         """
+        sigma_factor = 2.0 * sigma * sigma
+        return 1.0 / np.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2 / sigma_factor)
 
-        points = np.array(np.linspace(center - AbinsParameters.fwhm * self._sigma,
-                                      center + AbinsParameters.fwhm * self._sigma,
-                                      num=AbinsParameters.points_per_peak))
-
-        sigma_factor = 2.0 * self._sigma * self._sigma
-
-        # noinspection PyTypeChecker
-        return 1.0 / math.sqrt(sigma_factor * np.pi) * np.exp(-np.power(points - center, 2) / sigma_factor)
+    def get_nspec(self):
+        return self._q_powder.size

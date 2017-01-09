@@ -26,7 +26,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
         # Determine whether calculations are for molecule or crystal.
         found_type = False
         molecular = False
-        with open(self._clerk.get_input_filename(), 'r') as crystal_file:
+        with open(self._clerk.get_input_filename()) as crystal_file:
             for line in crystal_file:
                 if "MOLECULAR CALCULATION" in line or "0D - MOLECULE" in line:
                     molecular = True
@@ -59,7 +59,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
 
         # Read atomic coordinates in Angstrom
         filename = self._clerk.get_input_filename()
-        with open(filename, 'r') as crystal_file:
+        with open(filename) as crystal_file:
             logger.notice("Reading from " + filename)
             coord_lines = []
             found_coord = False
@@ -87,7 +87,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
             logger.debug(line.strip("\n"))
 
         # Read vibrational modes (frequencies and displacements)
-        with open(self._clerk.get_input_filename(), 'r') as crystal_file:
+        with open(self._clerk.get_input_filename()) as crystal_file:
             freq = []
             xdisp = []
             ydisp = []
@@ -277,7 +277,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
         dim = 3
 
         displacements = np.asarray(a=[displacements], order="C")
-        displacements = np.reshape(a=displacements, newshape=(self._num_k, num_freq, self._num_atoms, dim), order="C")
+        displacements = np.reshape(a=displacements, newshape=(self._num_k, num_freq, self._num_atoms, dim))
         data["atomic_displacements"] = np.transpose(a=displacements, axes=(0, 2, 1, 3))
 
         # In order  to provide compatibility with ABINS internal data structure same additional entries have to

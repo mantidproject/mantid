@@ -68,6 +68,7 @@ set ( TEST_PY_FILES
       test/ABINSCalculatePowderTest.py
       test/ABINSCalculateCrystalTest.py
       test/ABINSCalculateSPowderTest.py
+      test/ABINSCalculateSPowder2DTest.py
       )
 
 # Addition tests for SANS components

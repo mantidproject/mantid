@@ -36,68 +36,25 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_modules)
-class ABINSCalculateSPowderTest(unittest.TestCase):
-    """
-    Test of  CalculateS for the Powder scenario.
-    """
+class ABINSCalculateSPowder2DTest(unittest.TestCase):
 
     _temperature = 10  # 10 K,  temperature for the benchmark
     _sample_form = "Powder"
-    _instrument = InstrumentProducer().produce_instrument("TOSCA")
     _order_event = AbinsConstants.FUNDAMENTALS
-    _squaricn = "squaricn_sum_CalculateSPowder"
-    _si2 = "Si2-sc_CalculateSPowder"
+    _si2 = "Si2-phonon_CalculateS2DPowder"
 
     def setUp(self):
+
+        AbinsParameters.q_mesh = [2, 2, 2]
+        AbinsParameters.q2_step = 10.0
         AbinsParameters.atoms_threads = 1
+        self._instrument = InstrumentProducer().produce_instrument("TwoDMap")
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["CalculateSPowder"])
+        AbinsTestHelpers.remove_output_files(list_of_names=["CalculateS2DPowder"])
 
-    #     test input
-    def test_wrong_input(self):
-        full_path_filename = AbinsTestHelpers.find_file(filename=self._si2 + ".phonon")
-
-        castep_reader = LoadCASTEP(input_dft_filename=full_path_filename)
-        good_data = castep_reader.read_phonon_file()
-
-        # wrong filename
-        with self.assertRaises(ValueError):
-
-            CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
-                       abins_data=good_data, instrument=self._instrument, quantum_order_num=self._order_event)
-
-        # wrong temperature
-        with self.assertRaises(ValueError):
-
-            CalculateS(filename=full_path_filename, temperature=-1, sample_form=self._sample_form, abins_data=good_data,
-                       instrument=self._instrument, quantum_order_num=self._order_event)
-
-        # wrong sample
-        with self.assertRaises(ValueError):
-
-            CalculateS(filename=full_path_filename, temperature=self._temperature, sample_form="SOLID",
-                       abins_data=good_data, instrument=self._instrument,
-                       quantum_order_num=self._order_event)
-
-        # wrong abins data: content of abins data instead of object abins_data
-        with self.assertRaises(ValueError):
-
-            CalculateS(filename=full_path_filename, temperature=self._temperature, sample_form=self._sample_form,
-                       abins_data=good_data.extract(), instrument=self._instrument,
-                       quantum_order_num=self._order_event)
-
-        # wrong instrument
-        with self.assertRaises(ValueError):
-            # noinspection PyUnusedLocal
-            CalculateS(filename=full_path_filename, temperature=self._temperature, sample_form=self._sample_form,
-                       abins_data=good_data.extract(), instrument=self._instrument,
-                       quantum_order_num=self._order_event)
-
-    #  main test
     def test_good_case(self):
         self._good_case(name=self._si2)
-        self._good_case(name=self._squaricn)
 
     # helper functions
     def _good_case(self, name=None):
@@ -133,10 +90,10 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         with open(filename) as data_file:
             # noinspection PyPep8
             correct_data = json.loads(data_file.read().replace("\\n", " ").
-                                      replace("array",    "").
-                                      replace("([",  "[").
-                                      replace("])",  "]").
-                                      replace("'",  '"').
+                                      replace("array", "").
+                                      replace("([", "[").
+                                      replace("])", "]").
+                                      replace("'", '"').
                                       replace("0. ", "0.0"))
 
         temp = np.asarray(correct_data["frequencies"])
@@ -144,7 +101,6 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         # we need to - 1 because one entry is "frequencies"
         for el in range(len(correct_data) - 1):
-
             temp = np.asarray(correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS])
             correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS] = temp
 
@@ -158,7 +114,6 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         # we need to - 1 because one entry is "frequencies"
         for el in range(len(good_data) - 1):
-
             good_temp = good_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS]
             data_temp = data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS]
             self.assertEqual(True, np.allclose(good_temp, data_temp))

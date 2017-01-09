@@ -31,8 +31,14 @@ class Instrument(object):
        """
         return None
 
+    def get_nspec(self):
+        """
+        :return: number of S spectra for one one atom and for the given instrument.
+        """
+        return 1
+
     def __str__(self):
         return self._name
 
-    def getName(self):
+    def get_name(self):
         return self._name

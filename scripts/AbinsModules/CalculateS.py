@@ -2,14 +2,15 @@ import numpy as np
 
 try:
     # noinspection PyUnresolvedReferences
-    from pathos.multiprocessing import ProcessingPool
+    from pathos.multiprocessing import ProcessingPool, ThreadingPool
+    from pathos.parallel import ParallelPool
     PATHOS_FOUND = True
 except ImportError:
     PATHOS_FOUND = False
 
 from IOmodule import IOmodule
 from AbinsData import AbinsData
-from InstrumentProducer import InstrumentProducer
+from AbinsModules.Instruments import Instrument
 from CalculatePowder import CalculatePowder
 from CrystalData import CrystalData
 from PowderData import PowderData
@@ -26,14 +27,14 @@ class CalculateS(object):
     Class for calculating S(Q, omega)
     """
 
-    def __init__(self, filename=None, temperature=None, sample_form=None, abins_data=None, instrument_name=None,
+    def __init__(self, filename=None, temperature=None, sample_form=None, abins_data=None, instrument=None,
                  quantum_order_num=None):
         """
         @param filename: name of input DFT file (CASTEP: foo.phonon)
         @param temperature: temperature in K for which calculation of S should be done
         @param sample_form: form in which experimental sample is: Powder or SingleCrystal (str)
         @param abins_data: object of type AbinsData with data from phonon file
-        @param instrument_name: name of instrument (str)
+        @param instrument: name of instrument (str)
         @param quantum_order_num: number of quantum order events taken into account during the simulation
         """
         if not isinstance(temperature, (int, float)):
@@ -59,13 +60,10 @@ class CalculateS(object):
         else:
             raise ValueError("Invalid number of quantum order events.")
 
-        if instrument_name in AbinsConstants.ALL_INSTRUMENTS:
-            self._instrument_name = instrument_name
-            instrument_producer = InstrumentProducer()
-            self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
-
+        if isinstance(instrument, Instrument):
+            self._instrument = instrument
         else:
-            raise ValueError("Unknown instrument %s" % instrument_name)
+            raise ValueError("Unknown instrument %s" % instrument)
 
         if isinstance(filename, str):
             if filename.strip() == "":
@@ -77,7 +75,7 @@ class CalculateS(object):
             raise ValueError("Invalid name of input file. String was expected!")
 
         self._clerk = IOmodule(input_filename=filename,
-                               group_name=(AbinsParameters.s_data_group + "/" + self._instrument_name + "/" +
+                               group_name=(AbinsParameters.s_data_group + "/%s" % self._instrument + "/" +
                                            self._sample_form + "/%sK" % self._temperature))
 
         if self._sample_form == "Powder":
@@ -108,7 +106,11 @@ class CalculateS(object):
 
             powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
             powder_data = powder_calculator.get_formatted_data()
-            s_data = self._calculate_s_powder_1d(powder_data=powder_data)
+            if self._instrument.get_name() in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+                calculate_s_powder = self._calculate_s_powder_1d
+            else:
+                calculate_s_powder = self._calculate_s_powder_2d
+            s_data = calculate_s_powder(powder_data=powder_data)
 
         # Crystal case: calculate DW
         else:
@@ -172,23 +174,26 @@ class CalculateS(object):
         :param powder_data: object of type PowderData with with A and B tensors
         :return:  object of type SData with 2D dynamical structure factors for the powder case
         """
-        if self._instrument_name not in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+        if self._instrument.get_name() not in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
             raise ValueError("Instrument for 2D S map was expected.")
 
         q2_size = self._instrument.get_q_powder_size()
         q2_indices = range(q2_size)
+        self._powder_atoms_data = powder_data.extract()
         if PATHOS_FOUND:
-            p_local = ProcessingPool(ncpus=AbinsParameters.q_threads)
-            result = p_local.map(self._calculate_s_powder_core, powder_data, q2_indices)
+            p_local = ThreadingPool(nodes=AbinsParameters.q_threads)
+            result = p_local.map(self._calculate_s_powder_core, q2_indices)
         else:
             result = []
             for q2_i in q2_indices:
-                result.append(self._calculate_s_powder_core(powder_data=powder_data, q_indx=q2_i))
+                self._report_progress("Calculation for Q2 %s " % q2_i)
+                result.append(self._calculate_s_powder_core(q_indx=q2_i))
 
         num_atoms = powder_data.extract()["a_tensors"].shape[0]
 
         atoms_items = dict()
-        for atom_i in range(num_atoms):
+        multiplicities = self._instrument.get_multiplicities()
+        for atom in range(num_atoms):
             atoms_items["atom_%s" % atom] = {"s": dict()}
             for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
                 atoms_items["atom_%s" % atom]["s"] = \
@@ -196,12 +201,11 @@ class CalculateS(object):
                                                    dtype=AbinsConstants.FLOAT_TYPE)}
                 for q2_i in q2_indices:
                     atoms_items["atom_%s" % atom]["s"]["order_%s" % order][q2_i] = \
-                        result[q2_i][atom]["atom_%s" % atom]["order_%s" % order]
+                        result[q2_i]["atom_%s" % atom]["s"]["order_%s" % order] * multiplicities[q2_i]
 
         s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        data = self._calculate_s_powder_core(powder_data=powder_data)
-        data.update({"frequencies": self._bins[AbinsConstants.FIRST_BIN_INDEX:]})
-
+        atoms_items.update({"frequencies": self._bins[AbinsConstants.FIRST_BIN_INDEX:]})
+        s_data.set(items=atoms_items)
         return s_data
 
     def _calculate_s_powder_1d(self, powder_data=None):
@@ -213,45 +217,42 @@ class CalculateS(object):
         @return: object of type SData with 1D dynamical structure factors for the powder case
         """
         s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        data = self._calculate_s_powder_core(powder_data=powder_data)
+        self._powder_atoms_data = powder_data.extract()
+        data = self._calculate_s_powder_core()
         data.update({"frequencies": self._bins[AbinsConstants.FIRST_BIN_INDEX:]})
         s_data.set(items=data)
 
         return s_data
 
-    def _calculate_s_powder_core(self, powder_data=None, q_indx=None):
+    def _calculate_s_powder_core(self, q_indx=None):
         """
         Helper function for _calculate_s_powder_1d.
-        :param powder_data:  object of type PowderData with A and B tensors
         :return: Python dictionary with S data
         """
         atoms_items = dict()
-        num_atoms, atoms = self._prepare_data(powder_data=powder_data)
-        q_indices = num_atoms * [q_indx]
+        num_atoms, atoms = self._prepare_data()
+
+        q_multiplied = [q_indx] * num_atoms
 
         if PATHOS_FOUND:
-            p_local = ProcessingPool(ncpus=AbinsParameters.atoms_threads)
-            result = p_local.map(self._calculate_s_powder_one_atom, atoms, q_indices)
+            p_local = ProcessingPool(nodes=AbinsParameters.atoms_threads)
+            result = p_local.map(self._calculate_s_powder_one_atom, atoms, q_multiplied)
         else:
             result = []
             for atom in atoms:
-                result.append(self._calculate_s_powder_one_atom(atom=atom, q_indx=q_indices))
+                result.append(self._calculate_s_powder_one_atom(atom=atom, q_indx=q_indx))
 
         for atom in range(num_atoms):
             atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
             self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
         return atoms_items
 
-    def _prepare_data(self,  powder_data=None):
+    def _prepare_data(self):
         """
         Sets all necessary fields for 1D calculations. Sorts atom indices to improve parallelism.
-        :param powder_data: object of type PowderData with A and B tensors
         :return: number of atoms, sorted atom indices
         """
-        if not isinstance(powder_data, PowderData):
-            raise ValueError("Input parameter 'powder_data' should be of type PowderData.")
 
-        self._powder_atoms_data = powder_data.extract()
         num_atoms = self._powder_atoms_data["a_tensors"].shape[0]
         self._a_traces = np.trace(a=self._powder_atoms_data["a_tensors"], axis1=1, axis2=2)
         self._b_traces = np.trace(a=self._powder_atoms_data["b_tensors"], axis1=2, axis2=3)
@@ -383,9 +384,9 @@ class CalculateS(object):
 
         if local_freq.any():  # check if local_freq has non-zero values
 
-            if self._instrument_name in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+            if self._instrument.get_name() in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq)
-            elif self._instrument_name in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+            elif self._instrument.get_name() in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
                 q2 = self._instrument.calculate_q_powder(input_data=q_indx)
             else:
                 raise ValueError("Unsupported instrument.")

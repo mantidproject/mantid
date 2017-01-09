@@ -13,7 +13,7 @@ from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, S
                              DeleteWorkspace, Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
-from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, AbinsConstants
+from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, AbinsConstants, InstrumentProducer
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -30,7 +30,7 @@ class ABINS(PythonAlgorithm):
     _temperature = None
     _scale = None
     _sample_form = None
-    _instrument = None
+    _instrument_name = None
     _atoms = None
     _sum_contributions = None
     _scale_by_cross_section = None
@@ -92,7 +92,7 @@ class ABINS(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
                              doc="List of atoms to use to calculate partial S."
-                                 "If left blank, S for all types of atoms will be calculated")
+                                 "If left blank, S for all types of atoms will be calculated.")
 
         self.declareProperty(name="SumContributions", defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
@@ -116,7 +116,7 @@ class ABINS(PythonAlgorithm):
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
         self._make_preamble()
-        input_file_validators = {"CASTEP":self._validate_castep_input_file,
+        input_file_validators = {"CASTEP": self._validate_castep_input_file,
                                  "CRYSTAL": self._validate_crystal_input_file}
 
         issues = dict()
@@ -173,7 +173,8 @@ class ABINS(PythonAlgorithm):
 
         # 3) calculate S
         s_calculator = CalculateS(filename=self._phonon_file, temperature=self._temperature,
-                                  sample_form=self._sample_form, abins_data=dft_data, instrument_name=self._instrument,
+                                  sample_form=self._sample_form, abins_data=dft_data,
+                                  instrument=self._instrument,
                                   quantum_order_num=self._num_quantum_order_events)
         s_data = s_calculator.get_formatted_data()
         prog_reporter.report("Dynamical structure factors have been determined.")
@@ -242,8 +243,9 @@ class ABINS(PythonAlgorithm):
         """
         s_data_extracted = s_data.extract()
         freq = np.tile(s_data_extracted["frequencies"], (self._num_quantum_order_events, 1))
-        s_atom_data = np.copy(freq)
-
+        shape = [self._num_quantum_order_events]
+        shape.extend(list(s_data_extracted["atom_0"]["s"]["order_1"].shape))
+        s_atom_data = np.zeros(shape=tuple(shape), dtype=AbinsConstants.FLOAT_TYPE)
         num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
         result_workspaces = []
         temp_s_atom_data = np.copy(s_atom_data)
@@ -299,59 +301,59 @@ class ABINS(PythonAlgorithm):
         @param s_points: dynamical factor for the given atom
         @param workspace:  workspace to be filled with S
         """
+        if self._nspec == AbinsConstants.ONE_DIMENTIONAL_SPECTRUM:
+            # only FUNDAMENTALS
+            if s_points.shape[0] == self._nspec:
 
-        # only FUNDAMENTALS
-        if s_points.shape[0] == 1:
-
-            temp_freq, temp_s = self._rearrange_freq(freq=freq[0], s_array=s_points[0])
-            CreateWorkspace(DataX=temp_freq,
-                            DataY=temp_s,
-                            NSpec=1,
-                            YUnitLabel="S",
-                            OutputWorkspace=workspace,
-                            EnableLogging=False)
-            #
-            # Set correct units on workspace
-            self._set_workspace_units(wrk=workspace)
-
-        # total workspaces
-        elif len(s_points.shape) == 1:
-
-            temp_freq, temp_s = self._rearrange_freq(freq=freq, s_array=s_points)
-            CreateWorkspace(DataX=temp_freq,
-                            DataY=temp_s,
-                            NSpec=1,
-                            YUnitLabel="S",
-                            OutputWorkspace=workspace,
-                            EnableLogging=False)
-
-            # Set correct units on workspace
-            self._set_workspace_units(wrk=workspace)
-
-        # quantum order events (FUNDAMENTALS + overtones + combinations for the given order)
-        else:
-
-            dim = s_points.shape[0]
-            partial_wrk_names = []
-
-            for n in range(dim):
-                seed = "quantum_event_%s" % (n + 1)
-                wrk_name = workspace + "_" + seed
-                partial_wrk_names.append(wrk_name)
-                temp_freq, temp_s = self._rearrange_freq(freq=freq[n], s_array=s_points[n])
-
-                CreateWorkspace(DataX=temp_freq,
-                                DataY=temp_s,
-                                NSpec=1,
+                CreateWorkspace(DataX=freq[0],
+                                DataY=s_points[0],
+                                NSpec=self._nspec,
                                 YUnitLabel="S",
-                                OutputWorkspace=wrk_name,
+                                OutputWorkspace=workspace,
                                 EnableLogging=False)
 
                 # Set correct units on workspace
-                self._set_workspace_units(wrk=wrk_name)
+                self._set_workspace_units(wrk=workspace)
 
-            group = ','.join(partial_wrk_names)
-            GroupWorkspaces(group, OutputWorkspace=workspace)
+            # total workspaces
+            elif len(s_points.shape) == self._nspec:
+
+                CreateWorkspace(DataX=freq,
+                                DataY=s_points,
+                                NSpec=self._nspec,
+                                YUnitLabel="S",
+                                OutputWorkspace=workspace,
+                                EnableLogging=False)
+
+                # Set correct units on workspace
+                self._set_workspace_units(wrk=workspace)
+
+            # quantum order events (FUNDAMENTALS + overtones + combinations for the given order)
+            else:
+
+                dim = s_points.shape[0]
+                partial_wrk_names = []
+
+                for n in range(dim):
+                    seed = "quantum_event_%s" % (n + 1)
+                    wrk_name = workspace + "_" + seed
+                    partial_wrk_names.append(wrk_name)
+
+                    CreateWorkspace(DataX=freq[n],
+                                    DataY=s_points[n],
+                                    NSpec=self._nspec,
+                                    YUnitLabel="S",
+                                    OutputWorkspace=wrk_name,
+                                    EnableLogging=False)
+
+                    # Set correct units on workspace
+                    self._set_workspace_units(wrk=wrk_name)
+
+                group = ','.join(partial_wrk_names)
+                GroupWorkspaces(group, OutputWorkspace=workspace)
+        else:
+
+          pass
 
     def _create_total_workspace(self, partial_workspaces=None, workspace_core_name=None):
 
@@ -454,19 +456,6 @@ class ABINS(PythonAlgorithm):
         self._set_workspace_units(wrk=experimental_wrk.getName())
 
         return experimental_wrk
-
-    def _rearrange_freq(self, freq=None, s_array=None):
-
-        # arrays will be modified so make sure we work on their copies
-        local_freq = np.copy(freq)
-        local_s = np.copy(s_array)
-
-        # sort arrays
-        sorted_indx = local_freq.argsort()
-        local_freq = local_freq[sorted_indx]
-        local_s = local_s[sorted_indx]
-
-        return local_freq, local_s
 
     def _set_workspace_units(self, wrk=None):
         """
@@ -663,7 +652,7 @@ class ABINS(PythonAlgorithm):
 
         # check a structure of the header part of file.
         # Here fortran convention is followed: case of letter does not matter
-        with open(filename, "r") as castep_file:
+        with open(filename) as castep_file:
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(line, "beginheader"):  # first line is BEGIN header
@@ -722,15 +711,24 @@ class ABINS(PythonAlgorithm):
         self._temperature = self.getProperty("Temperature").value
         self._scale = self.getProperty("Scale").value
         self._sample_form = self.getProperty("SampleForm").value
-        self._instrument = self.getProperty("Instrument").value
+
+        instrument_name = self.getProperty("Instrument").value
+        if instrument_name in AbinsConstants.ALL_INSTRUMENTS:
+            self._instrument_name = instrument_name
+            instrument_producer = InstrumentProducer()
+            self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
+        else:
+            raise ValueError("Unknown instrument %s" % instrument_name)
+        self._nspec = self._instrument.get_nspec()
+
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
 
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
+
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
-
         self._calc_partial = (len(self._atoms) > 0)
 
     def _make_preamble(self):

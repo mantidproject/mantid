@@ -47,11 +47,12 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         else:
 
+            # freq_num: number of transition energies for the given quantum order event
+
+            # sigma[freq_num]
             sigma = AbinsParameters.tosca_a * frequencies ** 2 + \
                     AbinsParameters.tosca_b * frequencies + \
                     AbinsParameters.tosca_c
-
-            # freq_num: number of transition energies for the given quantum order event
 
             # start[freq_num]
             start = frequencies - AbinsParameters.fwhm * sigma

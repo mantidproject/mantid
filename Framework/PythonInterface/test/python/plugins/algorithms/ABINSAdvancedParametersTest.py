@@ -50,7 +50,7 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
                 os.remove(filename)
         try:
             DeleteWorkspace(self._wrk_name)
-        except :  # nothing bad happened if there is no workspace to delete
+        except ValueError:  # nothing bad happened if there is no workspace to delete
             pass
 
     def test_wrong_fwhm(self):
