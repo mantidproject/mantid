@@ -594,7 +594,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void test_splitByTime_and_getTotalValue() {
+  void Skiptest_splitByTime_and_getTotalValue() {
     TimeSeriesProperty<int> *log = createIntegerTSP(12);
     // Make the outputs
     std::vector<Property *> outputs;
@@ -648,7 +648,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void test_splitByTime_withOverlap() {
+  void Skiptest_splitByTime_withOverlap() {
     TimeSeriesProperty<int> *log = createIntegerTSP(12);
 
     // Make the outputs
