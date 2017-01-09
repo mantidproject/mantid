@@ -12,6 +12,8 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
+#include <QString>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -282,8 +284,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers
@@ -342,7 +344,12 @@ public:
    */
   virtual std::vector<std::string> getCachedArguments() const = 0;
 
-  virtual void externalProcessFinished(const std::string &str) = 0;
+  /**
+   * Emit the external process output signal so that it can be processed by it's
+   * receivers. The signals are connected inside the View's concrete class'
+   * @param str the output string of the process
+   */
+  virtual void emitExternalProcessFinished(const QString &str) = 0;
 };
 
 } // namespace CustomInterfaces

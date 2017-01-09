@@ -241,7 +241,7 @@ void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
 void TomographyIfacePresenter::emitExternalProcessOutput(const qint64 pid,
                                                          const int exitCode) {
   workerFinished(pid, exitCode);
-  m_view->externalProcessFinished(m_workerOutputCache);
+  m_view->emitExternalProcessFinished(m_workerOutputCache);
 }
 
 void TomographyIfacePresenter::processSystemSettingsUpdated() {
@@ -752,16 +752,14 @@ void TomographyIfacePresenter::addProcessToJobList() {
   processRefreshJobs();
 }
 
-void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
-  const auto &stdstr = s.toStdString();
-  m_workerOutputCache += stdstr;
-  m_model->logMsg(stdstr);
+void TomographyIfacePresenter::readWorkerStdOut(const QString &workerString) {
+  m_workerOutputCache.append(workerString);
+  m_model->logMsg(workerString.toStdString());
 }
 
-void TomographyIfacePresenter::readWorkerStdErr(const QString &s) {
-  const auto &stdstr = s.toStdString();
-  m_workerErrorCache += stdstr;
-  m_model->logErrMsg(stdstr);
+void TomographyIfacePresenter::readWorkerStdErr(const QString &workerString) {
+  m_workerErrorCache.append(workerString);
+  m_model->logErrMsg(workerString.toStdString());
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {

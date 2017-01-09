@@ -1,10 +1,10 @@
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidQtAPI/HelpWindow.h"
@@ -231,10 +231,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionRoi() {
           SLOT(runExternalProcess(std::string, std::vector<std::string>)));
   connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIW,
           SLOT(readCoRFromProcessOutput(QString)));
-}
-
-void TomographyIfaceViewQtGUI::externalProcessFinished(const std::string &str) {
-  emit externalProcessFinished(QString::fromStdString(str));
 }
 
 void TomographyIfaceViewQtGUI::runExternalProcess(
@@ -1178,8 +1174,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -2055,6 +2051,10 @@ void TomographyIfaceViewQtGUI::closeEvent(QCloseEvent *event) {
 void TomographyIfaceViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Tomographic_Reconstruction"));
+}
+
+void TomographyIfaceViewQtGUI::emitExternalProcessFinished(const QString &str) {
+  emit externalProcessFinished(str);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

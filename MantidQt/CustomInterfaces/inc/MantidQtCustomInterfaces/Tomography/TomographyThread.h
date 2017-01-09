@@ -99,8 +99,8 @@ public slots:
 
 signals:
   void workerFinished(const qint64, const int);
-  void stdOutReady(const QString &s) const;
-  void stdErrReady(const QString &s) const;
+  void stdOutReady(const QString &) const;
+  void stdErrReady(const QString &) const;
 
 private:
   bool m_workerRunning = false;
