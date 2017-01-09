@@ -47,7 +47,7 @@ class DLLExport SaveMDWorkspaceToVTKImpl {
 public:
   SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent = nullptr);
   ~SaveMDWorkspaceToVTKImpl() {}
-  void saveMDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
+  void saveMDWorkspace(const Mantid::API::IMDWorkspace_sptr &workspace,
                        const std::string &filename,
                        VisualNormalization normalization, int recursionDepth,
                        const std::string &compressorType) const;
@@ -58,18 +58,18 @@ public:
   std::vector<std::string>
   getAllowedNormalizationsInStringRepresentation() const;
   VisualNormalization
-  translateStringToVisualNormalization(const std::string normalization) const;
-  bool is3DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
+  translateStringToVisualNormalization(const std::string &normalization) const;
+  bool is3DWorkspace(const Mantid::API::IMDWorkspace &workspace) const;
 
 private:
   mutable API::Progress m_progress;
   std::map<std::string, VisualNormalization> m_normalizations;
   void setupMembers();
-  bool is4DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
+  bool is4DWorkspace(const Mantid::API::IMDWorkspace &workspace) const;
   int writeDataSetToVTKFile(vtkXMLWriter *writer, vtkDataSet *dataSet,
                             const std::string &filename,
                             vtkXMLWriter::CompressorType compressor) const;
-  double selectTimeSliceValue(Mantid::API::IMDWorkspace_sptr workspace) const;
+  double selectTimeSliceValue(const Mantid::API::IMDWorkspace &workspace) const;
   std::string getFullFilename(std::string filename,
                               bool isHistoWorkspace) const;
   vtkSmartPointer<vtkXMLWriter> getXMLWriter(bool isHistoWorkspace) const;

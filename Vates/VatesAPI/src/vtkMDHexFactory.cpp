@@ -254,7 +254,7 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
  * Get the next highest bin boundary
  */
 coord_t
-vtkMDHexFactory::getNextBinBoundary(IMDEventWorkspace_sptr imdws) const {
+vtkMDHexFactory::getNextBinBoundary(const IMDEventWorkspace_sptr &imdws) const {
   auto t_dim = imdws->getTDimension();
   coord_t bin_width = t_dim->getBinWidth();
   coord_t dim_min = t_dim->getMinimum();
@@ -264,8 +264,8 @@ vtkMDHexFactory::getNextBinBoundary(IMDEventWorkspace_sptr imdws) const {
 /*
  * Get the previous bin boundary, or the current one if m_time is on a boundary
  */
-coord_t
-vtkMDHexFactory::getPreviousBinBoundary(IMDEventWorkspace_sptr imdws) const {
+coord_t vtkMDHexFactory::getPreviousBinBoundary(
+    const IMDEventWorkspace_sptr &imdws) const {
   auto t_dim = imdws->getTDimension();
   coord_t bin_width = t_dim->getBinWidth();
   coord_t dim_min = t_dim->getMinimum();
@@ -295,7 +295,7 @@ dataobjects (workspaces) to run against at a later time. If workspace is not an
 IMDEventWorkspace, attempts to use any run-time successor set.
 @Param ws : Workspace to use.
 */
-void vtkMDHexFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkMDHexFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 3>(ws, false);
   m_workspace = imdws;
 }

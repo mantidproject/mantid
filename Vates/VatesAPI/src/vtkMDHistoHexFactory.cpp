@@ -55,7 +55,8 @@ vtkMDHistoHexFactory::vtkMDHistoHexFactory(const vtkMDHistoHexFactory &other) {
   this->m_workspace = other.m_workspace;
 }
 
-void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace) {
+void vtkMDHistoHexFactory::initialize(
+    const Mantid::API::Workspace_sptr &workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
 }
 

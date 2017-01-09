@@ -66,7 +66,7 @@ public:
 protected:
   bool m_isValid;
 
-  std::string parameterXMLTemplate(std::string valueXMLtext) const {
+  std::string parameterXMLTemplate(const std::string &valueXMLtext) const {
     using namespace Poco::XML;
     AutoPtr<Document> pDoc = new Document;
     AutoPtr<Element> paramElement = pDoc->createElement("Parameter");

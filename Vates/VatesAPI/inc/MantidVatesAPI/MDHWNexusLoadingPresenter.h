@@ -38,7 +38,7 @@ class MDLoadingView;
 class DLLExport MDHWNexusLoadingPresenter : public MDHWLoadingPresenter {
 public:
   MDHWNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
-                            const std::string fileName);
+                            const std::string &fileName);
   vtkSmartPointer<vtkDataSet>
   execute(vtkDataSetFactory *factory, ProgressAction &rebinningProgressUpdate,
           ProgressAction &drawingProgressUpdate) override;
