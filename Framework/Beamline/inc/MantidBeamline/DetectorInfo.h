@@ -57,13 +57,17 @@ namespace Beamline {
 class MANTID_BEAMLINE_DLL DetectorInfo {
 public:
   DetectorInfo(const size_t numberOfDetectors);
+  DetectorInfo(const size_t numberOfDetectors,
+               const std::vector<size_t> &monitorIndices);
 
   size_t size() const;
 
+  bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   void setMasked(const size_t index, bool masked);
 
 private:
+  Kernel::cow_ptr<std::vector<bool>> m_isMonitor;
   Kernel::cow_ptr<std::vector<bool>> m_isMasked;
 };
 

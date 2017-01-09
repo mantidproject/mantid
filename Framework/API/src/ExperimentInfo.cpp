@@ -166,7 +166,11 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
     const auto numDets = oldInstr.getNumberDetectors();
-    return Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+    std::vector<size_t> monitors;
+    for (size_t i = 0; i < numDets; ++i)
+      if (newInstr.isMonitorViaIndex(i))
+        monitors.push_back(i);
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets, monitors);
   }
 }
 }

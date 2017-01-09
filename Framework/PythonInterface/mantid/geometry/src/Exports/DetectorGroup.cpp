@@ -20,6 +20,19 @@ bool isMaskedDeprecated(const DetectorGroup &self) {
   }
   return masked;
 }
+
+bool isMonitorDeprecated(const DetectorGroup &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMonitor' is "
+                                       "deprecated, use "
+                                       "'SpectrumInfo::isMonitor' instead.");
+  const auto &dets = self.getDetectors();
+  for (const auto &det : dets) {
+    const auto &detInfo = det->parameterMap().detectorInfo();
+    if (!detInfo.isMonitor(det->index()))
+      return false;
+  }
+  return true;
+}
 }
 
 void export_DetectorGroup() {
@@ -28,6 +41,8 @@ void export_DetectorGroup() {
       .def("isMasked", &isMaskedDeprecated, arg("self"),
            "Returns the value of the masked flag. True means ignore this "
            "detector")
+      .def("isMonitor", &isMonitorDeprecated, arg("self"),
+           "Returns True if the detector is marked as a monitor in the IDF")
       .def("getDetectorIDs", &DetectorGroup::getDetectorIDs, arg("self"),
            "Returns the list of detector IDs within this group")
       .def("getNameSeparator", &DetectorGroup::getNameSeparator, arg("self"),
