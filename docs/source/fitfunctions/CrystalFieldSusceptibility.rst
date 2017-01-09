@@ -31,6 +31,15 @@ be along the quantisation axis of the crystal fied (which is usually defined to 
 :math:`B_x`, :math:`B_y`, and :math:`B_z` are the components of the unit vector pointing in the direction of the applied 
 magnetic field in this coordinate system.
 
+Finally, in order to account for the effect of any exchange interactions in the system which will shift the susceptiblity curve
+up or down (analogous to the Curie-Weiss temperature), the actual magnetic susceptibility calculated by this function is:
+
+.. math:: \chi^{\mathrm{eff}} = \frac{\chi(T)}{1 - \lambda \chi(T)}
+
+where :math:`\lambda` parameterises an effective exchange interaction and :math:`\chi` is the bare (paramagnetic Crystal Field)
+susceptibility. A negative :math:`\lambda` indicates overall antiferromagnetic interactions, whilst a positive :math:`\lambda`
+corresponds to overall ferromagnetic interactions.
+
 Example
 -------
 

@@ -103,6 +103,7 @@ CrystalFieldSusceptibility::CrystalFieldSusceptibility()
   declareAttribute("inverse", Attribute(false));
   declareAttribute("powder", Attribute(false));
   declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
+  declareParameter("lambda", 0.0, "Effective exchange interaction");
 }
 
 // Sets the eigenvectors / values directly
@@ -170,6 +171,12 @@ void CrystalFieldSusceptibility::function1D(double *out,
   if (fact != 1.0) {
     for (size_t i = 0; i < nData; i++) {
       out[i] *= fact;
+    }
+  }
+  const double lambda = getParameter("lambda");
+  if (fabs(lambda) > 1.e-6) {
+    for (size_t i = 0; i < nData; i++) {
+      out[i] /= (1. - lambda * out[i]);  // chi = chi0/(1 - lambda.chi0)
     }
   }
 }
