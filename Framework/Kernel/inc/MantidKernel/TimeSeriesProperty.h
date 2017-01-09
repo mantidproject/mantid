@@ -157,6 +157,11 @@ public:
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<Property *> outputs,
                    bool isPeriodic) const override;
+
+  /// New split method
+  void splitByTimeVector(std::vector<double> &time_vec, std::vector<int> &target_vec,
+                         std::vector<Property *>outputs);
+
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
                          double max, double TimeTolerance = 0.0,

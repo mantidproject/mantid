@@ -522,6 +522,14 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   }
 }
 
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::splitByTimeVector(
+        std::vector<double> &time_vec, std::vector<int> &target_vec,
+        std::vector<Property *>outputs)
+{
+
+}
+
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
 // warnings when the template type is the wider integer types
 // (when it's being assigned back to a double such as in a call to minValue or
