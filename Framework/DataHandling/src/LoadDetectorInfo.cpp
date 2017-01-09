@@ -138,25 +138,24 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
     // offset value is be subtracted so store negative
     delta *= -1.0f;
 
-    size_t index;
     try {
-      index = detectorInfo.indexOf(detID);
+      size_t index = detectorInfo.indexOf(detID);
+      if (detectorInfo.isMonitor(index) || code == 1)
+        continue;
+
+      // drop 10 float columns
+      for (int i = 0; i < 10; ++i)
+        is >> droppedFloat;
+
+      // pressure, wall thickness
+      float pressure(0.0), thickness(0.0);
+      is >> pressure >> thickness;
+
+      updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
+                         delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
-    if (detectorInfo.isMonitor(index) || code == 1)
-      continue;
-
-    // drop 10 float columns
-    for (int i = 0; i < 10; ++i)
-      is >> droppedFloat;
-
-    // pressure, wall thickness
-    float pressure(0.0), thickness(0.0);
-    is >> pressure >> thickness;
-
-    updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
-                       delta, pressure, thickness);
   }
 }
 
@@ -194,30 +193,29 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = static_cast<detid_t>(iraw.udet[i]);
     int code = iraw.code[i];
-    size_t index;
     try {
-      index = detectorInfo.indexOf(detID);
+      size_t index = detectorInfo.indexOf(detID);
+      if (detectorInfo.isMonitor(index) || code == 1)
+        continue;
+
+      // Positions
+      float l2 = iraw.len2[i];
+      float theta = iraw.tthe[i];
+      float phi = (phiPresent ? iraw.ut[i] : 0.0f);
+
+      // Parameters
+      float delta = iraw.delt[i];
+      // offset value is be subtracted so store negative
+      delta *= -1.0f;
+      // pressure, wall thickness
+      float pressure = iraw.ut[i + pressureTabNum * numDets];
+      float thickness = iraw.ut[i + thicknessTabNum * numDets];
+
+      updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
+                         delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
-    if (detectorInfo.isMonitor(index) || code == 1)
-      continue;
-
-    // Positions
-    float l2 = iraw.len2[i];
-    float theta = iraw.tthe[i];
-    float phi = (phiPresent ? iraw.ut[i] : 0.0f);
-
-    // Parameters
-    float delta = iraw.delt[i];
-    // offset value is be subtracted so store negative
-    delta *= -1.0f;
-    // pressure, wall thickness
-    float pressure = iraw.ut[i + pressureTabNum * numDets];
-    float thickness = iraw.ut[i + thicknessTabNum * numDets];
-
-    updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
-                       delta, pressure, thickness);
   }
 }
 
@@ -258,30 +256,29 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = detInfo.ids[i];
     int code = detInfo.codes[i];
-    size_t index;
     try {
-      index = detectorInfo.indexOf(detID);
+      size_t index = detectorInfo.indexOf(detID);
+      if (detectorInfo.isMonitor(index) || code == 1)
+        continue;
+
+      // Positions
+      double l2 = detInfo.l2[i];
+      double theta = detInfo.theta[i];
+      double phi = detInfo.phi[i];
+
+      // Parameters
+      double delta = detInfo.delays[i];
+      // offset value is be subtracted so store negative
+      delta *= -1.0;
+      // pressure, wall thickness
+      double pressure = detInfo.pressures[i];
+      double thickness = detInfo.thicknesses[i];
+
+      updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
+                         delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
-    if (detectorInfo.isMonitor(index) || code == 1)
-      continue;
-
-    // Positions
-    double l2 = detInfo.l2[i];
-    double theta = detInfo.theta[i];
-    double phi = detInfo.phi[i];
-
-    // Parameters
-    double delta = detInfo.delays[i];
-    // offset value is be subtracted so store negative
-    delta *= -1.0;
-    // pressure, wall thickness
-    double pressure = detInfo.pressures[i];
-    double thickness = detInfo.thicknesses[i];
-
-    updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
-                       delta, pressure, thickness);
   }
 }
 

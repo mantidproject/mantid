@@ -229,7 +229,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     }
 
     bool skip{false};
-    size_t index;
+    size_t index = static_cast<size_t>(-1);
     const Geometry::IDetector *det{nullptr};
     if (isSpectrum) {
       auto it = specToIndex.find(detOrSpec);
@@ -253,7 +253,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
         skip = true;
       }
     }
-    if (skip) {
+    if (skip || index == static_cast<size_t>(-1)) {
       g_log.debug()
           << "Skipping \"" << line
           << "\". Spectrum in workspace but cannot find associated detector.\n";
