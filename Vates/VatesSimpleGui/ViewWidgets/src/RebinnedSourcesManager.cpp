@@ -34,9 +34,10 @@
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
 #endif
-#include <QList>
 #include "boost/shared_ptr.hpp"
 #include <Poco/ActiveResult.h>
+#include <QList>
+#include <utility>
 
 namespace Mantid {
 namespace Vates {
@@ -152,7 +153,7 @@ void RebinnedSourcesManager::checkSource(pqPipelineSource *src,
   // anything
   if (isHistoWorkspace || isEventWorkspace) {
     processWorkspaceNames(inputWorkspace, outputWorkspace, source,
-                          workspaceName, algorithmType);
+                          workspaceName, std::move(algorithmType));
   }
 }
 
@@ -307,7 +308,7 @@ void RebinnedSourcesManager::getStoredWorkspaceNames(
  */
 std::vector<pqPipelineSource *>
 RebinnedSourcesManager::findAllRebinnedSourcesForWorkspace(
-    std::string workspaceName) {
+    const std::string &workspaceName) {
   std::vector<std::string> linkedSources;
   // We need to iterate over the map
   for (std::map<std::pair<std::string, std::string>,
@@ -371,11 +372,10 @@ bool RebinnedSourcesManager::doesSourceNeedToBeDeleted(
  * @param workspaceName The name of the workspace of the current source.
  * @param algorithmType The algorithm which creates the rebinned source.
  */
-void RebinnedSourcesManager::processWorkspaceNames(std::string &inputWorkspace,
-                                                   std::string &outputWorkspace,
-                                                   pqPipelineSource *source,
-                                                   std::string workspaceName,
-                                                   std::string algorithmType) {
+void RebinnedSourcesManager::processWorkspaceNames(
+    std::string &inputWorkspace, std::string &outputWorkspace,
+    pqPipelineSource *source, std::string workspaceName,
+    const std::string &algorithmType) {
   // Reset the temporary tracking elements, which are needed only for the
   // duration of the rebinning itself
   m_newWorkspacePairBuffer.clear();
@@ -424,7 +424,7 @@ void RebinnedSourcesManager::processWorkspaceNames(std::string &inputWorkspace,
  * @param key a key to the tracking map
  */
 void RebinnedSourcesManager::untrackWorkspaces(
-    std::pair<std::string, std::string> key) {
+    const std::pair<std::string, std::string> &key) {
   if (m_rebinnedWorkspaceAndSourceToOriginalWorkspace.count(key) > 0) {
     m_rebinnedWorkspaceAndSourceToOriginalWorkspace.erase(key);
   }
@@ -552,7 +552,7 @@ void RebinnedSourcesManager::copySafe(vtkSMProxy *dest, vtkSMProxy *source) {
       }
 
       if (destValue) {
-        Q_ASSERT(srcValue != NULL);
+        Q_ASSERT(srcValue != nullptr);
         copySafe(destValue, srcValue);
         destPP->SetProxy(0, destValue);
       }

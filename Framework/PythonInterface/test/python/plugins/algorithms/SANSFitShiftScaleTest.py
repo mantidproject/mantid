@@ -173,7 +173,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         self.assertEquals(out_scale_factor, 1.0)
         self.assertEquals(out_shift_factor, -5.0)
 
-    def test_scale_both(self):
+    def do_test_scale_both(self, hab_range):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
         create_alg.initialize()
@@ -183,14 +183,14 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         create_alg.setProperty('DataX', range(0, 10))
 
         # HAB as linear function y=x+5
-        create_alg.setProperty('DataY', range(5, 14))
+        create_alg.setProperty('DataY', hab_range)
         create_alg.execute()
         hab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         # LAB as linear function y=x+0
         create_alg.setProperty('DataY', range(0, 9))
         create_alg.execute()
-        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+        lab_workspace = create_alg.getProperty('OutputWorkspace').value
 
         # FLAT NORM
         create_alg.setProperty('DataY', [1] * 9)
@@ -212,6 +212,17 @@ class SANSFitShiftScaleTest(unittest.TestCase):
 
         self.assertEquals(out_scale_factor, 1.0)
         self.assertEquals(out_shift_factor, -5.0)
+
+    def test_scale_both(self):
+        hab_range = range(5, 14)
+        self.do_test_scale_both(hab_range)
+
+    def test_scale_both_with_nan(self):
+        hab_range = range(5, 14)
+        hab_range[6] = np.nan
+        hab_range[7] = np.nan
+        self.assertRaises(RuntimeError, self.do_test_scale_both, hab_range)
+
 
 class TestErrorTransferFromModelToData(unittest.TestCase):
     def _createWorkspace(self, x1, y1, err1, x2, y2, err2):

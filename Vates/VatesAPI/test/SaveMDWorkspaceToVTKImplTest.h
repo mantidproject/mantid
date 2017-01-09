@@ -69,7 +69,7 @@ public:
     auto workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
 
     // Act
-    const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
+    const auto is3D = saveMDToVTK.is3DWorkspace(*workspace);
 
     // Assert
     TSM_ASSERT("Detects a non-3D MD workspace", !is3D);
@@ -82,7 +82,7 @@ public:
     auto workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims);
 
     // Act
-    const auto is3D = saveMDToVTK.is3DWorkspace(workspace);
+    const auto is3D = saveMDToVTK.is3DWorkspace(*workspace);
 
     // Assert
     TSM_ASSERT("Detects that a 3D MD workspace", is3D);

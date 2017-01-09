@@ -754,7 +754,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
   }
   // Else need to construct a DetectorGroup and return that
   auto dets_ptr = localInstrument->getDetectors(dets);
-  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr, false);
+  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector
@@ -1254,7 +1254,7 @@ public:
   /// short name which identify the dimension among other dimension. A dimension
   /// can be usually find by its ID and various
   /// various method exist to manipulate set of dimensions by their names.
-  std::string getDimensionId() const override { return m_dimensionId; }
+  const std::string &getDimensionId() const override { return m_dimensionId; }
 
   /// if the dimension is integrated (e.g. have single bin)
   bool getIsIntegrated() const override { return m_axis.length() == 1; }
@@ -1341,7 +1341,7 @@ public:
   /// short name which identify the dimension among other dimension. A dimension
   /// can be usually find by its ID and various
   /// various method exist to manipulate set of dimensions by their names.
-  std::string getDimensionId() const override { return m_dimensionId; }
+  const std::string &getDimensionId() const override { return m_dimensionId; }
 
   /// if the dimension is integrated (e.g. have single bin)
   bool getIsIntegrated() const override { return m_X.size() == 1; }

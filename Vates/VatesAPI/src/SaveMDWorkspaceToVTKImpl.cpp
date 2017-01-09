@@ -26,6 +26,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <memory>
+#include <utility>
 
 namespace {
 // This progress object gets called by PV (and is used by the plugins),
@@ -45,10 +46,10 @@ bool has_suffix(const std::string &stringToCheck, const std::string &suffix) {
   return isSuffixInString;
 }
 
-bool isNDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
+bool isNDWorkspace(const Mantid::API::IMDWorkspace &workspace,
                    const size_t dimensionality) {
   auto actualNonIntegratedDimensionality =
-      workspace->getNonIntegratedDimensions().size();
+      workspace.getNonIntegratedDimensions().size();
   return actualNonIntegratedDimensionality == dimensionality;
 }
 }
@@ -74,9 +75,9 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent)
  * from which level data should be displayed
  */
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace, const std::string &filename,
-    VisualNormalization normalization, int recursionDepth,
-    const std::string &compressorType) const {
+    const Mantid::API::IMDWorkspace_sptr &workspace,
+    const std::string &filename, VisualNormalization normalization,
+    int recursionDepth, const std::string &compressorType) const {
   auto isHistoWorkspace =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
       nullptr;
@@ -96,7 +97,7 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     }
   }();
   // Define a time slice.
-  auto time = selectTimeSliceValue(workspace);
+  auto time = selectTimeSliceValue(*workspace);
 
   // Get presenter and data set factory set up
   auto factoryChain =
@@ -249,7 +250,7 @@ SaveMDWorkspaceToVTKImpl::getAllowedNormalizationsInStringRepresentation()
 
 VisualNormalization
 SaveMDWorkspaceToVTKImpl::translateStringToVisualNormalization(
-    const std::string normalization) const {
+    const std::string &normalization) const {
   return m_normalizations.at(normalization);
 }
 
@@ -269,10 +270,10 @@ void SaveMDWorkspaceToVTKImpl::setupMembers() {
  * @return either the first time entry in case of a 4D workspace or else 0.0
  */
 double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(
-    Mantid::API::IMDWorkspace_sptr workspace) const {
+    const Mantid::API::IMDWorkspace &workspace) const {
   double time = 0.0;
   if (is4DWorkspace(workspace)) {
-    auto timeLikeDimension = workspace->getDimension(3);
+    auto timeLikeDimension = workspace.getDimension(3);
     time = static_cast<double>(timeLikeDimension->getMinimum());
   }
   return time;
@@ -284,7 +285,7 @@ double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(
  * @return true if the workspace is 4D else false
  */
 bool SaveMDWorkspaceToVTKImpl::is4DWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace) const {
+    const Mantid::API::IMDWorkspace &workspace) const {
   const size_t dimensionality = 4;
   return isNDWorkspace(workspace, dimensionality);
 }
@@ -295,7 +296,7 @@ bool SaveMDWorkspaceToVTKImpl::is4DWorkspace(
  * @return true if the workspace is 3D else false
  */
 bool SaveMDWorkspaceToVTKImpl::is3DWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace) const {
+    const Mantid::API::IMDWorkspace &workspace) const {
   const size_t dimensionality = 3;
   return isNDWorkspace(workspace, dimensionality);
 }

@@ -21,6 +21,7 @@ Bug Fixes
 - IDF bug when using Larmor in batch mode was resolved.
 - Issue where Gui changes were not picked up for batch reductions was resolved.
 - Remove SaveNexusProcessed and SaveCSV as an option. Reorder options by dimensionality.
+- Fix for merged reduction with phi masking.
 
 X uncertainties (delta-Q)
 -------------------------

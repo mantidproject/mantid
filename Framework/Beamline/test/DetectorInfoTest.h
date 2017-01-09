@@ -51,6 +51,31 @@ public:
     TS_ASSERT_EQUALS(assignee.size(), 7);
     // TODO once DetectorInfo has moveable fields, check that they are cleared.
   }
+
+  void test_masking() {
+    DetectorInfo info(3);
+    TS_ASSERT(!info.isMasked(0));
+    TS_ASSERT(!info.isMasked(1));
+    TS_ASSERT(!info.isMasked(2));
+    info.setMasked(1, true);
+    TS_ASSERT(!info.isMasked(0));
+    TS_ASSERT(info.isMasked(1));
+    TS_ASSERT(!info.isMasked(2));
+    info.setMasked(1, false);
+    TS_ASSERT(!info.isMasked(0));
+    TS_ASSERT(!info.isMasked(1));
+    TS_ASSERT(!info.isMasked(2));
+  }
+
+  void test_masking_copy() {
+    DetectorInfo source(1);
+    source.setMasked(0, true);
+    DetectorInfo copy(source);
+    TS_ASSERT(copy.isMasked(0));
+    source.setMasked(0, false);
+    TS_ASSERT(!source.isMasked(0));
+    TS_ASSERT(copy.isMasked(0));
+  }
 };
 
 #endif /* MANTID_BEAMLINE_DETECTORINFOTEST_H_ */
