@@ -48,7 +48,9 @@ void calculate(double *out, const double *xValues, const size_t nData,
 DECLARE_FUNCTION(CrystalFieldHeatCapacity)
 
 CrystalFieldHeatCapacity::CrystalFieldHeatCapacity()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {}
+    : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
+  declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
+}
 
 // Sets the eigenvectors / values directly
 void CrystalFieldHeatCapacity::set_eigensystem(const DoubleFortranVector &en_in,
@@ -75,6 +77,12 @@ void CrystalFieldHeatCapacity::function1D(double *out,
   else {
     // Use stored values
     calculate(out, xValues, nData, en);
+  }
+  auto fact = getAttribute("ScaleFactor").asDouble();
+  if (fact != 1.0) {
+    for (size_t i = 0; i < nData; i++) {
+      out[i] *= fact;
+    }
   }
 }
 

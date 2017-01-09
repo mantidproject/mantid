@@ -85,6 +85,7 @@ CrystalFieldMagnetisation::CrystalFieldMagnetisation()
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
   declareAttribute("powder", Attribute(false));
+  declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
 }
 
 // Sets the base crystal field Hamiltonian matrix
@@ -138,6 +139,12 @@ void CrystalFieldMagnetisation::function1D(double *out,
       calculate_powder(out, xValues, nData, ham, nre, T, convfact, iscgs);
     } else {
       calculate(out, xValues, nData, ham, nre, H, T, convfact, iscgs);
+    }
+  }
+  auto fact = getAttribute("ScaleFactor").asDouble();
+  if (fact != 1.0) {
+    for (size_t i = 0; i < nData; i++) {
+      out[i] *= fact;
     }
   }
 }

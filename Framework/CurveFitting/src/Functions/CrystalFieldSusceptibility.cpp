@@ -102,6 +102,7 @@ CrystalFieldSusceptibility::CrystalFieldSusceptibility()
   declareAttribute("Unit", Attribute("cgs"));
   declareAttribute("inverse", Attribute(false));
   declareAttribute("powder", Attribute(false));
+  declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
 }
 
 // Sets the eigenvectors / values directly
@@ -163,6 +164,12 @@ void CrystalFieldSusceptibility::function1D(double *out,
   if (getAttribute("inverse").asBool()) {
     for (size_t i = 0; i < nData; i++) {
       out[i] = 1. / out[i];
+    }
+  }
+  auto fact = getAttribute("ScaleFactor").asDouble();
+  if (fact != 1.0) {
+    for (size_t i = 0; i < nData; i++) {
+      out[i] *= fact;
     }
   }
 }

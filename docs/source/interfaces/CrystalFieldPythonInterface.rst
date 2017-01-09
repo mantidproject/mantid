@@ -405,7 +405,7 @@ Calculating Physical Properties
 In addition to the inelastic neutron spectrum, various physical properties arising from the crystal field interaction
 can be calculated. These include the crystal field contribution to the magnetic heat capacity, the magnetic 
 susceptibility, and magnetisation. The calculated values can be invoked using the `getHeatCapacity()`, 
-`getSusceptibility()` and `getMagnetisation()` methods. 
+`getSusceptibility()` and `getMagneticMoment()` methods. 
 
 To calculate the heat capacity use::
 
@@ -427,7 +427,8 @@ To calculate the heat capacity use::
     Cv = cf.getHeatCapacity(ws, 1)  # Uses the second spectrum's x-values for T (e.g. 450<T<900)
     plot(*Cv)
 
-All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in J/mol/K. 
+All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in 
+Jmol\ :sup:`-1`\ K\ :sup:`-1`\ .
 The theory is described in :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`.
 
 The molar susceptibility is calculated using Van Vleck's formula, and requires in addition knowledge of the applied 
@@ -445,7 +446,7 @@ The powder averaging is done by taking the mean of the susceptibility (or magnet
 :math:`y` and :math:`z` directions (e.g. :math:`\chi^{\mathrm{pow}} = (\chi^x + \chi^y + \chi^z)/3`).
 
 Note that the function calculates the *molar* magnetic susceptibility, and by default outputs it in *cgs* units
-(:math:`\mathrm{cm}^3/\mathrm{mol}` or emu/mol). To obtain the result in SI units (:math:`\mathrm{m}^3/`mathrm{mol}`)
+(cm\ :sup:`3`/mol or emu/mol). To obtain the result in SI units (m\ :sup:`3`/mol)
 use::
 
     chi_v_cgs = cf.getSusceptibility(T, Hdir=[1, 1, 0], Unit='SI')
@@ -485,53 +486,83 @@ Fitting Physical Properties
 
 Instead of fitting the inelastic neutron spectrum, the physical properties can be fitted using a similar interface
 to that described above. The main difference is that some experimental setup information has to be given - especially
-for the susceptibility and magnetisation. This is done by creating an instance (object) of the relevant class
-and passing these to the `CrystalFieldFit` object instead of a `CrystalField` object::
+for the susceptibility and magnetisation. This is done by specifying an instance of the `PhysicalProperties` helper
+class as the `PhysicalProperty` attribute of `CrystalField`, either as a keyword argument in the constructor::
 
+    from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
     # Fits a heat capacity dataset - you must have subtracted the phonon contribution by some method already
     # and the data must be in J/mol/K.
-    cv_obj = CrystalFieldHeatCapacity(cf)
-    fit_cv = CrystalFieldFit(Model=cv_obj, InputWorkspace=ws)
-    fit_cv.fit()
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                      PhysicalProperty=PhysicalProperties('Cv'))
+    fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+    fitcv.fit()
+
+or separately after construction::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    cf.PhysicalProperty = PhysicalProperties('Cv')
+    fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+    fitcv.fit()
 
     # Fits a susceptibility dataset. Data is the volume susceptibility in SI units
-    chi_obj = CrystalFieldSusceptibility(cf, Hdir='powder', Unit='SI')
-    fit_chi = CrystalFieldFit(Model=chi_obj, InputWorkspace=ws)
+    cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder', Unit='SI')
+    fit_chi = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_chi.fit()
-    
+
     # Fits a magnetisation dataset. Data is in emu/mol, and was measured at 5K with the field || [111].
-    mag_obj = CrystalFieldMagnetisation(cf, Temperature=5, Hdir=[1, 1, 1], Unit='cgs')
-    fit_mag = CrystalFieldFit(Model=mag_obj, InputWorkspace=ws)
+    cf.PhysicalProperty = PhysicalProperties('M(H)', Temperature=5, Hdir=[1, 1, 1], Unit='cgs')
+    fit_mag = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_mag.fit()
 
     # Fits a magnetisation vs temperature dataset. Data is in Am^2/mol, measured with a 0.1T field || [110]
-    moment_obj = CrystalFieldMagnetisation(cf, Hmag=0.1, Hdir=[1, 1, 0], Unit='SI')
-    fit_moment = CrystalFieldFit(Model=moment_obj, InputWorkspace=ws)
+    cf.PhysicalProperty = PhysicalProperties('M(T)', Hmag=0.1, Hdir=[1, 1, 0], Unit='SI')
+    fit_moment = CrystalFieldFit(Model=cf, InputWorkspace=ws)
     fit_moment.fit()
 
 Unfortunately only 1D datasets can be fitted (e.g. M(H, T) cannot be fitted as a simultaneous function of field and
-temperature.
+temperature).
 
 Simultaneous Fitting of Physical Properties and Inelastic Neutron Spectra
 -------------------------------------------------------------------------
 
-Finally, physical properties data and neutron spectra may be fitted simultaneously. Instead of passing a single
-object as the `Model` parameter to `CrystalFieldFit`, pass a list of objects::
+Finally, physical properties data and neutron spectra may be fitted simultaneously. In this case, all the inelastic
+neutron spectra must be specified first in the list of input workspaces, with the physical properties dataset(s)
+following in the same order as specified in the `PhysicalProperty` attribute, which for multiple physical
+properties should be a list. E.g.::
 
-    # Fits two INS spectra (at 44K and 50K) and the heat capacity, susceptibility and magnetisation simultaneously.
-    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-                      Temperature=[44.0, 50], FWHM=[1.1, 0.9])
-    cv_obj = CrystalFieldHeatCapacity(cf)
-    chi_obj = CrystalFieldSusceptibility(cf, Hdir='powder', Unit='SI')
-    mag_obj = CrystalFieldMagnetisation(cf, Temperature=5, Hdir=[1, 1, 1], Unit='cgs')
-    fit = CrystalFieldFit(Model=[cf, cv_obj, chi_obj, mag_obj], 
-                          InputWorkspace=[ws_44K, ws_50K, ws_cp, ws_chi, ws_mag])
+    # Fits an INS spectrum (at 10K) and the heat capacity simultaneously
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    cf.Temperature = 10
+    cf.FWHM = 1.5
+    cf.PhysicalProperty = PhysicalProperties('Cv')
+    fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_10K, ws_cp])
     fit.fit()
 
-Note that all the different physical properties objects must be based on the same `CrystalField` object (so that
-they have the same crystal field parameters). Note that if the `CrystalField` object contains multiple spectra,
-the workspaces corresponding to these spectra should be given together (and the `InputWorkspace` should be in the
-same order as the `Model` list).
+    # Fits two INS spectra (at 44K and 50K) and the heat capacity, susceptibility and magnetisation simultaneously.
+    PPCv = PhysicalProperty('Cv')
+    PPchi = PhysicalProperty('susc', 'powder', Unit='cgs')
+    PPMag = PhysicalProperty('M(H)', 5, [1, 1, 1], 'bohr')
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                      Temperature=[44.0, 50], FWHM=[1.1, 0.9], PhysicalProperty=[PPCv, PPchi, PPMag] )
+    fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_44K, ws_ins_50K, ws_cp, ws_chi, ws_mag])
+    fit.fit()
 
-  
+Note that `PhysicalProperty` requires the type of physical property (either `'Cv'` or `'Cp'` or `'heatcap'` for
+heat capacity; `'susc'` or `'chi'` for susceptibility; `'mag'` or `'M(H)'` for magnetic moment vs applied field;
+or `'mom'` or `'M(T)'` for moment vs temperature) as the first argument. subsequent arguments are optional, and
+are in the following order::
+
+    PhysicalProperties('Cp')  # No further parameters required for heat capacity
+    PhysicalProperties('chi', hdir, inverse, unit)
+    PhysicalProperties('chi', unit)
+    PhysicalProperties('mag', temp, hdir, unit)
+    PhysicalProperties('mag', unit)
+    PhysicalProperties('M(T)', hmag, hdir, inverse, unit)
+    PhysicalProperties('M(T)', unit)
+
+Or these parameters may be specified using keyword arguments, with the keywords: `'Hdir'`, `'Hmag'`, `'Inverse'`, 
+`'Unit'`, and `'Temperature'` (note these are case sensitive, and not all parameters apply to all types of 
+physical properties). The default values (`Hdir=[0,0,1]`, `Hmag=1`, `Inverse=False`, `Unit='cgs'` and 
+`Temperature=1` are used if nothing is specified for a particular attribute.
+
 .. categories:: Interfaces Indirect
