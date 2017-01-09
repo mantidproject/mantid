@@ -86,6 +86,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
       m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"),
       m_firstNonOrthogonalWorkspaceOpen(true), m_nonOrthogonalDefault(false),
+      m_oldDimNonOrthogonal(false),
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
@@ -2386,16 +2387,16 @@ void SliceViewer::setNonOrthogonalbtn() {
   bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
   if (!canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()) {
     ui.btnNonOrthogonalToggle->toggle();
+    m_oldDimNonOrthogonal = true;
+  }
+
+  if (canShowSkewedWS && m_oldDimNonOrthogonal &&
+      !ui.btnNonOrthogonalToggle->isChecked()) {
+    ui.btnNonOrthogonalToggle->toggle();
+    m_oldDimNonOrthogonal = false;
   }
   ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
-  // Orthogonal Overlay axes calculated and appear.
-  if (canShowSkewedWS) {
-    m_nonOrthogonalOverlay->enable();
-    auto slicePoint = getSlicePoint();
 
-  } else {
-    m_nonOrthogonalOverlay->disable();
-  }
   emit disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());
 }
 

@@ -392,6 +392,9 @@ private:
   bool m_firstNonOrthogonalWorkspaceOpen;
   bool m_nonOrthogonalDefault; // sets whether nonOrthogonalview should be shown
                                // as a default
+  bool m_oldDimNonOrthogonal; // sets whether previous dimensions were displayed
+  // as nonorthogonal, so if dims switch from orth -> nonOrth,
+  // then nonOrth should default be shown again
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;
