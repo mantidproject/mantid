@@ -787,3 +787,19 @@ class PhysicalProperties(object):
                 out += (',Hmag=%s' % (self._hmag)) if self._typeid==3 else ''
         return out
 
+    def envString(self, dataset=0):
+        """Create environment string for multidataset fitting"""
+        dataset = str(dataset)
+        out = ''
+        if self._typeid > 1:
+            out += ',Unit%s=%s' % (dataset, self._physpropUnit)
+            if 'powder' in self._hdir:
+                out += ',powder%s=1' % (dataset)
+            else:
+                out += ',Hdir%s=(%s)' % (dataset, ','.join([str(hh) for hh in self._hdir]))
+            if self._typeid == 3:  # magnetisation M(H)
+                out += ',Temperature%s=%s' % (dataset, self._physpropTemperature)
+            else:            # either susceptibility or M(T)
+                out += ',inverse%s=%s' % (dataset, 1 if self._suscInverseFlag else 0)
+                out += (',Hmag%s=%s' % (dataset, self._hmag)) if self._typeid==3 else ''
+        return out

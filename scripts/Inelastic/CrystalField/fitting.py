@@ -258,14 +258,33 @@ class CrystalField(object):
         """
         Make the main attribute part of the function string for makeMultiSpectrumFunction()
         """
+        # Handles physical properties (PP). self._temperature applies only for INS datasets. But the
+        # C++ CrystalFieldMultiSpectrum uses it to count number of datasets, so we need to set it here
+        # as a concatenation of the INS (self._temperature and self._FWHM) and PP (self._physprop)
+        temperature = self._temperature
+        FWHM = self._FWHM
+        if self._physprop is not None:
+            physprop = []
+            for tt in self._temperature:
+                physprop.append(None)
+            for pp in self._physprop:
+                temperature.append(pp.Temperature if (pp.Temperature is not None) else 0.)
+                FWHM.append(0.)
+                physprop.append(pp)
+            ppid = [0 if pp is None else pp.TypeID for pp in physprop]
+            ppenv = [pp.envString(i) for i, pp in enumerate(physprop) if pp is not None]
+            ppenv = filter(None, ppenv)
         out = ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         out += ',PeakShape=%s' % self.getPeak().name
         out += ',FixAllPeaks=%s' % self._fixAllPeaks
         if self.background is not None:
             out += ',Background=%s' % self.background[0].nameString()
-        out += ',Temperatures=(%s)' % ','.join(map(str, self._temperature))
+        out += ',Temperatures=(%s)' % ','.join(map(str, temperature))
+        if self._physprop is not None:
+            out += ',PhysicalProperties=(%s)' % ','.join(map(str, ppid))
+            out += ','.join(map(str, ppenv))
         if self._FWHM is not None:
-            out += ',FWHMs=(%s)' % ','.join(map(str, self._FWHM))
+            out += ',FWHMs=(%s)' % ','.join(map(str, FWHM))
         if self._intensityScaling is not None:
             for i in range(len(self._intensityScaling)):
                 out += ',IntensityScaling%s=%s' % (i, self._intensityScaling[i])
@@ -438,9 +457,14 @@ class CrystalField(object):
 
     @Temperature.setter
     def Temperature(self, value):
+        lenval = len(value) if hasattr(value, '__len__') else 1
+        lentemp = len(self._temperature) if hasattr(self._temperature, '__len__') else 1
         self._temperature = value
         self._dirty_peaks = True
         self._dirty_spectra = True
+        if lenval != lentemp:
+            peakname = self.peaks[0].name if isinstance(self.peaks, list) else self.peaks.name
+            self.setPeaks(peakname)
 
     @property
     def FWHM(self):
