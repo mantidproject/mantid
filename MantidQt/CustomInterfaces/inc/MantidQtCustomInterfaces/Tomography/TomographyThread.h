@@ -105,7 +105,7 @@ signals:
 private:
   bool m_workerRunning = false;
   /// Holder for the current running process' PID
-  qint64 m_workerPID;
+  qint64 m_workerPID = 0;
   TomographyProcess *const m_worker;
 };
 } // CustomInterfaces
