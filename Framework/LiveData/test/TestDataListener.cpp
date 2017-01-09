@@ -96,7 +96,8 @@ void TestDataListener::createEmptyWorkspace() {
   // Add a monitor workspace
   auto monitorWS =
       WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_buffer, monitorWS, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_buffer, *monitorWS,
+                                                    true);
   monitorWS->dataX(0)[0] = 40000;
   monitorWS->dataX(0)[1] = 60000;
   m_buffer->setMonitorWorkspace(monitorWS);

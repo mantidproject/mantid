@@ -12,6 +12,9 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
+namespace API {
+class DetectorInfo;
+}
 namespace MDAlgorithms {
 
 class DLLExport IntegrateEllipsoids : public API::Algorithm {
@@ -37,7 +40,7 @@ private:
                         Kernel::DblMatrix const &UBinv, bool hkl_integ);
 
   /// Calculate if this Q is on a detector
-  void calculateE1(Geometry::Instrument_const_sptr inst);
+  void calculateE1(const API::DetectorInfo &detectorInfo);
 
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);

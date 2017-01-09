@@ -265,7 +265,6 @@ void LoadNXSPE::exec() {
   // generate instrument
   Geometry::Instrument_sptr instrument(new Geometry::Instrument(
       instrument_name.empty() ? "NXSPE" : instrument_name));
-  outputWS->setInstrument(instrument);
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
   source->setPos(0.0, 0.0, -10.);
@@ -294,6 +293,7 @@ void LoadNXSPE::exec() {
     instrument->add(det);
     instrument->markAsDetector(det);
   }
+  outputWS->setInstrument(instrument);
 
   std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
                                 itdataend, iterrorend;

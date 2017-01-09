@@ -1415,13 +1415,11 @@ class DirectEnergyConversion(object):
         signal = []
         error = []
         izerc = 0
+        data_specInfo = data_ws.spectrumInfo()
         for i in range(nhist):
-            try:
-                det = data_ws.getDetector(i)
-#pylint: disable=broad-except
-            except Exception:
+            if not data_specInfo.hasDetectors(i):
                 continue
-            if det.isMasked():
+            if data_specInfo.isMasked(i):
                 continue
             sig = data_ws.readY(i)[0]
             err = data_ws.readE(i)[0]

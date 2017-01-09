@@ -120,7 +120,7 @@ void FileBackedExperimentInfo::cacheDetectorGroupings(
  * Populate the object and returns the members of the group for a given ID
  * @param detID A detector ID to lookup
  */
-const std::vector<detid_t> &
+const std::set<detid_t> &
 FileBackedExperimentInfo::getGroupMembers(const detid_t detID) const {
   populateIfNotLoaded();
   return ExperimentInfo::getGroupMembers(detID);
@@ -275,6 +275,17 @@ void FileBackedExperimentInfo::setEFixed(const detid_t detID,
                                          const double value) {
   populateIfNotLoaded();
   ExperimentInfo::setEFixed(detID, value);
+}
+
+size_t FileBackedExperimentInfo::numberOfDetectorGroups() const {
+  populateIfNotLoaded();
+  return ExperimentInfo::numberOfDetectorGroups();
+}
+
+const std::set<detid_t> &
+FileBackedExperimentInfo::detectorIDsInGroup(const size_t index) const {
+  populateIfNotLoaded();
+  return ExperimentInfo::detectorIDsInGroup(index);
 }
 
 //------------------------------------------------------------------------------------------------------

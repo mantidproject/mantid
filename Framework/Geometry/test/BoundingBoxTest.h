@@ -209,6 +209,18 @@ public:
     TS_ASSERT_EQUALS(box.maxPoint() == V3D(-FLT_MAX, -FLT_MAX, -FLT_MAX), true);
     TS_ASSERT_EQUALS(box.minPoint() == V3D(FLT_MAX, FLT_MAX, FLT_MAX), true);
   }
+
+  void test_generatePointInside_Gives_Point_Inside() {
+    BoundingBox box(3.0, 4.0, 5.0, 1.0, 1.0, 2.5);
+
+    auto pt = box.generatePointInside(0.1, 0.2, 0.3);
+    TS_ASSERT(box.isPointInside(pt));
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(1.2, pt.X(), tolerance);
+    TS_ASSERT_DELTA(1.6, pt.Y(), tolerance);
+    TS_ASSERT_DELTA(3.25, pt.Z(), tolerance);
+  }
+
   void testBB_expansion_works_fine() {
     BoundingBox box(3.0, 4.0, 5.5, 1.0, 1.0, 1.5);
     std::vector<V3D> points;

@@ -1182,7 +1182,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
     // Remove extra white spaces
     boost::algorithm::trim(parname);
 
-    if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos")) {
+    if (!parname.empty() && (parname[0] == 'A' || parname == "Bkpos")) {
       // Insert parameter name starting with A or Bkpos (special case for
       // FullprofPolynomial)
       parmap.emplace(parname, parvalue);
@@ -1406,8 +1406,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 4. Set axis
   m_outputWS->getAxis(0)->setUnit("TOF");
 
-  API::TextAxis *tAxis = nullptr;
-  tAxis = new API::TextAxis(nspec);
+  API::TextAxis *tAxis = new API::TextAxis(nspec);
   tAxis->setLabel(0, "Data");
   tAxis->setLabel(1, "Calc");
   tAxis->setLabel(2, "Diff");

@@ -197,7 +197,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             if len(filename) <= 0:
                 issues[
                     "MaskingFilename"] = "Masking=\"%s\" requires a filename" % masking
-        elif masking == "MaskingWorkspace":
+        elif masking == "Masking Workspace":
             mask_workspace = self.getPropertyValue("MaskingWorkspace")
             if mask_workspace is None or len(mask_workspace) <= 0:
                 issues["MaskingWorkspace"] = "Must supply masking workspace"
@@ -436,7 +436,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                 if norm == "Extracted from Data":
                     DeleteWorkspace(Workspace='%s_%s_normalizer' % (new_Tag, r)) # was 'peak_clip_WS'
 
-            propertyName = 'OutputWorkspace'
+            propertyName = 'OutputWorkspace_'+str(outputWksp)
             self.declareProperty(WorkspaceProperty(
                 propertyName, outputWksp, Direction.Output))
             self.setProperty(propertyName, outputWksp)
