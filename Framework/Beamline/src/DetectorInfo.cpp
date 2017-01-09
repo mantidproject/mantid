@@ -17,7 +17,11 @@ DetectorInfo::DetectorInfo(const size_t numberOfDetectors,
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
 /// instrument.
-size_t DetectorInfo::size() const { return m_isMasked->size(); }
+size_t DetectorInfo::size() const {
+  if (!m_isMasked)
+    return 0;
+  return m_isMasked->size();
+}
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {

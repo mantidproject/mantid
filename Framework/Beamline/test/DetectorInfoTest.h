@@ -46,7 +46,7 @@ public:
     DetectorInfo source(7);
     const auto moved(std::move(source));
     TS_ASSERT_EQUALS(moved.size(), 7);
-    // TODO once DetectorInfo has moveable fields, check that they are cleared.
+    TS_ASSERT_EQUALS(source.size(), 0);
   }
 
   void test_assign() {
@@ -61,7 +61,7 @@ public:
     DetectorInfo assignee(1);
     assignee = std::move(source);
     TS_ASSERT_EQUALS(assignee.size(), 7);
-    // TODO once DetectorInfo has moveable fields, check that they are cleared.
+    TS_ASSERT_EQUALS(source.size(), 0);
   }
 
   void test_no_monitors() {
