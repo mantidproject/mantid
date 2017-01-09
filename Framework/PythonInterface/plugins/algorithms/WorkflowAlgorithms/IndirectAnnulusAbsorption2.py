@@ -53,10 +53,10 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                              doc='Use of Mass density or Number density')
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.2,
+        self.declareProperty(name='SampleInnerRadius', defaultValue=0.23,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.25,
+        self.declareProperty(name='SampleOuterRadius', defaultValue=0.27,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
         self.declareProperty(name='SampleHeight', defaultValue=1.0,
@@ -80,7 +80,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='CanInnerRadius', defaultValue=0.19,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container inner radius')
-        self.declareProperty(name='CanOuterRadius', defaultValue=0.26,
+        self.declareProperty(name='CanOuterRadius', defaultValue=0.35,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container outer radius')
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
@@ -199,6 +199,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             logger.information('Container thickness: %f & %f' % (can_thickness_1, can_thickness_2))
 
             if self._use_can_corrections:
+
                 prog.report('Calculating container corrections')
                 divide_alg.setProperty("LHSWorkspace", sample_wave_ws)
                 divide_alg.setProperty("RHSWorkspace", self._ass_ws)
@@ -225,6 +226,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                     'Center': [0., 0., 0.],
                                     'Axis': 1},
                           Material=container_mat_list)
+
                 MonteCarloAbsorption(InputWorkspace=can1_wave_ws,
                                      OutputWorkspace='__Acc1',
                                      EventsPerPoint=self._events,
