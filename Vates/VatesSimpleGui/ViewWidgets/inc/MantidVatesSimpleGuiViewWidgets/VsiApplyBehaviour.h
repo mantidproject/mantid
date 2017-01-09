@@ -16,7 +16,8 @@ public:
   typedef QObject Superclass;
 
 public:
-  VsiApplyBehaviour(Mantid::VATES::ColorScaleLock *lock, QObject *parent = 0);
+  VsiApplyBehaviour(Mantid::VATES::ColorScaleLock *lock,
+                    QObject *parent = nullptr);
   ~VsiApplyBehaviour() override{};
 
   /// Register/unregister pqPropertiesPanel instances to monitor.

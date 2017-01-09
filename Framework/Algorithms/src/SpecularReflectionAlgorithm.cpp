@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -154,7 +155,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(
     checkSpectrumNumbers(spectrumNumbers, strictSpectrumChecking, g_log);
     auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
     DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
-    bool warnIfMasked = true;
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (auto index : spectrumNumbers) {
       const size_t spectrumNumber{static_cast<size_t>(index)};
       auto it = specToWorkspaceIndex.find(index);
@@ -166,7 +167,10 @@ SpecularReflectionAlgorithm::getDetectorComponent(
       }
       const size_t workspaceIndex = it->second;
       auto detector = workspace->getDetector(workspaceIndex);
-      allDetectors->addDetector(detector, warnIfMasked);
+      if (spectrumInfo.isMasked(workspaceIndex))
+        g_log.warning() << "Adding a detector (ID:" << detector->getID()
+                        << ") that is flagged as masked.\n";
+      allDetectors->addDetector(detector);
     }
     searchResult = allDetectors;
   } else {

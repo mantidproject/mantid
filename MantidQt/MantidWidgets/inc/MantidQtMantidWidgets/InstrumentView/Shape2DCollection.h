@@ -1,6 +1,8 @@
 #ifndef MANTIDPLOT_SHAPE2DCOLLECTION_H_
 #define MANTIDPLOT_SHAPE2DCOLLECTION_H_
 
+#include "MantidAPI/ITableWorkspace.h"
+
 #include "Shape2D.h"
 #include "RectF.h"
 
@@ -85,6 +87,10 @@ public:
 
   /// Change border color of all shapes.
   void changeBorderColor(const QColor &color);
+  /// Save shape collection to a Table workspace
+  void saveToTableWorkspace();
+  /// Load shape collectio from a Table workspace
+  void loadFromTableWorkspace(Mantid::API::ITableWorkspace_const_sptr ws);
   /// Load settings for the shape 2D collection from a project file
   virtual void loadFromProject(const std::string &lines);
   /// Save settings for the shape 2D collection to a project file

@@ -436,7 +436,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                 if norm == "Extracted from Data":
                     DeleteWorkspace(Workspace='%s_%s_normalizer' % (new_Tag, r)) # was 'peak_clip_WS'
 
-            propertyName = 'OutputWorkspace'
+            propertyName = 'OutputWorkspace_'+str(outputWksp)
             self.declareProperty(WorkspaceProperty(
                 propertyName, outputWksp, Direction.Output))
             self.setProperty(propertyName, outputWksp)

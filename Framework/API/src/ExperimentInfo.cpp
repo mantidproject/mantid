@@ -9,6 +9,8 @@
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
@@ -24,6 +26,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
@@ -141,6 +144,33 @@ const std::string ExperimentInfo::toString() const {
   return out.str();
 }
 
+// Helpers for setInstrument and getInstrument
+namespace {
+void checkDetectorInfoSize(const Instrument &instr,
+                           const Beamline::DetectorInfo &detInfo) {
+  const auto numDets = instr.getNumberDetectors();
+  if (numDets != detInfo.size())
+    throw std::runtime_error("ExperimentInfo: size mismatch between "
+                             "DetectorInfo and number of detectors in "
+                             "instrument");
+}
+
+std::unique_ptr<Beamline::DetectorInfo>
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
+  if (newInstr.hasDetectorInfo()) {
+    // We allocate a new DetectorInfo in case there is an Instrument holding a
+    // reference to our current DetectorInfo.
+    const auto &detInfo = newInstr.detectorInfo();
+    checkDetectorInfoSize(oldInstr, detInfo);
+    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
+  } else {
+    // If there is no DetectorInfo in the instrument we create a default one.
+    const auto numDets = oldInstr.getNumberDetectors();
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+  }
+}
+}
+
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
@@ -154,20 +184,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
-  const auto numDets = sptr_instrument->getNumberDetectors();
-  if (instr->hasDetectorInfo()) {
-    const auto &detInfo = instr->detectorInfo();
-    if (numDets != detInfo.size())
-      throw std::runtime_error("ExperimentInfo::setInstrument: size mismatch "
-                               "between DetectorInfo and number of detectors "
-                               "in instrument");
-    // We allocate a new DetectorInfo in case there is an Instrument holding a
-    // reference to our current DetectorInfo.
-    m_detectorInfo = boost::make_shared<Beamline::DetectorInfo>(detInfo);
-  } else {
-    // If there is no DetectorInfo in the instrument we create a default one.
-    m_detectorInfo = boost::make_shared<Beamline::DetectorInfo>(numDets);
-  }
+  m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -176,10 +193,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  if (sptr_instrument->getNumberDetectors() != m_detectorInfo->size())
-    throw std::runtime_error("ExperimentInfo::getInstrument: size mismatch "
-                             "between DetectorInfo and number of detectors in "
-                             "instrument");
+  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
@@ -340,6 +354,8 @@ void ExperimentInfo::populateInstrumentParameters() {
 
 /**
  * Replaces current parameter map with a copy of the given map
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap const reference to parameter map whose copy replaces the current
  * parameter map
  */
@@ -352,6 +368,8 @@ void ExperimentInfo::replaceInstrumentParameters(
 
 /**
  * exchanges contents of current parameter map with contents of other map)
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap reference to parameter map which would exchange its contents with
  * current map
  */
@@ -924,7 +942,7 @@ const DetectorInfo &ExperimentInfo::detectorInfo() const {
     std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
     if (!m_detectorInfoWrapper)
       m_detectorInfoWrapper =
-          Kernel::make_unique<DetectorInfo>(getInstrument());
+          Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument());
   }
   return *m_detectorInfoWrapper;
 }
@@ -947,7 +965,7 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   // reference count to the ParameterMap. This has do be done *after* getting
   // the ParameterMap.
   m_detectorInfoWrapper =
-      Kernel::make_unique<DetectorInfo>(getInstrument(), pmap);
+      Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
   return *m_detectorInfoWrapper;
 }
 
@@ -1260,7 +1278,22 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     int size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[4];
-    pmap.add(tokens[1], comp, tokens[2], paramValue);
+
+    if (tokens[2].compare("masked") == 0) {
+      // Do not add masking to ParameterMap, it is stored in DetectorInfo
+      const auto det = dynamic_cast<const Detector *const>(comp);
+      if (!det)
+        throw std::runtime_error(
+            "Found masking for a non-detector component. This is not possible");
+      const auto &type = tokens[1];
+      const std::string name = "dummy";
+      auto param = ParameterFactory::create(type, name);
+      param->fromString(paramValue);
+      bool value = param->value<bool>();
+      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), value);
+    } else {
+      pmap.add(tokens[1], comp, tokens[2], paramValue);
+    }
   }
 }
 
@@ -1285,8 +1318,15 @@ void ExperimentInfo::populateWithParameter(
     pDescription = &paramInfo.m_description;
 
   // Some names are special. Values should be convertible to double
-  if (name.compare("x") == 0 || name.compare("y") == 0 ||
-      name.compare("z") == 0) {
+  if (name.compare("masked") == 0) {
+    // Do not add masking to ParameterMap, it is stored in DetectorInfo
+    const auto det = dynamic_cast<const Detector *const>(paramInfo.m_component);
+    if (!det)
+      throw std::runtime_error(
+          "Found masking for a non-detector component. This is not possible");
+    m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), paramValue);
+  } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
+             name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
   } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
              name.compare("roty") == 0 || name.compare("rotz") == 0) {

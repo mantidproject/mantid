@@ -250,9 +250,9 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
   bc->setSplitInto(2);
   bc->setSplitThreshold(10);
   bc->setMaxDepth(7);
-  ws->addDimension(dimX);
-  ws->addDimension(dimY);
-  ws->addDimension(dimZ);
+  ws->addDimension(std::move(dimX));
+  ws->addDimension(std::move(dimY));
+  ws->addDimension(std::move(dimZ));
   ws->initialize();
 
   if (errorsSQ) {

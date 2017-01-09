@@ -40,6 +40,9 @@ public:
 
   void read(size_t index, const std::string &text) override;
 
+  /// Sets item from a stream
+  void read(const size_t index, std::istream &in) override;
+
   /// Specialized type check
   bool isBool() const override;
 
@@ -77,6 +80,8 @@ private:
   typedef boost::variant<double, int, std::string, Kernel::V3D> CacheValueType;
   ///
   mutable std::list<CacheValueType> m_oldRows;
+  /// Sets the correct value in the referenced peak.
+  void setPeakHKLOrRunNumber(const size_t index, const double val);
 };
 
 } // namespace Mantid
