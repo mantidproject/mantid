@@ -273,7 +273,7 @@ signals:
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
   void comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-            std::vector<Mantid::Geometry::IPeak *>>&);
+                                    std::vector<Mantid::Geometry::IPeak *>> &);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -340,8 +340,7 @@ protected:
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
   std::pair<QPointF, QPointF> m_selectedMarkers;
   std::pair<std::vector<Mantid::Geometry::IPeak *>,
-            std::vector<Mantid::Geometry::IPeak *>>
-  m_selectedPeaks;
+            std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
   /// use with a new PeakOverlay.
 
 private:

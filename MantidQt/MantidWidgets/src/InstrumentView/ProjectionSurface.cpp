@@ -746,7 +746,8 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
     // clear selected peak markers
     for (auto marker : peakMarkers) {
       auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-      if (m_selectedPeaks.first.front() == peak || m_selectedPeaks.second.front() == peak) {
+      if (m_selectedPeaks.first.front() == peak ||
+          m_selectedPeaks.second.front() == peak) {
         m_selectedPeaks.first.clear();
         m_selectedPeaks.second.clear();
         m_selectedMarkers.first = QPointF();
@@ -761,7 +762,7 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
 void ProjectionSurface::comparePeaks(const QRect &rect) {
   // Find the selected peak across all of the peak overlays.
   QPointF origin;
-  std::vector<Mantid::Geometry::IPeak*> peaks;
+  std::vector<Mantid::Geometry::IPeak *> peaks;
   for (auto *po : m_peakShapes) {
     po->selectIn(rect);
     const auto markers = po->getSelectedPeakMarkers();
@@ -789,8 +790,8 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
     // Two peaks have now been selected
     m_selectedPeaks.second = peaks;
     m_selectedMarkers.second = origin;
-  } else if (!m_selectedPeaks.first.empty()
-             && !m_selectedPeaks.second.empty()) {
+  } else if (!m_selectedPeaks.first.empty() &&
+             !m_selectedPeaks.second.empty()) {
     // Two peaks have already been selected. Clear the pair and store
     // the new peak as the first entry
     m_selectedPeaks.first = peaks;

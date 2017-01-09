@@ -545,11 +545,11 @@ void InstrumentWidgetPickTab::initSurface() {
           SLOT(singleComponentPicked(size_t)));
   connect(
       surface,
-      SIGNAL(comparePeaks(
-          std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>>)),
+      SIGNAL(comparePeaks(std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                    std::vector<Mantid::Geometry::IPeak *>>)),
       this,
-      SLOT(comparePeaks(
-          std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>>)));
+      SLOT(comparePeaks(std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                  std::vector<Mantid::Geometry::IPeak *>>)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
@@ -681,8 +681,9 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_plotController->updatePlot();
 }
 
-void InstrumentWidgetPickTab::comparePeaks(const std::pair<std::vector<
-    Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> &peaks) {
+void InstrumentWidgetPickTab::comparePeaks(
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
@@ -925,8 +926,8 @@ ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
   return QString::fromStdString(text.str());
 }
 
-QString ComponentInfoController::displayPeakAngles(
-    const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
+QString ComponentInfoController::displayPeakAngles(const std::pair<
+    Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
@@ -941,13 +942,14 @@ QString ComponentInfoController::displayPeakAngles(
   return QString::fromStdString(text.str());
 }
 
-void ComponentInfoController::displayComparePeaksInfo(const
-                                                      std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                                                      std::vector<Mantid::Geometry::IPeak *>> &peaks) {
+void ComponentInfoController::displayComparePeaksInfo(
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   std::stringstream text;
 
   text << "Comparison Information\n";
-  auto peaksFromDetectors = std::make_pair(peaks.first.front(), peaks.second.front());
+  auto peaksFromDetectors =
+      std::make_pair(peaks.first.front(), peaks.second.front());
   text << displayPeakAngles(peaksFromDetectors).toStdString();
 
   text << "-------------------------------\n";
@@ -961,7 +963,6 @@ void ComponentInfoController::displayComparePeaksInfo(const
     text << displayPeakInfo(peak).toStdString();
 
   text << "\n";
-
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
