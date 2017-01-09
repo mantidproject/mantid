@@ -242,7 +242,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -477,24 +478,27 @@ void TomographyIfaceModel::doRemoteRunReconstructionJob(
  * @param thread This thread will be started after the worker is set up with the
  *    runnable and the arguments
  * @param worker The worker will only be set up with the runnable and arguments
+ * @param workerName The process name with which it will be shown in the
+ *    reconstruction jobs. Default is "Mantid_Local"
  */
 void TomographyIfaceModel::doLocalRunReconstructionJob(
     const std::string &runnable, const std::vector<std::string> &args,
     const std::string &allOpts, TomographyThread &thread,
-    TomographyProcess &worker) {
+    TomographyProcess &worker, const std::string &workerName) {
 
   // Can only run one reconstruction at a time
   // Qt doesn't use exceptions so we can't make sure it ran here
-  worker.setup(runnable, args, allOpts);
+  worker.setup(runnable, args, allOpts, workerName);
   thread.start();
 }
 
 void TomographyIfaceModel::addJobToStatus(const qint64 pid,
                                           const std::string &runnable,
-                                          const std::string &allOpts) {
+                                          const std::string &allOpts,
+                                          const std::string &workerName) {
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
   info.id = boost::lexical_cast<std::string>(pid);
-  info.name = pid > 0 ? "Mantid_Local" : "none";
+  info.name = pid > 0 ? workerName : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
   info.cmdLine = runnable + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
