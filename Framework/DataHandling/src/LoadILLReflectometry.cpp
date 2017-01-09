@@ -131,9 +131,6 @@ void LoadILLReflectometry::exec() {
   g_log.debug("Building properties...");
   loadNexusEntriesIntoProperties(filenameData);
 
-  g_log.debug("Loading data...");
-  loadData(firstEntry, monitorsData);
-
   // load the instrument from the IDF if it exists
   g_log.debug("Loading instrument definition...");
   runLoadInstrument();
@@ -141,39 +138,47 @@ void LoadILLReflectometry::exec() {
 
   Mantid::Kernel::NexusDescriptor descriptor(filenameData);
 
-  // Set the channel width property
+  std::vector<double> xVals;
+  // Set the channel width property and get x values
   if (descriptor.pathExists("/entry0/monitor1/time_of_flight")){
     auto channel_width = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty("monitor1.time_of_flight_0"));
+        m_localWorkspace->run().getProperty("monitor1.time_of_flight_0")); /* PAR1[95] */
     m_localWorkspace->mutableRun().addProperty<double>(
         "channel_width", *channel_width, true); // overwrite
+    m_channelWidth = *channel_width;
+    getXValues(xVals);
   }
   else{
     g_log.debug() << "Did not find Nexus entry monitor1.time_of_flight \n";
+    m_channelWidth = 0;
+
+    g_log.debug() << "No monitor TOF values for axis description (no conversion to wavelength possible). \n";
+
+    xVals.reserve(m_localWorkspace->x(0).size());
+    for (size_t t = 0; t <= m_numberOfChannels; ++t) {
+      double dt = double(t);
+      xVals.push_back(dt);
+    }
   }
+  g_log.debug() << "Channel width: " << m_channelWidth << '\n';
+
+  g_log.debug("Loading data...");
+  loadData(firstEntry, monitorsData, xVals);
 
   // convert to wavelength using algorithm ConvertUnits
-  auto convertToWavelength = createChildAlgorithm("ConvertUnits", true);
-  convertToWavelength->initialize();
-  convertToWavelength->setLogging(true);
-  convertToWavelength->enableHistoryRecordingForChild(true);
-
-  // execute ConvertUnits
   if (descriptor.pathExists("/entry0/monitor1/time_of_flight")){
-
+    auto convertToWavelength = createChildAlgorithm("ConvertUnits", true);
+    convertToWavelength->initialize();
+    convertToWavelength->setLogging(true);
+    convertToWavelength->enableHistoryRecordingForChild(true);
     convertToWavelength->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_localWorkspace);
     convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", m_localWorkspace);
     convertToWavelength->setPropertyValue("Target", "Wavelength");
-    convertToWavelength->setPropertyValue("EMode", "Direct");
-    //convertToWavelength->setProperty<bool>("AlignBins", true); // very critical to use, does not work anyways, seems to be a bug
-    //convertToWavelength->setProperty<bool>("ConvertFromPointData", false);
-
+    convertToWavelength->setPropertyValue("EMode", "Elastic");
     convertToWavelength->execute();
   }
-  else
-    g_log.debug() << "No wavelength axis description. \n";
 
-  // transpose workspace (histogram)
+  // eventually transpose workspace (histogram)
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -287,14 +292,102 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
 }
 
 /**
- * Load data found in nexus file
+ * Determine x values
  *
- * @param entry :: The Nexus entry
+ * @param xVals :: vector holding the x values
+ *
+ */
+void LoadILLReflectometry::getXValues(std::vector<double> &xVals){
+  try{
+          // use Chopper1.phase
+          auto chop1_phase = dynamic_cast<PropertyWithValue<double> *>(
+            m_localWorkspace->run().getProperty("Chopper1.phase"));
+
+          auto tof_1 = dynamic_cast<PropertyWithValue<double> *>(
+            m_localWorkspace->run().getProperty("monitor1.time_of_flight_2")); /* PAR1[96] */
+
+          auto POFF = dynamic_cast<PropertyWithValue<double> *>(
+            m_localWorkspace->run().getProperty("VirtualChopper.poff")); /* par1[54] */
+
+          auto open_offset = dynamic_cast<PropertyWithValue<double> *>(
+            m_localWorkspace->run().getProperty("VirtualChopper.open_offset")); /* par1[56] */
+
+          auto chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
+            m_localWorkspace->run().getProperty("VirtualChopper.chopper1_speed_average")); /* PAR2[109] */
+
+          auto chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
+            m_localWorkspace->run().getProperty("VirtualChopper.chopper2_speed_average")); /* PAR2[109] */
+
+          auto chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
+            m_localWorkspace->run().getProperty("VirtualChopper.chopper2_phase_average")); /* PAR2[114] */
+
+              std::string chopper;
+
+              if (chop1_speed && chop2_speed && chop2_phase) {
+                // virtual Chopper entries are valid
+                chopper = "Virtual chopper";
+              } else {
+                // use Chopper values instead
+
+                chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
+                  m_localWorkspace->run().getProperty("Chopper1.rotation_speed")); /* PAR2[109] */
+
+                chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
+                  m_localWorkspace->run().getProperty("Chopper2.rotation_speed")); /* PAR2[109] */
+
+                chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
+                  m_localWorkspace->run().getProperty("Chopper2.phase"));
+
+                chopper = "Chopper";
+              }
+
+              // major logging
+              g_log.debug() << "TOF delay: " << *tof_1 << '\n';
+              g_log.debug() << "Poff: " << *POFF << '\n';
+              g_log.debug() << "Open offset: " << *open_offset << '\n';
+              g_log.debug() << "Chopper 1 phase : " << *chop1_phase << '\n';
+              g_log.debug() << chopper << " 1 speed : " << *chop1_speed << '\n';
+              g_log.debug() << chopper << " 2 phase : " << *chop2_phase << '\n';
+              g_log.debug() << chopper << " 2 speed : " << *chop2_speed << '\n';
+
+              double t_TOF2 = 0.0;
+              if (!chop1_speed) {
+                g_log.debug() << "Warning: chop1_speed is null.\n";
+              } else {
+                // Thanks to Miguel Gonzales/ILL for this TOF formula
+                t_TOF2 = -1.e+6 * 60.0 * (*POFF - 45.0 + *chop2_phase -
+                                          *chop1_phase + *open_offset) /
+                         ( 2.0 * 360 * *chop1_speed );
+              }
+              g_log.debug() << "t_TOF2 : " << t_TOF2 << '\n';
+
+              // compute tof values
+              xVals.reserve(m_localWorkspace->x(0).size());
+
+              for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;
+                   ++timechannelnumber) {
+                double t_TOF1 =
+                    (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth +
+                    *tof_1;
+                xVals.push_back(t_TOF1 + t_TOF2);
+             }
+    } catch (std::runtime_error &e) {
+      g_log.information()
+          << "Unable to access Nexus file entries : "
+          << e.what() << '\n';
+    }
+}
+
+/**
+ * Load data from nexus file
+ *
+ * @param entry :: The Nexus file entry
  * @param monitorsData :: Monitors data already loaded
+ * @param xVals :: X values
  *
  */
 void LoadILLReflectometry::loadData(
-    NeXus::NXEntry &entry, std::vector<std::vector<int>> monitorsData) {
+    NeXus::NXEntry &entry, std::vector<std::vector<int>> monitorsData, std::vector<double> &xVals) {
 
   m_wavelength = entry.getFloat("wavelength");
 
@@ -313,121 +406,19 @@ void LoadILLReflectometry::loadData(
   Progress progress(this, 0, 1,
                     m_numberOfTubes * m_numberOfPixelsPerTube + nb_monitors);
 
-  std::vector<double> xVals;
-
-  // unknown property search object, readd check for Nexus file entry
-
-  auto tof_0 = dynamic_cast<PropertyWithValue<double> *>(
-    m_localWorkspace->run().getProperty("monitor1.time_of_flight_0")); /* PAR1[95] */
-
-  auto tof_1 = dynamic_cast<PropertyWithValue<double> *>(
-    m_localWorkspace->run().getProperty("monitor1.time_of_flight_2")); /* PAR1[96] */
-
-  auto POFF = dynamic_cast<PropertyWithValue<double> *>(
-    m_localWorkspace->run().getProperty("VirtualChopper.poff")); /* par1[54] */
-
-  auto open_offset = dynamic_cast<PropertyWithValue<double> *>(
-    m_localWorkspace->run().getProperty("VirtualChopper.open_offset")); /* par1[56] */
-
-  if (tof_0 && tof_1 && POFF && open_offset){
-
-      m_channelWidth = *tof_0;
-      g_log.debug() << "Channel width: " << m_channelWidth << '\n';
-      g_log.debug() << "TOF delay: " << *tof_1 << '\n';
-      g_log.debug() << "Poff: " << *POFF << '\n';
-      g_log.debug() << "Open offset: " << *open_offset << '\n';
-
-      // test on availability of VirtualChopper data
-      auto chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("VirtualChopper.chopper1_speed_average")); /* PAR2[109] */
-
-      auto chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("VirtualChopper.chopper2_speed_average")); /* PAR2[109] */
-
-      auto chop1_phase = dynamic_cast<PropertyWithValue<double> *>(
-         m_localWorkspace->run().getProperty("VirtualChopper.chopper1_phase_average"));
-
-      auto chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
-         m_localWorkspace->run().getProperty("VirtualChopper.chopper2_phase_average")); /* PAR2[114] */
-
-      std::string chopper;
-
-      if (chop1_speed && chop2_speed && chop1_phase && chop2_phase) {
-        // virtual Chopper entries are valid
-        chopper = "Virtual chopper";
-      } else {// Lamp seems to use chopper only and phases divided by 100?
-        // use Chopper values instead
-
-        chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("Chopper1.rotation_speed")); /* PAR2[109] */
-
-        chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("Chopper2.rotation_speed")); /* PAR2[109] */
-
-        chop1_phase = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("Chopper1.phase"));
-
-        chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("Chopper2.phase"));
-
-        chopper = "Chopper";
-      }
-
-      g_log.debug() << chopper << " 1 phase : " << *chop1_phase << '\n';
-      g_log.debug() << chopper << " 1 speed : " << *chop1_speed << '\n';
-      g_log.debug() << chopper << " 2 phase : " << *chop2_phase << '\n';
-      g_log.debug() << chopper << " 2 speed : " << *chop2_speed << '\n';
-
-      double t_TOF2 = 0.0;
-      if (!chop1_speed) {
-        g_log.debug() << "Warning: chop1_speed is null.\n";
-      } else {
-        // Thanks to Miguel Gonzales/ILL for this TOF formula
-        t_TOF2 = -1.e6 * 60.0 * (*POFF - 45.0 + *chop2_phase -
-                                 *chop1_phase + *open_offset) /
-                 ( 2 * 360 * *chop1_speed);
-      }
-      g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
-
-      // compute tof values
-      xVals.reserve(m_localWorkspace->x(0).size());
-
-      for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;
-           ++timechannelnumber) {
-        double t_TOF1 =
-            (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth +
-            *tof_1;
-        xVals.push_back(t_TOF1 + t_TOF2);
-
-     }
-  }
-  else{
-    g_log.debug() << "No monitor TOF values for axis description. \n";
-
-    xVals.reserve(m_localWorkspace->x(0).size());
-    for (size_t t = 0; t <= m_numberOfChannels; ++t) {
-      double dt = double(t);
-      xVals.push_back(dt);
-    }
-
-  }
-
   HistogramData::BinEdges binEdges(xVals);
 
-  // Write monitors
+  // write monitors
   for (size_t im = 0; im < nb_monitors; im++) {
     int *monitor_p = monitorsData[im].data();
     const HistogramData::Counts histoCounts(monitor_p,
                                             monitor_p + m_numberOfChannels);
-    const HistogramData::CountStandardDeviations histoBlankError(
-        monitorsData[im].size(), 0.0);
-    m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts),
-                                   std::move(histoBlankError));
+    m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
 
     progress.report();
   }
 
-  // Write data
+  // write data
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
@@ -491,7 +482,7 @@ void LoadILLReflectometry::placeDetector() {
     auto dist =
      dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("det.value"));
     double distance = *dist / 1000.0; // convert to meter
-    g_log.debug() << "Sample - detector distance in meter "
+    g_log.debug() << "Sample - detector distance in millimeter "
                   << *dist << '\n';
 
 

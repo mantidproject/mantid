@@ -64,26 +64,23 @@ private:
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
+  void getXValues(std::vector<double> &xVals);
   void loadData(NeXus::NXEntry &entry,
-                                std::vector<std::vector<int>> monitorsData);
+                                std::vector<std::vector<int>> monitorsData, std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties(std::string nexusfilename);
   std::vector<int>loadSingleMonitor(NeXus::NXEntry &entry, std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
-  //void centerDetector(double);
   void placeDetector();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
+  /* Values parsed from the nexus file */
   std::string m_instrumentName; ///< Name of the instrument
-
   size_t m_numberOfTubes;         // number of tubes - X
   size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
   size_t m_numberOfChannels;      // time channels - Z
-
   size_t m_numberOfHistograms;
-
-  /* Values parsed from the nexus file */
   double m_wavelength;
   double m_channelWidth;
 
