@@ -135,6 +135,9 @@ void CrossCorrelate::exec() {
   // Create a 2DWorkspace that will hold the result
   const int nY = static_cast<int>(refY.size());
   const int npoints = 2 * nY - 3;
+  if (npoints < 1)
+    throw std::runtime_error("Range is not valid");
+
   MatrixWorkspace_sptr out =
       WorkspaceFactory::Instance().create(inputWS, nspecs, npoints, npoints);
 
