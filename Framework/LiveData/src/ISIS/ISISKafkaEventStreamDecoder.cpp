@@ -20,6 +20,7 @@ GCC_DIAG_ON(conversion)
 #include <boost/make_shared.hpp>
 
 #include <cassert>
+#include <condition_variable>
 #include <functional>
 #include <map>
 
@@ -30,6 +31,9 @@ Mantid::Kernel::Logger g_log("ISISKafkaEventStreamDecoder");
 std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 std::string RUN_NUMBER_PROPERTY = "run_number";
 std::string RUN_START_PROPERTY = "run_start";
+
+std::condition_variable cv;
+bool extractWaiting = false;
 
 /**
  * Append sample log data to existing log or create a new log if one with specified name does not already exist
@@ -166,9 +170,13 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
     throw * m_exception;
   }
   std::lock_guard<std::mutex> lock(m_mutex);
+  extractWaiting = true;
+  cv.notify_one();
   if (m_localEvents.size() == 1) {
     auto temp = createBufferWorkspace(m_localEvents.front());
     std::swap(m_localEvents.front(), temp);
+    extractWaiting = false;
+    cv.notify_one();
     return temp;
   } else if (m_localEvents.size() > 1) {
     auto group = boost::make_shared<API::WorkspaceGroup>();
@@ -178,8 +186,12 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
       std::swap(m_localEvents[index++], temp);
       group->addWorkspace(temp);
     }
+    extractWaiting = false;
+    cv.notify_one();
     return group;
   } else {
+    extractWaiting = false;
+    cv.notify_one();
     throw Exception::NotYet("Local buffers not initialized.");
   }
 }
@@ -216,7 +228,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
   std::string buffer;
   while (!m_interrupt) {
     // Let another thread do something for a short while
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     // Pull in events
     m_eventStream->consumeMessage(&buffer);
@@ -236,7 +248,10 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       const auto &specData = *(eventData->spec());
       auto nevents = tofData.size();
       auto nSEEvents = seData.size();
-      std::lock_guard<std::mutex> lock(m_mutex);
+      //std::lock_guard<std::mutex> lock(m_mutex);
+      //TODO if extractData method is waiting for access then we wait for it to finish with the buffer workspace
+      std::unique_lock<std::mutex> lck(m_mutex);
+      cv.wait(lck, [&]{return !extractWaiting;});
       auto &periodBuffer = *m_localEvents[frameData->period()];
       auto &mutableRunInfo = periodBuffer.mutableRun();
       mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
@@ -246,6 +261,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
         spectrum.addEventQuickly(TofEvent(tofData[i], pulseTime));
       }
       addSampleEnvLogs(seData, nSEEvents, mutableRunInfo);
+      lck.unlock();
     }
   }
   g_log.debug("Event capture finished");
