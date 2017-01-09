@@ -133,7 +133,6 @@ public slots:
 
 protected:
   void initLayout();
-  void showImg();
 
   void resetCoR() override;
   void resetROI() override;

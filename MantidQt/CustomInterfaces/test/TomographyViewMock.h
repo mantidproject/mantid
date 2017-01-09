@@ -129,7 +129,7 @@ public:
   MOCK_CONST_METHOD0(getCachedArguments, std::vector<std::string>());
 
   //  virtual void externalProcessFinished(const std::string &str) = 0;
-  MOCK_METHOD1(externalProcessFinished, void(const std::string &str));
+  MOCK_METHOD1(emitExternalProcessFinished, void(const QString &str));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
