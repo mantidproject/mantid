@@ -48,8 +48,7 @@ variable_help = {
                              "defaulted to off and should be overridden in the basic configuration when necessary to "
                              "avoid them being performed accidentally.",
         "raw_data_cropping_values": "This specifies the valid range in TOF of the raw data. This is applied before any "
-                                    "processing takes place to remove negative counts where at very low TOF the empty "
-                                    "count => sample count.",
+                                    "processing takes place to remove negative counts at very low TOF values",
         "spline_coefficient": "The coefficient to use when calculating the vanadium splines during the calibration "
                               "step."
     },

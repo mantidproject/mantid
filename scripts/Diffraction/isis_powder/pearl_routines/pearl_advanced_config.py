@@ -40,7 +40,8 @@ long_mode_off_params = {
 long_mode_on_params = {
     "monitor_lambda_crop_range": (5.9, 12.0),
     "monitor_integration_range": (6, 10),
-    # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
+    # raw_data_tof_cropping needs to be greater than the bank TOF cropping values or
+    # you will get data that divides to 0 or inf
     "raw_data_tof_cropping": (20280, 39995),
     "vanadium_tof_cropping": (20295, 39993),
     "tof_cropping_ranges": [
@@ -83,11 +84,11 @@ variable_help = {
         "monitor_integration_range": "The minimum and maximum values to consider whilst integrating the monitor "
                                      "workspace",
         "raw_data_tof_cropping": "The crop values for to apply when loading raw data. This step is applied before any "
-                                 "processing takes place. This is to crop from 40,000 microseconds windows in the "
-                                 "raw data to 20,000 windows in PEARL",
+                                 "processing takes place. This is to crop from 40,000 microseconds in the "
+                                 "raw data to 20,000 microseconds worth of data",
         "tof_cropping_ranges": "These values are used to determine the TOF range to crop a focused (not Vanadium "
-                               "Cal.) workspace to. These are applied on a bank by bank basis. They must be less than "
-                               "the values specified for raw_data_tof_cropping."
+                               "calibration) workspace to. These are applied on a bank by bank basis. They must be "
+                               "less than the values specified for raw_data_tof_cropping."
     },
 
     "general_params": {
