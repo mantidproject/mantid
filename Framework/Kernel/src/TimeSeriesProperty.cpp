@@ -406,7 +406,8 @@ void TimeSeriesProperty<TYPE>::splitByTime(
     std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
     bool isPeriodic) const {
 
-  throw std::runtime_error("Try to find out whether this method is called at all.");
+  throw std::runtime_error(
+      "Try to find out whether this method is called at all.");
 
   // 0. Sort if necessary
   sortIfNecessary();

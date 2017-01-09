@@ -39,10 +39,10 @@ DECLARE_ALGORITHM(FilterEvents)
 /** Constructor
  */
 FilterEvents::FilterEvents()
-    : m_eventWS(), m_splittersWorkspace(), m_splitterTableWorkspace(), m_matrixSplitterWS(),
-      m_detCorrectWorkspace(), m_useTableSplitters(false), m_useArbTableSplitters(false),
-      m_workGroupIndexes(),
-      m_splitters(), m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(),
+    : m_eventWS(), m_splittersWorkspace(), m_splitterTableWorkspace(),
+      m_matrixSplitterWS(), m_detCorrectWorkspace(), m_useTableSplitters(false),
+      m_useArbTableSplitters(false), m_workGroupIndexes(), m_splitters(),
+      m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(),
       m_detTofFactors(), m_FilterByPulseTime(false), m_informationWS(),
       m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
@@ -207,7 +207,8 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-  for (miter = m_outputWorkspacesMap.begin(); miter != m_outputWorkspacesMap.end(); ++miter) {
+  for (miter = m_outputWorkspacesMap.begin();
+       miter != m_outputWorkspacesMap.end(); ++miter) {
     outputwsnames.push_back(miter->second->name());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
@@ -232,7 +233,8 @@ void FilterEvents::processAlgorithmProperties() {
 
   m_splittersWorkspace =
       boost::dynamic_pointer_cast<SplittersWorkspace>(tempws);
-  m_splitterTableWorkspace = boost::dynamic_pointer_cast<TableWorkspace>(tempws);
+  m_splitterTableWorkspace =
+      boost::dynamic_pointer_cast<TableWorkspace>(tempws);
   if (m_splittersWorkspace) {
     m_useTableSplitters = true;
   } else if (m_splitterTableWorkspace)
