@@ -39,8 +39,9 @@ DECLARE_ALGORITHM(FilterEvents)
 /** Constructor
  */
 FilterEvents::FilterEvents()
-    : m_eventWS(), m_splittersWorkspace(), m_matrixSplitterWS(),
-      m_detCorrectWorkspace(), m_useTableSplitters(false), m_workGroupIndexes(),
+    : m_eventWS(), m_splittersWorkspace(), m_splitterTableWorkspace(), m_matrixSplitterWS(),
+      m_detCorrectWorkspace(), m_useTableSplitters(false), m_useArbTableSplitters(false),
+      m_workGroupIndexes(),
       m_splitters(), m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(),
       m_detTofFactors(), m_FilterByPulseTime(false), m_informationWS(),
       m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
@@ -231,9 +232,12 @@ void FilterEvents::processAlgorithmProperties() {
 
   m_splittersWorkspace =
       boost::dynamic_pointer_cast<SplittersWorkspace>(tempws);
+  m_splitterTableWorkspace = boost::dynamic_pointer_cast<TableWorkspace>(tempws);
   if (m_splittersWorkspace) {
     m_useTableSplitters = true;
-  } else {
+  } else if (m_splitterTableWorkspace)
+    m_useArbTableSplitters = true;
+  else {
     m_matrixSplitterWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tempws);
     if (m_matrixSplitterWS) {
       m_useTableSplitters = false;

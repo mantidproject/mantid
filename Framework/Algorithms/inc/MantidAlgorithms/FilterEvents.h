@@ -117,11 +117,13 @@ private:
 
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
+  DataObjects::TableWorkspace_sptr m_splitterTableWorkspace;
   API::MatrixWorkspace_const_sptr m_matrixSplitterWS;
   DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
 
   /// Flag to use matrix splitters or table splitters
   bool m_useTableSplitters;
+  bool m_useArbTableSplitters;
 
   std::set<int> m_workGroupIndexes;
   Kernel::TimeSplitterType m_splitters;
