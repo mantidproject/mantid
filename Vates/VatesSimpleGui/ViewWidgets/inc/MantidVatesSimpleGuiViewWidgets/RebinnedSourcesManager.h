@@ -61,7 +61,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinnedSourcesManager
       MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  RebinnedSourcesManager(QWidget *parent = 0);
+  RebinnedSourcesManager(QWidget *parent = nullptr);
 
   ~RebinnedSourcesManager() override;
 

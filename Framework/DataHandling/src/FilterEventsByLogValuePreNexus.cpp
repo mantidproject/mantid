@@ -590,7 +590,7 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   if (!this->m_spectraList.empty())
     nSpec = this->m_spectraList.size();
   auto ws = createWorkspace<EventWorkspace>(nSpec, 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(tempworkspace, ws, true);
+  WorkspaceFactory::Instance().initializeFromParent(*tempworkspace, *ws, true);
 
   return ws;
 }

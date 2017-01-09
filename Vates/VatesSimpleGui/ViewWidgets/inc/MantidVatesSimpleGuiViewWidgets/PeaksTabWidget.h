@@ -20,7 +20,7 @@ namespace SimpleGui {
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeakCustomTabWidget
     : public QTabWidget {
 public:
-  PeakCustomTabWidget(QWidget *parent = 0) { setParent(parent); }
+  PeakCustomTabWidget(QWidget *parent = nullptr) { setParent(parent); }
 
   // Overridden method from QTabWidget
   QTabBar *tabBar() { return QTabWidget::tabBar(); }
@@ -31,7 +31,8 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTabWidget
   Q_OBJECT
 public:
   PeaksTabWidget(std::vector<Mantid::API::IPeaksWorkspace_sptr> ws,
-                 const std::string &coordinateSystem, QWidget *parent = 0);
+                 const std::string &coordinateSystem,
+                 QWidget *parent = nullptr);
   ~PeaksTabWidget() override;
   void setupMvc(std::map<std::string, std::vector<bool>> visiblePeaks);
   void addNewPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,

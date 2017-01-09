@@ -357,7 +357,7 @@ bool LoadLog::LoadSNSText() {
   // Go back to start
   inLogFile.seekg(0);
   while (Mantid::Kernel::Strings::extractToEOL(inLogFile, aLine)) {
-    if (aLine.size() == 0)
+    if (aLine.empty())
       break;
 
     if (SNSTextFormatColumns(aLine, cols)) {

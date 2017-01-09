@@ -416,8 +416,11 @@ size_t CompositeFunction::addFunction(IFunction_sptr f) {
  * @param i :: The index of the function to remove
  */
 void CompositeFunction::removeFunction(size_t i) {
-  if (i >= nFunctions())
-    throw std::out_of_range("Function index out of range.");
+  if (i >= nFunctions()) {
+    throw std::out_of_range("Function index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
+  }
 
   IFunction_sptr fun = getFunction(i);
 
@@ -477,8 +480,11 @@ void CompositeFunction::replaceFunctionPtr(const IFunction_sptr f_old,
  * @param f :: A pointer to the new function
  */
 void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
-  if (i >= nFunctions())
-    throw std::out_of_range("Function index out of range.");
+  if (i >= nFunctions()) {
+    throw std::out_of_range("Function index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
+  }
 
   IFunction_sptr fun = getFunction(i);
   size_t np_old = fun->nParams();
@@ -522,7 +528,9 @@ void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
  */
 IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
   if (i >= nFunctions()) {
-    throw std::out_of_range("Function index out of range.");
+    throw std::out_of_range("Function index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
   }
   return m_functions[i];
 }
@@ -534,7 +542,9 @@ IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
  */
 size_t CompositeFunction::functionIndex(std::size_t i) const {
   if (i >= nParams()) {
-    throw std::out_of_range("Function parameter index out of range.");
+    throw std::out_of_range("Function parameter index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nParams()) +
+                            ").");
   }
   return m_IFunction[i];
 }

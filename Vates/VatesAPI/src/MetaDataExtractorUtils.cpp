@@ -79,7 +79,8 @@ MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace) {
   if (!workspace)
     throw std::invalid_argument("The workspace is empty.");
 
-  auto iterators = workspace->createIterators(PARALLEL_GET_MAX_THREADS, 0);
+  auto iterators =
+      workspace->createIterators(PARALLEL_GET_MAX_THREADS, nullptr);
 
   std::vector<QwtDoubleInterval> intervals(iterators.size());
   // cppcheck-suppress syntaxError

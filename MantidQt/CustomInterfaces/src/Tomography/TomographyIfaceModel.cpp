@@ -376,6 +376,9 @@ void TomographyIfaceModel::prepareSubmissionArguments(
 
   // used for remote submission
   allOpts = constructSingleStringFromVector(args);
+
+  logMsg("Running " + usingTool() + ", with binary: " + runnable +
+         ", with parameters: " + allOpts);
 }
 
 /**
@@ -436,10 +439,6 @@ void TomographyIfaceModel::doRemoteRunReconstructionJob(
     const std::string &compRes, const std::string &runnable,
     const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
-
-  logMsg("Running " + usingTool() + ", with binary: " + runnable +
-         ", with parameters: " + allOpts);
-
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
   transAlg->initialize();
@@ -486,10 +485,6 @@ void TomographyIfaceModel::doLocalRunReconstructionJob(
 
   // Can only run one reconstruction at a time
   // Qt doesn't use exceptions so we can't make sure it ran here
-
-  logMsg("Running " + usingTool() + ", with binary: " + runnable +
-         ", with parameters: " + allOpts);
-
   worker.setup(runnable, args, allOpts);
   thread.start();
 }
@@ -566,12 +561,10 @@ void TomographyIfaceModel::refreshLocalJobsInfo() {
 void TomographyIfaceModel::updateProcessInJobList(const qint64 pid,
                                                   const int exitCode) {
   // cast to string from qint64 so we can compare
-  const std::string processPID = std::to_string(static_cast<int>(pid));
+  const std::string processPID = std::to_string(pid);
   for (auto &job : m_jobsStatusLocal) {
-    if (job.id == processPID) {
-      if (exitCode == 1) {
-        job.status = "Exit";
-      }
+    if (job.id == processPID && exitCode == 1) {
+      job.status = "Exit";
     }
   }
 }

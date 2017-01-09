@@ -11,7 +11,6 @@ src/CompositePeaksPresenterVsi.cpp
 src/ConcretePeaksPresenterVsi.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
-src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
@@ -21,14 +20,12 @@ src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
 src/MDHWNexusLoadingPresenter.cpp
 src/MDLoadingViewSimple.cpp
-src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
 src/MDLoadingPresenter.cpp
 src/Normalization.cpp
-src/NoThresholdRange.cpp
 src/ProgressAction.cpp
 src/PresenterUtilities.cpp
 src/SaveMDWorkspaceToVTK.cpp
@@ -36,7 +33,6 @@ src/SaveMDWorkspaceToVTKImpl.cpp
 src/SingleWorkspaceProvider.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
-src/UserDefinedThresholdRange.cpp
 src/VatesXMLDefinitions.cpp
 src/VatesConfigurations.cpp
 src/ViewFrustum.cpp
@@ -89,14 +85,11 @@ inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewSimple.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
-inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/MetaDataExtractorUtils.h
 inc/MantidVatesAPI/MetadataJsonManager.h
 inc/MantidVatesAPI/Normalization.h
-inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
-inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
 inc/MantidVatesAPI/PresenterFactories.h
@@ -105,10 +98,8 @@ inc/MantidVatesAPI/SaveMDWorkspaceToVTK.h
 inc/MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h
 inc/MantidVatesAPI/SingleWorkspaceProvider.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
-inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
-inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/VatesXMLDefinitions.h
 inc/MantidVatesAPI/VatesConfigurations.h
 inc/MantidVatesAPI/VatesKnowledgeSerializer.h
@@ -180,10 +171,6 @@ test/SingleWorkspaceProviderTest.h
 test/SQWLoadingPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
-test/UserDefinedThresholdRangeTest.h
-test/MedianAndBelowThresholdRangeTest.h
-test/NoThresholdRangeTest.h
-test/IgnoreZerosThresholdRangeTest.h
 test/VatesKnowledgeSerializerTest.h
 test/ViewFrustumTest.h
 test/vtkDataSetToScaledDataSetTest.h

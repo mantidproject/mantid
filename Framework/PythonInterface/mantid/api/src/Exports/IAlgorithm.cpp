@@ -186,7 +186,7 @@ std::string createDocString(IAlgorithm &self) {
   // Put in the quick overview message
   std::stringstream buffer;
   std::string temp = self.summary();
-  if (temp.size() > 0)
+  if (!temp.empty())
     buffer << temp << EOL << EOL;
 
   // get a sorted copy of the properties

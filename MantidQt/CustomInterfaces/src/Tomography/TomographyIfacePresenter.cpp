@@ -772,8 +772,6 @@ void TomographyIfacePresenter::processRefreshJobs() {
   m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
   {
-    // BUG :: still crash here if closed during running process
-    // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
     m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
@@ -783,11 +781,9 @@ void TomographyIfacePresenter::processRefreshJobs() {
 
 void TomographyIfacePresenter::processCancelJobs() {
   const std::string &resource = m_view->currentComputeResource();
-  if (isLocalResourceSelected()) {
-    if (userConfirmationToCancelRecon()) {
-      // user confirmed
-      m_workerThread.reset();
-    }
+  if (isLocalResourceSelected() && userConfirmationToCancelRecon()) {
+    // if local and user confirmed
+    m_workerThread.reset();
   } else {
     m_model->doCancelJobs(resource, m_view->processingJobsIDs());
   }

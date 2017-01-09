@@ -7,9 +7,6 @@
 #include <QString>
 #include <QThread>
 
-// remove for DEBUG only
-#include <iostream>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /*
