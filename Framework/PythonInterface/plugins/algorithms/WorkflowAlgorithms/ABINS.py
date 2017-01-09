@@ -353,7 +353,7 @@ class ABINS(PythonAlgorithm):
                 GroupWorkspaces(group, OutputWorkspace=workspace)
         else:
 
-          pass
+            pass
 
     def _create_total_workspace(self, partial_workspaces=None, workspace_core_name=None):
 
