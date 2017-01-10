@@ -98,7 +98,9 @@ void ReflDataProcessorPresenter::process() {
         auto wsName = takeSlice(runno, startTimes[i], stopTimes[i]);
         std::vector<std::string> slice(row);
         slice[0] = wsName;
-        reduceRow(slice);
+        auto newData = reduceRow(slice);
+        newData[0] = row[0];
+        m_manager->update(item.first, data.first, newData);
       }
     }
 
