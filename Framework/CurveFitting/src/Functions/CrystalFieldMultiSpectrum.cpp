@@ -182,7 +182,10 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
                                "size as Temperatures or size 1.");
     }
   } else {
-    m_physprops.assign(physprops.begin(), physprops.end());
+    m_physprops.clear();
+    for (auto elem: physprops) {
+      m_physprops.push_back((int)elem);
+    }
   }
   // Create the single-spectrum functions.
   m_nPeaks.resize(nSpec);

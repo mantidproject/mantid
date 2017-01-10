@@ -700,10 +700,10 @@ class CrystalField(object):
         if 'mantid' in str(type(workspace)) and len(args) > 0:
             ws_index = args.pop(0)
 
-        # _calcSpectrum updates parameters and susceptibility has a 'lambda' parameter which other
+        # _calcSpectrum updates parameters and susceptibility has a 'Lambda' parameter which other
         # CF functions don't have. This causes problems if you want to calculate another quantity after
         x, y = self._getPhysProp(PhysicalProperties('chi', *args, **kwargs), workspace, ws_index)
-        self._fieldParameters.pop('lambda', None)
+        self._fieldParameters.pop('Lambda', None)
         return x, y
 
     def getMagneticMoment(self, *args, **kwargs):

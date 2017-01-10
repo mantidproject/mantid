@@ -1043,11 +1043,10 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
 
 /// Calculate the diagonal matrix elements of the magnetic moment operator
 /// in a particular eigenvector basis.
-/// @param eigenvector :: Input. The eigenvector basis.
-/// @param hdir :: Input. Cartesian direction of the magnetic moment operator
+/// @param ev :: Input. The eigenvector basis.
+/// @param Hdir :: Input. Cartesian direction of the magnetic moment operator
 /// @param nre :: Input. The ion number to calculate for.
-/// @param gj :: Output. The Lande g-factor of this ion.
-/// @param moment :: Output the diagonal elements of the magnetic moment matrix
+/// @param moment :: Output. The diagonal elements of the magnetic moment matrix
 void calculateMagneticMoment(const ComplexFortranMatrix &ev,
                              const DoubleFortranVector &Hdir, const int nre,
                              DoubleFortranVector &moment) {
@@ -1063,11 +1062,10 @@ void calculateMagneticMoment(const ComplexFortranMatrix &ev,
 }
 
 /// Calculate the full magnetic moment matrix in a particular eigenvector basis.
-/// @param eigenvector :: Input. The eigenvector basis.
-/// @param hdir :: Input. Cartesian direction of the magnetic moment operator
+/// @param ev :: Input. The eigenvector basis.
+/// @param Hdir :: Input. Cartesian direction of the magnetic moment operator
 /// @param nre :: Input. The ion number to calculate for.
-/// @param gj :: Output. The Lande g-factor of this ion.
-/// @param mumat :: Output the matrix elements of the magnetic moment matrix
+/// @param mumat :: Output. The matrix elements of the magnetic moment matrix
 void calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
                                    const std::vector<double> &Hdir,
                                    const int nre, ComplexFortranMatrix &mumat) {
