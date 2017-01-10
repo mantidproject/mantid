@@ -96,7 +96,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 DECLARE_FUNCTION(CrystalFieldSusceptibility)
 
 CrystalFieldSusceptibility::CrystalFieldSusceptibility()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
+    : CrystalFieldPeaksBase(), API::IFunction1D(), m_setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Unit", Attribute("cgs"));
   declareAttribute("inverse", Attribute(false));
@@ -106,13 +106,13 @@ CrystalFieldSusceptibility::CrystalFieldSusceptibility()
 }
 
 // Sets the eigenvectors / values directly
-void CrystalFieldSusceptibility::set_eigensystem(
-    const DoubleFortranVector &en_in, const ComplexFortranMatrix &wf_in,
-    const int nre_in) {
-  setDirect = true;
-  en = en_in;
-  wf = wf_in;
-  nre = nre_in;
+void CrystalFieldSusceptibility::setEigensystem(
+    const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+    const int nre) {
+  m_setDirect = true;
+  m_en = en;
+  m_wf = wf;
+  m_nre = nre;
 }
 
 void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
@@ -140,24 +140,24 @@ void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
   // give the susceptibility in "atomic" units of uB/T/ion.
   // Note that chi_SI = (4pi*10^-6)chi_cgs
   // Default unit is cgs (cm^3/mol).
-  if (!setDirect) {
+  if (!m_setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
-    DoubleFortranVector en_;
-    ComplexFortranMatrix wf_;
-    int nre_ = 0;
-    calculateEigenSystem(en_, wf_, nre_);
-    if (powder) {
-      calculate_powder(out, xValues, nData, en_, wf_, nre_, convfact);
-    } else {
-      calculate(out, xValues, nData, en_, wf_, nre_, H, convfact);
-    }
-  } else {
-    // Use stored values
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    int nre = 0;
+    calculateEigenSystem(en, wf, nre);
     if (powder) {
       calculate_powder(out, xValues, nData, en, wf, nre, convfact);
     } else {
       calculate(out, xValues, nData, en, wf, nre, H, convfact);
+    }
+  } else {
+    // Use stored values
+    if (powder) {
+      calculate_powder(out, xValues, nData, m_en, m_wf, m_nre, convfact);
+    } else {
+      calculate(out, xValues, nData, m_en, m_wf, m_nre, H, convfact);
     }
   }
   if (getAttribute("inverse").asBool()) {

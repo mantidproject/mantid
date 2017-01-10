@@ -75,7 +75,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 DECLARE_FUNCTION(CrystalFieldMoment)
 
 CrystalFieldMoment::CrystalFieldMoment()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
+    : CrystalFieldPeaksBase(), API::IFunction1D(), m_setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Hmag", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
@@ -85,11 +85,11 @@ CrystalFieldMoment::CrystalFieldMoment()
 }
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMoment::set_hamiltonian(const ComplexFortranMatrix &ham_in,
-                                         const int nre_in) {
-  setDirect = true;
-  ham = ham_in;
-  nre = nre_in;
+void CrystalFieldMoment::setHamiltonian(const ComplexFortranMatrix &ham,
+                                         const int nre) {
+  m_setDirect = true;
+  m_ham = ham;
+  m_nre = nre;
 }
 
 void CrystalFieldMoment::function1D(double *out, const double *xValues,
@@ -115,27 +115,27 @@ void CrystalFieldMoment::function1D(double *out, const double *xValues,
   if (boost::iequals(unit, "cgs")) {
     Hmag *= 0.0001; // Converts field from Gauss to Tesla (calcs in SI).
   }
-  if (!setDirect) {
+  if (!m_setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
-    DoubleFortranVector en_;
-    ComplexFortranMatrix wf_;
-    ComplexFortranMatrix ham_;
-    ComplexFortranMatrix hz_;
-    int nre_ = 0;
-    calculateEigenSystem(en_, wf_, ham_, hz_, nre_);
-    ham_ += hz_;
-    if (powder) {
-      calculate_powder(out, xValues, nData, ham_, nre_, Hmag, convfact);
-    } else {
-      calculate(out, xValues, nData, ham_, nre_, H, Hmag, convfact);
-    }
-  } else {
-    // Use stored values
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    ComplexFortranMatrix ham;
+    ComplexFortranMatrix hz;
+    int nre = 0;
+    calculateEigenSystem(en, wf, ham, hz, nre);
+    ham += hz;
     if (powder) {
       calculate_powder(out, xValues, nData, ham, nre, Hmag, convfact);
     } else {
       calculate(out, xValues, nData, ham, nre, H, Hmag, convfact);
+    }
+  } else {
+    // Use stored values
+    if (powder) {
+      calculate_powder(out, xValues, nData, m_ham, m_nre, Hmag, convfact);
+    } else {
+      calculate(out, xValues, nData, m_ham, m_nre, H, Hmag, convfact);
     }
   }
   if (getAttribute("inverse").asBool()) {

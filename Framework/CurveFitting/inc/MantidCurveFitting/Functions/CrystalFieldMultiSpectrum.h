@@ -41,6 +41,12 @@ public:
   void setAttribute(const std::string &name, const Attribute &) override;
   std::vector<API::IFunction_sptr> createEquivalentFunctions() const override;
   void buildTargetFunction() const override;
+  enum PhysicalProperty { 
+    HeatCapacity = 1, ///< Specify dataset is magnetic heat capacity Cv(T)
+    Susceptibility = 2, ///< Specify dataset is magnetic susceptibility chi(T)
+    Magnetisation = 3, ///< Specify dataset is magnetisation vs field M(H)
+    MagneticMoment = 4 ///< Specify dataset is magnetisation vs temp M(T)
+  };
 
 protected:
   void updateTargetFunction() const override;

@@ -43,14 +43,14 @@ public:
   CrystalFieldMoment();
   std::string name() const override { return "CrystalFieldMoment"; }
   const std::string category() const override { return "General"; }
-  void set_hamiltonian(const ComplexFortranMatrix &wf_in, const int nre_in);
+  void setHamiltonian(const ComplexFortranMatrix &ham, const int nre);
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
 
 private:
-  ComplexFortranMatrix ham;
-  int nre;
-  bool setDirect;
+  ComplexFortranMatrix m_ham;
+  int m_nre;
+  bool m_setDirect;
 };
 
 } // namespace Functions

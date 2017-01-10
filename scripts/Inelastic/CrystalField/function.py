@@ -655,7 +655,7 @@ class PhysicalProperties(object):
         elif default is not None:
             return default
         else:
-            raise ValueError('Unit %s not recognised' % (self._physpropUnit))
+            raise ValueError('Unit %s not recognised' % (unit))
 
     def _checkhdir(self, hdir):
         import numpy as np

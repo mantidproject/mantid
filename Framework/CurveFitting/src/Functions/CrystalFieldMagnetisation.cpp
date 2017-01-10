@@ -79,7 +79,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 DECLARE_FUNCTION(CrystalFieldMagnetisation)
 
 CrystalFieldMagnetisation::CrystalFieldMagnetisation()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
+    : CrystalFieldPeaksBase(), API::IFunction1D(), m_setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
@@ -88,24 +88,29 @@ CrystalFieldMagnetisation::CrystalFieldMagnetisation()
 }
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMagnetisation::set_hamiltonian(
-    const ComplexFortranMatrix &ham_in, const int nre_in) {
-  setDirect = true;
-  ham = ham_in;
-  nre = nre_in;
+void CrystalFieldMagnetisation::setHamiltonian(
+    const ComplexFortranMatrix &ham, const int nre) {
+  m_setDirect = true;
+  m_ham = ham;
+  m_nre = nre;
 }
 
 void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
                                            const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
+  if (Hdir.size() != 3) {
+    throw std::invalid_argument("Hdir must be a three-element vector.");
+  }
   auto T = getAttribute("Temperature").asDouble();
   auto powder = getAttribute("powder").asBool();
   double Hnorm =
       sqrt(Hdir[0] * Hdir[0] + Hdir[1] * Hdir[1] + Hdir[2] * Hdir[2]);
   DoubleFortranVector H(1, 3);
-  for (auto i = 0; i < 3; i++) {
-    H(i + 1) = Hdir[i] / Hnorm;
+  if (fabs(Hnorm) > 1.e-6) {
+    for (auto i = 0; i < 3; i++) {
+      H(i + 1) = Hdir[i] / Hnorm;
+    }
   }
   auto unit = getAttribute("Unit").asString();
   const double NAMUB = 5.5849397; // N_A*mu_B - J/T/mol
@@ -117,27 +122,27 @@ void CrystalFieldMagnetisation::function1D(double *out, const double *xValues,
                         ? NAMUB
                         : (boost::iequals(unit, "cgs") ? NAMUB * 1000. : 1.);
   const bool iscgs = boost::iequals(unit, "cgs");
-  if (!setDirect) {
+  if (!m_setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
-    DoubleFortranVector en_;
-    ComplexFortranMatrix wf_;
-    ComplexFortranMatrix ham_;
-    ComplexFortranMatrix hz_;
-    int nre_ = 0;
-    calculateEigenSystem(en_, wf_, ham_, hz_, nre_);
-    ham_ += hz_;
-    if (powder) {
-      calculate_powder(out, xValues, nData, ham_, nre_, T, convfact, iscgs);
-    } else {
-      calculate(out, xValues, nData, ham_, nre_, H, T, convfact, iscgs);
-    }
-  } else {
-    // Use stored values
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    ComplexFortranMatrix ham;
+    ComplexFortranMatrix hz;
+    int nre = 0;
+    calculateEigenSystem(en, wf, ham, hz, nre);
+    ham += hz;
     if (powder) {
       calculate_powder(out, xValues, nData, ham, nre, T, convfact, iscgs);
     } else {
       calculate(out, xValues, nData, ham, nre, H, T, convfact, iscgs);
+    }
+  } else {
+    // Use stored values
+    if (powder) {
+      calculate_powder(out, xValues, nData, m_ham, m_nre, T, convfact, iscgs);
+    } else {
+      calculate(out, xValues, nData, m_ham, m_nre, H, T, convfact, iscgs);
     }
   }
   auto fact = getAttribute("ScaleFactor").asDouble();

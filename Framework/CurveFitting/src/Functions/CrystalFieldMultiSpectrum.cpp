@@ -116,11 +116,11 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
       switch (static_cast<int>(physpropId[iSpec])) {
-      case 4: // Hmag, Hdir, inverse, Unit, powder
+      case MagneticMoment: // Hmag, Hdir, inverse, Unit, powder
         declareAttribute("Hmag" + suffix, Attribute(1.0));
-      case 2: // Hdir, inverse, Unit, powder
+      case Susceptibility: // Hdir, inverse, Unit, powder
         declareAttribute("inverse" + suffix, Attribute(false));
-      case 3: // Hdir, Unit, powder
+      case Magnetisation:  // Hdir, Unit, powder
         declareAttribute("Hdir" + suffix,
                          Attribute(std::vector<double>{0., 0., 1.}));
         declareAttribute("Unit" + suffix, Attribute("bohr"));
@@ -271,51 +271,44 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
     const ComplexFortranMatrix &ham, double temperature, size_t iSpec) const {
   switch (m_physprops[iSpec]) {
-  case 1: { // Heat capacity
-    auto spectrum = new CrystalFieldHeatCapacity;
-    spectrum->set_eigensystem(en, wf, nre);
-    return IFunction_sptr(spectrum);
+  case HeatCapacity: {
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldHeatCapacity);
+    auto &spectrum = dynamic_cast<CrystalFieldHeatCapacity &>(*retval);
+    spectrum.setEnergy(en);
+    return retval;
   }
-  case 2: { // Susceptibility
-    auto spectrum = new CrystalFieldSusceptibility;
-    spectrum->set_eigensystem(en, wf, nre);
+  case Susceptibility: {
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldSusceptibility);
+    auto &spectrum = dynamic_cast<CrystalFieldSusceptibility &>(*retval);
+    spectrum.setEigensystem(en, wf, nre);
     auto suffix = std::to_string(iSpec);
-    auto hdir = getAttribute("Hdir" + suffix).asVector();
-    spectrum->setAttribute("Hdir", Attribute(hdir));
-    auto inverse = getAttribute("inverse" + suffix).asBool();
-    spectrum->setAttribute("inverse", Attribute(inverse));
-    auto powder = getAttribute("powder" + suffix).asBool();
-    spectrum->setAttribute("powder", Attribute(powder));
-    return IFunction_sptr(spectrum);
+    spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
+    spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
+    spectrum.setAttribute("powder", getAttribute("powder" + suffix));
+    return retval;
   }
-  case 3: { // Magnetisation
-    auto spectrum = new CrystalFieldMagnetisation;
-    spectrum->set_hamiltonian(ham, nre);
-    spectrum->setAttribute("Temperature", Attribute(temperature));
+  case Magnetisation: {
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldMagnetisation);
+    auto &spectrum = dynamic_cast<CrystalFieldMagnetisation &>(*retval);
+    spectrum.setHamiltonian(ham, nre);
+    spectrum.setAttribute("Temperature", Attribute(temperature));
     auto suffix = std::to_string(iSpec);
-    auto unit = getAttribute("Unit" + suffix).asString();
-    spectrum->setAttribute("Unit", Attribute(unit));
-    auto hdir = getAttribute("Hdir" + suffix).asVector();
-    spectrum->setAttribute("Hdir", Attribute(hdir));
-    auto powder = getAttribute("powder" + suffix).asBool();
-    spectrum->setAttribute("powder", Attribute(powder));
-    return IFunction_sptr(spectrum);
+    spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
+    spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
+    spectrum.setAttribute("powder", getAttribute("powder" + suffix));
+    return retval;
   }
-  case 4: { // Moment vs temperature
-    auto spectrum = new CrystalFieldMoment;
-    spectrum->set_hamiltonian(ham, nre);
+  case MagneticMoment: {
+    IFunction_sptr retval = IFunction_sptr(new CrystalFieldMoment);
+    auto &spectrum = dynamic_cast<CrystalFieldMoment &>(*retval);
+    spectrum.setHamiltonian(ham, nre);
     auto suffix = std::to_string(iSpec);
-    auto unit = getAttribute("Unit" + suffix).asString();
-    spectrum->setAttribute("Unit", Attribute(unit));
-    auto hdir = getAttribute("Hdir" + suffix).asVector();
-    spectrum->setAttribute("Hdir", Attribute(hdir));
-    auto hmag = getAttribute("Hmag" + suffix).asDouble();
-    spectrum->setAttribute("Hmag", Attribute(hmag));
-    auto inverse = getAttribute("inverse" + suffix).asBool();
-    spectrum->setAttribute("inverse", Attribute(inverse));
-    auto powder = getAttribute("powder" + suffix).asBool();
-    spectrum->setAttribute("powder", Attribute(powder));
-    return IFunction_sptr(spectrum);
+    spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
+    spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
+    spectrum.setAttribute("Hmag", getAttribute("Hmag" + suffix));
+    spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
+    spectrum.setAttribute("powder", getAttribute("powder" + suffix));
+    return retval;
   }
   }
   throw std::runtime_error("Physical property type not understood");
@@ -351,24 +344,24 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     const ComplexFortranMatrix &wf, const ComplexFortranMatrix &ham,
     double temperature, size_t iSpec) const {
   switch (m_physprops[iSpec]) {
-  case 1: {
+  case HeatCapacity: {
     auto &heatcap = dynamic_cast<CrystalFieldHeatCapacity &>(spectrum);
-    heatcap.set_eigensystem(en, wf, nre);
+    heatcap.setEnergy(en);
     break;
   }
-  case 2: {
+  case Susceptibility: {
     auto &suscept = dynamic_cast<CrystalFieldSusceptibility &>(spectrum);
-    suscept.set_eigensystem(en, wf, nre);
+    suscept.setEigensystem(en, wf, nre);
     break;
   }
-  case 3: {
+  case Magnetisation: {
     auto &magnetisation = dynamic_cast<CrystalFieldMagnetisation &>(spectrum);
-    magnetisation.set_hamiltonian(ham, nre);
+    magnetisation.setHamiltonian(ham, nre);
     break;
   }
-  case 4: {
+  case MagneticMoment: {
     auto &moment = dynamic_cast<CrystalFieldMoment &>(spectrum);
-    moment.set_hamiltonian(ham, nre);
+    moment.setHamiltonian(ham, nre);
     break;
   }
   default:

@@ -47,33 +47,29 @@ void calculate(double *out, const double *xValues, const size_t nData,
 DECLARE_FUNCTION(CrystalFieldHeatCapacity)
 
 CrystalFieldHeatCapacity::CrystalFieldHeatCapacity()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), setDirect(false) {
+    : CrystalFieldPeaksBase(), API::IFunction1D(), m_setDirect(false) {
   declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
 }
 
 // Sets the eigenvectors / values directly
-void CrystalFieldHeatCapacity::set_eigensystem(
-    const DoubleFortranVector &en_in, const ComplexFortranMatrix &wf_in,
-    const int nre_in) {
-  setDirect = true;
-  en = en_in;
-  wf = wf_in;
-  nre = nre_in;
+void CrystalFieldHeatCapacity::setEnergy(const DoubleFortranVector &en) {
+  m_setDirect = true;
+  m_en = en;
 }
 
 void CrystalFieldHeatCapacity::function1D(double *out, const double *xValues,
                                           const size_t nData) const {
-  if (!setDirect) {
+  if (!m_setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
-    DoubleFortranVector en_;
-    ComplexFortranMatrix wf_;
-    int nre_ = 0;
-    calculateEigenSystem(en_, wf_, nre_);
-    calculate(out, xValues, nData, en_);
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    int nre = 0;
+    calculateEigenSystem(en, wf, nre);
+    calculate(out, xValues, nData, en);
   } else {
     // Use stored values
-    calculate(out, xValues, nData, en);
+    calculate(out, xValues, nData, m_en);
   }
   auto fact = getAttribute("ScaleFactor").asDouble();
   if (fact != 1.0) {
