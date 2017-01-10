@@ -116,13 +116,14 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
       switch(static_cast<int>(physpropId[iSpec])) {
-        case 4: // Hmag, Hdir, inverse, Unit,
+        case 4: // Hmag, Hdir, inverse, Unit, powder
           declareAttribute("Hmag" + suffix, Attribute(1.0));
-        case 2: // Hdir, inverse, Unit
+        case 2: // Hdir, inverse, Unit, powder
           declareAttribute("inverse" + suffix, Attribute(false));
-        case 3: // Hdir, Unit
+        case 3: // Hdir, Unit, powder
           declareAttribute("Hdir" + suffix, Attribute(std::vector<double>{0., 0., 1.}));
           declareAttribute("Unit" + suffix, Attribute("bohr"));
+          declareAttribute("powder" + suffix, Attribute(false));
           break;
       }
     }
@@ -279,6 +280,8 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
       spectrum->setAttribute("Hdir", Attribute(hdir));
       auto inverse = getAttribute("inverse" + suffix).asBool();
       spectrum->setAttribute("inverse", Attribute(inverse));
+      auto powder = getAttribute("powder" + suffix).asBool();
+      spectrum->setAttribute("powder", Attribute(powder));
       return IFunction_sptr(spectrum);
     }
     case 3: { // Magnetisation
@@ -290,6 +293,8 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
       spectrum->setAttribute("Unit", Attribute(unit));
       auto hdir = getAttribute("Hdir" + suffix).asVector();
       spectrum->setAttribute("Hdir", Attribute(hdir));
+      auto powder = getAttribute("powder" + suffix).asBool();
+      spectrum->setAttribute("powder", Attribute(powder));
       return IFunction_sptr(spectrum);
     }
     case 4: { // Moment vs temperature
@@ -304,6 +309,8 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
       spectrum->setAttribute("Hmag", Attribute(hmag));
       auto inverse = getAttribute("inverse" + suffix).asBool();
       spectrum->setAttribute("inverse", Attribute(inverse));
+      auto powder = getAttribute("powder" + suffix).asBool();
+      spectrum->setAttribute("powder", Attribute(powder));
       return IFunction_sptr(spectrum);
     }
   }

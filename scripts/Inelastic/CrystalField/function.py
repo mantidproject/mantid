@@ -624,7 +624,7 @@ class PhysicalProperties(object):
         PhysicalProperties('Cp')  # No further parameters required for heat capacity
         PhysicalProperties('chi', hdir, inverse, unit)
         PhysicalProperties('chi', unit)
-        PhysicalProperties('mag', temp, hdir, unit)
+        PhysicalProperties('mag', hdir, temp, unit)
         PhysicalProperties('mag', unit)
         PhysicalProperties('M(T)', hmag, hdir, inverse, unit)
         PhysicalProperties('M(T)', unit)
@@ -639,9 +639,9 @@ class PhysicalProperties(object):
         self._typeid = self._str2id(typeid) if isinstance(typeid, basestring) else int(typeid)
         try:
             initialiser = getattr(self, 'init' + str(self._typeid))
-            initialiser(*args, **kwargs)
         except AttributeError:
             raise ValueError('Physical property type %s not recognised' % (str(typeid)))
+        initialiser(*args, **kwargs)
 
     def _checkmagunits(self, unit, default=None):
         """ Checks that unit string is valid and converts to correct case. """
@@ -732,7 +732,14 @@ class PhysicalProperties(object):
             raise ValueError('No environment arguments should be specified for heat capacity')
 
     def _parseargs(self, mapping, *args, **kwargs):
-        args = filter(None, args)
+        args = filter(None, list(args))
+        # Handles special case of first argument being a unit type
+        if len(args) > 0:
+            try: 
+                if self._checkmagunits(args[0], 'bad') is not 'bad':
+                    kwargs['Unit'] = args.pop(0)
+            except AttributeError:
+                pass
         for i in range(len(mapping)):
             if len(args) > i:
                 try:
@@ -748,25 +755,16 @@ class PhysicalProperties(object):
     def init2(self, *args, **kwargs):
         """ Initialises environment for susceptibility data """
         mapping = ['Hdir', 'Inverse', 'Unit']
-        # Handles special case of first argument being a unit type
-        if len(args) == 1 and self._checkmagunits(value, None) is not None:
-            kwargs['Unit'] = args.pop(0)
         self._parseargs(mapping, *args, **kwargs)
 
     def init3(self, *args, **kwargs):
         """ Initialises environment for M(H) data """
-        mapping = ['Temperature', 'Hdir', 'Unit']
-        # Handles special case of first argument being a unit type
-        if len(args) == 1 and self._checkmagunits(value, None) is not None:
-            kwargs['Unit'] = args.pop(0)
+        mapping = ['Hdir', 'Temperature', 'Unit']
         self._parseargs(mapping, *args, **kwargs)
 
     def init4(self, *args, **kwargs):
         """ Initialises environment for M(T) data """
         mapping = ['Hmag', 'Hdir', 'Inverse', 'Unit']
-        # Handles special case of first argument being a unit type
-        if len(args) == 1 and self._checkmagunits(value, None) is not None:
-            kwargs['Unit'] = args.pop(0)
         self._parseargs(mapping, *args, **kwargs)
 
     def toString(self):

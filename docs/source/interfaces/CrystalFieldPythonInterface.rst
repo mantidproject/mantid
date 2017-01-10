@@ -555,7 +555,7 @@ are in the following order::
     PhysicalProperties('Cp')  # No further parameters required for heat capacity
     PhysicalProperties('chi', hdir, inverse, unit)
     PhysicalProperties('chi', unit)
-    PhysicalProperties('mag', temp, hdir, unit)
+    PhysicalProperties('mag', hdir, temp, unit)
     PhysicalProperties('mag', unit)
     PhysicalProperties('M(T)', hmag, hdir, inverse, unit)
     PhysicalProperties('M(T)', unit)
