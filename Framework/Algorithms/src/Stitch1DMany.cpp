@@ -116,7 +116,7 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
           groupWSName);
 
       for (size_t i = 0; i < groupWS->size(); i++) {
-        std::string wsName = groupWS->getItem(i)->name();
+        const std::string &wsName = groupWS->getItem(i)->getName();
         if (AnalysisDataService::Instance().doesExist(wsName)) {
           inputWorkspaces.push_back(
               AnalysisDataService::Instance().retrieveWS<Workspace>(wsName));
@@ -306,7 +306,7 @@ void Stitch1DMany::doStitch1DMany(
   std::vector<std::string> toProcess;
 
   for (auto &groupWs : inputWSGroups) {
-    const std::string wsName = groupWs->getItem(period)->name();
+    const std::string &wsName = groupWs->getItem(period)->getName();
     toProcess.push_back(wsName);
     outName += "_" + wsName;
   }
@@ -379,13 +379,13 @@ bool Stitch1DMany::processGroups() {
     for (size_t i = 0; i < m_numWSPerGroup; i++) {
       auto lhsWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[0][i]);
-      outName = groupName + "_" + lhsWS->name();
+      outName = groupName + "_" + lhsWS->getName();
 
       // Perform stiching on the workspace for each group of that period
       for (size_t j = 1; j < m_numWSPerPeriod; j++) {
         auto rhsWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[j][i]);
-        outName += "_" + rhsWS->name(); // add name
+        outName += "_" + rhsWS->getName(); // add name
         double outScaleFactor;
 
         doStitch1D(lhsWS, rhsWS, j, m_startOverlaps, m_endOverlaps, m_params,
