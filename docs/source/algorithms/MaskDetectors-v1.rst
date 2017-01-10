@@ -67,7 +67,8 @@ All but the *Workspace* property are optional and at least one of them must be
 set. If several are set, the combination of them is used.
 
 The set of spectra and detectors to be masked can be given as a list of either
-spectrum numbers, detector IDs, workspace indices or as a workspace index range.
+spectrum numbers, detector IDs, workspace indices, component names, or as a
+workspace index range.
 
 The workspace index range (properties *StartWorkspacIndex* and *EndWorkspaceIndex*)
 changes its action depending on other masking properties being provided, namely:
@@ -83,7 +84,8 @@ If *MaskedWorkspace* is provided, both *MaskedWorkspace* and
 *Workspace* mask have the same instrument. 
 
 The algorithm works differently depending on *MaskedWorkspace* property 
-being a *Mask Workspace* (SpecialWorkspace2D object) or  `Matrix Workspace <http://docs.mantidproject.org/nightly/concepts/MatrixWorkspace.html#matrixworkspace>`_. 
+being a *Mask Workspace* (SpecialWorkspace2D object) or 
+`Matrix Workspace <http://docs.mantidproject.org/nightly/concepts/MatrixWorkspace.html#matrixworkspace>`_. 
 
 If source *MaskedWorkspace* is a *Mask Workspace* and the number of spectra in the source 
 *MaskedWorkspace* is equal to number of spectra in the target *Workspace*, the 
@@ -149,7 +151,7 @@ Here are the rules for input information for masking
 2. Workspace indices and Spectra cannot be given at the same time.
 3. MaskWorkspace  and general :ref:`MatrixWorkspace <MatrixWorkspace>` cannot be given at the same time.
 4. When a general :ref:`MatrixWorkspace <MatrixWorkspace>` is specified, then all detectors in a spectrum are treated as masked if the effective detector of that spectrum is masked.
-5. The detectors found recursively in given instrument components are added to the list of detectors to mask.
+5. The detectors found recursively in given instrument components are added to the list of detectors to mask. If multiple components with the same name exist, the first component found is masked.
 6. The masks specified from
 
    a) workspace indices/spectra
