@@ -46,7 +46,7 @@ public:
   IReflEventPresenter *getPresenter() const override;
 
   /// Returns the number of time slices
-  std::string getNumTimeSlices() const override;
+  std::string getTimeSlices() const override;
 
 private:
   /// Initialise the interface

@@ -37,7 +37,7 @@ IReflEventPresenter *QtReflEventView::getPresenter() const {
 /** Returns the number of time slices
 * @return :: The number of time slices
 */
-std::string QtReflEventView::getNumTimeSlices() const {
+std::string QtReflEventView::getTimeSlices() const {
 
   return m_ui.evenTimeSlicesEdit->text().toStdString();
 }

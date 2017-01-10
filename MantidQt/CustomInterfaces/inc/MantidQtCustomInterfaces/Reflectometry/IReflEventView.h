@@ -45,7 +45,7 @@ public:
   /// Returns the presenter managing this view
   virtual IReflEventPresenter *getPresenter() const = 0;
 
-  virtual std::string getNumTimeSlices() const = 0;
+  virtual std::string getTimeSlices() const = 0;
 };
 }
 }
