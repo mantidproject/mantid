@@ -782,6 +782,7 @@ set ( TEST_FILES
 	MCInteractionVolumeTest.h
 	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
+	MaskDetectorsIfTest.h
 	MaskBinsTest.h
 	MaxEnt/MaxentCalculatorTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
