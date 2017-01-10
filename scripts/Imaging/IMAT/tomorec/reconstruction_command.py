@@ -26,13 +26,24 @@ import numpy as np
 # For 3d median filter
 try:
     import scipy
+    print(
+        scipy.__file__,
+        "< this is the directory of where scipy was imported from. If this is a Mantid "
+        "directory, then the scipy that fails to import here is older and/or missing ndimage than "
+        "the one I have locally")
 except ImportError:
     raise ImportError(
         "Could not find the package scipy which is required for image pre-/post-processing"
     )
 
 try:
+    # for some reason ndimage is not found here. reason unknown?
     import scipy.ndimage
+    print(
+        scipy.ndimage.__file__,
+        "< this is the directory of where scipy was imported from. If this is a Mantid "
+        "directory, then the scipy that fails to import here is older and/or missing ndimage than "
+        "the one I have locally")
 except ImportError:
     raise ImportError(
         "Could not find the subpackage scipy.ndimage, required for image pre-/post-processing"
