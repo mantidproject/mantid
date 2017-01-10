@@ -57,12 +57,14 @@ Improvements
 - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
 - TOSCA instrument definition file has been updated
 - When plotting from interfaces the plots now display error bars as standard
+- Rebinning of the container workspace was made optional in :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`
 
 Bugfixes
 --------
 
 - Clicking 'Save' without creating a res file in *ISISCalibration* no longer causes an error
 - Fixed issue when trying to plot multiple spectra
+- Fixed an issue where :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` would unintentionally modify the input container workspace
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
