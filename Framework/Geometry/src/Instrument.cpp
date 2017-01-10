@@ -60,7 +60,7 @@ Instrument::Instrument(const Instrument &instr)
       m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
-      m_monitorCache(instr.m_monitorCache), m_defaultView(instr.m_defaultView),
+      m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
@@ -74,11 +74,11 @@ Instrument::Instrument(const Instrument &instr)
   for (it = children.begin(); it != children.end(); ++it) {
     // First check if the current component is a detector and add to cache if it
     // is
-    // N.B. The list of monitors should remain unchanged. As the cache holds
-    // detector id
-    // numbers rather than pointers, there's no need for special handling
     if (const IDetector *det = dynamic_cast<const Detector *>(it->get())) {
-      markAsDetector(det);
+      if (instr.isMonitor(det->getID()))
+        markAsMonitor(det);
+      else
+        markAsDetector(det);
       continue;
     }
     // Now check whether the current component is the source or sample.
@@ -733,7 +733,7 @@ void Instrument::markAsDetectorFinalize() {
 *
 * @throw Exception::ExistsError if cannot add detector to cache
 */
-void Instrument::markAsMonitor(IDetector *det) {
+void Instrument::markAsMonitor(const IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsMonitor() called on a "
                              "parametrized Instrument object.");
@@ -744,7 +744,6 @@ void Instrument::markAsMonitor(IDetector *det) {
   // mark detector as a monitor
   auto it = find(m_detectorCache, det->getID());
   std::get<2>(*it) = true;
-  m_monitorCache.push_back(det->getID());
 }
 
 /** Removes a detector from the instrument and from the detector cache.
@@ -759,12 +758,6 @@ void Instrument::removeDetector(IDetector *det) {
   const detid_t id = det->getID();
   // Remove the detector from the detector cache
   const auto it = find(m_detectorCache, id);
-  // Also need to remove from monitor cache if appropriate
-  if (std::get<2>(*it)) {
-    auto it2 = std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
-    if (it2 != m_monitorCache.end())
-      m_monitorCache.erase(it2);
-  }
   m_detectorCache.erase(it);
 
   // Remove it from the parent assembly (and thus the instrument). Evilness
@@ -783,9 +776,13 @@ void Instrument::removeDetector(IDetector *det) {
 std::vector<detid_t> Instrument::getMonitors() const {
   // Monitors cannot be parametrized. So just return the base.
   if (m_map)
-    return static_cast<const Instrument *>(m_base)->m_monitorCache;
-  else
-    return m_monitorCache;
+    return m_instr->getMonitors();
+
+  std::vector<detid_t> mons;
+  for (const auto &item : m_detectorCache)
+    if (std::get<2>(item))
+      mons.push_back(std::get<0>(item));
+  return mons;
 }
 
 /**

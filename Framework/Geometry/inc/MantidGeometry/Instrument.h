@@ -124,7 +124,7 @@ public:
   /// child comp.)
   /// to be a monitor and also add it to _detectorCache for possible later
   /// retrieval
-  void markAsMonitor(IDetector *);
+  void markAsMonitor(const IDetector *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -300,9 +300,6 @@ private:
   /// specified
   /// by the user in radian (not degrees)
   std::map<std::string, std::string> m_logfileUnit;
-
-  /// a vector holding detector ids of monitor s
-  std::vector<detid_t> m_monitorCache;
 
   /// Stores the default type of the instrument view: 3D or one of the
   /// "unwrapped"
