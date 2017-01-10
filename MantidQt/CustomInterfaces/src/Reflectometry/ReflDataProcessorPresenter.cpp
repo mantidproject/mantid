@@ -88,32 +88,28 @@ void ReflDataProcessorPresenter::process() {
 
     for (const auto &data : item.second) {
 
-      // The run number as a string
-      std::string runno = data.second.at(0);
+      auto row = data.second;
 
+      // Load the run
+      std::string runno = row.at(0);
       loadRun(runno);
 
       for (size_t i = 0; i < numSlices; i++) {
-        takeSlice(runno, startTimes[i], stopTimes[i]);
+        auto wsName = takeSlice(runno, startTimes[i], stopTimes[i]);
+        std::vector<std::string> slice(row);
+        slice[0] = wsName;
+        reduceRow(slice);
       }
     }
 
     // Post-process (if needed)
   }
 
-  // Perform slicing, see Max's script
-  // When running ReflectometryReductionOneAuto apply global options and options
-  // specified in the 'Options' column
-
-  // For each group
-  // Stitch slices (if needed), applying global options
-
-  // Finally, notebook: Don't implement this for the moment
-  // If selected, print message saying that notebook will not be saved
+  // Notebook not implemented yet
   if (m_view->getEnableNotebook()) {
     GenericDataProcessorPresenter::giveUserWarning(
-        "Notebook will not be generated for sliced data",
-        "Notebook will not be created");
+        "Notebook not implemented for sliced data yet",
+        "Notebook will not be generated");
   }
   // If not selected, do nothing
 }
@@ -149,11 +145,9 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
                                       "Time slicing error");
 }
 
-/** Takes a slice from a run
+/** Loads a run
 *
 * @param runno :: the run number as a string
-* @param startTime :: start time
-* @param stopTime :: stop time
 */
 void ReflDataProcessorPresenter::loadRun(const std::string &runno) {
 
@@ -173,8 +167,9 @@ void ReflDataProcessorPresenter::loadRun(const std::string &runno) {
 * @param runno :: the run number as a string
 * @param startTime :: start time
 * @param stopTime :: stop time
+* @return :: the name of the sliced workspace
 */
-void ReflDataProcessorPresenter::takeSlice(const std::string &runno,
+std::string ReflDataProcessorPresenter::takeSlice(const std::string &runno,
                                            double startTime, double stopTime) {
 
   std::string runName = "TOF_" + runno;
@@ -229,6 +224,8 @@ void ReflDataProcessorPresenter::takeSlice(const std::string &runno,
   append->setProperty("OutputWorkspace", sliceName);
   append->setProperty("MergeLogs", true);
   append->execute();
+
+  return sliceName;
 }
 }
 }

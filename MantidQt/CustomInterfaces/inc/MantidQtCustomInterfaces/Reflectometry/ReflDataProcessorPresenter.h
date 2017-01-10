@@ -62,7 +62,8 @@ private:
   // Load a run
   void loadRun(const std::string &runno);
   // Take a slice from event workspace
-  void takeSlice(const std::string &runno, double startTime, double stopTime);
+  std::string takeSlice(const std::string &runno, double startTime,
+                        double stopTime);
 };
 }
 }
