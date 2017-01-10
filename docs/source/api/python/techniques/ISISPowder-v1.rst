@@ -55,7 +55,31 @@ TODO talk about the calibration mapping file
 
 Focus Modes
 ^^^^^^^^^^^
-TODO talk about various focus modes
+
+All
+~~~
+In `all` mode banks 1-9 (inclusive) are summed into a single spectra then scaled
+down by 1/9. The workspace is then attenuated if the correction is on. Workspaces
+10-14 are left as separate workspaces with appropriate names.
+
+Groups
+~~~~~~
+In `groups` mode banks 1+2+3, 4+5+6, 7+8+9 are summed into three (3) separate 
+workspaces then scaled down by 1/3. The workspaces containing banks 4-9 (inclusive)
+are then added into a separate workspace and scaled down by 1/2. Banks 10-14
+are left as separate workspaces with appropriate names.
+
+Trans
+~~~~~
+In `trans` mode banks 1-9 (inclusive) are summed into a single spectra then scaled
+down by 1/9. The workspace is then attenuated if the correction is on. The individual
+banks 1-9 (inclusive) are also output as individual workspaces with appropriate names.
+
+Mods
+~~~~
+In `mods` mode each bank is left as an individual workspace with an appropriate
+name. No additional processing is performed. 
+
 
 Script configuration parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -103,7 +127,7 @@ TODO talk about defaults?
    Acceptable options: `tt35`, `tt70`, `tt88`.
  
  - `vanadium_normalisation` - If set to true divides the sample by the vanadium
-   vanadium calibration during the focusing step.
+   vanadium calibration during the focussing step.
    
 Advanced Script Parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -195,15 +219,10 @@ object will not affect others: In the above examples `pearl_object_override`
 will save in *"My custom location"* whilst `pearl_manually_specified` will have user
 name *"Mantid"* and save in *<Path to output folder>*. 
 
+Vanadium Calibration
+^^^^^^^^^^^^^^^^^^^^^
+TODO 
 
-
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+Focussing
+^^^^^^^^^^
+TODO
