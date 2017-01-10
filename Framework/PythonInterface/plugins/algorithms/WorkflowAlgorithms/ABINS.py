@@ -302,11 +302,11 @@ class ABINS(PythonAlgorithm):
         """
         if self._nspec == AbinsConstants.ONE_DIMENTIONAL_SPECTRUM:
             # only FUNDAMENTALS
-            if s_points.shape[0] == self._nspec:
+            if s_points.shape[0] == AbinsConstants.ONE_DIMENTIONAL_SPECTRUM:
 
                 CreateWorkspace(DataX=freq[0],
                                 DataY=s_points[0],
-                                NSpec=self._nspec,
+                                NSpec=AbinsConstants.ONE_DIMENTIONAL_SPECTRUM,
                                 YUnitLabel="S",
                                 OutputWorkspace=workspace,
                                 EnableLogging=False)
@@ -319,7 +319,7 @@ class ABINS(PythonAlgorithm):
 
                 CreateWorkspace(DataX=freq,
                                 DataY=s_points,
-                                NSpec=self._nspec,
+                                NSpec=AbinsConstants.ONE_DIMENTIONAL_SPECTRUM,
                                 YUnitLabel="S",
                                 OutputWorkspace=workspace,
                                 EnableLogging=False)
@@ -340,7 +340,7 @@ class ABINS(PythonAlgorithm):
 
                     CreateWorkspace(DataX=freq[n],
                                     DataY=s_points[n],
-                                    NSpec=self._nspec,
+                                    NSpec=AbinsConstants.ONE_DIMENTIONAL_SPECTRUM,
                                     YUnitLabel="S",
                                     OutputWorkspace=wrk_name,
                                     EnableLogging=False)
