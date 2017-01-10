@@ -522,13 +522,64 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   }
 }
 
+/// Split this TimeSeriresProperty by a vector of time with N entries,
+/// and by the target workspace index defined by target_vec
+/// Requirements:
+/// 1. vector outputs must be defined before this method is called;
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::splitByTimeVector(
         std::vector<double> &time_vec, std::vector<int> &target_vec,
         std::vector<Property *>outputs)
 {
+    // check inputs
+    if (time_vec.size() != target_vec.size()+1)
+	throw std::runtime_error("Input time vector's size does not match taget workspace index vector's size.");
+    if (outputs.empty())
+	return;
+  
+    // sort if necessary
+    sortIfNecessary();
 
+    // work on m_values, m_size, and m_time
+    // FIXME - should access the class variable m_time
+    std::vector<Kernel::DateAndTime> tsp_time_vec = this->timesAsVector();
+
+    // go over both filter time vector and time series property time vector
+    bool continue_search = true;
+    size_t index_time_filter = 0;
+    size_t index_tsp_time = 0;
+    while (continue_search){
+
+	Kernel::DateAndTime tsp_time = tsp_time_vec[index_tsp_time];
+	Kernel::DateAndTime start_filter_time = time_vec[index_filter_time];
+	Kernel::DateAndTime stop_filter_time = time_vec[index_filter_time+1];
+
+	if (tsp_time < stop_filter_time)
+	{
+	    // the time series entry is still in the filter, add this entry to current times series property
+	    current_tsp.add(tsp_time, m_values[index_tsp_time]);
+	    ++ index_tsp_filter;
+	} else {
+	    // the filter ends, then it is a time to ends with time series property and advance to next
+	    blabla;
+	}
+
+
+	// check loop's termination criteria
+	if (index_time_filter >= time_vec.size() - 1)
+	{
+	    // filter is advanced to the last entry of the input time vector
+	    continue_search = false;
+	} else if (index_tsp_time >= tsp_time_vec.size())
+	{
+	    // time series property is advanced to the last entry
+	    continue_search = false;
+	}
+    } // END-OF-WHILE
+
+    return;
 }
+
 
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
 // warnings when the template type is the wider integer types
