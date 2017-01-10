@@ -142,6 +142,9 @@ void KafkaTopicSubscriber::subscribe() {
     throw std::runtime_error(os.str());
   }
 
+  // For the detector-spectrum map topic and the run info topic we want to
+  // subscribe from the last available message, for other topics subscribe
+  // to message starting from the next message
   RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
   if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX) ||
       endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
@@ -150,6 +153,7 @@ void KafkaTopicSubscriber::subscribe() {
     int64_t highOffset = 0;
     auto topicPartition =
         RdKafka::TopicPartition::create(m_topicName, partition);
+    // This gets the lowest and highest offsets available on the brokers
     m_consumer->query_watermark_offsets(m_topicName, partition, &lowOffset,
                                         &highOffset, -1);
     // Offset of message to start at, corresponds to the last message in the
