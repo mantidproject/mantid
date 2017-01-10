@@ -62,7 +62,7 @@ public:
    * @param dimension the XML string containing the axis information
    * @return an axis information object containing the given information
    */
-  AxisInformation *getAxisInfo(const std::string dimension);
+  AxisInformation *getAxisInfo(const std::string &dimension);
 
 private:
   /**
@@ -70,7 +70,7 @@ private:
    * @param val the axis bound to convert
    * @return the double representation of the bound
    */
-  double convertBounds(Poco::XML::XMLString val);
+  double convertBounds(const Poco::XML::XMLString &val);
 
   Poco::AutoPtr<Poco::XML::Document> pDoc; ///< A XML document handle
 };

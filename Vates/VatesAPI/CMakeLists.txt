@@ -27,6 +27,7 @@ src/MetadataJsonManager.cpp
 src/MDLoadingPresenter.cpp
 src/Normalization.cpp
 src/ProgressAction.cpp
+src/PresenterFactories.cpp
 src/PresenterUtilities.cpp
 src/SaveMDWorkspaceToVTK.cpp
 src/SaveMDWorkspaceToVTKImpl.cpp
