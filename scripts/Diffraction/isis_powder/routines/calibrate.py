@@ -23,19 +23,20 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
 
     corrected_van_ws = instrument.apply_solid_angle_efficiency_corr(ws_to_correct=corrected_van_ws,
                                                                     run_details=run_details)
+
     if absorb:
-        corrected_van_ws = _apply_absorb_corrections(instrument=instrument,
-                                                     run_details=run_details,
+        corrected_van_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,
                                                      corrected_van_ws=corrected_van_ws, gen_absorb=gen_absorb)
 
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=corrected_van_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
+
     focused_spectra = common.extract_ws_spectra(focused_vanadium)
-    # Crop back to sane TOF as for PEARL at least 20,000-40,000 microseconds is extrapolated
-    # to 0-60,000 microseconds
     focused_spectra = instrument.crop_van_to_expected_tof_range(focused_spectra)
+
     d_spacing_group = _save_focused_vanadium(instrument=instrument, run_details=run_details,
                                              van_spectra=focused_spectra)
+
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 
     common.remove_intermediate_workspace(corrected_van_ws)
@@ -56,20 +57,8 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
 
 
 def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_absorb):
-    corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="Wavelength")
-
-    if gen_absorb or not run_details.vanadium_absorption_path:
-        absorb_ws = instrument.generate_vanadium_absorb_corrections(run_details, corrected_van_ws)
-    else:
-        absorb_ws = mantid.LoadNexus(Filename=run_details.vanadium_absorption_path)
-
-    if corrected_van_ws.getNumberBins() != absorb_ws.getNumberBins():
-        corrected_van_ws = mantid.RebinToWorkspace(WorkspaceToRebin=corrected_van_ws, WorkspaceToMatch=absorb_ws)
-    corrected_van_ws = mantid.Divide(LHSWorkspace=corrected_van_ws, RHSWorkspace=absorb_ws)
-    corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="dSpacing")
-
-    common.remove_intermediate_workspace(absorb_ws)
-    return corrected_van_ws
+    absorb_ws = instrument.generate_vanadium_absorb_corrections(run_details, corrected_van_ws)
+    return absorb_ws
 
 
 def _save_focused_vanadium(instrument, run_details, van_spectra):

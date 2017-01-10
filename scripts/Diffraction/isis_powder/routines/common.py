@@ -4,9 +4,6 @@ import mantid.kernel as kernel
 import mantid.simpleapi as mantid
 from isis_powder.routines.common_enums import InputBatchingEnum
 
-# A small workaround to ensure when reading workspaces in a loop
-# the previous workspace does not got overridden
-
 
 def create_calibration_by_names(calibration_runs, startup_objects, grouping_file_name, group_names):
     _create_blank_cal_file(calibration_runs=calibration_runs, group_names=group_names,
@@ -125,7 +122,8 @@ def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
     for ws in focused_vanadium_spectra:
         out_name = "spline_bank_" + str(bank_index)
         bank_index += 1
-        tof_ws_list.append(mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name))
+        tof_ws_list.append(mantid.CloneWorkspace(InputWorkspace=ws, OutputWorkspace=out_name))
+        #tof_ws_list.append(mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name))
 
     splined_ws_list = []
     for ws in tof_ws_list:

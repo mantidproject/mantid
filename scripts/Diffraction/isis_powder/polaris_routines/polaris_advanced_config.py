@@ -25,7 +25,9 @@ absorption_correction_params = {
     # http://docs.mantidproject.org/nightly/algorithms/CylinderAbsorption-v1.html
     "cylinder_sample_height": 4.0,
     "cylinder_sample_radius": 0.4,
+    "cylinder_position": [0., 0., 0.],
 
+    "chemical_formula": "V",
     "attenuation_cross_section": 4.88350,
     "scattering_cross_section": 5.15775,
     "sample_number_density": 0.0718956,

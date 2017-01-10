@@ -8,21 +8,26 @@ from isis_powder.routines.RunDetails import RunDetails
 from isis_powder.polaris_routines import polaris_advanced_config
 
 
-def generate_absorb_corrections(ws_to_match):
-    absorb_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)
-    absorb_dict = polaris_advanced_config.absorption_correction_params
+def generate_absorb_corrections(ws_to_correct):
+    mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
 
-    absorb_ws = mantid.CylinderAbsorption(InputWorkspace=absorb_ws,
-                                          CylinderSampleHeight=absorb_dict["cylinder_sample_height"],
-                                          CylinderSampleRadius=absorb_dict["cylinder_sample_radius"],
-                                          AttenuationXSection=absorb_dict["attenuation_cross_section"],
-                                          ScatteringXSection=absorb_dict["scattering_cross_section"],
-                                          SampleNumberDensity=absorb_dict["sample_number_density"],
-                                          NumberOfSlices=absorb_dict["number_of_slices"],
-                                          NumberOfAnnuli=absorb_dict["number_of_annuli"],
-                                          NumberOfWavelengthPoints=absorb_dict["number_of_wavelength_points"],
-                                          ExpMethod=absorb_dict["exponential_method"])
-    return absorb_ws
+    absorb_dict = polaris_advanced_config.absorption_correction_params
+    geometry_json = {'Shape': 'Cylinder', 'Height': absorb_dict["cylinder_sample_height"],
+                     'Radius': absorb_dict["cylinder_sample_radius"], 'Center': absorb_dict["cylinder_position"]}
+    material_json = {'AttenuationXSection': absorb_dict["attenuation_cross_section"],
+                     'ChemicalFormula': absorb_dict["chemical_formula"],
+                     'ScatteringXSection':  absorb_dict["scattering_cross_section"],
+                     'SampleNumberDensity': absorb_dict["sample_number_density"]}
+
+    mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
+
+    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="TOF")
+    ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
+    ws_to_correct = mantid.ReplaceSpecialValues(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                                NaNValue=0, NaNError=0)
+    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="dSpacing")
+
+    return ws_to_correct
 
 
 def generate_solid_angle_corrections(run_details, instrument):
