@@ -149,8 +149,7 @@ void KafkaTopicSubscriber::subscribe() {
   if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX) ||
       endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
     const int partition = 0;
-    int64_t lowOffset = 0;
-    int64_t highOffset = 0;
+    int64_t lowOffset, highOffset = 0;
     auto topicPartition =
         RdKafka::TopicPartition::create(m_topicName, partition);
     // This gets the lowest and highest offsets available on the brokers
@@ -158,10 +157,9 @@ void KafkaTopicSubscriber::subscribe() {
                                         &highOffset, -1);
     // Offset of message to start at, corresponds to the last message in the
     // partition
-    int64_t confOffset = highOffset - 1;
+    auto confOffset = highOffset - 1;
     topicPartition->set_offset(confOffset);
-    std::vector<RdKafka::TopicPartition *> topicPartitionList{topicPartition};
-    error = m_consumer->assign(topicPartitionList);
+    error = m_consumer->assign({topicPartition});
     if (confOffset < 0) {
       std::ostringstream os;
       os << "No messages are yet available on the Kafka brokers for this "
