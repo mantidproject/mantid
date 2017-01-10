@@ -526,7 +526,8 @@ void MaskDetectors::appendToDetectorListFromComponentList(
       const auto component = instrument->getComponentByName(compName);
       const auto det = boost::dynamic_pointer_cast<const IDetector>(component);
       if (!det) {
-        g_log.warning() << "No detectors found in component '" << compName << "'\n";
+        g_log.warning() << "No detectors found in component '" << compName
+                        << "'\n";
         continue;
       }
       dets.emplace_back(det);
