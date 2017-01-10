@@ -776,7 +776,6 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-
 private:
   // boost::shared_ptr
   boost::scoped_ptr<testing::NiceMock<MockTomographyIfaceView>> m_view;

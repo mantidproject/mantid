@@ -124,7 +124,9 @@ public:
     testing::NiceMock<MockTomographyROIView> mockView;
     MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, askImagePath(testing::_)).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, askImagePath(testing::_))
+        .Times(1)
+        .WillOnce(Return(""));
 
     // No error, no warnings, just ignored
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
