@@ -43,7 +43,7 @@ public:
   std::string name() const override { return "CrystalFieldSusceptibility"; }
   const std::string category() const override { return "General"; }
   void setEigensystem(const DoubleFortranVector &en,
-                       const ComplexFortranMatrix &wf, const int nre);
+                      const ComplexFortranMatrix &wf, const int nre);
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
 

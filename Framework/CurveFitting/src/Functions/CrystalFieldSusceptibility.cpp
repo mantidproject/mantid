@@ -106,9 +106,9 @@ CrystalFieldSusceptibility::CrystalFieldSusceptibility()
 }
 
 // Sets the eigenvectors / values directly
-void CrystalFieldSusceptibility::setEigensystem(
-    const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    const int nre) {
+void CrystalFieldSusceptibility::setEigensystem(const DoubleFortranVector &en,
+                                                const ComplexFortranMatrix &wf,
+                                                const int nre) {
   m_setDirect = true;
   m_en = en;
   m_wf = wf;

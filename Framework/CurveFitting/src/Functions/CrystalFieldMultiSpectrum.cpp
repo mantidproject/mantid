@@ -120,7 +120,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         declareAttribute("Hmag" + suffix, Attribute(1.0));
       case Susceptibility: // Hdir, inverse, Unit, powder
         declareAttribute("inverse" + suffix, Attribute(false));
-      case Magnetisation:  // Hdir, Unit, powder
+      case Magnetisation: // Hdir, Unit, powder
         declareAttribute("Hdir" + suffix,
                          Attribute(std::vector<double>{0., 0., 1.}));
         declareAttribute("Unit" + suffix, Attribute("bohr"));

@@ -86,7 +86,7 @@ CrystalFieldMoment::CrystalFieldMoment()
 
 // Sets the base crystal field Hamiltonian matrix
 void CrystalFieldMoment::setHamiltonian(const ComplexFortranMatrix &ham,
-                                         const int nre) {
+                                        const int nre) {
   m_setDirect = true;
   m_ham = ham;
   m_nre = nre;

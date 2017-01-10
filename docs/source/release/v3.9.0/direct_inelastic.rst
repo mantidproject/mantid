@@ -14,8 +14,6 @@ Improvements
 
 - The previously inaccurate instrument definition for IN4 at ILL has been updated. The instrument geometry should now be more correct.
 
-`Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
-
 New features
 ------------
 
@@ -28,8 +26,11 @@ Crystal Field
 -------------
 
 - The peak widths can be fixed to or varied around values obtained from experimental or calculated instrument resolution function.
-- The initial field parameters can be estimated using a Monte Carlo seach algorithm (:ref:`EstimateFitParameters <algm-EstimateFitParameters>`)
+- The initial field parameters can be estimated using a Monte Carlo seach algorithm
+  (:ref:`EstimateFitParameters <algm-EstimateFitParameters>`)
 - The crystal field heat capacity, magnetisation and susceptibility can now be calculated or fitted, using new functions
   :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`, :ref:`CrystalFieldSusceptibility <func-CrystalFieldSusceptibility>`,
   :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>`, and :ref:`CrystalFieldMoment <func-CrystalFieldMoment>`.
   The Python interface :ref:`Crystal Field Python Interface` has also been updated to handle calculating and fitting these quantities.
+
+`Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_

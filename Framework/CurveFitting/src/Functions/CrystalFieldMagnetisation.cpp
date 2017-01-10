@@ -88,8 +88,8 @@ CrystalFieldMagnetisation::CrystalFieldMagnetisation()
 }
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMagnetisation::setHamiltonian(
-    const ComplexFortranMatrix &ham, const int nre) {
+void CrystalFieldMagnetisation::setHamiltonian(const ComplexFortranMatrix &ham,
+                                               const int nre) {
   m_setDirect = true;
   m_ham = ham;
   m_nre = nre;
