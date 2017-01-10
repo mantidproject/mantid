@@ -45,7 +45,9 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
 
         # check whether sum is calculated correctly, for theta=0, dwf=1
         y_sum = sum(self._input_ws.readY(0)[27:75])
+        e_sum = np.sqrt(sum(np.square(self._input_ws.readE(0)[27:75])))
         self.assertAlmostEqual(y_sum, wsoutput.readY(0)[0])
+        self.assertAlmostEqual(e_sum, wsoutput.readE(0)[0])
 
         DeleteWorkspace(wsoutput)
 
@@ -61,10 +63,12 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
 
         # check dwf calculation
         y_sum = sum(self._input_ws.readY(1)[27:75])
+        e_sum = np.sqrt(sum(np.square(self._input_ws.readE(1)[27:75])))
         mvan = 0.001*50.942/N_A
         Bcoef = 4.736767162094296*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
         dwf = np.exp(-1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
         self.assertAlmostEqual(y_sum*dwf, wsoutput.readY(1)[0])
+        self.assertAlmostEqual(e_sum*dwf, wsoutput.readE(1)[0])
 
         DeleteWorkspace(wsoutput)
 
