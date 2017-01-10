@@ -520,38 +520,19 @@ void MaskDetectors::appendToDetectorListFromComponentList(
   }
   std::set<detid_t> detectorIDs;
   for (const auto &compName : componentList) {
-    std::vector<boost::shared_ptr<const IComponent>> components;
-    if (compName.find('/') != std::string::npos) {
-      auto component = instrument->getComponentByName(compName);
-      if (component) {
-        components.emplace_back(component);
+    std::vector<IDetector_const_sptr> dets;
+    instrument->getDetectorsInBank(dets, compName);
+    if (dets.empty()) {
+      const auto component = instrument->getComponentByName(compName);
+      const auto det = boost::dynamic_pointer_cast<const IDetector>(component);
+      if (!det) {
+        g_log.warning() << "No detectors found in component '" << compName << "'\n";
+        continue;
       }
-    } else {
-      components = instrument->getAllComponentsWithName(compName);
+      dets.emplace_back(det);
     }
-    if (components.empty()) {
-      g_log.error() << "Component " << compName
-                    << " not found in input workspace.\n";
-      continue;
-    }
-    for (const auto &comp : components) {
-      const auto assembly =
-          boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-      const auto detector = boost::dynamic_pointer_cast<const IDetector>(comp);
-      if (detector) {
-        detectorIDs.emplace(detector->getID());
-      } else if (assembly) {
-        std::vector<IComponent_const_sptr> childComponents;
-        const bool recursively = true;
-        assembly->getChildren(childComponents, recursively);
-        for (const auto &childComp : childComponents) {
-          const auto childDetector =
-              boost::dynamic_pointer_cast<const IDetector>(childComp);
-          if (childDetector) {
-            detectorIDs.emplace(childDetector->getID());
-          }
-        }
-      }
+    for (const auto &det : dets) {
+      detectorIDs.emplace(det->getID());
     }
   }
   const auto oldSize = detectorList.size();
