@@ -109,7 +109,8 @@ void ConvertToDiffractionMDWorkspace2::init() {
       Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default "
-      "+-50 in each dimension.");
+      "will use ConvertToMDMinMaxLocal to calculate extents for each "
+      "dimension.");
   setPropertyGroup("Extents", getBoxSettingsGroupName());
 }
 
