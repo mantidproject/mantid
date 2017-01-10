@@ -1142,8 +1142,8 @@ void TomographyIfaceViewQtGUI::jobTableRefreshClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-        &localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+        localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
