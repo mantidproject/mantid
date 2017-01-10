@@ -165,6 +165,9 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     double sampleThickness = m_uiForm.spFlatSampleThickness->value();
     alg->setProperty("SampleThickness", sampleThickness);
 
+    double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+    alg->setProperty("SampleAngle", sampleAngle);
+
   } else if (shape == "Annulus") {
     double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     alg->setProperty("SampleInnerRadius", sampleInnerRadius);

@@ -4,7 +4,7 @@ from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption, GroupWork
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         PropertyMode, Progress, WorkspaceGroupProperty, mtd)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           Direction, logger, FloatBoundedValidator)
+                           Direction, logger, FloatBoundedValidator, FloatMandatoryValidator)
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
@@ -16,6 +16,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
     _sample_height = None
     _sample_width = None
     _sample_thickness = None
+    _sample_angle=None
 
     # Container variables
     _can_ws_name = None
@@ -64,6 +65,9 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleThickness', defaultValue=0.5,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample thickness')
+        self.declareProperty(name='SampleAngle', defaultValue=1.0,
+                             validator=FloatMandatoryValidator(),
+                             doc='Sample angle')
 
         # Container
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '', optional=PropertyMode.Optional,
@@ -150,7 +154,8 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                             'Width': self._sample_width,
                             'Height': self._sample_height,
                             'Thick': self._sample_thickness,
-                            'Center': [0., 0., 0.]},
+                            'Center': [0., 0., 0.],
+                            'Angle': self._sample_angle},
                   Material=sample_mat_list)
 
         prog.report('Calculating sample corrections')
@@ -217,7 +222,8 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                                     'Width': self._sample_width,
                                     'Height': self._sample_height,
                                     'Thick': self._can_front_thickness,
-                                    'Center': [0., 0., -offset_front]},
+                                    'Center': [0., 0., -offset_front],
+                                    'Angle': self._sample_angle},
                           Material=container_mat_list)
 
                 MonteCarloAbsorption(InputWorkspace=can1_wave_ws,
@@ -237,7 +243,8 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                                     'Width': self._sample_width,
                                     'Height': self._sample_height,
                                     'Thick': self._can_back_thickness,
-                                    'Center': [0., 0., offset_back]},
+                                    'Center': [0., 0., offset_back],
+                                    'Angle': self._sample_angle},
                           Material=container_mat_list)
 
                 MonteCarloAbsorption(InputWorkspace=can2_wave_ws,
@@ -305,7 +312,8 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                        ('sample_filename', self._sample_ws_name),
                        ('sample_height', self._sample_height),
                        ('sample_width', self._sample_width),
-                       ('sample_thickness', self._sample_thickness)]
+                       ('sample_thickness', self._sample_thickness),
+                       ('sample_angle', self._sample_angle)]
 
         if self._can_ws_name is not None:
             sample_logs.append(('container_filename', self._can_ws_name))
@@ -352,6 +360,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self._sample_height = self.getProperty('SampleHeight').value
         self._sample_width = self.getProperty('SampleWidth').value
         self._sample_thickness = self.getProperty('SampleThickness').value
+        self._sample_angle = self.getProperty('SampleAngle').value
 
         self._can_ws_name = self.getPropertyValue('CanWorkspace')
         if self._can_ws_name == '':

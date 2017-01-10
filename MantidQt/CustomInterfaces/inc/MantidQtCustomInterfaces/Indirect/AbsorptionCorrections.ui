@@ -266,6 +266,16 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="3">
+           <widget class="QDoubleSpinBox" name="spFlatSampleAngle"/>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="lbFlatSampleAngle">
+            <property name="text">
+             <string>Sample Angle:</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="pgAbsCorAnnulus">
@@ -575,7 +585,7 @@
       <item row="0" column="0">
        <widget class="QCheckBox" name="ckBeamSize">
         <property name="text">
-         <string>Use Instrument Default Beam Size</string>
+         <string>Use Instrument Default Beam Size (IRIS and OSIRIS)</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -1023,8 +1033,8 @@
      <y>283</y>
     </hint>
     <hint type="destinationlabel">
-     <x>253</x>
-     <y>308</y>
+     <x>458</x>
+     <y>319</y>
     </hint>
    </hints>
   </connection>
@@ -1135,8 +1145,8 @@
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
-     <x>130</x>
-     <y>219</y>
+     <x>118</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -1151,8 +1161,8 @@
      <y>87</y>
     </hint>
     <hint type="destinationlabel">
-     <x>252</x>
-     <y>218</y>
+     <x>118</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -1167,8 +1177,8 @@
      <y>82</y>
     </hint>
     <hint type="destinationlabel">
-     <x>460</x>
-     <y>216</y>
+     <x>118</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -1183,8 +1193,8 @@
      <y>77</y>
     </hint>
     <hint type="destinationlabel">
-     <x>630</x>
-     <y>218</y>
+     <x>118</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -1199,8 +1209,8 @@
      <y>81</y>
     </hint>
     <hint type="destinationlabel">
-     <x>526</x>
-     <y>201</y>
+     <x>118</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -1215,8 +1225,8 @@
      <y>74</y>
     </hint>
     <hint type="destinationlabel">
-     <x>673</x>
-     <y>204</y>
+     <x>118</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
