@@ -67,9 +67,6 @@ private:
   /// Minimum number of data points in spline
   const int m_min_points;
 
-  /// overwrite IFunction base class method, which declares function parameters
-  void init() override;
-
   /// Functor to free a GSL objects in a shared pointer
   struct GSLFree {
     void operator()(gsl_spline *spline) { gsl_spline_free(spline); }

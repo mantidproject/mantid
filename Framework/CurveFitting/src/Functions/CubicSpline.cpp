@@ -27,12 +27,7 @@ DECLARE_FUNCTION(CubicSpline)
  */
 CubicSpline::CubicSpline()
     : m_min_points(3), m_acc(gsl_interp_accel_alloc(), m_gslFree),
-      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree) {}
-
-/**init() will override IFunction base class
- * (a protected member that should be called via initialize())
- */
-void CubicSpline::init() {
+      m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree) {
   // setup class with a default set of attributes
   declareAttribute("n", Attribute(m_min_points));
 

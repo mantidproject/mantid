@@ -123,16 +123,7 @@ void SplineInterpolation::exec() {
   ensureXIncreasing(iws);
 
   int histNo = static_cast<int>(iws->getNumberHistograms());
-  int binsNo = static_cast<int>(iws->blocksize());
-
-  if (type == true && binsNo == 2) {
-    //m_interp_type = boost::make_shared<Linear>();
-    //g_log.information() << "Linear interpolation for 2 points.\n";
-  } else {
-    m_interp_type = boost::make_shared<CubicSpline>();
-  }
-
-  m_interp_type->initialize();
+  size_t binsNo = static_cast<int>(iws->blocksize());
 
   // vector of multiple derivative workspaces
   std::vector<MatrixWorkspace_sptr> derivs(histNo);
@@ -152,11 +143,22 @@ void SplineInterpolation::exec() {
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
+  if (type == true && binsNo == 2) {
+    // Linear interpolation with gsl or with BSpline
+    g_log.information() << "Linear interpolation using 2 points.\n";
+    m_cspline = boost::make_shared<BSpline>();
+  } else {
+    m_cspline = boost::make_shared<CubicSpline>();
+  }
+
   // for each histogram in workspace, calculate interpolation and derivatives
   for (int i = 0; i < histNo; ++i) {
 
     // set the interpolation points
-    setInterpolationPoints(iwspt, i);
+    if (type == true && binsNo == 2)
+      setInterpolationPointsLinear(iwspt, i);
+    else
+      setInterpolationPoints(iwspt, i);
 
     // compare the data set against our spline
     calculateSpline(mwspt, outputWorkspace, i);
@@ -193,6 +195,7 @@ void SplineInterpolation::exec() {
 
   // set y values according to the integreation range
   setXRange(outputWorkspace, iws);
+
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
@@ -222,7 +225,7 @@ SplineInterpolation::setupOutputWorkspace(MatrixWorkspace_sptr mws,
 /**Convert a binned workspace to point data
  *
  * @param workspace :: The input workspace
- * @return the converted workspace containing point data
+ * @return The converted workspace containing point data
  */
 MatrixWorkspace_sptr
 SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
@@ -253,6 +256,29 @@ SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
   return workspace;
 }
 
+/** Sets the points defining a linear bspline
+ *
+ * @param inputWorkspace :: The input workspace containing the points of the
+ *bpline
+ * @param row :: The row of spectra to use
+ */
+void SplineInterpolation::setInterpolationPointsLinear(
+    MatrixWorkspace_const_sptr inputWorkspace, const int row) const {
+  const auto &xIn = inputWorkspace->x(row);
+  const auto &yIn = inputWorkspace->y(row);
+  int size = static_cast<int>(xIn.size());
+
+  // pass x attributes and y parameters to BSpline
+  m_cspline->setAttributeValue("Order", 1);
+  m_cspline->setAttributeValue("NBreak", 10);
+  m_cspline->setAttributeValue("StartX", xIn[0]);
+  m_cspline->setAttributeValue("EndX", xIn[size-1]);
+  for (int i = 0; i < size; ++i) {
+    // Call parent setParameter implementation
+    m_cspline->ParamFunction::setParameter(i, yIn[i], true);
+  }
+}
+
 /** Sets the points defining the spline
  *
  * @param inputWorkspace :: The input workspace containing the points of the
@@ -266,18 +292,18 @@ void SplineInterpolation::setInterpolationPoints(
   int size = static_cast<int>(xIn.size());
 
   // pass x attributes and y parameters to CubicSpline
-  m_interp_type->setAttributeValue("n", size);
+  m_cspline->setAttributeValue("n", size);
 
   for (int i = 0; i < size; ++i) {
     // check that setting the x attribute is within our range
     if (i < size) {
       std::string xName = "x" + std::to_string(i);
-      m_interp_type->setAttributeValue(xName, xIn[i]);
+      m_cspline->setAttributeValue(xName, xIn[i]);
     } else {
       throw std::range_error("SplineInterpolation: x index out of range.");
     }
     // Call parent setParameter implementation
-    m_interp_type->ParamFunction::setParameter(i, yIn[i], true);
+    m_cspline->ParamFunction::setParameter(i, yIn[i], true);
   }
 }
 
@@ -296,7 +322,7 @@ void SplineInterpolation::calculateDerivatives(
   double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
 
   // calculate the derivatives
-  m_interp_type->derivative1D(yValues, xValues, nData, order);
+  m_cspline->derivative1D(yValues, xValues, nData, order);
 }
 
 /** Calculate the interpolation of the input points against the spline
@@ -314,7 +340,7 @@ void SplineInterpolation::calculateSpline(
   double *yValues = &(outputWorkspace->mutableY(row)[0]);
 
   // calculate the interpolation
-  m_interp_type->function1D(yValues, xValues, nData);
+  m_cspline->function1D(yValues, xValues, nData);
 }
 
 /** Check if the supplied x value falls within the interpolation range.
@@ -347,16 +373,16 @@ void SplineInterpolation::setXRange(
         nOutsideRight++;
     }
     double *yValues = &(inputWorkspace->mutableY(n)[0]);
+    if (nOutsideRight > 0) {
+      nOutsideRight += 1;
+      g_log.warning() << nOutsideRight - 1 << " x value(s) smaller than "
+                                          "integration range, will not be "
+                                          "calculated.\n";
+    }
     if (nOutsideLeft > 0) {
       std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);
       g_log.warning() << nOutsideLeft << " x value(s) larger than integration "
                                          "range, will not be calculated.\n";
-    }
-    if (nOutsideRight > 0) {
-      nOutsideRight += 1;
-      g_log.warning() << nOutsideRight << " x value(s) smaller than "
-                                          "integration range, will not be "
-                                          "calculated.\n";
     }
     for (size_t k = nData - nOutsideRight; k < nData; ++k)
       yValues[k] = yValues[nData - nOutsideRight];

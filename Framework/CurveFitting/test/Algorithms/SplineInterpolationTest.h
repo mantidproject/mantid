@@ -120,7 +120,8 @@ public:
     MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
     const auto &xt = ows->x(0);
     const auto &yt = ows->y(0);
-    // check output
+
+    // check output: first four points should have constant y values
     for (size_t j = 0; j < 3; ++j) {
       TS_ASSERT_DELTA(yt[j], xt[3] * 2, 1e-15);
     }

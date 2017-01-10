@@ -76,7 +76,7 @@ private:
   void init() override;
   void exec() override;
 
-  boost::shared_ptr<BackgroundFunction> m_interp_type;
+  boost::shared_ptr<BackgroundFunction> m_cspline;
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra
@@ -85,6 +85,11 @@ private:
 
   /// convert a binned workspace to point data. Uses mean of the bins as point
   MatrixWorkspace_sptr convertBinnedData(MatrixWorkspace_sptr workspace) const;
+
+  /// set the points that define the linear bspline used for interpolation of a
+  /// workspace
+  void setInterpolationPointsLinear(MatrixWorkspace_const_sptr inputWorkspace,
+                              const int row) const;
 
   /// set the points that define the spline used for interpolation of a
   /// workspace
