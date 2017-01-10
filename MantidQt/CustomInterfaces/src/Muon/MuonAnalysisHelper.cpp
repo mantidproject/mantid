@@ -295,6 +295,8 @@ void WidgetAutoSaver::saveWidgetValue() {
     settings.setValue(senderName, w->isChecked());
   } else if (auto w = qobject_cast<QComboBox *>(sender)) {
     settings.setValue(senderName, w->currentIndex());
+  } else if (auto w = qobject_cast<QSpinBox *>(sender)) {
+    settings.setValue(senderName, w->value());
   }
   // ... add more as neccessary
 }
@@ -319,6 +321,8 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
     w->setChecked(value.toBool());
   } else if (auto w = qobject_cast<QComboBox *>(widget)) {
     w->setCurrentIndex(value.toInt());
+  } else if (auto w = qobject_cast<QSpinBox *>(widget)) {
+    w->setValue(value.toInt());
   }
   // ... add more as neccessary
 }
