@@ -16,7 +16,7 @@ algorithms and data objects that are:
       Implementing Algorithms, Virtual Instrument Geometry.
 
 """
-
+# flake8: noqa
 from IOmodule import IOmodule
 
 # Frequency generator
