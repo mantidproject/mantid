@@ -2,7 +2,6 @@
 #define MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_
 
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
-#include "KafkaRebalanceCb.h"
 #include <memory>
 
 // -----------------------------------------------------------------------------
@@ -49,9 +48,12 @@ public:
   virtual void subscribe() override;
   virtual void consumeMessage(std::string *payload) override;
 
+  static const std::string EVENT_TOPIC_SUFFIX;
+  static const std::string RUN_TOPIC_SUFFIX;
+  static const std::string DET_SPEC_TOPIC_SUFFIX;
+
 private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
-  KafkaRebalanceCb m_rebalanceCb;
   std::string m_brokerAddr;
   std::string m_topicName;
 };

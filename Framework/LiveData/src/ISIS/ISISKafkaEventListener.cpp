@@ -2,7 +2,7 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
-#include "MantidLiveData/Kafka/KafkaRebalanceCb.h"
+#include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISKafkaEventListener");
@@ -23,10 +23,10 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   try {
     std::string instrumentName = getProperty("InstrumentName");
     const std::string eventTopic(instrumentName +
-                                 KafkaRebalanceCb::EVENT_TOPIC_SUFFIX),
-        runInfoTopic(instrumentName + KafkaRebalanceCb::RUN_TOPIC_SUFFIX),
+                                 KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
+        runInfoTopic(instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
         spDetInfoTopic(instrumentName +
-                       KafkaRebalanceCb::DET_SPEC_TOPIC_SUFFIX);
+                           KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {

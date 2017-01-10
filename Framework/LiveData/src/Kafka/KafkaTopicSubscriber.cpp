@@ -1,6 +1,5 @@
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include "MantidKernel/Logger.h"
-#include "MantidLiveData/Kafka/KafkaRebalanceCb.h"
 
 #include <librdkafka/rdkafkacpp.h>
 
@@ -44,12 +43,22 @@ std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
   auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_TOPIC));
   std::string errorMsg;
   // default to start consumption from the end of the topic
-  // NB, this behaviour may be overridden in the rebalance_cb
+  // NB, can be circumvented by calling assign rather than subscribe
   conf->set("auto.offset.reset", "largest", errorMsg);
 
   // tie the global config to this topic configuration
   globalConf->set("default_topic_conf", conf.get(), errorMsg);
   return conf;
+}
+
+bool endsWith(std::string const &fullString, std::string const &ending) {
+  if (fullString.length() >= ending.length()) {
+    return (0 ==
+            fullString.compare(fullString.length() - ending.length(),
+                               ending.length(), ending));
+  } else {
+    return false;
+  }
 }
 }
 
@@ -59,6 +68,10 @@ namespace LiveData {
 // -----------------------------------------------------------------------------
 // Public members
 // -----------------------------------------------------------------------------
+
+const std::string KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX = "_events";
+const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";
+const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 
 /**
  * Construct a topic subscriber
@@ -98,10 +111,8 @@ void KafkaTopicSubscriber::subscribe() {
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
   auto topicConf = createTopicConfiguration(globalConf.get());
 
-  std::string errorMsg;
-  globalConf->set("rebalance_cb", &m_rebalanceCb, errorMsg);
-
   // consumer
+  std::string errorMsg;
   m_consumer = std::unique_ptr<KafkaConsumer>(
       KafkaConsumer::create(globalConf.get(), errorMsg));
   if (!m_consumer) {
@@ -131,7 +142,22 @@ void KafkaTopicSubscriber::subscribe() {
     throw std::runtime_error(os.str());
   }
 
-  auto error = m_consumer->subscribe({m_topicName});
+  RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
+  if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX) ||
+      endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
+    const int partition = 0;
+    const int offset = 10;
+    auto topicPartition = RdKafka::TopicPartition::create(m_topicName, partition);
+    topicPartition->set_offset(offset);
+    std::vector<RdKafka::TopicPartition *> topicPartitionList{topicPartition};
+    error = m_consumer->assign(topicPartitionList);
+    LOGGER().debug() << "Assigning topic: " << m_topicName
+                     << " partition: " << partition
+                     << " offset: " << offset;
+  } else {
+    error = m_consumer->subscribe({m_topicName});
+  }
+
   if (error) {
     std::ostringstream os;
     os << "Failed to subscribe to topic: '" << RdKafka::err2str(error) << "'";

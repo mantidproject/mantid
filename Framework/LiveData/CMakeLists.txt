@@ -61,8 +61,7 @@ if ( LIBRDKAFKA_FOUND )
     src/ISIS/ISISKafkaEventListener.cpp
     src/ISIS/ISISKafkaEventStreamDecoder.cpp
     src/Kafka/KafkaBroker.cpp
-	src/Kafka/KafkaRebalanceCb.cpp
-    src/Kafka/KafkaTopicSubscriber.cpp
+          src/Kafka/KafkaTopicSubscriber.cpp
   )
   set ( INC_FILES
     ${INC_FILES}
@@ -71,8 +70,7 @@ if ( LIBRDKAFKA_FOUND )
     inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
     inc/MantidLiveData/Kafka/IKafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaBroker.h
-	inc/MantidLiveData/Kafka/KafkaRebalanceCb.h
-    inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
+		  inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
     src/ISIS/private/Kafka/Schema/flatbuffers/flatbuffers.h
     src/ISIS/private/Kafka/Schema/det_spec_mapping_schema_generated.h
     src/ISIS/private/Kafka/Schema/event_schema_generated.h
