@@ -68,11 +68,11 @@ public:
     // Test x unit
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Wavelength");
 
-    // Test x values, minimum and maximum -> the unit test file has inf's at the moment
-    //double minimum_wavelength = output->dataX(2)[0];
-    //TS_ASSERT_EQUALS(minimum_wavelength, -0.243654);
-    //double maximum_wavelength = output->dataX(2)[1000];
-    //TS_ASSERT_EQUALS(maximum_wavelength, 30.7741);
+    // Test x values, minimum and maximum
+    double minimum_wavelength = output->dataX(2)[0];
+    TS_ASSERT_DELTA(minimum_wavelength, -0.23369886776335402, 1e-6);
+    double maximum_wavelength = output->dataX(2)[1000];
+    TS_ASSERT_DELTA(maximum_wavelength, 30.784049961143634, 1e-6);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();

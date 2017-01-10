@@ -323,7 +323,7 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals){
 
               std::string chopper;
 
-              if (chop1_speed && chop2_speed && chop2_phase) {
+              if (*chop1_speed && *chop2_speed && *chop2_phase) {
                 // virtual Chopper entries are valid
                 chopper = "Virtual chopper";
               } else {
