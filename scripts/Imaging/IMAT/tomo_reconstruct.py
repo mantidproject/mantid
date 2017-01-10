@@ -372,13 +372,17 @@ def main_tomo_rec():
             format(vers))
 
     import inspect
+    import pydevd
+    pydevd.settrace('localhost', port=59003,
+                    stdoutToServer=True, stderrToServer=True)
 
     import IMAT.tomorec.io as tomoio
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()
 
-    # Grab and check pre-processing options + algorithm setup + post-processing options
+    # Grab and check pre-processing options + algorithm setup +
+    # post-processing options
     preproc_config = grab_preproc_options(args)
     alg_config = grab_tool_alg_options(args)
     postproc_config = grab_postproc_options(args)
@@ -396,7 +400,8 @@ def main_tomo_rec():
         cmd.tomo_print(" >>> Finding COR <<<")
         cmd.find_center(cfg)
     else:
-        # Save myself early. Save command this command line script and all packages/subpackages
+        # Save myself early. Save command this command line script and all
+        # packages/subpackages
         tomoio.self_save_zipped_scripts(
             args.output_path,
             os.path.abspath(inspect.getsourcefile(lambda: 0)))

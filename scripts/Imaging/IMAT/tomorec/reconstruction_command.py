@@ -75,12 +75,14 @@ class ReconstructionCommand(object):
         self._whole_exec_timer = False
 
         # whether to crop before applying normalization steps. If True, the air region cannot be
-        # outside of the region of interest. Leaving as False by default, and not exposing this option.
+        # outside of the region of interest. Leaving as False by default, and
+        # not exposing this option.
         self.__class__.crop_before_normaliz = False
 
     def _debug_print_memory_usage_linux(self, message=""):
         try:
-            # Windows doesn't seem to have resouce package, so this will silently fail
+            # Windows doesn't seem to have resouce package, so this will
+            # silently fail
             import resource
             print(" >> Memory usage",
                   resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, "KB, ",
@@ -277,7 +279,8 @@ class ReconstructionCommand(object):
         # Save output from the reconstruction
         self.save_recon_output(recon_data, cfg)
 
-        # turned off for now, as it can't be opened from ParaView so it's a waste
+        # turned off for now, as it can't be opened from ParaView so it's a
+        # waste
         save_netcdf_vol = False
         if save_netcdf_vol:
             self.tomo_print_timed_start(
@@ -304,7 +307,8 @@ class ReconstructionCommand(object):
         """
         tstart = time.time()
 
-        # generate file with dos/windows line end for windoze users' convenience
+        # generate file with dos/windows line end for windoze users'
+        # convenience
         with open(filename, 'w') as oreadme:
             file_hdr = (
                 'Tomographic reconstruction. Summary of inputs, settings and outputs.\n'
@@ -357,7 +361,8 @@ class ReconstructionCommand(object):
         readme file was written
         @param t_recon_elapsed :: reconstruction time
         """
-        # append to a readme/report that should have been pre-filled with the initial configuration
+        # append to a readme/report that should have been pre-filled with the
+        # initial configuration
         with open(filename, 'a') as oreadme:
 
             run_hdr = ("\n"
@@ -431,7 +436,8 @@ class ReconstructionCommand(object):
         self._check_data_stack(data)
 
         if 'float64' == data.dtype:
-            # this is done because tomoio.write has problems with float64 to int16
+            # this is done because tomoio.write has problems with float64 to
+            # int16
             data = data.astype(dtype='float32')
             # print with top priority
             self.tomo_print(
@@ -724,7 +730,7 @@ class ReconstructionCommand(object):
             if self.crop_before_normaliz and cfg.crop_coords:
                 norm_divide = norm_divide[:, cfg.crop_coords[
                     1]:cfg.crop_coords[3] + 1, cfg.crop_coords[0]:
-                                          cfg.crop_coords[2] + 1]
+                    cfg.crop_coords[2] + 1]
             # prevent divide-by-zero issues
             norm_divide[norm_divide == 0] = 1e-6
 
@@ -911,7 +917,7 @@ class ReconstructionCommand(object):
                 theta=proj_angles,
                 center=preproc_cfg.cor,
                 algorithm=alg_cfg.algorithm,
-                num_iter=alg_cfg.num_iter)  #, filter_name='parzen')
+                num_iter=alg_cfg.num_iter)  # , filter_name='parzen')
 
         else:
             self.tomo_print_timed_start(
@@ -1014,10 +1020,10 @@ class ReconstructionCommand(object):
     #blen = width - ctr
     #mid = width / 2.0
 
-    #if ctr > mid:
+    # if ctr > mid:
     #plow = pad
     #phigh = (alen - blen) + pad
-    #else:
+    # else:
     #plow = (blen - alen) + pad
     #phigh = pad
 
@@ -1171,7 +1177,8 @@ class ReconstructionCommand(object):
         and dark image.
         """
         # Note, not giving prefix. It will load all the files found.
-        # Example prefixes are prefix = 'tomo_', prefix = 'LARMOR00', prefix = 'angle_agg'
+        # Example prefixes are prefix = 'tomo_', prefix = 'LARMOR00', prefix =
+        # 'angle_agg'
 
         sample, white, dark = tomoio.read_stack_of_images(
             sample_path,
@@ -1275,91 +1282,3 @@ class ReconstructionCommand(object):
             raise ValueError(
                 "Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
                 format(data.shape))
-
-    def find_center(self, cfg):
-        self._check_paths_integrity(cfg)
-
-        self.tomo_print_timed_start(" * Importing tool " + cfg.alg_cfg.tool)
-        # import tool
-        import tomorec.tool_imports as tti
-        tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
-        self.tomo_print_timed_stop(" * Tool loaded.")
-
-        self.tomo_print_timed_start(" * Loading data...")
-        # load in data
-        sample, white, dark = self.read_in_stack(
-            cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
-            cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        self.tomo_print_timed_stop(
-            " * Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
-                sample.shape, sample.dtype))
-
-        # rotate
-        sample, white, dark = self.rotate_stack(sample, cfg.preproc_cfg)
-
-        # crop the ROI, this is done first, so beware of what the correct ROI coordinates are
-        sample = self.crop_coords(sample, cfg.preproc_cfg)
-
-        # sanity check
-        self.tomo_print(" * Sanity check on data", 0)
-        self._check_data_stack(sample)
-
-        num_projections = sample.shape[0]
-        inc = float(cfg.preproc_cfg.max_angle) / (num_projections - 1)
-
-        self.tomo_print(" * Calculating projection angles")
-        proj_angles = np.arange(0, num_projections * inc, inc)
-        # For tomopy
-        self.tomo_print(" * Calculating radians for TomoPy")
-        proj_angles = np.radians(proj_angles)
-
-        size = int(num_projections)
-
-        # depending on the number of COR projections it will select different slice indices
-        cor_num_checked_projections = 6
-        cor_proj_slice_indices = []
-        cor_slice_index = 0
-
-        if cor_num_checked_projections < 2:
-            # this will give us the middle slice
-            cor_slice_index = int(size / 2)
-            cor_proj_slice_indices.append(cor_slice_index)
-        else:
-            for c in range(cor_num_checked_projections):
-                cor_slice_index += int(size / cor_num_checked_projections)
-                cor_proj_slice_indices.append(cor_slice_index)
-
-        calculated_cors = []
-
-        self.tomo_print_timed_start(
-            " * Starting COR calculation for " +
-            str(cor_num_checked_projections) + " out of " +
-            str(sample.shape[0]) + " projections", 2)
-
-        cropCoords = cfg.preproc_cfg.crop_coords[0]
-        imageWidth = sample.shape[2]
-
-        # if crop corrds match with the image width then the full image was selected
-        pixelsFromLeftSide = cropCoords if cropCoords - imageWidth <= 1 else 0
-
-        for slice_idx in cor_proj_slice_indices:
-            tomopy_cor = tomopy.find_center(
-                tomo=sample, theta=proj_angles, ind=slice_idx, emission=False)
-            print(" ** COR for slice", str(slice_idx), ".. REL to CROP ",
-                  str(tomopy_cor), ".. REL to FULL ",
-                  str(tomopy_cor + pixelsFromLeftSide))
-            calculated_cors.append(tomopy_cor)
-
-        self.tomo_print_timed_stop(" * Finished COR calculation.", 2)
-
-        averageCORrelativeToCrop = sum(calculated_cors) / len(calculated_cors)
-        averageCORrelativeToFullImage = sum(calculated_cors) / len(
-            calculated_cors) + pixelsFromLeftSide
-
-        # we add the pixels cut off from the left, to reflect the full image in Mantid
-        self.tomo_print(" * Printing average COR in relation to cropped image "
-                        + str(cfg.preproc_cfg.crop_coords) + ":", 2)
-        print(str(round(averageCORrelativeToCrop)))
-        self.tomo_print(" * Printing average COR in relation to FULL image:",
-                        2)
-        print(str(round(averageCORrelativeToFullImage)))
