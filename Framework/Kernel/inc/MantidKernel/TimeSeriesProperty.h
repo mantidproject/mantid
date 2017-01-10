@@ -160,7 +160,7 @@ public:
 
   /// New split method
   void splitByTimeVector(std::vector<double> &time_vec, std::vector<int> &target_vec,
-                         std::vector<Property *>outputs);
+                         std::vector<TimeSeriesProperty *> outputs);
 
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
