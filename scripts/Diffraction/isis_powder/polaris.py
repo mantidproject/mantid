@@ -34,14 +34,13 @@ class Polaris(AbstractInst):
 
     def create_calibration_vanadium(self, run_in_range, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-
         run_details = self.get_run_details(run_number_string=int(run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
 
         return self._create_calibration_vanadium(
             vanadium_runs=run_details.vanadium_run_numbers, empty_runs=run_details.empty_runs,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-            gen_absorb_correction=self._inst_settings.gen_absorb_corrections)
+            gen_absorb_correction=None)  # TODO POLARIS doesn't need this flag to gen abs. corrections does PEARL?
 
     def get_run_details(self, run_number_string):
         input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)

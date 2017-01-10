@@ -4,15 +4,17 @@ general_params = {
     "monitor_spectrum_number": 1,
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 60
-}
 
-long_mode_off_params = {
     "file_names": {
         "vanadium_absorb_file": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
         "tt88_grouping": "pearl_group_12_1_TT88.cal",
         "tt70_grouping": "pearl_group_12_1_TT70.cal",
         "tt35_grouping": "pearl_group_12_1_TT35.cal"
     },
+}
+
+long_mode_off_params = {
+
 
     "monitor_lambda_crop_range": (0.03, 6.00),
     "monitor_integration_range": (0.6, 5.0),

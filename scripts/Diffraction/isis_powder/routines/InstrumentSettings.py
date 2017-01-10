@@ -34,6 +34,10 @@ class InstrumentSettings(object):
             raise AttributeError("The parameter with name: '" + str(map_entry[0]) + "' is required but was not set or "
                                  "passed.\nPlease set this configuration option and try again")
         else:
+            # If you have got here from a grep or something similar this error message means the line caller
+            # has asked for a class attribute which does not exist. These attributes are set in a mapping file which
+            # is passed in whilst InstrumentSettings is being constructed. Check that the 'script name' (i.e. not user
+            # friendly name) is typed correctly in both the script(s) and mapping file.
             raise AttributeError("The attribute in the script with name " + str(item) + " is unknown to the mapping."
                                  "\nPlease contact the development team.")
 
