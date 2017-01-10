@@ -22,8 +22,41 @@ class LoadCRYSTAL(GeneralDFTProgram):
 
         @return  object of type AbinsData.
         """
+        # TODO: to make LoadCRYSTAL more robust it would be good if masses can be read directly from CRYSTAL output file
+        # Atomic masses
+        masses = {'K': 39.0980,
+                  'O': 15.9994,
+                  'C': 12.0107,
+                  'H': 1.00794,
+                  'F': 18.9984,
+                  'CL': 35.4530,
+                  'N': 14.0067,
+                  'NA': 22.99
+                  }
+        # determine system
+        molecular = self._determine_system()
 
-        # Determine whether calculations are for molecule or crystal.
+        # read data from output CRYSTAL file
+        coord_lines = self._read_atomic_coordinates()
+        freq, coordinates = self._read_modes()
+        coord_lines = self._clear_coord(molecular=molecular, coord_lines=coord_lines)
+
+        # put data into ABINS data structure
+        data = {}
+        self._create_atoms_data(data=data, coord_lines=coord_lines, masses=masses)
+        self._create_kpoints_data(data=data, freq=freq, atomic_displacements=coordinates,
+                                  atomic_coordinates=coord_lines, masses=masses)
+
+        # save data to hdf file
+        self.save_dft_data(data=data)
+
+        # return AbinsData object
+        return self._rearrange_data(data=data)
+
+    def _determine_system(self):
+        """
+        Determines whether the system is a molecule or a crystal.
+        """
         found_type = False
         molecular = False
         with open(self._clerk.get_input_filename()) as crystal_file:
@@ -45,19 +78,13 @@ class LoadCRYSTAL(GeneralDFTProgram):
         else:
             logger.notice("This run is for a 3D CRYSTAL system")
 
-        # TODO: to make LoadCRYSTAL more robust it would be good if masses can be read directly from CRYSTAL output file
-        # Atomic masses
-        masses = {'K':  39.0980,
-                  'O':  15.9994,
-                  'C':  12.0107,
-                  'H':  1.00794,
-                  'F':  18.9984,
-                  'CL': 35.4530,
-                  'N':  14.0067,
-                  'NA': 22.99
-                  }
+        return molecular
 
-        # Read atomic coordinates in Angstrom
+    def _read_atomic_coordinates(self):
+        """
+        Reads atomic coordinates from .out file.
+        :return: list with atomic coordinates
+        """
         filename = self._clerk.get_input_filename()
         with open(filename) as crystal_file:
             logger.notice("Reading from " + filename)
@@ -69,8 +96,8 @@ class LoadCRYSTAL(GeneralDFTProgram):
                     found_coord = True
                 if found_coord:
                     if "LOCAL ATOMIC FUNCTIONS BASIS SET" in line or \
-                       "ROTATION" in line or "T = ATOM BELONGING " in line or \
-                       "PSEUDOPOTENTIAL INFORMATION" in line:
+                                    "ROTATION" in line or "T = ATOM BELONGING " in line or \
+                                    "PSEUDOPOTENTIAL INFORMATION" in line:
 
                         found_coord = False
                         if not found_coord:
@@ -86,7 +113,12 @@ class LoadCRYSTAL(GeneralDFTProgram):
         for line in coord_lines:
             logger.debug(line.strip("\n"))
 
-        # Read vibrational modes (frequencies and displacements)
+        return coord_lines
+
+    def _read_modes(self):
+        """
+        Reads vibrational modes (frequencies and displacements)
+        """
         with open(self._clerk.get_input_filename()) as crystal_file:
             freq = []
             xdisp = []
@@ -110,16 +142,28 @@ class LoadCRYSTAL(GeneralDFTProgram):
                     if "Z" in line:
                         zdisp += line[14:].strip("\n").split()
 
-        # Clean molecular coordinates, removing 'T'
+        return freq, [xdisp, ydisp, zdisp]
+
+    # noinspection PyMethodMayBeStatic
+    def _clear_coord(self, molecular=None, coord_lines=None):
+        """
+        Clean molecular coordinates, removing 'T'
+        """
         if molecular:
             coord_lines2 = []
             for item in coord_lines:
                 coord_lines2 += [item[0:4] + item[6:]]
             coord_lines = coord_lines2
 
-        # Create Python dictionary which can easily be converted to AbinsData object
-        #  1) Create  "atoms" dictionary for AtomsDaTa object
-        data = {"atoms": {}}
+        return coord_lines
+
+    # noinspection PyMethodMayBeStatic
+    def _create_atoms_data(self, data=None, coord_lines=None, masses=None):
+        """
+        Create Python dictionary which can easily be converted to AbinsData object
+        :return:
+        """
+        data.update({"atoms": dict()})
         for i, line in enumerate(coord_lines):
             l = line.split()
             if l[2] in masses:
@@ -129,7 +173,15 @@ class LoadCRYSTAL(GeneralDFTProgram):
             data["atoms"]["atom_%s" % i] = {"symbol": l[2].capitalize(), "mass": mass, "sort": i,
                                             "fract_coord": np.asarray(l[3:6]).astype(dtype=AbinsConstants.FLOAT_TYPE)}
 
-        #  2) Create entries for KpointsData object
+    def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
+                             masses=None):
+        """
+         Normalises atomic displacement.  Saves result to data Python dictionary.
+        :param data: Python dictionary for in k points  data will be stored
+        :param freq: normal modes
+        :param atomic_displacements: atomic displacements
+        :param atomic_coordinates: atomic coordinates
+        """
         #     a) Put frequencies into dictionary
         data["frequencies"] = np.asarray([freq]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")
 
@@ -138,25 +190,29 @@ class LoadCRYSTAL(GeneralDFTProgram):
         it = -1
         nb = 0
         displacements = []
+        xdisp = atomic_displacements[0]
+        ydisp = atomic_displacements[1]
+        zdisp = atomic_displacements[2]
+
         for _ in freq:
             i += 1
             it += 1
             if i == 6:
                 i = 0
                 nb += 1
-            if nb <= len(xdisp) / (6 * len(coord_lines)) - 1:
+            if nb <= len(xdisp) / (6 * len(atomic_coordinates)) - 1:
                 iat = -1
                 # Compute normalisation constant for displacements
                 # and build block of coordinates to print out
                 block_to_print = []
                 norm_const1 = 0.
-                for line in coord_lines:
+                for line in atomic_coordinates:
                     iat += 1
                     l = line.split()
-                    if nb * len(coord_lines) * 6 + iat * 6 + i <= len(xdisp) - 1:
-                        x = float(xdisp[nb * len(coord_lines) * 6 + iat * 6 + i])
-                        y = float(ydisp[nb * len(coord_lines) * 6 + iat * 6 + i])
-                        z = float(zdisp[nb * len(coord_lines) * 6 + iat * 6 + i])
+                    if nb * len(atomic_coordinates) * 6 + iat * 6 + i <= len(xdisp) - 1:
+                        x = float(xdisp[nb * len(atomic_coordinates) * 6 + iat * 6 + i])
+                        y = float(ydisp[nb * len(atomic_coordinates) * 6 + iat * 6 + i])
+                        z = float(zdisp[nb * len(atomic_coordinates) * 6 + iat * 6 + i])
                         norm_const1 += x * x + y * y + z * z
                         block_to_print += [[iat + 1, l[2], int(l[1]), x, y, z]]
                 # Normalise displacements -> xn, yn, zn
@@ -211,12 +267,12 @@ class LoadCRYSTAL(GeneralDFTProgram):
                 # and build block of coordinates to print out
                 block_to_print = []
                 norm_const1 = 0.
-                for line in coord_lines:
+                for line in atomic_coordinates:
                     iat += 1
                     l = line.split()
-                    x = float(xdisp[nb * len(coord_lines) * 6 + iat * lb + i])
-                    y = float(ydisp[nb * len(coord_lines) * 6 + iat * lb + i])
-                    z = float(zdisp[nb * len(coord_lines) * 6 + iat * lb + i])
+                    x = float(xdisp[nb * len(atomic_coordinates) * 6 + iat * lb + i])
+                    y = float(ydisp[nb * len(atomic_coordinates) * 6 + iat * lb + i])
+                    z = float(zdisp[nb * len(atomic_coordinates) * 6 + iat * lb + i])
                     logger.debug("{0:s} {1:s} {2:s}".format(x, y, z))
                     norm_const1 += x * x + y * y + z * z
                     block_to_print += [[iat + 1, l[2], int(l[1]), x, y, z]]
@@ -273,7 +329,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
         # (num_freq, num_atom, dim) -> (num_k, num_atom, num_freq, dim)
 
         num_freq = len(freq)
-        self._num_atoms = len(coord_lines)
+        self._num_atoms = len(atomic_coordinates)
         dim = 3
 
         displacements = np.asarray(a=[displacements], order="C")
@@ -285,8 +341,4 @@ class LoadCRYSTAL(GeneralDFTProgram):
         data["weights"] = np.asarray([1.0]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")
         data["k_vectors"] = np.asarray([[0.0, 0.0, 0.0]]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")
         data["unit_cell"] = np.zeros(shape=(dim, dim), dtype=AbinsConstants.FLOAT_TYPE)
-        # TODO: it would make LoadCRYSTAL more robust if these parameters can be read from CRYSTAL output.
-
-        self.save_dft_data(data=data)
-
-        return self._rearrange_data(data=data)
+        # TODO: it would make LoadCRYSTAL more robust if these parameters can be read from CRYSTAL output
