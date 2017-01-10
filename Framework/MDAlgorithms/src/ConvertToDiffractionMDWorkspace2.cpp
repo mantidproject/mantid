@@ -14,6 +14,9 @@
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
+#include <algorithm>
+#include <limits>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -276,6 +279,10 @@ void ConvertToDiffractionMDWorkspace2::calculateExtentsFromData(std::vector<doub
 
     minVal = alg->getProperty("MinValues");
     maxVal = alg->getProperty("MaxValues");
+
+    auto inf = std::numeric_limits<double>::infinity();
+    std::replace(minVal.begin(), minVal.end(), -inf, -50.0);
+    std::replace(maxVal.begin(), maxVal.end(), inf, 50.0);
 }
 
 } // namespace Mantid
