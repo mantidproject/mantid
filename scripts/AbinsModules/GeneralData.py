@@ -1,6 +1,3 @@
-import numpy as np
-
-
 class GeneralData(object):
 
     def __init__(self):

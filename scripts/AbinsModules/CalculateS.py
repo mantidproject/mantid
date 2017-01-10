@@ -3,7 +3,6 @@ import numpy as np
 try:
     # noinspection PyUnresolvedReferences
     from pathos.multiprocessing import ProcessingPool, ThreadingPool
-    from pathos.parallel import ParallelPool
     PATHOS_FOUND = True
 except ImportError:
     PATHOS_FOUND = False
@@ -13,7 +12,6 @@ from AbinsData import AbinsData
 from AbinsModules.Instruments import Instrument
 from CalculatePowder import CalculatePowder
 from CrystalData import CrystalData
-from PowderData import PowderData
 from SData import SData
 from AbinsModules import FrequencyPowderGenerator
 
@@ -197,8 +195,8 @@ class CalculateS(object):
             atoms_items["atom_%s" % atom] = {"s": dict()}
             for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
                 atoms_items["atom_%s" % atom]["s"] = \
-                    {"order_%s" % order:  np.zeros(shape=(q2_size, self._bins.size - AbinsConstants.FIRST_BIN_INDEX),
-                                                   dtype=AbinsConstants.FLOAT_TYPE)}
+                    {"order_%s" % order: np.zeros(shape=(q2_size, self._bins.size - AbinsConstants.FIRST_BIN_INDEX),
+                                                  dtype=AbinsConstants.FLOAT_TYPE)}
                 for q2_i in q2_indices:
                     atoms_items["atom_%s" % atom]["s"]["order_%s" % order][q2_i] = \
                         result[q2_i]["atom_%s" % atom]["s"]["order_%s" % order] * multiplicities[q2_i]
@@ -362,7 +360,7 @@ class CalculateS(object):
         for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
             s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
 
-        return new_fundamentals,  new_fundamentals_coeff
+        return new_fundamentals, new_fundamentals_coeff
 
     def _helper_atom(self, atom=None, local_freq=None, local_coeff=None, fundamentals_freq=None, fund_coeff=None,
                      order=None, q_indx=None):

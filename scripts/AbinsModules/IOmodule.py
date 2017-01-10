@@ -1,5 +1,5 @@
 import h5py
-import numpy as np 
+import numpy as np
 import subprocess
 import shutil
 import hashlib
@@ -357,7 +357,7 @@ class IOmodule(object):
         else:
             return self._convert_unicode_to_str(
                 object_to_check=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
-                                                                                path=hdf_group.name+"/"))
+                                                                                path=hdf_group.name + "/"))
 
     def _recursively_load_dict_contents_from_group(self, hdf_file=None, path=None):
         """

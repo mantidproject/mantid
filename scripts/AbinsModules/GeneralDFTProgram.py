@@ -66,7 +66,7 @@ class GeneralDFTProgram(object):
                                           the moment only Gamma point calculations are supported**
 
                         "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
-                        
+
                         "unit_cell"      -   numpy array with unit cell vectors
 
               The following structured datasets should be also defined:
