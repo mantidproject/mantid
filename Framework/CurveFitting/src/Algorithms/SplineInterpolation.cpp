@@ -126,8 +126,8 @@ void SplineInterpolation::exec() {
   int binsNo = static_cast<int>(iws->blocksize());
 
   if (type == true && binsNo == 2) {
-    m_interp_type = boost::make_shared<Linear>();
-    g_log.information() << "Linear interpolation for 2 points.\n";
+    //m_interp_type = boost::make_shared<Linear>();
+    //g_log.information() << "Linear interpolation for 2 points.\n";
   } else {
     m_interp_type = boost::make_shared<CubicSpline>();
   }

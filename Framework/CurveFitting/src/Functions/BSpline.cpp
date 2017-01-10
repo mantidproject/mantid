@@ -2,12 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BSpline.h"
-#include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidAPI/FunctionFactory.h"
 
-#include <boost/lexical_cast.hpp>
-#include <gsl/gsl_version.h>
 
 namespace Mantid {
 namespace CurveFitting {
