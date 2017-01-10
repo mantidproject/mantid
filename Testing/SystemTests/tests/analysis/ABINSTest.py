@@ -1,5 +1,5 @@
 import stresstesting
-from mantid.simpleapi import ABINS, mtd, Load, DeleteWorkspace
+from mantid.simpleapi import ABINS, mtd, DeleteWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 
 

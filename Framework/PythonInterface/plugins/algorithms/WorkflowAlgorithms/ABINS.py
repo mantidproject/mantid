@@ -9,11 +9,13 @@ import numpy as np
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
-from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, \
-                             DeleteWorkspace, Rebin, Load, SaveAscii
+from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, Rebin, \
+                             SaveAscii, Load
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
-
 from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, AbinsConstants, InstrumentProducer
+
+# switch off check for complexity
+# flake8: max-complexity=50
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -284,8 +286,8 @@ class ABINS(PythonAlgorithm):
     def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
         """
         Creates workspaces for all types of atoms. Each workspace stores quantum order events for S for the given
-        type of atom. It also stores total workspace for the given type of atom. 
-         
+        type of atom. It also stores total workspace for the given type of atom.
+
         @param atoms_symbols: list of atom types for which quantum order events of S  should be calculated
         @param s_data: dynamical factor data of type SData
         @return: workspaces for list of atoms types, each workspace contains  quantum order events of
@@ -470,6 +472,7 @@ class ABINS(PythonAlgorithm):
         mtd[wrk].setYUnit("Arbitrary Units")
 
     def _check_advanced_parameter(self):
+
         """
         Checks if parameters from AbinsParameters.py are valid. If any parameter is invalid then RuntimeError is thrown
         with meaningful message.
