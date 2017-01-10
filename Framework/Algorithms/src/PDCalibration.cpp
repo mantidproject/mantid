@@ -397,7 +397,7 @@ void PDCalibration::exec() {
       tof_vec.push_back(centre);
     }
 
-    if (d_vec.size() == 0) {
+    if (d_vec.empty()) {
       maskWS->setMaskedIndex(wkspIndex, true);
       continue;
     } else {

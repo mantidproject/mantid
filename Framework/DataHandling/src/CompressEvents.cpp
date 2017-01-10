@@ -58,7 +58,7 @@ void CompressEvents::exec() {
         API::WorkspaceFactory::Instance().create(
             "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
+    API::WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS,
                                                            false);
     // We DONT copy the data though
 

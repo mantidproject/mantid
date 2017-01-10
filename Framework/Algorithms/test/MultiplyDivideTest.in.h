@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
@@ -956,18 +957,17 @@ public:
     MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("work_in1");
     TS_ASSERT(output);
 
+    const auto &spectrumInfo = output->spectrumInfo();
     for( int i = 0; i < nHist; ++i )
     {
-      IDetector_const_sptr det = output->getDetector(i);
-      TS_ASSERT(det);
-      if( !det ) TS_FAIL("No detector found");
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
       if( masking.count(i) == 0 )
       {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
       }
       else
       {
-        TS_ASSERT_EQUALS(det->isMasked(), true);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
         double yValue = output->readY(i)[0];
         TS_ASSERT_EQUALS(yValue, yValue );
         TS_ASSERT( !std::isinf(yValue) );

@@ -180,7 +180,6 @@ private:
       space2D->setBinEdges(i, x);
       space2D->setCounts(i, y);
       space2D->setCountStandardDeviations(i, e);
-      space2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWS, space2D);

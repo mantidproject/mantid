@@ -55,6 +55,7 @@ void export_IMDDimension() {
       .def("getX", &IMDDimension::getX, (arg("self"), arg("ind")),
            "Return coordinate of the axis at the given index")
       .def("getDimensionId", &IMDDimension::getDimensionId, arg("self"),
+           return_value_policy<copy_const_reference>(),
            "Return a short name which identify the dimension among other "
            "dimension."
            "A dimension can be usually find by its ID and various  ")

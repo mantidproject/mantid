@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <QMap>
+#include <QRegExp>
 #include <QStringList>
 
 namespace MantidQt {
@@ -39,7 +40,7 @@ struct AnalysisOptions {
   std::string groupPairName; /// Name of group or pair to use
   const Mantid::API::Grouping grouping; /// Grouping to use
   PlotType plotType = {};               /// Type of analysis to perform
-  explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g){};
+  explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g) {}
 };
 } // namespace Muon
 
@@ -77,6 +78,7 @@ public:
                         const std::string &deadTimesFile = "");
   /// change list of supported instruments
   void setSupportedInstruments(const QStringList &instruments);
+
   /// load files
   Muon::LoadResult loadFiles(const QStringList &files) const;
   /// correct and group loaded data
@@ -106,6 +108,9 @@ private:
   /// Get instrument name from workspace
   std::string
   getInstrumentName(const Mantid::API::Workspace_sptr workspace) const;
+  /// Check if we should cache result of a load of the given files
+  bool shouldBeCached(const QStringList &filenames) const;
+
   /// Dead times type
   Muon::DeadTimesType m_deadTimesType;
   /// Dead times file
@@ -114,6 +119,8 @@ private:
   QStringList m_instruments;
   /// Cache of previously loaded data
   mutable std::map<std::string, Muon::LoadResult> m_loadedDataCache;
+  /// Regex blacklisting certain files from being cached
+  QRegExp m_cacheBlacklist;
 };
 
 } // namespace CustomInterfaces

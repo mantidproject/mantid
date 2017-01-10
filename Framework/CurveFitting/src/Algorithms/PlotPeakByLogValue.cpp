@@ -554,7 +554,7 @@ PlotPeakByLogValue::makeNames() const {
       } else if (index.size() > 1 && index[0] == 'i') { // workspace index
         wi = boost::lexical_cast<int>(index.substr(1));
         spec = -1; // undefined yet
-      } else if (index.size() > 0 && index[0] == 'v') {
+      } else if (!index.empty() && index[0] == 'v') {
         if (index.size() > 1) { // there is some text after 'v'
           tokenizer range(index.substr(1), ":",
                           tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);

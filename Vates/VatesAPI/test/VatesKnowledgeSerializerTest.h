@@ -56,7 +56,7 @@ public:
 
     VatesKnowledgeSerializer generator; // Location is not required.
     generator.setImplicitFunction(impFunction);
-    generator.setWorkspace(workspace);
+    generator.setWorkspace(*workspace);
 
     TSM_ASSERT_THROWS_NOTHING("The location is not mandatory, should not throw",
                               generator.createXMLString());
@@ -70,7 +70,7 @@ public:
     boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
     VatesKnowledgeSerializer generator;
     generator.setImplicitFunction(impFunction);
-    generator.setWorkspace(workspace);
+    generator.setWorkspace(*workspace);
 
     TSM_ASSERT_THROWS("Cannot create the xml without the workspace name",
                       generator.createXMLString(), std::runtime_error);
