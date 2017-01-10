@@ -20,9 +20,16 @@
       <item>
         <widget class="QGroupBox" name="uniformGroup">
           <property name="title">
-            <string>Uniform slicing</string>
+            <string>Custom slicing</string>
           </property>
           <layout class="QHBoxLayout" name="uniformLayout">
+            <item>
+              <widget class="QLabel" name="evenTimeSlicesLabel">
+                <property name="text">
+                  <string> Python list (sec)</string>
+                </property>
+              </widget>
+            </item>
             <item>
               <widget class="QLineEdit" name="evenTimeSlicesEdit">
                 <property name="sizeHint" stdset="0">
@@ -30,13 +37,6 @@
                     <width>10</width>
                     <height>10</height>
                   </size>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QLabel" name="evenTimeSlicesLabel">
-                <property name="text">
-                  <string> even time slices</string>
                 </property>
               </widget>
             </item>

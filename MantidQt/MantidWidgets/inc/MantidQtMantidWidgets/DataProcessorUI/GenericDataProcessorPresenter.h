@@ -127,10 +127,6 @@ protected:
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
 
-  // load a run into the ADS, or re-use one in the ADS if possible
-  Mantid::API::Workspace_sptr loadRun(const std::string &run,
-                                      const std::string &instrument,
-                                      const std::string &prefix);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
@@ -154,6 +150,10 @@ private:
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
+  // load a run into the ADS, or re-use one in the ADS if possible
+  Mantid::API::Workspace_sptr loadRun(const std::string &run,
+	  const std::string &instrument,
+	  const std::string &prefix);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,

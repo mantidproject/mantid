@@ -55,6 +55,12 @@ public:
 private:
   // Process selected rows
   void process() override;
+  // Parse time slicing from string
+  void parseTimeSlicing(const std::string &timeSlicing,
+                        std::vector<double> &startTimes,
+                        std::vector<double> &stopTimes);
+  // Load a run
+  void loadRun(const std::string &runno);
   // Take a slice from event workspace
   void takeSlice(const std::string &runno, double startTime, double stopTime);
 };

@@ -7,6 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
@@ -47,11 +49,16 @@ void ReflDataProcessorPresenter::process() {
 
   // if uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  std::string stopTime = m_mainPresenter->getTimeSlicingOptions();
-  if (stopTime.empty()) {
+  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
+  if (timeSlicing.empty()) {
     GenericDataProcessorPresenter::process();
     return;
   }
+
+  // Parse time slices
+  std::vector<double> startTimes, stopTimes;
+  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
+  size_t numSlices = startTimes.size();
 
   // Things we should take into account:
   // 1. We need to report progress, see GenericDataProcessorPresenter::process()
@@ -84,7 +91,11 @@ void ReflDataProcessorPresenter::process() {
       // The run number as a string
       std::string runno = data.second.at(0);
 
-      takeSlice(runno, 0.0, boost::lexical_cast<double>(stopTime));
+      loadRun(runno);
+
+      for (size_t i = 0; i < numSlices; i++) {
+        takeSlice(runno, startTimes[i], stopTimes[i]);
+      }
     }
 
     // Post-process (if needed)
@@ -107,7 +118,57 @@ void ReflDataProcessorPresenter::process() {
   // If not selected, do nothing
 }
 
+void ReflDataProcessorPresenter::parseTimeSlicing(
+    const std::string &timeSlicing, std::vector<double> &startTimes,
+    std::vector<double> &stopTimes) {
+
+  std::vector<std::string> timesStr;
+  boost::split(timesStr, timeSlicing, boost::is_any_of(","));
+
+  std::vector<double> times;
+  std::transform(timesStr.begin(), timesStr.end(), std::back_inserter(times),
+                 [](const std::string &astr) { return std::stod(astr); });
+
+  size_t numTimes = times.size();
+
+  if (numTimes == 1) {
+    startTimes.push_back(0);
+    stopTimes.push_back(times[0]);
+  } else if (numTimes == 2) {
+    startTimes.push_back(times[0]);
+    stopTimes.push_back(times[1]);
+  } else {
+    for (size_t i = 0; i < numTimes - 1; i++) {
+      startTimes.push_back(times[i]);
+      stopTimes.push_back(times[i + 1]);
+    }
+  }
+
+  if (startTimes.size() != stopTimes.size())
+    m_mainPresenter->giveUserCritical("Error parsing time slices",
+                                      "Time slicing error");
+}
+
 /** Takes a slice from a run
+*
+* @param runno :: the run number as a string
+* @param startTime :: start time
+* @param stopTime :: stop time
+*/
+void ReflDataProcessorPresenter::loadRun(const std::string &runno) {
+
+  std::string runName = "TOF_" + runno;
+
+  // Load the run
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
+  algLoadRun->initialize();
+  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runno);
+  algLoadRun->setProperty("OutputWorkspace", runName);
+  algLoadRun->setProperty("LoadMonitors", true);
+  algLoadRun->execute();
+}
+
+/** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
 * @param runno :: the run number as a string
 * @param startTime :: start time
@@ -117,16 +178,9 @@ void ReflDataProcessorPresenter::takeSlice(const std::string &runno,
                                            double startTime, double stopTime) {
 
   std::string runName = "TOF_" + runno;
-  std::string sliceName = runName + "_" + std::to_string(stopTime);
+  std::string sliceName = runName + "_" + std::to_string((int)startTime) + "_" +
+                          std::to_string((int)stopTime);
   std::string monName = runName + "_monitors";
-
-  // Load the run
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
-  algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runno);
-  algLoadRun->setProperty("OutputWorkspace", runName);
-  algLoadRun->setProperty("LoadMonitors", true);
-  algLoadRun->execute();
 
   // Filter by time
   IAlgorithm_sptr filter = AlgorithmManager::Instance().create("FilterByTime");
@@ -172,7 +226,7 @@ void ReflDataProcessorPresenter::takeSlice(const std::string &runno,
   append->initialize();
   append->setProperty("InputWorkspace1", monName);
   append->setProperty("InputWorkspace2", sliceName);
-  append->setProperty("OutputWorkspace", "RESULT");
+  append->setProperty("OutputWorkspace", sliceName);
   append->setProperty("MergeLogs", true);
   append->execute();
 }
