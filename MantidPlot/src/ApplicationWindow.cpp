@@ -9577,7 +9577,6 @@ void ApplicationWindow::newProject(const bool doNotSave) {
   folders->blockSignals(false);
 
   // Reset everything else
-  resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled")); // Mantid
   projectname = "untitled";
 
