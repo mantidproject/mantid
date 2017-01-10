@@ -146,14 +146,19 @@ void KafkaTopicSubscriber::subscribe() {
   if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX) ||
       endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
     const int partition = 0;
-    const int offset = 10;
-    auto topicPartition = RdKafka::TopicPartition::create(m_topicName, partition);
-    topicPartition->set_offset(offset);
+    int64_t lowOffset = 0;
+    int64_t highOffset = 0;
+    auto topicPartition =
+        RdKafka::TopicPartition::create(m_topicName, partition);
+    m_consumer->query_watermark_offsets(m_topicName, partition, &lowOffset,
+                                        &highOffset, -1);
+    int64_t confOffset = highOffset - 1; // Offset of message to start at
+    topicPartition->set_offset(confOffset);
     std::vector<RdKafka::TopicPartition *> topicPartitionList{topicPartition};
     error = m_consumer->assign(topicPartitionList);
     LOGGER().debug() << "Assigning topic: " << m_topicName
                      << " partition: " << partition
-                     << " offset: " << offset;
+                     << " offset: " << confOffset;
   } else {
     error = m_consumer->subscribe({m_topicName});
   }

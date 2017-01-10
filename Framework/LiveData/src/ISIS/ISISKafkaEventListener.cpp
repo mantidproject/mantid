@@ -26,7 +26,7 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
                                  KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
         runInfoTopic(instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
         spDetInfoTopic(instrumentName +
-                           KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
+                       KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {
