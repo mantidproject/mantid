@@ -183,7 +183,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
     }
   } else {
     m_physprops.clear();
-    for (auto elem: physprops) {
+    for (auto elem : physprops) {
       m_physprops.push_back((int)elem);
     }
   }
