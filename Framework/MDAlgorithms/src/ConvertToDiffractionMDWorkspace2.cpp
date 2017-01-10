@@ -182,7 +182,7 @@ void ConvertToDiffractionMDWorkspace2::convertExtents(
       maxVal[d] = Extents[2 * d + 1];
     }
   } else if (Extents.size() == 0) {
-      calculateExtentsFromData(minVal, maxVal);
+    calculateExtentsFromData(minVal, maxVal);
   } else
     throw std::invalid_argument(
         "You must specify either 2 or 6 extents (min,max).");
@@ -259,33 +259,33 @@ void ConvertToDiffractionMDWorkspace2::exec() {
  * @param minVal :: the minimum bounds of the MD space.
  * @param maxVal :: the maximum bounds of the MD space.
  */
-void ConvertToDiffractionMDWorkspace2::calculateExtentsFromData(std::vector<double> &minVal, 
-        std::vector<double> &maxVal) {
-    auto alg = createChildAlgorithm("ConvertToMDMinMaxLocal");
-    alg->initialize();
-    alg->setProperty<MatrixWorkspace_sptr>(
-            "InputWorkspace", getProperty("InputWorkspace"));
-    alg->setPropertyValue("QDimensions", "Q3D");
-    std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
-    alg->setPropertyValue("dEAnalysisMode",
-            dE_modes[Kernel::DeltaEMode::Elastic]);
+void ConvertToDiffractionMDWorkspace2::calculateExtentsFromData(
+    std::vector<double> &minVal, std::vector<double> &maxVal) {
+  auto alg = createChildAlgorithm("ConvertToMDMinMaxLocal");
+  alg->initialize();
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
+                                         getProperty("InputWorkspace"));
+  alg->setPropertyValue("QDimensions", "Q3D");
+  std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
+  alg->setPropertyValue("dEAnalysisMode",
+                        dE_modes[Kernel::DeltaEMode::Elastic]);
 
-    std::string TargetFrame, Scaling;
-    convertFramePropertyNames(getPropertyValue("OutputDimensions"),
-            TargetFrame, Scaling);
-    alg->setProperty("Q3DFrames", TargetFrame);
-    alg->setProperty("QConversionScales", Scaling);
+  std::string TargetFrame, Scaling;
+  convertFramePropertyNames(getPropertyValue("OutputDimensions"), TargetFrame,
+                            Scaling);
+  alg->setProperty("Q3DFrames", TargetFrame);
+  alg->setProperty("QConversionScales", Scaling);
 
-    alg->execute();
+  alg->execute();
 
-    minVal = alg->getProperty("MinValues");
-    maxVal = alg->getProperty("MaxValues");
+  minVal = alg->getProperty("MinValues");
+  maxVal = alg->getProperty("MaxValues");
 
-    // If the calculation produced +/- infinity as one of the extents
-    // replace this with a more reasonable value.
-    auto inf = std::numeric_limits<double>::infinity();
-    std::replace(minVal.begin(), minVal.end(), -inf, -50.0);
-    std::replace(maxVal.begin(), maxVal.end(), inf, 50.0);
+  // If the calculation produced +/- infinity as one of the extents
+  // replace this with a more reasonable value.
+  auto inf = std::numeric_limits<double>::infinity();
+  std::replace(minVal.begin(), minVal.end(), -inf, -50.0);
+  std::replace(maxVal.begin(), maxVal.end(), inf, 50.0);
 }
 
 } // namespace Mantid

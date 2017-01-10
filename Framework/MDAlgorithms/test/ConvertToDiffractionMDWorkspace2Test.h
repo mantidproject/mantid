@@ -204,7 +204,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
     FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS",
                                       "OutputWorkspace", "inputWS", "Params",
-                                      "0, 500, 16e3", "PreserveEvents", "0"); 
+                                      "0, 500, 16e3", "PreserveEvents", "0");
 
     ConvertToDiffractionMDWorkspace2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
