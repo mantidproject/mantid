@@ -1,10 +1,8 @@
 import numpy as np
-import math
 
 from Instrument import Instrument
 from AbinsModules import AbinsParameters
 from AbinsModules import AbinsConstants
-from AbinsModules.KpointsData import KpointsData
 
 
 class TwoDMap(Instrument):
