@@ -77,7 +77,7 @@ void CrossCorrelate::exec() {
   auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(),
                             std::bind2nd(std::greater<double>(), xmin));
   if (minIt == referenceX.cend())
-    throw std::runtime_error("No daWorkspaceIndexMaxta above XMin");
+    throw std::runtime_error("No data above XMin");
   auto maxIt = std::find_if(minIt, referenceX.cend(),
                             std::bind2nd(std::greater<double>(), xmax));
   if (minIt == maxIt)
