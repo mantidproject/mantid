@@ -281,6 +281,8 @@ void ConvertToDiffractionMDWorkspace2::calculateExtentsFromData(std::vector<doub
     minVal = alg->getProperty("MinValues");
     maxVal = alg->getProperty("MaxValues");
 
+    // If the calculation produced +/- infinity as one of the extents
+    // replace this with a more reasonable value.
     auto inf = std::numeric_limits<double>::infinity();
     std::replace(minVal.begin(), minVal.end(), -inf, -50.0);
     std::replace(maxVal.begin(), maxVal.end(), inf, 50.0);
