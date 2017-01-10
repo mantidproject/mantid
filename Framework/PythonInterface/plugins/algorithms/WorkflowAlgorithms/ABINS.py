@@ -14,9 +14,6 @@ from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, S
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, AbinsConstants, InstrumentProducer
 
-# switch off check for complexity
-# flake8: max-complexity=50
-
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
 class ABINS(PythonAlgorithm):
@@ -478,8 +475,22 @@ class ABINS(PythonAlgorithm):
         with meaningful message.
         """
 
-        message_end = " in AbinsParameters.py. "
+        message = " in AbinsParameters.py. "
 
+        self._check_general_resolution(message)
+        self._check_tosca_parameters(message)
+        self._check_folder_names(message)
+        self._check_rebining(message)
+        self._check_threshold(message)
+        self._check_chunk_size(message)
+        self._check_threads(message)
+        self._check_q_mesh(message)
+
+    def _check_general_resolution(self, message_end=None):
+        """
+        Checks general parameters used in construction resolution functions.
+        :param message_end: closing part of the error message.
+        """
         # check fwhm
         fwhm = AbinsParameters.fwhm
         if not (isinstance(fwhm, float) and 0.0 < fwhm < 10.0):
@@ -490,7 +501,12 @@ class ABINS(PythonAlgorithm):
         if not (isinstance(delta_width, float) and 0.0 < delta_width < 1.0):
             raise RuntimeError("Invalid value of delta_width" + message_end)
 
-        # check TOSCA parameters
+    def _check_tosca_parameters(self, message_end=None):
+        """
+        Checks TOSCA parameters.
+        :param message_end: closing part of the error message.
+        """
+
         # TOSCA final energy in cm^-1
         final_energy = AbinsParameters.tosca_final_neutron_energy
         if not (isinstance(final_energy, float) and final_energy > 0.0):
@@ -515,7 +531,11 @@ class ABINS(PythonAlgorithm):
             raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)" +
                                message_end)
 
-        # check folders names
+    def _check_folder_names(self, message_end=None):
+        """
+        Checks folders names.
+        :param message_end: closing part of the error message.
+        """
         folder_names = []
         dft_group = AbinsParameters.dft_group
         if not isinstance(dft_group, str) or dft_group == "":
@@ -541,7 +561,11 @@ class ABINS(PythonAlgorithm):
         elif s_data_group in folder_names:
             raise RuntimeError("Name for s_data_group already used as a name of another folder.")
 
-        # check rebinning parameters
+    def _check_rebining(self, message_end=None):
+        """
+        Checks rebinning parameters.
+        :param message_end: closing part of the error message.
+        """
         pkt_per_peak = AbinsParameters.pkt_per_peak
         if not (isinstance(pkt_per_peak, (int, long)) and 1 <= pkt_per_peak <= 1000):
             raise RuntimeError("Invalid value of pkt_per_peak" + message_end)
@@ -562,7 +586,11 @@ class ABINS(PythonAlgorithm):
         if min_wavenumber > max_wavenumber:
             raise RuntimeError("Invalid energy window for rebinning.")
 
-        # check acoustic phonon threshold
+    def _check_threshold(self, message_end=None):
+        """
+        Checks acoustic phonon threshold.
+        :param message_end: closing part of the error message.
+        """
         acoustic_threshold = AbinsParameters.acoustic_phonon_threshold
         if not (isinstance(acoustic_threshold, float) and acoustic_threshold >= 0.0):
             raise RuntimeError("Invalid value of acoustic_phonon_threshold" + message_end)
@@ -576,30 +604,42 @@ class ABINS(PythonAlgorithm):
         if not (isinstance(s_relative_threshold, float) and s_relative_threshold > 0.0):
             raise RuntimeError("Invalid value of s_relative_threshold" + message_end)
 
-        # check optimal size of chunk
+    def _check_chunk_size(self, message_end=None):
+        """
+        Check optimal size of chunk
+        :param message_end: closing part of the error message.
+        """
         optimal_size = AbinsParameters.optimal_size
         if not (isinstance(optimal_size, (int, long)) and optimal_size > 0):
             raise RuntimeError("Invalid value of optimal_size" + message_end)
 
-        # number of threads
+    def _check_threads(self, message_end=None):
+        """
+        Checks number of threads
+        :param message_end: closing part of the error message.
+        """
         if PATHOS_FOUND:
             atoms_threads = AbinsParameters.atoms_threads
             if not (isinstance(atoms_threads, (int, long)) and 1 <= atoms_threads <= mp.cpu_count()):
-                raise RuntimeError("Invalid number of threads for parallelisation over atoms " + message_end)
+                raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
             q_threads = AbinsParameters.q_threads
             if not (isinstance(q_threads, (int, long)) and 1 <= q_threads <= mp.cpu_count()):
-                raise RuntimeError("Invalid number of threads for parallelisation over q " + message_end)
+                raise RuntimeError("Invalid number of threads for parallelisation over q" + message_end)
 
             if atoms_threads * q_threads > mp.cpu_count():
                 raise RuntimeError("User asked for more threads than available.")
 
-        # q_mesh
+    def _check_q_mesh(self, message_end=None):
+        """
+        Checks q mesh.
+        :param message_end: closing part of the error message.
+        """
         q_mesh = AbinsParameters.q_mesh
         if not isinstance(q_mesh, list):
-            raise RuntimeError("Q mesh is expected to be a list.")
+            raise RuntimeError("Q mesh is expected to be a list  " + message_end)
         if not all([isinstance(i, int) for i in q_mesh]):
-            raise RuntimeError("Q mesh should be a list of integers.")
+            raise RuntimeError("Q mesh should be a list of integers " + message_end)
 
     def _validate_crystal_input_file(self, filename=None):
         """
