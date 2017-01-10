@@ -1,9 +1,9 @@
 #ifndef MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
 #define MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
+#include <cxxtest/TestSuite.h>
 #include <memory>
 
 class KafkaTopicSubscriberTest : public CxxTest::TestSuite {
@@ -39,8 +39,7 @@ public:
 
     TS_ASSERT_THROWS(subscriber->subscribe(), std::runtime_error);
   }
-  
-  
+
   // ---------------------------------------------------------------------------
   // Failure cases
   // ---------------------------------------------------------------------------
@@ -54,7 +53,6 @@ public:
 
     TS_ASSERT_THROWS(subscriber->subscribe(), std::runtime_error);
   }
-
 };
 
 #endif /* MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_ */
