@@ -5323,7 +5323,6 @@ void ApplicationWindow::readSettings() {
     settings.setValue("/DuplicationDialogShown", true);
   }
 
-
   // Mantid Muon interface one time only change
   settings.beginGroup("/CustomInterfaces");
   settings.beginGroup("/MuonAnalysis");
