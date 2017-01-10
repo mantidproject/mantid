@@ -12,6 +12,8 @@ import opcode
 import inspect
 import sys
 
+PY36 = sys.version_info >= (3, 6)
+
 #-------------------------------------------------------------------------------
 def replace_signature(func, varnames):
     """
@@ -106,17 +108,18 @@ def decompile(code_object):
     instructions = []
     n = len(code)
     i = 0
+
     while i < n:
         i_offset = i
         i_opcode = opcode_from_bytecode(code[i])
         i = i + 1
         if i_opcode >= opcode.HAVE_ARGUMENT:
-            if sys.version_info < (3, 6): # from 3.6 bytecode is now 16-bit not 8-bit
+            if PY36: # from 3.6 bytecode is now 16-bit not 8-bit
+                i_argument = code[i]
+                i = i + 1
+            else:
                 i_argument = opcode_from_bytecode(code[i]) + (opcode_from_bytecode(code[i+1]) << (4*2))
                 i = i + 2
-            else:
-                i_argument = opcode_from_bytecode(code[i])
-                i = i + 1
             if i_opcode in opcode.hasconst:
                 i_arg_value = repr(code_object.co_consts[i_argument])
                 i_arg_type = 'CONSTANT'
