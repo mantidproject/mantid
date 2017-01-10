@@ -60,7 +60,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         Do validation on a correction workspace.
 
         @param ws Workspace to validate
-        @param correction_type Type of correction that should hav ebeen applied
+        @param correction_type Type of correction that should have been applied
         """
 
         # X axis should be in wavelength
