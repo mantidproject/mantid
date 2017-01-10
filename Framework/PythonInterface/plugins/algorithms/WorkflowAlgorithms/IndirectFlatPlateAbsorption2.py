@@ -65,7 +65,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleThickness', defaultValue=0.5,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample thickness')
-        self.declareProperty(name='SampleAngle', defaultValue=1.0,
+        self.declareProperty(name='SampleAngle', defaultValue=0.0,
                              validator=FloatMandatoryValidator(),
                              doc='Sample angle')
 
