@@ -56,7 +56,11 @@ protected: // for testing
   // ConvertToMD
   void convertExtents(const std::vector<double> &Extents,
                       std::vector<double> &minVal,
-                      std::vector<double> &maxVal) const;
+                      std::vector<double> &maxVal);
+
+  // method to calculate the extents of the data from the input workspace
+  void calculateExtentsFromData(std::vector<double> &minVal,
+                                std::vector<double> &maxVal);
 };
 
 } // namespace Mantid

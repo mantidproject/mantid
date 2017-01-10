@@ -10,6 +10,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 
+#include "MantidMDAlgorithms/ConvertToMDMinMaxLocal.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
@@ -100,7 +101,7 @@ void ConvertToDiffractionMDWorkspace2::init() {
       "order to merge them later\n");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
-  std::vector<double> extents{-50, +50};
+  std::vector<double> extents;
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
       "A comma separated list of min, max for each dimension,\n"
@@ -163,7 +164,7 @@ void ConvertToDiffractionMDWorkspace2::convertFramePropertyNames(
 */
 void ConvertToDiffractionMDWorkspace2::convertExtents(
     const std::vector<double> &Extents, std::vector<double> &minVal,
-    std::vector<double> &maxVal) const {
+    std::vector<double> &maxVal) {
   minVal.resize(3);
   maxVal.resize(3);
   if (Extents.size() == 2) {
@@ -176,6 +177,8 @@ void ConvertToDiffractionMDWorkspace2::convertExtents(
       minVal[d] = Extents[2 * d + 0];
       maxVal[d] = Extents[2 * d + 1];
     }
+  } else if (Extents.size() == 0) {
+      calculateExtentsFromData(minVal, maxVal);
   } else
     throw std::invalid_argument(
         "You must specify either 2 or 6 extents (min,max).");
@@ -245,6 +248,34 @@ void ConvertToDiffractionMDWorkspace2::exec() {
 
   IMDEventWorkspace_sptr iOut = Convert->getProperty("OutputWorkspace");
   this->setProperty("OutputWorkspace", iOut);
+}
+
+/** Calculate the extents to use for the conversion from the input workspace.
+ *
+ * @param minVal :: the minimum bounds of the MD space.
+ * @param maxVal :: the maximum bounds of the MD space.
+ */
+void ConvertToDiffractionMDWorkspace2::calculateExtentsFromData(std::vector<double> &minVal, 
+        std::vector<double> &maxVal) {
+    auto alg = createChildAlgorithm("ConvertToMDMinMaxLocal");
+    alg->initialize();
+    alg->setProperty<MatrixWorkspace_sptr>(
+            "InputWorkspace", getProperty("InputWorkspace"));
+    alg->setPropertyValue("QDimensions", "Q3D");
+    std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
+    alg->setPropertyValue("dEAnalysisMode",
+            dE_modes[Kernel::DeltaEMode::Elastic]);
+
+    std::string TargetFrame, Scaling;
+    convertFramePropertyNames(getPropertyValue("OutputDimensions"),
+            TargetFrame, Scaling);
+    alg->setProperty("Q3DFrames", TargetFrame);
+    alg->setProperty("QConversionScales", Scaling);
+
+    alg->execute();
+
+    minVal = alg->getProperty("MinValues");
+    maxVal = alg->getProperty("MaxValues");
 }
 
 } // namespace Mantid
