@@ -78,10 +78,10 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         DeleteWorkspace(backup)
 
     def tearDown(self):
-        if AnalysisDataService.doesExist(self._input_ws.getName()):
+        if AnalysisDataService.doesExist(self._input_ws.name()):
             DeleteWorkspace(self._input_ws)
 
-        if AnalysisDataService.doesExist(self._table.getName()):
+        if AnalysisDataService.doesExist(self._table.name()):
             DeleteWorkspace(self._table)
 
 if __name__ == "__main__":

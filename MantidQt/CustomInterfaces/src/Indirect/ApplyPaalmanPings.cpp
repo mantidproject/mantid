@@ -227,7 +227,8 @@ void ApplyPaalmanPings::run() {
           result = QMessageBox::Yes;
         } else {
           std::string text = "Number of bins on sample and " +
-                             factorWs->name() + " workspace does not match.\n" +
+                             factorWs->getName() +
+                             " workspace does not match.\n" +
                              "Would you like to interpolate this workspace to "
                              "match the sample?";
 
@@ -357,8 +358,8 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
   interpolationAlg->initialize();
 
   interpolationAlg->setProperty("WorkspaceToInterpolate",
-                                toInterpolate->name());
-  interpolationAlg->setProperty("OutputWorkspace", toInterpolate->name());
+                                toInterpolate->getName());
+  interpolationAlg->setProperty("OutputWorkspace", toInterpolate->getName());
 
   m_batchAlgoRunner->addAlgorithm(interpolationAlg, interpolationProps);
 }
@@ -492,7 +493,7 @@ bool ApplyPaalmanPings::validate() {
         Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
         if (xUnit->caption() != "Wavelength") {
           QString msg = "Correction factor workspace " +
-                        QString::fromStdString(factorWs->name()) +
+                        QString::fromStdString(factorWs->getName()) +
                         " is not in wavelength";
           uiv.addErrorMessage(msg);
         }

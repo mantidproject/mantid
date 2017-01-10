@@ -157,8 +157,8 @@ void MaskDetectors::exec() {
                                  "between input Workspace and MaskWorkspace");
       }
 
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")\n";
+      g_log.debug() << "Extracting mask from MaskWorkspace ("
+                    << maskWS->getName() << ")\n";
       bool forceDetIDs = getProperty("ForceInstrumentMasking");
       if (prevMasking->getNumberHistograms() != WS->getNumberHistograms() ||
           forceDetIDs) {
@@ -358,8 +358,8 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
             "Size mismatch between input Workspace and MaskWorkspace");
       }
 
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")\n";
+      g_log.debug() << "Extracting mask from MaskWorkspace ("
+                    << maskWS->getName() << ")\n";
 
       for (size_t i = 0; i < maskDetInfo.size(); ++i)
         if (maskDetInfo.isMasked(i))

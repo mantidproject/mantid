@@ -58,7 +58,7 @@ public:
       TS_ASSERT_EQUALS(item, 0.);
     }
 
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_sqrt() {
@@ -70,7 +70,7 @@ public:
       TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
     }
 
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_oneIfZero() {
@@ -80,7 +80,7 @@ public:
     for (const auto item : E) {
       TS_ASSERT(item > 0.);
     }
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_sqrtOrOne() {
@@ -96,7 +96,7 @@ public:
       }
     }
 
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 };
 

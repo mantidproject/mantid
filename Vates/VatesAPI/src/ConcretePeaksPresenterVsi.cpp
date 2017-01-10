@@ -54,7 +54,8 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const {
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty("InputWorkspace", peaksWS);
-    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
+    alg->setProperty("OutputWorkspace",
+                     peaksWS->getName() + "_peaks_in_region");
     alg->setProperty("Extents", viewable);
     alg->setProperty("CheckPeakExtents", true);
     alg->setProperty("PeakRadius", effectiveRadius);

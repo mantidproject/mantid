@@ -387,7 +387,7 @@ void TomoToolConfigDialogSavu::menuSaveClicked() {
   } else {
     AnalysisDataService::Instance().add(createUniqueNameHidden(),
                                         m_currPlugins);
-    std::string csvWorkspaceNames = m_currPlugins->name();
+    std::string csvWorkspaceNames = m_currPlugins->getName();
 
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "SaveTomoConfig");

@@ -1447,9 +1447,10 @@ void EnggDiffFittingPresenter::getDifcTzero(MatrixWorkspace_const_sptr wks,
     difc = 18400;
     g_log.warning()
         << "Could not retrieve the DIFC, DIFA, TZERO values from the workspace "
-        << wks->name() << ". Using default, which is not adjusted for this "
-                          "workspace/run: DIFA: " << difa << ", DIFC: " << difc
-        << ", TZERO: " << tzero << ". Error details: " << rexc.what() << '\n';
+        << wks->getName() << ". Using default, which is not adjusted for this "
+                             "workspace/run: DIFA: " << difa
+        << ", DIFC: " << difc << ", TZERO: " << tzero
+        << ". Error details: " << rexc.what() << '\n';
   }
 }
 

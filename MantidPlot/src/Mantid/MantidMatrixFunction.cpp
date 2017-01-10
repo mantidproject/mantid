@@ -234,7 +234,7 @@ MantidMatrixFunctionWorkspaceObserver::MantidMatrixFunctionWorkspaceObserver(
 void MantidMatrixFunctionWorkspaceObserver::afterReplaceHandle(
     const std::string &wsName,
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
-  if (m_function->m_workspace && wsName == m_function->m_workspace->name()) {
+  if (m_function->m_workspace && wsName == m_function->m_workspace->getName()) {
     auto mws =
         boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
     if (mws) {
@@ -249,7 +249,7 @@ void MantidMatrixFunctionWorkspaceObserver::afterReplaceHandle(
 void MantidMatrixFunctionWorkspaceObserver::preDeleteHandle(
     const std::string &wsName,
     const boost::shared_ptr<Mantid::API::Workspace>) {
-  if (m_function->m_workspace && wsName == m_function->m_workspace->name()) {
+  if (m_function->m_workspace && wsName == m_function->m_workspace->getName()) {
     emit requestClose();
   }
 }

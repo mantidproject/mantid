@@ -2234,7 +2234,7 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
     auto alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(rebinName);
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inWS->name());
+    alg->setPropertyValue("InputWorkspace", inWS->getName());
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setProperty("Params", boost::lexical_cast<std::string>(bin));
 
@@ -2337,7 +2337,7 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
     auto alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(rebinName);
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inWS->name());
+    alg->setPropertyValue("InputWorkspace", inWS->getName());
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setProperty("Params", boost::lexical_cast<std::string>(timeStep));
 
