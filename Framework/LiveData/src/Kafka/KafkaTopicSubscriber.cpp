@@ -152,13 +152,19 @@ void KafkaTopicSubscriber::subscribe() {
         RdKafka::TopicPartition::create(m_topicName, partition);
     m_consumer->query_watermark_offsets(m_topicName, partition, &lowOffset,
                                         &highOffset, -1);
-    int64_t confOffset = highOffset - 1; // Offset of message to start at
+    // Offset of message to start at, corresponds to the last message in the
+    // partition
+    int64_t confOffset = highOffset - 1;
     topicPartition->set_offset(confOffset);
     std::vector<RdKafka::TopicPartition *> topicPartitionList{topicPartition};
     error = m_consumer->assign(topicPartitionList);
-    LOGGER().debug() << "Assigning topic: " << m_topicName
-                     << " partition: " << partition
-                     << " offset: " << confOffset;
+    if (confOffset < 0) {
+      std::ostringstream os;
+      os << "No messages are yet available on the Kafka brokers for this "
+            "topic: '"
+         << m_topicName << "'";
+      throw std::runtime_error(os.str());
+    }
   } else {
     error = m_consumer->subscribe({m_topicName});
   }
