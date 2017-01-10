@@ -76,7 +76,7 @@ public:
     zeroAllEntries(bmol, bext, bkq);
 
     // The internal (molecular) field is not rotated. So we leave it at zero
-    // else in the rotated case (en2) it will be in a different [physical] 
+    // else in the rotated case (en2) it will be in a different [physical]
     // direction and so give a different splitting. The external field
     // is rotated in the code, so we set it to some value to check the
     // rotation works.

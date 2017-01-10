@@ -27,7 +27,7 @@ ComplexType conj(const ComplexMatrixValueConverter &conv) {
 
 // Does the actual calculation of the susceptibility
 void calculate(double *out, const double *xValues, const size_t nData,
-               const DoubleFortranVector &en, const ComplexFortranMatrix &wf, 
+               const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
                const int nre, const std::vector<double> &H,
                const double convfact) {
   // Some constants
@@ -44,10 +44,10 @@ void calculate(double *out, const double *xValues, const size_t nData,
   for (auto i = 1; i <= nlevels; i++) {
     for (auto j = 1; j <= nlevels; j++) {
       const double den = en(i) - en(j);
-      if (fabs(den) < eps) {  // First order term
-        mu(i) += real(mumat(i,j) * conj(mumat(i,j)));
+      if (fabs(den) < eps) { // First order term
+        mu(i) += real(mumat(i, j) * conj(mumat(i, j)));
       } else { // Second order term
-        mu2(i) += real(mumat(i,j) * conj(mumat(i,j))) / den;
+        mu2(i) += real(mumat(i, j) * conj(mumat(i, j))) / den;
       }
     }
   }
@@ -55,7 +55,7 @@ void calculate(double *out, const double *xValues, const size_t nData,
   mu *= convfact;
   mu2 *= convfact;
   for (size_t iT = 0; iT < nData; iT++) {
-    double expfact; 
+    double expfact;
     double Z = 0.;
     double U = 0.;
     const double beta = 1 / (k_B * xValues[iT]);
@@ -70,7 +70,7 @@ void calculate(double *out, const double *xValues, const size_t nData,
 
 // Calculate powder average - Mpowder = (Mx + My + Mz)/3
 void calculate_powder(double *out, const double *xValues, const size_t nData,
-                      const DoubleFortranVector &en, 
+                      const DoubleFortranVector &en,
                       const ComplexFortranMatrix &wf, const int nre,
                       const double convfact) {
   for (size_t j = 0; j < nData; j++) {
@@ -91,7 +91,6 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
     out[j] /= 3.;
   }
 }
-
 }
 
 DECLARE_FUNCTION(CrystalFieldSusceptibility)
@@ -107,21 +106,20 @@ CrystalFieldSusceptibility::CrystalFieldSusceptibility()
 }
 
 // Sets the eigenvectors / values directly
-void CrystalFieldSusceptibility::set_eigensystem(const DoubleFortranVector &en_in,
-                                                 const ComplexFortranMatrix &wf_in,
-                                                 const int nre_in) {
+void CrystalFieldSusceptibility::set_eigensystem(
+    const DoubleFortranVector &en_in, const ComplexFortranMatrix &wf_in,
+    const int nre_in) {
   setDirect = true;
   en = en_in;
   wf = wf_in;
   nre = nre_in;
 }
 
-void CrystalFieldSusceptibility::function1D(double *out,
-                                          const double *xValues,
-                                          const size_t nData) const {
+void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
+                                            const size_t nData) const {
   auto H = getAttribute("Hdir").asVector();
   auto powder = getAttribute("powder").asBool();
-  double Hnorm = sqrt(H[0]*H[0] + H[1]*H[1] + H[2]*H[2]);
+  double Hnorm = sqrt(H[0] * H[0] + H[1] * H[1] + H[2] * H[2]);
   for (auto i = 0; i < 3; i++) {
     H[i] /= Hnorm;
   }
@@ -135,8 +133,9 @@ void CrystalFieldSusceptibility::function1D(double *out,
   // Again, for SI units, we need to have one of the muB in meV not J.
   // The additional factor of mu0 is due to the different definitions of
   // the magnetisation, B- and H-fields in the SI and cgs systems.
-  double convfact = boost::iequals(unit, "bohr") ? 0.057883818 :
-                    (boost::iequals(unit, "SI") ? NAMUB2si : NAMUB2cgs);
+  double convfact = boost::iequals(unit, "bohr")
+                        ? 0.057883818
+                        : (boost::iequals(unit, "SI") ? NAMUB2si : NAMUB2cgs);
   // Note the constant for "bohr" is the bohr magneton in meV/T, this will
   // give the susceptibility in "atomic" units of uB/T/ion.
   // Note that chi_SI = (4pi*10^-6)chi_cgs
@@ -146,15 +145,14 @@ void CrystalFieldSusceptibility::function1D(double *out,
     // Use temporary variables instead.
     DoubleFortranVector en_;
     ComplexFortranMatrix wf_;
-    int nre_ = 0; 
+    int nre_ = 0;
     calculateEigenSystem(en_, wf_, nre_);
     if (powder) {
       calculate_powder(out, xValues, nData, en_, wf_, nre_, convfact);
     } else {
       calculate(out, xValues, nData, en_, wf_, nre_, H, convfact);
     }
-  }
-  else {
+  } else {
     // Use stored values
     if (powder) {
       calculate_powder(out, xValues, nData, en, wf, nre, convfact);
@@ -176,7 +174,7 @@ void CrystalFieldSusceptibility::function1D(double *out,
   const double lambda = getParameter("lambda");
   if (fabs(lambda) > 1.e-6) {
     for (size_t i = 0; i < nData; i++) {
-      out[i] /= (1. - lambda * out[i]);  // chi = chi0/(1 - lambda.chi0)
+      out[i] /= (1. - lambda * out[i]); // chi = chi0/(1 - lambda.chi0)
     }
   }
 }
@@ -184,4 +182,3 @@ void CrystalFieldSusceptibility::function1D(double *out,
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-

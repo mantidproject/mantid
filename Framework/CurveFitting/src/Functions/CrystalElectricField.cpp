@@ -569,7 +569,7 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 //--------------------------------------
 // calculation of the zeeman hamiltonian
 //--------------------------------------
-void zeeman(ComplexFortranMatrix &hamiltonian, const int nre, 
+void zeeman(ComplexFortranMatrix &hamiltonian, const int nre,
             const DoubleFortranVector &bext, const DoubleFortranVector &bmol) {
   auto i = ComplexType(0.0, 1.0);
   auto bmolp = bmol(1) + i * bmol(2);
@@ -661,13 +661,13 @@ void calculateZeemanEigensystem(DoubleFortranVector &eigenvalues,
   DoubleFortranVector bmol(1, 3);
   bmol.zero();
   // Adds the external and molecular fields
-  ComplexFortranMatrix hz; 
+  ComplexFortranMatrix hz;
   zeeman(hz, nre, bext, bmol);
   h -= hz;
   // Now run the actual diagonalisation
   diagonalise(h, eigenvalues, eigenvectors);
 }
-       
+
 /// Calculate eigenvalues and eigenvectors of the crystal field hamiltonian.
 /// @param eigenvalues :: Output. The eigenvalues in ascending order. The
 /// smallest value is subtracted from all eigenvalues so they always
@@ -736,15 +736,15 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
   // reduced by chosing the quantisation axis along a high symmetry
   // rotation axis, rather than along a crystallographic axis.
   // The eigenvalues should remain the same, but the eigenvectors will
-  // change. 
-  // The rotation is done using a Wigner D-matrix. As noted by 
+  // change.
+  // The rotation is done using a Wigner D-matrix. As noted by
   // Buckmaster, the Stevens operators cannot be rotated as is, because
   // the have an inconsistent normalisation between differen k, q terms
-  // Thus they have to be converted to and from the "Wybourne" 
+  // Thus they have to be converted to and from the "Wybourne"
   // normalisation using the epsilon / omega values.
-  // There was a bug in the original FOCUS code. Multiplying by 
+  // There was a bug in the original FOCUS code. Multiplying by
   // omega*epsilon converts Wybourne parameters to Stevens parameters.
-  // Thus to convert the original dkq_star(k,qs) from Steven to Wybourn 
+  // Thus to convert the original dkq_star(k,qs) from Steven to Wybourn
   // we should divide by epsilon(k,qs)*omega(k,qs) and then multiply by
   // the new dkq_star(k,q) by epsilon(k,q)*omega(k,q).
   //-------------------------------------------------------------------
@@ -1042,28 +1042,27 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
 }
 
 /// Calculate the diagonal matrix elements of the magnetic moment operator
-/// in a particular eigenvector basis. 
+/// in a particular eigenvector basis.
 /// @param eigenvector :: Input. The eigenvector basis.
 /// @param hdir :: Input. Cartesian direction of the magnetic moment operator
 /// @param nre :: Input. The ion number to calculate for.
 /// @param gj :: Output. The Lande g-factor of this ion.
 /// @param moment :: Output the diagonal elements of the magnetic moment matrix
 void calculateMagneticMoment(const ComplexFortranMatrix &ev,
-                             const DoubleFortranVector &Hdir,
-                             const int nre,
+                             const DoubleFortranVector &Hdir, const int nre,
                              DoubleFortranVector &moment) {
   int dim = (int)ddimj[nre - 1];
   auto gj = ggj[nre - 1];
   moment.allocate(dim);
   for (auto i = 1; i <= dim; ++i) {
-    moment(i) = real(matjx(ev, i, i, dim))*Hdir(1) +  // <ev|jx|ev>
-                real(matjy(ev, i, i, dim))*Hdir(2) +  // <ev|jy|ev>
-                real(matjz(ev, i, i, dim))*Hdir(3);   // <ev|jz|ev>
+    moment(i) = real(matjx(ev, i, i, dim)) * Hdir(1) + // <ev|jx|ev>
+                real(matjy(ev, i, i, dim)) * Hdir(2) + // <ev|jy|ev>
+                real(matjz(ev, i, i, dim)) * Hdir(3);  // <ev|jz|ev>
   }
   moment *= gj;
-} 
+}
 
-/// Calculate the full magnetic moment matrix in a particular eigenvector basis. 
+/// Calculate the full magnetic moment matrix in a particular eigenvector basis.
 /// @param eigenvector :: Input. The eigenvector basis.
 /// @param hdir :: Input. Cartesian direction of the magnetic moment operator
 /// @param nre :: Input. The ion number to calculate for.
@@ -1071,16 +1070,15 @@ void calculateMagneticMoment(const ComplexFortranMatrix &ev,
 /// @param mumat :: Output the matrix elements of the magnetic moment matrix
 void calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
                                    const std::vector<double> &Hdir,
-                                   const int nre,
-                                   ComplexFortranMatrix &mumat) {
+                                   const int nre, ComplexFortranMatrix &mumat) {
   int dim = (int)ddimj[nre - 1];
   auto gj = ggj[nre - 1];
   mumat.allocate(1, dim, 1, dim);
   for (auto i = 1; i <= dim; ++i) {
     for (auto j = 1; j <= dim; ++j) {
-      mumat(i,j) = matjx(ev, i, j, dim)*Hdir[0] +  // <ev|jx|ev'>
-                   matjy(ev, i, j, dim)*Hdir[1] +  // <ev|jy|ev'>
-                   matjz(ev, i, j, dim)*Hdir[2];   // <ev|jz|ev'>
+      mumat(i, j) = matjx(ev, i, j, dim) * Hdir[0] + // <ev|jx|ev'>
+                    matjy(ev, i, j, dim) * Hdir[1] + // <ev|jy|ev'>
+                    matjz(ev, i, j, dim) * Hdir[2];  // <ev|jz|ev'>
     }
   }
   mumat *= gj;

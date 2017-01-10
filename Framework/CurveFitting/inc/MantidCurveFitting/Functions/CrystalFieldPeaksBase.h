@@ -43,11 +43,10 @@ public:
 
   /// Calculate the crystal field eigensystem
   void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
-                            ComplexFortranMatrix &ham, 
-                            ComplexFortranMatrix &hz, int &nre) const; 
-  inline 
-  void calculateEigenSystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
-                            int &nre) const {
+                            ComplexFortranMatrix &ham, ComplexFortranMatrix &hz,
+                            int &nre) const;
+  inline void calculateEigenSystem(DoubleFortranVector &en,
+                                   ComplexFortranMatrix &wf, int &nre) const {
     ComplexFortranMatrix ham, hz;
     calculateEigenSystem(en, wf, ham, hz, nre);
   }

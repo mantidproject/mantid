@@ -10,7 +10,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /**
-  CrystalFieldSusceptibility is a function that calculates the volume magnetic 
+  CrystalFieldSusceptibility is a function that calculates the volume magnetic
   susceptibility (dimensionless) due to the crystalline electric field.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -36,14 +36,17 @@ namespace Functions {
 */
 
 class MANTID_CURVEFITTING_DLL CrystalFieldSusceptibility
-    : public CrystalFieldPeaksBase, public API::IFunction1D {
+    : public CrystalFieldPeaksBase,
+      public API::IFunction1D {
 public:
   CrystalFieldSusceptibility();
   std::string name() const override { return "CrystalFieldSusceptibility"; }
   const std::string category() const override { return "General"; }
-  void set_eigensystem(const DoubleFortranVector &en_in, 
-      const ComplexFortranMatrix &wf_in, const int nre_in);
-  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void set_eigensystem(const DoubleFortranVector &en_in,
+                       const ComplexFortranMatrix &wf_in, const int nre_in);
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+
 private:
   DoubleFortranVector en;
   ComplexFortranMatrix wf;

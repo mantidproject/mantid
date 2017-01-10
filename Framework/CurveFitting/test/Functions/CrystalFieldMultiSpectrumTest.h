@@ -216,7 +216,7 @@ public:
         "Workspace_4");
     TS_ASSERT(out4);
     TS_ASSERT_EQUALS(out4->getNumberHistograms(), 3);
-    // SI and cgs susceptibility differ by factor of 10. 
+    // SI and cgs susceptibility differ by factor of 10.
     // Dataset 2 in cgs, dataset 4 in SI.
     TS_ASSERT_DELTA(out4->readY(1)[51], out2->readY(1)[51], 1e-4);
     TS_ASSERT_DELTA(out4->readY(1)[61], out2->readY(1)[61], 1e-4);

@@ -25,10 +25,10 @@ void calculate(double *out, const double *xValues, const size_t nData,
   const double convfact = PhysicalConstants::N_A * PhysicalConstants::meV;
   int nlevels = en.len();
   for (size_t iT = 0; iT < nData; iT++) {
-    double expfact; 
+    double expfact;
     double Z = 0.;
     double U = 0.;
-    double U2 = 0.; 
+    double U2 = 0.;
     const double beta = 1 / (k_B * xValues[iT]);
     // Using fortran indexing...
     for (auto iE = 1; iE <= nlevels; iE++) {
@@ -37,12 +37,11 @@ void calculate(double *out, const double *xValues, const size_t nData,
       U += en(iE) * expfact;
       U2 += en(iE) * en(iE) * expfact;
     }
-    U /= Z; 
-    U2 /= Z; 
-    out[iT] = ( (U2 - U*U) / (k_B * xValues[iT]*xValues[iT]) ) * convfact;
+    U /= Z;
+    U2 /= Z;
+    out[iT] = ((U2 - U * U) / (k_B * xValues[iT] * xValues[iT])) * convfact;
   }
 }
-
 }
 
 DECLARE_FUNCTION(CrystalFieldHeatCapacity)
@@ -53,28 +52,26 @@ CrystalFieldHeatCapacity::CrystalFieldHeatCapacity()
 }
 
 // Sets the eigenvectors / values directly
-void CrystalFieldHeatCapacity::set_eigensystem(const DoubleFortranVector &en_in,
-                                               const ComplexFortranMatrix &wf_in,
-                                               const int nre_in) {
+void CrystalFieldHeatCapacity::set_eigensystem(
+    const DoubleFortranVector &en_in, const ComplexFortranMatrix &wf_in,
+    const int nre_in) {
   setDirect = true;
   en = en_in;
   wf = wf_in;
   nre = nre_in;
 }
 
-void CrystalFieldHeatCapacity::function1D(double *out,
-                                          const double *xValues,
+void CrystalFieldHeatCapacity::function1D(double *out, const double *xValues,
                                           const size_t nData) const {
   if (!setDirect) {
     // Because this method is const, we can't change the stored en / wf
     // Use temporary variables instead.
     DoubleFortranVector en_;
     ComplexFortranMatrix wf_;
-    int nre_ = 0; 
+    int nre_ = 0;
     calculateEigenSystem(en_, wf_, nre_);
     calculate(out, xValues, nData, en_);
-  }
-  else {
+  } else {
     // Use stored values
     calculate(out, xValues, nData, en);
   }
@@ -89,4 +86,3 @@ void CrystalFieldHeatCapacity::function1D(double *out,
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-

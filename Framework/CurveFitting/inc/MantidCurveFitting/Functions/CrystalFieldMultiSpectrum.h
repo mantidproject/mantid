@@ -51,7 +51,7 @@ private:
                                     const ComplexFortranMatrix &wf,
                                     double temperature, double fwhm,
                                     size_t i) const;
-  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en, 
+  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en,
                                     const ComplexFortranMatrix &wf,
                                     const ComplexFortranMatrix &ham,
                                     double temperature, size_t iSpec) const;

@@ -11,7 +11,7 @@ namespace Functions {
 
 /**
   CrystalFieldMagnetisation is a function that calculates the induced
-  magnetic moment (in bohr magnetons per ion) as a function of applied 
+  magnetic moment (in bohr magnetons per ion) as a function of applied
   external magnetic field (in Tesla), for a particular crystal field
   splitting.
 
@@ -38,13 +38,16 @@ namespace Functions {
 */
 
 class MANTID_CURVEFITTING_DLL CrystalFieldMagnetisation
-    : public CrystalFieldPeaksBase, public API::IFunction1D {
+    : public CrystalFieldPeaksBase,
+      public API::IFunction1D {
 public:
   CrystalFieldMagnetisation();
   std::string name() const override { return "CrystalFieldMagnetisation"; }
   const std::string category() const override { return "General"; }
   void set_hamiltonian(const ComplexFortranMatrix &wf_in, const int nre_in);
-  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+
 private:
   ComplexFortranMatrix ham;
   int nre;

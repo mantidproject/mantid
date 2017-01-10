@@ -30,8 +30,7 @@ namespace {
 
 /// Define the source function for CrystalFieldMultiSpectrum.
 /// Its function() method is not needed.
-class Peaks : public CrystalFieldPeaksBase, 
-              public API::IFunctionGeneral {
+class Peaks : public CrystalFieldPeaksBase, public API::IFunctionGeneral {
 public:
   Peaks() : CrystalFieldPeaksBase() {}
   std::string name() const override { return "Peaks"; }
@@ -71,7 +70,8 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("FWHMVariation", Attribute(0.1));
   declareAttribute("NPeaks", Attribute(0));
   declareAttribute("FixAllPeaks", Attribute(false));
-  declareAttribute("PhysicalProperties", Attribute(std::vector<double>(1, 0.0)));
+  declareAttribute("PhysicalProperties",
+                   Attribute(std::vector<double>(1, 0.0)));
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
@@ -115,16 +115,17 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     auto nSpec = physpropId.size();
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
-      switch(static_cast<int>(physpropId[iSpec])) {
-        case 4: // Hmag, Hdir, inverse, Unit, powder
-          declareAttribute("Hmag" + suffix, Attribute(1.0));
-        case 2: // Hdir, inverse, Unit, powder
-          declareAttribute("inverse" + suffix, Attribute(false));
-        case 3: // Hdir, Unit, powder
-          declareAttribute("Hdir" + suffix, Attribute(std::vector<double>{0., 0., 1.}));
-          declareAttribute("Unit" + suffix, Attribute("bohr"));
-          declareAttribute("powder" + suffix, Attribute(false));
-          break;
+      switch (static_cast<int>(physpropId[iSpec])) {
+      case 4: // Hmag, Hdir, inverse, Unit, powder
+        declareAttribute("Hmag" + suffix, Attribute(1.0));
+      case 2: // Hdir, inverse, Unit, powder
+        declareAttribute("inverse" + suffix, Attribute(false));
+      case 3: // Hdir, Unit, powder
+        declareAttribute("Hdir" + suffix,
+                         Attribute(std::vector<double>{0., 0., 1.}));
+        declareAttribute("Unit" + suffix, Attribute("bohr"));
+        declareAttribute("powder" + suffix, Attribute(false));
+        break;
       }
     }
   }
@@ -171,9 +172,8 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   // Get a list of "spectra" which corresponds to physical properties
   auto physprops = getAttribute("PhysicalProperties").asVector();
   if (physprops.empty()) {
-    m_physprops.resize(nSpec, 0);  // Assume no physical properties - just INS
-  }
-  else if (physprops.size() != nSpec) {
+    m_physprops.resize(nSpec, 0); // Assume no physical properties - just INS
+  } else if (physprops.size() != nSpec) {
     if (physprops.size() == 1) {
       int physprop = (int)physprops.front();
       m_physprops.resize(nSpec, physprop);
@@ -200,7 +200,8 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
         m_fwhmX[i] = IFunction::getAttribute("FWHMX" + suffix).asVector();
         m_fwhmY[i] = IFunction::getAttribute("FWHMY" + suffix).asVector();
       }
-      fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], fwhms[i], i));
+      fun->addFunction(
+          buildSpectrum(nre, en, wf, temperatures[i], fwhms[i], i));
     }
     fun->setDomainIndex(i, i);
   }
@@ -266,53 +267,53 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
 API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
     const ComplexFortranMatrix &ham, double temperature, size_t iSpec) const {
-  switch(m_physprops[iSpec]) {
-    case 1: { // Heat capacity
-      auto spectrum = new CrystalFieldHeatCapacity;
-      spectrum->set_eigensystem(en, wf, nre);
-      return IFunction_sptr(spectrum);
-    }
-    case 2: { // Susceptibility
-      auto spectrum = new CrystalFieldSusceptibility;
-      spectrum->set_eigensystem(en, wf, nre);
-      auto suffix = std::to_string(iSpec);
-      auto hdir = getAttribute("Hdir" + suffix).asVector();
-      spectrum->setAttribute("Hdir", Attribute(hdir));
-      auto inverse = getAttribute("inverse" + suffix).asBool();
-      spectrum->setAttribute("inverse", Attribute(inverse));
-      auto powder = getAttribute("powder" + suffix).asBool();
-      spectrum->setAttribute("powder", Attribute(powder));
-      return IFunction_sptr(spectrum);
-    }
-    case 3: { // Magnetisation
-      auto spectrum = new CrystalFieldMagnetisation;
-      spectrum->set_hamiltonian(ham, nre);
-      spectrum->setAttribute("Temperature", Attribute(temperature));
-      auto suffix = std::to_string(iSpec);
-      auto unit = getAttribute("Unit" + suffix).asString();
-      spectrum->setAttribute("Unit", Attribute(unit));
-      auto hdir = getAttribute("Hdir" + suffix).asVector();
-      spectrum->setAttribute("Hdir", Attribute(hdir));
-      auto powder = getAttribute("powder" + suffix).asBool();
-      spectrum->setAttribute("powder", Attribute(powder));
-      return IFunction_sptr(spectrum);
-    }
-    case 4: { // Moment vs temperature
-      auto spectrum = new CrystalFieldMoment;
-      spectrum->set_hamiltonian(ham, nre);
-      auto suffix = std::to_string(iSpec);
-      auto unit = getAttribute("Unit" + suffix).asString();
-      spectrum->setAttribute("Unit", Attribute(unit));
-      auto hdir = getAttribute("Hdir" + suffix).asVector();
-      spectrum->setAttribute("Hdir", Attribute(hdir));
-      auto hmag = getAttribute("Hmag" + suffix).asDouble();
-      spectrum->setAttribute("Hmag", Attribute(hmag));
-      auto inverse = getAttribute("inverse" + suffix).asBool();
-      spectrum->setAttribute("inverse", Attribute(inverse));
-      auto powder = getAttribute("powder" + suffix).asBool();
-      spectrum->setAttribute("powder", Attribute(powder));
-      return IFunction_sptr(spectrum);
-    }
+  switch (m_physprops[iSpec]) {
+  case 1: { // Heat capacity
+    auto spectrum = new CrystalFieldHeatCapacity;
+    spectrum->set_eigensystem(en, wf, nre);
+    return IFunction_sptr(spectrum);
+  }
+  case 2: { // Susceptibility
+    auto spectrum = new CrystalFieldSusceptibility;
+    spectrum->set_eigensystem(en, wf, nre);
+    auto suffix = std::to_string(iSpec);
+    auto hdir = getAttribute("Hdir" + suffix).asVector();
+    spectrum->setAttribute("Hdir", Attribute(hdir));
+    auto inverse = getAttribute("inverse" + suffix).asBool();
+    spectrum->setAttribute("inverse", Attribute(inverse));
+    auto powder = getAttribute("powder" + suffix).asBool();
+    spectrum->setAttribute("powder", Attribute(powder));
+    return IFunction_sptr(spectrum);
+  }
+  case 3: { // Magnetisation
+    auto spectrum = new CrystalFieldMagnetisation;
+    spectrum->set_hamiltonian(ham, nre);
+    spectrum->setAttribute("Temperature", Attribute(temperature));
+    auto suffix = std::to_string(iSpec);
+    auto unit = getAttribute("Unit" + suffix).asString();
+    spectrum->setAttribute("Unit", Attribute(unit));
+    auto hdir = getAttribute("Hdir" + suffix).asVector();
+    spectrum->setAttribute("Hdir", Attribute(hdir));
+    auto powder = getAttribute("powder" + suffix).asBool();
+    spectrum->setAttribute("powder", Attribute(powder));
+    return IFunction_sptr(spectrum);
+  }
+  case 4: { // Moment vs temperature
+    auto spectrum = new CrystalFieldMoment;
+    spectrum->set_hamiltonian(ham, nre);
+    auto suffix = std::to_string(iSpec);
+    auto unit = getAttribute("Unit" + suffix).asString();
+    spectrum->setAttribute("Unit", Attribute(unit));
+    auto hdir = getAttribute("Hdir" + suffix).asVector();
+    spectrum->setAttribute("Hdir", Attribute(hdir));
+    auto hmag = getAttribute("Hmag" + suffix).asDouble();
+    spectrum->setAttribute("Hmag", Attribute(hmag));
+    auto inverse = getAttribute("inverse" + suffix).asBool();
+    spectrum->setAttribute("inverse", Attribute(inverse));
+    auto powder = getAttribute("powder" + suffix).asBool();
+    spectrum->setAttribute("powder", Attribute(powder));
+    return IFunction_sptr(spectrum);
+  }
   }
   throw std::runtime_error("Physical property type not understood");
 }
@@ -344,37 +345,37 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 /// Update a function for a single spectrum.
 void CrystalFieldMultiSpectrum::updateSpectrum(
     API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
-    const ComplexFortranMatrix &wf, const ComplexFortranMatrix &ham, 
+    const ComplexFortranMatrix &wf, const ComplexFortranMatrix &ham,
     double temperature, size_t iSpec) const {
-  switch(m_physprops[iSpec]) {
-    case 1: {
-      auto &heatcap = dynamic_cast<CrystalFieldHeatCapacity &>(spectrum);
-      heatcap.set_eigensystem(en, wf, nre);
-      break;
-    }
-    case 2: {
-      auto &suscept = dynamic_cast<CrystalFieldSusceptibility &>(spectrum);
-      suscept.set_eigensystem(en, wf, nre);
-      break;
-    }
-    case 3: {
-      auto &magnetisation = dynamic_cast<CrystalFieldMagnetisation &>(spectrum);
-      magnetisation.set_hamiltonian(ham, nre);
-      break;
-    }
-    case 4: {
-      auto &moment = dynamic_cast<CrystalFieldMoment &>(spectrum);
-      moment.set_hamiltonian(ham, nre);
-      break;
-    }
-    default:
-      auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
-      FunctionValues values;
-      calcExcitations(nre, en, wf, temperature, values, iSpec);
-      auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
-      m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
-          composite, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
-          fwhmVariation);
+  switch (m_physprops[iSpec]) {
+  case 1: {
+    auto &heatcap = dynamic_cast<CrystalFieldHeatCapacity &>(spectrum);
+    heatcap.set_eigensystem(en, wf, nre);
+    break;
+  }
+  case 2: {
+    auto &suscept = dynamic_cast<CrystalFieldSusceptibility &>(spectrum);
+    suscept.set_eigensystem(en, wf, nre);
+    break;
+  }
+  case 3: {
+    auto &magnetisation = dynamic_cast<CrystalFieldMagnetisation &>(spectrum);
+    magnetisation.set_hamiltonian(ham, nre);
+    break;
+  }
+  case 4: {
+    auto &moment = dynamic_cast<CrystalFieldMoment &>(spectrum);
+    moment.set_hamiltonian(ham, nre);
+    break;
+  }
+  default:
+    auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
+    FunctionValues values;
+    calcExcitations(nre, en, wf, temperature, values, iSpec);
+    auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
+    m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
+        composite, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
+        fwhmVariation);
   }
 }
 

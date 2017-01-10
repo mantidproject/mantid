@@ -10,7 +10,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /**
-  CrystalFieldHeatCapacity is a function that calculates the molar magnetic 
+  CrystalFieldHeatCapacity is a function that calculates the molar magnetic
   heat capacity (in J/K/mol) due to the splitting of electronic energy levels
   due to the crystal field.
 
@@ -36,15 +36,18 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacity 
-    : public CrystalFieldPeaksBase, public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacity
+    : public CrystalFieldPeaksBase,
+      public API::IFunction1D {
 public:
   CrystalFieldHeatCapacity();
   std::string name() const override { return "CrystalFieldHeatCapacity"; }
   const std::string category() const override { return "General"; }
-  void set_eigensystem(const DoubleFortranVector &en_in, 
-      const ComplexFortranMatrix &wf_in, const int nre_in);
-  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void set_eigensystem(const DoubleFortranVector &en_in,
+                       const ComplexFortranMatrix &wf_in, const int nre_in);
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+
 private:
   DoubleFortranVector en;
   ComplexFortranMatrix wf;

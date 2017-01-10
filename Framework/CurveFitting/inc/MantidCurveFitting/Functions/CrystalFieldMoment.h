@@ -37,14 +37,16 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_CURVEFITTING_DLL CrystalFieldMoment
-    : public CrystalFieldPeaksBase, public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL CrystalFieldMoment : public CrystalFieldPeaksBase,
+                                                   public API::IFunction1D {
 public:
   CrystalFieldMoment();
   std::string name() const override { return "CrystalFieldMoment"; }
   const std::string category() const override { return "General"; }
   void set_hamiltonian(const ComplexFortranMatrix &wf_in, const int nre_in);
-  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+
 private:
   ComplexFortranMatrix ham;
   int nre;

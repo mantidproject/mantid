@@ -8,15 +8,12 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
-void MANTID_CURVEFITTING_DLL
-calculateEigensystem(DoubleFortranVector &eigenvalues,
-                     ComplexFortranMatrix &eigenvectors,
-                     ComplexFortranMatrix &hamiltonian,
-                     ComplexFortranMatrix &hzeeman, int nre,
-                     const DoubleFortranVector &bmol,
-                     const DoubleFortranVector &bext,
-                     const ComplexFortranMatrix &bkq, double alpha_euler = 0.0,
-                     double beta_euler = 0.0, double gamma_euler = 0.0);
+void MANTID_CURVEFITTING_DLL calculateEigensystem(
+    DoubleFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
+    ComplexFortranMatrix &hamiltonian, ComplexFortranMatrix &hzeeman, int nre,
+    const DoubleFortranVector &bmol, const DoubleFortranVector &bext,
+    const ComplexFortranMatrix &bkq, double alpha_euler = 0.0,
+    double beta_euler = 0.0, double gamma_euler = 0.0);
 
 inline void MANTID_CURVEFITTING_DLL
 calculateEigensystem(DoubleFortranVector &eigenvalues,
@@ -31,11 +28,11 @@ calculateEigensystem(DoubleFortranVector &eigenvalues,
                        bmol, bext, bkq, alpha_euler, beta_euler, gamma_euler);
 }
 
-void MANTID_CURVEFITTING_DLL 
+void MANTID_CURVEFITTING_DLL
 calculateZeemanEigensystem(DoubleFortranVector &eigenvalues,
                            ComplexFortranMatrix &eigenvectors,
-                           const ComplexFortranMatrix &hamiltonian,
-                           int nre, const DoubleFortranVector &bext);
+                           const ComplexFortranMatrix &hamiltonian, int nre,
+                           const DoubleFortranVector &bext);
 
 void MANTID_CURVEFITTING_DLL
 calculateIntensities(int nre, const DoubleFortranVector &energies,
@@ -53,13 +50,13 @@ calculateExcitations(const DoubleFortranVector &e_energies,
 
 void MANTID_CURVEFITTING_DLL
 calculateMagneticMoment(const ComplexFortranMatrix &ev,
-                        const DoubleFortranVector &Hmag,
-                        const int nre, DoubleFortranVector &moment);
+                        const DoubleFortranVector &Hmag, const int nre,
+                        DoubleFortranVector &moment);
 
 void MANTID_CURVEFITTING_DLL
 calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
-                              const std::vector<double> &Hdir,
-                              const int nre, ComplexFortranMatrix &mumat);
+                              const std::vector<double> &Hdir, const int nre,
+                              ComplexFortranMatrix &mumat);
 
 } // namespace Functions
 } // namespace CurveFitting
