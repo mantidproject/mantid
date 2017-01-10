@@ -326,3 +326,8 @@ qreal QwtScaleDrawNonOrthogonal::getScreenLeftInXyz() const {
   QPoint screenLeft(0, 0);
   return fromScreenToXyz(screenLeft).x();
 }
+
+void QwtScaleDrawNonOrthogonal::updateSlicePoint(
+    Mantid::Kernel::VMD newSlicepoint) {
+  m_slicePoint = newSlicepoint;
+}

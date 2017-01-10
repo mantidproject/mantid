@@ -43,7 +43,6 @@
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/SliceViewerFunctions.h"
-#include "MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
 #include <qwt_plot_panner.h>
@@ -1629,9 +1628,11 @@ void SliceViewer::updateDisplay(bool resetAxes) {
   // Set the color range
   m_data->setRange(m_colorBar->getViewRange());
 
-  //  m_colorBar->setColorMap(m_colorRange, m_colorMap);
-  //  m_plot->setAxisScale(QwtPlot::yRight, m_colorRange.minValue(),
-  //  m_colorRange.maxValue() );
+  if (ui.btnNonOrthogonalToggle->isChecked()) {
+    m_nonOrthAxis0->updateSlicePoint(m_slicePoint);
+    m_nonOrthAxis1->updateSlicePoint(m_slicePoint);
+    m_plot->update();
+  }
 
   // Is the overlay workspace visible at all from this slice point?
   if (m_overlayWS) {
@@ -2921,14 +2922,14 @@ void SliceViewer::switchAxis() {
 
 /// Apply the non orthogonal axis scale draw
 void SliceViewer::applyNonOrthogonalAxisScaleDraw() {
-  auto *axis0 = new QwtScaleDrawNonOrthogonal(
+  m_nonOrthAxis0 = new QwtScaleDrawNonOrthogonal(
       m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::X, m_ws, m_dimX,
       m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
-  auto *axis1 = new QwtScaleDrawNonOrthogonal(
+  m_nonOrthAxis1 = new QwtScaleDrawNonOrthogonal(
       m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::Y, m_ws, m_dimX,
       m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
-  m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
-  m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+  m_plot->setAxisScaleDraw(QwtPlot::xBottom, m_nonOrthAxis0);
+  m_plot->setAxisScaleDraw(QwtPlot::yLeft, m_nonOrthAxis1);
 }
 
 /// Apply the orthogonal axis scale draw

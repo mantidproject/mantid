@@ -18,6 +18,7 @@
 #include "MantidQtSliceViewer/NonOrthogonalOverlay.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <qwt_color_map.h>
@@ -416,6 +417,8 @@ private:
 
   AspectRatioType m_aspectRatioType;
   AspectRatioType m_lastRatioState;
+  QwtScaleDrawNonOrthogonal *m_nonOrthAxis0;
+  QwtScaleDrawNonOrthogonal *m_nonOrthAxis1;
 };
 
 } // namespace SliceViewer

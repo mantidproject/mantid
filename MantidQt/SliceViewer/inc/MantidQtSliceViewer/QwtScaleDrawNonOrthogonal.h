@@ -24,6 +24,8 @@ public:
   void drawLabelNonOrthogonal(QPainter *painter, double labelValue,
                               double labelPos) const;
 
+  void updateSlicePoint(Mantid::Kernel::VMD newSlicepoint);
+
 private:
   void setTransformationMatrices(Mantid::API::IMDWorkspace_sptr workspace);
   qreal getScreenBottomInXyz() const;
