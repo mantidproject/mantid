@@ -127,6 +127,10 @@ protected:
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
 
+  // load a run into the ADS, or re-use one in the ADS if possible
+  Mantid::API::Workspace_sptr loadRun(const std::string &run,
+                                      const std::string &instrument,
+                                      const std::string &prefix);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
@@ -155,10 +159,6 @@ private:
   prepareRunWorkspace(const std::string &run,
                       const DataProcessorPreprocessingAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
-  // load a run into the ADS, or re-use one in the ADS if possible
-  Mantid::API::Workspace_sptr loadRun(const std::string &run,
-                                      const std::string &instrument,
-                                      const std::string &prefix); // change
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model

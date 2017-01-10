@@ -26,7 +26,7 @@ std::string ReflEventPresenter::getTimeSlicingOptions() const {
   // Add number of time slices
   auto numTimeSlices = m_view->getNumTimeSlices();
   if (!numTimeSlices.empty())
-    options.push_back("NumTimeSlices=" + numTimeSlices);
+    options.push_back(numTimeSlices);
 
   return boost::algorithm::join(options, ",");
 }

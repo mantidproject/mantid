@@ -2,8 +2,13 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 using namespace MantidQt::MantidWidgets;
+using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,8 +26,8 @@ namespace CustomInterfaces {
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> &postprocessMap,
@@ -42,17 +47,18 @@ void ReflDataProcessorPresenter::process() {
 
   // if uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  std::string timeSlicingOptions =
-      m_mainPresenter->getTimeSlicingOptions();
-  if (timeSlicingOptions.empty()) {
+  std::string stopTime = m_mainPresenter->getTimeSlicingOptions();
+  if (stopTime.empty()) {
     GenericDataProcessorPresenter::process();
     return;
   }
 
   // Things we should take into account:
   // 1. We need to report progress, see GenericDataProcessorPresenter::process()
-  // 2. We need to pay attention to prefixes. See how the interface names the output workspaces
-  // 3. For slices, we probably want to add a suffix: <output_ws_name>_start_stop
+  // 2. We need to pay attention to prefixes. See how the interface names the
+  // output workspaces
+  // 3. For slices, we probably want to add a suffix:
+  // <output_ws_name>_start_stop
   // (check that this is the suffix they're using in Max's script)
   // 4. There may be some methods defined in GenericDataProcessorPreseter that
   // we may find useful here, for instance
@@ -60,10 +66,6 @@ void ReflDataProcessorPresenter::process() {
   // GenericDataProcessorPresenter::getPostprocessedWorkspaceName(). If there is
   // a private method you want to use, don't hesitate to make it protected in
   // the base class.
-
-  std::map<std::string, std::string> globalTransmissionOptions;
-  if (!m_preprocessMap.empty())
-    globalTransmissionOptions = m_mainPresenter->getPreprocessingOptions();
 
   // If transmission runs specified in the table
   // Load transmission runs
@@ -73,49 +75,19 @@ void ReflDataProcessorPresenter::process() {
   // Get selected runs
   const auto items = m_manager->selectedData(true);
 
-  // Progress: each group and each row within count as a progress step.
-  int progress = 0;
-  int maxProgress = (int)(items.size());
-  for (const auto subitem : items) {
-    maxProgress += (int)(subitem.second.size());
-  }
-  ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
-                                     m_progressView);
-
   for (const auto &item : items) {
 
     // Reduce rows sequentially
 
     for (const auto &data : item.second) {
-      // item.second -> set of vectors containing data
 
-      try {
-        auto newData = reduceRow(data.second);
-        m_manager->update(item.first, data.first, newData);
-        progressReporter.report();
+      // The run number as a string
+      std::string runno = data.second.at(0);
 
-      }
-      catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
-        progressReporter.clear();
-        return;
-      }
-
-      progressReporter.report();
+      takeSlice(runno, 0.0, boost::lexical_cast<double>(stopTime));
     }
 
     // Post-process (if needed)
-    if (item.second.size() > 1) {
-      try {
-        postProcessGroup(item.second);
-        progressReporter.report();
-      }
-      catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
-        progressReporter.clear();
-        return;
-      }
-    }
   }
 
   // Perform slicing, see Max's script
@@ -133,6 +105,76 @@ void ReflDataProcessorPresenter::process() {
         "Notebook will not be created");
   }
   // If not selected, do nothing
+}
+
+/** Takes a slice from a run
+*
+* @param runno :: the run number as a string
+* @param startTime :: start time
+* @param stopTime :: stop time
+*/
+void ReflDataProcessorPresenter::takeSlice(const std::string &runno,
+                                           double startTime, double stopTime) {
+
+  std::string runName = "TOF_" + runno;
+  std::string sliceName = runName + "_" + std::to_string(stopTime);
+  std::string monName = runName + "_monitors";
+
+  // Load the run
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
+  algLoadRun->initialize();
+  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runno);
+  algLoadRun->setProperty("OutputWorkspace", runName);
+  algLoadRun->setProperty("LoadMonitors", true);
+  algLoadRun->execute();
+
+  // Filter by time
+  IAlgorithm_sptr filter = AlgorithmManager::Instance().create("FilterByTime");
+  filter->initialize();
+  filter->setProperty("InputWorkspace", runName);
+  filter->setProperty("OutputWorkspace", sliceName);
+  filter->setProperty("StartTime", startTime);
+  filter->setProperty("StopTime", stopTime);
+  filter->execute();
+
+  // Get the normalization constant for this slice
+  MatrixWorkspace_sptr mws =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(runName);
+  double total = mws->run().getProtonCharge();
+  mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sliceName);
+  double slice = mws->run().getProtonCharge();
+  double fraction = slice / total;
+
+  IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
+  scale->initialize();
+  scale->setProperty("InputWorkspace", monName);
+  scale->setProperty("Factor", fraction);
+  scale->setProperty("OutputWorkspace", monName);
+  scale->execute();
+
+  IAlgorithm_sptr rebinMon = AlgorithmManager::Instance().create("Rebin");
+  rebinMon->initialize();
+  rebinMon->setProperty("InputWorkspace", monName);
+  rebinMon->setProperty("OutputWorkspace", monName);
+  rebinMon->setProperty("Params", "0, 100, 100000");
+  rebinMon->setProperty("PreserveEvents", false);
+  rebinMon->execute();
+
+  IAlgorithm_sptr rebinDet = AlgorithmManager::Instance().create("Rebin");
+  rebinDet->initialize();
+  rebinDet->setProperty("InputWorkspace", sliceName);
+  rebinDet->setProperty("OutputWorkspace", sliceName);
+  rebinDet->setProperty("Params", "0, 100, 100000");
+  rebinDet->setProperty("PreserveEvents", false);
+  rebinDet->execute();
+
+  IAlgorithm_sptr append = AlgorithmManager::Instance().create("AppendSpectra");
+  append->initialize();
+  append->setProperty("InputWorkspace1", monName);
+  append->setProperty("InputWorkspace2", sliceName);
+  append->setProperty("OutputWorkspace", "RESULT");
+  append->setProperty("MergeLogs", true);
+  append->execute();
 }
 }
 }

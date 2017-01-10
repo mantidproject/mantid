@@ -53,8 +53,10 @@ public:
   ~ReflDataProcessorPresenter() override;
 
 private:
-  // process selected rows
+  // Process selected rows
   void process() override;
+  // Take a slice from event workspace
+  void takeSlice(const std::string &runno, double startTime, double stopTime);
 };
 }
 }
