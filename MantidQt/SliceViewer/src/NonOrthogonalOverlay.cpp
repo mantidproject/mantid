@@ -65,11 +65,15 @@ void NonOrthogonalOverlay::updateXGridlines(QwtValueList xAxisTicks,
   auto size = xAxisTicks.size();
   if (m_xAngle != 0 && size >= 1) {
     double firstTick;
+    double lastTick;
     double diff;
     firstTick = xAxisTicks.at(0);
+    lastTick = xAxisTicks.last();
     diff = xAxisTicks.at(1) - firstTick;
     for (auto j = 0; j < size * 2; j++) {
       auto tick = firstTick - diff * j;
+      m_xAxisTicks.append(tick);
+      tick = lastTick + diff * j;
       m_xAxisTicks.append(tick);
     }
   }
@@ -82,11 +86,15 @@ void NonOrthogonalOverlay::updateYGridlines(QwtValueList yAxisTicks,
   auto size = yAxisTicks.size();
   if (m_yAngle != 0 && size >= 1) {
     double firstTick;
+    double lastTick;
     double diff;
     firstTick = yAxisTicks.at(0);
+    lastTick = yAxisTicks.last();
     diff = yAxisTicks.at(1) - firstTick;
     for (auto j = 0; j < size * 2; j++) {
       auto tick = firstTick - diff * j;
+      m_yAxisTicks.append(tick);
+      tick = lastTick + diff * j;
       m_yAxisTicks.append(tick);
     }
   }
