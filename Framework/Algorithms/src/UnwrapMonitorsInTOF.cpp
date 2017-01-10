@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -242,10 +243,10 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
     }
   } else {
     auto numberOfHistograms = workspace->getNumberHistograms();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (size_t workspaceIndex = 0; workspaceIndex < numberOfHistograms;
          ++workspaceIndex) {
-      auto detector = workspace->getDetector(workspaceIndex);
-      if (detector->isMonitor()) {
+      if (spectrumInfo.isMonitor(workspaceIndex)) {
         workspaceIndices.push_back(workspaceIndex);
       }
     }
