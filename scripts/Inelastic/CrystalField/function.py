@@ -592,6 +592,7 @@ class ResolutionModel:
             n = len(x)
         return x, y
 
+
 class PhysicalProperties(object):
     """
     Contains information about measurement conditions of physical properties
@@ -616,7 +617,7 @@ class PhysicalProperties(object):
         :param hmag: the magnitude in Tesla of the magnetic field for M(T)
         :param temperature: the temperature in Kelvin of measurements of M(H)
         :param inverse: a boolean indicating whether susceptibility is chi or 1/chi or M(T) or 1/M(T)
-        :param unit: the unit the data was measured in. Either: 'bohr', 'SI' or 'cgs'. 
+        :param unit: the unit the data was measured in. Either: 'bohr', 'SI' or 'cgs'.
 
         typeid is required in all cases, and all other parameters may be specified as keyword arguments.
         otherwise the syntax is:
@@ -735,7 +736,7 @@ class PhysicalProperties(object):
         args = filter(None, list(args))
         # Handles special case of first argument being a unit type
         if len(args) > 0:
-            try: 
+            try:
                 if self._checkmagunits(args[0], 'bad') is not 'bad':
                     kwargs['Unit'] = args.pop(0)
             except AttributeError:

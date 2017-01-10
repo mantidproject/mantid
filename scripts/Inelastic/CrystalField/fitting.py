@@ -103,7 +103,7 @@ class CrystalField(object):
                         IntensityScaling: A scaling factor for the intensity of each spectrum.
                         FWHM: A default value for the full width at half maximum of the peaks.
                         Temperature: A temperature "of the spectrum" in Kelvin
-                        PhysicalProperty: A list of PhysicalProperties objects denoting the required data type 
+                        PhysicalProperty: A list of PhysicalProperties objects denoting the required data type
                                           Note that physical properties datasets should follow inelastic spectra
                                           See the Crystal Field Python Interface help page for more details.
         """
@@ -677,11 +677,11 @@ class CrystalField(object):
                             to calculate the heat capacity; or a list or numpy ndarray of temperatures.
                             Temperatures are in Kelvin.
         @param ws_index: The index of a spectrum to use (default=0) if using a workspace for x.
-        @param Hdir: The magnetic field direction to calculate the susceptibility along. Either a 
+        @param Hdir: The magnetic field direction to calculate the susceptibility along. Either a
                      Cartesian vector with z along the quantisation axis of the CF parameters, or the
                      string 'powder' (case insensitive) to get the powder averaged susceptibility
                      default: [0, 0, 1]
-        @param Unit: Any one of the strings 'bohr', 'SI' or 'cgs' (case insensitive) to indicate whether 
+        @param Unit: Any one of the strings 'bohr', 'SI' or 'cgs' (case insensitive) to indicate whether
                      to output in atomic (bohr magneton/Tesla/ion), SI (m^3/mol) or cgs (cm^3/mol) units.
                      default: 'cgs'
         @param Inverse: Whether to calculate the susceptibility (Inverse=False, default) or inverse
@@ -727,19 +727,19 @@ class CrystalField(object):
             cf.getMagneticMoment(Hmag=ws, ws_index=0, Hdir=[1, 1, 0], Unit='SI', Temperature=T, Inverse=True)
 
         @param Hmag: The magnitude of the applied magnetic field in Tesla, specified either as a Mantid
-                     workspace whose x-values will be used; or a list or numpy ndarray of field points. 
+                     workspace whose x-values will be used; or a list or numpy ndarray of field points.
                      If Temperature is specified as a list / array / workspace, Hmag must be scalar.
                      (default: 0-30T in 0.1T steps, or 1T if temperature vector specified)
-        @param Temperature: The temperature in Kelvin at which to calculate the moment. 
+        @param Temperature: The temperature in Kelvin at which to calculate the moment.
                             Temperature is a keyword argument only. Can be a list, ndarray or workspace.
                             If Hmag is a list / array / workspace, Temperature must be scalar.
                             (default=1K)
         @param ws_index: The index of a spectrum to use (default=0) if using a workspace for x.
-        @param Hdir: The magnetic field direction to calculate the susceptibility along. Either a 
+        @param Hdir: The magnetic field direction to calculate the susceptibility along. Either a
                      Cartesian vector with z along the quantisation axis of the CF parameters, or the
                      string 'powder' (case insensitive) to get the powder averaged susceptibility
                      default: [0, 0, 1]
-        @param Unit: Any one of the strings 'bohr', 'SI' or 'cgs' (case insensitive) to indicate whether 
+        @param Unit: Any one of the strings 'bohr', 'SI' or 'cgs' (case insensitive) to indicate whether
                      to output in atomic (bohr magneton/ion), SI (Am^2/mol) or cgs (emu/mol) units.
                      default: 'bohr'
         @param Inverse: Whether to calculate the susceptibility (Inverse=False, default) or inverse
@@ -754,11 +754,11 @@ class CrystalField(object):
         temperature = kwargs['Temperature'] if 'Temperature' in kwargs.keys() else 1.
 
         # Checks whether to calculate M(H) or M(T)
-        hmag_isscalar = (not hasattr(hmag, '__len__') or len(hmag) == 1) 
+        hmag_isscalar = (not hasattr(hmag, '__len__') or len(hmag) == 1)
         hmag_isvector = (hasattr(hmag, '__len__') and len(hmag) > 1)
-        t_isscalar = (not hasattr(temperature, '__len__') or len(temperature) == 1) 
+        t_isscalar = (not hasattr(temperature, '__len__') or len(temperature) == 1)
         t_isvector = (hasattr(temperature, '__len__') and len(temperature) > 1)
-        if hmag_isscalar and (t_isvector or 'mantid' in str(type(temperature))): 
+        if hmag_isscalar and (t_isvector or 'mantid' in str(type(temperature))):
             typeid = 4
             workspace = temperature
             kwargs['Hmag'] = hmag[0] if hasattr(hmag, '__len__') else hmag
@@ -939,18 +939,6 @@ class CrystalField(object):
     def __rmul__(self, factor):
         return self.__mul__(factor)
 
-    def __eq__(self, other):
-        if isinstance(other, CrystalField):
-            if (len(self._fieldParameters) != len(other._fieldParameters)
-                or self._ion != other._ion or self._symmetry != other._symmetry):
-                return False
-            try:
-                return all([self[ky]==other[ky] for ky in self._fieldParameters.keys()])
-            except KeyError:
-                return False
-        else:
-            raise TypeError('Cannot compare type %s to CrystalField' % other.__class__.__name__)
-
     def _getTemperature(self, i):
         """Get temperature value for i-th spectrum."""
         if self._temperature is None:
@@ -1006,7 +994,7 @@ class CrystalField(object):
             xArray = workspace
         else:
             return self._calcSpectrum(funstr, workspace, ws_index)
-            
+
         yArray = np.zeros_like(xArray)
         wksp = makeWorkspace(xArray, yArray)
         return self._calcSpectrum(funstr, wksp, ws_index)
@@ -1062,6 +1050,7 @@ class CrystalField(object):
     def _isMultiSpectra(self):
         return hasattr(self._temperature, '__len__')
 
+
 class CrystalFieldSite(object):
     """
     A helper class for the multi-site algebra. It is a result of the '*' operation between a CrystalField
@@ -1111,8 +1100,7 @@ class CrystalFieldMulti(object):
         # variable parameters and we require the sum to be unity.
         factors = np.array(self.abundances)
         sum_factors = np.sum(factors)
-        for i in range(len(self.sites)):
-            factstr[i] = ',ScaleFactor=%s' % (str(factors[i] / sum_factors))
+        factstr = [',ScaleFactor=%s' % (str(factors[i] / sum_factors)) for i in range(len(self.sites))]
         fun = ';'.join([a.makePhysicalPropertiesFunction()+factstr[i] for a,i in enumerate(self.sites)])
         ties = self.getTies()
         if len(ties) > 0:
