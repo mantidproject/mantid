@@ -1,11 +1,11 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -28,8 +28,8 @@ namespace CustomInterfaces {
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> &postprocessMap,
@@ -62,22 +62,6 @@ void ReflDataProcessorPresenter::process() {
 
   // Things we should take into account:
   // 1. We need to report progress, see GenericDataProcessorPresenter::process()
-  // 2. We need to pay attention to prefixes. See how the interface names the
-  // output workspaces
-  // 3. For slices, we probably want to add a suffix:
-  // <output_ws_name>_start_stop
-  // (check that this is the suffix they're using in Max's script)
-  // 4. There may be some methods defined in GenericDataProcessorPreseter that
-  // we may find useful here, for instance
-  // GenericDataProcessorPresenter::getReducedWorkspaceName() or
-  // GenericDataProcessorPresenter::getPostprocessedWorkspaceName(). If there is
-  // a private method you want to use, don't hesitate to make it protected in
-  // the base class.
-
-  // If transmission runs specified in the table
-  // Load transmission runs
-  // Run CreateTransmissionWorkspaceAuto, taking into account global options
-  // from settings, if any
 
   // Get selected runs
   const auto items = m_manager->selectedData(true);
@@ -92,7 +76,13 @@ void ReflDataProcessorPresenter::process() {
 
       // Load the run
       std::string runno = row.at(0);
-      loadRun(runno);
+      try {
+        loadRun(runno);
+      } catch (...) {
+        m_mainPresenter->giveUserCritical(
+            "Couldn't load run " + runno + " as event workspace", "Error");
+        return;
+      }
 
       for (size_t i = 0; i < numSlices; i++) {
         auto wsName = takeSlice(runno, startTimes[i], stopTimes[i]);
@@ -105,6 +95,20 @@ void ReflDataProcessorPresenter::process() {
     }
 
     // Post-process (if needed)
+    if (item.second.size() > 1) {
+      for (size_t i = 0; i < numSlices; i++) {
+
+        GroupData group;
+        std::vector<std::string> data;
+        for (const auto &row : item.second) {
+          data = row.second;
+          data[0] = row.second[0] + "_" + std::to_string((int)startTimes[i]) +
+                    "_" + std::to_string((int)stopTimes[i]);
+          group[row.first] = data;
+        }
+        postProcessGroup(group);
+      }
+    }
   }
 
   // Notebook not implemented yet
@@ -113,9 +117,16 @@ void ReflDataProcessorPresenter::process() {
         "Notebook not implemented for sliced data yet",
         "Notebook will not be generated");
   }
-  // If not selected, do nothing
 }
 
+/** Parses a string to extract time slicing
+*
+* @param timeSlicing :: the string to parse
+* @param startTimes :: [output] A vector containing the start time for each
+*slice
+* @param stopTimes :: [output] A vector containing the stop time for each
+*slice
+*/
 void ReflDataProcessorPresenter::parseTimeSlicing(
     const std::string &timeSlicing, std::vector<double> &startTimes,
     std::vector<double> &stopTimes) {
@@ -169,10 +180,11 @@ void ReflDataProcessorPresenter::loadRun(const std::string &runno) {
 * @param runno :: the run number as a string
 * @param startTime :: start time
 * @param stopTime :: stop time
-* @return :: the name of the sliced workspace
+* @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
 std::string ReflDataProcessorPresenter::takeSlice(const std::string &runno,
-                                           double startTime, double stopTime) {
+                                                  double startTime,
+                                                  double stopTime) {
 
   std::string runName = "TOF_" + runno;
   std::string sliceName = runName + "_" + std::to_string((int)startTime) + "_" +
@@ -227,7 +239,133 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runno,
   append->setProperty("MergeLogs", true);
   append->execute();
 
-  return sliceName;
+  return sliceName.substr(4);
+}
+
+/** Plots any currently selected rows */
+void ReflDataProcessorPresenter::plotRow() {
+
+  // if uniform slicing is empty plot normally
+  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
+  if (timeSlicing.empty()) {
+    GenericDataProcessorPresenter::plotRow();
+    return;
+  }
+
+  // Parse time slices
+  std::vector<double> startTimes, stopTimes;
+  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
+  size_t numSlices = startTimes.size();
+
+  // Set of workspaces to plot
+  std::set<std::string> workspaces;
+  // Set of workspaces not found in the ADS
+  std::set<std::string> notFound;
+
+  const auto items = m_manager->selectedData();
+
+  for (const auto &item : items) {
+    for (const auto &run : item.second) {
+
+      const std::string wsName =
+          getReducedWorkspaceName(run.second, m_processor.prefix(0));
+
+      for (size_t slice = 0; slice < numSlices; slice++) {
+        const std::string sliceName =
+            wsName + "_" + std::to_string((int)startTimes[slice]) + "_" +
+            std::to_string((int)stopTimes[slice]);
+        if (AnalysisDataService::Instance().doesExist(sliceName))
+          workspaces.insert(sliceName);
+        else
+          notFound.insert(sliceName);
+      }
+    }
+  }
+
+  if (!notFound.empty())
+    m_mainPresenter->giveUserWarning(
+        "The following workspaces were not plotted because they were not "
+        "found:\n" +
+            boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the rows you are trying to plot have been "
+            "fully processed.",
+        "Error plotting rows.");
+
+  plotWorkspaces(workspaces);
+}
+
+/** This method returns, for a given set of rows, i.e. a group of runs, the name
+* of the output (post-processed) workspace
+*
+* @param groupData : The data in a given group
+* @param prefix : A prefix to be appended to the generated ws name
+* @param startTime : start time of the slice
+* @param stopTime : stop time of the slice
+* @returns : The name of the workspace
+*/
+std::string ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
+    const GroupData &groupData, const std::string &prefix, double startTime,
+    double stopTime) {
+
+  std::vector<std::string> outputNames;
+
+  for (const auto &data : groupData) {
+    outputNames.push_back(getReducedWorkspaceName(data.second) + "_" +
+                          std::to_string((int)startTime) + "_" +
+                          std::to_string((int)stopTime));
+  }
+  return prefix + boost::join(outputNames, "_");
+}
+
+/** Plots any currently selected groups */
+void ReflDataProcessorPresenter::plotGroup() {
+
+  // if uniform slicing is empty plot normally
+  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
+  if (timeSlicing.empty()) {
+    GenericDataProcessorPresenter::plotGroup();
+    return;
+  }
+
+  // Parse time slices
+  std::vector<double> startTimes, stopTimes;
+  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
+  size_t numSlices = startTimes.size();
+
+  // Set of workspaces to plot
+  std::set<std::string> workspaces;
+  // Set of workspaces not found in the ADS
+  std::set<std::string> notFound;
+
+  const auto items = m_manager->selectedData();
+
+  for (const auto &item : items) {
+
+    if (item.second.size() > 1) {
+
+      for (size_t slice = 0; slice < numSlices; slice++) {
+
+        const std::string wsName = getPostprocessedWorkspaceName(
+            item.second, "IvsQ_", startTimes[slice], stopTimes[slice]);
+
+        if (AnalysisDataService::Instance().doesExist(wsName))
+          workspaces.insert(wsName);
+        else
+          notFound.insert(wsName);
+      }
+    }
+  }
+
+  if (!notFound.empty())
+    m_mainPresenter->giveUserWarning(
+        "The following workspaces were not plotted because they were not "
+        "found:\n" +
+            boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the groups you are trying to plot have been "
+            "fully processed.",
+        "Error plotting groups.");
+
+  plotWorkspaces(workspaces);
 }
 }
 }

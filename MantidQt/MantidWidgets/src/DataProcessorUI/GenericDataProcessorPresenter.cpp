@@ -488,7 +488,7 @@ std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
 }
 
 /**
-Returns the name of the reduced workspace for a given row
+Returns the name of the reduced workspace for a given group
 @param groupData : The data in a given group
 @param prefix : A prefix to be appended to the generated ws name
 @returns : The name of the workspace
@@ -1116,7 +1116,7 @@ void GenericDataProcessorPresenter::plotGroup() {
             boost::algorithm::join(notFound, "\n") +
             "\n\nPlease check that the groups you are trying to plot have been "
             "fully processed.",
-        "Error plotting rows.");
+        "Error plotting groups.");
 
   plotWorkspaces(workspaces);
 }

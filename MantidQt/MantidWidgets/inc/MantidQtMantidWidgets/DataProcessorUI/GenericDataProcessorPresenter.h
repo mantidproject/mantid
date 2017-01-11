@@ -134,6 +134,10 @@ protected:
 
   // Process selected rows
   virtual void process();
+  // Plotting
+  virtual void plotRow();
+  virtual void plotGroup();
+  void plotWorkspaces(const std::set<std::string> &workspaces);
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
@@ -186,10 +190,6 @@ private:
   void saveTableAs();
   void importTable();
   void exportTable();
-  // plotting
-  void plotRow();
-  void plotGroup();
-  void plotWorkspaces(const std::set<std::string> &workspaces);
 
   // options
   void showOptionsDialog();

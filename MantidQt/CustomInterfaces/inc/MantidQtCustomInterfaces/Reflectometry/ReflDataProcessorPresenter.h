@@ -55,6 +55,13 @@ public:
 private:
   // Process selected rows
   void process() override;
+  // Plotting
+  void plotRow() override;
+  void plotGroup() override;
+  // Get the name of a post-processed workspace
+  std::string getPostprocessedWorkspaceName(const GroupData &groupData,
+                                            const std::string &prefix,
+                                            double startTime, double stopTime);
   // Parse time slicing from string
   void parseTimeSlicing(const std::string &timeSlicing,
                         std::vector<double> &startTimes,
