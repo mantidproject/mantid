@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import warnings
-import sys
 
 
 # Have to patch warnings at runtime to not print the source code. This is even advertised as a 'feature' of
@@ -32,7 +31,6 @@ class InstrumentSettings(object):
         map_entry = next((attr_tuple for attr_tuple in self._attr_mapping if item == attr_tuple[-1]), None)
         if map_entry:
             # User forgot to enter the param:
-            sys.tracebacklimit = 0
             raise AttributeError("The parameter with name: '" + str(map_entry[0]) + "' is required but was not set or "
                                  "passed.\nPlease set this configuration option and try again")
         else:
