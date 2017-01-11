@@ -1987,8 +1987,7 @@ void SliceViewer::openFromXML(const QString &xml) {
         "SliceViewer::openFromXML(): No root element in XML string.");
 
   // ------- Find the workspace ------------
-  Poco::XML::Element *cur = NULL;
-  cur = pRootElem->getChildElement("MDWorkspaceName");
+  Poco::XML::Element *cur = pRootElem->getChildElement("MDWorkspaceName");
   if (!cur)
     throw std::runtime_error(
         "SliceViewer::openFromXML(): No MDWorkspaceName element.");
@@ -2749,7 +2748,7 @@ std::string SliceViewer::saveToProject() const {
   tsv.writeSection("overlay", m_lineOverlay->saveToProject());
 
   if (m_overlayWS)
-    tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();
+    tsv.writeLine("OverlayWorkspace") << m_overlayWS->getName();
 
   return tsv.outputLines();
 }

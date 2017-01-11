@@ -316,11 +316,15 @@ void ProjectionSurface::updateView(bool picking) {
 }
 
 void ProjectionSurface::updateDetectors() {
+  // updating detectors should not reset the view rect
+  // cache the value here are reapply after updating the detectors
+  auto viewRectCache = m_viewRect;
   clear();
   this->init();
   // if integration range in the instrument actor has changed
   // update visiblity of peak markers
   setPeakVisibility();
+  m_viewRect = viewRectCache;
 }
 
 /// Send a redraw request to the surface owner
@@ -594,6 +598,22 @@ void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor,
 }
 
 /**
+ * Save shapes drawn on the view to a table workspace
+ */
+void ProjectionSurface::saveShapesToTableWorkspace() {
+  m_maskShapes.saveToTableWorkspace();
+}
+
+/**
+ * Load shapes from a table workspace on to the view.
+ * @param ws :: table workspace to load shapes from
+ */
+void ProjectionSurface::loadShapesFromTableWorkspace(
+    Mantid::API::ITableWorkspace_const_sptr ws) {
+  m_maskShapes.loadFromTableWorkspace(ws);
+}
+
+/**
 * Return a combined list of peak parkers from all overlays
 * @param detID :: The detector ID of interest
 */
@@ -795,7 +815,7 @@ void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
   foreach (PeakOverlay *po, m_peakShapes) {
-    names << QString::fromStdString(po->getPeaksWorkspace()->name());
+    names << QString::fromStdString(po->getPeaksWorkspace()->getName());
   }
   return names;
 }

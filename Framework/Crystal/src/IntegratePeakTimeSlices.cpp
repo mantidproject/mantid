@@ -1335,15 +1335,10 @@ void DataModeHandler::setHeightHalfWidthInfo(
   double offset = std::max<double>(.2, (maxCount - minCount) / 20);
   double TotR_max = 0;
   double TotR_min = 0;
-  int nedge1Cells = 0;
-  int nintCells = 0;
-  int nBoundEdge1Cells = 0;
-  int nBoundIntCells = 0;
   double TotRx0 = 0;
   double TotRy0 = 0;
   double TotCx = 0;
   double TotCy = 0;
-  double IntOffset = std::min<double>(highX - lowX, highY - lowY);
   for (int i = 0; i < N; i++) {
     if (C[i] > maxCount - offset) {
       TotMax += C[i];
@@ -1361,16 +1356,6 @@ void DataModeHandler::setHeightHalfWidthInfo(
                               (Y[i] - MaxY) * (Y[i] - MaxY));
     }
 
-    if (X[i] >= lowX && X[i] <= highX && Y[i] >= lowY && Y[i] <= highY) {
-      nedge1Cells++;
-      if (C[i] < minCount + offset)
-        nBoundEdge1Cells++;
-    }
-    if (fabs(MaxX - X[i]) < IntOffset && fabs(MaxY - Y[i]) < IntOffset) {
-      nintCells++;
-      if (C[i] < minCount + offset)
-        nBoundIntCells++;
-    }
     if (fabs(MaxY - Y[i]) < 1.2 && fabs(MaxX - X[i]) > 1.2 &&
         C[i] >= CountLow && C[i] <= CountUp && fabs(MaxX - X[i]) < dSpanx) {
       TotRx0 += (C[i] - minCount) * (X[i] - MaxX) * (X[i] - MaxX);
@@ -1578,7 +1563,6 @@ void IntegratePeakTimeSlices::SetUpData1(
   int nBoundaryCells = 0;
   double TotBoundaryVariances = 0;
 
-  int N = 0;
   double BoundaryRadius = min<double>(
       .90 * Radius, Radius - 1.5 * max<double>(m_cellWidth, m_cellHeight));
   double minRow = 20000, maxRow = -1, minCol = 20000, maxCol = -1;
@@ -1633,7 +1617,6 @@ void IntegratePeakTimeSlices::SetUpData1(
           variance += histoerrs[chan] * histoerrs[chan];
         }
 
-        N++;
         yvalB.push_back(intensity);
         double sigma = 1;
 

@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <string>
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -12,15 +11,18 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <boost/functional/hash.hpp>
+#include "boost/make_shared.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <boost/functional/hash.hpp>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
+
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -35,7 +37,7 @@ private:
     GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(getUnits, const Mantid::Kernel::UnitLabel());
-    MOCK_CONST_METHOD0(getDimensionId, std::string());
+    MOCK_CONST_METHOD0(getDimensionId, const std::string &());
     MOCK_CONST_METHOD0(getMaximum, coord_t());
     MOCK_CONST_METHOD0(getMinimum, coord_t());
     MOCK_CONST_METHOD0(getNBins, size_t());
@@ -63,20 +65,25 @@ private:
 
 public:
   void testCopyConstruction() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("_a"));
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    std::string a{"_a"}, b{"_b"}, c{"_c"}, d{"_d"};
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
 
-    MockIMDDimension *pDimensionY = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("_b"));
+    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
+        .WillRepeatedly(ReturnRef(b));
     EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
 
-    MockIMDDimension *pDimensionZ = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionZ, getDimensionId()).WillRepeatedly(Return("_c"));
+    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
+        .WillRepeatedly(ReturnRef(c));
     EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
 
-    MockIMDDimension *pDimensionT = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionT, getDimensionId()).WillRepeatedly(Return("_d"));
+    auto pDimensionT = boost::make_shared<MockIMDDimension>();
+    EXPECT_CALL(Const(*pDimensionT), getDimensionId())
+        .WillRepeatedly(ReturnRef(d));
     EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
 
     MDGeometryBuilderXML<NoDimensionPolicy> original;
@@ -95,20 +102,25 @@ public:
   }
 
   void testAssignment() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("_a"));
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    std::string a{"_a"}, b{"_b"}, c{"_c"}, d{"_d"};
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
 
-    MockIMDDimension *pDimensionY = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("_b"));
+    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
+        .WillRepeatedly(ReturnRef(b));
     EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
 
-    MockIMDDimension *pDimensionZ = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionZ, getDimensionId()).WillRepeatedly(Return("_c"));
+    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
+        .WillRepeatedly(ReturnRef(c));
     EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
 
-    MockIMDDimension *pDimensionT = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionT, getDimensionId()).WillRepeatedly(Return("_d"));
+    auto pDimensionT = boost::make_shared<MockIMDDimension>();
+    EXPECT_CALL(Const(*pDimensionT), getDimensionId())
+        .WillRepeatedly(ReturnRef(d));
     EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
 
     MDGeometryBuilderXML<NoDimensionPolicy> A;
@@ -127,8 +139,10 @@ public:
   }
 
   void testCannotAddSameDimensionMultipleTimes() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    std::string a{"a"};
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
     IMDDimension_const_sptr dimension(pDimensionX);
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
@@ -156,8 +170,10 @@ public:
   }
 
   void testStrictPolicy() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    std::string a{"a"};
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, getIsIntegrated()).WillRepeatedly(Return(true));
     IMDDimension_const_sptr dimension(pDimensionX);
 
@@ -178,8 +194,10 @@ public:
 
   // Same as test above, but shouldn't throw.
   void testNoPolicy() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+    std::string a{"a"};
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, getIsIntegrated()).WillRepeatedly(Return(true));
     IMDDimension_const_sptr dimension(pDimensionX);
 
@@ -199,11 +217,15 @@ public:
   }
 
   void testWithOrinaryDimensionOnly() {
-    MockIMDDimension *pDimensionOrdinary = new MockIMDDimension;
+    auto pDimensionOrdinary = boost::make_shared<MockIMDDimension>();
 
     EXPECT_CALL(*pDimensionOrdinary, toXMLString())
         .Times(1)
         .WillOnce(Return(createDimensionXMLString(1, -1, 1, "O", "o")));
+
+    std::string o{"o"};
+    EXPECT_CALL(Const(*pDimensionOrdinary), getDimensionId())
+        .WillRepeatedly(ReturnRef(o));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addOrdinaryDimension(IMDDimension_const_sptr(pDimensionOrdinary));
@@ -239,13 +261,13 @@ public:
   }
 
   void testManyOrinaryDimensions() {
-    MockIMDDimension *pDimA = new MockIMDDimension;
-    MockIMDDimension *pDimB = new MockIMDDimension;
-    MockIMDDimension *pDimC = new MockIMDDimension;
-
-    EXPECT_CALL(*pDimA, getDimensionId()).WillRepeatedly(Return("a"));
-    EXPECT_CALL(*pDimB, getDimensionId()).WillRepeatedly(Return("b"));
-    EXPECT_CALL(*pDimC, getDimensionId()).WillRepeatedly(Return("c"));
+    auto pDimA = boost::make_shared<MockIMDDimension>();
+    auto pDimB = boost::make_shared<MockIMDDimension>();
+    auto pDimC = boost::make_shared<MockIMDDimension>();
+    std::string a{"a"}, b{"b"}, c{"c"};
+    EXPECT_CALL(Const(*pDimA), getDimensionId()).WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(Const(*pDimB), getDimensionId()).WillRepeatedly(ReturnRef(b));
+    EXPECT_CALL(Const(*pDimC), getDimensionId()).WillRepeatedly(ReturnRef(c));
 
     EXPECT_CALL(*pDimA, toXMLString())
         .Times(1)
@@ -266,17 +288,18 @@ public:
     builder.addManyOrdinaryDimensions(vecDims);
 
     TS_ASSERT_THROWS_NOTHING(builder.create()); // Serialize the geometry.
-    TS_ASSERT(testing::Mock::VerifyAndClear(pDimA));
-    TS_ASSERT(testing::Mock::VerifyAndClear(pDimB));
-    TS_ASSERT(testing::Mock::VerifyAndClear(pDimC));
+    TS_ASSERT(testing::Mock::VerifyAndClear(pDimA.get()));
+    TS_ASSERT(testing::Mock::VerifyAndClear(pDimB.get()));
+    TS_ASSERT(testing::Mock::VerifyAndClear(pDimC.get()));
   }
 
   void testWithXDimensionOnly() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    std::string a{"a"};
     EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillOnce(Return("a"));
+        .WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
@@ -312,16 +335,19 @@ public:
   }
 
   void testWithXYDimensionOnly() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    MockIMDDimension *pDimensionY = new MockIMDDimension;
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    std::string a{"a"}, b{"b"};
 
     EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
 
     EXPECT_CALL(*pDimensionY, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", "b")));
-    EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("b"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
+        .WillRepeatedly(ReturnRef(b));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
@@ -359,21 +385,25 @@ public:
   }
 
   void testWithXYZDimensionOnly() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    MockIMDDimension *pDimensionY = new MockIMDDimension;
-    MockIMDDimension *pDimensionZ = new MockIMDDimension;
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
+    std::string a{"a"}, b{"b"}, c{"c"};
 
     EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
 
     EXPECT_CALL(*pDimensionY, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", "b")));
-    EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("b"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
+        .WillRepeatedly(ReturnRef(b));
 
     EXPECT_CALL(*pDimensionZ, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", "c")));
-    EXPECT_CALL(*pDimensionZ, getDimensionId()).WillRepeatedly(Return("c"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", c)));
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
+        .WillRepeatedly(ReturnRef(c));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
@@ -412,32 +442,37 @@ public:
   }
 
   void testFullCreate() {
-    MockIMDDimension *pDimensionX = new MockIMDDimension;
-    MockIMDDimension *pDimensionY = new MockIMDDimension;
-    MockIMDDimension *pDimensionZ = new MockIMDDimension;
-    MockIMDDimension *pDimensionT = new MockIMDDimension;
+    auto pDimensionX = boost::make_shared<MockIMDDimension>();
+    auto pDimensionY = boost::make_shared<MockIMDDimension>();
+    auto pDimensionZ = boost::make_shared<MockIMDDimension>();
+    auto pDimensionT = boost::make_shared<MockIMDDimension>();
+    std::string a{"a"}, b{"b"}, c{"c"}, d{"d"};
 
     EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
-    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
+        .WillRepeatedly(ReturnRef(a));
 
     EXPECT_CALL(*pDimensionY, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", "b")));
-    EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("b"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
+        .WillRepeatedly(ReturnRef(b));
 
     EXPECT_CALL(*pDimensionZ, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", "c")));
-    EXPECT_CALL(*pDimensionZ, getDimensionId()).WillRepeatedly(Return("c"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", c)));
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
+        .WillRepeatedly(ReturnRef(c));
 
     EXPECT_CALL(*pDimensionT, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "D", "d")));
-    EXPECT_CALL(*pDimensionT, getDimensionId()).WillRepeatedly(Return("d"));
+        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "D", d)));
+    EXPECT_CALL(Const(*pDimensionT), getDimensionId())
+        .WillRepeatedly(ReturnRef(d));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
-    builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
-    builder.addYDimension(IMDDimension_const_sptr(pDimensionY));
-    builder.addZDimension(IMDDimension_const_sptr(pDimensionZ));
-    builder.addTDimension(IMDDimension_const_sptr(pDimensionT));
+    builder.addXDimension(pDimensionX);
+    builder.addYDimension(pDimensionY);
+    builder.addZDimension(pDimensionZ);
+    builder.addTDimension(pDimensionT);
 
     // Only practicle way to check the xml output in the absense of xsd is as
     // part of a dom tree.

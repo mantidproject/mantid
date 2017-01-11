@@ -781,7 +781,7 @@ std::string UnwrappedSurface::saveToProject() const {
 
   tsv.writeLine("PeaksWorkspaces");
   for (auto overlay : m_peakShapes) {
-    tsv << overlay->getPeaksWorkspace()->name();
+    tsv << overlay->getPeaksWorkspace()->getName();
   }
 
   return tsv.outputLines();

@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -25,8 +23,6 @@ using namespace Mantid::Geometry;
 SofQWPolygon::SofQWPolygon()
     : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
 
-//----------------------------------------------------------------------------------------------
-
 /**
  * Initialize the algorithm
  */
@@ -38,7 +34,7 @@ void SofQWPolygon::init() { SofQW::createCommonInputProperties(*this); }
 void SofQWPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     throw std::invalid_argument(
         "The input workspace must have common binning across all spectra");
   }
@@ -213,36 +209,23 @@ void SofQWPolygon::initThetaCache(const API::MatrixWorkspace &workspace) {
   size_t ndets(0);
   double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
 
-  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) // signed for OpenMP
-  {
-
+  const auto &spectrumInfo = workspace.spectrumInfo();
+  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     m_progress->report("Calculating detector angles");
-    IDetector_const_sptr det;
+    m_thetaPts[i] = -1.0; // Indicates a detector to skip
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
+      continue;
+    // Check to see if there is an EFixed, if not skip it
     try {
-      det = workspace.getDetector(i);
-      // Check to see if there is an EFixed, if not skip it
-      try {
-        m_EmodeProperties.getEFixed(*det);
-      } catch (std::runtime_error &) {
-        det.reset();
-      }
-    } catch (Kernel::Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
+      m_EmodeProperties.getEFixed(spectrumInfo.detector(i));
+    } catch (std::runtime_error &) {
+      continue;
     }
-    // If no detector found, skip onto the next spectrum
-    if (!det || det->isMonitor()) {
-      m_thetaPts[i] = -1.0; // Indicates a detector to skip
-    } else {
-      ++ndets;
-      const double theta = workspace.detectorTwoTheta(*det);
-      m_thetaPts[i] = theta;
-      minTheta = std::min(minTheta, theta);
-      maxTheta = std::max(maxTheta, theta);
-    }
+    ++ndets;
+    const double theta = spectrumInfo.twoTheta(i);
+    m_thetaPts[i] = theta;
+    minTheta = std::min(minTheta, theta);
+    maxTheta = std::max(maxTheta, theta);
   }
 
   if (0 == ndets)

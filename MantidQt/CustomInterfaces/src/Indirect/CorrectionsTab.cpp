@@ -77,7 +77,7 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
                                                 const std::string &unitID,
                                                 const std::string &suffix,
                                                 std::string eMode) {
-  std::string outputName = ws->name();
+  std::string outputName = ws->getName();
 
   if (suffix != "UNIT")
     outputName += suffix;
@@ -88,7 +88,7 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
       AlgorithmManager::Instance().create("ConvertUnits");
   convertAlg->initialize();
 
-  convertAlg->setProperty("InputWorkspace", ws->name());
+  convertAlg->setProperty("InputWorkspace", ws->getName());
   convertAlg->setProperty("OutputWorkspace", outputName);
   convertAlg->setProperty("Target", unitID);
 

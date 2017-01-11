@@ -27,7 +27,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfRunFile" native="true">
+       <widget class="MantidQt::API::MWRunFiles" name="rfRunFile" native="true">
         <property name="label" stdset="0">
          <string>Run File</string>
         </property>
@@ -68,7 +68,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="rfMapFile" native="true">
             <property name="label" stdset="0">
              <string></string>
             </property>
@@ -230,9 +230,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

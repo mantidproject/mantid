@@ -256,7 +256,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
 void LoadVulcanCalFile::setupMaskWorkspace() {
 
   // Skip if bad pixel file is not given
-  if (m_badPixFilename.size() == 0)
+  if (m_badPixFilename.empty())
     return;
 
   // Open file

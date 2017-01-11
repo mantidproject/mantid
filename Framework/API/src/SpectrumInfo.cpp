@@ -34,7 +34,10 @@ bool SpectrumInfo::isMonitor(const size_t index) const {
 
 /// Returns true if the detector(s) associated with the spectrum are masked.
 bool SpectrumInfo::isMasked(const size_t index) const {
-  return getDetector(index).isMasked();
+  bool masked = true;
+  for (const auto detIndex : getDetectorIndices(index))
+    masked &= m_detectorInfo.isMasked(detIndex);
+  return masked;
 }
 
 /** Returns L2 (distance from sample to spectrum).
@@ -135,15 +138,12 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   return count == 1;
 }
 
-/** Set the mask flag of the spectrum with given index.
+/** Set the mask flag of the spectrum with given index. Not thread safe.
  *
  * Currently this simply sets the mask flags for the underlying detectors. */
 void SpectrumInfo::setMasked(const size_t index, bool masked) {
-  for (const auto &det : getDetectorVector(index)) {
-    const auto detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto detIndex : getDetectorIndices(index))
     m_mutableDetectorInfo->setMasked(detIndex, masked);
-  }
 }
 
 /// Return a const reference to the detector or detector group of the spectrum
@@ -201,7 +201,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
       }
     }
     m_lastDetector[thread] =
-        boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);
+        boost::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
 
   return *m_lastDetector[thread];
@@ -218,6 +218,22 @@ SpectrumInfo::getDetectorVector(const size_t index) const {
     size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
     return {m_lastDetector[thread]};
   }
+}
+
+std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
+  std::vector<size_t> detIndices;
+  const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
+    const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
+                                      validDetectorIDs.cend(), id);
+    if (it != validDetectorIDs.cend() && *it == id) {
+      detIndices.push_back(m_detectorInfo.indexOf(id));
+    }
+  }
+  if (detIndices.empty())
+    throw Kernel::Exception::NotFoundError(
+        "SpectrumInfo: No detectors for this workspace index.", "");
+  return detIndices;
 }
 
 } // namespace API

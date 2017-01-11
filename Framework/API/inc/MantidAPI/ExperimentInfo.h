@@ -16,6 +16,9 @@ namespace Mantid {
 namespace Kernel {
 class Property;
 }
+namespace Beamline {
+class DetectorInfo;
+}
 namespace Geometry {
 class ParameterMap;
 class XMLInstrumentParameter;
@@ -67,9 +70,7 @@ public:
   // Add parameters to the instrument parameter map
   virtual void populateInstrumentParameters();
 
-  /// Replaces current parameter map with copy of given map
   virtual void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
-  /// exchange contents of current parameter map with contents of other map)
   virtual void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs
@@ -211,7 +212,8 @@ private:
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
 
-  mutable std::unique_ptr<DetectorInfo> m_detectorInfo;
+  boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
+  mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
   mutable std::mutex m_detectorInfoMutex;
 };
 

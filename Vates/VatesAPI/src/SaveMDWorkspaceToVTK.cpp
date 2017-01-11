@@ -60,13 +60,6 @@ void SaveMDWorkspaceToVTK::init() {
       "The visual normalization option. The automatic default will choose a "
       "normalization based on your data type and instrument.");
 
-  auto thresholds = saver->getAllowedThresholdsInStringRepresentation();
-  declareProperty(
-      "ThresholdRange", "IgnoreZerosThresholdRange",
-      boost::make_shared<Mantid::Kernel::StringListValidator>(thresholds),
-      "The threshold range. Currently either no threshold or an ignore-zeros "
-      "policy can be applied.");
-
   boost::shared_ptr<Mantid::Kernel::BoundedValidator<int>> mustBePositive(
       new Mantid::Kernel::BoundedValidator<int>());
   mustBePositive->setLower(1);
@@ -90,18 +83,13 @@ void SaveMDWorkspaceToVTK::exec() {
   auto normalization = saver->translateStringToVisualNormalization(
       normalizationInStringRepresentation);
 
-  std::string thresholdRangeInStringRepresentation =
-      this->getProperty("ThresholdRange");
-  auto thresholdRange = saver->translateStringToThresholdRange(
-      thresholdRangeInStringRepresentation);
-
   int recursionDepth = this->getProperty("RecursionDepth");
 
   std::string compressorType = this->getProperty("CompressorType");
 
   // Save workspace into file
-  saver->saveMDWorkspace(inputWS, filename, normalization, thresholdRange,
-                         recursionDepth, compressorType);
+  saver->saveMDWorkspace(inputWS, filename, normalization, recursionDepth,
+                         compressorType);
 }
 
 std::map<std::string, std::string> SaveMDWorkspaceToVTK::validateInputs() {
@@ -116,7 +104,7 @@ std::map<std::string, std::string> SaveMDWorkspaceToVTK::validateInputs() {
   }
 
   // Check for the dimensionality
-  if (!saver->is3DWorkspace(inputWS)) {
+  if (!saver->is3DWorkspace(*inputWS)) {
     errorMessage.emplace("InputWorkspace", "The MD workspace must be 3D.");
   }
 

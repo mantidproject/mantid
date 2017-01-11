@@ -9,9 +9,13 @@
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
+
+#include "MantidBeamline/DetectorInfo.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -19,8 +23,10 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
@@ -47,7 +53,8 @@ Kernel::Logger g_log("ExperimentInfo");
 ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
-      sptr_instrument(new Instrument()) {}
+      sptr_instrument(new Instrument()),
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {}
 
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
@@ -75,6 +82,7 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
+  *m_detectorInfo = *other->m_detectorInfo;
 }
 
 /** Clone this ExperimentInfo class into a new one
@@ -136,12 +144,39 @@ const std::string ExperimentInfo::toString() const {
   return out.str();
 }
 
+// Helpers for setInstrument and getInstrument
+namespace {
+void checkDetectorInfoSize(const Instrument &instr,
+                           const Beamline::DetectorInfo &detInfo) {
+  const auto numDets = instr.getNumberDetectors();
+  if (numDets != detInfo.size())
+    throw std::runtime_error("ExperimentInfo: size mismatch between "
+                             "DetectorInfo and number of detectors in "
+                             "instrument");
+}
+
+std::unique_ptr<Beamline::DetectorInfo>
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
+  if (newInstr.hasDetectorInfo()) {
+    // We allocate a new DetectorInfo in case there is an Instrument holding a
+    // reference to our current DetectorInfo.
+    const auto &detInfo = newInstr.detectorInfo();
+    checkDetectorInfoSize(oldInstr, detInfo);
+    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
+  } else {
+    // If there is no DetectorInfo in the instrument we create a default one.
+    const auto numDets = oldInstr.getNumberDetectors();
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+  }
+}
+}
+
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     m_parmap = instr->getParameterMap();
@@ -149,6 +184,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
+  m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -157,8 +193,11 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
-                                                         m_parmap);
+  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
+  auto instrument = Geometry::ParComponentFactory::createInstrument(
+      sptr_instrument, m_parmap);
+  instrument->setDetectorInfo(m_detectorInfo);
+  return instrument;
 }
 
 /**  Returns a new copy of the instrument parameters
@@ -176,7 +215,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
       invalidateInstrumentReferences();
-      m_detectorInfo = nullptr;
+      m_detectorInfoWrapper = nullptr;
     }
     if (!m_parmap.unique()) {
       ParameterMap_sptr oldData = m_parmap;
@@ -315,24 +354,28 @@ void ExperimentInfo::populateInstrumentParameters() {
 
 /**
  * Replaces current parameter map with a copy of the given map
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap const reference to parameter map whose copy replaces the current
  * parameter map
  */
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
 }
 
 /**
  * exchanges contents of current parameter map with contents of other map)
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap reference to parameter map which would exchange its contents with
  * current map
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
   invalidateInstrumentReferences();
-  m_detectorInfo = nullptr;
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
 }
 
@@ -895,12 +938,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
  * this reference.
  */
 const DetectorInfo &ExperimentInfo::detectorInfo() const {
-  if (!m_detectorInfo) {
+  if (!m_detectorInfoWrapper) {
     std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
-    if (!m_detectorInfo)
-      m_detectorInfo = Kernel::make_unique<DetectorInfo>(getInstrument());
+    if (!m_detectorInfoWrapper)
+      m_detectorInfoWrapper =
+          Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument());
   }
-  return *m_detectorInfo;
+  return *m_detectorInfoWrapper;
 }
 
 /** Return a non-const reference to the DetectorInfo object. Not thread safe.
@@ -910,18 +954,19 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
 
   // We get the non-const ParameterMap reference *first* such that no copy is
   // triggered unless really necessary. The call to `instrumentParameters`
-  // releases the old m_detectorInfo to drop the reference count to the
+  // releases the old m_detectorInfoWrapper to drop the reference count to the
   // ParameterMap by 1 (DetectorInfo contains a parameterized Instrument, so the
-  // reference count to the ParameterMap is at least 2 if m_detectorInfo is not
-  // nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then the
-  // ExperimentInfo is not the sole owner of the ParameterMap a copy is
+  // reference count to the ParameterMap is at least 2 if m_detectorInfoWrapper
+  // is not nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then
+  // the ExperimentInfo is not the sole owner of the ParameterMap a copy is
   // triggered.
   auto pmap = &instrumentParameters();
   // Here `getInstrument` creates a parameterized instrument, increasing the
   // reference count to the ParameterMap. This has do be done *after* getting
   // the ParameterMap.
-  m_detectorInfo = Kernel::make_unique<DetectorInfo>(getInstrument(), pmap);
-  return *m_detectorInfo;
+  m_detectorInfoWrapper =
+      Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
+  return *m_detectorInfoWrapper;
 }
 
 /** Returns the number of detector groups.
@@ -1233,7 +1278,22 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     int size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[4];
-    pmap.add(tokens[1], comp, tokens[2], paramValue);
+
+    if (tokens[2].compare("masked") == 0) {
+      // Do not add masking to ParameterMap, it is stored in DetectorInfo
+      const auto det = dynamic_cast<const Detector *const>(comp);
+      if (!det)
+        throw std::runtime_error(
+            "Found masking for a non-detector component. This is not possible");
+      const auto &type = tokens[1];
+      const std::string name = "dummy";
+      auto param = ParameterFactory::create(type, name);
+      param->fromString(paramValue);
+      bool value = param->value<bool>();
+      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), value);
+    } else {
+      pmap.add(tokens[1], comp, tokens[2], paramValue);
+    }
   }
 }
 
@@ -1258,8 +1318,15 @@ void ExperimentInfo::populateWithParameter(
     pDescription = &paramInfo.m_description;
 
   // Some names are special. Values should be convertible to double
-  if (name.compare("x") == 0 || name.compare("y") == 0 ||
-      name.compare("z") == 0) {
+  if (name.compare("masked") == 0) {
+    // Do not add masking to ParameterMap, it is stored in DetectorInfo
+    const auto det = dynamic_cast<const Detector *const>(paramInfo.m_component);
+    if (!det)
+      throw std::runtime_error(
+          "Found masking for a non-detector component. This is not possible");
+    m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), paramValue);
+  } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
+             name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
   } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
              name.compare("roty") == 0 || name.compare("rotz") == 0) {
