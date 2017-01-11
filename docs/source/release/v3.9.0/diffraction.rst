@@ -19,7 +19,7 @@ Crystal Improvements
 
 General Diffraction
 -------------------
-:ref:`algm-ConvertToDiffractionMD2` now automatically calculates extents using :ref:`algm-ConvertToMDMinMaxLocal` if none are provided.
+A new version of :ref:`algm-ConvertToDiffractionMDWorkspace-v3` has been created that now automatically calculates extents using :ref:`algm-ConvertToMDMinMaxLocal` if none are provided.
 
 Single Crystal Diffraction
 --------------------------
