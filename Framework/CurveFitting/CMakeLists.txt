@@ -372,6 +372,10 @@ set ( TEST_FILES
 	Functions/CrystalFieldTest.h
 	Functions/CrystalFieldMultiSpectrumTest.h
 	Functions/CrystalFieldSpectrumTest.h
+	Functions/CrystalFieldHeatCapacityTest.h
+	Functions/CrystalFieldSusceptibilityTest.h
+	Functions/CrystalFieldMagnetisationTest.h
+	Functions/CrystalFieldMomentTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
 	Functions/DiffRotDiscreteCircleTest.h
