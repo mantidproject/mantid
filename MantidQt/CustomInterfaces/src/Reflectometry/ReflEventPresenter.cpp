@@ -21,14 +21,7 @@ ReflEventPresenter::~ReflEventPresenter() {}
 */
 std::string ReflEventPresenter::getTimeSlicingOptions() const {
 
-  std::vector<std::string> options;
-
-  // Add number of time slices
-  auto numTimeSlices = m_view->getTimeSlices();
-  if (!numTimeSlices.empty())
-    options.push_back(numTimeSlices);
-
-  return boost::algorithm::join(options, ",");
+  return m_view->getTimeSlices();
 }
 }
 }
