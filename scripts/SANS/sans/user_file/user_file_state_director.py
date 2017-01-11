@@ -7,7 +7,7 @@ from sans.common.general_functions import (get_ranges_for_rebin_setting, get_ran
 from sans.user_file.user_file_reader import UserFileReader
 from sans.user_file.user_file_common import (DetectorId, BackId, LimitsId, TransId, TubeCalibrationFileId,
                                              QResolutionId, MaskId, SampleId, SetId, MonId, FitId, GravityId, OtherId,
-                                             simple_range, complex_range, position_entry, rebin_string_values)
+                                             simple_range, complex_range, rebin_string_values)
 
 from sans.state.automatic_setters import set_up_setter_forwarding_from_director_to_builder
 from sans.state.state import get_state_builder
