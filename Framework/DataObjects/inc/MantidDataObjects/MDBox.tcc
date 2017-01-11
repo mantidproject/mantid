@@ -435,7 +435,7 @@ for (const MDE & Evnt : data) {
       for (size_t d = 0; d < nd; d++) {
         // Total up the coordinate weighted by the signal.
         centroid[d] += Evnt.getCenter(d) * signal;
-	  }
+    }
     }
   }
 
@@ -550,20 +550,44 @@ TMDE(void MDBox)::generalBin(
  * @param radiusSquared :: radius^2 below which to integrate
  * @param[out] signal :: set to the integrated signal
  * @param[out] errorSquared :: set to the integrated squared error.
+ * @param innerRadiusSquared :: radius^2 above which to integrate
  */
 TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                                   const coord_t radiusSquared, signal_t &signal,
-                                  signal_t &errorSquared) const {
+                                  signal_t &errorSquared, const coord_t innerRadiusSquared) const {
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
-
-  // For each MDLeanEvent
-  for (const auto & it :events) {
-    coord_t out[nd];
-    radiusTransform.apply(it.getCenter(), out);
-    if (out[0] < radiusSquared) {
-      signal += static_cast<signal_t>(it.getSignal());
-      errorSquared += static_cast<signal_t>(it.getErrorSquared());
+  if (innerRadiusSquared == 0.0) {
+    // For each MDLeanEvent
+    for (const auto &it : events) {
+      coord_t out[nd];
+      radiusTransform.apply(it.getCenter(), out);
+      if (out[0] < radiusSquared) {
+        signal += static_cast<signal_t>(it.getSignal());
+        errorSquared += static_cast<signal_t>(it.getErrorSquared());
+      }
+    }
+  } else {
+      // For each MDLeanEvent
+    std::vector<double> eventVec, errsqVec;
+    for (const auto &it : events) {
+      coord_t out[nd];
+      radiusTransform.apply(it.getCenter(), out);
+      if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
+        eventVec.push_back(static_cast<signal_t>(it.getSignal()));
+        errsqVec.push_back(static_cast<signal_t>(it.getErrorSquared()));
+        //signal += static_cast<signal_t>(it.getSignal());
+        //errorSquared += static_cast<signal_t>(it.getErrorSquared());
+      }
+    }
+    std::sort(errsqVec.begin(), errsqVec.end(), MyComparator(eventVec));
+    std::sort(eventVec.begin(), eventVec.end());
+    // Remove top 1% of background
+    for (size_t k = 0;
+         k < static_cast<size_t>(0.99 * static_cast<double>(eventVec.size()));
+         k++) {
+      signal += eventVec[k];
+      errorSquared += errsqVec[k];
     }
   }
   // it is constant access, so no saving or fiddling with the buffer is needed.

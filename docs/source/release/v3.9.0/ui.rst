@@ -88,3 +88,4 @@ VSI Improvements
 - Update the cut button to match the equivalent ParaView icon.
 - Changed the fallback for a MDHistoworkspace opened in the (incompatible) SplatterPlot view to the MultiSlice view.
 - Faster initial loading of a MDHistoworkspace in the MultiSlice and ThreeSlice view.
+- Drawing of a MDHistoWorkspace is now carried out in parallel using vtkSMPTools.

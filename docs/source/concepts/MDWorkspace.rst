@@ -126,7 +126,7 @@ If you want to check if a variable points to something that is an MDWorkspace Wo
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C', Units='U,U,U')
 
     if isinstance(mdws, IMDEventWorkspace):
-        print mdws.getName() + " is a " + mdws.id()
+        print mdws.name() + " is a " + mdws.id()
 
 Output:
 

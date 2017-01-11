@@ -91,6 +91,7 @@ private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
   getDetectorVector(const size_t index) const;
+  std::vector<size_t> getDetectorIndices(const size_t index) const;
 
   const ExperimentInfo &m_experimentInfo;
   DetectorInfo *m_mutableDetectorInfo{nullptr};

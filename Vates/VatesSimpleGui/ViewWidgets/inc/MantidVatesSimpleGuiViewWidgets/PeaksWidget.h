@@ -18,7 +18,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksWidget
   Q_OBJECT
 public:
   PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws,
-              const std::string &coordinateSystem, QWidget *parent = 0);
+              const std::string &coordinateSystem, QWidget *parent = nullptr);
   void setupMvc(std::vector<bool> visiblePeaks);
   void updateModel(std::vector<bool> visiblePeaks);
 signals:
@@ -26,7 +26,7 @@ signals:
   void sortPeaks(const std::string &columnToSortBy, const bool sortAscending,
                  Mantid::API::IPeaksWorkspace_sptr ws);
 public slots:
-  void onCurrentChanged(QModelIndex current, QModelIndex);
+  void onCurrentChanged(const QModelIndex &current, const QModelIndex &);
   void onPeaksSorted(const std::string &columnToSortBy,
                      const bool sortAscending);
 

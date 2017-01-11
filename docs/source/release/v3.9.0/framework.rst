@@ -20,14 +20,16 @@ Improved
 
 - :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
-- All algorithms using `AsciiPointBase` now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects `SaveReflCustomAscii <algm-SaveReflCustomAscii>`, `SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, `SaveANSTOAscii <algm-SaveANSTOAscii>` and `SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
-- :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
+- All algorithms using AsciiPointBase now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects :ref:`SaveReflCustomAscii <algm-SaveReflCustomAscii>`, :ref:`SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, :ref:`SaveANSTOAscii <algm-SaveANSTOAscii>` and :ref:`SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
+- :ref:`ReplaceSpecialValues <algm_ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
+- :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces. The documentation for this algorithm has also been improved.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` has a working progress bar.
 - :ref:`SumSpectra <algm-SumSpectra>` has an option to ignore special floating point values called 'RemoveSpecialValues'. This is off by default but when enabled will ignore values such as NaN or Infinity during the summation of the spectra.  It was also updated to fix special values being used in some cases when the option was selected.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`:
    * an `Interpolation` option has been added. Availabile options are: `Linear` & `CSpline`.
    * the method of selecting the scattering point has ben updated to give better agreement with numerical algorithms such as :ref:`CylinderAbsorption <algm-CylinderAbsorption>`.
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
+- :ref:`MaskDetectors <algm-MaskDetectors>` has now a new option to mask detectors by instrument component name.
 
 Renamed
 #######
@@ -96,6 +98,7 @@ Python
 ------
 
 - The function `IMDDimension::getName()` has been deprecated. Use the propery `IMDDimension::name` instead.
+- The duplicate function `Workspace::getName()` has been deprecated. Use `Workspace::name()` instead.
 
 Python Algorithms
 #################
