@@ -601,27 +601,31 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
         tup = ()
         for idx in self.listMain.selectedItems():
-            split_title = re.split(":th=|th=|:", idx.text())
-            if len(split_title) != 3:
+            split_title = re.split(":th=|th=|:|dq/q=", idx.text())
+            if len(split_title) < 3:
                 split_title = re.split(":", idx.text())
-                if len(split_title) != 2:
+                if len(split_title) < 2:
                     logger.warning('cannot transfer ' + idx.text() + ' title is not in the right form ')
+                    continue
                 else:
                     theta = 0
                     split_title.append(theta) # Append a dummy theta value.
-                    tup = tup + (split_title,)
-            else:
-                tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta)
+            if len(split_title) < 4:
+                dqq = 0
+                split_title.append(dqq) # Append a dummy dq/q value.
+            tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta, dq/q)
 
         tupsort = sorted(tup, key=itemgetter(1, 2))  # now sorted by title then theta
         row = 0
         for _key, group in itertools.groupby(tupsort, lambda x: x[1]): # now group by title
             col = 0
+            dqq = 0 # only one value of dqq per row
             run_angle_pairs_of_title = list() # for storing run_angle pairs all with the same title
             for object in group:  # loop over all with equal title
 
                 run_no = object[0]
-                angle = object[-1]
+                dqq = object[-1]
+                angle = object[-2]
                 run_angle_pairs_of_title.append((run_no, angle))
 
             for angle_key, group in itertools.groupby(run_angle_pairs_of_title, lambda x: x[1]):
@@ -645,6 +649,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 col = col + 5
                 if col >= 11:
                     col = 0
+
+            # set dq/q
+            item = QtGui.QTableWidgetItem()
+            item.setText(str(dqq))
+            self.tableMain.setItem(row, 15, item)
 
             row = row + 1
 
