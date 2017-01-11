@@ -283,9 +283,13 @@ void ConvertToDiffractionMDWorkspace2::calculateExtentsFromData(
 
   // If the calculation produced +/- infinity as one of the extents
   // replace this with a more reasonable value.
-  auto inf = std::numeric_limits<double>::infinity();
-  std::replace(minVal.begin(), minVal.end(), -inf, -50.0);
-  std::replace(maxVal.begin(), maxVal.end(), inf, 50.0);
+  const auto INF = std::numeric_limits<double>::infinity();
+  const auto MAX_DBL = std::numeric_limits<double>::max();
+
+  std::replace(minVal.begin(), minVal.end(), -INF, -50.0);
+  std::replace(maxVal.begin(), maxVal.end(), INF, 50.0);
+  std::replace(minVal.begin(), minVal.end(), MAX_DBL, -50.0);
+  std::replace(maxVal.begin(), maxVal.end(), -MAX_DBL, 50.0);
 }
 
 } // namespace Mantid
