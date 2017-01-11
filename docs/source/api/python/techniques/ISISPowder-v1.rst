@@ -112,8 +112,14 @@ TODO talk about defaults?
  - `calbiration_config_path` - The full path to the calibration configuration file 
    a description of the file is here: :ref:`pearl_cal_map_isis-powder-diffraction-ref`
    
- - `do_absorb_corrections` - Used during a vanadium calibration if set to true the 
-   calibration will correct for absorption and scattering in a cylindrical sample
+ - `do_absorb_corrections` - Used during a vanadium calibration and focusing:
+   
+   In a vanadium calibration if set to true the calibration will correct for 
+   absorption and scattering in a cylindrical sample. 
+   
+   During focusing if set to true this will load a calibration which 
+   has had the absorption corrections performed, if false it will use a calibration
+   where the absorption corrections have not been performed.
    
  - `focus_mode` - More information found here: :ref:`pearl_focus_mode_isis-powder-diffraction-ref` .
    Acceptable options: `all`, `groups`, `trans` and `mods`.
@@ -123,11 +129,21 @@ TODO talk about defaults?
  - `perform_attenuation` - If set to true uses the user specified attenuation file 
    (see `attenuation_file_name`) and applies the correction.
    
- - `tt_mode` - Specifies the detectors to be considered whilst focussing.
+ - `run_number` - Used during focusing a single run or range of runs can be specified 
+   here. This range is inclusive e.g. 10-12 will be runs 10,11,12. 
+   These runs will be first summed together before any processing is performed
+   on them if there are multiple runs specified.
+   
+ - `run_in_range` - Only used during vanadium calibration. The run specified 
+   here is used with the calibration mapping file see: 
+   :ref:`pearl_cal_map_isis-powder-diffraction-ref` to determine the current cycle
+   and the vanadium/empty run numbers for the subsequent processing.
+   
+ - `tt_mode` - Specifies the detectors to be considered whilst focusing.
    Acceptable options: `tt35`, `tt70`, `tt88`.
  
  - `vanadium_normalisation` - If set to true divides the sample by the vanadium
-   vanadium calibration during the focussing step.
+   vanadium calibration during the focusing step.
    
 Advanced Script Parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -177,13 +193,15 @@ Advanced Script Parameters
    More information here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
  
  - `vanadium_tof_cropping` - The range in TOF to crop the calibrated vanadium
-   file to after focussing. This must be less than `raw_data_tof_cropping` and
+   file to after focusing. This must be less than `raw_data_tof_cropping` and
    larger than `tof_cropping_values`. The cropping is applied before a spline is
    taken of the vanadium sample. 
    
- 
+.. _pearl_config_scripts_isis-powder-diffraction-ref:
+
 Configuring the scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^
+TODO add some text here
 Code example with comments:
 ::
 
@@ -221,8 +239,38 @@ name *"Mantid"* and save in *<Path to output folder>*.
 
 Vanadium Calibration
 ^^^^^^^^^^^^^^^^^^^^^
-TODO 
+Following on from the examples configuring the scripts (see: 
+:ref:`pearl_config_scripts_isis-powder-diffraction-ref`) we can run a vanadium
+calibration with the `create_calibration_vanadium` method. 
+TODO the following parameters are needed...
+::
 
-Focussing
+ # Lets use the "pearl_object_override" which stores in "My custom location"
+ # from the previous examples
+ pearl_object_override.create_calibration_vanadium(run_in_range=12345, 
+                                                   do_absorb_corrections=True
+                                                   long_mode=False)
+
+This will generate a calibration for the specified vanadium and empty runs 
+specified in the calibration mapping file (see: :ref:`pearl_cal_map_isis-powder-diffraction-ref`)
+and store it in the calibration folder - more details here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
+
+*Note: This only needs to be completed once as the splined vanadium workspace will be
+automatically loaded and used for all future focusing. This means that it should
+not be part of your focusing scripts as it will recalculate the same values every
+time it is ran.*
+
+Focusing
 ^^^^^^^^^^
-TODO
+Using the examples from the configured scripts (see: :ref:`pearl_config_scripts_isis-powder-diffraction-ref`)
+we can run focusing with the `focus` method:
+TODO the following parameters are needed...
+::
+
+  # Using pearl_object_config_file which was using a configuration file
+  # We will focus runs 10000-10010 which sums up the runs inclusively 
+  pearl_object_config_file.focus(run_number="10000-10010")
+  
+  
+  
+

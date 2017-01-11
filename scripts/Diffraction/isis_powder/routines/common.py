@@ -122,8 +122,7 @@ def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
     for ws in focused_vanadium_spectra:
         out_name = "spline_bank_" + str(bank_index)
         bank_index += 1
-        tof_ws_list.append(mantid.CloneWorkspace(InputWorkspace=ws, OutputWorkspace=out_name))
-        #tof_ws_list.append(mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name))
+        tof_ws_list.append(mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name))
 
     splined_ws_list = []
     for ws in tof_ws_list:

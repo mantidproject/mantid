@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 general_params = {
     "monitor_spectrum_number": 1,
     "monitor_spline_coefficient": 20,
-    "spline_coefficient": 60
+    "spline_coefficient": 60,
 
     "file_names": {
         "vanadium_absorb_file": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
@@ -14,8 +14,6 @@ general_params = {
 }
 
 long_mode_off_params = {
-
-
     "monitor_lambda_crop_range": (0.03, 6.00),
     "monitor_integration_range": (0.6, 5.0),
     # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
