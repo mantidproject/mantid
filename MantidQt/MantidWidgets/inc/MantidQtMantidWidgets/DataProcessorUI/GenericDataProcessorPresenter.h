@@ -118,14 +118,6 @@ protected:
   DataProcessorView *m_view;
   // The progress view
   ProgressableView *m_progressView;
-  // The pre-processing instructions
-  std::map<std::string, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
-  // The data processor algorithm
-  DataProcessorProcessingAlgorithm m_processor;
-  // Post-processing algorithm
-  DataProcessorPostprocessingAlgorithm m_postprocessor;
-  // Post-processing map
-  std::map<std::string, std::string> m_postprocessMap;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
@@ -144,6 +136,14 @@ private:
   std::string m_wsName;
   // The whitelist
   DataProcessorWhiteList m_whitelist;
+  // The pre-processing instructions
+  std::map<std::string, DataProcessorPreprocessingAlgorithm> m_preprocessMap;
+  // The data processor algorithm
+  DataProcessorProcessingAlgorithm m_processor;
+  // Post-processing algorithm
+  DataProcessorPostprocessingAlgorithm m_postprocessor;
+  // Post-processing map
+  std::map<std::string, std::string> m_postprocessMap;
   // Loader
   std::string m_loader;
   // A boolean indicating whether a post-processing algorithm has been defined

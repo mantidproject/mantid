@@ -114,8 +114,16 @@ void ReflDataProcessorPresenter::process() {
                     "_" + std::to_string((int)stopTimes[i]);
           group[row.first] = data;
         }
-        postProcessGroup(group);
-        progressReporter.report();
+        try {
+          postProcessGroup(group);
+          progressReporter.report();
+        } catch (std::exception &ex) {
+          m_mainPresenter->giveUserCritical(
+              std::string(ex.what()) + "\nTry providing a value for dq/Q",
+              "Error stitching");
+          progressReporter.clear();
+          return;
+        }
       }
     }
   }
@@ -278,8 +286,7 @@ void ReflDataProcessorPresenter::plotRow() {
   for (const auto &item : items) {
     for (const auto &run : item.second) {
 
-      const std::string wsName =
-          getReducedWorkspaceName(run.second, m_processor.prefix(0));
+      const std::string wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
         const std::string sliceName =
