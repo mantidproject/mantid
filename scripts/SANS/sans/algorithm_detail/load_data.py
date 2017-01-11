@@ -46,7 +46,7 @@ cache.
 from abc import (ABCMeta, abstractmethod)
 from mantid.api import (AnalysisDataService)
 from sans.common.file_information import (SANSFileInformationFactory, FileType, get_extension_for_file_type,
-                                              find_full_file_path)
+                                          find_full_file_path)
 from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITOR_SUFFIX, CALIBRATION_WORKSPACE_TAG,
                                    SANS_FILE_TAG, OUTPUT_WORKSPACE_GROUP, OUTPUT_MONITOR_WORKSPACE,
                                    OUTPUT_MONITOR_WORKSPACE_GROUP)
@@ -429,7 +429,7 @@ def loader_for_added_isis_nexus(file_information, is_transmission, period):
     @param period: the period to load
     @return: the name of the load algorithm and the selected load options
     """
-    _ = is_transmission
+    _ = is_transmission  # noqa
     loader_name = "LoadNexusProcessed"
     loader_options = {"Filename": file_information.get_file_name(),
                       "OutputWorkspace": EMPTY_NAME,

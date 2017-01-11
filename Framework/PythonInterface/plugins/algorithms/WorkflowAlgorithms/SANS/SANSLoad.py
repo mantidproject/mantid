@@ -59,10 +59,10 @@ class SANSLoad(DataProcessorAlgorithm):
 
         # Sample Scatter Workspaces
         self.declareProperty(WorkspaceProperty('SampleScatterWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                               optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter workspace. This workspace does not contain monitors.')
         self.declareProperty(WorkspaceProperty('SampleScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                               optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter monitor workspace. This workspace only contains monitors.')
         self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),

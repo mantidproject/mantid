@@ -5,13 +5,9 @@ from sans.common.file_information import find_full_file_path
 from sans.common.general_functions import (get_ranges_for_rebin_setting, get_ranges_for_rebin_array,
                                            get_ranges_from_event_slice_setting)
 from sans.user_file.user_file_reader import UserFileReader
-from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                             single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
-                                             simple_range, complex_range, MaskId, mask_block, mask_block_cross,
-                                             mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
-                                             position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                             fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId, OtherId, rebin_string_values)
+from sans.user_file.user_file_common import (DetectorId, BackId, LimitsId, TransId, TubeCalibrationFileId,
+                                             QResolutionId, MaskId, SampleId, SetId, MonId, FitId, GravityId, OtherId,
+                                             simple_range, complex_range, position_entry, rebin_string_values)
 
 from sans.state.automatic_setters import set_up_setter_forwarding_from_director_to_builder
 from sans.state.state import get_state_builder
