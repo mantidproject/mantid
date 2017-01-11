@@ -438,7 +438,7 @@ class SANSLoadTest(unittest.TestCase):
     def test_that_can_load_single_period_from_added_multi_period_event_file(self):
         # Arrange
         special_selection_on_group = 2
-        state = SANSLoadTest._get_simple_state(sample_scatter="LARMOR00013065-add.nxs",
+        state = SANSLoadTest._get_simple_state(sample_scatter="V2_LARMOR00013065-add.nxs",
                                                sample_scatter_period=special_selection_on_group)
 
         # Act
@@ -461,7 +461,7 @@ class SANSLoadTest(unittest.TestCase):
 
     def test_that_can_load_all_periods_from_added_multi_period_event_file(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="LARMOR00013065-add.nxs")
+        state = SANSLoadTest._get_simple_state(sample_scatter="V2_LARMOR00013065-add.nxs")
 
         # Act
         output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
