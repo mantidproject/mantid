@@ -43,7 +43,8 @@ class ArgumentParser(object):
         self._parser = parser
         self._args = None
 
-    def _setup_functional_args(self, parser):
+    @staticmethod
+    def _setup_functional_args(parser):
         """
         Setup the functional arguments for the script
         :param parser: The parser which is set up
@@ -108,7 +109,8 @@ class ArgumentParser(object):
                  "uniform angle increment for every projection (note: this "
                  "is overriden by the angles found in the input FITS headers)")
 
-    def _setup_preproc_args(self, parser):
+    @staticmethod
+    def _setup_preproc_args(parser):
         """
         Setup the pre-processing arguments for the script
         :param parser: The parser which is set up
@@ -202,7 +204,8 @@ class ArgumentParser(object):
             help="Perform corrections specific to images taken with the MCP detector"
         )
 
-    def _setup_postproc_args(self, parser):
+    @staticmethod
+    def _setup_postproc_args(parser):
         """
         Setup the post-processing arguments for the script
         :param parser: The parser which is set up
@@ -248,10 +251,12 @@ class ArgumentParser(object):
         """
         self._args = self._parser.parse_args()
 
-    def grab_options(self):
+    def grab_full_config(self):
         functional_args = self._grab_functional_args()
         preproc_args = self._grab_preproc_args()
         postproc_args = self._grab_postproc_args()
+
+        # combine all of them together
         recon_config = ReconstructionConfig(
             functional_args, preproc_args, postproc_args)
 

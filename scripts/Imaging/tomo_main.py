@@ -69,15 +69,31 @@ def main():
                     stdoutToServer=True, stderrToServer=True)
 
     check_version_info()
-    import tomo_argparser
-    arg_parser = tomo_argparser.ArgumentParser()
+
+    from tomo_argparser import ArgumentParser
+    arg_parser = ArgumentParser()
     arg_parser.parse_args()
-    # Grab and check pre-processing options + algorithm setup +
-    # post-processing options
-    config = arg_parser.grab_options()
+
+    config = arg_parser.grab_full_config()
+
+    from recon.helper import Helper
+    helper = Helper(config)
+
+    # first call, start timer
+    helper.total_reconstruction_timer()
 
     if config.find_cor:
-        # run find_center stuff 
+        # run find_center stuff
+        import recon.find_cor
+        recon.find_cor.execute(config)
     else:
         # run recon stuff
+        import recon.runner
+        import sys
+        cmd_line = " ".join(sys.argv)
+        recon.runner.execute(config, cmd_line)
+
+    # end timer
+    helper.total_reconstruction_timer()
+
 main()

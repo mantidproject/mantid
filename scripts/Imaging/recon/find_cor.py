@@ -1,97 +1,119 @@
-from tomo_helper import Helper
+from __future__ import (absolute_import, division, print_function)
+
+import numpy as np
+
+from recon.helper import Helper
 
 
-class FindCOR(object):
+def execute(config):
+    h = Helper()
+    h.check_config_integrity(config)
 
-    def find_center(self, cfg):
-        self._check_paths_integrity(cfg)
-        tomo_helper = Helper()
-        tomo_helper.tomo_print_timed_start(
-            " * Importing tool " + cfg.alg_cfg.tool)
-        # import tool
-        import tomorec.tool_imports as tti
-        tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
-        tomo_helper.tomo_print_timed_stop(" * Tool loaded.")
+    # -----------------------------------------------------------------------------
 
-        tomo_helper.tomo_print_timed_start(" * Loading data...")
-        # load in data
-        sample, white, dark = self.read_in_stack(
-            cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
-            cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        tomo_helper.tomo_print_timed_stop(
-            " * Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
-                sample.shape, sample.dtype))
+    h.pstart(" * Importing tool " + config.func.tool)
 
-        # rotate
-        sample, white, dark = self.rotate_stack(sample, cfg.preproc_cfg)
+    # import tool
+    from recon.tools import tool_importer
 
-        # crop the ROI, this is done first, so beware of what the correct ROI
-        # coordinates are
-        sample = self.crop_coords(sample, cfg.preproc_cfg)
+    # tomopy is the only supported tool for now
+    tool = tool_importer.import_tool(config.alg_cfg.tool)
 
-        # sanity check
-        tomo_helper.tomo_print(" * Sanity check on data", 0)
-        self._check_data_stack(sample)
+    h.pstop(" * Tool loaded.")
 
-        num_projections = sample.shape[0]
-        inc = float(cfg.preproc_cfg.max_angle) / (num_projections - 1)
+    # -----------------------------------------------------------------------------
+    h.pstart(" * Loading data...")
 
-        tomo_helper.tomo_print(" * Calculating projection angles")
-        proj_angles = np.arange(0, num_projections * inc, inc)
-        # For tomopy
-        tomo_helper.tomo_print(" * Calculating radians for TomoPy")
-        proj_angles = np.radians(proj_angles)
+    from recon.data import loader
+    sample, white, dark = loader.read_in_stack(
+        config.preproc_cfg.input_dir, config.preproc_cfg.in_img_format,
+        config.preproc_cfg.input_dir_flat, config.preproc_cfg.input_dir_dark)
 
-        size = int(num_projections)
+    h.pstop(
+        " * Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
+            sample.shape, sample.dtype))
 
-        # depending on the number of COR projections it will select different
-        # slice indices
-        cor_num_checked_projections = 6
-        cor_proj_slice_indices = []
-        cor_slice_index = 0
+    # -----------------------------------------------------------------------------
 
-        if cor_num_checked_projections < 2:
-            # this will give us the middle slice
-            cor_slice_index = int(size / 2)
-            cor_proj_slice_indices.append(cor_slice_index)
-        else:
-            for c in range(cor_num_checked_projections):
-                cor_slice_index += int(size / cor_num_checked_projections)
-                cor_proj_slice_indices.append(cor_slice_index)
+    # import all used filters
+    from recon.filters import rotate_stack, crop_coords
 
-        calculated_cors = []
+    h.pstart(" * Rotating stack...")
 
-        tomo_helper.tomo_print_timed_start(
-            " * Starting COR calculation for " +
-            str(cor_num_checked_projections) + " out of " +
-            str(sample.shape[0]) + " projections", 2)
+    sample, white, dark = rotate_stack.execute(sample, config.preproc_cfg)
 
-        cropCoords = cfg.preproc_cfg.crop_coords[0]
-        imageWidth = sample.shape[2]
+    h.pstop(" * Finished rotating stack.")
 
-        # if crop corrds match with the image width then the full image was
-        # selected
-        pixelsFromLeftSide = cropCoords if cropCoords - imageWidth <= 1 else 0
+    h.pstart(" * Cropping images...")
+    # crop the ROI, this is done first, so beware of what the correct ROI
+    # coordinates are
+    sample = crop_coords.execute(sample, config.preproc_cfg)
 
-        for slice_idx in cor_proj_slice_indices:
-            tomopy_cor = tomopy.find_center(
-                tomo=sample, theta=proj_angles, ind=slice_idx, emission=False)
-            print(" ** COR for slice", str(slice_idx), ".. REL to CROP ",
-                  str(tomopy_cor), ".. REL to FULL ",
-                  str(tomopy_cor + pixelsFromLeftSide))
-            calculated_cors.append(tomopy_cor)
+    h.pstop("* Finished cropping images.")
 
-        tomo_helper.tomo_print_timed_stop(" * Finished COR calculation.", 2)
+    # sanity check
+    h.tomo_print(" * Sanity check on data", 0)
+    h.check_data_stack(sample)
 
-        averageCORrelativeToCrop = sum(calculated_cors) / len(calculated_cors)
-        averageCORrelativeToFullImage = sum(calculated_cors) / len(
-            calculated_cors) + pixelsFromLeftSide
+    num_projections = sample.shape[0]
+    projection_angle_increment = float(
+        config.preproc_cfg.max_angle) / (num_projections - 1)
 
-        # we add the pixels cut off from the left, to reflect the full image in
-        # Mantid
-        tomo_helper.tomo_print(" * Printing average COR in relation to cropped image "
-                               + str(cfg.preproc_cfg.crop_coords) + ":", 2)
-        print(str(round(averageCORrelativeToCrop)))
-        tomo_helper.tomo_print(" * Printing average COR in relation to FULL image:",
-                               2)
-        print(str(round(averageCORrelativeToFullImage)))
+    h.tomo_print(" * Calculating projection angles")
+    projection_angles = np.arange(
+        0, num_projections * projection_angle_increment, projection_angle_increment)
+
+    # For tomopy
+    h.tomo_print(" * Calculating radians for TomoPy")
+    projection_angles = np.radians(projection_angles)
+
+    size = int(num_projections)
+
+    # depending on the number of COR projections it will select different
+    # slice indices
+    checked_projections = 6
+    slice_indices = []
+    current_slice_index = 0
+
+    if checked_projections < 2:
+        # this will give us the middle slice
+        current_slice_index = int(size / 2)
+        slice_indices.append(current_slice_index)
+    else:
+        for c in range(checked_projections):
+            current_slice_index += int(size / checked_projections)
+            slice_indices.append(current_slice_index)
+
+    h.pstart(" * Starting COR calculation on " +
+             str(checked_projections) + " projections.")
+
+    crop_coords = config.preproc_cfg.crop_coords[0]
+    image_width = sample.shape[2]
+
+    # if crop coords match with the image width then the full image was
+    # selected
+    pixels_from_left_side = crop_coords if crop_coords - image_width <= 1 else 0
+
+    calculated_cors = []
+    for slice_idx in slice_indices:
+        cor = tool.find_center(
+            tomo=sample, theta=projection_angles, ind=slice_idx, emission=False)
+
+        h.tomo_print(" ** COR for slice" + str(slice_idx) + ".. REL to CROP " +
+                     str(cor) + ".. REL to FULL " + str(cor + pixels_from_left_side), 3)
+
+        calculated_cors.append(cor)
+
+    h.pstop(" * Finished COR calculation.", 2)
+
+    average_cor_relative_to_crop = sum(calculated_cors) / len(calculated_cors)
+    average_cor_relative_to_full_image = sum(
+        calculated_cors) / len(calculated_cors) + pixels_from_left_side
+
+    # we add the pixels cut off from the left, to reflect the full image in
+    # Mantid
+    h.tomo_print(" * Printing average COR in relation to cropped image {0}:{1}".format(
+        str(config.preproc_cfg.crop_coords), str(round(average_cor_relative_to_crop))))
+
+    h.tomo_print(" * Printing average COR in relation to FULL image:{0}".format(
+        str(round(average_cor_relative_to_full_image))))

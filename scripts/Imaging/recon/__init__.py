@@ -19,3 +19,7 @@
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+import find_cor
+import helper
+import runner

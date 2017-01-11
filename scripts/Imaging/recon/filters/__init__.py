@@ -19,3 +19,17 @@
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+IMPORT_ERR_MSG = ("Inconsistency found. Could not import {0} which should be "
+                  "available in this package. Details/reason: {1}")
+
+try:
+    import preproc
+except ImportError as exc:
+    raise ImportError(
+        IMPORT_ERR_MSG.format("'preproc' (input/output routines)", exc))
+try:
+    import postproc
+except ImportError as exc:
+    raise ImportError(
+        IMPORT_ERR_MSG.format("'postproc' (input/output routines)", exc))

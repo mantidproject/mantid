@@ -1,24 +1,13 @@
-# Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory, NScD
-# Oak Ridge National Laboratory & European Spallation Source
-#
-# This file is part of Mantid.
-# Mantid is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# Mantid is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# File change history is stored at: <https://github.com/mantidproject/mantid>.
-# Code Documentation is available at: <http://doxygen.mantidproject.org>
-
 import numpy as np
+
+
+def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):
+    if not wv_levels:
+        max_len = np.max(data_vol.shape)
+        wv_levels = int(np.ceil(np.log2(max_len)))
+
+    return _remove_sino_stripes_rings_wf(data_vol, wv_levels)
+
 
 # The code of the 'Wavelet-Fourier' stripe removal method is heavily based on
 # the implementation of this method in tomopy
@@ -67,9 +56,7 @@ import numpy as np
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE         #
 # POSSIBILITY OF SUCH DAMAGE.                                             #
 # #########################################################################
-
-
-def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=2, pad=True):
+def _remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=2, pad=True):
     """
     Removes horizontal stripes in sinograms (reducing ring artifacts in the reconstructed volume).
     Implements a combined Wavelet-Fourier filter (wf) as described in:
@@ -103,7 +90,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=
             c_V.append(cVt)
             c_D.append(cDt)
 
-        c_V = ft_horizontal_bands(c_V, wv_levels, sigma)
+        c_V = _ft_horizontal_bands(c_V, wv_levels, sigma)
 
         # Wavelet reconstruction
         for nlvl in range(wv_levels)[::-1]:
@@ -115,7 +102,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=
     return data_vol
 
 
-def ft_horizontal_bands(c_V, wv_levels, sigma):
+def _ft_horizontal_bands(c_V, wv_levels, sigma):
     """
     Fourier transform of horizontal frequency bands
     """

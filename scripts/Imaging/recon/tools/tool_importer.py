@@ -1,4 +1,7 @@
-# Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD
+from __future__ import (absolute_import, division, print_function)
+
+
+# Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
 # This file is part of Mantid.
@@ -15,7 +18,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Author: Dimitar Tasev, Mantid Development Team
-#
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+def import_tool(tool):
+    if not tool or not isinstance(tool, str):
+        raise ValueError("The name of a reconstruction tool is required as a string. Got: {0}".
+                         format(tool))
+    if 'tomopy' == tool:
+        from . import tomopy_tool
+        tomopy_tool.import_self()
+
+    elif 'astra' == tool:
+        from . import astra_tool
+        astra_tool.import_self()
+
+    else:
+        raise ValueError("Internal inconsistency. Tried to import unknown tool: {0}".format(tool))
