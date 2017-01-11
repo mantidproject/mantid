@@ -102,7 +102,6 @@ void BaseConvertToDiffractionMDWorkspace::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 }
 
-
 /** method to convert the value of the target frame specified for the
   *ConvertToDiffractionMDWorksapce into the properties names of the ConvertToMD
   * @param  TargFrame -- the string, describing target transformation frame in
@@ -142,7 +141,8 @@ void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(
         MDAlgorithms::CnvrtToMD::HKLScale); //< momentums in A^-1
   } else {
     throw std::invalid_argument(
-        "BaseConvertToDiffractionMDWorkspace::Unknown target frame: " + TargFrame);
+        "BaseConvertToDiffractionMDWorkspace::Unknown target frame: " +
+        TargFrame);
   }
 }
 

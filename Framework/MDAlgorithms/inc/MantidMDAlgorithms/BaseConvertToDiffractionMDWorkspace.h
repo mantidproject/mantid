@@ -12,7 +12,6 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-
 /** BaseConvertToDiffractionMDWorkspace
  *
  * Base class for common code shared between different versions of the
@@ -57,7 +56,8 @@ protected: // for testing
   // ConvertToDiffractionMDWorksapce  into the min-max properties names of the
   // ConvertToMD
   virtual void convertExtents(const std::vector<double> &Extents,
-                      std::vector<double> &minVal, std::vector<double> &maxVal) = 0;
+                              std::vector<double> &minVal,
+                              std::vector<double> &maxVal) = 0;
 };
 
 } // namespace Mantid

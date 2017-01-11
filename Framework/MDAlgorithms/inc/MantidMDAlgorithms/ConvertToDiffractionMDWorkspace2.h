@@ -30,7 +30,8 @@ protected: // for testing
   // ConvertToDiffractionMDWorksapce  into the min-max properties names of the
   // ConvertToMD
   void convertExtents(const std::vector<double> &Extents,
-                      std::vector<double> &minVal, std::vector<double> &maxVal) override;
+                      std::vector<double> &minVal,
+                      std::vector<double> &maxVal) override;
 };
 
 } // namespace Mantid

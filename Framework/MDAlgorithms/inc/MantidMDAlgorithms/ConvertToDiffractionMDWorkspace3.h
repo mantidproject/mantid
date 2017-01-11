@@ -28,7 +28,8 @@ private:
 private:
   // method to covnert extents to the properties of ConvertMD
   void convertExtents(const std::vector<double> &Extents,
-                      std::vector<double> &minVal, std::vector<double> &maxVal) override;
+                      std::vector<double> &minVal,
+                      std::vector<double> &maxVal) override;
 
   // method to calculate the extents of the data from the input workspace
   void calculateExtentsFromData(std::vector<double> &minVal,
