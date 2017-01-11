@@ -2,8 +2,8 @@
 #define MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_
 
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
-#include <memory>
 #include <librdkafka/rdkafkacpp.h>
+#include <memory>
 
 // -----------------------------------------------------------------------------
 // RdKafka forward declarations
@@ -58,7 +58,8 @@ private:
   std::string m_brokerAddr;
   std::string m_topicName;
 
-  void reportSuccessOrFailure(const RdKafka::ErrorCode &error, int64_t confOffset) const;
+  void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
+                              int64_t confOffset) const;
 
   void subscribeAtOffset() const;
   void checkTopicExists() const;
