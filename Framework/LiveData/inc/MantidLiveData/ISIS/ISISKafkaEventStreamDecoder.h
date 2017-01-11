@@ -1,10 +1,10 @@
 #ifndef MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_
 #define MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_
 
-#include "MantidLiveData/Kafka/IKafkaBroker.h"
-#include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidLiveData/Kafka/IKafkaBroker.h"
+#include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 
 #include <atomic>
 #include <mutex>

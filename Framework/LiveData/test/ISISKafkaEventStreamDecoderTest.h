@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
+#include "ISISKafkaTesting.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "ISISKafkaTesting.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
 
 #include <Poco/Path.h>
 #include <thread>
@@ -231,7 +231,8 @@ private:
       TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
     }
     TS_ASSERT(eventWksp.run().hasProperty("SampleLog1"));
-    TS_ASSERT_DELTA(eventWksp.run().getLogAsSingleValue("SampleLog1"), 42.0, 0.01);
+    TS_ASSERT_DELTA(eventWksp.run().getLogAsSingleValue("SampleLog1"), 42.0,
+                    0.01);
   }
 
   void checkWorkspaceEventData(

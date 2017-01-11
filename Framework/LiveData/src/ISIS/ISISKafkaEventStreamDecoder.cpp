@@ -1,20 +1,20 @@
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
-#include "MantidLiveData/Exception.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/Run.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidLiveData/Exception.h"
 
 GCC_DIAG_OFF(conversion)
-#include "private/Kafka/Schema/event_schema_generated.h"
 #include "private/Kafka/Schema/det_spec_mapping_schema_generated.h"
+#include "private/Kafka/Schema/event_schema_generated.h"
 GCC_DIAG_ON(conversion)
 
 #include <boost/make_shared.hpp>
@@ -32,7 +32,8 @@ std::string RUN_NUMBER_PROPERTY = "run_number";
 std::string RUN_START_PROPERTY = "run_start";
 
 /**
- * Append sample log data to existing log or create a new log if one with specified name does not already exist
+ * Append sample log data to existing log or create a new log if one with
+ * specified name does not already exist
  *
  * @tparam T : Type of the log value
  * @param mutableRunInfo : Log manager containing the existing sample logs
@@ -41,8 +42,8 @@ std::string RUN_START_PROPERTY = "run_start";
  * @param value : Sample log measured value
  */
 template <typename T>
-void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name, const Mantid::Kernel::DateAndTime &time,
-                 T value) {
+void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
+                 const Mantid::Kernel::DateAndTime &time, T value) {
   if (mutableRunInfo.hasProperty(name)) {
     auto property = mutableRunInfo.getTimeSeriesProperty<T>(name);
     property->addValue(time, value);
@@ -54,15 +55,16 @@ void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name, cons
 }
 
 /**
- * Get sample environment log data from the flatbuffer and append it to the workspace
+ * Get sample environment log data from the flatbuffer and append it to the
+ * workspace
  *
  * @param seData : flatbuffer offset of the sample environment log data
  * @param nSEEvents : number of sample environment log values in the flatbuffer
  * @param mutableRunInfo : Log manager containing the existing sample logs
  */
 void addSampleEnvLogs(
-  const flatbuffers::Vector<flatbuffers::Offset<ISISStream::SEEvent>> &seData, flatbuffers::uoffset_t nSEEvents,
-  Mantid::API::Run &mutableRunInfo) {
+    const flatbuffers::Vector<flatbuffers::Offset<ISISStream::SEEvent>> &seData,
+    flatbuffers::uoffset_t nSEEvents, Mantid::API::Run &mutableRunInfo) {
   for (decltype(nSEEvents) i = 0; i < nSEEvents; ++i) {
     auto seEvent = seData[i];
     auto name = seEvent->name()->str();
@@ -79,13 +81,17 @@ void addSampleEnvLogs(
       auto value = static_cast<const ISISStream::LongValue *>(seEvent->value());
       appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
     } else if (seEvent->value_type() == ISISStream::SEValue_DoubleValue) {
-      auto value = static_cast<const ISISStream::DoubleValue *>(seEvent->value());
+      auto value =
+          static_cast<const ISISStream::DoubleValue *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time, value->value());
     } else if (seEvent->value_type() == ISISStream::SEValue_StringValue) {
-      auto value = static_cast<const ISISStream::StringValue *>(seEvent->value());
-      appendToLog<std::string>(mutableRunInfo, name, time, value->value()->str());
+      auto value =
+          static_cast<const ISISStream::StringValue *>(seEvent->value());
+      appendToLog<std::string>(mutableRunInfo, name, time,
+                               value->value()->str());
     } else {
-      g_log.warning() << "SEValue for log named '" << name << "' was not of recognised type" << std::endl;
+      g_log.warning() << "SEValue for log named '" << name
+                      << "' was not of recognised type" << std::endl;
     }
   }
 }
@@ -276,7 +282,8 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
     std::ostringstream os;
     os << "ISISKafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec=" << nspec << ", ndet=" << nudet;
+          "found nspec="
+       << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
   // Create buffer
