@@ -91,8 +91,7 @@ private:
   /**
    * Function to parse and store the signal and errors from the data file.
    *
-   * @param data the array to store the signal values
-   * @param errs the array to store the error values
+   * @param workspace handle to the workspace to to load data into
    */
   void getData(API::MatrixWorkspace_sptr workspace);
 
@@ -106,8 +105,9 @@ private:
   /**
    * Function to set the workspace axes
    *
-   * @param handle to the workspace to set axes on
-   * @param x and y axis data
+   * @param workspace handle to the workspace to set axes on
+   * @param x the a axis data
+   * @param y the a axis data
    */
   void setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
                         const std::vector<double> &xAxis,
@@ -116,7 +116,8 @@ private:
   /**
    * Convert a workspace to a histogram
    *
-   * @param handle to the distribution workspace to convert to a histogram
+   * @param workspace handle to the distribution workspace to convert to a
+   * histogram
    */
   API::MatrixWorkspace_sptr
   convertWorkspaceToHistogram(API::MatrixWorkspace_sptr workspace);
