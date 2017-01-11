@@ -129,7 +129,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'DetectorsAtL2': '128, 129',
             'ElasticPeakDiagnosticsLowThreshold': 0.1,
-            'ElasticPeakDiagnosticsHighThreshold': 4.9,
+            'ElasticPeakDiagnosticsHighThreshold': 4.8,
             'OutputDiagnosticsWorkspace': diagnosticsWSName,
             'rethrow': True
         }
@@ -262,6 +262,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'EnergyRebinningParams': '{0}, {1}, {2}'.format(rebinningBegin,
                                                             binWidth,
                                                             rebinningEnd),
+            'QRebinningParams' : '0, 0.1, 10.0',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -283,6 +284,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Manual Rebinning',
+            'QRebinningParams' : '0, 0.1, 10.0',
             'child': True,
             'rethrow': True
         }
@@ -299,6 +301,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
+            'QRebinningParams' : '0, 0.1, 10.0',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -319,6 +322,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Median Bin Width',
+            'QRebinningParams' : '0, 0.1, 10.0',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
