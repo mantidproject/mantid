@@ -577,7 +577,7 @@
                  </size>
                </property>
                <property name="toolTip">
-                 <string>NonOrthogonalView</string>
+                 <string>NonOrthogonal axes view</string>
                </property>
                <property name="text">
                  <string>...</string>

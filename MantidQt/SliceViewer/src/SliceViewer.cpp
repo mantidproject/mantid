@@ -2416,6 +2416,22 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
     m_nonOrthogonalOverlay->disable();
   }
 
+  if (checked) { // change tooltips to explain why buttons are disabled
+    ui.btnDoLine->setToolTip(
+        QString("Cut line is disabled in NonOrthogonal view"));
+    ui.btnSnapToGrid->setToolTip(
+        QString("Cut line is disabled in NonOrthogonal view"));
+    ui.btnClearLine->setToolTip(
+        QString("Cut line is disabled in NonOrthogonal view"));
+    ui.btnPeakOverlay->setToolTip(
+        QString("Peak overlay is disabled in NonOrthogonal view"));
+  } else {
+    ui.btnDoLine->setToolTip(QString("Draw a 1D cut line"));
+    ui.btnSnapToGrid->setToolTip(QString("Snap to grid when drawing cut line"));
+    ui.btnClearLine->setToolTip(QString("Remove the current cut line"));
+    ui.btnPeakOverlay->setToolTip(QString("Overlay Peaks"));
+  }
+
   ui.btnDoLine->setDisabled(checked);
   ui.btnSnapToGrid->setDisabled(checked);
   ui.btnClearLine->setDisabled(checked);
