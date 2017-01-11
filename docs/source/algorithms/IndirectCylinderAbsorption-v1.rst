@@ -15,7 +15,7 @@ allowing for the subtraction or corrections of the container.
 
 The correction factor workspace is a workspace group containing the correction
 factors in the Paalman and Pings format, note that only :math:`{A_{s,s}}` and
-:math:`A_{c,c}` factors are calculated by thsi algorithm.
+:math:`A_{c,c}` factors are calculated by this algorithm.
 
 Workflow
 --------
@@ -39,7 +39,7 @@ Usage
                                                SampleChemicalFormula='H2-O',
                                                CanWorkspace=can_ws,
                                                CanScaleFactor=0.8,
-                                               SampleRadius=0.2,
+                                               SampleRadius=0.1,
                                                UseCanCorrections=False,
                                                Events=100)
 

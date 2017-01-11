@@ -42,7 +42,7 @@ Usage
                                                 SampleHeight=1,
                                                 SampleWidth=1,
                                                 SampleThickness=1,
-                                                ElementSize=1,
+                                                Events=100,
                                                 UseCanCorrections=False)
 
   ass = fact[0]
@@ -82,7 +82,7 @@ Usage
                                                 SampleHeight=1,
                                                 SampleWidth=1,
                                                 SampleThickness=1,
-                                                ElementSize=1,
+                                                Events=100,
                                                 UseCanCorrections=True)
 
   ass = fact[0]

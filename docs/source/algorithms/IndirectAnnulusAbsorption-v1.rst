@@ -43,7 +43,7 @@ Usage
                                               SampleInnerRadius=0.2,
                                               SampleOuterRadius=0.25,
                                               CanOuterRadius=0.26,
-                                              Events=200)
+                                              Events=100)
 
   ass = fact[0]
 
@@ -82,7 +82,7 @@ Usage
                                               SampleInnerRadius=0.2,
                                               SampleOuterRadius=0.25,
                                               CanOuterRadius=0.26,
-                                              Events=200,
+                                              Events=100,
                                               UseCanCorrections=True)
 
   ass = fact[0]
