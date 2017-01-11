@@ -28,7 +28,7 @@ def execute(config, cmd_line=None):
     _readme_fullpath = os.path.join(config.func.output_dir, config.func.readme_file_name)
     generate_readme_begin(_readme_fullpath, cmd_line, config, h)
 
-    preprocessing(config, data, flat, dark)
+    pre_processing(config, data, flat, dark)
 
     # Save pre-proc images, print inside
     import recon.data.saver as saver
@@ -39,7 +39,7 @@ def execute(config, cmd_line=None):
     # Reconstruction
     data = tool.run_reconstruct(data, config)
 
-    postprocessing()
+    post_processing()
 
     # Save output from the reconstruction
     saver.save_recon_output(data, config)
@@ -52,38 +52,36 @@ def execute(config, cmd_line=None):
     pass
 
 
-def preprocessing(config, data, flat, dark):
+def pre_processing(config, data, flat, dark):
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
         mcp_corrections, scale_down, median_filter
 
     data, flat, dark = rotate_stack.execute(data, config, flat, dark)
-    crop_before_normaliz = False  # DEBUG
-    if crop_before_normaliz:
+
+    if config.pre.crop_before_normalize:
+        # TODO must crop flat and dark too!
         data = crop_coords.execute(data, config)
+
     data = normalise_by_flat_dark.execute(data, config, flat, dark)
     data = normalise_by_air_region.execute(data, config)
-    if not crop_before_normaliz:
+
+    if not config.pre.crop_before_normalize:
         data = crop_coords.execute(data, config)
 
     # cut_off
-    data = cut_off.execute(data, config)
+    # data = cut_off.execute(data, config)
     # mcp_corrections
-    data = mcp_corrections.execute(data, config)
+    # data = mcp_corrections.execute(data, config)
     # scale_down, not implemented
     # data = scale_down.execute(data, config)
+
     # median filter
-    # h.pstart(
-    #     " * Starting noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
-    #         format(data.dtype, config.median_filter_size))
     data = median_filter.execute(data, config)
-    # h.pstop(
-    #     " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
-    #         format(data.dtype, config.median_filter_size))
-
-    # ----------------------------------------------------------------
 
 
-def postprocessing():
+    return data
+
+def post_processing():
     pass
     # TODO Post-processing
     # ----------------------------------------------------------------

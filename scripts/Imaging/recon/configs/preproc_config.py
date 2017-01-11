@@ -1,4 +1,4 @@
-#pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 class PreProcConfig(object):
     """
     All pre-processing options required to run a tomographic reconstruction.
@@ -12,7 +12,8 @@ class PreProcConfig(object):
 
     def __init__(self):
         # defaults that look sensible for the MCP detector:
-        # median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction: on
+        # median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction:
+        # on
         self.input_dir = None
         self.input_dir_flat = None
         self.input_dir_dark = None
@@ -20,11 +21,13 @@ class PreProcConfig(object):
         self.out_img_format = 'fits'
         self.max_angle = 360
 
+        self.crop_before_normalize = False  # DEBug, default TRUE
         # Rotation 90 degrees clockwise (positive) or counterclockwise (negative)
         # Example: -1 => (-90 degrees == 90 degrees counterclockwise)
         self.rotation = -1
         self.normalize_flat_dark = True
-        # list with coordinates of the region for normalization / "air" / not blocked by any object
+        # list with coordinates of the region for normalization / "air" / not
+        # blocked by any object
         self.normalize_air_region = None
         self.normalize_proton_charge = False
 

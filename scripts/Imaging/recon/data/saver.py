@@ -14,7 +14,7 @@ def save_recon_output(self, recon_data, cfg, save_horiz_slices=False):
     out_recon_dir = os.path.join(output_dir, 'reconstructed')
     self.tomo_print_timed_start(
         " * Starting saving slices of the reconstructed volume in: {0}...".
-        format(out_recon_dir))
+            format(out_recon_dir))
     tomoio.save_recon_as_vertical_slices(
         recon_data,
         out_recon_dir,
@@ -34,7 +34,7 @@ def save_recon_output(self, recon_data, cfg, save_horiz_slices=False):
 
     self.tomo_print_timed_stop(
         " * Finished saving slices of the reconstructed volume in: {0}".
-        format(out_recon_dir))
+            format(out_recon_dir))
 
 
 def save_preproc_images(data, config):
@@ -61,10 +61,41 @@ def save_preproc_images(data, config):
 
     for idx in range(0, data.shape[0]):
         # rescale_intensity has issues with float64=>int16
-        write_image(data[idx, :, :], min_pix, max_pix,
-                    os.path.join(preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+        write_image(data[idx, :, :], os.path.join(preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+        # write_image(data[idx, :, :], min_pix, max_pix,
+        #             os.path.join(preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
 
     h.pstop(" * Saving pre-processed images finished.")
+
+
+def write_image(img_data, filename):
+    """
+    Output image data, given as a numpy array, to a file, in a given image format.
+    Assumes that the output directory exists (must be checked before). The pixel
+    values are rescaled in the range [min_pix, max_pix] which would normally be set
+    to the minimum/maximum values found in a stack of images.
+
+    @param img_data :: image data in the usual numpy representation
+
+    @param min_pix :: minimum reference value to rescale data (may be local to an
+    image or global for a stack of images)
+    @param max_pix :: maximum reference value to rescale data (may be local to an
+    image or global for a stack of images)
+
+    @param filename :: file name, including directory and extension
+    @param img_format :: image file format
+    @param dtype :: can be used to force a pixel type, otherwise the type
+    of the input data is used
+
+    Returns:: name of the file saved
+    """
+    import loader
+    fits = loader.import_pyfits()
+    hdu = fits.PrimaryHDU(img_data[:, :])
+    hdulist = fits.HDUList([hdu])
+    hdulist.writeto(filename + ".fits")
+
+    return filename
 
 
 def gen_readme_summary_begin(filename, cfg, cmd_line):

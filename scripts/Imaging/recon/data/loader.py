@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function)
+
+
 import numpy as np
 
 
@@ -151,7 +154,7 @@ def _read_img(filename, file_extension=None):
     :param file_extension :: extension and effectively format to use ('tiff', 'fits')
     """
     if file_extension in ['fits', 'fit']:
-        pyfits = _import_pyfits()
+        pyfits = import_pyfits()
         image = pyfits.open(filename)
         if len(image) < 1:
             raise RuntimeError(
@@ -161,7 +164,7 @@ def _read_img(filename, file_extension=None):
         img_arr = image[0].data
 
     elif file_extension in ['tiff', 'tif', 'png']:
-        skio = _import_skimage_io()
+        skio = import_skimage_io()
         img_arr = skio.imread(filename)
 
     else:
@@ -171,7 +174,7 @@ def _read_img(filename, file_extension=None):
     return img_arr
 
 
-def _import_pyfits():
+def import_pyfits():
     """
     To import pyfits optionally only when it is/can be used
     """
@@ -189,7 +192,7 @@ def _import_pyfits():
     return pyfits
 
 
-def _import_skimage_io():
+def import_skimage_io():
     """
     To import skimage io only when it is/can be used
     """

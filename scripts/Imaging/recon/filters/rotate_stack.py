@@ -1,63 +1,69 @@
-def _rotate_imgs(self, data, cfg):
+from __future__ import (absolute_import, division, print_function)
+
+
+def _rotate_imgs(data, rotation):
     """
     NOTE: ONLY WORKS FOR SQUARE IMAGES
     Rotate every image of a stack
 
-    @param data :: image stack as a 3d numpy array
-    @param cfg :: pre-processing configuration
+    :param data :: image stack as a 3d numpy array
+    :param rotation :: rotation for the image
 
     Returns :: rotated data (stack of images)
     """
 
-    self._check_data_stack(data)
-    self._debug_print_memory_usage_linux("before rotation.")
+    import numpy as np
 
     for idx in range(0, data.shape[0]):
-        # rot90 rotates counterclockwise; cfg.rotation rotates clockwise
-        counterclock_rotations = 4 - cfg.rotation
+        # rot90 rotates counterclockwise; config.pre.rotation rotates clockwise
+        counterclock_rotations = 4 - rotation
         data[idx, :, :] = np.rot90(data[idx, :, :], counterclock_rotations)
-
-    self._debug_print_memory_usage_linux("after rotation.")
 
     return data
 
 
-def execute(data, cfg, white=None, dark=None):
+def execute(data, config, white=None, dark=None):
     """
     Rotates a stack (sample, white and dark images).
-    This funciton is usually used on the whole picture, which is a square.
+    This function is usually used on the whole picture, which is a square.
     If the picture is cropped first, the ROI coordinates
     have to be adjusted separately to be pointing at the NON ROTATED image!
 
-    @param data :: stack of sample images
-    @param cfg :: pre-processing configuration
-    @param white :: stack of white images
-    @param white :: stack of dark images
+    :param data :: stack of sample images
+    :param config :: pre-processing configuration
+    :param white :: stack of white images
+    :param dark :: stack of dark images
 
     Returns :: rotated images
     """
-    if not cfg or not isinstance(cfg, tomocfg.PreProcConfig):
+    from recon.configs.recon_config import ReconstructionConfig
+    if not config or not isinstance(config, ReconstructionConfig):
         raise ValueError(
             "Cannot rotate images without a valid pre-processing configuration"
         )
 
-    if not cfg.rotation or cfg.rotation < 0:
-        self.tomo_print(
-            " * Note: NOT rotating the input images.", verbosity=2)
+    from recon.helper import Helper
+    h = Helper(config)
+    h.check_data_stack(data)
+
+    if not config.pre.rotation or config.pre.rotation < 0:
+        h.tomo_print(" * Note: NOT rotating the input images.")
         return data, white, dark
 
-    self.tomo_print_timed_start(
+    rotation = config.pre.rotation
+    h.pstart(
         " * Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
-            format(cfg.rotation * 90, data.dtype))
+        format(rotation * 90, data.dtype))
 
-    data = self._rotate_imgs(data, cfg)
+    data = _rotate_imgs(data, rotation)
     if white:
-        white = self._rotate_imgs(white, cfg)
+        white = _rotate_imgs(white, rotation)
     if dark:
-        dark = self._rotate_imgs(dark, cfg)
+        dark = _rotate_imgs(dark, rotation)
 
-    self.tomo_print_timed_stop(
-        " * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}.".
-            format(cfg.rotation * 90, data.dtype))
+    h.pstop(" * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}."
+            .format(rotation * 90, data.dtype))
 
-    return (data, white, dark)
+    h.check_data_stack(data)
+
+    return data, white, dark
