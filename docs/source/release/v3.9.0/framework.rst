@@ -29,6 +29,7 @@ Improved
    * an `Interpolation` option has been added. Availabile options are: `Linear` & `CSpline`.
    * the method of selecting the scattering point has ben updated to give better agreement with numerical algorithms such as :ref:`CylinderAbsorption <algm-CylinderAbsorption>`.
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
+- :ref:`MaskDetectors <algm-MaskDetectors>` has now a new option to mask detectors by instrument component name.
 
 Renamed
 #######
