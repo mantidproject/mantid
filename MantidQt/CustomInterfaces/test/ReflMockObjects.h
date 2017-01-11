@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
@@ -149,6 +150,14 @@ public:
   ~MockRunsTabPresenter() override{};
 };
 
+class MockEventTabPresenter : public IReflEventTabPresenter {
+public:
+  std::string getTimeSlicingOptions(int group) const override {
+    return std::string();
+  };
+  ~MockEventTabPresenter() override{};
+};
+
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
@@ -198,6 +207,10 @@ public:
   void setInstrumentName(const std::string &instName) const override {
     UNUSED_ARG(instName);
   }
+  std::string getTimeSlicingOptions(int group) const override {
+    return std::string();
+  };
+
   ~MockMainWindowPresenter() override{};
 };
 
