@@ -174,7 +174,7 @@ createDetectorGroupWith5CylindricalDetectors() {
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       ic++;
     }
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -258,7 +258,7 @@ boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
     det->markAsMonitor();
     groupMembers[i] = det;
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -286,7 +286,7 @@ Instrument_sptr createTestInstrumentCylindrical(
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
         std::ostringstream lexer;
-        lexer << "pixel-(" << j << "," << i << ")";
+        lexer << "pixel-(" << j << ";" << i << ")";
         Detector *physicalPixel =
             new Detector(lexer.str(), pixelID, pixelShape, bank);
         const double xpos = j * (cylRadius * 2.0);

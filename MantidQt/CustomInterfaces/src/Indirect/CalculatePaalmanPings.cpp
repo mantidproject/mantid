@@ -272,7 +272,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
           AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       convertSpecAlgo->initialize();
       convertSpecAlgo->setProperty("InputWorkspace", factorWs);
-      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->name());
+      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->getName());
       convertSpecAlgo->setProperty("Target", "ElasticQ");
       convertSpecAlgo->setProperty("EMode", "Indirect");
 

@@ -91,7 +91,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
                     groupnum += 1
         f.write('</detector-grouping>')
         f.close()
-        mantid.simpleapi.DeleteWorkspace(__w.getName())
+        mantid.simpleapi.DeleteWorkspace(__w.name())
         return
 
 mantid.api.AlgorithmFactory.subscribe(GenerateGroupingSNSInelastic)

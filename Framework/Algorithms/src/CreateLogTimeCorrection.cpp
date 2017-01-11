@@ -49,7 +49,7 @@ void CreateLogTimeCorrection::exec() {
 
   //   Check whether the output workspace name is same as input
   string outwsname = getPropertyValue("OutputWorkspace");
-  if (outwsname.compare(m_dataWS->name()) == 0) {
+  if (outwsname.compare(m_dataWS->getName()) == 0) {
     stringstream errmsg;
     errmsg << "It is not allowed to use the same name by both input matrix "
               "workspace and output table workspace.";
