@@ -169,14 +169,27 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
   if (m_exception) {
     throw * m_exception;
   }
-  std::lock_guard<std::mutex> lock(m_mutex);
+
+  std::unique_lock<std::mutex> waitLock(m_waitMutex);
   extractWaiting = true;
+  waitLock.unlock();
+  cv.notify_one(); // TODO this line may not be required
+
+  auto workspace_ptr = extractDataImpl();
+
+  waitLock.lock();
+  extractWaiting = false;
+  waitLock.unlock();
   cv.notify_one();
+
+  return workspace_ptr;
+}
+
+API::Workspace_sptr ISISKafkaEventStreamDecoder::extractDataImpl() {
+  std::lock_guard<std::mutex> lock(m_mutex);
   if (m_localEvents.size() == 1) {
     auto temp = createBufferWorkspace(m_localEvents.front());
     std::swap(m_localEvents.front(), temp);
-    extractWaiting = false;
-    cv.notify_one();
     return temp;
   } else if (m_localEvents.size() > 1) {
     auto group = boost::make_shared<API::WorkspaceGroup>();
@@ -186,12 +199,8 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
       std::swap(m_localEvents[index++], temp);
       group->addWorkspace(temp);
     }
-    extractWaiting = false;
-    cv.notify_one();
     return group;
   } else {
-    extractWaiting = false;
-    cv.notify_one();
     throw Exception::NotYet("Local buffers not initialized.");
   }
 }
@@ -229,6 +238,13 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
   while (!m_interrupt) {
     // Let another thread do something for a short while
     //std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    //TODO if extractData method is waiting for access then we wait for it to finish with the buffer workspace
+    std::unique_lock<std::mutex> readyLock(m_waitMutex);
+    //TODO is this if statement required?
+    if (extractWaiting) {
+      cv.wait(readyLock, [&] { return !extractWaiting; });
+    }
+    readyLock.unlock();
 
     // Pull in events
     m_eventStream->consumeMessage(&buffer);
@@ -248,10 +264,8 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       const auto &specData = *(eventData->spec());
       auto nevents = tofData.size();
       auto nSEEvents = seData.size();
-      //std::lock_guard<std::mutex> lock(m_mutex);
-      //TODO if extractData method is waiting for access then we wait for it to finish with the buffer workspace
-      std::unique_lock<std::mutex> lck(m_mutex);
-      cv.wait(lck, [&]{return !extractWaiting;});
+
+      std::lock_guard<std::mutex> lock(m_mutex);
       auto &periodBuffer = *m_localEvents[frameData->period()];
       auto &mutableRunInfo = periodBuffer.mutableRun();
       mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
@@ -261,7 +275,6 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
         spectrum.addEventQuickly(TofEvent(tofData[i], pulseTime));
       }
       addSampleEnvLogs(seData, nSEEvents, mutableRunInfo);
-      lck.unlock();
     }
   }
   g_log.debug("Event capture finished");
