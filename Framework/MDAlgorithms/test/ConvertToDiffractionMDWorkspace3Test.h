@@ -4,7 +4,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h"
+#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace3.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -18,10 +18,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 
-class ConvertToDiffractionMDWorkspace2Test : public CxxTest::TestSuite {
+class ConvertToDiffractionMDWorkspace3Test : public CxxTest::TestSuite {
 public:
   void test_Init() {
-    ConvertToDiffractionMDWorkspace2 alg;
+    ConvertToDiffractionMDWorkspace3 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -120,7 +120,7 @@ public:
                                       "0, 500, 16e3", "PreserveEvents",
                                       MakeWorkspace2D ? "0" : "1");
 
-    ConvertToDiffractionMDWorkspace2 alg;
+    ConvertToDiffractionMDWorkspace3 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     alg.setPropertyValue("InputWorkspace", "inputWS");
@@ -192,6 +192,47 @@ public:
     // this is questionable change, indicating that ConvertToMD and
     // CovertToDiffractionWorkspace treat 0 differently
     do_test_MINITOPAZ(TOF, 1, false, true, 399);
+  }
+
+  void test_MINITOPAZ_autoExtents() {
+
+    int numEventsPer = 100;
+    EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::
+        createDiffractionEventWorkspace(numEventsPer);
+
+    // Rebin the workspace to have a manageable number bins
+    AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
+    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS",
+                                      "OutputWorkspace", "inputWS", "Params",
+                                      "0, 500, 16e3", "PreserveEvents", "0");
+
+    ConvertToDiffractionMDWorkspace3 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    alg.setPropertyValue("InputWorkspace", "inputWS");
+    alg.setPropertyValue("OutputWorkspace", "test_md3");
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+    TS_ASSERT(alg.isExecuted())
+
+    MDEventWorkspace3::sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(
+            "test_md3"));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    auto dim = ws->getDimension(0);
+    TS_ASSERT_DELTA(dim->getMinimum(), -50, 1e-3);
+    TS_ASSERT_DELTA(dim->getMaximum(), -0.9411, 1e-3);
+
+    dim = ws->getDimension(1);
+    TS_ASSERT_DELTA(dim->getMinimum(), -0.4669, 1e-3);
+    TS_ASSERT_DELTA(dim->getMaximum(), 0.474, 1e-3);
+
+    dim = ws->getDimension(2);
+    TS_ASSERT_DELTA(dim->getMinimum(), 0, 1e-3);
+    TS_ASSERT_DELTA(dim->getMaximum(), 0.705, 1e-3);
   }
 };
 

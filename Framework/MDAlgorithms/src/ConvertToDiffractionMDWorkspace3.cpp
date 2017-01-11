@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h"
+#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace3.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
 
@@ -26,16 +26,16 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace2)
+DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace3)
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void ConvertToDiffractionMDWorkspace2::init() {
+void ConvertToDiffractionMDWorkspace3::init() {
   // initilise common properties between versions
   BaseConvertToDiffractionMDWorkspace::init();
 
-  std::vector<double> extents = {-50.0, 50.0};
+  std::vector<double> extents;
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
       "A comma separated list of min, max for each dimension,\n"
@@ -55,7 +55,7 @@ void ConvertToDiffractionMDWorkspace2::init() {
  * @return minVal and maxVal -- two vectors with minimal and maximal values of
  *the momentums in the target workspace.
 */
-void ConvertToDiffractionMDWorkspace2::convertExtents(
+void ConvertToDiffractionMDWorkspace3::convertExtents(
     const std::vector<double> &Extents, std::vector<double> &minVal,
     std::vector<double> &maxVal) {
   minVal.resize(3);
@@ -70,9 +70,50 @@ void ConvertToDiffractionMDWorkspace2::convertExtents(
       minVal[d] = Extents[2 * d + 0];
       maxVal[d] = Extents[2 * d + 1];
     }
+  } else if (Extents.size() == 0) {
+    calculateExtentsFromData(minVal, maxVal);
   } else
     throw std::invalid_argument(
         "You must specify either 2 or 6 extents (min,max).");
+}
+
+/** Calculate the extents to use for the conversion from the input workspace.
+ *
+ * @param minVal :: the minimum bounds of the MD space.
+ * @param maxVal :: the maximum bounds of the MD space.
+ */
+void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(
+    std::vector<double> &minVal, std::vector<double> &maxVal) {
+  auto alg = createChildAlgorithm("ConvertToMDMinMaxLocal");
+  alg->initialize();
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
+                                         getProperty("InputWorkspace"));
+  alg->setPropertyValue("QDimensions", "Q3D");
+  std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
+  alg->setPropertyValue("dEAnalysisMode",
+                        dE_modes[Kernel::DeltaEMode::Elastic]);
+
+  std::string TargetFrame, Scaling;
+  convertFramePropertyNames(getPropertyValue("OutputDimensions"), TargetFrame,
+                            Scaling);
+  alg->setProperty("Q3DFrames", TargetFrame);
+  alg->setProperty("QConversionScales", Scaling);
+
+  alg->execute();
+
+  minVal = alg->getProperty("MinValues");
+  maxVal = alg->getProperty("MaxValues");
+
+  // If the calculation produced +/- infinity as one of the extents
+  // replace this with a more reasonable value.
+  const auto INF = std::numeric_limits<double>::infinity();
+  const auto MAX_DBL = std::numeric_limits<double>::max();
+  const auto DEFAULT_BOUND = 50.0;
+
+  std::replace(minVal.begin(), minVal.end(), -INF, -DEFAULT_BOUND);
+  std::replace(maxVal.begin(), maxVal.end(), INF, DEFAULT_BOUND);
+  std::replace(minVal.begin(), minVal.end(), MAX_DBL, -DEFAULT_BOUND);
+  std::replace(maxVal.begin(), maxVal.end(), -MAX_DBL, DEFAULT_BOUND);
 }
 
 } // namespace Mantid

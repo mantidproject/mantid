@@ -3,8 +3,9 @@ set ( SRC_FILES
 	# Old TMP convertToMD code prepared for deprecation:
 	# src/CreateMDFitWorkspace.cpp
 	#end TMP
-    src/AccumulateMD.cpp
+        src/AccumulateMD.cpp
 	src/AndMD.cpp
+	src/BaseConvertToDiffractionMDWorkspace.cpp
 	src/BinMD.cpp
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
@@ -28,6 +29,7 @@ set ( SRC_FILES
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace2.cpp
+	src/ConvertToDiffractionMDWorkspace3.cpp
 	src/ConvertToMD.cpp
 	src/ConvertToMDMinMaxGlobal.cpp
 	src/ConvertToMDMinMaxLocal.cpp
@@ -132,9 +134,9 @@ set ( SRC_FILES
 #)
 
 set ( INC_FILES
-	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
-    inc/MantidMDAlgorithms/AccumulateMD.h
+        inc/MantidMDAlgorithms/AccumulateMD.h
 	inc/MantidMDAlgorithms/AndMD.h
+        inc/MantidMDAlgorithms/BaseConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/BinMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
@@ -155,6 +157,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
+        inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace3.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
 	inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
 	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
@@ -264,7 +267,7 @@ set ( TEST_FILES
 	#
 	# these tests are as they test verify different parts of the CPR algorithms
 	#CreateMDFitWorkspaceTest.h
-    AccumulateMDTest.h
+        AccumulateMDTest.h
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
 	BoxControllerSettingsAlgorithmTest.h
@@ -283,9 +286,10 @@ set ( TEST_FILES
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpiceDataToRealSpaceTest.h
 	ConvertToDetectorFaceMDTest.h
-	ConvertToDiffractionMDWorkspace2Test.h
-	ConvertToDiffractionMDWorkspaceTest.h
-	ConvertToMDComponentsTest.h
+        ConvertToDiffractionMDWorkspaceTest.h
+        ConvertToDiffractionMDWorkspace2Test.h
+        ConvertToDiffractionMDWorkspace3Test.h
+        ConvertToMDComponentsTest.h
 	ConvertToMDMinMaxGlobalTest.h
 	ConvertToMDMinMaxLocalTest.h
 	ConvertToMDTest.h
