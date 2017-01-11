@@ -14,7 +14,7 @@ def save_recon_output(self, recon_data, cfg, save_horiz_slices=False):
     out_recon_dir = os.path.join(output_dir, 'reconstructed')
     self.tomo_print_timed_start(
         " * Starting saving slices of the reconstructed volume in: {0}...".
-            format(out_recon_dir))
+        format(out_recon_dir))
     tomoio.save_recon_as_vertical_slices(
         recon_data,
         out_recon_dir,
@@ -34,48 +34,37 @@ def save_recon_output(self, recon_data, cfg, save_horiz_slices=False):
 
     self.tomo_print_timed_stop(
         " * Finished saving slices of the reconstructed volume in: {0}".
-            format(out_recon_dir))
+        format(out_recon_dir))
 
 
-def save_preproc_images(self,
-                        output_dir,
-                        preproc_data,
-                        preproc_cfg,
-                        out_dtype='uint16'):
+def save_preproc_images(data, config):
     """
     Save (pre-processed) images from a data array to image files.
 
-    @param output_dir :: where results are being saved, including the pre-proc images/slices
-    @param preproc_data :: data volume with pre-processed images
-    @param preproc_cfg :: pre-processing configuration set up for a reconstruction
+    @param data :: The pre-processed data that will be saved
+    @param config :: The full reconstruction config
     @param out_dtype :: dtype used for the pixel type/depth in the output image files
     """
+    import os
+    import numpy as np
+    from recon.helper import Helper
+    h = Helper(config)
 
-    min_pix = np.amin(preproc_data)
-    max_pix = np.amax(preproc_data)
-    # DEBUG message
-    # print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
-    if preproc_cfg.save_preproc_imgs:
-        preproc_dir = os.path.join(output_dir,
-                                   self._PREPROC_IMGS_SUBDIR_NAME)
-        self.tomo_print_timed_start(
-            " * Saving all pre-processed images (preproc_data) into {0} dtype: {1}".
-                format(preproc_dir, preproc_data.dtype))
-        tomoio.make_dirs_if_needed(preproc_dir)
-        for idx in range(0, preproc_data.shape[0]):
-            # rescale_intensity has issues with float64=>int16
-            tomoio.write_image(
-                preproc_data[idx, :, :],
-                min_pix,
-                max_pix,
-                os.path.join(preproc_dir,
-                             'out_preproc_proj_image' + str(idx).zfill(6)),
-                img_format=preproc_cfg.out_img_format,
-                dtype=out_dtype)
-        self.tomo_print_timed_stop(
-            " * Saving pre-processed images finished.")
-    else:
-        self.tomo_print(" * NOTE: NOT saving pre-processed images...")
+    min_pix = np.amin(data)
+    max_pix = np.amax(data)
+
+    preproc_dir = os.path.join(config.func.output_dir, config.func.preproc_images_subdir)
+
+    h.pstart(" * Saving all pre-processed images (data) into {0} dtype: {1}".format(preproc_dir, data.dtype))
+
+    make_dirs_if_needed(preproc_dir)
+
+    for idx in range(0, data.shape[0]):
+        # rescale_intensity has issues with float64=>int16
+        write_image(data[idx, :, :], min_pix, max_pix,
+                    os.path.join(preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+
+    h.pstop(" * Saving pre-processed images finished.")
 
 
 def gen_readme_summary_begin(filename, cfg, cmd_line):
@@ -90,10 +79,11 @@ def gen_readme_summary_begin(filename, cfg, cmd_line):
 
     Returns :: time now (begin of run) in number of seconds since epoch (time() time)
     """
+
+    import time
     tstart = time.time()
 
-    # generate file with dos/windows line end for windoze users'
-    # convenience
+    # generate file with dos/windows line end for windows users convenience
     with open(filename, 'w') as oreadme:
         file_hdr = (
             'Tomographic reconstruction. Summary of inputs, settings and outputs.\n'
@@ -132,7 +122,19 @@ def gen_readme_summary_begin(filename, cfg, cmd_line):
         oreadme.write(cmd_line)
         oreadme.write("\n")
 
-    return tstart
+
+def make_dirs_if_needed(dirname):
+    """
+    Makes sure that the directory needed (for example to save a file)
+    exists, otherwise creates it.
+
+    @param dirname :: (output) directory to check
+
+    """
+    import os
+    absname = os.path.abspath(dirname)
+    if not os.path.exists(absname):
+        os.makedirs(absname)
 
 
 def gen_readme_summary_end(filename, data_stages, tstart,
@@ -150,6 +152,7 @@ def gen_readme_summary_end(filename, data_stages, tstart,
     # append to a readme/report that should have been pre-filled with the
     # initial configuration
     with open(filename, 'a') as oreadme:
+        import time
         run_hdr = ("\n"
                    "--------------------------\n"
                    "Run/job details:\n"
@@ -169,6 +172,4 @@ def gen_readme_summary_end(filename, data_stages, tstart,
         oreadme.write("Time elapsed in reconstruction: {0:.3f}s\r\n".
                       format(t_recon_elapsed))
         tend = time.time()
-        oreadme.write("Total time elapsed: {0:.3f}s\r\n".format(tend -
-                                                                tstart))
         oreadme.write('Time now (run end): ' + time.ctime(tend))

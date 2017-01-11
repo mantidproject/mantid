@@ -17,42 +17,34 @@ class TomoPyTool(AbstractTool):
         num_proj = data.shape[0]
         inc = float(config.pre.max_angle) / (num_proj - 1)
 
-        projection_angles = np.arange(0, num_proj * inc, inc)
+        proj_angles = np.arange(0, num_proj * inc, inc)
 
-        projection_angles = np.radians(projection_angles)
+        proj_angles = np.radians(proj_angles)
 
         alg = config.func.algorithm
         cor = config.func.cor
+        num_iter = config.func.num_iter
 
         h.tomo_print(" * Using center of rotation: {0}".format(cor))
 
         if 'gridrec' != alg and 'fbp' != alg:
-            if not config.func.num_iter:
-                tomopy.cfg_num_iter = config.func.num_iter
 
             # For ref, some typical run times with 4 cores:
             # 'bart' with num_iter=20 => 467.640s ~= 7.8m
             # 'sirt' with num_iter=30 => 698.119 ~= 11.63
             h.pstart(
                 " * Starting iterative method with TomoPy. Algorithm: {0}, "
-                "number of iterations: {1}...".format(alg, config.func.num_iter))
+                "number of iterations: {1}...".format(alg, num_iter))
 
-            rec = tomopy.recon(
-                tomo=data,
-                theta=projection_angles,
-                center=cor,
-                algorithm=alg,
-                num_iter=config.func.num_iter)  # , filter_name='parzen')
+            rec = tomopy.recon(tomo=data, theta=proj_angles, center=cor,
+                               algorithm=alg, num_iter=num_iter)  # , filter_name='parzen')
 
         else:
             h.pstart(
                 " * Starting non-iterative reconstruction algorithm with TomoPy. "
                 "Algorithm: {0}...".format(alg))
             rec = tomopy.recon(
-                tomo=data,
-                theta=projection_angles,
-                center=cor,
-                algorithm=alg)
+                tomo=data, theta=proj_angles, center=cor, algorithm=alg)
 
         h.pstop(
             " * Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".

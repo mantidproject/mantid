@@ -26,7 +26,14 @@ class FunctionalConfig(object):
         self.input_dir = None
         self.input_dir_flat = None
         self.input_dir_dark = None
+
+        self.readme_file_name = '0.README_reconstruction.txt'
+        self.preproc_images_subdir = 'pre_processed'
+        self.preproc_images_format = 'fits'
         self.output_dir = None
+        self.out_slices_file_name_prefix = 'out_recon_slice'
+        self.out_horiz_slices_subdir = 'out_recon_horiz_slice'
+
         self.cor = None
         self.find_cor = None
         self.verbosity = 3  # default 2
@@ -39,10 +46,13 @@ class FunctionalConfig(object):
 
     def __str__(self):
         return "Input dir:{0}\nFlat dir:{1}\nDark dir:{2}\nOutput dir:{3}\nCOR:{4}\nFind_COR:{5}\nTool:{6}\n" \
-                "Algorithm:{7}\nNum iter:{8}\nRegularization:{9}".format(str(self.input_dir),
-                                                                         str(self.input_dir_flat),
-                                                                         str(self.input_dir_dark),
-                                                                         str(self.output_dir), str(self.cor),
-                                                                         str(self.find_cor), str(self.tool),
-                                                                         str(self.algorithm), str(self.num_iter),
-                                                                         str(self.regularization))
+            "Algorithm:{7}\nNum iter:{8}\nRegularization:{9}".format(str(self.input_dir),
+                                                                     str(self.input_dir_flat),
+                                                                     str(self.input_dir_dark),
+                                                                     str(self.output_dir), str(
+                self.cor),
+                str(self.find_cor), str(
+                self.tool),
+                str(self.algorithm), str(
+                self.num_iter),
+                str(self.regularization))

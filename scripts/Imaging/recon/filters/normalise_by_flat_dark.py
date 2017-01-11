@@ -1,4 +1,4 @@
-def execute(self, data, cfg, norm_flat_img, norm_dark_img):
+def execute(data, cfg, norm_flat_img, norm_dark_img):
     """
     Normalize by flat and dark images
 

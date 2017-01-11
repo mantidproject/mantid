@@ -49,13 +49,11 @@ class ToolAlgorithmConfig(object):
         mystr = "Tool: {0}\n".format(self.tool)
         mystr += "Algorithm: {0}\n".format(self.algorithm)
         if self.num_iter:
-            mystr += "Number of algorith iterations: {0}\n".format(
-                self.num_iter)
+            mystr += "Number of algorith iterations: {0}\n".format(self.num_iter)
         else:
             mystr += "(Algorithm iterations: not defined)\n"
         if self.regularization:
-            mystr += "Regularization parameter: {0}\n".format(
-                self.regularization)
+            mystr += "Regularization parameter: {0}\n".format(self.regularization)
         else:
             mystr += "(Regularization parameter: not defined)\n"
 
@@ -106,39 +104,27 @@ class PreProcConfig(object):
 
         mystr = "Input path (relative): {0}\n".format(self.input_dir)
         if self.input_dir:
-            mystr += "Input path (absolute): {0}\n".format(
-                os.path.abspath(self.input_dir))
+            mystr += "Input path (absolute): {0}\n".format(os.path.abspath(self.input_dir))
         else:
-            mystr += "Input path (absolute): {0}\n".format(
-                'cannot find because the input '
-                'path has not been set')
-        mystr += "Input path for flat (open beam) images (relative): {0}\n".format(
-            self.input_dir_flat)
-        mystr += "Input path for dark images (relative): {0}\n".format(
-            self.input_dir_dark)
+            mystr += "Input path (absolute): {0}\n".format('cannot find because the input '
+                                                           'path has not been set')
+        mystr += "Input path for flat (open beam) images (relative): {0}\n".format(self.input_dir_flat)
+        mystr += "Input path for dark images (relative): {0}\n".format(self.input_dir_dark)
         mystr += "Input image format: {0}\n".format(self.in_img_format)
         mystr += "Output image format: {0}\n".format(self.out_img_format)
         mystr += "Maximum angle:: {0}\n".format(self.max_angle)
         mystr += "Center of rotation: {0}\n".format(self.cor)
-        mystr += "Region of interest (crop coordinates): {0}\n".format(
-            self.crop_coords)
-        mystr += "Normalize by flat/dark images: {0}\n".format(
-            self.normalize_flat_dark)
-        mystr += "Normalize by air region: {0}\n".format(
-            self.normalize_air_region)
-        mystr += "Normalize by proton charge: {0}\n".format(
-            self.normalize_proton_charge)
-        mystr += "Cut-off on normalized images: {0}\n".format(
-            self.cut_off_level)
-        mystr += "Corrections for MCP detector: {0}\n".format(
-            self.mcp_corrections)
+        mystr += "Region of interest (crop coordinates): {0}\n".format(self.crop_coords)
+        mystr += "Normalize by flat/dark images: {0}\n".format(self.normalize_flat_dark)
+        mystr += "Normalize by air region: {0}\n".format(self.normalize_air_region)
+        mystr += "Normalize by proton charge: {0}\n".format(self.normalize_proton_charge)
+        mystr += "Cut-off on normalized images: {0}\n".format(self.cut_off_level)
+        mystr += "Corrections for MCP detector: {0}\n".format(self.mcp_corrections)
         mystr += "Scale down factor for images: {0}\n".format(self.scale_down)
         mystr += "Median filter width: {0}\n".format(self.median_filter_size)
         mystr += "Rotation: {0}\n".format(self.rotation)
-        mystr += "Line projection (line integral/log re-scale): {0}\n".format(
-            1)
-        mystr += "Sinogram stripes removal: {0}".format(
-            self.stripe_removal_method)
+        mystr += "Line projection (line integral/log re-scale): {0}\n".format(1)
+        mystr += "Sinogram stripes removal: {0}".format(self.stripe_removal_method)
 
         return mystr
 
@@ -163,19 +149,15 @@ class PostProcConfig(object):
 
         mystr = "Output path (relative): {0}\n".format(self.output_dir)
         if self.output_dir:
-            mystr += "Output path (absolute): {0}\n".format(
-                os.path.abspath(self.output_dir))
+            mystr += "Output path (absolute): {0}\n".format(os.path.abspath(self.output_dir))
         else:
-            mystr += "Output path (absolute): {0}\n".format(
-                'cannot find because the input '
-                'path has not been set')
+            mystr += "Output path (absolute): {0}\n".format('cannot find because the input '
+                                                            'path has not been set')
         mystr += "Circular mask: {0}\n".format(self.circular_mask)
-        mystr += "Cut-off on reconstructed volume: {0}\n".format(
-            self.cut_off_level)
+        mystr += "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level)
         mystr += "Gaussian filter: {0}\n".format(self.gaussian_filter_par)
         mystr += "Median filter size:: {0}\n".format(self.median_filter_size)
-        mystr += "Median filter (3d) size:: {0}\n".format(
-            self.median_filter3d_size)
+        mystr += "Median filter (3d) size:: {0}\n".format(self.median_filter3d_size)
 
         return mystr
 
@@ -191,5 +173,4 @@ class ReconstructionConfig(object):
         self.postproc_cfg = postproc_cfg
 
     def __str__(self):
-        return str(self.preproc_cfg) + str(self.alg_cfg) + str(
-            self.postproc_cfg)
+        return str(self.preproc_cfg) + str(self.alg_cfg) + str(self.postproc_cfg)
