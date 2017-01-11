@@ -167,17 +167,35 @@ void MaskDetectors::exec() {
         appendToIndexListFromMaskWS(indexList, maskWS, ranges_info);
       }
     } else { // not mask workspace
+      auto nHist = prevMasking->getNumberHistograms();
       // Check the provided workspace has the same number of spectra as the
       // input
-      if (prevMasking->getNumberHistograms() > WS->getNumberHistograms()) {
-        g_log.error() << "Input workspace has " << WS->getNumberHistograms()
-                      << " histograms   vs. "
-                      << "Input masking workspace has "
-                      << prevMasking->getNumberHistograms()
-                      << " histograms. \n";
-        throw std::runtime_error("Size mismatch between two input workspaces.");
+      if (nHist > WS->getNumberHistograms()) {
+        // Check the provided workspace has the same number of detectors as the
+        // input. If so add to the detector list
+        auto instrument = WS->getInstrument();
+        if(instrument && nHist == instrument->getNumberDetectors()) {
+          detectorList.reserve(prevMasking->getNumberHistograms());
+          for (size_t i = 0; i < prevMasking->getNumberHistograms(); ++i) {
+            if(prevMasking->y(i)[0] == 0) {
+              auto id = prevMasking->getDetector(i)->getID();
+              detectorList.push_back(id);
+            }
+          }
+        } else {
+          // We have more spectra in the mask than in the workspace and we also
+          // don't have a list of detector IDs. There's nothing more to try so
+          // give up loudly.
+          g_log.error() << "Input workspace has " << WS->getNumberHistograms()
+                  << " histograms   vs. "
+                  << "Input masking workspace has "
+                  << prevMasking->getNumberHistograms()
+                  << " histograms. \n";
+          throw std::runtime_error("Size mismatch between two input workspaces.");
+        }
+      } else {
+        appendToIndexListFromWS(indexList, prevMasking, ranges_info);
       }
-      appendToIndexListFromWS(indexList, prevMasking, ranges_info);
     }
   }
 
