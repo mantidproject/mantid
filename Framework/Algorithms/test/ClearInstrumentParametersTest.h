@@ -61,7 +61,7 @@ public:
   void clearParameters() {
     ClearInstrumentParameters clearer;
     TS_ASSERT_THROWS_NOTHING(clearer.initialize());
-    clearer.setPropertyValue("Workspace", m_ws->name());
+    clearer.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(clearer.execute());
     TS_ASSERT(clearer.isExecuted());
   }

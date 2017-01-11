@@ -580,7 +580,7 @@ MantidUI::importMatrixWorkspace(const MatrixWorkspace_sptr workspace, int lower,
                                 int upper, bool showDlg) {
   MantidMatrix *matrix = 0;
   if (workspace) {
-    const QString wsName(workspace->name().c_str());
+    const QString wsName(workspace->getName().c_str());
     if (showDlg) {
       ImportWorkspaceDlg dlg(appWindow(), workspace->getNumberHistograms());
       if (dlg.exec() == QDialog::Accepted) {
@@ -2824,7 +2824,7 @@ Table *MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs,
     return NULL;
 
   return createTableFromSpectraList(
-      m->name(), QString::fromStdString(m->workspace()->name()), indexList,
+      m->name(), QString::fromStdString(m->workspace()->getName()), indexList,
       errs, binCentres);
 }
 
