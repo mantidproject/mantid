@@ -632,7 +632,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
     } // for each unique boundary
 
     // If all bins were masked
-    if (line.x.size() == 0) {
+    if (line.x.empty()) {
       this->makeSinglePointWithNaN(line.x, line.y, line.e);
     }
   }

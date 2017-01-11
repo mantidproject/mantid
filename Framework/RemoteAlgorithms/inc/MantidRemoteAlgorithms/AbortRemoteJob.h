@@ -2,12 +2,17 @@
 #define ABORTREMOTEJOB_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport AbortRemoteJob : public Mantid::API::Algorithm {
+class DLLExport AbortRemoteJob : public Mantid::API::Algorithm,
+                                 public API::DeprecatedAlgorithm {
 public:
+  /// Default constructor
+  AbortRemoteJob();
+
   /// Algorithm's name
   const std::string name() const override { return "AbortRemoteJob"; }
   /// Summary of algorithms purpose

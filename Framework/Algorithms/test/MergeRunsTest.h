@@ -13,7 +13,6 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -27,8 +26,6 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::DataHandling::LoadEventPreNexus;
-
 class MergeRunsTest : public CxxTest::TestSuite {
 
 private:
@@ -234,7 +231,7 @@ private:
     MergeRuns alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspaces", input->name() + "," + input->name()));
+        "InputWorkspaces", input->getName() + "," + input->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr wsOut = Mantid::API::AnalysisDataService::Instance()
@@ -834,7 +831,7 @@ public:
     MergeRuns alg;
     alg.setRethrows(true);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", a->name() + "," + b->name());
+    alg.setPropertyValue("InputWorkspaces", a->getName() + "," + b->getName());
     alg.setPropertyValue("OutputWorkspace", "out");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -882,7 +879,7 @@ public:
     MergeRuns alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspaces", input->name() + "," + input->name()));
+        "InputWorkspaces", input->getName() + "," + input->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outer"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     WorkspaceGroup_sptr wsgroup =
@@ -960,7 +957,7 @@ public:
                                             const bool noOutput = false) {
 
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspaces", input->name()));
+        alg.setPropertyValue("InputWorkspaces", input->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -1267,7 +1264,7 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -1302,7 +1299,7 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
     alg.setPropertyValue("OutputWorkspace", "outWS1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -1311,7 +1308,7 @@ public:
 
     MergeRuns alg2;
     alg2.initialize();
-    alg2.setPropertyValue("InputWorkspaces", ws2->name());
+    alg2.setPropertyValue("InputWorkspaces", ws2->getName());
     alg2.setPropertyValue("OutputWorkspace", "outWS2");
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
 
@@ -1350,7 +1347,7 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
     alg.setPropertyValue("OutputWorkspace", "outWS1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 

@@ -16,6 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -51,6 +52,11 @@ using Mantid::MantidVecPtr;
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
 }
+
+EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
+                         const double height_, const FitStatus fitStatus_)
+    : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0),
+      height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
@@ -506,8 +512,6 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  workspace->setInstrument(instrument);
-
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
@@ -520,6 +524,7 @@ void createInstrumentForWorkspaceWithDistances(
     workspace->getSpectrum(i).clearDetectorIDs();
     workspace->getSpectrum(i).addDetectorID(det->getID());
   }
+  workspace->setInstrument(instrument);
 }
 
 //================================================================================================================
@@ -994,8 +999,9 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
 
   // c) Pad all the pixels and Set to zero
   size_t workspaceIndex = 0;
+  const auto &detectorInfo = outputWS->detectorInfo();
   for (it = detector_map.begin(); it != detector_map.end(); ++it) {
-    if (!it->second->isMonitor()) {
+    if (!detectorInfo.isMonitor(detectorInfo.indexOf(it->first))) {
       auto &spec = outputWS->getSpectrum(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
@@ -1233,6 +1239,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   size_t nHist = targWS->rowCount();
   //// Loop over the spectra
   uint32_t liveDetectorsCount(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
     sp2detMap[i] = std::numeric_limits<size_t>::quiet_NaN();
     detId[i] = std::numeric_limits<int32_t>::quiet_NaN();
@@ -1241,26 +1248,17 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
     TwoTheta[i] = std::numeric_limits<double>::quiet_NaN();
     Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();
 
-    // get detector or detector group which corresponds to the spectra i
-    Geometry::IDetector_const_sptr spDet;
-    try {
-      spDet = inputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      continue;
-    }
-
-    // Check that we aren't dealing with monitor...
-    if (spDet->isMonitor())
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // calculate the requested values;
     sp2detMap[i] = liveDetectorsCount;
-    detId[liveDetectorsCount] = int32_t(spDet->getID());
+    detId[liveDetectorsCount] = int32_t(spectrumInfo.detector(i).getID());
     detIDMap[liveDetectorsCount] = i;
-    L2[liveDetectorsCount] = spDet->getDistance(*sample);
+    L2[liveDetectorsCount] = spectrumInfo.l2(i);
 
-    double polar = inputWS->detectorTwoTheta(*spDet);
-    double azim = spDet->getPhi();
+    double polar = spectrumInfo.twoTheta(i);
+    double azim = spectrumInfo.detector(i).getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
 
@@ -1309,4 +1307,32 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
     }
   }
 }
+
+ITableWorkspace_sptr
+createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
+  ITableWorkspace_sptr ws = boost::make_shared<TableWorkspace>(rows.size());
+  auto wsIndexColumn = ws->addColumn("int", "WorkspaceIndex");
+  auto centreColumn = ws->addColumn("double", "PeakCentre");
+  auto centreErrorColumn = ws->addColumn("double", "PeakCentreError");
+  auto sigmaColumn = ws->addColumn("double", "Sigma");
+  auto sigmaErrorColumn = ws->addColumn("double", "SigmaError");
+  auto heightColumn = ws->addColumn("double", "Height");
+  auto heightErrorColumn = ws->addColumn("double", "HeightError");
+  auto chiSqColumn = ws->addColumn("double", "chiSq");
+  auto statusColumn = ws->addColumn("str", "FitStatus");
+  for (size_t i = 0; i != rows.size(); ++i) {
+    const auto &row = rows[i];
+    wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    centreColumn->cell<double>(i) = row.peakCentre;
+    centreErrorColumn->cell<double>(i) = row.peakCentreError;
+    sigmaColumn->cell<double>(i) = row.sigma;
+    sigmaErrorColumn->cell<double>(i) = row.sigmaError;
+    heightColumn->cell<double>(i) = row.height;
+    heightErrorColumn->cell<double>(i) = row.heightError;
+    chiSqColumn->cell<double>(i) = row.chiSq;
+    statusColumn->cell<std::string>(i) =
+        row.fitStatus == EPPTableRow::FitStatus::SUCCESS ? "success" : "failed";
+  }
+  return ws;
 }
+} // namespace WorkspaceCreationHelper

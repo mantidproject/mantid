@@ -86,9 +86,9 @@ void SaveDspacemap::CalculateDspaceFromCal(
     it = allDetectors.find(i);
     if (it != allDetectors.end()) {
       det = it->second;
-      factor =
-          Instrument::calcConversion(l1, beamline, beamline_norm, samplePos,
-                                     det, offsetsWS->getValue(i, 0.0));
+      factor = Instrument::calcConversion(l1, beamline, beamline_norm,
+                                          samplePos, det->getPos(),
+                                          offsetsWS->getValue(i, 0.0));
       // Factor of 10 between ISAW and Mantid
       factor *= 0.1;
       if (factor < 0)

@@ -77,7 +77,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         """
         run = self.vanaws.getRun()
         if not run.hasProperty('temperature'):
-            self.log().warning("Temperature sample log is not present in " + self.vanaws.getName() +
+            self.log().warning("Temperature sample log is not present in " + self.vanaws.name() +
                                " T=293K is assumed for Debye-Waller factor.")
             return self.defaultT
         try:
@@ -107,16 +107,14 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         dataX = self.vanaws.readX(0)
         coefY = np.zeros(nhist)
         coefE = np.zeros(nhist)
-        instrument = self.vanaws.getInstrument()
-        detID_offset = self.get_detID_offset()
         peak_centre = eppws.column('PeakCentre')
         sigma = eppws.column('Sigma')
 
+        specInfo = self.vanaws.spectrumInfo()
         for idx in range(nhist):
             prog_reporter.report("Setting %dth spectrum" % idx)
             dataY = self.vanaws.readY(idx)
-            det = instrument.getDetector(idx + detID_offset)
-            if np.max(dataY) == 0 or det.isMasked():
+            if np.max(dataY) == 0 or specInfo.isMasked(idx):
                 coefY[idx] = 0.
                 coefE[idx] = 0.
             else:

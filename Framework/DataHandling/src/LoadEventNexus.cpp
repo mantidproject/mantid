@@ -865,7 +865,7 @@ void LoadEventNexus::init() {
 */
 void LoadEventNexus::setTopEntryName() {
   std::string nxentryProperty = getProperty("NXentryName");
-  if (nxentryProperty.size() > 0) {
+  if (!nxentryProperty.empty()) {
     m_top_entry_name = nxentryProperty;
     return;
   }

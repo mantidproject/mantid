@@ -69,7 +69,7 @@ If you want to check if a variable points to something that is an MDHistoWorkspa
                            NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
    if isinstance(ws, IMDHistoWorkspace):
-    print ws.getName() + " is a " + ws.id()
+    print ws.name() + " is a " + ws.id()
 
 Output:
 

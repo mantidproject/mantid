@@ -75,7 +75,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             wks = api.AnalysisDataService.retrieve(self.input_workspaces[key])
             run = wks.getRun()
             if not run.hasProperty('flipper'):
-                message = "Workspace " + wks.getName() + " does not have flipper sample log!"
+                message = "Workspace " + wks.name() + " does not have flipper sample log!"
                 self.log().error(message)
                 raise RuntimeError(message)
             flipper = run.getProperty('flipper').value
@@ -84,7 +84,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             else:
                 needed = 'ON'
             if flipper != needed:
-                message = "Workspace " + wks.getName() + " must have flipper " + needed + ", but it is " + flipper
+                message = "Workspace " + wks.name() + " must have flipper " + needed + ", but it is " + flipper
                 self.log().error(message)
                 raise RuntimeError(message)
 
@@ -136,9 +136,9 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
 
         # 2. subtract background from NiCr
         _sf_nicr_bg_ = sf_nicr - sf_bkgr
-        wslist.append(_sf_nicr_bg_.getName())
+        wslist.append(_sf_nicr_bg_.name())
         _nsf_nicr_bg_ = nsf_nicr - nsf_bkgr
-        wslist.append(_nsf_nicr_bg_.getName())
+        wslist.append(_nsf_nicr_bg_.name())
         # check negative values, throw exception
         sf_arr = np.array(_sf_nicr_bg_.extractY()).flatten()
         nsf_arr = np.array(_nsf_nicr_bg_.extractY()).flatten()
@@ -152,13 +152,13 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
 
         # 3. calculate flipping ratio F - 1 = (NiCr - Bkg)NSF/(NiCr - Bkg)SF - 1
         _coef_ws_ = api.Divide(LHSWorkspace=_nsf_nicr_bg_, RHSWorkspace=_sf_nicr_bg_, WarnOnZeroDivide=True) - 1.0
-        wslist.append(_coef_ws_.getName())
+        wslist.append(_coef_ws_.name())
         # 4. apply correction raw data
         sf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['SF_Data'])
         nsf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['NSF_Data'])
         # NSF_corr[i] = NSF[i] + (NSF[i] - SF[i])/(F[i] - 1)
         _diff_ws_ = nsf_data_ws - sf_data_ws
-        wslist.append(_diff_ws_.getName())
+        wslist.append(_diff_ws_.name())
         _tmp_ws_ = api.Divide(LHSWorkspace=_diff_ws_, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True)
         _tmp_ws_.setYUnit(nsf_data_ws.YUnit())
         api.Plus(LHSWorkspace=nsf_data_ws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.nsf_outws_name)

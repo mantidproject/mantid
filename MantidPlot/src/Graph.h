@@ -898,6 +898,8 @@ private:
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
+  /// trim a title from a legend key
+  QString trimTableNameFromLegendKey(const QString &key) const;
 
   QString yAxisTitleFromFirstCurve();
 
