@@ -3,6 +3,7 @@
 
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 #include <memory>
+#include <librdkafka/rdkafkacpp.h>
 
 // -----------------------------------------------------------------------------
 // RdKafka forward declarations
@@ -56,6 +57,11 @@ private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
   std::string m_brokerAddr;
   std::string m_topicName;
+
+  void reportSuccessOrFailure(const RdKafka::ErrorCode &error, int64_t confOffset) const;
+
+  void subscribeAtOffset() const;
+  void checkTopicExists() const;
 };
 
 } // namespace LiveData
