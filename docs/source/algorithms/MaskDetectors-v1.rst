@@ -164,7 +164,7 @@ Operations Involved in Masking
 There are 2 operations to mask a detector and thus spectrum related
 
 1. Set the detector in workspace's instrument's *parameter map* to *masked*.
-2. Zero the data associated with the spectrum with detectors that are masked.
+2. Zero the data and clear the events associated with the spectrum with detectors that are masked.
 
 
 Usage
