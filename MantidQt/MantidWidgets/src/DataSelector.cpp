@@ -173,8 +173,7 @@ QString DataSelector::getProblem() const {
  */
 void DataSelector::autoLoadFile(const QString &filepath) {
   using namespace Mantid::API;
-  QFileInfo qfio(filepath);
-  QString baseName = qfio.completeBaseName();
+  QString baseName = getWsNameFromFiles();
 
   // create instance of load algorithm
   const Algorithm_sptr loadAlg =
@@ -193,12 +192,9 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
   if (!error) {
-    QString filename(this->getFullFilePath());
-    QFileInfo qfio(filename);
-    QString baseName = qfio.completeBaseName();
 
     // emit that we got a valid workspace/file to work with
-    emit dataReady(baseName);
+    emit dataReady(getWsNameFromFiles());
   } else {
     m_uiForm.rfFileInput->setFileProblem(
         "Could not load file. See log for details.");
@@ -252,6 +248,24 @@ QString DataSelector::getFullFilePath() const {
 }
 
 /**
+ * Gets the workspace name that is created after loading the files
+ *
+ * @return The workspace name that is created after loading the files
+ */
+QString DataSelector::getWsNameFromFiles() const {
+  QString filepath = DataSelector::getFullFilePath();
+  QFileInfo qfio(filepath);
+  QString baseName = qfio.completeBaseName();
+
+  // make up a name for the group workspace, if multiple files are specified
+  if (m_uiForm.rfFileInput->allowMultipleFiles() && filepath.count(",") > 0) {
+    baseName += "_group";
+  }
+
+  return baseName;
+}
+
+/**
  * Gets the name of item selected in the DataSelector.
  *
  * This will either return the base name of the filepath or
@@ -270,7 +284,7 @@ QString DataSelector::getCurrentDataName() const {
   case 0:
     // the file selector is visible
     if (m_uiForm.rfFileInput->isValid()) {
-      filename = m_uiForm.rfFileInput->getUserInput().toString();
+      filename = getWsNameFromFiles();
     }
     break;
   case 1:
