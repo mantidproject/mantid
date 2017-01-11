@@ -62,6 +62,7 @@ private:
 
   void subscribeAtOffset() const;
   void checkTopicExists() const;
+  void createConsumer();
 };
 
 } // namespace LiveData

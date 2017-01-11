@@ -105,11 +105,19 @@ const std::string KafkaTopicSubscriber::topic() const { return m_topicName; }
  * Setup the connection to the broker for the configured topic
  */
 void KafkaTopicSubscriber::subscribe() {
-  // configurations
+  createConsumer();
+  checkTopicExists();
+  subscribeAtOffset();
+}
+
+/**
+ * Create the KafkaConsumer for requried configuration
+ */
+void KafkaTopicSubscriber::createConsumer() {
+  // Create configurations
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
   auto topicConf = createTopicConfiguration(globalConf.get());
 
-  // consumer
   std::string errorMsg;
   m_consumer = std::unique_ptr<KafkaConsumer>(
       KafkaConsumer::create(globalConf.get(), errorMsg));
@@ -119,9 +127,6 @@ void KafkaTopicSubscriber::subscribe() {
     throw std::runtime_error(os.str());
   }
   LOGGER().debug() << "% Created consumer " << m_consumer->name() << std::endl;
-
-  checkTopicExists();
-  subscribeAtOffset();
 }
 
 /**
