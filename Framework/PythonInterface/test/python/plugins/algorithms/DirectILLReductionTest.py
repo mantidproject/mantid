@@ -98,7 +98,12 @@ class DirectILLReductionTest(unittest.TestCase):
         cls._in5WStemplate = \
             LoadEmptyInstrument(InstrumentName='IN5',
                                 OutputWorkspace=cls._TEMPLATE_IN5_WS_NAME)
-        MaskDetectors(Workspace=cls._in5WStemplate, StartWorkspaceIndex=151)
+        mask = list()
+        for i in range(513):
+            if i % 10 != 0:
+                mask.append(i)
+        MaskDetectors(Workspace=cls._in5WStemplate, DetectorList=mask)
+        MaskDetectors(Workspace=cls._in5WStemplate, StartWorkspaceIndex=512)
         cls._in5WStemplate = \
             RemoveMaskedSpectra(InputWorkspace=cls._in5WStemplate,
                                 OutputWorkspace=cls._in5WStemplate)
@@ -124,10 +129,10 @@ class DirectILLReductionTest(unittest.TestCase):
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
-            'IndexType': 'Detector ID',
+            'IndexType': 'Workspace Index',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
-            'DetectorsAtL2': '128, 129',
+            'DetectorsAtL2': '12, 38',
             'ElasticPeakDiagnosticsLowThreshold': 0.1,
             'ElasticPeakDiagnosticsHighThreshold': 4.8,
             'OutputDiagnosticsWorkspace': diagnosticsWSName,
@@ -143,7 +148,9 @@ class DirectILLReductionTest(unittest.TestCase):
         for i in range(diagnosticsWS.getNumberHistograms()):
             originalI = i + 1  # Monitor has been extracted.
             if originalI in shouldBeMasked:
-                self.assertEqual(diagnosticsWS.readY(i)[0], 1.0)
+                self.assertEqual(diagnosticsWS.readY(i)[0], 1.0,
+                                 ('Detector at ws index {0} should be ' +
+                                  'masked').format(i))
             else:
                 self.assertEqual(diagnosticsWS.readY(i)[0], 0.0)
         DeleteWorkspace(outWSName)
@@ -156,10 +163,10 @@ class DirectILLReductionTest(unittest.TestCase):
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
-            'IndexType': 'Detector ID',
+            'IndexType': 'Workspace Index',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
-            'DetectorsAtL2': '128, 129',
+            'DetectorsAtL2': '12, 38',
             'OutputDiagnosticsWorkspace': diagnosticsWSName,
             'rethrow': True
         }
@@ -186,10 +193,10 @@ class DirectILLReductionTest(unittest.TestCase):
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
-            'IndexType': 'Detector ID',
+            'IndexType': 'Workspace Index',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
-            'DetectorsAtL2': '128, 129',
+            'DetectorsAtL2': '12, 38',
             'NoisyBkgDiagnosticsHighThreshold': 1.9,
             'OutputDiagnosticsWorkspace': diagnosticsWSName,
             'rethrow': True
@@ -216,7 +223,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
-            'IndexType': 'Detector ID',
+            'IndexType': 'Workspace Index',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
@@ -296,7 +303,7 @@ class DirectILLReductionTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
-            'Reductiontype': 'Sample',
+            'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
@@ -308,7 +315,7 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = mtd[outWSName]
         self._checkAlgorithmsInHistory(ws, 'BinWidthAtX', 'Rebin')
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
-        xs = ws.extractX()
+        xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
         DeleteWorkspace(ws)
 
@@ -317,7 +324,7 @@ class DirectILLReductionTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
-            'Reductiontype': 'Sample',
+            'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
@@ -329,13 +336,13 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = mtd[outWSName]
         self._checkAlgorithmsInHistory(ws, 'MedianBinWidth', 'Rebin')
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
-        xs = ws.extractX()
+        xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
         DeleteWorkspace(ws)
 
     def test_user_mask(self):
         numHistograms = self._testIN5WS.getNumberHistograms()
-        userMask = [0, int(3 * numHistograms / 5), numHistograms - 1]
+        userMask = [0, int(3 * numHistograms / 5), numHistograms - 2]
         maskString = '{0},'.format(userMask[0])
         for i in userMask:
             maskString += str(i) + ','
@@ -344,7 +351,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
             'ReductionType': 'Empty Container/Cadmium',
-            'IndexType': 'Detector ID',
+            'IndexType': 'Workspace Index',
             'Monitor': '0',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
@@ -355,8 +362,7 @@ class DirectILLReductionTest(unittest.TestCase):
         outWS = mtd[outWSName]
         self._checkAlgorithmsInHistory(outWS, 'MaskDetectors')
         for i in range(outWS.getNumberHistograms()):
-            originalI = i + 1  # Monitor has been extracted.
-            if originalI in userMask:
+            if i in userMask:
                 self.assertTrue(outWS.getDetector(i).isMasked())
             else:
                 self.assertFalse(outWS.getDetector(i).isMasked())

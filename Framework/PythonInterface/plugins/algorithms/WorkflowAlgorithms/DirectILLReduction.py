@@ -10,7 +10,8 @@ from mantid.kernel import (CompositeValidator, Direct, Direction,
                            FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, IntBoundedValidator,
                            IntMandatoryValidator, Property, PropertyCriterion,
-                           StringListValidator, UnitConversion)
+                           StringArrayProperty, StringListValidator,
+                           UnitConversion)
 from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
                               CalculateFlatBackground, ClearMaskFlag,
                               CloneWorkspace, ComputeCalibrationCoefVan,
@@ -90,6 +91,7 @@ _PROP_REFERENCE_TOF_AXIS_WS = 'ReferenceTOFAxisWorkspace'
 _PROP_TRANSMISSION = 'Transmission'
 _PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
 _PROP_USER_MASK = 'MaskedDetectors'
+_PROP_USER_MASK_COMPONENTS = 'MaskedComponents'
 _PROP_VANA_WS = 'VanadiumWorkspace'
 
 _PROPGROUP_REBINNING = 'Rebinning for SofQW'
@@ -519,6 +521,8 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                            LowOutlier=0.0,
                            EnableLogging=algorithmLogging)
     _reportDiagnostics(report, elasticPeakDiagnostics, noisyBkgDiagnostics)
+    ClearMaskFlag(Workspace=elasticPeakDiagnostics,
+                  EnableLogging=algorithmLogging)
     ClearMaskFlag(Workspace=noisyBkgDiagnostics,
                   EnableLogging=algorithmLogging)
     combinedDiagnosticsWSName = wsNames.withSuffix('diagnostics')
@@ -1038,6 +1042,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                               validator=positiveIntArray,
                                               direction=Direction.Input),
                              doc='List of spectra to mask.')
+        self.declareProperty(
+            StringArrayProperty(name=_PROP_USER_MASK_COMPONENTS,
+                                values='',
+                                direction=Direction.Input),
+            doc='List of instrument components to mask.')
         self.declareProperty(name=_PROP_DET_DIAGNOSTICS,
                              defaultValue=_DIAGNOSTICS_YES,
                              validator=StringListValidator([
@@ -1221,6 +1230,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         '''
         userMask = self.getProperty(_PROP_USER_MASK).value
         indexType = self.getProperty(_PROP_INDEX_TYPE).value
+        maskComponents = self.getProperty(_PROP_USER_MASK_COMPONENTS).value
         maskedWSName = wsNames.withSuffix('masked')
         maskedWS = CloneWorkspace(InputWorkspace=mainWS,
                                   OutputWorkspace=maskedWSName,
@@ -1228,14 +1238,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if indexType == _INDEX_TYPE_DET_ID:
             MaskDetectors(Workspace=maskedWS,
                           DetectorList=userMask,
+                          ComponentList=maskComponents,
                           EnableLogging=algorithmLogging)
         elif indexType == _INDEX_TYPE_SPECTRUM_NUMBER:
             MaskDetectors(Workspace=maskedWS,
                           SpectraList=userMask,
+                          ComponentList=maskComponents,
                           EnableLogging=algorithmLogging)
         elif indexType == _INDEX_TYPE_WS_INDEX:
             MaskDetectors(Workspace=maskedWS,
                           WorkspaceIndexList=userMask,
+                          ComponentList=maskComponents,
                           EnableLogging=algorithmLogging)
         else:
             raise RuntimeError('Unknown ' + _PROP_INDEX_TYPE)
