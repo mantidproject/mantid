@@ -7,7 +7,9 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflEventTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
@@ -102,6 +104,15 @@ public:
   IReflSettingsPresenter *getPresenter() const override { return nullptr; }
 };
 
+class MockEventView : public IReflEventView {
+public:
+  // Global options
+  MOCK_CONST_METHOD0(getTimeSlices, std::string());
+
+  // Calls we don't care about
+  IReflEventPresenter *getPresenter() const override { return nullptr; }
+};
+
 class MockSaveTabView : public IReflSaveTabView {
 public:
   MOCK_CONST_METHOD1(setSavePath, void(const std::string &path));
@@ -148,6 +159,12 @@ public:
     UNUSED_ARG(presenter);
   };
   ~MockRunsTabPresenter() override{};
+};
+
+class MockEventPresenter : public IReflEventPresenter {
+public:
+	MOCK_CONST_METHOD0(getTimeSlicingOptions, std::string());
+	~MockEventPresenter() override {};
 };
 
 class MockEventTabPresenter : public IReflEventTabPresenter {

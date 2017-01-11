@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidQtCustomInterfaces/Reflectometry/ReflEventPresenter.h"
+#include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
@@ -25,7 +26,17 @@ public:
 
   ReflEventPresenterTest() {}
 
-  void test_something() { TS_ASSERT(false); }
+  void test_slicing_options() {
+    MockEventView mockView;
+    ReflEventPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getTimeSlices())
+        .Times(Exactly(1))
+        .WillOnce(Return("MultiDetectorAnalysis"));
+    presenter.getTimeSlicingOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H */
