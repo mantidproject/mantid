@@ -144,7 +144,15 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
                                                                                          front_data=q_high_angle,
                                                                                          q_min=q_min, q_max=q_max)
 
-        fit = self.createChildAlgorithm('Fit')
+        # The front_data_corrected data set is used as the fit model. Setting the IgnoreInvalidData on the Fit algorithm
+        # will not have any ignore Nans in the model, but only in the data. Hence this will lead to unreadable
+        # error messages of the fit algorithm. We need to catch this before the algorithm starts
+        y_model = front_data_corrected.dataY(0)
+        y_data = rear_data_corrected.dataY(0)
+        if any([np.isnan(element) for element in y_model]) or any([np.isnan(element) for element in y_data]):
+            raise RuntimeError("Trying to merge the two reduced data sets for HAB and LAB failed. "
+                               "You seem to have Nan values in your reduced HAB or LAB data set. This is most likely "
+                               "caused by a too small Q binning. Try to increase the Q bin width.")
 
         # We currently have to put the front_data into the ADS so that the TabulatedFunction has access to it
         front_data_corrected = AnalysisDataService.addOrReplace('front_data_corrected', front_data_corrected)
@@ -153,6 +161,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         function = 'name=TabulatedFunction, Workspace="' + str(
             front_in_ads.name()) + '"' + ";name=FlatBackground"
 
+        fit = self.createChildAlgorithm('Fit')
         fit.setProperty('Function', function)
         fit.setProperty('InputWorkspace', rear_data_corrected)
 
@@ -278,5 +287,6 @@ class ErrorTransferFromModelToData(object):
         comment.setProperty('Workspace', ws)
         comment.setProperty('Text', message)
         comment.execute()
+
 
 AlgorithmFactory.subscribe(SANSFitShiftScale)

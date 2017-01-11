@@ -778,6 +778,13 @@
       <connection name="fake" address="127.0.0.1:0" listener="FakeEventDataListener" />
     </livedata>
   </instrument>
+  
+  <instrument name="ISIS_Kafka_Event">
+    <technique>Test Listener</technique>
+    <livedata>
+      <connection name="kafka_event" address="sakura:9092" listener="ISISKafkaEventListener" />
+    </livedata>
+  </instrument>
 
 </facility>
 

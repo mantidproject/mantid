@@ -20,6 +20,7 @@ Muon Analysis
 - The "compatibility mode" option has been renamed "Enable multiple fitting", and defaults to off. The interface will therefore look the same as it did in Mantid 3.7 by default. To enable the new multi-fitting functionality, just tick the box on the settings tab.
 - The layout of the new fitting tab UI has been improved to give more space for the fitting function, and enable the relative space given to each section to be adjusted by the user.
 - Fixed a bug where stale plot guesses would be left on the graph in some situations.
+- Fixed a bug with load current run that meant it would be actually loading old data due to caching. Data from current run files is no longer cached behind the scenes.
 
 Algorithms
 ----------

@@ -36,7 +36,9 @@ namespace CustomInterfaces {
 MuonAnalysisDataLoader::MuonAnalysisDataLoader(
     const DeadTimesType &deadTimesType, const QStringList &instruments,
     const std::string &deadTimesFile)
-    : m_instruments(instruments) {
+    : m_instruments(instruments),
+      m_cacheBlacklist("\\w*auto_\\w.tmp", Qt::CaseInsensitive,
+                       QRegExp::RegExp2) {
   this->setDeadTimesType(deadTimesType, deadTimesFile);
 }
 
@@ -80,10 +82,12 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
     return oss.str();
   };
 
+  // Clean cache from stale files etc
+  updateCache();
   // Check cache to see if we've loaded this set of files before
   const std::string fileString = toString(files);
-  updateCache();
   if (m_loadedDataCache.find(fileString) != m_loadedDataCache.end()) {
+    g_log.information("Using cached workspace for file(s): " + fileString);
     return m_loadedDataCache[fileString];
   }
 
@@ -176,8 +180,11 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
     result.label = MuonAnalysisHelper::getRunLabel(loadedWorkspaces);
   }
 
-  // Cache the result so we don't have to load it next time
-  m_loadedDataCache[fileString] = result;
+  // Cache the result if we should so we don't have to load it next time
+  if (shouldBeCached(files)) {
+    g_log.information("Caching loaded workspace for file(s): " + fileString);
+    m_loadedDataCache[fileString] = result;
+  }
   return result;
 }
 
@@ -198,6 +205,23 @@ std::string MuonAnalysisDataLoader::getInstrumentName(
     }
   }
   return "";
+}
+
+/**
+ * Checks against an internal regex for files that match. If any files match
+ * then none will be cached.
+ * @param filenames A list of file paths
+ * @return True if they should be cached on loading, false otherwise.
+ */
+bool MuonAnalysisDataLoader::shouldBeCached(
+    const QStringList &filenames) const {
+  for (const auto &filename : filenames) {
+    if (m_cacheBlacklist.indexIn(filename) >= 0) {
+      // match indicates not caching
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -443,6 +467,7 @@ void MuonAnalysisDataLoader::updateCache() const {
   }
   // Remove the invalid cache entries
   for (const auto &key : invalidKeys) {
+    g_log.information("Erasing invalid cached entry for file(s): " + key);
     m_loadedDataCache.erase(key);
   }
 }

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
@@ -16,8 +17,12 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class DLLExport CentroidPeaksMD : public API::Algorithm {
+class DLLExport CentroidPeaksMD : public API::Algorithm,
+                                  public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  CentroidPeaksMD();
+
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaksMD"; };
   /// Summary of algorithms purpose

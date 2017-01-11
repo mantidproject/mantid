@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
+	src/HistoWorkspace.cpp
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
@@ -87,6 +88,7 @@ set ( SRC_FILES
 	src/LinearScale.cpp
 	src/LiveListener.cpp
 	src/LiveListenerFactory.cpp
+	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
@@ -100,6 +102,7 @@ set ( SRC_FILES
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NearestNeighbourInfo.cpp
+	src/NearestNeighbours.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -206,6 +209,7 @@ set ( INC_FILES
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
+	inc/MantidAPI/HistoWorkspace.h
 	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
@@ -271,6 +275,7 @@ set ( INC_FILES
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListener.h
 	inc/MantidAPI/LiveListenerFactory.h
+	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
@@ -286,6 +291,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NearestNeighbourInfo.h
+        inc/MantidAPI/NearestNeighbours.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -389,6 +395,7 @@ set ( TEST_FILES
 	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
 	LiveListenerTest.h
+	LogFilterGeneratorTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
@@ -400,6 +407,7 @@ set ( TEST_FILES
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
 	NearestNeighbourInfoTest.h
+	NearestNeighboursTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h

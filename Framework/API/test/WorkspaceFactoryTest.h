@@ -34,6 +34,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite {
       size.push_back(YLength);
       WorkspaceTester::init(NVectors, XLength, YLength);
     }
+    using WorkspaceTester::init;
     std::vector<size_t> size;
   };
 

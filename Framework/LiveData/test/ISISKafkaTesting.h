@@ -1,9 +1,9 @@
 #ifndef MANTID_LIVEDATA_ISISKAFKATESTING_H_
 #define MANTID_LIVEDATA_ISISKAFKATESTING_H_
 
-#include "MantidLiveData/Kafka/IKafkaBroker.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF(conversion)
@@ -86,15 +86,17 @@ public:
     std::vector<flatbuffers::Offset<ISISStream::SEEvent>> sEEventsVector;
     auto sEValue = ISISStream::CreateDoubleValue(builder, 42.0);
     auto nameOffset = builder.CreateString("SampleLog1");
-    auto sEEventOffset = ISISStream::CreateSEEvent(builder, nameOffset, 2.0,
-                                                   ISISStream::SEValue_DoubleValue, sEValue.Union());
+    auto sEEventOffset = ISISStream::CreateSEEvent(
+        builder, nameOffset, 2.0, ISISStream::SEValue_DoubleValue,
+        sEValue.Union());
     sEEventsVector.push_back(sEEventOffset);
 
     auto messageSEEvents = builder.CreateVector(sEEventsVector);
 
     auto messageFramePart = ISISStream::CreateFramePart(
         builder, frameNumber, frameTime, ISISStream::RunState_RUNNING,
-        protonCharge, m_nextPeriod, endOfFrame, endOfRun, messageNEvents, messageSEEvents);
+        protonCharge, m_nextPeriod, endOfFrame, endOfRun, messageNEvents,
+        messageSEEvents);
     auto messageFlatbuf = ISISStream::CreateEventMessage(
         builder, ISISStream::MessageTypes_FramePart, messageFramePart.Union());
     builder.Finish(messageFlatbuf);
@@ -102,7 +104,7 @@ public:
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
-    m_nextPeriod = ((m_nextPeriod+1) % m_nperiods);
+    m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
   }
 
 private:

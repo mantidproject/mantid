@@ -9,10 +9,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
-//#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
@@ -212,8 +212,6 @@ public:
 
       m_2DWS->setCounts(j, spectrum);
       m_2DWS->setCountStandardDeviations(j, errors);
-      // Just set the spectrum number to match the index
-      m_2DWS->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service
@@ -232,7 +230,8 @@ public:
     m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // mask the detector
-    m_2DWS->maskWorkspaceIndex(THEMASKED);
+    m_2DWS->getSpectrum(THEMASKED).clearData();
+    m_2DWS->mutableSpectrumInfo().setMasked(THEMASKED, true);
   }
 
 private:

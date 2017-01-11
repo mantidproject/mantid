@@ -45,6 +45,10 @@ public:
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<RebinnedOutput> cloneEmpty() const {
+    return std::unique_ptr<RebinnedOutput>(doCloneEmpty());
+  }
   RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
   /// Get the workspace ID.
@@ -72,12 +76,15 @@ protected:
   /// Called by initialize() in MatrixWorkspace
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
+  void init(const std::size_t &NVectors,
+            const HistogramData::Histogram &histogram) override;
 
   /// A vector that holds the 1D vectors for the fractional area.
   std::vector<MantidVec> fracArea;
 
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
+  RebinnedOutput *doCloneEmpty() const override { return new RebinnedOutput(); }
 };
 
 /// shared pointer to the RebinnedOutput class

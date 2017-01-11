@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -40,8 +41,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport LoadNexusMonitors : public API::Algorithm {
+class DLLExport LoadNexusMonitors : public API::Algorithm,
+                                    public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  LoadNexusMonitors() { this->useAlgorithm("LoadNexusMonitors", 2); }
+
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadNexusMonitors"; }
 

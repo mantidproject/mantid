@@ -182,8 +182,8 @@ boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
                 1));
 
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer[i],
-                                                           temp, false);
+    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[i],
+                                                           *temp, false);
 
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
@@ -281,8 +281,8 @@ void ISISLiveEventDataListener::run() {
       saveEvents(events.data, pulseTime, events.head_n.period);
     }
 
-  } catch (std::runtime_error &
-               e) { // exception handler for generic runtime exceptions
+  } catch (std::runtime_error
+               &e) { // exception handler for generic runtime exceptions
 
     g_log.error() << "Caught a runtime exception.\nException message: "
                   << e.what() << '\n';
@@ -290,8 +290,8 @@ void ISISLiveEventDataListener::run() {
 
     m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
-  } catch (std::invalid_argument &
-               e) { // TimeSeriesProperty (and possibly some other things) can
+  } catch (std::invalid_argument
+               &e) { // TimeSeriesProperty (and possibly some other things) can
     // can throw these errors
     g_log.error()
         << "Caught an invalid argument exception.\nException message: "
@@ -363,7 +363,7 @@ void ISISLiveEventDataListener::initEventBuffer(
 
       // Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(
-          m_eventBuffer[0], m_eventBuffer[i], false);
+          *m_eventBuffer[0], *m_eventBuffer[i], false);
     }
   }
 }

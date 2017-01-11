@@ -2,7 +2,6 @@
 #define VATES_MD_QUAD_FACTORY
 
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include <boost/shared_ptr.hpp>
@@ -41,8 +40,7 @@ class DLLExport vtkMDQuadFactory : public vtkDataSetFactory {
 
 public:
   /// Constructor
-  vtkMDQuadFactory(ThresholdRange_scptr thresholdRange,
-                   const VisualNormalization normalizationOption);
+  vtkMDQuadFactory(const VisualNormalization normalizationOption);
 
   /// Destructor
   ~vtkMDQuadFactory() override;
@@ -52,7 +50,7 @@ public:
   create(ProgressAction &progressUpdating) const override;
 
   /// Initalize with a target workspace.
-  void initialize(Mantid::API::Workspace_sptr) override;
+  void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   /// Get the name of the type.
   std::string getFactoryTypeName() const override;
@@ -62,9 +60,6 @@ protected:
   void validate() const override;
 
 private:
-  /// ThresholdRange functor.
-  ThresholdRange_scptr m_thresholdRange;
-
   /// Name of the scalar.
   const VisualNormalization m_normalizationOption;
 
