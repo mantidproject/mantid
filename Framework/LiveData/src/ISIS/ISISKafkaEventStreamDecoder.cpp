@@ -179,7 +179,7 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
   std::unique_lock<std::mutex> waitLock(m_waitMutex);
   extractWaiting = true;
   waitLock.unlock();
-  cv.notify_one(); // TODO this line may not be required
+  cv.notify_one();
 
   auto workspace_ptr = extractDataImpl();
 
@@ -242,11 +242,9 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
   m_interrupt = false;
   std::string buffer;
   while (!m_interrupt) {
-    // Let another thread do something for a short while
-    //std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    //TODO if extractData method is waiting for access then we wait for it to finish with the buffer workspace
+    // If extractData method is waiting for access to the buffer workspace
+    // then we wait for it to finish
     std::unique_lock<std::mutex> readyLock(m_waitMutex);
-    //TODO is this if statement required?
     if (extractWaiting) {
       cv.wait(readyLock, [&] { return !extractWaiting; });
     }
@@ -430,7 +428,8 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", parent->getNumberHistograms(), 2, 1));
   // Copy meta data
-  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer,
+                                                         false);
   // Clear out the old logs, except for the most recent entry
   buffer->mutableRun().clearOutdatedTimeSeriesLogValues();
   return buffer;
