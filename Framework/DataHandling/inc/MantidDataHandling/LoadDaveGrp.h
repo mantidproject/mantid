@@ -106,8 +106,8 @@ private:
    * Function to set the workspace axes
    *
    * @param workspace handle to the workspace to set axes on
-   * @param x the a axis data
-   * @param y the a axis data
+   * @param xAxis the x axis data
+   * @param yAxis the y axis data
    */
   void setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
                         const std::vector<double> &xAxis,
