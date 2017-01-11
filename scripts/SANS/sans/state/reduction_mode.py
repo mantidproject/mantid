@@ -56,7 +56,7 @@ class StateReductionMode(StateReductionBase, StateBase):
         # Set the shifts to defaults which essentially don't do anything.
         self.merge_shift = 0.0
         self.merge_scale = 1.0
-        self.merge_fit_mode = FitModeForMerge.NoFit
+        self.merge_fit_mode = FitModeForMerge.None
         self.merge_range_min = None
         self.merge_range_max = None
 

@@ -1,8 +1,10 @@
 import unittest
 import mantid
 
+from mantid.kernel import DateAndTime
 from sans.common.file_information import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)
-from sans.common.xml_parsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file)
+from sans.common.xml_parsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file,
+                                     get_valid_to_time_from_idf_string)
 
 
 class XMLParsingTest(unittest.TestCase):
@@ -59,6 +61,26 @@ class XMLParsingTest(unittest.TestCase):
         for key, value in results.items():
             self.assertTrue(value == ("monitor"+str(key)))
 
+    def test_that_get_valid_to_date_from_idf_string(self):
+        # Arrange
+        idf_string = u'<?xml version="1.0" encoding="UTF-8" ?>' \
+                     u'<!-- For help on the notation used to specify an Instrument Definition File ' \
+                     u'see http://www.mantidproject.org/IDF -->' \
+                     u'<instrument xmlns="http://www.mantidproject.org/IDF/1.0" ' \
+                     u'            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' \
+                     u'            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" ' \
+                     u'            name="PEARL" valid-from   ="1900-01-31 23:59:59" ' \
+                     u'            valid-to     ="2011-05-01 23:59:50" ' \
+                     u'            last-modified="2008-09-17 05:00:00">' \
+                     u'</instrument>'
+
+        # Act
+        extracted_time = get_valid_to_time_from_idf_string(idf_string)
+        # Assert
+        self.assertTrue(extracted_time == DateAndTime("2011-05-01 23:59:50"))
+
 
 if __name__ == '__main__':
     unittest.main()
+
+

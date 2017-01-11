@@ -17,7 +17,7 @@ from sans.state.adjustment import (StateAdjustment)
 from sans.state.convert_to_q import (StateConvertToQ)
 
 from state_test_helper import assert_validate_error, assert_raises_nothing
-
+from sans.common.enums import SANSInstrument
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  State
@@ -104,6 +104,7 @@ class StateTest(unittest.TestCase):
                            "slice": MockStateSliceEvent(), "mask": MockStateMask(), "wavelength": MockStateWavelength(),
                            "save": MockStateSave(), "scale": MockStateScale(), "adjustment": MockStateAdjustment(),
                            "convert_to_q": MockStateConvertToQ()}
+        default_entries["data"].instrument = SANSInstrument.LARMOR
 
         for key, value in default_entries.items():
             if key in entries:
