@@ -60,11 +60,17 @@ void ReflDataProcessorPresenter::process() {
   parseTimeSlicing(timeSlicing, startTimes, stopTimes);
   size_t numSlices = startTimes.size();
 
-  // Things we should take into account:
-  // 1. We need to report progress, see GenericDataProcessorPresenter::process()
-
   // Get selected runs
   const auto items = m_manager->selectedData(true);
+
+  // Progress report
+  int progress = 0;
+  int maxProgress = (int)(items.size());
+  for (const auto subitem : items) {
+    maxProgress += (int)(subitem.second.size());
+  }
+  ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
+                                     m_progressView);
 
   for (const auto &item : items) {
 
@@ -81,6 +87,7 @@ void ReflDataProcessorPresenter::process() {
       } catch (...) {
         m_mainPresenter->giveUserCritical(
             "Couldn't load run " + runno + " as event workspace", "Error");
+        progressReporter.clear();
         return;
       }
 
@@ -91,6 +98,7 @@ void ReflDataProcessorPresenter::process() {
         auto newData = reduceRow(slice);
         newData[0] = row[0];
         m_manager->update(item.first, data.first, newData);
+        progressReporter.report();
       }
     }
 
@@ -107,6 +115,7 @@ void ReflDataProcessorPresenter::process() {
           group[row.first] = data;
         }
         postProcessGroup(group);
+        progressReporter.report();
       }
     }
   }
@@ -117,6 +126,8 @@ void ReflDataProcessorPresenter::process() {
         "Notebook not implemented for sliced data yet",
         "Notebook will not be generated");
   }
+
+  progressReporter.clear();
 }
 
 /** Parses a string to extract time slicing
