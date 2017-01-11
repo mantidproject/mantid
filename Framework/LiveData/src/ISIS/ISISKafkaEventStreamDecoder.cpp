@@ -401,7 +401,7 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", parent->getNumberHistograms(), 2, 1));
   // Copy meta data
-  API::WorkspaceFactory::Instance().initializeFromParent(parent, buffer, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer, false);
   // Clear out the old logs, except for the most recent entry
   buffer->mutableRun().clearOutdatedTimeSeriesLogValues();
   return buffer;
