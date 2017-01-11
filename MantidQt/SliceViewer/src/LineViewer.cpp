@@ -1161,7 +1161,7 @@ std::string LineViewer::saveToProject() const {
   if (!m_sliceWS)
     return "";
 
-  tsv.writeLine("SliceWorkspace") << m_sliceWS->name();
+  tsv.writeLine("SliceWorkspace") << m_sliceWS->getName();
   tsv.writeLine("XDim") << m_freeDimX;
   tsv.writeLine("YDim") << m_freeDimY;
   tsv.writeLine("AllFreeDims") << m_allDimsFree;

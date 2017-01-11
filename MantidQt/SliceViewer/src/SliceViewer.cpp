@@ -2748,7 +2748,7 @@ std::string SliceViewer::saveToProject() const {
   tsv.writeSection("overlay", m_lineOverlay->saveToProject());
 
   if (m_overlayWS)
-    tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();
+    tsv.writeLine("OverlayWorkspace") << m_overlayWS->getName();
 
   return tsv.outputLines();
 }

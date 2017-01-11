@@ -77,7 +77,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         """
         run = self.vanaws.getRun()
         if not run.hasProperty('temperature'):
-            self.log().warning("Temperature sample log is not present in " + self.vanaws.getName() +
+            self.log().warning("Temperature sample log is not present in " + self.vanaws.name() +
                                " T=293K is assumed for Debye-Waller factor.")
             return self.defaultT
         try:

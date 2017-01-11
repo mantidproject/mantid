@@ -815,7 +815,7 @@ void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
   foreach (PeakOverlay *po, m_peakShapes) {
-    names << QString::fromStdString(po->getPeaksWorkspace()->name());
+    names << QString::fromStdString(po->getPeaksWorkspace()->getName());
   }
   return names;
 }

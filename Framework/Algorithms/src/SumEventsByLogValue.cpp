@@ -82,7 +82,7 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   } catch (Exception::NotFoundError &) {
     errors["LogName"] = "The log '" + m_logName +
                         "' does not exist in the workspace '" +
-                        m_inputWorkspace->name() + "'.";
+                        m_inputWorkspace->getName() + "'.";
     return errors;
   }
 

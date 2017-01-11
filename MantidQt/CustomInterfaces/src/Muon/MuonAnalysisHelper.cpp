@@ -1090,10 +1090,10 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
     if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
         const auto &ws = group->getItem(i);
-        if (ws->name().find("_Parameters") != std::string::npos) {
+        if (ws->getName().find("_Parameters") != std::string::npos) {
           params = getKeysFromTable(
               boost::dynamic_pointer_cast<ITableWorkspace>(ws));
-        } else if (ws->name().find("_Workspace") != std::string::npos) {
+        } else if (ws->getName().find("_Workspace") != std::string::npos) {
           ++nRuns;
         }
       }
@@ -1103,7 +1103,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
       params = getKeysFromTable(table);
     } else {
       throw std::invalid_argument(
-          "Unexpected workspace type for " + ws->name() +
+          "Unexpected workspace type for " + ws->getName() +
           " (expected WorkspaceGroup or ITableWorkspace)");
     }
     fitProperties.emplace_back(nRuns, params);

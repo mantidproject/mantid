@@ -144,7 +144,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
     if run == '0':
         RunNumber = '0'
     else:
-        RunNumber = groupGet(_sample_ws.getName(), 'samp', 'run_number')
+        RunNumber = groupGet(_sample_ws.name(), 'samp', 'run_number')
 
     if not pointdet:
         # Proccess Multi-Detector; assume MD goes to the end:
