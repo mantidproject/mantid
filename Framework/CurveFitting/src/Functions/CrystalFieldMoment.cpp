@@ -96,13 +96,18 @@ void CrystalFieldMoment::function1D(double *out, const double *xValues,
                                     const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
+  if (Hdir.size() != 3) {
+    throw std::invalid_argument("Hdir must be a three-element vector.");
+  }
   auto Hmag = getAttribute("Hmag").asDouble();
   auto powder = getAttribute("powder").asBool();
   double Hnorm =
       sqrt(Hdir[0] * Hdir[0] + Hdir[1] * Hdir[1] + Hdir[2] * Hdir[2]);
   DoubleFortranVector H(1, 3);
-  for (auto i = 0; i < 3; i++) {
-    H(i + 1) = Hdir[i] / Hnorm;
+  if (fabs(Hnorm) > 1.e-6) {
+    for (auto i = 0; i < 3; i++) {
+      H(i + 1) = Hdir[i] / Hnorm;
+    }
   }
   auto unit = getAttribute("Unit").asString();
   const double NAMUB = 5.5849397; // N_A*mu_B - J/T/mol

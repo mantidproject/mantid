@@ -11,9 +11,9 @@ namespace Functions {
 
 /**
   CrystalFieldMoment is a function that calculates the induced
-  magnetic moment (in bohr magnetons per ion) at some applied external
-  magnetic field (in Tesla) as a function of temperature (in Kelvin).
-  for a particular crystal field splitting.
+  magnetic moment (in bohr magnetons per ion, Am^2 or erg/Gauss) at some
+  applied external magnetic field (in Tesla or Gauss) as a function of 
+  temperature (in Kelvin) for a particular crystal field splitting.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

@@ -26,10 +26,10 @@ The function calculates the expectation value of the magnetic moment operator :m
 where :math:`B` is the magnetic field in Tesla, :math:`g_J` is the Landé g-factor, :math:`\mu_B` is the Bohr magneton. 
 The moment operator is defined as :math:`\mathbf{J} = \hat{J}_x B_x + \hat{J}_y B_y + \hat{J}_z B_z` where 
 :math:`\hat{J}_x`, :math:`\hat{J}_y`, and :math:`\hat{J}_z` are the angular momentum operators in Cartesian coordinates, 
-with :math:`z` defined to be along the quantisation axis of the crystal fied (which is usually defined to be the highest 
+with :math:`z` defined to be along the quantisation axis of the crystal field (which is usually defined to be the highest 
 symmetry rotation axis). :math:`B_x`, :math:`B_y`, and :math:`B_z` are the components of the unit vector pointing in the 
 direction of the applied magnetic field in this coordinate system. :math:`V_n(B)` and :math:`E_n(B)` are the n\ :sup:`th` 
-eigenvector and eigenvalue (wavefunction and energy) obtained by diagonlising the Hamiltonian:
+eigenvector and eigenvalue (wavefunction and energy) obtained by diagonalising the Hamiltonian:
 
 .. math:: \mathcal{H} = \mathcal{H}_{\mathrm{cf}} + \mathcal{H}_{\mathrm{Zeeman}} = \sum_{k,q} B_k^q \hat{O}_k^q 
    - g_J \mu_B \mathbf{J}\cdot\mathbf{B}

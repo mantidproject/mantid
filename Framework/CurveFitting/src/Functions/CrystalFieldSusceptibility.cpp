@@ -118,10 +118,15 @@ void CrystalFieldSusceptibility::setEigensystem(const DoubleFortranVector &en,
 void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
                                             const size_t nData) const {
   auto H = getAttribute("Hdir").asVector();
+  if (H.size() != 3) {
+    throw std::invalid_argument("Hdir must be a three-element vector.");
+  }
   auto powder = getAttribute("powder").asBool();
   double Hnorm = sqrt(H[0] * H[0] + H[1] * H[1] + H[2] * H[2]);
-  for (auto i = 0; i < 3; i++) {
-    H[i] /= Hnorm;
+  if (fabs(Hnorm) > 1.e-6) {
+    for (auto i = 0; i < 3; i++) {
+      H[i] /= Hnorm;
+    }
   }
   // Get the unit conversion factor.
   auto unit = getAttribute("Unit").asString();

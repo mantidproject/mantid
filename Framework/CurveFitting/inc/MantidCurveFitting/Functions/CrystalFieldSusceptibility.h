@@ -10,8 +10,8 @@ namespace CurveFitting {
 namespace Functions {
 
 /**
-  CrystalFieldSusceptibility is a function that calculates the volume magnetic
-  susceptibility (dimensionless) due to the crystalline electric field.
+  CrystalFieldSusceptibility is a function that calculates the molar magnetic
+  susceptibility (in cm^3/mol or m^3/mol) due to the crystalline electric field.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

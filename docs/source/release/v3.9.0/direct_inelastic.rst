@@ -29,7 +29,7 @@ Crystal Field
 -------------
 
 - The peak widths can be fixed to or varied around values obtained from experimental or calculated instrument resolution function.
-- The initial field parameters can be estimated using a Monte Carlo seach algorithm (:ref:`EstimateFitParameters <algm-EstimateFitParameters>`)
+- The initial field parameters can be estimated using a Monte Carlo search algorithm (:ref:`EstimateFitParameters <algm-EstimateFitParameters>`)
 - The crystal field heat capacity, magnetisation and susceptibility can now be calculated or fitted, using new functions
   :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`, :ref:`CrystalFieldSusceptibility <func-CrystalFieldSusceptibility>`,
   :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>`, and :ref:`CrystalFieldMoment <func-CrystalFieldMoment>`.
