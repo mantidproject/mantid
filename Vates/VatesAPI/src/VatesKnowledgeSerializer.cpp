@@ -1,11 +1,12 @@
-#include <MantidGeometry/MDGeometry/MDImplicitFunction.h>
-#include <boost/shared_ptr.hpp>
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include <MantidAPI/IMDWorkspace.h>
+#include <MantidGeometry/MDGeometry/MDImplicitFunction.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
-#include "MantidVatesAPI/VatesXMLDefinitions.h"
+#include <boost/shared_ptr.hpp>
+#include <utility>
 
 using Mantid::Geometry::MDGeometryXMLDefinitions;
 namespace Mantid {
@@ -16,30 +17,30 @@ VatesKnowledgeSerializer::VatesKnowledgeSerializer()
 
 void VatesKnowledgeSerializer::setImplicitFunction(
     boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction) {
-  this->m_spFunction = spFunction;
+  this->m_spFunction = std::move(spFunction);
 }
 
 /// Set the workspace name to apply.
 void VatesKnowledgeSerializer::setWorkspace(
-    boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace) {
+    const Mantid::API::IMDWorkspace &workspace) {
 
   this->m_wsNameXML = MDGeometryXMLDefinitions::workspaceNameXMLTagStart() +
-                      workspace->getName() +
+                      workspace.getName() +
                       MDGeometryXMLDefinitions::workspaceNameXMLTagEnd();
   this->m_wsLocationXML =
       MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + "" +
       MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd();
-  this->m_geomXML = workspace->getGeometryXML();
+  this->m_geomXML = workspace.getGeometryXML();
 }
 
-void VatesKnowledgeSerializer::setWorkspaceName(std::string wsName) {
+void VatesKnowledgeSerializer::setWorkspaceName(const std::string &wsName) {
   this->m_wsName = wsName;
   this->m_wsNameXML =
       std::string(MDGeometryXMLDefinitions::workspaceNameXMLTagStart() +
                   wsName + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd());
 }
 
-void VatesKnowledgeSerializer::setGeometryXML(std::string geomXML) {
+void VatesKnowledgeSerializer::setGeometryXML(const std::string &geomXML) {
   this->m_geomXML = geomXML;
 }
 

@@ -10,8 +10,8 @@
 #include <boost/type_traits.hpp>
 #endif
 
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 namespace Json {
 class Value;
@@ -296,11 +296,12 @@ protected:
   */
   void declareProperty(
       const std::string &name, const char *value,
-      IValidator_sptr validator = IValidator_sptr(new NullValidator),
-      const std::string &doc = "",
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
+      const std::string &doc = std::string(),
       const unsigned int direction = Direction::Input) {
     // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), validator, doc, direction);
+    declareProperty(name, std::string(value), std::move(validator), doc,
+                    direction);
   }
 
   /** Specialised version of declareProperty template method to prevent the
@@ -322,10 +323,11 @@ protected:
   */
   void declareProperty(
       const std::string &name, const char *value, const std::string &doc,
-      IValidator_sptr validator = IValidator_sptr(new NullValidator),
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
       const unsigned int direction = Direction::Input) {
     // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), validator, doc, direction);
+    declareProperty(name, std::string(value), std::move(validator), doc,
+                    direction);
   }
 
   /** Add a property of string type to the list of managed properties

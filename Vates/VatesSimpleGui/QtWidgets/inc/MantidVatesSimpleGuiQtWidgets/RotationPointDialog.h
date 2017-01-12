@@ -42,7 +42,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS RotationPointDialog
 
 public:
   /// Default constructor.
-  RotationPointDialog(QWidget *parent = 0);
+  RotationPointDialog(QWidget *parent = nullptr);
   /// Default destructor.
   ~RotationPointDialog() override;
 

@@ -155,18 +155,18 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
 
   auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
-    double twoTheta(0.0), efixed(0.0);
+    double theta(0.0), efixed(0.0);
     if (!spectrumInfo.isMonitor(i)) {
-      twoTheta = 0.5 * spectrumInfo.twoTheta(i);
+      theta = 0.5 * spectrumInfo.twoTheta(i);
       efixed =
           getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
     } else {
-      twoTheta = 0.0;
+      theta = 0.0;
       efixed = DBL_MIN;
     }
 
     // Convert to MomentumTransfer
-    double elasticQInAngstroms = Kernel::UnitConversion::run(twoTheta, efixed);
+    double elasticQInAngstroms = Kernel::UnitConversion::run(theta, efixed);
 
     if (targetUnit == "ElasticQ") {
       m_indexMap.emplace(elasticQInAngstroms, i);

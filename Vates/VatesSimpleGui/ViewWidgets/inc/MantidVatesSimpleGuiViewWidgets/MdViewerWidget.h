@@ -118,7 +118,7 @@ protected slots:
   /// Triggered when panel is changed.
   void panelChanged();
   /// On rebin
-  void onRebin(std::string algorithmType);
+  void onRebin(const std::string &algorithmType);
   /// On  unbin
   void onUnbin();
   /// On switching an MDEvent source to a temporary source.
@@ -227,7 +227,7 @@ private:
   void updateAppState();
   /// Get the initial view for the current workspace and user setting
   ModeControlWidget::Views getInitialView(int workspaceType,
-                                          std::string instrumentName);
+                                          const std::string &instrumentName);
   /// Check that the view is valid for teh workspace type
   ModeControlWidget::Views
   checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType);
@@ -243,10 +243,10 @@ private:
   void resetCurrentView(int workspaceType, const std::string &instrumentName);
   /// Render rebinned workspace
   pqPipelineSource *
-  prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName,
-                           std::string sourceType);
+  prepareRebinnedWorkspace(const std::string &rebinnedWorkspaceName,
+                           const std::string &sourceType);
   /// Handle drag and drop of peaks workspcaes
-  void handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
+  void handleDragAndDropPeaksWorkspaces(QEvent *e, const QString &text,
                                         QStringList &wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
@@ -254,7 +254,7 @@ private:
   void setColorMap();
   /// Render the original workspace
   pqPipelineSource *
-  renderOriginalWorkspace(const std::string originalWorkspaceName);
+  renderOriginalWorkspace(const std::string &originalWorkspaceName);
 
   /// Remove the rebinning when switching views or otherwise.
   void
