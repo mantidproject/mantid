@@ -1,0 +1,54 @@
+digraph Stitch1DMany {
+label = "Stitch1DMany Flowchart"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS       [label="Input Workspaces"]
+  outWS         [label="Output Workspace"]
+  outSF         [label="Output Scale Factor"]
+  psf           [label="Period Scale Factors"]
+  stitchedWSVec [label="Vector of Stitched Workspaces"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkGroups   [label="Input workspaces are\ngroup workspaces?"]
+  checkGlobalSF [label="Using global\nscale factor?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  S1D_WS      [label="Do Stitch1D for\nall workspaces"]
+  S1D_Groups  [label="Do Stitch1D for\nall workspaces per group"]
+  S1DM_Global [label="Do Stitch1DMany\nfor each group"]
+  S1DM_Period [label="Do Stitch1DMany\nfor group specified by\nScaleFactorFromPeriod"]
+  groupWS     [label="GroupWorkspaces"]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWS       -> checkGroups
+checkGroups   -> S1D_WS        [label="no"]
+checkGroups   -> checkGlobalSF [label="yes"]
+S1D_WS        -> outWS
+S1D_WS        -> outSF
+checkGlobalSF -> S1DM_Period   [label="no"]
+checkGlobalSF -> S1DM_Global   [label="yes"]
+S1DM_Period   -> psf
+psf           -> S1D_Groups
+S1D_Groups    -> stitchedWSVec
+S1DM_Global   -> stitchedWSVec
+stitchedWSVec -> groupWS
+groupWS       -> outWS
+groupWS       -> outSF
+
+{rank = same; S1DM_Global; S1DM_Period}
+
+}

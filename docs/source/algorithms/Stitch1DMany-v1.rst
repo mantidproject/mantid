@@ -36,6 +36,11 @@ ScaleFactorFromPeriod to select a period (group index) which will obtain a
 scale factor from the selected period. This scale factor is then applied to
 all other periods when stitching.
 
+Workflow Diagram
+----------------
+
+.. diagram:: Stitch1DMany-v1_wkflw.dot
+
 Usage
 -----
 **Example - a basic example using Stitch1DMany to stitch three workspaces together.**
