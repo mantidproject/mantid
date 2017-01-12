@@ -64,9 +64,6 @@ def check_version_info():
 
 
 def main():
-    import pydevd
-    pydevd.settrace('localhost', port=59003,
-                    stdoutToServer=True, stderrToServer=True)
 
     check_version_info()
 
@@ -81,6 +78,11 @@ def main():
 
     # first call, start timer
     helper.total_reconstruction_timer()
+
+    if config.func.debug:
+        import pydevd
+        pydevd.settrace('localhost', port=config.func.debug_port,
+                        stdoutToServer=True, stderrToServer=True)
 
     if config.func.find_cor:
         # run find_center stuff

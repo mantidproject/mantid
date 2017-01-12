@@ -23,6 +23,8 @@ class FunctionalConfig(object):
             True - Raise an exception and stop execution immediately
             False - Note the failure to import but continue execution without applying the filter
         """
+        self.debug = True
+        self.debug_port = 59003
         self.input_dir = None
         self.input_dir_flat = None
         self.input_dir_dark = None

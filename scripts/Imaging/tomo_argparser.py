@@ -81,6 +81,20 @@ class ArgumentParser(object):
         grp_recon = parser.add_argument_group('Reconstruction options')
 
         grp_recon.add_argument(
+            "-d",
+            "--debug",
+            required=False,
+            action='store_true',
+            help='Run debug to specified port, if no port is specified, it will default to 59003')
+
+        grp_recon.add_argument(
+            "-p",
+            "--debug-port",
+            required=False,
+            type=int,
+            help='Port on which a debugger is listening, if no port is specified, it will default to 59003')
+
+        grp_recon.add_argument(
             "-t",
             "--tool",
             required=False,
@@ -266,6 +280,14 @@ class ArgumentParser(object):
     def _grab_functional_args(self):
         functional_config = FunctionalConfig()
 
+        functional_config.debug = self._args.debug
+
+        if self._args.debug_port is not None:
+            functional_config.debug_port = self._args.debug_port
+        else:
+            functional_config.debug_port = 59003
+
+
         # grab paths
         functional_config.input_dir = self._args.input_path
         functional_config.input_dir_flat = self._args.input_path_flat
@@ -284,7 +306,8 @@ class ArgumentParser(object):
 
         if self._args.num_iter:
             if isinstance(self._args.num_iter, str) and not self._args.num_iter.isdigit():
-                raise RuntimeError("The number of iterations must be an integer")
+                raise RuntimeError(
+                    "The number of iterations must be an integer")
             functional_config.num_iter = int(self._args.num_iter)
 
         return functional_config

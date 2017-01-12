@@ -64,6 +64,8 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     sample_file_names = _get_stack_file_names(
         sample_path, file_prefix, file_extension)
 
+    print("\n".join(sample_file_names))
+
     flat_file_names = _get_stack_file_names(
         flat_file_path, flat_file_prefix, file_extension)
 
@@ -115,7 +117,10 @@ def _get_stack_file_names(path, file_prefix, file_extension):
     if len(files_match) <= 0:
         raise RuntimeError("Could not find any image files in {0}, with prefix: {1}, extension: {2}".
                            format(path, file_prefix, file_extension))
-    # files_match.sort(key=_alphanum_key_split)
+
+    # this is a necessary step, otherwise the file order is not guaranteed to be sequential and we could get randomly
+    # ordered stack of images which would produce nonsense
+    files_match.sort(key=_alphanum_key_split)
 
     h.tomo_print(" > Found {0} image files in {1}".format(
         len(files_match), path), verbosity=3)

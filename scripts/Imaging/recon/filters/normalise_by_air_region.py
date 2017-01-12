@@ -55,8 +55,6 @@ def execute(data, config):
 
         air_sums = np.true_divide(air_sums, np.amax(air_sums))
 
-        h.tomo_print(" Air region sums (relative to maximum): {0}".format(air_sums))
-
         for idx in range(0, data.shape[0]):
             data[idx, :, :] = np.true_divide(data[idx, :, :],
                                              air_sums[idx])
