@@ -79,7 +79,6 @@ public:
     }
     TS_ASSERT_EQUALS(nTies, 6);
   }
-
 };
 
 #endif /*CRYSTALFIELDSUSCEPTIBILITYTEST_H_*/

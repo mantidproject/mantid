@@ -82,7 +82,6 @@ public:
     }
     TS_ASSERT_EQUALS(nTies, 6);
   }
-
 };
 
 #endif /*CRYSTALFIELDMOMENTTEST_H_*/

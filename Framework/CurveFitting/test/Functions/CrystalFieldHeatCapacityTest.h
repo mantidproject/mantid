@@ -28,7 +28,7 @@ public:
     FunctionValues y(x);
     fun.function(x, y);
 
-    // Test function values obtained from McPhase, interpolated by two cubic poly
+    // Test function values obtained from McPhase, interpolated by two cubics
     auto testFun1 = FunctionFactory::Instance().createInitialized(
         "name=UserFunction,Formula=a*x*x*x+b*x*x+c*x+d,"
         "a=6.1504e-6,b=2.4075e-5,c=-7.9692e-3,d=5.9915e-2");
@@ -75,7 +75,6 @@ public:
     }
     TS_ASSERT_EQUALS(nTies, 6);
   }
-
 };
 
 #endif /*CRYSTALFIELDHEATCAPACITYTEST_H_*/
