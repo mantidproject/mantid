@@ -1204,6 +1204,9 @@ void SliceViewer::zoomRectSlot(const QwtDoubleRect &rect) {
     return;
   this->setXYLimits(rect.left(), rect.right(), rect.top(), rect.bottom());
   autoRebinIfRequired();
+  if (ui.btnNonOrthogonalToggle->isChecked()) {
+    adjustSize();
+  }
 }
 
 /// Slot for opening help page
@@ -2929,7 +2932,8 @@ std::string SliceViewer::saveDimensionWidgets() const {
 }
 
 void SliceViewer::switchAxis() {
-  if (m_canSwitchScales) {
+  if (m_canSwitchScales) { // cannot be called when sliceviewer first
+                           // initialised because axis is inaccurate
     auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
     if (isHKL) {
       applyNonOrthogonalAxisScaleDraw();
