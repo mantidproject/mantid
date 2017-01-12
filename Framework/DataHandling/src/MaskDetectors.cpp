@@ -175,20 +175,23 @@ void MaskDetectors::exec() {
         // input. If so add to the detector list
         auto instrument = WS->getInstrument();
         auto maskInstrument = prevMasking->getInstrument();
-        if(instrument && maskInstrument
-           && maskInstrument->getNumberDetectors() == instrument->getNumberDetectors()
-           && nHist == instrument->getNumberDetectors()) {
-          appendToDetectorListFromWS(detectorList, WS, prevMasking, ranges_info);
+        if (instrument && maskInstrument &&
+            maskInstrument->getNumberDetectors() ==
+                instrument->getNumberDetectors() &&
+            nHist == instrument->getNumberDetectors()) {
+          appendToDetectorListFromWS(detectorList, WS, prevMasking,
+                                     ranges_info);
         } else {
           // We have more spectra in the mask than in the workspace and we also
           // don't have a list of detector IDs. There's nothing more to try so
           // give up loudly.
           g_log.error() << "Input workspace has " << WS->getNumberHistograms()
-                  << " histograms   vs. "
-                  << "Input masking workspace has "
-                  << prevMasking->getNumberHistograms()
-                  << " histograms. \n";
-          throw std::runtime_error("Size mismatch between two input workspaces.");
+                        << " histograms   vs. "
+                        << "Input masking workspace has "
+                        << prevMasking->getNumberHistograms()
+                        << " histograms. \n";
+          throw std::runtime_error(
+              "Size mismatch between two input workspaces.");
         }
       } else {
         appendToIndexListFromWS(indexList, prevMasking, ranges_info);
@@ -464,7 +467,6 @@ void MaskDetectors::appendToIndexListFromWS(
     }
   }
   tmp_index.swap(indexList);
-
 }
 
 /**
@@ -479,16 +481,18 @@ void MaskDetectors::appendToIndexListFromWS(
 *                       -- the range of indexes to topy
 */
 void MaskDetectors::appendToDetectorListFromWS(
-    std::vector<detid_t> &detectorList, const MatrixWorkspace_const_sptr inputWs, const MatrixWorkspace_const_sptr maskWs, const std::tuple<size_t, size_t, bool> &range_info)
-{
+    std::vector<detid_t> &detectorList,
+    const MatrixWorkspace_const_sptr inputWs,
+    const MatrixWorkspace_const_sptr maskWs,
+    const std::tuple<size_t, size_t, bool> &range_info) {
   size_t startIndex = std::get<0>(range_info);
   size_t endIndex = std::get<1>(range_info);
 
-  const auto & detMap = inputWs->getDetectorIDToWorkspaceIndexMap();
+  const auto &detMap = inputWs->getDetectorIDToWorkspaceIndexMap();
   detectorList.reserve(maskWs->getNumberHistograms());
 
   for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
-    if(maskWs->y(i)[0] == 0) {
+    if (maskWs->y(i)[0] == 0) {
       auto id = maskWs->getDetector(i)->getID();
       if (detMap.at(id) >= startIndex && detMap.at(id) <= endIndex)
         detectorList.push_back(id);

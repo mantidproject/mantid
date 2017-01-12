@@ -89,10 +89,11 @@ private:
   appendToIndexListFromWS(std::vector<size_t> &indexList,
                           const API::MatrixWorkspace_sptr maskedWorkspace,
                           const std::tuple<size_t, size_t, bool> &range_info);
-  void appendToDetectorListFromWS(std::vector<detid_t> &detectorList,
-                                  const API::MatrixWorkspace_const_sptr inputWs,
-                                  const API::MatrixWorkspace_const_sptr maskWs,
-                                  const std::tuple<size_t, size_t, bool> &range_info);
+  void appendToDetectorListFromWS(
+      std::vector<detid_t> &detectorList,
+      const API::MatrixWorkspace_const_sptr inputWs,
+      const API::MatrixWorkspace_const_sptr maskWs,
+      const std::tuple<size_t, size_t, bool> &range_info);
   void appendToIndexListFromMaskWS(
       std::vector<size_t> &indexList,
       const DataObjects::MaskWorkspace_const_sptr maskedWorkspace,

@@ -581,7 +581,7 @@ public:
   }
 
   void test_MaskWithWorkspaceWithDetectorIDs() {
-    auto & ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(90);
 
@@ -606,7 +606,8 @@ public:
 
     // Make workspace to act as mask
     const auto numMaskWSSpec = inputWS->getInstrument()->getNumberDetectors();
-    auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(static_cast<int>(numMaskWSSpec), 1, 0, 0);
+    auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        static_cast<int>(numMaskWSSpec), 1, 0, 0);
     maskWs->setInstrument(inputWS->getInstrument());
     for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
       maskWs->mutableY(i)[0] = 1.0;
@@ -644,13 +645,11 @@ public:
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
       }
-
+    }
   }
-  }
-
 
   void test_MaskWithWorkspaceWithDetectorIDsAndWsIndexRange() {
-    auto & ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(90);
 
@@ -675,7 +674,8 @@ public:
 
     // Make workspace to act as mask
     const auto numMaskWSSpec = inputWS->getInstrument()->getNumberDetectors();
-    auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(static_cast<int>(numMaskWSSpec), 1, 0, 0);
+    auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        static_cast<int>(numMaskWSSpec), 1, 0, 0);
     maskWs->setInstrument(inputWS->getInstrument());
     for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
       maskWs->mutableY(i)[0] = 1.0;
@@ -715,9 +715,9 @@ public:
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
       }
+    }
+  }
 
-  }
-  }
 private:
   MaskDetectors marker;
 };
