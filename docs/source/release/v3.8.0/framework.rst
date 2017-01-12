@@ -91,7 +91,7 @@ Improved
 
 - :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
-- :ref:`LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+- :ref:`LoadILL <algm-LoadILLTOF>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
@@ -125,7 +125,7 @@ Performance
   - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`: 25% speedup
   - :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: 3x to 4x speedup
   - :ref:`ConvertToPointData <algm-ConvertToPointData>`: 3x to 4x speedup
-  - :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>`: 10% speedup
+  - :ref:`CorrectFlightPaths <algm-ConvertToConstantL2>`: 10% speedup
   - :ref:`ExtractSpectra <algm-ExtractSpectra>`: no change when X-range changes, otherwise 50x to 100x speedup for Workspace2D and up to 3x speedup for EventWorkspace
   - :ref:`GetAllEi <algm-GetAllEi>`: 5-10% speedup
   - :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`: 5-10% speedup
