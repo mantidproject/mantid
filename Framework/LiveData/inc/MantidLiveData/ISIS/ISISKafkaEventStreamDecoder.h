@@ -45,7 +45,7 @@ class DLLExport ISISKafkaEventStreamDecoder {
 public:
   ISISKafkaEventStreamDecoder(const IKafkaBroker &broker,
                               std::string eventTopic, std::string runInfoTopic,
-                              std::string spDetTopic);
+                              std::string spDetTopic, bool terminateAtEndOfRun = false);
   ~ISISKafkaEventStreamDecoder();
   ISISKafkaEventStreamDecoder(const ISISKafkaEventStreamDecoder &) = delete;
   ISISKafkaEventStreamDecoder &
@@ -86,6 +86,9 @@ private:
 
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
+  /// Flag indicating if the capture thread should terminate
+  /// if the FramePart::end_of_run flag is set.
+  std::atomic<bool> m_stopEOR;
   /// Subscriber for the event stream
   std::unique_ptr<IKafkaStreamSubscriber> m_eventStream;
   /// Local event workspace buffers

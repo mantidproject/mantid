@@ -110,14 +110,16 @@ using Kernel::DateAndTime;
  * @param broker A reference to a Broker object for creating topic streams
  * @param eventTopic The name of the topic streaming the event data
  * @param spDetTopic The name of the topic streaming the spectrum-detector
+ * @param terminateAtEndOfRun Terminate event capture at the end of the current
+ * run
  * mapping
  */
 ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
     const IKafkaBroker &broker, std::string eventTopic,
-    std::string runInfoTopic, std::string spDetTopic)
-    : m_interrupt(false), m_eventStream(broker.subscribe(eventTopic)),
-      m_localEvents(), m_specToIdx(), m_runStart(),
-      m_runStream(broker.subscribe(runInfoTopic)),
+    std::string runInfoTopic, std::string spDetTopic, bool terminateAtEndOfRun)
+    : m_interrupt(false), m_stopEOR(terminateAtEndOfRun),
+      m_eventStream(broker.subscribe(eventTopic)), m_localEvents(),
+      m_specToIdx(), m_runStart(), m_runStream(broker.subscribe(runInfoTopic)),
       m_spDetStream(broker.subscribe(spDetTopic)), m_runNumber(-1), m_thread(),
       m_capturing(false), m_exception() {}
 
@@ -252,6 +254,8 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
         spectrum.addEventQuickly(TofEvent(tofData[i], pulseTime));
       }
       addSampleEnvLogs(seData, nSEEvents, mutableRunInfo);
+
+      m_interrupt = frameData->end_of_run() && m_stopEOR;
     }
   }
   g_log.debug("Event capture finished");
