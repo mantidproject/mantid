@@ -109,7 +109,6 @@ void SplineSmoothing::exec() {
  * @param index :: index of the spectrum to smooth
  */
 void SplineSmoothing::smoothSpectrum(const int index) {
-  m_cspline = boost::make_shared<BSpline>();
   m_cspline->setAttributeValue("Uniform", false);
 
   // choose some smoothing points from input workspace
