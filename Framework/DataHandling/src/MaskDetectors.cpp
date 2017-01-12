@@ -174,14 +174,11 @@ void MaskDetectors::exec() {
         // Check the provided workspace has the same number of detectors as the
         // input. If so add to the detector list
         auto instrument = WS->getInstrument();
-        if(instrument && nHist == instrument->getNumberDetectors()) {
-          detectorList.reserve(prevMasking->getNumberHistograms());
-          for (size_t i = 0; i < prevMasking->getNumberHistograms(); ++i) {
-            if(prevMasking->y(i)[0] == 0) {
-              auto id = prevMasking->getDetector(i)->getID();
-              detectorList.push_back(id);
-            }
-          }
+        auto maskInstrument = prevMasking->getInstrument();
+        if(instrument && maskInstrument
+           && maskInstrument->getNumberDetectors() == instrument->getNumberDetectors()
+           && nHist == instrument->getNumberDetectors()) {
+          appendToDetectorListFromWS(detectorList, WS, prevMasking, ranges_info);
         } else {
           // We have more spectra in the mask than in the workspace and we also
           // don't have a list of detector IDs. There's nothing more to try so
@@ -468,7 +465,36 @@ void MaskDetectors::appendToIndexListFromWS(
   }
   tmp_index.swap(indexList);
 
-} // appendToIndexListFromWS
+}
+
+/**
+* Append the indices of a workspace corresponding to detector IDs to the
+* given list
+*
+* @param detectorsList :: An existing list of detector IDs
+* @param inputWs :: A workspace to mask detectors in
+* @param maskedWorkspace :: A workspace with masked spectra
+* @param range_info    :: tuple containing the information on
+*                      if copied indexes are constrained by ranges and if yes
+*                       -- the range of indexes to topy
+*/
+void MaskDetectors::appendToDetectorListFromWS(
+    std::vector<detid_t> &detectorList, const MatrixWorkspace_const_sptr inputWs, const MatrixWorkspace_const_sptr maskWs, const std::tuple<size_t, size_t, bool> &range_info)
+{
+  size_t startIndex = std::get<0>(range_info);
+  size_t endIndex = std::get<1>(range_info);
+
+  const auto & detMap = inputWs->getDetectorIDToWorkspaceIndexMap();
+  detectorList.reserve(maskWs->getNumberHistograms());
+
+  for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
+    if(maskWs->y(i)[0] == 0) {
+      auto id = maskWs->getDetector(i)->getID();
+      if (detMap.at(id) >= startIndex && detMap.at(id) <= endIndex)
+        detectorList.push_back(id);
+    }
+  }
+}
 
 /**
 * Append the indices of the masked spectra from the given workspace list to the
