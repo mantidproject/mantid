@@ -614,10 +614,10 @@ def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entr
 
     for index in range(len(wsGroup)):
         childWorkspace = wsGroup.getItem(index)
-        if re.search(REG_DATA_NAME, childWorkspace.getName()):
+        if re.search(REG_DATA_NAME, childWorkspace.name()):
             is_in = True if isinstance(childWorkspace, IEventWorkspace) else False
             has_data.append(is_in)
-        elif re.search(REG_DATA_MONITORS_NAME, childWorkspace.getName()):
+        elif re.search(REG_DATA_MONITORS_NAME, childWorkspace.name()):
             is_in = True if isinstance(childWorkspace, MatrixWorkspace) else False
             has_monitors.append(is_in)
 
@@ -637,7 +637,7 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
     @param appendix :: what to append to the names of the child workspaces
     '''
     # Store the name of the group workspace in a string
-    ws_group_name = ws_group.getName()
+    ws_group_name = ws_group.name()
 
     # Get a handle on each child workspace
     ws_handles = []
@@ -656,7 +656,7 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
     data_workspaces = []
     monitor_workspaces = []
     for ws_handle in ws_handles:
-        old_workspace_name = ws_handle.getName()
+        old_workspace_name = ws_handle.name()
         # Get the index of the multiperiod workspace if it is present
         new_workspace_name = get_new_workspace_name(appendix, old_workspace_name, ws_group_name)
         RenameWorkspace(InputWorkspace = ws_handle, OutputWorkspace=new_workspace_name)

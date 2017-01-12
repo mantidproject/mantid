@@ -3,6 +3,7 @@
 #include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -440,7 +441,7 @@ void MdViewerWidget::setParaViewComponentsForView() {
  * Reaction for a rebin event
  * @param algorithmType The type of rebinning algorithm
  */
-void MdViewerWidget::onRebin(std::string algorithmType) {
+void MdViewerWidget::onRebin(const std::string &algorithmType) {
   pqPipelineSource *source = pqActiveObjects::instance().activeSource();
 
   std::string inputWorkspaceName;
@@ -459,8 +460,8 @@ void MdViewerWidget::onRebin(std::string algorithmType) {
 void MdViewerWidget::onSwitchSources(std::string rebinnedWorkspaceName,
                                      std::string sourceType) {
   // Create the rebinned workspace
-  pqPipelineSource *rebinnedSource =
-      prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType);
+  pqPipelineSource *rebinnedSource = prepareRebinnedWorkspace(
+      std::move(rebinnedWorkspaceName), std::move(sourceType));
 
   try {
     // Repipe the filters to the rebinned source
@@ -515,7 +516,7 @@ void MdViewerWidget::onResetViewsStateToAllData() {
  * @param sourceType The name of the source plugin.
  */
 pqPipelineSource *MdViewerWidget::prepareRebinnedWorkspace(
-    const std::string rebinnedWorkspaceName, std::string sourceType) {
+    const std::string &rebinnedWorkspaceName, const std::string &sourceType) {
   // Load a new source plugin
   auto gridAxesOn = areGridAxesOn();
   pqPipelineSource *newRebinnedSource = this->currentView->setPluginSource(
@@ -542,7 +543,7 @@ pqPipelineSource *MdViewerWidget::prepareRebinnedWorkspace(
  * @param originalWorkspaceName The name of the original workspace
  */
 pqPipelineSource *MdViewerWidget::renderOriginalWorkspace(
-    const std::string originalWorkspaceName) {
+    const std::string &originalWorkspaceName) {
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
   auto gridAxesOn = areGridAxesOn();
@@ -763,7 +764,8 @@ void MdViewerWidget::resetCurrentView(int workspaceType,
  * @returns An initial view.
 */
 ModeControlWidget::Views
-MdViewerWidget::getInitialView(int workspaceType, std::string instrumentName) {
+MdViewerWidget::getInitialView(int workspaceType,
+                               const std::string &instrumentName) {
   // Get the possible initial views
   QString initialViewFromUserProperties =
       mdSettings.getUserSettingInitialView();
@@ -1607,7 +1609,8 @@ bool otherWorkspacePresent() {
   * @param wsNames  Reference to a list of workspaces names, which are being
  * extracted.
   */
-void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
+void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e,
+                                                      const QString &text,
                                                       QStringList &wsNames) {
   int endIndex = 0;
   while (text.indexOf("[\"", endIndex) > -1) {

@@ -57,7 +57,7 @@ namespace Strings {
  */
 template <typename ITERATOR_TYPE>
 DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                           const std::string separator) {
+                           const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {

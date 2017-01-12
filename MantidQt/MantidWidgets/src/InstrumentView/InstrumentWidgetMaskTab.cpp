@@ -875,7 +875,7 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->execute();
     }
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->name());
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
@@ -903,12 +903,12 @@ void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask) {
       Mantid::API::IAlgorithm_sptr alg =
           Mantid::API::AlgorithmManager::Instance().create(
               "MaskWorkspaceToCalFile", -1);
-      alg->setPropertyValue("InputWorkspace", outputWS->name());
+      alg->setPropertyValue("InputWorkspace", outputWS->getName());
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->setProperty("Invert", false);
       alg->execute();
     }
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->name());
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
@@ -1286,7 +1286,7 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
   auto workspace = actor->getWorkspace();
   auto instrument = workspace->getInstrument();
   auto instrumentName = instrument->getName();
-  auto tempName = "__" + workspace->name() + "MaskView";
+  auto tempName = "__" + workspace->getName() + "MaskView";
 
   // load the mask from the project folder
   try {

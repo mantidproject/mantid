@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -974,22 +975,18 @@ void IFunction::convertValue(std::vector<double> &values,
           << "Ignore convertion.";
       return;
     }
-    double l1 = instrument->getSource()->getDistance(*sample);
-    Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
-    double l2(-1.0), twoTheta(0.0);
-    if (!det->isMonitor()) {
-      l2 = det->getDistance(*sample);
-      twoTheta = ws->detectorTwoTheta(*det);
-    } else // If this is a monitor then make l1+l2 = source-detector distance
-           // and twoTheta=0
-    {
-      l2 = det->getDistance(*(instrument->getSource()));
-      l2 = l2 - l1;
-      twoTheta = 0.0;
-    }
+    const auto &spectrumInfo = ws->spectrumInfo();
+    double l1 = spectrumInfo.l1();
+    // If this is a monitor then l1+l2 = source-detector distance and twoTheta=0
+    double l2 = spectrumInfo.l2(wsIndex);
+    double twoTheta(0.0);
+    if (!spectrumInfo.isMonitor(wsIndex))
+      twoTheta = spectrumInfo.twoTheta(wsIndex);
     int emode = static_cast<int>(ws->getEMode());
     double efixed(0.0);
     try {
+      boost::shared_ptr<const Geometry::IDetector> det(
+          &spectrumInfo.detector(wsIndex), NoDeleting());
       efixed = ws->getEFixed(det);
     } catch (std::exception &) {
       // assume elastic

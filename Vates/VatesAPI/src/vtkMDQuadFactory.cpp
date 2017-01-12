@@ -167,7 +167,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
 }
 
 /// Initalize with a target workspace.
-void vtkMDQuadFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkMDQuadFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   m_workspace = doInitialize<IMDEventWorkspace, 2>(ws);
 }
 

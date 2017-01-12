@@ -74,7 +74,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         iet_alg.execute()
 
         group_ws = iet_alg.getProperty('OutputWorkspace').value
-        icon_ws = group_ws.getItem(0).getName()
+        icon_ws = group_ws.getItem(0).name()
 
         workflow_prog = Progress(self, start=0.7, end=0.9, nreports=4)
 
