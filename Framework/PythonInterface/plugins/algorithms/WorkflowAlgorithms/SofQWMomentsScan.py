@@ -1,19 +1,13 @@
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid import config
 
-import os, numpy as np
-
-
-_str_or_none = lambda s: s if s != '' else None
-_ws_or_none = lambda s: mtd[s] if s != '' else None
-_elems_or_none = lambda l: l if len(l) != 0 else None
+import os
+import numpy as np
 
 
 class SofQWMomentsScan(DataProcessorAlgorithm):
-
     _data_files = None
     _sum_files = None
     _load_logs = None
@@ -25,30 +19,22 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
     _resolution = None
     _spectra_range = None
     _background_range = None
-    _elastic_range = None
-    _inelastic_range = None
     _rebin_string = None
     _detailed_balance = None
     _grouping_method = None
     _grouping_ws = None
     _grouping_map_file = None
-    _output_ws = None
     _output_x_units = None
-    _plot_type = None
-    _save_formats = None
     _ipf_filename = None
     _sample_log_name = None
     _sample_log_value = None
     _workspace_names = None
-    _scan_ws = None
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect;Workflow\\MIDAS'
 
-
     def summary(self):
         return 'Runs an energy transfer reduction for an inelastic indirect geometry instrument.'
-
 
     def PyInit(self):
         # Input properties
@@ -61,7 +47,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
-                             doc='Workspace contining calibration data')
+                             doc='Workspace containing calibration data')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='',
@@ -78,9 +64,9 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='QRange'),
-                             doc='Range of background to subtact from raw data in time of flight.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(FloatArrayProperty(name='EnergyRange'),
-                             doc='Range of background to subtact from raw data in time of flight.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
                              doc='Apply the detailed balance correction')
 
@@ -105,19 +91,16 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
                              StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
-
         # Output properties
         self.declareProperty(WorkspaceGroupProperty('ReducedWorkspace', defaultValue='Reduced',
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='The output reduced workspace.')
         self.declareProperty(WorkspaceGroupProperty('SqwWorkspace', defaultValue='Sqw',
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='The output Sqw workspace.')
         self.declareProperty(name='MomentWorkspace', defaultValue='Moment',
                              doc='The output Moment workspace.')
 
-
-    #pylint: disable=too-many-locals
     def PyExec(self):
 
         self._setup()
@@ -125,25 +108,25 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         progress.report('Energy transfer')
         scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
-        scan_alg.setProperty('InputFiles',self._data_files)
-        scan_alg.setProperty('SumFiles',self._sum_files)
-        scan_alg.setProperty('LoadLogFiles',self._load_logs)
-        scan_alg.setProperty('CalibrationWorkspace',self._calibration_ws)
-        scan_alg.setProperty('Instrument',self._instrument_name)
-        scan_alg.setProperty('Analyser',self._analyser) 
-        scan_alg.setProperty('Reflection',self._reflection)
-        scan_alg.setProperty('Efixed',self._efixed)
-        scan_alg.setProperty('SpectraRange',self._spectra_range)
-        scan_alg.setProperty('BackgroundRange',self._background_range)
-        scan_alg.setProperty('RebinString',self._rebin_string)
-        scan_alg.setProperty('DetailedBalance',self._detailed_balance)
-        scan_alg.setProperty('ScaleFactor',self._scale_factor)
-        scan_alg.setProperty('FoldMultipleFrames',self._fold_multiple_frames)
-        scan_alg.setProperty('GroupingMethod',self._grouping_method)
-        scan_alg.setProperty('GroupingWorkspace',self._grouping_ws)
-        scan_alg.setProperty('MapFile',self._grouping_map_file)
-        scan_alg.setProperty('UnitX',self._output_x_units)
-        scan_alg.setProperty('OutputWorkspace',self._red_ws)
+        scan_alg.setProperty('InputFiles', self._data_files)
+        scan_alg.setProperty('SumFiles', self._sum_files)
+        scan_alg.setProperty('LoadLogFiles', self._load_logs)
+        scan_alg.setProperty('CalibrationWorkspace', self._calibration_ws)
+        scan_alg.setProperty('Instrument', self._instrument_name)
+        scan_alg.setProperty('Analyser', self._analyser)
+        scan_alg.setProperty('Reflection', self._reflection)
+        scan_alg.setProperty('Efixed', self._efixed)
+        scan_alg.setProperty('SpectraRange', self._spectra_range)
+        scan_alg.setProperty('BackgroundRange', self._background_range)
+        scan_alg.setProperty('RebinString', self._rebin_string)
+        scan_alg.setProperty('DetailedBalance', self._detailed_balance)
+        scan_alg.setProperty('ScaleFactor', self._scale_factor)
+        scan_alg.setProperty('FoldMultipleFrames', self._fold_multiple_frames)
+        scan_alg.setProperty('GroupingMethod', self._grouping_method)
+        scan_alg.setProperty('GroupingWorkspace', self._grouping_ws)
+        scan_alg.setProperty('MapFile', self._grouping_map_file)
+        scan_alg.setProperty('UnitX', self._output_x_units)
+        scan_alg.setProperty('OutputWorkspace', self._red_ws)
         scan_alg.execute()
         logger.information('ReducedWorkspace : %s' % self._red_ws)
 
@@ -167,8 +150,8 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         output_workspaces = list()
         temperatures = list()
         run_numbers = list()
-        sofqw_alg = self.createChildAlgorithm("SofQW", enableLogging = False)
-        group_alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging = False)
+        sofqw_alg = self.createChildAlgorithm("SofQW", enableLogging=False)
+        group_alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
 
         for input_ws in input_workspace_names:
             progress.report('SofQW for workspace: %s' % input_ws)
@@ -180,7 +163,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             sofqw_alg.setProperty("OutputWorkspace", input_ws + '_sqw')
             sofqw_alg.execute()
             mtd.addOrReplace(input_ws + '_sqw', sofqw_alg.getProperty("OutputWorkspace").value)
-            output_workspaces.append(input_ws + '_sqw')   
+            output_workspaces.append(input_ws + '_sqw')
 
             # Get the sample temperature
             temp = self._get_temperature(input_ws + '_sqw')
@@ -191,9 +174,8 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
                 run_no = self._get_InstrRun(input_ws)[1]
                 run_numbers.append(run_no)
 
-
         y_axis = mtd[input_workspace_names[0] + '_sqw'].getAxis(1)
-        y_values =y_axis.extractValues()
+        y_values = y_axis.extractValues()
         q = list()
         for idx in range(len(y_values)):
             q.append(y_values[idx])
@@ -210,7 +192,6 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
         create_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
-        idx = 0
         for input_ws in input_workspace_names:
             progress.report('SofQWMoments for workspace: %s' % input_ws)
             SofQWMoments(InputWorkspace=input_ws,
@@ -265,9 +246,9 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             delete_alg.execute()
         logger.information('Moment Workspace : %s' % self._moment_ws)
 
-        width_workspace =  self._sqw_ws + '_width'		
-        clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging = True)
-        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging = True)
+        width_workspace = self._sqw_ws + '_width'
+        clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=True)
+        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=True)
         for idx in range(len(width_workspaces)):
             if idx == 0:
                 clone_alg.setProperty("InputWorkspace", width_workspaces[0])
@@ -295,7 +276,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         xdat = list()
         ydat = list()
         edat = list()
-        for idx in range(len(input_workspace_names)):
+        for idx in range(len(temperatures)):
             x = mtd[width_workspace].readX(idx)
             y = mtd[width_workspace].readY(idx)
             e = mtd[width_workspace].readE(idx)
@@ -303,22 +284,21 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
                 xdat.append(float(temperatures[idx]))
             else:
                 xdat.append(float(run_numbers[idx][-3:]))
-            ydat.append(y[5]/x[5])
-            edat.append(e[5]/x[5])
-        diffusion_workspace =  self._sqw_ws + '_diffusion'		
-        create_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging = False)
-        create_alg.setProperty("OutputWorkspace",diffusion_workspace)
-        create_alg.setProperty("DataX",xdat)
-        create_alg.setProperty("DataY",ydat)
-        create_alg.setProperty("DataE",edat)
-        create_alg.setProperty("NSpec",1)
+            ydat.append(y[5] / x[5])
+            edat.append(e[5] / x[5])
+        diffusion_workspace = self._sqw_ws + '_diffusion'
+        create_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
+        create_alg.setProperty("OutputWorkspace", diffusion_workspace)
+        create_alg.setProperty("DataX", xdat)
+        create_alg.setProperty("DataY", ydat)
+        create_alg.setProperty("DataE", edat)
+        create_alg.setProperty("NSpec", 1)
         create_alg.setProperty("YUnitLabel", 'Diffusion')
         create_alg.execute()
         mtd.addOrReplace(diffusion_workspace, create_alg.getProperty("OutputWorkspace").value)
         unitx = mtd[diffusion_workspace].getAxis(0).setUnit("Label")
         unitx.setLabel(unit[0], unit[1])
         logger.information('Diffusion Workspace : %s' % diffusion_workspace)
-
 
     def validateInputs(self):
         """
@@ -361,15 +341,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             elif energy_range[0] > energy_range[2]:
                 issues['EnergyRange'] = 'Range must be in format: lower,upper'
 
-        # Validate grouping method
-        grouping_method = self.getPropertyValue('GroupingMethod')
-        grouping_ws = _ws_or_none(self.getPropertyValue('GroupingWorkspace'))
-
-        if grouping_method == 'Workspace' and grouping_ws is None:
-            issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
-
         return issues
-
 
     def _setup(self):
         """
@@ -451,9 +423,9 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[len(x)-1],
+            value_action = {'last_value': lambda x: x[len(x) - 1],
                             'average': lambda x: x.mean()
-                           }
+                            }
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp
@@ -491,7 +463,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         run_number = str(mtd[ws_name].getRunNumber())
         if run_number == '0':
-        # Attempt to parse run number off of name
+            # Attempt to parse run number off of name
             match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
             if match:
                 run_number = match.group(2)

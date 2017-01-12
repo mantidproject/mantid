@@ -20,17 +20,10 @@ Usage
 
 **Example - Running SofQWMoments from with an SofQW workspace.**
 
-.. testcode:: ExSofQWMomentsScan
+.. code-block:: python
 
-    reduced, sqw, moments = SqwMomentsScan(InputFiles='IRS21360', LoadLogFiles=False, Instrument='IRIS', Analyser='graphite', Reflection='002', SpectraRange='3,53',
+    reduced, sqw, moments = SofQWMomentsScan(InputFiles='OSIRIS100320', LoadLogFiles=False, Instrument='OSIRIS', Analyser='graphite', Reflection='002', SpectraRange='3,53',
                                            QRange='0,0.1,2', EnergyRange='-0.4,0.01,0.4')
-
-
-.. testcleanup:: ExSofQWMomentsScan
-
-   DeleteWorkspace(reduced)
-   DeleteWorkspace(sqw)
-   DeleteWorkspace(moments)
 
 .. categories::
 
