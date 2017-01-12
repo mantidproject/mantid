@@ -20,10 +20,9 @@ public:
   void testDeselectIfNotEqual() {
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
-    MatrixWorkspace_const_sptr inWS =
-        setupAlgorithm(alg, "DeselectIf", "NotEqual", 2.2);
+    setupAlgorithm(alg, "DeselectIf", "NotEqual", 2.2);
     std::ifstream file;
-    runAlgorithm(alg, inWS, file);
+    runAlgorithm(alg, file);
 
     // specific checks
     if (file.is_open()) {
@@ -38,10 +37,9 @@ public:
   void testDeselectIfLess() {
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
-    MatrixWorkspace_const_sptr inWS =
-        setupAlgorithm(alg, "DeselectIf", "Less", 2.2);
+    setupAlgorithm(alg, "DeselectIf", "Less", 2.2);
     std::ifstream file;
-    runAlgorithm(alg, inWS, file);
+    runAlgorithm(alg, file);
 
     // specific checks
     if (file.is_open()) {
@@ -56,10 +54,9 @@ public:
   void testDeselectIfLessEqual() {
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
-    MatrixWorkspace_const_sptr inWS =
-        setupAlgorithm(alg, "DeselectIf", "LessEqual", 2.2);
+    setupAlgorithm(alg, "DeselectIf", "LessEqual", 2.2);
     std::ifstream file;
-    runAlgorithm(alg, inWS, file);
+    runAlgorithm(alg, file);
 
     // specific checks
     if (file.is_open()) {
@@ -74,10 +71,9 @@ public:
   void testDeselectIfGreater() {
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
-    MatrixWorkspace_const_sptr inWS =
-        setupAlgorithm(alg, "DeselectIf", "Greater", 2.2);
+    setupAlgorithm(alg, "DeselectIf", "Greater", 2.2);
     std::ifstream file;
-    runAlgorithm(alg, inWS, file);
+    runAlgorithm(alg, file);
 
     // specific checks
     if (file.is_open()) {
@@ -92,10 +88,9 @@ public:
   void testDeselectIfGreaterEqual() {
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
-    MatrixWorkspace_const_sptr inWS =
-        setupAlgorithm(alg, "DeselectIf", "GreaterEqual", 2.2);
+    setupAlgorithm(alg, "DeselectIf", "GreaterEqual", 2.2);
     std::ifstream file;
-    runAlgorithm(alg, inWS, file);
+    runAlgorithm(alg, file);
 
     // specific checks
     if (file.is_open()) {
@@ -114,10 +109,9 @@ public:
 
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
-    MatrixWorkspace_const_sptr inWS =
-        setupAlgorithm(alg, "SelectIf", "Equal", 2.2, inputFile.getFileName());
+    setupAlgorithm(alg, "SelectIf", "Equal", 2.2, inputFile.getFileName());
     std::ifstream file;
-    runAlgorithm(alg, inWS, file);
+    runAlgorithm(alg, file);
 
     // specific checks
     if (file.is_open()) {
@@ -161,8 +155,8 @@ private:
   }
 
   // Initialise the algorithm and set the properties. Creates a fake
-  // workspace for the input and returns it.
-  MatrixWorkspace_const_sptr setupAlgorithm(
+  // workspace for the input.
+  void setupAlgorithm(
       MaskDetectorsIf &alg, const std::string &mode, const std::string &op,
       const double value,
       const std::string &inputFile = "4detector_cal_example_file.cal") {
@@ -178,15 +172,11 @@ private:
     alg.setProperty("Operator", op);
     alg.setProperty("Value", value);
     alg.setProperty("OutputCalFile", "MaskDetectorsIfTestOutput.cal");
-
-    return inWS;
   }
 
-  // Run the algorithm and do some basic checks. Returns the open output file
-  // stream if everything is ok (or a closed file stream if not ok).
-  std::ifstream runAlgorithm(MaskDetectorsIf &alg,
-                             const MatrixWorkspace_const_sptr inWS,
-                             std::ifstream &outFile) {
+  // Run the algorithm and do some basic checks. Opens the output file
+  // stream if everything is ok (leaves it closed if not).
+  void runAlgorithm(MaskDetectorsIf &alg, std::ifstream &outFile) {
     // run the algorithm
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -210,8 +200,6 @@ private:
           outFile.close();
       }
     }
-
-    return outFile;
   }
 
   void skipHeader(std::ifstream &file) {
