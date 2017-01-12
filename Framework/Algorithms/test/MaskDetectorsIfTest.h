@@ -22,7 +22,8 @@ public:
     MaskDetectorsIf alg;
     MatrixWorkspace_const_sptr inWS =
         setupAlgorithm(alg, "DeselectIf", "NotEqual", 2.2);
-    std::ifstream file = runAlgorithm(alg, inWS);
+    std::ifstream file;
+    runAlgorithm(alg, inWS, file);
 
     // specific checks
     if (file.is_open()) {
@@ -39,7 +40,8 @@ public:
     MaskDetectorsIf alg;
     MatrixWorkspace_const_sptr inWS =
         setupAlgorithm(alg, "DeselectIf", "Less", 2.2);
-    std::ifstream file = runAlgorithm(alg, inWS);
+    std::ifstream file;
+    runAlgorithm(alg, inWS, file);
 
     // specific checks
     if (file.is_open()) {
@@ -56,7 +58,8 @@ public:
     MaskDetectorsIf alg;
     MatrixWorkspace_const_sptr inWS =
         setupAlgorithm(alg, "DeselectIf", "LessEqual", 2.2);
-    std::ifstream file = runAlgorithm(alg, inWS);
+    std::ifstream file;
+    runAlgorithm(alg, inWS, file);
 
     // specific checks
     if (file.is_open()) {
@@ -73,7 +76,8 @@ public:
     MaskDetectorsIf alg;
     MatrixWorkspace_const_sptr inWS =
         setupAlgorithm(alg, "DeselectIf", "Greater", 2.2);
-    std::ifstream file = runAlgorithm(alg, inWS);
+    std::ifstream file;
+    runAlgorithm(alg, inWS, file);
 
     // specific checks
     if (file.is_open()) {
@@ -90,7 +94,8 @@ public:
     MaskDetectorsIf alg;
     MatrixWorkspace_const_sptr inWS =
         setupAlgorithm(alg, "DeselectIf", "GreaterEqual", 2.2);
-    std::ifstream file = runAlgorithm(alg, inWS);
+    std::ifstream file;
+    runAlgorithm(alg, inWS, file);
 
     // specific checks
     if (file.is_open()) {
@@ -111,7 +116,8 @@ public:
     MaskDetectorsIf alg;
     MatrixWorkspace_const_sptr inWS =
         setupAlgorithm(alg, "SelectIf", "Equal", 2.2, inputFile.getFileName());
-    std::ifstream file = runAlgorithm(alg, inWS);
+    std::ifstream file;
+    runAlgorithm(alg, inWS, file);
 
     // specific checks
     if (file.is_open()) {
@@ -179,7 +185,8 @@ private:
   // Run the algorithm and do some basic checks. Returns the open output file
   // stream if everything is ok (or a closed file stream if not ok).
   std::ifstream runAlgorithm(MaskDetectorsIf &alg,
-                             const MatrixWorkspace_const_sptr inWS) {
+                             const MatrixWorkspace_const_sptr inWS,
+                             std::ifstream &outFile) {
     // run the algorithm
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -190,22 +197,21 @@ private:
     TS_ASSERT(fileExists = Poco::File(outputFile).exists());
 
     // check that we can open the file
-    std::ifstream file;
     if (fileExists) {
-      file.open(outputFile.c_str());
-      TS_ASSERT(file.is_open());
+      outFile.open(outputFile.c_str());
+      TS_ASSERT(outFile.is_open());
 
       // skip the header, and check that there is still content left
-      if (file.is_open()) {
-        skipHeader(file);
-        TS_ASSERT(!file.eof());
+      if (outFile.is_open()) {
+        skipHeader(outFile);
+        TS_ASSERT(!outFile.eof());
 
-        if (file.eof())
-          file.close();
+        if (outFile.eof())
+          outFile.close();
       }
     }
 
-    return file;
+    return outFile;
   }
 
   void skipHeader(std::ifstream &file) {
