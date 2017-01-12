@@ -1,7 +1,6 @@
 #ifndef MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
 #define MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/Functions/CubicSpline.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
