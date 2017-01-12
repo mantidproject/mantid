@@ -147,7 +147,6 @@ class MatchPeaks(PythonAlgorithm):
         output_ws = CloneWorkspace(InputWorkspace=mtd[self._input_ws], OutputWorkspace=self._output_ws)
 
         size = mtd[self._input_ws].blocksize()
-
         mid_bin = int(size / 2)
 
         # Find peak positions in input workspace
@@ -208,7 +207,6 @@ class MatchPeaks(PythonAlgorithm):
             bin_range = CreateEmptyTableWorkspace(OutputWorkspace=self._output_bin_range)
             bin_range.addColumn(type="double", name='MinBin')
             bin_range.addColumn(type="double", name='MaxBin')
-
             bin_range.addRow({'MinBin': min_bin, 'MaxBin': max_bin})
             self.setProperty('BinRangeTable', bin_range)
 
@@ -233,30 +231,21 @@ class MatchPeaks(PythonAlgorithm):
 
         # Mid bin number
         mid_bin = int(mtd[self._input_ws].blocksize() / 2)
-
         # Initialisation
         peak_bin = np.ones(mtd[self._input_ws].getNumberHistograms()) * mid_bin
-
         # Bin range: difference between mid bin and peak bin should be in this range
         tolerance = int(mid_bin / 2)
-
         x_values = mtd[self._input_ws].readX(0)
 
         for i in range(mtd[self._input_ws].getNumberHistograms()):
-
             fit = fit_table.row(i)
-
             # Bin number, where Y has its maximum
             y_values = mtd[self._input_ws].readY(i)
-
             max_pos = np.argmax(y_values)
-
             peak_plus_error = abs(fit["PeakCentreError"]) + abs(fit["PeakCentre"])
 
             if peak_plus_error > x_values[0] and peak_plus_error < x_values[-1]:
-
                 peak_plus_error_bin = mtd[self._input_ws].binIndexOf(peak_plus_error)
-
                 if abs(peak_plus_error_bin - mid_bin) < tolerance and fit["FitStatus"] == 'success':
                     # fit succeeded, and fitted peak is within acceptance range, take it
                     peak_bin[i] = mtd[self._input_ws].binIndexOf(fit["PeakCentre"])
@@ -284,17 +273,14 @@ class MatchPeaks(PythonAlgorithm):
 
         # Clean-up unused TableWorkspaces in try-catch
         # Direct deletion causes problems when running in parallel for too many workspaces
-
         try:
             DeleteWorkspace('EPPfit_Parameters')
         except ValueError:
             logger.debug('Fit parameters workspace already deleted')
-
         try:
             DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
         except ValueError:
             logger.debug('Fit covariance matrix already deleted')
-
         try:
             DeleteWorkspace(fit_table)
         except ValueError:
