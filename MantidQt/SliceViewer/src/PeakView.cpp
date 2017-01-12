@@ -15,8 +15,8 @@ PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
                    PeakViewColor foregroundColor, PeakViewColor backgroundColor,
                    double largestEffectiveRadius)
     : PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent),
-      m_peaks(vecPeakRepresentation), m_cachedOccupancyIntoView(0),
-      m_cachedOccupancyInView(0), m_showBackground(false),
+      m_peaks(vecPeakRepresentation), m_cachedOccupancyIntoView(0.015),
+      m_cachedOccupancyInView(0.015), m_showBackground(false),
       m_foregroundColor(foregroundColor), m_backgroundColor(backgroundColor),
       m_largestEffectiveRadius(largestEffectiveRadius) {}
 
@@ -133,7 +133,7 @@ void PeakView::takeSettingsFrom(const PeakOverlayView *const source) {
   // cross-type peak
   this->showBackgroundRadius(source->isBackgroundShown());
 
-  // Pass on the information which only concerns the cross-type peak
+  // Pass on the information which only concerns the cross-type peak.
   this->changeOccupancyIntoView(source->getOccupancyIntoView());
   this->changeOccupancyInView(source->getOccupancyInView());
 }
