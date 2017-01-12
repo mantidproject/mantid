@@ -2264,7 +2264,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
 
   size_t numrows = parameterWS->rowCount();
 
-  g_log.notice() << "[DBx409] Import TableWorkspace " << parameterWS->name()
+  g_log.notice() << "[DBx409] Import TableWorkspace " << parameterWS->getName()
                  << " containing " << numrows
                  << " instrument profile parameters\n";
 
@@ -2328,7 +2328,7 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
 
   g_log.information() << "Import " << hklmaps.size()
                       << " entries from Bragg peak TableWorkspace "
-                      << peakws->name() << '\n';
+                      << peakws->getName() << '\n';
 }
 
 //----------------------------------------------------------------------------

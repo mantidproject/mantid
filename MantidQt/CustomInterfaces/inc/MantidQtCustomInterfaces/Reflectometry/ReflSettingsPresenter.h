@@ -1,10 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
 
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -59,6 +59,7 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
+  void wrapWithQuotes(std::string &str) const;
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);

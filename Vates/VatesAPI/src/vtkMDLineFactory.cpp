@@ -169,7 +169,7 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
 }
 
 /// Initalize with a target workspace.
-void vtkMDLineFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkMDLineFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   m_workspace = doInitialize<IMDEventWorkspace, 1>(ws);
 }
 

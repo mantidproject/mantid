@@ -303,7 +303,7 @@ class Layer(QtProxyObject):
         if isinstance(args[0],str):
             return threadsafe_call(self._getHeldObject().insertCurve, *args)
         elif hasattr(args[0], 'getName'):
-            return threadsafe_call(self._getHeldObject().insertCurve, args[0].getName(),*args[1:])
+            return threadsafe_call(self._getHeldObject().insertCurve, args[0].name(),*args[1:])
         else:
             return threadsafe_call(self._getHeldObject().insertCurve, args[0]._getHeldObject(),*args[1:])
 
@@ -763,7 +763,7 @@ def getWorkspaceNames(source):
         for w in source:
             names = getWorkspaceNames(w)
             ws_names += names
-    elif hasattr(source, 'getName'):
+    elif hasattr(source, 'name'):
         if hasattr(source, '_getHeldObject'):
             wspace = source._getHeldObject()
         else:
@@ -773,10 +773,10 @@ def getWorkspaceNames(source):
         if hasattr(wspace, 'getNames'):
             grp_names = wspace.getNames()
             for n in grp_names:
-                if n != wspace.getName():
+                if n != wspace.name():
                     ws_names.append(n)
         else:
-            ws_names.append(wspace.getName())
+            ws_names.append(wspace.name())
     elif isinstance(source,str):
         w = None
         try:
@@ -803,7 +803,7 @@ class ProxyCompositePeaksPresenter(QtProxyObject):
         if isinstance(source, str):
             to_present = source
         elif isinstance(source, mantid.api.Workspace):
-            to_present = source.getName()
+            to_present = source.name()
         else:
             raise ValueError("getPeaksPresenter expects a Workspace name or a Workspace object.")
         if not mantid.api.mtd.doesExist(to_present):

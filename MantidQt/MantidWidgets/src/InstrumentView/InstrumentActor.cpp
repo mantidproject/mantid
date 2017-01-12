@@ -282,7 +282,7 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const {
 * Apply mask stored in the helper mask workspace to the data workspace.
 */
 void InstrumentActor::applyMaskWorkspace() {
-  auto wsName = getWorkspace()->name();
+  auto wsName = getWorkspace()->getName();
   if (m_maskWorkspace) {
     // Mask detectors
     try {
@@ -868,7 +868,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
   Mantid::API::IAlgorithm *alg =
       Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",
                                                                 -1);
-  alg->setPropertyValue("InputWorkspace", getWorkspace()->name());
+  alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
   alg->execute();
 

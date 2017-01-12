@@ -56,7 +56,7 @@ void ExtractMaskToTable::exec() {
 
   bool m_inputIsMask = false;
   if (maskws) {
-    g_log.notice() << "InputWorkspace " << m_dataWS->name()
+    g_log.notice() << "InputWorkspace " << m_dataWS->getName()
                    << " is a MaskWorkspace.\n";
     m_inputIsMask = true;
   } else {
@@ -135,8 +135,8 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
     chkcolumans[2] = "DetectorIDsList";
     for (int i = 0; i < 3; ++i) {
       if (colnames[i] != chkcolumans[i]) {
-        g_log.error() << "Mask table workspace " << masktablews->name() << "'s "
-                      << i << "-th column name is " << colnames[i]
+        g_log.error() << "Mask table workspace " << masktablews->getName()
+                      << "'s " << i << "-th column name is " << colnames[i]
                       << ", while it should be " << chkcolumans[i]
                       << ". MaskWorkspace is invalid"
                       << " and thus not used.\n";
@@ -264,7 +264,7 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
   vector<string> targetcolnames = targetWS->getColumnNames();
   if (sourcecolnames.size() != targetcolnames.size()) {
     stringstream errmsg;
-    errmsg << "Soruce table workspace " << sourceWS->name()
+    errmsg << "Soruce table workspace " << sourceWS->getName()
            << " has different number of columns (" << sourcecolnames.size()
            << ") than target table workspace's (" << targetcolnames.size()
            << ")";

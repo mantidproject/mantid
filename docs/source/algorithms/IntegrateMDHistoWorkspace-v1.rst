@@ -56,7 +56,7 @@ Usage
    non_integrated_dims = low_d_cut.getNonIntegratedDimensions()
    print 'Number of non integrated dimensions after integration are %i'  % len(non_integrated_dims)
    for dim in non_integrated_dims:
-       print 'Non integrated dimension is %s' % dim.getName()
+       print 'Non integrated dimension is %s' % dim.name
        print 'Limits are from %0.2f to %0.2f' % (dim.getMinimum(), dim.getMaximum())
 
 Output:
@@ -91,7 +91,7 @@ maximum and minimum limits may need to be adjusted to ensure no partial binning 
    non_integrated_dims = low_d_cut.getNonIntegratedDimensions()
    print 'Number of non integrated dimensions after integration are %i'  % len(non_integrated_dims)
    for dim in non_integrated_dims:
-       print 'Non integrated dimension is %s' % dim.getName()
+       print 'Non integrated dimension is %s' % dim.name
        print 'Limits are from %0.2f to %0.2f' % (dim.getMinimum(), dim.getMaximum())
        print 'Output bin width is %0.2f' % float((dim.getMaximum() - dim.getMinimum() )/dim.getNBins())  
 

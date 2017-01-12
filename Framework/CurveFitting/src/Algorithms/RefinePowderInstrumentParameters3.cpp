@@ -375,7 +375,6 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 
   // 3. Monte Carlo starts
   double chisqx = chisq0;
-  int numtotalacceptance = 0;
   int numrecentacceptance = 0;
   int numrecentsteps = 0;
 
@@ -420,7 +419,6 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
       }
 
       // e) MC strategy control
-      ++numtotalacceptance;
       ++numrecentacceptance;
       ++numrecentsteps;
     }

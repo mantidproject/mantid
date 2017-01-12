@@ -466,7 +466,7 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 10);
-      TS_ASSERT_EQUALS(ws->name(), "group_" + std::to_string(i + 1));
+      TS_ASSERT_EQUALS(ws->getName(), "group_" + std::to_string(i + 1));
     }
   }
 
@@ -496,8 +496,8 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
-      TS_ASSERT_EQUALS(ws->name(), "irs55125_graphite002_to_55131_" +
-                                       std::string(suffix[i]));
+      TS_ASSERT_EQUALS(ws->getName(), "irs55125_graphite002_to_55131_" +
+                                          std::string(suffix[i]));
     }
   }
 
@@ -527,8 +527,8 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
-      TS_ASSERT_EQUALS(ws->name(), "irs55125_graphite002_to_55131_" +
-                                       std::string(suffix[i]));
+      TS_ASSERT_EQUALS(ws->getName(), "irs55125_graphite002_to_55131_" +
+                                          std::string(suffix[i]));
     }
 
     // load same file again, but to a different group
@@ -556,8 +556,8 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
-      TS_ASSERT_EQUALS(ws->name(), "irs55125_graphite002_to_55131_" +
-                                       std::string(suffix[i]) + "_1");
+      TS_ASSERT_EQUALS(ws->getName(), "irs55125_graphite002_to_55131_" +
+                                          std::string(suffix[i]) + "_1");
     }
   }
 

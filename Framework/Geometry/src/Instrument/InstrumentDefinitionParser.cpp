@@ -455,6 +455,12 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   if (m_indirectPositions)
     createNeutronicInstrument();
 
+  // Instrument::markAsDetector is slow unless the detector IDs in the IDF are
+  // sorted. To circumvent this we use the 2-part interface,
+  // markAsDetectorIncomplete (which does not sort) and markAsDetectorFinalize
+  // (which does the final sorting).
+  m_instrument->markAsDetectorFinalize();
+
   // And give back what we created
   return m_instrument;
 }
@@ -1238,7 +1244,7 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(
            pLocElem->getAttribute("mark-as").compare("monitor") == 0)) {
         m_instrument->markAsMonitor(detector);
       } else
-        m_instrument->markAsDetector(detector);
+        m_instrument->markAsDetectorIncomplete(detector);
     }
 
   } catch (Kernel::Exception::ExistsError &) {
@@ -1351,7 +1357,7 @@ void InstrumentDefinitionParser::createRectangularDetector(
           if (m_haveDefaultFacing)
             makeXYplaneFaceComponent(comp, m_defaultFacing);
           // Mark it as a detector (add to the instrument cache)
-          m_instrument->markAsDetector(detector.get());
+          m_instrument->markAsDetectorIncomplete(detector.get());
         }
       }
     }
@@ -1496,7 +1502,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
           if (m_haveDefaultFacing)
             makeXYplaneFaceComponent(comp, m_defaultFacing);
           // Mark it as a detector (add to the instrument cache)
-          m_instrument->markAsDetector(detector.get());
+          m_instrument->markAsDetectorIncomplete(detector.get());
         }
       }
     }

@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -106,12 +107,13 @@ public:
     TS_ASSERT_THROWS(i->getDetector(9), Exception::NotFoundError);
 
     // Check the monitors are correctly marked
-    TS_ASSERT(i->getDetector(1)->isMonitor())
-    TS_ASSERT(i->getDetector(2)->isMonitor())
+    const auto &detInfo = output->detectorInfo();
+    TS_ASSERT(detInfo.isMonitor(0))
+    TS_ASSERT(detInfo.isMonitor(1))
     // ...and that a normal detector isn't
-    TS_ASSERT(!i->getDetector(3)->isMonitor())
-    TS_ASSERT(!i->getDetector(4)->isMonitor())
-    TS_ASSERT(!i->getDetector(8)->isMonitor())
+    TS_ASSERT(!detInfo.isMonitor(2))
+    TS_ASSERT(!detInfo.isMonitor(3))
+    TS_ASSERT(!detInfo.isMonitor(7))
 
     AnalysisDataService::Instance().remove(wsName);
   }
