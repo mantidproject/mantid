@@ -9577,7 +9577,6 @@ void ApplicationWindow::newProject(const bool doNotSave) {
   folders->blockSignals(false);
 
   // Reset everything else
-  resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled")); // Mantid
   projectname = "untitled";
 
@@ -14371,7 +14370,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
 
   d_current_folder = newFolder;
 
-  resultsLog->clear();
   resultsLog->appendInformation(currentFolder()->logInfo());
 
   lv->clear();

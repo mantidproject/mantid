@@ -305,7 +305,7 @@ pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
   auto workspaceProvider = Mantid::Kernel::make_unique<
       Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
   if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-          wsName.toStdString(), std::move(workspaceProvider))) {
+          wsName.toStdString(), *workspaceProvider)) {
     vtkSMPropertyHelper(src->getProxy(), "Recursion Depth").Set(split.get());
   }
   // WORKAROUND END

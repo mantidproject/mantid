@@ -9,6 +9,8 @@
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
@@ -24,6 +26,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
@@ -163,7 +166,19 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
     const auto numDets = oldInstr.getNumberDetectors();
-    return Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+    // Currently monitors flags are stored in the detector cache of the base
+    // instrument. The copy being made here is strictly speaking duplicating
+    // that data, but with future refactoring this will no longer be the case.
+    // Note that monitors will not change after creating a workspace.
+    // Instrument::markAsMonitor works only for the base instrument and it is
+    // not possible to obtain a non-const reference to the base instrument in a
+    // workspace. Thus we do not need to worry about the two copies of monitor
+    // flags running out of sync.
+    std::vector<size_t> monitors;
+    for (size_t i = 0; i < numDets; ++i)
+      if (newInstr.isMonitorViaIndex(i))
+        monitors.push_back(i);
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets, monitors);
   }
 }
 }
@@ -1275,7 +1290,22 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     int size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[4];
-    pmap.add(tokens[1], comp, tokens[2], paramValue);
+
+    if (tokens[2].compare("masked") == 0) {
+      // Do not add masking to ParameterMap, it is stored in DetectorInfo
+      const auto det = dynamic_cast<const Detector *const>(comp);
+      if (!det)
+        throw std::runtime_error(
+            "Found masking for a non-detector component. This is not possible");
+      const auto &type = tokens[1];
+      const std::string name = "dummy";
+      auto param = ParameterFactory::create(type, name);
+      param->fromString(paramValue);
+      bool value = param->value<bool>();
+      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), value);
+    } else {
+      pmap.add(tokens[1], comp, tokens[2], paramValue);
+    }
   }
 }
 
@@ -1300,8 +1330,15 @@ void ExperimentInfo::populateWithParameter(
     pDescription = &paramInfo.m_description;
 
   // Some names are special. Values should be convertible to double
-  if (name.compare("x") == 0 || name.compare("y") == 0 ||
-      name.compare("z") == 0) {
+  if (name.compare("masked") == 0) {
+    // Do not add masking to ParameterMap, it is stored in DetectorInfo
+    const auto det = dynamic_cast<const Detector *const>(paramInfo.m_component);
+    if (!det)
+      throw std::runtime_error(
+          "Found masking for a non-detector component. This is not possible");
+    m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), paramValue);
+  } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
+             name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
   } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
              name.compare("roty") == 0 || name.compare("rotz") == 0) {

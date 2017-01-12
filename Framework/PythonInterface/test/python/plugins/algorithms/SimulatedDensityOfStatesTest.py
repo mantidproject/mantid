@@ -326,7 +326,7 @@ def _perform_group_name_search(wks_group, name_to_find):
     """
 
     for workspace in wks_group:
-        if workspace.getName() == name_to_find:
+        if workspace.name() == name_to_find:
             return workspace
 
 if __name__=="__main__":

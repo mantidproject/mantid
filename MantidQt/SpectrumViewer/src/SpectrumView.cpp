@@ -113,7 +113,7 @@ void SpectrumView::renderWorkspace(
   if (isFirstPlot) {
     m_ui->imageTabs->setTabText(
         m_ui->imageTabs->indexOf(m_ui->imageTabs->currentWidget()),
-        QString::fromStdString(wksp->name()));
+        QString::fromStdString(wksp->getName()));
     m_hGraph = boost::make_shared<GraphDisplay>(m_ui->h_graphPlot,
                                                 m_ui->h_graph_table, false);
     m_vGraph = boost::make_shared<GraphDisplay>(m_ui->v_graphPlot,
@@ -124,7 +124,8 @@ void SpectrumView::renderWorkspace(
     auto layout = new QHBoxLayout();
     layout->addWidget(spectrumPlot);
     widget->setLayout(layout);
-    tab = m_ui->imageTabs->addTab(widget, QString::fromStdString(wksp->name()));
+    tab = m_ui->imageTabs->addTab(widget,
+                                  QString::fromStdString(wksp->getName()));
     m_ui->imageTabs->setTabsClosable(true);
   }
 
@@ -366,7 +367,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
 
   spec.writeLine("Workspaces");
   for (auto source : m_dataSource) {
-    spec << source->getWorkspace()->name();
+    spec << source->getWorkspace()->getName();
   }
 
   int index = m_ui->imageTabs->currentIndex();

@@ -1082,11 +1082,13 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
  * @param radiusSquared :: radius^2 below which to integrate
  * @param signal [out] :: set to the integrated signal
  * @param errorSquared [out] :: set to the integrated squared error.
+ * @param innerRadiusSquared :: radius^2 above which to integrate
  */
 TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
                                       const coord_t radiusSquared,
                                       signal_t &signal,
-                                      signal_t &errorSquared) const {
+                                      signal_t &errorSquared, 
+                                      const coord_t innerRadiusSquared) const {
   // We start by looking at the vertices at every corner of every box contained,
   // to see which boxes are partially contained/fully contained.
 
@@ -1137,7 +1139,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
     // Is this vertex contained?
     coord_t out[nd];
     radiusTransform.apply(vertexCoord, out);
-    if (out[0] < radiusSquared) {
+    if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
       // Yes, this vertex is contained within the integration volume!
       //        std::cout << "vertex at " << vertexCoord[0] << ", " <<
       //        vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
@@ -1214,7 +1216,8 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
       coord_t out[nd];
       radiusTransform.apply(boxCenter, out);
 
-      if (out[0] < diagonalSquared * 0.72 + radiusSquared) {
+      if (out[0] < diagonalSquared * 0.72 + radiusSquared || 
+          out[0] < diagonalSquared * 0.72 + innerRadiusSquared) {
         // If the center is closer than the size of the box, then it MIGHT be
         // touching.
         // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
@@ -1231,7 +1234,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
     if (partialBox) {
       // Use the detailed integration method.
       box->integrateSphere(radiusTransform, radiusSquared, signal,
-                           errorSquared);
+                           errorSquared, innerRadiusSquared);
       //        std::cout << ".signal=" << signal << "\n";
       numPartiallyContained++;
     }

@@ -38,12 +38,10 @@ namespace DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectors)
 
-using namespace Kernel;
 using namespace API;
+using namespace Kernel;
 using namespace DataObjects;
-using Geometry::Instrument_const_sptr;
-using Geometry::IDetector_const_sptr;
-using namespace DataObjects;
+using namespace Geometry;
 
 /*
  * Define input arguments
@@ -93,6 +91,9 @@ void MaskDetectors::init() {
       "Default is number of histograms in target workspace if other masks are"
       " present "
       "or ignored if not.");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>("ComponentList"),
+      "An ArrayProperty containing a list of component names to mask");
 }
 
 /*
@@ -119,6 +120,10 @@ void MaskDetectors::exec() {
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
   std::vector<specnum_t> spectraList = getProperty("SpectraList");
   std::vector<detid_t> detectorList = getProperty("DetectorList");
+  std::vector<std::string> componentList = getProperty("ComponentList");
+  if (!componentList.empty()) {
+    appendToDetectorListFromComponentList(detectorList, componentList, WS);
+  }
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
   auto ranges_info = getRanges(WS);
@@ -157,8 +162,8 @@ void MaskDetectors::exec() {
                                  "between input Workspace and MaskWorkspace");
       }
 
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")\n";
+      g_log.debug() << "Extracting mask from MaskWorkspace ("
+                    << maskWS->getName() << ")\n";
       bool forceDetIDs = getProperty("ForceInstrumentMasking");
       if (prevMasking->getNumberHistograms() != WS->getNumberHistograms() ||
           forceDetIDs) {
@@ -358,8 +363,8 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
             "Size mismatch between input Workspace and MaskWorkspace");
       }
 
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")\n";
+      g_log.debug() << "Extracting mask from MaskWorkspace ("
+                    << maskWS->getName() << ")\n";
 
       for (size_t i = 0; i < maskDetInfo.size(); ++i)
         if (maskDetInfo.isMasked(i))
@@ -494,6 +499,48 @@ void MaskDetectors::appendToIndexListFromMaskWS(
   }
   tmp_index.swap(indexList);
 } // appendToIndexListFromWS
+
+/**
+ * Append the detector IDs of detectors found recursively in the list of
+ * components.
+ *
+ * @param detectorList :: An existing list of detector IDs
+ * @param componentList :: List of component names
+ * @param WS :: Workspace instrument of which to use
+ */
+void MaskDetectors::appendToDetectorListFromComponentList(
+    std::vector<detid_t> &detectorList,
+    const std::vector<std::string> &componentList,
+    const API::MatrixWorkspace_const_sptr WS) {
+  const auto instrument = WS->getInstrument();
+  if (!instrument) {
+    g_log.error()
+        << "No instrument in input workspace. Ignoring ComponentList\n";
+    return;
+  }
+  std::set<detid_t> detectorIDs;
+  for (const auto &compName : componentList) {
+    std::vector<IDetector_const_sptr> dets;
+    instrument->getDetectorsInBank(dets, compName);
+    if (dets.empty()) {
+      const auto component = instrument->getComponentByName(compName);
+      const auto det = boost::dynamic_pointer_cast<const IDetector>(component);
+      if (!det) {
+        g_log.warning() << "No detectors found in component '" << compName
+                        << "'\n";
+        continue;
+      }
+      dets.emplace_back(det);
+    }
+    for (const auto &det : dets) {
+      detectorIDs.emplace(det->getID());
+    }
+  }
+  const auto oldSize = detectorList.size();
+  detectorList.resize(detectorList.size() + detectorIDs.size());
+  auto appendBegin = detectorList.begin() + oldSize;
+  std::copy(detectorIDs.cbegin(), detectorIDs.cend(), appendBegin);
+} // appendToDetectorListFromComponentList
 
 } // namespace DataHandling
 } // namespace Mantid

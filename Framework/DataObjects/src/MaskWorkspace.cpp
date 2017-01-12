@@ -95,7 +95,7 @@ size_t MaskWorkspace::getNumberMasked() const {
     } else {
       std::stringstream errss;
       errss << "No instrument is associated with mask workspace "
-            << this->name();
+            << this->getName();
       throw std::runtime_error(errss.str());
     }
   }

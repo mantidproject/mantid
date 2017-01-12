@@ -90,7 +90,7 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   } catch (Exception::NotFoundError &) {
     errors["LogName"] = "The log '" + logname +
                         "' does not exist in the workspace '" +
-                        inputWS->name() + "'.";
+                        inputWS->getName() + "'.";
     return errors;
   }
 

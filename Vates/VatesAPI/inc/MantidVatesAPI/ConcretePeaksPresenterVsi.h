@@ -32,7 +32,7 @@ public:
 
 private:
   /// Get the max radius.
-  double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape) const;
+  double getMaxRadius(const Mantid::Geometry::PeakShape &shape) const;
   /// Viewable Peaks
   mutable std::vector<bool> m_viewablePeaks;
   /// The viewable region

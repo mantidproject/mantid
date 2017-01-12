@@ -120,7 +120,7 @@ class IqtFitSequential(PythonAlgorithm):
             self._spec_max = num_hist - 1
 
         # Name stem for generated workspace
-        output_workspace = '%sIqtFit_%s_s%d_to_%d' % (getWSprefix(self._input_ws.getName()),
+        output_workspace = '%sIqtFit_%s_s%d_to_%d' % (getWSprefix(self._input_ws.name()),
                                                       self._fit_type, self._spec_min,
                                                       self._spec_max)
 
@@ -216,14 +216,14 @@ class IqtFitSequential(PythonAlgorithm):
         copy_log_alg.setProperty("OutputWorkspace", self._fit_group_name)
         copy_log_alg.execute()
         copy_log_alg.setProperty("InputWorkspace", self._input_ws)
-        copy_log_alg.setProperty("OutputWorkspace", self._result_ws.getName())
+        copy_log_alg.setProperty("OutputWorkspace", self._result_ws.name())
         copy_log_alg.execute()
 
         log_names = [item for item in sample_logs]
         log_values = [sample_logs[item] for item in sample_logs]
 
         add_sample_log_multi = self.createChildAlgorithm("AddSampleLogMultiple")
-        add_sample_log_multi.setProperty("Workspace", self._result_ws.getName())
+        add_sample_log_multi.setProperty("Workspace", self._result_ws.name())
         add_sample_log_multi.setProperty("LogNames", log_names)
         add_sample_log_multi.setProperty("LogValues", log_values)
         add_sample_log_multi.execute()

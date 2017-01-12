@@ -7,6 +7,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
@@ -16,6 +17,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Strings.h"
@@ -811,6 +813,47 @@ public:
     savedNexus.close();
     Poco::File(outputFileName).remove();
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_masking() {
+    LoadEmptyInstrument createWorkspace;
+    createWorkspace.initialize();
+    createWorkspace.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
+    createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
+    createWorkspace.execute();
+    auto ws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpace"));
+    ws->mutableDetectorInfo().setMasked(1, true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(2), false);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testSpace");
+    std::string file = "SaveNexusProcessedTest_test_masking.nxs";
+    if (Poco::File(file).exists())
+      Poco::File(file).remove();
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    LoadNexus loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", file);
+    loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+    TS_ASSERT(loadAlg.isExecuted());
+    auto wsReloaded = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(2), false);
+
+    if (clearfiles)
+      Poco::File(file).remove();
+    AnalysisDataService::Instance().remove("testSpace");
   }
 
 private:
