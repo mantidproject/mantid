@@ -85,7 +85,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
       m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"),
       m_firstNonOrthogonalWorkspaceOpen(true), m_nonOrthogonalDefault(false),
-      m_oldDimNonOrthogonal(false),
+      m_oldDimNonOrthogonal(false), m_canSwitchScales(false),
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
@@ -847,6 +847,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   enablePeakOverlaysIfAppropriate();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
+  m_canSwitchScales = true;
 }
 
 //------------------------------------------------------------------------------
@@ -2928,11 +2929,13 @@ std::string SliceViewer::saveDimensionWidgets() const {
 }
 
 void SliceViewer::switchAxis() {
-  auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
-  if (isHKL) {
-    applyNonOrthogonalAxisScaleDraw();
-  } else {
-    applyOrthogonalAxisScaleDraw();
+  if (m_canSwitchScales) {
+    auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+    if (isHKL) {
+      applyNonOrthogonalAxisScaleDraw();
+    } else {
+      applyOrthogonalAxisScaleDraw();
+    }
   }
 }
 
