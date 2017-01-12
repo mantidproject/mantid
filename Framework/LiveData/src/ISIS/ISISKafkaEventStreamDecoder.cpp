@@ -255,7 +255,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       }
       addSampleEnvLogs(seData, nSEEvents, mutableRunInfo);
 
-      m_interrupt = frameData->end_of_run() && m_stopEOR;
+      m_interrupt = frameData->end_of_run() && m_stopEOR ? true : m_interrupt;
     }
   }
   g_log.debug("Event capture finished");
@@ -405,7 +405,8 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", parent->getNumberHistograms(), 2, 1));
   // Copy meta data
-  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer,
+                                                         false);
   // Clear out the old logs, except for the most recent entry
   buffer->mutableRun().clearOutdatedTimeSeriesLogValues();
   return buffer;
