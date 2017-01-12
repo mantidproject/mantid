@@ -261,13 +261,19 @@ class CrystalField(object):
         # Handles physical properties (PP). self._temperature applies only for INS datasets. But the
         # C++ CrystalFieldMultiSpectrum uses it to count number of datasets, so we need to set it here
         # as a concatenation of the INS (self._temperature and self._FWHM) and PP (self._physprop)
-        temperature = self._temperature
-        FWHM = self._FWHM
-        if self._physprop is not None:
+        if self._temperature is None:
+            if self._physprop is None:
+                errmsg = 'Cannot run fit: No temperature (INS spectrum) or physical properties defined.'
+                raise RuntimeError(errmsg)
             physprop = []
-            for tt in self._temperature:
-                physprop.append(None)
-            for pp in self._physprop:
+            temperature = []
+            FWHM = []
+        else:
+            physprop = (len(self._temperature) if hasattr(self._temperature, '__len__') else 1) * [None]
+            temperature = self._temperature if hasattr(self._temperature, '__len__') else [self._temperature]
+            FWHM = self._FWHM if hasattr(self._FWHM, '__len__') else [self._FWHM]
+        if self._physprop is not None:
+            for pp in (self._physprop if hasattr(self._physprop, '__len__') else [self._physprop]):
                 temperature.append(pp.Temperature if (pp.Temperature is not None) else 0.)
                 FWHM.append(0.)
                 physprop.append(pp)
@@ -282,7 +288,7 @@ class CrystalField(object):
         out += ',Temperatures=(%s)' % ','.join(map(str, temperature))
         if self._physprop is not None:
             out += ',PhysicalProperties=(%s)' % ','.join(map(str, ppid))
-            out += ','.join(map(str, ppenv))
+            out += ',%s' % ','.join(map(str, ppenv))
         if self._FWHM is not None:
             out += ',FWHMs=(%s)' % ','.join(map(str, FWHM))
         if self._intensityScaling is not None:
@@ -310,7 +316,7 @@ class CrystalField(object):
         """
         out = ''
         i = 0
-        for peaks in self.peaks:
+        for peaks in (self.peaks if hasattr(self.peaks, '__len__') else [self.peaks]):
             parOut = peaks.paramString('f%s.' % i, 1)
             if len(parOut) > 0:
                 out += ',%s' % parOut
@@ -346,8 +352,9 @@ class CrystalField(object):
                 if len(constraintsOut) > 0:
                     constraintsList.append(constraintsOut)
                 i += 1
-        out += self._makeMultiResolutionModel()
-        out += self._makeMultiPeaks()
+        if self._temperature is not None:
+            out += self._makeMultiResolutionModel()
+            out += self._makeMultiPeaks()
 
         ties = self.getFieldTies()
         if len(ties) > 0:
@@ -887,7 +894,8 @@ class CrystalField(object):
                 if ipeak == 0:
                     if self.background is None:
                         self.setBackground(background=Function(self.default_background))
-                    background = self.background[ispec]
+                    background = (self.background[ispec] 
+                        if hasattr(self.background, '__len__') else self.background)
                     bgMatch = re.match(FN_PATTERN, par)
                     if bgMatch:
                         i = int(bgMatch.group(1))
@@ -904,7 +912,10 @@ class CrystalField(object):
                         else:
                             raise RuntimeError('Background is undefined in CrystalField instance.')
                 else:
-                    self.peaks[ispec].param[ipeak - 1][par] = value
+                    if hasattr(self.peaks, '__len__'):
+                        self.peaks[ispec].param[ipeak - 1][par] = value
+                    else:
+                        self.peaks.param[ipeak - 1][par] = value
             else:
                 self._fieldParameters[par] = value
 
