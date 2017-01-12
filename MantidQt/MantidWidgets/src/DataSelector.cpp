@@ -268,10 +268,12 @@ QString DataSelector::getWsNameFromFiles() const {
 /**
  * Gets the name of item selected in the DataSelector.
  *
- * This will either return the base name of the filepath or
- * the currently selected item in the workspace selector depending
- * on what view is available. If there is no valid input the method returns
- * an empty string.
+ * This will return the currently selected item in the workspace selector,
+ * if the workspace view is active.
+ * If the file view is active, it will return the basename of the file.
+ * If multiple files are allowed, and auto-loading is off, it will return the
+ * full user input.
+ * If there is no valid input the method returns an empty string.
  *
  * @return The name of the current data item
  */
@@ -284,7 +286,13 @@ QString DataSelector::getCurrentDataName() const {
   case 0:
     // the file selector is visible
     if (m_uiForm.rfFileInput->isValid()) {
-      filename = getWsNameFromFiles();
+      if (m_uiForm.rfFileInput->allowMultipleFiles() && !m_autoLoad) {
+        // if multiple files are allowed, auto-loading is not on, return the
+        // full user input
+        filename = getFullFilePath();
+      } else {
+        filename = getWsNameFromFiles();
+      }
     }
     break;
   case 1:
