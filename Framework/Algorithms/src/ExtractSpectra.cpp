@@ -161,7 +161,7 @@ void ExtractSpectra::execHistogram() {
         outputWorkspace->setSharedDx(
             j,
             make_cow<HistogramData::HistogramDx>(
-                oldDx.begin() + m_minX, oldDx.begin() + m_maxX - m_histogram));
+                oldDx.begin() + m_minX, oldDx.begin() + (m_maxX - m_histogram)));
       }
     } else {
       // Safe to just copy whole vector 'cos can't be cropping in X if not
@@ -328,7 +328,7 @@ void ExtractSpectra::execEvent() {
       if (hasDx) {
         auto &oldDx = m_inputWorkspace->dx(i);
         outEL.setPointStandardDeviations(oldDx.begin() + m_minX,
-                                         oldDx.begin() + m_maxX - m_histogram);
+                                         oldDx.begin() + (m_maxX - m_histogram));
       }
     }
 
