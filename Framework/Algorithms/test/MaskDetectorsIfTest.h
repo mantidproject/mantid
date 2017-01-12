@@ -17,6 +17,13 @@ using ScopedFileHelper::ScopedFile;
 
 class MaskDetectorsIfTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MaskDetectorsIfTest *createSuite() {
+    return new MaskDetectorsIfTest();
+  }
+  static void destroySuite(MaskDetectorsIfTest *suite) { delete suite; }
+
   void testDeselectIfNotEqual() {
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
