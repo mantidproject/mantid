@@ -92,11 +92,9 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
                              doc='Value selection of the sample environment log entry')
 
         # Output properties
-        self.declareProperty(WorkspaceGroupProperty('ReducedWorkspace', defaultValue='Reduced',
-                                                    direction=Direction.Output),
+        self.declareProperty('ReducedWorkspace', defaultValue='Reduced',
                              doc='The output reduced workspace.')
-        self.declareProperty(WorkspaceGroupProperty('SqwWorkspace', defaultValue='Sqw',
-                                                    direction=Direction.Output),
+        self.declareProperty('SqwWorkspace', defaultValue='Sqw',
                              doc='The output Sqw workspace.')
         self.declareProperty(name='MomentWorkspace', defaultValue='Moment',
                              doc='The output Moment workspace.')
