@@ -88,7 +88,7 @@ private:
   std::atomic<bool> m_interrupt;
   /// Flag indicating if the capture thread should terminate
   /// if the FramePart::end_of_run flag is set.
-  std::atomic<bool> m_stopEOR;
+  const bool m_stopEOR;
   /// Subscriber for the event stream
   std::unique_ptr<IKafkaStreamSubscriber> m_eventStream;
   /// Local event workspace buffers
