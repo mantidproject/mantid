@@ -18,13 +18,12 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
     h = Helper(config)
     h.check_data_stack(data)
 
-    if not config.normalize_flat_dark:
-        h.tomo_print(
-            " * Note: NOT applying normalization by flat/dark images.")
+    if not config.pre.normalize_flat_dark:
+        h.tomo_print(" * Note: NOT applying normalization by flat/dark images.")
         return data
 
     if isinstance(norm_flat_img, np.ndarray):
-        if 2 != len(norm_flat_img.shape) or norm_flat_img.shape != data.shape[1:]:
+        if 2 != len(norm_flat_img.shape):
             raise ValueError(
                 "Incorrect shape of the flat image ({0}) which should match the "
                 "shape of the sample images ({1})".format(
@@ -39,10 +38,8 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
         norm_divide[norm_divide == 0] = 1e-6
 
         for idx in range(0, data.shape[0]):
-            data[idx, :, :] = np.true_divide(
-                data[idx, :, :] - norm_dark_img, norm_divide)
-        # true_divide produces float64, we assume that precision not needed (definitely not
-        # for 16-bit depth output images as we usually have).
+            data[idx, :, :] = np.true_divide(data[idx, :, :] - norm_dark_img, norm_divide)
+
         h.pstop(
             " * Finished normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
     else:

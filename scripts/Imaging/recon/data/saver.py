@@ -1,3 +1,42 @@
+from __future__ import (absolute_import, division, print_function)
+
+
+def save_single_image(data,
+                      config=None,
+                      output_dir=None,
+                      image_name='saved_image',
+                      image_index=0):
+    """
+    Save (pre-processed) images from a data array to image files.
+    :param config:
+    :param output_dir :: additional output directory, currently used for debugging
+    :param data :: data volume with pre-processed images
+    :param image_name: image name to be appended
+    :param image_index: image index to be appended
+    """
+    from recon.helper import Helper
+    import os
+
+    # using the config's output dir
+    preproc_dir = os.path.join(config.func.output_dir,
+                               config.func.preproc_images_subdir)
+    h = Helper(config)
+
+    if output_dir is not None:
+        # using the provided output_dir
+        preproc_dir = os.path.join(preproc_dir, output_dir)
+
+    h.pstart(
+        " * Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
+
+    make_dirs_if_needed(preproc_dir)
+
+    write_image(data[:, :], os.path.join(
+        preproc_dir, image_name + str(image_index).zfill(6)))
+
+    h.pstop(" * Finished saving single image.")
+
+
 def save_recon_output(recon_data, cfg, save_horiz_slices=False):
     """
     Save output reconstructed volume in different forms.
@@ -46,12 +85,8 @@ def save_preproc_images(data, config):
     @param out_dtype :: dtype used for the pixel type/depth in the output image files
     """
     import os
-    import numpy as np
     from recon.helper import Helper
     h = Helper(config)
-
-    min_pix = np.amin(data)
-    max_pix = np.amax(data)
 
     preproc_dir = os.path.join(
         config.func.output_dir, config.func.preproc_images_subdir)
@@ -62,12 +97,8 @@ def save_preproc_images(data, config):
     make_dirs_if_needed(preproc_dir)
 
     for idx in range(0, data.shape[0]):
-        # rescale_intensity has issues with float64=>int16
         write_image(data[idx, :, :], os.path.join(
             preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
-        # write_image(data[idx, :, :], min_pix, max_pix,
-        # os.path.join(preproc_dir, 'out_preproc_proj_image' +
-        # str(idx).zfill(6)))
 
     h.pstop(" * Saving pre-processed images finished.")
 
@@ -79,21 +110,14 @@ def write_image(img_data, filename):
     values are rescaled in the range [min_pix, max_pix] which would normally be set
     to the minimum/maximum values found in a stack of images.
 
-    @param img_data :: image data in the usual numpy representation
-
-    @param min_pix :: minimum reference value to rescale data (may be local to an
-    image or global for a stack of images)
-    @param max_pix :: maximum reference value to rescale data (may be local to an
-    image or global for a stack of images)
-
-    @param filename :: file name, including directory and extension
-    @param img_format :: image file format
-    @param dtype :: can be used to force a pixel type, otherwise the type
+    :param img_data :: image data in the usual numpy representation
+    :param filename :: file name, including directory and extension
     of the input data is used
 
-    Returns:: name of the file saved
+    :returns:: name of the file saved
     """
-    import loader
+
+    from recon.data import loader
     fits = loader.import_pyfits()
     hdu = fits.PrimaryHDU(img_data[:, :])
     hdulist = fits.HDUList([hdu])
@@ -102,13 +126,13 @@ def write_image(img_data, filename):
     return filename
 
 
-def gen_readme_summary_begin(filename, cfg, cmd_line):
+def gen_readme_summary_begin(filename, config, cmd_line):
     """
     To write configuration, settings, etc. early on. As early as possible, before any failure
     can happen.
 
     @param filename :: name of the readme/final report file
-    @param cfg :: full reconstruction configuration
+    @param config :: full reconstruction configuration
     @param cmd_line :: command line originally used to run this reconstruction, when running
     from the command line
 
@@ -130,7 +154,7 @@ def gen_readme_summary_begin(filename, cfg, cmd_line):
                    "Tool/Algorithm\n"
                    "--------------------------\n")
         oreadme.write(alg_hdr)
-        oreadme.write(str(cfg.alg_cfg))
+        oreadme.write(str(config.func))
         oreadme.write("\n")
 
         preproc_hdr = ("\n"
@@ -138,7 +162,7 @@ def gen_readme_summary_begin(filename, cfg, cmd_line):
                        "Pre-processing parameters\n"
                        "--------------------------\n")
         oreadme.write(preproc_hdr)
-        oreadme.write(str(cfg.pre))
+        oreadme.write(str(config.pre))
         oreadme.write("\n")
 
         postproc_hdr = ("\n"
@@ -146,7 +170,7 @@ def gen_readme_summary_begin(filename, cfg, cmd_line):
                         "Post-processing parameters\n"
                         "--------------------------\n")
         oreadme.write(postproc_hdr)
-        oreadme.write(str(cfg.postproc_cfg))
+        oreadme.write(str(config.post))
         oreadme.write("\n")
 
         cmd_hdr = ("\n"

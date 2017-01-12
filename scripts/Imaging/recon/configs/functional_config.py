@@ -34,6 +34,14 @@ class FunctionalConfig(object):
         self.out_slices_file_name_prefix = 'out_recon_slice'
         self.out_horiz_slices_subdir = 'out_recon_horiz_slice'
 
+        import numpy as np
+
+        # TODO test all data types:
+        # uint16, float16, float32, float64!
+        # Was getting bad data with float16 after median filter and scaling up
+        # to save as PNG
+        self.data_dtype = np.uint16
+
         self.cor = None
         self.find_cor = None
 

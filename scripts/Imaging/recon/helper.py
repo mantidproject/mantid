@@ -23,6 +23,9 @@ class Helper(object):
         self._timer_start = None
         self._verbosity = 2 if config is None else config.func.verbosity
 
+    def get_verbosity(self):
+        return self._verbosity
+
     @staticmethod
     def check_config_integrity(config):
         if not config or not isinstance(config, ReconstructionConfig):
@@ -39,9 +42,9 @@ class Helper(object):
 
     @staticmethod
     def check_data_stack(data):
-        import numpy as np
+        import numpy
 
-        if not isinstance(data, np.ndarray):
+        if not isinstance(data, numpy.ndarray):
             raise ValueError(
                 "Invalid stack of images data. It is not a numpy array: {0}".
                 format(data))
@@ -78,6 +81,31 @@ class Helper(object):
             memory_string = " <not available on Windows>"
 
         return memory_string
+
+    def tomo_print_same_line(self, message, verbosity=2):
+        """
+        TODO currently the priority parameter is ignored
+        Verbosity levels:
+        0 -> debug, print everything
+        1 -> information, print information about progress
+        2 -> print only major progress information, i.e data loaded, recon started, recon finished
+
+        Print only messages that have priority >= config verbosity level
+
+        :param message: Message to be printed
+        :param verbosity: Default 2, messages with existing levels:
+
+            0 - Silent, no output at all (not recommended)
+            1 - Low verbosity, will output each step that is being performed
+            2 - Normal verbosity, will output each step and execution time
+            3 - High verbosity, will output the step name, execution time and memory usage before and after each step
+        :return:
+        """
+
+        # will be printed if the message verbosity is lower or equal
+        # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
+        if verbosity <= self._verbosity:
+            print(message, end='')
 
     def tomo_print(self, message, verbosity=2):
         """

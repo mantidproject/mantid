@@ -6,7 +6,7 @@ from recon.helper import Helper
 
 
 def execute(config):
-    h = Helper()
+    h = Helper(config)
     h.check_config_integrity(config)
 
     # -----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ def execute(config):
     h.pstart(" * Cropping images...")
     # crop the ROI, this is done first, so beware of what the correct ROI
     # coordinates are
-    sample = crop_coords.execute(sample, config)
+    sample = crop_coords.execute_volume(sample, config)
 
     h.pstop("* Finished cropping images.")
 
@@ -94,8 +94,7 @@ def execute(config):
         cor = tool.find_center(
             tomo=sample, theta=projection_angles, ind=slice_idx, emission=False)
 
-        h.tomo_print(" ** COR for slice" + str(slice_idx) + ".. REL to CROP " +
-                     str(cor) + ".. REL to FULL " + str(cor + pixels_from_left_side), 3)
+        print_proper_message(cor, h, pixels_from_left_side, slice_idx)
 
         calculated_cors.append(cor)
 
@@ -112,3 +111,12 @@ def execute(config):
 
     h.tomo_print(" * Printing average COR in relation to non-cropped image: {0}".format(
         round(average_cor_relative_to_full_image)))
+
+
+def print_proper_message(cor, h, pixels_from_left_side, slice_idx):
+    v = h.get_verbosity()
+    if v <= 2:
+        h.tomo_print_same_line('.')
+    else:
+        h.tomo_print(" ** COR for slice {0} .. REL to CROP {1} .. REL to FULL {2}"
+                     .format(slice_idx, cor, (cor + pixels_from_left_side)), 3)

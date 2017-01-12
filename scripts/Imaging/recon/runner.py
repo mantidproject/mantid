@@ -36,7 +36,7 @@ def execute(config, cmd_line=None):
     saver.save_preproc_images(sample, config)
 
     # ----------------------------------------------------------------
-
+    return
     # Reconstruction
     sample = tool.run_reconstruct(sample, config)
 
@@ -59,15 +59,24 @@ def pre_processing(config, data, flat, dark):
 
     data, flat, dark = rotate_stack.execute(data, config, flat, dark)
 
+    _debug_save_out_data(data, config, flat, dark, 0)
+
     if config.pre.crop_before_normalize:
-        # TODO must crop flat and dark too!
-        data = crop_coords.execute(data, config)
+        data = crop_coords.execute_volume(data, config)
+
+        # todo TEST BELOW
+        flat = crop_coords.execute_image(flat, config)
+        dark = crop_coords.execute_image(dark, config)
 
     data = normalise_by_flat_dark.execute(data, config, flat, dark)
+    _debug_save_out_data(data, config, flat, dark, 1)
+    return
     data = normalise_by_air_region.execute(data, config)
+    _debug_save_out_data(data, config, flat, dark, 2)
 
     if not config.pre.crop_before_normalize:
-        data = crop_coords.execute(data, config)
+        # in this case we don't care about cropping the flat and dark
+        data = crop_coords.execute_volume(data, config)
 
     # cut_off
     # data = cut_off.execute(data, config)
@@ -78,8 +87,25 @@ def pre_processing(config, data, flat, dark):
 
     # median filter
     data = median_filter.execute(data, config)
+    _debug_save_out_data(data, config, flat, dark, 1)
 
     return data
+
+
+def _debug_save_out_data(data, config, flat, dark, append_index):
+    from recon.data import saver
+
+    try:
+        saver.save_single_image(
+            data[0], config, 'sample', image_name='sample', image_index=append_index)
+        saver.save_single_image(
+            flat, config, 'flat', image_name='flat', image_index=append_index)
+        saver.save_single_image(
+            dark, config, 'dark', image_name='dark', image_index=append_index)
+    except IOError as err:
+        print("IOError", err, "raised, will retry ONCE with current time appended")
+        import time
+        _debug_save_out_data(data, config, flat, dark, str(time.time())[0:8])
 
 
 def post_processing():

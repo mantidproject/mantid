@@ -27,7 +27,7 @@ def read_in_stack(config):
                          format(img_format, supported_exts))
 
     sample, flat, dark = read_stack_of_images(
-        sample_path, flat_field_path, dark_field_path, img_format)
+        sample_path, flat_field_path, dark_field_path, img_format, argument_data_dtype=config.func.data_dtype)
 
     from recon.helper import Helper
     Helper.check_data_stack(sample)
@@ -37,7 +37,7 @@ def read_in_stack(config):
 
 def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
                          file_extension='tiff', file_prefix='',
-                         flat_file_prefix='', dark_file_prefix=''):
+                         flat_file_prefix='', dark_file_prefix='', argument_data_dtype=np.float16):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -55,6 +55,7 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     :param file_prefix :: prefix for the image files, to filter files that should not be loaded
     :param flat_file_prefix :: prefix for the flat field image files
     :param dark_file_prefix :: prefix for the dark field image files
+    :param argument_data_dtype: the type in which the data will be loaded, could be float16, float32, float64, uint16
 
     :return :: 3 numpy arrays: input data volume (3d), average of flatt images (2d),
     average of dark images(2d)
@@ -81,11 +82,8 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     data_dtype = first_sample_img.dtype
     # usual type in fits with 16-bit pixel depth
     if '>i2' == data_dtype:
-        # TODO test all data types:
-        # uint16, float16, float32, float64!
-        # Was getting bad data with float16 after median filter and scaling up
-        # to save as PNG
-        data_dtype = np.float16
+
+        data_dtype = argument_data_dtype
 
     img_shape = first_sample_img.shape
 
@@ -111,8 +109,6 @@ def _get_stack_file_names(path, file_prefix, file_extension):
 
     path = os.path.expanduser(path)
 
-    h.tomo_print("Loading stack of images from {0}".format(path))
-
     files_match = glob.glob(os.path.join(
         path, "{0}*.{1}".format(file_prefix, file_extension)))
 
@@ -121,8 +117,8 @@ def _get_stack_file_names(path, file_prefix, file_extension):
                            format(path, file_prefix, file_extension))
     # files_match.sort(key=_alphanum_key_split)
 
-    h.tomo_print("Found {0} image files in {1}".format(
-        len(files_match), path))
+    h.tomo_print(" > Found {0} image files in {1}".format(
+        len(files_match), path), verbosity=3)
 
     return files_match
 
