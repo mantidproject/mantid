@@ -894,8 +894,8 @@ class CrystalField(object):
                 if ipeak == 0:
                     if self.background is None:
                         self.setBackground(background=Function(self.default_background))
-                    background = (self.background[ispec] 
-                        if hasattr(self.background, '__len__') else self.background)
+                    background = (self.background[ispec]
+                                  if hasattr(self.background, '__len__') else self.background)
                     bgMatch = re.match(FN_PATTERN, par)
                     if bgMatch:
                         i = int(bgMatch.group(1))

@@ -669,7 +669,7 @@ class PhysicalProperties(object):
                 hdir = np.array(hdir)
                 if len(hdir) != 3:
                     raise TypeError()
-                hdir / hdir  # Catches most cases where elements not numeric...
+                hdir * hdir  # Catches most cases where elements not numeric...
         except TypeError:
             raise ValueError('Magnetic field direction %s not recognised' % (str(self._hdir)))
         return hdir
