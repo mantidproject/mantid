@@ -1,17 +1,20 @@
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
-#include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
+
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -62,8 +65,6 @@ const std::string TomographyIfaceViewQtGUI::g_styleSheetOnline =
     "QPushButton:pressed { background-color: rgb(120, 255, 120); "
     "}";
 
-size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
-
 // For paths where Python third party tools are installed, if they're
 // not included in the system python path. For example you could have
 // put the AstraToolbox package in
@@ -74,9 +75,6 @@ size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 // c:/local/Anaconda/Lib/site-packages/
 std::vector<std::string> TomographyIfaceViewQtGUI::g_defAddPathPython;
 
-const std::string TomographyIfaceViewQtGUI::g_defRemotePathScripts =
-    "/work/imat/phase_commissioning";
-
 const std::string TomographyIfaceViewQtGUI::g_SCARFName = "SCARF@STFC";
 const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
 #ifdef _WIN32
@@ -85,7 +83,7 @@ const std::string TomographyIfaceViewQtGUI::g_defOutPathLocal =
     "~/imat/";
 #endif
 
-// TODO: could use ConfigService::isNetworkDrive(const std::string &)
+// TODOVIEW: could use ConfigService::isNetworkDrive(const std::string &)
 const std::string TomographyIfaceViewQtGUI::g_defOutPathRemote =
 #ifdef _WIN32
     "I:/imat/imat-data/";
@@ -125,13 +123,6 @@ const std::string TomographyIfaceViewQtGUI::g_defOctopusAppendPath =
 
 const std::string TomographyIfaceViewQtGUI::g_defProcessedSubpath = "processed";
 
-// names by which we know image/tomography reconstruction tools (3rd party)
-const std::string TomographyIfaceViewQtGUI::g_TomoPyTool = "TomoPy";
-const std::string TomographyIfaceViewQtGUI::g_AstraTool = "Astra";
-const std::string TomographyIfaceViewQtGUI::g_CCPiTool = "CCPi CGLS";
-const std::string TomographyIfaceViewQtGUI::g_SavuTool = "Savu";
-const std::string TomographyIfaceViewQtGUI::g_customCmdTool = "Custom command";
-
 // phase or cycle component, like: phase_commissioning, cycle_15_4, cycle_16_1
 const std::string TomographyIfaceViewQtGUI::g_defPathComponentPhase =
     "phase_commissioning";
@@ -165,24 +156,12 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
       m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
-      m_currentReconTool(""), m_imgPath(""), m_logMsgs(), m_systemSettings(),
-      m_toolsSettings(), m_settings(),
+      m_currentReconTool("TomoPy"), m_imgPath(""), m_logMsgs(),
+      m_systemSettings(), m_settings(),
       m_settingsGroup("CustomInterfaces/Tomography"),
       m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
       m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
-      m_presenter(nullptr) {
-
-  // defaults from the tools
-  m_tomopyMethod = ToolConfigTomoPy::methods().front().first;
-  m_astraMethod = ToolConfigAstraToolbox::methods().front().first;
-
-  // TODO: find a better place for this Savu stuff when the tool is
-  // ready - see other TODOs
-  m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
-  m_availPlugins->addColumns("str", "name", 4);
-  m_currPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
-  m_currPlugins->addColumns("str", "name", 4);
-}
+      m_presenter(nullptr) {}
 
 TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() {}
 
@@ -245,11 +224,6 @@ void TomographyIfaceViewQtGUI::initLayout() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
-  // Menu Items
-  connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(menuOpenClicked()));
-  connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(menuSaveClicked()));
-  connect(m_ui.actionSaveAs, SIGNAL(triggered()), this,
-          SLOT(menuSaveAsClicked()));
 
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise you'd be left
@@ -374,7 +348,7 @@ void TomographyIfaceViewQtGUI::doSetupSectionFilters() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
-  // TODO: take g_def values first time, when Qsettings are empty, then from
+  // TODOVIEW: take g_def values first time, when Qsettings are empty, then from
   // QSettings
   m_setupParaviewPath = g_defParaviewPath;
   m_setupProcessedSubpath = g_defProcessedSubpath;
@@ -525,39 +499,6 @@ void TomographyIfaceViewQtGUI::setComputeResources(
   }
 }
 
-// This is here while savu becomes available and we find a better place for savu
-// stuff
-void TomographyIfaceViewQtGUI::doSetupSavu() {
-  // geometry, etc. niceties
-  // on the left (just plugin names) 1/2, right: 2/3
-  QList<int> sizes;
-  sizes.push_back(100);
-  sizes.push_back(200);
-  m_uiSavu.splitterPlugins->setSizes(sizes);
-
-  // Setup Parameter editor tab
-  loadAvailablePlugins();
-  m_uiSavu.treeCurrentPlugins->setHeaderHidden(true);
-
-  // Connect slots
-
-  // Lists/trees
-  connect(m_uiSavu.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(availablePluginSelected()));
-  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(currentPluginSelected()));
-  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
-          this, SLOT(expandedItem(QTreeWidgetItem *)));
-
-  // Buttons
-  connect(m_uiSavu.btnTransfer, SIGNAL(released()), this,
-          SLOT(transferClicked()));
-  connect(m_uiSavu.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
-  connect(m_uiSavu.btnMoveDown, SIGNAL(released()), this,
-          SLOT(moveDownClicked()));
-  connect(m_uiSavu.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
-}
-
 void TomographyIfaceViewQtGUI::setReconstructionTools(
     const std::vector<std::string> &tools, const std::vector<bool> &enabled) {
 
@@ -586,7 +527,7 @@ void TomographyIfaceViewQtGUI::setReconstructionTools(
  * cancel job, etc.
  */
 void TomographyIfaceViewQtGUI::enableLoggedActions(bool enable) {
-  // TODO: this may not make sense anymore when/if the "Local" compute
+  // TODOVIEW: this may not make sense anymore when/if the "Local" compute
   // resource is used in the future (except when none of the tools
   // supported are available/detected on "Local")
   std::vector<QPushButton *> buttons;
@@ -771,9 +712,9 @@ void TomographyIfaceViewQtGUI::readSettings() {
   TomoSystemSettings sysSettings;
   streamSys >> sysSettings;
   if (QDataStream::Ok == streamSys.status()) {
-    updateSystemSettings(sysSettings);
+    updateSystemSettingsTabFields(sysSettings);
   } else {
-    updateSystemSettings(TomoSystemSettings());
+    updateSystemSettingsTabFields(TomoSystemSettings());
   }
 
   // Get input paths (sample/dark/flats)
@@ -970,65 +911,18 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   qs.endGroup();
 }
 
-/**
- * Load a savu tomo config file into the current plugin list, overwriting it.
- * Uses the algorithm LoadSavuTomoConfig
- */
-void TomographyIfaceViewQtGUI::loadSavuTomoConfig(
-    std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
-  // try to load tomo reconstruction parametereization file
-  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "LoadSavuTomoConfig");
-  alg->initialize();
-  alg->setPropertyValue("Filename", filePath);
-  alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
-  try {
-    alg->execute();
-  } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        std::string("Error when trying to load tomographic reconstruction "
-                    "parameter file: ") +
-        e.what());
-  }
-
-  // new processing plugins list
-  try {
-    currentPlugins = alg->getProperty("OutputWorkspace");
-  } catch (std::exception &e) {
-    userError("Could not load config file", "Failed to load the file "
-                                            "with the following error: " +
-                                                std::string(e.what()));
-  }
-}
-
-// Build a unique (and hidden) name for the table ws
-std::string TomographyIfaceViewQtGUI::createUniqueNameHidden() {
-  std::string name;
-  do {
-    // with __ prefix => hidden
-    name = "__TomoConfigTableWS_Seq_" +
-           boost::lexical_cast<std::string>(g_nameSeqNo++);
-  } while (AnalysisDataService::Instance().doesExist(name));
-
-  return name;
-}
-
 /// needs to at least update the 'tool' combo box
 void TomographyIfaceViewQtGUI::compResourceIndexChanged(int /* i */) {
   QComboBox *rt = m_uiTabRun.comboBox_run_compute_resource;
   if (!rt)
     return;
 
-  // TODO validateCompResource(rt->currentText().toStdString());
   m_currentComputeRes = rt->currentText().toStdString();
   m_presenter->notify(ITomographyIfacePresenter::CompResourceChanged);
 }
 
 void TomographyIfaceViewQtGUI::runToolIndexChanged(int /* i */) {
   QComboBox *rt = m_uiTabRun.comboBox_run_tool;
-  if (!rt)
-    return;
-
   m_currentReconTool = rt->currentText().toStdString();
   m_presenter->notify(ITomographyIfacePresenter::ToolChanged);
 }
@@ -1101,7 +995,7 @@ void TomographyIfaceViewQtGUI::updatePathsConfig(const TomoPathsConfig &cfg) {
  * Updates the view/forms with new system settings (local and remote,
  * including multiple paths and path components)
  */
-void TomographyIfaceViewQtGUI::updateSystemSettings(
+void TomographyIfaceViewQtGUI::updateSystemSettingsTabFields(
     const TomoSystemSettings &setts) {
   // paths and related
   m_uiTabSystemSettings.lineEdit_path_comp_1st->setText(
@@ -1152,95 +1046,13 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
 /**
  * Displays and gets the results of a tool specific configuration dialog.
  *
- * @param name Name of the (tomographic reconstruction) tool
+ * @param dialog The pointer to the current dialog
  */
-void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
-  QString run = "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
-                "tomo_reconstruct.py"; // m_uiAstra.lineEdit_runnable->text();
-  static size_t reconIdx = 1;
+void TomographyIfaceViewQtGUI::showToolConfig(
+    TomoToolConfigDialogBase &dialog) {
 
-  const std::string localOutNameAppendix =
-      std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
-
-  if (g_TomoPyTool == name) {
-    TomoToolConfigTomoPy tomopy;
-    m_uiTomoPy.setupUi(&tomopy);
-    m_uiTomoPy.comboBox_method->clear();
-    const auto methods = ToolConfigTomoPy::methods();
-    for (size_t i = 0; i < methods.size(); i++) {
-      m_uiTomoPy.comboBox_method->addItem(
-          QString::fromStdString(methods[i].second));
-    }
-    int res = tomopy.exec();
-
-    if (QDialog::Accepted == res) {
-      // TODO: move this
-      int mi = m_uiTomoPy.comboBox_method->currentIndex();
-
-      TomoPathsConfig paths = currentPathsConfig();
-      // TODO: for the output path, probably better to take the sample path,
-      // then up one level
-      m_toolsSettings.tomoPy = ToolConfigTomoPy(
-          run.toStdString(),
-          g_defOutPathLocal + "/" +
-              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
-              localOutNameAppendix,
-          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
-      m_tomopyMethod = methods[mi].first;
-    }
-  } else if (g_AstraTool == name) {
-    TomoToolConfigAstra astra;
-    m_uiAstra.setupUi(&astra);
-    m_uiAstra.comboBox_method->clear();
-    const auto methods = ToolConfigAstraToolbox::methods();
-    for (size_t i = 0; i < methods.size(); i++) {
-      m_uiAstra.comboBox_method->addItem(
-          QString::fromStdString(methods[i].second));
-    }
-    int res = astra.exec();
-
-    if (QDialog::Accepted == res) {
-      // TODO: move this
-      int mi = m_uiAstra.comboBox_method->currentIndex();
-
-      TomoPathsConfig paths = currentPathsConfig();
-      // TODO: for the output path, probably better to take the sample path,
-      // then up one level
-      m_toolsSettings.astra = ToolConfigAstraToolbox(
-          run.toStdString(),
-          Poco::Path::expand(
-              g_defOutPathLocal + "/" +
-              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
-              localOutNameAppendix),
-          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
-      m_astraMethod = methods[mi].first;
-    }
-  } else if (g_SavuTool == name) {
-    // TODO: savu not ready. This is a temporary kludge, it just shows
-    // the setup dialog so we can chat about it.
-    TomoToolConfigSavu savu;
-    m_uiSavu.setupUi(&savu);
-    doSetupSavu();
-    savu.setWindowModality(Qt::ApplicationModal);
-    savu.show();
-    QEventLoop el;
-    connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
-    el.exec();
-  } else if (g_customCmdTool == name) {
-    TomoToolConfigCustom cmd;
-    m_uiCustom.setupUi(&cmd);
-    int res = cmd.exec();
-
-    if (QDialog::Accepted == res) {
-      // TODO: move this
-      QString run = m_uiCustom.lineEdit_runnable->text();
-      QString opts = m_uiCustom.textEdit_cl_opts->toPlainText();
-
-      m_toolsSettings.custom =
-          ToolConfigCustom(run.toStdString(), opts.toStdString());
-    }
-  }
-  // TODO: 'CCPi CGLS' tool maybe in the future. Tool not ready.
+  // execute also intiialises all the parts of the GUI
+  dialog.initialiseGUIandExecute();
 }
 
 /**
@@ -1447,7 +1259,7 @@ std::string TomographyIfaceViewQtGUI::getPassword() const {
 void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
   bool enable = 0 != status;
   // Alternative behavior, whereby disabling would also imply clearing:
-  // TODO: not totally clear at the moment what users will prefer
+  // TODOVIEW: not totally clear at the moment what users will prefer
   // if (!enable) {
   //   m_pathsConfig.updatePathOpenBeam("");
   // } else {
@@ -1465,7 +1277,7 @@ void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
 void TomographyIfaceViewQtGUI::darksPathCheckStatusChanged(int status) {
   bool enable = 0 != status;
   // Alternative behavior, whereby disabling would also imply clearing:
-  // TODO: not totally clear at the moment what users will prefer
+  // TODOVIEW: not totally clear at the moment what users will prefer
   // if (!enable) {
   //   m_pathsConfig.updatePathDarks("");
   // } else {
@@ -1545,11 +1357,13 @@ void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
                      "Select location of scripts (scripts subdirectory/folder "
                      "in the Mantid installation",
                      false);
+  systemSettingsEdited();
 }
 
 void TomographyIfaceViewQtGUI::browseLocalExternalInterpreterClicked() {
   checkUserBrowseFile(m_uiTabSystemSettings.lineEdit_local_external_interpreter,
                       "Select interpreter executable", false);
+  systemSettingsEdited();
 }
 
 /**
@@ -1607,7 +1421,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   size_t width;
   try {
     width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
-    // TODO: add a settings option for this (like max mem allocation for
+    // TODOVIEW: add a settings option for this (like max mem allocation for
     // images)?
     if (width >= MAXDIM)
       width = MAXDIM;
@@ -1715,7 +1529,7 @@ TomographyIfaceViewQtGUI::grabPrePostProcSettings() const {
   opts.prep.normalizeByAirRegion =
       m_uiTabFilters.checkBox_normalize_by_air_region->isChecked();
 
-  // TODO
+  // TODOVIEW
   // m_uiTabFilters.checkBox_normalize_by_proton_charge is disabled for now
   opts.prep.normalizeByProtonCharge = false;
 
@@ -1725,7 +1539,7 @@ TomographyIfaceViewQtGUI::grabPrePostProcSettings() const {
   opts.prep.normalizeByDarks =
       m_uiTabFilters.checkBox_normalize_by_darks->isChecked();
 
-  // TODO
+  // TODOVIEW
   // m_uiTabFilters.checkBox_corrections_MCP_detector is disabled for now
 
   opts.prep.medianFilterWidth = static_cast<size_t>(
@@ -1847,6 +1661,13 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   setts.m_local.m_reconScriptsPath =
       m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
 
+  setts.m_local.m_externalInterpreterPath =
+      m_uiTabSystemSettings.lineEdit_local_external_interpreter->text()
+          .toStdString();
+
+  setts.m_experimentReference =
+      m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
+
   return setts;
 }
 
@@ -1860,7 +1681,7 @@ void TomographyIfaceViewQtGUI::sendToParaviewClicked() {
 }
 
 /**
- * Start a third party tool as a process. TODO: This is a very early
+ * Start a third party tool as a process. TODOVIEW: This is a very early
  * experimental implementation that should be moved out of this view.
  *
  * @param toolName Human understandable name of the tool/program
@@ -1955,7 +1776,7 @@ void TomographyIfaceViewQtGUI::defaultDirLocalVisualizeClicked() {
   if (!model)
     return;
 
-  // TODO: this should be moved to presenter?
+  // TODOVIEW: this should be moved to presenter?
   std::string checkedPath = checkDefaultVisualizeDir(
       m_uiTabSystemSettings.lineEdit_on_local_data_drive_or_path->text()
           .toStdString(),
@@ -1973,7 +1794,7 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
   if (!model)
     return;
 
-  // TODO: this should be moved to presenter?
+  // TODOVIEW: this should be moved to presenter?
   std::string checkedPath = checkDefaultVisualizeDir(
       m_uiTabSystemSettings.lineEdit_on_local_remote_data_drive_path->text()
           .toStdString(),
@@ -2098,17 +1919,31 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  auto reply = QMessageBox::question(
-      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
-                                  "ALL</strong> System settings?<br>This "
-                                  "action cannot be undone!",
-      QMessageBox::Yes | QMessageBox::No);
+  const auto title = "Reset Confirmation";
+  const auto body = "Are you sure you want to <br><strong>RESET "
+                    "ALL</strong> System settings?<br>This "
+                    "action cannot be undone!";
   // default constructors with factory defaults
-  if (reply == QMessageBox::Yes) {
+  if (userConfirmation(title, body)) {
     // From factory defaults
     TomoSystemSettings defaults;
-    updateSystemSettings(defaults);
+    updateSystemSettingsTabFields(defaults);
   }
+}
+
+/**
+ * Prompts the user for confirmation with a yes/no dialogue.
+ * The body can use HTML formatting.
+ *
+ * @param title The title that the message has
+ * @param body The body that the message has. This CAN use HTML formatting
+ */
+bool TomographyIfaceViewQtGUI::userConfirmation(const std::string &title,
+                                                const std::string &body) {
+  auto reply = QMessageBox::question(this, QString::fromStdString(title),
+                                     QString::fromStdString(body),
+                                     QMessageBox::Yes | QMessageBox::No);
+  return reply == QMessageBox::Yes;
 }
 
 /**
@@ -2188,7 +2023,7 @@ void TomographyIfaceViewQtGUI::closeEvent(QCloseEvent *event) {
   }
 
   if (answer == QMessageBox::AcceptRole) {
-    // TODO? cleanup();
+    // TODOVIEW? cleanup();
     m_presenter->notify(ITomographyIfacePresenter::ShutDown);
     event->accept();
   } else {

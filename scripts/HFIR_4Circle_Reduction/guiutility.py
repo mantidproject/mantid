@@ -3,7 +3,7 @@
 #
 import math
 import numpy
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 
 def convert_str_to_matrix(matrix_str, matrix_shape):
@@ -18,7 +18,8 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     :return: numpy.ndarray, len(shape) == 2
     """
     # check
-    assert isinstance(matrix_str, str)
+    assert isinstance(matrix_str, str), 'Input matrix (string) %s is not a string but of type %s.' \
+                                        '' % (str(matrix_str), matrix_str.__class__.__name__)
     assert isinstance(matrix_shape, tuple) and len(matrix_shape) == 2
 
     # split matrix string to 9 elements and check
@@ -32,9 +33,9 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     assert matrix_shape[0] * matrix_shape[1] == len(matrix_terms)
     matrix = numpy.ndarray(shape=matrix_shape, dtype='float')
     term_index = 0
-    for i_row in xrange(len(matrix_shape[0])):
-        for j_col in xrange(len(matrix_shape[1])):
-            matrix_shape[i_row][j_col] = matrix_terms[term_index]
+    for i_row in xrange(matrix_shape[0]):
+        for j_col in xrange(matrix_shape[1]):
+            matrix[i_row][j_col] = matrix_terms[term_index]
             term_index += 1
 
     return matrix
@@ -309,3 +310,125 @@ def parse_integers_editors(line_edits, allow_blank=False):
         return True, integer_list[0]
 
     return True, integer_list
+
+
+class GetValueDialog(QtGui.QDialog):
+    """
+    A dialog that gets a single value
+    """
+    def __init__(self, parent=None):
+        """
+
+        :param parent:
+        """
+        super(GetValueDialog, self).__init__(parent)
+
+        layout = QtGui.QVBoxLayout(self)
+
+        # nice widget for editing the date
+        self.value_edit = QtGui.QLineEdit(self)
+        layout.addWidget(self.value_edit)
+
+        self.setWindowTitle('Workspace Name')
+
+        # self.datetime = QDateTimeEdit(self)
+        # self.datetime.setCalendarPopup(True)
+        # self.datetime.setDateTime(QDateTime.currentDateTime())
+        # layout.addWidget(self.datetime)
+
+        # OK and Cancel buttons
+        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
+                                         QtCore.Qt.Horizontal, self)
+
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        return
+
+    # def accept(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.close()
+    #
+    # def reject(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.close()
+
+    # get current date and time from the dialog
+    def get_value(self):
+        """
+
+        :return:
+        """
+        return str(self.value_edit.text())
+
+
+# static method to create the dialog and return (date, time, accepted)
+def get_value(parent=None):
+    """ Get value from a pop-up dialog
+    :param parent:
+    :return:
+    """
+    dialog = GetValueDialog(parent)
+    result = dialog.exec_()
+    value = dialog.get_value()
+
+    return value, result == QtGui.QDialog.Accepted
+
+
+class DisplayDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        """
+
+        :param parent:
+        """
+        super(DisplayDialog, self).__init__(parent)
+
+        layout = QtGui.QVBoxLayout(self)
+
+        # nice widget for editing the date
+        self.message_edit = QtGui.QPlainTextEdit(self)
+        self.message_edit.setReadOnly(True)
+        layout.addWidget(self.message_edit)
+
+        self.setWindowTitle('Merged Scans Workspace Names')
+
+        # OK and Cancel buttons
+        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok,
+                                         QtCore.Qt.Horizontal, self)
+
+        buttons.accepted.connect(self.accept)
+        layout.addWidget(buttons)
+
+        return
+
+    def show_message(self, message):
+        """
+        show message
+        :param message:
+        :return:
+        """
+        self.message_edit.setPlainText(message)
+
+        return
+
+
+def show_message(parent=None, message='show message here!'):
+    """
+    show message
+    :param parent:
+    :param message:
+    :return: True for accepting.  False for rejecting or cancelling
+    """
+    dialog = DisplayDialog(parent)
+    dialog.show_message(message)
+
+    result = dialog.exec_()
+
+    return result

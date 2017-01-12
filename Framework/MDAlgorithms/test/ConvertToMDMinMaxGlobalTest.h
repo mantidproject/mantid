@@ -182,7 +182,7 @@ private:
                                                   double Ef) {
 
     Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 100, xmin, dx);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, xmin, dx);
 
     if ((Ei > 0 || Ef > 0) && deltaEUnits) {
       ws->getAxis(0)->setUnit("DeltaE");
@@ -192,7 +192,6 @@ private:
 
     Mantid::Geometry::Instrument_sptr testInst(
         new Mantid::Geometry::Instrument);
-    ws->setInstrument(testInst);
     // Define a source and sample position
     // Define a source component
     Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent(
@@ -212,6 +211,7 @@ private:
     physicalPixel->setPos(0.5, 0, 5.0);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
+    ws->setInstrument(testInst);
 
     ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
@@ -221,9 +221,8 @@ private:
     }
 
     if (Ef > 0) {
-      Mantid::Geometry::ParameterMap pmap(ws->instrumentParameters());
+      auto &pmap = ws->instrumentParameters();
       pmap.addDouble(physicalPixel, "Efixed", Ef);
-      ws->replaceInstrumentParameters(pmap);
     }
     Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
     ws->mutableSample().setOrientedLattice(&latt);

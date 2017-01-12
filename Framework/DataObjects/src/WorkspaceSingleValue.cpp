@@ -1,5 +1,4 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/IPropertyManager.h"
 
@@ -12,7 +11,7 @@ DECLARE_WORKSPACE(WorkspaceSingleValue)
 
 /// Constructor
 WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
-    : API::MatrixWorkspace() {
+    : API::HistoWorkspace() {
   // Set the "histogram" to the single value
   data.dataX().resize(1, 0.0);
   data.setCounts(1, value);
@@ -23,7 +22,7 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
 }
 
 WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
-    : MatrixWorkspace(other), data(other.data) {
+    : HistoWorkspace(other), data(other.data) {
   setDistribution(true);
 }
 
@@ -39,6 +38,12 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors,
   (void)NVectors;
   (void)XLength;
   (void)YLength; // Avoid compiler warning
+}
+
+void WorkspaceSingleValue::init(const std::size_t &NVectors,
+                                const HistogramData::Histogram &histogram) {
+  UNUSED_ARG(NVectors);
+  UNUSED_ARG(histogram);
 }
 
 /// Return the underlying Histogram1D at the given workspace index.
@@ -71,11 +76,6 @@ size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
 } // namespace DataObjects
 } // namespace Mantid
-
-///\cond TEMPLATE
-
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
 
 namespace Mantid {
 namespace Kernel {

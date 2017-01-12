@@ -3,13 +3,13 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
@@ -82,7 +82,7 @@ void SaveNXSPE::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error("The input workspace must have common bins");
     throw std::invalid_argument("The input workspace must have common bins");
   }
@@ -228,20 +228,15 @@ void SaveNXSPE::exec() {
   // Write the data
   Progress progress(this, 0, 1, nHist);
   int64_t bufferCounter(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int64_t i = 0; i < nHist; ++i) {
     progress.report();
 
-    Geometry::IDetector_const_sptr det;
-    try { // detector exist
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-    }
-
     double *signalBufferStart = signalBuffer.get() + bufferCounter * nBins;
     double *errorBufferStart = errorBuffer.get() + bufferCounter * nBins;
-    if (det && !det->isMonitor()) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // a detector but not a monitor
-      if (!det->isMasked()) {
+      if (!spectrumInfo.isMasked(i)) {
         const auto &inY = inputWS->readY(i);
         std::copy(inY.begin(), inY.end(), signalBufferStart);
         const auto &inE = inputWS->readE(i);

@@ -1,16 +1,17 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtAPI/PythonRunner.h"
-// #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
@@ -182,14 +183,12 @@ void EnggDiffractionPresenter::notify(
 void EnggDiffractionPresenter::processStart() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   m_view->showStatus("Ready");
-
-  updateNewCalib(m_view->currentCalibFile());
 }
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
 
-  std::string fname = m_view->askExistingCalibFilename();
+  const std::string fname = m_view->askExistingCalibFilename();
   if (fname.empty()) {
     return;
   }
@@ -2235,7 +2234,7 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
     auto alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(rebinName);
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inWS->name());
+    alg->setPropertyValue("InputWorkspace", inWS->getName());
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setProperty("Params", boost::lexical_cast<std::string>(bin));
 
@@ -2338,7 +2337,7 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
     auto alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(rebinName);
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inWS->name());
+    alg->setPropertyValue("InputWorkspace", inWS->getName());
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setProperty("Params", boost::lexical_cast<std::string>(timeStep));
 

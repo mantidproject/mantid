@@ -15,6 +15,7 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -35,6 +36,7 @@ using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Indexing::IndexInfo;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -51,7 +53,6 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   ws2->initialize(numSpectra, numBins, numBins);
 
   auto inst = boost::make_shared<Instrument>("TestInstrument");
-  ws2->setInstrument(inst);
   // We get a 1:1 map by default so the detector ID should match the spectrum
   // number
   for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
@@ -61,6 +62,7 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
     inst->markAsDetector(det);
     ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
   }
+  ws2->setInstrument(inst);
   return ws2;
 }
 
@@ -75,6 +77,98 @@ public:
 
   MatrixWorkspaceTest() : ws(boost::make_shared<WorkspaceTester>()) {
     ws->initialize(1, 1, 1);
+  }
+
+  void test_set_bad_IndexInfo() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    IndexInfo bad(2);
+    TS_ASSERT_THROWS(ws.setIndexInfo(std::move(bad)), std::runtime_error);
+  }
+
+  void test_IndexInfo() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    const auto &indexInfo = ws.indexInfo();
+
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    indices.setDetectorIDs({{0}, {1}, {2, 3}});
+    TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
+
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 4);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), 6);
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), (std::vector<detid_t>{0}));
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(1), (std::vector<detid_t>{1}));
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(2), (std::vector<detid_t>{2, 3}));
+  }
+
+  void test_setIndexInfo() {
+    // NOTE: This test checks if the IndexInfo set via
+    // MatrixWorkspace::setIndexInfo() affects data stored in ISpectrum and
+    // obtained via the legacy interface. THIS TEST SHOULD BE REMOVED ONCE THAT
+    // INTERFACE IS BEING REMOVED.
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    indices.setDetectorIDs({{0}, {1}, {2, 3}});
+    TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 4);
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getSpectrumNo(), 6);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
+                     (std::set<detid_t>{0}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
+                     (std::set<detid_t>{1}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs(),
+                     (std::set<detid_t>{2, 3}));
+  }
+
+  void test_indexInfo_legacy_compatibility() {
+    // NOTE: This test checks if the IndexInfo reference returned by
+    // MatrixWorkspace::indexInfo() reflects changes done via the legacy
+    // interface of ISpectrum. THIS TEST SHOULD BE REMOVED ONCE THAT INTERFACE
+    // IS BEING REMOVED.
+    WorkspaceTester ws;
+    ws.initialize(1, 1, 1);
+    const auto &indexInfo = ws.indexInfo();
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), std::vector<detid_t>({0}));
+    ws.getSpectrum(0).setSpectrumNo(7);
+    ws.getSpectrum(0).addDetectorID(7);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 7);
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), std::vector<detid_t>({0, 7}));
+  }
+
+  void test_IndexInfo_copy() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    indices.setDetectorIDs({{0}, {1}, {2, 3}});
+    ws.setIndexInfo(std::move(indices));
+
+    // Internally this references data in ISpectrum
+    const auto &indexInfo = ws.indexInfo();
+    // This should create a copy, dropping any links to MatrixWorkspace or
+    // ISpectrum
+    const auto copy(indexInfo);
+
+    TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(1), 4);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(2), 6);
+    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(1), (std::vector<detid_t>{1}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(2), (std::vector<detid_t>{2, 3}));
+    // Changing data in workspace affects indexInfo, but not copy
+    ws.getSpectrum(0).setSpectrumNo(7);
+    ws.getSpectrum(0).addDetectorID(7);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 7);
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), (std::vector<detid_t>{0, 7}));
+    TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
+    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
   }
 
   void test_toString_Produces_Expected_Contents() {
@@ -249,23 +343,21 @@ public:
         makeWorkspaceWithDetectors(3, 1));
 
     // Initially un masked
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {
       TS_ASSERT_EQUALS(workspace->readY(i)[0], 1.0);
       TS_ASSERT_EQUALS(workspace->readE(i)[0], 1.0);
-
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
-      if (det) {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
-      } else {
-        TS_FAIL("No detector defined");
-      }
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
     }
 
     // Mask a spectra
-    workspace->maskWorkspaceIndex(1);
-    workspace->maskWorkspaceIndex(2);
+    workspace->getSpectrum(1).clearData();
+    workspace->getSpectrum(2).clearData();
+    workspace->mutableSpectrumInfo().setMasked(1, true);
+    workspace->mutableSpectrumInfo().setMasked(2, true);
 
+    const auto &spectrumInfo2 = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {
       double expectedValue(0.0);
       bool expectedMasked(false);
@@ -277,14 +369,8 @@ public:
       }
       TS_ASSERT_EQUALS(workspace->readY(i)[0], expectedValue);
       TS_ASSERT_EQUALS(workspace->readE(i)[0], expectedValue);
-
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
-      if (det) {
-        TS_ASSERT_EQUALS(det->isMasked(), expectedMasked);
-      } else {
-        TS_FAIL("No detector defined");
-      }
+      TS_ASSERT(spectrumInfo2.hasDetectors(i));
+      TS_ASSERT_EQUALS(spectrumInfo2.isMasked(i), expectedMasked);
     }
   }
 
@@ -292,8 +378,10 @@ public:
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
-    workspace->maskWorkspaceIndex(1);
-    workspace->maskWorkspaceIndex(2);
+    workspace->getSpectrum(1).clearData();
+    workspace->getSpectrum(2).clearData();
+    workspace->mutableSpectrumInfo().setMasked(1, true);
+    workspace->mutableSpectrumInfo().setMasked(2, true);
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {
@@ -467,6 +555,47 @@ public:
     TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
   }
 
+  void testBinIndexOfDescendingBinning() {
+    WorkspaceTester wkspace;
+    wkspace.initialize(1, 4, 3);
+
+    wkspace.dataX(0)[0] = 5.3;
+    wkspace.dataX(0)[1] = 4.3;
+    wkspace.dataX(0)[2] = 3.3;
+    wkspace.dataX(0)[3] = 2.3;
+
+    TS_ASSERT_EQUALS(wkspace.getNumberHistograms(), 1);
+
+    // First boundary
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.3), 0)
+    // First bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.2), 0);
+    // Bin boundary
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(4.3), 0);
+    // Mid range
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.8), 1);
+    // Still second bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(std::nextafter(3.3, 10.0)), 1);
+    // Last bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.1), 2);
+    // Last value
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.3), 2);
+
+    // Error handling
+
+    // Bad index value
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, 1), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, -1), std::out_of_range);
+
+    // Bad X values
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(5.3, 10.0)),
+                     std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(5.4), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(2.3, 0.0)),
+                     std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
+  }
+
   void test_nexus_spectraMap() {
     NexusTestHelper th(true);
     th.createFile("MatrixWorkspaceTest.nxs");
@@ -480,55 +609,6 @@ public:
     }
     // Save that to the NXS file
     TS_ASSERT_THROWS_NOTHING(ws->saveSpectraMapNexus(th.file, spec););
-  }
-
-  /** Properly, this tests a method on Instrument, not MatrixWorkspace, but they
-   * are related.
-   */
-  void test_isDetectorMasked() {
-    auto ws = makeWorkspaceWithDetectors(100, 10);
-    Instrument_const_sptr inst = ws->getInstrument();
-    // Make sure the instrument is parametrized so that the test is thorough
-    TS_ASSERT(inst->isParametrized());
-    TS_ASSERT(!inst->isDetectorMasked(1));
-    TS_ASSERT(!inst->isDetectorMasked(19));
-    // Mask then check that it returns as masked
-    TS_ASSERT(ws->getSpectrum(19).hasDetectorID(19));
-    ws->maskWorkspaceIndex(19);
-    TS_ASSERT(inst->isDetectorMasked(19));
-  }
-
-  /** Check if any of a list of detectors are masked */
-  void test_isDetectorMasked_onASet() {
-    auto ws = makeWorkspaceWithDetectors(100, 10);
-    Instrument_const_sptr inst = ws->getInstrument();
-    // Make sure the instrument is parametrized so that the test is thorough
-    TS_ASSERT(inst->isParametrized());
-
-    // Mask detector IDs 8 and 9
-    ws->maskWorkspaceIndex(8);
-    ws->maskWorkspaceIndex(9);
-
-    std::set<detid_t> dets;
-    TSM_ASSERT("No detector IDs = not masked", !inst->isDetectorMasked(dets));
-    dets.insert(6);
-    TSM_ASSERT("Detector is not masked", !inst->isDetectorMasked(dets));
-    dets.insert(7);
-    TSM_ASSERT("Detectors are not masked", !inst->isDetectorMasked(dets));
-    dets.insert(8);
-    TSM_ASSERT("If any detector is not masked, return false",
-               !inst->isDetectorMasked(dets));
-    // Start again
-    dets.clear();
-    dets.insert(8);
-    TSM_ASSERT("If all detectors are not masked, return true",
-               inst->isDetectorMasked(dets));
-    dets.insert(9);
-    TSM_ASSERT("If all detectors are not masked, return true",
-               inst->isDetectorMasked(dets));
-    dets.insert(10);
-    TSM_ASSERT("If any detector is not masked, return false",
-               !inst->isDetectorMasked(dets));
   }
 
   void test_hasGroupedDetectors() {
@@ -587,7 +667,6 @@ public:
     // the detector ID
     // is stored in at least 3 places
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
     // We get a 1:1 map by default so the detector ID should match the spectrum
     // number
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
@@ -602,6 +681,7 @@ public:
       inst->markAsDetector(det);
       ws->getSpectrum(i).addDetectorID(detid);
     }
+    ws->setInstrument(inst);
     ws->getSpectrum(66).clearDetectorIDs();
 
     TS_ASSERT_THROWS_NOTHING(

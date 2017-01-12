@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
@@ -442,7 +444,7 @@ void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS,
   if (!isWithinTolerance(behaviour, addeeWSNumber, outWSNumber) &&
       !stringPropertiesMatch(behaviour, addeeWSProperty)) {
     m_logger.warning() << generateDifferenceMessage(
-        name, addeeWS.name(), addeeWSProperty->value(),
+        name, addeeWS.getName(), addeeWSProperty->value(),
         behaviour.property->value());
   }
 }
@@ -468,7 +470,7 @@ void SampleLogsBehaviour::checkErrorProperty(
   if (!isWithinTolerance(behaviour, addeeWSNumber, outWSNumber) &&
       !stringPropertiesMatch(behaviour, addeeWSProperty)) {
     throw std::invalid_argument(generateDifferenceMessage(
-        name, addeeWS.name(), addeeWSProperty->value(),
+        name, addeeWS.getName(), addeeWSProperty->value(),
         behaviour.property->value()));
   }
 }

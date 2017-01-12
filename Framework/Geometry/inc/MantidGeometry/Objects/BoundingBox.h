@@ -142,9 +142,10 @@ public:
   std::vector<Kernel::V3D> const &getCoordSystem() const {
     return coord_system;
   }
-
   //@}
 
+  /// Generate a random point within the box
+  Kernel::V3D generatePointInside(double r1, double r2, double r3) const;
   /** returns the expanded box consisting of all 8 box points,
     * shifted into the coordinate system with the observer centre; */
   void getFullBox(std::vector<Kernel::V3D> &box,

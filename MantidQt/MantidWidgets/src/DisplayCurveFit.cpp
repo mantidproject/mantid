@@ -1,3 +1,4 @@
+#include "MantidKernel/Logger.h"
 #include "MantidQtMantidWidgets/DisplayCurveFit.h"
 // includes for workspace handling
 
@@ -100,7 +101,7 @@ QPair<double, double> DisplayCurveFit::getCurveRange(
   curveTypes typesFound = this->getCurvesForWorkspace(workspace);
   if (typesFound.size() == 0) {
     throw std::runtime_error("No fitting curves associated to workspace" +
-                             workspace->name());
+                             workspace->getName());
   }
   return getCurveRange(typesFound[0]);
 }

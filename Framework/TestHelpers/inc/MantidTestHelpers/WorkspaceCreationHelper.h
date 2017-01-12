@@ -10,19 +10,24 @@
  *********************************************************************************/
 #ifndef WORKSPACECREATIONHELPER_H_
 #define WORKSPACECREATIONHELPER_H_
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/make_unique.h"
 
@@ -52,9 +57,9 @@ class MockAlgorithm : public Mantid::API::Algorithm {
 public:
   MockAlgorithm(size_t nSteps = 100);
   /// Algorithm's name for identification
-  const std::string name() const override { return "MockAlgorithm"; };
+  const std::string name() const override { return "MockAlgorithm"; }
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override { return 1; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Test"; }
   /// Algorithm's summary.
@@ -69,12 +74,32 @@ public:
   }
 
 private:
-  void init() override{};
-  void exec() override{};
+  void init() override {}
+  void exec() override {}
 
   std::unique_ptr<Mantid::API::Progress> m_Progress;
   /// logger -> to provide logging,
   static Mantid::Kernel::Logger &g_log;
+};
+
+/// A struct containing the cells of an EPP table row.
+struct EPPTableRow {
+  /// FindEPP algorithm fitting success status.
+  enum class FitStatus { SUCCESS, FAILURE };
+
+  /// Construct a row with the default values.
+  EPPTableRow() = default;
+  /// Construct a row with errors set to zero.
+  EPPTableRow(const double peakCentre, const double sigma, const double height,
+              const FitStatus fitStatus);
+  double peakCentre = 0;
+  double peakCentreError = 0;
+  double sigma = 0;
+  double sigmaError = 0;
+  double height = 0;
+  double heightError = 0;
+  double chiSq = 0;
+  FitStatus fitStatus = FitStatus::SUCCESS;
 };
 
 /// Adds a workspace to the ADS
@@ -86,25 +111,24 @@ template <typename T> boost::shared_ptr<T> getWS(const std::string &name) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(name);
 }
 
-Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceRand(int size);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceRand(int size);
 Mantid::DataObjects::Workspace2D_sptr
-Create1DWorkspaceConstant(int size, double value, double error);
-Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceFib(int size);
+create1DWorkspaceConstant(int size, double value, double error);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size);
 Mantid::DataObjects::Workspace2D_sptr
-Create1DWorkspaceConstantWithXerror(int size, double value, double error,
+create1DWorkspaceConstantWithXerror(int size, double value, double error,
                                     double xError);
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(
-    int nhist,
-    int numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries);
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace(int nhist,
+                                                        int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(
-    int64_t nHist, int64_t nBinsssssssssssss, bool isHist = false,
-    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(
+create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123(
     int64_t nHist, int64_t nBins, bool isHist = false,
     const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace154(
+    int64_t nHist, int64_t nBins, bool isHist = false,
+    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithValuesAndXerror(
     int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,
     double eVal, double dxVal,
     const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
@@ -114,25 +138,23 @@ maskSpectra(Mantid::DataObjects::Workspace2D_sptr workspace,
 /**
  * Create a WorkspaceGroup with N workspaces and the specified parameters
  */
-Mantid::API::WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist,
+Mantid::API::WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist,
                                                       int nBins,
                                                       const std::string &stem);
 /** Create a 2D workspace with this many histograms and bins.
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
+create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
                         double deltax = 1.0);
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
-Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(
-    int nhist,
-    const int
-        numBoundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundariesundaries,
-    const double xBoundaries[]);
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspaceBinned(int nhist, const int numBoundaries,
+                        const double xBoundaries[]);
 
 /**
  * Creates a 2D workspace from taking the function values from the input
@@ -147,7 +169,7 @@ Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(
  */
 template <typename Func>
 Mantid::DataObjects::Workspace2D_sptr
-Create2DWorkspaceFromFunction(Func f, int nSpec, double x0, double x1,
+create2DWorkspaceFromFunction(Func f, int nSpec, double x0, double x1,
                               double dx, bool isHist = false) {
   int nX = int((x1 - x0) / dx) + 1;
   int nY = nX - (isHist ? 1 : 0);
@@ -225,16 +247,16 @@ Mantid::DataObjects::EventWorkspace_sptr
 createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents);
 
 Mantid::DataObjects::WorkspaceSingleValue_sptr
-CreateWorkspaceSingleValue(double value);
+createWorkspaceSingleValue(double value);
 Mantid::DataObjects::WorkspaceSingleValue_sptr
-CreateWorkspaceSingleValueWithError(double value, double error);
+createWorkspaceSingleValueWithError(double value, double error);
 /** Perform some finalization on event workspace stuff */
-void EventWorkspace_Finalize(Mantid::DataObjects::EventWorkspace_sptr ew);
+void eventWorkspace_Finalize(Mantid::DataObjects::EventWorkspace_sptr ew);
 /** Create event workspace with:
  * 500 pixels
  * 1000 histogrammed bins.
  */
-Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspace();
+Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace();
 
 /** Create event workspace with:
  * 50 pixels
@@ -243,50 +265,50 @@ Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspace();
  * PulseTime = 1 second, 2 seconds, etc.
  */
 Mantid::DataObjects::EventWorkspace_sptr
-CreateEventWorkspace2(int numPixels = 50, int numBins = 100);
+createEventWorkspace2(int numPixels = 50, int numBins = 100);
 
 Mantid::DataObjects::EventWorkspace_sptr
-CreateEventWorkspace(int numPixels, int numBins, int numEvents = 100,
+createEventWorkspace(int numPixels, int numBins, int numEvents = 100,
                      double x0 = 0.0, double binDelta = 1.0,
                      int eventPattern = 1, int start_at_pixelID = 0);
 
-Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspaceWithStartTime(
+Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithStartTime(
     int numPixels, int numBins, int numEvents = 100, double x0 = 0.0,
     double binDelta = 1.0, int eventPattern = 1, int start_at_pixelID = 0,
     Mantid::Kernel::DateAndTime run_start =
         Mantid::Kernel::DateAndTime("2010-01-01T00:00:00"));
 
 Mantid::DataObjects::EventWorkspace_sptr
-CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
+createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta = 1., double xOffset = 0.);
 
 Mantid::DataObjects::EventWorkspace_sptr
-CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
+createRandomEventWorkspace(size_t numbins, size_t numpixels,
                            double bin_delta = 1.0);
 
 Mantid::API::MatrixWorkspace_sptr
-CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta);
+createGroupedWorkspace2D(size_t numHist, int numBins, double binDelta);
 // grouped workspace with detectors arranges in rings in center and into boxes
 // outside
-Mantid::API::MatrixWorkspace_sptr CreateGroupedWorkspace2DWithRingsAndBoxes(
+Mantid::API::MatrixWorkspace_sptr createGroupedWorkspace2DWithRingsAndBoxes(
     size_t RootOfNumHist = 10, int numBins = 10, double binDelta = 1.0);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void DisplayDataY(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataY(const Mantid::API::MatrixWorkspace_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void DisplayData(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayData(const Mantid::API::MatrixWorkspace_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void DisplayDataX(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataX(const Mantid::API::MatrixWorkspace_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void DisplayDataE(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataE(const Mantid::API::MatrixWorkspace_sptr ws);
 
-void AddTSPEntry(Mantid::API::Run &runInfo, std::string name, double val);
-void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
+void addTSPEntry(Mantid::API::Run &runInfo, std::string name, double val);
+void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c);
-void SetGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi,
+void setGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi,
                    double omega);
 
 // create workspace which should be result of homering (transform to energy in
@@ -307,7 +329,7 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
                       std::string wsname, Mantid::API::Algorithm *alg);
 
 /// Function to create a fixed RebinnedOutput workspace
-Mantid::DataObjects::RebinnedOutput_sptr CreateRebinnedOutputWorkspace();
+Mantid::DataObjects::RebinnedOutput_sptr createRebinnedOutputWorkspace();
 
 /// Create a simple peaks workspace containing the given number of peaks
 boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
@@ -333,6 +355,11 @@ void createInstrumentForWorkspaceWithDistances(
     const Mantid::Kernel::V3D &samplePosition,
     const Mantid::Kernel::V3D &sourcePosition,
     const std::vector<Mantid::Kernel::V3D> &detectorPositions);
-}
+
+/// Create a table workspace corresponding to what the FindEPP algorithm gives.
+Mantid::API::ITableWorkspace_sptr
+createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
+
+} // namespace WorkspaceCreationHelper
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

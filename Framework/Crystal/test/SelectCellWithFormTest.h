@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 
 using namespace Mantid;

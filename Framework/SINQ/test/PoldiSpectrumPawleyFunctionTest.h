@@ -109,7 +109,7 @@ public:
     fn.setDecoratedFunction("MockPawleyFunction");
 
     MatrixWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(4, 10);
 
     // Make sure the setMatrixWorkspace method can be called directly.
     IPawleyFunction_sptr pFn = fn.getPawleyFunction();

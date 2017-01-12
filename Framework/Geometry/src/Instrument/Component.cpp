@@ -1,6 +1,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 
 #include <Poco/XML/XMLWriter.h>

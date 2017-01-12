@@ -56,10 +56,6 @@ public:
       // the same for each bin
       space2D->setCounts(j, NBINS, j + 1);
       space2D->setCountStandardDeviations(j, errors);
-      space2D->getSpectrum(j).setSpectrumNo(j + 1); // spectra numbers are also
-                                                    // 1 + index_numbers
-                                                    // because this is the
-                                                    // tradition
       space2D->getSpectrum(j).setDetectorID(j);
     }
 
@@ -95,7 +91,7 @@ public:
 
   void testAveragingWithNoInstrument() {
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 3, false);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 3, false);
     GroupDetectors2 grouper;
     grouper.initialize();
     grouper.setChild(true);
@@ -532,7 +528,7 @@ public:
     int numPixels = 5;
     int numBins = 5;
     int numEvents = 200;
-    EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, numBins, numEvents, 0, 1, 4);
     AnalysisDataService::Instance().addOrReplace("GDEvents", input);
     GroupDetectors2 alg2;

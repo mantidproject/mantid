@@ -7,17 +7,21 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -246,7 +250,7 @@ public:
     groups[4].push_back(50);
 
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0,
+        WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0,
                                                              1.0);
     WS->getSpectrum(3).clear(false);
     // Switch the event type
@@ -399,7 +403,7 @@ public:
     const int nBins = 1;
     const std::string stem = "test_group_ws";
     Mantid::API::WorkspaceGroup_sptr group_ws =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(nEntries, nHist, nBins,
+        WorkspaceCreationHelper::createWorkspaceGroup(nEntries, nHist, nBins,
                                                       stem);
 
     SaveNexusProcessed alg;
@@ -730,6 +734,126 @@ public:
     savedNexus.close();
     Poco::File(outputFileName).remove();
     AnalysisDataService::Instance().clear();
+  }
+
+  void testSaveTableEmptyColumn() {
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
+
+    // Create a table which we will save
+    auto table =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+            WorkspaceFactory::Instance().createTable());
+    table->setRowCount(3);
+    table->addColumn("int", "IntColumn");
+    {
+      auto &data = table->getColVector<int>("IntColumn");
+      data[0] = 5;
+      data[1] = 2;
+      data[2] = 3;
+    }
+    table->addColumn("str", "EmptyColumn");
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", table);
+    alg.setPropertyValue("Filename", outputFileName);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    if (!alg.isExecuted())
+      return; // Nothing to check
+
+    // Get full output file path
+    outputFileName = alg.getPropertyValue("Filename");
+
+    NeXus::File savedNexus(outputFileName);
+
+    savedNexus.openGroup("mantid_workspace_1", "NXentry");
+    savedNexus.openGroup("table_workspace", "NXdata");
+
+    {
+      savedNexus.openData("column_1");
+      doTestColumnInfo(savedNexus, NX_INT32, "", "IntColumn");
+      int32_t expectedData[] = {5, 2, 3};
+      doTestColumnData("IntColumn", savedNexus, expectedData);
+    }
+
+    {
+      savedNexus.openData("column_2");
+
+      NeXus::Info columnInfo = savedNexus.getInfo();
+      TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
+      TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
+      TS_ASSERT_EQUALS(columnInfo.dims[1], 1);
+      TS_ASSERT_EQUALS(columnInfo.type, NX_CHAR);
+
+      std::vector<NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS(attrInfos.size(), 3);
+
+      if (attrInfos.size() == 3) {
+        TS_ASSERT_EQUALS(attrInfos[1].name, "interpret_as");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[1]), "A string");
+
+        TS_ASSERT_EQUALS(attrInfos[2].name, "name");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[2]), "EmptyColumn");
+
+        TS_ASSERT_EQUALS(attrInfos[0].name, "units");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[0]), "N/A");
+      }
+
+      std::vector<char> data;
+      savedNexus.getData(data);
+      TS_ASSERT_EQUALS(data.size(), 3);
+      TS_ASSERT_EQUALS(data[0], ' ');
+      TS_ASSERT_EQUALS(data[1], ' ');
+      TS_ASSERT_EQUALS(data[2], ' ');
+    }
+
+    savedNexus.close();
+    Poco::File(outputFileName).remove();
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_masking() {
+    LoadEmptyInstrument createWorkspace;
+    createWorkspace.initialize();
+    createWorkspace.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
+    createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
+    createWorkspace.execute();
+    auto ws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpace"));
+    ws->mutableDetectorInfo().setMasked(1, true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(2), false);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testSpace");
+    std::string file = "SaveNexusProcessedTest_test_masking.nxs";
+    if (Poco::File(file).exists())
+      Poco::File(file).remove();
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    LoadNexus loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", file);
+    loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+    TS_ASSERT(loadAlg.isExecuted());
+    auto wsReloaded = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(2), false);
+
+    if (clearfiles)
+      Poco::File(file).remove();
+    AnalysisDataService::Instance().remove("testSpace");
   }
 
 private:

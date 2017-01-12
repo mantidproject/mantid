@@ -1,6 +1,3 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/LoadILLTOF.h"
 
 #include "MantidAPI/Axis.h"
@@ -10,6 +7,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -21,10 +20,6 @@ using namespace HistogramData;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
 
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
-
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -32,25 +27,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
  * be used
  */
 int LoadILLTOF::confidence(Kernel::NexusDescriptor &descriptor) const {
-
-  // fields existent only at the ILL
-  if (descriptor.pathExists("/entry0/wavelength") &&
-      descriptor.pathExists("/entry0/experiment_identifier") &&
-      descriptor.pathExists("/entry0/mode") &&
-      !descriptor.pathExists(
-          "/entry0/dataSD") // This one is for LoadILLIndirect
-      &&
-      !descriptor.pathExists(
-          "/entry0/instrument/VirtualChopper") // This one is for
-                                               // LoadILLReflectometry
-      ) {
-    return 80;
-  } else {
-    return 0;
-  }
+  UNUSED_ARG(descriptor)
+  // This loader is deprecated.
+  return 0;
 }
 
 LoadILLTOF::LoadILLTOF() : API::IFileLoader<Kernel::NexusDescriptor>() {
+  useAlgorithm("LoadILLTOF", 2);
   m_instrumentName = "";
   m_wavelength = 0;
   m_channelWidth = 0;

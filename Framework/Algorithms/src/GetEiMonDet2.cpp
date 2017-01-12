@@ -3,15 +3,16 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UserStringParser.h"
 #include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::API;
@@ -21,6 +22,7 @@ using namespace Mantid::PhysicalConstants;
 namespace Mantid {
 namespace Algorithms {
 
+namespace {
 /** A private namespace to store string constants dealing with
  *  tables returned by the FindEPP algorithm.
  */
@@ -38,11 +40,11 @@ const static std::string FIT_STATUS_SUCCESS("success");
  */
 namespace IndexTypes {
 /// Tag for detector ids
-const static std::string DETECTOR_ID("DetectorID");
+const static std::string DETECTOR_ID("Detector ID");
 /// Tag for spectrum numbers
-const static std::string SPECTRUM_NUMBER("SpectrumNumber");
+const static std::string SPECTRUM_NUMBER("Spectrum Number");
 /// Tag for workspace indices
-const static std::string WORKSPACE_INDEX("WorkspaceIndex");
+const static std::string WORKSPACE_INDEX("Workspace Index");
 }
 
 /** A private namespace holding the property names of
@@ -71,6 +73,14 @@ const static std::string NOMINAL_ENERGY("NominalIncidentEnergy");
 const static std::string PULSE_INTERVAL("PulseInterval");
 }
 
+/** A private namespace holding names for sample log entries.
+ */
+namespace SampleLogs {
+/// Name of the pulse interval sample log
+const static std::string PULSE_INTERVAL("pulse_interval");
+}
+} // anonymous namespace
+
 // Register the algorithm into the algorithm factory.
 DECLARE_ALGORITHM(GetEiMonDet2)
 
@@ -81,8 +91,8 @@ void GetEiMonDet2::init() {
   auto tofWorkspace = boost::make_shared<CompositeValidator>();
   tofWorkspace->add<WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<InstrumentValidator>();
-  auto mandatoryStringProperty =
-      boost::make_shared<MandatoryValidator<std::string>>();
+  auto mandatoryArrayProperty =
+      boost::make_shared<MandatoryValidator<std::vector<int>>>();
   auto mandatoryIntProperty = boost::make_shared<MandatoryValidator<int>>();
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
@@ -103,9 +113,9 @@ void GetEiMonDet2::init() {
                   boost::make_shared<StringListValidator>(indexTypes),
                   "The type of indices " + PropertyNames::DETECTORS + " and " +
                       PropertyNames::MONITOR + " refer to.");
-  declareProperty(PropertyNames::DETECTORS, "",
-                  "A list of detector ids/spectrum number/workspace indices.",
-                  mandatoryStringProperty);
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+                      PropertyNames::DETECTORS.c_str(), mandatoryArrayProperty),
+                  "A list of detector ids/spectrum number/workspace indices.");
   declareProperty(make_unique<WorkspaceProperty<>>(
                       PropertyNames::MONITOR_WORKSPACE.c_str(), "",
                       Direction::Input, PropertyMode::Optional, tofWorkspace),
@@ -123,7 +133,8 @@ void GetEiMonDet2::init() {
   declareProperty(PropertyNames::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
-                  "Interval between neutron pulses, in microseconds.");
+                  "Interval between neutron pulses, in microseconds. Taken "
+                  "from the sample logs, if not specified.");
   declareProperty(
       PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive,
       "Incident energy guess. Taken from the sample logs, if not specified.");
@@ -198,6 +209,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   double distanceSum = 0;
   double eppSum = 0;
   size_t n = 0;
+  auto &spectrumInfo = m_detectorWs->spectrumInfo();
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
@@ -210,17 +222,16 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
     }
     if (fitStatusColumn->cell<std::string>(index) ==
         EPPTableLiterals::FIT_STATUS_SUCCESS) {
-      const auto detector = m_detectorWs->getDetector(index);
-      if (!detector) {
+      if (!spectrumInfo.hasDetectors(index)) {
         throw std::runtime_error("No detector specified by " +
                                  PropertyNames::DETECTORS + " found");
       }
-      if (detector->isMonitor()) {
+      if (spectrumInfo.isMonitor(index)) {
         g_log.warning() << "Workspace index " << index
                         << " should be detector, but is marked as monitor.\n";
       }
-      if (!detector->isMasked()) {
-        const double d = detector->getDistance(*sample);
+      if (!spectrumInfo.isMasked(index)) {
+        const double d = spectrumInfo.detector(index).getDistance(*sample);
         distanceSum += d;
         const double epp = (*peakPositionColumn)[index];
         eppSum += epp;
@@ -274,10 +285,17 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
   g_log.information() << "Nominal time-of-flight: " << nominalTimeOfFlight
                       << ".\n";
   // Check if the obtained time-of-flight makes any sense.
-  const double energyTolerance = 20; // %'s of the nominal energy
+  const double energyTolerance = 0.2; // As a fraction of nominal energy.
   const double toleranceLimit =
       1 / std::sqrt(1 + energyTolerance) * nominalTimeOfFlight;
-  const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
+  double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
+  if (pulseInterval == EMPTY_DBL()) {
+    if (m_detectorWs->run().hasProperty(SampleLogs::PULSE_INTERVAL)) {
+      pulseInterval = m_detectorWs->run().getPropertyAsSingleValue(
+          SampleLogs::PULSE_INTERVAL);
+      pulseInterval *= 1e6; // To microseconds.
+    }
+  }
   const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;
   const double lowerTimeLimit =
       toleranceLimit > pulseIntervalLimit ? toleranceLimit : pulseIntervalLimit;
@@ -297,8 +315,8 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
     // Neutrons hit the detectors in a later frame.
     interruption_point();
     if (pulseInterval == EMPTY_DBL()) {
-      throw std::runtime_error("No " + PropertyNames::PULSE_INTERVAL +
-                               " specified");
+      throw std::runtime_error(PropertyNames::PULSE_INTERVAL +
+                               " not specified nor found in sample logs");
     }
     ++delayFrameCount;
     timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
@@ -337,16 +355,17 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
     throw std::runtime_error("No successful monitor fit found in " +
                              PropertyNames::MONITOR_EPP_TABLE);
   }
-  const auto monitor = m_monitorWs->getDetector(monitorIndex);
-  if (monitor->isMasked()) {
+  auto &spectrumInfo = m_monitorWs->spectrumInfo();
+  if (spectrumInfo.isMasked(monitorIndex)) {
     throw std::runtime_error("Monitor spectrum is masked");
   }
-  if (!monitor->isMonitor()) {
+  if (!spectrumInfo.isMonitor(monitorIndex)) {
     g_log.warning() << "The monitor spectrum is not actually marked "
                     << "as monitor.\n";
   }
   const auto sample = m_detectorWs->getInstrument()->getSample();
-  monitorToSampleDistance = monitor->getDistance(*sample);
+  monitorToSampleDistance =
+      spectrumInfo.position(monitorIndex).distance(sample->getPos());
   g_log.information() << "Monitor-to-sample distance: "
                       << monitorToSampleDistance << ".\n";
 
@@ -367,7 +386,7 @@ namespace {
  *         workspace indices
  */
 template <typename Map>
-void mapIndices(const std::vector<unsigned int> &detectors, const int monitor,
+void mapIndices(const std::vector<int> &detectors, const int monitor,
                 const Map &detectorIndexMap, const Map &monitorIndexMap,
                 std::vector<size_t> &detectorIndices, size_t &monitorIndex) {
   auto back = std::back_inserter(detectorIndices);
@@ -396,9 +415,7 @@ void mapIndices(const std::vector<unsigned int> &detectors, const int monitor,
 void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
                                 size_t &monitorIndex) const {
   detectorIndices.clear();
-  UserStringParser spectraListParser;
-  const auto detectors = VectorHelper::flattenVector(
-      spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
+  const std::vector<int> detectors = getProperty(PropertyNames::DETECTORS);
   const int monitor = getProperty(PropertyNames::MONITOR);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
   if (indexType == IndexTypes::DETECTOR_ID) {

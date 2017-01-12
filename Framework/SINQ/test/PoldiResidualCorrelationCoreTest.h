@@ -39,7 +39,7 @@ public:
 
     // test data with all 0s except (0, 0) - it's -1.0
     Mantid::DataObjects::Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     testWorkspace->dataY(0)[0] = -1.0;
 
     core.setNormCountData(testWorkspace);
@@ -63,7 +63,7 @@ public:
     TestablePoldiResidualCorrelationCore core(m_log);
 
     Mantid::DataObjects::Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     core.setCountData(testWorkspace);
 
     TS_ASSERT_EQUALS(testWorkspace->dataY(0)[0], 0.0);
@@ -98,7 +98,7 @@ public:
     TestablePoldiResidualCorrelationCore core(m_log);
 
     Mantid::DataObjects::Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     core.setCountData(testWorkspace);
     core.m_timeBinCount = 2;
     core.m_detectorElements = {0, 1};

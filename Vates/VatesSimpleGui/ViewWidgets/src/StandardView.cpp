@@ -93,8 +93,8 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
 StandardView::StandardView(QWidget *parent,
                            RebinnedSourcesManager *rebinnedSourcesManager,
                            bool createRenderProxy)
-    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(NULL),
-      m_sliceMDAction(NULL), m_cutMDAction(NULL), m_unbinAction(NULL) {
+    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(nullptr),
+      m_sliceMDAction(nullptr), m_cutMDAction(nullptr), m_unbinAction(nullptr) {
   this->m_ui.setupUi(this);
   this->m_cameraReset = false;
 
@@ -111,6 +111,10 @@ StandardView::StandardView(QWidget *parent,
   // Set the cut button to create a slice on the data
   QObject::connect(this->m_ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
+
+  // Set the cut button to create a slice on the data
+  QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this,
+                   SLOT(onThresholdButtonClicked()));
 
   // Listen to a change in the active source, to adapt our rebin buttons
   QObject::connect(&pqActiveObjects::instance(),
@@ -175,6 +179,7 @@ void StandardView::setupViewButtons() {
 void StandardView::destroyView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(QString("Slice"));
+  this->destroyFilter(QString("Threshold"));
   builder->destroy(this->m_view);
 }
 
@@ -182,7 +187,7 @@ pqRenderView *StandardView::getView() { return this->m_view.data(); }
 
 void StandardView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
-  if (NULL == this->origSrc) {
+  if (!this->origSrc) {
     return;
   }
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -205,15 +210,11 @@ void StandardView::render() {
   if (!this->isPeaksWorkspace(this->origSrc)) {
     vtkSMPVRepresentationProxy::SetScalarColoring(
         drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
-    // drep->getProxy()->UpdateVTKObjects();
-    // vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
-    //                                                               "signal",
-    //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
-  this->resetDisplay();
   emit this->triggerAccept();
+  this->resetDisplay();
 }
 
 void StandardView::onCutButtonClicked() {
@@ -225,6 +226,21 @@ void StandardView::onCutButtonClicked() {
   // Apply cut to currently viewed data
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->createFilter("filters", "Cut", this->getPvActiveSrc());
+
+  // We need to attach the visibility listener to the newly
+  // created filter, this is required for automatic updating the color scale
+  setVisibilityListener();
+}
+
+void StandardView::onThresholdButtonClicked() {
+  // check that has active source
+  if (!hasActiveSource()) {
+    return;
+  }
+
+  // Apply cut to currently viewed data
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  builder->createFilter("filters", "Threshold", this->getPvActiveSrc());
 
   // We need to attach the visibility listener to the newly
   // created filter, this is required for automatic updating the color scale

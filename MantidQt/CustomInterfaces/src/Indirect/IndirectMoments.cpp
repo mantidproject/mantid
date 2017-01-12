@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectMoments.h"
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>

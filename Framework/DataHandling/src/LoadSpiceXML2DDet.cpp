@@ -68,24 +68,24 @@ void SpiceXMLNode::setParameters(const std::string &nodetype,
   }
 
   // unit
-  if (nodeunit.size() > 0) {
+  if (!nodeunit.empty()) {
     m_unit = nodeunit;
   }
 
   // description
-  if (nodedescription.size() > 0)
+  if (!nodedescription.empty())
     m_description = nodedescription;
 }
 
 /** Check whether XML has unit set
  */
-bool SpiceXMLNode::hasUnit() const { return (m_unit.size() > 0); }
+bool SpiceXMLNode::hasUnit() const { return (!m_unit.empty()); }
 
 /** Check whether XML node has value set
  * @brief SpiceXMLNode::hasValue
  * @return
  */
-bool SpiceXMLNode::hasValue() const { return (m_value.size() > 0); }
+bool SpiceXMLNode::hasValue() const { return (!m_value.empty()); }
 
 /** Is this node of string type?
  * @brief SpiceXMLNode::isString
@@ -201,10 +201,23 @@ void LoadSpiceXML2DDet::init() {
   declareProperty("PtNumber", 0,
                   "Pt. value for the row to get sample log from. ");
 
+  declareProperty("UserSpecifiedWaveLength", EMPTY_DBL(),
+                  "User can specify the wave length of the instrument if it is "
+                  "drifted from the designed value."
+                  "It happens often.");
+
   declareProperty(
       "ShiftedDetectorDistance", 0.,
       "Amount of shift of the distance between source and detector centre."
       "It is used to apply instrument calibration.");
+
+  declareProperty("DetectorCenterXShift", 0.0, "The amount of shift of "
+                                               "detector center along X "
+                                               "direction in the unit meter.");
+
+  declareProperty("DetectorCenterYShift", 0.0, "The amount of shift of "
+                                               "detector center along Y "
+                                               "direction in the unit meter.");
 }
 
 /** Process inputs arguments
@@ -227,12 +240,17 @@ void LoadSpiceXML2DDet::processInputs() {
 
   // Retreive sample environment data from SPICE scan table workspace
   std::string spicetablewsname = getPropertyValue("SpiceTableWorkspace");
-  if (spicetablewsname.size() > 0)
+  if (!spicetablewsname.empty())
     m_hasScanTable = true;
   else
     m_hasScanTable = false;
 
   m_ptNumber4Log = getProperty("PtNumber");
+
+  m_userSpecifiedWaveLength = getProperty("UserSpecifiedWaveLength");
+
+  m_detXShift = getProperty("DetectorCenterXShift");
+  m_detYShift = getProperty("DetectorCenterYShift");
 }
 
 /** Set up sample logs especially 2theta and diffr for loading instrument
@@ -247,12 +265,13 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
     setupSampleLogFromSpiceTable(outws, spicetablews, m_ptNumber4Log);
   }
 
+  Kernel::DateAndTime anytime(1000);
+
   // Process 2theta
   bool return_true = true;
   if (!outws->run().hasProperty("2theta") &&
       outws->run().hasProperty("_2theta")) {
     // Set up 2theta if it is not set up yet
-    Kernel::DateAndTime anytime(1000);
     double logvalue =
         atof(outws->run().getProperty("_2theta")->value().c_str());
     TimeSeriesProperty<double> *newlogproperty =
@@ -268,8 +287,16 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
     return_true = false;
   }
 
+  // set up the caibrated detector center to beam
+  TimeSeriesProperty<double> *det_dx = new TimeSeriesProperty<double>("deltax");
+  det_dx->addValue(anytime, m_detXShift);
+  outws->mutableRun().addProperty(det_dx);
+
+  TimeSeriesProperty<double> *det_dy = new TimeSeriesProperty<double>("deltay");
+  det_dy->addValue(anytime, m_detYShift);
+  outws->mutableRun().addProperty(det_dy);
+
   // set up Sample-detetor distance calibration
-  Kernel::DateAndTime anytime(1000);
   double sampledetdistance = m_detSampleDistanceShift;
   TimeSeriesProperty<double> *distproperty =
       new TimeSeriesProperty<double>("diffr");
@@ -299,8 +326,14 @@ void LoadSpiceXML2DDet::exec() {
 
   if (m_loadInstrument && can_set_instrument) {
     loadInstrument(outws, m_idfFileName);
-    double wavelength;
-    bool has_wavelength = getHB3AWavelength(outws, wavelength);
+    // set wave length to user specified wave length
+    double wavelength = m_userSpecifiedWaveLength;
+    // if user does not specify wave length then try to get wave length from log
+    // sample _m1 (or m1 as well in future)
+    bool has_wavelength = !(wavelength == EMPTY_DBL());
+    if (!has_wavelength)
+      has_wavelength = getHB3AWavelength(outws, wavelength);
+
     if (has_wavelength) {
       setXtoLabQ(outws, wavelength);
     }
@@ -437,6 +470,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   // Go through all XML nodes to process
   size_t numxmlnodes = vecxmlnode.size();
   bool parsedDet = false;
+  double max_counts = 0.;
   for (size_t n = 0; n < numxmlnodes; ++n) {
     // Process node for detector's count
     const SpiceXMLNode &xmlnode = vecxmlnode[n];
@@ -451,20 +485,20 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
                     << "\n";
 
       // XML file records data in the order of column-major
-      size_t icol = 0;
+      size_t i_col = 0;
       for (size_t i = 0; i < vecLines.size(); ++i) {
         std::string &line = vecLines[i];
 
         // Skip empty line
-        if (line.size() == 0) {
+        if (line.empty()) {
           g_log.debug() << "\tFound empty Line at " << i << "\n";
           continue;
         }
 
         // Check whether it exceeds boundary
-        if (icol == numpixelx) {
+        if (i_col == numpixelx) {
           std::stringstream errss;
-          errss << "Number of non-empty rows (" << icol + 1
+          errss << "Number of non-empty rows (" << i_col + 1
                 << ") in detector data "
                 << "exceeds user defined geometry size " << numpixelx << ".";
           throw std::runtime_error(errss.str());
@@ -478,18 +512,20 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         // in Y direction
         if (veccounts.size() != numpixely) {
           std::stringstream errss;
-          errss << "Row " << icol << " contains " << veccounts.size()
+          errss << "Row " << i_col << " contains " << veccounts.size()
                 << " items other than " << numpixely
                 << " counts specified by user.";
           throw std::runtime_error(errss.str());
         }
 
-        // scan per row
+        // scan per column
         for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
           double counts = atof(veccounts[j_row].c_str());
 
           if (loadinstrument) {
-            size_t wsindex = j_row * numpixely + icol;
+            // the detector ID and ws index are set up in column-major too!
+            size_t wsindex = i_col * numpixelx + j_row;
+            //  size_t wsindex = j_row * numpixely + icol;
             // size_t wsindex = icol * numpixelx + j_row;
             outws->dataX(wsindex)[0] = static_cast<double>(wsindex);
             outws->dataY(wsindex)[0] = counts;
@@ -499,18 +535,23 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
               outws->dataE(wsindex)[0] = 1.0;
 
           } else {
-            outws->dataX(j_row)[icol] = static_cast<double>(j_row);
-            outws->dataY(j_row)[icol] = counts;
+            outws->dataX(j_row)[i_col] = static_cast<double>(j_row);
+            outws->dataY(j_row)[i_col] = counts;
             if (counts > 0)
-              outws->dataE(j_row)[icol] = sqrt(counts);
+              outws->dataE(j_row)[i_col] = sqrt(counts);
             else
-              outws->dataE(j_row)[icol] = 1.0;
+              outws->dataE(j_row)[i_col] = 1.0;
+          }
+
+          // record max count
+          if (counts > max_counts) {
+            max_counts = counts;
           }
         }
 
-        // Update irow
-        icol += 1;
-      }
+        // Update column index (i.e., column number)
+        i_col += 1;
+      } // END-FOR (i-vec line)
 
       // Set flag
       parsedDet = true;
@@ -547,6 +588,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
           << ". Unable to load 2D detector XML file.";
     throw std::runtime_error(errss.str());
   }
+
+  g_log.notice() << "Maximum detector count on it is " << max_counts << "\n";
 
   return outws;
 }
@@ -688,7 +731,7 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
   API::IAlgorithm_sptr loadinst = createChildAlgorithm("LoadInstrument");
   loadinst->initialize();
   loadinst->setProperty("Workspace", matrixws);
-  if (idffilename.size() > 0) {
+  if (!idffilename.empty()) {
     loadinst->setProperty("Filename", idffilename);
   } else
     loadinst->setProperty("InstrumentName", "HB3A");

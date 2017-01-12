@@ -1,4 +1,5 @@
-# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes,
+# pylint: disable = too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *

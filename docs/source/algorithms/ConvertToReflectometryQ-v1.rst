@@ -117,9 +117,9 @@ Normalised Polygon Transformation
     
     pipf, vertexes_pipf = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
 
-    print qxqy.getDimension(0).getName(), qxqy.getDimension(1).getName()
-    print kikf.getDimension(0).getName(), kikf.getDimension(1).getName()
-    print pipf.getDimension(0).getName(), pipf.getDimension(1).getName()
+    print qxqy.getDimension(0).name, qxqy.getDimension(1).name
+    print kikf.getDimension(0).name, kikf.getDimension(1).name
+    print pipf.getDimension(0).name, pipf.getDimension(1).name
 
 
 Output:

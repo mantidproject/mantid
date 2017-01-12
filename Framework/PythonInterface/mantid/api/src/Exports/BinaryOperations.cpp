@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidPythonInterface/kernel/Policies/AsType.h"
 

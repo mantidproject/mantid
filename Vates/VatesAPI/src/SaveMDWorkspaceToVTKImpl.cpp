@@ -1,9 +1,6 @@
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/Normalization.h"
 
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
-
 #include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
@@ -18,6 +15,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
+#include "vtkCallbackCommand.h"
 #include "vtkFloatArray.h"
 #include "vtkNew.h"
 #include "vtkSmartPointer.h"
@@ -26,7 +24,9 @@
 #include "vtkXMLUnstructuredGridWriter.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/round.hpp>
 #include <memory>
+#include <utility>
 
 namespace {
 // This progress object gets called by PV (and is used by the plugins),
@@ -46,10 +46,10 @@ bool has_suffix(const std::string &stringToCheck, const std::string &suffix) {
   return isSuffixInString;
 }
 
-bool isNDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
+bool isNDWorkspace(const Mantid::API::IMDWorkspace &workspace,
                    const size_t dimensionality) {
   auto actualNonIntegratedDimensionality =
-      workspace->getNonIntegratedDimensions().size();
+      workspace.getNonIntegratedDimensions().size();
   return actualNonIntegratedDimensionality == dimensionality;
 }
 }
@@ -60,21 +60,23 @@ namespace VATES {
 const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = "vts";
 const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = "vtu";
 
-SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() { setupMembers(); }
+SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent)
+    : m_progress(parent, 0.0, 1.0, 101) {
+  setupMembers();
+}
 
 /**
  * Save an MD workspace to a vts/vtu file.
  * @param workspace: the workspace which is to be saved.
  * @param filename: the name of the file to which the workspace is to be saved.
  * @param normalization: the visual normalization option
- * @param thresholdRange: a plolicy for the threshold range
  * @param recursionDepth: the recursion depth for MDEvent Workspaces determines
  * @param compressorType: the compression type used by VTK
  * from which level data should be displayed
  */
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace, const std::string &filename,
-    VisualNormalization normalization, ThresholdRange_scptr thresholdRange,
+    const Mantid::API::IMDWorkspace_sptr &workspace,
+    const std::string &filename, VisualNormalization normalization,
     int recursionDepth, const std::string &compressorType) const {
   auto isHistoWorkspace =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
@@ -95,11 +97,11 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     }
   }();
   // Define a time slice.
-  auto time = selectTimeSliceValue(workspace);
+  auto time = selectTimeSliceValue(*workspace);
 
   // Get presenter and data set factory set up
-  auto factoryChain = getDataSetFactoryChain(isHistoWorkspace, thresholdRange,
-                                             normalization, time);
+  auto factoryChain =
+      getDataSetFactoryChain(isHistoWorkspace, normalization, time);
 
   auto presenter = getPresenter(isHistoWorkspace, workspace, recursionDepth);
 
@@ -145,22 +147,19 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
 /**
  * Creates the correct factory chain based
  * @param isHistoWorkspace: flag if workspace is MDHisto
- * @param thresholdRange: the threshold range
  * @param normalization: the normalization option
  * @param time: the time slice info
  * @returns a data set factory
  */
 std::unique_ptr<vtkDataSetFactory>
 SaveMDWorkspaceToVTKImpl::getDataSetFactoryChain(
-    bool isHistoWorkspace, ThresholdRange_scptr thresholdRange,
-    VisualNormalization normalization, double time) const {
+    bool isHistoWorkspace, VisualNormalization normalization,
+    double time) const {
   std::unique_ptr<vtkDataSetFactory> factory;
   if (isHistoWorkspace) {
-    factory = createFactoryChainForHistoWorkspace(thresholdRange, normalization,
-                                                  time);
+    factory = createFactoryChainForHistoWorkspace(normalization, time);
   } else {
-    factory = createFactoryChainForEventWorkspace(thresholdRange, normalization,
-                                                  time);
+    factory = createFactoryChainForEventWorkspace(normalization, time);
   }
   return factory;
 }
@@ -195,6 +194,22 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
   return presenter;
 }
 
+void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
+                      void *clientData, void *vtkNotUsed(callData)) {
+  vtkXMLWriter *testFilter = dynamic_cast<vtkXMLWriter *>(caller);
+  if (!testFilter)
+    return;
+  const char *progressText = testFilter->GetProgressText();
+  if (progressText) {
+    reinterpret_cast<Kernel::ProgressBase *>(clientData)
+        ->report(boost::math::iround(testFilter->GetProgress() * 100.0),
+                 progressText);
+  } else {
+    reinterpret_cast<Kernel::ProgressBase *>(clientData)
+        ->report(boost::math::iround(testFilter->GetProgress() * 100.0));
+  }
+}
+
 /**
  * Write an unstructured grid or structured grid to a vtk file.
  * @param writer: a vtk xml writer
@@ -206,6 +221,10 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
     vtkXMLWriter *writer, vtkDataSet *dataSet, const std::string &filename,
     vtkXMLWriter::CompressorType compressor) const {
+  vtkNew<vtkCallbackCommand> progressCallback;
+  progressCallback->SetCallback(ProgressFunction);
+  writer->AddObserver(vtkCommand::ProgressEvent, progressCallback.GetPointer());
+  progressCallback->SetClientData(&m_progress);
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
   writer->SetCompressorType(compressor);
@@ -231,7 +250,7 @@ SaveMDWorkspaceToVTKImpl::getAllowedNormalizationsInStringRepresentation()
 
 VisualNormalization
 SaveMDWorkspaceToVTKImpl::translateStringToVisualNormalization(
-    const std::string normalization) const {
+    const std::string &normalization) const {
   return m_normalizations.at(normalization);
 }
 
@@ -243,26 +262,6 @@ void SaveMDWorkspaceToVTKImpl::setupMembers() {
                            VisualNormalization::NumEventsNormalization);
   m_normalizations.emplace("VolumeNormalization",
                            VisualNormalization::VolumeNormalization);
-
-  m_thresholds.emplace_back("IgnoreZerosThresholdRange");
-  m_thresholds.emplace_back("NoThresholdRange");
-}
-
-std::vector<std::string>
-SaveMDWorkspaceToVTKImpl::getAllowedThresholdsInStringRepresentation() const {
-  return m_thresholds;
-}
-
-ThresholdRange_scptr SaveMDWorkspaceToVTKImpl::translateStringToThresholdRange(
-    const std::string thresholdRange) const {
-  if (thresholdRange == m_thresholds[0]) {
-    return boost::make_shared<IgnoreZerosThresholdRange>();
-  } else if (thresholdRange == m_thresholds[1]) {
-    return boost::make_shared<NoThresholdRange>();
-  } else {
-    throw std::runtime_error("SaveMDWorkspaceToVTK: The selected threshold "
-                             "range seems to be incorrect.");
-  }
 }
 
 /**
@@ -271,10 +270,10 @@ ThresholdRange_scptr SaveMDWorkspaceToVTKImpl::translateStringToThresholdRange(
  * @return either the first time entry in case of a 4D workspace or else 0.0
  */
 double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(
-    Mantid::API::IMDWorkspace_sptr workspace) const {
+    const Mantid::API::IMDWorkspace &workspace) const {
   double time = 0.0;
   if (is4DWorkspace(workspace)) {
-    auto timeLikeDimension = workspace->getDimension(3);
+    auto timeLikeDimension = workspace.getDimension(3);
     time = static_cast<double>(timeLikeDimension->getMinimum());
   }
   return time;
@@ -286,7 +285,7 @@ double SaveMDWorkspaceToVTKImpl::selectTimeSliceValue(
  * @return true if the workspace is 4D else false
  */
 bool SaveMDWorkspaceToVTKImpl::is4DWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace) const {
+    const Mantid::API::IMDWorkspace &workspace) const {
   const size_t dimensionality = 4;
   return isNDWorkspace(workspace, dimensionality);
 }
@@ -297,7 +296,7 @@ bool SaveMDWorkspaceToVTKImpl::is4DWorkspace(
  * @return true if the workspace is 3D else false
  */
 bool SaveMDWorkspaceToVTKImpl::is3DWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace) const {
+    const Mantid::API::IMDWorkspace &workspace) const {
   const size_t dimensionality = 3;
   return isNDWorkspace(workspace, dimensionality);
 }

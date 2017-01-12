@@ -1,4 +1,5 @@
 #pylint: disable=W0403,R0902
+import numpy
 from fourcircle_utility import *
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
@@ -6,7 +7,7 @@ from mantid.kernel import V3D
 __author__ = 'wzz'
 
 
-class PeakProcessHelper(object):
+class PeakProcessRecord(object):
     """ Class containing a peak's information for GUI
     In order to manage some operations for a peak
     It does not contain peak workspace but will hold
@@ -25,6 +26,7 @@ class PeakProcessHelper(object):
                                                             'exist.' % peak_ws_name
 
         # set
+        self._isCurrentUserHKL = True
         self._myExpNumber = exp_number
         self._myScanNumber = scan_number
         self._myPeakWorkspaceName = peak_ws_name
@@ -33,12 +35,12 @@ class PeakProcessHelper(object):
         self._myDataMDWorkspaceName = None
 
         # Define class variable
-        self._userHKL = None
-        self._currHKL = None
+        # HKL list
+        self._userHKL = None    # user specified HKL
+        self._spiceHKL = None                        # spice HKL
+        self._prevHKL = numpy.array([0., 0., 0.])    # previous HKL
 
-        self._calculatedHKL = numpy.array([0., 0., 0.])
         self._avgPeakCenter = None
-
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
         self._ptIntensityDict = None
@@ -129,29 +131,23 @@ class PeakProcessHelper(object):
         assert peak_ws
         return peak_ws
 
-    def get_current_hkl(self):
-        """ Get user's last setup HKL
+    def get_hkl(self, user_hkl):
+        """ Get HKL from the peak process record
+        :param user_hkl: if selected, then return the HKL set from client (GUI). Otherwise, HKL is retrieved
+                        from original SPICE file.
         :return:
         """
-        if self._currHKL is None:
-            raise RuntimeError('Exp %d Scan %d does not have CURRENT HKL set up yet.' % (self._myExpNumber,
-                                                                                         self._myScanNumber))
-
-        return self._currHKL
-
-    def get_spice_hkl(self):
-        """
-        Get HKL set to this object by client
-        :return: 3-tuple of float as (H, K, L)
-        """
-        # get HKL from SPICE table if not set up yet.
-        if self._userHKL is None:
+        if user_hkl:
+            # return user-specified HKL
+            assert self._userHKL is not None, 'User HKL is None (not set up yet)'
+            ret_hkl = self._userHKL
+        else:
+            # get HKL from SPICE file
+            # if self._spiceHKL is None:
             self.retrieve_hkl_from_spice_table()
+            ret_hkl = self._spiceHKL
 
-        # check
-        assert self._userHKL is not None, 'Spice/user HKL has not been set.'
-
-        return self._userHKL[0], self._userHKL[1], self._userHKL[2]
+        return ret_hkl
 
     def get_weighted_peak_centres(self):
         """ Get the peak centers found in peak workspace.
@@ -207,9 +203,9 @@ class PeakProcessHelper(object):
             hkl += numpy.array([mi_h, mi_k, mi_l])
         # END-FOR
 
-        self._userHKL = hkl/num_rows
+        self._spiceHKL = hkl/num_rows
 
-        return self._userHKL
+        return
 
     def set_data_ws_name(self, md_ws_name):
         """ Set the name of MDEventWorkspace with merged Pts.
@@ -223,29 +219,51 @@ class PeakProcessHelper(object):
 
         return
 
-    def set_hkl(self, hkl):
+    def set_hkl_np_array(self, hkl):
         """ Set current HKL which may come from any source, such as user, spice or calculation
         :param hkl: 3-item-list or 3-tuple for HKL
         :return:
         """
         # check
-        assert len(hkl) == 3
+        assert isinstance(hkl, numpy.ndarray), 'HKL must be a numpy array but not %s.' % type(hkl)
+        assert hkl.shape == (3,), 'HKL must be a 3-element 1-D array but not %s.' % str(hkl.shape)
 
-        self._currHKL = hkl
+        # store the HKL
+        if self._userHKL is not None:
+            self._prevHKL = self._userHKL[:]
+        self._userHKL = hkl
 
         return
 
-    def set_indexed_hkl(self, hkl):
+    def set_hkl(self, mi_h, mi_k, mi_l):
         """
-        Set HKL to PeakInfo.  HKL is calculated via peak indexing
-        Requirements: input HKL is a list of 3 elements
-        :param hkl:
+        Set HKL to this peak Info
+        :param mi_h:
+        :param mi_k:
+        :param mi_l:
         :return:
         """
-        assert isinstance(hkl, list) and len(hkl) == 3
+        assert isinstance(mi_h, float) or isinstance(mi_h, int), 'h must be a float or integer but not %s.' % type(mi_h)
+        assert isinstance(mi_k, float)
+        assert isinstance(mi_l, float)
 
-        for i in xrange(3):
-            self._calculatedHKL[i] = hkl[i]
+        if isinstance(mi_h, int):
+            mi_h = float(mi_h)
+            mi_k = float(mi_k)
+            mi_l = float(mi_l)
+        # END-IF
+
+        if self._userHKL is None:
+            # init HKL
+            self._userHKL = numpy.ndarray(shape=(3,), dtype='float')
+        else:
+            # save previous HKL
+            self._prevHKL = self._userHKL[:]
+
+        # set current
+        self._userHKL[0] = mi_h
+        self._userHKL[1] = mi_k
+        self._userHKL[2] = mi_l
 
         return
 
@@ -275,8 +293,6 @@ class PeakProcessHelper(object):
         """
         assert isinstance(pt_intensity_dict, dict)
 
-        print '[DB...BAT] Pt intensity dict keys: ', pt_intensity_dict.keys()
-
         self._ptIntensityDict = pt_intensity_dict
 
         return
@@ -294,24 +310,6 @@ class PeakProcessHelper(object):
         assert isinstance(sigma, float) and sigma > -0.
 
         self._mySigma = sigma
-
-        return
-
-    def set_user_hkl(self, mi_h, mi_k, mi_l):
-        """
-        Set HKL to this peak Info
-        :param mi_h:
-        :param mi_k:
-        :param mi_l:
-        :return:
-        """
-        assert isinstance(mi_h, float)
-        assert isinstance(mi_k, float)
-        assert isinstance(mi_l, float)
-
-        self._userHKL[0] = mi_h
-        self._userHKL[1] = mi_k
-        self._userHKL[2] = mi_l
 
         return
 

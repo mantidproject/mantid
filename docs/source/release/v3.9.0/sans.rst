@@ -6,8 +6,9 @@ SANS Changes
    :local:
 
 Features
---------
+---------
 
+- Make added multi-period event files available for the ISIS SANS reduction.
 - Added NXcanSAS as an output format of the ISIS SANS Gui.
 
 
@@ -16,8 +17,10 @@ Bug Fixes
 
 |
 
+- Fix for LARMOR multi-period loading. The initial rotation was not correctly applied to all child workspaces.
 - IDF bug when using Larmor in batch mode was resolved.
 - Issue where Gui changes were not picked up for batch reductions was resolved.
+- Fix for merged reduction with phi masking.
 
 X uncertainties (delta-Q)
 -------------------------

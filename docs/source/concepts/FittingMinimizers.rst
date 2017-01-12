@@ -1,4 +1,4 @@
-.. _FittingMinimizers:
+﻿.. _FittingMinimizers:
 
 Comparing Minimizers
 ====================
@@ -25,25 +25,18 @@ Several minimizers are included with Mantid and can be selected in the
 or when using the algorithm :ref:`Fit <algm-Fit>` The following
 options are available:
 
-- `Simplex <https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method>`__
-- `SteepestDescent <https://en.wikipedia.org/wiki/Gradient_descent>`__
-- `Conjugate gradient (Fletcher-Reeves imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
-- `Conjugate gradient (Polak-Ribiere imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
-- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`__
-- `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ (default)
-- Levenberg-MarquardtMD
+- `Simplex <../fitminimizers/Simplex.html>`__
+- `SteepestDescent <../fitminimizers/GradientDescent.html>`__
+- `Conjugate gradient (Fletcher-Reeves imp.) <../fitminimizers/FletcherReeves.html>`__
+- `Conjugate gradient (Polak-Ribiere imp.) <../fitminimizers/PolakRibiere.html>`__
+- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../fitminimizers/BFGS.html>`__
+- `Levenberg-Marquardt <../fitminimizers/LevenbergMarquardt.html>`__ (default)
+- `Levenberg-MarquardtMD <../fitminimizers/LevenbergMarquardtMD.html>`__
 
   A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
-- Damping 
-
-  A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
+- `Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
-- `Trust region
-  <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust
-  region algorithm <https://en.wikipedia.org/wiki/Trust_region>`__ that,
-  at each iteration, calculates and returns the step that reduces the
-  model by an acceptable amount by solving (or approximating a
-  solution to) the trust-region subproblem
+- `Trust region <../fitminimizers/TrustRegion.html>`__
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*

@@ -236,7 +236,7 @@ void LoadSpiceAscii::parseSPICEAscii(
     // Strip
     boost::trim(line);
     // skip for empyt line
-    if (line.size() == 0)
+    if (line.empty())
       continue;
 
     // Comment line for run information
@@ -285,7 +285,8 @@ void LoadSpiceAscii::parseSPICEAscii(
       } else {
         // Not supported
         std::stringstream wss;
-        wss << "Line " << line << " cannot be parsed. It is ignored then.";
+        wss << "File " << filename << ": line \"" << line
+            << "\" cannot be parsed. It is ignored then.";
         g_log.warning(wss.str());
       }
     } // If for run info

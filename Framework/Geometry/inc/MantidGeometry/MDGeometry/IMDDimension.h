@@ -73,7 +73,7 @@ public:
   /// can be usually find by its ID and various
   /// various method exist to manipulate set of dimensions by their names.
   /// @return Dimension ID string.
-  virtual std::string getDimensionId() const = 0;
+  virtual const std::string &getDimensionId() const = 0;
 
   /// @return the minimum extent of this dimension
   virtual coord_t getMinimum() const = 0;
