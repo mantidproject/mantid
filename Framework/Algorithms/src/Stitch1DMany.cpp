@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
 #include <boost/make_shared.hpp>
@@ -20,16 +21,19 @@ DECLARE_ALGORITHM(Stitch1DMany)
 void Stitch1DMany::init() {
 
   declareProperty(
-      make_unique<ArrayProperty<std::string>>("InputWorkspaces",
-                                              Direction::Input),
-      "Input Workspaces. List of histogram workspaces to stitch together.");
+      Kernel::make_unique<ArrayProperty<std::string>>(
+          "InputWorkspaces",
+          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+      "Input Workspaces. List of histogram workspaces to stitch together. At "
+      "least 2 workspaces must be supplied for stitching and all must be of "
+      "the same type.");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output stitched workspace.");
 
   declareProperty(make_unique<ArrayProperty<double>>(
-                      "Params", boost::make_shared<RebinParamsValidator>(true),
+                      "Params", boost::make_shared<RebinParamsValidator>(false),
                       Direction::Input),
                   "Rebinning Parameters. See Rebin for format.");
 
@@ -68,7 +72,8 @@ void Stitch1DMany::init() {
   declareProperty(make_unique<PropertyWithValue<int>>(
                       "ScaleFactorFromPeriod", 1,
                       scaleFactorFromPeriodValidator, Direction::Input),
-                  "Provided index of period to obtain scale factor from.");
+                  "Provided index of period to obtain scale factor from. "
+                  "Periods are indexed from 1.");
 }
 
 /** Load and validate the algorithm's properties.
@@ -168,18 +173,14 @@ std::map<std::string, std::string> Stitch1DMany::validateCommonInputs() {
     errors["InputWorkspaces"] = "At least 2 input workspaces required.";
 
   // Check that all the workspaces are of the same type
-  if (!m_inputWSMatrix.empty() && !m_inputWSMatrix[0].empty()) {
-    const std::string id = m_inputWSMatrix[0][0]->id();
-    for (auto &period : m_inputWSMatrix) {
-      for (auto &inputWS : period) {
-        if (inputWS->id() != id) {
-          errors["InputWorkspaces"] = "All workspaces must be the same type.";
-          break;
-        }
+  const std::string id = m_inputWSMatrix[0][0]->id();
+  for (auto &period : m_inputWSMatrix) {
+    for (auto &inputWS : period) {
+      if (inputWS->id() != id) {
+        errors["InputWorkspaces"] = "All workspaces must be the same type.";
+        break;
       }
     }
-  } else {
-    errors["InputWorkspaces"] = "Input workspaces must be given";
   }
 
   m_startOverlaps = this->getProperty("StartOverlaps");
@@ -201,8 +202,8 @@ std::map<std::string, std::string> Stitch1DMany::validateCommonInputs() {
     errors["EndOverlaps"] =
         "EndOverlaps must have the same number of entries as StartOverlaps.";
 
-  if (m_params.empty())
-    errors["Params"] = "At least one parameter must be given.";
+  // if (m_params.empty())
+  //  errors["Params"] = "At least one parameter must be given.";
 
   m_useManualScaleFactor = this->getProperty("UseManualScaleFactor");
   m_manualScaleFactor = this->getProperty("ManualScaleFactor");
