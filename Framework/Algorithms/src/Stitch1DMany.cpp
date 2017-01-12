@@ -39,11 +39,14 @@ void Stitch1DMany::init() {
 
   declareProperty(
       make_unique<ArrayProperty<double>>("StartOverlaps", Direction::Input),
-      "Start overlaps for stitched workspaces.");
+      "Start overlaps for stitched workspaces. If specified, the number of "
+      "StartOverlaps must be 1 less than the number of input workspaces. "
+      "Optional.");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("EndOverlaps", Direction::Input),
-      "End overlaps for stitched workspaces.");
+      "End overlaps for stitched workspaces. If specified, the number of "
+      "EndOverlaps must be the same as the number of StartOverlaps. Optional.");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
                                                        true, Direction::Input),

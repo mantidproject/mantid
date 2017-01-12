@@ -17,7 +17,11 @@ The algorithm expects pairs of StartOverlaps and EndOverlaps values. The
 order in which these are provided determines the pairing. There should
 be N entries in each of these StartOverlaps and EndOverlaps lists, where
 N = 1 -(No of workspaces to stitch). StartOverlaps and EndOverlaps are
-in the same units as the X-axis for the workspace and are optional.
+in the same units as the X-axis for the workspace and are optional. For
+each pair of these values, the StartOverlaps value cannot exceed its
+corresponding EndOverlaps value. Furthermore, if either the start or end value
+is outside the range of X-axis intersection, they will be forcibly changed to
+the intersection min and max respectively.
 
 The workspaces must be histogrammed. Use
 :ref:`algm-ConvertToHistogram` on workspaces prior to
@@ -27,7 +31,10 @@ This algorithm is also capable of stitching together matrix workspaces
 from multiple workspace groups. In this case, each group must contain the
 same number of workspaces. The algorithm will stitch together the workspaces
 in the first group before stitching workspaces from the next group on top
-of the previous ones.
+of the previous ones. For scaling the workspaces, one can specify
+ScaleFactorFromPeriod to select a period (group index) which will obtain a
+scale factor from the selected period. This scale factor is then applied to
+all other periods when stitching.
 
 Usage
 -----
