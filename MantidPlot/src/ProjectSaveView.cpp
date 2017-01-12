@@ -214,7 +214,6 @@ void ProjectSaveView::save(bool checked) {
  * project.
  */
 void ProjectSaveView::findFilePath() {
-  QString fileName = "";
   QString filter = "MantidPlot project (*.mantid);;";
   filter += "Compressed MantidPlot project (*.mantid.gz)";
 
@@ -222,7 +221,7 @@ void ProjectSaveView::findFilePath() {
   QString filename = QFileDialog::getSaveFileName(this, "Save Project As", "",
                                                   filter, &selectedFilter);
 
-  m_ui.projectPath->setText(fileName);
+  m_ui.projectPath->setText(filename);
 }
 
 // Private helper methods
