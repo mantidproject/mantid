@@ -255,7 +255,8 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       }
       addSampleEnvLogs(seData, nSEEvents, mutableRunInfo);
 
-      m_interrupt = frameData->end_of_run() && m_stopEOR ? true : m_interrupt;
+      if (frameData->end_of_run() && m_stopEOR)
+        m_interrupt = true;
     }
   }
   g_log.debug("Event capture finished");
