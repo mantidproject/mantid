@@ -478,9 +478,9 @@ void MaskDetectors::appendToIndexListFromWS(
 * Append the indices of a workspace corresponding to detector IDs to the
 * given list
 *
-* @param detectorsList :: An existing list of detector IDs
+* @param detectorList :: An existing list of detector IDs
 * @param inputWs :: A workspace to mask detectors in
-* @param maskedWorkspace :: A workspace with masked spectra
+* @param maskWs :: A workspace with masked spectra
 * @param range_info    :: tuple containing the information on
 *                      if copied indexes are constrained by ranges and if yes
 *                       -- the range of indexes to topy
