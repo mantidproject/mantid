@@ -66,7 +66,8 @@ class ArgumentParser(object):
             "--cor",
             required=False,
             type=float,
-            help="Provide a pre-calculated centre of rotation. If one is not provided it will be automatically calculated"
+            help="Provide a pre-calculated centre of rotation. If one is not provided it will be automatically "
+                 "calculated "
         )
 
         grp_req.add_argument(
@@ -321,7 +322,7 @@ class ArgumentParser(object):
 
         if self._args.region_of_interest:
             roi_coords = ast.literal_eval(self._args.region_of_interest)
-            pre_config.region_of_interest = [int(val) for val in roi_coords]
+            pre_config.crop_coords = [int(val) for val in roi_coords]
 
         if 'yes' == self._args.mcp_corrections:
             pre_config.mcp_corrections = True

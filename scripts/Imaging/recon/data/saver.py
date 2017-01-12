@@ -1,4 +1,4 @@
-def save_recon_output(self, recon_data, cfg, save_horiz_slices=False):
+def save_recon_output(recon_data, cfg, save_horiz_slices=False):
     """
     Save output reconstructed volume in different forms.
 
@@ -14,12 +14,12 @@ def save_recon_output(self, recon_data, cfg, save_horiz_slices=False):
     out_recon_dir = os.path.join(output_dir, 'reconstructed')
     self.tomo_print_timed_start(
         " * Starting saving slices of the reconstructed volume in: {0}...".
-            format(out_recon_dir))
+        format(out_recon_dir))
     tomoio.save_recon_as_vertical_slices(
         recon_data,
         out_recon_dir,
         name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
-        img_format=cfg.preproc_cfg.out_img_format)
+        img_format=cfg.pre.out_img_format)
 
     # Sideways slices:
     save_horiz_slices = False
@@ -30,11 +30,11 @@ def save_recon_output(self, recon_data, cfg, save_horiz_slices=False):
             recon_data,
             out_horiz_dir,
             name_prefix=self._OUT_HORIZ_SLICES_SUBDIR,
-            img_format=cfg.preproc_cfg.out_img_format)
+            img_format=cfg.pre.out_img_format)
 
     self.tomo_print_timed_stop(
         " * Finished saving slices of the reconstructed volume in: {0}".
-            format(out_recon_dir))
+        format(out_recon_dir))
 
 
 def save_preproc_images(data, config):
@@ -53,17 +53,21 @@ def save_preproc_images(data, config):
     min_pix = np.amin(data)
     max_pix = np.amax(data)
 
-    preproc_dir = os.path.join(config.func.output_dir, config.func.preproc_images_subdir)
+    preproc_dir = os.path.join(
+        config.func.output_dir, config.func.preproc_images_subdir)
 
-    h.pstart(" * Saving all pre-processed images (data) into {0} dtype: {1}".format(preproc_dir, data.dtype))
+    h.pstart(
+        " * Saving all pre-processed images (data) into {0} dtype: {1}".format(preproc_dir, data.dtype))
 
     make_dirs_if_needed(preproc_dir)
 
     for idx in range(0, data.shape[0]):
         # rescale_intensity has issues with float64=>int16
-        write_image(data[idx, :, :], os.path.join(preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+        write_image(data[idx, :, :], os.path.join(
+            preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
         # write_image(data[idx, :, :], min_pix, max_pix,
-        #             os.path.join(preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+        # os.path.join(preproc_dir, 'out_preproc_proj_image' +
+        # str(idx).zfill(6)))
 
     h.pstop(" * Saving pre-processed images finished.")
 
@@ -134,7 +138,7 @@ def gen_readme_summary_begin(filename, cfg, cmd_line):
                        "Pre-processing parameters\n"
                        "--------------------------\n")
         oreadme.write(preproc_hdr)
-        oreadme.write(str(cfg.preproc_cfg))
+        oreadme.write(str(cfg.pre))
         oreadme.write("\n")
 
         postproc_hdr = ("\n"

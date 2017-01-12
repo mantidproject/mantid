@@ -22,32 +22,33 @@ def execute(config, cmd_line=None):
 
     tool = load_tool(config, h)
 
-    data, flat, dark = load_data(config, h)
+    sample, flat, dark = load_data(config, h)
 
     # todo new class for readme
-    _readme_fullpath = os.path.join(config.func.output_dir, config.func.readme_file_name)
+    _readme_fullpath = os.path.join(
+        config.func.output_dir, config.func.readme_file_name)
     generate_readme_begin(_readme_fullpath, cmd_line, config, h)
 
-    pre_processing(config, data, flat, dark)
+    pre_processing(config, sample, flat, dark)
 
     # Save pre-proc images, print inside
     import recon.data.saver as saver
-    saver.save_preproc_images(data, config)
+    saver.save_preproc_images(sample, config)
 
     # ----------------------------------------------------------------
 
     # Reconstruction
-    data = tool.run_reconstruct(data, config)
+    sample = tool.run_reconstruct(sample, config)
 
     post_processing()
 
     # Save output from the reconstruction
-    saver.save_recon_output(data, config)
+    saver.save_recon_output(sample, config)
 
     save_netcdf_volume()
 
     # todo new class for readme
-    generate_readme_end(_readme_fullpath, data, config)
+    generate_readme_end(_readme_fullpath, sample, config)
 
     pass
 
@@ -78,8 +79,8 @@ def pre_processing(config, data, flat, dark):
     # median filter
     data = median_filter.execute(data, config)
 
-
     return data
+
 
 def post_processing():
     pass
@@ -120,7 +121,8 @@ def generate_readme_end(_readme_fullpath, data, config):
     # TODO move this functionality into a new readme writer class!
 
     # saver.gen_readme_summary_end(
-    #     _readme_fullpath,(data, preproc_data, recon_data), tstart, t_recon_end - t_recon_start)
+    # _readme_fullpath,(data, preproc_data, recon_data), tstart, t_recon_end -
+    # t_recon_start)
 
 
 def load_tool(config, h):
@@ -139,11 +141,11 @@ def load_data(config, h):
 
     from recon.data import loader
 
-    data, white, dark = loader.read_in_stack(config)
+    sample, flat, dark = loader.read_in_stack(config)
 
     h.pstop(" * Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
-        data.shape, data.dtype))
+        sample.shape, sample.dtype))
 
-    h.check_data_stack(data)
+    h.check_data_stack(sample)
 
-    return dark, data, white
+    return sample, flat, dark

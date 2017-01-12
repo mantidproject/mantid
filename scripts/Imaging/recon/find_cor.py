@@ -17,7 +17,7 @@ def execute(config):
     from recon.tools import tool_importer
 
     # tomopy is the only supported tool for now
-    tool = tool_importer.import_tool(config.alg_cfg.tool)
+    tool = tool_importer.import_tool(config.func.tool)
 
     h.pstop(" * Tool loaded.")
 
@@ -25,9 +25,7 @@ def execute(config):
     h.pstart(" * Loading data...")
 
     from recon.data import loader
-    sample, white, dark = loader.read_in_stack(
-        config.preproc_cfg.input_dir, config.preproc_cfg.in_img_format,
-        config.preproc_cfg.input_dir_flat, config.preproc_cfg.input_dir_dark)
+    sample, flat, dark = loader.read_in_stack(config)  # and onwards we go!
 
     h.pstop(
         " * Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
@@ -40,24 +38,19 @@ def execute(config):
 
     h.pstart(" * Rotating stack...")
 
-    sample, white, dark = rotate_stack.execute(sample, config.preproc_cfg)
+    sample, flat, dark = rotate_stack.execute(sample, config, flat, dark)
 
     h.pstop(" * Finished rotating stack.")
 
     h.pstart(" * Cropping images...")
     # crop the ROI, this is done first, so beware of what the correct ROI
     # coordinates are
-    sample = crop_coords.execute(sample, config.preproc_cfg)
+    sample = crop_coords.execute(sample, config)
 
     h.pstop("* Finished cropping images.")
 
-    # sanity check
-    h.tomo_print(" * Sanity check on data", 0)
-    h.check_data_stack(sample)
-
     num_projections = sample.shape[0]
-    projection_angle_increment = float(
-        config.preproc_cfg.max_angle) / (num_projections - 1)
+    projection_angle_increment = float(config.pre.max_angle) / num_projections
 
     h.tomo_print(" * Calculating projection angles")
     projection_angles = np.arange(
@@ -71,11 +64,13 @@ def execute(config):
 
     # depending on the number of COR projections it will select different
     # slice indices
-    checked_projections = 6
+    checked_projections = config.func.num_iter
     slice_indices = []
     current_slice_index = 0
 
-    if checked_projections < 2:
+    # if we are checking a single projection
+    # or the data we've sent in is a single image
+    if checked_projections == 1 or sample.shape[0] <= 1:
         # this will give us the middle slice
         current_slice_index = int(size / 2)
         slice_indices.append(current_slice_index)
@@ -84,15 +79,15 @@ def execute(config):
             current_slice_index += int(size / checked_projections)
             slice_indices.append(current_slice_index)
 
-    h.pstart(" * Starting COR calculation on " +
-             str(checked_projections) + " projections.")
+    h.pstart(
+        " * Starting COR calculation on {0} projections.".format(checked_projections))
 
-    crop_coords = config.preproc_cfg.crop_coords[0]
+    left_crop_pos = config.pre.crop_coords[0]
     image_width = sample.shape[2]
 
     # if crop coords match with the image width then the full image was
     # selected
-    pixels_from_left_side = crop_coords if crop_coords - image_width <= 1 else 0
+    pixels_from_left_side = left_crop_pos if left_crop_pos - image_width <= 1 else 0
 
     calculated_cors = []
     for slice_idx in slice_indices:
@@ -112,8 +107,8 @@ def execute(config):
 
     # we add the pixels cut off from the left, to reflect the full image in
     # Mantid
-    h.tomo_print(" * Printing average COR in relation to cropped image {0}:{1}".format(
-        str(config.preproc_cfg.crop_coords), str(round(average_cor_relative_to_crop))))
+    h.tomo_print(" * Printing average COR in relation to image crop {0}: {1}".format(
+        config.pre.crop_coords, round(average_cor_relative_to_crop)))
 
-    h.tomo_print(" * Printing average COR in relation to FULL image:{0}".format(
-        str(round(average_cor_relative_to_full_image))))
+    h.tomo_print(" * Printing average COR in relation to non-cropped image: {0}".format(
+        round(average_cor_relative_to_full_image)))

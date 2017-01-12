@@ -32,7 +32,7 @@ class PreProcConfig(object):
         self.normalize_proton_charge = False
 
         # all coords outside the ROI will be cropped
-        self.region_of_interest = None
+        self.crop_coords = None
         self.cut_off_level = 0
         self.mcp_corrections = True
         self.scale_down = 0
@@ -63,7 +63,7 @@ class PreProcConfig(object):
         mystr += "Maximum angle:: {0}\n".format(self.max_angle)
         mystr += "Center of rotation: {0}\n".format(self.cor)
         mystr += "Region of interest (crop coordinates): {0}\n".format(
-            self.region_of_interest)
+            self.crop_coords)
         mystr += "Normalize by flat/dark images: {0}\n".format(
             self.normalize_flat_dark)
         mystr += "Normalize by air region: {0}\n".format(

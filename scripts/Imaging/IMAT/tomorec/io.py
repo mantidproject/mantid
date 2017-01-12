@@ -44,7 +44,8 @@ def _import_pyfits():
         try:
             import astropy.io.fits as pyfits
         except ImportError:
-            raise ImportError("Cannot find the package 'pyfits' which is required to read/write FITS image files")
+            raise ImportError(
+                "Cannot find the package 'pyfits' which is required to read/write FITS image files")
 
     return pyfits
 
@@ -74,75 +75,6 @@ def make_dirs_if_needed(dirname):
     absname = os.path.abspath(dirname)
     if not os.path.exists(absname):
         os.makedirs(absname)
-
-#pylint: disable=too-many-arguments
-
-
-def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
-                rescale_intensity=False):
-    """
-    Output image data, given as a numpy array, to a file, in a given image format.
-    Assumes that the output directory exists (must be checked before). The pixel
-    values are rescaled in the range [min_pix, max_pix] which would normally be set
-    to the minimum/maximum values found in a stack of images.
-
-    @param img_data :: image data in the usual numpy representation
-
-    @param min_pix :: minimum reference value to rescale data (may be local to an
-    image or global for a stack of images)
-    @param max_pix :: maximum reference value to rescale data (may be local to an
-    image or global for a stack of images)
-
-    @param filename :: file name, including directory and extension
-    @param img_format :: image file format
-    @param dtype :: can be used to force a pixel type, otherwise the type
-    of the input data is used
-
-    Returns:: name of the file saved
-    """
-    if not img_format:
-        img_format = 'png'
-    filename = filename + '.' + img_format
-
-    # The special case dtype = 'uint8' could be handled with bytescale:
-    # img_data = scipy.misc.bytescale(img_data)
-
-    # from bigger to smaller type, example: float32 => uint16
-    if dtype and img_data.dtype != dtype:
-        old_img_data = img_data
-        img_data = np.zeros(old_img_data.shape, dtype='float32')
-        pix_range = max_pix - float(min_pix)
-        scale_factor = (np.iinfo(dtype).max - np.iinfo(dtype).min) / pix_range
-
-        too_verbose = False
-        if too_verbose:
-            print("pix min: {0}, max: {1}, scale_factor: {2}".format(min_pix, max_pix, scale_factor))
-        img_data = scale_factor * (old_img_data - min_pix)
-        img_data = img_data.astype(dtype=dtype)
-
-    # this rescale intensity would ignore the range of other images in the stack
-    # in addition, it clips if the original values are below/above the destination type limits
-    if rescale_intensity:
-        try:
-            from skimage import exposure
-        except ImportError as exc:
-            raise ImportError("Could not find the exposure package (in skimage) "
-                              "Error details: {0}".format(exc))
-        img_data = exposure.rescale_intensity(img_data, out_range=dtype)#'uint16')
-
-    skio = _import_skimage_io()
-    # Without this plugin tiff files don't seem to be generated correctly for some
-    # bit depths (especially relevant for uint16), but you still need to load the
-    # freeimage plugin with use_plugin!
-    _USING_PLUGIN_TIFFFILE = True
-    if img_format == 'tiff' and _USING_PLUGIN_TIFFFILE:
-        # compression option intentionally not used: compress=6, 3rd party tools have
-        # issues loading compressed tiff files)
-        skio.imsave(filename, img_data, plugin='tifffile')
-    else:
-        skio.imsave(filename, img_data, plugin='freeimage')
-
-    return filename
 
 
 def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
@@ -216,7 +148,7 @@ def _agg_img(acc, img_data, agg_method=None, index=1):
     if 'sum' == agg_method:
         acc = np.add(acc, img_data)
     elif 'average' == agg_method:
-        acc = np.add((index-1)*acc/index, img_data/index)
+        acc = np.add((index - 1) * acc / index, img_data / index)
 
     return acc
 
@@ -237,7 +169,7 @@ def _alphanum_key_split(path_str):
     https://dave.st.germa.in/blog/2007/12/11/exception-handling-slow/
     """
     ALPHA_NUM_SPLIT_RE = re.compile('([0-9]+)')
-    return [ int(c) if c.isdigit() else c for c in ALPHA_NUM_SPLIT_RE.split(path_str) ]
+    return [int(c) if c.isdigit() else c for c in ALPHA_NUM_SPLIT_RE.split(path_str)]
 
 
 def _read_img(filename, file_extension=None):
@@ -262,7 +194,8 @@ def _read_img(filename, file_extension=None):
         img_arr = skio.imread(filename)
 
     else:
-        raise ValueError("Don't know how to load a file with this extension: {0}".format(file_extension))
+        raise ValueError(
+            "Don't know how to load a file with this extension: {0}".format(file_extension))
 
     return img_arr
 
@@ -281,7 +214,8 @@ def _read_listed_files(files, slice_img_shape, file_extension, dtype):
     to the number of files, and the sizes of the second and third dimensions equal to
     the sizes given in the input slice_img_shape
     """
-    data = np.zeros((len(files), slice_img_shape[0], slice_img_shape[1]), dtype=dtype)
+    data = np.zeros((len(files), slice_img_shape[
+                    0], slice_img_shape[1]), dtype=dtype)
     for idx, in_file in enumerate(files):
         try:
             data[idx, :, :] = _read_img(in_file, file_extension)
@@ -316,7 +250,8 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension, i
             print("Could not find any flat field / open beam image files in: {0}".
                   format(flat_field_prefix))
         else:
-            imgs_stack = _read_listed_files(files_match, img_shape, file_extension, data_dtype)
+            imgs_stack = _read_listed_files(
+                files_match, img_shape, file_extension, data_dtype)
             avg = np.mean(imgs_stack, axis=0)
 
     return avg
@@ -384,9 +319,11 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
     files_match.sort(key=_alphanum_key_split)
 
     if verbose:
-        print("Found {0} image files in {1}".format(len(files_match), sample_path))
+        print("Found {0} image files in {1}".format(
+            len(files_match), sample_path))
 
-    # It is assumed that all images have the same size and properties as the first.
+    # It is assumed that all images have the same size and properties as the
+    # first.
     try:
         first_img = _read_img(files_match[0], file_extension)
     except RuntimeError as exc:
@@ -400,7 +337,8 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
         data_dtype = np.uint16
 
     img_shape = first_img.shape
-    sample_data = _read_listed_files(files_match, img_shape, file_extension, data_dtype)
+    sample_data = _read_listed_files(
+        files_match, img_shape, file_extension, data_dtype)
 
     flat_avg = get_flat_dark_stack(flat_field_path, flat_field_prefix,
                                    flat_field_prefix, file_extension,
@@ -428,7 +366,8 @@ def save_recon_as_vertical_slices(recon_data, output_dir, img_format='tiff',
     max_pix = np.amax(recon_data)
     for idx in range(0, recon_data.shape[0]):
         write_image(recon_data[idx, :, :], min_pix, max_pix,
-                    os.path.join(output_dir, name_prefix + str(idx).zfill(zero_fill)),
+                    os.path.join(output_dir, name_prefix +
+                                 str(idx).zfill(zero_fill)),
                     img_format=img_format, dtype='uint16')
 
 
@@ -446,7 +385,8 @@ def save_recon_as_horizontal_slices(recon_data, out_horiz_dir, img_format='tiff'
     make_dirs_if_needed(out_horiz_dir)
     for idx in range(0, recon_data.shape[1]):
         write_image(recon_data[:, idx, :], np.amin(recon_data), np.amax(recon_data),
-                    os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
+                    os.path.join(out_horiz_dir, name_prefix +
+                                 str(idx).zfill(zero_fill)),
                     img_format=img_format, dtype='uint16')
 
 
@@ -461,7 +401,8 @@ def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     try:
         from scipy.io import netcdf_file
     except ImportError as exc:
-        print(" WARNING: could not save NetCDF file. Import error: {0}".format(exc))
+        print(
+            " WARNING: could not save NetCDF file. Import error: {0}".format(exc))
 
     xsize = recon_data.shape[0]
     ysize = recon_data.shape[1]
@@ -474,7 +415,7 @@ def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     ncfile.createDimension('z', zsize)
     print(" Creating netCDF volume data variable")
     dtype = 'int16'
-    data = ncfile.createVariable('data', np.dtype(dtype).char, ('x','y','z'))
+    data = ncfile.createVariable('data', np.dtype(dtype).char, ('x', 'y', 'z'))
     print(" Data shape: {0}".format(data.shape))
     print(" Loading/assigning data...")
 

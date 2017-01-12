@@ -26,12 +26,13 @@ def import_tool(tool):
         raise ValueError("The name of a reconstruction tool is required as a string. Got: {0}".
                          format(tool))
     if 'tomopy' == tool:
-        from . import tomopy_tool
-        tomopy_tool.import_self()
+        from recon.tools.tomopy_tool import TomoPyTool
+        return TomoPyTool.import_self()
 
     elif 'astra' == tool:
-        from . import astra_tool
-        astra_tool.import_self()
+        from recon.tools.astra_tool import AstraTool
+
+        return AstraTool.import_self()
 
     else:
         raise ValueError("Internal inconsistency. Tried to import unknown tool: {0}".format(tool))

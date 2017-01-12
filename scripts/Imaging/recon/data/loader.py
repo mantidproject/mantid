@@ -16,9 +16,9 @@ def read_in_stack(config):
     """
 
     img_format = config.pre.in_img_format
-    sample_path = config.pre.input_dir
-    flat_field_path = config.pre.input_dir_flat
-    dark_field_path = config.pre.input_dir_dark
+    sample_path = config.func.input_dir
+    flat_field_path = config.func.input_dir_flat
+    dark_field_path = config.func.input_dir_dark
 
     supported_exts = ['tiff', 'tif', 'fits', 'fit', 'png']
 
@@ -26,13 +26,13 @@ def read_in_stack(config):
         raise ValueError("File extension not supported: {0}. Supported extensions: {1}".
                          format(img_format, supported_exts))
 
-    sample, white, dark = read_stack_of_images(
+    sample, flat, dark = read_stack_of_images(
         sample_path, flat_field_path, dark_field_path, img_format)
 
     from recon.helper import Helper
     Helper.check_data_stack(sample)
 
-    return sample, white, dark
+    return sample, flat, dark
 
 
 def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
@@ -49,7 +49,7 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     the images in the stack.
 
     :param sample_path :: path to sample images. Can be a file or directory
-    :param flat_file_path :: (optional) path to open beam / white image(s). Can be a file or directory
+    :param flat_file_path :: (optional) path to open beam / flat image(s). Can be a file or directory
     :param dark_file_path :: (optional) path to dark field image(s). Can be a file or directory
     :param file_extension :: file extension (typically 'tiff', 'tif', 'fits', or 'fit' (not including the dot)
     :param file_prefix :: prefix for the image files, to filter files that should not be loaded
@@ -119,11 +119,12 @@ def _get_stack_file_names(path, file_prefix, file_extension):
     if len(files_match) <= 0:
         raise RuntimeError("Could not find any image files in {0}, with prefix: {1}, extension: {2}".
                            format(path, file_prefix, file_extension))
-    files_match.sort(key=_alphanum_key_split)
+    # files_match.sort(key=_alphanum_key_split)
 
     h.tomo_print("Found {0} image files in {1}".format(
         len(files_match), path))
-    return files_match, path
+
+    return files_match
 
 
 def _alphanum_key_split(path_str):
@@ -225,7 +226,8 @@ def _read_listed_files(files, slice_img_shape, file_extension, dtype):
     # FIXME TODO PERFORMANCE CRITICAL
     # TODO Performance Tests
 
-    data = np.zeros((len(files), slice_img_shape[0], slice_img_shape[1]), dtype=dtype)
+    data = np.zeros((len(files), slice_img_shape[
+                    0], slice_img_shape[1]), dtype=dtype)
 
     for idx, in_file in enumerate(files):
         try:

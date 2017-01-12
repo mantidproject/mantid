@@ -36,6 +36,8 @@ class FunctionalConfig(object):
 
         self.cor = None
         self.find_cor = None
+
+        # TODO test verbosity works properly on each level
         self.verbosity = 3  # default 2
         self.crash_on_failed_import = True  # default True
 

@@ -82,7 +82,7 @@ def main():
     # first call, start timer
     helper.total_reconstruction_timer()
 
-    if config.find_cor:
+    if config.func.find_cor:
         # run find_center stuff
         import recon.find_cor
         recon.find_cor.execute(config)

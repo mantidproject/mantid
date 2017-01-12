@@ -13,6 +13,7 @@ from recon.configs.recon_config import ReconstructionConfig
 
 
 class Helper(object):
+
     def __init__(self, config=None):
         """
         :param config:
@@ -20,19 +21,19 @@ class Helper(object):
         self._whole_exec_timer = None
         self._timer_running = False
         self._timer_start = None
-        self._verbosity = 2 if config is None else config.verbosity
+        self._verbosity = 2 if config is None else config.func.verbosity
 
     @staticmethod
-    def check_config_integrity(cfg):
-        if not cfg or not isinstance(cfg, ReconstructionConfig):
+    def check_config_integrity(config):
+        if not config or not isinstance(config, ReconstructionConfig):
             raise ValueError(
                 "Cannot run a reconstruction without a valid configuration")
 
-        if not cfg.preproc_cfg.input_dir:
+        if not config.func.input_dir:
             raise ValueError(
                 "Cannot run a reconstruction without setting the input path")
 
-        if not cfg.postproc_cfg.output_dir:
+        if not config.func.output_dir:
             raise ValueError(
                 "Cannot run a reconstruction without setting the output path")
 
@@ -53,7 +54,8 @@ class Helper(object):
     @staticmethod
     def debug_print_memory_usage_linux(message=""):
         try:
-            # Windows doesn't seem to have resource package, so this will silently fail
+            # Windows doesn't seem to have resource package, so this will
+            # silently fail
             import resource as res
             print(" >> Memory usage",
                   res.getrusage(res.RUSAGE_SELF).ru_maxrss, "KB, ",
@@ -66,10 +68,11 @@ class Helper(object):
     @staticmethod
     def get_memory_usage_linux():
         try:
-            # Windows doesn't seem to have resource package, so this will silently fail
+            # Windows doesn't seem to have resource package, so this will
+            # silently fail
             import resource as res
             memory_string = " {0} KB, {1} MB".format(
-                  res.getrusage(res.RUSAGE_SELF).ru_maxrss, int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024)
+                res.getrusage(res.RUSAGE_SELF).ru_maxrss, int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024)
         except ImportError:
             res = None
             memory_string = " <not available on Windows>"
