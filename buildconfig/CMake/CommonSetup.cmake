@@ -95,22 +95,21 @@ find_package ( OpenSSL REQUIRED )
 
 set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 set ( MtdVersion_WC_LAST_CHANGED_DATETIME 0 )
+set ( MtdVersion_WC_LAST_CHANGED_SHA Unknown )
 set ( NOT_GIT_REPO "Not" )
 
 if ( GIT_FOUND )
   # Get the last revision
-  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long
-                    OUTPUT_VARIABLE GIT_DESCRIBE
+  execute_process ( COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+                    OUTPUT_VARIABLE GIT_SHA_HEAD
                     ERROR_VARIABLE NOT_GIT_REPO
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
   )
   if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
-    # Remove the tag name part
-    string ( REGEX MATCH "[-](.*)" MtdVersion_WC_LAST_CHANGED_REV ${GIT_DESCRIBE} )
-    # Extract the SHA1 part (with a 'g' prefix which stands for 'git')
-    # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
-    string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
-
+    # "git describe" was originally used to produce this variable and this prefixes the short
+    # SHA1 with a 'g'. We keep the same format here now that we use rev-parse
+    set ( MtdVersion_WC_LAST_CHANGED_SHA "g${GIT_SHA_HEAD}" )
     # Get the date of the last commit
     execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -215,8 +214,8 @@ endif()
 
 ###########################################################################
 # Include the file that contains the version number
-# This must come after the git describe business above because it can be
-# used to override the patch version number (MtdVersion_WC_LAST_CHANGED_REV)
+# This must come after the git business above because it can be
+# used to override the patch version number
 ###########################################################################
 include ( VersionNumber )
 
