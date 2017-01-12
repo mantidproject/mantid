@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_IREFLEVENTVIEW_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

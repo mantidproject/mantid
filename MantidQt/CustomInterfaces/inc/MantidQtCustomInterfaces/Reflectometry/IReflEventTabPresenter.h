@@ -1,6 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLEVENTTABPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLEVENTTABPRESENTER_H
 
+#include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

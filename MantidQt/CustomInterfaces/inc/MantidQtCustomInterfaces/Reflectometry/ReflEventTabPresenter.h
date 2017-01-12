@@ -3,6 +3,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflEventTabPresenter.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
