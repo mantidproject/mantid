@@ -744,7 +744,7 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
     auto peakMarkers = po->getSelectedPeakMarkers();
 
     // clear selected peak markers
-    for (auto marker : peakMarkers) {
+    for (const auto &marker : peakMarkers) {
       auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
       if (m_selectedPeaks.first.front() == peak ||
           m_selectedPeaks.second.front() == peak) {
@@ -767,13 +767,13 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
     po->selectIn(rect);
     const auto markers = po->getSelectedPeakMarkers();
 
-    // make the assumption that the first peak found in the recticule is the one
+    // make the assumption that the first peak found in the recticle is the one
     // we wanted.
     if (markers.length() > 0 && origin.isNull()) {
       origin = markers.first()->origin();
     }
 
-    for (auto marker : markers) {
+    for (const auto &marker : markers) {
       // only collect peaks in the same detector & with the same origin
       if (marker->origin() == origin) {
         auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
