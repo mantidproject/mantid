@@ -40,7 +40,7 @@ class FunctionalConfig(object):
         # uint16, float16, float32, float64!
         # Was getting bad data with float16 after median filter and scaling up
         # to save as PNG
-        self.data_dtype = np.uint16
+        self.data_dtype = np.float32
 
         self.cor = None
         self.find_cor = None

@@ -18,8 +18,8 @@ def save_single_image(data,
     import os
 
     # using the config's output dir
-    preproc_dir = os.path.join(config.func.output_dir,
-                               config.func.preproc_images_subdir)
+    preproc_dir = os.path.join(config.func.output_dir, config.func.preproc_images_subdir)
+
     h = Helper(config)
 
     if output_dir is not None:
@@ -31,8 +31,7 @@ def save_single_image(data,
 
     make_dirs_if_needed(preproc_dir)
 
-    write_image(data[:, :], os.path.join(
-        preproc_dir, image_name + str(image_index).zfill(6)))
+    write_image(data, os.path.join(preproc_dir, image_name + str(image_index).zfill(6)))
 
     h.pstop(" * Finished saving single image.")
 
@@ -80,9 +79,8 @@ def save_preproc_images(data, config):
     """
     Save (pre-processed) images from a data array to image files.
 
-    @param data :: The pre-processed data that will be saved
-    @param config :: The full reconstruction config
-    @param out_dtype :: dtype used for the pixel type/depth in the output image files
+    :param data :: The pre-processed data that will be saved
+    :param config :: The full reconstruction config
     """
     import os
     from recon.helper import Helper
@@ -118,8 +116,12 @@ def write_image(img_data, filename):
     """
 
     from recon.data import loader
+
+    # from skimage import exposure
+    # img_data = exposure.rescale_intensity(img_data[:, :], out_range='uint16')
+
     fits = loader.import_pyfits()
-    hdu = fits.PrimaryHDU(img_data[:, :])
+    hdu = fits.PrimaryHDU(img_data)
     hdulist = fits.HDUList([hdu])
     hdulist.writeto(filename + ".fits")
 

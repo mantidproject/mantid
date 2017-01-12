@@ -36,7 +36,7 @@ def execute(data, config):
                 "(air region). Got these coordinates: {0}".format(
                     normalize_air_region))
 
-        right = normalize_air_region[2]  # why do we add 1?
+        right = normalize_air_region[2]
         top = normalize_air_region[1]
         left = normalize_air_region[0]
         bottom = normalize_air_region[3]
@@ -55,7 +55,7 @@ def execute(data, config):
 
         air_sums = np.true_divide(air_sums, np.amax(air_sums))
 
-        h.tomo_print(" Air region sums (relative to maximum): " + air_sums)
+        h.tomo_print(" Air region sums (relative to maximum): {0}".format(air_sums))
 
         for idx in range(0, data.shape[0]):
             data[idx, :, :] = np.true_divide(data[idx, :, :],

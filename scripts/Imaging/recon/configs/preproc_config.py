@@ -9,6 +9,8 @@ class PreProcConfig(object):
     """
 
     DEF_NUM_ITER = 5
+    # TODO document all parameters and make available in GUI
+    # new params: median_filter_mode, clip_min, clip_max
 
     def __init__(self):
         # defaults that look sensible for the MCP detector:
@@ -26,6 +28,10 @@ class PreProcConfig(object):
         # Example: -1 => (-90 degrees == 90 degrees counterclockwise)
         self.rotation = -1
         self.normalize_flat_dark = True
+        # clip normalisation values
+        self.clip_min = 0
+        self.clip_max = 1.5
+
         # list with coordinates of the region for normalization / "air" / not
         # blocked by any object
         self.normalize_air_region = None
@@ -37,6 +43,13 @@ class PreProcConfig(object):
         self.mcp_corrections = True
         self.scale_down = 0
         self.median_filter_size = 3
+        """
+        :param median_filter_mode: Default: 'mirror', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+            The mode parameter determines how the array borders are handled, where cval is the value when
+            mode is equal to 'constant'.
+        """
+        self.median_filter_mode = 'wrap'
+
         self.line_projection = True
         self.stripe_removal_method = 'wavelet-fourier'
 

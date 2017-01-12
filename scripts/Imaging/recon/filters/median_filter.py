@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def _import_scipy(config):
+def _import_scipy_ndimage(config):
     """
     Tries to import scipy so that the median filter can be applied
     :return:
@@ -26,29 +26,27 @@ def _import_scipy(config):
     return scipy_ndimage
 
 
-def execute(data, config, median_filter_mode='mirror'):
+def execute(data, config):
     """
 
     :param data: The data that will be processed with this filter
     :param config: The reconstruction config
-    :param median_filter_mode: Default: 'mirror', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
-                The mode parameter determines how the array borders are handled, where cval is the value when
-                mode is equal to 'constant'.
+
     :return: Returns the processed data
     """
     from recon.helper import Helper
     h = Helper(config)
     median_filter_size = config.pre.median_filter_size
+    median_filter_mode = config.pre.median_filter_mode
 
     if median_filter_size and median_filter_size > 1:
-        scipy_ndimage = _import_scipy(config)
+        scipy_ndimage = _import_scipy_ndimage(config)
         h.pstart(
             " * Starting noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
             format(data.dtype, median_filter_size))
 
         for idx in range(0, data.shape[0]):
-            data[idx] = scipy_ndimage.median_filter(
-                data[idx], median_filter_size, mode=median_filter_mode)
+            data[idx] = scipy_ndimage.median_filter(data[idx], median_filter_size, mode=median_filter_mode)
 
         h.pstop(
             " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
@@ -67,7 +65,7 @@ def execute_ndimensional(data, config):
     from recon.helper import Helper
     h = Helper(config)
 
-    scipy_ndimage = _import_scipy(config)
+    scipy_ndimage = _import_scipy_ndimage(config)
 
     data = scipy_ndimage.median_filter(data,
                                        config.median_filter_size)
@@ -84,7 +82,7 @@ def execute_3d(data, config):
 
     if config.median_filter3d_size and config.median_filter3d_size > 1:
 
-        scipy_ndimage = _import_scipy(config)
+        scipy_ndimage = _import_scipy_ndimage(config)
 
         kernel_size = config.median_filter3d_size
 

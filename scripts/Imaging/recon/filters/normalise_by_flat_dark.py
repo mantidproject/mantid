@@ -35,10 +35,16 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
         norm_divide = norm_flat_img - norm_dark_img
 
         # prevent divide-by-zero issues
-        norm_divide[norm_divide == 0] = 1e-6
+        # norm_divide[norm_divide == 0] = 1e-6
+        clip_min = config.pre.clip_min
+        clip_max = config.pre.clip_max
 
+        # this divide gives bad results
         for idx in range(0, data.shape[0]):
-            data[idx, :, :] = np.true_divide(data[idx, :, :] - norm_dark_img, norm_divide)
+            data[idx, :, :] = np.clip(np.divide(data[idx, :, :] - norm_dark_img, norm_divide), clip_min, clip_max)
+            # d = np.true_divide(d - norm_dark_img, norm_divide)
+            # d[d < 0] = 1
+            # d[d > 1.5] = 1
 
         h.pstop(
             " * Finished normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))

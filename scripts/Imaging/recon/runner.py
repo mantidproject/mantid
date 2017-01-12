@@ -58,21 +58,21 @@ def pre_processing(config, data, flat, dark):
         mcp_corrections, scale_down, median_filter
 
     data, flat, dark = rotate_stack.execute(data, config, flat, dark)
-
-    _debug_save_out_data(data, config, flat, dark, 0)
+    _debug_save_out_data(data, config, flat, dark, 1)
 
     if config.pre.crop_before_normalize:
         data = crop_coords.execute_volume(data, config)
 
-        # todo TEST BELOW
+        # TODO TEST BELOW
         flat = crop_coords.execute_image(flat, config)
         dark = crop_coords.execute_image(dark, config)
 
     data = normalise_by_flat_dark.execute(data, config, flat, dark)
     _debug_save_out_data(data, config, flat, dark, 1)
     return
+
     data = normalise_by_air_region.execute(data, config)
-    _debug_save_out_data(data, config, flat, dark, 2)
+    # _debug_save_out_data(data, config, flat, dark, 2)
 
     if not config.pre.crop_before_normalize:
         # in this case we don't care about cropping the flat and dark
@@ -87,7 +87,7 @@ def pre_processing(config, data, flat, dark):
 
     # median filter
     data = median_filter.execute(data, config)
-    _debug_save_out_data(data, config, flat, dark, 1)
+    _debug_save_out_data(data, config, flat, dark, 5)
 
     return data
 
@@ -97,7 +97,7 @@ def _debug_save_out_data(data, config, flat, dark, append_index):
 
     try:
         saver.save_single_image(
-            data[0], config, 'sample', image_name='sample', image_index=append_index)
+            data, config, 'sample', image_name='sample', image_index=append_index)
         saver.save_single_image(
             flat, config, 'flat', image_name='flat', image_index=append_index)
         saver.save_single_image(
@@ -105,7 +105,7 @@ def _debug_save_out_data(data, config, flat, dark, append_index):
     except IOError as err:
         print("IOError", err, "raised, will retry ONCE with current time appended")
         import time
-        _debug_save_out_data(data, config, flat, dark, str(time.time())[0:8])
+        _debug_save_out_data(data, config, flat, dark, str(time.time())[-2:])
 
 
 def post_processing():

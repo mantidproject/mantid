@@ -19,10 +19,8 @@ def _rotate_stack(data, rotation):
     Returns :: rotated data (stack of images)
     """
 
-    counterclock_rotations = 4 - rotation
-
     for idx in range(0, data.shape[0]):
-        _rotate_image(data[idx], counterclock_rotations)
+        _rotate_image(data[idx], rotation)
 
     return data
 
@@ -51,18 +49,20 @@ def execute(data, config, flat=None, dark=None):
         return data, flat, dark
 
     rotation = config.pre.rotation
+    counterclock_rotations = 4 - rotation
+
     h.pstart(
         " * Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
-            format(rotation * 90, data.dtype))
+            format(counterclock_rotations * 90, data.dtype))
 
-    data = _rotate_stack(data, rotation)
+    data = _rotate_stack(data, counterclock_rotations)
     if flat is not None:
-        flat = _rotate_image(flat, rotation)
+        flat = _rotate_image(flat, counterclock_rotations)
     if dark is not None:
-        dark = _rotate_image(dark, rotation)
+        dark = _rotate_image(dark, counterclock_rotations)
 
     h.pstop(" * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}."
-            .format(rotation * 90, data.dtype))
+            .format(counterclock_rotations * 90, data.dtype))
 
     h.check_data_stack(data)
 
