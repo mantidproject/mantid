@@ -1,11 +1,9 @@
 # Algorithm to start Bayes programs
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
-    WorkspaceGroupProperty, NumericAxis, Progress
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, NumericAxis, Progress
 from mantid.kernel import Direction
 from mantid import logger
 
-import os.path
 import numpy as np
 
 
