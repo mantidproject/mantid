@@ -483,6 +483,7 @@ set ( TEST_FILES
 	SaveNXcanSASTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
+	SaveOpenGenieAsciiTest.h
 	SavePARTest.h
 	SavePDFGuiTest.h
 	SavePHXTest.h

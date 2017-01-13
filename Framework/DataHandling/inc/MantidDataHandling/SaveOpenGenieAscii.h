@@ -9,7 +9,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
-namespace DatHandling {
+namespace DataHandling {
 
 class DLLExport SaveOpenGenieAscii : public Mantid::API::Algorithm {
 public:
@@ -32,6 +32,8 @@ public:
     return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
+
+
 private:
   /// Initialisation code
   void init() override;
@@ -39,38 +41,33 @@ private:
   /// Execution code
   void exec() override;
 
+  /// Typedef the tuple to outputTuple
+  using outputTuple = std::tuple<const std::string, const std::string, const std::string>;
+
+  /// Converts XYE data to OPENGENIE strings
+  std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();
+
   // write file header
   void writeFileHeader(std::ofstream &outfile);
 
-  /// Uses AxisHeader and WriteAxisValues to write out file
-  void axisToFile(const std::string alpha, const std::string singleSpc,
-                  const std::string fourspc, int nBins, bool isHistogram);
+  /// Parses and stores the workspace data into the output buffer
+  void parseWorkspaceData();
 
-  /// Generates the header for the axis which saves to file
-  std::string getAxisHeader(const std::string alpha,
-                            const std::string singleSpc,
-                            const std::string fourspc, int nBins);
+  void getSampleLogs();
 
-  /// Reads if alpha is e then reads the E values accordingly
-  std::string getAxisValues(std::string alpha, int bin,
-                            const std::string singleSpc);
+  /// Generates a ENGINX compatible spectrum number string
+  std::string getSpectrumNumAsString(const API::MatrixWorkspace &wsToSave);
 
-  /// Generates the header which saves to the openGenie file
-  void getSampleLogs(std::string fourspc);
-
-  /// sort and write out the sample logs
-  void writeSampleLogs(std::ofstream &outfile);
-
-  /// add ntc field which is required for OpenGenie
-  void addNtc(const std::string fourspc, int nBins);
+  /// sort and write out the data portion of the file
+  void writeDataToFile(std::ofstream &outfile);
 
   /// apply enginX format field which is required for OpenGenie
-  void applyEnginxFormat(const std::string fourspc);
+  void applyEnginxFormat();
 
   /// Vector to safe sample log
-  std::vector<std::string> logVector;
+  std::vector<outputTuple> m_outputVector;
   /// Workspace
-  API::MatrixWorkspace_sptr ws;
+  API::MatrixWorkspace_sptr m_inputWS;
 };
 }
 }
