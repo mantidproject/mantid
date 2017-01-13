@@ -18,7 +18,7 @@ def save_single_image(data,
     import os
 
     # using the config's output dir
-    preproc_dir = os.path.join(config.func.output_dir, config.func.preproc_images_subdir)
+    preproc_dir = os.path.join(config.func.output_dir, config.func.preproc_subdir)
 
     h = Helper(config)
 
@@ -87,14 +87,14 @@ def save_preproc_images(data, config):
     h = Helper(config)
 
     preproc_dir = os.path.join(
-        config.func.output_dir, config.func.preproc_images_subdir)
+        config.func.output_dir, config.func.preproc_subdir)
 
     h.pstart(
         " * Saving all pre-processed images (data) into {0} dtype: {1}".format(preproc_dir, data.dtype))
 
     make_dirs_if_needed(preproc_dir)
 
-    if not config.func.preproc_images_as_stack:
+    if not config.func.preproc_as_stack:
         for idx in range(0, data.shape[0]):
             write_image(data[idx, :, :], os.path.join(
                 preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))

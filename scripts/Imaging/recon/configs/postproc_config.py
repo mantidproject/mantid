@@ -94,8 +94,8 @@ class PostProcConfig(object):
         self.circular_mask = args.circular_mask
         self.cut_off_level_post = args.cut_off_post
 
-        self.gaussian_filter_size = args.gaussian_filter_size
-        self.gaussian_filter_mode = args.gaussian_filter_mode
+        self.gaussian_filter_size = args.out_gaussian_filter_size
+        self.gaussian_filter_mode = args.out_gaussian_filter_mode
 
         self.median_filter_size = args.median_filter_size
         self.median_filter_mode = args.median_filter_mode

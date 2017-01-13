@@ -27,17 +27,17 @@ python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=
 
 - ### Full `RB000888_test_stack_larmor_summed_201510` dataset <br>
 - ### ROI Crop **[36, 227, 219, 510]** <br>
-- ### **OUT OF BOUNDS** Air Region if `--crop_before_normalize` is SPECIFIED <br>
+- ### **OUT OF BOUNDS** Air Region **[344.000000, 97.000000, 403.000000, 168.000000]** if `--crop-before-normalize` is SPECIFIED <br>
 
 ```python
-python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --air-region='[344.000000, 97.000000, 403.000000, 168.000000]'
+python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --air-region='[344.000000, 97.000000, 403.000000, 168.000000]' --preproc-as-stack
 ```
 ---
 
 - ### Full `RB000888_test_stack_larmor_summed_201510` dataset<br>
 - ### ROI Crop **[36, 0, 219, 229]** <br>
-- ### **WORKING** Air Region for crop if `--crop_before_normalize` is SPECIFIED <br>
+- ### **WORKING** Air Region **[189.000000, 100.000000, 209.000000, 135.000000]** for crop if `--crop-before-normalize` is SPECIFIED <br>
 
 ```python
-python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed --region-of-interest='[36.000000, 0.000000, 219.000000, 229.000000]' --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalize
+python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed --region-of-interest='[36.000000, 0.000000, 219.000000, 229.000000]' --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalize --preproc-as-stack
 ```

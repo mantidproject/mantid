@@ -31,7 +31,7 @@ class PreProcConfig(object):
         self.rotation = False
 
         # clip normalisation values
-        self.clip_min = 0
+        self.clip_min = 0.0
         self.clip_max = 1.5
 
         # list with coordinates of the region for normalization / "air" / not
@@ -115,7 +115,7 @@ class PreProcConfig(object):
             help="Methods supported: 'wf' (Wavelet-Fourier)")
 
         grp_pre.add_argument(
-            "-r"
+            "-r",
             "--rotation",
             required=False,
             type=int,
@@ -133,7 +133,7 @@ class PreProcConfig(object):
         )
 
         grp_pre.add_argument(
-            "--clip-min",
+            "--clip-max",
             required=False,
             type=float,
             default=self.clip_max,
@@ -160,7 +160,7 @@ class PreProcConfig(object):
         )
 
         grp_pre.add_argument(
-            "-m"
+            "-m",
             "--mcp-corrections",
             required=False,
             action='store_true',
@@ -170,8 +170,16 @@ class PreProcConfig(object):
         return parser
 
     def update(self, args):
-        self.region_of_interest = args.region_of_interest
-        self.normalize_air_region = args.air_region
+        import ast
+
+        if args.region_of_interest:
+            roi_coords = ast.literal_eval(args.region_of_interest)
+            self.region_of_interest = [int(val) for val in roi_coords]
+
+        if args.air_region:
+            coords = ast.literal_eval(args.air_region)
+            self.normalize_air_region = [int(val) for val in coords]
+
         self.crop_before_normalize = args.crop_before_normalize
         self.median_filter_size = args.median_filter_size
         self.median_filter_mode = args.median_filter_mode

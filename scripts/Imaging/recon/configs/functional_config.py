@@ -96,7 +96,7 @@ class FunctionalConfig(object):
             "-i", "--input-path", required=True, type=str, help="Input directory", default=self.input_dir)
 
         grp_func.add_argument(
-            "-iflat"
+            "-iflat",
             "--input-path-flat",
             required=False,
             default=self.input_dir_flat,
@@ -104,7 +104,7 @@ class FunctionalConfig(object):
             help="Input directory for flat images")
 
         grp_func.add_argument(
-            "-idark"
+            "-idark",
             "--input-path-dark",
             required=False,
             default=self.input_dir_dark,
@@ -123,7 +123,7 @@ class FunctionalConfig(object):
         grp_func.add_argument(
             "--preproc-subdir",
             required=False,
-            type=float,
+            type=str,
             default=self.preproc_subdir,
             help="Default output-path/pre_processed/. The subdirectory for the pre-processed images."
         )
@@ -163,14 +163,14 @@ class FunctionalConfig(object):
 
         grp_func.add_argument(
             "--out-slices-file-name-prefix",
-            required=True,
+            required=False,
             default=self.out_slices_file_name_prefix,
             type=str,
             help="The prefix for the reconstructed slices files.")
 
         grp_func.add_argument(
             "--out-horiz-slices-subdir",
-            required=True,
+            required=False,
             default=self.out_horiz_slices_subdir,
             type=str,
             help="The subdirectory for the reconstructed horizontal slices")
@@ -203,10 +203,10 @@ class FunctionalConfig(object):
         grp_func.add_argument(
             "-v",
             "--verbosity",
-            action="count",
+            type=int,
             default=self.verbosity,
             help="Verbosity level. Default: 2."
-                 "0 - Silent, no text output at all (not recommended)"
+                 "0 - Silent, no text output at all, except results (not recommended)"
                  "1 - Low verbosity, will output text on each step that is being performed"
                  "2 - Normal verbosity, will output text on each step, including execution time"
                  "3 - High verbosity, will output text on each step, including the name, execution time and memory "

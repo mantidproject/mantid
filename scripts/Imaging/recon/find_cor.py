@@ -50,7 +50,7 @@ def execute(config):
     h.pstop("* Finished cropping images.")
 
     num_projections = sample.shape[0]
-    projection_angle_increment = float(config.pre.max_angle) / num_projections
+    projection_angle_increment = float(config.func.max_angle) / num_projections
 
     h.tomo_print(" * Calculating projection angles")
     projection_angles = np.arange(
@@ -82,7 +82,7 @@ def execute(config):
     h.pstart(
         " * Starting COR calculation on {0} projections.".format(checked_projections))
 
-    left_crop_pos = config.pre.crop_coords[0]
+    left_crop_pos = config.pre.region_of_interest[0]
     image_width = sample.shape[2]
 
     # if crop coords match with the image width then the full image was
@@ -107,10 +107,11 @@ def execute(config):
     # we add the pixels cut off from the left, to reflect the full image in
     # Mantid
     h.tomo_print(" * Printing average COR in relation to image crop {0}: {1}".format(
-        config.pre.crop_coords, round(average_cor_relative_to_crop)))
+        config.pre.region_of_interest, round(average_cor_relative_to_crop)))
 
-    h.tomo_print(" * Printing average COR in relation to non-cropped image: {0}".format(
-        round(average_cor_relative_to_full_image)))
+    # new line for GUI to be able to read
+    h.tomo_print(" * Printing average COR in relation to non-cropped image: \n{0}".format(
+        round(average_cor_relative_to_full_image)), 0)
 
 
 def print_proper_message(cor, h, pixels_from_left_side, slice_idx):
