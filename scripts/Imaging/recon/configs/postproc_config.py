@@ -23,13 +23,11 @@ class PostProcConfig(object):
 
     def __str__(self):
         return "Circular mask: {0}\n".format(self.circular_mask) \
-            "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level_post) \
-            "Gaussian filter size: {0}\n".format(self.gaussian_filter_size) \
-            "Gaussian filter mode: {0}\n".format(self.gaussian_filter_mode) \
-            "Median filter size:: {0}\n".format(self.median_filter_size) \
-            "Median filter mode: {0}\n".format(self.median_filter_mode)
-
-        return mystr
+            + "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level_post) \
+            + "Gaussian filter size: {0}\n".format(self.gaussian_filter_size) \
+            + "Gaussian filter mode: {0}\n".format(self.gaussian_filter_mode) \
+            + "Median filter size:: {0}\n".format(self.median_filter_size) \
+            + "Median filter mode: {0}\n".format(self.median_filter_mode)
 
     def setup_parser(self, parser):
         """
@@ -64,7 +62,7 @@ class PostProcConfig(object):
             help="Apply median filter (2d) on reconstructed volume with the given window size."
         )
 
-        grp_pre.add_argument(
+        grp_post.add_argument(
             "--out-median-filter-mode",
             type=str,
             required=False,
@@ -81,7 +79,7 @@ class PostProcConfig(object):
             help="Apply gaussian filter (2d) on reconstructed volume with the given window size."
         )
 
-        grp_pre.add_argument(
+        grp_post.add_argument(
             "--out-gaussian-filter-mode",
             type=str,
             required=False,
@@ -91,3 +89,14 @@ class PostProcConfig(object):
         )
 
         return parser
+
+    def update(self, args):
+        self.circular_mask = args.circular_mask
+        self.cut_off_level_post = args.cut_off_post
+
+        self.gaussian_filter_size = args.gaussian_filter_size
+        self.gaussian_filter_mode = args.gaussian_filter_mode
+
+        self.median_filter_size = args.median_filter_size
+        self.median_filter_mode = args.median_filter_mode
+        # self.median_filter3d_size = args.median_filter3d_size

@@ -43,7 +43,7 @@ class FunctionalConfig(object):
         self.data_dtype = np.float32
 
         self.cor = None
-        self.find_cor = None
+        self.find_cor = False
 
         # TODO test verbosity works properly on each level
         self.verbosity = 3  # default 2
@@ -58,33 +58,32 @@ class FunctionalConfig(object):
 
         self.tool = 'tomopy'
         self.algorithm = 'gridrec'
-        self.num_iter = None
-        self.regularization = None
+        self.num_iter = 5
         self.max_angle = 360.0
 
     def __str__(self):
         return "Input dir: {0}".format(str(self.input_dir)) \
-            + "Flat dir: {0}".format(str(self.input_dir_flat)) \
-            + "Dark dir: {0}".format(str(self.input_dir_dark)) \
-            + "In image format: {0}".format(str(self.in_img_format)) \
-            + "Pre processing images subdir: {0}".format(str(self.preproc_subdir)) \
-            + "Pre processing images format: {0}".format(str(self.preproc_format)) \
-            + "Pre processing images as stack: {0}".format(str(self.preproc_as_stack)) \
-            + "Output dir: {0}".format(str(self.output_dir)) \
-            + "Output image format: {0}".format(str(self.out_img_format)) \
-            + "Output slices file name prefix: {0}".format(str(self.out_slices_file_name_prefix)) \
-            + "Output horizontal slices subdir: {0}".format(str(self.out_horiz_slices_subdir)) \
-            + "Debug: {0}".format(str(self.debug)) \
-            + "Debug port: {0}".format(str(self.debug_port)) \
-            + "Data dtype: {0}".format(str(self.data_dtype)) \
-            + "Argument COR: {0}".format(str(self.cor)) \
-            + "Find COR Run: {0}".format(str(self.find_cor)) \
-            + "Verbosity: {0}".format(str(self.verbosity)) \
-            + "Crash on failed import: {0}".format(str(self.crash_on_failed_import)) \
-            + "Tool: {0}".format(str(self.tool)) \
-            + "Algorithm: {0}".format(str(self.algorithm)) \
-            + "Number of iterations: {0}".format(str(self.num_iter)) \
-            + "Maximum angle: {0}".format(str(self.max_angle))
+               + "Flat dir: {0}".format(str(self.input_dir_flat)) \
+               + "Dark dir: {0}".format(str(self.input_dir_dark)) \
+               + "In image format: {0}".format(str(self.in_img_format)) \
+               + "Pre processing images subdir: {0}".format(str(self.preproc_subdir)) \
+               + "Pre processing images format: {0}".format(str(self.preproc_format)) \
+               + "Pre processing images as stack: {0}".format(str(self.preproc_as_stack)) \
+               + "Output dir: {0}".format(str(self.output_dir)) \
+               + "Output image format: {0}".format(str(self.out_img_format)) \
+               + "Output slices file name prefix: {0}".format(str(self.out_slices_file_name_prefix)) \
+               + "Output horizontal slices subdir: {0}".format(str(self.out_horiz_slices_subdir)) \
+               + "Debug: {0}".format(str(self.debug)) \
+               + "Debug port: {0}".format(str(self.debug_port)) \
+               + "Data dtype: {0}".format(str(self.data_dtype)) \
+               + "Argument COR: {0}".format(str(self.cor)) \
+               + "Find COR Run: {0}".format(str(self.find_cor)) \
+               + "Verbosity: {0}".format(str(self.verbosity)) \
+               + "Crash on failed import: {0}".format(str(self.crash_on_failed_import)) \
+               + "Tool: {0}".format(str(self.tool)) \
+               + "Algorithm: {0}".format(str(self.algorithm)) \
+               + "Number of iterations: {0}".format(str(self.num_iter)) \
+               + "Maximum angle: {0}".format(str(self.max_angle))
 
     def setup_parser(self, parser):
         """
@@ -113,7 +112,7 @@ class FunctionalConfig(object):
             help="Input directory for flat images")
 
         img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
-        grp_pre.add_argument(
+        grp_func.add_argument(
             "--in-img-format",
             required=False,
             default='fits',
@@ -135,17 +134,16 @@ class FunctionalConfig(object):
             type=str,
             default=self.preproc_format,
             help="Format/file extension expected for the output of the pre processed images. Supported: {0}".
-            format(img_formats))
+            format(img_formats)
         )
 
         grp_func.add_argument(
             "--preproc-as-stack",
-            required = False,
-            action = 'store_true',
-            help = "Format/file extension expected for the output of the pre processed images. Supported: {0}".
-            format(img_formats))
+            required=False,
+            action='store_true',
+            help="Format/file extension expected for the output of the pre processed images. Supported: {0}".
+            format(img_formats)
         )
-
 
         grp_func.add_argument(
             "-o",
@@ -155,8 +153,7 @@ class FunctionalConfig(object):
             type=str,
             help="Where to write the output slice images (reconstructed volume)")
 
-
-        grp_pre.add_argument(
+        grp_func.add_argument(
             "--out-img-format",
             required=False,
             default='tiff',
@@ -164,6 +161,19 @@ class FunctionalConfig(object):
             help="Format/file extension expected for the input images. Supported: {0}".
             format(img_formats))
 
+        grp_func.add_argument(
+            "--out-slices-file-name-prefix",
+            required=True,
+            default=self.out_slices_file_name_prefix,
+            type=str,
+            help="The prefix for the reconstructed slices files.")
+
+        grp_func.add_argument(
+            "--out-horiz-slices-subdir",
+            required=True,
+            default=self.out_horiz_slices_subdir,
+            type=str,
+            help="The subdirectory for the reconstructed horizontal slices")
 
         grp_func.add_argument(
             "--data-dtype",
@@ -171,7 +181,6 @@ class FunctionalConfig(object):
             default='float32',
             type=str,
             help="The data type in which the data will be processed. Available: float32")
-        )
 
         grp_func.add_argument(
             "-c",
@@ -203,7 +212,7 @@ class FunctionalConfig(object):
                  "3 - High verbosity, will output text on each step, including the name, execution time and memory "
                  "usage before and after each step")
 
-        grp_recon.add_argument(
+        grp_func.add_argument(
             "--crash-on-failed-import",
             required=False,
             action='store_true',
@@ -213,7 +222,7 @@ class FunctionalConfig(object):
                  "failure to import but continue execution without applying the filter, WARNING this could corrupt "
                  "the data")
 
-        grp_recon=parser.add_argument_group('Reconstruction options')
+        grp_recon = parser.add_argument_group('Reconstruction options')
 
         grp_recon.add_argument(
             "-d",
@@ -271,35 +280,43 @@ class FunctionalConfig(object):
         Should be called after the parser has had a chance to
         parse the real arguments from the user
         """
-        self.input_dir=args.input_path
-        self.input_dir_flat=args.input_path_flat
-        self.input_dir_dark=args.input_path_dark
-        self.in_img_format=args.in_img_format
+        self.input_dir = args.input_path
+        self.input_dir_flat = args.input_path_flat
+        self.input_dir_dark = args.input_path_dark
+        self.in_img_format = args.in_img_format
 
-        self.preproc_subdir=
-        self.preproc_format
-        self.preproc_as_stack
+        self.preproc_subdir = args.preproc_subdir
+        self.preproc_format = args.preproc_format
+        self.preproc_as_stack = args.preproc_as_stack
 
-        self.out_img_format=args.out_img_format
-        self.output_dir=args.output_path
-        self.debug=args.debug
-        self.debug_port=args.debug_port
+        self.output_dir = args.output_path
+        self.out_img_format = args.out_img_format
+        self.out_slices_file_name_prefix = args.out_slices_file_name_prefix
+        self.out_horiz_slices_subdir = args.out_horiz_slices_subdir
+
+        import numpy as np
+
+        if args.data_dtype is 'uint16':
+            self.data_dtype = np.uint16
+        elif args.data_dtype is 'float16':
+            self.data_dtype = np.float16
+        elif args.data_dtype is 'float32':
+            self.data_dtype = np.float32
+        elif args.data_dtype is 'float64':
+            self.data_dtype = np.float64
+
+        self.debug = args.debug
+        self.debug_port = args.debug_port
 
         if args.cor:
-            self.cor=int(args.cor)
+            self.cor = int(args.cor)
 
-        if args.find_cor:
-            self.find_cor=args.find_cor
+        self.find_cor = args.find_cor
 
-        if args.verbosity:
-            self.verbosity=args.verbosity
+        self.verbosity = args.verbosity
 
         # grab tools options
-        self.tool=args.tool
-        self.algorithm=args.algorithm
-
-        if args.num_iter:
-            if isinstance(args.num_iter, str) and not args.num_iter.isdigit():
-                raise RuntimeError(
-                    "The number of iterations must be an integer")
-            self.num_iter=int(args.num_iter)
+        self.tool = args.tool
+        self.algorithm = args.algorithm
+        self.num_iter = args.num_iter
+        self.max_angle = args.max_angle

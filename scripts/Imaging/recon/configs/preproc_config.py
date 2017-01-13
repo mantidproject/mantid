@@ -8,11 +8,6 @@ class PreProcConfig(object):
     set of options to enable/disable/configure
     """
 
-    DEF_NUM_ITER = 5
-
-    # TODO document all parameters and make available in GUI
-    # new params: median_filter_mode, clip_min, clip_max
-
     def __init__(self):
         # defaults that look sensible for the MCP detector:
         # median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction:
@@ -129,24 +124,6 @@ class PreProcConfig(object):
                  "rotation counterclockwise")
 
         grp_pre.add_argument(
-            "--scale-down",
-            required=False,
-            type=int,
-            help="Scale down factor, to reduce the size of "
-                 "the images for faster (lower-resolution) reconstruction. For example a factor of 2 "
-                 "reduces 1kx1k images to 512x512 images (combining blocks of 2x2 pixels into a single "
-                 "pixel. The output pixels are calculated as the average of the input pixel blocks."
-        )
-
-        grp_pre.add_argument(
-            "-m"
-            "--mcp-corrections",
-            required=False,
-            action='store_true',
-            help="Perform corrections specific to images taken with the MCP detector"
-        )
-
-        grp_pre.add_argument(
             "--clip-min",
             required=False,
             type=float,
@@ -164,7 +141,7 @@ class PreProcConfig(object):
             "Default for min is 0, default for max is 1.5"
         )
 
-        grp_post.add_argument(
+        grp_pre.add_argument(
             "--cut-off-pre",
             required=False,
             type=float,
@@ -172,4 +149,41 @@ class PreProcConfig(object):
                  "volume. pixels below this percentage with respect to maximum intensity in the stack "
                  "will be set to the minimum value.")
 
+        grp_pre.add_argument(
+            "--scale-down",
+            required=False,
+            type=int,
+            help="Scale down factor, to reduce the size of "
+                 "the images for faster (lower-resolution) reconstruction. For example a factor of 2 "
+                 "reduces 1kx1k images to 512x512 images (combining blocks of 2x2 pixels into a single "
+                 "pixel. The output pixels are calculated as the average of the input pixel blocks."
+        )
+
+        grp_pre.add_argument(
+            "-m"
+            "--mcp-corrections",
+            required=False,
+            action='store_true',
+            help="Perform corrections specific to images taken with the MCP detector"
+        )
+
         return parser
+
+    def update(self, args):
+        self.region_of_interest = args.region_of_interest
+        self.normalize_air_region = args.air_region
+        self.crop_before_normalize = args.crop_before_normalize
+        self.median_filter_size = args.median_filter_size
+        self.median_filter_mode = args.median_filter_mode
+        self.stripe_removal_method = args.remove_stripes
+
+        self.rotation = args.rotation
+
+        self.clip_min = args.clip_min
+        self.clip_max = args.clip_max
+
+        self.cut_off_level_pre = args.cut_off_pre
+        self.mcp_corrections = args.mcp_corrections
+        self.scale_down = args.scale_down
+
+        # self.line_projection = args.line_projection
