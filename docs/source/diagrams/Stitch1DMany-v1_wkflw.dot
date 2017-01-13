@@ -20,9 +20,9 @@ subgraph decisions {
 subgraph algorithms {
  $algorithm_style
   S1D_WS      [label="Do Stitch1D for\nall workspaces"]
-  S1D_Groups  [label="Do Stitch1D for\nall workspaces per group"]
-  S1DM_Global [label="Do Stitch1DMany\nfor each group"]
-  S1DM_Period [label="Do Stitch1DMany\nfor group specified by\nScaleFactorFromPeriod"]
+  S1D_Groups  [label="Do Stitch1D for\nall workspaces per period\nwith period scale factors"]
+  S1DM_Global [label="Do Stitch1D for\nall workspaces per period\nwith single scale factor"]
+  S1DM_Period [label="Do Stitch1D for all\nworkspaces in period given\nby ScaleFactorFromPeriod"]
   groupWS     [label="GroupWorkspaces"]
 }
 
