@@ -141,7 +141,6 @@ public:
 
   //  virtual void externalProcessFinished(const QString &str) = 0;
   MOCK_METHOD1(emitExternalProcessFinished, void(const QString &str));
-
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
