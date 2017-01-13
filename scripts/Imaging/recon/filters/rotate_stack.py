@@ -44,7 +44,7 @@ def execute(data, config, flat=None, dark=None):
     h = Helper(config)
     h.check_data_stack(data)
 
-    if not config.pre.rotation or config.pre.rotation < 0:
+    if not config.pre.rotation:
         h.tomo_print_note(
             "NOT rotating the input images, because no valid -r/--rotation was specified.")
         return data, flat, dark

@@ -65,8 +65,7 @@ def pre_processing(config, data, flat, dark):
         _debug_save_out_data(data, config, flat, dark, "_rotated")
 
     # the air region coordinates must be within the ROI if this is selected
-    # TODO reflect change in GUI
-    if config.pre.crop_before_normalize:
+    if config.pre.crop_before_normalise:
         data = crop_coords.execute_volume(data, config)
 
         flat = crop_coords.execute_image(flat, config)
@@ -84,9 +83,10 @@ def pre_processing(config, data, flat, dark):
     if d:
         _debug_save_out_data(data, config, flat, dark, "_normalised_by_air")
 
-    if not config.pre.crop_before_normalize:
+    if not config.pre.crop_before_normalise:
         # in this case we don't care about cropping the flat and dark
         data = crop_coords.execute_volume(data, config)
+        _debug_save_out_data(data, config, flat, dark, "_cropped")
 
     # cut_off
     # data = cut_off.execute(data, config)

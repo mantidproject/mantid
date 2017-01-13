@@ -80,7 +80,7 @@ class FunctionalConfig(object):
                + "Argument COR: {0}".format(str(self.cor)) \
                + "Find COR Run: {0}".format(str(self.find_cor)) \
                + "Verbosity: {0}".format(str(self.verbosity)) \
-               + "Crash on failed import: {0}".format(str(self.crash_on_failed_import)) \
+               + "Crash on failed import: {0}".format(str(self.no_crash_on_failed_import)) \
                + "Tool: {0}".format(str(self.tool)) \
                + "Algorithm: {0}".format(str(self.algorithm)) \
                + "Number of iterations: {0}".format(str(self.num_iter)) \
