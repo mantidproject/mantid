@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <iomanip>
+
 using Mantid::Algorithms::MayersSampleCorrectionStrategy;
 using namespace Mantid::HistogramData;
 
@@ -50,8 +52,7 @@ public:
                     Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    auto outHisto = mscat.getCorrectedHisto();
-
+    const auto outHisto = mscat.getCorrectedHisto();
     const auto &tof = outHisto.x();
     const auto &signal = outHisto.y();
     const auto &error = outHisto.e();
@@ -75,8 +76,7 @@ public:
                     Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    auto outHisto = mscat.getCorrectedHisto();
-
+    const auto outHisto = mscat.getCorrectedHisto();
     const auto &tof = outHisto.x();
     const auto &signal = outHisto.y();
     const auto &error = outHisto.e();
@@ -95,7 +95,7 @@ public:
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
     const size_t nypts(100);
-    bool mscatOn(false);
+    const bool mscatOn(false);
     Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
                     Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), histo);
@@ -116,6 +116,60 @@ public:
 
     TS_ASSERT_DELTA(1.6574851, error.front(), delta);
     TS_ASSERT_DELTA(1.6609527, error.back(), delta);
+  }
+
+  void test_MutlipleScattering_NEvents_Parameter() {
+    const size_t nypts(100);
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
+                    Counts(nypts, 2.0));
+    const bool mscatOn(true);
+    auto corrPars = createTestParameters(mscatOn);
+    corrPars.msNEvents = 1000;
+    MayersSampleCorrectionStrategy mscat(corrPars, histo);
+
+    const auto outHisto = mscat.getCorrectedHisto();
+    const auto tof = outHisto.x();
+    const auto signal = outHisto.y();
+    const auto error = outHisto.e();
+
+    // Check some values
+    // Check some values
+    const double delta(1e-06);
+    TS_ASSERT_DELTA(99.5, tof.front(), delta);
+    TS_ASSERT_DELTA(199.5, tof.back(), delta);
+
+    TS_ASSERT_DELTA(0.37553636, signal.front(), delta);
+    TS_ASSERT_DELTA(0.37554482, signal.back(), delta);
+
+    TS_ASSERT_DELTA(0.26554431, error.front(), delta);
+    TS_ASSERT_DELTA(0.26555029, error.back(), delta);
+  }
+
+  void test_MutlipleScattering_NRuns_Parameter() {
+    const size_t nypts(100);
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
+                    Counts(nypts, 2.0));
+    const bool mscatOn(true);
+    auto corrPars = createTestParameters(mscatOn);
+    corrPars.msNRuns = 2;
+    MayersSampleCorrectionStrategy mscat(corrPars, histo);
+
+    const auto outHisto = mscat.getCorrectedHisto();
+    const auto tof = outHisto.x();
+    const auto signal = outHisto.y();
+    const auto error = outHisto.e();
+
+    // Check some values
+    // Check some values
+    const double delta(1e-06);
+    TS_ASSERT_DELTA(99.5, tof.front(), delta);
+    TS_ASSERT_DELTA(199.5, tof.back(), delta);
+
+    TS_ASSERT_DELTA(0.37376334, signal.front(), delta);
+    TS_ASSERT_DELTA(0.37123648, signal.back(), delta);
+
+    TS_ASSERT_DELTA(0.26429059, error.front(), delta);
+    TS_ASSERT_DELTA(0.26250383, error.back(), delta);
   }
 
   // ---------------------- Failure tests -----------------------------
@@ -144,6 +198,8 @@ private:
     pars.sigmaAbs = 5.08;
     pars.cylRadius = 0.0025;
     pars.cylHeight = 0.04;
+    pars.msNEvents = 10000;
+    pars.msNRuns = 10;
     return pars;
   }
 };

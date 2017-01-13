@@ -25,8 +25,6 @@ size_t N_MUR_PTS = 21;
 size_t N_RAD = 29;
 /// Number of theta points for cylindrical integration
 size_t N_THETA = 29;
-/// Number of second order event points
-size_t N_SECOND = 10000;
 /// Order of polynomial used to fit generated points
 size_t N_POLY_ORDER = 4;
 /// 2pi
@@ -235,11 +233,10 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
   seedRNG(irp);
 
   // Take an average over a number of sets of second scatters
-  const size_t nsets(10);
-  std::vector<double> deltas(nsets, 0.0);
-  for (size_t j = 0; j < nsets; ++j) {
+  std::vector<double> deltas(m_pars.msNRuns, 0.0);
+  for (size_t j = 0; j < m_pars.msNRuns; ++j) {
     double sum = 0.0;
-    for (size_t i = 0; i < N_SECOND; ++i) {
+    for (size_t i = 0; i < m_pars.msNEvents; ++i) {
       // Random (r,theta,z)
       const double r1 = pow(m_rng->nextValue(), radDistPower) * muR;
       const double r2 = pow(m_rng->nextValue(), radDistPower) * muR;

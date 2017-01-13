@@ -57,6 +57,8 @@ public:
     double sigmaAbs;  ///< Absorption cross-section at 2200m/s (barns)
     double cylRadius; ///< Radius of cylinder (m)
     double cylHeight; ///< Height of cylinder (m)
+    size_t msNEvents; ///< Number of second-order scatters per run
+    size_t msNRuns;   ///< Number of runs to average ms correction over
   };
 
   /// Constructor
