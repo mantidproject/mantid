@@ -17,6 +17,12 @@ using Mantid::HistogramData::CountStandardDeviations;
 
 class CrossCorrelateTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being
+  // created statically This means the constructor isn't called when
+  // running other tests
+  static CrossCorrelateTest *createSuite() { return new CrossCorrelateTest(); }
+  static void destroySuite(CrossCorrelateTest *suite) { delete suite; }
+
   void testValidInput() {
     // setup and run the algorithm (includes basic checks)
     CrossCorrelate alg;
