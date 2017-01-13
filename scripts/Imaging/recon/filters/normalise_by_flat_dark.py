@@ -18,10 +18,6 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
     h = Helper(config)
     h.check_data_stack(data)
 
-    if not config.pre.normalize_flat_dark:
-        h.tomo_print(" * Note: NOT applying normalization by flat/dark images.")
-        return data
-
     if isinstance(norm_flat_img, np.ndarray):
         if 2 != len(norm_flat_img.shape):
             raise ValueError(

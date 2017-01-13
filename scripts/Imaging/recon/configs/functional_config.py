@@ -23,22 +23,20 @@ class FunctionalConfig(object):
 
         self.readme_file_name = '0.README_reconstruction.txt'
 
+        # Functionality options
         self.input_dir = None
         self.input_dir_flat = None
         self.input_dir_dark = None
         self.in_img_format = 'fits'
 
-        self.preproc_images_subdir = 'pre_processed'
-        self.preproc_images_format = 'fits'
-        self.preproc_images_as_stack = True
+        self.preproc_subdir = 'pre_processed'
+        self.preproc_format = 'fits'
+        self.preproc_as_stack = True
 
         self.output_dir = None
         self.out_img_format = 'fits'
         self.out_slices_file_name_prefix = 'out_recon_slice'
         self.out_horiz_slices_subdir = 'out_recon_horiz_slice'
-
-        self.debug = True
-        self.debug_port = 59003
 
         import numpy as np
         # TODO more tests with float16/float64/uint16
@@ -49,7 +47,14 @@ class FunctionalConfig(object):
 
         # TODO test verbosity works properly on each level
         self.verbosity = 3  # default 2
-        self.crash_on_failed_import = True  # default True
+
+        # TODO unused (add exception handling funcitons in helper.py)
+        # default True
+        self.crash_on_failed_import = True
+
+        # Reconstruction options
+        self.debug = True
+        self.debug_port = 59003
 
         self.tool = 'tomopy'
         self.algorithm = 'gridrec'
@@ -58,67 +63,40 @@ class FunctionalConfig(object):
         self.max_angle = 360.0
 
     def __str__(self):
-        return\
-            "Input dir: {0}\n" \
-            "Flat dir: {1}\n" \
-            "Dark dir: {2}\n" \
-            "In image format: {3}" \
-            "Pre processing images subdir: {4}" \
-            "Pre processing images format: {5}" \
-            "Pre processing images as stack: {6}" \
-            "Output dir: {7}\n" \
-            "Output image format: {8}" \
-            "Output slices file name prefix: {9}" \
-            "Output horizontal slices subdir: {10}" \
-            "Debug: {11}" \
-            "Debug port: {12}" \
-            "Data dtype: {13}" \
-            "Argument COR: {14}" \
-            "Find COR Run: {15}" \
-            "Verbosity: {16}" \
-            "Crash on failed import: {17}" \
-            "Tool: {18}" \
-            "Algorithm: {19}" \
-            "Number of iterations: {20}" \
-            "Maximum angle: {21}"\
-            .format(
-                str(self.input_dir),
-                str(self.input_dir_flat),
-                str(self.input_dir_dark),
-                str(self.in_img_format),
-                str(self.preproc_images_subdir),
-                str(self.preproc_images_format),
-                str(self.preproc_images_as_stack),
-                str(self.output_dir),
-                str(self.out_img_format),
-                str(self.out_slices_file_name_prefix),
-                str(self.out_horiz_slices_subdir),
-                str(self.debug),
-                str(self.debug_port),
-                str(self.data_dtype),
-                str(self.cor),
-                str(self.find_cor),
-                str(self.verbosity),
-                str(self.crash_on_failed_import),
-                str(self.tool),
-                str(self.algorithm),
-                str(self.num_iter),
-                str(self.regularization),
-                str(self.max_angle)
-            )
+        return "Input dir: {0}".format(str(self.input_dir)) \
+            + "Flat dir: {0}".format(str(self.input_dir_flat)) \
+            + "Dark dir: {0}".format(str(self.input_dir_dark)) \
+            + "In image format: {0}".format(str(self.in_img_format)) \
+            + "Pre processing images subdir: {0}".format(str(self.preproc_subdir)) \
+            + "Pre processing images format: {0}".format(str(self.preproc_format)) \
+            + "Pre processing images as stack: {0}".format(str(self.preproc_as_stack)) \
+            + "Output dir: {0}".format(str(self.output_dir)) \
+            + "Output image format: {0}".format(str(self.out_img_format)) \
+            + "Output slices file name prefix: {0}".format(str(self.out_slices_file_name_prefix)) \
+            + "Output horizontal slices subdir: {0}".format(str(self.out_horiz_slices_subdir)) \
+            + "Debug: {0}".format(str(self.debug)) \
+            + "Debug port: {0}".format(str(self.debug_port)) \
+            + "Data dtype: {0}".format(str(self.data_dtype)) \
+            + "Argument COR: {0}".format(str(self.cor)) \
+            + "Find COR Run: {0}".format(str(self.find_cor)) \
+            + "Verbosity: {0}".format(str(self.verbosity)) \
+            + "Crash on failed import: {0}".format(str(self.crash_on_failed_import)) \
+            + "Tool: {0}".format(str(self.tool)) \
+            + "Algorithm: {0}".format(str(self.algorithm)) \
+            + "Number of iterations: {0}".format(str(self.num_iter)) \
+            + "Maximum angle: {0}".format(str(self.max_angle))
 
     def setup_parser(self, parser):
         """
                 Setup the functional arguments for the script
                 :param parser: The parser which is set up
                 """
-        grp_req = parser.add_argument_group(
-            'Arguments for the functionality of the script')
+        grp_func = parser.add_argument_group('Functionality options')
 
-        grp_req.add_argument(
+        grp_func.add_argument(
             "-i", "--input-path", required=True, type=str, help="Input directory", default=self.input_dir)
 
-        grp_req.add_argument(
+        grp_func.add_argument(
             "-iflat"
             "--input-path-flat",
             required=False,
@@ -126,21 +104,13 @@ class FunctionalConfig(object):
             type=str,
             help="Input directory for flat images")
 
-        grp_req.add_argument(
+        grp_func.add_argument(
             "-idark"
             "--input-path-dark",
             required=False,
             default=self.input_dir_dark,
             type=str,
             help="Input directory for flat images")
-
-        grp_req.add_argument(
-            "-o",
-            "--output-path",
-            required=True,
-            default=self.output_dir,
-            type=str,
-            help="Where to write the output slice images (reconstructed volume)")
 
         img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
         grp_pre.add_argument(
@@ -151,6 +121,41 @@ class FunctionalConfig(object):
             help="Format/file extension expected for the input images. Supported: {0}".
             format(img_formats))
 
+        grp_func.add_argument(
+            "--preproc-subdir",
+            required=False,
+            type=float,
+            default=self.preproc_subdir,
+            help="Default output-path/pre_processed/. The subdirectory for the pre-processed images."
+        )
+
+        grp_func.add_argument(
+            "--preproc-format",
+            required=False,
+            type=str,
+            default=self.preproc_format,
+            help="Format/file extension expected for the output of the pre processed images. Supported: {0}".
+            format(img_formats))
+        )
+
+        grp_func.add_argument(
+            "--preproc-as-stack",
+            required = False,
+            action = 'store_true',
+            help = "Format/file extension expected for the output of the pre processed images. Supported: {0}".
+            format(img_formats))
+        )
+
+
+        grp_func.add_argument(
+            "-o",
+            "--output-path",
+            required=True,
+            default=self.output_dir,
+            type=str,
+            help="Where to write the output slice images (reconstructed volume)")
+
+
         grp_pre.add_argument(
             "--out-img-format",
             required=False,
@@ -159,7 +164,16 @@ class FunctionalConfig(object):
             help="Format/file extension expected for the input images. Supported: {0}".
             format(img_formats))
 
-        grp_req.add_argument(
+
+        grp_func.add_argument(
+            "--data-dtype",
+            required=False,
+            default='float32',
+            type=str,
+            help="The data type in which the data will be processed. Available: float32")
+        )
+
+        grp_func.add_argument(
             "-c",
             "--cor",
             required=False,
@@ -169,7 +183,7 @@ class FunctionalConfig(object):
                  "calculated "
         )
 
-        grp_req.add_argument(
+        grp_func.add_argument(
             "-f",
             "--find-cor",
             action='store_true',
@@ -177,7 +191,7 @@ class FunctionalConfig(object):
             help="Find the center of rotation (in pixels). rotation around y axis is assumed"
         )
 
-        grp_req.add_argument(
+        grp_func.add_argument(
             "-v",
             "--verbosity",
             action="count",
@@ -189,7 +203,17 @@ class FunctionalConfig(object):
                  "3 - High verbosity, will output text on each step, including the name, execution time and memory "
                  "usage before and after each step")
 
-        grp_recon = parser.add_argument_group('Reconstruction options')
+        grp_recon.add_argument(
+            "--crash-on-failed-import",
+            required=False,
+            action='store_true',
+            default=self.crash_on_failed_import,
+            help="Default True, this option tells if the program should stop execution if an import fails and a step "
+                 "cannot be executed: True - Raise an exception and stop execution immediately False - Note the "
+                 "failure to import but continue execution without applying the filter, WARNING this could corrupt "
+                 "the data")
+
+        grp_recon=parser.add_argument_group('Reconstruction options')
 
         grp_recon.add_argument(
             "-d",
@@ -240,14 +264,42 @@ class FunctionalConfig(object):
                  "uniform angle increment for every projection (note: this "
                  "is overridden by the angles found in the input FITS headers)")
 
-        grp_recon.add_argument(
-            "--crash-on-failed-import",
-            required=False,
-            action='store_true',
-            default=self.crash_on_failed_import,
-            help="Default True, this option tells if the program should stop execution if an import fails and a step "
-                 "cannot be executed: True - Raise an exception and stop execution immediately False - Note the "
-                 "failure to import but continue execution without applying the filter, WARNING this could corrupt "
-                 "the data")
-
         return parser
+
+    def update(self, args):
+        """
+        Should be called after the parser has had a chance to
+        parse the real arguments from the user
+        """
+        self.input_dir=args.input_path
+        self.input_dir_flat=args.input_path_flat
+        self.input_dir_dark=args.input_path_dark
+        self.in_img_format=args.in_img_format
+
+        self.preproc_subdir=
+        self.preproc_format
+        self.preproc_as_stack
+
+        self.out_img_format=args.out_img_format
+        self.output_dir=args.output_path
+        self.debug=args.debug
+        self.debug_port=args.debug_port
+
+        if args.cor:
+            self.cor=int(args.cor)
+
+        if args.find_cor:
+            self.find_cor=args.find_cor
+
+        if args.verbosity:
+            self.verbosity=args.verbosity
+
+        # grab tools options
+        self.tool=args.tool
+        self.algorithm=args.algorithm
+
+        if args.num_iter:
+            if isinstance(args.num_iter, str) and not args.num_iter.isdigit():
+                raise RuntimeError(
+                    "The number of iterations must be an integer")
+            self.num_iter=int(args.num_iter)

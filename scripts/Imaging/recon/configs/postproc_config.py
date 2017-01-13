@@ -7,29 +7,87 @@ class PostProcConfig(object):
         """
         Builds a default post-processing configuration with a sensible choice of parameters
         """
-        self.output_dir = None
         self.circular_mask = 0.94
-        self.cut_off_level = 0
-        self.gaussian_filter_par = 0
+        self.cut_off_level_post = 0
+        self.gaussian_filter_size = 0
+        self.gaussian_filter_mode = 0
+
         self.median_filter_size = 0
-        self.median_filter3d_size = 0
+        """
+        :param median_filter_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+            The mode parameter determines how the array borders are handled, where cval is the value when
+            mode is equal to 'constant'.
+        """
+        self.median_filter_mode = 'reflect'
+        self.median_filter3d_size = 0  # TODO unused
 
     def __str__(self):
-        import os
-        mystr = "Output path (relative): {0}\n".format(self.output_dir)
-        if self.output_dir:
-            mystr += "Output path (absolute): {0}\n".format(
-                os.path.abspath(self.output_dir))
-        else:
-            mystr += "Output path (absolute): {0}\n".format(
-                'cannot find because the input '
-                'path has not been set')
-        mystr += "Circular mask: {0}\n".format(self.circular_mask)
-        mystr += "Cut-off on reconstructed volume: {0}\n".format(
-            self.cut_off_level)
-        mystr += "Gaussian filter: {0}\n".format(self.gaussian_filter_par)
-        mystr += "Median filter size:: {0}\n".format(self.median_filter_size)
-        mystr += "Median filter (3d) size:: {0}\n".format(
-            self.median_filter3d_size)
+        return "Circular mask: {0}\n".format(self.circular_mask) \
+            "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level_post) \
+            "Gaussian filter size: {0}\n".format(self.gaussian_filter_size) \
+            "Gaussian filter mode: {0}\n".format(self.gaussian_filter_mode) \
+            "Median filter size:: {0}\n".format(self.median_filter_size) \
+            "Median filter mode: {0}\n".format(self.median_filter_mode)
 
         return mystr
+
+    def setup_parser(self, parser):
+        """
+        Setup the post-processing arguments for the script
+        :param parser: The parser which is set up
+        """
+        grp_post = parser.add_argument_group(
+            'Post-processing of the reconstructed volume')
+
+        grp_post.add_argument(
+            "--circular-mask",
+            required=False,
+            type=float,
+            default=self.circular_mask,
+            help="Radius of the circular mask to apply on the reconstructed volume. "
+                 "It is given in [0,1] relative to the size of the smaller dimension/edge "
+                 "of the slices. Empty or zero implies no masking.")
+
+        grp_post.add_argument(
+            "--cut-off-post",
+            required=False,
+            type=float,
+            help="Cut off level (percentage) for reconstructed "
+                 "volume. pixels below this percentage with respect to maximum intensity in the stack "
+                 "will be set to the minimum value.")
+
+        grp_post.add_argument(
+            "--out-median-filter-size",
+            required=False,
+            type=float,
+            default=self.median_filter_size,
+            help="Apply median filter (2d) on reconstructed volume with the given window size."
+        )
+
+        grp_pre.add_argument(
+            "--out-median-filter-mode",
+            type=str,
+            required=False,
+            default=self.median_filter_mode,
+            help="Type of median filter. Default: 'reflect', available: "
+                 "{'reflect', 'constant', 'nearest', 'mirror', 'wrap'}"
+        )
+
+        grp_post.add_argument(
+            "--out-gaussian-filter-size",
+            required=False,
+            type=float,
+            default=self.median_filter_size,
+            help="Apply gaussian filter (2d) on reconstructed volume with the given window size."
+        )
+
+        grp_pre.add_argument(
+            "--out-gaussian-filter-mode",
+            type=str,
+            required=False,
+            default=self.median_filter_mode,
+            help="Type of gaussian filter. Default: 'reflect', available: "
+                 "{'reflect', 'constant', 'nearest', 'mirror', 'wrap'}"
+        )
+
+        return parser

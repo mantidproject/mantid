@@ -14,14 +14,15 @@ def _crop_coords_sanity_checks(coords, data_image, expected_data_shape=3):
             "these coordinates: {0}".format(coords))
 
     elif not isinstance(data_image, np.ndarray) or expected_data_shape != len(data_image.shape):
-        raise ValueError("Wrong data volume when trying to crop: {0}".format(data_image))
+        raise ValueError(
+            "Wrong data volume when trying to crop: {0}".format(data_image))
 
 
 def execute_image(data, config):
     from recon.helper import Helper
     h = Helper(config)
 
-    crop_coords = config.pre.crop_coords
+    crop_coords = config.pre.region_of_interest
     if crop_coords:
         try:
             h.pstart(
@@ -79,7 +80,7 @@ def execute_volume(data, config):
     h.check_data_stack(data)
 
     # list with first-x, first-y, second-x, second-y
-    crop_coords = config.pre.crop_coords
+    crop_coords = config.pre.region_of_interest
     if crop_coords:
         try:
             h.pstart(

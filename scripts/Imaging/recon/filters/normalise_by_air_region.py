@@ -36,35 +36,8 @@ def execute(data, config):
                 "(air region). Got these coordinates: {0}".format(
                     normalize_air_region))
 
-        air_right = normalize_air_region[2]
-        air_top = normalize_air_region[1]
-        air_left = normalize_air_region[0]
-        air_bottom = normalize_air_region[3]
-
-        # skip if for example: 0, 0, 0, 0 (empty selection)
-        if air_top >= air_bottom or air_left >= air_right:
-            h.tomo_print(
-                " * NOTE: NOT applying Normalise by Air Region. Reason: Empty Selection")
-            return data
-
-        crop_coords = config.pre.crop_coords
-        crop_right = crop_coords[2]
-        crop_top = crop_coords[1]
-        crop_left = crop_coords[0]
-        crop_bottom = crop_coords[3]
-
-        if air_top < crop_top or \
-           air_bottom > crop_bottom or \
-           air_left < crop_left or \
-           air_right > crop_right:
-            raise ValueError(
-                "Selected air region is outside of the cropped data range.")
-
-        # move the air region coordinates
-        air_left -= crop_left
-        air_right -= crop_left
-        air_bottom -= crop_top
-        air_top -= crop_top
+        air_right, air_top, air_left, air_bottom = translate_coords_onto_cropped_picture(
+            config.pre.region_of_interest, normalize_air_region)
 
         h.pstart(" * Starting normalization by air region...")
         air_sums = []
@@ -92,3 +65,28 @@ def execute(data, config):
 
     h.check_data_stack(data)
     return data
+
+
+def translate_coords_onto_cropped_picture(crop_coords, normalize_air_region):
+    air_right = normalize_air_region[2]
+    air_top = normalize_air_region[1]
+    air_left = normalize_air_region[0]
+    air_bottom = normalize_air_region[3]
+
+    crop_right = crop_coords[2]
+    crop_top = crop_coords[1]
+    crop_left = crop_coords[0]
+    crop_bottom = crop_coords[3]
+
+    if air_top < crop_top or \
+            air_bottom > crop_bottom or \
+            air_left < crop_left or \
+            air_right > crop_right:
+        raise ValueError(
+            "Selected air region is outside of the cropped data range.")
+
+    # Translate the air region coordinates to the crop.
+    air_left -= crop_left
+    air_right -= crop_left
+    air_bottom -= crop_top
+    air_top -= crop_top

@@ -9,6 +9,7 @@ class PreProcConfig(object):
     """
 
     DEF_NUM_ITER = 5
+
     # TODO document all parameters and make available in GUI
     # new params: median_filter_mode, clip_min, clip_max
 
@@ -17,12 +18,22 @@ class PreProcConfig(object):
         # median_filter=3, rotate=-1, crop=[0,  252, 0, 512], MCP correction:
         # on
 
-        self.max_angle = 360
+        # all coords outside the ROI will be cropped
+        self.region_of_interest = None
+        self.normalize_air_region = None
+        self.crop_before_normalize = None
+        self.median_filter_size = 3
+        """
+        :param median_filter_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+            The mode parameter determines how the array borders are handled, where cval is the value when
+            mode is equal to 'constant'.
+        """
+        self.median_filter_mode = 'reflect'
+        self.stripe_removal_method = 'wavelet-fourier'
 
         # Rotation 90 degrees clockwise (positive) or counterclockwise (negative)
         # Example: -1 => (-90 degrees == 90 degrees counterclockwise)
-        self.rotation = -1
-        self.normalize_flat_dark = True
+        self.rotation = False
 
         # clip normalisation values
         self.clip_min = 0
@@ -30,52 +41,26 @@ class PreProcConfig(object):
 
         # list with coordinates of the region for normalization / "air" / not
         # blocked by any object
-        self.normalize_air_region = None
-        self.normalize_proton_charge = False
+        # self.normalize_proton_charge = False
 
-        # all coords outside the ROI will be cropped
-        self.crop_before_normalize = False
-        self.crop_coords = None
-        self.cut_off_level = 0
+        self.cut_off_level_pre = 0  # TODO unused
         self.mcp_corrections = True
         self.scale_down = 0
-        self.median_filter_size = 5
-        """
-        :param median_filter_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
-            The mode parameter determines how the array borders are handled, where cval is the value when
-            mode is equal to 'constant'.
-        """
-        self.median_filter_mode = 'reflect'
 
-        self.line_projection = True
-        self.stripe_removal_method = 'wavelet-fourier'
-
-        # center of rotation
-        self.cor = None
-        self.save_preproc_imgs = True
+        self.line_projection = True  # TODO unused
 
     def __str__(self):
-        mystr = "Region of interest (crop coordinates): {0}\n".format(
-            self.crop_coords)
-        mystr += "Normalize by flat/dark images: {0}\n".format(
-            self.normalize_flat_dark)
-        mystr += "Normalize by air region: {0}\n".format(
-            self.normalize_air_region)
-        mystr += "Normalize by proton charge: {0}\n".format(
-            self.normalize_proton_charge)
-        mystr += "Cut-off on normalized images: {0}\n".format(
-            self.cut_off_level)
-        mystr += "Corrections for MCP detector: {0}\n".format(
-            self.mcp_corrections)
-        mystr += "Scale down factor for images: {0}\n".format(self.scale_down)
-        mystr += "Median filter width: {0}\n".format(self.median_filter_size)
-        mystr += "Rotation: {0}\n".format(self.rotation)
-        mystr += "Line projection (line integral/log re-scale): {0}\n".format(
-            1)
-        mystr += "Sinogram stripes removal: {0}".format(
-            self.stripe_removal_method)
-
-        return mystr
+        return "Region of interest (crop coordinates): {0}\n".format(self.region_of_interest) \
+               + "Normalize by air region: {0}\n".format(self.normalize_air_region) \
+               + "Cut-off on normalized images: {0}\n".format(self.cut_off_level_pre) \
+               + "Corrections for MCP detector: {0}\n".format(self.mcp_corrections) \
+               + "Scale down factor for images: {0}\n".format(self.scale_down) \
+               + "Median filter width: {0}\n".format(self.median_filter_size) \
+               + "Rotation: {0}\n".format(self.rotation) \
+               + "Line projection (line integral/log re-scale): {0}\n".format(self.line_projection) \
+               + "Sinogram stripes removal: {0}".format(self.stripe_removal_method) \
+               + "Clip min value: {0}".format(self.clip_min) \
+               + "Clip max value: {0}".format(self.clip_max)
 
     def setup_parser(self, parser):
         """
@@ -100,7 +85,8 @@ class PreProcConfig(object):
             type=str,
             help="Air region /region for normalization. "
                  "If not provided, the normalization against beam intensity fluctuations in this "
-                 "region will not be performed")
+                 "region will not be performed. list with coordinates of the region for normalization "
+                 "by 'air', must not be blocked by any object.")
 
         grp_pre.add_argument(
             "--crop-before-normalize",
@@ -114,12 +100,14 @@ class PreProcConfig(object):
             "--median-filter-size",
             type=int,
             required=False,
+            default=self.median_filter_size,
             help="Size/width of the median filter (pre-processing")
 
         grp_pre.add_argument(
             "--median-filter-mode",
             type=str,
             required=False,
+            default=self.median_filter_mode,
             help="Type of median filter. Default: 'reflect', available: "
                  "{'reflect', 'constant', 'nearest', 'mirror', 'wrap'}"
         )
@@ -132,6 +120,7 @@ class PreProcConfig(object):
             help="Methods supported: 'wf' (Wavelet-Fourier)")
 
         grp_pre.add_argument(
+            "-r"
             "--rotation",
             required=False,
             type=int,
@@ -150,10 +139,37 @@ class PreProcConfig(object):
         )
 
         grp_pre.add_argument(
+            "-m"
             "--mcp-corrections",
             required=False,
             action='store_true',
             help="Perform corrections specific to images taken with the MCP detector"
         )
+
+        grp_pre.add_argument(
+            "--clip-min",
+            required=False,
+            type=float,
+            default=self.clip_min,
+            help="Clip values after normalisations to remove out of bounds pixel values. "
+            "Default for min is 0, default for max is 1.5"
+        )
+
+        grp_pre.add_argument(
+            "--clip-min",
+            required=False,
+            type=float,
+            default=self.clip_max,
+            help="Clip values after normalisations to remove out of bounds pixel values. "
+            "Default for min is 0, default for max is 1.5"
+        )
+
+        grp_post.add_argument(
+            "--cut-off-pre",
+            required=False,
+            type=float,
+            help="Cut off level (percentage) for pre processed "
+                 "volume. pixels below this percentage with respect to maximum intensity in the stack "
+                 "will be set to the minimum value.")
 
         return parser

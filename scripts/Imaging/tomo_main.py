@@ -67,11 +67,8 @@ def main():
 
     check_version_info()
 
-    from tomo_argparser import ArgumentParser
-    arg_parser = ArgumentParser()
-    arg_parser.parse_args()
-
-    config = arg_parser.grab_full_config()
+    import tomo_argparser
+    config = tomo_argparser.grab_full_config()
 
     from recon.helper import Helper
     helper = Helper(config)
