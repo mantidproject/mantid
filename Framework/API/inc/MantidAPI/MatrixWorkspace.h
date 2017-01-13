@@ -543,6 +543,8 @@ public:
   // End image methods
   //=====================================================================================
 
+  void cacheDetectorGroupings(const det2group_map &mapping) override;
+
   size_t numberOfDetectorGroups() const override;
   const std::set<detid_t> &
   detectorIDsInGroup(const size_t index) const override;

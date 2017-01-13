@@ -1997,6 +1997,15 @@ MatrixWorkspace::detectorIDs(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
 }
 
+/// Cache a lookup of grouped detIDs to member IDs. Always throws
+/// std::runtime_error since MatrixWorkspace supports detector grouping via
+/// spectra instead of the caching mechanism.
+void MatrixWorkspace::cacheDetectorGroupings(const det2group_map &) {
+  throw std::runtime_error("Cannot cache detector groupings in a "
+                           "MatrixWorkspace -- grouping must be defined via "
+                           "spectra");
+}
+
 /// Returns the number of detector groups. This is equal to the number of
 /// spectra.
 size_t MatrixWorkspace::numberOfDetectorGroups() const {
