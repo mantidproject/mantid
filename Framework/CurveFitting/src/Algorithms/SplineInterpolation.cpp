@@ -265,7 +265,6 @@ SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
 void SplineInterpolation::setInterpolationPointsLinear(
     MatrixWorkspace_const_sptr inputWorkspace, const int row) const {
   const auto &xIn = inputWorkspace->x(row);
-  const auto &yIn = inputWorkspace->y(row);
   int size = static_cast<int>(xIn.size());
 
   // pass x attributes and y parameters to BSpline
@@ -273,10 +272,6 @@ void SplineInterpolation::setInterpolationPointsLinear(
   m_cspline->setAttributeValue("NBreak", 10);
   m_cspline->setAttributeValue("StartX", xIn[0]);
   m_cspline->setAttributeValue("EndX", xIn[size-1]);
-  for (int i = 0; i < size; ++i) {
-    // Call parent setParameter implementation
-    m_cspline->ParamFunction::setParameter(i, yIn[i], true);
-  }
 }
 
 /** Sets the points defining the spline
