@@ -133,7 +133,9 @@ def write_image(img_data, filename):
     # img_data = exposure.rescale_intensity(img_data[:, :], out_range='uint16')
 
     fits = loader.import_pyfits()
-    hdu = fits.PrimaryHDU(img_data[::-1])
+    # to flip vertically img_data[::-1] ps. saved images are still flipped
+    # vertically
+    hdu = fits.PrimaryHDU(img_data)
     hdulist = fits.HDUList([hdu])
     hdulist.writeto(filename + ".fits")
 

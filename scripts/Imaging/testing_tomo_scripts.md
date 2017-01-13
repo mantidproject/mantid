@@ -94,7 +94,7 @@ python tomo_main.py
 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full
 --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed
 --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed
---region-of-interest='[41.0, 0.0, 230.0, 228.0]'
+--region-of-interest='[41.0, 0.0, 233.0, 228.0]'
 --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000
 --median-filter-size=3
 --cor=255.000000
