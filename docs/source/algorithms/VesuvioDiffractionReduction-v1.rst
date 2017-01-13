@@ -27,7 +27,7 @@ Usage
 
 .. testcode:: ExVesuvioDiffractionReductionSimple
 
-    VesuvioDiffractionReduction(InputFiles='EVS15289.raw',
+    VesuvioDiffractionReduction(InputFiles='15289',
                             OutputWorkspace='DiffractionReductions',
                             InstrumentParFile='IP0005.dat')
 
