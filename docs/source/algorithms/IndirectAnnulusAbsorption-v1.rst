@@ -79,9 +79,9 @@ Usage
                                               CanWorkspace=can_ws,
                                               CanChemicalFormula='H2-O',
                                               CanInnerRadius=0.19,
-                                              SampleInnerRadius=0.2,
-                                              SampleOuterRadius=0.25,
-                                              CanOuterRadius=0.26,
+                                              SampleInnerRadius=0.23,
+                                              SampleOuterRadius=0.27,
+                                              CanOuterRadius=0.35,
                                               Events=100,
                                               UseCanCorrections=True)
 
