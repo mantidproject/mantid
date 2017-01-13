@@ -138,25 +138,25 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 elwin_alg.setProperty("OutputInQSquared", q2_ws)
                 elwin_alg.execute()
 
-                log_alg = self.createChildAlgorithm("Logarithm", enableLogging=False)
-                log_alg.setProperty("InputWorkspace", q2_ws)
-                log_alg.setProperty("OutputWorkspace", q2_ws)
-                log_alg.execute()
+            log_alg = self.createChildAlgorithm("Logarithm", enableLogging=False)
+            log_alg.setProperty("InputWorkspace", q2_ws)
+            log_alg.setProperty("OutputWorkspace", q2_ws)
+            log_alg.execute()
 
-                q_workspaces.append(q_ws)
-                q2_workspaces.append(q2_ws)
+            q_workspaces.append(q_ws)
+            q2_workspaces.append(q2_ws)
 
-                # Get the run number
-                run_no = getInstrRun(input_ws)[1]
-                run_numbers.append(run_no)
+            # Get the run number
+            run_no = getInstrRun(input_ws)[1]
+            run_numbers.append(run_no)
 
-                # Get the sample environment unit
-                sample,unit = self._get_sample_units(input_ws)
-                if sample is not None:
-                    sample_param.append(sample)
-                else:
-                    # No need to output a temperature workspace if there are no temperatures
-                    self._elt_workspace = ''
+            # Get the sample environment unit
+            sample,unit = self._get_sample_units(input_ws)
+            if sample is not None:
+                sample_param.append(sample)
+            else:
+                # No need to output a temperature workspace if there are no temperatures
+                self._elt_workspace = ''
 
         logger.information('Creating Q and Q^2 workspaces')
         progress.report('Creating Q workspaces')
