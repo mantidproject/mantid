@@ -21,6 +21,8 @@ Bug Fixes
 - IDF bug when using Larmor in batch mode was resolved.
 - Issue where Gui changes were not picked up for batch reductions was resolved.
 - Fix for merged reduction with phi masking.
+- Improved CropToComponent and removed detector ordering.
+
 
 X uncertainties (delta-Q)
 -------------------------
