@@ -25,7 +25,7 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
 .. warning::
 
-    If sample log *temperature* is not present in the given Vanadium workspace or temperature is set to an invalid value, T=293K will be taken for the Debye-Waller factor calculation. Algorithm will produce warning in this case.
+    If the input *Temperature* is not specified or the sample log *temperature* is not present in the given Vanadium workspace, or is set to an invalid value, T=293K will be taken for the Debye-Waller factor calculation. The algorithm will produce a warning in this case.
 
 2. Load the peak centre and sigma from the *EPPTable*. These values are used to calculate sum :math:`S_i` as
 
