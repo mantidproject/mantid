@@ -62,12 +62,22 @@ private:
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix,
                                             double startTime, double stopTime);
+  // Loads a group of runs
+  bool loadGroup(const GroupData& group);
+  // Process a group of runs which are event workspaces
+  void processGroupAsEventWS(int groupID, const GroupData &group,
+                             const std::vector<double> &startTimes,
+                             const std::vector<double> &stopTimes);
+  // Process a group of runs which are not event workspaces
+  void processGroupAsNonEventWS(const GroupData& group);
   // Parse time slicing from string
   void parseTimeSlicing(const std::string &timeSlicing,
                         std::vector<double> &startTimes,
                         std::vector<double> &stopTimes);
-  // Load a run
-  void loadRun(const std::string &runno);
+  // Load a run as event workspace
+  void loadEventRun(const std::string &runno);
+  // Load a run (non-event workspace)
+  void loadNonEventRun(const std::string &runno);
   // Take a slice from event workspace
   std::string takeSlice(const std::string &runno, double startTime,
                         double stopTime);

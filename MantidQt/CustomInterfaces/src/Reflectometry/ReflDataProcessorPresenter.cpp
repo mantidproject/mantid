@@ -47,7 +47,7 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 */
 void ReflDataProcessorPresenter::process() {
 
-  // if uniform slicing is empty process normally, delegating to
+  // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
   if (timeSlicing.empty()) {
@@ -58,7 +58,6 @@ void ReflDataProcessorPresenter::process() {
   // Parse time slices
   std::vector<double> startTimes, stopTimes;
   parseTimeSlicing(timeSlicing, startTimes, stopTimes);
-  size_t numSlices = startTimes.size();
 
   // Get selected runs
   const auto items = m_manager->selectedData(true);
@@ -66,76 +65,130 @@ void ReflDataProcessorPresenter::process() {
   // Progress report
   int progress = 0;
   int maxProgress = (int)(items.size());
-  for (const auto subitem : items) {
-    maxProgress += (int)(subitem.second.size());
-  }
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
+  // Loop in groups
   for (const auto &item : items) {
 
-    // Reduce rows sequentially
+    // Group of runs
+    GroupData group = item.second;
 
-    for (const auto &data : item.second) {
+    // First load the runs.
+    bool allEventWS = loadGroup(group);
 
-      auto row = data.second;
+    if (allEventWS) {
+      // Process the group
+      processGroupAsEventWS(item.first, group, startTimes, stopTimes);
 
-      // Load the run
-      std::string runno = row.at(0);
-      try {
-        loadRun(runno);
-      } catch (...) {
-        m_mainPresenter->giveUserCritical(
-            "Couldn't load run " + runno + " as event workspace", "Error");
-        progressReporter.clear();
-        return;
+      // Notebook not implemented yet
+      if (m_view->getEnableNotebook()) {
+        GenericDataProcessorPresenter::giveUserWarning(
+            "Notebook not implemented for sliced data yet",
+            "Notebook will not be generated");
       }
 
-      for (size_t i = 0; i < numSlices; i++) {
-        auto wsName = takeSlice(runno, startTimes[i], stopTimes[i]);
-        std::vector<std::string> slice(row);
-        slice[0] = wsName;
-        auto newData = reduceRow(slice);
-        newData[0] = row[0];
-        m_manager->update(item.first, data.first, newData);
-        progressReporter.report();
-      }
+    } else {
+      // Process the group
+      processGroupAsNonEventWS(group);
+
+      // Notebook
     }
 
-    // Post-process (if needed)
-    if (item.second.size() > 1) {
-      for (size_t i = 0; i < numSlices; i++) {
-
-        GroupData group;
-        std::vector<std::string> data;
-        for (const auto &row : item.second) {
-          data = row.second;
-          data[0] = row.second[0] + "_" + std::to_string((int)startTimes[i]) +
-                    "_" + std::to_string((int)stopTimes[i]);
-          group[row.first] = data;
-        }
-        try {
-          postProcessGroup(group);
-          progressReporter.report();
-        } catch (std::exception &ex) {
-          m_mainPresenter->giveUserCritical(
-              std::string(ex.what()) + "\nTry providing a value for dq/Q",
-              "Error stitching");
-          progressReporter.clear();
-          return;
-        }
-      }
-    }
-  }
-
-  // Notebook not implemented yet
-  if (m_view->getEnableNotebook()) {
-    GenericDataProcessorPresenter::giveUserWarning(
-        "Notebook not implemented for sliced data yet",
-        "Notebook will not be generated");
+    progressReporter.report();
   }
 
   progressReporter.clear();
+}
+
+/** Loads a group of runs. Tries loading runs as event workspaces. If any of the
+* ws is not an event workspace, abost loading and loads all of them as
+* non-event workspaces. We need the workspaces to be of the same type to process
+* them together.
+*
+* @param group :: the group of runs
+* @return :: true if all runs were loaded as event workspaces. False otherwise
+*/
+bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
+
+  // True if all runs in this group are event workspaces
+  bool allEventWS = true;
+
+  // Reduce rows sequentially
+  for (const auto &row : group) {
+
+    // The run number
+    std::string runno = row.second.at(0);
+    // Try loading as event workspace
+    try {
+      loadEventRun(runno);
+    } catch (...) {
+      loadNonEventRun(runno);
+      allEventWS = false;
+      for (const auto &dataNew : group) {
+        // The run number
+        std::string runno = dataNew.second.at(0);
+        // Load as non-event workspace
+        loadNonEventRun(runno);
+      }
+      break;
+    }
+  }
+  return allEventWS;
+}
+
+/** Processes a group of runs
+*
+* @param groupID :: An integer number indicating the id of this group
+* @param group :: the group of event workspaces
+* @param startTimes :: start times for the set of slices
+* @param stopTimes :: stop times for the set of slices
+*/
+void ReflDataProcessorPresenter::processGroupAsEventWS(
+    int groupID, const GroupData &group, const std::vector<double> &startTimes,
+    const std::vector<double> &stopTimes) {
+
+  size_t numSlices = startTimes.size();
+
+  for (const auto &row : group) {
+
+    // Vector containing data for this row
+    auto data = row.second;
+    // The run number
+    std::string runno = row.second.at(0);
+
+    for (size_t i = 0; i < numSlices; i++) {
+      auto wsName = takeSlice(runno, startTimes[i], stopTimes[i]);
+      std::vector<std::string> slice(data);
+      slice[0] = wsName;
+      auto newData = reduceRow(slice);
+      newData[0] = data[0];
+      m_manager->update(groupID, row.first, newData);
+    }
+  }
+
+  // Post-process (if needed)
+  if (group.size() > 1) {
+    for (size_t i = 0; i < numSlices; i++) {
+
+      GroupData group;
+      std::vector<std::string> data;
+      for (const auto &row : group) {
+        data = row.second;
+        data[0] = row.second[0] + "_" + std::to_string((int)startTimes[i]) +
+                  "_" + std::to_string((int)stopTimes[i]);
+        group[row.first] = data;
+      }
+      try {
+        postProcessGroup(group);
+      } catch (std::exception &ex) {
+        m_mainPresenter->giveUserCritical(
+            std::string(ex.what()) + "\nTry providing a value for dq/Q",
+            "Error stitching");
+        return;
+      }
+    }
+  }
 }
 
 /** Parses a string to extract time slicing
@@ -177,16 +230,33 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
                                       "Time slicing error");
 }
 
-/** Loads a run
+/** Loads an event workspace and puts it into the ADS
 *
 * @param runno :: the run number as a string
 */
-void ReflDataProcessorPresenter::loadRun(const std::string &runno) {
+void ReflDataProcessorPresenter::loadEventRun(const std::string &runno) {
 
   std::string runName = "TOF_" + runno;
 
-  // Load the run
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
+  IAlgorithm_sptr algLoadRun =
+      AlgorithmManager::Instance().create("LoadEventNexus");
+  algLoadRun->initialize();
+  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runno);
+  algLoadRun->setProperty("OutputWorkspace", runName);
+  algLoadRun->setProperty("LoadMonitors", true);
+  algLoadRun->execute();
+}
+
+/** Loads a non-event workspace and puts it into the ADS
+*
+* @param runno :: the run number as a string
+*/
+void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runno) {
+
+  std::string runName = "TOF_" + runno;
+
+  IAlgorithm_sptr algLoadRun =
+      AlgorithmManager::Instance().create("LoadISISNexus");
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runno);
   algLoadRun->setProperty("OutputWorkspace", runName);
