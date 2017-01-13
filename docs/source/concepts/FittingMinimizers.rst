@@ -54,9 +54,7 @@ options are available:
 - `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../fitminimizers/BFGS.html>`__
 - `Levenberg-Marquardt <../fitminimizers/LevenbergMarquardt.html>`__ (default)
 - `Levenberg-MarquardtMD <../fitminimizers/LevenbergMarquardtMD.html>`__
-
-  A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
-- `Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__ algorithm with damping.
+- `Damped Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__
 - :ref:`FABADA <FABADA>`
 - `Trust region <../fitminimizers/TrustRegion.html>`__
 
@@ -153,7 +151,7 @@ following information:
 - Initial values (starting point) of the function parameters
 - Optional: reference best values for the parameters (some may refer to these as certified values), i.e. target parameter values for the minimizers   
 
-The current problems have been obtained from the following benchmarks and sources:
+The current problems have been obtained from the following sources:
 
 - `NIST nonlinear regression problems
   <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
