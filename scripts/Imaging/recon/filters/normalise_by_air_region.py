@@ -36,21 +36,41 @@ def execute(data, config):
                 "(air region). Got these coordinates: {0}".format(
                     normalize_air_region))
 
-        right = normalize_air_region[2]
-        top = normalize_air_region[1]
-        left = normalize_air_region[0]
-        bottom = normalize_air_region[3]
+        air_right = normalize_air_region[2]
+        air_top = normalize_air_region[1]
+        air_left = normalize_air_region[0]
+        air_bottom = normalize_air_region[3]
 
         # skip if for example: 0, 0, 0, 0 (empty selection)
-        if top >= bottom or left >= right:
-            h.tomo_print(" * NOTE: NOT applying Normalise by Air Region. Reason: Empty Selection")
+        if air_top >= air_bottom or air_left >= air_right:
+            h.tomo_print(
+                " * NOTE: NOT applying Normalise by Air Region. Reason: Empty Selection")
             return data
 
-        h.pstart(" * Starting normalization by air region...")
+        crop_coords = config.pre.crop_coords
+        crop_right = crop_coords[2]
+        crop_top = crop_coords[1]
+        crop_left = crop_coords[0]
+        crop_bottom = crop_coords[3]
 
+        if air_top < crop_top or \
+           air_bottom > crop_bottom or \
+           air_left < crop_left or \
+           air_right > crop_right:
+            raise ValueError(
+                "Selected air region is outside of the cropped data range.")
+
+        # move the air region coordinates
+        air_left -= crop_left
+        air_right -= crop_left
+        air_bottom -= crop_top
+        air_top -= crop_top
+
+        h.pstart(" * Starting normalization by air region...")
         air_sums = []
         for idx in range(0, data.shape[0]):
-            air_data_sum = data[idx, top:bottom, left:right].sum()
+            air_data_sum = data[
+                idx, air_top:air_bottom, air_left:air_right].sum()
             air_sums.append(air_data_sum)
 
         air_sums = np.true_divide(air_sums, np.amax(air_sums))

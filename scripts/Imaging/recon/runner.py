@@ -20,6 +20,7 @@ def execute(config, cmd_line=None):
 
     h.check_config_integrity(config)
 
+    # import early to check if tool is available
     tool = load_tool(config, h)
 
     sample, flat, dark = load_data(config, h)
@@ -29,11 +30,11 @@ def execute(config, cmd_line=None):
         config.func.output_dir, config.func.readme_file_name)
     generate_readme_begin(_readme_fullpath, cmd_line, config, h)
 
-    pre_processing(config, sample, flat, dark)
+    sample = pre_processing(config, sample, flat, dark)
 
     # Save pre-proc images, print inside
     import recon.data.saver as saver
-    # saver.save_preproc_images(sample, config)
+    saver.save_preproc_images(sample, config)
 
     # ----------------------------------------------------------------
     return
@@ -56,27 +57,35 @@ def execute(config, cmd_line=None):
 def pre_processing(config, data, flat, dark):
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
         mcp_corrections, scale_down, median_filter
-    _debug_save_out_data(data, config, flat, dark)
-
-    # data, flat, dark = rotate_stack.execute(data, config, flat, dark)
     # _debug_save_out_data(data, config, flat, dark)
 
-    # if config.pre.crop_before_normalize:
-    #     data = crop_coords.execute_volume(data, config)
-    #
-    #     # TODO TEST BELOW
-    #     flat = crop_coords.execute_image(flat, config)
-    #     dark = crop_coords.execute_image(dark, config)
+    d = True if config.func.debug else False
 
-    # data = normalise_by_flat_dark.execute(data, config, flat, dark)
-    # _debug_save_out_data(data, config, flat, dark)
+    data, flat, dark = rotate_stack.execute(data, config, flat, dark)
+    if d:
+        _debug_save_out_data(data, config, flat, dark, "_rotated")
 
-    # data = normalise_by_air_region.execute(data, config)
-    # _debug_save_out_data(data, config, flat, dark)
+    # the air region coordinates must be within the ROI if this is selected
+    # TODO reflect change in GUI
+    if config.pre.crop_before_normalize:
+        data = crop_coords.execute_volume(data, config)
 
-    # if not config.pre.crop_before_normalize:
-    #     in this case we don't care about cropping the flat and dark
-    #     data = crop_coords.execute_volume(data, config)
+        flat = crop_coords.execute_image(flat, config)
+        dark = crop_coords.execute_image(dark, config)
+
+    # removes background using images taken when exposed to fully open beam and no beam
+    data = normalise_by_flat_dark.execute(data, config, flat, dark)
+    if d:
+        _debug_save_out_data(data, config, flat, dark, "_normalised_by_flat_dark")
+
+    # removes the contrast difference between the stack of images
+    data = normalise_by_air_region.execute(data, config)
+    if d:
+        _debug_save_out_data(data, config, flat, dark, "_normalised_by_air")
+
+    if not config.pre.crop_before_normalize:
+        # in this case we don't care about cropping the flat and dark
+        data = crop_coords.execute_volume(data, config)
 
     # cut_off
     # data = cut_off.execute(data, config)
@@ -85,14 +94,14 @@ def pre_processing(config, data, flat, dark):
     # scale_down, not implemented
     # data = scale_down.execute(data, config)
 
-    # median filter
-    # data = median_filter.execute(data, config)
-    # _debug_save_out_data(data, config, flat, dark)
+    data = median_filter.execute(data, config)
+    if d:
+        _debug_save_out_data(data, config, flat, dark, "_median_filtered")
 
     return data
 
 
-def _debug_save_out_data(data, config, flat, dark):
+def _debug_save_out_data(data, config, flat, dark, image_append):
     from recon.data import saver
 
     import time
@@ -100,11 +109,11 @@ def _debug_save_out_data(data, config, flat, dark):
     append_index = str(time.time())[-2:]
 
     saver.save_single_image(
-        data, config, 'sample', image_name='sample', image_index=append_index)
+        data, config, 'sample', image_name='sample'+image_append, image_index=append_index)
     saver.save_single_image(
-        flat, config, 'flat', image_name='flat', image_index=append_index)
+        flat, config, 'flat', image_name='flat'+image_append, image_index=append_index)
     saver.save_single_image(
-        dark, config, 'dark', image_name='dark', image_index=append_index)
+        dark, config, 'dark', image_name='dark'+image_append, image_index=append_index)
 
 
 def post_processing():

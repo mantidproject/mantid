@@ -39,16 +39,18 @@ def execute_image(data, config):
     else:
         h.tomo_print(" * Note: NOT applying cropping to region of interest.")
 
+    return data
+
 
 def _crop_image(data_image, coords):
     """
     Crops a data volume by a rectangle defined by two corner
     coordinates. Crops along the z axis (outermost numpy array index)
 
-    @param data_vol :: 3D data volume
-    @param coords :: coordinates of the corners that define a rectangle box (crop to this
+    :param data_image :: image data to be cropped
+    :param coords :: coordinates of the corners that define a rectangle box (crop to this
     box, as when cropping to the regions of interest).
-    Returns :: cropped data volume
+    :returns :: cropped image
     """
     _crop_coords_sanity_checks(coords, data_image, expected_data_shape=2)
     left = coords[0]
@@ -60,7 +62,7 @@ def _crop_image(data_image, coords):
         # skip if for example: 0, 0, 0, 0 (empty selection)
         return data_image
     else:
-        return data_image[:, top:bottom, left:right]
+        return data_image[top:bottom, left:right]
 
 
 def execute_volume(data, config):

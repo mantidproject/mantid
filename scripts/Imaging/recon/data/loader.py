@@ -15,19 +15,19 @@ def read_in_stack(config):
     :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
     """
 
-    img_format = config.pre.in_img_format
+    in_img_format = config.func.in_img_format
     sample_path = config.func.input_dir
     flat_field_path = config.func.input_dir_flat
     dark_field_path = config.func.input_dir_dark
 
     supported_exts = ['tiff', 'tif', 'fits', 'fit', 'png']
 
-    if img_format not in supported_exts:
+    if in_img_format not in supported_exts:
         raise ValueError("File extension not supported: {0}. Supported extensions: {1}".
-                         format(img_format, supported_exts))
+                         format(in_img_format, supported_exts))
 
     sample, flat, dark = read_stack_of_images(
-        sample_path, flat_field_path, dark_field_path, img_format, argument_data_dtype=config.func.data_dtype)
+        sample_path, flat_field_path, dark_field_path, in_img_format, argument_data_dtype=config.func.data_dtype)
 
     from recon.helper import Helper
     Helper.check_data_stack(sample)
@@ -63,8 +63,6 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
 
     sample_file_names = _get_stack_file_names(
         sample_path, file_prefix, file_extension)
-
-    print("\n".join(sample_file_names))
 
     flat_file_names = _get_stack_file_names(
         flat_file_path, flat_file_prefix, file_extension)

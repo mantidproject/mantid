@@ -94,9 +94,12 @@ def save_preproc_images(data, config):
 
     make_dirs_if_needed(preproc_dir)
 
-    for idx in range(0, data.shape[0]):
-        write_image(data[idx, :, :], os.path.join(
-            preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+    if not config.func.preproc_images_as_stack:
+        for idx in range(0, data.shape[0]):
+            write_image(data[idx, :, :], os.path.join(
+                preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+    else:
+        write_image(data, os.path.join(preproc_dir, 'out_preproc_proj_images_stack'))
 
     h.pstop(" * Saving pre-processed images finished.")
 
