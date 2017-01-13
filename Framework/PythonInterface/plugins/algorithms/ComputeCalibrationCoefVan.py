@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory,
                         MatrixWorkspaceProperty, Progress, InstrumentValidator,
                         ITableWorkspaceProperty)
-from mantid.kernel import Direction
+from mantid.kernel import Direction, FloatBoundedValidator, Property
 import numpy as np
 from scipy import integrate
 import scipy as sp
@@ -54,9 +54,16 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                              direction=Direction.Output),
                              ("Name the workspace that will contain the " +
                               "calibration coefficients"))
+        self.declareProperty("Temperature",
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=FloatBoundedValidator(lower=0.0),
+                             direction=Direction.Input,
+                             doc=("Temperature during the experiment."))
         return
 
     def validateInputs(self):
+        """ Validate the inputs
+        """
         issues = dict()
         inws = self.getProperty("VanadiumWorkspace").value
         run = inws.getRun()
@@ -85,21 +92,23 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         return issues
 
     def get_temperature(self):
+        """Return the temperature
         """
-        tries to get temperature from the sample logs
-        in the case of fail, default value is returned
-        """
+        if not self.getProperty("Temperature").isDefault:
+            return self.getProperty("Temperature").value
         run = self.vanaws.getRun()
         if not run.hasProperty('temperature'):
-            self.log().warning("Temperature sample log is not present in " +
+            self.log().warning("No Temperature given and the 'temperature' " +
+                               "sample log is not present in " +
                                self.vanaws.name() +
                                " T=293K is assumed for Debye-Waller factor.")
             return self.defaultT
         try:
             temperature = float(run.getProperty('temperature').value)
         except ValueError as err:
-            self.log().warning("Error of getting temperature: " + err +
-                               " T=293K is assumed for Debye-Waller factor.")
+            self.log().warning("Error of getting temperature from the " +
+                               "sample log " + err + " T=293K is assumed " +
+                               "for Debye-Waller factor.")
             return self.defaultT
 
         return temperature
