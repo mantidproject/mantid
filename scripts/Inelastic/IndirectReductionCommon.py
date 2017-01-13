@@ -35,7 +35,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
         # The filename without path and extension will be the workspace name
         ws_name = os.path.splitext(os.path.basename(str(filename)))[0]
         logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
-        print(filename)
+
         if 'VESUVIO' in ipf_filename:
             evs_filename = os.path.basename(str(filename)).replace('EVS', '')
             LoadVesuvio(Filename=evs_filename,
