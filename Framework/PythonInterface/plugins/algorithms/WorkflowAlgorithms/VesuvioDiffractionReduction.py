@@ -101,16 +101,12 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
 
         # Split up runs as LoadVesuvio sums multiple runs
         input_files = self._data_files
-
         for run in input_files:
-            if "-" in run:
-                lower, upper = run.split("-")
-                # Range goes lower to up-1 but we want to include the last number
-                self._data_files = list(range(int(lower), int(upper) + 1))
-            elif "," in run:
-                self._data_files = run.split(",")
-            else:
-                self._data_files = [str(run)]
+            try:
+                number_generator = IntArrayProperty('array_generator', run)
+                self._data_files = number_generator.value.tolist()
+            except RuntimeError:
+                raise RuntimeError("Could not generate run numbers from this input: " + run)
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                ipf_filename=self._ipf_filename,
