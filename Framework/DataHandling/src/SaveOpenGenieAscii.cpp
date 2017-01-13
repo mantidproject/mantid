@@ -139,37 +139,37 @@ std::string SaveOpenGenieAscii::getSpectrumNumAsString(
 std::vector<std::tuple<std::string, int>>
 SaveOpenGenieAscii::convertWorkspaceToStrings() {
   // Build x, y and e strings
-  std::string xValsOutput, yValsOutput, eValsOutput;
-  const std::string newlineStr = "/n    ";
+  std::string xValsOutput("    "), yValsOutput(xValsOutput) , eValsOutput(xValsOutput);
+  const std::string newlineStr = "\n    ";
 
   int xCount = 0;
   const auto &x = m_inputWS->x(0);
   for (const auto xVal : x) {
-    xCount++;
     if (xCount % 10 == 0) {
       xValsOutput += newlineStr;
     }
-    xValsOutput += std::to_string(xVal);
+	xCount++;
+    xValsOutput += std::to_string(xVal) + ' ';
   }
 
   int yCount = 0;
   const auto &y = m_inputWS->y(0);
   for (const auto yVal : y) {
-    yCount++;
     if (yCount % 10 == 0) {
       yValsOutput += newlineStr;
     }
-    yValsOutput += std::to_string(yVal);
+    yCount++;
+    yValsOutput += std::to_string(yVal) + ' ';
   }
 
   int eCount = 0;
   const auto &e = m_inputWS->e(0);
   for (const auto eVal : e) {
-    eCount++;
     if (eCount % 10 == 0) {
       eValsOutput += newlineStr;
     }
-    eValsOutput += std::to_string(eVal);
+    eCount++;
+    eValsOutput += std::to_string(eVal) + ' ';
   }
 
   std::vector<std::tuple<std::string, int>> outDataStrings;
@@ -203,10 +203,8 @@ void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile) {
   *
   */
 void SaveOpenGenieAscii::parseWorkspaceData() {
-
-  const std::string outputType =
-      "    GXRealarray\n"
-      "    1"; // Bank number - force to 1 at the moment
+	// 1 is Bank number - force to 1 at the moment
+  const std::string outputType = "GXRealarray\n    1"; 
 
   const auto xyeTuples = convertWorkspaceToStrings();
   const auto &xTuple = xyeTuples[0];
@@ -360,12 +358,12 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
   // xunit & xlabel put in OpenGenie format
   const std::string xunits = "xunits";
   const std::string xlabel = "xlabel";
-  const std::string xunitsVal = "\"Time-of-Flight (\\gms)\"";
+  const std::string xunitsVal = "Time-of-Flight (\\gms)";
 
   // yunit & ylabel put in OpenGenie format
   const std::string yunits = "yunits";
   const std::string ylabel = "ylabel";
-  const std::string yunitsVal = "\"Neutron counts / \\gms\"";
+  const std::string yunitsVal = "Neutron counts / \\gms";
 
   const std::string specNumIdentifier = "spec_no";
   const std::string specNoToSave = getSpectrumNumAsString(*m_inputWS);
