@@ -698,68 +698,6 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_sillySessionLocal() {
-    // the user does a few silly things...
-    testing::NiceMock<MockTomographyIfaceView> mockView;
-    MantidQt::CustomInterfaces::TomographyIfacePresenter *pres =
-        new MantidQt::CustomInterfaces::TomographyIfacePresenter(&mockView);
-
-    EXPECT_CALL(mockView, systemSettings()).Times(0);
-
-    EXPECT_CALL(mockView, currentPathsConfig())
-        .Times(1)
-        .WillOnce(Return(TomoPathsConfig()));
-
-    // user changes some paths
-    pres->notify(ITomographyIfacePresenter::TomoPathsChanged);
-    EXPECT_CALL(mockView, currentComputeResource())
-        .WillRepeatedly(Return("Local"));
-
-    // user changes the compute resource
-    pres->notify(ITomographyIfacePresenter::CompResourceChanged);
-
-    EXPECT_CALL(mockView, currentReconTool())
-        .Times(2)
-        .WillRepeatedly(Return("TomoPy"));
-
-    // and basic tools settings
-    EXPECT_CALL(mockView, currentPathsConfig())
-        .Times(1)
-        .WillOnce(Return(TomoPathsConfig()));
-
-    // the tool changed event sets up the tool's paths
-    pres->notify(ITomographyIfacePresenter::ToolChanged);
-    // user opens dialog and sets up a reconstruction tool
-    pres->notify(ITomographyIfacePresenter::SetupReconTool);
-
-    TomoPathsConfig pathsCfg;
-    EXPECT_CALL(mockView, currentPathsConfig())
-        .Times(1)
-        .WillOnce(Return(pathsCfg));
-
-    ImageStackPreParams roiEtc;
-    EXPECT_CALL(mockView, currentROIEtcParams())
-        .Times(1)
-        .WillOnce(Return(roiEtc));
-
-    TomoReconFiltersSettings filters;
-    EXPECT_CALL(mockView, prePostProcSettings())
-        .Times(1)
-        .WillOnce(Return(filters));
-
-    // No errors, no warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-
-    // finally, user tries to run a reconstruction job
-    pres->notify(ITomographyIfacePresenter::RunReconstruct);
-
-    TSM_ASSERT(
-        "Mock not used as expected. Some EXPECT_CALL conditions were not "
-        "satisfied.",
-        testing::Mock::VerifyAndClearExpectations(&mockView))
-  }
-
   void test_shutDown() {
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
