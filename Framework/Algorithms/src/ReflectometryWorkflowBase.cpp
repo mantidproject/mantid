@@ -17,10 +17,10 @@ namespace Algorithms {
 namespace {
 
 /**
- *  Helper method used with the stl to determine whether values are negative
- * @param value : Value to check
- * @return : True if negative.
- */
+*  Helper method used with the stl to determine whether values are negative
+* @param value : Value to check
+* @return : True if negative.
+*/
 bool checkNotPositive(const int value) { return value < 0; }
 }
 
@@ -121,14 +121,14 @@ const std::string ReflectometryWorkflowBase::getWorkspaceIndexList() const {
 }
 
 /**
- * Fetch min, max inputs as a vector (int) if they are non-default and set them
- * to the optionalUpperLower object.
- * Performs checks to verify that invalid indexes have not been passed in.
- * @param propertyName : Property name to fetch
- * @param isPointDetector : Flag indicates that the execution is in point
- * detector mode.
- * @param optionalUpperLower : Object to set min and max on.
- */
+* Fetch min, max inputs as a vector (int) if they are non-default and set them
+* to the optionalUpperLower object.
+* Performs checks to verify that invalid indexes have not been passed in.
+* @param propertyName : Property name to fetch
+* @param isPointDetector : Flag indicates that the execution is in point
+* detector mode.
+* @param optionalUpperLower : Object to set min and max on.
+*/
 void ReflectometryWorkflowBase::fetchOptionalLowerUpperPropertyValue(
     const std::string &propertyName, bool isPointDetector,
     OptionalWorkspaceIndexes &optionalUpperLower) const {
@@ -347,27 +347,20 @@ void ReflectometryWorkflowBase::getTransmissionRunInfo(
 }
 
 /**
- * Convert the TOF workspace into a monitor workspace. Crops to the monitorIndex
- * and applying flat background correction as part of the process.
- * @param toConvert : TOF wavlength to convert.
+ * Crops input workspace to the monitorIndex and applying flat background
+ * correction as part of the process.
+ * @param inputWS : Input workspace to extract monitor workspace from.
  * @param monitorIndex : Monitor index to crop to
  * @param backgroundMinMax : Min and Max Lambda range for Flat background
  * correction.
- * @return The cropped and corrected monitor workspace.
+ * @return Monitor workspace in wavelength
  */
-MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamMonitor(
-    const MatrixWorkspace_sptr &toConvert, const OptionalInteger monitorIndex,
+MatrixWorkspace_sptr ReflectometryWorkflowBase::retrieveMonitorWS(
+    const MatrixWorkspace_sptr &inputWS, const OptionalInteger monitorIndex,
     const OptionalMinMax &backgroundMinMax) {
-  // Convert Units.
-  auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
-  convertUnitsAlg->initialize();
-  convertUnitsAlg->setProperty("InputWorkspace", toConvert);
-  convertUnitsAlg->setProperty("Target", "Wavelength");
-  convertUnitsAlg->execute();
 
-  // Crop the to the monitor index.
-  MatrixWorkspace_sptr monitorWS =
-      convertUnitsAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr monitorWS = inputWS;
+
   auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
   cropWorkspaceAlg->setProperty("InputWorkspace", monitorWS);
@@ -396,21 +389,20 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamMonitor(
 }
 
 /**
- * Convert to a detector workspace in lambda.
+ * Retrieves detector workspace from an input workspace.
  * @param processingCommands : Commands to apply to crop and add spectra of the
- * toConvert workspace.
- * @param toConvert : TOF wavelength to convert.
+ * detector workspace.
+ * @param inputWS : Input workspace to extract detector workspace from.
  * @param wavelengthMinMax : Wavelength minmax to keep. Crop out the rest.
- * @return Detector workspace in wavelength
+ * @return Detector workspace
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
-                                         const MatrixWorkspace_sptr &toConvert,
-                                         const MinMax &wavelengthMinMax) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase::retrieveDetectorWS(
+    const std::string &processingCommands, const MatrixWorkspace_sptr &inputWS,
+    const MinMax &wavelengthMinMax) {
 
   auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
-  convertUnitsAlg->setProperty("InputWorkspace", toConvert);
+  convertUnitsAlg->setProperty("InputWorkspace", inputWS);
   convertUnitsAlg->setProperty("Target", "Wavelength");
   convertUnitsAlg->setProperty("AlignBins", true);
   convertUnitsAlg->execute();
@@ -457,9 +449,10 @@ ReflectometryWorkflowBase::makeUnityWorkspace(const HistogramX &x) {
 }
 
 /**
- * Convert From a TOF workspace into a detector and monitor workspace both in
- * Lambda.
- * @param toConvert: TOF workspace to convert
+ * Splits an input workspace into its constituent detector and monitor
+ * workspace components. Input workspace is expected to be in units of
+ * wavelength.
+ * @param inputWS: Input workspace to split
  * @param processingCommands : Detector index ranges
  * @param monitorIndex : Monitor index
  * @param wavelengthMinMax : Wavelength min max for detector workspace
@@ -468,19 +461,18 @@ ReflectometryWorkflowBase::makeUnityWorkspace(const HistogramX &x) {
  * @return Tuple of detector and monitor workspaces
  */
 ReflectometryWorkflowBase::DetectorMonitorWorkspacePair
-ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
-                                 const std::string &processingCommands,
-                                 const OptionalInteger monitorIndex,
-                                 const MinMax &wavelengthMinMax,
-                                 const OptionalMinMax &backgroundMinMax) {
+ReflectometryWorkflowBase::splitDetectorsMonitors(
+    const MatrixWorkspace_sptr inputWS, const std::string &processingCommands,
+    const OptionalInteger monitorIndex, const MinMax &wavelengthMinMax,
+    const OptionalMinMax &backgroundMinMax) {
   // Detector Workspace Processing
   MatrixWorkspace_sptr detectorWS =
-      toLamDetector(processingCommands, toConvert, wavelengthMinMax);
+      retrieveDetectorWS(processingCommands, inputWS, wavelengthMinMax);
 
   MatrixWorkspace_sptr monitorWS;
   if (monitorIndex.is_initialized() && backgroundMinMax.is_initialized()) {
     // Monitor Workspace Processing
-    monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
+    monitorWS = retrieveMonitorWS(inputWS, monitorIndex, backgroundMinMax);
   } else {
     // We don't have a monitor index, so we divide through by unity.
     monitorWS = makeUnityWorkspace(detectorWS->x(0));

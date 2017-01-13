@@ -39,7 +39,7 @@ public:
     m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
   }
 
-  void test_tolam() {
+  void test_splitDetectorsMonitors() {
     MatrixWorkspace_sptr toConvert = m_tinyReflWS;
     std::vector<int> detectorIndexRange;
     size_t workspaceIndexToKeep1 = 1;
@@ -62,18 +62,30 @@ public:
     const double backgroundWavelengthMin = 17;
     const double backgroundWavelengthMax = 20;
 
+    // Convert input workspace units to wavelength
+    auto convertUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
+    convertUnitsAlg->initialize();
+    convertUnitsAlg->setProperty("InputWorkspace", toConvert);
+    convertUnitsAlg->setProperty("Target", "Wavelength");
+    convertUnitsAlg->setProperty("AlignBins", true);
+    convertUnitsAlg->setProperty("OutputWorkspace", "Converted");
+    convertUnitsAlg->execute();
+    toConvert = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Converted");
+
     ReflectometryReductionOne alg;
 
     // Run the conversion.
-    ReflectometryWorkflowBase::DetectorMonitorWorkspacePair inLam =
-        alg.toLam(toConvert, detectorIndexRangesStr, monitorIndex,
-                  boost::tuple<double, double>(wavelengthMin, wavelengthMax),
-                  boost::tuple<double, double>(backgroundWavelengthMin,
-                                               backgroundWavelengthMax));
+    ReflectometryWorkflowBase::DetectorMonitorWorkspacePair detMonPair =
+        alg.splitDetectorsMonitors(
+            toConvert, detectorIndexRangesStr, monitorIndex,
+            boost::tuple<double, double>(wavelengthMin, wavelengthMax),
+            boost::tuple<double, double>(backgroundWavelengthMin,
+                                         backgroundWavelengthMax));
 
     // Unpack the results
-    MatrixWorkspace_sptr detectorWS = inLam.get<0>();
-    MatrixWorkspace_sptr monitorWS = inLam.get<1>();
+    MatrixWorkspace_sptr detectorWS = detMonPair.get<0>();
+    MatrixWorkspace_sptr monitorWS = detMonPair.get<1>();
 
     /* ---------- Checks for the detector workspace ------------------*/
 

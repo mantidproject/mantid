@@ -60,6 +60,8 @@ public:
   MatrixWorkspace_sptr m_dataWorkspace;
   MatrixWorkspace_sptr m_transWorkspace1;
   MatrixWorkspace_sptr m_transWorkspace2;
+  MatrixWorkspace_sptr m_decWorkspaceWrongNumSpectra;
+  MatrixWorkspace_sptr m_decWorkspaceWrongNumValues;
   WorkspaceGroup_sptr m_multiDetectorWorkspace;
   const std::string outWSQName;
   const std::string outWSLamName;
@@ -71,8 +73,12 @@ public:
         outWSLamName("ReflectometryReductionOneAutoTest_OutputWS_Lam"),
         inWSName("ReflectometryReductionOneAutoTest_InputWS"),
         transWSName("ReflectometryReductionOneAutoTest_TransWS") {
-    MantidVec xData = {0, 0, 0, 0};
-    MantidVec yData = {0, 0, 0};
+    MantidVec xData(4, 0);
+    MantidVec yData(3, 0);
+    MantidVec xDecData(3, 0);
+    MantidVec yDecData(3, 1);
+    MantidVec xDecDataDouble(10, 0);
+    MantidVec yDecDataDouble(10, 1);
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -93,6 +99,26 @@ public:
     createWorkspace->setPropertyValue("OutputWorkspace", "TOF");
     createWorkspace->execute();
     m_TOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOF");
+
+    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("DataX", xDecData);
+    createWorkspace->setProperty("DataY", yDecData);
+    createWorkspace->setProperty("NSpec", 3);
+    createWorkspace->setProperty("OutputWorkspace", "DECWrongNumSpectra");
+    createWorkspace->execute();
+    m_decWorkspaceWrongNumSpectra =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "DECWrongNumSpectra");
+
+    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("DataX", xDecDataDouble);
+    createWorkspace->setProperty("DataY", yDecDataDouble);
+    createWorkspace->setProperty("NSpec", 5);
+    createWorkspace->setProperty("OutputWorkspace", "DECWrongNumValues");
+    createWorkspace->execute();
+    m_decWorkspaceWrongNumValues =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "DECWrongNumValues");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
@@ -258,6 +284,24 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     m_TOF->setInstrument(tempInst);
   }
+
+  void test_detector_efficiency_correction_wrong_num_of_spectra_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("InputWorkspace", m_dataWorkspace);
+    alg->setProperty("DetectorEfficiencyCorrection",
+                     m_decWorkspaceWrongNumSpectra);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void
+  test_detector_efficiency_correction_more_than_one_value_per_spectra_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("InputWorkspace", m_dataWorkspace);
+    alg->setProperty("DetectorEfficiencyCorrection",
+                     m_decWorkspaceWrongNumValues);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
   void
   test_cannot_set_direct_beam_region_of_interest_without_multidetector_run() {
     auto alg = construct_standard_algorithm();
@@ -295,6 +339,7 @@ public:
     alg->setProperty("SampleComponentName", "made-up");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
+
   void test_exec() {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");

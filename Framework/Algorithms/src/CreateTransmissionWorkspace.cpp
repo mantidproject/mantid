@@ -157,13 +157,23 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     const OptionalDouble &stitchingEndOverlap) {
   /*make struct of optional inputs to refactor method arguments*/
   /*make a using statements defining OptionalInteger for MonitorIndex*/
-  auto trans1InLam =
-      toLam(firstTransmissionRun, processingCommands, i0MonitorIndex,
-            wavelengthInterval, wavelengthMonitorBackgroundInterval);
-  MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
-  MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 
-  // Monitor integration ... can this happen inside the toLam routine?
+  // Convert first transmission workspace units to wavelength
+  auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+  convertUnitsAlg->initialize();
+  convertUnitsAlg->setProperty("InputWorkspace", firstTransmissionRun);
+  convertUnitsAlg->setProperty("Target", "Wavelength");
+  convertUnitsAlg->setProperty("AlignBins", true);
+  convertUnitsAlg->execute();
+  firstTransmissionRun = convertUnitsAlg->getProperty("OutputWorkspace");
+
+  auto trans1DetMonPair = splitDetectorsMonitors(
+      firstTransmissionRun, processingCommands, i0MonitorIndex,
+      wavelengthInterval, wavelengthMonitorBackgroundInterval);
+  MatrixWorkspace_sptr trans1Detector = trans1DetMonPair.get<0>();
+  MatrixWorkspace_sptr trans1Monitor = trans1DetMonPair.get<1>();
+
+  // Monitor integration ... can this happen in splitMonitorsDetectors routine?
   if (wavelengthMonitorIntegrationInterval.is_initialized()) {
     auto integrationAlg = this->createChildAlgorithm("Integration");
     integrationAlg->initialize();
@@ -181,15 +191,24 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     g_log.debug(
         "Extracting second transmission run workspace indexes from spectra");
 
-    auto trans2InLam =
-        toLam(transRun2, processingCommands, i0MonitorIndex, wavelengthInterval,
-              wavelengthMonitorBackgroundInterval);
+    // Convert second transmission workspace units to wavelength
+    auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+    convertUnitsAlg->initialize();
+    convertUnitsAlg->setProperty("InputWorkspace", transRun2);
+    convertUnitsAlg->setProperty("Target", "Wavelength");
+    convertUnitsAlg->setProperty("AlignBins", true);
+    convertUnitsAlg->execute();
+    transRun2 = convertUnitsAlg->getProperty("OutputWorkspace");
+
+    auto trans2DetMonPair = splitDetectorsMonitors(
+        transRun2, processingCommands, i0MonitorIndex, wavelengthInterval,
+        wavelengthMonitorBackgroundInterval);
 
     // Unpack the conversion results.
-    MatrixWorkspace_sptr trans2Detector = trans2InLam.get<0>();
-    MatrixWorkspace_sptr trans2Monitor = trans2InLam.get<1>();
+    MatrixWorkspace_sptr trans2Detector = trans2DetMonPair.get<0>();
+    MatrixWorkspace_sptr trans2Monitor = trans2DetMonPair.get<1>();
 
-    // Monitor integration ... can this happen inside the toLam routine?
+    // Monitor integration ... can this happen in splitMonitorsDetectors?
     if (wavelengthMonitorIntegrationInterval.is_initialized()) {
       auto integrationAlg = this->createChildAlgorithm("Integration");
       integrationAlg->initialize();

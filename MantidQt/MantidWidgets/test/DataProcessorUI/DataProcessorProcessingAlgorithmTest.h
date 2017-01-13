@@ -75,8 +75,9 @@ public:
     TS_ASSERT_EQUALS(alg.prefix(0), "IvsQ_");
     TS_ASSERT_EQUALS(alg.prefix(1), "IvsLam_");
     TS_ASSERT_EQUALS(alg.inputPropertyName(0), "InputWorkspace");
-    TS_ASSERT_EQUALS(alg.inputPropertyName(1), "FirstTransmissionRun");
-    TS_ASSERT_EQUALS(alg.inputPropertyName(2), "SecondTransmissionRun");
+    TS_ASSERT_EQUALS(alg.inputPropertyName(1), "DetectorEfficiencyCorrection");
+    TS_ASSERT_EQUALS(alg.inputPropertyName(2), "FirstTransmissionRun");
+    TS_ASSERT_EQUALS(alg.inputPropertyName(3), "SecondTransmissionRun");
     TS_ASSERT_EQUALS(alg.outputPropertyName(0), "OutputWorkspace");
     TS_ASSERT_EQUALS(alg.outputPropertyName(1), "OutputWorkspaceWavelength");
   }

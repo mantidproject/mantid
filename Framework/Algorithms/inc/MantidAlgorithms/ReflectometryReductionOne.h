@@ -55,6 +55,10 @@ public:
                                            OptionalDouble &thetaInDeg,
                                            const bool isPointDetector);
 
+protected:
+  /// Validate the input properties
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /** Overridden Algorithm methods **/
 

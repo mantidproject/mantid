@@ -137,6 +137,13 @@ void ReflectometryReductionOne::init() {
                   "ranges that correspond to the direct beam in multi-detector "
                   "mode.");
 
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "DetectorEfficiencyCorrection", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Applies flood correction. Must consist of either a single "
+                  "single data point, or a list of spectra with a single "
+                  "value.");
+
   this->initIndexInputs();
   this->initWavelengthInputs();
 
@@ -277,6 +284,37 @@ void ReflectometryReductionOne::init() {
                   "the IvsQ Workspace",
                   Direction::Input);
 }
+
+//----------------------------------------------------------------------------------------------
+/** Validate the input properties.
+*/
+std::map<std::string, std::string> ReflectometryReductionOne::validateInputs() {
+
+  std::map<std::string, std::string> result;
+
+  MatrixWorkspace_sptr decWS = getProperty("DetectorEfficiencyCorrection");
+  MatrixWorkspace_sptr runWS = getProperty("InputWorkspace");
+
+  if (!decWS) {
+    return result;
+  }
+
+  if (decWS->getNumberHistograms() > 1 &&
+      decWS->getNumberHistograms() != runWS->getNumberHistograms()) {
+    result["DetectorEfficiencyCorrection"] =
+        "The number of spectra in the "
+        "Detector Efficiency Correction workspace must either be 1 or equal to "
+        "the number of spectra in the input workspace";
+  } else if (decWS->blocksize() > 1) {
+    result["DetectorEfficiencyCorrection"] =
+        "Each spectra in Detector Efficiency Correction workspace must hold "
+        "only one value each";
+  }
+
+  return result;
+}
+
+//----------------------------------------------------------------------------------------------
 
 /**
 * Correct the position of the detectors based on the input theta value.
@@ -500,6 +538,12 @@ void ReflectometryReductionOne::exec() {
                          stitchingStart, stitchingDelta, stitchingEnd,
                          stitchingStartOverlap, stitchingEndOverlap);
 
+  OptionalMatrixWorkspace_sptr decWS;
+  MatrixWorkspace_sptr decTemp = getProperty("DetectorEfficiencyCorrection");
+  if (decTemp) {
+    decWS = decTemp;
+  }
+
   OptionalDouble theta;
   if (!isPropertyDefault("ThetaIn")) {
     double temp = this->getProperty("ThetaIn");
@@ -550,11 +594,38 @@ void ReflectometryReductionOne::exec() {
   } else if (xUnitID == "TOF") {
     // If the input workspace is in TOF, do some corrections and generate IvsLam
     // from it.
-    DetectorMonitorWorkspacePair inLam =
-        toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
-              monitorBackgroundWavelengthInterval);
-    auto detectorWS = inLam.get<0>();
-    auto monitorWS = inLam.get<1>();
+
+    // Convert input workspace units to wavelength
+    auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+    convertUnitsAlg->initialize();
+    convertUnitsAlg->setProperty("InputWorkspace", runWS);
+    convertUnitsAlg->setProperty("Target", "Wavelength");
+    convertUnitsAlg->setProperty("AlignBins", true);
+    convertUnitsAlg->execute();
+    runWS = convertUnitsAlg->getProperty("OutputWorkspace");
+
+    if (decWS.is_initialized()) {
+      // Convert flood workspace units to wavelength, if units are not already
+      // in that form
+      auto decXUnitID = decWS.get()->getAxis(0)->unit()->unitID();
+      if (decXUnitID != "Wavelength") {
+        auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+        convertUnitsAlg->initialize();
+        convertUnitsAlg->setProperty("InputWorkspace", *decWS);
+        convertUnitsAlg->setProperty("Target", "Wavelength");
+        convertUnitsAlg->execute();
+        decWS = convertUnitsAlg->getProperty("OutputWorkspace");
+      }
+
+      // Normalize by the direct beam.
+      runWS = divide(runWS, *decWS);
+    }
+
+    DetectorMonitorWorkspacePair detMonPair = splitDetectorsMonitors(
+        runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
+        monitorBackgroundWavelengthInterval);
+    auto detectorWS = detMonPair.get<0>();
+    auto monitorWS = detMonPair.get<1>();
 
     if (isMultiDetector) {
       if (directBeam.is_initialized()) {
@@ -563,7 +634,7 @@ void ReflectometryReductionOne::exec() {
         std::stringstream buffer;
         buffer << db.front() << "-" << db.back();
         MatrixWorkspace_sptr regionOfDirectBeamWS =
-            this->toLamDetector(buffer.str(), runWS, wavelengthInterval);
+            this->retrieveDetectorWS(buffer.str(), runWS, wavelengthInterval);
 
         // Rebin to the detector workspace
         auto rebinToWorkspaceAlg =

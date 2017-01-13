@@ -76,6 +76,13 @@ void ReflectometryReductionOneAuto::init() {
       "Indices of the spectra a pair (lower, upper) that mark the ranges that "
       "correspond to the direct beam in multi-detector mode.");
 
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "DetectorEfficiencyCorrection", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Applies flood correction. Must consist of either a single "
+                  "single data point, or a list of spectra with a single "
+                  "value.");
+
   declareProperty("AnalysisMode", analysis_modes[0], analysis_mode_validator,
                   "Analysis Mode to Choose", Direction::Input);
 
@@ -282,6 +289,7 @@ void ReflectometryReductionOneAuto::exec() {
   std::string analysis_mode = getPropertyValue("AnalysisMode");
   MatrixWorkspace_sptr first_ws = getProperty("FirstTransmissionRun");
   MatrixWorkspace_sptr second_ws = getProperty("SecondTransmissionRun");
+  MatrixWorkspace_sptr dec_ws = getProperty("DetectorEfficiencyCorrection");
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
@@ -467,6 +475,10 @@ void ReflectometryReductionOneAuto::exec() {
 
     if (second_ws) {
       refRedOne->setProperty("SecondTransmissionRun", second_ws);
+    }
+
+    if (dec_ws) {
+      refRedOne->setProperty("DetectorEfficiencyCorrection", dec_ws);
     }
 
     if (start_overlap.is_initialized()) {
