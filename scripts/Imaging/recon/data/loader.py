@@ -16,9 +16,9 @@ def read_in_stack(config):
     """
 
     in_img_format = config.func.in_img_format
-    sample_path = config.func.input_dir
-    flat_field_path = config.func.input_dir_flat
-    dark_field_path = config.func.input_dir_dark
+    sample_path = config.func.input_path
+    flat_field_path = config.func.input_path_flat
+    dark_field_path = config.func.input_path_dark
 
     supported_exts = ['tiff', 'tif', 'fits', 'fit', 'png']
 
@@ -64,12 +64,6 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     sample_file_names = _get_stack_file_names(
         sample_path, file_prefix, file_extension)
 
-    flat_file_names = _get_stack_file_names(
-        flat_file_path, flat_file_prefix, file_extension)
-
-    dark_file_names = _get_stack_file_names(
-        dark_file_path, dark_file_prefix, file_extension)
-
     # It is assumed that all images have the same size and properties as the
     # first.
     try:
@@ -90,13 +84,25 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     sample_data = _read_listed_files(
         sample_file_names, img_shape, file_extension, data_dtype)
 
-    flat_data = _read_listed_files(
-        flat_file_names, img_shape, file_extension, data_dtype)
-    flat_avg = get_data_average(flat_data)
+    if flat_file_path is not None:
+        flat_file_names = _get_stack_file_names(
+            flat_file_path, flat_file_prefix, file_extension)
 
-    dark_data = _read_listed_files(
-        dark_file_names, img_shape, file_extension, data_dtype)
-    dark_avg = get_data_average(dark_data)
+        flat_data = _read_listed_files(
+            flat_file_names, img_shape, file_extension, data_dtype)
+        flat_avg = get_data_average(flat_data)
+    else:
+        flat_avg = 1  # dividing by 1 will not change the images
+
+    if dark_file_path is not None:
+        dark_file_names = _get_stack_file_names(
+            dark_file_path, dark_file_prefix, file_extension)
+
+        dark_data = _read_listed_files(
+            dark_file_names, img_shape, file_extension, data_dtype)
+        dark_avg = get_data_average(dark_data)
+    else:
+        dark_avg = 0  # subtracting 0 will not change the images
 
     return sample_data, flat_avg, dark_avg
 

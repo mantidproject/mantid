@@ -42,16 +42,16 @@ class PostProcConfig(object):
             required=False,
             type=float,
             default=self.circular_mask,
-            help="Radius of the circular mask to apply on the reconstructed volume. "
+            help="Radius of the circular mask to apply on the reconstructed volume.\n"
                  "It is given in [0,1] relative to the size of the smaller dimension/edge "
-                 "of the slices. Empty or zero implies no masking.")
+                 "of the slices.\nEmpty or zero implies no masking.")
 
         grp_post.add_argument(
             "--cut-off-post",
             required=False,
             type=float,
-            help="Cut off level (percentage) for reconstructed "
-                 "volume. pixels below this percentage with respect to maximum intensity in the stack "
+            help="Cut off level (percentage) for reconstructed volume.\n"
+            "Pixels below this percentage with respect to maximum intensity in the stack "
                  "will be set to the minimum value.")
 
         grp_post.add_argument(
@@ -59,7 +59,7 @@ class PostProcConfig(object):
             required=False,
             type=float,
             default=self.median_filter_size,
-            help="Apply median filter (2d) on reconstructed volume with the given window size."
+            help="Apply median filter (2d) on reconstructed volume with the given window size.(post processing)"
         )
 
         grp_post.add_argument(
@@ -67,9 +67,8 @@ class PostProcConfig(object):
             type=str,
             required=False,
             default=self.median_filter_mode,
-            help="Type of median filter. Default: 'reflect', available: "
-                 "{'reflect', 'constant', 'nearest', 'mirror', 'wrap'}"
-        )
+            help="Mode of median filter which determines how the array borders are handled.(post processing)\n"
+                 "Default: 'reflect', available: {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}.")
 
         grp_post.add_argument(
             "--out-gaussian-filter-size",

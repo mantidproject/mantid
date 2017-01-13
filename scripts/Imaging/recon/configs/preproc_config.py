@@ -15,9 +15,9 @@ class PreProcConfig(object):
 
         # all coords outside the ROI will be cropped
         self.region_of_interest = None
-        self.normalize_air_region = None
-        self.crop_before_normalize = None
-        self.median_filter_size = 3
+        self.normalise_air_region = None
+        self.crop_before_normalise = None
+        self.median_filter_size = None
         """
         :param median_filter_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
             The mode parameter determines how the array borders are handled, where cval is the value when
@@ -34,9 +34,9 @@ class PreProcConfig(object):
         self.clip_min = 0.0
         self.clip_max = 1.5
 
-        # list with coordinates of the region for normalization / "air" / not
+        # list with coordinates of the region for normalisation / "air" / not
         # blocked by any object
-        # self.normalize_proton_charge = False
+        # self.normalise_proton_charge = False
 
         self.cut_off_level_pre = 0  # TODO unused
         self.mcp_corrections = True
@@ -46,8 +46,8 @@ class PreProcConfig(object):
 
     def __str__(self):
         return "Region of interest (crop coordinates): {0}\n".format(self.region_of_interest) \
-               + "Normalize by air region: {0}\n".format(self.normalize_air_region) \
-               + "Cut-off on normalized images: {0}\n".format(self.cut_off_level_pre) \
+               + "Normalise by air region: {0}\n".format(self.normalise_air_region) \
+               + "Cut-off on normalised images: {0}\n".format(self.cut_off_level_pre) \
                + "Corrections for MCP detector: {0}\n".format(self.mcp_corrections) \
                + "Scale down factor for images: {0}\n".format(self.scale_down) \
                + "Median filter width: {0}\n".format(self.median_filter_size) \
@@ -70,66 +70,64 @@ class PreProcConfig(object):
             "--region-of-interest",
             required=False,
             type=str,
-            help="Region of interest (crop original "
-                 "images to these coordinates, given as comma separated values: x1,y1,x2,y2. If not "
-                 "given, the whole images are used.")
+            help="Crop original images using these coordinates, after rotating the images.\n"
+                 "If not given, the whole images are used.\n"
+                 "Example: --region-of-interest='[150,234,23,22]'.")
 
         grp_pre.add_argument(
             "--air-region",
             required=False,
             type=str,
-            help="Air region /region for normalization. "
-                 "If not provided, the normalization against beam intensity fluctuations in this "
-                 "region will not be performed. list with coordinates of the region for normalization "
-                 "by 'air', must not be blocked by any object.")
+            help="Air region /region for normalisation.\n"
+                 "For best results it should avoid being blocked by any object.\n"
+                 "Example: --air-region='[150,234,23,22]'")
 
         grp_pre.add_argument(
-            "--crop-before-normalize",
+            "--crop-before-normalise",
             required=False,
             action='store_true',
-            help="Default: True, If True crop before normalizing by flat/dark or air region. \
-                    Cropping first could improve performance and reduce memory usage, as this allows \
-                    the algorithms to work on smaller data, as they will be cropped.")
+            help="Crop before doing any normalisations on the images.\n"
+                 "This improves performance and reduces memory usage, as"
+                 "the algorithms will work on smaller data.")
 
         grp_pre.add_argument(
             "--median-filter-size",
             type=int,
             required=False,
             default=self.median_filter_size,
-            help="Size/width of the median filter (pre-processing")
+            help="Size/width of the median filter (pre-processing).\nDefault: 3.")
 
         grp_pre.add_argument(
             "--median-filter-mode",
             type=str,
             required=False,
             default=self.median_filter_mode,
-            help="Type of median filter. Default: 'reflect', available: "
-                 "{'reflect', 'constant', 'nearest', 'mirror', 'wrap'}"
-        )
+            help="Mode of median filter which determines how the array borders are handled.\n"
+                 "Default: 'reflect', available: {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}.")
 
         grp_pre.add_argument(
             "--remove-stripes",
             default='wf',
             required=False,
             type=str,
-            help="Methods supported: 'wf' (Wavelet-Fourier)")
+            help="Methods supported: 'wf' (Wavelet-Fourier).")
 
         grp_pre.add_argument(
             "-r",
             "--rotation",
             required=False,
             type=int,
-            help="Rotate images by 90 degrees a number of "
-                 "times. The rotation is clockwise unless a negative number is given which indicates "
-                 "rotation counterclockwise")
+            help="Rotate images by 90 degrees a number of times.\n"
+                 "The rotation is clockwise unless a negative number is given which indicates "
+                 "rotation counterclockwise.")
 
         grp_pre.add_argument(
             "--clip-min",
             required=False,
             type=float,
             default=self.clip_min,
-            help="Clip values after normalisations to remove out of bounds pixel values. "
-            "Default for min is 0, default for max is 1.5"
+            help="Clip values after normalisations to remove out of bounds pixel values.\n"
+            "Default: 0"
         )
 
         grp_pre.add_argument(
@@ -138,25 +136,24 @@ class PreProcConfig(object):
             type=float,
             default=self.clip_max,
             help="Clip values after normalisations to remove out of bounds pixel values. "
-            "Default for min is 0, default for max is 1.5"
+            "Default: 1.5"
         )
 
         grp_pre.add_argument(
             "--cut-off-pre",
             required=False,
             type=float,
-            help="Cut off level (percentage) for pre processed "
-                 "volume. pixels below this percentage with respect to maximum intensity in the stack "
+            help="Cut off level (percentage) for pre processed images.\n"
+                 "Pixels below this percentage with respect to maximum intensity in the stack "
                  "will be set to the minimum value.")
 
         grp_pre.add_argument(
             "--scale-down",
             required=False,
             type=int,
-            help="Scale down factor, to reduce the size of "
-                 "the images for faster (lower-resolution) reconstruction. For example a factor of 2 "
-                 "reduces 1kx1k images to 512x512 images (combining blocks of 2x2 pixels into a single "
-                 "pixel. The output pixels are calculated as the average of the input pixel blocks."
+            help="Scale down factor, to reduce the size of the images for faster (lower-resolution) reconstruction.\n"
+                 "Example a factor of 2 reduces 1024x1024 images to 512x512 images (combining blocks of 2x2 pixels into a single pixel.)\n"
+                 "The output pixels are calculated as the average of the input pixel blocks."
         )
 
         grp_pre.add_argument(
@@ -164,8 +161,7 @@ class PreProcConfig(object):
             "--mcp-corrections",
             required=False,
             action='store_true',
-            help="Perform corrections specific to images taken with the MCP detector"
-        )
+            help="Perform corrections specific to images taken with the MCP detector.")
 
         return parser
 
@@ -178,9 +174,9 @@ class PreProcConfig(object):
 
         if args.air_region:
             coords = ast.literal_eval(args.air_region)
-            self.normalize_air_region = [int(val) for val in coords]
+            self.normalise_air_region = [int(val) for val in coords]
 
-        self.crop_before_normalize = args.crop_before_normalize
+        self.crop_before_normalise = args.crop_before_normalise
         self.median_filter_size = args.median_filter_size
         self.median_filter_mode = args.median_filter_mode
         self.stripe_removal_method = args.remove_stripes

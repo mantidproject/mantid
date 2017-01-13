@@ -27,7 +27,7 @@ def execute(config, cmd_line=None):
 
     # todo new class for readme
     _readme_fullpath = os.path.join(
-        config.func.output_dir, config.func.readme_file_name)
+        config.func.output_path, config.func.readme_file_name)
     generate_readme_begin(_readme_fullpath, cmd_line, config, h)
 
     sample = pre_processing(config, sample, flat, dark)
@@ -57,7 +57,6 @@ def execute(config, cmd_line=None):
 def pre_processing(config, data, flat, dark):
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
         mcp_corrections, scale_down, median_filter
-    # _debug_save_out_data(data, config, flat, dark)
 
     d = True if config.func.debug else False
 
@@ -73,10 +72,12 @@ def pre_processing(config, data, flat, dark):
         flat = crop_coords.execute_image(flat, config)
         dark = crop_coords.execute_image(dark, config)
 
-    # removes background using images taken when exposed to fully open beam and no beam
+    # removes background using images taken when exposed to fully open beam
+    # and no beam
     data = normalise_by_flat_dark.execute(data, config, flat, dark)
     if d:
-        _debug_save_out_data(data, config, flat, dark, "_normalised_by_flat_dark")
+        _debug_save_out_data(data, config, flat, dark,
+                             "_normalised_by_flat_dark")
 
     # removes the contrast difference between the stack of images
     data = normalise_by_air_region.execute(data, config)
@@ -109,11 +110,11 @@ def _debug_save_out_data(data, config, flat, dark, image_append):
     append_index = str(time.time())[-2:]
 
     saver.save_single_image(
-        data, config, 'sample', image_name='sample'+image_append, image_index=append_index)
+        data, config, 'sample', image_name='sample' + image_append, image_index=append_index)
     saver.save_single_image(
-        flat, config, 'flat', image_name='flat'+image_append, image_index=append_index)
+        flat, config, 'flat', image_name='flat' + image_append, image_index=append_index)
     saver.save_single_image(
-        dark, config, 'dark', image_name='dark'+image_append, image_index=append_index)
+        dark, config, 'dark', image_name='dark' + image_append, image_index=append_index)
 
 
 def post_processing():
@@ -135,7 +136,7 @@ def save_netcdf_volume():
     # if save_netcdf_vol:
     #     h.pstart(
     #         " * Saving reconstructed volume as NetCDF...")
-    # saver.save_recon_netcdf(recon_data, config.post.output_dir)
+    # saver.save_recon_netcdf(recon_data, config.post.output_path)
     # h.pstop(
     #     " * Finished saving reconstructed volume as NetCDF.")
 

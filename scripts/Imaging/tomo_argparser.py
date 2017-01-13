@@ -30,10 +30,14 @@ from recon.configs.recon_config import ReconstructionConfig
 def grab_full_config():
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description='Run tomographic reconstruction via third party tools')
+    from argparse import RawTextHelpFormatter
 
-    # this sets up the arguments in the parser, with defaults from the Config file
+    parser = argparse.ArgumentParser(
+        description='Run tomographic reconstruction via third party tools',
+        formatter_class=RawTextHelpFormatter)
+
+    # this sets up the arguments in the parser, with defaults from the Config
+    # file
     functional_args = FunctionalConfig()
     parser = functional_args.setup_parser(parser)
 

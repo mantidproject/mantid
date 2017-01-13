@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 def execute(data, config, norm_flat_img, norm_dark_img=0):
     """
-    Normalize by flat and dark images
+    Normalise by flat and dark images
 
     :param data :: image stack as a 3d numpy array
     :param config :: pre-processing configuration

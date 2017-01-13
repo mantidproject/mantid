@@ -22,6 +22,7 @@ class Helper(object):
         self._timer_running = False
         self._timer_start = None
         self._verbosity = 2 if config is None else config.func.verbosity
+        self._no_crash_on_failed_import = False if config is None else config.func.no_crash_on_failed_import
         self._cache_last_memory = None
 
     def get_verbosity(self):
@@ -33,11 +34,11 @@ class Helper(object):
             raise ValueError(
                 "Cannot run a reconstruction without a valid configuration")
 
-        if not config.func.input_dir:
+        if not config.func.input_path:
             raise ValueError(
                 "Cannot run a reconstruction without setting the input path")
 
-        if not config.func.output_dir:
+        if not config.func.output_path:
             raise ValueError(
                 "Cannot run a reconstruction without setting the output path")
 
@@ -75,20 +76,20 @@ class Helper(object):
             # silently fail
             import resource as res
 
-            memory_in_KBs = int(res.getrusage(res.RUSAGE_SELF).ru_maxrss)
+            memory_in_kbs = int(res.getrusage(res.RUSAGE_SELF).ru_maxrss)
 
-            memory_in_MBs = int(res.getrusage(
+            memory_in_mbs = int(res.getrusage(
                 res.RUSAGE_SELF).ru_maxrss) / 1024
 
             # handle caching
             memory_string = " {0} KB, {1} MB".format(
-                memory_in_KBs, memory_in_MBs)
+                memory_in_kbs, memory_in_mbs)
 
             if self._cache_last_memory is None:
-                self._cache_last_memory = memory_in_KBs
+                self._cache_last_memory = memory_in_kbs
             else:
                 # get memory difference in Megabytes
-                delta_memory = (memory_in_KBs - self._cache_last_memory) / 1024
+                delta_memory = (memory_in_kbs - self._cache_last_memory) / 1024
 
                 # remove cached memory
                 self._cache_last_memory = None
@@ -163,7 +164,7 @@ class Helper(object):
     def handle_exception(self, exception):
         """
         TODO The plan for this function is to apply 
-        the --crash-on-failed-import (rename to crash on exception?) throughout 
+        the --no-crash-on-failed-import (rename to crash on exception?) throughout 
         the scripts, so that they use a common function
 
         Currently only re-raises the exception so that it is not lost silently!

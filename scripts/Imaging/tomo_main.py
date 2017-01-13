@@ -60,11 +60,10 @@ def check_version_info():
     if python_version < (2, 7, 0):
         raise RuntimeError(
             "Not running this test as it requires Python >= 2.7. Version found: {0}".
-            format(python_version))
+                format(python_version))
 
 
 def main():
-
     check_version_info()
 
     import tomo_argparser
@@ -94,5 +93,6 @@ def main():
 
     # end timer
     helper.total_reconstruction_timer()
+
 
 main()

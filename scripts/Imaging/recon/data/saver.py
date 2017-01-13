@@ -3,13 +3,13 @@ from __future__ import (absolute_import, division, print_function)
 
 def save_single_image(data,
                       config=None,
-                      output_dir=None,
+                      output_path=None,
                       image_name='saved_image',
                       image_index=0):
     """
     Save (pre-processed) images from a data array to image files.
     :param config:
-    :param output_dir :: additional output directory, currently used for debugging
+    :param output_path :: additional output directory, currently used for debugging
     :param data :: data volume with pre-processed images
     :param image_name: image name to be appended
     :param image_index: image index to be appended
@@ -18,20 +18,22 @@ def save_single_image(data,
     import os
 
     # using the config's output dir
-    preproc_dir = os.path.join(config.func.output_dir, config.func.preproc_subdir)
+    preproc_dir = os.path.join(
+        config.func.output_path, config.func.preproc_subdir)
 
     h = Helper(config)
 
-    if output_dir is not None:
-        # using the provided output_dir
-        preproc_dir = os.path.join(preproc_dir, output_dir)
+    if output_path is not None:
+        # using the provided output_path
+        preproc_dir = os.path.join(preproc_dir, output_path)
 
     h.pstart(
         " * Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
 
     make_dirs_if_needed(preproc_dir)
 
-    write_image(data, os.path.join(preproc_dir, image_name + str(image_index).zfill(6)))
+    write_image(data, os.path.join(
+        preproc_dir, image_name + str(image_index).zfill(6)))
 
     h.pstop(" * Finished saving single image.")
 
@@ -47,9 +49,9 @@ def save_recon_output(recon_data, cfg, save_horiz_slices=False):
     some tools
     """
     # slices along the vertical (z) axis
-    # output_dir = 'output_recon_tomopy'
-    output_dir = cfg.postproc_cfg.output_dir
-    out_recon_dir = os.path.join(output_dir, 'reconstructed')
+    # output_path = 'output_recon_tomopy'
+    output_path = cfg.postproc_cfg.output_path
+    out_recon_dir = os.path.join(output_path, 'reconstructed')
     self.tomo_print_timed_start(
         " * Starting saving slices of the reconstructed volume in: {0}...".
         format(out_recon_dir))
@@ -62,7 +64,7 @@ def save_recon_output(recon_data, cfg, save_horiz_slices=False):
     # Sideways slices:
     save_horiz_slices = False
     if save_horiz_slices:
-        out_horiz_dir = os.path.join(output_dir, 'horiz_slices')
+        out_horiz_dir = os.path.join(output_path, 'horiz_slices')
         print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
         tomoio.save_recon_as_horizontal_slices(
             recon_data,
@@ -86,12 +88,14 @@ def save_preproc_images(data, config):
     h = Helper(config)
 
     if not config.func.save_preproc:
-        h.tomo_print_note("NOT saving out pre-processed images, because no -s/--save-preproc was specified.")
+        h.tomo_print_warning(
+            "NOT saving out pre-processed images, because no -s/--save-preproc was specified.")
+        return
 
     import os
 
     preproc_dir = os.path.join(
-        config.func.output_dir, config.func.preproc_subdir)
+        config.func.output_path, config.func.preproc_subdir)
 
     h.pstart(
         " * Saving all pre-processed images (data) into {0} dtype: {1}".format(preproc_dir, data.dtype))
@@ -103,7 +107,8 @@ def save_preproc_images(data, config):
             write_image(data[idx, :, :], os.path.join(
                 preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
     else:
-        write_image(data, os.path.join(preproc_dir, 'out_preproc_proj_images_stack'))
+        write_image(data, os.path.join(
+            preproc_dir, 'out_preproc_proj_images_stack'))
 
     h.pstop(" * Saving pre-processed images finished.")
 
