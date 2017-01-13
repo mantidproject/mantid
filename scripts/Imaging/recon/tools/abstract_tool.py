@@ -8,11 +8,11 @@ class AbstractTool:
     """
 
     def __init__(self):
-        pass
+        # import the tool to make sure the package is available
+        self.import_self()
 
     def run_reconstruct(self, data, config):
         raise NotImplementedError("This is an abstract class. Use a derived class' implementation")
 
-    @staticmethod
-    def import_self():
+    def import_self(self):
         raise NotImplementedError("This is an abstract class. Use a derived class' implementation")

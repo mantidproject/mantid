@@ -53,9 +53,9 @@ class PreProcConfig(object):
                + "Median filter width: {0}\n".format(self.median_filter_size) \
                + "Rotation: {0}\n".format(self.rotation) \
                + "Line projection (line integral/log re-scale): {0}\n".format(self.line_projection) \
-               + "Sinogram stripes removal: {0}".format(self.stripe_removal_method) \
-               + "Clip min value: {0}".format(self.clip_min) \
-               + "Clip max value: {0}".format(self.clip_max)
+               + "Sinogram stripes removal: {0}\n".format(self.stripe_removal_method) \
+               + "Clip min value: {0}\n".format(self.clip_min) \
+               + "Clip max value: {0}\n".format(self.clip_max)
 
     def setup_parser(self, parser):
         """

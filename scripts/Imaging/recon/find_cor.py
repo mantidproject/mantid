@@ -17,7 +17,7 @@ def execute(config):
     from recon.tools import tool_importer
 
     # tomopy is the only supported tool for now
-    tool = tool_importer.import_tool(config.func.tool)
+    tool = tool_importer.do_importing(config.func.tool)
 
     h.pstop(" * Tool loaded.")
 

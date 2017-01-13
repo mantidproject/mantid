@@ -3,6 +3,9 @@ from recon.tools.abstract_tool import AbstractTool
 
 
 class AstraTool(AbstractTool):
+    def __init__(self):
+        AbstractTool.__init__(self)
+
     def run_reconstruct(self, data, config):
         import tomorec.tool_imports as tti
         astra = tti.import_tomo_tool('astra')

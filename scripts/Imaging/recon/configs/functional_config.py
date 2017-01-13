@@ -33,11 +33,14 @@ class FunctionalConfig(object):
         self.out_img_format = 'fits'
         self.out_slices_file_name_prefix = 'out_recon_slice'
         self.out_horiz_slices_subdir = 'out_recon_horiz_slice'
+        self.save_horiz_slices = False  # TODO not done
 
         self.save_preproc = True
         self.preproc_subdir = 'pre_processed'
         self.preproc_format = 'fits'
-        self.preproc_as_stack = True
+
+        # TODO rename to data_as_stack, and save out ALL data as stack
+        self.data_as_stack = True
 
         import numpy as np
         # TODO more tests with float16/float64/uint16
@@ -63,28 +66,28 @@ class FunctionalConfig(object):
         self.max_angle = 360.0
 
     def __str__(self):
-        return "Input dir: {0}".format(str(self.input_path)) \
-               + "Flat dir: {0}".format(str(self.input_path_flat)) \
-               + "Dark dir: {0}".format(str(self.input_path_dark)) \
-               + "In image format: {0}".format(str(self.in_img_format)) \
-               + "Pre processing images subdir: {0}".format(str(self.preproc_subdir)) \
-               + "Pre processing images format: {0}".format(str(self.preproc_format)) \
-               + "Pre processing images as stack: {0}".format(str(self.preproc_as_stack)) \
-               + "Output dir: {0}".format(str(self.output_path)) \
-               + "Output image format: {0}".format(str(self.out_img_format)) \
-               + "Output slices file name prefix: {0}".format(str(self.out_slices_file_name_prefix)) \
-               + "Output horizontal slices subdir: {0}".format(str(self.out_horiz_slices_subdir)) \
-               + "Debug: {0}".format(str(self.debug)) \
-               + "Debug port: {0}".format(str(self.debug_port)) \
-               + "Data dtype: {0}".format(str(self.data_dtype)) \
-               + "Argument COR: {0}".format(str(self.cor)) \
-               + "Find COR Run: {0}".format(str(self.find_cor)) \
-               + "Verbosity: {0}".format(str(self.verbosity)) \
-               + "Crash on failed import: {0}".format(str(self.no_crash_on_failed_import)) \
-               + "Tool: {0}".format(str(self.tool)) \
-               + "Algorithm: {0}".format(str(self.algorithm)) \
-               + "Number of iterations: {0}".format(str(self.num_iter)) \
-               + "Maximum angle: {0}".format(str(self.max_angle))
+        return "Input dir: {0}\n".format(str(self.input_path)) \
+               + "Flat dir: {0}\n".format(str(self.input_path_flat)) \
+               + "Dark dir: {0}\n".format(str(self.input_path_dark)) \
+               + "In image format: {0}\n".format(str(self.in_img_format)) \
+               + "Pre processing images subdir: {0}\n".format(str(self.preproc_subdir)) \
+               + "Pre processing images format: {0}\n".format(str(self.preproc_format)) \
+               + "Pre processing images as stack: {0}\n".format(str(self.data_as_stack)) \
+               + "Output dir: {0}\n".format(str(self.output_path)) \
+               + "Output image format: {0}\n".format(str(self.out_img_format)) \
+               + "Output slices file name prefix: {0}\n".format(str(self.out_slices_file_name_prefix)) \
+               + "Output horizontal slices subdir: {0}\n".format(str(self.out_horiz_slices_subdir)) \
+               + "Debug: {0}\n".format(str(self.debug)) \
+               + "Debug port: {0}\n".format(str(self.debug_port)) \
+               + "Data dtype: {0}\n".format(str(self.data_dtype)) \
+               + "Argument COR: {0}\n".format(str(self.cor)) \
+               + "Find COR Run: {0}\n".format(str(self.find_cor)) \
+               + "Verbosity: {0}\n".format(str(self.verbosity)) \
+               + "Crash on failed import: {0}\n".format(str(self.no_crash_on_failed_import)) \
+               + "Tool: {0}\n".format(str(self.tool)) \
+               + "Algorithm: {0}\n".format(str(self.algorithm)) \
+               + "Number of iterations: {0}\n".format(str(self.num_iter)) \
+               + "Maximum angle: {0}\n".format(str(self.max_angle))
 
     def setup_parser(self, parser):
         """
@@ -175,10 +178,10 @@ class FunctionalConfig(object):
         )
 
         grp_func.add_argument(
-            "--preproc-as-stack",
+            "--data-as-stack",
             required=False,
             action='store_true',
-            help="Save out the pre-processing images as a single file image stack.")
+            help="Save out all images as a single file image stack.")
 
         grp_func.add_argument(
             "--data-dtype",
@@ -284,7 +287,7 @@ class FunctionalConfig(object):
         self.save_preproc = args.save_preproc
         self.preproc_subdir = args.preproc_subdir
         self.preproc_format = args.preproc_format
-        self.preproc_as_stack = args.preproc_as_stack
+        self.data_as_stack = args.data_as_stack
 
         self.output_path = args.output_path
         self.out_img_format = args.out_img_format

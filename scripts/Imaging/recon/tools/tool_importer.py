@@ -21,18 +21,18 @@ from __future__ import (absolute_import, division, print_function)
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-def import_tool(tool):
+def do_importing(tool):
     if not tool or not isinstance(tool, str):
         raise ValueError("The name of a reconstruction tool is required as a string. Got: {0}".
                          format(tool))
     if 'tomopy' == tool:
         from recon.tools.tomopy_tool import TomoPyTool
-        return TomoPyTool.import_self()
+        return TomoPyTool()
 
     elif 'astra' == tool:
         from recon.tools.astra_tool import AstraTool
 
-        return AstraTool.import_self()
+        return AstraTool()
 
     else:
         raise ValueError("Internal inconsistency. Tried to import unknown tool: {0}".format(tool))

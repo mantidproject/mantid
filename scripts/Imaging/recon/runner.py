@@ -37,7 +37,6 @@ def execute(config, cmd_line=None):
     saver.save_preproc_images(sample, config)
 
     # ----------------------------------------------------------------
-    return
     # Reconstruction
     sample = tool.run_reconstruct(sample, config)
 
@@ -61,8 +60,8 @@ def pre_processing(config, data, flat, dark):
     d = True if config.func.debug else False
 
     data, flat, dark = rotate_stack.execute(data, config, flat, dark)
-    if d:
-        _debug_save_out_data(data, config, flat, dark, "_rotated")
+    # if d:
+    #     _debug_save_out_data(data, config, flat, dark, "_rotated")
 
     # the air region coordinates must be within the ROI if this is selected
     if config.pre.crop_before_normalise:
@@ -74,19 +73,19 @@ def pre_processing(config, data, flat, dark):
     # removes background using images taken when exposed to fully open beam
     # and no beam
     data = normalise_by_flat_dark.execute(data, config, flat, dark)
-    if d:
-        _debug_save_out_data(data, config, flat, dark,
-                             "_normalised_by_flat_dark")
+    # if d:
+    #     _debug_save_out_data(data, config, flat, dark,
+    #                          "_normalised_by_flat_dark")
 
     # removes the contrast difference between the stack of images
     data = normalise_by_air_region.execute(data, config)
-    if d:
-        _debug_save_out_data(data, config, flat, dark, "_normalised_by_air")
+    # if d:
+    #     _debug_save_out_data(data, config, flat, dark, "_normalised_by_air")
 
     if not config.pre.crop_before_normalise:
         # in this case we don't care about cropping the flat and dark
         data = crop_coords.execute_volume(data, config)
-        _debug_save_out_data(data, config, flat, dark, "_cropped")
+        # _debug_save_out_data(data, config, flat, dark, "_cropped")
 
     # cut_off
     # data = cut_off.execute(data, config)
@@ -96,8 +95,8 @@ def pre_processing(config, data, flat, dark):
     # data = scale_down.execute(data, config)
 
     data = median_filter.execute(data, config)
-    if d:
-        _debug_save_out_data(data, config, flat, dark, "_median_filtered")
+    # if d:
+    #     _debug_save_out_data(data, config, flat, dark, "_median_filtered")
 
     return data
 
@@ -166,7 +165,8 @@ def load_tool(config, h):
     # import tool
     from recon.tools import tool_importer
     # tomopy is the only supported tool for now
-    tool = tool_importer.import_tool(config.func.tool)
+    tool = tool_importer.do_importing(config.func.tool)
+
     h.pstop(" * Tool loaded.")
     return tool
 

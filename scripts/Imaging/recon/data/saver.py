@@ -38,43 +38,82 @@ def save_single_image(data,
     h.pstop(" * Finished saving single image.")
 
 
-def save_recon_output(recon_data, cfg, save_horiz_slices=False):
+def save_recon_output(data, config):
     """
     Save output reconstructed volume in different forms.
 
-    @param recon_data :: reconstructed data volume. A sequence of images will be saved from this
-    @param cfg :: configuration of the reconstruction, including output paths and formats
-    @param save_horiz_slices :: Save images along the horizontal axis in addition to the vertical
-    slices saved by defult. Useful for testing
-    some tools
+    :param data :: reconstructed data volume. A sequence of images will be saved from this
+    :param config :: configuration of the reconstruction, including output paths and formats
+    slices saved by default. Useful for testing some tools
     """
     # slices along the vertical (z) axis
     # output_path = 'output_recon_tomopy'
-    output_path = cfg.postproc_cfg.output_path
+    from recon.helper import Helper
+    h = Helper(config)
+
+    import os
+
+    output_path = config.func.output_path
     out_recon_dir = os.path.join(output_path, 'reconstructed')
-    self.tomo_print_timed_start(
-        " * Starting saving slices of the reconstructed volume in: {0}...".
-        format(out_recon_dir))
-    tomoio.save_recon_as_vertical_slices(
-        recon_data,
-        out_recon_dir,
-        name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
-        img_format=cfg.pre.out_img_format)
+    data_as_stack = config.func.data_as_stack
+    h.pstart(
+        " * Starting saving slices of the reconstructed volume in: {0}...".format(out_recon_dir))
+
+    save_recon_as_vertical_slices(
+        data, out_recon_dir, config.func.out_slices_file_name_prefix, data_as_stack)
 
     # Sideways slices:
-    save_horiz_slices = False
-    if save_horiz_slices:
-        out_horiz_dir = os.path.join(output_path, 'horiz_slices')
-        print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
-        tomoio.save_recon_as_horizontal_slices(
-            recon_data,
-            out_horiz_dir,
-            name_prefix=self._OUT_HORIZ_SLICES_SUBDIR,
-            img_format=cfg.pre.out_img_format)
+    # if config.func.save_horiz_slices:
+    out_horiz_dir = os.path.join(output_path, 'horiz_slices')
+    print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
+    save_recon_as_horizontal_slices(
+        data, out_horiz_dir, config.func.out_horiz_slices_subdir, data_as_stack)
 
-    self.tomo_print_timed_stop(
+    h.pstop(
         " * Finished saving slices of the reconstructed volume in: {0}".
         format(out_recon_dir))
+
+
+def save_recon_as_vertical_slices(data, output_dir, name_prefix='out_recon_slice', data_as_stack=False):
+    """
+    Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
+    :param data_as_stack:
+    :param data :: data as images/slices stores in numpy array
+    :param output_dir :: where to save the files
+    :param name_prefix :: prefix for the names of the images - an index is appended to this prefix
+    """
+
+    import os
+
+    make_dirs_if_needed(output_dir)
+    if not data_as_stack:
+        for idx in range(0, data.shape[0]):
+            write_image(data[idx, :, :], os.path.join(
+                output_dir, name_prefix + str(idx).zfill(6)))
+    else:
+        write_image(data, os.path.join(
+            output_dir, name_prefix + "_stack".zfill(6)))
+
+
+def save_recon_as_horizontal_slices(data, out_horiz_dir, name_prefix='out_recon_horiz_slice', data_as_stack=False):
+    """
+    Save reconstructed volume (3d) into a series of slices along the Y axis (second numpy dimension)
+    :param data :: data as images/slices stores in numpy array
+    :param out_horiz_dir :: where to save the files
+    :param name_prefix :: prefix for the names of the images throughout the horizontal axis
+    the prefix
+    """
+    import os
+    make_dirs_if_needed(out_horiz_dir)
+
+    # TODO find out how to flip with numpy
+    # if not config.func.data_as_stack:
+    for idx in range(0, data.shape[1]):
+        write_image(data[:, idx, :], os.path.join(
+            out_horiz_dir, name_prefix + str(idx).zfill(6)))
+    # else:
+        # write_image(data[:, idx, :], os.path.join(
+        # out_horiz_dir, name_prefix + str(idx).zfill(6)))
 
 
 def save_preproc_images(data, config):
@@ -102,7 +141,7 @@ def save_preproc_images(data, config):
 
     make_dirs_if_needed(preproc_dir)
 
-    if not config.func.preproc_as_stack:
+    if not config.func.data_as_stack:
         for idx in range(0, data.shape[0]):
             write_image(data[idx, :, :], os.path.join(
                 preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
@@ -157,6 +196,8 @@ def gen_readme_summary_begin(filename, config, cmd_line):
 
     import time
     tstart = time.time()
+
+    make_dirs_if_needed(config.func.output_path)
 
     # generate file with dos/windows line end for windows users convenience
     with open(filename, 'w') as oreadme:
@@ -233,14 +274,14 @@ def gen_readme_summary_end(filename, data_stages, tstart,
                    "Run/job details:\n"
                    "--------------------------\n")
         oreadme.write(run_hdr)
-        (raw_data, preproc_data, recon_data) = data_stages
+        (raw_data, preproc_data, data) = data_stages
 
         oreadme.write("Dimensions of raw input sample data: {0}\n".format(
             raw_data.shape))
         oreadme.write("Dimensions of pre-processed sample data: {0}\n".
                       format(preproc_data.shape))
         oreadme.write("Dimensions of reconstructed volume: {0}\n".format(
-            recon_data.shape))
+            data.shape))
 
         oreadme.write("Raw input pixel type: {0}\n".format(raw_data.dtype))
         oreadme.write("Output pixel type: {0}\n".format('uint16'))
