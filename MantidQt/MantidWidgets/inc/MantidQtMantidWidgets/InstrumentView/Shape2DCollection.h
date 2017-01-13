@@ -53,6 +53,7 @@ public:
   void keyPressEvent(QKeyEvent *);
 
   bool selectAtXY(int x, int y, bool edit = true);
+  bool selectAtXY(const QPointF &point, bool edit = true);
   void deselectAtXY(int x, int y);
   bool selectIn(const QRect &rect);
   void removeCurrentShape();

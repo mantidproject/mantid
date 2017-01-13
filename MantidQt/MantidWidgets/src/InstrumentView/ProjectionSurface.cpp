@@ -515,20 +515,54 @@ void ProjectionSurface::setPeakVisibility() const {
   }
 }
 
+/** Check a peak is visible at the given point
+ *
+ * Will return true if any peak in any overlay was found to be positioned at
+ * the given point.
+ *
+ * @param point :: the point to check for peaks
+ * @return true if any peaks was found at the given point
+ */
+bool ProjectionSurface::peakVisibleAtPoint(const QPointF &point) const {
+  bool visible = false;
+  for (const auto po : m_peakShapes) {
+    po->selectAtXY(point);
+    auto markers = po->getSelectedPeakMarkers();
+    visible =
+        std::any_of(markers.begin(), markers.end(),
+                    [](PeakMarker2D *marker) { return marker->isVisible(); });
+
+    if (visible)
+      return true;
+  }
+
+  return false;
+}
+
 /**
  * Draw a line between peak markers being compared
  * @param painter :: The QPainter object to draw the line with
  */
 void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const {
-  if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
-    QTransform transform;
-    auto windowRect = getSurfaceBounds();
-    windowRect.findTransform(transform, painter.viewport());
-    auto p1 = transform.map(m_selectedMarkers.first);
-    auto p2 = transform.map(m_selectedMarkers.second);
-    painter.setPen(Qt::red);
-    painter.drawLine(p1, p2);
-  }
+  const auto &firstOrigin = m_selectedMarkers.first;
+  const auto &secondOrigin = m_selectedMarkers.second;
+
+  // Check is user has selected enough peaks
+  if (firstOrigin.isNull() || secondOrigin.isNull())
+    return;
+
+  // Check if the integration range is such that some peaks are visible
+  if (!peakVisibleAtPoint(firstOrigin) || !peakVisibleAtPoint(secondOrigin))
+    return;
+
+  // Draw line between peaks
+  QTransform transform;
+  auto windowRect = getSurfaceBounds();
+  windowRect.findTransform(transform, painter.viewport());
+  auto p1 = transform.map(firstOrigin);
+  auto p2 = transform.map(secondOrigin);
+  painter.setPen(Qt::red);
+  painter.drawLine(p1, p2);
 }
 
 /**

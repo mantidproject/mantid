@@ -352,6 +352,8 @@ private:
   void drawMaskShapes(QPainter &painter) const;
   /// Draw the selection rectangle to the surface
   void drawSelectionRect(QPainter &painter) const;
+  /// Check if a peak is visible at a given point
+  bool peakVisibleAtPoint(const QPointF &point) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 
