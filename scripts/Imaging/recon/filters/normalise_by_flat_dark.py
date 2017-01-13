@@ -37,14 +37,15 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
 
         # this divide gives bad results
         for idx in range(0, data.shape[0]):
-            data[idx, :, :] = np.clip(np.true_divide(data[idx, :, :] - norm_dark_img, norm_divide), clip_min, clip_max)
+            data[idx, :, :] = np.clip(np.true_divide(
+                data[idx, :, :] - norm_dark_img, norm_divide), clip_min, clip_max)
 
         h.pstop(
             " * Finished normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
     else:
-        h.tomo_print(
-            " * Note: cannot apply normalization by flat/dark images because no valid flat image has been "
-            "provided in the inputs. Flat image given: {0}".format(norm_flat_img))
+        h.tomo_print_note(
+            "Cannot apply normalization by flat/dark images because no valid flat image has been "
+            "provided with -iflat/--input-path-flat")
 
     h.check_data_stack(data)
 

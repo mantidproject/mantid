@@ -46,14 +46,15 @@ def execute(data, config):
             format(data.dtype, median_filter_size))
 
         for idx in range(0, data.shape[0]):
-            data[idx] = scipy_ndimage.median_filter(data[idx], median_filter_size, mode=median_filter_mode)
+            data[idx] = scipy_ndimage.median_filter(
+                data[idx], median_filter_size, mode=median_filter_mode)
 
         h.pstop(
             " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
             format(data.dtype, median_filter_size))
 
     else:
-        h.tomo_print(" * Note: NOT applying noise filter /median.", 2)
+        h.tomo_print_note("NOT applying noise filter /median.")
 
     return data
 
@@ -90,7 +91,7 @@ def execute_3d(data, config):
         # data = scipy.signal.medfilt(
         #     data, kernel_size=kernel_size)
     else:
-        h.tomo_print(
-            " * Note: NOT applied N-dimensional median filter on reconstructed volume", 2)
+        h.tomo_print_note(
+            "NOT applied N-dimensional median filter on reconstructed volume")
 
     return data

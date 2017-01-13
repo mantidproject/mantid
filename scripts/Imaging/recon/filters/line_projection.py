@@ -30,7 +30,7 @@ def execute(imgs_angles, config):
     h.check_data_stack(imgs_angles)
 
     if not config.pre.line_projection:
-        h.tomo_print(" * Note: NOT applying line projection.")
+        h.tomo_print_note("NOT applying line projection.")
         return imgs_angles
 
     h.pstart(

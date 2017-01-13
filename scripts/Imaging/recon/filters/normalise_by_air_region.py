@@ -37,7 +37,7 @@ def execute(data, config):
                     normalize_air_region))
 
         air_right, air_top, air_left, air_bottom = translate_coords_onto_cropped_picture(
-                config.pre.region_of_interest, normalize_air_region, config)
+            config.pre.region_of_interest, normalize_air_region, config)
 
         h.pstart(" * Starting normalization by air region...")
         air_sums = []
@@ -61,7 +61,8 @@ def execute(data, config):
             format(avg, max_avg, min_avg))
 
     else:
-        h.tomo_print(" * Note: NOT normalizing by air region")
+        h.tomo_print_note(
+            "NOT normalizing by air region, because no --air-region coordinates were given.")
 
     h.check_data_stack(data)
     return data
@@ -101,8 +102,8 @@ def _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
                                 crop_bottom, crop_left, crop_right, crop_top):
     # sanity check just in case
     if air_top < crop_top or \
-                    air_bottom > crop_bottom or \
-                    air_left < crop_left or \
-                    air_right > crop_right:
+            air_bottom > crop_bottom or \
+            air_left < crop_left or \
+            air_right > crop_right:
         raise ValueError(
             "Selected air region is outside of the cropped data range.")

@@ -38,7 +38,8 @@ def execute_image(data, config):
                 "Error in crop (region of interest) parameter (expecting a list with four integers. "
                 "Got: {0}. Error details: ".format(crop_coords), exc)
     else:
-        h.tomo_print(" * Note: NOT applying cropping to region of interest.")
+        h.tomo_print_note(
+            "NOT applying cropping to region of interest, because no --region-of-interest coordinates were given.")
 
     return data
 

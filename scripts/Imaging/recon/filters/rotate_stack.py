@@ -10,7 +10,7 @@ def _rotate_image(data, rotation):
 
 def _rotate_stack(data, rotation):
     """
-    NOTE: ONLY WORKS FOR SQUARE IMAGES
+    WARNING: ONLY WORKS FOR SQUARE IMAGES
     Rotate every image of a stack
 
     :param data :: image stack as a 3d numpy array
@@ -45,7 +45,8 @@ def execute(data, config, flat=None, dark=None):
     h.check_data_stack(data)
 
     if not config.pre.rotation or config.pre.rotation < 0:
-        h.tomo_print(" * Note: NOT rotating the input images.")
+        h.tomo_print_note(
+            "NOT rotating the input images, because no valid -r/--rotation was specified.")
         return data, flat, dark
 
     rotation = config.pre.rotation
@@ -53,7 +54,7 @@ def execute(data, config, flat=None, dark=None):
 
     h.pstart(
         " * Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
-            format(counterclock_rotations * 90, data.dtype))
+        format(counterclock_rotations * 90, data.dtype))
 
     data = _rotate_stack(data, counterclock_rotations)
     if flat is not None:

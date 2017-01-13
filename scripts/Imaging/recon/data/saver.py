@@ -82,9 +82,13 @@ def save_preproc_images(data, config):
     :param data :: The pre-processed data that will be saved
     :param config :: The full reconstruction config
     """
-    import os
     from recon.helper import Helper
     h = Helper(config)
+
+    if not config.func.save_preproc:
+        h.tomo_print_note("NOT saving out pre-processed images, because no -s/--save-preproc was specified.")
+
+    import os
 
     preproc_dir = os.path.join(
         config.func.output_dir, config.func.preproc_subdir)

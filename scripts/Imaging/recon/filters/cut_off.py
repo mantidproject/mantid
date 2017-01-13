@@ -11,6 +11,7 @@ def execute(data, config):
             " * Finished cut-off step, with pixel data type: {0}.".format(
                 data.dtype))
     else:
-        self.tomo_print(" * Note: NOT applying cut-off.", verbosity=2)
+        self.tomo_print_note(
+            "NOT applying cut-off, because no --cut-off-pre or --cut-off-post was specified.")
 
     return data

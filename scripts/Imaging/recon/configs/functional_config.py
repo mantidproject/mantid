@@ -29,6 +29,7 @@ class FunctionalConfig(object):
         self.input_dir_dark = None
         self.in_img_format = 'fits'
 
+        self.save_preproc = True
         self.preproc_subdir = 'pre_processed'
         self.preproc_format = 'fits'
         self.preproc_as_stack = True
@@ -119,6 +120,15 @@ class FunctionalConfig(object):
             type=str,
             help="Format/file extension expected for the input images. Supported: {0}".
             format(img_formats))
+
+        grp_func.add_argument(
+            "-s",
+            "--save-preproc",
+            required=False,
+            action='store_true',
+            default=self.save_preproc,
+            help="If passed as argument, the pre-processed images will be saved out."
+        )
 
         grp_func.add_argument(
             "--preproc-subdir",
@@ -285,6 +295,7 @@ class FunctionalConfig(object):
         self.input_dir_dark = args.input_path_dark
         self.in_img_format = args.in_img_format
 
+        self.save_preproc = args.save_preproc
         self.preproc_subdir = args.preproc_subdir
         self.preproc_format = args.preproc_format
         self.preproc_as_stack = args.preproc_as_stack

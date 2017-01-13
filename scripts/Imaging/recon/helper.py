@@ -22,6 +22,7 @@ class Helper(object):
         self._timer_running = False
         self._timer_start = None
         self._verbosity = 2 if config is None else config.func.verbosity
+        self._cache_last_memory = None
 
     def get_verbosity(self):
         return self._verbosity
@@ -68,17 +69,34 @@ class Helper(object):
             res = None
             pass
 
-    @staticmethod
-    def get_memory_usage_linux():
+    def get_memory_usage_linux(self):
         try:
             # Windows doesn't seem to have resource package, so this will
             # silently fail
             import resource as res
+
+            memory_in_KBs = int(res.getrusage(res.RUSAGE_SELF).ru_maxrss)
+
+            memory_in_MBs = int(res.getrusage(
+                res.RUSAGE_SELF).ru_maxrss) / 1024
+
+            # handle caching
             memory_string = " {0} KB, {1} MB".format(
-                res.getrusage(res.RUSAGE_SELF).ru_maxrss, int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024)
+                memory_in_KBs, memory_in_MBs)
+
+            if self._cache_last_memory is None:
+                self._cache_last_memory = memory_in_KBs
+            else:
+                # get memory difference in Megabytes
+                delta_memory = (memory_in_KBs - self._cache_last_memory) / 1024
+
+                # remove cached memory
+                self._cache_last_memory = None
+                memory_string += ". Memory change: {0}".format(delta_memory)
+
         except ImportError:
             res = None
-            memory_string = " <not available on Windows>"
+            memory_string = " <not available on Windows> "
 
         return memory_string
 
@@ -121,16 +139,36 @@ class Helper(object):
         :param verbosity: Default 2, messages with existing levels:
 
             0 - Silent, no output at all (not recommended)
-            1 - Low verbosity, will output each step that is being performed
+            1 - Low verbosity, will output each step that is being performed and important warnings/errors
             2 - Normal verbosity, will output each step and execution time
-            3 - High verbosity, will output the step name, execution time and memory usage before and after each step
-        :return:
+            3 - High verbosity, will output the step name, execution time and memory usage before and after each step. 
+                THE MEMORY USAGE DOES NOT WORK ON WINDOWS. 
+                This will probably use more resources.
         """
 
         # will be printed if the message verbosity is lower or equal
         # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
         if verbosity <= self._verbosity:
             print(message)
+
+    def tomo_print_note(self, message, verbosity=2):
+        self.tomo_print(" * Note: " + message, 2)
+
+    def tomo_print_warning(self, message, verbosity=2):
+        self.tomo_print(" * WARNING: " + message, 2)
+
+    def tomo_print_error(self, message, verbosity=2):
+        self.tomo_print(" * ERROR: " + message, 1)
+
+    def handle_exception(self, exception):
+        """
+        TODO The plan for this function is to apply 
+        the --crash-on-failed-import (rename to crash on exception?) throughout 
+        the scripts, so that they use a common function
+
+        Currently only re-raises the exception so that it is not lost silently!
+        """
+        raise exception
 
     def pstart(self, message, verbosity=2):
         """
