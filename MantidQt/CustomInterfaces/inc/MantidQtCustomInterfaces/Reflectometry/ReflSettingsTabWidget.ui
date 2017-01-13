@@ -299,7 +299,7 @@
                 <item row="0" column="0">
                   <widget class="QPushButton" name="getExpDefaultsButton">
                     <property name="fixedWidth">
-                      <number>75</number>
+                      <number>70</number>
                     </property>
                     <property name="fixedHeight">
                       <number>100</number>
@@ -509,7 +509,7 @@
                 <item row="0" column="0">
                   <widget class="QPushButton" name="getInstDefaultsButton">
                     <property name="fixedWidth">
-                      <number>75</number>
+                      <number>70</number>
                     </property>
                     <property name="fixedHeight">
                       <number>100</number>
