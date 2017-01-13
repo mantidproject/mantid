@@ -4,9 +4,9 @@ label = "Stitch1DMany Flowchart"
 
 subgraph params {
  $param_style
-  inputWS       [label="Input Workspaces"]
-  outWS         [label="Output Workspace"]
-  outSF         [label="Output Scale Factor"]
+  inputWS       [label="InputWorkspaces"]
+  outWS         [label="OutputWorkspace"]
+  outSF         [label="OutScaleFactors"]
   psf           [label="Period Scale Factors"]
   stitchedWSVec [label="Vector of Stitched Workspaces"]
 }
@@ -44,11 +44,13 @@ checkGlobalSF -> S1DM_Global   [label="yes"]
 S1DM_Period   -> psf
 psf           -> S1D_Groups
 S1D_Groups    -> stitchedWSVec
+S1D_Groups    -> outSF
 S1DM_Global   -> stitchedWSVec
+S1DM_Global   -> outSF
 stitchedWSVec -> groupWS
 groupWS       -> outWS
-groupWS       -> outSF
 
 {rank = same; S1DM_Global; S1DM_Period}
+{rank = same; outWS; outSF}
 
 }
