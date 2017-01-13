@@ -68,29 +68,29 @@ public:
   void testInputXLength2() {
     // this throws because at least 3 X values are required
     CrossCorrelate alg;
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, 2.0, 3.0);
-    runAlgorithmThrows(alg, inWS);
+    setupAlgorithm(alg, 2.0, 3.0);
+    runAlgorithmThrows(alg);
   }
 
   void testInputXLength1() {
     // this throws because at least 3 X values are required
     CrossCorrelate alg;
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, 2.0, 2.4);
-    runAlgorithmThrows(alg, inWS);
+    setupAlgorithm(alg, 2.0, 2.4);
+    runAlgorithmThrows(alg);
   }
 
   void testXMinEqualsXMax() {
     // this throws because XMin should be > XMax
     CrossCorrelate alg;
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, 2.0, 2.0);
-    runAlgorithmThrows(alg, inWS);
+    setupAlgorithm(alg, 2.0, 2.0);
+    runAlgorithmThrows(alg);
   }
 
   void testXMinGreaterThanXMax() {
     // this throws because XMin should be < XMax
     CrossCorrelate alg;
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, 3.0, 2.0);
-    runAlgorithmThrows(alg, inWS);
+    setupAlgorithm(alg, 3.0, 2.0);
+    runAlgorithmThrows(alg);
   }
 
 private:
@@ -166,8 +166,7 @@ private:
 
   // Run the algorithm with invalid input and check that it throws a runtime
   // error
-  void runAlgorithmThrows(CrossCorrelate &alg,
-                          const MatrixWorkspace_const_sptr inWS) {
+  void runAlgorithmThrows(CrossCorrelate &alg) {
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 };
