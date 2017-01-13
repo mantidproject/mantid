@@ -75,13 +75,6 @@ void SaveOpenGenieAscii::exec() {
   if (nBins == 0 || nSpectra == 0)
     throw std::runtime_error("Trying to save an empty workspace");
 
-  // Get IncludeHeader property
-  const bool headers = getProperty("IncludeHeader");
-  // if true write file header
-  if (headers) {
-    writeFileHeader(outfile);
-  }
-
   bool isHistogram = m_inputWS->isHistogramData();
   // Progress progress(this, 0, 1, nBins);
 
@@ -139,7 +132,8 @@ std::string SaveOpenGenieAscii::getSpectrumNumAsString(
 std::vector<std::tuple<std::string, int>>
 SaveOpenGenieAscii::convertWorkspaceToStrings() {
   // Build x, y and e strings
-  std::string xValsOutput("    "), yValsOutput(xValsOutput) , eValsOutput(xValsOutput);
+  std::string xValsOutput("    "), yValsOutput(xValsOutput),
+      eValsOutput(xValsOutput);
   const std::string newlineStr = "\n    ";
 
   int xCount = 0;
@@ -148,7 +142,7 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
     if (xCount % 10 == 0) {
       xValsOutput += newlineStr;
     }
-	xCount++;
+    xCount++;
     xValsOutput += std::to_string(xVal) + ' ';
   }
 
@@ -180,31 +174,14 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
   return outDataStrings;
 }
 
-// -----------------------------------------------------------------------------
-/** generates the OpenGenie file header
-   *  @param outfile :: File it will save it out to
-   */
-void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile) {
-
-  const std::vector<Property *> &logData = m_inputWS->run().getLogData();
-  auto &log = logData;
-  // get total number of sample logs
-  auto samplenumber = (&log)->size();
-  samplenumber += 3; // x, y, e
-
-  outfile << "# Open Genie ASCII File #\n# label \nGXWorkspace\n"
-          // number of entries
-          << samplenumber << '\n';
-}
-
 //-----------------------------------------------------------------------------
 /** Parses the data in the workspace into OpenGENIE compatible
   * string and stores them in the output buffer
   *
   */
 void SaveOpenGenieAscii::parseWorkspaceData() {
-	// 1 is Bank number - force to 1 at the moment
-  const std::string outputType = "GXRealarray\n    1"; 
+  // 1 is Bank number - force to 1 at the moment
+  const std::string outputType = "GXRealarray\n    1";
 
   const auto xyeTuples = convertWorkspaceToStrings();
   const auto &xTuple = xyeTuples[0];
@@ -303,8 +280,8 @@ void SaveOpenGenieAscii::getSampleLogs() {
     // if name != x y or e push str to vector; to avoid any duplication
     if (name != "x" && name != "y" && name != "e") {
 
-      std::string outStr = ("  \"" + name + "\"" + "\n" + "    " + type +
-                            "\n" + "    " + value + "\n");
+      std::string outStr = ("  \"" + name + "\"" + "\n" + "    " + type + "\n" +
+                            "    " + value + "\n");
 
       // TODO
       // logVector.push_back(outStr);
@@ -317,6 +294,14 @@ void SaveOpenGenieAscii::getSampleLogs() {
    *  @param outfile :: File it will save it out to
    */
 void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
+  // Write header
+	if (getProperty("IncludeHeader")) {
+		outfile << "# Open Genie ASCII File #\n"
+			<< "# label \n"
+			<< "GXWorkspace\n"
+			<< m_outputVector.size() << '\n';
+	}
+
   // Sort by parameter name
   std::sort(m_outputVector.begin(), m_outputVector.end(),
             [](const outputTuple &t1, const outputTuple &t2) {
@@ -328,19 +313,21 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
     // 4 spaces then the type name, newline
     // 4 spaces and value(s), newline
 
-	// The parameter name must be surrounded with quotes
+    // The parameter name must be surrounded with quotes
     // If the type is a string the value must be wrapped in quotes
 
     // First the parameter name
     outfile << "  " << '"' << std::get<0>(outTuple) << '"' << '\n';
 
-    // Next the param type
-    const auto &outputType = std::get<1>(outTuple);
+    // Next the parameter type - have to make a copy as we might need to
+    // capitalise the first char
+    std::string outputType = std::get<1>(outTuple);
+    outputType[0] = toupper(outputType[0]);
     outfile << "    " << outputType << '\n';
 
-    // Then the data values
+    // Then the data values - the formatting depends on data type
     outfile << "    ";
-    if (outputType == "string" || outputType == "String") {
+    if (outputType == "String") {
       outfile << '"' << std::get<2>(outTuple) << '"';
     } else {
       outfile << std::get<2>(outTuple);
@@ -358,12 +345,12 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
   // xunit & xlabel put in OpenGenie format
   const std::string xunits = "xunits";
   const std::string xlabel = "xlabel";
-  const std::string xunitsVal = "Time-of-Flight (\\gms)";
+  const std::string xunitsVal = "Time-of-Flight (\\\\gms)";
 
   // yunit & ylabel put in OpenGenie format
   const std::string yunits = "yunits";
   const std::string ylabel = "ylabel";
-  const std::string yunitsVal = "Neutron counts / \\gms";
+  const std::string yunitsVal = "Neutron counts / \\\\gms";
 
   const std::string specNumIdentifier = "spec_no";
   const std::string specNoToSave = getSpectrumNumAsString(*m_inputWS);

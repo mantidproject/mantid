@@ -47,9 +47,6 @@ private:
   /// Converts XYE data to OPENGENIE strings
   std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();
 
-  // write file header
-  void writeFileHeader(std::ofstream &outfile);
-
   /// Parses and stores the workspace data into the output buffer
   void parseWorkspaceData();
 
