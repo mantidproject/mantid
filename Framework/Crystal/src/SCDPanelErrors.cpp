@@ -324,7 +324,7 @@ void SCDPanelErrors::setupData() const {
 
   m_bank = getAttribute("Bank").asString();
 
-  g_log.debug() << "Setting up " << m_workspace->name() << " bank " << m_bank
+  g_log.debug() << "Setting up " << m_workspace->getName() << " bank " << m_bank
                 << '\n';
 
   m_setupFinished = true;

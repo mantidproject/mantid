@@ -233,11 +233,11 @@ public:
 
     WorkspaceGroup_sptr outWS = manager.getProperty("OUT_WS");
     TS_ASSERT(outWS);
-    TS_ASSERT_EQUALS(outWS->getItem(0)->name(), "out_Workspace_0");
-    TS_ASSERT_EQUALS(outWS->getItem(1)->name(), "out_Workspace_1");
-    TS_ASSERT_EQUALS(outWS->getItem(2)->name(), "out_Workspace_2");
+    TS_ASSERT_EQUALS(outWS->getItem(0)->getName(), "out_Workspace_0");
+    TS_ASSERT_EQUALS(outWS->getItem(1)->getName(), "out_Workspace_1");
+    TS_ASSERT_EQUALS(outWS->getItem(2)->getName(), "out_Workspace_2");
     manager.store("OUT_WS");
-    TS_ASSERT_EQUALS(outWS->name(), "out_Workspaces");
+    TS_ASSERT_EQUALS(outWS->getName(), "out_Workspaces");
     AnalysisDataService::Instance().clear();
   }
 

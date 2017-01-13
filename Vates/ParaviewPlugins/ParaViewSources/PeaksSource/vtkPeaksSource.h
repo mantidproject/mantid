@@ -45,7 +45,7 @@ public:
                vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
                                                     vtkIndent indent) override;
 
-  void SetWsName(std::string wsName);
+  void SetWsName(const std::string &wsName);
   void SetPeakDimension(int dim);
   /// Setter for the unitegrated peak marker size
   void SetUnintPeakMarkerSize(double mSize);

@@ -41,7 +41,6 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
 
     Instrument_sptr instr(new Instrument);
-    work_in->setInstrument(instr);
 
     // yVeryDead is a detector with low counts
     Counts yVeryDead(sizex, 0.1);
@@ -78,6 +77,7 @@ public:
       instr->markAsDetector(det);
       work_in->getSpectrum(i).setDetectorID(i);
     }
+    work_in->setInstrument(instr);
 
     FindDetectorsOutsideLimits alg;
 

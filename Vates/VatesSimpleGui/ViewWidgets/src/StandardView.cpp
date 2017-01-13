@@ -93,8 +93,8 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
 StandardView::StandardView(QWidget *parent,
                            RebinnedSourcesManager *rebinnedSourcesManager,
                            bool createRenderProxy)
-    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(NULL),
-      m_sliceMDAction(NULL), m_cutMDAction(NULL), m_unbinAction(NULL) {
+    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(nullptr),
+      m_sliceMDAction(nullptr), m_cutMDAction(nullptr), m_unbinAction(nullptr) {
   this->m_ui.setupUi(this);
   this->m_cameraReset = false;
 
@@ -179,6 +179,7 @@ void StandardView::setupViewButtons() {
 void StandardView::destroyView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(QString("Slice"));
+  this->destroyFilter(QString("Threshold"));
   builder->destroy(this->m_view);
 }
 
@@ -186,7 +187,7 @@ pqRenderView *StandardView::getView() { return this->m_view.data(); }
 
 void StandardView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
-  if (NULL == this->origSrc) {
+  if (!this->origSrc) {
     return;
   }
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();

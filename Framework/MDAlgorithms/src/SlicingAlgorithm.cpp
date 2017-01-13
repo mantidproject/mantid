@@ -177,7 +177,7 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
 
   // Get the entire name
   std::string name = Strings::strip(input.substr(0, n_first_comma));
-  if (name.size() == 0)
+  if (name.empty())
     throw std::invalid_argument("name should not be blank.");
 
   // Now remove the name and comma
@@ -488,7 +488,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     Strings::convert(strs[0], min);
     Strings::convert(strs[1], max);
     Strings::convert(strs[2], numBins);
-    if (name.size() == 0)
+    if (name.empty())
       throw std::invalid_argument("Name should not be blank.");
     if (min >= max)
       throw std::invalid_argument("Min should be > max.");

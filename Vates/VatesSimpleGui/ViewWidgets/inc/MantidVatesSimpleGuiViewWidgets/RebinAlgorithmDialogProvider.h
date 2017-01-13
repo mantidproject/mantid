@@ -48,19 +48,22 @@ public:
 
   ~RebinAlgorithmDialogProvider();
 
-  void showDialog(std::string inputWorkspace, std::string outputWorkspace,
-                  std::string algorithmType);
+  void showDialog(const std::string &inputWorkspace,
+                  const std::string &outputWorkspace,
+                  const std::string &algorithmType);
 
   static const size_t BinCutOffValue;
 
 private:
-  MantidQt::API::AlgorithmDialog *createDialog(
-      Mantid::API::IAlgorithm_sptr algorithm, const std::string &inputWorkspace,
-      const std::string &outputWorkspace, const std::string &algorithmType);
+  MantidQt::API::AlgorithmDialog *
+  createDialog(const Mantid::API::IAlgorithm &algorithm,
+               const std::string &inputWorkspace,
+               const std::string &outputWorkspace,
+               const std::string &algorithmType);
 
   void
   setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog *dialog,
-                    std::string inputWorkspace);
+                    const std::string &inputWorkspace);
 
   Mantid::API::IMDEventWorkspace_sptr
   getWorkspace(const std::string &workspaceName);

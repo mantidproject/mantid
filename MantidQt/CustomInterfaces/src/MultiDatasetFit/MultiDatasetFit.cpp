@@ -374,7 +374,7 @@ QString MultiDatasetFit::getOutputWorkspaceName(int i) const {
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
     if (auto group =
             boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-      wsName = group->getItem(i)->name();
+      wsName = group->getItem(i)->getName();
     }
   }
   return QString::fromStdString(wsName);

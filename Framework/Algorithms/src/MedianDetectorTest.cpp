@@ -247,7 +247,7 @@ int MedianDetectorTest::maskOutliers(
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
-  const auto &spectrumInfo = countsWS->spectrumInfo();
+  auto &spectrumInfo = countsWS->mutableSpectrumInfo();
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
     std::vector<size_t> &hists = indexmap[i];
@@ -263,13 +263,17 @@ int MedianDetectorTest::maskOutliers(
         }
       }
       if ((value < out_lo * median) && (value > 0.0)) {
-        countsWS->maskWorkspaceIndex(hists[j]);
-        PARALLEL_ATOMIC
-        ++numFailed;
+        countsWS->getSpectrum(hists[j]).clearData();
+        PARALLEL_CRITICAL(setMasked) {
+          spectrumInfo.setMasked(hists[j], true);
+          ++numFailed;
+        }
       } else if (value > out_hi * median) {
-        countsWS->maskWorkspaceIndex(hists[j]);
-        PARALLEL_ATOMIC
-        ++numFailed;
+        countsWS->getSpectrum(hists[j]).clearData();
+        PARALLEL_CRITICAL(setMasked) {
+          spectrumInfo.setMasked(hists[j], true);
+          ++numFailed;
+        }
       }
     }
     PARALLEL_CHECK_INTERUPT_REGION

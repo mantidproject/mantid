@@ -1325,7 +1325,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
     IMDWorkspace_sptr imdWS = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
     // Only process IMDWorkspaces
     if (imdWS) {
-      QString currentName(imdWS->name().c_str());
+      QString currentName(imdWS->getName().c_str());
       try {
         MantidMDCurve *curve = new MantidMDCurve(currentName, g, showErrors);
         MantidQwtIMDWorkspaceData *data = curve->mantidData();
