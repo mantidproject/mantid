@@ -402,6 +402,7 @@ set ( TEST_FILES
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadISISNexusTest.h
+        LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
 	LoadIsawDetCalTest.h
