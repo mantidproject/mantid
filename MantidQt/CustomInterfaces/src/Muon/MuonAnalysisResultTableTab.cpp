@@ -497,41 +497,44 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     // Get log information
     std::string wsName = fittedWsList[i].toStdString();
     auto ws = retrieveWSChecked<ExperimentInfo>(wsName + WORKSPACE_POSTFIX);
-
-    Mantid::Kernel::DateAndTime start = ws->run().startTime();
-    Mantid::Kernel::DateAndTime end = ws->run().endTime();
-
     const std::vector<Property *> &logData = ws->run().getLogData();
+    const TimeSeriesProperty<bool> *runningLog;//=dynamic_cast<TimeSeriesProperty<bool> *>(runLog);// need a TimeSeriesProperty <bool> to apply the filter
+    bool foundRunning=false;
+    std::string running="running";	
+    Property *runLog;
+    for (const auto prop : logData) 
+    {
+	std::string currentString=prop->name().c_str();
+	if(currentString == running)
+	{
+		foundRunning=true; 
+                runLog =  ws->run().getLogData(running);// what happend if this does not exist? -> just delete an n 		
+   		runningLog=dynamic_cast<TimeSeriesProperty<bool> *>(runLog);// need a TimeSeriesProperty <bool> to apply the filter
+	}
+    }
+    
+   // if runnunglog is empty throw a warning 
+    if(!foundRunning)
+    { 
+    		Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
+		g_log.warning("No running log found. Filtering will not be applied to the data.\n");
+    }
+     for (const auto prop : logData) {
+     // Check if is a timeseries log
+      if (TimeSeriesProperty<double> *log=dynamic_cast<TimeSeriesProperty<double> *>(prop)) 
+      {
 
-    for (const auto prop : logData) {
-      // Check if is a timeseries log
-      if (TimeSeriesProperty<double> *tspd =
-              dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
-        QString logFile(QFileInfo(prop->name().c_str()).fileName());
-
-        double value(0.0);
-        int count(0);
-
-        Mantid::Kernel::DateAndTime logTime;
-
-        // iterate through all logs entries of a specific log
-        for (int k(0); k < tspd->size(); k++) {
-          // Get the log time for the specific entry
-          logTime = tspd->nthTime(k);
-
-          // If the entry was made during the run times
-          if ((logTime >= start) && (logTime <= end)) {
-            // add it to a total and increment the count (will be used to make
-            // average entry value during a run)
-            value += tspd->nthValue(k);
-            count++;
-          }
-        }
-
-        if (count != 0) {
-          // Find average
-          wsLogValues[logFile] = value / count;
-        }
+		
+		auto mylog = log->clone();
+		if(foundRunning){
+		mylog->filterWith(runningLog);}//only do this if runninglog exists}
+                QString logFile(QFileInfo(prop->name().c_str()).fileName());
+        	auto time_ave = mylog->timeAverageValue();
+         	if (time_ave != 0) 
+         	{
+         	  	// Return average
+         	  	wsLogValues[logFile] = time_ave;
+         	}
       } else // Should be a non-timeseries one
       {
         QString logName = QString::fromStdString(prop->name());
