@@ -544,12 +544,12 @@ void InstrumentWidgetPickTab::initSurface() {
   connect(surface, SIGNAL(singleComponentPicked(size_t)), this,
           SLOT(singleComponentPicked(size_t)));
   connect(
-      surface,
-      SIGNAL(comparePeaks(std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                                    std::vector<Mantid::Geometry::IPeak *>>)),
-      this,
-      SLOT(comparePeaks(std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                                  std::vector<Mantid::Geometry::IPeak *>>)));
+      surface, SIGNAL(comparePeaks(
+                   const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                   std::vector<Mantid::Geometry::IPeak *>> &)),
+      this, SLOT(comparePeaks(
+                const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                std::vector<Mantid::Geometry::IPeak *>> &)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
