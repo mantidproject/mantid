@@ -805,34 +805,6 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_showImg_good() {
-    testing::NiceMock<MockTomographyIfaceView> mockView;
-    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
-
-    const std::string path = "FITS_small_02.fits";
-    // needs image file name - re-uses a FITS from the unit tests
-    ON_CALL(mockView, showImagePath()).WillByDefault(Return(path));
-    EXPECT_CALL(mockView, showImagePath()).Times(1);
-
-    EXPECT_CALL(
-        mockView,
-        showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(1);
-    EXPECT_CALL(mockView,
-                showImage(testing::Matcher<const std::string &>(testing::_)))
-        .Times(0);
-
-    // No errors, no warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-
-    pres.notify(ITomographyIfacePresenter::ViewImg);
-    TSM_ASSERT(
-        "Mock not used as expected. Some EXPECT_CALL conditions were not "
-        "satisfied.",
-        testing::Mock::VerifyAndClearExpectations(&mockView))
-  }
-
 private:
   // boost::shared_ptr
   boost::scoped_ptr<testing::NiceMock<MockTomographyIfaceView>> m_view;
