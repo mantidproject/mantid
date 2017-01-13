@@ -42,7 +42,7 @@ private:
   void exec() override;
 
   /// Typedef the tuple to outputTuple
-  using outputTuple = std::tuple<const std::string, const std::string, const std::string>;
+  using outputTuple = std::tuple<std::string, std::string, std::string>;
 
   /// Converts XYE data to OPENGENIE strings
   std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();

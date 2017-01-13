@@ -172,11 +172,12 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
     eValsOutput += std::to_string(eVal);
   }
 
-  std::vector<std::tuple<std::string, int>> outputVec;
-  outputVec.reserve(3);
-  outputVec.push_back(std::make_tuple(xValsOutput, xCount));
-  outputVec.push_back(std::make_tuple(yValsOutput, yCount));
-  outputVec.push_back(std::make_tuple(eValsOutput, eCount));
+  std::vector<std::tuple<std::string, int>> outDataStrings;
+  outDataStrings.reserve(3);
+  outDataStrings.push_back(std::make_tuple(xValsOutput, xCount));
+  outDataStrings.push_back(std::make_tuple(yValsOutput, yCount));
+  outDataStrings.push_back(std::make_tuple(eValsOutput, eCount));
+  return outDataStrings;
 }
 
 // -----------------------------------------------------------------------------
