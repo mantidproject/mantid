@@ -20,6 +20,7 @@ GCC_DIAG_ON(conversion)
 #include <boost/make_shared.hpp>
 
 #include <cassert>
+#include <condition_variable>
 #include <functional>
 #include <map>
 
@@ -30,6 +31,9 @@ Mantid::Kernel::Logger g_log("ISISKafkaEventStreamDecoder");
 std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 std::string RUN_NUMBER_PROPERTY = "run_number";
 std::string RUN_START_PROPERTY = "run_start";
+
+std::condition_variable cv;
+bool extractWaiting = false;
 
 /**
  * Append sample log data to existing log or create a new log if one with
@@ -173,6 +177,23 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
   if (m_exception) {
     throw * m_exception;
   }
+
+  std::unique_lock<std::mutex> waitLock(m_waitMutex);
+  extractWaiting = true;
+  waitLock.unlock();
+  cv.notify_one();
+
+  auto workspace_ptr = extractDataImpl();
+
+  waitLock.lock();
+  extractWaiting = false;
+  waitLock.unlock();
+  cv.notify_one();
+
+  return workspace_ptr;
+}
+
+API::Workspace_sptr ISISKafkaEventStreamDecoder::extractDataImpl() {
   std::lock_guard<std::mutex> lock(m_mutex);
   if (m_localEvents.size() == 1) {
     auto temp = createBufferWorkspace(m_localEvents.front());
@@ -223,8 +244,13 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
   m_interrupt = false;
   std::string buffer;
   while (!m_interrupt) {
-    // Let another thread do something for a short while
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    // If extractData method is waiting for access to the buffer workspace
+    // then we wait for it to finish
+    std::unique_lock<std::mutex> readyLock(m_waitMutex);
+    if (extractWaiting) {
+      cv.wait(readyLock, [&] { return !extractWaiting; });
+    }
+    readyLock.unlock();
 
     // Pull in events
     m_eventStream->consumeMessage(&buffer);
@@ -244,6 +270,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       const auto &specData = *(eventData->spec());
       auto nevents = tofData.size();
       auto nSEEvents = seData.size();
+
       std::lock_guard<std::mutex> lock(m_mutex);
       auto &periodBuffer = *m_localEvents[frameData->period()];
       auto &mutableRunInfo = periodBuffer.mutableRun();

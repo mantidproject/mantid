@@ -84,6 +84,8 @@ private:
   void loadInstrument(const std::string &name,
                       DataObjects::EventWorkspace_sptr workspace);
 
+  API::Workspace_sptr extractDataImpl();
+
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
   /// Flag indicating if the capture thread should terminate
@@ -108,6 +110,8 @@ private:
   std::thread m_thread;
   /// Mutex protecting event buffers
   mutable std::mutex m_mutex;
+  /// Mutex protecting the wait flag
+  mutable std::mutex m_waitMutex;
   /// Flag indicating that the decoder is capturing
   std::atomic<bool> m_capturing;
   /// Exception object indicating there was an error
