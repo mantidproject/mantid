@@ -29,19 +29,19 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
 
     // specific checks
-    const Mantid::MantidVec outX = outWS->readX(0);
+    const MantidVec &outX = outWS->readX(0);
     TS_ASSERT_EQUALS(outX.size(), 3);
     TS_ASSERT_DELTA(outX[0], -1.0, 1e-6);
     TS_ASSERT_DELTA(outX[1], 0.0, 1e-6);
     TS_ASSERT_DELTA(outX[2], 1.0, 1e-6);
 
-    const Mantid::MantidVec outY0 = outWS->readY(0);
+    const MantidVec &outY0 = outWS->readY(0);
     TS_ASSERT_EQUALS(outY0.size(), 3);
     TS_ASSERT_DELTA(outY0[0], -0.018902, 1e-6);
     TS_ASSERT_DELTA(outY0[1], 1.0, 1e-6);
     TS_ASSERT_DELTA(outY0[2], -0.018902, 1e-6);
 
-    const Mantid::MantidVec outY1 = outWS->readY(1);
+    const MantidVec &outY1 = outWS->readY(1);
     TS_ASSERT_EQUALS(outY1.size(), 3);
     TS_ASSERT_DELTA(outY1[0], -0.681363, 1e-6);
     TS_ASSERT_DELTA(outY1[1], 0.168384, 1e-6);
@@ -57,15 +57,15 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
 
     // specific checks
-    const Mantid::MantidVec outX = outWS->readX(0);
+    const MantidVec &outX = outWS->readX(0);
     TS_ASSERT_EQUALS(outX.size(), 1);
     TS_ASSERT_DELTA(outX[0], 0.0, 1e-6);
 
-    const Mantid::MantidVec outY0 = outWS->readY(0);
+    const MantidVec &outY0 = outWS->readY(0);
     TS_ASSERT_EQUALS(outY0.size(), 1);
     TS_ASSERT_DELTA(outY0[0], 1.0, 1e-6);
 
-    const Mantid::MantidVec outY1 = outWS->readY(1);
+    const MantidVec &outY1 = outWS->readY(1);
     TS_ASSERT_EQUALS(outY1.size(), 1);
     TS_ASSERT_DELTA(outY1[0], -1.0, 1e-6);
   }
