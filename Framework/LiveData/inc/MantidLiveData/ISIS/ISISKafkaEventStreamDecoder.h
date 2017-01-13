@@ -45,7 +45,8 @@ class DLLExport ISISKafkaEventStreamDecoder {
 public:
   ISISKafkaEventStreamDecoder(const IKafkaBroker &broker,
                               std::string eventTopic, std::string runInfoTopic,
-                              std::string spDetTopic, bool terminateAtEndOfRun = false);
+                              std::string spDetTopic,
+                              bool terminateAtEndOfRun = false);
   ~ISISKafkaEventStreamDecoder();
   ISISKafkaEventStreamDecoder(const ISISKafkaEventStreamDecoder &) = delete;
   ISISKafkaEventStreamDecoder &
@@ -60,9 +61,10 @@ public:
 
   ///@name Querying
   ///@{
-  bool isRunning() const noexcept { return m_capturing; }
+  bool isCapturing() const noexcept { return m_capturing; }
   bool hasData() const noexcept;
   int runNumber() const noexcept { return m_runNumber; }
+  bool hasReachedEndOfRun() noexcept;
   ///@}
 
   ///@name Modifying
@@ -112,10 +114,21 @@ private:
   mutable std::mutex m_mutex;
   /// Mutex protecting the wait flag
   mutable std::mutex m_waitMutex;
+  /// Mutex protecting the runStatusSeen flag
+  mutable std::mutex m_runStatusMutex;
   /// Flag indicating that the decoder is capturing
   std::atomic<bool> m_capturing;
   /// Exception object indicating there was an error
   boost::shared_ptr<std::runtime_error> m_exception;
+
+  /// Indicate that decoder has reached the last message in a run
+  std::atomic<bool> m_endRun;
+  /// Indicate that LoadLiveData is waiting for access to the buffer workspace
+  std::atomic<bool> m_extractWaiting;
+  /// Indicate that MonitorLiveData has seen the runStatus since it was set to EndRun
+  bool m_runStatusSeen;
+
+  std::atomic<bool> m_extractedEndRunData;
 };
 
 } // namespace LiveData

@@ -33,7 +33,7 @@ std::string RUN_NUMBER_PROPERTY = "run_number";
 std::string RUN_START_PROPERTY = "run_start";
 
 std::condition_variable cv;
-bool extractWaiting = false;
+std::condition_variable cvRunStatus;
 
 /**
  * Append sample log data to existing log or create a new log if one with
@@ -125,7 +125,7 @@ ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
       m_eventStream(broker.subscribe(eventTopic)), m_localEvents(),
       m_specToIdx(), m_runStart(), m_runStream(broker.subscribe(runInfoTopic)),
       m_spDetStream(broker.subscribe(spDetTopic)), m_runNumber(-1), m_thread(),
-      m_capturing(false), m_exception() {}
+      m_capturing(false), m_exception(), m_extractWaiting(false) {}
 
 /**
  * Destructor.
@@ -167,6 +167,25 @@ bool ISISKafkaEventStreamDecoder::hasData() const noexcept {
 }
 
 /**
+ * Check if a message has indicated that end of run has been reached
+ * @return  True if end of run has been reached
+ */
+bool ISISKafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
+  // Notify the decoder that MonitorLiveData knows it has reached end of run
+  // and after giving it opportunity to interrupt, decoder can continue with
+  // messages of the next run
+  if (!m_extractedEndRunData)
+    return false;
+  if (m_endRun) {
+    std::lock_guard<std::mutex> runStatusLock(m_runStatusMutex);
+    m_runStatusSeen = true;
+    cvRunStatus.notify_one();
+    std::cout << "MonitorLiveData knows run status is EndRun" << std::endl;
+  }
+  return m_endRun;
+}
+
+/**
  * Check for an exception thrown by the background thread and rethrow
  * it if necessary. If no error occurred swap the current internal buffer
  * for a fresh one and return the old buffer.
@@ -178,20 +197,20 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
     throw * m_exception;
   }
 
-  std::unique_lock<std::mutex> waitLock(m_waitMutex);
-  extractWaiting = true;
-  waitLock.unlock();
+  m_extractWaiting = true;
   cv.notify_one();
 
   auto workspace_ptr = extractDataImpl();
 
-  waitLock.lock();
-  extractWaiting = false;
-  waitLock.unlock();
+  m_extractWaiting = false;
   cv.notify_one();
 
   return workspace_ptr;
 }
+
+// -----------------------------------------------------------------------------
+// Private members
+// -----------------------------------------------------------------------------
 
 API::Workspace_sptr ISISKafkaEventStreamDecoder::extractDataImpl() {
   std::lock_guard<std::mutex> lock(m_mutex);
@@ -213,9 +232,6 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractDataImpl() {
   }
 }
 
-// -----------------------------------------------------------------------------
-// Private members
-// -----------------------------------------------------------------------------
 /**
  * Start decoding data from the streams into the internal buffers.
  * Implementation designed to be entry point for new thread of execution.
@@ -242,15 +258,39 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
   initLocalCaches();
 
   m_interrupt = false;
+  m_endRun = false;
+  m_runStatusSeen = false;
+  m_extractedEndRunData = true;
   std::string buffer;
   while (!m_interrupt) {
     // If extractData method is waiting for access to the buffer workspace
     // then we wait for it to finish
     std::unique_lock<std::mutex> readyLock(m_waitMutex);
-    if (extractWaiting) {
-      cv.wait(readyLock, [&] { return !extractWaiting; });
+    if (m_extractWaiting) {
+      if (m_endRun)
+        g_log.notice() << "EndRun true, should wait" << std::endl;
+      cv.wait(readyLock, [&] { return !m_extractWaiting; });
+      readyLock.unlock();
+      if (m_endRun) {
+        m_extractedEndRunData = true;
+        // Wait until MonitorLiveData has seen that end of run was
+        // reached before setting m_endRun back to false and continuing
+        if (!m_runStatusSeen)
+          g_log.notice() << "runStatusSeen is false" << std::endl;
+        std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
+        cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
+        m_endRun = false;
+        m_runStatusSeen = false;
+        runStatusLock.unlock();
+        // Give time for MonitorLiveData to act on runStatus information
+        // and trigger m_interrupt for next loop iteration if user requested
+        // LiveData algorithm to stop at the end of the run
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        g_log.notice() << "Continued executing decoder" << std::endl;
+        if (m_interrupt)
+          break;
+      }
     }
-    readyLock.unlock();
 
     // Pull in events
     m_eventStream->consumeMessage(&buffer);
@@ -282,11 +322,20 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       }
       addSampleEnvLogs(seData, nSEEvents, mutableRunInfo);
 
-      if (frameData->end_of_run() && m_stopEOR)
-        m_interrupt = true;
+      m_endRun = frameData->end_of_run();
+      if (m_endRun) {
+        // If we've reached the end of a run then set m_extractWaiting to true
+        // so that wait until the buffer is emptied before continuing.
+        // Otherwise we can end up with data from two different runs in the
+        // same buffer workspace which is problematic if the user wanted the
+        // "Stop" or "Rename" run transition options.
+        m_extractWaiting = true;
+        m_extractedEndRunData = false;
+        g_log.notice() << "Reached end of run in data stream." << std::endl;
+      }
     }
   }
-  g_log.debug("Event capture finished");
+  g_log.notice("Event capture finished");
 }
 
 /**

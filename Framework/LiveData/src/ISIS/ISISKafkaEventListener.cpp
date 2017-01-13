@@ -67,12 +67,12 @@ boost::shared_ptr<API::Workspace> ISISKafkaEventListener::extractData() {
 
 /// @copydoc ILiveListener::isConnected
 bool ISISKafkaEventListener::isConnected() {
-  return (m_decoder ? m_decoder->isRunning() : false);
+  return (m_decoder ? m_decoder->isCapturing() : false);
 }
 
 /// @copydoc ILiveListener::runStatus
 API::ILiveListener::RunStatus ISISKafkaEventListener::runStatus() {
-  return Running;
+  return m_decoder->hasReachedEndOfRun() ? EndRun : Running;
 }
 
 /// @copydoc ILiveListener::runNumber
