@@ -1632,12 +1632,6 @@ void SliceViewer::updateDisplay(bool resetAxes) {
   // Set the color range
   m_data->setRange(m_colorBar->getViewRange());
 
-  if (ui.btnNonOrthogonalToggle->isChecked()) {
-    m_nonOrthAxis0->updateSlicePoint(m_slicePoint);
-    m_nonOrthAxis1->updateSlicePoint(m_slicePoint);
-    m_plot->update();
-  }
-
   // Is the overlay workspace visible at all from this slice point?
   if (m_overlayWS) {
     bool overlayInSlice = true;
@@ -1660,6 +1654,12 @@ void SliceViewer::updateDisplay(bool resetAxes) {
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
+  bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+  if (canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()) {
+    m_nonOrthAxis0->updateSlicePoint(m_slicePoint);
+    m_nonOrthAxis1->updateSlicePoint(m_slicePoint);
+    m_plot->update();
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -2428,6 +2428,7 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
         QString("Cut line is disabled in NonOrthogonal view"));
     ui.btnPeakOverlay->setToolTip(
         QString("Peak overlay is disabled in NonOrthogonal view"));
+
   } else {
     ui.btnDoLine->setToolTip(QString("Draw a 1D cut line"));
     ui.btnSnapToGrid->setToolTip(QString("Snap to grid when drawing cut line"));

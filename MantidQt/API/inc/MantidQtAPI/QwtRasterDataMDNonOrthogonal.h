@@ -25,14 +25,12 @@ public:
                       Mantid::Geometry::IMDDimension_const_sptr Y,
                       std::vector<Mantid::coord_t> &slicePoint) override;
   Mantid::coord_t *m_lookPoint;
-  Mantid::coord_t m_skewMatrix[9];
+  Mantid::coord_t m_fromHklToXyz[9];
   size_t m_missingHKLdim;
 
 protected:
   void copyFrom(const QwtRasterDataMDNonOrthogonal &source,
                 QwtRasterDataMDNonOrthogonal &dest) const;
-  // Mantid::coord_t *m_lookPoint;
-  // Mantid::coord_t m_skewMatrix[9];
 };
 
 } // namespace SliceViewer

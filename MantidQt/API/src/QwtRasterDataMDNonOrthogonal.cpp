@@ -9,15 +9,15 @@ using namespace Mantid::API;
 
 QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
     : m_lookPoint(nullptr) {
-  m_skewMatrix[0] = 1.0;
-  m_skewMatrix[1] = 0.0;
-  m_skewMatrix[2] = 0.0;
-  m_skewMatrix[3] = 0.0;
-  m_skewMatrix[4] = 1.0;
-  m_skewMatrix[5] = 0.0;
-  m_skewMatrix[6] = 0.0;
-  m_skewMatrix[7] = 0.0;
-  m_skewMatrix[8] = 1.0;
+  m_fromHklToXyz[0] = 1.0;
+  m_fromHklToXyz[1] = 0.0;
+  m_fromHklToXyz[2] = 0.0;
+  m_fromHklToXyz[3] = 0.0;
+  m_fromHklToXyz[4] = 1.0;
+  m_fromHklToXyz[5] = 0.0;
+  m_fromHklToXyz[6] = 0.0;
+  m_fromHklToXyz[7] = 0.0;
+  m_fromHklToXyz[8] = 1.0;
   m_missingHKLdim = 0;
 }
 
@@ -49,8 +49,8 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   }
 
   // Transform the lookpoint to the coordinate of the workspace
-  transformLookpointToWorkspaceCoord(m_lookPoint, m_skewMatrix, m_dimX, m_dimY,
-                                     m_missingHKLdim);
+  transformLookpointToWorkspaceCoord(m_lookPoint, m_fromHklToXyz, m_dimX,
+                                     m_dimY, m_missingHKLdim);
   // Get the signal at that point
   signal_t value = 0;
 
@@ -86,7 +86,7 @@ void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   // Add the skewMatrix for the basis
   Mantid::Kernel::DblMatrix skewMatrix(m_nd, m_nd, true);
   provideSkewMatrix(skewMatrix, ws);
-  transformFromDoubleToCoordT(skewMatrix, m_skewMatrix);
+  transformFromDoubleToCoordT(skewMatrix, m_fromHklToXyz);
 }
 
 void QwtRasterDataMDNonOrthogonal::setSliceParams(
@@ -143,7 +143,7 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
   }
 
   for (size_t d = 0; d < 9; ++d) {
-    dest.m_skewMatrix[d] = source.m_skewMatrix[d];
+    dest.m_fromHklToXyz[d] = source.m_fromHklToXyz[d];
   }
 }
 
