@@ -56,26 +56,16 @@ void SaveOpenGenieAscii::init() {
 void SaveOpenGenieAscii::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
-  int nSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
-  int nBins = static_cast<int>(m_inputWS->blocksize());
+  const int nSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
+  const int nBins = static_cast<int>(m_inputWS->blocksize());
 
-  // Retrieve the filename from the properties
-  const std::string filename = getProperty("Filename");
-
-  // Output string variables
-  const std::string singleSpc = " ";
-  const std::string fourspc = "    ";
-
-  // file
-  std::ofstream outfile(filename.c_str());
-  if (!outfile) {
-    g_log.error("Unable to create file: " + filename);
-    throw Exception::FileError("Unable to create file: ", filename);
-  }
   if (nBins == 0 || nSpectra == 0)
     throw std::runtime_error("Trying to save an empty workspace");
 
-  bool isHistogram = m_inputWS->isHistogramData();
+  if (!m_inputWS->isHistogramData()) {
+    throw std::runtime_error("This algorithm cannot save workspaces with event "
+                             "data, please convert to histogram data first.");
+  }
   // Progress progress(this, 0, 1, nBins);
 
   // writes out x, y, e to vector
@@ -85,13 +75,12 @@ void SaveOpenGenieAscii::exec() {
   getSampleLogs();
 
   // add ntc (number of bins)
-  const auto numBins = std::to_string(nBins);
-  m_outputVector.push_back(outputTuple("ntc", "Integer", std::move(numBins)));
+  m_outputVector.push_back(
+      outputTuple("ntc", "Integer", std::to_string(nBins)));
 
   // Getting the format property
   std::string formatType = getProperty("OpenGenieFormat");
   if (formatType == "ENGIN-X Format") {
-
     // Apply EnginX format if selected
     applyEnginxFormat();
   } else {
@@ -100,14 +89,19 @@ void SaveOpenGenieAscii::exec() {
     throw std::runtime_error(msg.str());
   }
 
+  auto outputStream = openFileStream();
+
   // write out all data
-  writeDataToFile(outfile);
+  writeDataToFile(outputStream);
+  outputStream.close();
 
   // progress.report();
 }
 
 /**
-  * Determines the spectrum numbers for an ENGINX output file/
+  * Determines the spectrum numbers for an ENGINX output file
+  * and converts them into an OpenGenie compatible string which
+  * is stored into the output buffer
   */
 std::string SaveOpenGenieAscii::getSpectrumNumAsString(
     const API::MatrixWorkspace &WSToSave) {
@@ -129,6 +123,16 @@ std::string SaveOpenGenieAscii::getSpectrumNumAsString(
   return outputString;
 }
 
+/**
+  * Converts the workspace data into strings which are compatible
+  * with OpenGenie and stores them into a tuple with the number
+  * of data points for X Y and E
+  *
+  * @return :: Returns a vector of tuples - the tuples being the
+  * data as a string and the number of data points. The first element
+  * of the vector is X, second Y, and final element E data
+  *
+  */
 std::vector<std::tuple<std::string, int>>
 SaveOpenGenieAscii::convertWorkspaceToStrings() {
   // Build x, y and e strings
@@ -175,9 +179,9 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
 }
 
 //-----------------------------------------------------------------------------
-/** Parses the data in the workspace into OpenGENIE compatible
-  * string and stores them in the output buffer
-  *
+/**
+  * Parses the X Y E data from the workspace into OpenGENIE compatible
+  * strings and stores them in the output buffer
   */
 void SaveOpenGenieAscii::parseWorkspaceData() {
   // 1 is Bank number - force to 1 at the moment
@@ -204,6 +208,18 @@ void SaveOpenGenieAscii::parseWorkspaceData() {
                            std::move(std::get<0>(eTuple));
   m_outputVector.push_back(
       outputTuple("e", outputType, std::move(eDataString)));
+}
+
+std::ofstream SaveOpenGenieAscii::openFileStream() {
+  // Retrieve the filename from the properties
+  const std::string filename = getProperty("Filename");
+  // file
+  std::ofstream outfile(filename.c_str());
+  if (!outfile) {
+    g_log.error("Unable to create file: " + filename);
+    throw Exception::FileError("Unable to create file: ", filename);
+  }
+  return outfile;
 }
 
 //-----------------------------------------------------------------------
@@ -295,12 +311,12 @@ void SaveOpenGenieAscii::getSampleLogs() {
    */
 void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   // Write header
-	if (getProperty("IncludeHeader")) {
-		outfile << "# Open Genie ASCII File #\n"
-			<< "# label \n"
-			<< "GXWorkspace\n"
-			<< m_outputVector.size() << '\n';
-	}
+  if (getProperty("IncludeHeader")) {
+    outfile << "# Open Genie ASCII File #\n"
+            << "# label \n"
+            << "GXWorkspace\n"
+            << m_outputVector.size() << '\n';
+  }
 
   // Sort by parameter name
   std::sort(m_outputVector.begin(), m_outputVector.end(),
@@ -355,11 +371,13 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
   const std::string specNumIdentifier = "spec_no";
   const std::string specNoToSave = getSpectrumNumAsString(*m_inputWS);
 
+  m_outputVector.reserve(5);
+
   m_outputVector.push_back(
       outputTuple(specNumIdentifier, stringType, specNoToSave));
+
   m_outputVector.push_back(outputTuple(xunits, stringType, xunitsVal));
   m_outputVector.push_back(outputTuple(xlabel, stringType, xunitsVal));
-  // Push to vector
   m_outputVector.push_back(outputTuple(yunits, stringType, yunitsVal));
   m_outputVector.push_back(outputTuple(ylabel, stringType, yunitsVal));
 }

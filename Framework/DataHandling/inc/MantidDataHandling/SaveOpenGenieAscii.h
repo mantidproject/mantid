@@ -50,9 +50,12 @@ private:
   /// Parses and stores the workspace data into the output buffer
   void parseWorkspaceData();
 
+  /// Attempts to open the user specified file path as an output stream
+  std::ofstream openFileStream();
+
   void getSampleLogs();
 
-  /// Generates a ENGINX compatible spectrum number string
+  /// Generates a spectrum number string
   std::string getSpectrumNumAsString(const API::MatrixWorkspace &wsToSave);
 
   /// sort and write out the data portion of the file
@@ -61,9 +64,9 @@ private:
   /// apply enginX format field which is required for OpenGenie
   void applyEnginxFormat();
 
-  /// Vector to safe sample log
+  /// Output buffer which holds the tuples to be written
   std::vector<outputTuple> m_outputVector;
-  /// Workspace
+  /// Workspace to save
   API::MatrixWorkspace_sptr m_inputWS;
 };
 }
