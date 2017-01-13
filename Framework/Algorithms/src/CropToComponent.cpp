@@ -31,17 +31,17 @@ void getWorkspaceIndices(
   }
 
   // Get the corresponding workspace indices
-  auto detIdToWorkspaceIndexMap = workspace->getDetectorIDToWorkspaceIndexMap(true);
+  auto detIdToWorkspaceIndexMap =
+      workspace->getDetectorIDToWorkspaceIndexMap(true);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int index = 0; index < numberOfDetectors; ++index) {
-    workspaceIndices[index] =  detIdToWorkspaceIndexMap[detectorIds[index]];
+    workspaceIndices[index] = detIdToWorkspaceIndexMap[detectorIds[index]];
   }
 
   // Sort the workspace indices
   std::sort(workspaceIndices.begin(), workspaceIndices.end());
 }
 }
-
 
 namespace Mantid {
 namespace Algorithms {
