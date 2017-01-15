@@ -10,7 +10,7 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorit
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, Rebin, \
-                             SaveAscii, Load
+                             SaveAscii, Load, DeleteWorkspace
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, AbinsConstants, InstrumentProducer
 
@@ -28,7 +28,6 @@ class ABINS(PythonAlgorithm):
     _atoms = None
     _sum_contributions = None
     _scale_by_cross_section = None
-    _output_workspace_name = None
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
@@ -203,8 +202,7 @@ class ABINS(PythonAlgorithm):
             for ws in workspaces:
                 if "total" in ws:
                     total_atom_workspaces.append(ws)
-            total_workspace = self._create_total_workspace(partial_workspaces=total_atom_workspaces,
-                                                           workspace_core_name=self._out_ws_name)
+            total_workspace = self._create_total_workspace(partial_workspaces=total_atom_workspaces)
             workspaces.insert(0, total_workspace)
             prog_reporter.report("Workspace with total S  has been constructed.")
 
@@ -240,12 +238,17 @@ class ABINS(PythonAlgorithm):
         shape = [self._num_quantum_order_events]
 
         shape.extend(list(s_data_extracted["atom_0"]["s"]["order_1"].shape))
+
         s_atom_data = np.zeros(shape=tuple(shape), dtype=AbinsConstants.FLOAT_TYPE)
+        shape.pop(0)
+
         num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
-        result_workspaces = []
         temp_s_atom_data = np.copy(s_atom_data)
 
+        result = []
+
         for atom_symbol in atoms_symbols:
+
             # create partial workspaces for the given type of atom
             atom_workspaces = []
             s_atom_data.fill(0.0)
@@ -253,7 +256,7 @@ class ABINS(PythonAlgorithm):
             for atom in range(num_atoms):
                 if self._extracted_dft_data["atom_%s" % atom]["symbol"] == atom_symbol:
 
-                    temp_s_atom_data.fill(0)
+                    temp_s_atom_data.fill(0.0)
 
                     for order in range(AbinsConstants.FUNDAMENTALS,
                                        self._num_quantum_order_events + AbinsConstants.S_LAST_INDEX):
@@ -262,19 +265,20 @@ class ABINS(PythonAlgorithm):
                         temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
                         temp_s_atom_data[order_indx] = temp_s_order
 
-                    np.add(s_atom_data, temp_s_atom_data, s_atom_data)  # sum S over the atoms of the same type
+                    s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
 
-            atom_workspaces.append(self._create_workspace(atom_name=atom_symbol,
-                                                          frequencies=freq,
-                                                          s_points=np.copy(s_atom_data)))
+            total_s_atom_data = np.sum(s_atom_data, axis=0)
 
-            # create total workspace for the given type of atom
-            ws_name = self._out_ws_name + "_" + atom_symbol
-            atom_workspaces.insert(0, self._create_total_workspace(partial_workspaces=atom_workspaces,
-                                                                   workspace_core_name=ws_name))
-            result_workspaces.extend(atom_workspaces)
+            atom_workspaces.append(
+                self._create_workspace(atom_name=atom_symbol, frequencies=freq, s_points=np.copy(total_s_atom_data),
+                                       optional_name="_total"))
 
-        return result_workspaces
+            atom_workspaces.append(
+                self._create_workspace(atom_name=atom_symbol, frequencies=freq, s_points=np.copy(s_atom_data)))
+
+            result.extend(atom_workspaces)
+
+        return result
 
     def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
         """
@@ -349,7 +353,12 @@ class ABINS(PythonAlgorithm):
         # 2D S map
         else:
 
+
             n_spec = self._instrument.get_nspec()
+
+            print "n_spec=", n_spec
+            print "freq.shape=", freq.shape
+            print "s_points.shape=", s_points.shape
 
             # only FUNDAMENTALS
             if s_points.shape[0] == AbinsConstants.FUNDAMENTALS:
@@ -367,7 +376,9 @@ class ABINS(PythonAlgorithm):
                 self._set_workspace_units(wrk=workspace)
 
             # total workspaces
-            elif len(s_points[0]) == self._instrument.get_nspec():
+            elif s_points.shape[0] == self._instrument.get_nspec():
+
+                print "total"
 
                 CreateWorkspace(DataX=freq,
                                 DataY=s_points.flatten(),
@@ -408,15 +419,14 @@ class ABINS(PythonAlgorithm):
                 group = ','.join(partial_wrk_names)
                 GroupWorkspaces(group, OutputWorkspace=workspace)
 
-    def _create_total_workspace(self, partial_workspaces=None, workspace_core_name=None):
+    def _create_total_workspace(self, partial_workspaces=None):
 
         """
         Sets workspace with total S.
         @param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
         @return: workspace with total S from partial_workspaces
-        """
-
-        total_workspace = workspace_core_name + "_total"
+         """
+        total_workspace = self._out_ws_name + "_total"
 
         if isinstance(mtd[partial_workspaces[0]], WorkspaceGroup):
             local_partial_workspaces = mtd[partial_workspaces[0]].getNames()
@@ -425,39 +435,66 @@ class ABINS(PythonAlgorithm):
 
         if len(local_partial_workspaces) > 1:
 
+            # get frequencies
+            freq = mtd[local_partial_workspaces[0]].dataX(0)
+
+            # initialize S
+            if self._nspec == AbinsConstants.ONE_DIMENTIONAL_SPECTRUM:
+                s_atoms = np.copy(mtd[local_partial_workspaces[0]].dataY(0))
+            else:
+                s_atoms = np.tile(np.copy(mtd[local_partial_workspaces[0]].dataY(0)), (self._nspec, 1))
+
+            s_atoms.fill(0.0)
+
+            # collect all S
+            for partial_ws in local_partial_workspaces:
+                if self._nspec == AbinsConstants.ONE_DIMENTIONAL_SPECTRUM:
+                    s_atoms += mtd[partial_ws].dataY(0)
+                else:
+                    for i in range(self._nspec):
+                        s_atoms[i] += mtd[partial_ws].dataY(i)
+
+            # create workspace with S
+            self._fill_s_workspace(freq, s_atoms, total_workspace)
+
+            # rebin
             if self._instrument.get_nspec() == AbinsConstants.ONE_DIMENTIONAL_SPECTRUM:
 
-                freq = np.zeros(shape=AbinsConstants.TOTAL_WORKSPACE_SIZE, dtype=AbinsConstants.FLOAT_TYPE)
-                s_atoms = np.zeros(shape=AbinsConstants.TOTAL_WORKSPACE_SIZE, dtype=AbinsConstants.FLOAT_TYPE)
-                ws_x = mtd[local_partial_workspaces[0]].dataX(0)  # all total workspaces have the same x values
-                freq[:ws_x.size] = ws_x
-                for partial_ws in local_partial_workspaces:
-                    ws_y = mtd[partial_ws].dataY(0)
-                    s_atoms[:ws_y.size] += ws_y
+                Rebin(InputWorkspace=total_workspace,
+                      Params=[AbinsParameters.min_wavenumber, AbinsParameters.bin_width,
+                              AbinsParameters.max_wavenumber],
+                      OutputWorkspace=total_workspace)
 
             else:
 
-                q_dim = self._instrument.get_nspec()
+                wrk = mtd[total_workspace]
+                workspace = self._out_ws_name + "_temp"
+                hist_num = wrk.getNumberHistograms()
 
-                freq = np.zeros(shape=AbinsConstants.TOTAL_WORKSPACE_SIZE, dtype=AbinsConstants.FLOAT_TYPE)
-                s_atoms = np.zeros(shape=(q_dim, AbinsConstants.TOTAL_WORKSPACE_SIZE),
-                                   dtype=AbinsConstants.FLOAT_TYPE)
-                ws_x = mtd[local_partial_workspaces[0]].dataX(0)  # all total workspaces have the same x values
-                freq[:ws_x.size] = ws_x
-                for partial_ws in local_partial_workspaces:
-                    for q_indx in range(q_dim):
-                        ws_y = mtd[partial_ws].dataY(q_indx)
-                        s_atoms[q_indx, :ws_y.size] += ws_y
+                for i in range(hist_num):
 
-            self._fill_s_workspace(freq, s_atoms, total_workspace)
+                    y_data = wrk.dataY(i)
 
-        # Otherwise just repackage the workspace we have as the total
+                    CreateWorkspace(DataX=freq,
+                                    DataY=y_data,
+                                    NSpec=AbinsConstants.ONE_DIMENTIONAL_SPECTRUM,
+                                    OutputWorkspace=workspace,
+                                    EnableLogging=False)
+
+                    Rebin(InputWorkspace=workspace,
+                          Params=[AbinsParameters.min_wavenumber, AbinsParameters.bin_width,
+                                  AbinsParameters.max_wavenumber],
+                          OutputWorkspace=workspace)
+
+                DeleteWorkspace(workspace)
+
+        # # Otherwise just repackage the workspace we have as the total
         else:
-            CloneWorkspace(InputWorkspace=local_partial_workspaces[0],
-                           OutputWorkspace=total_workspace)
+            CloneWorkspace(InputWorkspace=local_partial_workspaces[0], OutputWorkspace=total_workspace)
+
         return total_workspace
 
-    def _create_workspace(self, atom_name=None, frequencies=None, s_points=None):
+    def _create_workspace(self, atom_name=None, frequencies=None, s_points=None, optional_name=""):
 
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
@@ -466,11 +503,11 @@ class ABINS(PythonAlgorithm):
         @param atom_name: symbol of atom for which workspace should be created
         @param frequencies: frequencies in the form of numpy array for which S(Q, omega) can be plotted
         @param s_points: S(Q, omega)
+        @param optional_name: optional part of workspace name
         @return: workspace for the given frequency and S data
-
         """
 
-        ws_name = self._out_ws_name + "_" + atom_name
+        ws_name = self._out_ws_name + "_" + atom_name + optional_name
         self._fill_s_workspace(freq=frequencies, s_points=s_points, workspace=ws_name)
 
         # 1D S
@@ -481,6 +518,7 @@ class ABINS(PythonAlgorithm):
                   OutputWorkspace=ws_name)
 
             wrk = mtd[ws_name]
+
             if isinstance(wrk, WorkspaceGroup):
                 num_wrk = wrk.getNumberOfEntries()
                 for n in range(num_wrk):
@@ -492,25 +530,59 @@ class ABINS(PythonAlgorithm):
         else:
 
             wrk = mtd[ws_name]
-            hist_num = wrk.getNumberHistograms()
-
-            for i in range(hist_num):
-
-                spectrum = wrk.getSpectrum(i)
-                Rebin(InputWorkspace=spectrum,
-                      Params=[AbinsParameters.min_wavenumber, AbinsParameters.bin_width,
-                              AbinsParameters.max_wavenumber],
-                      OutputWorkspace=spectrum)
+            workspace = self._out_ws_name + "_temp"
 
             if isinstance(wrk, WorkspaceGroup):
 
                 num_wrk = wrk.getNumberOfEntries()
+
+                x_data = wrk.getItem(0).dataX(0)  # all histograms have the same x-axis
+
                 for n in range(num_wrk):
+
+                    hist_num = wrk.getItem(n).getNumberHistograms()
+
+                    for i in range(hist_num):
+
+                        y_data = wrk.getItem(n).dataY(i)
+
+                        CreateWorkspace(DataX=x_data,
+                                        DataY=y_data,
+                                        NSpec=AbinsConstants.ONE_DIMENTIONAL_SPECTRUM,
+                                        OutputWorkspace=workspace,
+                                        EnableLogging=False)
+
+                        Rebin(InputWorkspace=workspace,
+                              Params=[AbinsParameters.min_wavenumber, AbinsParameters.bin_width,
+                                      AbinsParameters.max_wavenumber],
+                              OutputWorkspace=workspace)
+
                     self._scale_workspace(atom_name=atom_name, ws_name=wrk.getItem(n).getName())
+
+                DeleteWorkspace(workspace)
 
             else:
 
+                hist_num = wrk.getNumberHistograms()
+                x_data = wrk.dataX(0)
+
+                for i in range(hist_num):
+
+                    y_data = wrk.dataY(i)
+
+                    CreateWorkspace(DataX=x_data,
+                                    DataY=y_data,
+                                    NSpec=AbinsConstants.ONE_DIMENTIONAL_SPECTRUM,
+                                    OutputWorkspace=workspace,
+                                    EnableLogging=False)
+
+                    Rebin(InputWorkspace=workspace,
+                          Params=[AbinsParameters.min_wavenumber, AbinsParameters.bin_width,
+                                  AbinsParameters.max_wavenumber],
+                          OutputWorkspace=workspace)
+
                 self._scale_workspace(atom_name=atom_name, ws_name=ws_name)
+                DeleteWorkspace(workspace)
 
         return ws_name
 
