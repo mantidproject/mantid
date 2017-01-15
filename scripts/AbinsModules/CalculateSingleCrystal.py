@@ -23,9 +23,8 @@ class CalculateSingleCrystal(IOmodule):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = float(temperature)  # temperature in K
 
-        super(CalculateSingleCrystal, self).__init__(input_filename=filename,
-                                               group_name=AbinsParameters.crystal_data_group + "/" + "%sK" %
-                                                                                                     self._temperature)
+        super(CalculateSingleCrystal, self).__init__(
+            input_filename=filename, group_name=AbinsParameters.crystal_data_group + "/" + "%sK" % self._temperature)
 
     def _calculate_crystal(self):
 
@@ -41,7 +40,7 @@ class CalculateSingleCrystal(IOmodule):
         Calculates data needed for calculation of S(Q, omega) in case experimental sample is in
         the form of single crystal.
         Saves calculated data to an hdf file.
-        @return:  object of type SingleCrystalData 
+        @return:  object of type SingleCrystalData
         """
 
         data = self._calculate_crystal()
