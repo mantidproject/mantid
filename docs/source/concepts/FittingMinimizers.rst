@@ -76,7 +76,7 @@ information of the cost function (second-order partial derivatives of
 a Hessian matrix). Some algorithms like BFGS approximate the Hessian by the
 gradient values of successive iterations. The Levenberg-Marquard
 algorithm is a modified Gauss-Newton that introduces an adaptive term
-to prevent unstability when the approximated Hessian is not positive
+to prevent instability when the approximated Hessian is not positive
 defined. An in-depth description of the methods is beyond the scope of
 these pages. More information can be found from the links and general
 references on optimization methods such as [Kelley1999]_ and
