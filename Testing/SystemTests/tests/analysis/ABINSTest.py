@@ -1,6 +1,6 @@
 import stresstesting
-from mantid.simpleapi import ABINS, mtd, DeleteWorkspace
-from AbinsModules import AbinsConstants, AbinsTestHelpers
+from mantid.simpleapi import ABINS, mtd, DeleteWorkspace, Scale
+from AbinsModules import AbinsConstants, AbinsTestHelpers, AbinsParameters
 
 
 class HelperTestingClass(object):
@@ -15,10 +15,25 @@ class HelperTestingClass(object):
         self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out"}
         self._output_name = "output_workspace"
         self._ref = "reference_workspace"
+        self._scale = 1.0
 
         self._dft_program = None
         self._quantum_order_event = None
         self._system_name = None
+
+    def set_instrument_name(self, instrument_name=None):
+
+        if instrument_name in AbinsConstants.ALL_INSTRUMENTS:
+            self._instrument_name = instrument_name
+        else:
+            raise ValueError("Wrong instrument.")
+
+    def set_scale(self, scale=None):
+
+        if isinstance(scale, float) and scale > 0.0:
+            self._scale = scale
+        else:
+            raise ValueError("Wrong scale.")
 
     def set_dft_program(self, dft_program=None):
 
@@ -40,6 +55,7 @@ class HelperTestingClass(object):
     def set_name(self, name):
         if isinstance(name, str):
             self._system_name = name
+            self._output_name = name
         else:
             raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
 
@@ -50,7 +66,7 @@ class HelperTestingClass(object):
         ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions,
-              QuantumOrderEventsNumber=str(self._quantum_order_event),
+              QuantumOrderEventsNumber=str(self._quantum_order_event), Scale=self._scale,
               ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
 
     def case_restart_diff_t(self):
@@ -67,21 +83,21 @@ class HelperTestingClass(object):
         # T = 10 K
         ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions,
+              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "init")
 
         # T = 20 K
         ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions,
+              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "_mod")
 
         # T = 10 K
         ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions,
+              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event),
               ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
 
@@ -96,7 +112,7 @@ class HelperTestingClass(object):
         DeleteWorkspace(self._output_name)
         ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions,
+              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=self._output_name)
 
@@ -109,13 +125,17 @@ class HelperTestingClass(object):
         mtd.clear()
 
 # ----------------------------------------------------------------------------------------------------------------
-
+# Tests for 1D S
+# ----------------------------------------------------------------------------------------------------------------
 
 class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from CASTEP and for 1-4 quantum
     order events is correct.
     """
+    _ref_result = None
+    tolerance = None
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -142,6 +162,9 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for only 1 quantum
     order event is correct.
     """
+    _ref_result = None
+    tolerance = None
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -168,6 +191,8 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
     In this benchmark scenario of restart is considered in which data for other temperature already exists in an hdf
     file. In this benchmark input data from CASTEP DFT program is used.
     """
+    _ref_result = None
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -191,6 +216,8 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
     In this benchmark it is tested if calculation from restart with input data from CASTEP is correct. Requested order
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
     """
+    _ref_result = None
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -214,6 +241,7 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
     In this benchmark it is tested if calculation from restart with input data from CASTEP is correct. Requested
     order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
     """
+    _ref_result = None
 
     def runTest(self):
 
@@ -231,4 +259,123 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
         return self._output_name, self.ref_result
 
 
-# TODO: add test for 2D S MAP
+class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
+        """
+        In this benchmark it is tested if scaling is correct.
+        """
+        _wrk_1 = None
+        _wrk_2 = None
+
+        def runTest(self):
+            HelperTestingClass.__init__(self)
+
+            scaling_factor = 2.0
+
+            name = "BenzeneNoScale"
+            self.set_dft_program("CASTEP")
+            self.set_name(name)
+            self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+            self.case_from_scratch()
+            self._wrk_1 = self._output_name
+
+            Scale(InputWorkspace=self._wrk_1,
+                  OutputWorkspace=self._wrk_1,
+                  Operation='Multiply',
+                  Factor=scaling_factor)
+
+            self._output_name = ""
+            name = "BenzeneScale"
+            self.set_dft_program("CASTEP")
+            self.set_name(name)
+            self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+            self.set_scale(scaling_factor)
+            self.case_from_scratch()
+
+            self._wrk_2 = self._output_name
+
+        def validateMethod(self):
+            return "validateWorkspaceToWorkspace"
+
+        def validate(self):
+            return self._wrk_1, self._wrk_2
+
+# ----------------------------------------------------------------------------------------------------------------
+# Tests for 2D S
+# ----------------------------------------------------------------------------------------------------------------
+
+
+class AbinsCASTEPTestScratchTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from CASTEP, for 1-2 order quantum
+    events and for TwoDMap is correct.
+    """
+    _ref_result = None
+    tolerance = None
+
+    def runTest(self):
+
+        HelperTestingClass.__init__(self)
+
+        name = "BenzeneScratchTwoDMapABINS"
+        AbinsParameters.q_start = 0.0  # beginning of q interval
+        AbinsParameters.q_end = 30  # end of q interval
+        AbinsParameters.q_step = 5.0  # sampling of q
+
+        self._ref_result = name + ".nxs"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_instrument_name("TwoDMap")
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.case_from_scratch()
+
+    def validate(self):
+
+        self.tolerance = 1e-2
+
+        return self._output_name, self._ref_result
+
+
+class AbinsCASTEPTestScaleTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if scaling is correct.
+    """
+    _wrk_1 = None
+    _wrk_2 = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        AbinsParameters.q_start = 0.0  # beginning of q interval
+        AbinsParameters.q_end = 30  # end of q interval
+        AbinsParameters.q_step = 5.0  # sampling of q
+
+        scaling_factor = 2.0
+
+        name = "BenzeneNoScaleTwoDMap"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_instrument_name("TwoDMap")
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.case_from_scratch()
+        self._wrk_1 = self._output_name
+
+        Scale(InputWorkspace=self._wrk_1,
+              OutputWorkspace=self._wrk_1,
+              Operation='Multiply',
+              Factor=scaling_factor)
+
+        self._output_name = ""
+        name = "BenzeneScaleTwoDMap"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_instrument_name("TwoDMap")
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_scale(scaling_factor)
+        self.case_from_scratch()
+        self._wrk_2 = self._output_name
+
+    def validateMethod(self):
+        return "validateWorkspaceToWorkspace"
+
+    def validate(self):
+        return self._wrk_1, self._wrk_2
