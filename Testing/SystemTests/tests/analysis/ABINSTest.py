@@ -128,6 +128,7 @@ class HelperTestingClass(object):
 # Tests for 1D S
 # ----------------------------------------------------------------------------------------------------------------
 
+
 class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from CASTEP and for 1-4 quantum

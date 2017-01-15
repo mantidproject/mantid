@@ -353,12 +353,7 @@ class ABINS(PythonAlgorithm):
         # 2D S map
         else:
 
-
             n_spec = self._instrument.get_nspec()
-
-            print "n_spec=", n_spec
-            print "freq.shape=", freq.shape
-            print "s_points.shape=", s_points.shape
 
             # only FUNDAMENTALS
             if s_points.shape[0] == AbinsConstants.FUNDAMENTALS:
@@ -377,8 +372,6 @@ class ABINS(PythonAlgorithm):
 
             # total workspaces
             elif s_points.shape[0] == self._instrument.get_nspec():
-
-                print "total"
 
                 CreateWorkspace(DataX=freq,
                                 DataY=s_points.flatten(),
