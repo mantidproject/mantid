@@ -23,20 +23,7 @@ public:
     delete suite;
   }
 
-  void testCylinder() {
-    // setup and run the algorithm (includes basic checks)
-    LoadSampleDetailsFromRaw alg;
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, "MAR11001.raw");
-    runAlgorithm(alg);
-
-    // specific checks
-    TS_ASSERT_EQUALS(inWS->sample().getGeometryFlag(), 1);
-    TS_ASSERT_DELTA(inWS->sample().getHeight(), 42.0, 1e-6);
-    TS_ASSERT_DELTA(inWS->sample().getWidth(), 40.0, 1e-6);
-    TS_ASSERT_DELTA(inWS->sample().getThickness(), 4.0, 1e-6);
-  }
-
-  void testFlatPlate() {
+  void testExec() {
     // setup and run the algorithm (includes basic checks)
     LoadSampleDetailsFromRaw alg;
     const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, "HRP39180.RAW");
@@ -49,19 +36,6 @@ public:
     TS_ASSERT_DELTA(inWS->sample().getThickness(), 11.0, 1e-6);
   }
 
-  void testDisc() {
-    // setup and run the algorithm (includes basic checks)
-    LoadSampleDetailsFromRaw alg;
-    const MatrixWorkspace_const_sptr inWS = setupAlgorithm(alg, "LOQ48097.raw");
-    runAlgorithm(alg);
-
-    // specific checks
-    TS_ASSERT_EQUALS(inWS->sample().getGeometryFlag(), 3);
-    TS_ASSERT_DELTA(inWS->sample().getHeight(), 8.0, 1e-6);
-    TS_ASSERT_DELTA(inWS->sample().getWidth(), 8.0, 1e-6);
-    TS_ASSERT_DELTA(inWS->sample().getThickness(), 1.0, 1e-6);
-  }
-
 private:
   const MatrixWorkspace_sptr makeFakeWorkspace() {
     // create the workspace
@@ -70,7 +44,7 @@ private:
   }
 
   // Initialise the algorithm and set the properties. Creates a fake
-  // workspace for the input.
+  // workspace for the input and returns it.
   const MatrixWorkspace_sptr setupAlgorithm(LoadSampleDetailsFromRaw &alg,
                                             const std::string &filename) {
     // create the workspace
