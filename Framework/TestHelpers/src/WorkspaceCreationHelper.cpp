@@ -16,6 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -998,8 +999,9 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
 
   // c) Pad all the pixels and Set to zero
   size_t workspaceIndex = 0;
+  const auto &detectorInfo = outputWS->detectorInfo();
   for (it = detector_map.begin(); it != detector_map.end(); ++it) {
-    if (!it->second->isMonitor()) {
+    if (!detectorInfo.isMonitor(detectorInfo.indexOf(it->first))) {
       auto &spec = outputWS->getSpectrum(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
@@ -1237,6 +1239,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   size_t nHist = targWS->rowCount();
   //// Loop over the spectra
   uint32_t liveDetectorsCount(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
     sp2detMap[i] = std::numeric_limits<size_t>::quiet_NaN();
     detId[i] = std::numeric_limits<int32_t>::quiet_NaN();
@@ -1245,26 +1248,17 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
     TwoTheta[i] = std::numeric_limits<double>::quiet_NaN();
     Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();
 
-    // get detector or detector group which corresponds to the spectra i
-    Geometry::IDetector_const_sptr spDet;
-    try {
-      spDet = inputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      continue;
-    }
-
-    // Check that we aren't dealing with monitor...
-    if (spDet->isMonitor())
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // calculate the requested values;
     sp2detMap[i] = liveDetectorsCount;
-    detId[liveDetectorsCount] = int32_t(spDet->getID());
+    detId[liveDetectorsCount] = int32_t(spectrumInfo.detector(i).getID());
     detIDMap[liveDetectorsCount] = i;
-    L2[liveDetectorsCount] = spDet->getDistance(*sample);
+    L2[liveDetectorsCount] = spectrumInfo.l2(i);
 
-    double polar = inputWS->detectorTwoTheta(*spDet);
-    double azim = spDet->getPhi();
+    double polar = spectrumInfo.twoTheta(i);
+    double azim = spectrumInfo.detector(i).getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
 

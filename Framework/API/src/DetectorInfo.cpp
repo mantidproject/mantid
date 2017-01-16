@@ -52,10 +52,10 @@ size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
-  return getDetector(index).isMonitor();
+  return m_detectorInfo.isMonitor(index);
 }
 
-/// Returns true if the detector is a masked.
+/// Returns true if the detector is masked.
 bool DetectorInfo::isMasked(const size_t index) const {
   return m_detectorInfo.isMasked(index);
 }

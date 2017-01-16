@@ -1165,7 +1165,10 @@ const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void ParameterMap::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  m_detectorInfo = std::move(detectorInfo);
+  if (detectorInfo != m_detectorInfo) {
+    PARALLEL_CRITICAL(ParameterMap_setDetectorInfo)
+    m_detectorInfo = std::move(detectorInfo);
+  }
 }
 
 } // Namespace Geometry

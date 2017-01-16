@@ -100,9 +100,6 @@ public:
   /// Gives the phi of this detector offset from y=0 by offset.
   virtual double getPhiOffset(const double &offset) const = 0;
 
-  /// Indicates whether this is a monitor detector
-  virtual bool isMonitor() const = 0;
-
   /// returns the geometry of detectors, meaningful for groups, rectangular for
   /// single; returns the centre of a detector
   virtual det_topology getTopology(Kernel::V3D &center) const = 0;
