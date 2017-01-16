@@ -98,15 +98,15 @@ GroupingPattern
 Grouping can also be specified using the GroupingPattern property. Its syntax
 is as follows:
 
-The pattern consists of a list of numbers that refer to workspace indexes and
+The pattern consists of a list of numbers that refer to workspace indices and
 various operators: :literal:`,:+-`.
 
 The spectra you wish to keep can be specified by selecting the appropriate
-workspace indicies. This can be achieved with the following operators:
+workspace indices. This can be achieved with the following operators:
 
-- :literal:`,` allows you to specify additional indexes. :literal:`1,2,4` will
-  keep indexes 1, 2 and 4 only.
-- :literal:`:` indicates a continuous range of indexes. For example,
+- :literal:`,` allows you to specify additional indices. :literal:`1,2,4` will
+  keep indices 1, 2 and 4 only.
+- :literal:`:` indicates a continuous range of indices. For example,
   :literal:`1:5` is the same as :literal:`1,2,3,4,5`.
 - :literal:`+` sums two spectra together. :literal:'7+9' will produce a single
   spectra listing the sum of 7 and 9, ignoring any others.

@@ -149,7 +149,7 @@ algorithms that may need to manipulate/use it.
 Processing Instructions
 #######################
 
-These enable a grouping pattern on workspace indexes to yield only the detectors of interest. It allows usage of the operators :literal:`,:+-` to specify or exclude specific indexes or to add
+These enable a grouping pattern on workspace indices to yield only the detectors of interest. It allows usage of the operators :literal:`,:+-` to specify or exclude specific indices or to add
 spectra together. See :literal:`Grouping Pattern` from :Ref:`algm-GroupDetectors` for further details on their usage.
 
 Usage
