@@ -1531,16 +1531,16 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
   }
 
   // A > 0, B > 0, S > 0
-  auto abound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "A",
-                                                     0.0000001, DBL_MAX, false);
+  auto abound = Kernel::make_unique<BoundaryConstraint>(
+      peakfunction.get(), "A", 0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(abound));
 
-  auto bbound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "B",
-                                                     0.0000001, DBL_MAX, false);
+  auto bbound = Kernel::make_unique<BoundaryConstraint>(
+      peakfunction.get(), "B", 0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(bbound));
 
   auto sbound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "S",
-                                                     0.0001, DBL_MAX, false);
+                                                        0.0001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(sbound));
 
   // 2. Unfix all parameters
