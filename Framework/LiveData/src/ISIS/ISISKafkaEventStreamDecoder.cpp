@@ -263,30 +263,6 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
   m_extractedEndRunData = true;
   std::string buffer;
   while (!m_interrupt) {
-    // If extractData method is waiting for access to the buffer workspace
-    // then we wait for it to finish
-    std::unique_lock<std::mutex> readyLock(m_waitMutex);
-    if (m_extractWaiting) {
-      cv.wait(readyLock, [&] { return !m_extractWaiting; });
-      readyLock.unlock();
-      if (m_endRun) {
-        m_extractedEndRunData = true;
-        // Wait until MonitorLiveData has seen that end of run was
-        // reached before setting m_endRun back to false and continuing
-        std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
-        cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
-        m_endRun = false;
-        m_runStatusSeen = false;
-        runStatusLock.unlock();
-        // Give time for MonitorLiveData to act on runStatus information
-        // and trigger m_interrupt for next loop iteration if user requested
-        // LiveData algorithm to stop at the end of the run
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        if (m_interrupt)
-          break;
-      }
-    }
-
     // Pull in events
     m_eventStream->consumeMessage(&buffer);
     // No events, wait for some to come along...
@@ -327,6 +303,28 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
         m_extractWaiting = true;
         m_extractedEndRunData = false;
         g_log.debug() << "Reached end of run in data stream." << std::endl;
+      }
+    }
+
+    // If extractData method is waiting for access to the buffer workspace
+    // then we wait for it to finish
+    std::unique_lock<std::mutex> readyLock(m_waitMutex);
+    if (m_extractWaiting) {
+      cv.wait(readyLock, [&] { return !m_extractWaiting; });
+      readyLock.unlock();
+      if (m_endRun) {
+        m_extractedEndRunData = true;
+        // Wait until MonitorLiveData has seen that end of run was
+        // reached before setting m_endRun back to false and continuing
+        std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
+        cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
+        m_endRun = false;
+        m_runStatusSeen = false;
+        runStatusLock.unlock();
+        // Give time for MonitorLiveData to act on runStatus information
+        // and trigger m_interrupt for next loop iteration if user requested
+        // LiveData algorithm to stop at the end of the run
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     }
   }
