@@ -13,8 +13,8 @@ subgraph params {
 
 subgraph decisions {
  $decision_style
-  checkGroups   [label="Input workspaces are\ngroup workspaces?"]
-  checkGlobalSF [label="Using global\nscale factor?"]
+  checkGroups [label="Input workspaces are\ngroup workspaces?"]
+  checkSFFP   [label="Using\nScaleFactorFromPeriod?"]
 }
 
 subgraph algorithms {
@@ -35,18 +35,18 @@ subgraph values {
 }
 
 inputWS       -> checkGroups
-checkGroups   -> S1D_WS        [label="no"]
-checkGroups   -> checkGlobalSF [label="yes"]
+checkGroups   -> S1D_WS       [label="no"]
+checkGroups   -> checkSFFP    [label="yes"]
 S1D_WS        -> outWS
 S1D_WS        -> outSF
-checkGlobalSF -> S1DM_Period   [label="no"]
-checkGlobalSF -> S1DM_Global   [label="yes"]
+checkSFFP     -> S1DM_Global  [label="no"]
+checkSFFP     -> S1DM_Period  [label="yes"]
+S1DM_Global   -> stitchedWSVec
+S1DM_Global   -> outSF
 S1DM_Period   -> psf
 psf           -> S1D_Groups
 S1D_Groups    -> stitchedWSVec
 S1D_Groups    -> outSF
-S1DM_Global   -> stitchedWSVec
-S1DM_Global   -> outSF
 stitchedWSVec -> groupWS
 groupWS       -> outWS
 

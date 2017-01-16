@@ -206,9 +206,6 @@ std::map<std::string, std::string> Stitch1DMany::validateCommonInputs() {
     errors["EndOverlaps"] =
         "EndOverlaps must have the same number of entries as StartOverlaps.";
 
-  // if (m_params.empty())
-  //  errors["Params"] = "At least one parameter must be given.";
-
   m_useManualScaleFactor = this->getProperty("UseManualScaleFactor");
   m_manualScaleFactor = this->getProperty("ManualScaleFactor");
 
@@ -352,7 +349,8 @@ bool Stitch1DMany::processGroups() {
   std::string groupName = this->getProperty("OutputWorkspace");
   std::string outName;
 
-  // Determine whether or not we are using a global scale factor
+  // Determine whether or not we are scaling workspaces using scale factors from
+  // a specific period
   Property *manualSF = this->getProperty("ManualScaleFactor");
   bool usingScaleFromPeriod = m_useManualScaleFactor && manualSF->isDefault();
 
