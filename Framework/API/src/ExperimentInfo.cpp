@@ -85,6 +85,8 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
     m_choppers.push_back(chopper->clone());
   }
   *m_detectorInfo = *other->m_detectorInfo;
+  m_spectrumInfo =
+      Kernel::make_unique<Beamline::SpectrumInfo>(*other->m_spectrumInfo);
 }
 
 /** Clone this ExperimentInfo class into a new one
@@ -416,28 +418,34 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
  */
 void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
   populateIfNotLoaded();
-  m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(mapping.size());
+  setNumberOfDetectorGroups(mapping.size());
   size_t specIndex = 0;
   for (const auto &item : mapping) {
     m_det2group[item.first] = specIndex;
-    Beamline::SpectrumDefinition specDef;
-    for (const auto detID : item.second) {
-      try {
-        const size_t detIndex = detectorInfo().indexOf(detID);
-        specDef.add(detIndex);
-      } catch (std::out_of_range &) {
-        // Silently strip bad detector IDs
-      }
-    }
-    m_spectrumInfo->setSpectrumDefinition(specIndex, std::move(specDef));
+    updateCachedDetectorGrouping(specIndex, item.second);
     specIndex++;
   }
   // Create default grouping if `mapping` is empty.
   cacheDefaultDetectorGrouping();
 }
 
-void ExperimentInfo::updatedCachedDetectorGrouping(
-    const size_t index, const std::set<detid_t> &detIDs) {}
+void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) {
+  m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
+}
+
+void ExperimentInfo::updateCachedDetectorGrouping(
+    const size_t index, const std::set<detid_t> &detIDs) {
+  Beamline::SpectrumDefinition specDef;
+  for (const auto detID : detIDs) {
+    try {
+      const size_t detIndex = detectorInfo().indexOf(detID);
+      specDef.add(detIndex);
+    } catch (std::out_of_range &) {
+      // Silently strip bad detector IDs
+    }
+  }
+  m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
+}
 
 /**
  * Set an object describing the moderator properties and take ownership

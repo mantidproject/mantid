@@ -86,7 +86,6 @@ public:
   void setDetectorIDs(std::set<detid_t> &&detIDs);
 
   bool hasDetectorID(const detid_t detID) const;
-  std::set<detid_t> &getDetectorIDs();
   const std::set<detid_t> &getDetectorIDs() const;
 
   void clearDetectorIDs();

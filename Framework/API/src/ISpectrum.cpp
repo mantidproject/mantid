@@ -111,10 +111,6 @@ void ISpectrum::clearDetectorIDs() {
   updateExperimentInfo();
 }
 
-/** Get a mutable reference to the detector IDs set.
- */
-std::set<detid_t> &ISpectrum::getDetectorIDs() { return this->detectorIDs; }
-
 /// @return the spectrum number of this spectrum
 specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
 
@@ -141,7 +137,7 @@ void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo,
 
 void ISpectrum::updateExperimentInfo() const {
   if (m_experimentInfo)
-    m_experimentInfo->updatedCachedDetectorGrouping(m_index, detectorIDs);
+    m_experimentInfo->updateCachedDetectorGrouping(m_index, detectorIDs);
 }
 
 } // namespace Mantid
