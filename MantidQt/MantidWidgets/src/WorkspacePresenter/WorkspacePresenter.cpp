@@ -101,6 +101,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::PlotSpectrumWithErrors:
     plotSpectrumWithErrors();
     break;
+  case ViewNotifiable::Flag::PlotSpectrumAdvanced:
+    plotSpectrumAdvanced();
+    break;
   case ViewNotifiable::Flag::ShowColourFillPlot:
     showColourFillPlot();
     break;
@@ -315,6 +318,11 @@ void WorkspacePresenter::plotSpectrum() {
 void WorkspacePresenter::plotSpectrumWithErrors() {
   auto view = lockView();
   view->plotSpectrum(true);
+}
+
+void WorkspacePresenter::plotSpectrumAdvanced() {
+  auto view = lockView();
+  view->plotSpectrum(false);
 }
 
 void WorkspacePresenter::showColourFillPlot() {

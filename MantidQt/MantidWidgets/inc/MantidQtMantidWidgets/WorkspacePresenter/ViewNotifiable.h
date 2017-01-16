@@ -52,6 +52,7 @@ public:
     ShowInstrumentView,
     PlotSpectrum,
     PlotSpectrumWithErrors,
+    PlotSpectrumAdvanced,
     ShowColourFillPlot,
     ShowDetectorsTable,
     ShowBoxDataTable,
