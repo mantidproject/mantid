@@ -267,16 +267,12 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
     // then we wait for it to finish
     std::unique_lock<std::mutex> readyLock(m_waitMutex);
     if (m_extractWaiting) {
-      if (m_endRun)
-        g_log.notice() << "EndRun true, should wait" << std::endl;
       cv.wait(readyLock, [&] { return !m_extractWaiting; });
       readyLock.unlock();
       if (m_endRun) {
         m_extractedEndRunData = true;
         // Wait until MonitorLiveData has seen that end of run was
         // reached before setting m_endRun back to false and continuing
-        if (!m_runStatusSeen)
-          g_log.notice() << "runStatusSeen is false" << std::endl;
         std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
         cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
         m_endRun = false;
@@ -286,7 +282,6 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
         // and trigger m_interrupt for next loop iteration if user requested
         // LiveData algorithm to stop at the end of the run
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        g_log.notice() << "Continued executing decoder" << std::endl;
         if (m_interrupt)
           break;
       }
@@ -325,13 +320,13 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       m_endRun = frameData->end_of_run();
       if (m_endRun) {
         // If we've reached the end of a run then set m_extractWaiting to true
-        // so that wait until the buffer is emptied before continuing.
+        // so that we wait until the buffer is emptied before continuing.
         // Otherwise we can end up with data from two different runs in the
         // same buffer workspace which is problematic if the user wanted the
-        // "Stop" or "Rename" run transition options.
+        // "Stop" or "Rename" run transition option.
         m_extractWaiting = true;
         m_extractedEndRunData = false;
-        g_log.notice() << "Reached end of run in data stream." << std::endl;
+        g_log.debug() << "Reached end of run in data stream." << std::endl;
       }
     }
   }
