@@ -413,63 +413,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws1 = makeWorkspace(*origin.getSpectrum(1))
         return ws0, ws1
 
-    def test_CrystalFieldFit_physical_properties(self):
-        from CrystalField.fitting import makeWorkspace
-        from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
-        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544, 
-                              Temperature=[10, 100], FWHM=[1.1, 1.2])
-        ws0 = makeWorkspace(*origin.getSpectrum(0))
-        ws1 = makeWorkspace(*origin.getSpectrum(1))
-        wscv = makeWorkspace(*origin.getHeatCapacity())
-        wschi = makeWorkspace(*origin.getSusceptibility(Hdir='powder'))
-        wsmag = makeWorkspace(*origin.getMagneticMoment(Hdir=[0,1,0]))
-        wsmom = makeWorkspace(*origin.getMagneticMoment(H=100, T=np.linspace(1,300,300), Unit='cgs'))
-
-        # Fits single physical properties dataset
-        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
-        cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder')
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=wschi, MaxIterations=100)
-        fit.fit()
-        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
-        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
-        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
-        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
-        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
-        
-        # Fits multiple physical properties
-        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
-        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=[wschi, wsmag], MaxIterations=100)
-        fit.fit()
-        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
-        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
-        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
-        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
-        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
-
-        # Fits one INS spectrum and one physical property
-        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12, Temperature=10, FWHM=1.1)
-        cf.PhysicalProperty = PhysicalProperties('M(H)',Hdir=[0,1,0])
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, wsmag], MaxIterations=100)
-        fit.fit()
-        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
-        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
-        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
-        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
-        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
-
-        # Fits multiple INS spectra and multiple physical properties
-        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12, 
-                          Temperature=[10, 100], FWHM=[1.1, 1.2])
-        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, ws1, wschi, wsmag], MaxIterations=100)
-        fit.fit()
-        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
-        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
-        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
-        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
-        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
-
     def test_CrystalFieldFit(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -1596,6 +1539,63 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         self.assertTrue(np.all(out1 / y1 > 1.49999999999))
         self.assertTrue(np.all(out1 / y1 < 1.50000000001))
+
+    def test_CrystalFieldFit_physical_properties(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544, 
+                              Temperature=[10, 100], FWHM=[1.1, 1.2])
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
+        wscv = makeWorkspace(*origin.getHeatCapacity())
+        wschi = makeWorkspace(*origin.getSusceptibility(Hdir='powder'))
+        wsmag = makeWorkspace(*origin.getMagneticMoment(Hdir=[0,1,0]))
+        wsmom = makeWorkspace(*origin.getMagneticMoment(H=100, T=np.linspace(1,300,300), Unit='cgs'))
+
+        # Fits single physical properties dataset
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
+        cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder')
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=wschi, MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+        
+        # Fits multiple physical properties
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
+        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[wschi, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
+        # Fits one INS spectrum and one physical property
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12, Temperature=10, FWHM=1.1)
+        cf.PhysicalProperty = PhysicalProperties('M(H)',Hdir=[0,1,0])
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
+        # Fits multiple INS spectra and multiple physical properties
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12, 
+                          Temperature=[10, 100], FWHM=[1.1, 1.2])
+        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, ws1, wschi, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
 
 
 if __name__ == "__main__":

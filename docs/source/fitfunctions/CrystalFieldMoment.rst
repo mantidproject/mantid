@@ -44,7 +44,7 @@ The "data" here is generated from the function itself.
 
 The `x`-axis is the temperature in Kelvin, and the magnetic moment (`y`-axis) is in Am\ :sup:`2`\ /mol (SI units), and the "measurement" was done with a field of 0.01 Tesla along the [110] direction of the crystal field (not necessarily the crystallographic [110] direction).
 
-.. code::
+.. code:: ExampleCrystalFieldMoment
 
     import numpy as np
     
@@ -69,6 +69,26 @@ The `x`-axis is the temperature in Kelvin, and the magnetic moment (`y`-axis) is
     # (set MaxIterations=0 to see the starting point)
     Fit(fun, 'data', WorkspaceIndex=1, Output='fit',MaxIterations=100, CostFunction='Unweighted least squares')
     # Using Unweighted least squares fit because the data has no errors.
+
+    # Extract fitted parameters
+    parws = mtd['fit_Parameters']
+    for i in range(parws.rowCount()):
+        row = parws.row(i)
+        if row['Value'] != 0:
+            print "%7s = % 7.5g" % (row['Name'], row['Value'])
+
+.. testcleanup:: ExampleCrystalFieldMoment
+
+Output:
+
+.. testoutput:: ExampleCrystalFieldMoment
+
+        B20 =  0.37745
+        B22 =  0.016732
+        B40 = -0.032093
+        B42 = -0.11298
+        B44 = -0.12685
+    Cost function value =  9.7067e-18
 
 .. attributes::
 

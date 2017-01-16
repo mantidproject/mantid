@@ -37,7 +37,7 @@ using it with this function.
 
 The `x`-axis is given in Kelvin, and the heat capacity (`y`-axis) is in Joules per mole-Kelvin (Jmol\ :sup:`-1`\ K\ :sup:`-1`).
 
-.. code::
+.. testcode:: ExampleCrystalFieldHeatCapacity
 
     import numpy as np
 
@@ -60,6 +60,26 @@ The `x`-axis is given in Kelvin, and the heat capacity (`y`-axis) is in Joules p
     # (set MaxIterations=0 to see the starting point)
     Fit(fun, 'data', WorkspaceIndex=1, Output='fit',MaxIterations=100, CostFunction='Unweighted least squares')
     # Using Unweighted least squares fit because the data has no errors.
+
+    # Extract fitted parameters
+    parws = mtd['fit_Parameters']
+    for i in range(parws.rowCount()):
+        row = parws.row(i)
+        if row['Value'] != 0:
+            print "%7s = % 7.5g" % (row['Name'], row['Value'])
+
+.. testcleanup:: ExampleCrystalFieldHeatCapacity
+
+Output:
+
+.. testoutput:: ExampleCrystalFieldHeatCapacity
+
+        B20 =  0.40709
+        B22 =  0.020272
+        B40 = -0.031454
+        B42 = -0.10724
+        B44 = -0.1314
+    Cost function value =  4.4642e-15
 
 .. attributes::
 

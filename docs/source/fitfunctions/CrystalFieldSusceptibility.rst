@@ -48,7 +48,7 @@ The "data" here is generated from the function itself, for a field along the [11
 
 The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs units of m\ :sup:`3`\ /mol (==emu/mol).
 
-.. code::
+.. code:: ExampleCrystalFieldSusceptibility
 
     import numpy as np
 
@@ -73,6 +73,26 @@ The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs uni
     # (set MaxIterations=0 to see the starting point)
     Fit(fun, 'data', WorkspaceIndex=1, Output='fit',MaxIterations=100, CostFunction='Unweighted least squares')
     # Using Unweighted least squares fit because the data has no errors.
+
+    # Extract fitted parameters
+    parws = mtd['fit_Parameters']
+    for i in range(parws.rowCount()):
+        row = parws.row(i)
+        if row['Value'] != 0:
+            print "%7s = % 7.5g" % (row['Name'], row['Value'])
+
+.. testcleanup:: ExampleCrystalFieldSusceptibility
+
+Output:
+
+.. testoutput:: ExampleCrystalFieldSusceptibility
+
+        B20 =  0.37737
+        B22 =  0.039788
+        B40 = -0.031787
+        B42 = -0.11611
+        B44 = -0.12544
+    Cost function value =  1.0921e-14
 
 .. attributes::
 

@@ -46,7 +46,7 @@ The "data" here is generated from the function itself.
 
 The `x`-axis is given in Tesla, and the magnetisation (`y`-axis) is in bohr magnetons per magnetic ion (:math:`\mu_B`/ion).
 
-.. code::
+.. code:: ExampleCrystalFieldMagnetisation
 
     import numpy as np
     
@@ -70,6 +70,26 @@ The `x`-axis is given in Tesla, and the magnetisation (`y`-axis) is in bohr magn
     # (set MaxIterations=0 to see the starting point)
     Fit(fun, 'data', WorkspaceIndex=1, Output='fit',MaxIterations=100, CostFunction='Unweighted least squares')
     # Using Unweighted least squares fit because the data has no errors.
+
+    # Extract fitted parameters
+    parws = mtd['fit_Parameters']
+    for i in range(parws.rowCount()):
+        row = parws.row(i)
+        if row['Value'] != 0:
+            print "%7s = % 7.5g" % (row['Name'], row['Value'])
+
+.. testcleanup:: ExampleCrystalFieldMagnetisation
+
+Output:
+
+.. testoutput:: ExampleCrystalFieldMagnetisation
+
+        B20 =  0.39541
+        B22 =  0.030001
+        B40 = -0.029841
+        B42 = -0.11611
+        B44 = -0.1481
+    Cost function value =  1.2987e-14
 
 .. attributes::
 
