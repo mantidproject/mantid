@@ -1,3 +1,4 @@
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/System.h"
@@ -18,6 +19,7 @@ ISpectrum::ISpectrum(const specnum_t specNo) : m_specNo(specNo) {}
 void ISpectrum::copyInfoFrom(const ISpectrum &other) {
   m_specNo = other.m_specNo;
   detectorIDs = other.detectorIDs;
+  updateExperimentInfo();
 }
 
 /**
@@ -42,6 +44,7 @@ const MantidVec &ISpectrum::readE() const { return this->dataE(); }
  */
 void ISpectrum::addDetectorID(const detid_t detID) {
   this->detectorIDs.insert(detID);
+  updateExperimentInfo();
 }
 
 /** Add a set of detector IDs to the set of detector IDs
@@ -50,6 +53,7 @@ void ISpectrum::addDetectorID(const detid_t detID) {
  */
 void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
+  updateExperimentInfo();
 }
 
 /** Add a vector of detector IDs to the set of detector IDs
@@ -58,6 +62,7 @@ void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
  */
 void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
+  updateExperimentInfo();
 }
 
 /** Clear the list of detector IDs, then add one.
@@ -67,6 +72,7 @@ void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
 void ISpectrum::setDetectorID(const detid_t detID) {
   this->detectorIDs.clear();
   this->detectorIDs.insert(detID);
+  updateExperimentInfo();
 }
 
 /** Set the detector IDs to be the set given.
@@ -75,6 +81,7 @@ void ISpectrum::setDetectorID(const detid_t detID) {
  */
 void ISpectrum::setDetectorIDs(const std::set<detid_t> &detIDs) {
   detectorIDs = detIDs;
+  updateExperimentInfo();
 }
 
 /** Set the detector IDs to be the set given (move version).
@@ -83,6 +90,7 @@ void ISpectrum::setDetectorIDs(const std::set<detid_t> &detIDs) {
  */
 void ISpectrum::setDetectorIDs(std::set<detid_t> &&detIDs) {
   detectorIDs = std::move(detIDs);
+  updateExperimentInfo();
 }
 
 /** Return true if the given detector ID is in the list for this ISpectrum */
@@ -98,7 +106,10 @@ const std::set<detid_t> &ISpectrum::getDetectorIDs() const {
 
 /** Clear the detector IDs set.
  */
-void ISpectrum::clearDetectorIDs() { this->detectorIDs.clear(); }
+void ISpectrum::clearDetectorIDs() {
+  this->detectorIDs.clear();
+  updateExperimentInfo();
+}
 
 /** Get a mutable reference to the detector IDs set.
  */
@@ -121,6 +132,17 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
  * Resets the hasDx flag
  */
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
+
+void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo,
+                                  const size_t index) {
+  m_experimentInfo = experimentInfo;
+  m_index = index;
+}
+
+void ISpectrum::updateExperimentInfo() const {
+  if (m_experimentInfo)
+    m_experimentInfo->updatedCachedDetectorGrouping(m_index, detectorIDs);
+}
 
 } // namespace Mantid
 } // namespace API

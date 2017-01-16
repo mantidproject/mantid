@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace API {
+class ExperimentInfo;
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
  * in particular:
@@ -240,6 +241,8 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
+  void setExperimentInfo(ExperimentInfo *experimentInfo, const size_t index);
+
 protected:
   virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
   virtual void checkWorksWithPoints() const {}
@@ -255,6 +258,10 @@ protected:
 private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;
   virtual HistogramData::Histogram &mutableHistogramRef() = 0;
+
+  void updateExperimentInfo() const;
+  ExperimentInfo *m_experimentInfo{nullptr};
+  size_t m_index;
 
   /// The spectrum number of this spectrum
   specnum_t m_specNo{0};

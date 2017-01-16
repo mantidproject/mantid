@@ -436,6 +436,9 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
   cacheDefaultDetectorGrouping();
 }
 
+void ExperimentInfo::updatedCachedDetectorGrouping(
+    const size_t index, const std::set<detid_t> &detIDs) {}
+
 /**
  * Set an object describing the moderator properties and take ownership
  * @param source :: A pointer to an object describing the source. Ownership is

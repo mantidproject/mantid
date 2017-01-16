@@ -77,6 +77,9 @@ public:
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
 
+  void updatedCachedDetectorGrouping(const size_t index,
+                                     const std::set<detid_t> &detIDs);
+
   /// Set an object describing the source properties and take ownership
   void setModeratorModel(ModeratorModel *source);
   /// Returns a reference to the source properties object
