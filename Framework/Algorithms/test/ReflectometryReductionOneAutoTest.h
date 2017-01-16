@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ReflectometryReductionOneAuto;

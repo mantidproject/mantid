@@ -3,10 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -82,6 +83,7 @@ public:
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ProcessingInstructions", "0");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -95,6 +97,7 @@ public:
     alg.setProperty("WavelengthMax", 1.0);
     alg.setProperty("ProcessingInstructions", "0");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -110,6 +113,7 @@ public:
     alg.setProperty("MonitorBackgroundWavelengthMin", 3.0);
     alg.setProperty("MonitorBackgroundWavelengthMax", 0.5);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -125,6 +129,7 @@ public:
     alg.setProperty("MonitorIntegrationWavelengthMin", 15.0);
     alg.setProperty("MonitorIntegrationWavelengthMax", 1.5);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -141,6 +146,7 @@ public:
     alg.setProperty("MonitorIntegrationWavelengthMin", 1.0);
     alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -234,6 +240,7 @@ public:
     alg.setProperty("ThetaIn", 0.7);
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("OutputWorkspace", "IvsQ");
+    alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
@@ -274,51 +281,6 @@ public:
                     std::tan(0.7 * 2 * M_PI / 180), 1e-4);
   }
 
-  void test_correct_detector_position_OFFSPEC_LinearDetector() {
-    // Histograms in this run correspond to 'LinearDetector' component
-    auto offspec = loadRun("OFFSPEC00004622.raw");
-
-    ReflectometryReductionOneAuto2 alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", offspec);
-    alg.setProperty("ThetaIn", 0.64);
-    alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
-    alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("OutputWorkspace", "IvsQ");
-    alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
-
-    // Compare instrument components before and after
-    auto instIn = offspec->getInstrument();
-    auto instOut = out->getInstrument();
-
-    // The following components should not have been moved
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor1")->getPos(),
-                     instOut->getComponentByName("monitor1")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor2")->getPos(),
-                     instOut->getComponentByName("monitor2")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("monitor3")->getPos(),
-                     instOut->getComponentByName("monitor3")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("point-detector")->getPos(),
-                     instOut->getComponentByName("point-detector")->getPos());
-    TS_ASSERT_EQUALS(instIn->getComponentByName("WLSFDetector")->getPos(),
-                     instOut->getComponentByName("WLSFDetector")->getPos());
-
-    // Only 'LinearDetector' should have been moved vertically (along Y)
-
-    auto detectorIn = instIn->getComponentByName("LinearDetector")->getPos();
-    auto detectorOut = instOut->getComponentByName("LinearDetector")->getPos();
-
-    TS_ASSERT_EQUALS(detectorIn.X(), detectorOut.X());
-    TS_ASSERT_EQUALS(detectorIn.Z(), detectorOut.Z());
-    TS_ASSERT_DIFFERS(detectorIn.Y(), detectorOut.Y());
-    TS_ASSERT_DELTA(detectorOut.Y() /
-                        (detectorOut.Z() - instOut->getSample()->getPos().Z()),
-                    std::tan(0.64 * 2 * M_PI / 180), 1e-4);
-  }
-
   void test_correct_detector_position_POLREF() {
     // Histograms in this run correspond to 'OSMOND' component
     auto polref = loadRun("POLREF00014966.raw");
@@ -330,7 +292,9 @@ public:
     alg.setProperty("ThetaIn", 1.5);
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
     alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("OutputWorkspace", "IvsQ");
+    alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
@@ -373,7 +337,9 @@ public:
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 0.25);
     alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("OutputWorkspace", "IvsQ");
+    alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
@@ -430,91 +396,6 @@ public:
     // Output workspace
     TS_ASSERT_EQUALS(sum->blocksize(), 20);
     TS_ASSERT_DELTA(sum->y(0)[0], 4 * 2, 1e-6);
-  }
-
-  void test_monitors_not_integrated_with_polynomial_corrections() {
-
-    // I need to change some values in the monitor spectrum to get reasonable
-    // numbers
-    auto inputWS = m_TOF;
-    auto &Y = inputWS->mutableY(0);
-    std::fill(Y.begin(), Y.begin() + 2, 1.0);
-
-    ReflectometryReductionOneAuto2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("WavelengthMin", 0.0);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("I0MonitorIndex", "0");
-    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
-    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
-    alg.setProperty("NormalizeByIntegratedMonitors", "1");
-    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
-    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
-    alg.setProperty("CorrectionAlgorithm", "PolynomialCorrection");
-    alg.setProperty("Polynomial", "1, 0, 0");
-    alg.setPropertyValue("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
-
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
-    // Expected values are 2.4996 = 3.15301 (detectors) / 1.26139 (monitors)
-    TSM_ASSERT_DELTA(
-        "With a correction algorithm, monitors should not be integrated",
-        outLam->y(0)[2], 2.4996, 0.0001);
-    TSM_ASSERT_DELTA(
-        "With a correction algorithm, monitors should not be integrated",
-        outLam->y(0)[4], 2.4996, 0.0001);
-    TSM_ASSERT_DELTA(
-        "With a correction algorithm, monitors should not be integrated",
-        outLam->y(0)[7], 2.4996, 0.0001);
-  }
-
-  void test_monitors_not_integrated_with_exponential_corrections() {
-
-    // I need to change some values in the monitor spectrum to get reasonable
-    // numbers
-    auto inputWS = m_TOF;
-    auto &Y = inputWS->mutableY(0);
-    std::fill(Y.begin(), Y.begin() + 2, 1.0);
-
-    ReflectometryReductionOneAuto2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("WavelengthMin", 0.0);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("I0MonitorIndex", "0");
-    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
-    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
-    alg.setProperty("NormalizeByIntegratedMonitors", "1");
-    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
-    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
-    alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
-    alg.setProperty("C0", 1.0);
-    alg.setProperty("C1", 0.0);
-    alg.setPropertyValue("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
-
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
-    // Expected values are 2.4996 = 3.15301 (detectors) / 1.26139 (monitors)
-    TSM_ASSERT_DELTA(
-        "With a correction algorithm, monitors should not be integrated",
-        outLam->y(0)[2], 2.4996, 0.0001);
-    TSM_ASSERT_DELTA(
-        "With a correction algorithm, monitors should not be integrated",
-        outLam->y(0)[4], 2.4996, 0.0001);
-    TSM_ASSERT_DELTA(
-        "With a correction algorithm, monitors should not be integrated",
-        outLam->y(0)[7], 2.4996, 0.0001);
   }
 };
 
