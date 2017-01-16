@@ -600,7 +600,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // Constraint
     double lowerb = lowerbounds[i];
     double upperb = upperbounds[i];
-    auto newconstraint = std::make_unique<BoundaryConstraint>(
+    auto newconstraint = Kernel::make_unique<BoundaryConstraint>(
         func4fit.get(), parname, lowerb, upperb);
     func4fit->addConstraint(std::move(newconstraint));
   }

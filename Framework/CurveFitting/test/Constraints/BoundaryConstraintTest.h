@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -13,6 +14,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Expression.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -140,7 +142,7 @@ public:
     Gaussian gaus;
     gaus.initialize();
     {
-      auto bc = std::make_unique<BoundaryConstraint>();
+      auto bc = Kernel::make_unique<BoundaryConstraint>();
       Expression expr;
       expr.parse("Sigma<20");
       bc->initialize(&gaus, expr, false);
@@ -169,13 +171,13 @@ public:
     Gaussian gaus;
     gaus.initialize();
 
-    auto bcSigma = std::make_unique<BoundaryConstraint>();
+    auto bcSigma = Kernel::make_unique<BoundaryConstraint>();
     Expression exprSigma;
     exprSigma.parse("Sigma<20");
     bcSigma->initialize(&gaus, exprSigma, false);
     gaus.addConstraint(std::move(bcSigma));
 
-    auto bcHeight = std::make_unique<BoundaryConstraint>();
+    auto bcHeight = Kernel::make_unique<BoundaryConstraint>();
     Expression exprHeight;
     exprHeight.parse("1.3<Height<3.4");
     bcHeight->initialize(&gaus, exprHeight, false);

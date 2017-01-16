@@ -23,6 +23,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -111,7 +112,7 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  */
 void IFunction::tie(const std::string &parName, const std::string &expr,
                     bool isDefault) {
-  auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
+  auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
   this->fix(getParameterIndex(*ti));
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());

@@ -317,6 +317,10 @@ public:
         m_chiSquared(0.0) {}
   /// Virtual destructor
   virtual ~IFunction();
+  /// No copying
+  IFunction(const IFunction &) = delete;
+  /// No copying
+  IFunction &operator=(const IFunction &) = delete;
 
   /// Returns the function's name
   virtual std::string name() const = 0;
@@ -582,10 +586,6 @@ protected:
   Kernel::ProgressBase *m_progReporter;
 
 private:
-  /// No copying
-  IFunction(const IFunction &) = delete;
-  /// No copying
-  IFunction &operator=(const IFunction &) = delete;
   /// The declared attributes
   std::map<std::string, API::IFunction::Attribute> m_attrs;
   /// The covariance matrix of the fitting parameters

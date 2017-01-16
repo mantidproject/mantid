@@ -7,6 +7,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -285,7 +286,7 @@ void PawleyParameterFunction::createLatticeSystemParameters(
 void PawleyParameterFunction::addLengthConstraint(
     const std::string &parameterName) {
   auto cellEdgeConstraint =
-      std::make_unique<BoundaryConstraint>(this, parameterName, 0.0, true);
+      Kernel::make_unique<BoundaryConstraint>(this, parameterName, 0.0, true);
   cellEdgeConstraint->setPenaltyFactor(1e12);
   addConstraint(std::move(cellEdgeConstraint));
 }
@@ -293,7 +294,7 @@ void PawleyParameterFunction::addLengthConstraint(
 /// Adds a default constraint so cell angles are in the range 0 to 180.
 void PawleyParameterFunction::addAngleConstraint(
     const std::string &parameterName) {
-  auto cellAngleConstraint = std::make_unique<BoundaryConstraint>(
+  auto cellAngleConstraint = Kernel::make_unique<BoundaryConstraint>(
       this, parameterName, 0.0, 180.0, true);
   cellAngleConstraint->setPenaltyFactor(1e12);
   addConstraint(std::move(cellAngleConstraint));

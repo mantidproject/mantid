@@ -6,6 +6,7 @@
 // Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/make_unique.h"
 // third party library headers
 #include <boost/math/special_functions/bessel.hpp>
 // standard library headers
@@ -39,11 +40,11 @@ ElasticIsoRotDiff::ElasticIsoRotDiff() {
  */
 void ElasticIsoRotDiff::init() {
   // Ensure positive values for Height and Radius
-  auto HeightConstraint = std::make_unique<BConstraint>(
+  auto HeightConstraint = Kernel::make_unique<BConstraint>(
       this, "Height", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(HeightConstraint));
 
-  auto RadiusConstraint = std::make_unique<BConstraint>(
+  auto RadiusConstraint = Kernel::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
 }

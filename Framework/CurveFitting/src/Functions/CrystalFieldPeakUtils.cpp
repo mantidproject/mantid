@@ -4,6 +4,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <math.h>
@@ -61,7 +62,7 @@ void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
       return;
     }
     peak.removeConstraint("FWHM");
-    auto constraint = std::make_unique<Constraints::BoundaryConstraint>(
+    auto constraint = Kernel::make_unique<Constraints::BoundaryConstraint>(
         &peak, "FWHM", lowerBound, upperBound);
     peak.addConstraint(std::move(constraint));
   } else if (peak.name() == "Gaussian") {
@@ -73,7 +74,7 @@ void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
     lowerBound /= WIDTH_TO_SIGMA;
     upperBound /= WIDTH_TO_SIGMA;
     peak.removeConstraint("Sigma");
-    auto constraint = std::make_unique<Constraints::BoundaryConstraint>(
+    auto constraint = Kernel::make_unique<Constraints::BoundaryConstraint>(
         &peak, "Sigma", lowerBound, upperBound);
     peak.addConstraint(std::move(constraint));
   } else {

@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
 // 3rd party library headers (N/A)
 // standard library headers
@@ -51,15 +52,15 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
  */
 void InelasticDiffRotDiscreteCircle::init() {
   // Ensure positive values for Intensity, Radius, and decay
-  auto IntensityConstraint = std::make_unique<BConstraint>(
+  auto IntensityConstraint = Kernel::make_unique<BConstraint>(
       this, "Intensity", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(IntensityConstraint));
 
-  auto RadiusConstraint = std::make_unique<BConstraint>(
+  auto RadiusConstraint = Kernel::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
 
-  auto DecayConstraint = std::make_unique<BConstraint>(
+  auto DecayConstraint = Kernel::make_unique<BConstraint>(
       this, "Decay", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(DecayConstraint));
 }

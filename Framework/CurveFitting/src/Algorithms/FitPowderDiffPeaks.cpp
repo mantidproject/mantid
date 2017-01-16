@@ -1254,18 +1254,18 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // a) Peak centre
   double peakcentreleftbound = peak->centre() - peak->fwhm();
   double peakcentrerightbound = peak->centre() + peak->fwhm();
-  auto x0bc = std::make_unique<BoundaryConstraint>(
+  auto x0bc = Kernel::make_unique<BoundaryConstraint>(
       peak.get(), "X0", peakcentreleftbound, peakcentrerightbound);
   peak->addConstraint(std::move(x0bc));
 
   // b) A
   auto abc =
-      std::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
+      Kernel::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
   peak->addConstraint(std::move(abc));
 
   // c) B
   auto bbc =
-      std::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
+      Kernel::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
   peak->addConstraint(std::move(bbc));
 
   // d) Guessed height
@@ -1522,7 +1522,7 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
     double tof_h = peakfunction->centre();
     double centerleftend = tof_h - guessedfwhm * 3.0;
     double centerrightend = tof_h + guessedfwhm * 3.0;
-    auto centerbound = std::make_unique<BoundaryConstraint>(
+    auto centerbound = Kernel::make_unique<BoundaryConstraint>(
         peakfunction.get(), "X0", centerleftend, centerrightend, false);
     peakfunction->addConstraint(std::move(centerbound));
 
@@ -1531,15 +1531,15 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
   }
 
   // A > 0, B > 0, S > 0
-  auto abound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "A",
+  auto abound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "A",
                                                      0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(abound));
 
-  auto bbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "B",
+  auto bbound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "B",
                                                      0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(bbound));
 
-  auto sbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "S",
+  auto sbound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "S",
                                                      0.0001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(sbound));
 
@@ -1810,7 +1810,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // b) Constraint
   double centerleftend = in_center - leftfwhm * 0.5;
   double centerrightend = in_center + rightfwhm * 0.5;
-  auto centerbound = std::make_unique<BoundaryConstraint>(
+  auto centerbound = Kernel::make_unique<BoundaryConstraint>(
       gaussianpeak.get(), "PeakCentre", centerleftend, centerrightend, false);
   gaussianpeak->addConstraint(std::move(centerbound));
 
@@ -2116,7 +2116,7 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     double leftcentrebound = centre - 0.5 * fwhm;
     double rightcentrebound = centre + 0.5 * fwhm;
 
-    auto bc = std::make_unique<BoundaryConstraint>(
+    auto bc = Kernel::make_unique<BoundaryConstraint>(
         thispeak.get(), "X0", leftcentrebound, rightcentrebound, false);
     thispeak->addConstraint(std::move(bc));
   }
