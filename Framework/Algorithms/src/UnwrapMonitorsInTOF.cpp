@@ -340,8 +340,9 @@ void UnwrapMonitorsInTOF::exec() {
         getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
     // Get the input histogram
     auto inputHistogram = inputWorkspace->histogram(workspaceIndex);
-    auto spectrumIsHistogramData = inputHistogram.xMode() ==
-                              Mantid::HistogramData::Histogram::XMode::BinEdges;
+    auto spectrumIsHistogramData =
+        inputHistogram.xMode() ==
+        Mantid::HistogramData::Histogram::XMode::BinEdges;
     if (spectrumIsHistogramData) {
       Mantid::HistogramData::BinEdges binEdges(points);
       Mantid::HistogramData::Histogram histogram(binEdges, counts);
