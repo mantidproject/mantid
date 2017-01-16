@@ -12,15 +12,16 @@ from mantid.kernel import (CompositeValidator, Direct, Direction,
                            IntMandatoryValidator, Property, PropertyCriterion,
                            StringArrayProperty, StringListValidator,
                            UnitConversion)
-from mantid.simpleapi import (AddSampleLog, BinWidthAtX,
-                              CalculateFlatBackground, ClearMaskFlag,
-                              CloneWorkspace, ComputeCalibrationCoefVan,
-                              ConvertSpectrumAxis, ConvertToConstantL2,
-                              ConvertUnits, CorrectKiKf, CorrectTOFAxis,
-                              CreateEmptyTableWorkspace,
-                              CreateSingleValuedWorkspace, DeleteWorkspace,
+from mantid.simpleapi import (AddSampleLog, ApplyPaalmanPingsCorrection,
+                              BinWidthAtX, CalculateFlatBackground,
+                              ClearMaskFlag, CloneWorkspace,
+                              ComputeCalibrationCoefVan, ConvertSpectrumAxis,
+                              ConvertToConstantL2, ConvertUnits, CorrectKiKf,
+                              CorrectTOFAxis, CreateEmptyTableWorkspace,
+                              CreateSingleValuedWorkspace, CylinderPaalmanPingsCorrection2, DeleteWorkspace,
                               DetectorEfficiencyCorUser, Divide,
-                              ExtractMonitors, FindEPP, GetEiMonDet,
+                              ExtractMonitors, FindEPP,
+                              FlatPlatePaalmanPingsCorrection, GetEiMonDet,
                               GroupDetectors, Integration, Load, MaskDetectors,
                               MedianBinWidth, MedianDetectorTest, MergeRuns,
                               Minus, Multiply, NormaliseToMonitor, Plus, Rebin,
@@ -45,17 +46,27 @@ _NORM_METHOD_MON = 'Monitor'
 _NORM_METHOD_OFF = 'No Normalisation'
 _NORM_METHOD_TIME = 'Acquisition Time'
 
+# TODO Alphabetic order.
 _SUBALG_LOGGING_OFF = 'No Subalgorithm Logging'
 _SUBALG_LOGGING_ON = 'Allow Subalgorithm Logging'
 
+# TODO Beam dimension apply only to cylinder geometry.
+_PROP_BEAM_HEIGHT = 'BeamHeight'
+_PROP_BEAM_WIDTH = 'BeamWidth'
 _PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgDiagnosticsHighThreshold'
 _PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgDiagnosticsLowThreshold'
 _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgDiagnosticsErrorThreshold'
 _PROP_CD_WS = 'CadmiumWorkspace'
 _PROP_CLEANUP_MODE = 'Cleanup'
+_PROP_CONTAINER_BACK_THICKNESS = 'ContainerBackThickness'
+_PROP_CONTAINER_CHEMICAL_FORMULA = 'ContainerChemicalFormula'
+_PROP_CONTAINER_FRONT_THICKNESS = 'ContainerFronThickness'
+_PROP_CONTAINER_NUMBER_DENSITY = 'ContainerNumberDensity'
+_PROP_CONTAINER_OUTER_RADIUS = 'ContainerOuterRadius'
 _PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 _PROP_DET_DIAGNOSTICS = 'Diagnostics'
 _PROP_DETS_AT_L2 = 'DetectorsAtL2'
+_PROP_EC_SCALING_FACTOR = 'EmptyContainerScalingFactor'
 _PROP_EC_WS = 'EmptyContainerWorkspace'
 _PROP_ELASTIC_BIN_INDEX = 'ElasticBinIndex'
 _PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER = 'ElasticPeakWidthInSigmas'
@@ -77,6 +88,8 @@ _PROP_OUTPUT_DIAGNOSTICS_REPORT_WS = 'OutputDiagnosticsReportWorkspace'
 _PROP_OUTPUT_FLAT_BKG_WS = 'OutputFlatBkgWorkspace'
 _PROP_OUTPUT_INCIDENT_ENERGY_WS = 'OutputIncidentEnergyWorkspace'
 _PROP_OUTPUT_MON_EPP_WS = 'OutputMonitorEPPWorkspace'
+_PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS = \
+    'OutputSelfShieldingCorrectionWorkspace'
 _PROP_OUTPUT_THETA_W_WS = 'OutputThetaDeltaEWorkspace'
 _PROP_OUTPUT_WS = 'OutputWorkspace'
 _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
@@ -88,22 +101,47 @@ _PROP_REBINNING_PARAMS_Q = 'QRebinningParams'
 _PROP_REBINNING_PARAMS_W = 'EnergyRebinningParams'
 _PROP_REDUCTION_TYPE = 'ReductionType'
 _PROP_REFERENCE_TOF_AXIS_WS = 'ReferenceTOFAxisWorkspace'
-_PROP_TRANSMISSION = 'Transmission'
+_PROP_SAMPLE_ANGLE = 'SampleAngle'
+_PROP_SAMPLE_CHEMICAL_FORMULA = 'SampleChemicalFormula'
+_PROP_SAMPLE_NUMBER_DENSITY = 'SampleNumberDensity'
+_PROP_SAMPLE_INNER_RADIUS = 'SampleInnerRadius'
+_PROP_SAMPLE_OUTER_RADIUS = 'SampleOuterRadius'
+_PROP_SAMPLE_SHAPE = 'SampleShape'
+_PROP_SAMPLE_THICKNESS = 'SampleThickness'
+_PROP_SELF_SHIELDING_CORRECTION = 'SelfShieldingCorrection'
+_PROP_SELF_SHIELDING_CORRECTION_WS = 'SelfShieldingCorrectionWorkspace'
+_PROP_SELF_SHIELDING_NUMBER_WAVELENGTHS = 'SelfShieldingNumberWavelengths'
+_PROP_SELF_SHIELDING_STEP_SIZE = 'SelfShieldingStepSize'
 _PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
 _PROP_USER_MASK = 'MaskedDetectors'
 _PROP_USER_MASK_COMPONENTS = 'MaskedComponents'
 _PROP_VANA_WS = 'VanadiumWorkspace'
 
+_PROPGROUP_BEAM = 'Incident neutron beam properties'
+_PROPGROUP_CONTAINER = 'Container Material Properties'
+_PROPGROUP_CYLINDER_CONTAINER = 'Cylindrical Container Properties'
+_PROPGROUP_DET_DIAGNOSTICS = 'Detector Diagnostics and Masking'
+_PROPGROUP_EC = 'Empty Container Subtraction'
+_PROPGROUP_FLAT_BKG = 'Flat Time-Independent Background'
+_PROPGROUP_OPTIONAL_OUTPUT = 'Optional Output'
 _PROPGROUP_REBINNING = 'Rebinning for SofQW'
+_PROPGROUP_SAMPLE = 'Sample Material Properties'
+_PROPGROUP_SLAB_CONTAINER = 'Flat Container Properties'
 _PROPGROUP_TOF_AXIS_CORRECTION = 'TOF Axis Correction for Elastic Channel'
 
 _REBIN_AUTO_ELASTIC_PEAK = 'Rebin to Bin Width at Elastic Peak'
 _REBIN_AUTO_MEDIAN_BIN_WIDTH = 'Rebin to Median Bin Width'
 _REBIN_MANUAL = 'Manual Rebinning'
 
-_REDUCTION_TYPE_EC_CD = 'Empty Container/Cadmium'
+_REDUCTION_TYPE_EC = 'Empty Container'
 _REDUCTION_TYPE_SAMPLE = 'Sample'
 _REDUCTION_TYPE_VANA = 'Vanadium'
+
+_SAMPLE_SHAPE_CYLINDER = 'Cylindrical Sample'
+_SAMPLE_SHAPE_SLAB = 'Flat Plate Sample'
+
+_SELF_SHIELDING_CORRECTION_OFF = 'No Self Shielding Correction'
+_SELF_SHIELDING_CORRECTION_ON = 'Apply Self Shielding Correction'
 
 _WS_CONTENT_DETS = 0
 _WS_CONTENT_MONS = 1
@@ -288,10 +326,11 @@ def _createDetectorGroups(ws):
 
 
 def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
-                                  reportWSName):
+                                  reportWSName, algorithmLogging):
     PLOT_TYPE_X = 1
     PLOT_TYPE_Y = 2
-    reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName)
+    reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName,
+                                         EnableLogging=algorithmLogging)
     reportWS.addColumn('int', 'WorkspaceIndex', PLOT_TYPE_X)
     reportWS.addColumn('double', 'ElasticIntensity', PLOT_TYPE_Y)
     reportWS.addColumn('double', 'FlatBkg', PLOT_TYPE_Y)
@@ -507,8 +546,6 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                            SignificanceTest=peakSettings.significanceTest,
                            LowThreshold=peakSettings.lowThreshold,
                            HighThreshold=peakSettings.highThreshold,
-                           RangeLower=integrationBegin,
-                           RangeUpper=integrationEnd,
                            EnableLogging=algorithmLogging)
     # 2. Diagnose backgrounds.
     noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
@@ -534,7 +571,8 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
         _createDiagnosticsReportTable(solidAngleCorrectedElasticPeaksWS,
                                       bkgWS,
                                       diagnosticsWS,
-                                      reportWSName)
+                                      reportWSName,
+                                      algorithmLogging)
     wsCleanup.cleanup(constantL2WS)
     wsCleanup.cleanup(elasticPeakDiagnostics)
     wsCleanup.cleanup(noisyBkgDiagnostics)
@@ -629,6 +667,37 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
     return calibratedWS
 
 
+def _applySelfShieldingCorrections(ws, ecWS, ecScaling, correctionsWS, wsNames,
+                                   algorithmLogging):
+    '''
+    Applies a self-shielding corrections workspace.
+    '''
+    correctedWSName = wsNames.withSuffix('self_shielding_applied')
+    correctedWS = ApplyPaalmanPingsCorrection(
+        SampleWorkspace=ws,
+        CorrectionsWorkspace=correctionsWS,
+        CanWorkspace=ecWS,
+        CanScaleFactor=ecScaling,
+        OutputWorkspace=correctedWSName,
+        EnableLogging=algorithmLogging)
+    return correctedWS
+
+
+def _applySelfShieldingCorrectionsNoEC(ws, correctionsWS, wsNames,
+                                       algorithmLogging):
+    '''
+    Applies a self-shielding corrections workspace without subtracting an empty
+    container.
+    '''
+    correctedWSName = wsNames.withSuffix('self_shielding_applied')
+    correctedWS = ApplyPaalmanPingsCorrection(
+        SampleWorkspace=ws,
+        CorrectionsWorkspace=correctionsWS,
+        OutputWorkspace=correctedWSName,
+        EnableLogging=algorithmLogging)
+    return correctedWS
+
+
 def _normalizeToMonitor(ws, monWS, monEPPWS, sigmaMultiplier, monIndex,
                         wsNames, wsCleanup, algorithmLogging):
     '''
@@ -674,59 +743,140 @@ def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
     return normalizedWS
 
 
-def _subtractECWithCd(ws, ecWS, cdWS, transmission, wsNames, wsCleanup,
-                      algorithmLogging):
+def _selfShieldingCorrectionsCylinder(ws, ecWS, sampleChemicalFormula,
+                                      sampleNumberDensity,
+                                      containerChemicalFormula,
+                                      containerNumberDensity, sampleInnerR,
+                                      sampleOuterR, containerOuterR, beamWidth,
+                                      beamHeight, stepSize, numberWavelengths,
+                                      wsNames, algorithmLogging):
     '''
-    Subtracts cadmium corrected emtpy container.
+    Calculates the self-shielding corrections workspace for cylindrical sample.
     '''
-    # out = (in - Cd) / transmission - (EC - Cd)
-    transmissionWSName = wsNames.withSuffix('transmission')
-    transmissionWS = \
-        CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
-                                    DataValue=transmission,
-                                    EnableLogging=algorithmLogging)
-    cdSubtractedECWSName = wsNames.withSuffix('Cd_subtracted_EC')
-    cdSubtractedECWS = Minus(LHSWorkspace=ecWS,
-                             RHSWorkspace=cdWS,
-                             OutputWorkspace=cdSubtractedECWSName,
-                             EnableLogging=algorithmLogging)
-    cdSubtractedWSName = wsNames.withSuffix('Cd_subtracted')
-    cdSubtractedWS = Minus(LHSWorkspace=ws,
-                           RHSWorkspace=cdWS,
-                           OutputWorkspace=cdSubtractedWSName,
-                           EnableLogging=algorithmLogging)
-    correctedCdSubtractedWSName = \
-        wsNames.withSuffix('transmission_corrected_Cd_subtracted')
-    correctedCdSubtractedWS = \
-        Divide(LHSWorkspace=cdSubtractedWS,
-               RHSWorkspace=transmissionWS,
-               OutputWorkspace=correctedCdSubtractedWSName,
-               EnableLogging=algorithmLogging)
-    ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
-    ecSubtractedWS = Minus(LHSWorkspace=correctedCdSubtractedWS,
-                           RHSWorkspace=cdSubtractedECWS,
-                           OutputWorkspace=ecSubtractedWSName,
-                           EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(cdSubtractedECWS,
-                      cdSubtractedWS,
-                      correctedCdSubtractedWS,
-                      EnableLogging=algorithmLogging)
-    return ecSubtractedWS
+    from mantid.simpleapi import CylinderPaalmanPingsCorrection
+    selfShieldingWSName = \
+        wsNames.withSuffix('self_shielding_corrections_with_ec')
+    selfShieldingWS = CylinderPaalmanPingsCorrection(
+        SampleWorkspace=ws,
+        SampleChemicalFormula=sampleChemicalFormula,
+        SampleDensityType='Number Density',
+        SampleDensity=sampleNumberDensity,
+        SampleInnerRadius=sampleInnerR,
+        SampleOuterRadius=sampleOuterR,
+        CanWorkspace=ecWS,
+        CanChemicalFormula=containerChemicalFormula,
+        CanDensityType='Number Density',
+        CanDensity=containerNumberDensity,
+        CanOuterRadius=containerOuterR,
+        BeamHeight=beamHeight,
+        BeamWidth=beamWidth,
+        StepSize=stepSize,
+        NumberWavelengths=numberWavelengths,
+        Emode='Direct',
+        OutputWorkspace=selfShieldingWSName,
+        EnableLogging=algorithmLogging)
+    return selfShieldingWS
 
 
-def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup, algorithmLogging):
+def _selfShieldingCorrectionsCylinderNoEC(ws, sampleChemicalFormula,
+                                          sampleNumberDensity,
+                                          sampleInnerR, sampleOuterR,
+                                          beamWidth, beamHeight, stepSize,
+                                          numberWavelengths, wsNames,
+                                          algorithmLogging):
+    '''
+    Calculates the self-shielding corrections workspace for cylindrical sample
+    without using empty container data.
+    '''
+    from mantid.simpleapi import CylinderPaalmanPingsCorrection
+    selfShieldingWSName = \
+        wsNames.withSuffix('self_shielding_corrections')
+    selfShieldingWS = CylinderPaalmanPingsCorrection(
+        SampleWorkspace=ws,
+        SampleChemicalFormula=sampleChemicalFormula,
+        SampleDensityType='Number Density',
+        SampleDensity=sampleNumberDensity,
+        SampleInnerRadius=sampleInnerR,
+        SampleOuterRadius=sampleOuterR,
+        BeamHeight=beamHeight,
+        BeamWidth=beamWidth,
+        StepSize=stepSize,
+        NumberWavelengths=numberWavelengths,
+        Emode='Direct',
+        OutputWorkspace=selfShieldingWSName,
+        EnableLogging=algorithmLogging)
+    return selfShieldingWS
+
+
+def _selfShieldingCorrectionsSlab(ws, ecWS, sampleChemicalFormula,
+                                  sampleNumberDensity,
+                                  containerChemicalFormula,
+                                  containerNumberDensity, sampleThickness,
+                                  sampleAngle, containerFrontThickness,
+                                  containerBackThickness, numberWavelengths,
+                                  wsNames, algorithmLogging):
+    '''
+    Calculates the self-shielding corrections workspace for flat plate sample.
+    '''
+    selfShieldingWSName = \
+        wsNames.withSuffix('self_shielding_corrections_with_ec')
+    selfShieldingWS = FlatPlatePaalmanPingsCorrection(
+        SampleWorkspace=ws,
+        SampleChemicalFormula=sampleChemicalFormula,
+        SampleDensityType='Number Density',
+        SampleDensity=sampleNumberDensity,
+        SampleThickness=sampleThickness,
+        SampleAngle=sampleAngle,
+        CanWorkspace=ecWS,
+        CanChemicalFormula=containerChemicalFormula,
+        CanDensityType='NumberDensity',
+        CanDensity=containerNumberDensity,
+        CanFrontThickness=containerFrontThickness,
+        CanBackThickness=containerBackThickness,
+        NumberWavelengths=numberWavelengths,
+        Emode='Direct',
+        OutputWorkspace=selfShieldingWSName,
+        EnableLogging=algorithmLogging)
+    return selfShieldingWS
+
+
+def _selfShieldingCorrectionsSlabNoEC(ws, sampleChemicalFormula,
+                                      sampleNumberDensity, sampleThickness,
+                                      sampleAngle, numberWavelengths, wsNames,
+                                      algorithmLogging):
+    '''
+    Calculates the self-shielding corrections workspace for flat plate sample
+    without using empty container data.
+    '''
+    selfShieldingWSName = \
+        wsNames.withSuffix('self_shielding_corrections')
+    selfShieldingWS = FlatPlatePaalmanPingsCorrection(
+        SampleWorkspace=ws,
+        SampleChemicalFormula=sampleChemicalFormula,
+        SampleDensityType='Number Density',
+        SampleDensity=sampleNumberDensity,
+        SampleThickness=sampleThickness,
+        SampleAngle=sampleAngle,
+        NumberWavelengths=numberWavelengths,
+        Emode='Direct',
+        OutputWorkspace=selfShieldingWSName,
+        EnableLogging=algorithmLogging)
+    return selfShieldingWS
+
+
+def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
     '''
     Subtracts empty container.
     '''
-    # out = in - transmission * EC
-    transmissionWSName = wsNames.withSuffix('transmission')
-    transmissionWS = \
-        CreateSingleValuedWorkspace(OutputWorkspace=transmissionWSName,
-                                    DataValue=transmission,
+    # out = in - ecScaling * EC
+    scalingWSName = wsNames.withSuffix('ecScaling')
+    scalingWS = \
+        CreateSingleValuedWorkspace(OutputWorkspace=scalingWSName,
+                                    DataValue=ecScaling,
                                     EnableLogging=algorithmLogging)
-    correctedECWSName = wsNames.withSuffix('transmission_corrected_EC')
+    correctedECWSName = wsNames.withSuffix('scaled_EC')
     correctedECWS = Multiply(LHSWorkspace=ecWS,
-                             RHSWorkspace=transmissionWS,
+                             RHSWorkspace=scalingWS,
                              OutputWorkspace=correctedECWSName,
                              EnableLogging=algorithmLogging)
     ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
@@ -734,7 +884,7 @@ def _subtractEC(ws, ecWS, transmission, wsNames, wsCleanup, algorithmLogging):
                            RHSWorkspace=correctedECWS,
                            OutputWorkspace=ecSubtractedWSName,
                            EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(transmissionWS)
+    wsCleanup.cleanup(scalingWS)
     wsCleanup.cleanup(correctedECWS)
     return ecSubtractedWS
 
@@ -823,14 +973,19 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  wsCleanup, subalgLogging)
 
         # Reduction for empty container and cadmium ends here.
-        if reductionType == _REDUCTION_TYPE_EC_CD:
+        if reductionType == _REDUCTION_TYPE_EC:
             self._finalize(mainWS, wsCleanup, report)
             return
 
         # Continuing with vanadium and sample reductions.
 
-        # Empty container subtraction, if requested.
-        mainWS = self._subtractEC(mainWS, wsNames, wsCleanup, subalgLogging)
+        # TODO EC is not corrected in simple manual subtraction.
+        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup,
+                                      subalgLogging)
+
+        # Self shielding and empty container subtraction, if requested.
+        mainWS = self._selfShieldingAndEC(mainWS, wsNames, wsCleanup,
+                                          subalgLogging)
 
         # Reduction for vanadium ends here.
         if reductionType == _REDUCTION_TYPE_VANA:
@@ -854,9 +1009,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # TODO Absolute normalization.
         mainWS = self._normalizeToVana(mainWS, wsNames, wsCleanup,
                                        subalgLogging)
-
-        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup,
-                                      subalgLogging)
 
         # Convert units from TOF to energy.
         mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup,
@@ -893,6 +1045,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mandatoryPositiveInt.add(IntMandatoryValidator())
         mandatoryPositiveInt.add(IntBoundedValidator(lower=0))
         positiveFloat = FloatBoundedValidator(lower=0)
+        positiveInt = IntBoundedValidator(lower=0)
         positiveIntArray = IntArrayBoundedValidator()
         positiveIntArray.setLower(0)
         scalingFactor = FloatBoundedValidator(lower=0, upper=1)
@@ -922,7 +1075,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([
                                  _REDUCTION_TYPE_SAMPLE,
                                  _REDUCTION_TYPE_VANA,
-                                 _REDUCTION_TYPE_EC_CD]),
+                                 _REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of the reduction workflow and output.')
         self.declareProperty(name=_PROP_CLEANUP_MODE,
@@ -953,13 +1106,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced vanadium workspace.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=_PROP_EC_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Reduced empty container workspace.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_CD_WS,
             defaultValue='',
@@ -1025,28 +1171,33 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Flat background scaling constant')
+        self.setPropertyGroup(_PROP_FLAT_BKG_SCALING, _PROPGROUP_FLAT_BKG)
         self.declareProperty(name=_PROP_FLAT_BKG_WINDOW,
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Running average window width (in bins) ' +
                                  'for flat background.')
+        self.setPropertyGroup(_PROP_FLAT_BKG_WINDOW, _PROPGROUP_FLAT_BKG)
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_FLAT_BKG_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Workspace from which to get flat background data.')
+        self.setPropertyGroup(_PROP_FLAT_BKG_WS, _PROPGROUP_FLAT_BKG)
         self.declareProperty(IntArrayProperty(name=_PROP_USER_MASK,
                                               values='',
                                               validator=positiveIntArray,
                                               direction=Direction.Input),
                              doc='List of spectra to mask.')
+        self.setPropertyGroup(_PROP_USER_MASK, _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(
             StringArrayProperty(name=_PROP_USER_MASK_COMPONENTS,
                                 values='',
                                 direction=Direction.Input),
             doc='List of instrument components to mask.')
+        self.setPropertyGroup(_PROP_USER_MASK_COMPONENTS, _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_DET_DIAGNOSTICS,
                              defaultValue=_DIAGNOSTICS_YES,
                              validator=StringListValidator([
@@ -1055,6 +1206,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='If true, run detector diagnostics or ' +
                                  'apply ' + _PROP_DIAGNOSTICS_WS + '.')
+        self.setPropertyGroup(_PROP_DET_DIAGNOSTICS,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(MatrixWorkspaceProperty(
             name=_PROP_DIAGNOSTICS_WS,
             defaultValue='',
@@ -1062,42 +1215,56 @@ class DirectILLReduction(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace obtained from another ' +
                 'reduction run.')
+        self.setPropertyGroup(_PROP_DET_DIAGNOSTICS,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.1,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in elastic peak diagnostics.')
+        self.setPropertyGroup(_PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=3.0,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in elastic peak diagnostics.')
+        self.setPropertyGroup(_PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Error bar multiplier for significance ' +
                                  'test in the elastic peak diagnostics.')
+        self.setPropertyGroup(_PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=0.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
                                  'used in noisy background diagnostics.')
+        self.setPropertyGroup(_PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=33.3,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
                                  'used in noisy background diagnostics.')
+        self.setPropertyGroup(_PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=3.3,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Error bar multiplier for significance ' +
                                  'test in the noisy background diagnostics.')
+        self.setPropertyGroup(_PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_NORMALISATION,
                              defaultValue=_NORM_METHOD_MON,
                              validator=StringListValidator([
@@ -1106,12 +1273,173 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  _NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method.')
-        self.declareProperty(name=_PROP_TRANSMISSION,
+        self.declareProperty(MatrixWorkspaceProperty(
+            name=_PROP_EC_WS,
+            defaultValue='',
+            validator=inputWorkspaceValidator,
+            direction=Direction.Input,
+            optional=PropertyMode.Optional),
+            doc='Reduced empty container workspace.')
+        self._enabledByNonECReduction(_PROP_EC_WS)
+        self.setPropertyGroup(_PROP_EC_WS,
+                              _PROPGROUP_EC)
+        self.declareProperty(name=_PROP_EC_SCALING_FACTOR,
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
-                             doc='Sample transmission for empty container ' +
-                                 'subtraction.')
+                             doc='Scaling factor (transmission, if no self ' +
+                                 'shielding is applied) for empty container.')
+        self._enabledByNonECReduction(_PROP_EC_SCALING_FACTOR)
+        self.setPropertyGroup(_PROP_EC_SCALING_FACTOR,
+                              _PROPGROUP_EC)
+        self.declareProperty(name=_PROP_SELF_SHIELDING_CORRECTION,
+                             defaultValue=_SELF_SHIELDING_CORRECTION_OFF,
+                             validator=StringListValidator([
+                                 _SELF_SHIELDING_CORRECTION_OFF,
+                                 _SELF_SHIELDING_CORRECTION_ON]),
+                             direction=Direction.Input,
+                             doc='Enable of disable self shielding ' +
+                                 'correction.')
+        self._enabledByNonECReduction(_PROP_SELF_SHIELDING_CORRECTION)
+        self.declareProperty(MatrixWorkspaceProperty(
+            name=_PROP_SELF_SHIELDING_CORRECTION_WS,
+            defaultValue='',
+            direction=Direction.Input,
+            optional=PropertyMode.Optional),
+            doc='A workspace containing self shielding correction factors.')
+        self._enabledBySelfShieldingCorrection(
+            _PROP_SELF_SHIELDING_CORRECTION_WS)
+        self.setPropertySettings(_PROP_SELF_SHIELDING_CORRECTION_WS,
+                                 EnabledWhenProperty(
+                                     _PROP_SELF_SHIELDING_CORRECTION,
+                                     PropertyCriterion.IsEqualTo,
+                                     _SELF_SHIELDING_CORRECTION_ON))
+        self.declareProperty(name=_PROP_SELF_SHIELDING_STEP_SIZE,
+                             defaultValue=0.002,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Step size for self shielding simulation.')
+        self._enabledBySelfShieldingCorrection(_PROP_SELF_SHIELDING_STEP_SIZE)
+        self.declareProperty(name=_PROP_SELF_SHIELDING_NUMBER_WAVELENGTHS,
+                             defaultValue=10,
+                             validator=positiveInt,
+                             direction=Direction.Input,
+                             doc='Number of wavelengths for self shielding ' +
+                                 'simulation')
+        self._enabledBySelfShieldingCorrection(
+            _PROP_SELF_SHIELDING_NUMBER_WAVELENGTHS)
+        self.declareProperty(name=_PROP_SAMPLE_SHAPE,
+                             defaultValue=_SAMPLE_SHAPE_SLAB,
+                             validator=StringListValidator([
+                                 _SAMPLE_SHAPE_SLAB,
+                                 _SAMPLE_SHAPE_CYLINDER]),
+                             direction=Direction.Input,
+                             doc='The shape of the sample and its container.')
+        self._enabledBySelfShieldingCorrection(_PROP_SAMPLE_SHAPE)
+        self.declareProperty(name=_PROP_SAMPLE_CHEMICAL_FORMULA,
+                             defaultValue='',
+                             direction=Direction.Input,
+                             doc='Chemical formula for the sample material.')
+        self._enabledBySelfShieldingCorrection(_PROP_SAMPLE_CHEMICAL_FORMULA)
+        self.setPropertyGroup(_PROP_SAMPLE_CHEMICAL_FORMULA,
+                              _PROPGROUP_SAMPLE)
+        self.declareProperty(name=_PROP_SAMPLE_NUMBER_DENSITY,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Number density of the sample material.')
+        self._enabledBySelfShieldingCorrection(_PROP_SAMPLE_NUMBER_DENSITY)
+        self.setPropertyGroup(_PROP_SAMPLE_NUMBER_DENSITY,
+                              _PROPGROUP_SAMPLE)
+        self.declareProperty(name=_PROP_CONTAINER_CHEMICAL_FORMULA,
+                             defaultValue='',
+                             direction=Direction.Input,
+                             doc='Chemical formula for the container ' +
+                                 'material.')
+        self._enabledBySelfShieldingCorrection(
+            _PROP_CONTAINER_CHEMICAL_FORMULA)
+        self.setPropertySettings(_PROP_CONTAINER_CHEMICAL_FORMULA,
+                                 EnabledWhenProperty(
+                                     _PROP_SELF_SHIELDING_CORRECTION,
+                                     PropertyCriterion.IsEqualTo,
+                                     _SELF_SHIELDING_CORRECTION_ON))
+        self.setPropertyGroup(_PROP_CONTAINER_CHEMICAL_FORMULA,
+                              _PROPGROUP_CONTAINER)
+        self.declareProperty(name=_PROP_CONTAINER_NUMBER_DENSITY,
+                             defaultValue='',
+                             direction=Direction.Input,
+                             doc='Number density of the container material.')
+        self._enabledBySelfShieldingCorrection(_PROP_CONTAINER_NUMBER_DENSITY)
+        self.setPropertyGroup(_PROP_CONTAINER_NUMBER_DENSITY,
+                              _PROPGROUP_CONTAINER)
+        self.declareProperty(name=_PROP_SAMPLE_THICKNESS,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Sample thickness.')
+        self._enabledBySelfShieldingCorrection(_PROP_SAMPLE_THICKNESS)
+        self.setPropertyGroup(_PROP_SAMPLE_THICKNESS,
+                              _PROPGROUP_SLAB_CONTAINER)
+        self.declareProperty(name=_PROP_CONTAINER_FRONT_THICKNESS,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Container front face thickness.')
+        self._enabledBySelfShieldingCorrection(_PROP_CONTAINER_FRONT_THICKNESS)
+        self.setPropertyGroup(_PROP_CONTAINER_FRONT_THICKNESS,
+                              _PROPGROUP_SLAB_CONTAINER)
+        self.declareProperty(name=_PROP_CONTAINER_BACK_THICKNESS,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Container back face thickness.')
+        self._enabledBySelfShieldingCorrection(_PROP_CONTAINER_BACK_THICKNESS)
+        self.setPropertyGroup(_PROP_CONTAINER_BACK_THICKNESS,
+                              _PROPGROUP_SLAB_CONTAINER)
+        self.declareProperty(name=_PROP_SAMPLE_ANGLE,
+                             defaultValue=0.0,
+                             direction=Direction.Input,
+                             doc='Sample rotation angle.')
+        self._enabledBySelfShieldingCorrection(_PROP_SAMPLE_ANGLE)
+        self.setPropertyGroup(_PROP_SAMPLE_ANGLE,
+                              _PROPGROUP_SLAB_CONTAINER)
+        self.declareProperty(name=_PROP_SAMPLE_INNER_RADIUS,
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
+                             doc='Inner radius of the sample.')
+        self._enabledBySelfShieldingCorrection(_PROP_SAMPLE_INNER_RADIUS)
+        self.setPropertyGroup(_PROP_SAMPLE_INNER_RADIUS,
+                              _PROPGROUP_CYLINDER_CONTAINER)
+        self.declareProperty(name=_PROP_SAMPLE_OUTER_RADIUS,
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
+                             doc='Outer radius of the sample.')
+        self._enabledBySelfShieldingCorrection(_PROP_SAMPLE_OUTER_RADIUS)
+        self.setPropertyGroup(_PROP_SAMPLE_OUTER_RADIUS,
+                              _PROPGROUP_CYLINDER_CONTAINER)
+        self.declareProperty(name=_PROP_CONTAINER_OUTER_RADIUS,
+                             defaultValue=Property.EMPTY_DBL,
+                             direction=Direction.Input,
+                             doc='Outer radius of the container.')
+        self._enabledBySelfShieldingCorrection(_PROP_CONTAINER_OUTER_RADIUS)
+        self.setPropertyGroup(_PROP_CONTAINER_OUTER_RADIUS,
+                              _PROPGROUP_CYLINDER_CONTAINER)
+        self.declareProperty(name=_PROP_BEAM_WIDTH,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Width of the neutron beam.')
+        self._enabledBySelfShieldingCorrection(_PROP_BEAM_WIDTH)
+        self.setPropertyGroup(_PROP_BEAM_WIDTH,
+                              _PROPGROUP_CYLINDER_CONTAINER)
+        self.declareProperty(name=_PROP_BEAM_HEIGHT,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Height of the neutron beam.')
+        self._enabledBySelfShieldingCorrection(_PROP_BEAM_HEIGHT)
+        self.setPropertyGroup(_PROP_BEAM_HEIGHT,
+                              _PROPGROUP_CYLINDER_CONTAINER)
         self.declareProperty(MatrixWorkspaceProperty(
                              name=_PROP_REFERENCE_TOF_AXIS_WS,
                              defaultValue='',
@@ -1119,11 +1447,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              optional=PropertyMode.Optional,
                              direction=Direction.Input),
                              doc='Workspace from which to copy the TOF axis.')
-        self.setPropertySettings(_PROP_REFERENCE_TOF_AXIS_WS,
-                                 EnabledWhenProperty(
-                                     _PROP_REDUCTION_TYPE,
-                                     PropertyCriterion.IsEqualTo,
-                                     _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REFERENCE_TOF_AXIS_WS)
         self.setPropertyGroup(_PROP_REFERENCE_TOF_AXIS_WS,
                               _PROPGROUP_TOF_AXIS_CORRECTION)
         self.declareProperty(name=_PROP_ELASTIC_BIN_INDEX,
@@ -1131,9 +1455,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=0),
                              direction=Direction.Input,
                              doc='Bin index of the elastic channel.')
-        self.setPropertySettings(_PROP_ELASTIC_BIN_INDEX, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_ELASTIC_BIN_INDEX)
         self.setPropertyGroup(_PROP_ELASTIC_BIN_INDEX,
                               _PROPGROUP_TOF_AXIS_CORRECTION)
         self.declareProperty(name=_PROP_REBINNING_MODE_W,
@@ -1144,21 +1466,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  _REBIN_MANUAL]),
                              direction=Direction.Input,
                              doc='Energy rebinnin mode.')
-        self.setPropertySettings(_PROP_REBINNING_MODE_W, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REBINNING_MODE_W)
         self.setPropertyGroup(_PROP_REBINNING_MODE_W, _PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
-        self.setPropertySettings(_PROP_REBINNING_PARAMS_W, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_W)
         self.setPropertyGroup(_PROP_REBINNING_PARAMS_W, _PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_Q),
                              doc='Rebinning parameters for q.')
-        self.setPropertySettings(_PROP_REBINNING_PARAMS_Q, EnabledWhenProperty(
-            _PROP_REDUCTION_TYPE, PropertyCriterion.IsEqualTo,
-            _REDUCTION_TYPE_SAMPLE))
+        self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_Q)
         self.setPropertyGroup(_PROP_REBINNING_PARAMS_Q, _PROPGROUP_REBINNING)
         # Rest of the output properties.
         self.declareProperty(ITableWorkspaceProperty(
@@ -1167,42 +1483,67 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for elastic peak positions.')
+        self.setPropertyGroup(_PROP_OUTPUT_DET_EPP_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_OUTPUT_MON_EPP_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for monitor elastic peak positions.')
+        self.setPropertyGroup(_PROP_OUTPUT_MON_EPP_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_INCIDENT_ENERGY_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for calibrated inciden energy.')
+        self.setPropertyGroup(_PROP_OUTPUT_INCIDENT_ENERGY_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_FLAT_BKG_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for flat background.')
+        self.setPropertyGroup(_PROP_OUTPUT_FLAT_BKG_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_DIAGNOSTICS_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for detector diagnostics.')
+        self.setPropertyGroup(_PROP_OUTPUT_DIAGNOSTICS_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_OUTPUT_DIAGNOSTICS_REPORT_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output table workspace for detector diagnostics reporting.')
+        self.setPropertyGroup(_PROP_OUTPUT_DIAGNOSTICS_REPORT_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
+        self.declareProperty(WorkspaceProperty(
+            name=_PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS,
+            defaultValue='',
+            direction=Direction.Output,
+            optional=PropertyMode.Optional),
+            doc='Output workspace for self shielding corrections.')
+        self._enabledByNonECReduction(
+            _PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS)
+        self.setPropertyGroup(_PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=_PROP_OUTPUT_THETA_W_WS,
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for reduced S(theta, DeltaE).')
+        self._enabledBySampleReduction(_PROP_OUTPUT_THETA_W_WS)
+        self.setPropertyGroup(_PROP_OUTPUT_THETA_W_WS,
+                              _PROPGROUP_OPTIONAL_OUTPUT)
 
     def validateInputs(self):
         '''
@@ -1222,6 +1563,57 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 issues[_PROP_REBINNING_PARAMS_Q] = _PROP_REBINNING_PARAMS_Q + \
                     ' is mandatory when ' + _PROP_REDUCTION_TYPE + ' is ' + \
                     _REDUCTION_TYPE_SAMPLE + '.'
+        selfShielding = \
+            self.getProperty(_PROP_SELF_SHIELDING_CORRECTION).value
+        if selfShielding == _SELF_SHIELDING_CORRECTION_ON:
+            if self.getProperty(_PROP_SAMPLE_CHEMICAL_FORMULA).isDefault:
+                issues[_PROP_SAMPLE_CHEMICAL_FORMULA] = 'Chemical formula ' + \
+                    'must be specified.'
+            if self.getProperty(_PROP_SAMPLE_NUMBER_DENSITY).isDefault:
+                issues[_PROP_SAMPLE_NUMBER_DENSITY] = 'Number density ' + \
+                    'must be specified.'
+            if not self.getProperty(_PROP_EC_WS).isDefault:
+                if self.getProperty(
+                        _PROP_CONTAINER_CHEMICAL_FORMULA).isDefault:
+                    issues[_PROP_CONTAINER_CHEMICAL_FORMULA] = 'Chemical ' + \
+                        'formula must be specified.'
+                if self.getProperty(_PROP_CONTAINER_NUMBER_DENSITY).isDefault:
+                    issues[_PROP_CONTAINER_NUMBER_DENSITY] = 'Number ' + \
+                        'density must be specified.'
+            sampleShape = self.getProperty(_PROP_SAMPLE_SHAPE).value
+            if sampleShape == _SAMPLE_SHAPE_CYLINDER:
+                if self.getProperty(_PROP_SAMPLE_INNER_RADIUS).isDefault:
+                    issues[_PROP_SAMPLE_INNER_RADIUS] = 'Inner radius ' + \
+                        'must be specified.'
+                if self.getProperty(_PROP_SAMPLE_OUTER_RADIUS).isDefault:
+                    issues[_PROP_SAMPLE_OUTER_RADIUS] = 'Outer radius ' + \
+                        'must be specified.'
+                if self.getProperty(_PROP_BEAM_HEIGHT).isDefault:
+                    issues[_PROP_BEAM_HEIGHT] = 'Beam height must be ' + \
+                        'specified.'
+                if self.getProperty(_PROP_BEAM_WIDTH).isDefault:
+                    issues[_PROP_BEAM_WIDTH] = 'Beam widtht must be specified.'
+                if not self.getProperty(_PROP_EC_WS).isDefault:
+                    if self.getProperty(
+                            _PROP_CONTAINER_OUTER_RADIUS).isDefault:
+                        issues[_PROP_CONTAINER_OUTER_RADIUS] = 'Outer ' + \
+                            'radius must be specified.'
+            else:
+                if self.getProperty(_PROP_SAMPLE_THICKNESS).isDefault:
+                    issues[_PROP_SAMPLE_THICKNESS] = 'Thickness must be ' + \
+                        'specified.'
+                if self.getProperty(_PROP_SAMPLE_ANGLE).isDefault:
+                    issues[_PROP_SAMPLE_ANGLE] = 'Sample angle must be ' + \
+                        'specified.'
+                if not self.getProperty(_PROP_EC_WS).isDefault:
+                    if self.getProperty(
+                            _PROP_CONTAINER_BACK_THICKNESS).isDefault:
+                        issues[_PROP_CONTAINER_BACK_THICKNESS] = \
+                            'Thickness must be specified.'
+                    if self.getProperty(
+                            _PROP_CONTAINER_FRONT_THICKNESS).isDefault:
+                        issues[_PROP_CONTAINER_FRONT_THICKNESS] = \
+                            'Thickness must be specified.'
         return issues
 
     def _applyUserMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
@@ -1368,6 +1760,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return correctedWS
 
     def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Adjusts the TOF axis to get the elastic channel correct.
+        '''
         correctedWSName = wsNames.withSuffix('tof_axis_corrected')
         referenceWS = self.getProperty(_PROP_REFERENCE_TOF_AXIS_WS).value
         if referenceWS:
@@ -1391,7 +1786,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      IndexType='Workspace Index',
                                      ReferenceSpectra='0',
                                      ElasticBinIndex=index,
-                                     EnableLogging=True)
+                                     EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return correctedWS
 
@@ -1500,6 +1895,36 @@ class DirectILLReduction(DataProcessorAlgorithm):
             wsCleanup.cleanup(mainWS)
             return diagnosedWS
         return mainWS
+
+    def _enabledByNonECReduction(self, prop):
+        '''
+        Enables a property if reduction type is Vanadium or Sample.
+        '''
+        self.setPropertySettings(prop,
+                                 EnabledWhenProperty(
+                                     _PROP_REDUCTION_TYPE,
+                                     PropertyCriterion.IsNotEqualTo,
+                                     _REDUCTION_TYPE_EC))
+
+    def _enabledBySampleReduction(self, prop):
+        '''
+        Enables a property if reduction type is Sample.
+        '''
+        self.setPropertySettings(prop,
+                                 EnabledWhenProperty(
+                                     _PROP_REDUCTION_TYPE,
+                                     PropertyCriterion.IsEqualTo,
+                                     _REDUCTION_TYPE_SAMPLE))
+
+    def _enabledBySelfShieldingCorrection(self, prop):
+        '''
+        Enables a property if self-shielding corrections are enabled.
+        '''
+        self.setPropertySettings(prop,
+                                 EnabledWhenProperty(
+                                     _PROP_SELF_SHIELDING_CORRECTION,
+                                     PropertyCriterion.IsEqualTo,
+                                     _SELF_SHIELDING_CORRECTION_ON))
 
     def _finalize(self, outWS, wsCleanup, report):
         '''
@@ -1682,6 +2107,159 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         return rebinnedWS
 
+    def _selfShieldingAndEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Calculates and applies self shielding corrections and empty can
+        subtraction.
+        '''
+        ecWS = self.getProperty(_PROP_EC_WS).value
+        selfShielding = self.getProperty(_PROP_SELF_SHIELDING_CORRECTION).value
+        if not ecWS and selfShielding == _SELF_SHIELDING_CORRECTION_OFF:
+            # No EC, no self-shielding -> nothing to do.
+            return mainWS
+        elif ecWS and selfShielding == _SELF_SHIELDING_CORRECTION_OFF:
+            # Use simple EC subtraction only.
+            return self._subtractEC(mainWS, ecWS, wsNames, wsCleanup,
+                                    subalgLogging)
+        wavelengthWSName = wsNames.withSuffix('in_wavelength')
+        wavelengthWS = ConvertUnits(InputWorkspace=mainWS,
+                                    OutputWorkspace=wavelengthWSName,
+                                    Target='Wavelength',
+                                    EMode='Direct',
+                                    EnableLogging=subalgLogging)
+        selfShieldingWS = \
+            self.getProperty(_PROP_SELF_SHIELDING_CORRECTION_WS).value
+        sampleShape = self.getProperty(_PROP_SAMPLE_SHAPE).value
+        if ecWS:
+            ecScaling = self.getProperty(_PROP_EC_SCALING_FACTOR).value
+            tofCorrectedECWSName = wsNames.withSuffix('ec_tof_corrected')
+            tofCorrectedECWS = CorrectTOFAxis(
+                InputWorkspace=ecWS,
+                OutputWorkspace=tofCorrectedECWSName,
+                ReferenceWorkspace=mainWS,
+                IndexType='Workspace Index',
+                ReferenceSpectra='0',
+                EnableLogging=subalgLogging)
+            wavelengthECWSName = wsNames.withSuffix('ec_in_wavelength')
+            wavelengthECWS = \
+                ConvertUnits(InputWorkspace=tofCorrectedECWS,
+                             OutputWorkspace=wavelengthECWSName,
+                             Target='Wavelength',
+                             EMode='Direct',
+                             EnableLogging=subalgLogging)
+            wsCleanup.cleanup(tofCorrectedECWS)
+            if not selfShieldingWS:
+                sampleChemicalFormula = \
+                    self.getProperty(_PROP_SAMPLE_CHEMICAL_FORMULA).value
+                sampleNumberDensity = \
+                    self.getProperty(_PROP_SAMPLE_NUMBER_DENSITY).value
+                containerChemicalFormula = \
+                    self.getProperty(
+                        _PROP_CONTAINER_CHEMICAL_FORMULA).value
+                containerNumberDensity = \
+                    self.getProperty(_PROP_CONTAINER_NUMBER_DENSITY).value
+                stepSize = \
+                    self.getProperty(_PROP_SELF_SHIELDING_STEP_SIZE).value
+                numberWavelengths = \
+                    self.getProperty(
+                        _PROP_SELF_SHIELDING_NUMBER_WAVELENGTHS).value
+                if sampleShape == _SAMPLE_SHAPE_CYLINDER:
+                    sampleInnerR = \
+                        self.getProperty(_PROP_SAMPLE_INNER_RADIUS).value
+                    sampleOuterR = \
+                        self.getProperty(_PROP_SAMPLE_OUTER_RADIUS).value
+                    containerOuterR = \
+                        self.getProperty(
+                            _PROP_CONTAINER_OUTER_RADIUS).value
+                    beamWidth = self.getProperty(_PROP_BEAM_WIDTH).value
+                    beamHeight = self.getProperty(_PROP_BEAM_HEIGHT).value
+                    selfShieldingWS = \
+                        _selfShieldingCorrectionsCylinder(
+                            wavelengthWS, wavelengthECWS,
+                            sampleChemicalFormula, sampleNumberDensity,
+                            containerChemicalFormula,
+                            containerNumberDensity, sampleInnerR,
+                            sampleOuterR, containerOuterR, beamWidth,
+                            beamHeight, stepSize, numberWavelengths,
+                            wsNames, subalgLogging)
+                else:
+                    # Slab container.
+                    sampleThickness = \
+                        self.getProperty(_PROP_SAMPLE_THICKNESS).value
+                    containerFrontThickness = \
+                        self.getProperty(
+                            _PROP_CONTAINER_FRONT_THICKNESS).value
+                    containerBackThickness = \
+                        self.getProperty(
+                            _PROP_CONTAINER_BACK_THICKNESS).value
+                    angle = self.getProperty(_PROP_SAMPLE_ANGLE).value
+                    selfShieldingWS = \
+                        _selfShieldingCorrectionsSlab(
+                            wavelengthWS, wavelengthECWS,
+                            sampleChemicalFormula, sampleNumberDensity,
+                            containerChemicalFormula,
+                            containerNumberDensity, sampleThickness, angle,
+                            containerFrontThickness,
+                            containerBackThickness, numberWavelengths,
+                            wsNames, subalgLogging)
+            correctedWS = _applySelfShieldingCorrections(wavelengthWS,
+                                                         wavelengthECWS,
+                                                         ecScaling,
+                                                         selfShieldingWS,
+                                                         wsNames,
+                                                         subalgLogging)
+            wsCleanup.cleanup(wavelengthECWS)
+        else:  # No ecWS.
+            if not selfShieldingWS:
+                sampleChemicalFormula = \
+                    self.getProperty(_PROP_SAMPLE_CHEMICAL_FORMULA).value
+                sampleNumberDensity = \
+                    self.getProperty(_PROP_SAMPLE_NUMBER_DENSITY).value
+                stepSize = \
+                    self.getProperty(_PROP_SELF_SHIELDING_STEP_SIZE).value
+                numberWavelengths = \
+                    self.getProperty(
+                        _PROP_SELF_SHIELDING_NUMBER_WAVELENGTHS).value
+                if sampleShape == _SAMPLE_SHAPE_CYLINDER:
+                    sampleInnerR = \
+                        self.getProperty(_PROP_SAMPLE_INNER_RADIUS).value
+                    sampleOuterR = \
+                        self.getProperty(_PROP_SAMPLE_OUTER_RADIUS).value
+                    beamWidth = self.getProperty(_PROP_BEAM_WIDTH).value
+                    beamHeight = self.getProperty(_PROP_BEAM_HEIGHT).value
+                    selfShieldingWS = \
+                        _selfShieldingCorrectionsCylinderNoEC(
+                            wavelengthWS, sampleChemicalFormula,
+                            sampleNumberDensity, sampleInnerR, sampleOuterR,
+                            beamWidth, beamHeight, stepSize, numberWavelengths,
+                            wsNames, subalgLogging)
+                else:
+                    # Slab container.
+                    sampleThickness = \
+                        self.getProperty(_PROP_SAMPLE_THICKNESS).value
+                    angle = self.getProperty(_PROP_SAMPLE_ANGLE).value
+                    selfShieldingWS = \
+                        _selfShieldingCorrectionsSlabNoEC(
+                            wavelengthWS, sampleChemicalFormula,
+                            sampleNumberDensity, sampleThickness, angle,
+                            numberWavelengths, wsNames, subalgLogging)
+            correctedWS = _applySelfShieldingCorrectionsNoEC(wavelengthWS,
+                                                             selfShieldingWS,
+                                                             wsNames,
+                                                             subalgLogging)
+        correctedWS = ConvertUnits(InputWorkspace=correctedWS,
+                                   OutputWorkspace=correctedWS,
+                                   Target='TOF',
+                                   EMode='Direct',
+                                   EnableLogging=subalgLogging)
+        if not self.getProperty(
+                _PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS).isDefault:
+            self.setProperty(_PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS,
+                             selfShieldingWS)
+        wsCleanup.cleanup(mainWS)
+        wsCleanup.cleanup(wavelengthWS)
+        return correctedWS
+
     def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
         '''
         Extracts monitors to a separate workspace.
@@ -1712,31 +2290,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         return sOfQWWS
 
-    def _subtractEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _subtractEC(self, mainWS, ecInWS, wsNames, wsCleanup, subalgLogging):
         '''
-        Subtracts the empty container workspace optionally using a cadmium run.
+        Subtracts the empty container workspace.
         '''
-        ecInWS = self.getProperty(_PROP_EC_WS).value
-        if ecInWS:
-            cdInWS = self.getProperty(_PROP_CD_WS).value
-            transmission = self.getProperty(_PROP_TRANSMISSION).value
-            if cdInWS:
-                ecSubtractedWS = _subtractECWithCd(mainWS,
-                                                   ecInWS,
-                                                   cdInWS,
-                                                   transmission,
-                                                   wsNames,
-                                                   wsCleanup,
-                                                   subalgLogging)
-            else:
-                ecSubtractedWS = _subtractEC(mainWS,
-                                             ecInWS,
-                                             transmission,
-                                             wsNames,
-                                             wsCleanup,
-                                             subalgLogging)
-            wsCleanup.cleanup(mainWS)
-            return ecSubtractedWS
-        return mainWS
+        ecScaling = self.getProperty(_PROP_EC_SCALING_FACTOR).value
+        ecSubtractedWS = _subtractEC(mainWS,
+                                     ecInWS,
+                                     ecScaling,
+                                     wsNames,
+                                     wsCleanup,
+                                     subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return ecSubtractedWS
 
 AlgorithmFactory.subscribe(DirectILLReduction)
