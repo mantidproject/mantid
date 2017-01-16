@@ -423,37 +423,6 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
   cacheDefaultDetectorGrouping();
 }
 
-/// Returns the detector IDs that make up the group that this ID is part of
-const std::set<detid_t> &
-ExperimentInfo::getGroupMembers(const detid_t detID) const {
-  populateIfNotLoaded();
-  auto iter = m_det2group.find(detID);
-  if (iter != m_det2group.end()) {
-    return m_detgroups[iter->second];
-  } else {
-    throw std::runtime_error(
-        "ExperimentInfo::getGroupMembers - Unable to find ID " +
-        std::to_string(detID) + " in lookup");
-  }
-}
-
-/**
- * Get a detector or detector group from an ID
- * @param detID ::
- * @returns A single detector or detector group depending on the mapping set.
- * @see set
- */
-Geometry::IDetector_const_sptr
-ExperimentInfo::getDetectorByID(const detid_t detID) const {
-  populateIfNotLoaded();
-  if (m_detgroups.empty()) {
-    return getInstrument()->getDetector(detID);
-  } else {
-    const auto &ids = this->getGroupMembers(detID);
-    return getInstrument()->getDetectorG(ids);
-  }
-}
-
 /**
  * Set an object describing the moderator properties and take ownership
  * @param source :: A pointer to an object describing the source. Ownership is
@@ -1064,6 +1033,24 @@ void ExperimentInfo::cacheDefaultDetectorGrouping() const {
   for (const auto detID : sptr_instrument->getDetectorIDs()) {
     m_det2group[detID] = m_detgroups.size();
     m_detgroups.push_back({detID});
+  }
+}
+
+/** Returns the index of the (first) group the detID is part of.
+ *
+ * The purpose of this method is access to grouping information for
+ * MDWorkspaces. */
+size_t ExperimentInfo::groupOfDetectorID(const detid_t detID) const {
+  if (m_detgroups.empty())
+    return detectorInfo().indexOf(detID);
+
+  auto iter = m_det2group.find(detID);
+  if (iter != m_det2group.end()) {
+    return iter->second;
+  } else {
+    throw std::out_of_range(
+        "ExperimentInfo::groupOfDetectorID - Unable to find ID " +
+        std::to_string(detID) + " in lookup");
   }
 }
 

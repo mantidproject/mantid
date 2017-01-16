@@ -412,24 +412,6 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
-  void test_getDetectorByID() {
-    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
-    addInstrumentWithParameter(*exptInfo, "a", "b");
-
-    IDetector_const_sptr det;
-    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
-    TS_ASSERT(det);
-
-    // Set a mapping
-    std::set<Mantid::detid_t> group{1, 2};
-    Mantid::det2group_map mapping{{1, group}};
-    exptInfo->cacheDetectorGroupings(mapping);
-
-    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
-    TS_ASSERT(det);
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-  }
-
   void test_detectorIDsInGroup() {
     using namespace Mantid;
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
@@ -455,21 +437,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(expt.cacheDetectorGroupings(mappings));
   }
 
-  void test_Getting_Group_Members_For_Unknown_ID_Throws() {
+  void test_Getting_Group_For_Unknown_ID_Throws() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.getGroupMembers(1), std::runtime_error);
+    TS_ASSERT_THROWS(expt.groupOfDetectorID(1), std::out_of_range);
   }
 
   void
-  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
+  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_Group() {
     ExperimentInfo expt;
     Mantid::det2group_map mappings;
     mappings.emplace(1, std::set<Mantid::detid_t>{2});
     expt.cacheDetectorGroupings(mappings);
 
-    std::set<Mantid::detid_t> ids;
-    TS_ASSERT_THROWS_NOTHING(ids = expt.getGroupMembers(1));
+    size_t index;
+    TS_ASSERT_THROWS_NOTHING(index = expt.groupOfDetectorID(1));
+    TS_ASSERT_EQUALS(index, 0);
   }
 
   struct fromToEntry {

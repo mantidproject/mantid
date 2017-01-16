@@ -74,11 +74,7 @@ public:
   void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs
-  void cacheDetectorGroupings(const det2group_map &mapping);
-  /// Returns the detector IDs that make up the group that this ID is part of
-  const std::set<detid_t> &getGroupMembers(const detid_t detID) const;
-  /// Get a detector or detector group from an ID
-  Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
+  virtual void cacheDetectorGroupings(const det2group_map &mapping);
 
   /// Set an object describing the source properties and take ownership
   void setModeratorModel(ModeratorModel *source);
@@ -160,6 +156,7 @@ public:
 
   virtual size_t numberOfDetectorGroups() const;
   virtual const std::set<detid_t> &detectorIDsInGroup(const size_t index) const;
+  virtual size_t groupOfDetectorID(const detid_t detID) const;
 
 protected:
   /// Called as the first operation of most public methods.

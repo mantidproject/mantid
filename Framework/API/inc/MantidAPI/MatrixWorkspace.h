@@ -548,6 +548,7 @@ public:
   size_t numberOfDetectorGroups() const override;
   const std::set<detid_t> &
   detectorIDsInGroup(const size_t index) const override;
+  size_t groupOfDetectorID(const detid_t detID) const override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

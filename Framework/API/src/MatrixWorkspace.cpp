@@ -2019,6 +2019,12 @@ MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
 }
 
+/// Throws an exception. This method is only for MDWorkspaces.
+size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
+  throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "
+                           "for MatrixWorkspace, only for MDWorkspaces");
+}
+
 } // namespace API
 } // Namespace Mantid
 
