@@ -254,7 +254,7 @@ class FunctionalConfig(object):
             required=False,
             type=str,
             default=self.algorithm,
-            help="Reconstruction algorithm (tool dependent)")
+            help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {'art', 'bart', 'fbp', 'gridrec', 'mlem', 'osem', 'ospml_hybrid', plm_hybrid', 'pml_quad', 'sirt'}.")
 
         grp_recon.add_argument(
             "-n",
