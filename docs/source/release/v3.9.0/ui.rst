@@ -65,6 +65,7 @@ Bugs Resolved
 - Fix a bug where saving a tiled plot saved to a project file would be reloaded with different size plots.
 - Fixed a bug where minimised windows would not stay minimised after being serialised to a Mantid project
 - Fixed a bug where changing the integration range of the instrument view would clear the applied zooming.
+- Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
 - Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
 
 SliceViewer Improvements
