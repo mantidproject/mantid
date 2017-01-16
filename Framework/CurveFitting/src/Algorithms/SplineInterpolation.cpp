@@ -138,8 +138,7 @@ void SplineInterpolation::exec() {
   // convert data to binned data as required
   MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
   MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
-
-  MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, iws);
+  MatrixWorkspace_sptr outputWorkspace = iws->clone(); 
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
@@ -197,29 +196,6 @@ void SplineInterpolation::exec() {
   setXRange(outputWorkspace, iws);
 
   setProperty("OutputWorkspace", outputWorkspace);
-}
-
-/**Copy the meta data for the input workspace to an output workspace and create
- *it with the desired number of spectra.
- * Also labels the axis of each spectra with Yi, where i is the index
- *
- * @param mws :: The input workspace to match
- * @param iws :: The input workspace to interpolate
- * @return The pointer to the newly created workspace
- */
-MatrixWorkspace_sptr
-SplineInterpolation::setupOutputWorkspace(MatrixWorkspace_sptr mws,
-                                          MatrixWorkspace_sptr iws) {
-  size_t numSpec = iws->getNumberHistograms();
-
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create(mws, numSpec);
-
-  // use the vertical axis from the workspace to interpolate on the output WS
-  Axis *vAxis = iws->getAxis(1)->clone(iws.get());
-  outputWorkspace->replaceAxis(1, vAxis);
-
-  return outputWorkspace;
 }
 
 /**Convert a binned workspace to point data
