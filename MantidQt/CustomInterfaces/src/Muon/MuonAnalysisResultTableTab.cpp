@@ -502,29 +502,30 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
                                                 // object in scope. If
                                                 // applicable it is assigned a
                                                 // value within an if statement.
-    bool foundRunning = false; // If a running log is found within the workspace
+
+
     std::string running = "running"; // define the running log via a string to
                                      // prevent typos between different
                                      // occurances.
-    Property *runLog; // defined here to keep the object in scope. If applicable
+    Property *runLog=nullptr; // defined here to keep the object in scope. If applicable
                       // it is assigned a value within an if statement.
-    for (const auto prop : logData) {
-      if (prop->name().c_str() == running) {
-        foundRunning = true;                    // running log exists
-        runLog = ws->run().getLogData(running); // what happend if this does not
-                                                // exist? -> just delete an n
+
+
+    bool foundRunning = ws->run().hasProperty(running); // If a running log is found within the workspace
+    if(foundRunning)
+{
+        runLog = ws->run().getLogData(running); 
         runningLog = dynamic_cast<TimeSeriesProperty<bool> *>(
             runLog); // need a TimeSeriesProperty <bool> to apply the filter
-      }
-    }
-
-    // if runnunglog is empty throw a warning
-    if (!foundRunning) {
-      Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
+ 
+}
+else // if runnunglog is empty throw a warning
+{
+     Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
       g_log.warning(
-          "No running log found. Filtering will not be applied to the data.\n");
-    }
-    for (const auto prop : logData) {
+          "No running log found. Filtering will not be applied to the data.\n"); 
+}
+   for (const auto prop : logData) {
       // Check if is a timeseries log
       if (TimeSeriesProperty<double> *log =
               dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
