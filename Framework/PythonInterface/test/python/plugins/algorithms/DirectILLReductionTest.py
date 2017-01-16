@@ -226,6 +226,64 @@ class DirectILLReductionTest(unittest.TestCase):
         run_algorithm('DirectILLReduction', **algProperties)
         self.assertFalse(mtd.doesExist(diagnosticsWSName))
 
+    def test_empty_container_subtraction(self):
+        SELF_SHIELDING_ALGORITHMS = ['ApplyPaalmanPingsCorrection',
+            'CylinderPaalmanPingsCorrection',
+            'FlatPlatePaalmanPingsCorrection']
+        outECWSName = 'outECWS'
+        ecWS = CloneWorkspace(self._testIN5WS)  # Empty container ws.
+        for i in range(ecWS.getNumberHistograms() - 1):
+            ys = ecWS.dataY(i + 1)
+            ys *= 0.1
+        algProperties = {
+            'InputWorkspace': ecWS,
+            'OutputWorkspace': outECWSName,
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'ReductionType': 'Empty Container',
+            'Normalisation': 'No Normalisation',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'ReductionType': 'Vanadium',
+            'Normalisation': 'No Normalisation',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self.assertFalse(self._checkAlgorithmsInHistory(ws,
+            SELF_SHIELDING_ALGORITHMS))
+        outECSubtractedWSName = 'outECSubtractedWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outECSubtractedWSName,
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'ReductionType': 'Vanadium',
+            'Normalisation': 'No Normalisation',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EmptyContainerWorkspace': outECWSName,
+            'EmptyContainerScalingFactor': 0.75,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(self._checkAlgorithmsInHistory(ws,
+            SELF_SHIELDING_ALGORITHMS[0]))
+        self.assertFalse(self._checkAlgorithmsInHistory(ws,
+            SELF_SHIELDING_ALGORITHMS[1:]))
+        DeleteWorkspace(ecWS)
+        DeleteWorkspace(outWSName)
+        DeleteWorkspace(outECSubtractedWSName)
+        DeleteWorkspace(outECWSName)
+
     def test_input_ws_not_deleted(self):
         outWSName = 'outWS'
         algProperties = {
@@ -267,7 +325,7 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         ws = mtd[outWSName]
-        self._checkAlgorithmsInHistory(ws, 'Rebin')
+        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'Rebin'))
         for i in range(ws.getNumberHistograms()):
             xs = ws.readX(i)
             self.assertAlmostEqual(xs[0], rebinningBegin)
@@ -306,7 +364,8 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         ws = mtd[outWSName]
-        self._checkAlgorithmsInHistory(ws, 'BinWidthAtX', 'Rebin')
+        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'BinWidthAtX',
+                                                       'Rebin'))
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
         xs = ws.extractX()
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
@@ -327,7 +386,8 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         ws = mtd[outWSName]
-        self._checkAlgorithmsInHistory(ws, 'MedianBinWidth', 'Rebin')
+        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'MedianBinWidth',
+                                                       'Rebin'))
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
         xs = ws.extractX()
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
@@ -353,7 +413,7 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         outWS = mtd[outWSName]
-        self._checkAlgorithmsInHistory(outWS, 'MaskDetectors')
+        self.assertTrue(self._checkAlgorithmsInHistory(outWS, 'MaskDetectors'))
         for i in range(outWS.getNumberHistograms()):
             originalI = i + 1  # Monitor has been extracted.
             if originalI in userMask:
@@ -368,13 +428,16 @@ class DirectILLReductionTest(unittest.TestCase):
         algHistories = reductionHistory.getChildHistories()
         algNames = [alg.name() for alg in algHistories]
         for algName in arg:
-            self.assertTrue(algName in algNames)
+            return algName in algNames
 
     def _checkDiagnosticsAlgorithmsInHistory(self, outWS, diagnosticsWS):
-        self._checkAlgorithmsInHistory(outWS, 'MedianDetectorTest',
-                                       'MaskDetectors')
-        self._checkAlgorithmsInHistory(diagnosticsWS, 'MedianDetectorTest',
-                                       'ClearMaskFlag', 'Plus')
+        self.assertTrue(self._checkAlgorithmsInHistory(outWS, 
+                                                       'MedianDetectorTest',
+                                                       'MaskDetectors'))
+        self.assertTrue(self._checkAlgorithmsInHistory(diagnosticsWS,
+                                                       'MedianDetectorTest',
+                                                       'ClearMaskFlag',
+                                                       'Plus'))
 
 if __name__ == '__main__':
     unittest.main()
