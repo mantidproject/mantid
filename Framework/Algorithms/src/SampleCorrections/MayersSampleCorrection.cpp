@@ -63,6 +63,16 @@ void MayersSampleCorrection::init() {
       "If True then also correct for the effects of multiple scattering."
       "Please note that the MS correction assumes the scattering is elastic.",
       Direction::Input);
+  declareProperty("MSEvents", 10000, "Controls the number of second-scatter "
+                                     "events generated. Only applicable where "
+                                     "MultipleScattering=True.",
+                  Direction::Input);
+  declareProperty("MSRuns", 10,
+                  "Controls the number of simulations, each containing "
+                  "MSEvents, performed. The final MS correction is "
+                  "computed as the average over the runs. Only applicable"
+                  "where MultipleScattering=True.",
+                  Direction::Input);
   // Outputs
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -74,10 +84,13 @@ void MayersSampleCorrection::init() {
 void MayersSampleCorrection::exec() {
   using API::Progress;
   using API::WorkspaceFactory;
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  bool mscatOn = getProperty("MultipleScattering");
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
 
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const bool mscatOn = getProperty("MultipleScattering");
+  const int msEvents = getProperty("MSEvents");
+  const int msRuns = getProperty("MSRuns");
+
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Instrument constants
   auto instrument = inputWS->getInstrument();
   const auto source = instrument->getSource();
@@ -125,6 +138,8 @@ void MayersSampleCorrection::exec() {
     params.sigmaSc = sampleMaterial.totalScatterXSection();
     params.cylRadius = radius;
     params.cylHeight = height;
+    params.msNEvents = static_cast<size_t>(msEvents);
+    params.msNRuns = static_cast<size_t>(msRuns);
 
     MayersSampleCorrectionStrategy correction(params, inputWS->histogram(i));
     outputWS->setHistogram(i, correction.getCorrectedHisto());
