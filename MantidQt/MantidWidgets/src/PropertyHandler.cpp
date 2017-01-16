@@ -1015,10 +1015,10 @@ void PropertyHandler::addTie(const QString &tieStr) {
   std::string name = parts[0].trimmed().toStdString();
   std::string expr = parts[1].trimmed().toStdString();
   try {
-    m_browser->compositeFunction()->tie(name, expr);
-    //QString parName = QString::fromStdString(
-    //    tie->getFunction()->parameterName(static_cast<int>(tie->getIndex())));
-    QString parName = QString::fromStdString(name);
+    auto &cfun = *m_browser->compositeFunction();
+    cfun.tie(name, expr);
+    QString parName = QString::fromStdString(
+        cfun.parameterLocalName(cfun.parameterIndex(name)));
     foreach (QtProperty *parProp, m_parameters) {
       if (parProp->propertyName() == parName) {
         m_browser->m_changeSlotsEnabled = false;
