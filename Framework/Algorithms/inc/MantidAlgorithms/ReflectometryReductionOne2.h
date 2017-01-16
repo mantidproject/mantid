@@ -67,7 +67,7 @@ private:
   // Performs transmission corrections using alternative correction algorithms
   Mantid::API::MatrixWorkspace_sptr
   algorithmicCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
-  // convert to momentum transfer, rebin and scale
+  // convert to momentum transfer
   Mantid::API::MatrixWorkspace_sptr
   convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
 };

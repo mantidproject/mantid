@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -194,8 +194,13 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Output workspace in Q
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceBinned", "", Direction::Output),
+                  "Output workspace in Q (rebinned workspace)");
+
+  // Output workspace in Q (unbinned)
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "Output workspace in Q");
+                  "Output workspace in Q (native binning)");
 
   // Output workspace in wavelength
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -225,9 +230,16 @@ void ReflectometryReductionOneAuto2::exec() {
   auto instructions = populateProcessingInstructions(alg, instrument, inputWS);
 
   // Now that we know the detectors of interest, we can move them if necessary
-  // (i.e. if theta is given)
-  if (!getPointerToProperty("ThetaIn")->isDefault())
+  // (i.e. if theta is given). If not, we calculate theta from the current
+  // detector positions
+  double theta;
+  if (!getPointerToProperty("ThetaIn")->isDefault()) {
+    theta = getProperty("ThetaIn");
     inputWS = correctDetectorPositions(instructions, inputWS);
+  } else {
+    // Calculate theta
+    theta = calculateTheta(instructions, inputWS);
+  }
 
   // Optional properties
 
@@ -236,7 +248,6 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setPropertyValue("NormalizeByIntegratedMonitors",
                         getPropertyValue("NormalizeByIntegratedMonitors"));
   populateTransmissionProperties(alg, instrument);
-  populateMomentumTransferProperties(alg);
 
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
@@ -244,29 +255,41 @@ void ReflectometryReductionOneAuto2::exec() {
   MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
 
+  std::vector<double> params;
+  MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
+
   setProperty("OutputWorkspaceWavelength", IvsLam);
   setProperty("OutputWorkspace", IvsQ);
+  setProperty("OutputWorkspaceBinned", IvsQB);
+
+  // Set other properties so they can be updated in the Reflectometry interface
+  setProperty("ThetaIn", theta);
+  if (!params.empty()) {
+    if (params.size() == 3) {
+      setProperty("MomentumTransferMin", params[0]);
+      setProperty("MomentumTransferStep", params[1]);
+      setProperty("MomentumTransferMax", params[2]);
+    } else {
+      setProperty("MomentumTransferMin", IvsQ->x(0).front());
+      setProperty("MomentumTransferMax", IvsQ->x(0).back());
+      setProperty("MomentumTransferStep", params[0]);
+    }
+  }
 }
 
-/** Correct an instrument component vertically.
+/** Returns the detectors of interest, specified via processing instructions
 *
 * @param instructions :: processing instructions defining detectors of interest
 * @param inputWS :: the input workspace
-* @return :: the corrected workspace
+* @return :: the names of the detectors of interest
 */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
+std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
     const std::string &instructions, MatrixWorkspace_sptr inputWS) {
-
-  // First we need to figure out which of the instrument components we need to
-  // move
-  // We know the detectors of interest, which are specified via processing
-  // instructions
-  // So we will move the parent component of the detectors of interest
 
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, instructions, boost::is_any_of(":,-"));
-  // Set of comopnents
-  std::set<std::string> detectors;
+  // vector of comopnents
+  std::vector<std::string> detectors;
 
   for (const auto wsIndex : wsIndices) {
 
@@ -279,15 +302,38 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
       auto parentType = parent->type();
       auto detectorName = (parentType == "Instrument") ? detector->getName()
                                                        : parent->getName();
-      detectors.insert(detectorName);
+      detectors.push_back(detectorName);
     }
   }
+  return detectors;
+}
+
+/** Correct an instrument component vertically.
+*
+* @param instructions :: processing instructions defining the detectors of
+* interest
+* @param inputWS :: the input workspace
+* @return :: the corrected workspace
+*/
+MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
+    const std::string &instructions, MatrixWorkspace_sptr inputWS) {
+
+  auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
+
+  // Detectors of interest may be empty. This happens for instance when we input
+  // a workspace that was previously reduced using this algorithm. In this case,
+  // we shouldn't correct the detector positions
+  if (detectorsOfInterest.empty())
+    return inputWS;
+
+  std::set<std::string> detectorSet(detectorsOfInterest.begin(),
+                                    detectorsOfInterest.end());
 
   double theta = getProperty("ThetaIn");
 
   MatrixWorkspace_sptr corrected = inputWS;
 
-  for (const auto &detector : detectors) {
+  for (const auto &detector : detectorSet) {
     IAlgorithm_sptr alg =
         createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
@@ -300,6 +346,38 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
   return corrected;
 }
 
+/** Calculate the theta value of the detector of interest specified via
+* processing instructions
+*
+* @param instructions :: processing instructions defining the detectors of
+* interest
+* @param inputWS :: the input workspace
+* @return :: the angle of the detector (only the first detector is considered)
+*/
+double
+ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
+                                               MatrixWorkspace_sptr inputWS) {
+
+  auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
+
+  // Detectors of interest may be empty. This happens for instance when we input
+  // a workspace that was previously reduced using this algorithm. In this case,
+  // we can't calculate theta
+  if (detectorsOfInterest.empty())
+    return 0.0;
+
+  IAlgorithm_sptr alg =
+      createChildAlgorithm("SpecularReflectionCalculateTheta");
+  alg->setProperty("InputWorkspace", inputWS);
+  alg->setProperty("DetectorComponentName", detectorsOfInterest[0]);
+  alg->execute();
+  double theta = alg->getProperty("TwoTheta");
+  // First factor 0.5 detector position, which isexpected to be at 2 * theta
+  // Second factor 0.5 comes from SpecularReflectionCalculateTheta, which
+  // outputs 2 * theta
+  return theta * 0.5 * 0.5;
+}
+
 /** Set direct beam properties
 *
 * @param alg :: ReflectometryReductionOne algorithm
@@ -309,22 +387,6 @@ void ReflectometryReductionOneAuto2::populateDirectBeamProperties(
 
   alg->setPropertyValue("RegionOfDirectBeam",
                         getPropertyValue("RegionOfDirectBeam"));
-}
-
-/** Set momentum transfer properties and scale factor
-*
-* @param alg :: ReflectometryReductionOne algorithm
-*/
-void ReflectometryReductionOneAuto2::populateMomentumTransferProperties(
-    IAlgorithm_sptr alg) {
-
-  alg->setPropertyValue("MomentumTransferMin",
-                        getPropertyValue("MomentumTransferMin"));
-  alg->setPropertyValue("MomentumTransferMax",
-                        getPropertyValue("MomentumTransferMax"));
-  alg->setPropertyValue("MomentumTransferStep",
-                        getPropertyValue("MomentumTransferStep"));
-  alg->setPropertyValue("ScaleFactor", getPropertyValue("ScaleFactor"));
 }
 
 /** Set transmission properties
@@ -414,6 +476,81 @@ void ReflectometryReductionOneAuto2::populateTransmissionProperties(
   }
 }
 
+/** Rebin and scale a workspace in Q.
+*
+* @param inpuwWS :: the workspace in Q
+* @param theta :: the angle of this run
+* @param params :: [output] rebin parameters
+* @return :: the output workspace
+*/
+MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(
+    MatrixWorkspace_sptr inputWS, double theta, std::vector<double> &params) {
+
+  Property *qStepProp = getProperty("MomentumTransferStep");
+  double qstep;
+  if (!qStepProp->isDefault()) {
+    qstep = getProperty("MomentumTransferStep");
+    qstep = -qstep;
+  } else {
+    if (theta == 0.0) {
+      throw std::runtime_error(
+          "Theta determined from the detector positions is "
+          "0.0. Please provide a value for theta manually "
+          "or correct the detector position before running "
+          "this algorithm.");
+    }
+
+    IAlgorithm_sptr calcRes = createChildAlgorithm("CalculateResolution");
+    calcRes->setProperty("Workspace", inputWS);
+    calcRes->setProperty("TwoTheta", 2 * theta);
+    calcRes->execute();
+
+    if (!calcRes->isExecuted()) {
+      g_log.error("CalculateResolution failed. Workspace in Q will not be "
+                  "rebinned. Please provide dQ/Q.");
+      return inputWS;
+    }
+    qstep = calcRes->getProperty("Resolution");
+    qstep = -qstep;
+  }
+
+  Property *qMin = getProperty("MomentumTransferMin");
+  Property *qMax = getProperty("MomentumTransferMax");
+  if (!qMin->isDefault() && !qMax->isDefault()) {
+    double qmin = getProperty("MomentumTransferMin");
+    double qmax = getProperty("MomentumTransferMax");
+    params.push_back(qmin);
+    params.push_back(qstep);
+    params.push_back(qmax);
+  } else {
+    params.push_back(qstep);
+  }
+
+  // Rebin
+  IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
+  algRebin->initialize();
+  algRebin->setProperty("InputWorkspace", inputWS);
+  algRebin->setProperty("OutputWorkspace", inputWS);
+  algRebin->setProperty("Params", params);
+  algRebin->execute();
+  MatrixWorkspace_sptr IvsQ = algRebin->getProperty("OutputWorkspace");
+
+  // Scale (optional)
+  Property *scaleProp = getProperty("ScaleFactor");
+  if (!scaleProp->isDefault()) {
+    double scaleFactor = getProperty("ScaleFactor");
+    IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
+    algScale->initialize();
+    algScale->setProperty("InputWorkspace", IvsQ);
+    algScale->setProperty("OutputWorkspace", IvsQ);
+    algScale->setProperty("Factor", 1.0 / scaleFactor);
+    algScale->execute();
+    IvsQ = algScale->getProperty("OutputWorkspace");
+  }
+
+  return IvsQ;
+}
+
 /** Check if input workspace is a group
 */
 bool ReflectometryReductionOneAuto2::checkGroups() {
@@ -449,8 +586,11 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   // Get our input workspace group
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       getPropertyValue("InputWorkspace"));
-  // Get name of IvsQ workspace
+  // Get name of IvsQ workspace (native binning)
   const std::string outputIvsQ = getPropertyValue("OutputWorkspace");
+  // Get name of IvsQ (native binning) workspace
+  const std::string outputIvsQBinned =
+      getPropertyValue("OutputWorkspaceBinned");
   // Get name of IvsLam workspace
   const std::string outputIvsLam =
       getPropertyValue("OutputWorkspaceWavelength");
@@ -503,12 +643,14 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     }
   }
 
-  std::vector<std::string> IvsQGroup, IvsLamGroup;
+  std::vector<std::string> IvsQGroup, IvsQUnbinnedGroup, IvsLamGroup;
 
   // Execute algorithm over each group member
   for (size_t i = 0; i < group->size(); ++i) {
 
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
+    const std::string IvsQBinnedName =
+        outputIvsQBinned + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
 
     if (firstTransG) {
@@ -528,10 +670,12 @@ bool ReflectometryReductionOneAuto2::processGroups() {
 
     alg->setProperty("InputWorkspace", group->getItem(i)->getName());
     alg->setProperty("OutputWorkspace", IvsQName);
+    alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
     alg->execute();
 
     IvsQGroup.push_back(IvsQName);
+    IvsQUnbinnedGroup.push_back(IvsQBinnedName);
     IvsLamGroup.push_back(IvsLamName);
   }
 
@@ -545,10 +689,14 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   groupAlg->setProperty("InputWorkspaces", IvsQGroup);
   groupAlg->setProperty("OutputWorkspace", outputIvsQ);
   groupAlg->execute();
+  groupAlg->setProperty("InputWorkspaces", IvsQUnbinnedGroup);
+  groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
+  groupAlg->execute();
 
   if (!polarizationAnalysisOn) {
     // No polarization analysis. Reduction stops here
     setPropertyValue("OutputWorkspace", outputIvsQ);
+    setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
     setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
     return true;
   }
@@ -557,6 +705,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     g_log.warning("Polarization corrections can only be performed on "
                   "multiperiod workspaces.");
     setPropertyValue("OutputWorkspace", outputIvsQ);
+    setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
     setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
     return true;
   }
@@ -580,16 +729,21 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
   alg->setProperty("ThetaIn", Mantid::EMPTY_DBL());
+  alg->setProperty("ProcessingInstructions", "0");
   for (size_t i = 0; i < group->size(); ++i) {
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
+    const std::string IvsQBinnedName =
+        outputIvsQBinned + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
     alg->setProperty("InputWorkspace", IvsLamName);
     alg->setProperty("OutputWorkspace", IvsQName);
+	alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
     alg->execute();
   }
 
   setPropertyValue("OutputWorkspace", outputIvsQ);
+  setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
   setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
   return true;
 }

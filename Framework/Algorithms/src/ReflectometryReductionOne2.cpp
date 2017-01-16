@@ -124,8 +124,6 @@ void ReflectometryReductionOne2::init() {
                                                    "", Direction::Output,
                                                    PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
-
-  initMomentumTransferProperties();
 }
 
 /** Validate inputs
@@ -359,48 +357,6 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
   convertUnits->setProperty("AlignBins", true);
   convertUnits->execute();
   MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
-
-  // Rebin (optional)
-  Property *qStepProp = getProperty("MomentumTransferStep");
-  if (!qStepProp->isDefault()) {
-    double qstep = getProperty("MomentumTransferStep");
-    qstep = -qstep;
-
-    std::vector<double> qparams;
-    Property *qMin = getProperty("MomentumTransferMin");
-    Property *qMax = getProperty("MomentumTransferMax");
-    if (!qMin->isDefault() && !qMax->isDefault()) {
-      double qmin = getProperty("MomentumTransferMin");
-      double qmax = getProperty("MomentumTransferMax");
-      qparams.push_back(qmin);
-      qparams.push_back(qstep);
-      qparams.push_back(qmax);
-    } else {
-      g_log.information("MomentumTransferMin and MomentumTransferMax will not "
-                        "be used to regin IvsQ workspace");
-      qparams.push_back(qstep);
-    }
-    IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
-    algRebin->initialize();
-    algRebin->setProperty("InputWorkspace", IvsQ);
-    algRebin->setProperty("OutputWorkspace", IvsQ);
-    algRebin->setProperty("Params", qparams);
-    algRebin->execute();
-    IvsQ = algRebin->getProperty("OutputWorkspace");
-  }
-
-  // Scale (optional)
-  Property *scaleProp = getProperty("ScaleFactor");
-  if (!scaleProp->isDefault()) {
-    double scaleFactor = getProperty("ScaleFactor");
-    IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
-    algScale->initialize();
-    algScale->setProperty("InputWorkspace", IvsQ);
-    algScale->setProperty("OutputWorkspace", IvsQ);
-    algScale->setProperty("Factor", 1.0 / scaleFactor);
-    algScale->execute();
-    IvsQ = algScale->getProperty("OutputWorkspace");
-  }
 
   return IvsQ;
 }

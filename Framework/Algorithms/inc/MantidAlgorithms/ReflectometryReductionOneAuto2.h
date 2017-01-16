@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
 
-#include "ReflectometryWorkflowBase2.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "ReflectometryWorkflowBase2.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -54,18 +54,27 @@ public:
 private:
   void init() override;
   void exec() override;
+  /// Get the name of the detectors of interest based on processing instructions
+  std::vector<std::string>
+  getDetectorNames(const std::string &instructions,
+                   Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Correct detector positions vertically
   Mantid::API::MatrixWorkspace_sptr
   correctDetectorPositions(const std::string &instructions,
                            Mantid::API::MatrixWorkspace_sptr inputWS);
+  /// Calculate theta
+  double calculateTheta(const std::string &instructions,
+                        Mantid::API::MatrixWorkspace_sptr inputWS);
+  /// Rebin and scale a workspace in Q
+  Mantid::API::MatrixWorkspace_sptr
+  rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS, double theta,
+                std::vector<double> &params);
   /// Populate direct beam properties
   void populateDirectBeamProperties(Mantid::API::IAlgorithm_sptr alg);
   /// Populate transmission properties
   void populateTransmissionProperties(
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument);
-  /// Populate momentum transfer properties
-  void populateMomentumTransferProperties(Mantid::API::IAlgorithm_sptr alg);
 };
 
 } // namespace Algorithms
