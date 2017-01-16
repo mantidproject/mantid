@@ -1,12 +1,8 @@
 #include "MantidLiveData/ISIS/ISISKafkaEventListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
-
-using namespace Mantid::Kernel;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISKafkaEventListener");
@@ -18,7 +14,6 @@ namespace LiveData {
 DECLARE_LISTENER(ISISKafkaEventListener)
 
 ISISKafkaEventListener::ISISKafkaEventListener() {
-  declareProperty(make_unique<PropertyWithValue<bool>>("EndOfRunStop", false));
   declareProperty("InstrumentName", "");
 }
 
@@ -27,14 +22,13 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   KafkaBroker broker(address.toString());
   try {
     std::string instrumentName = getProperty("InstrumentName");
-    bool stopEOR = getProperty("EndOfRunStop");
     const std::string eventTopic(instrumentName +
                                  KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
         runInfoTopic(instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
         spDetInfoTopic(instrumentName +
                        KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
-        broker, eventTopic, runInfoTopic, spDetInfoTopic, stopEOR);
+        broker, eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {
     g_log.error() << "ISISKafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
