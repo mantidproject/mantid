@@ -605,6 +605,9 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
   connect(m_plotSpecErr, SIGNAL(triggered()), this,
           SLOT(onClickPlotSpectraErr()));
 
+  m_plotSpecAdv = new QAction(tr("Plot Spectrum Advanced..."), this);
+  connect(m_plotSpecAdv, SIGNAL(triggered()), this, SLOT(onClickPlotSpectraAdv()));
+
   m_colorFill = new QAction(tr("Color Fill Plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this,
           SLOT(onClickDrawColorFillPlot()));
@@ -943,10 +946,12 @@ void QWorkspaceDockView::addMatrixWorkspaceMenuItems(
   menu->addSeparator();
   menu->addAction(m_plotSpec);
   menu->addAction(m_plotSpecErr);
+  menu->addAction(m_plotSpecAdv);
 
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled(matrixWS->blocksize() > 1);
   m_plotSpecErr->setEnabled(matrixWS->blocksize() > 1);
+  m_plotSpecAdv->setEnabled(matrixWS->blocksize() > 1);
 
   menu->addAction(m_showSpectrumViewer); // The 2D spectrum viewer
 
@@ -1036,6 +1041,8 @@ void QWorkspaceDockView::addWorkspaceGroupMenuItems(
   menu->addAction(m_plotSpec);
   m_plotSpecErr->setEnabled(true);
   menu->addAction(m_plotSpecErr);
+  m_plotSpecAdv->setEnabled(true);
+  menu->addAction(m_plotSpecAdv);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
 
@@ -1504,6 +1511,11 @@ void QWorkspaceDockView::onClickPlotSpectra() {
 void QWorkspaceDockView::onClickPlotSpectraErr() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
 }
+
+void QWorkspaceDockView::onClickPlotSpectraAdv() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumAdvanced);
+}
+
 
 /** Plots one or more spectra from each selected workspace
 * @param showErrors If true, show error bars. Otherwise no error bars are

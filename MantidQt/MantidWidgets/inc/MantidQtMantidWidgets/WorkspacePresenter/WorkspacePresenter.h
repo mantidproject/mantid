@@ -75,6 +75,7 @@ private:
   void saveToProgram();
   void plotSpectrum();
   void plotSpectrumWithErrors();
+  void plotSpectrumAdvanced();
   void showColourFillPlot();
   void showDetectorsTable();
   void showBoxDataTable();
