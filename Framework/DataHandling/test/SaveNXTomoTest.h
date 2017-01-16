@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 
@@ -82,7 +83,7 @@ public:
     AnalysisDataService::Instance().add(m_inputWS + "0", input);
 
     TS_ASSERT_THROWS_NOTHING(
-        m_saver->setPropertyValue("InputWorkspaces", input->name()));
+        m_saver->setPropertyValue("InputWorkspaces", input->getName()));
     TS_ASSERT_THROWS_NOTHING(
         m_saver->setPropertyValue("Filename", m_outputFile));
     m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
@@ -101,7 +102,7 @@ public:
     checksOnNXTomoFormat(3);
 
     // Tidy up
-    AnalysisDataService::Instance().remove(input->name());
+    AnalysisDataService::Instance().remove(input->getName());
     if (file.exists())
       file.remove();
   }
@@ -116,7 +117,7 @@ public:
     AnalysisDataService::Instance().add(wsgName + "0", input);
 
     TS_ASSERT_THROWS_NOTHING(
-        m_saver->setPropertyValue("InputWorkspaces", input->name()));
+        m_saver->setPropertyValue("InputWorkspaces", input->getName()));
     TS_ASSERT_THROWS_NOTHING(
         m_saver->setPropertyValue("Filename", m_outputFile));
     m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
@@ -135,7 +136,7 @@ public:
     checksOnNXTomoFormat(2);
 
     // Tidy up
-    AnalysisDataService::Instance().remove(input->name());
+    AnalysisDataService::Instance().remove(input->getName());
     if (file.exists())
       file.remove();
   }
@@ -159,7 +160,7 @@ public:
           m_inputWS + boost::lexical_cast<std::string>(numberOfPriorWS), input);
 
       TS_ASSERT_THROWS_NOTHING(
-          m_saver->setPropertyValue("InputWorkspaces", input->name()));
+          m_saver->setPropertyValue("InputWorkspaces", input->getName()));
       TS_ASSERT_THROWS_NOTHING(
           m_saver->setPropertyValue("Filename", m_outputFile));
       m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
@@ -178,7 +179,7 @@ public:
       checksOnNXTomoFormat(static_cast<int>(wspaces.size()) + numberOfPriorWS);
 
       // Tidy up
-      AnalysisDataService::Instance().remove(input->name());
+      AnalysisDataService::Instance().remove(input->getName());
       file.remove();
     }
   }
@@ -186,7 +187,7 @@ public:
 private:
   Workspace_sptr makeWorkspaceSingle(const std::string &input) {
     // Create a single workspace
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(
         m_axisSize * m_axisSize, 1, 1.0);
     ws->setTitle(input);
 
@@ -227,11 +228,11 @@ private:
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(wspaces.size()); ++i) {
       if (specPerRow) {
-        wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+        wspaces[i] = WorkspaceCreationHelper::create2DWorkspaceBinned(
             m_axisSize, m_axisSize + 1, 1.0);
 
       } else {
-        wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+        wspaces[i] = WorkspaceCreationHelper::create2DWorkspaceBinned(
             m_axisSize * m_axisSize, 1, 1.0);
       }
       wspaces[i]->setTitle(

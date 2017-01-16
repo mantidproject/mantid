@@ -1125,12 +1125,11 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
   const Poco::URI fullURL = makeFullURI(t.m_url, g_downloadOneBasePath, jobId);
   const StringToStringMap headers =
       makeHeaders(std::string("application/xml"), token, g_acceptType);
-  const std::string body = remotePath;
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(fullURL, ss, headers,
-                                    Poco::Net::HTTPRequest::HTTP_GET, body);
+    code = doSendRequestGetResponse(
+        fullURL, ss, headers, Poco::Net::HTTPRequest::HTTP_GET, remotePath);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to download a file: " +

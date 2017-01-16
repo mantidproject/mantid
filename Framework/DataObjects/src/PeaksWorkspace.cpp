@@ -6,7 +6,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"

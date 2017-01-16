@@ -8,6 +8,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Unit.h"
 #include <boost/make_shared.hpp>
 
@@ -627,9 +628,9 @@ void ReflectometryReductionOne::exec() {
   double momentumTransferMaximum = getProperty("MomentumTransferMaximum");
   MantidVec QParams;
   if (isDefault("MomentumTransferMinimum"))
-    momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
+    momentumTransferMinimum = calculateQ(IvsLam->x(0).back(), theta.get());
   if (isDefault("MomentumTransferMaximum"))
-    momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
+    momentumTransferMaximum = calculateQ(IvsLam->x(0).front(), theta.get());
   if (isDefault("MomentumTransferStep")) {
     // if the DQQ is not given for this run.
     // we will use CalculateResoltion to produce this value

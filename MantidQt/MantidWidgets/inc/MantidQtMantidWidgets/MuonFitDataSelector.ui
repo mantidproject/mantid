@@ -38,7 +38,7 @@
               </widget>
              </item>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runs" native="true">
+              <widget class="MantidQt::API::MWRunFiles" name="runs" native="true">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -92,60 +92,13 @@
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayoutWSIndex">
-             <item>
-              <widget class="QLabel" name="lblWSIndex">
-               <property name="text">
-                <string>Workspace index:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="txtWSIndex">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayoutStartTime">
+            <layout class="QHBoxLayout" name="horizontalLayoutTime">
              <item>
               <widget class="QLabel" name="lblStart">
                <property name="text">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start (us):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacerStart">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
              <item>
               <widget class="QLineEdit" name="txtStart">
@@ -157,19 +110,8 @@
                </property>
               </widget>
              </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayoutEndTime">
              <item>
-              <widget class="QLabel" name="lblEnd">
-               <property name="text">
-                <string>End (us):</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacerEnd">
+              <spacer name="horizontalSpacerTime">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -180,6 +122,13 @@
                 </size>
                </property>
               </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="lblEnd">
+               <property name="text">
+                <string>End (us):</string>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QLineEdit" name="txtEnd">
@@ -385,9 +334,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

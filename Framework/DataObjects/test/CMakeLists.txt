@@ -12,6 +12,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
+                        ../../TestHelpers/src/FakeObjects.cpp
   )
 
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
@@ -20,6 +21,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             HistogramData
+            Indexing
             Kernel
             ${NEXUS_LIBRARIES}
             ${JSONCPP_LIBRARIES}

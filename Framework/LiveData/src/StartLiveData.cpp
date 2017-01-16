@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 
@@ -71,19 +72,22 @@ void StartLiveData::init() {
 }
 
 /**
- * After Instrument property is set copy any properties that the instrument's
- * listener may have to this algorithm.
+ * After Listener or Connection properties are set, copy any properties that
+ * the listener may have to this algorithm.
+ *
+ * @param propName Name of property that was just set
  */
 void StartLiveData::afterPropertySet(const std::string &propName) {
-  if (propName == "Instrument") {
+  // If any of these properties change, the listener class might change
+  if (propName == "Instrument" || propName == "Listener" ||
+      propName == "Connection") {
     // Properties of old listener, if any, need to be removed
     removeListenerProperties();
 
-    // Get of instance of listener for this instrument
-    auto listener = LiveListenerFactory::Instance().create(
-        getPropertyValue(propName), false);
+    // Get temp instance of listener for this instrument with current properties
+    auto listener = createLiveListener();
 
-    // Copy over properties of new listener to this algorithm
+    // Copy over properties of listener to this algorithm
     copyListenerProperties(listener);
   }
 }
@@ -108,11 +112,18 @@ void StartLiveData::copyListenerProperties(
  * Removes previously copied ILiveListener properties.
  */
 void StartLiveData::removeListenerProperties() {
-  // Remove all properties tagged with the listener property group
-  for (auto prop : getProperties()) {
+  std::vector<std::string> propertiesToRemove;
+
+  // Find properties tagged with the listener property group
+  for (const auto &prop : getProperties()) {
     if (prop->getGroup() == listenerPropertyGroup) {
-      removeProperty(prop->name());
+      propertiesToRemove.push_back(prop->name());
     }
+  }
+
+  // Remove identified properties
+  for (const auto &prop : propertiesToRemove) {
+    removeProperty(prop);
   }
 }
 

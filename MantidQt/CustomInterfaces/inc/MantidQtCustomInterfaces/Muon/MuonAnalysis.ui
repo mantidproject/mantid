@@ -195,7 +195,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunDeadTimeFile" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="mwRunDeadTimeFile" native="true">
                    <property name="enabled">
                     <bool>true</bool>
                    </property>
@@ -526,7 +526,7 @@ p, li { white-space: pre-wrap; }
                <item>
                 <layout class="QHBoxLayout" name="fileInputLayout">
                  <item>
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="mwRunFiles" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                      <horstretch>0</horstretch>
@@ -534,7 +534,7 @@ p, li { white-space: pre-wrap; }
                     </sizepolicy>
                    </property>
                    <property name="toolTip">
-                    <string>Specify a run number or data file by typing a run number or use 
+                    <string>Specify a run number or data file by typing a run number or use
 the Browse button to select</string>
                    </property>
                    <property name="findRunFiles" stdset="0">
@@ -1159,19 +1159,19 @@ p, li { white-space: pre-wrap; }
              <row/>
              <column>
               <property name="text">
-               <string>Group Pair 
+               <string>Group Pair
 (Name)</string>
               </property>
              </column>
              <column>
               <property name="text">
-               <string>Forward 
+               <string>Forward
 (Group name)</string>
               </property>
              </column>
              <column>
               <property name="text">
-               <string>Backward 
+               <string>Backward
 (Group name)</string>
               </property>
              </column>
@@ -1379,7 +1379,7 @@ p, li { white-space: pre-wrap; }
        <attribute name="toolTip">
         <string>The Results Table tab allows:
  creating result(s) tables
- selecting which instrument log values (temp, field etc) to write out alongside the fit 
+ selecting which instrument log values (temp, field etc) to write out alongside the fit
      parameters
  option to write out fit information from one or several data files</string>
        </attribute>
@@ -1490,9 +1490,9 @@ p, li { white-space: pre-wrap; }
              <item row="0" column="1">
               <widget class="QCheckBox" name="selectAllFittingResults">
                <property name="toolTip">
-                <string>If checked then the fit results 
-from all the runs listed are 
-selected and written to the 
+                <string>If checked then the fit results
+from all the runs listed are
+selected and written to the
 results table.</string>
                </property>
                <property name="text">
@@ -1577,7 +1577,7 @@ p, li { white-space: pre-wrap; }
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Individual fits</string>
+                <string>Individual</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -1599,7 +1599,7 @@ p, li { white-space: pre-wrap; }
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Sequential fits:</string>
+                <string>Sequential:</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">fitType</string>
@@ -1625,7 +1625,7 @@ p, li { white-space: pre-wrap; }
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Simultaneous fits:</string>
+                <string>Simultaneous:</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">fitType</string>
@@ -1651,7 +1651,7 @@ p, li { white-space: pre-wrap; }
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Multiple fits</string>
+                <string>Multiple</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">fitType</string>
@@ -2669,9 +2669,9 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>

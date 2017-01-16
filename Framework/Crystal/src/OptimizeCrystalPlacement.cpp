@@ -14,6 +14,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 
@@ -255,7 +256,7 @@ void OptimizeCrystalPlacement::exec() {
     message += "will be 'changed'";
     g_log.notice(message);
   }
-  if (OptRunNums.size() > 0 && !omitRuns)
+  if (!OptRunNums.empty() && !omitRuns)
     FuncArg += ",OptRuns=" + OptRunNums;
 
   //------------- Add initial parameter values to FuncArg -----------

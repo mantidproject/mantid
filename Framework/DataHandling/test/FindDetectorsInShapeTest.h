@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/FindDetectorsInShape.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 class FindDetectorsInShapeTest : public CxxTest::TestSuite {
 public:

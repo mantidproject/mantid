@@ -109,6 +109,14 @@ void ConvolutionFitSequential::init() {
   declareProperty("MaxIterations", 500, boundedV,
                   "The maximum number of iterations permitted",
                   Direction::Input);
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -131,6 +139,7 @@ void ConvolutionFitSequential::exec() {
   const bool convolve = getProperty("Convolve");
   const int maxIter = getProperty("MaxIterations");
   const std::string minimizer = getProperty("Minimizer");
+  const int peakRadius = getProperty("PeakRadius");
 
   // Inspect function to obtain fit Type and background
   const auto functionValues = findValuesFromFunction(function);
@@ -207,6 +216,7 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("MaxIterations", maxIter);
   plotPeaks->setProperty("Minimizer", minimizer);
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
+  plotPeaks->setProperty("PeakRadius", peakRadius);
   plotPeaks->executeAsChildAlg();
   ITableWorkspace_sptr outputWs = plotPeaks->getProperty("OutputWorkspace");
 

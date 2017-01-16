@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <fstream>
@@ -89,20 +90,20 @@ void FindDeadDetectors::exec() {
   int64_t iprogress_step = numSpec / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;
+  const auto &indexInfo = integratedWorkspace->indexInfo();
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
-    auto &spec = integratedWorkspace->getSpectrum(i);
-    double &y = spec.mutableY()[0];
+    double &y = integratedWorkspace->mutableY(i)[0];
     if (y > deadThreshold) {
       y = liveValue;
     } else {
       ++countSpec;
       y = deadValue;
-      const specnum_t specNo = spec.getSpectrumNo();
+      const specnum_t specNo = indexInfo.spectrumNumber(i);
       // Write the spectrum number to file
       file << i << " " << specNo;
       // Get the list of detectors for this spectrum and iterate over
-      const auto &dets = spec.getDetectorIDs();
+      const auto &dets = indexInfo.detectorIDs(i);
       for (const auto &det : dets) {
         // Write the detector ID to file, log & the FoundDead output property
         file << " " << det;

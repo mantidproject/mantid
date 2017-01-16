@@ -21,14 +21,37 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-
 #include "MantidKernel/Material.h"
-
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
+
+namespace {
+// -----------------------------------------------------------------------------
+// Mock Random Number Generator
+// -----------------------------------------------------------------------------
+class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
+public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  MOCK_METHOD0(nextValue, double());
+  MOCK_METHOD2(nextValue, double(double, double));
+  MOCK_METHOD2(nextInt, int(int, int));
+  MOCK_METHOD0(restart, void());
+  MOCK_METHOD0(save, void());
+  MOCK_METHOD0(restore, void());
+  MOCK_METHOD1(setSeed, void(size_t));
+  MOCK_METHOD2(setRange, void(const double, const double));
+  MOCK_CONST_METHOD0(min, double());
+  MOCK_CONST_METHOD0(max, double());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
+};
+}
 
 class ObjectTest : public CxxTest::TestSuite {
 
@@ -53,8 +76,7 @@ public:
   }
 
   void testCopyConstructorGivesObjectWithSameAttributes() {
-    Object_sptr original =
-        ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0);
     original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
@@ -80,8 +102,7 @@ public:
   }
 
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
-    Object_sptr original =
-        ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0);
     original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
@@ -181,7 +202,7 @@ public:
   }
 
   void testIsOnSideSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 0, 0)), false); // origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 4.0, 0)), false);
@@ -202,7 +223,7 @@ public:
   }
 
   void testIsValidSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 0, 0)), true); // origin
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 4.0, 0)), true);
@@ -223,7 +244,7 @@ public:
   }
 
   void testCalcValidTypeSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     // entry on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(1, 0, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(-1, 0, 0)),
@@ -246,7 +267,7 @@ public:
   }
 
   void testGetBoundingBoxForSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     const double tolerance(1e-10);
 
     double xmax, ymax, zmax, xmin, ymin, zmin;
@@ -322,7 +343,7 @@ public:
 
   void testInterceptSurfaceSphereY() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -334,7 +355,7 @@ public:
 
   void testInterceptSurfaceSphereX() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -555,7 +576,7 @@ public:
   }
 
   void testComplementWithTwoPrimitives() {
-    auto shell = createSphericalShell();
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
 
     TS_ASSERT_EQUALS(2, shell->getSurfaceIndex().size());
 
@@ -566,7 +587,7 @@ public:
     TS_ASSERT_EQUALS("SurfPoint", leaf1->className());
     auto surfPt1 = dynamic_cast<const SurfPoint *>(leaf1);
     TS_ASSERT(surfPt1);
-    TS_ASSERT_EQUALS(1, surfPt1->getKeyN());
+    TS_ASSERT_EQUALS(2, surfPt1->getKeyN());
     auto outer = dynamic_cast<const Sphere *>(surfPt1->getKey());
     TS_ASSERT(outer);
     TS_ASSERT_DELTA(1.0, outer->getRadius(), 1e-10);
@@ -577,7 +598,7 @@ public:
     TS_ASSERT(compRule);
     TS_ASSERT_EQUALS("SurfPoint", compRule->leaf(0)->className());
     auto surfPt2 = dynamic_cast<const SurfPoint *>(compRule->leaf(0));
-    TS_ASSERT_EQUALS(2, surfPt2->getKeyN());
+    TS_ASSERT_EQUALS(1, surfPt2->getKeyN());
     auto inner = dynamic_cast<const Sphere *>(surfPt2->getKey());
     TS_ASSERT(inner);
     TS_ASSERT_DELTA(0.5, inner->getRadius(), 1e-10);
@@ -661,9 +682,75 @@ public:
                          -M_SQRT2 - 0.5 * M_SQRT1_2,
                          -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
-    Object_sptr S = createSphere();
+    Object_sptr S = ComponentCreationHelper::createSphere(4.1);
     TS_ASSERT_EQUALS(S->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(0.0, 0.0, 0));
+  }
+
+  void testGeneratePointInside() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.70));
+
+    // inner radius=0.5, outer=1. Random sequence set up so as to give point
+    // inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    size_t maxAttempts(1);
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = shell->generatePointInObject(rng, maxAttempts));
+
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(-1. + 2. * 0.55, point.X(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.65, point.Y(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.70, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideRespectsMaxAttempts() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.1));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.2));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.3));
+
+    // inner radius=0.5, outer=1. Random sequence set up so as to give point
+    // inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    size_t maxAttempts(1);
+    TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
+                     std::runtime_error);
+  }
+
+  void testGeneratePointInsideRespectsActiveRegion() {
+    using namespace ::testing;
+
+    // Generate "random" sequence.
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.01));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.02));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.03));
+
+    // Radius=0.5
+    auto ball = ComponentCreationHelper::createSphere(0.5);
+    // Create a thin infinite rectangular region to restrict point generation
+    BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
+    size_t maxAttempts(1);
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(-0.1 + 0.01 * 0.2, point.X(), tolerance);
+    TS_ASSERT_DELTA(-0.1 + 0.02 * 0.2, point.Y(), tolerance);
+    TS_ASSERT_DELTA(-0.1 + 0.03 * 0.2, point.Z(), tolerance);
   }
 
   void testSolidAngleSphere()
@@ -671,7 +758,7 @@ public:
   Test solid angle calculation for a sphere
   */
   {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     double satol = 2e-2; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
@@ -936,7 +1023,7 @@ public:
   Test solid angle calculation for a sphere from triangulation
   */
   {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     double satol = 1e-3; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
@@ -1024,45 +1111,6 @@ private:
     retVal->populate(CylSurMap);
 
     return retVal;
-  }
-
-  Object_sptr createSphere() {
-    std::string S41 = "so 4.1"; // Sphere at origin radius 4.1
-
-    // First create some surfaces
-    std::map<int, boost::shared_ptr<Surface>> SphSurMap;
-    SphSurMap[41] = boost::make_shared<Sphere>();
-    SphSurMap[41]->setSurface(S41);
-    SphSurMap[41]->setName(41);
-
-    // A sphere
-    std::string ObjSphere = "-41";
-
-    Object_sptr retVal = Object_sptr(new Object);
-    retVal->setObject(41, ObjSphere);
-    retVal->populate(SphSurMap);
-
-    return retVal;
-  }
-
-  Object_sptr createSphericalShell() {
-    // First create some surfaces
-    auto outer = boost::make_shared<Sphere>();
-    outer->setName(1);
-    outer->setRadius(1.0);
-    auto inner = boost::make_shared<Sphere>();
-    inner->setName(2);
-    inner->setRadius(0.5);
-    std::map<int, boost::shared_ptr<Surface>> surfaces = {{1, outer},
-                                                          {2, inner}};
-
-    // algebra string is outer with intersection of complement of inner
-    const std::string algebra = "(-1) # (-2)";
-    auto shell = boost::make_shared<Object>();
-    shell->setObject(21, algebra);
-    shell->populate(surfaces);
-
-    return shell;
   }
 
   void clearSurfMap()
@@ -1292,6 +1340,45 @@ private:
     retVal->populate(HexSurMap);
     return retVal;
   }
+};
+
+// -----------------------------------------------------------------------------
+// Performance tests
+// -----------------------------------------------------------------------------
+class ObjectTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ObjectTestPerformance *createSuite() {
+    return new ObjectTestPerformance();
+  }
+  static void destroySuite(ObjectTestPerformance *suite) { delete suite; }
+
+  ObjectTestPerformance()
+      : rng(200000), solid(ComponentCreationHelper::createSphere(0.1)),
+        shell(ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
+
+  void test_generatePointInside_Solid_Primitive() {
+    const size_t maxAttempts(500);
+    V3D dummy;
+    for (size_t i = 0; i < npoints; ++i) {
+      dummy = solid->generatePointInObject(rng, maxAttempts);
+    }
+  }
+
+  void test_Point_Inside_Solid_Composite_With_Hole() {
+    const size_t maxAttempts(500);
+    V3D dummy;
+    for (size_t i = 0; i < npoints; ++i) {
+      dummy = shell->generatePointInObject(rng, maxAttempts);
+    }
+  }
+
+private:
+  const size_t npoints = 20000;
+  Mantid::Kernel::MersenneTwister rng;
+  Object_sptr solid;
+  Object_sptr shell;
 };
 
 #endif // MANTID_TESTOBJECT__

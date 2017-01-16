@@ -24,10 +24,8 @@
 #include <QSignalMapper>
 #include <QFileInfo>
 #include <QDir>
-#include "MantidAPI/MultipleFileProperty.h"
 #include <QGroupBox>
 #include <climits>
-#include "MantidQtAPI/FilePropertyWidget.h"
 #include "MantidQtAPI/PropertyWidgetFactory.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 #include "MantidQtAPI/PropertyWidget.h"

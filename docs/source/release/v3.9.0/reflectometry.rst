@@ -25,6 +25,9 @@ Algorithms
   * Monitor integration range was not being applied properly to CRISP data. The problem was that in the parameter
     file the wavelength range used to crop the workspace in wavelength is [0.6, 6.5] and the monitor integration range is outside of these limits ([4, 10]). This was causing the algorithm to integrate over [0.6, 4].
 
+* :ref:`algm-Stitch1D` documentation has been improved, it now includes a workflow diagram illustrating the different steps in the calculation and a note about how errors are propagated.
+* :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces.
+
 Reflectometry Reduction Interface
 ---------------------------------
 
@@ -32,6 +35,13 @@ ISIS Reflectometry (Polref)
 ###########################
 
 - Settings tab now displays individual global options for experiment and instrument settings.
+- New 'Save ASCII' tab added, similar in function and purpose to the 'Save Workspaces' window accessible from Interfaces->ISIS Reflectometry->File->Save Workspaces.
+- When runs are transferred to the processing table groups are now labeled according to run title.
+- Column :literal:`dQ/Q` is used as the rebin parameter to stitch workspaces.
+- Fixed a bug where if the user answered 'no' to a popup asking if they wanted to process all runs, the progress bar would show activity as though a data reduction was occurring.
+- The interface is now arranged in two different groups. Groups apply to tabs 'Run' and 'Settings'.
+- Documentation regarding the interface has been updated accordingly.
+- Error messages are displayed if the user either attempts to transfer zero runs or transfer runs with a different strategy to the one they used to search for runs with. 
 
 ISIS Reflectometry
 ##################

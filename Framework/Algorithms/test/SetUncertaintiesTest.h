@@ -25,7 +25,7 @@ public:
   */
   API::MatrixWorkspace_sptr runAlg(const std::string &mode) {
     // random data mostly works
-    auto inWksp = WorkspaceCreationHelper::Create1DWorkspaceRand(30);
+    auto inWksp = WorkspaceCreationHelper::create1DWorkspaceRand(30);
     // Ensure first elements of random workspace are zero so test don't
     // pass randomly
     auto &E = inWksp->mutableE(0);
@@ -58,7 +58,7 @@ public:
       TS_ASSERT_EQUALS(item, 0.);
     }
 
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_sqrt() {
@@ -70,7 +70,7 @@ public:
       TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
     }
 
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_oneIfZero() {
@@ -80,7 +80,7 @@ public:
     for (const auto item : E) {
       TS_ASSERT(item > 0.);
     }
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_sqrtOrOne() {
@@ -96,7 +96,7 @@ public:
       }
     }
 
-    API::AnalysisDataService::Instance().remove(outWS->name());
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 };
 
@@ -111,7 +111,7 @@ public:
     constexpr size_t wsSize(1000000);
 
     // random data mostly works
-    inputWs = WorkspaceCreationHelper::Create1DWorkspaceRand(wsSize);
+    inputWs = WorkspaceCreationHelper::create1DWorkspaceRand(wsSize);
     algZero.setProperty("InputWorkspace", inputWs);
     algZero.setProperty("SetError", "zero");
     algZero.setProperty("OutputWorkspace", wsName);

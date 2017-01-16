@@ -15,6 +15,7 @@
 #include "../MultiLayer.h"
 #include "ErrorBarSettings.h"
 #include "MantidKernel/ReadLock.h"
+#include <sstream>
 
 using namespace Mantid::API;
 using namespace MantidQt::API;

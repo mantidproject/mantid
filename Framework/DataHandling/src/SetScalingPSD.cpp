@@ -1,11 +1,8 @@
-// SetScalingPSD
 // @author Ronald Fowler
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -87,7 +84,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
   std::map<int, double> scaleMap;
   std::map<int, double>::iterator its;
 
-  Instrument_const_sptr instrument = m_workspace->getInstrument();
+  const auto &detectorInfo = m_workspace->detectorInfo();
   if (scalingFile.find(".sca") != std::string::npos ||
       scalingFile.find(".SCA") != std::string::npos) {
     // read a .sca text format file
@@ -140,38 +137,35 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
       // use abs as correction file has -ve l2 for first few detectors
       truPos.spherical(fabs(l2), theta, phi);
       truepos.push_back(truPos);
-      //
-      Geometry::IDetector_const_sptr det;
       try {
-        det = instrument->getDetector(detIndex);
-      } catch (Kernel::Exception::NotFoundError &) {
+        // detIndex is what Mantid usually calls detectorID
+        size_t index = detectorInfo.indexOf(detIndex);
+        Kernel::V3D detPos = detectorInfo.position(index);
+        Kernel::V3D shift = truPos - detPos;
+
+        // scaling applied to dets that are not monitors and have sequential IDs
+        if (detIdLast == detIndex - 1 && !detectorInfo.isMonitor(index)) {
+          Kernel::V3D diffI = detPos - detPosLast;
+          Kernel::V3D diffT = truPos - truPosLast;
+          double scale = diffT.norm() / diffI.norm();
+          // Wish to store the scaling in a map, if we already have a scaling
+          // for this detector (i.e. from the other side) we average the two
+          // values. End of tube detectors only have one scaling estimate.
+          scaleMap[detIndex] = scale;
+          its = scaleMap.find(detIndex - 1);
+          if (its == scaleMap.end())
+            scaleMap[detIndex - 1] = scale;
+          else
+            its->second = 0.5 * (its->second + scale);
+        }
+        detIdLast = detIndex;
+        detPosLast = detPos;
+        truPosLast = truPos;
+        posMap[detIndex] = shift;
+        prog.report();
+      } catch (std::out_of_range &) {
         continue;
       }
-      Kernel::V3D detPos = det->getPos();
-      Kernel::V3D shift = truPos - detPos;
-
-      // scaling applied to dets that are not monitors and have sequential IDs
-      if (detIdLast == detIndex - 1 && !det->isMonitor()) {
-        Kernel::V3D diffI = detPos - detPosLast;
-        Kernel::V3D diffT = truPos - truPosLast;
-        double scale = diffT.norm() / diffI.norm();
-        // Wish to store the scaling in a map, if we already have a scaling
-        // for this detector (i.e. from the other side) we average the two
-        // values. End of tube detectors only have one scaling estimate.
-        scaleMap[detIndex] = scale;
-        its = scaleMap.find(detIndex - 1);
-        if (its == scaleMap.end())
-          scaleMap[detIndex - 1] = scale;
-        else
-          its->second = 0.5 * (its->second + scale);
-        // std::cout << detIndex << scale << scaleDir << '\n';
-      }
-      detIdLast = detIndex;
-      detPosLast = detPos;
-      truPosLast = truPos;
-      posMap[detIndex] = shift;
-      //
-      prog.report();
     }
   } else if (scalingFile.find(".raw") != std::string::npos ||
              scalingFile.find(".RAW") != std::string::npos) {
@@ -189,44 +183,42 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
     Progress prog(this, 0.0, 0.5, detectorCount);
     for (int i = 0; i < detectorCount; i++) {
       int detIndex = detID[i];
-      Geometry::IDetector_const_sptr det;
       try {
-        det = instrument->getDetector(detIndex);
-      } catch (Kernel::Exception::NotFoundError &) {
+        // detIndex is what Mantid usually calls detectorID
+        size_t index = detectorInfo.indexOf(detIndex);
+        Kernel::V3D detPos = detectorInfo.position(index);
+        Kernel::V3D shift = truepos[i] - detPos;
+
+        if (detIdLast == detIndex - 1 && !detectorInfo.isMonitor(index)) {
+          Kernel::V3D diffI = detPos - detPosLast;
+          Kernel::V3D diffT = truepos[i] - truPosLast;
+          double scale = diffT.norm() / diffI.norm();
+          scaleMap[detIndex] = scale;
+          its = scaleMap.find(detIndex - 1);
+          if (its == scaleMap.end()) {
+            scaleMap[detIndex - 1] = scale;
+          } else {
+            if (m_scalingOption == 0)
+              its->second = 0.5 * (its->second + scale); // average of two
+            else if (m_scalingOption == 1) {
+              if (its->second < scale)
+                its->second = scale; // max
+            } else if (m_scalingOption == 2) {
+              if (its->second < scale)
+                its->second = scale;
+              its->second *= 1.05; // max+5%
+            } else
+              its->second = 3.0; // crazy test value
+          }
+        }
+        detIdLast = detID[i];
+        detPosLast = detPos;
+        truPosLast = truepos[i];
+        posMap[detIndex] = shift;
+        prog.report();
+      } catch (std::out_of_range &) {
         continue;
       }
-      Kernel::V3D detPos = det->getPos();
-      Kernel::V3D shift = truepos[i] - detPos;
-
-      if (detIdLast == detIndex - 1 && !det->isMonitor()) {
-        Kernel::V3D diffI = detPos - detPosLast;
-        Kernel::V3D diffT = truepos[i] - truPosLast;
-        double scale = diffT.norm() / diffI.norm();
-        scaleMap[detIndex] = scale;
-        its = scaleMap.find(detIndex - 1);
-        if (its == scaleMap.end()) {
-          scaleMap[detIndex - 1] = scale;
-        } else {
-          if (m_scalingOption == 0)
-            its->second = 0.5 * (its->second + scale); // average of two
-          else if (m_scalingOption == 1) {
-            if (its->second < scale)
-              its->second = scale; // max
-          } else if (m_scalingOption == 2) {
-            if (its->second < scale)
-              its->second = scale;
-            its->second *= 1.05; // max+5%
-          } else
-            its->second = 3.0; // crazy test value
-        }
-        // std::cout << detIndex << scale << scaleDir << '\n';
-      }
-      detIdLast = detID[i];
-      detPosLast = detPos;
-      truPosLast = truepos[i];
-      posMap[detIndex] = shift;
-      //
-      prog.report();
     }
   }
   movePos(m_workspace, posMap, scaleMap);

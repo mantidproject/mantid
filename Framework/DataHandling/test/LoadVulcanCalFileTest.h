@@ -4,7 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidDataHandling/LoadVulcanCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -144,11 +146,12 @@ public:
     if (!maskWS)
       return;
 
+    const auto &spectrumInfo = maskWS->spectrumInfo();
     size_t nummasked = 0;
     for (size_t i = 0; i < maskWS->getNumberHistograms(); ++i) {
       if (maskWS->readY(i)[0] > 0.5) {
         ++nummasked;
-        TS_ASSERT(maskWS->getDetector(i)->isMasked());
+        TS_ASSERT(spectrumInfo.isMasked(i));
       }
     }
 

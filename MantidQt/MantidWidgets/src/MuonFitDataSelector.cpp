@@ -26,7 +26,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
   // using the Browse button. (If they want to "Browse" they can use front tab).
-  m_ui.runs->doButtonOpt(MWRunFiles::ButtonOpts::None);
+  m_ui.runs->doButtonOpt(API::MWRunFiles::ButtonOpts::None);
 }
 
 /**
@@ -55,8 +55,6 @@ void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.runs, SIGNAL(filesFound()), this, SLOT(userChangedRuns()));
   connect(m_ui.rbCoAdd, SIGNAL(toggled(bool)), this,
           SLOT(fitTypeChanged(bool)));
-  connect(m_ui.txtWSIndex, SIGNAL(editingFinished()), this,
-          SIGNAL(dataPropertiesChanged()));
   connect(m_ui.txtStart, SIGNAL(editingFinished()), this,
           SIGNAL(dataPropertiesChanged()));
   connect(m_ui.txtEnd, SIGNAL(editingFinished()), this,
@@ -133,26 +131,6 @@ void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
 }
 
 /**
- * Get the user's supplied workspace index (default 0)
- * Returns an unsigned int so it can be put into a QVariant
- * @returns :: Workspace index input by user
- */
-unsigned int MuonFitDataSelector::getWorkspaceIndex() const {
-  // Validator ensures this can be cast to a positive integer
-  const QString index = m_ui.txtWSIndex->text();
-  return index.toUInt();
-}
-
-/**
- * Set the workspace index in the UI
- * @param index :: [input] Workspace index to set
- */
-void MuonFitDataSelector::setWorkspaceIndex(unsigned int index) {
-  m_ui.txtWSIndex->setText(QString::number(index));
-  emit dataPropertiesChanged();
-}
-
-/**
  * Get the user's supplied start time (default 0)
  * @returns :: start time input by user in microseconds
  */
@@ -219,8 +197,6 @@ QStringList MuonFitDataSelector::getFilenames() const {
  * e.g. some boxes should only accept numeric input
  */
 void MuonFitDataSelector::setUpValidators() {
-  // WS index: non-negative integers only
-  m_ui.txtWSIndex->setValidator(new QIntValidator(0, 1000, this));
   // Start/end times: numeric values only
   m_ui.txtStart->setValidator(new QDoubleValidator(this));
   m_ui.txtEnd->setValidator(new QDoubleValidator(this));
@@ -258,7 +234,6 @@ void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
 void MuonFitDataSelector::setDefaultValues() {
   m_ui.lblStart->setText(QString("Start (%1s)").arg(QChar(0x03BC)));
   m_ui.lblEnd->setText(QString("End (%1s)").arg(QChar(0x03BC)));
-  this->setWorkspaceIndex(0);
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   setPeriodCombination(false);
@@ -475,7 +450,6 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
 QVariant MuonFitDataSelector::getUserInput() const {
   QVariant ret(QVariant::Map);
   auto map = ret.toMap();
-  map.insert("Workspace index", getWorkspaceIndex());
   map.insert("Start", getStartTime());
   map.insert("End", getEndTime());
   map.insert("Runs", getRuns());
@@ -499,9 +473,6 @@ QVariant MuonFitDataSelector::getUserInput() const {
 void MuonFitDataSelector::setUserInput(const QVariant &value) {
   if (value.canConvert(QVariant::Map)) {
     const auto map = value.toMap();
-    if (map.contains("Workspace index")) {
-      setWorkspaceIndex(map.value("Workspace index").toUInt());
-    }
     if (map.contains("Start")) {
       setStartTime(map.value("Start").toDouble());
     }

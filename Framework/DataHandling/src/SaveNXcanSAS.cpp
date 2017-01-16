@@ -19,6 +19,7 @@
 #include <H5Cpp.h>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -752,7 +753,7 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
   }
 
   // Don't allow ragged workspaces for now
-  if (!API::WorkspaceHelpers::commonBoundaries(workspace)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*workspace)) {
     result.emplace("InputWorkspace",
                    "The InputWorkspace cannot be a ragged workspace.");
   }

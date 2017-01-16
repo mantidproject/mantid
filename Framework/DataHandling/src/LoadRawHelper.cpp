@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -13,7 +14,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/RawFileInfo.h"
 

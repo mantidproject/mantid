@@ -2,7 +2,9 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 

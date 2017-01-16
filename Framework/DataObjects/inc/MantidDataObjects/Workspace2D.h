@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid {
@@ -40,7 +40,7 @@ namespace DataObjects {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Workspace2D : public API::MatrixWorkspace {
+class DLLExport Workspace2D : public API::HistoWorkspace {
 public:
   /**
   Gets the name of the workspace type
@@ -55,6 +55,11 @@ public:
   /// Returns a clone of the workspace
   std::unique_ptr<Workspace2D> clone() const {
     return std::unique_ptr<Workspace2D>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<Workspace2D> cloneEmpty() const {
+    return std::unique_ptr<Workspace2D>(doCloneEmpty());
   }
 
   /// Returns the histogram number
@@ -96,6 +101,8 @@ protected:
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
+  void init(const std::size_t &NVectors,
+            const HistogramData::Histogram &histogram) override;
 
   /// The number of vectors in the workspace
   std::size_t m_noVectors;
@@ -108,6 +115,7 @@ protected:
 
 private:
   Workspace2D *doClone() const override { return new Workspace2D(*this); }
+  Workspace2D *doCloneEmpty() const override { return new Workspace2D(); }
 
   virtual std::size_t getHistogramNumberHelper() const;
 };

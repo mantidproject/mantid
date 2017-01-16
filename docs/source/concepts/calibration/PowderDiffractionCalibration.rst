@@ -41,6 +41,9 @@ Steps for other instruments
 
      6. Run :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, the Input workspace is the one from step 3 earlier.  For DReference you can enter a comma seperated list of the d-spacing values of the known peaks.
      7. The output is an OffsetsWorspace, and a workspace with the number of peaks found in each spectra,  The output offsets workspace that can be used directly in :ref:`DiffractionFocussing <algm-DiffractionFocussing>`, or saved using :ref:`SaveCalFile <algm-SaveCalFile>`.  You can also save it as a :ref:`CalFile` from :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`, by defining the GroupingFileName parameter.
+
+
+Additionally :ref:`PDCalibration <algm-PDCalibration>` can be used to fit peaks directly in TOF instead of converting to d-spacing. This algorithm produces a calibration table which can be passed to :ref:`AlignDetectors <algm-AlignDetectors>`. The algorithms :ref:`LoadDiffCal <algm-LoadDiffCal>` and :ref:`SaveDiffCal <algm-SaveDiffCal>` can be used to read and write the calibration table to file.
      
 .. figure:: /images/PG3_Calibrate.png
   :width: 400px

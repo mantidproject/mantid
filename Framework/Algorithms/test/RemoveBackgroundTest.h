@@ -107,9 +107,9 @@ public:
     int emode = static_cast<int>(Kernel::DeltaEMode().fromString("Direct"));
     bgRemoval.initialize(BgWS, SourceWS, emode);
 
-    MantidVec &dataX = clone->dataX(0);
-    MantidVec &dataY = clone->dataY(0);
-    MantidVec &dataE = clone->dataE(0);
+    auto &dataX = clone->mutableX(0);
+    auto &dataY = clone->mutableY(0);
+    auto &dataE = clone->mutableE(0);
 
     bgRemoval.removeBackground(0, dataX, dataY, dataE);
 
@@ -117,8 +117,8 @@ public:
         API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             "sampleWSdE");
 
-    const MantidVec &sampleX = SampleWS->readX(0);
-    const MantidVec &sampleY = SampleWS->readY(0);
+    auto &sampleX = SampleWS->x(0);
+    auto &sampleY = SampleWS->y(0);
     // const MantidVec & sampleE = SampleWS->readE(0);
     for (size_t i = 0; i < sampleY.size(); i++) {
       TS_ASSERT_DELTA(dataX[i], sampleX[i], 1.e-7);
@@ -144,11 +144,11 @@ public:
             "sampleWSdE");
     auto result = clone;
 
-    const MantidVec &sampleX = SampleWS->readX(0);
-    const MantidVec &sampleY = SampleWS->readY(0);
+    auto &sampleX = SampleWS->x(0);
+    auto &sampleY = SampleWS->y(0);
 
-    const MantidVec &resultX = result->readX(0);
-    const MantidVec &resultY = result->readY(0);
+    auto &resultX = result->x(0);
+    auto &resultY = result->y(0);
 
     // const MantidVec & sampleE = SampleWS->readE(0);
     for (size_t i = 0; i < sampleY.size(); i++) {
@@ -177,11 +177,11 @@ public:
         API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             "TestWS2");
 
-    const MantidVec &sampleX = SampleWS->readX(0);
-    const MantidVec &sampleY = SampleWS->readY(0);
+    auto &sampleX = SampleWS->x(0);
+    auto &sampleY = SampleWS->y(0);
 
-    const MantidVec &resultX = result->readX(0);
-    const MantidVec &resultY = result->readY(0);
+    auto &resultX = result->x(0);
+    auto &resultY = result->y(0);
 
     // const MantidVec & sampleE = SampleWS->readE(0);
     for (size_t i = 0; i < sampleY.size(); i++) {
@@ -205,9 +205,9 @@ public:
     auto binEdges = {0.0, 1.0};
     bgWS->setBinEdges(0, binEdges);
     bgWS->getAxis(0)->setUnit("TOF");
-    MantidVec &Ybg = bgWS->dataY(0);
+    auto &Ybg = bgWS->mutableY(0);
     Ybg[0] = 0;
-    MantidVec &Ebg = bgWS->dataE(0);
+    auto &Ebg = bgWS->mutableE(0);
     Ebg[0] = 0;
 
     // remove background. If bacground is fully 0, algorithm just removes
@@ -226,8 +226,8 @@ public:
         API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             "RemovedBgWS");
 
-    const MantidVec &resY = result->dataY(0);
-    const MantidVec &resE = result->readE(0);
+    auto &resY = result->y(0);
+    auto &resE = result->e(0);
 
     // const MantidVec & sampleE = SampleWS->readE(0);
     for (size_t i = 0; i < resY.size(); i++) {
@@ -240,10 +240,7 @@ private:
   API::MatrixWorkspace_sptr cloneSourceWS() {
     auto cloneWS = API::WorkspaceFactory::Instance().create(SourceWS);
 
-    auto X = SourceWS->refX(0);
-    cloneWS->setX(0, X);
-    cloneWS->dataY(0) = SourceWS->readY(0);
-    cloneWS->dataE(0) = SourceWS->readE(0);
+    cloneWS->setHistogram(0, SourceWS->histogram(0));
 
     return cloneWS;
   }
@@ -264,7 +261,6 @@ public:
   }
 
   RemoveBackgroundTestPerformance() {
-
     init_workspaces(1000, 15000, BgWS, SourceWS);
   }
 
@@ -277,31 +273,7 @@ public:
     bkgRem.setPropertyValue("BkgWorkspace", BgWS->getName());
     bkgRem.setPropertyValue("EMode", "Direct");
 
-    TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
-
-    auto SampleWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            "sampleWSdE");
-    auto result =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            "sourceWSdE");
-
-    size_t spectra[] = {0, 10, 100, 999};
-    std::vector<size_t> list_to_check(spectra, spectra + 4);
-
-    for (size_t i = 0; i < list_to_check.size(); i++) {
-      const MantidVec &sampleX = SampleWS->readX(list_to_check[i]);
-      const MantidVec &sampleY = SampleWS->readY(list_to_check[i]);
-
-      const MantidVec &resultX = result->readX(list_to_check[i]);
-      const MantidVec &resultY = result->readY(list_to_check[i]);
-
-      // const MantidVec & sampleE = SampleWS->readE(0);
-      for (size_t i = 0; i < sampleY.size(); i++) {
-        TS_ASSERT_DELTA(resultX[i], sampleX[i], 1.e-7);
-        TS_ASSERT_DELTA(resultY[i], sampleY[i], 1.e-7);
-      }
-    }
+    bkgRem.execute();
   }
 
 private:

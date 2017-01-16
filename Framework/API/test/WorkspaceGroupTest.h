@@ -5,6 +5,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -18,6 +19,7 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class WorkspaceGroupTest_WorkspaceGroupObserver {
   Poco::NObserver<WorkspaceGroupTest_WorkspaceGroupObserver,
@@ -190,7 +192,7 @@ public:
   void test_getItem() {
     WorkspaceGroup_sptr group = makeGroup();
     Workspace_sptr ws1 = group->getItem(1);
-    TS_ASSERT_EQUALS(ws1->name(), "ws1");
+    TS_ASSERT_EQUALS(ws1->getName(), "ws1");
     // Test the 'by name' overload
     Workspace_sptr ws11 = group->getItem("ws1");
     TS_ASSERT_EQUALS(ws1, ws11);

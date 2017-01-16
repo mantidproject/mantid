@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
+  BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -27,6 +28,7 @@ set ( TEST_PY_FILES
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
   DSFinterpTest.py
+  EnergyWindowScanTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
   EnggFitDIFCFromPeaksTest.py
@@ -69,6 +71,7 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   MatchPeaksTest.py
   MeanTest.py
+  MedianBinWidthTest.py
   MergeCalFilesTest.py
   MolDynTest.py
   MSDFitTest.py
@@ -78,6 +81,7 @@ set ( TEST_PY_FILES
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
+  SANSStitchTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SaveNexusPDTest.py
