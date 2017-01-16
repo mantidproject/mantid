@@ -60,7 +60,7 @@ def check_version_info():
     if python_version < (2, 7, 0):
         raise RuntimeError(
             "Not running this test as it requires Python >= 2.7. Version found: {0}".
-                format(python_version))
+            format(python_version))
 
 
 def main():
@@ -76,9 +76,10 @@ def main():
     helper.total_reconstruction_timer()
 
     if config.func.debug:
-        import pydevd
-        pydevd.settrace('localhost', port=config.func.debug_port,
-                        stdoutToServer=True, stderrToServer=True)
+        if config.func.debug_port is not None:
+            import pydevd
+            pydevd.settrace('localhost', port=config.func.debug_port,
+                            stdoutToServer=True, stderrToServer=True)
 
     if config.func.find_cor:
         # run find_center stuff

@@ -33,16 +33,14 @@ class FunctionalConfig(object):
         self.out_img_format = 'fits'
         self.out_slices_file_name_prefix = 'out_recon_slice'
         self.out_horiz_slices_subdir = 'out_recon_horiz_slice'
-        self.save_horiz_slices = False  # TODO not done
+        self.save_horiz_slices = False  # TODO activate for testing only
 
         self.save_preproc = True
         self.preproc_subdir = 'pre_processed'
-        self.preproc_format = 'fits'
-
-        # TODO rename to data_as_stack, and save out ALL data as stack
-        self.data_as_stack = True
+        self.data_as_stack = False
 
         import numpy as np
+
         # TODO more tests with float16/float64/uint16
         self.data_dtype = np.float32
 
@@ -58,7 +56,7 @@ class FunctionalConfig(object):
 
         # Reconstruction options
         self.debug = True
-        self.debug_port = 59003
+        self.debug_port = None
 
         self.tool = 'tomopy'
         self.algorithm = 'gridrec'
@@ -71,7 +69,6 @@ class FunctionalConfig(object):
                + "Dark dir: {0}\n".format(str(self.input_path_dark)) \
                + "In image format: {0}\n".format(str(self.in_img_format)) \
                + "Pre processing images subdir: {0}\n".format(str(self.preproc_subdir)) \
-               + "Pre processing images format: {0}\n".format(str(self.preproc_format)) \
                + "Pre processing images as stack: {0}\n".format(str(self.data_as_stack)) \
                + "Output dir: {0}\n".format(str(self.output_path)) \
                + "Output image format: {0}\n".format(str(self.out_img_format)) \
@@ -162,20 +159,17 @@ class FunctionalConfig(object):
             help="Save out the pre-processed images.")
 
         grp_func.add_argument(
+            "--save-horiz-slices",
+            required=False,
+            action='store_true',
+            help="Save out the horizontal reconstructed files.")
+
+        grp_func.add_argument(
             "--preproc-subdir",
             required=False,
             type=str,
             default=self.preproc_subdir,
             help="The subdirectory for the pre-processed images.\nDefault output-path/pre_processed/.")
-
-        grp_func.add_argument(
-            "--preproc-format",
-            required=False,
-            type=str,
-            default=self.preproc_format,
-            help="Format/file extension expected for the output of the pre processed images.\nSupported: {0}".
-            format(img_formats)
-        )
 
         grp_func.add_argument(
             "--data-as-stack",
@@ -254,7 +248,7 @@ class FunctionalConfig(object):
             required=False,
             type=str,
             default=self.algorithm,
-            help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {'art', 'bart', 'fbp', 'gridrec', 'mlem', 'osem', 'ospml_hybrid', plm_hybrid', 'pml_quad', 'sirt'}.")
+            help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {'art', 'bart', 'fbp', 'gridrec', 'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', pml_hybrid', 'pml_quad', 'sirt'}.")
 
         grp_recon.add_argument(
             "-n",
@@ -262,8 +256,7 @@ class FunctionalConfig(object):
             required=False,
             type=int,
             default=self.num_iter,
-            help="Number of iterations (only valid for iterative methods "
-                 "(example: SIRT, ART, etc.).")
+            help="Number of iterations(only valid for iterative methods: {'art', 'bart', 'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', pml_hybrid', 'pml_quad', 'sirt'}.")
 
         grp_recon.add_argument(
             "--max-angle",
@@ -284,15 +277,15 @@ class FunctionalConfig(object):
         self.input_path_dark = args.input_path_dark
         self.in_img_format = args.in_img_format
 
-        self.save_preproc = args.save_preproc
-        self.preproc_subdir = args.preproc_subdir
-        self.preproc_format = args.preproc_format
-        self.data_as_stack = args.data_as_stack
-
         self.output_path = args.output_path
         self.out_img_format = args.out_img_format
         self.out_slices_file_name_prefix = args.out_slices_file_name_prefix
         self.out_horiz_slices_subdir = args.out_horiz_slices_subdir
+        self.save_horiz_slices = args.save_horiz_slices
+
+        self.save_preproc = args.save_preproc
+        self.preproc_subdir = args.preproc_subdir
+        self.data_as_stack = args.data_as_stack
 
         import numpy as np
 

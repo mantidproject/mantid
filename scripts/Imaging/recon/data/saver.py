@@ -63,11 +63,11 @@ def save_recon_output(data, config):
         data, out_recon_dir, config.func.out_slices_file_name_prefix, data_as_stack)
 
     # Sideways slices:
-    # if config.func.save_horiz_slices:
-    out_horiz_dir = os.path.join(output_path, 'horiz_slices')
-    print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
-    save_recon_as_horizontal_slices(
-        data, out_horiz_dir, config.func.out_horiz_slices_subdir, data_as_stack)
+    if config.func.save_horiz_slices:
+        out_horiz_dir = os.path.join(out_recon_dir, 'horiz_slices')
+        print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
+        save_recon_as_horizontal_slices(
+            data, out_horiz_dir, config.func.out_horiz_slices_subdir, data_as_stack)
 
     h.pstop(
         " * Finished saving slices of the reconstructed volume in: {0}".
@@ -137,7 +137,7 @@ def save_preproc_images(data, config):
         config.func.output_path, config.func.preproc_subdir)
 
     h.pstart(
-        " * Saving all pre-processed images (data) into {0} dtype: {1}".format(preproc_dir, data.dtype))
+        " * Saving all pre-processed images into {0} dtype: {1}".format(preproc_dir, data.dtype))
 
     make_dirs_if_needed(preproc_dir)
 

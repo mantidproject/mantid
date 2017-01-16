@@ -36,8 +36,8 @@ def read_in_stack(config):
 
 
 def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
-                         file_extension='tiff', file_prefix='',
-                         flat_file_prefix='', dark_file_prefix='', argument_data_dtype=np.float16):
+                         file_extension='fits', file_prefix='',
+                         flat_file_prefix='', dark_file_prefix='', argument_data_dtype=np.float32):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -73,16 +73,25 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
             "Could not load at least one image file from: {0}. Details: {1}".
             format(sample_path, str(exc)))
 
-    data_dtype = first_sample_img.dtype
+    # data_dtype = first_sample_img.dtype
     # usual type in fits with 16-bit pixel depth
-    if '>i2' == data_dtype:
-
-        data_dtype = argument_data_dtype
+    # '>i2' uint16
+    # '>f4' float32
+    # (type letter i,f,etc, number is *8, eg f4 = float8*4 = float32
+    # force float32 on everything
+    data_dtype = argument_data_dtype
 
     img_shape = first_sample_img.shape
 
-    sample_data = _read_listed_files(
-        sample_file_names, img_shape, file_extension, data_dtype)
+    if len(img_shape) == 2:  # the loaded file was a single image
+        print("Loading single images")
+        sample_data = _read_listed_files(
+            sample_file_names, img_shape, file_extension, data_dtype)
+    elif len(img_shape) == 3:  # the loaded file was a stack of fits images
+        print("Loading stack")
+        sample_data = first_sample_img
+    else:
+        raise ValueError("Data loaded has invalid shape: {0}", img_shape)
 
     if flat_file_path is not None:
         flat_file_names = _get_stack_file_names(

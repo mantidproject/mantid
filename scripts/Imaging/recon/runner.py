@@ -60,8 +60,8 @@ def pre_processing(config, data, flat, dark):
     d = True if config.func.debug else False
 
     data, flat, dark = rotate_stack.execute(data, config, flat, dark)
-    # if d:
-    #     _debug_save_out_data(data, config, flat, dark, "_rotated")
+    if d:
+        _debug_save_out_data(data, config, flat, dark, "rotated", "_rotated")
 
     # the air region coordinates must be within the ROI if this is selected
     if config.pre.crop_before_normalise:
@@ -70,22 +70,27 @@ def pre_processing(config, data, flat, dark):
         flat = crop_coords.execute_image(flat, config)
         dark = crop_coords.execute_image(dark, config)
 
+        if d:
+            _debug_save_out_data(data, config, flat, dark,
+                                 "cropped", "_cropped")
+
     # removes background using images taken when exposed to fully open beam
     # and no beam
     data = normalise_by_flat_dark.execute(data, config, flat, dark)
-    # if d:
-    #     _debug_save_out_data(data, config, flat, dark,
-    #                          "_normalised_by_flat_dark")
+    if d:
+        _debug_save_out_data(data, config, flat, dark,
+                             "norm_by_flat_dark", "_normalised_by_flat_dark")
 
     # removes the contrast difference between the stack of images
     data = normalise_by_air_region.execute(data, config)
-    # if d:
-    #     _debug_save_out_data(data, config, flat, dark, "_normalised_by_air")
+    if d:
+        _debug_save_out_data(data, config, flat, dark,
+                             "norm_by_air",  "_normalised_by_air")
 
     if not config.pre.crop_before_normalise:
         # in this case we don't care about cropping the flat and dark
         data = crop_coords.execute_volume(data, config)
-        # _debug_save_out_data(data, config, flat, dark, "_cropped")
+        _debug_save_out_data(data, config, flat, dark, "cropped", "_cropped")
 
     # cut_off
     # data = cut_off.execute(data, config)
@@ -95,25 +100,24 @@ def pre_processing(config, data, flat, dark):
     # data = scale_down.execute(data, config)
 
     data = median_filter.execute(data, config)
-    # if d:
-    #     _debug_save_out_data(data, config, flat, dark, "_median_filtered")
+    if d:
+        _debug_save_out_data(data, config, flat, dark,
+                             "median_filtered", "_median_filtered")
 
     return data
 
 
-def _debug_save_out_data(data, config, flat, dark, image_append):
+def _debug_save_out_data(data, config, flat, dark, out_path_append, image_append):
     from recon.data import saver
 
     import time
 
-    append_index = str(time.time())[-2:]
-
     saver.save_single_image(
-        data, config, 'sample', image_name='sample' + image_append, image_index=append_index)
+        data, config, output_path=out_path_append, image_name='sample' + image_append)
     saver.save_single_image(
-        flat, config, 'flat', image_name='flat' + image_append, image_index=append_index)
+        flat, config, output_path=out_path_append, image_name='flat' + image_append)
     saver.save_single_image(
-        dark, config, 'dark', image_name='dark' + image_append, image_index=append_index)
+        dark, config, output_path=out_path_append, image_name='dark' + image_append)
 
 
 def post_processing():
