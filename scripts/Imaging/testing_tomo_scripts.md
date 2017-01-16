@@ -215,12 +215,54 @@ pyfits.open('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_te
 ```python
 from recon.data import loader
 import numpy as np
+import matplotlib.pyplot as plt
+from recon.filters import rotate_stack
 
 # load single images
 sample = loader.read_stack_of_images('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full', argument_data_dtype=np.float32)[0]
+rsample = rotate_stack._rotate_stack(sample, 3)
+plt.imshow(rsample[0,232:509,35:224], cmap='Greys_r')  # spheres
+plt.show()
+
+plt.imshow(rsample[0,0:228,41:233], cmap='Greys_r')  # bolts
+plt.show()
+
+csample = rsample[:, 0:228,41:233]
+sinograms = np.swapaxes(csample, 0, 1)
+
+plt.imshow(rsample[:,0,:], cmap='Greys_r') # sinogram
+plt.show()
+
+from recon.filters import circular_mask
+circular_mask.execute_custom(csample, 0.94)
+plt.imshow(circular_mask.execute_custom(csample, 0.98)[0, :, :]); plt.show()
 
 # load a stack of images
 sample = loader.read_stack_of_images('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/gridrec/pre_processed', argument_data_dtype=np.float32)[0]
 ```
 
 # Astra Reconstructions
+`astra_create_proj_geom`:
+- det_spacing: distance between the centers of two adjacent detector pixels (0.55?)
+- det_count: number of detector pixels in a single projection (512?)
+- angles: projection angles in radians
+
+```python
+from recon.data import loader
+import numpy as np
+import matplotlib.pyplot as plt
+from recon.filters import rotate_stack
+
+# load single images
+sample = loader.read_stack_of_images('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full', argument_data_dtype=np.float32)[0]
+rsample = rotate_stack._rotate_stack(sample, 3)
+csample = rsample[:, 0:228,41:233]
+num_proj = csample.shape[0]
+inc = float(360.0) / num_proj
+proj_angles = np.arange(0, num_proj * inc, inc)
+proj_angles = np.radians(proj_angles)
+
+vol_geom = astra.create_vol_geom(512)
+proj_geom = astra.create_proj_geom('parallel', 0.55, 512, proj_angles)
+
+```

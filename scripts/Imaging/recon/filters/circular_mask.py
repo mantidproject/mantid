@@ -1,4 +1,22 @@
-def execute(data_vol, ratio=1.0, mask_out_val=0.0):
+import numpy as np
+
+
+def execute(data, config):
+    ratio = config.post.circular_mask
+    if ratio:
+        from recon.tools import tool_importer
+        tomopy = tool_importer.do_importing('tomopy')
+        from recon.helper import Helper
+        h = Helper(config)
+
+        h.pstart(" * Starting circular mask...")
+        tomopy.circ_mask(data, axis=0, ratio=ratio)
+        h.pstart(" * Finished applying circular mask.")
+
+    return data
+
+
+def execute_custom(data_vol, ratio=1.0, mask_out_val=0.0):
     """
     Applies a circular mask on a 3D volume. The mask is applied along the z axis (first
     dimension of the numpy shape)
@@ -13,7 +31,7 @@ def execute(data_vol, ratio=1.0, mask_out_val=0.0):
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError(
             "Wrong data volume when trying to apply a circular mask: {0}".
-                format(data_vol))
+            format(data_vol))
 
     edge_z, edge_y, edge_x = data_vol.shape
     mask_in = _calc_mask(edge_y, edge_x, ratio)
@@ -41,7 +59,7 @@ def _calc_mask(ydim, xdim, ratio):
         small_radius2 = radius_x * radius_x
 
     y_mask, x_mask = np.ogrid[0.5 - radius_y:0.5 + radius_y, 0.5 - radius_x:0.5
-                                                                            + radius_x]
+                              + radius_x]
 
     small_radius2 *= ratio * ratio
     return (y_mask * y_mask + x_mask * x_mask) < (small_radius2)
