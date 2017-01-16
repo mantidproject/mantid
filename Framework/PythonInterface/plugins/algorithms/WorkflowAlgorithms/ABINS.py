@@ -75,7 +75,8 @@ class ABINS(PythonAlgorithm):
                              direction=Direction.Input,
                              defaultValue="Powder",
                              validator=StringListValidator(AbinsConstants.ALL_SAMPLE_FORMS),
-                             doc="Form of the sample: SingleCrystal or Powder.")
+                             #doc="Form of the sample: SingleCrystal or Powder.")
+                             doc="Form of the sample: Powder.")
 
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,

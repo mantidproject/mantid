@@ -236,7 +236,10 @@ class LoadCASTEP(GeneralDFTProgram):
 
         # save stuff to hdf file
         data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
-        data = {key: file_data[key] for key in data_to_save}
+        data = {}
+        for key in data_to_save:
+            data[key] = file_data[key]
+
         self.save_dft_data(data=data)
 
         return self._rearrange_data(data=file_data)

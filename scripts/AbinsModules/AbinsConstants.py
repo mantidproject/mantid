@@ -45,7 +45,8 @@ M_2_HARTREE = constants.codata.value("atomic mass unit-hartree relationship")  #
 
 ALL_INSTRUMENTS = ["TwoDMap", "TOSCA"]  # supported instruments
 
-ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
+#ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
+ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
 
 # keywords which define data structure of KpointsData
 ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements"]
@@ -133,7 +134,6 @@ THRESHOLD = 10e-15
 MAX_ORDER = 4  # max quantum order event
 
 NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher
-
 
 ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
 
