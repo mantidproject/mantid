@@ -18,6 +18,7 @@ class Property;
 }
 namespace Beamline {
 class DetectorInfo;
+class SpectrumInfo;
 }
 namespace Geometry {
 class ParameterMap;
@@ -155,7 +156,7 @@ public:
   DetectorInfo &mutableDetectorInfo();
 
   virtual size_t numberOfDetectorGroups() const;
-  virtual const std::set<detid_t> &detectorIDsInGroup(const size_t index) const;
+  virtual const std::set<detid_t> detectorIDsInGroup(const size_t index) const;
   virtual size_t groupOfDetectorID(const detid_t detID) const;
 
 protected:
@@ -200,7 +201,6 @@ private:
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
   /// Detector grouping information
-  mutable std::vector<std::set<detid_t>> m_detgroups;
   mutable std::unordered_map<detid_t, size_t> m_det2group;
   void cacheDefaultDetectorGrouping() const; // Not thread-safe
   mutable std::once_flag m_defaultDetectorGroupingCached;
@@ -211,6 +211,8 @@ private:
   boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
   mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
   mutable std::mutex m_detectorInfoMutex;
+
+  mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
 };
 
 /// Shared pointer to ExperimentInfo

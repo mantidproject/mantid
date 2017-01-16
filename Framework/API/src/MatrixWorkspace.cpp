@@ -2014,7 +2014,7 @@ size_t MatrixWorkspace::numberOfDetectorGroups() const {
 
 /// Returns a set of detector IDs for a group. This is equal to the detector IDs
 /// of the spectrum at given index.
-const std::set<detid_t> &
+const std::set<detid_t>
 MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
 }
