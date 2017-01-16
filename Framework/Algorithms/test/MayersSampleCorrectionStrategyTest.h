@@ -192,7 +192,7 @@ private:
     pars.l1 = 14.0;
     pars.l2 = 2.2;
     pars.twoTheta = 0.10821;
-    pars.phi = 0.0;
+    pars.azimuth = 0.0;
     pars.rho = 0.07261;
     pars.sigmaSc = 5.1;
     pars.sigmaAbs = 5.08;

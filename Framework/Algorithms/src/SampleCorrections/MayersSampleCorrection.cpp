@@ -11,6 +11,8 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -93,9 +95,6 @@ void MayersSampleCorrection::exec() {
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Instrument constants
   auto instrument = inputWS->getInstrument();
-  const auto source = instrument->getSource();
-  const auto sample = instrument->getSample();
-  const auto beamLine = sample->getPos() - source->getPos();
   const auto frame = instrument->getReferenceFrame();
 
   // Sample
@@ -125,14 +124,19 @@ void MayersSampleCorrection::exec() {
       continue;
     }
 
-    const auto &det = spectrumInfo.detector(i);
-
     MayersSampleCorrectionStrategy::Parameters params;
     params.mscat = mscatOn;
     params.l1 = spectrumInfo.l1();
     params.l2 = spectrumInfo.l2(i);
-    params.twoTheta = det.getTwoTheta(sample->getPos(), beamLine);
-    params.phi = det.getPhi();
+    params.twoTheta = spectrumInfo.twoTheta(i);
+    // Code requires angle above/below scattering plane not our definition of
+    // phi
+    const auto pos = spectrumInfo.position(i);
+    // Theta here is the angle between beam and neutron path not necessarily
+    // twoTheta if sample not at origin
+    double _(0.0), theta(0.0), phi(0.0);
+    pos.getSpherical(_, theta, phi);
+    params.azimuth = asin(sin(theta) * sin(phi));
     params.rho = sampleMaterial.numberDensity();
     params.sigmaAbs = sampleMaterial.absorbXSection();
     params.sigmaSc = sampleMaterial.totalScatterXSection();

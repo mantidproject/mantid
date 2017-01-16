@@ -51,7 +51,7 @@ public:
     double l1;        ///< Nominal distance from source to sample (m)
     double l2;        ///< Nominal distance from sample to detector (m)
     double twoTheta;  ///< Scattering angle of the detector (radians)
-    double phi;       ///< Azimuth angle of the detector (radians)
+    double azimuth;   ///< Azimuth angle of the detector (radians)
     double rho;       ///< Number density of scatters (angstroms^-3)
     double sigmaSc;   ///< Total scattering cross-section (barns)
     double sigmaAbs;  ///< Absorption cross-section at 2200m/s (barns)
