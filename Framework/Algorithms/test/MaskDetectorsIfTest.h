@@ -154,7 +154,7 @@ private:
 
     // Default y values are all 2.0. Change them so they're different
     // for each spectrum (this gives us the values 2.0, 2.1, 2.2, ...)
-    for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
+    for (size_t wi = 0; wi < ws->getNumberHistograms(); ++wi) {
       ws->mutableY(wi)[0] += static_cast<double>(wi) * 0.1;
     }
 
