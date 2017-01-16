@@ -31,6 +31,7 @@ Improved
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
 - :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 - :ref:`MaskDetectors <algm-MaskDetectors>` has now a new option to mask detectors by instrument component name.
+- :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`: The calculation of the azimuth angle has been fixed. Previously it was set equal to the Mantid definition of phi but the old code defined it as the angle away from the scattering plane.
 
 Renamed
 #######
