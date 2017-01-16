@@ -2387,7 +2387,7 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
 }
 /** NON ORTHOGONAL STUFF **/
 
-void SliceViewer::setNonOrthogonalbtn(bool forceOff) {
+void SliceViewer::setNonOrthogonalbtn() {
   bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
   if (!canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()) {
     ui.btnNonOrthogonalToggle->toggle();
