@@ -250,7 +250,7 @@ class DirectILLReductionTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
-            'Cleanup': 'Delete Intermediate Workspaces',
+            'Cleanup': 'Keep Intermediate Workspaces',
             'ReductionType': 'Vanadium',
             'Normalisation': 'No Normalisation',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
@@ -258,14 +258,14 @@ class DirectILLReductionTest(unittest.TestCase):
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
-        ws = mtd[outWSName]
-        self.assertFalse(self._checkAlgorithmsInHistory(ws,
-            SELF_SHIELDING_ALGORITHMS))
+        self.assertFalse(mtd.doesExist(outWSName + '_ecScaling'))
+        self.assertFalse(mtd.doesExist(outWSName + '_scaled_EC'))
+        self.assertFalse(mtd.doesExist(outWSName + '_EC_subtracted'))
         outECSubtractedWSName = 'outECSubtractedWS'
         algProperties = {
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outECSubtractedWSName,
-            'Cleanup': 'Delete Intermediate Workspaces',
+            'Cleanup': 'Keep Intermediate Workspaces',
             'ReductionType': 'Vanadium',
             'Normalisation': 'No Normalisation',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
@@ -275,10 +275,9 @@ class DirectILLReductionTest(unittest.TestCase):
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
-        self.assertTrue(self._checkAlgorithmsInHistory(ws,
-            SELF_SHIELDING_ALGORITHMS[0]))
-        self.assertFalse(self._checkAlgorithmsInHistory(ws,
-            SELF_SHIELDING_ALGORITHMS[1:]))
+        self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_ecScaling'))
+        self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_scaled_EC'))
+        self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_EC_subtracted'))
         DeleteWorkspace(ecWS)
         DeleteWorkspace(outWSName)
         DeleteWorkspace(outECSubtractedWSName)
