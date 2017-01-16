@@ -188,9 +188,7 @@ void TomographyROIPresenter::processBrowseImage() {
 
   m_stackPath = path;
   processLoadSingleImage();
-  std::cout << " >> DEBUG :: Loaded path: " << path << " .. path after cut: "
-            << path.substr(0, path.find_last_of("/\\")) << '\n';
-
+  
   m_view->imageOrStackLoaded(trimFileNameFromPath(path));
 }
 
