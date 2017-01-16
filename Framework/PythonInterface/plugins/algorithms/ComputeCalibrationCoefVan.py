@@ -58,7 +58,8 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              validator=FloatBoundedValidator(lower=0.0),
                              direction=Direction.Input,
-                             doc=("Temperature during the experiment."))
+                             doc=("Temperature during the experiment, in " +
+                                  "Kelvins."))
         return
 
     def validateInputs(self):
