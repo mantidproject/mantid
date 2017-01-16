@@ -79,7 +79,8 @@ public:
     fn->setParameter("PeakCentre", 79450.0);
     fn->setParameter("Height", 200.0);
     fn->setParameter("Sigma", 300.0);
-    fn->addConstraint(std::make_unique<BoundaryConstraint>(fn.get(), "Sigma", 20.0, 100.0));
+    fn->addConstraint(
+        std::make_unique<BoundaryConstraint>(fn.get(), "Sigma", 20.0, 100.0));
 
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);

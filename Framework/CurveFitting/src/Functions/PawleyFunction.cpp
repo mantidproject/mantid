@@ -293,8 +293,8 @@ void PawleyParameterFunction::addLengthConstraint(
 /// Adds a default constraint so cell angles are in the range 0 to 180.
 void PawleyParameterFunction::addAngleConstraint(
     const std::string &parameterName) {
-  auto cellAngleConstraint =
-      std::make_unique<BoundaryConstraint>(this, parameterName, 0.0, 180.0, true);
+  auto cellAngleConstraint = std::make_unique<BoundaryConstraint>(
+      this, parameterName, 0.0, 180.0, true);
   cellAngleConstraint->setPenaltyFactor(1e12);
   addConstraint(std::move(cellAngleConstraint));
 }

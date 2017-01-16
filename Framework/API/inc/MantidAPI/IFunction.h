@@ -450,7 +450,7 @@ public:
   //@{
   /// Tie a parameter to other parameters (or a constant)
   virtual void tie(const std::string &parName, const std::string &expr,
-                            bool isDefault = false);
+                   bool isDefault = false);
   /// Add several ties
   virtual void addTies(const std::string &ties, bool isDefault = false);
   /// Apply the ties
@@ -583,9 +583,9 @@ protected:
 
 private:
   /// No copying
-  IFunction(const IFunction&) = delete;
+  IFunction(const IFunction &) = delete;
   /// No copying
-  IFunction& operator=(const IFunction&) = delete;
+  IFunction &operator=(const IFunction &) = delete;
   /// The declared attributes
   std::map<std::string, API::IFunction::Attribute> m_attrs;
   /// The covariance matrix of the fitting parameters

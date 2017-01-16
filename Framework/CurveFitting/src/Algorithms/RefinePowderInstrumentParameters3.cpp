@@ -1224,9 +1224,8 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
         double upperbound = param.maxvalue;
         if (lowerbound >= -DBL_MAX * 0.1 || upperbound <= DBL_MAX * 0.1) {
           // If there is a boundary
-          auto bc =
-              std::make_unique<Constraints::BoundaryConstraint>(
-                  function.get(), parname, lowerbound, upperbound, false);
+          auto bc = std::make_unique<Constraints::BoundaryConstraint>(
+              function.get(), parname, lowerbound, upperbound, false);
           function->addConstraint(std::move(bc));
         }
       } else {

@@ -118,7 +118,7 @@ public:
 
   /// Tie a parameter of decorated function to other parameters (or a constant).
   void tie(const std::string &parName, const std::string &expr,
-                    bool isDefault = false) override;
+           bool isDefault = false) override;
   /// Apply the ties in decorated function.
   void applyTies() override;
   /// Remove all ties of decorated function.

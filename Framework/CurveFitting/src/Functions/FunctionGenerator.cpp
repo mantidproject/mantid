@@ -171,9 +171,8 @@ FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
 }
 
 /// Tie a parameter to other parameters (or a constant)
-void FunctionGenerator::tie(const std::string &parName,
-                                          const std::string &expr,
-                                          bool isDefault) {
+void FunctionGenerator::tie(const std::string &parName, const std::string &expr,
+                            bool isDefault) {
   if (isSourceName(parName)) {
     m_source->tie(parName, expr, isDefault);
   } else {

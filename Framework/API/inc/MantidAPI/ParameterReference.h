@@ -44,8 +44,8 @@ namespace API {
 class MANTID_API_DLL ParameterReference {
 public:
   ParameterReference();
-  ParameterReference(const ParameterReference&){}
-//  ParameterReference& operator=(const ParameterReference&) {}
+  ParameterReference(const ParameterReference &) {}
+  //  ParameterReference& operator=(const ParameterReference&) {}
   ParameterReference(IFunction *fun, std::size_t index, bool isDefault = false);
   std::size_t getIndex() const;
   void reset(IFunction *fun, std::size_t index, bool isDefault = false);

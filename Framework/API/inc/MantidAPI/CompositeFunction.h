@@ -150,7 +150,7 @@ public:
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
   /// Add a new tie
-  void addTie(std::unique_ptr<ParameterTie>tie) override;
+  void addTie(std::unique_ptr<ParameterTie> tie) override;
 
   /// Overwrite IFunction methods
   void addConstraint(std::unique_ptr<IConstraint> ic) override;

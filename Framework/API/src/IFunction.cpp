@@ -109,8 +109,8 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  * with this reference: a tie or a constraint.
  * @return newly ties parameters
  */
-void IFunction::tie(const std::string &parName,
-                             const std::string &expr, bool isDefault) {
+void IFunction::tie(const std::string &parName, const std::string &expr,
+                    bool isDefault) {
   auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
   this->fix(getParameterIndex(*ti));
   if (!isDefault && ti->isConstant()) {
@@ -118,7 +118,7 @@ void IFunction::tie(const std::string &parName,
   } else {
     addTie(std::move(ti));
   }
-//  return ti.get();
+  //  return ti.get();
 }
 
 /**

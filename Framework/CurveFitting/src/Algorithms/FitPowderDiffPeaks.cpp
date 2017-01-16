@@ -370,8 +370,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
       m_vecPeakFunctions[0].second.second->getParameterNames();
 
   // II. Create local background function.
-  Polynomial_sptr backgroundfunction =
-      boost::make_shared<Polynomial>();
+  Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -1105,8 +1104,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
  */
 void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
   // 1. Initialize (local) background function
-  Polynomial_sptr backgroundfunction =
-      boost::make_shared<Polynomial>();
+  Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -1261,11 +1259,13 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   peak->addConstraint(std::move(x0bc));
 
   // b) A
-  auto abc = std::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
+  auto abc =
+      std::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
   peak->addConstraint(std::move(abc));
 
   // c) B
-  auto bbc = std::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
+  auto bbc =
+      std::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
   peak->addConstraint(std::move(bbc));
 
   // d) Guessed height
@@ -1531,15 +1531,16 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
   }
 
   // A > 0, B > 0, S > 0
-  auto abound = std::make_unique<BoundaryConstraint>(
-      peakfunction.get(), "A", 0.0000001, DBL_MAX, false);
+  auto abound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "A",
+                                                     0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(abound));
 
-  auto bbound = std::make_unique<BoundaryConstraint>(
-      peakfunction.get(), "B", 0.0000001, DBL_MAX, false);
+  auto bbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "B",
+                                                     0.0000001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(bbound));
 
-  auto sbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "S", 0.0001, DBL_MAX, false);
+  auto sbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "S",
+                                                     0.0001, DBL_MAX, false);
   peakfunction->addConstraint(std::move(sbound));
 
   // 2. Unfix all parameters
@@ -1809,8 +1810,8 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // b) Constraint
   double centerleftend = in_center - leftfwhm * 0.5;
   double centerrightend = in_center + rightfwhm * 0.5;
-  auto centerbound = std::make_unique<BoundaryConstraint>(gaussianpeak.get(), "PeakCentre",
-                                          centerleftend, centerrightend, false);
+  auto centerbound = std::make_unique<BoundaryConstraint>(
+      gaussianpeak.get(), "PeakCentre", centerleftend, centerrightend, false);
   gaussianpeak->addConstraint(std::move(centerbound));
 
   // 3. Fit

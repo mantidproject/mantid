@@ -223,8 +223,7 @@ bool FunctionParameterDecorator::hasAttribute(
 }
 
 void FunctionParameterDecorator::tie(const std::string &parName,
-                                              const std::string &expr,
-                                              bool isDefault) {
+                                     const std::string &expr, bool isDefault) {
   throwIfNoFunctionSet();
 
   m_wrappedFunction->tie(parName, expr, isDefault);
@@ -260,7 +259,8 @@ ParameterTie *FunctionParameterDecorator::getTie(size_t i) const {
   return m_wrappedFunction->getTie(i);
 }
 
-void FunctionParameterDecorator::addConstraint(std::unique_ptr<IConstraint> ic) {
+void FunctionParameterDecorator::addConstraint(
+    std::unique_ptr<IConstraint> ic) {
   throwIfNoFunctionSet();
 
   m_wrappedFunction->addConstraint(std::move(ic));

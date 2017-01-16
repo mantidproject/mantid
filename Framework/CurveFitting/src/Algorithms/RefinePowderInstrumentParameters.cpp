@@ -600,8 +600,8 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // Constraint
     double lowerb = lowerbounds[i];
     double upperb = upperbounds[i];
-    auto newconstraint =
-        std::make_unique<BoundaryConstraint>(func4fit.get(), parname, lowerb, upperb);
+    auto newconstraint = std::make_unique<BoundaryConstraint>(
+        func4fit.get(), parname, lowerb, upperb);
     func4fit->addConstraint(std::move(newconstraint));
   }
   cout << "Function for fitting in MC: " << func4fit->asString() << '\n';
@@ -786,7 +786,6 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
   // 2. Get the parameter names from function
   m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
   std::vector<std::string> funparamnames = m_Function->getParameterNames();
-
 
   // 3. Copy
   parnames = funparamnames;

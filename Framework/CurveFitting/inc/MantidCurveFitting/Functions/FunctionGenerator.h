@@ -94,7 +94,7 @@ public:
   size_t getParameterIndex(const API::ParameterReference &ref) const override;
   /// Tie a parameter to other parameters (or a constant)
   void tie(const std::string &parName, const std::string &expr,
-                         bool isDefault = false) override;
+           bool isDefault = false) override;
   /// Apply the ties
   void applyTies() override;
   /// Remove all ties

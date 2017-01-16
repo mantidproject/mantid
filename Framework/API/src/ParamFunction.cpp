@@ -298,14 +298,16 @@ void ParamFunction::applyTies() {
 class ReferenceEqual {
   /// index to find
   const size_t m_i;
+
 public:
   /// Constructor
   explicit ReferenceEqual(size_t i) : m_i(i) {}
   /// Bracket operator
   /// @param p :: the element you are looking for
   /// @return True if found
-  template<class T>
-  bool operator()(const std::unique_ptr<T> &p) { return p->getIndex() == m_i; }
+  template <class T> bool operator()(const std::unique_ptr<T> &p) {
+    return p->getIndex() == m_i;
+  }
 };
 
 /** Removes i-th parameter's tie if it is tied or does nothing.
