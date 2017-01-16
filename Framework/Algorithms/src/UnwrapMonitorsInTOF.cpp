@@ -331,8 +331,6 @@ void UnwrapMonitorsInTOF::exec() {
   const auto workspaceIndices =
       getWorkspaceIndicesForMonitors(outputWorkspace.get());
 
-  bool spectrumIsHistogramData(true);
-
   for (const auto &workspaceIndex : workspaceIndices) {
     const auto minMaxTof =
         getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,
@@ -342,7 +340,7 @@ void UnwrapMonitorsInTOF::exec() {
         getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
     // Get the input histogram
     auto inputHistogram = inputWorkspace->histogram(workspaceIndex);
-    spectrumIsHistogramData = inputHistogram.xMode() ==
+    auto spectrumIsHistogramData = inputHistogram.xMode() ==
                               Mantid::HistogramData::Histogram::XMode::BinEdges;
     if (spectrumIsHistogramData) {
       Mantid::HistogramData::BinEdges binEdges(points);
