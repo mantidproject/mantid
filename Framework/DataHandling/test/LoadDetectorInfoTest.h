@@ -220,12 +220,10 @@ void makeTestWorkspace(const int ndets, const int nbins,
     space2D->setCounts(j, nbins, j + 1);
     space2D->setCountStandardDeviations(j, errors);
     auto &spec = space2D->getSpectrum(j);
-    spec.setSpectrumNo(j + 1);
     spec.setDetectorID(j);
   }
 
   Instrument_sptr instr(new Instrument);
-  space2D->setInstrument(instr);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
   instr->markAsSamplePos(samplePos);
 
@@ -235,6 +233,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
     Detector *d = new Detector(os.str(), i, 0);
     instr->markAsDetector(d);
   }
+  space2D->setInstrument(instr);
 
   // Register the workspace in the data service
   AnalysisDataService::Instance().add(ads_name, space2D);

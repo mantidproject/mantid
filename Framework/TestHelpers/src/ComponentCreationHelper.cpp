@@ -174,7 +174,7 @@ createDetectorGroupWith5CylindricalDetectors() {
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,28 +240,9 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       ic++;
     }
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * Create a group of two monitors
- */
-boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
-  const int ndets(2);
-  std::vector<boost::shared_ptr<const IDetector>> groupMembers(ndets);
-  for (int i = 0; i < ndets; ++i) {
-    std::ostringstream os;
-    os << "m" << i;
-    auto det = boost::make_shared<Detector>(os.str(), i + 1, nullptr);
-    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
-    det->markAsMonitor();
-    groupMembers[i] = det;
-  }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
-}
-
-//----------------------------------------------------------------------------------------------
 Instrument_sptr createTestInstrumentCylindrical(
     int num_banks, const Mantid::Kernel::V3D &sourcePos,
     const Mantid::Kernel::V3D &samplePos, const double cylRadius,
@@ -286,7 +267,7 @@ Instrument_sptr createTestInstrumentCylindrical(
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
         std::ostringstream lexer;
-        lexer << "pixel-(" << j << "," << i << ")";
+        lexer << "pixel-(" << j << ";" << i << ")";
         Detector *physicalPixel =
             new Detector(lexer.str(), pixelID, pixelShape, bank);
         const double xpos = j * (cylRadius * 2.0);

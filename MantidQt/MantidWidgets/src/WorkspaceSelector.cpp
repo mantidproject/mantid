@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QDropEvent>
 #include <QMimeData>
@@ -30,8 +31,9 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_clearObserver(*this, &WorkspaceSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent),
-      m_init(init), m_workspaceTypes(), m_showHidden(false), m_optional(false),
-      m_suffix(), m_algName(), m_algPropName(), m_algorithm() {
+      m_init(init), m_workspaceTypes(), m_showHidden(false), m_showGroups(true),
+      m_optional(false), m_suffix(), m_algName(), m_algPropName(),
+      m_algorithm() {
   setEditable(false);
   if (init) {
     Mantid::API::AnalysisDataServiceImpl &ads =
@@ -84,6 +86,17 @@ bool WorkspaceSelector::showHiddenWorkspaces() const { return m_showHidden; }
 void WorkspaceSelector::showHiddenWorkspaces(bool show) {
   if (show != m_showHidden) {
     m_showHidden = show;
+    if (m_init) {
+      refresh();
+    }
+  }
+}
+
+bool WorkspaceSelector::showWorkspaceGroups() const { return m_showGroups; }
+
+void WorkspaceSelector::showWorkspaceGroups(bool show) {
+  if (show != m_showGroups) {
+    m_showGroups = show;
     if (m_init) {
       refresh();
     }
@@ -234,6 +247,11 @@ bool WorkspaceSelector::checkEligibility(
     return false;
   } else if (!hasValidSuffix(name)) {
     return false;
+  } else if (!m_showGroups) {
+    auto group =
+        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
+    if (group != nullptr)
+      return false;
   }
 
   return true;

@@ -227,6 +227,10 @@ public:
   void changeBorderColor(const QColor &color) {
     m_maskShapes.changeBorderColor(color);
   }
+  /// Save masks to a table workspace
+  void saveShapesToTableWorkspace();
+  /// Load masks from a table workspace
+  void loadShapesFromTableWorkspace(Mantid::API::ITableWorkspace_const_sptr ws);
 
   //-----------------------------------
   //    Peaks overlay methods

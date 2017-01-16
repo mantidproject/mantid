@@ -116,7 +116,7 @@ void RemoveLowResTOF::exec() {
   m_numberOfSpectra = m_inputWS->getNumberHistograms();
 
   std::string lowreswsname = getPropertyValue("LowResTOFWorkspace");
-  if (lowreswsname.size() > 0)
+  if (!lowreswsname.empty())
     m_outputLowResTOF = true;
   else
     m_outputLowResTOF = false;

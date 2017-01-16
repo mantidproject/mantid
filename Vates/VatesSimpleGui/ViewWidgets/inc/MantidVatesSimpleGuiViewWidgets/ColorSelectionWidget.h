@@ -52,7 +52,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget
 
 public:
   /// Default constructor.
-  ColorSelectionWidget(QWidget *parent = 0);
+  ColorSelectionWidget(QWidget *parent = nullptr);
   /// Default destructor.
   ~ColorSelectionWidget() override {}
 

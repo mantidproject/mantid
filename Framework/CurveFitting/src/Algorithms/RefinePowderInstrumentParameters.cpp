@@ -54,7 +54,9 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
  */
 RefinePowderInstrumentParameters::RefinePowderInstrumentParameters()
     : m_BestGSLChi2(0.0), m_MinSigma(0.0), m_MinNumFittedPeaks(0),
-      m_MaxNumberStoredParameters(0) {}
+      m_MaxNumberStoredParameters(0) {
+  this->useAlgorithm("RefinePowderInstrumentParameters", 3);
+}
 
 //----------------------------------------------------------------------------------------------
 /** Parameter declaration
@@ -963,7 +965,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
       trow >> parname >> value;
       parameters.emplace(parname, value);
     } catch (runtime_error &) {
-      g_log.error() << "Import table workspace " << parameterWS->name()
+      g_log.error() << "Import table workspace " << parameterWS->getName()
                     << " error in line " << ir << ".  "
                     << " Requires [string, double] in the first 2 columns.\n";
       throw;
@@ -1025,7 +1027,7 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
       } catch (runtime_error &) {
         g_log.error() << "Import MC parameter " << colnames[ic]
                       << " error in row " << ir << " of workspace "
-                      << tablews->name() << '\n';
+                      << tablews->getName() << '\n';
         row >> tmpstr;
         g_log.error() << "Should be " << tmpstr << '\n';
       }

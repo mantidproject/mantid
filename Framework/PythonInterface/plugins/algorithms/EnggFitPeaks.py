@@ -66,7 +66,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Get expected peaks in TOF for the detector
         in_wks = self.getProperty("InputWorkspace").value
-        dimType = in_wks.getXDimension().getName()
+        dimType = in_wks.getXDimension().name
         if self.EXPECTED_DIM_TYPE != dimType:
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
                              "the X dimension of the input workspace is: '%s'" % (self.EXPECTED_DIM_TYPE, dimType))

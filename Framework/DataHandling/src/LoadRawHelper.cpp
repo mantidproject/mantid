@@ -14,7 +14,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/RawFileInfo.h"
 

@@ -3630,7 +3630,7 @@ MdiSubWindow *ApplicationWindow::window(const QString &name) {
 }
 
 Table *ApplicationWindow::table(const QString &name) {
-  int pos = name.lastIndexOf("_");
+  int pos = name.indexOf("_");
   QString caption = name.left(pos);
 
   Folder *f = projectFolder();
@@ -5322,6 +5322,22 @@ void ApplicationWindow::readSettings() {
     g_log.warning() << tr(mess.toAscii()).toStdString() << "\n";
     settings.setValue("/DuplicationDialogShown", true);
   }
+
+  // Mantid Muon interface one time only change
+  settings.beginGroup("/CustomInterfaces");
+  settings.beginGroup("/MuonAnalysis");
+  if (!settings.contains("/UpdateForPlotPolicy1")) {
+    settings.setValue("/UpdateForPlotPolicy1", "true");
+    settings.beginGroup("/GeneralOptions");
+    if (settings.value("/newPlotPolicy", 0).toInt() == 0) {
+      settings.setValue("/newPlotPolicy", 1);
+      settings.setValue("/fitsToKeep", 0);
+    }
+    settings.endGroup();
+  }
+  settings.endGroup();
+  settings.endGroup();
+  // END Mantid Muon interface one time only change
 }
 
 void ApplicationWindow::saveSettings() {
@@ -9577,7 +9593,6 @@ void ApplicationWindow::newProject(const bool doNotSave) {
   folders->blockSignals(false);
 
   // Reset everything else
-  resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled")); // Mantid
   projectname = "untitled";
 
@@ -14371,7 +14386,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
 
   d_current_folder = newFolder;
 
-  resultsLog->clear();
   resultsLog->appendInformation(currentFolder()->logInfo());
 
   lv->clear();

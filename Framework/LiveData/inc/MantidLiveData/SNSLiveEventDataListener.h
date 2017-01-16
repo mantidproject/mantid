@@ -99,9 +99,9 @@ private:
   // complicated and I didn't want to be repeating the same tests in several
   // places...
   bool readyForInitPart2() {
-    if (m_instrumentXML.size() == 0)
+    if (m_instrumentXML.empty())
       return false;
-    if (m_instrumentName.size() == 0)
+    if (m_instrumentName.empty())
       return false;
     if (m_dataStartTime == Kernel::DateAndTime())
       return false;

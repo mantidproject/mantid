@@ -12,8 +12,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-using ButtonOpts = MWRunFiles::ButtonOpts;
-using LiveButtonOpts = MWRunFiles::LiveButtonOpts;
+using ButtonOpts = API::MWRunFiles::ButtonOpts;
+using LiveButtonOpts = API::MWRunFiles::LiveButtonOpts;
 
 /**
 This class defines a widget for selecting a workspace of file path by using a
@@ -81,6 +81,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
                  setWorkspaceTypes)
   Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE
                  showHiddenWorkspaces)
+  Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE
                  setValidatingAlgorithm)
 
@@ -362,6 +363,24 @@ public:
    */
   void showHiddenWorkspaces(bool show) {
     m_uiForm.wsWorkspaceInput->showHiddenWorkspaces(show);
+  }
+
+  /**
+   * Gets if the workspace selector shows group workspaces
+   *
+   * @return Boolean flag if group workspaces are shown
+   */
+  bool showWorkspaceGroups() const {
+    return m_uiForm.wsWorkspaceInput->showWorkspaceGroups();
+  }
+
+  /**
+   * Sets if the workspace selector shows workspace groups
+   *
+   * @param show :: Boolean flag if group workspaces are shown
+   */
+  void showWorkspaceGroups(bool show) {
+    m_uiForm.wsWorkspaceInput->showWorkspaceGroups(show);
   }
 
   /**
