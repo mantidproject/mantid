@@ -205,6 +205,30 @@ void InstrumentWidget::renameWorkspace(const std::string &workspace) {
 }
 
 /**
+ * Get the axis vector for the surface projection type.
+ * @param surfaceType :: Surface type for this projection
+ * @return a V3D for the axis being projected on
+ */
+Mantid::Kernel::V3D
+InstrumentWidget::getSurfaceAxis(const int surfaceType) const {
+  Mantid::Kernel::V3D axis;
+
+  // define the axis
+  if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y) {
+    axis = Mantid::Kernel::V3D(0, 1, 0);
+  } else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z) {
+    axis = Mantid::Kernel::V3D(0, 0, 1);
+  } else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X) {
+    axis = Mantid::Kernel::V3D(1, 0, 0);
+  } else // SIDE_BY_SIDE
+  {
+    axis = Mantid::Kernel::V3D(0, 0, 1);
+  }
+
+  return axis;
+}
+
+/**
 * Init the geometry and colour map outside constructor to prevent creating a
 * broken MdiSubwindow.
 * Must be called straight after constructor.
@@ -381,18 +405,7 @@ void InstrumentWidget::setSurfaceType(int type) {
         throw InstrumentHasNoSampleError();
       }
       Mantid::Kernel::V3D sample_pos = sample->getPos();
-      Mantid::Kernel::V3D axis;
-      // define the axis
-      if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y) {
-        axis = Mantid::Kernel::V3D(0, 1, 0);
-      } else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z) {
-        axis = Mantid::Kernel::V3D(0, 0, 1);
-      } else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X) {
-        axis = Mantid::Kernel::V3D(1, 0, 0);
-      } else // SIDE_BY_SIDE
-      {
-        axis = Mantid::Kernel::V3D(0, 0, 1);
-      }
+      auto axis = getSurfaceAxis(surfaceType);
 
       // create the surface
       if (surfaceType == FULL3D) {
