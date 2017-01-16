@@ -80,27 +80,16 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     # (type letter i,f,etc, number is *8, eg f4 = float8*4 = float32
     # force float32 on everything
     data_dtype = argument_data_dtype
-
     img_shape = first_sample_img.shape
 
-    if len(img_shape) == 2:  # the loaded file was a single image
-        sample_data = _read_listed_files(
-            sample_file_names, img_shape, file_extension, data_dtype)
-    elif len(img_shape) == 3:  # the loaded file was a stack of fits images
-        sample_data = first_sample_img
-    else:
-        raise ValueError("Data loaded has invalid shape: {0}", img_shape)
+    sample_data = _load_sample_data(first_sample_img, sample_file_names, img_shape, file_extension, data_dtype)
+    flat_avg = _load_flat_data(flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype)
+    dark_avg = _load_dark_data(dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype)
 
-    if flat_file_path is not None:
-        flat_file_names = _get_stack_file_names(
-            flat_file_path, flat_file_prefix, file_extension)
+    return sample_data, flat_avg, dark_avg
 
-        flat_data = _read_listed_files(
-            flat_file_names, img_shape, file_extension, data_dtype)
-        flat_avg = get_data_average(flat_data)
-    else:
-        flat_avg = 1  # dividing by 1 will not change the images
 
+def _load_dark_data(dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype):
     if dark_file_path is not None:
         dark_file_names = _get_stack_file_names(
             dark_file_path, dark_file_prefix, file_extension)
@@ -110,8 +99,33 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
         dark_avg = get_data_average(dark_data)
     else:
         dark_avg = 0  # subtracting 0 will not change the images
+    return dark_avg
 
-    return sample_data, flat_avg, dark_avg
+
+def _load_flat_data(flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype):
+    if flat_file_path is not None:
+        flat_file_names = _get_stack_file_names(
+            flat_file_path, flat_file_prefix, file_extension)
+
+        flat_data = _read_listed_files(
+            flat_file_names, img_shape, file_extension, data_dtype)
+        flat_avg = get_data_average(flat_data)
+    else:
+        flat_avg = 1  # dividing by 1 will not change the images
+    return flat_avg
+
+
+def _load_sample_data(first_sample_img, sample_file_names, img_shape, file_extension, data_dtype):
+    # determine what the loaded data was
+    if len(img_shape) == 2:  # the loaded file was a single image
+        sample_data = _read_listed_files(
+            sample_file_names, img_shape, file_extension, data_dtype)
+    elif len(img_shape) == 3:  # the loaded file was a stack of fits images
+        sample_data = first_sample_img
+    else:
+        raise ValueError("Data loaded has invalid shape: {0}", img_shape)
+
+    return sample_data
 
 
 def _get_stack_file_names(path, file_prefix, file_extension):
