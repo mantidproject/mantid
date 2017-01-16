@@ -29,6 +29,7 @@ Improved
    * an `Interpolation` option has been added. Availabile options are: `Linear` & `CSpline`.
    * the method of selecting the scattering point has ben updated to give better agreement with numerical algorithms such as :ref:`CylinderAbsorption <algm-CylinderAbsorption>`.
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
+- :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 - :ref:`MaskDetectors <algm-MaskDetectors>` has now a new option to mask detectors by instrument component name.
 
 Renamed
@@ -97,7 +98,8 @@ Improved
 Python
 ------
 
-- The duplicate function `Workspace::getName()` has been deprecated. Use `Workspace::name()` instead.
+- The function `IMDDimension.getName()` has been deprecated. Use the propery `IMDDimension.name` instead.
+- The duplicate function `Workspace.getName()` has been deprecated. Use `Workspace.name()` instead.
 
 Python Algorithms
 #################

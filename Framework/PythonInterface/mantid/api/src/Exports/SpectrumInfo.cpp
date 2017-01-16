@@ -6,6 +6,9 @@ using namespace boost::python;
 
 void export_SpectrumInfo() {
   class_<SpectrumInfo, boost::noncopyable>("SpectrumInfo", no_init)
+      .def("isMonitor", &SpectrumInfo::isMonitor, (arg("self"), arg("index")),
+           "Returns true if the detector(s) associated with the spectrum are "
+           "monitors.")
       .def("isMasked", &SpectrumInfo::isMasked, (arg("self"), arg("index")),
            "Returns true if the detector(s) associated with the spectrum are "
            "masked.")
