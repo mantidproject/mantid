@@ -179,7 +179,6 @@ bool ISISKafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
     std::lock_guard<std::mutex> runStatusLock(m_runStatusMutex);
     m_runStatusSeen = true;
     cvRunStatus.notify_one();
-    std::cout << "MonitorLiveData knows run status is EndRun" << std::endl;
   }
   return m_endRun;
 }
