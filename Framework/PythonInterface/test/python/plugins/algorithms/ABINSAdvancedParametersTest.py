@@ -1,6 +1,7 @@
 import unittest
 import os
 from mantid.simpleapi import mtd, logger
+import numpy as np
 from mantid.simpleapi import ABINS, DeleteWorkspace
 
 from AbinsModules import AbinsParameters, AbinsTestHelpers
