@@ -734,7 +734,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
                    SLOT(switchQWTRaster(bool)));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
                    SLOT(setNonOrthogonalbtn()));
-  // emit setNonOrthogonalbtn();
   m_firstNonOrthogonalWorkspaceOpen = true;
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
@@ -1714,7 +1713,8 @@ void SliceViewer::checkForHKLDimension() {
       const auto useNonOrthogonal = isHKL;
       switchQWTRaster(useNonOrthogonal);
     }
-    emit setNonOrthogonalbtn();
+    emit setNonOrthogonalbtn(); // true lets button decide what to enable
+                                // depending on workspace/axes etc
   }
 }
 //==============================================================================
@@ -2387,7 +2387,7 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
 }
 /** NON ORTHOGONAL STUFF **/
 
-void SliceViewer::setNonOrthogonalbtn() {
+void SliceViewer::setNonOrthogonalbtn(bool forceOff) {
   bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
   if (!canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()) {
     ui.btnNonOrthogonalToggle->toggle();
@@ -2399,8 +2399,21 @@ void SliceViewer::setNonOrthogonalbtn() {
     ui.btnNonOrthogonalToggle->toggle();
     m_oldDimNonOrthogonal = false;
   }
-  ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
+  if (ui.btnPeakOverlay->isChecked()) {
+    ui.btnNonOrthogonalToggle->setDisabled(true);
+    ui.btnNonOrthogonalToggle->setToolTip(
+        QString("NonOrthogonal view disabled when peakview enabled"));
+  } else {
+    ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
+    if (canShowSkewedWS) {
+      ui.btnNonOrthogonalToggle->setToolTip(QString("NonOrthogonal axes view"));
+    } else {
+      ui.btnNonOrthogonalToggle->setToolTip(
+          QString("NonOrthogonal view requires HKL axes"));
+    }
+  };
 
+  // temporary to disable if peak overlay is on
   emit disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());
 }
 
@@ -2588,6 +2601,7 @@ void SliceViewer::peakOverlay_clicked() {
                       QIcon::Off);
     ui.btnPeakOverlay->setChecked(false);
   }
+  setNonOrthogonalbtn(); // currently disabling nonOrthogonal when peaks view on
 }
 
 /**

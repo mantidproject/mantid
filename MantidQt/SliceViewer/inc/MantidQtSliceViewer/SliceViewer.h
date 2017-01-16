@@ -201,7 +201,7 @@ public slots:
   void copyImageToClipboard();
   void onPeaksViewerOverlayOptions();
   // Non Orthogonal
-  void setNonOrthogonalbtn();
+  void setNonOrthogonalbtn(bool forceOff = false);
   void disableOrthogonalAnalysisTools(bool checked);
   // Synced checkboxes
   void LineMode_toggled(bool);
