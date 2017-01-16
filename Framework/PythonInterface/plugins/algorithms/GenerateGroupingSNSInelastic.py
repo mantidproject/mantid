@@ -56,7 +56,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
 
         i=0
-        while __w.getDetector(i).isMonitor():
+        spectrumInfo = __w.spectrumInfo()
+        while spectrumInfo.isMonitor(i):
             i += 1
         #i is the index of the first true detector
         #now, crop the workspace of the monitors

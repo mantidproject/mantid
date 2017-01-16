@@ -81,7 +81,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         self.assertEqual(out_ws.getNumDims(), 2)
         self.assertEqual(out_ws.YUnit(), 'Counts')
         dimX = out_ws.getXDimension()
-        self.assertEqual(dimX.getName(), 'Time-of-flight')
+        self.assertEqual(dimX.name, 'Time-of-flight')
         self.assertEqual(dimX.getUnits(), 'microsecond')
         dimY = out_ws.getYDimension()
         self.assertEqual(dimY.getName(), 'Spectrum')

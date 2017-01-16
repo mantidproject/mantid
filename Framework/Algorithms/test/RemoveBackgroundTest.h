@@ -261,8 +261,7 @@ public:
   }
 
   RemoveBackgroundTestPerformance() {
-
-    init_workspaces(10000, 15000, BgWS, SourceWS);
+    init_workspaces(1000, 15000, BgWS, SourceWS);
   }
 
   void testRemoveBkgInPlace() {

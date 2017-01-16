@@ -19,7 +19,6 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(!pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMonitor());
   }
 
   void testNameParentConstructor() {
@@ -32,7 +31,6 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMonitor());
   }
 
   void testId() {
@@ -64,19 +62,6 @@ public:
     // DetectorInfo and ParameterMap should reject it.
     TS_ASSERT_THROWS(pmap->get(&det, "masked"), std::runtime_error);
     TS_ASSERT_THROWS(pmap->addBool(&det, "masked", true), std::runtime_error);
-  }
-
-  void testMonitor() {
-    Detector det("det", 0, 0);
-
-    ParameterMap_sptr pmap(new ParameterMap());
-    boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
-
-    TS_ASSERT(!pdet->isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor());
-    TS_ASSERT(pdet->isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor(false));
-    TS_ASSERT(!pdet->isMonitor());
   }
 
   void testGetNumberParameter() {
