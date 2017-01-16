@@ -51,17 +51,17 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
  */
 void InelasticDiffRotDiscreteCircle::init() {
   // Ensure positive values for Intensity, Radius, and decay
-  auto IntensityConstraint = new BConstraint(
+  auto IntensityConstraint = std::make_unique<BConstraint>(
       this, "Intensity", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(IntensityConstraint);
+  this->addConstraint(std::move(IntensityConstraint));
 
-  auto RadiusConstraint = new BConstraint(
+  auto RadiusConstraint = std::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(RadiusConstraint);
+  this->addConstraint(std::move(RadiusConstraint));
 
-  auto DecayConstraint = new BConstraint(
+  auto DecayConstraint = std::make_unique<BConstraint>(
       this, "Decay", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(DecayConstraint);
+  this->addConstraint(std::move(DecayConstraint));
 }
 
 /**

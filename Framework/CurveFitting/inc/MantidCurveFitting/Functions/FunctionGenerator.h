@@ -93,7 +93,7 @@ public:
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const API::ParameterReference &ref) const override;
   /// Tie a parameter to other parameters (or a constant)
-  API::ParameterTie *tie(const std::string &parName, const std::string &expr,
+  void tie(const std::string &parName, const std::string &expr,
                          bool isDefault = false) override;
   /// Apply the ties
   void applyTies() override;
@@ -107,7 +107,7 @@ public:
   API::ParameterTie *getTie(size_t i) const override;
 
   /// Add a constraint to function
-  void addConstraint(API::IConstraint *ic) override;
+  void addConstraint(std::unique_ptr<API::IConstraint> ic) override;
   /// Get constraint of i-th parameter
   API::IConstraint *getConstraint(size_t i) const override;
   /// Remove a constraint
@@ -125,7 +125,7 @@ protected:
                         const std::string &description = "") override;
 
   /// Add a new tie. Derived classes must provide storage for ties
-  void addTie(API::ParameterTie *tie) override;
+  void addTie(std::unique_ptr<API::ParameterTie> tie) override;
   //@}
 
 public:

@@ -80,11 +80,11 @@ void PseudoVoigt::init() {
   declareParameter("PeakCentre");
   declareParameter("FWHM");
 
-  BoundaryConstraint *mixingConstraint =
-      new BoundaryConstraint(this, "Mixing", 0.0, 1.0, true);
+  auto mixingConstraint =
+      std::make_unique<BoundaryConstraint>(this, "Mixing", 0.0, 1.0, true);
   mixingConstraint->setPenaltyFactor(1e9);
 
-  addConstraint(mixingConstraint);
+  addConstraint(std::move(mixingConstraint));
 }
 
 } // namespace Functions

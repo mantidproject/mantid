@@ -61,9 +61,9 @@ void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
       return;
     }
     peak.removeConstraint("FWHM");
-    auto constraint = new Constraints::BoundaryConstraint(
+    auto constraint = std::make_unique<Constraints::BoundaryConstraint>(
         &peak, "FWHM", lowerBound, upperBound);
-    peak.addConstraint(constraint);
+    peak.addConstraint(std::move(constraint));
   } else if (peak.name() == "Gaussian") {
     if (fix) {
       peak.fixParameter("Sigma");
@@ -73,9 +73,9 @@ void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
     lowerBound /= WIDTH_TO_SIGMA;
     upperBound /= WIDTH_TO_SIGMA;
     peak.removeConstraint("Sigma");
-    auto constraint = new Constraints::BoundaryConstraint(
+    auto constraint = std::make_unique<Constraints::BoundaryConstraint>(
         &peak, "Sigma", lowerBound, upperBound);
-    peak.addConstraint(constraint);
+    peak.addConstraint(std::move(constraint));
   } else {
     throw std::runtime_error("Cannot set constraint on width of " +
                              peak.name());

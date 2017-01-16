@@ -7,7 +7,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Unit.h"
@@ -450,7 +449,7 @@ public:
   /** @name Ties */
   //@{
   /// Tie a parameter to other parameters (or a constant)
-  virtual ParameterTie *tie(const std::string &parName, const std::string &expr,
+  virtual void tie(const std::string &parName, const std::string &expr,
                             bool isDefault = false);
   /// Add several ties
   virtual void addTies(const std::string &ties, bool isDefault = false);
@@ -465,7 +464,7 @@ public:
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const = 0;
   /// Add a new tie. Derived classes must provide storage for ties
-  virtual void addTie(ParameterTie *tie) = 0;
+  virtual void addTie(std::unique_ptr<ParameterTie> tie) = 0;
   //@}
 
   /** @name Constraints */
@@ -473,7 +472,7 @@ public:
   /// Add a list of conatraints from a string
   virtual void addConstraints(const std::string &str, bool isDefault = false);
   /// Add a constraint to function
-  virtual void addConstraint(IConstraint *ic) = 0;
+  virtual void addConstraint(std::unique_ptr<IConstraint> ic) = 0;
   /// Get constraint of i-th parameter
   virtual IConstraint *getConstraint(size_t i) const = 0;
   /// Remove a constraint
@@ -583,6 +582,10 @@ protected:
   Kernel::ProgressBase *m_progReporter;
 
 private:
+  /// No copying
+  IFunction(const IFunction&) = delete;
+  /// No copying
+  IFunction& operator=(const IFunction&) = delete;
   /// The declared attributes
   std::map<std::string, API::IFunction::Attribute> m_attrs;
   /// The covariance matrix of the fitting parameters

@@ -371,7 +371,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
 
   // II. Create local background function.
   Polynomial_sptr backgroundfunction =
-      boost::make_shared<Polynomial>(Polynomial());
+      boost::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -1106,7 +1106,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
 void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
   // 1. Initialize (local) background function
   Polynomial_sptr backgroundfunction =
-      boost::make_shared<Polynomial>(Polynomial());
+      boost::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -1256,19 +1256,17 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // a) Peak centre
   double peakcentreleftbound = peak->centre() - peak->fwhm();
   double peakcentrerightbound = peak->centre() + peak->fwhm();
-  BoundaryConstraint *x0bc = new BoundaryConstraint(
+  auto x0bc = std::make_unique<BoundaryConstraint>(
       peak.get(), "X0", peakcentreleftbound, peakcentrerightbound);
-  peak->addConstraint(x0bc);
+  peak->addConstraint(std::move(x0bc));
 
   // b) A
-  BoundaryConstraint *abc =
-      new BoundaryConstraint(peak.get(), "A", 1.0E-10, false);
-  peak->addConstraint(abc);
+  auto abc = std::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
+  peak->addConstraint(std::move(abc));
 
   // c) B
-  BoundaryConstraint *bbc =
-      new BoundaryConstraint(peak.get(), "B", 1.0E-10, false);
-  peak->addConstraint(bbc);
+  auto bbc = std::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
+  peak->addConstraint(std::move(bbc));
 
   // d) Guessed height
   peak->setHeight(maxheight);
@@ -1524,26 +1522,25 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
     double tof_h = peakfunction->centre();
     double centerleftend = tof_h - guessedfwhm * 3.0;
     double centerrightend = tof_h + guessedfwhm * 3.0;
-    BoundaryConstraint *centerbound = new BoundaryConstraint(
+    auto centerbound = std::make_unique<BoundaryConstraint>(
         peakfunction.get(), "X0", centerleftend, centerrightend, false);
-    peakfunction->addConstraint(centerbound);
+    peakfunction->addConstraint(std::move(centerbound));
 
     g_log.debug() << "[DoFitPeak] Peak Center Boundary = " << centerleftend
                   << ", " << centerrightend << '\n';
   }
 
   // A > 0, B > 0, S > 0
-  BoundaryConstraint *abound = new BoundaryConstraint(
+  auto abound = std::make_unique<BoundaryConstraint>(
       peakfunction.get(), "A", 0.0000001, DBL_MAX, false);
-  peakfunction->addConstraint(abound);
+  peakfunction->addConstraint(std::move(abound));
 
-  BoundaryConstraint *bbound = new BoundaryConstraint(
+  auto bbound = std::make_unique<BoundaryConstraint>(
       peakfunction.get(), "B", 0.0000001, DBL_MAX, false);
-  peakfunction->addConstraint(bbound);
+  peakfunction->addConstraint(std::move(bbound));
 
-  BoundaryConstraint *sbound =
-      new BoundaryConstraint(peakfunction.get(), "S", 0.0001, DBL_MAX, false);
-  peakfunction->addConstraint(sbound);
+  auto sbound = std::make_unique<BoundaryConstraint>(peakfunction.get(), "S", 0.0001, DBL_MAX, false);
+  peakfunction->addConstraint(std::move(sbound));
 
   // 2. Unfix all parameters
   vector<string> paramnames = peakfunction->getParameterNames();
@@ -1812,10 +1809,9 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // b) Constraint
   double centerleftend = in_center - leftfwhm * 0.5;
   double centerrightend = in_center + rightfwhm * 0.5;
-  Constraints::BoundaryConstraint *centerbound =
-      new Constraints::BoundaryConstraint(gaussianpeak.get(), "PeakCentre",
+  auto centerbound = std::make_unique<BoundaryConstraint>(gaussianpeak.get(), "PeakCentre",
                                           centerleftend, centerrightend, false);
-  gaussianpeak->addConstraint(centerbound);
+  gaussianpeak->addConstraint(std::move(centerbound));
 
   // 3. Fit
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
@@ -2119,9 +2115,9 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     double leftcentrebound = centre - 0.5 * fwhm;
     double rightcentrebound = centre + 0.5 * fwhm;
 
-    BoundaryConstraint *bc = new BoundaryConstraint(
+    auto bc = std::make_unique<BoundaryConstraint>(
         thispeak.get(), "X0", leftcentrebound, rightcentrebound, false);
-    thispeak->addConstraint(bc);
+    thispeak->addConstraint(std::move(bc));
   }
 }
 
@@ -2727,10 +2723,9 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
                             map<string, string> bk2bk2braggmap, bool &good,
                             vector<int> &hkl, double &d_h) {
   // Generate a peak function
-  BackToBackExponential newpeak;
-  newpeak.initialize();
   BackToBackExponential_sptr newpeakptr =
-      boost::make_shared<BackToBackExponential>(newpeak);
+      boost::make_shared<BackToBackExponential>();
+  newpeakptr->initialize();
 
   // Check miller index (HKL) is a valid value in a miller indexes pool (hklmap)
   good = getHKLFromMap(hklmap, hkl);

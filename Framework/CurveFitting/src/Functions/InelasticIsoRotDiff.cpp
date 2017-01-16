@@ -44,15 +44,15 @@ InelasticIsoRotDiff::InelasticIsoRotDiff() {
  */
 void InelasticIsoRotDiff::init() {
   // Ensure positive values for Height, Radius, and Diffusion constant
-  auto HeightConstraint = new BConstraint(
+  auto HeightConstraint = std::make_unique<BConstraint>(
       this, "Height", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(HeightConstraint);
-  auto RadiusConstraint = new BConstraint(
+  this->addConstraint(std::move(HeightConstraint));
+  auto RadiusConstraint = std::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(RadiusConstraint);
-  auto DiffusionConstraint = new BConstraint(
+  this->addConstraint(std::move(RadiusConstraint));
+  auto DiffusionConstraint = std::make_unique<BConstraint>(
       this, "Tau", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(DiffusionConstraint);
+  this->addConstraint(std::move(DiffusionConstraint));
 }
 
 /**

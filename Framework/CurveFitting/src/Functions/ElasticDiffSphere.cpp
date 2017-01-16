@@ -39,13 +39,13 @@ ElasticDiffSphere::ElasticDiffSphere() {
  */
 void ElasticDiffSphere::init() {
   // Ensure positive values for Height and Radius
-  auto HeightConstraint = new BConstraint(
+  auto HeightConstraint = std::make_unique<BConstraint>(
       this, "Height", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(HeightConstraint);
+  this->addConstraint(std::move(HeightConstraint));
 
-  auto RadiusConstraint = new BConstraint(
+  auto RadiusConstraint = std::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(RadiusConstraint);
+  this->addConstraint(std::move(RadiusConstraint));
 }
 
 /**

@@ -109,18 +109,16 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  * with this reference: a tie or a constraint.
  * @return newly ties parameters
  */
-ParameterTie *IFunction::tie(const std::string &parName,
+void IFunction::tie(const std::string &parName,
                              const std::string &expr, bool isDefault) {
-  auto ti = new ParameterTie(this, parName, expr, isDefault);
+  auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
   this->fix(getParameterIndex(*ti));
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
-    delete ti;
-    ti = nullptr;
   } else {
-    addTie(ti);
+    addTie(std::move(ti));
   }
-  return ti;
+//  return ti.get();
 }
 
 /**
@@ -253,9 +251,9 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   list.parse(str);
   list.toList();
   for (const auto &expr : list) {
-    IConstraint *c =
-        ConstraintFactory::Instance().createInitialized(this, expr, isDefault);
-    this->addConstraint(c);
+    auto c = std::unique_ptr<IConstraint>(
+        ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
+    this->addConstraint(std::move(c));
   }
 }
 
@@ -904,7 +902,7 @@ void IFunction::setMatrixWorkspace(
                       << "Can't set penalty factor for constraint\n";
                 }
               }
-              addConstraint(constraint);
+              addConstraint(std::unique_ptr<IConstraint>(constraint));
             }
           }
         }

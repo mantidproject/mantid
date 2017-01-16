@@ -224,8 +224,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   cout << "=========== Method [FitInstrumentParameters] ===============\n";
 
   // 1. Initialize the fitting function
-  ThermalNeutronDtoTOFFunction rawfunc;
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
+  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
   m_Function->initialize();
 
   API::FunctionDomain1DVector domain(m_dataWS->x(1).rawData());
@@ -601,9 +600,9 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // Constraint
     double lowerb = lowerbounds[i];
     double upperb = upperbounds[i];
-    BoundaryConstraint *newconstraint =
-        new BoundaryConstraint(func4fit.get(), parname, lowerb, upperb);
-    func4fit->addConstraint(newconstraint);
+    auto newconstraint =
+        std::make_unique<BoundaryConstraint>(func4fit.get(), parname, lowerb, upperb);
+    func4fit->addConstraint(std::move(newconstraint));
   }
   cout << "Function for fitting in MC: " << func4fit->asString() << '\n';
 
@@ -785,11 +784,9 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
   parnames.clear();
 
   // 2. Get the parameter names from function
-  ThermalNeutronDtoTOFFunction d2toffunc;
-  d2toffunc.initialize();
-  std::vector<std::string> funparamnames = d2toffunc.getParameterNames();
+  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
+  std::vector<std::string> funparamnames = m_Function->getParameterNames();
 
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>(d2toffunc);
 
   // 3. Copy
   parnames = funparamnames;
@@ -859,8 +856,9 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
 
   for (size_t ir = 0; ir < numrows; ++ir) {
     // a) Generate peak
-    BackToBackExponential newpeak;
-    newpeak.initialize();
+    BackToBackExponential_sptr newpeakptr =
+        boost::make_shared<BackToBackExponential>();
+    newpeakptr->initialize();
 
     // b) Parse parameters
     int h, k, l;
@@ -903,15 +901,11 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
       sigma = sqrt(sigma2);
 
     // c) Set peak parameters and etc.
-    newpeak.setParameter("A", alpha);
-    newpeak.setParameter("B", beta);
-    newpeak.setParameter("S", sigma);
-    newpeak.setParameter("X0", tof_h);
-    newpeak.setParameter("I", height);
-
-    // d) Make to share pointer and set to instance data structure (map)
-    BackToBackExponential_sptr newpeakptr =
-        boost::make_shared<BackToBackExponential>(newpeak);
+    newpeakptr->setParameter("A", alpha);
+    newpeakptr->setParameter("B", beta);
+    newpeakptr->setParameter("S", sigma);
+    newpeakptr->setParameter("X0", tof_h);
+    newpeakptr->setParameter("I", height);
 
     std::vector<int> hkl;
     hkl.push_back(h);
@@ -925,7 +919,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     g_log.information() << "[Generatem_Peaks] Peak " << ir << " HKL = ["
                         << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
                         << "], Input Center = " << setw(10) << setprecision(6)
-                        << newpeak.centre() << '\n';
+                        << newpeakptr->centre() << '\n';
 
   } // ENDFOR Each potential peak
 }

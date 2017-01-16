@@ -117,7 +117,7 @@ public:
   bool hasAttribute(const std::string &attName) const override;
 
   /// Tie a parameter of decorated function to other parameters (or a constant).
-  ParameterTie *tie(const std::string &parName, const std::string &expr,
+  void tie(const std::string &parName, const std::string &expr,
                     bool isDefault = false) override;
   /// Apply the ties in decorated function.
   void applyTies() override;
@@ -130,7 +130,7 @@ public:
   ParameterTie *getTie(size_t i) const override;
 
   /// Add a constraint to decorated function.
-  void addConstraint(IConstraint *ic) override;
+  void addConstraint(std::unique_ptr<IConstraint> ic) override;
   /// Get constraint of i-th parameter of decorated function.
   IConstraint *getConstraint(size_t i) const override;
   /// Remove a constraint of decorated function.
@@ -147,7 +147,7 @@ protected:
   void declareParameter(const std::string &name, double initValue,
                         const std::string &description) override;
 
-  void addTie(ParameterTie *tie) override;
+  void addTie(std::unique_ptr<ParameterTie>) override;
 
   virtual void beforeDecoratedFunctionSet(const IFunction_sptr &fn);
   void setDecoratedFunctionPrivate(const IFunction_sptr &fn);

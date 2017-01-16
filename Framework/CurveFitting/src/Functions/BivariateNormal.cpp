@@ -475,7 +475,7 @@ double BivariateNormal::initCommon() {
 
     if (getConstraint(0) == nullptr) {
 
-      addConstraint((new BoundaryConstraint(this, "Background", 0,
+      addConstraint((std::make_unique<BoundaryConstraint>(this, "Background", 0,
                                             Attrib[S_int] / Attrib[S_1])));
     }
 
@@ -485,20 +485,20 @@ double BivariateNormal::initCommon() {
       maxIntensity = 100;
 
     if (getConstraint(1) == nullptr) {
-      addConstraint(new BoundaryConstraint(this, "Intensity", 0, maxIntensity));
+      addConstraint(std::make_unique<BoundaryConstraint>(this, "Intensity", 0, maxIntensity));
     }
 
     double minMeany = MinY * .9 + .1 * MaxY;
     double maxMeany = MinY * .1 + .9 * MaxY;
 
     if (getConstraint(3) == nullptr) {
-      addConstraint(new BoundaryConstraint(this, "Mrow", minMeany, maxMeany));
+      addConstraint(std::make_unique<BoundaryConstraint>(this, "Mrow", minMeany, maxMeany));
     }
 
     double minMeanx = MinX * .9 + .1 * MaxX;
     double maxMeanx = MinX * .1 + .9 * MaxX;
     if (getConstraint(2) == nullptr) {
-      addConstraint(new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx));
+      addConstraint(std::make_unique<BoundaryConstraint>(this, "Mcol", minMeanx, maxMeanx));
     }
 
     if (CalcVariances && nParams() > 6) {

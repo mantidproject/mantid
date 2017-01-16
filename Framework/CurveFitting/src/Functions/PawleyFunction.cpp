@@ -284,19 +284,19 @@ void PawleyParameterFunction::createLatticeSystemParameters(
 /// Adds a default constraint so that cell edge lengths can not be less than 0.
 void PawleyParameterFunction::addLengthConstraint(
     const std::string &parameterName) {
-  BoundaryConstraint *cellEdgeConstraint =
-      new BoundaryConstraint(this, parameterName, 0.0, true);
+  auto cellEdgeConstraint =
+      std::make_unique<BoundaryConstraint>(this, parameterName, 0.0, true);
   cellEdgeConstraint->setPenaltyFactor(1e12);
-  addConstraint(cellEdgeConstraint);
+  addConstraint(std::move(cellEdgeConstraint));
 }
 
 /// Adds a default constraint so cell angles are in the range 0 to 180.
 void PawleyParameterFunction::addAngleConstraint(
     const std::string &parameterName) {
-  BoundaryConstraint *cellAngleConstraint =
-      new BoundaryConstraint(this, parameterName, 0.0, 180.0, true);
+  auto cellAngleConstraint =
+      std::make_unique<BoundaryConstraint>(this, parameterName, 0.0, 180.0, true);
   cellAngleConstraint->setPenaltyFactor(1e12);
-  addConstraint(cellAngleConstraint);
+  addConstraint(std::move(cellAngleConstraint));
 }
 
 /// Tries to extract and store the center parameter name from the function.
