@@ -76,7 +76,7 @@ public:
                "Decoder's data buffers should be created now");
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isRunning());
+    TS_ASSERT(!decoder->isCapturing());
 
     // -- Workspace checks --
     TSM_ASSERT(workspace,
@@ -110,7 +110,7 @@ public:
     Workspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isRunning());
+    TS_ASSERT(!decoder->isCapturing());
 
     // --- Workspace checks ---
     TSM_ASSERT(workspace,
@@ -146,7 +146,7 @@ public:
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     TS_ASSERT_THROWS_NOTHING(decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isRunning());
+    TS_ASSERT(!decoder->isCapturing());
   }
 
   //----------------------------------------------------------------------------
@@ -167,7 +167,7 @@ public:
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isRunning());
+    TS_ASSERT(!decoder->isCapturing());
   }
 
   void test_Empty_SpDet_Stream_Throws_Error_On_ExtractData() {
@@ -185,7 +185,7 @@ public:
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isRunning());
+    TS_ASSERT(!decoder->isCapturing());
   }
 
   void test_Empty_RunInfo_Stream_Throws_Error_On_ExtractData() {
@@ -203,7 +203,7 @@ public:
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isRunning());
+    TS_ASSERT(!decoder->isCapturing());
   }
 
 private:
