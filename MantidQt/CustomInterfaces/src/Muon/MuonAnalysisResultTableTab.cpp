@@ -498,24 +498,20 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     std::string wsName = fittedWsList[i].toStdString();
     auto ws = retrieveWSChecked<ExperimentInfo>(wsName + WORKSPACE_POSTFIX);
     const std::vector<Property *> &logData = ws->run().getLogData();
-    const TimeSeriesProperty<bool> *runningLog;//=dynamic_cast<TimeSeriesProperty<bool> *>(runLog);// need a TimeSeriesProperty <bool> to apply the filter
-    bool foundRunning=false;
-    std::string running="running";	
-    Property *runLog;
-    for (const auto prop : logData) 
-    {
-	std::string currentString=prop->name().c_str();
-	if(currentString == running)
-	{
-		foundRunning=true; 
+    const TimeSeriesProperty<bool> *runningLog;//defined here to keep the object in scope. If applicable it is assigned a value within an if statement. 
+    bool foundRunning=false; // If a running log is found within the workspace
+    std::string running="running";// define the running log via a string to prevent typos between different occurances. 	
+    Property *runLog; //defined here to keep the object in scope. If applicable it is assigned a value within an if statement. 
+    for (const auto prop : logData){
+	if(prop->name().c_str() == running){
+		foundRunning=true; // running log exists 
                 runLog =  ws->run().getLogData(running);// what happend if this does not exist? -> just delete an n 		
    		runningLog=dynamic_cast<TimeSeriesProperty<bool> *>(runLog);// need a TimeSeriesProperty <bool> to apply the filter
 	}
     }
     
    // if runnunglog is empty throw a warning 
-    if(!foundRunning)
-    { 
+    if(!foundRunning){ 
     		Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
 		g_log.warning("No running log found. Filtering will not be applied to the data.\n");
     }
@@ -525,13 +521,12 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
       {
 
 		
-		auto mylog = log->clone();
-		if(foundRunning){
-		mylog->filterWith(runningLog);}//only do this if runninglog exists}
+		auto mylog = log->clone();// clone to preserve the original object 
+		if(foundRunning){// if the running log exists apply the filter (status) otherwise do not apply a filter
+		mylog->filterWith(runningLog);}
                 QString logFile(QFileInfo(prop->name().c_str()).fileName());
-        	auto time_ave = mylog->timeAverageValue();
-         	if (time_ave != 0) 
-         	{
+        	auto time_ave = mylog->timeAverageValue();// get the time average 
+         	if (time_ave != 0){
          	  	// Return average
          	  	wsLogValues[logFile] = time_ave;
          	}
