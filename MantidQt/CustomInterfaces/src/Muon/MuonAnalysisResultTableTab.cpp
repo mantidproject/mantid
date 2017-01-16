@@ -503,29 +503,27 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
                                                 // applicable it is assigned a
                                                 // value within an if statement.
 
-
     std::string running = "running"; // define the running log via a string to
                                      // prevent typos between different
                                      // occurances.
-    Property *runLog=nullptr; // defined here to keep the object in scope. If applicable
-                      // it is assigned a value within an if statement.
+    Property *runLog =
+        nullptr; // defined here to keep the object in scope. If applicable
+                 // it is assigned a value within an if statement.
 
+    bool foundRunning = ws->run().hasProperty(
+        running); // If a running log is found within the workspace
+    if (foundRunning) {
+      runLog = ws->run().getLogData(running);
+      runningLog = dynamic_cast<TimeSeriesProperty<bool> *>(
+          runLog); // need a TimeSeriesProperty <bool> to apply the filter
 
-    bool foundRunning = ws->run().hasProperty(running); // If a running log is found within the workspace
-    if(foundRunning)
-{
-        runLog = ws->run().getLogData(running); 
-        runningLog = dynamic_cast<TimeSeriesProperty<bool> *>(
-            runLog); // need a TimeSeriesProperty <bool> to apply the filter
- 
-}
-else // if runnunglog is empty throw a warning
-{
-     Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
+    } else // if runnunglog is empty throw a warning
+    {
+      Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
       g_log.warning(
-          "No running log found. Filtering will not be applied to the data.\n"); 
-}
-   for (const auto prop : logData) {
+          "No running log found. Filtering will not be applied to the data.\n");
+    }
+    for (const auto prop : logData) {
       // Check if is a timeseries log
       if (TimeSeriesProperty<double> *log =
               dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
