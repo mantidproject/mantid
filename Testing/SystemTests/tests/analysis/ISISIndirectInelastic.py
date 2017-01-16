@@ -591,7 +591,7 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
         LoadNexus(self.input_workspace,
                   OutputWorkspace=self.input_workspace)
 
-        SofQWMoments(Sample=self.input_workspace, EnergyMin=self.e_min,
+        SofQWMoments(InputWorkspace=self.input_workspace, EnergyMin=self.e_min,
                      EnergyMax=self.e_max, Scale=self.scale,
                      OutputWorkspace=self.input_workspace + '_Moments')
 
