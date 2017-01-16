@@ -1,3 +1,28 @@
+# Contents
+
+<!-- TOC -->
+
+- [Contents](#contents)
+- [Utility](#utility)
+  - [Merge pre-processing images into a stack. This will not apply any filters as pre-processing, it will just pack all of the images into a stack](#merge-pre-processing-images-into-a-stack-this-will-not-apply-any-filters-as-pre-processing-it-will-just-pack-all-of-the-images-into-a-stack)
+- [Find Center Runs](#find-center-runs)
+  - [Single image and no crop](#single-image-and-no-crop)
+  - [Full `RB000888 test stack larmor summed 201510`, spheres crop](#full-rb000888-test-stack-larmor-summed-201510-spheres-crop)
+- [Run Reconstruction](#run-reconstruction)
+  - [Single Image <br>](#single-image-br)
+  - [Full `RB000888 test stack larmor summed 201510`, bolts crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-bolts-crop-good-air-region)
+  - [Full `RB000888 test stack larmor summed 201510`, spheres crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-spheres-crop-good-air-region)
+  - [Full `RB000888_test_stack_larmor_summed_201510` dataset, bolts crop, **BAD** air region](#full-rb000888_test_stack_larmor_summed_201510-dataset-bolts-crop-bad-air-region)
+- [ImageJ `GetSelectionCoordinates` Macro](#imagej-getselectioncoordinates-macro)
+- [Python local tests](#python-local-tests)
+  - [Pyfits load image stack](#pyfits-load-image-stack)
+  - [Test loading single images and image stack](#test-loading-single-images-and-image-stack)
+- [Astra Reconstructions](#astra-reconstructions)
+
+<!-- /TOC -->
+ 
+
+# Utility
 ## Merge pre-processing images into a stack. This will not apply any filters as pre-processing, it will just pack all of the images into a stack
 
 ```python
@@ -9,8 +34,12 @@ python tomo_main.py
 For Copy/Paste to terminal:
 >python tomo_main.py -i=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full -o=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --data-as-stack
 
----
-## Run Find_Center with a single image and no crop
+
+<br/>
+
+# Find Center Runs
+
+## Single image and no crop
 
 ```python
 python tomo_main.py  
@@ -33,7 +62,8 @@ EXPECTED RESULTS:
 > COR: 265.0
 
 ---
-## Run Find_Center with full `RB000888_test_stack_larmor_summed_201510` and crop **[36, 227, 219, 510]**
+
+## Full `RB000888 test stack larmor summed 201510`, spheres crop
 
 ```python
 python tomo_main.py  
@@ -58,8 +88,8 @@ EXPECTED RESULTS:
 <br />
 
 # Run Reconstruction
-- ### Single Image <br>
-- ### ROI Crop **[36, 227, 219, 510]** <br>
+
+## Single Image <br>
 
 ```python
 python tomo_main.py
@@ -82,7 +112,7 @@ For Copy/Paste to terminal:
 
 ---
 
-- ### ROI for the Bolts
+## Full `RB000888 test stack larmor summed 201510`, bolts crop, good air region
 - ### Full `RB000888_test_stack_larmor_summed_201510` dataset <br>
 - ### **OUT OF BOUNDS** Air Region if `--crop-before-normalise` is SPECIFIED <br>
 - ### Better results/Air Region if run wihout `--crop-before-normalise`
@@ -109,7 +139,7 @@ For Copy/Paste to terminal:
 
 ---
 
-- ### ROI for the Balls
+## Full `RB000888 test stack larmor summed 201510`, spheres crop, good air region
 - ### Full `RB000888_test_stack_larmor_summed_201510` dataset <br>
 - ### **OUT OF BOUNDS** Air Region if `--crop-before-normalise` is SPECIFIED <br>
 - ### Better results/Air Region if run wihout `--crop-before-normalise`
@@ -125,7 +155,7 @@ python tomo_main.py
 --region-of-interest='[35.0, 232.0, 224.0, 509.0]'
 --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000
 --median-filter-size=3
---cor=255.000000
+--cor=136.000000
 --rotation=1
 --max-angle=360.000000
 --air-region='[360.0, 111.0, 388.0, 144.0]'
@@ -135,9 +165,9 @@ For Copy/Paste to terminal:
 >python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
 ---
 
-- ### Full `RB000888_test_stack_larmor_summed_201510` dataset<br>
+## Full `RB000888_test_stack_larmor_summed_201510` dataset, bolts crop, **BAD** air region
 - ### ROI Crop **[36, 0, 219, 229]** <br>
-- ### **WORKING** Air Region **[189.000000, 100.000000, 209.000000, 135.000000]** for crop if `--crop-before-normalise` is SPECIFIED <br>
+- ### **WORKING** Air Region **[189.000000, 100.000000, 209.000000, 135.000000]** for crop if `--crop-before-normalise` is SPECIFIED <div id='id-section1'/>
 
 ```python
 python tomo_main.py
@@ -150,16 +180,19 @@ python tomo_main.py
 --region-of-interest='[35.0, 232.0, 224.0, 509.0]'
 --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000
 --median-filter-size=3
---cor=255.000000
+--cor=104.0
 --rotation=1
 --max-angle=360.000000
 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]'
 --crop-before-normalise --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalise --data-as-stack
+>python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full --input-path-flat=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed --input-path-dark=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/reconstruction_TomoPy_gridrec_2016December15_093530_690212000 --median-filter-size=3 --cor=104.0 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalise --data-as-stack
 
-ImageJ `GetSelectionCoordinates` Macro:
+<br/>
+
+# ImageJ `GetSelectionCoordinates` Macro
+- ### Gets selection coordinates and prints them in appropriate format to be copy pasted into Terminal
 
 ```
 macro "List XY Coordinates" {
@@ -168,3 +201,26 @@ macro "List XY Coordinates" {
   print("\'["+x[0]+".0, "+y[1]+".0, "+x[1]+".0, "+y[2]+".0]\'")
 }
 ```
+<br/>
+
+# Python local tests
+
+## Pyfits load image stack
+```python
+import pyfits
+pyfits.open('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/gridrec/pre_processed/out_preproc_proj_images_stack.fits')
+```
+
+## Test loading single images and image stack
+```python
+from recon.data import loader
+import numpy as np
+
+# load single images
+sample = loader.read_stack_of_images('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/data_full', argument_data_dtype=np.float32)[0]
+
+# load a stack of images
+sample = loader.read_stack_of_images('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/gridrec/pre_processed', argument_data_dtype=np.float32)[0]
+```
+
+# Astra Reconstructions

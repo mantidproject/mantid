@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 # this will handle tool imports and running the correct recon runner
-from recon.helper import Helper
 
 
 def execute(config, cmd_line=None):
@@ -16,7 +15,11 @@ def execute(config, cmd_line=None):
 
     import os
 
-    h = Helper()
+    from recon.helper import Helper
+    h = Helper(config)
+
+    from recon.data.saver import Saver
+    saver = Saver(config)
 
     h.check_config_integrity(config)
 
@@ -26,15 +29,13 @@ def execute(config, cmd_line=None):
     sample, flat, dark = load_data(config, h)
 
     # todo new class for readme
-    _readme_fullpath = os.path.join(
-        config.func.output_path, config.func.readme_file_name)
-    generate_readme_begin(_readme_fullpath, cmd_line, config, h)
+
+    saver.gen_readme_summary_begin(cmd_line, config)
 
     sample = pre_processing(config, sample, flat, dark)
 
     # Save pre-proc images, print inside
-    import recon.data.saver as saver
-    saver.save_preproc_images(sample, config)
+    saver.save_preproc_images(sample)
 
     # ----------------------------------------------------------------
     # Reconstruction
@@ -43,24 +44,23 @@ def execute(config, cmd_line=None):
     post_processing()
 
     # Save output from the reconstruction
-    saver.save_recon_output(sample, config)
+    saver.save_recon_output(sample)
 
     save_netcdf_volume()
 
     # todo new class for readme
-    generate_readme_end(_readme_fullpath, sample, config)
-
-    pass
+    # saver.gen_readme_summary_end(sample)
 
 
 def pre_processing(config, data, flat, dark):
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
         mcp_corrections, scale_down, median_filter
 
-    d = True if config.func.debug else False
+    save_preproc = config.func.save_preproc
+    debug = True if config.func.debug else False
 
     data, flat, dark = rotate_stack.execute(data, config, flat, dark)
-    if d:
+    if debug and save_preproc:
         _debug_save_out_data(data, config, flat, dark, "rotated", "_rotated")
 
     # the air region coordinates must be within the ROI if this is selected
@@ -70,27 +70,30 @@ def pre_processing(config, data, flat, dark):
         flat = crop_coords.execute_image(flat, config)
         dark = crop_coords.execute_image(dark, config)
 
-        if d:
+        if debug and save_preproc:
             _debug_save_out_data(data, config, flat, dark,
                                  "cropped", "_cropped")
 
     # removes background using images taken when exposed to fully open beam
     # and no beam
     data = normalise_by_flat_dark.execute(data, config, flat, dark)
-    if d:
+    if debug and save_preproc:
         _debug_save_out_data(data, config, flat, dark,
                              "norm_by_flat_dark", "_normalised_by_flat_dark")
 
     # removes the contrast difference between the stack of images
     data = normalise_by_air_region.execute(data, config)
-    if d:
+    if debug and save_preproc:
         _debug_save_out_data(data, config, flat, dark,
                              "norm_by_air",  "_normalised_by_air")
 
     if not config.pre.crop_before_normalise:
         # in this case we don't care about cropping the flat and dark
         data = crop_coords.execute_volume(data, config)
-        _debug_save_out_data(data, config, flat, dark, "cropped", "_cropped")
+
+        if debug and save_preproc:
+            _debug_save_out_data(data, config, flat, dark,
+                                 "cropped", "_cropped")
 
     # cut_off
     # data = cut_off.execute(data, config)
@@ -100,7 +103,7 @@ def pre_processing(config, data, flat, dark):
     # data = scale_down.execute(data, config)
 
     data = median_filter.execute(data, config)
-    if d:
+    if debug and save_preproc:
         _debug_save_out_data(data, config, flat, dark,
                              "median_filtered", "_median_filtered")
 
@@ -142,25 +145,6 @@ def save_netcdf_volume():
     # saver.save_recon_netcdf(recon_data, config.post.output_path)
     # h.pstop(
     #     " * Finished saving reconstructed volume as NetCDF.")
-
-
-def generate_readme_begin(_readme_fullpath, cmd_line, config, h):
-    # TODO move this functionality into a new readme writer class!
-    import recon.data.saver as saver
-
-    h.pstart(" * Generating reconstruction script...")
-    saver.gen_readme_summary_begin(_readme_fullpath, config, cmd_line)
-    h.pstop(" * Finished generating script.")
-
-
-def generate_readme_end(_readme_fullpath, data, config):
-    pass
-    # import recon.data.saver as saver
-    # TODO move this functionality into a new readme writer class!
-
-    # saver.gen_readme_summary_end(
-    # _readme_fullpath,(data, preproc_data, recon_data), tstart, t_recon_end -
-    # t_recon_start)
 
 
 def load_tool(config, h):

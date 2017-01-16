@@ -3,10 +3,77 @@ from recon.tools.abstract_tool import AbstractTool
 
 
 class AstraTool(AbstractTool):
+    """
+    Uses TomoPy's integration of Astra
+    """
+
     def __init__(self):
         AbstractTool.__init__(self)
+        self._tomopy = self.import_self()
 
     def run_reconstruct(self, data, config):
+        import numpy as np
+        from recon.helper import Helper
+
+        h = Helper(config)
+
+        h.check_data_stack(data)
+
+        num_proj = data.shape[0]
+        inc = float(config.func.max_angle) / (num_proj - 1)
+
+        proj_angles = np.arange(0, num_proj * inc, inc)
+
+        proj_angles = np.radians(proj_angles)
+
+        alg = config.func.algorithm.upper()  # get upper case
+        cor = config.func.cor
+        num_iter = config.func.num_iter
+
+        h.tomo_print(" * Using center of rotation: {0}".format(cor))
+
+        # remove xxx_CUDA from the string with the [0:find..]
+        iterative_algorithm = False if alg[0:alg.find('_')] in [
+            'FBP', 'FB', 'BP'] else True
+
+        # TODO needs to be in config
+        # are we using a CUDA algorithm
+        proj_type = 'cuda' if alg[alg.find('_') + 1:] == 'CUDA' else 'linear'
+
+        # run the iterative algorithms
+        if iterative_algorithm:
+            options = {
+                'proj_type': proj_type,
+                'method': alg
+            }
+
+            h.pstart(
+                " * Starting iterative method with Astra. Algorithm: {0}, "
+                "number of iterations: {1}...".format(alg, num_iter))
+
+            recon = self._tomopy.recon(tomo=data, theta=proj_angles,
+                                       center=cor, algorithm=self._tomopy.astra, options=options)
+        else:  # run the non-iterative algorithms
+
+            h.pstart(
+                " * Starting non-iterative reconstruction algorithm with TomoPy. "
+                "Algorithm: {0}...".format(alg))
+
+            options = {
+                'proj_type': proj_type,
+                'method': alg
+            }
+
+            recon = self._tomopy.recon(tomo=data, theta=proj_angles,
+                                       center=cor, algorithm=self._tomopy.astra, options=options)
+
+        h.pstop(
+            " * Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
+            format(recon.shape, recon.dtype))
+
+        return recon
+
+    def astra_reconstruct(self, data, config):
         import tomorec.tool_imports as tti
         astra = tti.import_tomo_tool('astra')
         sinograms = proj_data
@@ -43,8 +110,13 @@ class AstraTool(AbstractTool):
 
         return recon
 
-    @staticmethod
-    def import_self():
+    def import_self(self):
+        # use Astra through TomoPy
+        from recon.tools.tomopy_tool import TomoPyTool
+        t = TomoPyTool()
+        return t.import_self()
+
+    def _import_astra(self):
         # current astra distributions install here, so check there by default
         ASTRA_LOCAL_PATH = '/usr/local/python/'
         import sys
@@ -58,9 +130,11 @@ class AstraTool(AbstractTool):
         MIN_ASTRA_VERSION = 106
         vers = astra.astra.version()
         if isinstance(vers, int) and vers >= MIN_ASTRA_VERSION:
-            print("Imported astra successfully. Version: {0}".format(astra.astra.version()))
+            print("Imported astra successfully. Version: {0}".format(
+                astra.astra.version()))
         else:
-            raise RuntimeError("Could not find the required version of astra. Found version: {0}".format(vers))
+            raise RuntimeError(
+                "Could not find the required version of astra. Found version: {0}".format(vers))
 
         print("Astra using CUDA: {0}".format(astra.astra.use_cuda()))
         return astra

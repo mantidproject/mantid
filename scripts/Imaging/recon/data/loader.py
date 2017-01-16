@@ -84,11 +84,9 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     img_shape = first_sample_img.shape
 
     if len(img_shape) == 2:  # the loaded file was a single image
-        print("Loading single images")
         sample_data = _read_listed_files(
             sample_file_names, img_shape, file_extension, data_dtype)
     elif len(img_shape) == 3:  # the loaded file was a stack of fits images
-        print("Loading stack")
         sample_data = first_sample_img
     else:
         raise ValueError("Data loaded has invalid shape: {0}", img_shape)

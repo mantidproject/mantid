@@ -53,6 +53,7 @@ class FunctionalConfig(object):
         # TODO unused (add exception handling funcitons in helper.py)
         # default True
         self.no_crash_on_failed_import = False
+        self.overwrite_all = False
 
         # Reconstruction options
         self.debug = True
@@ -218,6 +219,15 @@ class FunctionalConfig(object):
             "WARNING this means some filters will not be applied and the result might not be as expeced.")
 
         grp_func.add_argument(
+            "-w",
+            "--overwrite-all",
+            required=False,
+            action='store_true',
+            default=self.overwrite_all,
+            help="Overwrite all conflicting files found in the output directory."
+        )
+
+        grp_func.add_argument(
             "-d",
             "--debug",
             required=False,
@@ -248,7 +258,8 @@ class FunctionalConfig(object):
             required=False,
             type=str,
             default=self.algorithm,
-            help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {'art', 'bart', 'fbp', 'gridrec', 'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', pml_hybrid', 'pml_quad', 'sirt'}.")
+            help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {'art', 'bart', 'fbp', 'gridrec', "
+                 "'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', pml_hybrid', 'pml_quad', 'sirt'}.")
 
         grp_recon.add_argument(
             "-n",
@@ -256,7 +267,8 @@ class FunctionalConfig(object):
             required=False,
             type=int,
             default=self.num_iter,
-            help="Number of iterations(only valid for iterative methods: {'art', 'bart', 'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', pml_hybrid', 'pml_quad', 'sirt'}.")
+            help="Number of iterations(only valid for iterative methods: {'art', 'bart', 'mlem', 'osem', "
+                 "'ospml_hybrid', 'ospml_quad', pml_hybrid', 'pml_quad', 'sirt'}.")
 
         grp_recon.add_argument(
             "--max-angle",
@@ -310,6 +322,7 @@ class FunctionalConfig(object):
 
         self.verbosity = args.verbosity
         self.no_crash_on_failed_import = args.no_crash_on_failed_import
+        self.overwrite_all=args.overwrite_all
 
         # grab tools options
         self.tool = args.tool

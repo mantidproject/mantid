@@ -3,6 +3,7 @@ from recon.tools.abstract_tool import AbstractTool
 
 
 class TomoPyTool(AbstractTool):
+
     def __init__(self):
         AbstractTool.__init__(self)
         self._tomopy = self.import_self()
@@ -10,8 +11,6 @@ class TomoPyTool(AbstractTool):
     def run_reconstruct(self, data, config):
         import numpy as np
         from recon.helper import Helper
-
-        tomopy = self.import_self()
 
         h = Helper(config)
 
@@ -30,30 +29,29 @@ class TomoPyTool(AbstractTool):
 
         h.tomo_print(" * Using center of rotation: {0}".format(cor))
 
-        if 'gridrec' != alg and 'fbp' != alg:
+        iterative_algorithm = False if alg in ['gridrec', 'fbp'] else True
 
-            # For ref, some typical run times with 4 cores:
-            # 'bart' with num_iter=20 => 467.640s ~= 7.8m
-            # 'sirt' with num_iter=30 => 698.119 ~= 11.63
+        # run the iterative algorithms
+        if iterative_algorithm:
             h.pstart(
                 " * Starting iterative method with TomoPy. Algorithm: {0}, "
                 "number of iterations: {1}...".format(alg, num_iter))
 
-            rec = self._tomopy.recon(tomo=data, theta=proj_angles, center=cor,
+            recon = self._tomopy.recon(tomo=data, theta=proj_angles, center=cor,
                                      algorithm=alg, num_iter=num_iter)  # , filter_name='parzen')
 
-        else:
+        else:  # run the non-iterative algorithms
             h.pstart(
                 " * Starting non-iterative reconstruction algorithm with TomoPy. "
                 "Algorithm: {0}...".format(alg))
-            rec = self._tomopy.recon(
+            recon = self._tomopy.recon(
                 tomo=data, theta=proj_angles, center=cor, algorithm=alg)
 
         h.pstop(
             " * Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
-                format(rec.shape, rec.dtype))
+            format(recon.shape, recon.dtype))
 
-        return rec
+        return recon
 
     def find_center(self, **kwargs):
         # just forward to tomopy
