@@ -188,7 +188,6 @@ void TomographyROIPresenter::processBrowseImage() {
 
   m_stackPath = path;
   processLoadSingleImage();
-
   m_view->imageOrStackLoaded(trimFileNameFromPath(path));
 }
 
