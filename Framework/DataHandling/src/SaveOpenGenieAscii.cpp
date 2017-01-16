@@ -56,8 +56,8 @@ void SaveOpenGenieAscii::init() {
 void SaveOpenGenieAscii::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
-  const int nSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
-  const int nBins = static_cast<int>(m_inputWS->blocksize());
+  const size_t nSpectra = m_inputWS->getNumberHistograms();
+  const size_t nBins = m_inputWS->blocksize();
 
   if (nBins == 0 || nSpectra == 0)
     throw std::runtime_error("Trying to save an empty workspace");
@@ -338,7 +338,7 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
     // Next the parameter type - have to make a copy as we might need to
     // capitalise the first char
     std::string outputType = std::get<1>(outTuple);
-    outputType[0] = toupper(outputType[0]);
+    outputType[0] = static_cast<char>(toupper(outputType[0]));
     outfile << "    " << outputType << '\n';
 
     // Then the data values - the formatting depends on data type
