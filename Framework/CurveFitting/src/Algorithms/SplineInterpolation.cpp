@@ -123,7 +123,7 @@ void SplineInterpolation::exec() {
   ensureXIncreasing(iws);
 
   int histNo = static_cast<int>(iws->getNumberHistograms());
-  int binsNo = static_cast<int>(iws->blocksize());
+  size_t binsNo = static_cast<int>(iws->blocksize());
   int binsNoInterp = static_cast<int>(mws->blocksize());
 
   // vector of multiple derivative workspaces
@@ -140,6 +140,7 @@ void SplineInterpolation::exec() {
   MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
   MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
   MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, iws);
+
   Progress pgress(this, 0.0, 1.0, histNo);
 
   if (type == true && binsNo == 2) {
@@ -155,31 +156,22 @@ void SplineInterpolation::exec() {
   for (int i = 0; i < histNo; ++i) {
     if (type == true && binsNo == 2){
         // set up the function that needs to be interpolated
-        gsl_interp_accel *acc = gsl_interp_accel_alloc ();
-        const gsl_interp_type *linear = gsl_interp_linear;
-        gsl_interp *lin = gsl_interp_alloc(linear, binsNo);
-        gsl_interp_init(lin, &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo);
+        boost::shared_ptr<gsl_interp_accel> acc(gsl_interp_accel_alloc (), gsl_interp_accel_free);
+        boost::shared_ptr<gsl_interp> linear(gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
+        gsl_interp_linear->init(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo);
         for (int k = 0; k < binsNoInterp; ++k){
-          outputWorkspace->mutableY(i)[k] = gsl_interp_eval(lin, &(iws->x(i)[0]), &(iws->y(i)[0]), mws->x(0)[k], acc);
-          switch (order){
-            case 0:
-              break;
-            case 1:
-              derivs[1] = WorkspaceFactory::Instance().create(mws, order);
-              vAxis->setValue(1, 2);
-              derivs[1]->setSharedX(1, mws->sharedX(0));
-              derivs[1]->mutableY(i)[k] = gsl_interp_eval_deriv(lin, &(iws->x(i)[0]), &(iws->y(i)[0]), mws->x(0)[k], acc);
-              derivs[1]->replaceAxis(1, vAxis);
-            case 2:
-              derivs[2] = WorkspaceFactory::Instance().create(mws, order);
-              vAxis->setValue(2, 3);
-              derivs[2]->setSharedX(2, mws->sharedX(0));
-              derivs[2]->mutableY(i)[k] = gsl_interp_eval_deriv2(lin, &(iws->x(i)[0]), &(iws->y(i)[0]), mws->x(0)[k], acc);
-              derivs[2]->replaceAxis(1, vAxis);
+          gsl_interp_linear->eval(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo, mws->x(0)[k], acc.get(), &(outputWorkspace->mutableY(i)[k]));
+          if (order != 0){
+              derivs[order] = WorkspaceFactory::Instance().create(mws, order);
+              vAxis->setValue(order, order + 1);
+              derivs[order]->setSharedX(order, mws->sharedX(0));
+              if (order == 1)
+                gsl_interp_linear->eval_deriv(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo, mws->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
+              if (order == 2)
+                gsl_interp_linear->eval_deriv2(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo, mws->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
+              derivs[order]->replaceAxis(1, vAxis);
           }
         }
-        gsl_interp_free(lin);
-        gsl_interp_accel_free(acc);
     }
     else{
         setInterpolationPoints(iwspt, i);
