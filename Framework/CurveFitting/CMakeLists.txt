@@ -332,6 +332,7 @@ set ( TEST_FILES
 	ComplexVectorTest.h
 	CompositeFunctionTest.h
 	Constraints/BoundaryConstraintTest.h
+	CostFunctions/CostFuncFittingTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
 	FitMWTest.h
@@ -339,6 +340,7 @@ set ( TEST_FILES
 	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
 	FuncMinimizers/DampedGaussNewtonMinimizerTest.h
+	FuncMinimizers/ErrorMessagesTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
 	FuncMinimizers/FRConjugateGradientTest.h
 	FuncMinimizers/LevenbergMarquardtMDTest.h

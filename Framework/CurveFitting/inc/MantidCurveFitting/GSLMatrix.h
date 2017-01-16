@@ -102,6 +102,8 @@ public:
   GSLMatrix() = default;
   /// Constructor
   GSLMatrix(const size_t nx, const size_t ny);
+  /// Construct from an initialisation list
+  GSLMatrix(std::initializer_list<std::initializer_list<double>> ilist);
   /// Copy constructor
   GSLMatrix(const GSLMatrix &M);
   /// Create a submatrix.
@@ -153,6 +155,8 @@ public:
   GSLMatrix &operator-=(const GSLMatrix &M);
   /// Multiply this matrix by a number
   GSLMatrix &operator*=(const double &d);
+  /// Matrix by vector multiplication
+  GSLVector operator*(const GSLVector &v) const;
   /// Assign this matrix to a product of two other matrices
   /// @param mult2 :: Matrix multiplication helper object.
   GSLMatrix &operator=(const GSLMatrixMult2 &mult2);

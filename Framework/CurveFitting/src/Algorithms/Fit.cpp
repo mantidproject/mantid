@@ -41,6 +41,9 @@ void Fit::initConcrete() {
       ->setDocumentation("Whether the fit was successful");
   declareProperty("OutputChi2overDoF", 0.0, "Returns the goodness of the fit",
                   Kernel::Direction::Output);
+  declareProperty("OutputNIterations", 0, Kernel::Direction::Output);
+  getPointerToProperty("OutputNIterations")
+      ->setDocumentation("Actual number of iterations performed.");
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
@@ -152,6 +155,7 @@ void Fit::execConcrete() {
   while (iter < maxIterations) {
     g_log.debug() << "Starting iteration " << iter << "\n";
     m_function->iterationStarting();
+    ++iter; // count the iteration whether successful or not
     if (!minimizer->iterate(iter)) {
       errorString = minimizer->getError();
       g_log.debug() << "Iteration stopped. Minimizer status string="
@@ -165,9 +169,9 @@ void Fit::execConcrete() {
     }
     prog.report();
     m_function->iterationFinished();
-    ++iter;
   }
   g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
+  setProperty("OutputNIterations", static_cast<int>(iter));
 
   minimizer->finalize();
 

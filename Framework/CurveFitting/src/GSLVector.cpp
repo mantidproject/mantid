@@ -28,6 +28,16 @@ GSLVector::GSLVector(const size_t n)
 GSLVector::GSLVector(const std::vector<double> &v)
     : m_data(v), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
 
+/// Construct from an initialisation list
+/// @param ilist :: A list of doubles: {V0, V1, V2, ...}
+GSLVector::GSLVector(std::initializer_list<double> ilist)
+    : GSLVector(ilist.size()) {
+  for (auto cell = ilist.begin(); cell != ilist.end(); ++cell) {
+    auto i = static_cast<size_t>(std::distance(ilist.begin(), cell));
+    set(i, *cell);
+  }
+}
+
 /// Copy constructor.
 /// @param v :: The other vector
 GSLVector::GSLVector(const GSLVector &v)

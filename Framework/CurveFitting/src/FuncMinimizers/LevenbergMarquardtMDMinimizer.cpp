@@ -70,8 +70,8 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
   }
 
   if (m_mu > muMax) {
-    // m_errorString = "Failed to converge, maximum mu reached";
-    // g_log.warning() << m_errorString << '\n';
+    m_errorString = "Failed to converge, maximum mu reached.";
+    g_log.information(m_errorString);
     return false;
   }
 
@@ -116,7 +116,8 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     H.set(i, i, tmp);
     sf[i] = sqrt(tmp);
     if (tmp == 0.0) {
-      m_errorString = "Singular matrix.";
+      m_errorString = "Function doesn't depend on parameter " +
+                      m_leastSquares->parameterName(i);
       g_log.information(m_errorString);
       return false;
     }

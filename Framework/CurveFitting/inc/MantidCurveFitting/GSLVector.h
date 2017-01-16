@@ -46,6 +46,8 @@ public:
   explicit GSLVector(const std::vector<double> &v);
   /// Copy from a gsl vector
   explicit GSLVector(const gsl_vector *v);
+  /// Construct from an initialisation list
+  GSLVector(std::initializer_list<double> ilist);
   /// Copy constructor.
   GSLVector(const GSLVector &v);
   /// Move constructor.
