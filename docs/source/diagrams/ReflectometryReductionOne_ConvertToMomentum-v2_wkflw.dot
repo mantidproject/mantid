@@ -6,10 +6,6 @@ subgraph params {
  $param_style
   inputWorkspace    [label="OutputWorkspaceWavelength", group=g1]
   outputWorkspace   [label="OutputWorkspace"]
-  qmin              [label="MomentumTransferMin"]
-  qmax              [label="MomentumTransferMax"]
-  qstep             [label="MomentumTransferStep"]
-  scaleFactor       [label="ScaleFactor"]
 }
 
 subgraph decisions {
@@ -18,9 +14,7 @@ subgraph decisions {
 
 subgraph algorithms {
  $algorithm_style
-  convertUnits  [label="ConvertUnits\n(AlignBins=True)", group=g1]
-  rebin         [label="Rebin", group=g1]
-  scale         [label="Scale", group=g1]
+  convertUnits  [label="ConvertUnits\n(AlignBins=False)", group=g1]
 }
 
 subgraph processes {
@@ -32,13 +26,5 @@ subgraph values {
 }
 
 inputWorkspace    -> convertUnits
-convertUnits      -> rebin
-qmin              -> rebin
-qstep             -> rebin
-qmax              -> rebin
-rebin             -> scale
-scaleFactor       -> scale
-scale             -> outputWorkspace
-
-{rank=same; qmin; qmax}
+convertUnits      ->  outputWorkspace
 }

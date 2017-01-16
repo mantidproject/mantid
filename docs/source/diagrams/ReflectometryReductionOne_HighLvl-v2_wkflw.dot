@@ -22,7 +22,7 @@ subgraph processes {
  $process_style
   convertUnits    [label="Convert to &lambda; and\nnormalize\nby monitors"]
   applyCorrTrans  [label="Apply transmission\n corrections"]
-  convertMom      [label="Convert to momentum\ntransfer, rebin and scale"]
+  convertMom      [label="Convert to momentum\ntransfer"]
 }
 
 subgraph values {

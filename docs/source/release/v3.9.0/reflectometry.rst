@@ -24,6 +24,7 @@ Algorithms
     to determine which detector components need to be moved.
   * Monitor integration range was not being applied properly to CRISP data. The problem was that in the parameter
     file the wavelength range used to crop the workspace in wavelength is [0.6, 6.5] and the monitor integration range is outside of these limits ([4, 10]). This was causing the algorithm to integrate over [0.6, 4].
+  * :ref:`algm-ReflectometryReductionOneAuto` rebins and scales the output workspace and outputs a third output workspace, :literal:`OutputWorkspaceBinned`.
 
 * :ref:`algm-Stitch1D` documentation has been improved, it now includes a workflow diagram illustrating the different steps in the calculation and a note about how errors are propagated.
 * :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces.

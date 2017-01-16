@@ -12,8 +12,8 @@ Description
 This algorithm is a facade over :ref:`algm-ReflectometryReductionOne` (see :ref:`algm-ReflectometryReductionOne`
 for more information on the wrapped algorithm). It optionally corrects the detector position and then pulls numeric
 parameters out of the instrument parameter file where possible. These automatically applied defaults
-can be overriden by providing your own values. In addition, it optionally performs polarization analysis if the
-input workspace is a workspace group.
+can be overriden by providing your own values. In addition, it outputs a rebinned workspace in Q, and it optionally
+performs polarization analysis if the input workspace is a workspace group.
 
 First, if :literal:`ThetaIn` is given the algorithm will try to correct the detector position. For this, it uses
 :literal:`ProcessingInstructions`, which corresponds to the grouping pattern of workspace indices that define the
@@ -65,8 +65,10 @@ Note that when using a correction algorithm, monitors will not be integrated, ev
 :literal:`NormalizeByIntegratedMonitors` was set to true.
 
 Finally, properties :literal:`MomentumTransferMin`, :literal:`MomentumTransferStep` and :literal:`MomentumTransferMax` are
-used to rebin the output workspace in Q, and :literal:`ScaleFactor` is used to scale the final workspace. When they
-are not provided :ref:`algm-Rebin` and :ref:`algm-Scale` will not take place.
+used to rebin the output workspace in Q, and :literal:`ScaleFactor` is used to scale the rebinned workspace. When they
+are not provided the algorithm will attempt to determine the bin width using :ref:`algm-CalculateResolution` (note that, for
+the latter to run successfully, a :literal:`slit` component with a :literal:`vertical gap` must be defined in the
+instrument definition file).
 
 See :ref:`algm-ReflectometryReductionOne` for more information
 on how the input properties are used by the wrapped algorithm.
@@ -76,11 +78,13 @@ Workspace Groups
 
 If a workspace group is provided as input, each workspace in the group will be
 reduced independently and sequentially using :ref:`algm-ReflectometryReductionOne`. Each of these
-individual reductions will produce two output workspaces: an output workspace in
-wavelength and an output workspace in Q. Output workspaces in wavelength will be
-grouped together to produce an output workspace group in wavelength, and output
+individual reductions will produce three output workspaces: an output workspace in
+wavelength, an output workspace in Q with native binning, and a rebinned workspace in Q.
+Output workspaces in wavelength will be grouped together to produce an output workspace group in wavelength, and output
 workspaces in Q will be grouped together to produce an output workspace group in Q.
-The diagram below illustrates this process.
+The diagram below illustrates this process (note that, for the sake of clarity, the rebinned output
+workspace in Q, :literal:`OutputWorkspaceBinned`, is not represented but it is handled analogously to
+:literal:`OutputWorkspace` and :literal:`OutputWorkspaceWavelength`):
 
 .. diagram:: ReflectometryReductionOneAuto-v2-Groups_noPA_wkflw.dot
 
@@ -105,10 +109,12 @@ the reduction continues and polarization corrections will be applied to
 the output workspace in wavelength. The algorithm will use the properties :literal:`PolarizationAnalysis`,
 :literal:`CPp`, :literal:`CAp`, :literal:`CRho` and :literal:`CAlpha` to run :ref:`algm-PolarizationCorrection`.
 The result will be a new workspace in wavelenght, which will override the previous one, that will
-be used as input to :ref:`algm-ReflectometryReductionOne` to calculate a new output workspace in Q, which
-in turn will override the existing workspace in Q. Note that if transmission runs are provided in the form of workspace
+be used as input to :ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in Q, which
+in turn will override the existing workspaces in Q. Note that if transmission runs are provided in the form of workspace
 groups, the individual workspaces will be summed to produce a matrix workspace that will be used as the
-transmission run for all items in the input workspace group, as illustrated in the diagram below.
+transmission run for all items in the input workspace group, as illustrated in the diagram below
+(note that, for the sake of clarity, the rebinned output workspace in Q, :literal:`OutputWorkspaceBinned`, is not
+represented but it is handled analogously to :literal:`OutputWorkspace`).
 
 .. diagram:: ReflectometryReductionOneAuto-v2-Groups_PA_wkflw.dot
 
@@ -127,10 +133,12 @@ Usage
 .. testcode:: ExReflRedOneAutoSimple
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
 
     print "%.5f" % (IvsLam.readY(0)[175])
     print "%.5f" % (IvsLam.readY(0)[176])
+    print "%.5f" % (IvsQ_unbinned.readY(0)[106])
+    print "%.5f" % (IvsQ_unbinned.readY(0)[107])
     print "%.5f" % (IvsQ.readY(0)[106])
     print "%.5f" % (IvsQ.readY(0)[107])
 
@@ -142,6 +150,8 @@ Output:
     0.59735
     0.57476
     0.54633
+    0.00027
+    0.00027
 
 **Example - Basic reduction with a transmission run**
 
@@ -149,10 +159,12 @@ Output:
 
     run = Load(Filename='INTER00013460.nxs')
     trans = Load(Filename='INTER00013463.nxs')
-    IvsQ, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
 
     print "%.5f" % (IvsLam.readY(0)[164])
     print "%.5f" % (IvsLam.readY(0)[164])
+    print "%.5f" % (IvsQ_unbinned.readY(0)[96])
+    print "%.5f" % (IvsQ_unbinned.readY(0)[97])
     print "%.5f" % (IvsQ.readY(0)[96])
     print "%.5f" % (IvsQ.readY(0)[97])
 
@@ -164,16 +176,20 @@ Output:
     0.36906
     1.05389
     1.02234
+    0.00074
+    0.00069
 
 **Example - Reduction overriding some default values**
 
 .. testcode:: ExReflRedOneAutoOverload
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
+    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
     print "%.5f" % (IvsLam.readY(0)[175])
     print "%.5f" % (IvsLam.readY(0)[176])
+    print "%.5f" % (IvsQ_unbinned.readY(0)[106])
+    print "%.5f" % (IvsQ_unbinned.readY(0)[107])
     print "%.5f" % (IvsQ.readY(0)[106])
     print "%.5f" % (IvsQ.readY(0)[107])
 
@@ -185,6 +201,8 @@ Output:
     0.52599
     0.51160
     0.48843
+    0.00027
+    0.00027
 
 .. categories::
 

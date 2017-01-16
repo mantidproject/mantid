@@ -9,6 +9,9 @@
 Description
 -----------
 
+This algorithm is not meant to be used directly by users. Please see :ref:`algm-ReflectometryReductionOneAuto`
+which is a facade over this algorithm.
+
 This algorithm reduces a single reflectometry run into a mod Q vs I/I0 workspace.
 The mandatory input properties, :literal:`WavelengthMin`, :literal:`WavelengthMax`
 and :literal:`ProcessingInstructions`, must be manually set by the user. In addition, for
@@ -95,12 +98,17 @@ properties.
 Conversion to Momentum Transfer (Q)
 ###################################
 
-Finally, the output workspace in wavelength is converted to momentum transfer (Q).
-Optionally, this workspace can be rebinned according to :literal:`MomentumTransferMin`,
-:literal:`MomentumTransferStep` and :literal:`MomentumTransferMax`, and scaled if
-:literal:`ScaleFactor` is given.
+Finally, the output workspace in wavelength is converted to momentum transfer (Q) using
+:ref:`algm-ConvertUnits`. Note that the output workspace in Q is therefore a workspace
+with native binning, and no rebin step is applied to it.
 
 .. diagram:: ReflectometryReductionOne_ConvertToMomentum-v2_wkflw.dot
+
+If you wish to obtain a rebinned workspace in Q you should consider using algorithm
+:ref:`algm-ReflectometryReductionOneAuto` instead, which is a facade over this algorithm
+and has two extra steps (:ref:`algm-Rebin` and :ref:`algm-Scale`) to produce an additional
+workspace in Q with specified binning and scale factor. Please refer to :ref:`algm-ReflectometryReductionOneAuto`
+for more information.
 
 Previous Versions
 -----------------
@@ -138,8 +146,8 @@ Output:
 
    0.0014
    0.0014
-   0.0117
-   0.0214
+   0.0001
+   0.0001
 
 
 **Example - Reduce a run and normalize by transmission workspace**
