@@ -79,7 +79,6 @@ if ( LIBRDKAFKA_FOUND )
   set ( TEST_FILES
     ${TEST_FILES}
     ISISKafkaEventStreamDecoderTest.h
-    KafkaBrokerTest.h
     KafkaTopicSubscriberTest.h
   )
 endif()
