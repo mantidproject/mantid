@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/ListValidator.h"
@@ -513,19 +514,19 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     if (firstTransG) {
       if (!polarizationAnalysisOn)
         alg->setProperty("FirstTransmissionRun",
-                         firstTransG->getItem(i)->name());
+                         firstTransG->getItem(i)->getName());
       else
         alg->setProperty("FirstTransmissionRun", firstTransSum);
     }
     if (secondTransG) {
       if (!polarizationAnalysisOn)
         alg->setProperty("SecondTransmissionRun",
-                         secondTransG->getItem(i)->name());
+                         secondTransG->getItem(i)->getName());
       else
         alg->setProperty("SecondTransmissionRun", secondTransSum);
     }
 
-    alg->setProperty("InputWorkspace", group->getItem(i)->name());
+    alg->setProperty("InputWorkspace", group->getItem(i)->getName());
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
     alg->execute();

@@ -3,6 +3,7 @@
 
 #include "ReflectometryWorkflowBase2.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {

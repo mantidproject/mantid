@@ -546,7 +546,7 @@ create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX) {
   const int nSpectra = 4;
   const int nBins = 20;
   const double deltaX = 5000; // TOF
-  auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
+  auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
 
   workspace->setTitle("Test histogram");
   workspace->getAxis(0)->setUnit("TOF");
