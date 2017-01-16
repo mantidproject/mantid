@@ -108,9 +108,9 @@ workspace indicies. This can be achieved with the following operators:
   keep indexes 1, 2 and 4 only.
 - :literal:`:` indicates a continuous range of indexes. For example,
   :literal:`1:5` is the same as :literal:`1,2,3,4,5`.
-- :literal:`+` adds two spectra together. :literal:'7+9' will produce a single
+- :literal:`+` sums two spectra together. :literal:'7+9' will produce a single
   spectra listing the sum of 7 and 9, ignoring any others.
-- :literal:`-` adds a range of spectra together. For example, :literal:`3-8` is
+- :literal:`-` sums a range of spectra together. For example, :literal:`3-8` is
   the same as :literal:`3+4+5+6+7+8`.
 
 One could combine these operations, for example :literal:`10+12,13:89` would
