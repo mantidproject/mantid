@@ -45,8 +45,7 @@ public:
   // Constructor
   DataProcessorProcessingAlgorithmBase(
       const std::string &name,
-      const std::set<std::string> &blacklist = std::set<std::string>(),
-      int version = -1);
+      const std::set<std::string> &blacklist = std::set<std::string>());
 
   // Destructor
   ~DataProcessorProcessingAlgorithmBase();
@@ -63,9 +62,6 @@ public:
   // Returns the name of this algorithm
   virtual std::string name() const final { return m_algName; };
 
-  // Returns the version of this algorithm
-  virtual int version() const final { return m_algVersion; };
-
   // Returns the blacklist
   virtual std::set<std::string> blacklist() const final { return m_blacklist; };
 
@@ -75,8 +71,6 @@ private:
 
   // The name of this algorithm
   std::string m_algName;
-  // The version of this algorithm
-  int m_algVersion;
   // The blacklist
   std::set<std::string> m_blacklist;
   // Input ws properties

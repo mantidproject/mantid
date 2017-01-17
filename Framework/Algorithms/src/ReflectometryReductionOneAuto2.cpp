@@ -267,14 +267,16 @@ void ReflectometryReductionOneAuto2::exec() {
   if (!params.empty()) {
     if (params.size() == 3) {
       setProperty("MomentumTransferMin", params[0]);
-      setProperty("MomentumTransferStep", params[1]);
+      setProperty("MomentumTransferStep", -params[1]);
       setProperty("MomentumTransferMax", params[2]);
     } else {
       setProperty("MomentumTransferMin", IvsQ->x(0).front());
       setProperty("MomentumTransferMax", IvsQ->x(0).back());
-      setProperty("MomentumTransferStep", params[0]);
+      setProperty("MomentumTransferStep", -params[0]);
     }
   }
+  if (getPointerToProperty("ScaleFactor")->isDefault())
+    setProperty("ScaleFactor", 1.0);
 }
 
 /** Returns the detectors of interest, specified via processing instructions

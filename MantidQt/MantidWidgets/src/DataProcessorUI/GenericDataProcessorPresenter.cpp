@@ -48,8 +48,8 @@ namespace MantidWidgets {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> &postprocessMap,
@@ -111,8 +111,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     DataProcessorPostprocessingAlgorithm()) {}
@@ -179,8 +179,7 @@ void GenericDataProcessorPresenter::acceptViews(
   // Provide autocompletion hints for the options column. We use the algorithm's
   // properties minus those we blacklist. We blacklist any useless properties or
   // ones we're handling that the user should'nt touch.
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
-      m_processor.name(), m_processor.version());
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   m_view->setOptionsHintStrategy(
       new AlgorithmHintStrategy(alg, m_processor.blacklist()), m_columns - 1);
 
@@ -319,8 +318,8 @@ void GenericDataProcessorPresenter::postProcessGroup(
   if (AnalysisDataService::Instance().doesExist(outputWSName))
     AnalysisDataService::Instance().remove(outputWSName);
 
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
-      m_postprocessor.name(), m_postprocessor.version());
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create(m_postprocessor.name());
   alg->initialize();
   alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
@@ -395,8 +394,8 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   * but that doesn't preserve history nicely, so we'll just take care of tidying
   * up in the event of failure.
   */
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
-      preprocessor.name(), preprocessor.version());
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create(preprocessor.name());
   alg->initialize();
   alg->setProperty(
       preprocessor.lhsProperty(),
@@ -577,8 +576,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
   /* Create the processing algorithm */
 
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
-      m_processor.name(), m_processor.version());
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(m_processor.name());
   alg->initialize();
 
   /* Read input properties from the table */

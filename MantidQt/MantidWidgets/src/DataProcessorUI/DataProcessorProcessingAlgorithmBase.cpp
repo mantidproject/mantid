@@ -5,18 +5,16 @@ namespace MantidWidgets {
 
 /** Constructor */
 DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase(
-    const std::string &name, const std::set<std::string> &blacklist,
-    int version)
-    : m_algName(name), m_algVersion(version), m_blacklist(blacklist),
-      m_inputWsProperties(), m_inputStrListProperties(),
-      m_OutputWsProperties() {
+    const std::string &name, const std::set<std::string> &blacklist)
+    : m_algName(name), m_blacklist(blacklist), m_inputWsProperties(),
+      m_inputStrListProperties(), m_OutputWsProperties() {
 
   countWsProperties();
 }
 
 /** Default constructor (nothing to do) */
 DataProcessorProcessingAlgorithmBase::DataProcessorProcessingAlgorithmBase()
-    : m_algName(), m_algVersion(-1), m_blacklist(), m_inputWsProperties(),
+    : m_algName(), m_blacklist(), m_inputWsProperties(),
       m_inputStrListProperties(), m_OutputWsProperties() {}
 
 /** Destructor */
@@ -26,7 +24,7 @@ DataProcessorProcessingAlgorithmBase::~DataProcessorProcessingAlgorithmBase() {}
 void DataProcessorProcessingAlgorithmBase::countWsProperties() {
 
   Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(m_algName, m_algVersion);
+      Mantid::API::AlgorithmManager::Instance().create(m_algName);
 
   auto properties = alg->getProperties();
   for (auto &prop : properties) {

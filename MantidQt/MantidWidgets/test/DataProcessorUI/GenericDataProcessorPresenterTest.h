@@ -31,8 +31,8 @@ private:
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
                          true, "TRANS_");
-    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
-    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("Q min", "MomentumTransferMin", "");
+    whitelist.addElement("Q max", "MomentumTransferMax", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
     whitelist.addElement("Scale", "ScaleFactor", "");
     return whitelist;
@@ -50,19 +50,18 @@ private:
          DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
-                                   "SecondTransmissionRun", "OutputWorkspace"},
-             1)}};
+                                   "SecondTransmissionRun",
+                                   "OutputWorkspace"})}};
   }
 
   DataProcessorProcessingAlgorithm createReflectometryProcessor() {
 
     return DataProcessorProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<std::string>{"IvsQ_", "IvsLam_"},
+        std::vector<std::string>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
         std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
                               "OutputWorkspace", "OutputWorkspaceWavelength",
-                              "FirstTransmissionRun", "SecondTransmissionRun"},
-        1);
+                              "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
   DataProcessorPostprocessingAlgorithm createReflectometryPostprocessor() {
@@ -132,7 +131,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "0"
         << "12346"
@@ -1038,9 +1037,13 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
@@ -1049,9 +1052,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
@@ -1073,7 +1078,7 @@ public:
 
     auto ws =
         createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
-    ws->String(0, QMinCol) = "";
+    ws->String(0, ThetaCol) = "";
     ws->String(1, ScaleCol) = "";
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -1118,13 +1123,17 @@ public:
     TS_ASSERT_EQUALS(ws->rowCount(), 4);
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
     TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
-    TS_ASSERT(ws->String(0, QMinCol) != "");
+    TS_ASSERT(ws->String(0, ThetaCol) != "");
     TS_ASSERT(ws->String(1, ScaleCol) != "");
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
@@ -1133,9 +1142,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
@@ -1199,9 +1210,13 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
@@ -1210,9 +1225,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
@@ -1223,6 +1240,7 @@ public:
   }
 
   void testProcessWithNotebook() {
+
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
@@ -1271,9 +1289,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
@@ -1308,7 +1328,7 @@ public:
         << "1.6"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "dataB"
@@ -1318,7 +1338,7 @@ public:
         << "2.9"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
+        << "ProcessingInstructions='0'";
 
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB");
@@ -1354,6 +1374,10 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataA"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
@@ -1365,6 +1389,8 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("dataA");
     AnalysisDataService::Instance().remove("dataB");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_dataA");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_dataB");
     AnalysisDataService::Instance().remove("IvsQ_TOF_dataA");
     AnalysisDataService::Instance().remove("IvsQ_TOF_dataB");
     AnalysisDataService::Instance().remove("IvsLam_TOF_dataA");
@@ -2246,8 +2272,7 @@ public:
     rowlist[1].insert(1);
 
     const std::string expected =
-        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0', "
-        "CorrectDetectorPositions=0\n"
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
         "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
@@ -2329,8 +2354,7 @@ public:
     rowlist[1].insert(0);
 
     const std::string expected =
-        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0', "
-        "CorrectDetectorPositions=0\n"
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
 
@@ -2657,6 +2681,7 @@ public:
   }
 
   void testPlotRowWarn() {
+
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
@@ -2696,6 +2721,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
+
   void testPlotEmptyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
@@ -3040,8 +3066,8 @@ public:
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
-    createTOFWorkspace("IvsQ_TOF_12345", "12345");
-    createTOFWorkspace("IvsQ_TOF_12346", "12346");
+    createTOFWorkspace("IvsQ_binned_TOF_12345", "12345");
+    createTOFWorkspace("IvsQ_binned_TOF_12346", "12346");
 
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
@@ -3059,18 +3085,17 @@ public:
 
     std::string pythonCode =
         "base_graph = None\nbase_graph = "
-        "plotSpectrum(\"IvsQ_TOF_12345\", 0, True, window = "
-        "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_TOF_12346\", 0, "
-        "True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "plotSpectrum(\"IvsQ_binned_TOF_12345\", 0, True, window = "
+        "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_binned_TOF_12346\", 0, "
+        "True, window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -3223,9 +3248,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("12346");

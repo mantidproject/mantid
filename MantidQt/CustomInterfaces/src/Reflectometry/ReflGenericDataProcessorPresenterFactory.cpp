@@ -42,14 +42,14 @@ ReflGenericDataProcessorPresenterFactory::create() {
       "/><i>optional</i><br />To specify two transmission runs, separate "
       "them with a '+'. If left blank, the sample runs will be normalised "
       "by monitor only.<br /><br /><b>Example:</b> <samp>1234+12345</samp>");
-  whitelist.addElement("Q min", "MomentumTransferMinimum",
+  whitelist.addElement("Q min", "MomentumTransferMin",
                        "<b>Minimum value of Q to be used</b><br "
                        "/><i>optional</i><br />Unit: &#197;<sup>-1</sup><br "
                        "/>Data with a value of Q lower than this will be "
                        "discarded. If left blank, this is set to the lowest "
                        "Q value found. This is useful for discarding noisy "
                        "data. <br /><br /><b>Example:</b> <samp>0.1</samp>");
-  whitelist.addElement("Q max", "MomentumTransferMaximum",
+  whitelist.addElement("Q max", "MomentumTransferMax",
                        "<b>Maximum value of Q to be used</b><br "
                        "/><i>optional</i><br />Unit: &#197;<sup>-1</sup><br "
                        "/>Data with a value of Q higher than this will be "
@@ -72,14 +72,14 @@ ReflGenericDataProcessorPresenterFactory::create() {
       /*The name of the algorithm */
       "ReflectometryReductionOneAuto",
       /*Prefixes to the output workspaces*/
-      std::vector<std::string>{"IvsQ_", "IvsLam_"},
+      std::vector<std::string>{"IvsQ_", "IvsQ_binned_", "IvsLam_"},
       /*The blacklist*/
-      std::set<std::string>{
-          "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",
-          "OutputWorkspaceWavelength", "FirstTransmissionRun",
-          "SecondTransmissionRun", "MomentumTransferMinimum",
-          "MomentumTransferMaximum", "MomentumTransferStep", "ScaleFactor"},
-      1);
+      std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
+                            "OutputWorkspace", "OutputWorkspaceBinned",
+                            "OutputWorkspaceWavelength", "FirstTransmissionRun",
+                            "SecondTransmissionRun", "MomentumTransferMin",
+                            "MomentumTransferMax", "MomentumTransferStep",
+                            "ScaleFactor"});
 
   // Pre-processing instructions as a map:
   // Keys are the column names
@@ -96,8 +96,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
        DataProcessorPreprocessingAlgorithm(
            "CreateTransmissionWorkspaceAuto", "TRANS_",
            std::set<std::string>{"FirstTransmissionRun",
-                                 "SecondTransmissionRun", "OutputWorkspace"},
-           1)}};
+                                 "SecondTransmissionRun", "OutputWorkspace"})}};
 
   // The post-processing algorithm
   DataProcessorPostprocessingAlgorithm postprocessor(
