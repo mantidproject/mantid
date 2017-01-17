@@ -5,8 +5,6 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -14,7 +12,8 @@ namespace DataHandling {
 class DLLExport SaveOpenGenieAscii : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
-  SaveOpenGenieAscii();
+  SaveOpenGenieAscii() = default;
+  ~SaveOpenGenieAscii() = default;
 
   /// Algorithm's name
   const std::string name() const override { return "SaveOpenGenieAscii"; }
@@ -32,52 +31,52 @@ public:
     return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
-
-
 private:
+  /// Typedef of a tuple containing the name, type and value as strings
+  using outputTuple = std::tuple<std::string, std::string, std::string>;
+
   /// Initialisation code
   void init() override;
 
   /// Execution code
   void exec() override;
 
-  void inputValidation();
-
-  /// Typedef the tuple to outputTuple
-  using outputTuple = std::tuple<std::string, std::string, std::string>;
-
-  /// Converts XYE data to OPENGENIE strings
-  std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();
-
-  /// Stores parameters from the workspace which are required for OpenGenie
-  void storeWorkspaceInformation();
-
-  /// Parses and stores the workspace data into the output buffer
-  void parseWorkspaceData();
-
-  /// Attempts to open the user specified file path as an output stream
-  std::ofstream openFileStream();
-
-  void getSampleLogs();
-
-  /// sort and write out the data portion of the file
-  void writeDataToFile(std::ofstream &outfile);
-
-  /// apply enginX format field which is required for OpenGenie
+  /// Adds ENGINX related data which is required for OpenGenie
   void applyEnginxFormat();
 
   /// Calculate delta x/y/z from the log files for ENGINX
   void calculateXYZDelta(const std::string &unit, const Kernel::Property *values);
 
+  /// Converts XYE data to OPENGENIE strings and number of data points 
+  std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();
+
+  /// Parses and stores appropriate output logs into the output buffer
+  void getSampleLogs();
+
+  /// Validates that workspace is focused and not empty
+  void inputValidation();
+
+  /// Attempts to open the user specified file path as an output stream
+  std::ofstream openFileStream();
+
+  /// Parses and stores the workspace data into the output buffer
+  void parseWorkspaceData();
+
+  /// Stores parameters from the workspace which are required for OpenGenie
+  void storeWorkspaceInformation();
+
+  /// sorts and writes out the data portion of the file
+  void writeDataToFile(std::ofstream &outfile);
+
   /// Output buffer which holds the tuples to be written
   std::vector<outputTuple> m_outputVector;
   /// Workspace to save
   API::MatrixWorkspace_sptr m_inputWS;
-  /// Output type String
+  /// Output type - String
   const std::string m_stringType = "String";
-  /// Output type Float
+  /// Output type - Float
   const std::string m_floatType = "Float";
-  /// Output type Integer
+  /// Output type - Integer
   const std::string m_intType = "Integer";
 };
 }
