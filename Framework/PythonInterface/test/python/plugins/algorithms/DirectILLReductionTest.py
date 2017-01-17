@@ -146,7 +146,7 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         outWS = mtd[outWSName]
-        self._checkAlgorithmsInHistory(outWS, 'MaskDetectors')
+        self.assertTrue(self._checkAlgorithmsInHistory(outWS, 'MaskDetectors'))
         nHistograms = outWS.getNumberHistograms()
         for i in range(int(nHistograms / 2)):
             self.assertTrue(outWS.getDetector(i).isMasked())
@@ -449,7 +449,8 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         ws = mtd[outWSName]
-        self._checkAlgorithmsInHistory(ws, 'MedianBinWidth', 'Rebin')
+        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'MedianBinWidth',
+                                                       'Rebin'))
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
         xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
@@ -527,7 +528,8 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         outWS = mtd[outWSName]
-        self._checkAlgorithmsInHistory(outWS, 'ComputeCalibrationCoefVan')
+        self.assertTrue(self._checkAlgorithmsInHistory(outWS,
+                        'ComputeCalibrationCoefVan'))
         for i in range(outWS.getNumberHistograms()):
             self.assertAlmostEqual(outWS.readY(i)[0], 0.000497, 5)
         DeleteWorkspace(outWSName)
