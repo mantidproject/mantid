@@ -19,7 +19,6 @@
 #include "ui_TomographyIfaceQtTabEnergy.h"
 #include "ui_TomographyIfaceQtTabFiltersSettings.h"
 #include "ui_TomographyIfaceQtTabRun.h"
-#include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabSystemSettings.h"
 #include "ui_TomographyIfaceQtTabVisualize.h"
 #include <boost/scoped_ptr.hpp>
