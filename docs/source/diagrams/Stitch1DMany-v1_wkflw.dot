@@ -7,6 +7,9 @@ subgraph params {
   inputWS       [label="InputWorkspaces"]
   outWS         [label="OutputWorkspace"]
   outSF         [label="OutScaleFactors"]
+  useManSF      [label="UseManualScaleFactor"]
+  manSF         [label="ManualScaleFactor"]
+  sffp          [label="ScaleFactorFromPeriod"]
   psf           [label="Period Scale Factors"]
   stitchedWSVec [label="Vector of Stitched Workspaces"]
 }
@@ -19,10 +22,10 @@ subgraph decisions {
 
 subgraph algorithms {
  $algorithm_style
-  S1D_WS      [label="Do Stitch1D for\nall workspaces"]
-  S1D_Groups  [label="Do Stitch1D for\nall workspaces per period\nwith period scale factors"]
-  S1DM_Global [label="Do Stitch1D for\nall workspaces per period\nwith single scale factor"]
-  S1DM_Period [label="Do Stitch1D for all\nworkspaces in period given\nby ScaleFactorFromPeriod"]
+  S1D_WS      [label="Stitch1D all\nworkspaces"]
+  S1D_Groups  [label="Stitch1D all\nworkspaces per period"]
+  S1DM_Global [label="Stitch1D all\nworkspaces per period"]
+  S1DM_Period [label="Stitch1D all workspaces\nin period given by\nScaleFactorFromPeriod"]
   groupWS     [label="GroupWorkspaces"]
 }
 
@@ -39,8 +42,11 @@ checkGroups   -> S1D_WS       [label="no"]
 checkGroups   -> checkSFFP    [label="yes"]
 S1D_WS        -> outWS
 S1D_WS        -> outSF
+useManSF      -> checkSFFP
+manSF         -> checkSFFP
 checkSFFP     -> S1DM_Global  [label="no"]
 checkSFFP     -> S1DM_Period  [label="yes"]
+sffp          -> S1DM_Period
 S1DM_Global   -> stitchedWSVec
 S1DM_Global   -> outSF
 S1DM_Period   -> psf
