@@ -177,14 +177,18 @@ std::map<std::string, std::string> Stitch1DMany::validateCommonInputs() {
     errors["InputWorkspaces"] = "At least 2 input workspaces required.";
 
   // Check that all the workspaces are of the same type
-  const std::string id = m_inputWSMatrix[0][0]->id();
-  for (auto &period : m_inputWSMatrix) {
-    for (auto &inputWS : period) {
-      if (inputWS->id() != id) {
-        errors["InputWorkspaces"] = "All workspaces must be the same type.";
-        break;
+  if (!m_inputWSMatrix.empty() && !m_inputWSMatrix[0].empty()) {
+    const std::string id = m_inputWSMatrix[0][0]->id();
+    for (auto &period : m_inputWSMatrix) {
+      for (auto &inputWS : period) {
+        if (inputWS->id() != id) {
+          errors["InputWorkspaces"] = "All workspaces must be the same type.";
+          break;
+        }
       }
     }
+  } else {
+    return errors; // Can't validate other properties without enough workspaces
   }
 
   m_startOverlaps = this->getProperty("StartOverlaps");

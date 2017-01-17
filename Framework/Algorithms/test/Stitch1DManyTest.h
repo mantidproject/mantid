@@ -150,7 +150,6 @@ public:
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
-    alg.setProperty("InputWorkspaces", "ws1");
     alg.setProperty("Params", "0.1, 0.1, 1.8");
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
