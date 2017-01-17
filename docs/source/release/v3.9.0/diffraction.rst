@@ -30,6 +30,8 @@ Engineering Diffraction
 Powder Diffraction
 ------------------
 
+- Instrument definition files for D4 and D20 diffractometers at ILL have been created.
+
 :ref:`algm-SNSPowderReduction` had an error in logic of subtracting the vanadium background. It was not being subtracted when ``PreserveEvents=True``.
 
 :ref:`algm-PDLoadCharacterizations` and
