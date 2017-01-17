@@ -69,7 +69,7 @@ public:
       m_PPLambdaIdxChild.resize(iSpec + 1, -1);
     }
     auto si = std::to_string(iSpec);
-    declareParameter("Lambda" + si, 0.0, 
+    declareParameter("Lambda" + si, 0.0,
                      "Effective exchange coupling of dataset " + si);
     m_PPLambdaIdxSelf[iSpec] = parameterIndex("Lambda" + si);
   }
@@ -318,7 +318,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
     spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
     spectrum.setAttribute("powder", getAttribute("powder" + suffix));
-    dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] = 
+    dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] =
         spectrum.parameterIndex("Lambda");
     return retval;
   }
@@ -393,7 +393,7 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     auto &suscept = dynamic_cast<CrystalFieldSusceptibility &>(spectrum);
     suscept.setEigensystem(en, wf, nre);
     auto &source = dynamic_cast<Peaks &>(*m_source);
-    suscept.setParameter(source.m_PPLambdaIdxChild[iSpec], 
+    suscept.setParameter(source.m_PPLambdaIdxChild[iSpec],
                          getParameter(source.m_PPLambdaIdxSelf[iSpec]));
     break;
   }
