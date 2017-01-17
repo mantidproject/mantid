@@ -13,7 +13,7 @@ Depends: git, g++, clang-format-3.6, cmake-qt-gui(>=3.5), ninja-build, libtbb-de
   libhdf5-dev, libhdf4-dev, libgsl0-dev, liboce-visualization-dev, libmuparser-dev, libssl-dev, libjsoncpp-dev(>=0.7.0),
   libpython-dev, python-numpy, python-scipy, python-qt4-dev, python-qt4-dbg, python-sphinx, python-dateutil,
   python-sphinx-bootstrap-theme, python-matplotlib, python-h5py, python-yaml, python-mock, ipython-qtconsole (>=1.2.0),
-  qt4-default, qt4-qmake, qt4-dev-tools, libqtwebkit-dev, libqwt5-qt4-dev, libqwtplot3d-qt4-dev, libqscintilla2-dev,
+  qt4-default, qt4-qmake, qt4-dev-tools, librdkafka-dev, libqtwebkit-dev, libqwt5-qt4-dev, libqwtplot3d-qt4-dev, libqscintilla2-dev,
   texlive, texlive-latex-extra, dvipng, graphviz, doxygen
 Description: Installs all packages required for a Mantid developer
  A metapackage which requires all the dependencies and tools that are
