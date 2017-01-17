@@ -62,14 +62,16 @@ public:
     std::vector<std::string> prefixes;
     prefixes.push_back("IvsQ_");
     // This should throw
-    TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm(algName, prefixes),
+    TS_ASSERT_THROWS(DataProcessorProcessingAlgorithm(
+                         algName, prefixes, std::set<std::string>(), 1),
                      std::invalid_argument);
     // But this should be OK
     prefixes.push_back("IvsLam_");
-    TS_ASSERT_THROWS_NOTHING(
-        DataProcessorProcessingAlgorithm(algName, prefixes));
+    TS_ASSERT_THROWS_NOTHING(DataProcessorProcessingAlgorithm(
+        algName, prefixes, std::set<std::string>(), 1));
 
-    auto alg = DataProcessorProcessingAlgorithm(algName, prefixes);
+    auto alg = DataProcessorProcessingAlgorithm(algName, prefixes,
+                                                std::set<std::string>(), 1);
     TS_ASSERT_EQUALS(alg.name(), "ReflectometryReductionOneAuto");
     TS_ASSERT_EQUALS(alg.numberOfOutputProperties(), 2);
     TS_ASSERT_EQUALS(alg.prefix(0), "IvsQ_");

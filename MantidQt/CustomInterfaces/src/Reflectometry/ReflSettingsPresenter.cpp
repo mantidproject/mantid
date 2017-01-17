@@ -360,7 +360,8 @@ void ReflSettingsPresenter::getInstDefaults() {
 /** Generates and returns an instance of the ReflectometryReductionOne algorithm
 */
 IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
-  return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto",
+                                             1);
 }
 
 /** Creates and returns an example empty instrument given an instrument name
