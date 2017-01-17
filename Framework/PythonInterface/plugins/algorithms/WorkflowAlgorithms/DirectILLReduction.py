@@ -1802,13 +1802,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                    ' given. TOF axis will not be adjusted.')
                 return mainWS
             index = mainWS.run().getLogData('Detector.elasticpeak').value
-        indexType = self.getProperty(_PROP_INDEX_TYPE).value
         detectorsAtL2 = self.getProperty(_PROP_DETS_AT_L2).value
         detectorsAtL2 = self._convertListToWorkspaceIndices(detectorsAtL2,
                                                             mainWS)
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
-                                     IndexType=indexType,
+                                     IndexType='Workspace Index',
                                      ReferenceSpectra=detectorsAtL2,
                                      ElasticBinIndex=index,
                                      EnableLogging=subalgLogging)
