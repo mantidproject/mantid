@@ -49,7 +49,7 @@ Usage
     ws = IndirectILLReductionFWS(Run='ILL/IN16B/083072:083077.nxs')
     print "Result is now a WorkspaceGroup, which has %d workspaces, one per each energy value" % ws.getNumberOfEntries()
     print "first item, called %s corresponds to energy value of %s" % \
-    (ws.getItem(0).getName(),ws.getItem(0).getName().split('_')[2])
+    (ws.getItem(0).getName(),ws.getItem(0).getName().split('_')[1])
     print "it has %d histograms and %d bins, one per each temperature" % \
     (ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize())
 
@@ -58,7 +58,7 @@ Output:
 .. testoutput:: ExFixedWindowScans
 
     Result is now a WorkspaceGroup, which has 3 workspaces, one per each energy value
-    first item, called ws_red_0.0 corresponds to energy value of 0.0
+    first item, called ws_0.0_red corresponds to energy value of 0.0
     it has 18 histograms and 2 bins, one per each temperature
 
 .. testcleanup:: ExFixedWindowScans
