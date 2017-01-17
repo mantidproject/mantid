@@ -53,7 +53,7 @@ def execute(data, config, flat=None, dark=None):
     counterclock_rotations = 4 - rotation
 
     h.pstart(
-        " * Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
+        "Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
         format(counterclock_rotations * 90, data.dtype))
 
     data = _rotate_stack(data, counterclock_rotations)
@@ -62,7 +62,7 @@ def execute(data, config, flat=None, dark=None):
     if dark is not None:
         dark = _rotate_image(dark, counterclock_rotations)
 
-    h.pstop(" * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}."
+    h.pstop("Finished rotation step ({0} degrees clockwise), with pixel data type: {1}."
             .format(counterclock_rotations * 90, data.dtype))
 
     h.check_data_stack(data)

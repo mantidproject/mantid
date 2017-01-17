@@ -119,8 +119,8 @@ class FunctionalConfig(object):
             required=False,
             default='fits',
             type=str,
-            help="Format/file extension expected for the input images.\nSupported: {0}".
-            format(img_formats))
+            choices=img_formats,
+            help="Format/file extension expected for the input images.")
 
         grp_func.add_argument(
             "-o",
@@ -133,10 +133,10 @@ class FunctionalConfig(object):
         grp_func.add_argument(
             "--out-img-format",
             required=False,
-            default='tiff',
+            default='fits',
             type=str,
-            help="Format/file extension expected for the input images.\nSupported: {0}".
-            format(img_formats))
+            choices=img_formats,
+            help="Format/file extension expected for the input images.")
 
         grp_func.add_argument(
             "--out-horiz-slices-subdir",
@@ -244,22 +244,30 @@ class FunctionalConfig(object):
 
         grp_recon = parser.add_argument_group('Reconstruction options')
 
+        supported_tools = ['tomopy', 'astra']
         grp_recon.add_argument(
             "-t",
             "--tool",
             required=False,
             type=str,
             default=self.tool,
-            help="Tomographic reconstruction tool to use")
+            choices=supported_tools,
+            help="Tomographic reconstruction tool to use.\nAvailable: {0}".format(supported_tools))
 
+        from recon.tools.tomopy_tool import TomoPyTool
+        from recon.tools.astra_tool import AstraTool
+
+        tomo_algs = TomoPyTool.tool_supported_methods()
+        astra_algs = AstraTool.tool_supported_methods()
         grp_recon.add_argument(
             "-a",
             "--algorithm",
             required=False,
             type=str,
             default=self.algorithm,
-            help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {'art', 'bart', 'fbp', 'gridrec', "
-                 "'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', 'pml_hybrid', 'pml_quad', 'sirt'}.")
+            help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {0}\nAstra:{1}".format(
+                tomo_algs, astra_algs)
+        )
 
         grp_recon.add_argument(
             "-n",

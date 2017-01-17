@@ -47,14 +47,14 @@ class Saver(object):
             preproc_dir = os.path.join(preproc_dir, subdir)
 
         self._h.pstart(
-            " * Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
+            "Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
 
         self.make_dirs_if_needed(preproc_dir)
 
         self.write_image(data, os.path.join(
             preproc_dir, image_name + str(image_index).zfill(6)))
 
-        self._h.pstop(" * Finished saving single image.")
+        self._h.pstop("Finished saving single image.")
 
     def save_recon_output(self, data):
         """
@@ -71,7 +71,7 @@ class Saver(object):
         out_recon_dir = os.path.join(self._output_path, 'reconstructed')
 
         self._h.pstart(
-            " * Starting saving slices of the reconstructed volume in: {0}...".format(out_recon_dir))
+            "Starting saving slices of the reconstructed volume in: {0}...".format(out_recon_dir))
 
         self.save_recon_as_vertical_slices(
             data, out_recon_dir, self._out_slices_file_name_prefix, self._data_as_stack)
@@ -84,7 +84,7 @@ class Saver(object):
                 data, out_horiz_dir, self._out_horiz_slices_subdir)
 
         self._h.pstop(
-            " * Finished saving slices of the reconstructed volume in: {0}".
+            "Finished saving slices of the reconstructed volume in: {0}".
             format(out_recon_dir))
 
     def save_recon_as_vertical_slices(self, data, output_dir, name_prefix='out_recon_slice', data_as_stack=False):
@@ -144,7 +144,7 @@ class Saver(object):
         preproc_dir = os.path.join(self._output_path, self._preproc_dir)
 
         self._h.pstart(
-            " * Saving all pre-processed images into {0} dtype: {1}".format(preproc_dir, data.dtype))
+            "Saving all pre-processed images into {0} dtype: {1}".format(preproc_dir, data.dtype))
 
         self.make_dirs_if_needed(preproc_dir)
 
@@ -156,7 +156,7 @@ class Saver(object):
             self.write_image(data, os.path.join(
                 preproc_dir, 'out_preproc_proj_images_stack'))
 
-        self._h.pstop(" * Saving pre-processed images finished.")
+        self._h.pstop("Saving pre-processed images finished.")
 
     def write_image(self, img_data, filename):
         """
@@ -204,7 +204,7 @@ class Saver(object):
 
         self.make_dirs_if_needed(self._output_path)
 
-        self._h.pstart(" * Generating reconstruction script beginning...")
+        self._h.pstart("Generating reconstruction script beginning...")
 
         # generate file with dos/windows line end for windows users convenience
         with open(self._readme_fullpath, 'w') as oreadme:
@@ -245,7 +245,7 @@ class Saver(object):
             oreadme.write(cmd_line)
             oreadme.write("\n")
 
-        self._h.pstop(" * Finished generating script beginning.")
+        self._h.pstop("Finished generating script beginning.")
 
     def make_dirs_if_needed(self, dirname):
         """

@@ -26,12 +26,12 @@ def execute_image(data, config):
     if crop_coords:
         try:
             h.pstart(
-                " * Starting image cropping with coordinates: {0}. ...".format(crop_coords))
+                "Starting image cropping with coordinates: {0}. ...".format(crop_coords))
 
             data = _crop_image(data, crop_coords)
 
-            h.pstop(" * Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
-                                                                                                         data.shape))
+            h.pstop("Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
+                                                                                                      data.shape))
 
         except ValueError as exc:
             h.tomo_print(
@@ -85,19 +85,19 @@ def execute_volume(data, config):
     if crop_coords:
         try:
             h.pstart(
-                " * Starting image cropping with coordinates: {0}. ...".format(crop_coords))
+                "Starting image cropping with coordinates: {0}. ...".format(crop_coords))
 
             data = _crop_volume(data, crop_coords)
 
-            h.pstop(" * Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
-                                                                                                         data.shape))
+            h.pstop("Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
+                                                                                                      data.shape))
 
         except ValueError as exc:
             h.tomo_print(
                 "Error in crop (region of interest) parameter (expecting a list with four integers. "
                 "Got: {0}. Error details: ".format(crop_coords), exc)
     else:
-        h.tomo_print(" * Note: NOT applying cropping to region of interest.")
+        h.tomo_print("Note: NOT applying cropping to region of interest.")
 
     h.check_data_stack(data)
 

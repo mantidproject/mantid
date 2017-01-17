@@ -42,7 +42,7 @@ def execute(data, config):
     if median_filter_size and median_filter_size > 1:
         scipy_ndimage = _import_scipy_ndimage(config)
         h.pstart(
-            " * Starting noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
+            "Starting noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
             format(data.dtype, median_filter_size))
 
         for idx in range(0, data.shape[0]):
@@ -50,7 +50,7 @@ def execute(data, config):
                 data[idx], median_filter_size, mode=median_filter_mode)
 
         h.pstop(
-            " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
+            "Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
             format(data.dtype, median_filter_size))
 
     else:

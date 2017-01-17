@@ -34,7 +34,7 @@ def execute(imgs_angles, config):
         return imgs_angles
 
     h.pstart(
-        " * Starting to apply line projection on {0} images...".format(imgs_angles.shape[0]))
+        "Starting to apply line projection on {0} images...".format(imgs_angles.shape[0]))
 
     imgs_angles = imgs_angles.astype('float32')
     for idx in range(0, imgs_angles.shape[0]):
@@ -47,6 +47,6 @@ def execute(imgs_angles, config):
         imgs_angles[idx, :, :] = -np.log(to_log + 1e-6)
 
     h.pstop(
-        " * Finished applying line projection on {0} images. ".format(imgs_angles.shape[0]))
+        "Finished applying line projection on {0} images. ".format(imgs_angles.shape[0]))
 
     return imgs_angles

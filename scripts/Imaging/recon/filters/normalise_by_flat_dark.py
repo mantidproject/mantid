@@ -26,7 +26,7 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
                     norm_flat_img.shape, data[0].shape))
 
         h.pstart(
-            " * Starting normalization by flat/dark images, pixel data type: {0}...".format(data.dtype))
+            "Starting normalization by flat/dark images, pixel data type: {0}...".format(data.dtype))
 
         norm_divide = np.subtract(norm_flat_img, norm_dark_img)
 
@@ -41,7 +41,7 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
                 data[idx, :, :] - norm_dark_img, norm_divide), clip_min, clip_max)
 
         h.pstop(
-            " * Finished normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
+            "Finished normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
     else:
         h.tomo_print_note(
             "Cannot apply normalization by flat/dark images because no valid flat image has been "

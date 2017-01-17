@@ -4,16 +4,20 @@ from recon.tools.abstract_tool import AbstractTool
 
 class TomoPyTool(AbstractTool):
 
+    @staticmethod
+    def tool_supported_methods():
+        return ['art', 'bart', 'fbp', 'gridrec', 'mlem',
+                'osem', 'ospml_hybrid', 'ospml_quad', 'pml_hybrid', 'pml_quad', 'sirt']
+
     def __init__(self):
         AbstractTool.__init__(self)
         self._tomopy = self.import_self()
-        self._tool_supported_methods = ['art', 'bart', 'fbp', 'gridrec', 'mlem',
-                                        'osem', 'ospml_hybrid', 'ospml_quad', 'pml_hybrid', 'pml_quad', 'sirt']
 
     def check_algorithm_compatibility(self, config):
         algorithm = config.func.algorithm
-        if algorithm not in self._tool_supported_methods:
-            raise ValueError("The selected algorithm {0} is not supported by TomoPy.".format(algorithm))
+        if algorithm not in tool_supported_methods():
+            raise ValueError(
+                "The selected algorithm {0} is not supported by TomoPy.".format(algorithm))
 
     def find_center(self, **kwargs):
         # just forward to tomopy
@@ -52,14 +56,14 @@ class TomoPyTool(AbstractTool):
         cor = config.func.cor
         num_iter = config.func.num_iter
 
-        h.tomo_print(" * Using center of rotation: {0}".format(cor))
+        h.tomo_print("Using center of rotation: {0}".format(cor))
 
         iterative_algorithm = False if alg in ['gridrec', 'fbp'] else True
 
         # run the iterative algorithms
         if iterative_algorithm:
             h.pstart(
-                " * Starting iterative method with TomoPy. Algorithm: {0}, "
+                "Starting iterative method with TomoPy. Algorithm: {0}, "
                 "number of iterations: {1}...".format(alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles, center=cor,
@@ -67,13 +71,13 @@ class TomoPyTool(AbstractTool):
 
         else:  # run the non-iterative algorithms
             h.pstart(
-                " * Starting non-iterative reconstruction algorithm with TomoPy. "
+                "Starting non-iterative reconstruction algorithm with TomoPy. "
                 "Algorithm: {0}...".format(alg))
             recon = self._tomopy.recon(
                 tomo=data, theta=proj_angles, center=cor, algorithm=alg)
 
         h.pstop(
-            " * Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
+            "Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
             format(recon.shape, recon.dtype))
 
         return recon

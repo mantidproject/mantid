@@ -3,15 +3,15 @@ import numpy as np
 
 def execute(data, config):
     ratio = config.post.circular_mask
-    if ratio:
+    if ratio and ratio > 0 and ratio < 1:
         from recon.tools import tool_importer
         tomopy = tool_importer.do_importing('tomopy')
         from recon.helper import Helper
         h = Helper(config)
 
-        h.pstart(" * Starting circular mask...")
+        h.pstart("Starting circular mask...")
         tomopy.circ_mask(data, axis=0, ratio=ratio)
-        h.pstart(" * Finished applying circular mask.")
+        h.pstart("Finished applying circular mask.")
 
     return data
 

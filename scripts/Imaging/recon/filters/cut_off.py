@@ -8,7 +8,7 @@ def execute(data, config):
         rel_cut_off = dmin + cfg.cut_off_level * (dmax - dmin)
         data[data < rel_cut_off] = dmin
         self.tomo_print_timed_stop(
-            " * Finished cut-off step, with pixel data type: {0}.".format(
+            "Finished cut-off step, with pixel data type: {0}.".format(
                 data.dtype))
     else:
         self.tomo_print_note(

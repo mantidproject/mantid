@@ -40,7 +40,8 @@ class PreProcConfig(object):
 
         self.cut_off_level_pre = 0  # TODO unused
         self.mcp_corrections = True
-        self.scale_down = 0
+        self.scale = None
+        self.scale_mode = 'bilinear'
 
         self.line_projection = True  # TODO unused
 
@@ -49,7 +50,7 @@ class PreProcConfig(object):
                + "Normalise by air region: {0}\n".format(self.normalise_air_region) \
                + "Cut-off on normalised images: {0}\n".format(self.cut_off_level_pre) \
                + "Corrections for MCP detector: {0}\n".format(self.mcp_corrections) \
-               + "Scale down factor for images: {0}\n".format(self.scale_down) \
+               + "Scale down factor for images: {0}\n".format(self.scale) \
                + "Median filter width: {0}\n".format(self.median_filter_size) \
                + "Rotation: {0}\n".format(self.rotation) \
                + "Line projection (line integral/log re-scale): {0}\n".format(self.line_projection) \
@@ -95,15 +96,20 @@ class PreProcConfig(object):
             type=int,
             required=False,
             default=self.median_filter_size,
-            help="Size/width of the median filter (pre-processing).\nDefault: 3.")
+            help="Size / width of the median filter(pre - processing)."
+        )
 
+        median_modes = ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
         grp_pre.add_argument(
             "--median-filter-mode",
             type=str,
             required=False,
             default=self.median_filter_mode,
-            help="Mode of median filter which determines how the array borders are handled.\n"
-                 "Default: 'reflect', available: {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}.")
+            choices=median_modes,
+            help="Default: %(default)s\n"
+                 "Mode of median filter which determines how the array borders are handled."
+
+        )
 
         grp_pre.add_argument(
             "--remove-stripes",
@@ -126,8 +132,8 @@ class PreProcConfig(object):
             required=False,
             type=float,
             default=self.clip_min,
-            help="Clip values after normalisations to remove out of bounds pixel values.\n"
-            "Default: 0"
+            help="Default: %(default)s\n"
+            "Clip values after normalisations to remove out of bounds pixel values."
         )
 
         grp_pre.add_argument(
@@ -135,8 +141,8 @@ class PreProcConfig(object):
             required=False,
             type=float,
             default=self.clip_max,
-            help="Clip values after normalisations to remove out of bounds pixel values. "
-            "Default: 1.5"
+            help="Default: %(default)s\n"
+            "Clip values after normalisations to remove out of bounds pixel values."
         )
 
         grp_pre.add_argument(
@@ -148,12 +154,22 @@ class PreProcConfig(object):
                  "will be set to the minimum value.")
 
         grp_pre.add_argument(
-            "--scale-down",
+            "--scale",
             required=False,
-            type=int,
-            help="Scale down factor, to reduce the size of the images for faster (lower-resolution) reconstruction.\n"
-                 "Example a factor of 2 reduces 1024x1024 images to 512x512 images (combining blocks of 2x2 pixels into a single pixel.)\n"
-                 "The output pixels are calculated as the average of the input pixel blocks."
+            type=float,
+            help="Scale factor by which the images will be scaled. This could be any positive float number.\n"
+            "If not specified no scaling will be done."
+        )
+
+        scale_modes = ['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']
+        grp_pre.add_argument(
+            "--scale-mode",
+            required=False,
+            type=float,
+            default=self.scale_mode,
+            choices=scale_modes,
+            help="Default: %(default)s\n"
+            "Specify which interpolation mode will be used for the scaling of the image."
         )
 
         grp_pre.add_argument(
@@ -188,6 +204,7 @@ class PreProcConfig(object):
 
         self.cut_off_level_pre = args.cut_off_pre
         self.mcp_corrections = args.mcp_corrections
-        self.scale_down = args.scale_down
+        self.scale = args.scale
+        self.scale_mode = args.scale_mode
 
         # self.line_projection = args.line_projection

@@ -197,7 +197,7 @@ class Helper(object):
         # will be printed if the message verbosity is lower or equal
         # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
         if verbosity <= self._verbosity:
-            print(print_string)
+            print(" *", print_string)
 
     def pstop(self, message, verbosity=2):
         """
@@ -231,7 +231,7 @@ class Helper(object):
         # will be printed if the message verbosity is lower or equal
         # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
         if verbosity <= self._verbosity:
-            print(print_string)
+            print(" *", print_string)
 
     def total_reconstruction_timer(self, message="Total execution time was "):
         """

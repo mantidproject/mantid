@@ -39,7 +39,7 @@ def execute(data, config):
         air_right, air_top, air_left, air_bottom = translate_coords_onto_cropped_picture(
             config.pre.region_of_interest, normalise_air_region, config)
 
-        h.pstart(" * Starting normalization by air region...")
+        h.pstart("Starting normalization by air region...")
         air_sums = []
         for idx in range(0, data.shape[0]):
             air_data_sum = data[
@@ -57,7 +57,7 @@ def execute(data, config):
         min_avg = np.min(air_sums) / avg
 
         h.pstop(
-            " * Finished normalization by air region. Average: {0}, max ratio: {1}, min ratio: {2}.".
+            "Finished normalization by air region. Average: {0}, max ratio: {1}, min ratio: {2}.".
             format(avg, max_avg, min_avg))
 
     else:

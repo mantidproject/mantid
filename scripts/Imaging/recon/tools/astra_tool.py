@@ -7,14 +7,17 @@ class AstraTool(AbstractTool):
     Uses TomoPy's integration of Astra
     """
 
+    @staticmethod
+    def tool_supported_methods():
+        return ['FP', 'FP_CUDA', 'BP', 'BP_CUDA', 'FBP',
+                'FBP_CUDA', 'SIRT', 'SIRT_CUDA', 'SART', 'SART_CUDA', 'CGLS', 'CGLS_CUDA']
+
     def __init__(self):
         AbstractTool.__init__(self)
 
         # we import tomopy so that we can use Astra through TomoPy's
         # implementation
         self._tomopy = self.import_self()
-        self._tool_supported_methods = ['FP', 'FP_CUDA', 'BP', 'BP_CUDA', 'FBP',
-                                        'FBP_CUDA', 'SIRT', 'SIRT_CUDA', 'SART', 'SART_CUDA', 'CGLS', 'CGLS_CUDA']
 
     def import_self(self):
         # use Astra through TomoPy
@@ -25,8 +28,9 @@ class AstraTool(AbstractTool):
     def check_algorithm_compatibility(self, config):
         algorithm = config.func.algorithm.upper()  # get full caps
 
-        if algorithm not in self._tool_supported_methods:
-            raise ValueError("The selected algorithm {0} is not supported by Astra.".format(algorithm))
+        if algorithm not in tool_supported_methods():
+            raise ValueError(
+                "The selected algorithm {0} is not supported by Astra.".format(algorithm))
 
     @staticmethod
     def _import_astra():
@@ -67,7 +71,7 @@ class AstraTool(AbstractTool):
         cor = config.func.cor
         num_iter = config.func.num_iter
 
-        h.tomo_print(" * Using center of rotation: {0}".format(cor))
+        h.tomo_print("Using center of rotation: {0}".format(cor))
 
         # remove xxx_CUDA from the string with the [0:find..]
         iterative_algorithm = False if alg[
@@ -85,7 +89,7 @@ class AstraTool(AbstractTool):
             }
 
             h.pstart(
-                " * Starting iterative method with Astra. Algorithm: {0}, "
+                "Starting iterative method with Astra. Algorithm: {0}, "
                 "number of iterations: {1}...".format(alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles,
@@ -93,7 +97,7 @@ class AstraTool(AbstractTool):
         else:  # run the non-iterative algorithms
 
             h.pstart(
-                " * Starting non-iterative reconstruction algorithm with Astra. "
+                "Starting non-iterative reconstruction algorithm with Astra. "
                 "Algorithm: {0}...".format(alg))
 
             options = {
@@ -105,7 +109,7 @@ class AstraTool(AbstractTool):
                                        center=cor, algorithm=self._tomopy.astra, options=options)
 
         h.pstop(
-            " * Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
+            "Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".
             format(recon.shape, recon.dtype))
 
         return recon

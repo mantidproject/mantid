@@ -11,7 +11,7 @@ def execute(config):
 
     # -----------------------------------------------------------------------------
 
-    h.pstart(" * Importing tool " + config.func.tool)
+    h.pstart("Importing tool " + config.func.tool)
 
     # import tool
     from recon.tools import tool_importer
@@ -19,16 +19,16 @@ def execute(config):
     # tomopy is the only supported tool for now
     tool = tool_importer.do_importing(config.func.tool)
 
-    h.pstop(" * Tool loaded.")
+    h.pstop("Tool loaded.")
 
     # -----------------------------------------------------------------------------
-    h.pstart(" * Loading data...")
+    h.pstart("Loading data...")
 
     from recon.data import loader
     sample, flat, dark = loader.read_in_stack(config)  # and onwards we go!
 
     h.pstop(
-        " * Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
+        "Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
             sample.shape, sample.dtype))
 
     # -----------------------------------------------------------------------------
@@ -36,13 +36,13 @@ def execute(config):
     # import all used filters
     from recon.filters import rotate_stack, crop_coords
 
-    h.pstart(" * Rotating stack...")
+    h.pstart("Rotating stack...")
 
     sample, flat, dark = rotate_stack.execute(sample, config, flat, dark)
 
-    h.pstop(" * Finished rotating stack.")
+    h.pstop("Finished rotating stack.")
 
-    h.pstart(" * Cropping images...")
+    h.pstart("Cropping images...")
     # crop the ROI, this is done first, so beware of what the correct ROI
     # coordinates are
     sample = crop_coords.execute_volume(sample, config)
@@ -52,12 +52,12 @@ def execute(config):
     num_projections = sample.shape[0]
     projection_angle_increment = float(config.func.max_angle) / num_projections
 
-    h.tomo_print(" * Calculating projection angles")
+    h.tomo_print("Calculating projection angles")
     projection_angles = np.arange(
         0, num_projections * projection_angle_increment, projection_angle_increment)
 
     # For tomopy
-    h.tomo_print(" * Calculating radians for TomoPy")
+    h.tomo_print("Calculating radians for TomoPy")
     projection_angles = np.radians(projection_angles)
 
     size = int(num_projections)
@@ -80,7 +80,7 @@ def execute(config):
             slice_indices.append(current_slice_index)
 
     h.pstart(
-        " * Starting COR calculation on {0} projections.".format(checked_projections))
+        "Starting COR calculation on {0} projections.".format(checked_projections))
 
     left_crop_pos = config.pre.region_of_interest[0]
     image_width = sample.shape[2]
@@ -98,7 +98,7 @@ def execute(config):
 
         calculated_cors.append(cor)
 
-    h.pstop(" * Finished COR calculation.", 2)
+    h.pstop("Finished COR calculation.", 2)
 
     average_cor_relative_to_crop = sum(calculated_cors) / len(calculated_cors)
     average_cor_relative_to_full_image = sum(
@@ -106,11 +106,11 @@ def execute(config):
 
     # we add the pixels cut off from the left, to reflect the full image in
     # Mantid
-    h.tomo_print(" * Printing average COR in relation to image crop {0}: {1}".format(
+    h.tomo_print("Printing average COR in relation to image crop {0}: {1}".format(
         config.pre.region_of_interest, round(average_cor_relative_to_crop)))
 
     # new line for GUI to be able to read
-    h.tomo_print(" * Printing average COR in relation to non-cropped image: \n{0}".format(
+    h.tomo_print("Printing average COR in relation to non-cropped image: \n{0}".format(
         round(average_cor_relative_to_full_image)), 0)
 
 

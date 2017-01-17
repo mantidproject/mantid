@@ -376,13 +376,13 @@ import scipy.misc as sm
 sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 print(rsample.shape)
-scale = 0.6565
+scale = 1.5
 num_images = rsample.shape[0]
 expected_dims = round(rsample.shape[1]*scale)  # this will give the shape calculated by scipy
 boop = np.zeros((num_images, expected_dims, expected_dims), dtype=np.float32)
 print(boop.shape) 
 for idx in xrange(rsample.shape[0]):
-    boop[idx] = sm.imresize(rsample[idx], scale, interp='nearest')
+    boop[idx] = sm.imresize(rsample[idx], scale, interp='bicubic')
     rsample[idx] = 0
 
 plt.imshow(boop[0], cmap='Greys_r'); plt.show()

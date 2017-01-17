@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-# this will handle tool imports and running the correct recon runner
-
 
 def execute(config, cmd_line=None):
     """
@@ -142,32 +140,32 @@ def save_netcdf_volume():
     # save_netcdf_vol = False
     # if save_netcdf_vol:
     #     h.pstart(
-    #         " * Saving reconstructed volume as NetCDF...")
+    #         "Saving reconstructed volume as NetCDF...")
     # saver.save_recon_netcdf(recon_data, config.post.output_path)
     # h.pstop(
-    #     " * Finished saving reconstructed volume as NetCDF.")
+    #     "Finished saving reconstructed volume as NetCDF.")
 
 
 def load_tool(config, h):
     # First step import the tool
-    h.pstart(" * Importing tool " + config.func.tool)
+    h.pstart("Importing tool " + config.func.tool)
     # import tool
     from recon.tools import tool_importer
     # tomopy is the only supported tool for now
     tool = tool_importer.do_importing(config.func.tool)
 
-    h.pstop(" * Tool loaded.")
+    h.pstop("Tool loaded.")
     return tool
 
 
 def load_data(config, h):
-    h.pstart(" * Loading data...")
+    h.pstart("Loading data...")
 
     from recon.data import loader
 
     sample, flat, dark = loader.read_in_stack(config)
 
-    h.pstop(" * Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
+    h.pstop("Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
         sample.shape, sample.dtype))
 
     h.check_data_stack(sample)

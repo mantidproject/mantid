@@ -62,13 +62,16 @@ class PostProcConfig(object):
             help="Apply median filter (2d) on reconstructed volume with the given window size.(post processing)"
         )
 
+        median_modes = ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
         grp_post.add_argument(
             "--out-median-filter-mode",
             type=str,
             required=False,
             default=self.median_filter_mode,
-            help="Mode of median filter which determines how the array borders are handled.(post processing)\n"
-                 "Default: 'reflect', available: {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}.")
+            choices=median_modes,
+            help="Default: %(default)s\n"
+                 "Mode of median filter which determines how the array borders are handled.(post processing)"
+        )
 
         grp_post.add_argument(
             "--out-gaussian-filter-size",
@@ -83,9 +86,8 @@ class PostProcConfig(object):
             type=str,
             required=False,
             default=self.median_filter_mode,
-            help="Type of gaussian filter. Default: 'reflect', available: "
-                 "{'reflect', 'constant', 'nearest', 'mirror', 'wrap'}"
-        )
+            choices=median_modes,
+            help="Default: %(default)s\nMode of gaussian filter which determines how the array borders are handled.(post processing).")
 
         return parser
 
