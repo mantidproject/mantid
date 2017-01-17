@@ -62,6 +62,7 @@ class SNAP_short(stresstesting.MantidStressTest):
         # default validation of workspace to processed nexus is right
         return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
 
+
 class SNAP_short_detcal(stresstesting.MantidStressTest):
     def skipTests(self):
         return _skip_test()
