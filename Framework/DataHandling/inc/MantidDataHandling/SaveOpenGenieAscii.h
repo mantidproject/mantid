@@ -72,7 +72,7 @@ private:
   /// Output buffer which holds the tuples to be written
   std::vector<outputTuple> m_outputVector;
   /// Workspace to save
-  API::MatrixWorkspace_sptr m_inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
   /// Output type - String
   const std::string m_stringType = "String";
   /// Output type - Float
