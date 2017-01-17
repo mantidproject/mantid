@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        ITableWorkspaceProperty, WorkspaceGroupProperty, Progress)
-from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, logger
+from mantid import logger, AlgorithmFactory
+from mantid.api import *
+from mantid.kernel import *
 import mantid.simpleapi as ms
 
 
@@ -227,7 +227,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         conclusion_prog.report('Adding sample logs')
         add_sample_log_multi = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
-        add_sample_log_multi.setProperty("Workspace", result_workspace)
+        add_sample_log_multi.setProperty("Workspace", result_workspace.name())
         add_sample_log_multi.setProperty("LogNames", log_names)
         add_sample_log_multi.setProperty("LogValues", log_values)
         add_sample_log_multi.execute()
