@@ -451,6 +451,32 @@ void ExperimentInfo::updateCachedDetectorGrouping(
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
 }
 
+void ExperimentInfo::addDetectorToGroup(const size_t index,
+                                        const detid_t detID) {
+  auto specDef = m_spectrumInfo->spectrumDefinition(index);
+  try {
+    const size_t detIndex = detectorInfo().indexOf(detID);
+    specDef.add(detIndex);
+    m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
+  } catch (std::out_of_range &) {
+    // Silently strip bad detector IDs
+  }
+}
+
+void ExperimentInfo::addDetectorsToGroup(const size_t index,
+                                         const std::set<detid_t> &detIDs) {
+  auto specDef = m_spectrumInfo->spectrumDefinition(index);
+  for (const auto detID : detIDs) {
+    try {
+      const size_t detIndex = detectorInfo().indexOf(detID);
+      specDef.add(detIndex);
+    } catch (std::out_of_range &) {
+      // Silently strip bad detector IDs
+    }
+  }
+  m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
+}
+
 /**
  * Set an object describing the moderator properties and take ownership
  * @param source :: A pointer to an object describing the source. Ownership is

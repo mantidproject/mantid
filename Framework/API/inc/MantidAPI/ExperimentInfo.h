@@ -80,6 +80,8 @@ public:
   void setNumberOfDetectorGroups(const size_t count);
   void updateCachedDetectorGrouping(const size_t index,
                                      const std::set<detid_t> &detIDs);
+  void addDetectorToGroup(const size_t index, const detid_t detID);
+  void addDetectorsToGroup(const size_t index, const std::set<detid_t> &detIDs);
 
   /// Set an object describing the source properties and take ownership
   void setModeratorModel(ModeratorModel *source);
