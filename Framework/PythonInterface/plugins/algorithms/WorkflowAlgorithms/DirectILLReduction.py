@@ -879,13 +879,20 @@ def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
                              RHSWorkspace=scalingWS,
                              OutputWorkspace=correctedECWSName,
                              EnableLogging=algorithmLogging)
+    tofAdjustedECWSName = wsNames.withSuffix('scaled_EC_TOF_corrected')
+    tofAdjustedECWS = CorrectTOFAxis(InputWorkspace=correctedECWS,
+                                     OutputWorkspace=tofAdjustedECWSName,
+                                     ReferenceWorkspace=ws,
+                                     IndexType='Workspace Index',
+                                     ReferenceSpectra='0')
     ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
     ecSubtractedWS = Minus(LHSWorkspace=ws,
-                           RHSWorkspace=correctedECWS,
+                           RHSWorkspace=tofAdjustedECWS,
                            OutputWorkspace=ecSubtractedWSName,
                            EnableLogging=algorithmLogging)
     wsCleanup.cleanup(scalingWS)
     wsCleanup.cleanup(correctedECWS)
+    wsCleanup.cleanup(tofAdjustedECWS)
     return ecSubtractedWS
 
 

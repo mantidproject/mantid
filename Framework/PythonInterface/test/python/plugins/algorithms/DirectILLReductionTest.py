@@ -108,6 +108,8 @@ class DirectILLReductionTest(unittest.TestCase):
             RemoveMaskedSpectra(InputWorkspace=cls._in5WStemplate,
                                 OutputWorkspace=cls._in5WStemplate)
         cls._in5WStemplate = _fillTemplateWorkspace(cls._in5WStemplate)
+        cls._in5WStemplate.mutableRun().addProperty('Detector.elasticpeak', 42,
+                                                    True)
 
     @classmethod
     def tearDownClass(cls):
@@ -234,9 +236,6 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertFalse(mtd.doesExist(diagnosticsWSName))
 
     def test_empty_container_subtraction(self):
-        SELF_SHIELDING_ALGORITHMS = ['ApplyPaalmanPingsCorrection',
-            'CylinderPaalmanPingsCorrection',
-            'FlatPlatePaalmanPingsCorrection']
         outECWSName = 'outECWS'
         ecWS = CloneWorkspace(self._testIN5WS)  # Empty container ws.
         for i in range(ecWS.getNumberHistograms() - 1):
@@ -252,7 +251,10 @@ class DirectILLReductionTest(unittest.TestCase):
             'Diagnostics': 'No Detector Diagnostics',
             'rethrow': True
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        try:
+            run_algorithm('DirectILLReduction', **algProperties)
+        except:
+            self.fail('Algorithm threw an exception.')
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._testIN5WS,
@@ -264,7 +266,10 @@ class DirectILLReductionTest(unittest.TestCase):
             'Diagnostics': 'No Detector Diagnostics',
             'rethrow': True
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        try:
+            run_algorithm('DirectILLReduction', **algProperties)
+        except:
+            self.fail('Algorithm threw an exception.')
         self.assertFalse(mtd.doesExist(outWSName + '_ecScaling'))
         self.assertFalse(mtd.doesExist(outWSName + '_scaled_EC'))
         self.assertFalse(mtd.doesExist(outWSName + '_EC_subtracted'))
@@ -281,7 +286,10 @@ class DirectILLReductionTest(unittest.TestCase):
             'EmptyContainerScalingFactor': 0.75,
             'rethrow': True
         }
-        run_algorithm('DirectILLReduction', **algProperties)
+        try:
+            run_algorithm('DirectILLReduction', **algProperties)
+        except:
+            self.fail('Algorithm threw and exception')
         self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_ecScaling'))
         self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_scaled_EC'))
         self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_EC_subtracted'))
