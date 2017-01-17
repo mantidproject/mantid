@@ -56,7 +56,6 @@ _PROP_BEAM_WIDTH = 'BeamWidth'
 _PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgDiagnosticsHighThreshold'
 _PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgDiagnosticsLowThreshold'
 _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgDiagnosticsErrorThreshold'
-_PROP_CD_WS = 'CadmiumWorkspace'
 _PROP_CLEANUP_MODE = 'Cleanup'
 _PROP_CONTAINER_BACK_THICKNESS = 'ContainerBackThickness'
 _PROP_CONTAINER_CHEMICAL_FORMULA = 'ContainerChemicalFormula'
@@ -1122,13 +1121,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced vanadium workspace.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=_PROP_CD_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Reduced cadmium workspace.')
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_EPP_WS,
             defaultValue='',
