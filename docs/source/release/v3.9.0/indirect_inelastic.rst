@@ -57,6 +57,7 @@ Improvements
 - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
 - TOSCA instrument definition file has been updated
 - When plotting from interfaces the plots now display error bars as standard
+- *I(Q, t)Fit* now uses the ExpDecay and StretchedExp functions already in Mantid
 
 Bugfixes
 --------
