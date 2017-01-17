@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Unit.h"
@@ -576,7 +576,6 @@ public:
     // reset the instrument associated with m_dataWorkspace
     m_dataWorkspace->setInstrument(m_dataWorkspaceInstHolder);
   }
-
   void test_point_detector_run_with_single_transmission_workspace() {
     ReflectometryReductionOneAuto alg;
     alg.initialize();
@@ -639,7 +638,7 @@ public:
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 2.0);
     alg.setProperty("I0MonitorIndex", 0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
     alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
@@ -652,7 +651,7 @@ public:
 
     MatrixWorkspace_sptr trans = alg.getProperty("OutputWorkspaceWavelength");
     alg.setProperty("FirstTransmissionRun", trans);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "4");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
@@ -663,7 +662,7 @@ public:
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 2.0);
     alg.setProperty("I0MonitorIndex", 0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
     alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
@@ -676,7 +675,7 @@ public:
 
     MatrixWorkspace_sptr trans = alg.getProperty("OutputWorkspaceWavelength");
     alg.setProperty("FirstTransmissionRun", trans);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("StrictSpectrumChecking", "0");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
