@@ -5,12 +5,12 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 
-#include <math.h>
 #include <QFileInfo>
 #include <QMenu>
+#include <math.h>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -399,36 +399,45 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
   return result;
 }
 
-IFunction_sptr IqtFit::createExponentialFunction(const QString &name, bool tie) {
+IFunction_sptr IqtFit::createExponentialFunction(const QString &name,
+                                                 bool tie) {
   IFunction_sptr result;
   if (name.startsWith("Exp")) {
     IFunction_sptr result =
-      FunctionFactory::Instance().createFunction("ExpDecay");
-    result->setParameter("Height", m_dblManager->value(m_properties[name + ".Intensity"]));
-    result->setParameter("Lifetime", m_dblManager->value(m_properties[name + ".Tau"]));
+        FunctionFactory::Instance().createFunction("ExpDecay");
+    result->setParameter(
+        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
+    result->setParameter("Lifetime",
+                         m_dblManager->value(m_properties[name + ".Tau"]));
     if (tie) {
-      result->tie("Height", m_properties[name + ".Intensity"]->valueText().toStdString());
-      result->tie("Lifetime", m_properties[name + ".Tau"]->valueText().toStdString());
+      result->tie("Height",
+                  m_properties[name + ".Intensity"]->valueText().toStdString());
+      result->tie("Lifetime",
+                  m_properties[name + ".Tau"]->valueText().toStdString());
     }
     result->applyTies();
     return result;
-  }
-  else {
+  } else {
     IFunction_sptr result =
-      FunctionFactory::Instance().createFunction("StretchExp");
-    result->setParameter("Height", m_dblManager->value(m_properties[name + ".Intensity"]));
-    result->setParameter("Lifetime", m_dblManager->value(m_properties[name + ".Tau"]));
-    result->setParameter("Stretching", m_dblManager->value(m_properties[name + ".Beta"]));
+        FunctionFactory::Instance().createFunction("StretchExp");
+    result->setParameter(
+        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
+    result->setParameter("Lifetime",
+                         m_dblManager->value(m_properties[name + ".Tau"]));
+    result->setParameter("Stretching",
+                         m_dblManager->value(m_properties[name + ".Beta"]));
     if (tie) {
-      result->tie("Height", m_properties[name + ".Intensity"]->valueText().toStdString());
-      result->tie("Lifetime", m_properties[name + ".Tau"]->valueText().toStdString());
-      result->tie("Stretching", m_properties[name + ".Beta"]->valueText().toStdString());
+      result->tie("Height",
+                  m_properties[name + ".Intensity"]->valueText().toStdString());
+      result->tie("Lifetime",
+                  m_properties[name + ".Tau"]->valueText().toStdString());
+      result->tie("Stretching",
+                  m_properties[name + ".Beta"]->valueText().toStdString());
     }
     result->applyTies();
     return result;
   }
 }
-
 
 QtProperty *IqtFit::createExponential(const QString &name) {
   QtProperty *expGroup = m_grpManager->addProperty(name);
