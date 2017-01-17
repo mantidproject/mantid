@@ -77,6 +77,40 @@ For more information about McStas and its general usage for simulating neutron
 scattering instruments and experiments visit the McStas homepage http://www.mcstas.org.
 
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Load McStas data containing both event and histogram data:**
+
+.. testcode:: ExLoadMcStas
+
+   # Load the data into tuple
+   ws = LoadMcStas('mcstas_event_hist.h5')
+
+   # workspace group is first entry in tuple
+   group = ws[0]
+   print "Number of entries in group: " + str(group.getNumberOfEntries())
+
+   eventData = ws[1]
+   print "Number of histograms in event data: " + str(eventData.getNumberHistograms())
+   print "Name of event data: " + str(eventData.getName())
+
+   someHistogramData = ws[2]
+   print "Number of histograms in hist data: " + str(someHistogramData.getNumberHistograms())
+   print "Name of hist data: " + str(someHistogramData.getName())
+
+Output:
+
+.. testoutput:: ExLoadMcStas
+
+   Number of entries in group: 5
+   Number of histograms in event data: 8192
+   Name of event data: EventData_ws
+   Number of histograms in hist data: 1
+   Name of hist data: Edet.dat_ws
+
 .. categories::
 
 .. sourcelink::
