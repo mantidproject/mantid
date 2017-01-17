@@ -278,13 +278,19 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         '''
         Reduces the given (single or summed multiple) run
         @param run :: run path
-        @param runnumber :: run number
         @param  label :: sample, background or calibration
         '''
 
-        runnumber = os.path.basename(run.split('+')[0]).split('.')[0]
+        runs_list = run.split('+')
 
-        ws = '__' + runnumber + '_' + label
+        runnumber = os.path.basename(runs_list[0]).split('.')[0]
+
+        ws = '__' + runnumber
+
+        if (len(runs_list) > 1):
+            ws += '_multiple'
+
+        ws += '_' + label
 
         self._progress.report("Reducing run #" + runnumber)
 
@@ -471,7 +477,12 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             run_list = ''  # to set to sample logs
 
             for ws in ws_list:
-                run_list += ws.split('_')[2] + ','
+                run = mtd[ws].getRun()
+
+                if run.hasProperty('run_number_list'):
+                    run_list += run.getLogData('run_number_list').value.replace(', ', '+') + ','
+                else:
+                    run_list += str(run.getLogData('run_number').value) + ','
 
             AddSampleLog(Workspace=wsname, LogName='ReducedRunsList', LogText=run_list.rstrip(','))
 

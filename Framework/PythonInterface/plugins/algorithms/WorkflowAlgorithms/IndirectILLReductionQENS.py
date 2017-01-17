@@ -284,11 +284,18 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         @param run :: run path
         '''
 
-        runnumber = os.path.basename(run.split('+')[0]).split('.')[0]
+        runs_list = run.split('+')
 
-        self._progress.report("Reducing run #" + run)
+        runnumber = os.path.basename(runs_list[0]).split('.')[0]
 
-        ws = '__' + runnumber + '_' + self._red_ws
+        self._progress.report("Reducing run #" + runnumber)
+
+        ws = '__' + runnumber
+
+        if (len(runs_list) > 1):
+            ws += '_multiple'
+
+        ws += '_' + self._red_ws
 
         back_ws = '__background_'+self._red_ws
 

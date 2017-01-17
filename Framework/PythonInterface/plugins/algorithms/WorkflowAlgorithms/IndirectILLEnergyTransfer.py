@@ -252,15 +252,17 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=self._run_file.count('+'))
 
         # This is faster than Load, moreover MergeRuns handles the metadata correctly
-        for i, item in enumerate(self._run_file.split('+')):
-            runnumber = '__' + os.path.basename(item).split('.')[0]
+        run_files = self._run_file.split('+')
+        for i, item in enumerate(run_files):
+            runnumber = os.path.basename(item).split('.')[0]
+            ws_name = '__' + runnumber
             self._progress.report("Loading run #"+runnumber)
             if i == 0:
                 LoadILLIndirect(Filename=item,OutputWorkspace=self._red_ws)
             if i > 0:
-                LoadILLIndirect(Filename=item, OutputWorkspace=runnumber)
-                MergeRuns(InputWorkspaces=[self._red_ws,runnumber],OutputWorkspace=self._red_ws)
-                DeleteWorkspace(runnumber)
+                LoadILLIndirect(Filename=item, OutputWorkspace=ws_name)
+                MergeRuns(InputWorkspaces=[self._red_ws,ws_name],OutputWorkspace=self._red_ws)
+                DeleteWorkspace(ws_name)
 
         self._instrument = mtd[self._red_ws].getInstrument()
 
@@ -269,6 +271,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         run = '{0:06d}'.format(mtd[self._red_ws].getRunNumber())
 
         self._ws = self._red_ws + '_' + run
+
+        if len(run_files) > 1:  # multiple summed files
+            self._ws += '_multiple'
 
         RenameWorkspace(InputWorkspace=self._red_ws, OutputWorkspace=self._ws)
 
