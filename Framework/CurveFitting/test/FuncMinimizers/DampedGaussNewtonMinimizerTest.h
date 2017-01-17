@@ -246,10 +246,8 @@ public:
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
 
-    BoundaryConstraint *constraint =
-        new BoundaryConstraint(fun.get(), "a", 0, 0.5);
-
-    fun->addConstraint(constraint);
+    fun->addConstraint(
+        Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
