@@ -426,6 +426,25 @@ class DirectILLReductionTest(unittest.TestCase):
                 self.assertFalse(outWS.getDetector(i).isMasked())
         DeleteWorkspace(outWSName)
 
+    def test_vanadium_workflow(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Vanadium',
+            'IndexType': 'Workspace Index',
+            'Monitor': '0',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        outWS = mtd[outWSName]
+        self._checkAlgorithmsInHistory(outWS, 'ComputeCalibrationCoefVan')
+        for i in range(outWS.getNumberHistograms()):
+            self.assertAlmostEqual(outWS.readY(i)[0], 0.000497, 5)
+        DeleteWorkspace(outWSName)
+
     def test_component_mask(self):
         outWSName = 'outWS'
         algProperties = {

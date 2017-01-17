@@ -979,6 +979,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Continuing with vanadium and sample reductions.
 
+        # Save vanadium's original TOF for later restoration.
+        vanaXs = None
+        if reductionType == _REDUCTION_TYPE_VANA:
+            vanaXs = numpy.array(mainWS.readX(0))
         # TODO EC is not corrected in simple manual subtraction.
         mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup,
                                       subalgLogging)
@@ -991,6 +995,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if reductionType == _REDUCTION_TYPE_VANA:
             # We output an integrated vanadium, ready to be used for
             # normalization.
+            # Restore vanadium's original TOF axis. Otherwise, the EPP table
+            # would be incorrect.
+            for i in range(mainWS.getNumberHistograms()):
+                numpy.copyto(mainWS.dataX(i), vanaXs)
             outWS = self.getPropertyValue(_PROP_OUTPUT_WS)
             # TODO For the time being, we may just want to integrate
             # the vanadium data as `ComputeCalibrationCoef` does not do
