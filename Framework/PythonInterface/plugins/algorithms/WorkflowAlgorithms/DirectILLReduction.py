@@ -1995,7 +1995,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                    OutputWorkspace=groupedWSName,
                                    GroupingPattern=groupingPattern,
                                    KeepUngroupedSpectra=False,
-                                   Behaviour='Sum',
+                                   Behaviour='Average',
                                    EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return groupedWS
