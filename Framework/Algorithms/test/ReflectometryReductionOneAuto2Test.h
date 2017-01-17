@@ -397,6 +397,85 @@ public:
     TS_ASSERT_EQUALS(sum->blocksize(), 20);
     TS_ASSERT_DELTA(sum->y(0)[0], 4 * 2, 1e-6);
   }
+
+  void test_IvsQ_linear_binning() {
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_TOF);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferMin", 1.0);
+    alg.setProperty("MomentumTransferMax", 10.0);
+    alg.setProperty("MomentumTransferStep", -0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
+
+    TS_ASSERT_EQUALS(outQbinned->getNumberHistograms(), 1);
+    // blocksize = (10.0 - 1.0) / 0.04
+    TS_ASSERT_EQUALS(outQbinned->blocksize(), 225);
+    TS_ASSERT_DELTA(outQbinned->x(0)[1] - outQbinned->x(0)[0], 0.04, 1e-6);
+    TS_ASSERT_DELTA(outQbinned->x(0)[2] - outQbinned->x(0)[1], 0.04, 1e-6);
+  }
+
+  void test_IvsQ_logarithmic_binning() {
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_TOF);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferMin", 1.0);
+    alg.setProperty("MomentumTransferMax", 10.0);
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
+
+    TS_ASSERT_EQUALS(outQbinned->getNumberHistograms(), 1);
+    TS_ASSERT_DIFFERS(outQbinned->blocksize(), 8);
+    TS_ASSERT_DELTA(outQbinned->x(0)[1] - outQbinned->x(0)[0], 0.04, 1e-6);
+    TS_ASSERT(outQbinned->x(0)[7] - outQbinned->x(0)[6] > 0.05);
+  }
+
+  void test_IvsQ_q_range() {
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_TOF);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+
+    for (size_t i = 0; i < outQ->blocksize(); i++)
+      std::cout << outLam->x(0)[i] << "\n";
+
+    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outQ->blocksize(), 8);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLam->x(0)[0], 2.8257, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 12.7158, 0.0001);
+    // X range in outQ
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3403, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 1.1345, 0.0001);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_ */
