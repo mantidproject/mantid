@@ -45,9 +45,10 @@ private:
   void applyEnginxFormat();
 
   /// Calculate delta x/y/z from the log files for ENGINX
-  void calculateXYZDelta(const std::string &unit, const Kernel::Property *values);
+  void calculateXYZDelta(const std::string &unit,
+                         const Kernel::Property *values);
 
-  /// Converts XYE data to OPENGENIE strings and number of data points 
+  /// Converts XYE data to OPENGENIE strings and number of data points
   std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();
 
   /// Parses and stores appropriate output logs into the output buffer
