@@ -69,9 +69,9 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Wavelength");
 
     // Test x values, minimum and maximum
-    double minimum_wavelength = output->dataX(2)[0];
+    double minimum_wavelength = output->x(2)[0];
     TS_ASSERT_DELTA(minimum_wavelength, -0.23369886776335402, 1e-6);
-    double maximum_wavelength = output->dataX(2)[1000];
+    double maximum_wavelength = output->x(2)[1000];
     TS_ASSERT_DELTA(maximum_wavelength, 30.784049961143634, 1e-6);
 
     // Remove workspace from the data service.
