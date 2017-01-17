@@ -61,3 +61,29 @@ class SNAP_short(stresstesting.MantidStressTest):
         self.tolerance = 1.0e-2
         # default validation of workspace to processed nexus is right
         return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
+
+class SNAP_short_detcal(stresstesting.MantidStressTest):
+    def skipTests(self):
+        return _skip_test()
+
+    def cleanup(self):
+        do_cleanup()
+        return True
+
+    def requiredFiles(self):
+        files = []
+        files.append("SNAP_34172_event.nxs")
+        return files
+
+    def runTest(self):
+        # run the actual code
+        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.9,-0.004,6',
+                   Calibration='DetCal File', DetCalFilename='SNAP_34172.DetCal',
+                   Normalization='Extracted from Data', PeakClippingWindowSize=7,
+                   SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
+                   SaveData=True, OutputDirectory=getSaveDir())
+
+    def validate(self):
+        self.tolerance = 1.0e-2
+        # default validation of workspace to processed nexus is right
+        return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
