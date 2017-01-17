@@ -50,9 +50,9 @@ bool ILLEnergyTransfer::validate() {
   if (!m_uiForm.rfBackgroundRun->isValid()) {
     uiv.addErrorMessage("Background Run File is invalid.");
   } else {
-    bool ok = true;
-    m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&ok);
-    if ((!ok || m_backScaling <= 0) &&
+    bool isDouble = true;
+    m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&isDouble);
+    if ((!isDouble || m_backScaling <= 0) &&
         !m_uiForm.rfBackgroundRun->getUserInput()
              .toString()
              .toStdString()
@@ -73,12 +73,12 @@ bool ILLEnergyTransfer::validate() {
       uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
                           "Provide comma separated two energy values in meV.");
     } else {
-      bool ok1 = true;
-      m_peakRange[0] = range[0].toDouble(&ok1);
-      bool ok2 = true;
-      m_peakRange[1] = range[1].toDouble(&ok2);
+      bool isDouble1 = true;
+      m_peakRange[0] = range[0].toDouble(&isDouble1);
+      bool isDouble2 = true;
+      m_peakRange[1] = range[1].toDouble(&isDouble2);
 
-      if (!ok1 || !ok2) {
+      if (!isDouble1 || !isDouble2) {
         uiv.addErrorMessage(
             "Calibration Peak Range is invalid. \n"
             "Provide comma separated two energy values in meV.");
@@ -99,12 +99,12 @@ bool ILLEnergyTransfer::validate() {
           "PSD Integration Range is invalid. \n"
           "Provide comma separated two pixel numbers, e.g. 1,128");
     } else {
-      bool ok1 = true;
-      m_pixelRange[0] = range[0].toInt(&ok1);
-      bool ok2 = true;
-      m_pixelRange[1] = range[1].toInt(&ok2);
+      bool isDouble1 = true;
+      m_pixelRange[0] = range[0].toInt(&isDouble1);
+      bool isDouble2 = true;
+      m_pixelRange[1] = range[1].toInt(&isDouble2);
 
-      if (!ok1 || !ok2) {
+      if (!isDouble1 || !isDouble2) {
         uiv.addErrorMessage(
             "PSD Integration Range is invalid. \n"
             "Provide comma separated two pixel numbers, e.g. 1,128");
