@@ -88,7 +88,7 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
-  //   and should not be overriden.
+  //   and should not be overridden (copy is done in MatrixWorkspace ctor).
   // - For cached groupings (for MDWorkspaces), grouping was not copied in the
   //   old implementation either.
 }
