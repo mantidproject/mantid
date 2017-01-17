@@ -5,6 +5,12 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+Facility Updates
+----------------
+
+- Mantid now supports automatic updates to the facilities.xml file in the same way that it does the instrument definitions.  This allows extensions and changes to the list of supported instruments without needing to install a new release of Mantid.
+  - This has been initially put into place to support a data file naming change for Vesuvio, but will help for future changes as well.
+
 Algorithms
 ----------
 

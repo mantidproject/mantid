@@ -1689,24 +1689,31 @@ bool ConfigServiceImpl::addDirectoryifExists(
 void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   clearFacilities();
 
-  //search all of the instrument directories
+  // search all of the instrument directories
   std::vector<std::string> directoryNames = getInstrumentDirectories();
   std::string fileName = "";
   for (const auto &instrDir : directoryNames) {
     fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
 
-    Poco::File facilitiesFile(fileName); 
+    Poco::File facilitiesFile(fileName);
     // stop when you find the first one
     if (facilitiesFile.exists())
       break;
   }
-    
 
   // Set up the DOM parser and parse xml file
   Poco::XML::DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc;
 
   try {
+    if (fileName.empty()) {
+      std::string directoryNamesList =
+          boost::algorithm::join(directoryNames, ", ");
+      throw std::runtime_error(
+          "Could not find a facilities info file! Searched for " +
+          directoryNamesList);
+    }
+
     try {
       pDoc = pParser.parse(fileName);
     } catch (...) {
