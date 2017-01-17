@@ -13,6 +13,7 @@ from mantid.kernel import ConfigService
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
 
+
 class BackgroundTest(unittest.TestCase):
 
     def setUp(self):
@@ -343,7 +344,7 @@ class CrystalFieldTests(unittest.TestCase):
 
         x0, y0 = cf.getSpectrum()
         x1, y1 = cf.getSpectrum(1)
-        # Original test was for FOCUS convention - intensity in barn. 
+        # Original test was for FOCUS convention - intensity in barn.
         # Now use ISIS convention with intensity in milibarn/steradian
         y0 = y0 / c_mbsr
         y1 = y1 / c_mbsr
@@ -479,7 +480,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.10000812804, 4)
         self.assertAlmostEqual(cf.peaks.param[2]['Amplitude'], 0.429808829601*c_mbsr, 2)
 
-
     def test_CrystalFieldFit_multi_spectrum(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -565,7 +565,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertNotEqual(cf.peaks[1].param[3]['PeakCentre'], 0.0)
         self.assertNotEqual(cf.peaks[1].param[3]['FWHM'], 0.0)
         self.assertNotEqual(cf.peaks[1].param[3]['Amplitude'], 0.0)
-
 
     def test_CrystalFieldFit_multi_spectrum_simple_background(self):
         from CrystalField.fitting import makeWorkspace
@@ -686,6 +685,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
         fit.fit()
 
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
@@ -717,9 +717,11 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         cf1 = CrystalField('Ce', 'C2v', B40=-0.02, B42=-0.11, B44=-0.12, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
         cf1.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf1.FixAllPeaks = True
         cf2 = CrystalField('Pr', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0],
                            ToleranceIntensity=6.0, ToleranceEnergy=1.0)
         cf2.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf2.FixAllPeaks = True
         cf = cf1 + cf2
 
         chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws1, InputWorkspace_1=ws2)[1]
@@ -727,6 +729,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
         fit.fit()
 
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
@@ -1273,6 +1276,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
         # Run fit
         fit.fit()
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < 100.0)
 
     def test_monte_carlo_multi_spectrum(self):
@@ -1286,7 +1290,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws2 = makeWorkspace(*origin.getSpectrum(1))
 
         # Define a CrystalField object with parameters slightly shifted.
-        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=9,
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=11,
                           Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
 
         # Set the ties
@@ -1294,10 +1298,11 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
         # Create a fit object
         fit = CrystalFieldFit(cf, InputWorkspace=[ws1, ws2])
-        fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
+        fit.monte_carlo(NSamples=1000, Constraints='20<f0.f1.PeakCentre<45,20<f0.f2.PeakCentre<45')
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertTrue(cf.chi2 > 0.0)
+        self.assertTrue(cf.chi2 < 200.0)
 
     def test_multi_ion_intensity_scaling(self):
         from CrystalField import CrystalField, CrystalFieldFit

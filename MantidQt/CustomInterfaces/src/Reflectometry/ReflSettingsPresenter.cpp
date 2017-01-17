@@ -106,8 +106,10 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
 
   // Add detector limits
   auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty())
+  if (!procInst.empty()) {
+    wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
+  }
 
   return boost::algorithm::join(options, ",");
 }
@@ -154,8 +156,10 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 
   // Add direct beam
   auto dbnr = m_view->getDirectBeam();
-  if (!dbnr.empty())
+  if (!dbnr.empty()) {
+    wrapWithQuotes(dbnr);
     options.push_back("RegionOfDirectBeam=" + dbnr);
+  }
 
   // Add polarisation corrections
   auto polCorr = m_view->getPolarisationCorrections();
@@ -215,8 +219,10 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 
   // Add detector limits
   auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty())
+  if (!procInst.empty()) {
+    wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
+  }
 
   // Add transmission runs
   auto transRuns = this->getTransmissionRuns();

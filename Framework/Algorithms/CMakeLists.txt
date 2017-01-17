@@ -712,6 +712,7 @@ set ( TEST_FILES
 	CreateWorkspaceTest.h
 	CropToComponentTest.h
 	CropWorkspaceTest.h
+	CrossCorrelateTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
 	DeleteLogTest.h
@@ -783,6 +784,7 @@ set ( TEST_FILES
 	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
+	MaskDetectorsIfTest.h
 	MaxEnt/MaxentCalculatorTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h

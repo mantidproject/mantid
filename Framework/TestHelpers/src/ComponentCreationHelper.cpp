@@ -243,25 +243,6 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
   return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * Create a group of two monitors
- */
-boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
-  const int ndets(2);
-  std::vector<boost::shared_ptr<const IDetector>> groupMembers(ndets);
-  for (int i = 0; i < ndets; ++i) {
-    std::ostringstream os;
-    os << "m" << i;
-    auto det = boost::make_shared<Detector>(os.str(), i + 1, nullptr);
-    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
-    det->markAsMonitor();
-    groupMembers[i] = det;
-  }
-  return boost::make_shared<DetectorGroup>(groupMembers);
-}
-
-//----------------------------------------------------------------------------------------------
 Instrument_sptr createTestInstrumentCylindrical(
     int num_banks, const Mantid::Kernel::V3D &sourcePos,
     const Mantid::Kernel::V3D &samplePos, const double cylRadius,
