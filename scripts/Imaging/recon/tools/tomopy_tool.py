@@ -7,6 +7,31 @@ class TomoPyTool(AbstractTool):
     def __init__(self):
         AbstractTool.__init__(self)
         self._tomopy = self.import_self()
+        self._tool_supported_methods = ['art', 'bart', 'fbp', 'gridrec', 'mlem',
+                                        'osem', 'ospml_hybrid', 'ospml_quad', 'pml_hybrid', 'pml_quad', 'sirt']
+
+    def check_algorithm_compatibility(self, config):
+        algorithm = config.func.algorithm
+        if algorithm not in self._tool_supported_methods:
+            raise ValueError("The selected algorithm {0} is not supported by TomoPy.".format(algorithm))
+
+    def find_center(self, **kwargs):
+        # just forward to tomopy
+        return self._tomopy.find_center(**kwargs)
+
+    def import_self(self):
+        try:
+            import tomopy
+            import tomopy.prep
+            import tomopy.recon
+            import tomopy.misc
+            import tomopy.io
+
+        except ImportError as exc:
+            raise ImportError("Could not import the tomopy package and its subpackages. Details: {0}".
+                              format(exc))
+
+        return tomopy
 
     def run_reconstruct(self, data, config):
         import numpy as np
@@ -17,7 +42,7 @@ class TomoPyTool(AbstractTool):
         h.check_data_stack(data)
 
         num_proj = data.shape[0]
-        inc = float(config.func.max_angle) / (num_proj - 1)
+        inc = float(config.func.max_angle) / num_proj
 
         proj_angles = np.arange(0, num_proj * inc, inc)
 
@@ -38,7 +63,7 @@ class TomoPyTool(AbstractTool):
                 "number of iterations: {1}...".format(alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles, center=cor,
-                                     algorithm=alg, num_iter=num_iter)  # , filter_name='parzen')
+                                       algorithm=alg, num_iter=num_iter)  # , filter_name='parzen')
 
         else:  # run the non-iterative algorithms
             h.pstart(
@@ -52,21 +77,3 @@ class TomoPyTool(AbstractTool):
             format(recon.shape, recon.dtype))
 
         return recon
-
-    def find_center(self, **kwargs):
-        # just forward to tomopy
-        return self._tomopy.find_center(**kwargs)
-
-    def import_self(self):
-        try:
-            import tomopy
-            import tomopy.prep
-            import tomopy.recon
-            import tomopy.misc
-            import tomopy.io
-
-        except ImportError as exc:
-            raise ImportError("Could not import the tomopy package and its subpackages. Details: {0}".
-                              format(exc))
-
-        return tomopy

@@ -98,7 +98,7 @@ class FunctionalConfig(object):
             "-i", "--input-path", required=True, type=str, help="Input directory", default=self.input_path)
 
         grp_func.add_argument(
-            "-iflat",
+            "-l",
             "--input-path-flat",
             required=False,
             default=self.input_path_flat,
@@ -106,7 +106,7 @@ class FunctionalConfig(object):
             help="Input directory for flat images")
 
         grp_func.add_argument(
-            "-idark",
+            "-k",
             "--input-path-dark",
             required=False,
             default=self.input_path_dark,
@@ -259,7 +259,7 @@ class FunctionalConfig(object):
             type=str,
             default=self.algorithm,
             help="Reconstruction algorithm (tool dependent).\nAvailable:\nTomoPy: {'art', 'bart', 'fbp', 'gridrec', "
-                 "'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', pml_hybrid', 'pml_quad', 'sirt'}.")
+                 "'mlem', 'osem', 'ospml_hybrid', 'ospml_quad', 'pml_hybrid', 'pml_quad', 'sirt'}.")
 
         grp_recon.add_argument(
             "-n",
@@ -322,7 +322,7 @@ class FunctionalConfig(object):
 
         self.verbosity = args.verbosity
         self.no_crash_on_failed_import = args.no_crash_on_failed_import
-        self.overwrite_all=args.overwrite_all
+        self.overwrite_all = args.overwrite_all
 
         # grab tools options
         self.tool = args.tool

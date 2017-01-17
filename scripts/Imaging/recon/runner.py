@@ -25,6 +25,7 @@ def execute(config, cmd_line=None):
 
     # import early to check if tool is available
     tool = load_tool(config, h)
+    tool.check_algorithm_compatibility(config)
 
     sample, flat, dark = load_data(config, h)
 
