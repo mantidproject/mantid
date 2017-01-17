@@ -146,6 +146,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 *  @return index number of the first bin to include in the calculation
 */
 size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
+                                 const SpectrumInfo &spectrumInfo,
                                  const double RCut, const double WCut,
                                  const size_t wsInd) const {
   double l_WCutOver = 0.0;
@@ -161,7 +162,7 @@ size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
   }
   // get the distance of between this detector and the origin, which should be
   // the along the beam center
-  const V3D posOnBank = dataWS->getDetector(wsInd)->getPos();
+  const V3D posOnBank = spectrumInfo.position(wsInd);
   double R = (posOnBank.X() * posOnBank.X()) + (posOnBank.Y() * posOnBank.Y());
   R = std::sqrt(R);
 
