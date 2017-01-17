@@ -131,6 +131,29 @@ class DirectILLReductionTest(unittest.TestCase):
     def tearDownClass(cls):
         mtd.clear()
 
+    def test_component_mask(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Empty Container',
+            'IndexType': 'Workspace Index',
+            'Monitor': '0',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'MaskedComponents': 'tube_1',  # Mask workspace indices 0-31
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        outWS = mtd[outWSName]
+        self._checkAlgorithmsInHistory(outWS, 'MaskDetectors')
+        nHistograms = outWS.getNumberHistograms()
+        for i in range(int(nHistograms / 2)):
+            self.assertTrue(outWS.getDetector(i).isMasked())
+        for i in range(int(nHistograms / 2), nHistograms):
+            self.assertFalse(outWS.getDetector(i).isMasked())
+        DeleteWorkspace(outWSName)
+
     def test_det_diagnostics_bad_elastic_intensity(self):
         nHistograms = self._testIN5WS.getNumberHistograms()
         noPeakIndices = [1, int(nHistograms / 6)]
@@ -478,29 +501,6 @@ class DirectILLReductionTest(unittest.TestCase):
         self._checkAlgorithmsInHistory(outWS, 'ComputeCalibrationCoefVan')
         for i in range(outWS.getNumberHistograms()):
             self.assertAlmostEqual(outWS.readY(i)[0], 0.000497, 5)
-        DeleteWorkspace(outWSName)
-
-    def test_component_mask(self):
-        outWSName = 'outWS'
-        algProperties = {
-            'InputWorkspace': self._testIN5WS,
-            'OutputWorkspace': outWSName,
-            'ReductionType': 'Empty Container',
-            'IndexType': 'Workspace Index',
-            'Monitor': '0',
-            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
-            'Diagnostics': 'No Detector Diagnostics',
-            'MaskedComponents': 'tube_1',  # Mask workspace indices 0-31
-            'rethrow': True
-        }
-        run_algorithm('DirectILLReduction', **algProperties)
-        outWS = mtd[outWSName]
-        self._checkAlgorithmsInHistory(outWS, 'MaskDetectors')
-        nHistograms = outWS.getNumberHistograms()
-        for i in range(int(nHistograms / 2)):
-            self.assertTrue(outWS.getDetector(i).isMasked())
-        for i in range(int(nHistograms / 2), nHistograms):
-            self.assertFalse(outWS.getDetector(i).isMasked())
         DeleteWorkspace(outWSName)
 
     def _checkAlgorithmsInHistory(self, ws, *arg):
