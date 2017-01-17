@@ -460,7 +460,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             ws_list = self._all_runs[label][energy]
             size = len(self._all_runs[label][energy])
 
-            wsname = groupname + '_' + str(energy)
+            wsname = groupname.split('_')[0] + '_' + str(energy) + '_' + groupname.split('_')[1]
 
             togroup.append(wsname)
             nspectra = mtd[ws_list[0]].getNumberHistograms()
