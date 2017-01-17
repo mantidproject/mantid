@@ -478,7 +478,7 @@ void ReflectometryReductionOneAuto2::populateTransmissionProperties(
 
 /** Rebin and scale a workspace in Q.
 *
-* @param inpuwWS :: the workspace in Q
+* @param inputWS :: the workspace in Q
 * @param theta :: the angle of this run
 * @param params :: [output] rebin parameters
 * @return :: the output workspace
