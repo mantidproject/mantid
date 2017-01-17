@@ -18,10 +18,10 @@ workspaces prior to passing them to this algorithm.
 
 The algorithm expects pairs of :literal:`StartOverlaps` and
 :literal:`EndOverlaps` values. The order in which these are provided determines
-the pairing. There should be N entries in each of these lists, where N = 1 - (No
-of workspaces to stitch). StartOverlaps and EndOverlaps are in the same units as
-the X-axis for the workspace and are optional. For each pair of these values, the
-:literal:`StartOverlaps` value cannot exceed its corresponding
+the pairing. There should be N entries in each of these lists, where N = 1 - 
+(No. of workspaces to stitch). StartOverlaps and EndOverlaps are in the same
+units as the X-axis for the workspace and are optional. For each pair of these
+values, the :literal:`StartOverlaps` value cannot exceed its corresponding
 :literal:`EndOverlaps` value. Furthermore, if either the start or end value is
 outside the range of X-axis intersection, they will be forcibly changed to the
 intersection min and max respectively.
@@ -49,34 +49,35 @@ The algorithm workflow is as follows:
    workspaces or not. The algorithm handles matrix workspaces differently from
    group workspaces.
 #. If matrix workspaces are supplied, the algorithm simply iterates over each
-   workspace and calls the :literal:`Stitch1D` algorithm, each RHS workspace to
-   the LHS workspace to form a single stitched workspace (LHS to RHS if
-   ScaleRHSWorkspace is set to false). The resultant workspace and its scale
-   factor are outputted.
+   workspace and calls the :literal:`Stitch1D` algorithm. This stitches each RHS
+   workspace to the LHS workspace to form a single stitched workspace (LHS to
+   RHS if ScaleRHSWorkspace is set to false). The resultant workspace and its
+   scale factor are outputted.
 #. If group workspaces are supplied, the algorithm checks whether or not to
    scale workspaces using scale factors from a specific period (given by
-   `ScaleFactorFromPeriod`). This is done if either
+   :literal:`ScaleFactorFromPeriod`). This is done if either
    :literal:`UseManualScaleFactor` is false, or :literal:`UseManualScaleFactor`
    is true and :literal:`ManualScaleFactor` is set to its default value.
-#. If not using `ScaleFactorFromPeriod`, the algorithm collects the workspaces
-   belonging to each period across all groups and calls :literal:`Stitch1DMany`
-   for each period. As a selection of non-group workspaces are passed to it,
-   this essential repeats step 2 for each period. Each of the resultant stitched
-   workspaces stored in a vector while each list of out scale factors are
-   appended to each other and outputted.
+#. If not using :literal:`ScaleFactorFromPeriod`, the algorithm collects the
+   workspaces belonging to each period across all groups and calls
+   :literal:`Stitch1DMany` for each period. As a selection of non-group
+   workspaces are passed to it, this essential repeats step 2 for each period.
+   Each of the resultant stitched workspaces stored in a vector while each list
+   of out scale factors are appended to each other and outputted.
 #. The vector of output stitched workspaces are passed to
    :literal:`GroupWorkspaces`, which groups the workspaces into a single
    workspace, which is then outputted.
-#. If using `ScaleFactorFromPeriod`, the algorithm calls :literal:`Stitch1DMany`
-   for a period specified by :literal:`ScaleFactorFromPeriod` and passes the
-   same input workspaces. This returns a vector of period scale factors obtained
-   by stitching workspaces from a specific period.
+#. If using :literal:`ScaleFactorFromPeriod`, the algorithm calls
+   :literal:`Stitch1DMany` for a period specified by
+   :literal:`ScaleFactorFromPeriod` and passes the same input workspaces. This
+   returns a vector of period scale factors obtained by stitching workspaces
+   from a specific period.
 #. The algorithm iterates over each workspace for each period across all groups
    and calls :literal:`Stitch1D`, passing the scale factor from period scale
    factors for each period index. Like in step 4, the stitched workspaces are
    stored in a vector while the out scale factors are appended and outputted.
-   Finally step 5 is called, grouping the workspaces into a single one that is
-   outputted.
+   Finally step 5 is performed, grouping the workspaces into a single one that
+   is outputted.
 
 .. diagram:: Stitch1DMany-v1_wkflw.dot
 
