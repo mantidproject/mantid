@@ -88,7 +88,7 @@ class SimpleAPILoadTest(unittest.TestCase):
                 self.fail("Dialog function raised the correct exception type but the message was wrong")
 
     def _do_name_check(self, wkspace, expected_name):
-        self.assertEqual(wkspace.getName(), expected_name)
+        self.assertEqual(wkspace.name(), expected_name)
         self.assertTrue(expected_name in mtd)
 
 if __name__ == '__main__':

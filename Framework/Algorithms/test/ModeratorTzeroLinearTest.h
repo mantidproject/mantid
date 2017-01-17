@@ -3,7 +3,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
-#include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidHistogramData/LinearGenerator.h"

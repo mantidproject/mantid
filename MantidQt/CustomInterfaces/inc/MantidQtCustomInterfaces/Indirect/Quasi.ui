@@ -137,7 +137,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwFixWidthDat" native="true">
+         <widget class="MantidQt::API::MWRunFiles" name="mwFixWidthDat" native="true">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -405,9 +405,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>

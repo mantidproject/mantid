@@ -618,7 +618,7 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
  */
 void validateToken(const std::string &token) {
   // Each token must be non-empty.
-  if (token.size() == 0)
+  if (token.empty())
     throw std::runtime_error("A comma-separated token is empty.");
 
   // Each token must begin and end with a numeric character.

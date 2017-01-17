@@ -83,11 +83,13 @@ class ExtractMonitorsTest(unittest.TestCase):
         self.assertEquals(monitors.getNumberHistograms(), 3)
         self.assertEquals(detectors.getMonitorWorkspace().name(), "mon")
 
+        spectrumInfo = monitors.spectrumInfo()
         for i in range(monitors.getNumberHistograms()):
-            self.assertTrue(monitors.getDetector(i).isMonitor())
+            self.assertTrue(spectrumInfo.isMonitor(i))
 
+        spectrumInfo = detectors.spectrumInfo()
         for i in range(detectors.getNumberHistograms()):
-            self.assertFalse(detectors.getDetector(i).isMonitor())
+            self.assertFalse(spectrumInfo.isMonitor(i))
 
 if __name__=="__main__":
     unittest.main()

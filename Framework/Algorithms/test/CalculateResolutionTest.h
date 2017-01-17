@@ -24,7 +24,7 @@ public:
 
     CalculateResolution alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace", ws->name());
+    alg.setPropertyValue("Workspace", ws->getName());
     alg.setProperty("TwoTheta", 1.0);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -39,7 +39,7 @@ public:
 
     CalculateResolution alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace", ws->name());
+    alg.setPropertyValue("Workspace", ws->getName());
     alg.setProperty("TwoTheta", 1.0);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

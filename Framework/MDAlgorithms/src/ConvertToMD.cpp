@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -307,18 +308,15 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   // found detector which is not a monitor to get proper bin boundaries.
   size_t spectra_index(0);
   bool dector_found(false);
+  const auto &spectrumInfo = m_InWS2D->spectrumInfo();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    try {
-      auto det = m_InWS2D->getDetector(i);
-      if (!det->isMonitor()) {
-        spectra_index = i;
-        dector_found = true;
-        g_log.debug() << "Using spectra N " << i << " as the source of the bin "
-                                                    "boundaries for the "
-                                                    "resolution corrections \n";
-        break;
-      }
-    } catch (...) {
+    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMonitor(i)) {
+      spectra_index = i;
+      dector_found = true;
+      g_log.debug() << "Using spectra N " << i
+                    << " as the source of the bin "
+                       "boundaries for the resolution corrections \n";
+      break;
     }
   }
   if (!dector_found)
@@ -357,10 +355,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   auto mapping = boost::make_shared<det2group_map>();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     const auto &dets = m_InWS2D->getSpectrum(i).getDetectorIDs();
-    if (!dets.empty()) {
-      mapping->emplace(*dets.begin(),
-                       std::vector<detid_t>(dets.begin(), dets.end()));
-    }
+    mapping->emplace(*dets.begin(), dets);
   }
 
   // The last experiment info should always be the one that refers

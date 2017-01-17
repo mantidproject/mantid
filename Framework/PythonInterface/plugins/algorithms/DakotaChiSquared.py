@@ -82,10 +82,10 @@ class DakotaChiSquared(PythonAlgorithm):
         self.setProperty("ChiSquared",chisquared)
 
             #cleanup
-        mantid.simpleapi.DeleteWorkspace(__w1.getName())
-        mantid.simpleapi.DeleteWorkspace(__w2.getName())
-        mantid.simpleapi.DeleteWorkspace(__soe2.getName())
+        mantid.simpleapi.DeleteWorkspace(__w1.name())
+        mantid.simpleapi.DeleteWorkspace(__w2.name())
+        mantid.simpleapi.DeleteWorkspace(__soe2.name())
         if len(soeName)==0:
-            mantid.simpleapi.DeleteWorkspace(__soe.getName())
+            mantid.simpleapi.DeleteWorkspace(__soe.name())
 
 AlgorithmFactory.subscribe(DakotaChiSquared)

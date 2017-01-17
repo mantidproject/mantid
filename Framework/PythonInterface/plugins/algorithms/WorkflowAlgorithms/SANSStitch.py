@@ -178,7 +178,7 @@ class SANSStitch(DataProcessorAlgorithm):
 
         if ws.getNumberHistograms() != 1:
             # Strip zeros is only possible on 1D workspaces
-            return
+            return ws
 
         y_vals = ws.readY(0)
         length = len(y_vals)

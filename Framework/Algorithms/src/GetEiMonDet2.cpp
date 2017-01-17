@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -21,6 +22,7 @@ using namespace Mantid::PhysicalConstants;
 namespace Mantid {
 namespace Algorithms {
 
+namespace {
 /** A private namespace to store string constants dealing with
  *  tables returned by the FindEPP algorithm.
  */
@@ -38,11 +40,11 @@ const static std::string FIT_STATUS_SUCCESS("success");
  */
 namespace IndexTypes {
 /// Tag for detector ids
-const static std::string DETECTOR_ID("DetectorID");
+const static std::string DETECTOR_ID("Detector ID");
 /// Tag for spectrum numbers
-const static std::string SPECTRUM_NUMBER("SpectrumNumber");
+const static std::string SPECTRUM_NUMBER("Spectrum Number");
 /// Tag for workspace indices
-const static std::string WORKSPACE_INDEX("WorkspaceIndex");
+const static std::string WORKSPACE_INDEX("Workspace Index");
 }
 
 /** A private namespace holding the property names of
@@ -70,6 +72,14 @@ const static std::string NOMINAL_ENERGY("NominalIncidentEnergy");
 /// Name of the neutron pulse interval property
 const static std::string PULSE_INTERVAL("PulseInterval");
 }
+
+/** A private namespace holding names for sample log entries.
+ */
+namespace SampleLogs {
+/// Name of the pulse interval sample log
+const static std::string PULSE_INTERVAL("pulse_interval");
+}
+} // anonymous namespace
 
 // Register the algorithm into the algorithm factory.
 DECLARE_ALGORITHM(GetEiMonDet2)
@@ -123,7 +133,8 @@ void GetEiMonDet2::init() {
   declareProperty(PropertyNames::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
-                  "Interval between neutron pulses, in microseconds.");
+                  "Interval between neutron pulses, in microseconds. Taken "
+                  "from the sample logs, if not specified.");
   declareProperty(
       PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive,
       "Incident energy guess. Taken from the sample logs, if not specified.");
@@ -198,6 +209,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   double distanceSum = 0;
   double eppSum = 0;
   size_t n = 0;
+  auto &spectrumInfo = m_detectorWs->spectrumInfo();
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
@@ -210,17 +222,16 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
     }
     if (fitStatusColumn->cell<std::string>(index) ==
         EPPTableLiterals::FIT_STATUS_SUCCESS) {
-      const auto detector = m_detectorWs->getDetector(index);
-      if (!detector) {
+      if (!spectrumInfo.hasDetectors(index)) {
         throw std::runtime_error("No detector specified by " +
                                  PropertyNames::DETECTORS + " found");
       }
-      if (detector->isMonitor()) {
+      if (spectrumInfo.isMonitor(index)) {
         g_log.warning() << "Workspace index " << index
                         << " should be detector, but is marked as monitor.\n";
       }
-      if (!detector->isMasked()) {
-        const double d = detector->getDistance(*sample);
+      if (!spectrumInfo.isMasked(index)) {
+        const double d = spectrumInfo.detector(index).getDistance(*sample);
         distanceSum += d;
         const double epp = (*peakPositionColumn)[index];
         eppSum += epp;
@@ -274,10 +285,17 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
   g_log.information() << "Nominal time-of-flight: " << nominalTimeOfFlight
                       << ".\n";
   // Check if the obtained time-of-flight makes any sense.
-  const double energyTolerance = 20; // %'s of the nominal energy
+  const double energyTolerance = 0.2; // As a fraction of nominal energy.
   const double toleranceLimit =
       1 / std::sqrt(1 + energyTolerance) * nominalTimeOfFlight;
-  const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
+  double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
+  if (pulseInterval == EMPTY_DBL()) {
+    if (m_detectorWs->run().hasProperty(SampleLogs::PULSE_INTERVAL)) {
+      pulseInterval = m_detectorWs->run().getPropertyAsSingleValue(
+          SampleLogs::PULSE_INTERVAL);
+      pulseInterval *= 1e6; // To microseconds.
+    }
+  }
   const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;
   const double lowerTimeLimit =
       toleranceLimit > pulseIntervalLimit ? toleranceLimit : pulseIntervalLimit;
@@ -297,8 +315,8 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
     // Neutrons hit the detectors in a later frame.
     interruption_point();
     if (pulseInterval == EMPTY_DBL()) {
-      throw std::runtime_error("No " + PropertyNames::PULSE_INTERVAL +
-                               " specified");
+      throw std::runtime_error(PropertyNames::PULSE_INTERVAL +
+                               " not specified nor found in sample logs");
     }
     ++delayFrameCount;
     timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
@@ -337,16 +355,17 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
     throw std::runtime_error("No successful monitor fit found in " +
                              PropertyNames::MONITOR_EPP_TABLE);
   }
-  const auto monitor = m_monitorWs->getDetector(monitorIndex);
-  if (monitor->isMasked()) {
+  auto &spectrumInfo = m_monitorWs->spectrumInfo();
+  if (spectrumInfo.isMasked(monitorIndex)) {
     throw std::runtime_error("Monitor spectrum is masked");
   }
-  if (!monitor->isMonitor()) {
+  if (!spectrumInfo.isMonitor(monitorIndex)) {
     g_log.warning() << "The monitor spectrum is not actually marked "
                     << "as monitor.\n";
   }
   const auto sample = m_detectorWs->getInstrument()->getSample();
-  monitorToSampleDistance = monitor->getDistance(*sample);
+  monitorToSampleDistance =
+      spectrumInfo.position(monitorIndex).distance(sample->getPos());
   g_log.information() << "Monitor-to-sample distance: "
                       << monitorToSampleDistance << ".\n";
 

@@ -158,9 +158,13 @@ void FunctionGenerator::unfix(size_t i) {
 /// Return parameter index from a parameter reference.
 size_t
 FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
-  auto index = m_source->getParameterIndex(ref);
-  if (index < m_nOwnParams) {
-    return index;
+  if (ref.getFunction() == this) {
+    auto index = ref.getIndex();
+    auto np = nParams();
+    if (index < np) {
+      return index;
+    }
+    return np;
   }
   checkTargetFunction();
   return m_target->getParameterIndex(ref) + m_nOwnParams;
@@ -265,6 +269,8 @@ void FunctionGenerator::addTie(API::ParameterTie *tie) {
     m_source->addTie(tie);
   } else {
     checkTargetFunction();
+    tie->reset(m_target.get(), tie->getIndex() - m_nOwnParams,
+               tie->isDefault());
     m_target->addTie(tie);
   }
 }

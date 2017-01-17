@@ -84,6 +84,7 @@ set ( TEST_PY_FILES
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
+  SANSStitchTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SaveNexusPDTest.py

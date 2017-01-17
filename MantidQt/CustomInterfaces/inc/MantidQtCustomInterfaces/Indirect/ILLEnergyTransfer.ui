@@ -42,7 +42,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfInput" native="true">
+       <widget class="MantidQt::API::MWRunFiles" name="rfInput" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -357,7 +357,7 @@
            <number>0</number>
           </property>
           <item alignment="Qt::AlignVCenter">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="rfMapFile" native="true">
             <property name="visible">
              <bool>false</bool>
             </property>
@@ -447,7 +447,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfBackgroundRun" native="true">
+       <widget class="MantidQt::API::MWRunFiles" name="rfBackgroundRun" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -536,7 +536,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalibrationRun" native="true">
+       <widget class="MantidQt::API::MWRunFiles" name="rfCalibrationRun" native="true">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -605,7 +605,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="3">
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfAlignmentRun" native="true">
+       <widget class="MantidQt::API::MWRunFiles" name="rfAlignmentRun" native="true">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -798,9 +798,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

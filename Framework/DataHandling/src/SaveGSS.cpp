@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -113,7 +114,7 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
   Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
   if (!det) {
     std::stringstream errss;
-    errss << "Workspace " << wksp->name()
+    errss << "Workspace " << wksp->getName()
           << " does not have detector with spectrum " << spectrum;
     throw std::runtime_error(errss.str());
   }
@@ -208,19 +209,17 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   int nHist = static_cast<int>(inputWS->getNumberHistograms());
   Progress p(this, 0.0, 1.0, nHist);
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int iws = 0; iws < nHist; iws++) {
     // Determine whether to skip the spectrum due to being masked
     if (has_instrument) {
-      try {
-        Geometry::IDetector_const_sptr det =
-            inputWS->getDetector(static_cast<size_t>(iws));
-        if (det->isMasked())
-          continue;
-      } catch (const Kernel::Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(iws)) {
         has_instrument = false;
         g_log.warning() << "There is no detector associated with spectrum "
                         << iws
                         << ". Workspace is treated as NO-INSTRUMENT case. \n";
+      } else if (spectrumInfo.isMasked(iws)) {
+        continue;
       }
     }
 

@@ -194,6 +194,10 @@ void GenericDataProcessorPresenter::process() {
 
   const auto items = m_manager->selectedData(true);
 
+  // Don't bother continuing if there are no items to process
+  if (items.size() == 0)
+    return;
+
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
   int maxProgress = (int)(items.size());
@@ -393,8 +397,9 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(preprocessor.name());
   alg->initialize();
-  alg->setProperty(preprocessor.lhsProperty(),
-                   loadRun(runs[0], instrument, preprocessor.prefix())->name());
+  alg->setProperty(
+      preprocessor.lhsProperty(),
+      loadRun(runs[0], instrument, preprocessor.prefix())->getName());
   alg->setProperty(preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
@@ -415,7 +420,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       alg->setProperty(
           preprocessor.rhsProperty(),
-          loadRun(*runIt, instrument, preprocessor.prefix())->name());
+          loadRun(*runIt, instrument, preprocessor.prefix())->getName());
       alg->execute();
 
       if (runIt != --runs.end()) {
@@ -604,7 +609,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        alg->setProperty(propertyName, runWS->name());
+        alg->setProperty(propertyName, runWS->getName());
       }
     } else {
       // No pre-processing needed
