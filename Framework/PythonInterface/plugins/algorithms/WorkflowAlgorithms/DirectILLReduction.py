@@ -1573,6 +1573,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
             issues[_PROP_INPUT_FILE] = \
                 'Must give either an input file or an input workspace.'
         reductionType = self.getProperty(_PROP_REDUCTION_TYPE).value
+        if reductionType in [_REDUCTION_TYPE_SAMPLE, _REDUCTION_TYPE_VANA]:
+            if self.getProperty(_PROP_DETS_AT_L2).isDefault:
+                issues[_PROP_DETS_AT_L2] = \
+                    'Detectors at L2 distance have to be specified when ' + \
+                    _PROP_REDUCTION_TYPE + ' is ' + _REDUCTION_TYPE_VANA + \
+                    ' or ' + _REDUCTION_TYPE_SAMPLE + '.'
         if reductionType == _REDUCTION_TYPE_SAMPLE:
             if self.getProperty(_PROP_REBINNING_PARAMS_Q).isDefault:
                 issues[_PROP_REBINNING_PARAMS_Q] = _PROP_REBINNING_PARAMS_Q + \
@@ -1796,10 +1802,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                    ' given. TOF axis will not be adjusted.')
                 return mainWS
             index = mainWS.run().getLogData('Detector.elasticpeak').value
+        indexType = self.getProperty(_PROP_INDEX_TYPE).value
+        detectorsAtL2 = self.getProperty(_PROP_DETS_AT_L2).value
+        detectorsAtL2 = self._convertListToWorkspaceIndices(detectorsAtL2,
+                                                            mainWS)
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
-                                     IndexType='Workspace Index',
-                                     ReferenceSpectra='0',
+                                     IndexType=indexType,
+                                     ReferenceSpectra=detectorsAtL2,
                                      ElasticBinIndex=index,
                                      EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)

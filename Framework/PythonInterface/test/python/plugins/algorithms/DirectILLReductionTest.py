@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import (CloneWorkspace, CreateWorkspace, DeleteWorkspace,
-                              LoadEmptyInstrument, MaskDetectors, mtd,
-                              RemoveMaskedSpectra)
+from mantid.simpleapi import (AddSampleLog, CloneWorkspace, CreateWorkspace,
+                              DeleteWorkspace, LoadEmptyInstrument,
+                              MaskDetectors, mtd, RemoveMaskedSpectra)
 import numpy
 import numpy.testing
 from scipy import constants
@@ -34,8 +34,8 @@ def _fillTemplateWorkspace(templateWS):
     E_i = 23.0
     nBins = 128
     binWidth = 2.63
-    elasticIndex = nBins / 3
-    monitorElasticIndex = nBins / 2
+    elasticIndex = int(nBins / 3)
+    monitorElasticIndex = int(nBins / 2)
     xs = numpy.empty(nHistograms*(nBins+1))
     ys = numpy.empty(nHistograms*nBins)
     es = numpy.empty(nHistograms*nBins)
@@ -77,11 +77,29 @@ def _fillTemplateWorkspace(templateWS):
                          NSpec=nHistograms,
                          ParentWorkspace=templateWS)
     ws.getAxis(0).setUnit('TOF')
-    ws.run().addProperty('Ei', E_i, True)
-    ws.run().addProperty('wavelength', float(_wavelength(E_i)), True)
+    AddSampleLog(Workspace=ws,
+                 LogName='Ei',
+                 LogText=str(E_i),
+                 LogType='Number',
+                 NumberType='Double')
+    AddSampleLog(Workspace=ws,
+                 LogName='wavelength',
+                 LogText=str(float(_wavelength(E_i))),
+                 LogType='Number',
+                 NumberType='Double')
+    
     pulseInterval = \
         tofMonitorDetector + (monitorElasticIndex - elasticIndex) * binWidth
-    ws.run().addProperty('pulse_interval', float(pulseInterval * 1e-6), True)
+    AddSampleLog(Workspace=ws,
+                 LogName='pulse_interval',
+                 LogText=str(float(pulseInterval * 1e-6)),
+                 LogType='Number',
+                 NumberType='Double')
+    AddSampleLog(Workspace=ws,
+                 LogName='Detector.elasticpeak',
+                 LogText=str(elasticIndex),
+                 LogType='Number',
+                 NumberType='Int')
     return ws
 
 
@@ -108,8 +126,6 @@ class DirectILLReductionTest(unittest.TestCase):
             RemoveMaskedSpectra(InputWorkspace=cls._in5WStemplate,
                                 OutputWorkspace=cls._in5WStemplate)
         cls._in5WStemplate = _fillTemplateWorkspace(cls._in5WStemplate)
-        cls._in5WStemplate.mutableRun().addProperty('Detector.elasticpeak', 42,
-                                                    True)
 
     @classmethod
     def tearDownClass(cls):
@@ -261,6 +277,8 @@ class DirectILLReductionTest(unittest.TestCase):
             'OutputWorkspace': outWSName,
             'Cleanup': 'Keep Intermediate Workspaces',
             'ReductionType': 'Vanadium',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
             'Normalisation': 'No Normalisation',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
@@ -280,6 +298,8 @@ class DirectILLReductionTest(unittest.TestCase):
             'Cleanup': 'Keep Intermediate Workspaces',
             'ReductionType': 'Vanadium',
             'Normalisation': 'No Normalisation',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EmptyContainerWorkspace': outECWSName,
@@ -330,6 +350,8 @@ class DirectILLReductionTest(unittest.TestCase):
             'Cleanup': 'Delete Intermediate Workspaces',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
             'EnergyRebinningMode': 'Manual Rebinning',
             'EnergyRebinningParams': '{0}, {1}, {2}'.format(rebinningBegin,
                                                             binWidth,
@@ -370,6 +392,8 @@ class DirectILLReductionTest(unittest.TestCase):
             'OutputWorkspace': outWSName,
             'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
@@ -393,6 +417,8 @@ class DirectILLReductionTest(unittest.TestCase):
             'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Median Bin Width',
             'QRebinningParams' : '0, 0.1, 10.0',
@@ -442,6 +468,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'ReductionType': 'Vanadium',
             'IndexType': 'Workspace Index',
             'Monitor': '0',
+            'DetectorsAtL2': '12, 38',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'rethrow': True
