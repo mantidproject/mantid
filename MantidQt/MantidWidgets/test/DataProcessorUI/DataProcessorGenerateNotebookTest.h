@@ -122,17 +122,10 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
     const std::string result[] = {
-        "{",
-        "   \"metadata\" : {",
-        "      \"name\" : \"Mantid Notebook\"",
-        "   },",
-        "   \"nbformat\" : 3,",
-        "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [",
-        "      {",
-        "         \"cells\" : [",
-        "            {",
-        "               \"cell_type\" : \"markdown\",",
+        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
+        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
+        "   \"worksheets\" : [", "      {", "         \"cells\" : [",
+        "            {", "               \"cell_type\" : \"markdown\",",
     };
 
     // Check that the first 10 lines are output as expected
@@ -225,8 +218,7 @@ public:
         "0 | 12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | ",
         "0 | 12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ",
         "1 | 24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | ",
-        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ",
-        ""};
+        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ", ""};
 
     int i = 0;
     for (const auto &line : notebookLines) {
@@ -285,8 +277,7 @@ public:
 
     // The python code that does the loading
     const std::string result[] = {
-        "RUN1 = Load(Filename = 'INST_RUN1')",
-        "RUN1_RUN2_RUN3 = RUN1",
+        "RUN1 = Load(Filename = 'INST_RUN1')", "RUN1_RUN2_RUN3 = RUN1",
         "RUN2 = Load(Filename = 'INST_RUN2')",
         "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
         "InputWorkspace2 = 'RUN2', Property1 = 1, Property2 = 2)",
@@ -370,8 +361,7 @@ public:
                         userPreProcessingOptions, "");
 
     const std::string result[] = {
-        "RUN_1000 = Load(Filename = 'INST1000')",
-        "RUN_1000_1001 = RUN_1000",
+        "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
         "RUN_1001 = Load(Filename = 'INST1001')",
         "RUN_1000_1001 = Plus(LHSWorkspace = 'RUN_1000_1001', RHSWorkspace = "
         "'RUN_1001', Property=prop)",
