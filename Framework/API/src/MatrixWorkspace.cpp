@@ -78,6 +78,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   // ExperimentInfo just kept a shared_ptr to the same map as in other, which
   // is not enough as soon as the maps in one of the workspaces it edited.
   instrumentParameters();
+  setNumberOfDetectorGroups(other.getNumberHistograms());
 }
 
 /// Destructor

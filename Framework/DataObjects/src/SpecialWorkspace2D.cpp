@@ -58,6 +58,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
  */
 SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   this->init(parent->getNumberHistograms(), 1, 1);
+  setNumberOfDetectorGroups(getNumberHistograms());
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
