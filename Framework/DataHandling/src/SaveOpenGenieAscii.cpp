@@ -63,35 +63,40 @@ void SaveOpenGenieAscii::exec() {
   // estimate as some logs are not included whilst some other params are.
   m_outputVector.reserve(m_inputWS->run().getLogData().size());
 
-  // Progress progress(this, 0, 1, nBins);
+  // There are 5 main steps below, whilst this doesn't weigh in the processing
+  // required it breaks down the algorithm nicely for the moment
+  const int numOfSteps = 5; 
+  Progress progressBar(this, 0, 1, numOfSteps);
+
+  const std::string formatType = getProperty("OpenGenieFormat");
+  if (formatType == "ENGIN-X Format") {
+	  progressBar.report("Generating ENGINX header");
+	  applyEnginxFormat();
+  }
+  else {
+	  const std::string err_msg("Unrecognized format \"" + formatType + "\"");
+	  throw std::runtime_error(err_msg);
+  }
 
   // store common workspace properties
+  progressBar.report("Processing workspace information");
   storeWorkspaceInformation();
 
   // store x, y, e to vector
+  progressBar.report("Processing workspace data");
   parseWorkspaceData();
-
-  // get all the sample in workspace
+  
+  progressBar.report("Processing log data");
   getSampleLogs();
-
-  // Getting the format property
-  std::string formatType = getProperty("OpenGenieFormat");
-  if (formatType == "ENGIN-X Format") {
-    // Apply EnginX format if selected
-    applyEnginxFormat();
-  } else {
-    std::stringstream msg;
-    msg << "Unrecognized format \"" << formatType << "\"";
-    throw std::runtime_error(msg.str());
-  }
 
   auto outputStream = openFileStream();
 
-  // write out all data
+  progressBar.report("Writing to file");
   writeDataToFile(outputStream);
   outputStream.close();
 
-  // progress.report();
+  // Indicate we have finished
+  progressBar.report();
 }
 
 /**
