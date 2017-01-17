@@ -884,7 +884,8 @@ def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
                                      OutputWorkspace=tofAdjustedECWSName,
                                      ReferenceWorkspace=ws,
                                      IndexType='Workspace Index',
-                                     ReferenceSpectra='0')
+                                     ReferenceSpectra='0',
+                                     EnableLogging=algorithmLogging)
     ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
     ecSubtractedWS = Minus(LHSWorkspace=ws,
                            RHSWorkspace=tofAdjustedECWS,
