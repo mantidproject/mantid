@@ -66,13 +66,6 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("powder").asBool(), false);
     TS_ASSERT_EQUALS(fun->getParameter("B20"), 0.37);
 
-    auto i = fun->parameterIndex("BmolX");
-    auto tie = fun->getTie(i);
-    TS_ASSERT(tie);
-    if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "BmolX=0")
-    }
-
     size_t nTies = 0;
     for (size_t i = 0; i < fun->nParams(); ++i) {
       auto tie = fun->getTie(i);
@@ -80,7 +73,7 @@ public:
         ++nTies;
       }
     }
-    TS_ASSERT_EQUALS(nTies, 6);
+    TS_ASSERT_EQUALS(nTies, 0);
   }
 };
 

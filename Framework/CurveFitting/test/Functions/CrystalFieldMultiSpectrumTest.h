@@ -164,7 +164,7 @@ public:
                   "50,1,10,1),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
                   "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
                   "PhysicalProperties=(0,1,2,3,4)," // INS, Cp, chi, M(H), M(T)
-                  "Hdir3=(1,1,1), Hmag4=1, Unit4=cgs,"
+                  "Hdir3=(1,1,1), Hmag4=1, Unit4=cgs, Lambda2=0.0000001,"
                   "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3";
     auto ws = createWorkspace();
     auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);

@@ -50,7 +50,7 @@ public:
     std::string funDef =
         "name=CrystalFieldHeatCapacity,Ion=Ce,Symmetry=C2v,"
         "B20=0.37,B22=3.9, B40=-0.03,B42=-0.1,B44=-0.12, "
-        "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
+        "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=BextX)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->name(), "CrystalFieldHeatCapacity");
@@ -59,11 +59,11 @@ public:
     TS_ASSERT_EQUALS(fun->getParameter("B20"), 0.37);
     TS_ASSERT_EQUALS(fun->getParameter("B42"), -0.1);
 
-    auto i = fun->parameterIndex("BmolY");
+    auto i = fun->parameterIndex("BextZ");
     auto tie = fun->getTie(i);
     TS_ASSERT(tie);
     if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "BmolY=0")
+      TS_ASSERT_EQUALS(tie->asString(), "BextZ=BextX");
     }
 
     size_t nTies = 0;
@@ -73,7 +73,7 @@ public:
         ++nTies;
       }
     }
-    TS_ASSERT_EQUALS(nTies, 6);
+    TS_ASSERT_EQUALS(nTies, 1); // Fixed values not ties.
   }
 };
 
