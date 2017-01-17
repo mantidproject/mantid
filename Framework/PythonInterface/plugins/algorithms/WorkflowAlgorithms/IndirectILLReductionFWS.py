@@ -9,6 +9,10 @@ import numpy as np
 import time
 
 
+def _insert_energy_value(ws_name, energy):
+    return ws_name.replace('_red', '_' + str(energy) + '_red')
+
+
 class IndirectILLReductionFWS(PythonAlgorithm):
 
     _SAMPLE = 'sample'
@@ -334,7 +338,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[label]:
-                ws = self._red_ws + '_' + label + '_' + str(energy)
+                ws = _insert_energy_value(self._red_ws, energy) + '_' + label
                 x_range = mtd[ws].readX(0)[-1] - mtd[ws].readX(0)[0]
                 if mtd[ws].blocksize() > 1:
                     Integration(InputWorkspace=ws, OutputWorkspace=ws)
@@ -349,10 +353,13 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[label]:
-                ref = self._red_ws + '_' + str(energy)
-                ws = self._red_ws + '_' + label + '_' + str(energy)
+                ref = _insert_energy_value(self._red_ws, energy)
+                ws = ref + '_' + label
                 if mtd[ws].blocksize() > 1:
-                    SplineInterpolation(WorkspaceToInterpolate=ws,WorkspaceToMatch=ref,OutputWorkspace=ws)
+                    SplineInterpolation(WorkspaceToInterpolate=ws,
+                                        WorkspaceToMatch=ref,
+                                        OutputWorkspace=ws)
+                    # add Linear2Point=True, when ready
 
     def _subtract_background(self):
         '''
@@ -361,8 +368,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[self._BACKGROUND]:
-                sample_ws = self._red_ws + '_' + str(energy)
-                back_ws = self._red_ws + '_' + self._BACKGROUND + '_' + str(energy)
+                sample_ws = _insert_energy_value(self._red_ws, energy)
+                back_ws = sample_ws + '_' + self._BACKGROUND
                 Minus(LHSWorkspace=sample_ws, RHSWorkspace=back_ws, OutputWorkspace=sample_ws)
             else:
                 self.log().warning('No background subtraction can be performed for doppler energy of {0} microEV, '
@@ -375,8 +382,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[self._CALIBRATION]:
-                sample_ws = self._red_ws + '_' + str(energy)
-                calib_ws = self._red_ws + '_' + self._CALIBRATION + '_' + str(energy)
+                sample_ws = _insert_energy_value(self._red_ws, energy)
+                calib_ws = sample_ws + '_' + self._CALIBRATION
                 Divide(LHSWorkspace=sample_ws, RHSWorkspace=calib_ws, OutputWorkspace=sample_ws)
                 self._scale_calibration(sample_ws,calib_ws)
             else:
@@ -460,7 +467,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             ws_list = self._all_runs[label][energy]
             size = len(self._all_runs[label][energy])
 
-            wsname = groupname.split('_')[0] + '_' + str(energy) + '_' + groupname.split('_')[1]
+            wsname = _insert_energy_value(groupname, energy)
 
             togroup.append(wsname)
             nspectra = mtd[ws_list[0]].getNumberHistograms()

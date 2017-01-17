@@ -40,7 +40,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         self._run_ifws()
 
-        self._run_efws()
+        #self._run_efws()
 
         self._run_sum_interpolate()
 
@@ -71,7 +71,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         LoadNexusProcessed(Filename="ILLIN16B_EFWS.nxs",OutputWorkspace="ref")
 
-        result = CompareWorkspaces(Workspace1='efws_red_0.0',Workspace2='ref',**self.params)
+        result = CompareWorkspaces(Workspace1='efws_0.0_red',Workspace2='ref',**self.params)
 
         if result[0]:
             self.assertTrue(result[0])

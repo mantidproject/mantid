@@ -155,4 +155,4 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
         self.tearDown()
 
     def validate(self):
-        return ['136558_out_red','ILLIN16B_QENS.nxs']
+        return ['136558_multiple_out_red','ILLIN16B_QENS.nxs']
