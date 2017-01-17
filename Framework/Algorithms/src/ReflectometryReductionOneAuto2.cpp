@@ -737,7 +737,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
     alg->setProperty("InputWorkspace", IvsLamName);
     alg->setProperty("OutputWorkspace", IvsQName);
-	alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
+    alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
     alg->execute();
   }
