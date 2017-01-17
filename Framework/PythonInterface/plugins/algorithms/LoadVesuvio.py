@@ -327,7 +327,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             inst_prefix = isis.instrument("VESUVIO").shortName()
 
             try:
-                run_str = inst_prefix + runs[0]
+                run_str = inst_prefix + runs[0] +'.raw'
             except ValueError:
                 run_str = runs[0]
 
