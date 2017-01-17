@@ -158,8 +158,8 @@ void SplineInterpolation::exec() {
   for (int i = 0; i < histNo; ++i) {
     if (type == true && binsNo == 2){
         // set up the function that needs to be interpolated
-        boost::shared_ptr<gsl_interp_accel> acc(gsl_interp_accel_alloc (), gsl_interp_accel_free);
-        boost::shared_ptr<gsl_interp> linear(gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
+        std::unique_ptr<gsl_interp_accel, void(*)(gsl_interp_accel*)> acc(gsl_interp_accel_alloc (), gsl_interp_accel_free);
+        std::unique_ptr<gsl_interp, void(*)(gsl_interp*)> linear(gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
         gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo);
         for (int k = 0; k < binsNoInterp; ++k){
           gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(outputWorkspace->mutableY(i)[k]));
