@@ -32,10 +32,10 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
   // Init the Workspace2D with one spectrum per detector, in the same order.
   this->init(inst->getNumberDetectors(!includeMonitors), 1, 1);
 
+  setNumberOfDetectorGroups(getNumberHistograms());
+
   // Copy the instrument
   this->setInstrument(inst);
-
-  setNumberOfDetectorGroups(getNumberHistograms());
 
   // Initialize the spectra-det-map, 1:1 between spectrum number and det ID
   this->MatrixWorkspace::rebuildSpectraMapping(includeMonitors);

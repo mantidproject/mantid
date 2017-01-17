@@ -560,6 +560,8 @@ protected:
   /// could allow the X values to be changed.
   void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
 
+  void updateCachedDetectorGroupings() override;
+
   /// A vector of pointers to the axes for this workspace
   std::vector<Axis *> m_axes;
 

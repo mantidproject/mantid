@@ -162,6 +162,7 @@ public:
   const DetectorInfo &detectorInfo() const;
   DetectorInfo &mutableDetectorInfo();
 
+  const Beamline::SpectrumInfo &internalSpectrumInfo() const;
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
@@ -173,6 +174,7 @@ protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 
+  virtual void updateCachedDetectorGroupings();
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.

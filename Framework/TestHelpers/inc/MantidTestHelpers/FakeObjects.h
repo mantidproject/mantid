@@ -114,7 +114,10 @@ public:
   size_t blocksize() const override {
     return vec.empty() ? 0 : vec[0].dataY().size();
   }
-  ISpectrum &getSpectrum(const size_t index) override { return vec[index]; }
+  ISpectrum &getSpectrum(const size_t index) override {
+    vec[index].setExperimentInfo(this, index);
+    return vec[index];
+  }
   const ISpectrum &getSpectrum(const size_t index) const override {
     return vec[index];
   }
@@ -131,6 +134,7 @@ protected:
     vec.resize(spec, SpectrumTester(HistogramData::getHistogramXMode(j, k),
                                     HistogramData::Histogram::YMode::Counts));
     for (size_t i = 0; i < spec; i++) {
+      vec[i].setExperimentInfo(this, i);
       vec[i].dataX().resize(j, 1.0);
       vec[i].dataY().resize(k, 1.0);
       vec[i].dataE().resize(k, 1.0);

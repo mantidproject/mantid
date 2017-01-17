@@ -66,6 +66,9 @@ ExperimentInfo::ExperimentInfo()
  */
 ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
   this->copyExperimentInfoFrom(&source);
+  if (source.m_spectrumInfo)
+    m_spectrumInfo =
+        Kernel::make_unique<Beamline::SpectrumInfo>(*source.m_spectrumInfo);
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -89,7 +92,8 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
-  //   and should not be overridden (copy is done in MatrixWorkspace ctor).
+  //   and should not be overridden (copy is done in ExperimentInfo ctor, but
+  //   not here since we just copy the experiment data).
   // - For cached groupings (for MDWorkspaces), grouping was not copied in the
   //   old implementation either.
 }
@@ -213,6 +217,13 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     m_parmap = boost::make_shared<ParameterMap>();
   }
   m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
+  // Detector IDs that were previously dropped because they were not part of the
+  // instrument may now suddenly be valid, so we have to reinitialize the
+  // detector grouping.
+  // WARNING: The check of m_spectrumInfo is important, to avoid calling this
+  // virtual function from the constructor.
+  if (m_spectrumInfo)
+    updateCachedDetectorGroupings();
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -450,6 +461,17 @@ void ExperimentInfo::updateCachedDetectorGrouping(
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
+}
+
+void ExperimentInfo::updateCachedDetectorGroupings() {
+  // This should happen only for MatrixWorkspace and subclasses, the
+  // implementation of ExperimentInfo::updateCachedDetectorGroupings throws --
+  // when grouping is cached for an MDWorkspace there is no way of updating the
+  // grouping. Furthermore, this should never be called from the constructor,
+  // since this is a virtual function call (m_spectrumInfo should always be
+  // nullptr in that case).
+  throw std::runtime_error(
+      "ExperimentInfo::updateCachedDetectorGroupings should never be called.");
 }
 
 void ExperimentInfo::addDetectorToGroup(const size_t index,
@@ -1040,6 +1062,10 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   m_detectorInfoWrapper =
       Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
   return *m_detectorInfoWrapper;
+}
+
+const Beamline::SpectrumInfo &ExperimentInfo::internalSpectrumInfo() const {
+  return *m_spectrumInfo;
 }
 
 /** Return a reference to the SpectrumInfo object.

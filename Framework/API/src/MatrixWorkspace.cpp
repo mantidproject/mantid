@@ -77,7 +77,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   // ExperimentInfo just kept a shared_ptr to the same map as in other, which
   // is not enough as soon as the maps in one of the workspaces it edited.
   instrumentParameters();
-  setNumberOfDetectorGroups(other.getNumberHistograms());
 }
 
 /// Destructor
@@ -1978,6 +1977,12 @@ MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
 size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
   throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "
                            "for MatrixWorkspace, only for MDWorkspaces");
+}
+
+void MatrixWorkspace::updateCachedDetectorGroupings() {
+  for (size_t i = 0; i < getNumberHistograms(); ++i) {
+    updateCachedDetectorGrouping(i, getSpectrum(i).getDetectorIDs());
+  }
 }
 
 } // namespace API

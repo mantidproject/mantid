@@ -414,7 +414,8 @@ public:
 
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), std::out_of_range);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0),
+                     Kernel::Exception::NotFoundError);
   }
 
   void test_ExperimentInfo_basics() {
@@ -431,14 +432,14 @@ public:
     const ExperimentInfo expInfo(m_grouped);
     TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 5);
     const SpectrumInfo spectrumInfo(expInfo);
-    // We construct from a grouped workspace, but since that information is lost
-    // when constructing expInfo, so we should just see the masking of the
-    // underlying detectors.
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+    // We construct from a grouped workspace (via ISpectrum), but grouping is
+    // now stored in Beamline::SpectrumInfo as part of ExperimentInfo, so we
+    // should also see the grouping here.
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets2And3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And4), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets4And5), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), false);
   }
 
   void test_ExperimentInfo_grouped() {
