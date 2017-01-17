@@ -3,6 +3,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
@@ -56,27 +58,23 @@ void SaveOpenGenieAscii::init() {
 void SaveOpenGenieAscii::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
-  const size_t nSpectra = m_inputWS->getNumberHistograms();
-  const size_t nBins = m_inputWS->blocksize();
 
-  if (nBins == 0 || nSpectra == 0)
-    throw std::runtime_error("Trying to save an empty workspace");
+  inputValidation();
 
-  if (!m_inputWS->isHistogramData()) {
-    throw std::runtime_error("This algorithm cannot save workspaces with event "
-                             "data, please convert to histogram data first.");
-  }
+  // Its better to reserve over and the number of logs gives us a good
+  // estimate as some logs are not included whilst some other params are.
+  m_outputVector.reserve(m_inputWS->run().getLogData().size());
+
   // Progress progress(this, 0, 1, nBins);
 
-  // writes out x, y, e to vector
+  // store common workspace properties
+  storeWorkspaceInformation();
+
+  // store x, y, e to vector
   parseWorkspaceData();
 
   // get all the sample in workspace
   getSampleLogs();
-
-  // add ntc (number of bins)
-  m_outputVector.push_back(
-      outputTuple("ntc", "Integer", std::to_string(nBins)));
 
   // Getting the format property
   std::string formatType = getProperty("OpenGenieFormat");
@@ -98,30 +96,20 @@ void SaveOpenGenieAscii::exec() {
   // progress.report();
 }
 
-/**
-  * Determines the spectrum numbers for an ENGINX output file
-  * and converts them into an OpenGenie compatible string which
-  * is stored into the output buffer
-  */
-std::string SaveOpenGenieAscii::getSpectrumNumAsString(
-    const API::MatrixWorkspace &WSToSave) {
-  const auto numHistograms = WSToSave.getNumberHistograms();
+void SaveOpenGenieAscii::inputValidation() {
+	const size_t nSpectra = m_inputWS->getNumberHistograms();
 
-  const int lowerSpecNumber = WSToSave.getSpectrum(0).getSpectrumNo();
-  const int upperSpecNumber =
-      WSToSave.getSpectrum(numHistograms - 1).getSpectrumNo();
-
-  const std::string lowerSpecString(std::to_string(lowerSpecNumber));
-  const std::string upperSpecString(std::to_string(upperSpecNumber));
-
-  // The string will either be '0 - 140' or 140 depending on whether the
-  // lower and upper numbers are equal or not
-  const std::string outputString(lowerSpecNumber == upperSpecNumber
-                                     ? upperSpecString
-                                     : lowerSpecString + " - " +
-                                           upperSpecString);
-  return outputString;
+	if (m_inputWS->blocksize() == 0 || nSpectra == 0)
+		throw std::runtime_error("Trying to save an empty workspace");
+	else if (nSpectra > 1) {
+		throw std::runtime_error("Workspace has multiple spectra. This algorithm can only save focused workspaces.");
+	}
+	else if (!m_inputWS->isHistogramData()) {
+		throw std::runtime_error("This algorithm cannot save workspaces with event "
+			"data, please convert to histogram data first.");
+	}
 }
+
 
 /**
   * Converts the workspace data into strings which are compatible
@@ -171,12 +159,35 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
   }
 
   std::vector<std::tuple<std::string, int>> outDataStrings;
-  outDataStrings.reserve(3);
   outDataStrings.push_back(std::make_tuple(xValsOutput, xCount));
   outDataStrings.push_back(std::make_tuple(yValsOutput, yCount));
   outDataStrings.push_back(std::make_tuple(eValsOutput, eCount));
   return outDataStrings;
 }
+
+/**
+  * Stores the workspace information such as title or run number
+  * in the output buffer
+  */
+void SaveOpenGenieAscii::storeWorkspaceInformation()
+{
+	m_outputVector.push_back(outputTuple("run_no", m_stringType, std::to_string(m_inputWS->getRunNumber())));
+	m_outputVector.push_back(outputTuple("title", m_stringType, m_inputWS->getTitle()));
+	m_outputVector.push_back(outputTuple("inst_name", m_stringType,
+		m_inputWS->getInstrument()->getName()));
+
+	// Number of bins 
+	m_outputVector.push_back(
+		outputTuple("ntc", m_intType, std::to_string(m_inputWS->blocksize())));
+
+	const auto &specInfo = m_inputWS->spectrumInfo();
+	m_outputVector.push_back(outputTuple("l1", m_floatType, std::to_string(specInfo.l1())));
+	m_outputVector.push_back(outputTuple("l2", m_floatType, std::to_string(specInfo.l2(0))));
+
+	const double two_theta = specInfo.twoTheta(0) * 180 / M_PI; // Convert to deg
+	m_outputVector.push_back(outputTuple("twotheta", m_floatType, std::to_string(two_theta)));
+}
+
 
 //-----------------------------------------------------------------------------
 /**
@@ -226,82 +237,55 @@ std::ofstream SaveOpenGenieAscii::openFileStream() {
 /** Reads the sample logs and writes to vector
    */
 void SaveOpenGenieAscii::getSampleLogs() {
-  const std::vector<Property *> &logData = m_inputWS->run().getLogData();
+	const std::unordered_map<std::string, std::string> MantidGenieNameMap = 
+	{ { "x", "x_pos" }, {"y", "y_pos"},	{"z", "z_pos"}, {"dae_beam_current", "microamps" },
+	{"dur", "effective_time"} };
+		
+	//"theta_pos", "microamps", "load", "macro_strain", "pos", "eurotherm",
+	//"x_pos_error", "y_pos_error", "z_pos_error", "theta_pos_error",
+	//"load_error", "macro_strain_error", "pos_error", "eurotherm_error"};
 
-  return;
+	const std::vector<Property *> &logData = m_inputWS->run().getLogData();
 
-  // TODO choose which logs are important to openGENIE
-  // DO NOT let this be merged in this state
+  for (const auto &logEntry : logData) {
+    const std::string &logName = logEntry->name();
+    const std::string &type = logEntry->type();
+	std::string outName;
+	std::string outType;
+	std::string outValue;
 
-  for (auto log : logData) {
-    std::string name = log->name();
-    std::string type = log->type();
-    std::string value = log->value();
+	const auto foundMapping = MantidGenieNameMap.find(logName);
+	if (foundMapping == MantidGenieNameMap.cend()) {
+		continue;
+	}
+	outName = foundMapping->second;
 
-    if (type.std::string::find("vector") &&
-        type.std::string::find("double") != std::string::npos) {
+	// Calculate dx/dy/dz
+	if (outName == "x_pos" || outName == "y_pos" || outName == "z_pos") {
+		calculateXYZDelta(foundMapping->first, logEntry);
+	}
 
-      auto tsp = m_inputWS->run().getTimeSeriesProperty<double>(name);
-      value = boost::lexical_cast<std::string>(tsp->timeAverageValue());
-    }
-
-    else if (type.std::string::find("vector") &&
-             type.std::string::find("int") != std::string::npos) {
-
-      auto tsp = m_inputWS->run().getTimeSeriesProperty<int>(name);
-      value = boost::lexical_cast<std::string>(tsp->timeAverageValue());
-    }
-
-    else if (type.std::string::find("vector") &&
-             type.std::string::find("bool") != std::string::npos) {
-
-      auto tsp = m_inputWS->run().getTimeSeriesProperty<bool>(name);
-      value = boost::lexical_cast<std::string>(tsp->timeAverageValue());
-    }
-
-    else if (type.std::string::find("vector") &&
-             type.std::string::find("char") != std::string::npos) {
-
-      auto tsp = m_inputWS->run().getTimeSeriesProperty<std::string>(name);
-      value = (tsp->lastValue());
-    }
-
+	if (ITimeSeriesProperty* timeSeries = dynamic_cast<ITimeSeriesProperty*>(logEntry)) {
+		outValue = std::to_string(timeSeries->timeAverageValue());
+	}
+	else {
+		outValue = logEntry->value();
+	}
+	
     if ((type.std::string::find("number") != std::string::npos) ||
         (type.std::string::find("double") != std::string::npos) ||
         (type.std::string::find("dbl list") != std::string::npos)) {
-      type = "Float";
-    }
-
-    else if ((type.std::string::find("TimeValueUnit<bool>") !=
+		outType = "Float";
+    } else if ((type.std::string::find("TimeValueUnit<bool>") !=
               std::string::npos) ||
              (type.std::string::find("TimeValueUnit<int>") !=
               std::string::npos)) {
-      type = "Integer";
+		outType = "Integer";
+    } else if (type.std::string::find("string") != std::string::npos) {
+		outType = "String";
     }
 
-    else if (type.std::string::find("string") != std::string::npos) {
-      type = "String";
-    }
-
-    if (name == "run_number") {
-      name = "run_no";
-      value = "\"" + value + "\"";
-    }
-
-    if (name == "run_title") {
-      name = "title";
-      value = "\"" + value + "\"";
-    }
-
-    // if name != x y or e push str to vector; to avoid any duplication
-    if (name != "x" && name != "y" && name != "e") {
-
-      std::string outStr = ("  \"" + name + "\"" + "\n" + "    " + type + "\n" +
-                            "    " + value + "\n");
-
-      // TODO
-      // logVector.push_back(outStr);
-    }
+	m_outputVector.push_back(outputTuple(outName, outType, outValue));
   }
 }
 
@@ -335,15 +319,12 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
     // First the parameter name
     outfile << "  " << '"' << std::get<0>(outTuple) << '"' << '\n';
 
-    // Next the parameter type - have to make a copy as we might need to
-    // capitalise the first char
-    std::string outputType = std::get<1>(outTuple);
-    outputType[0] = static_cast<char>(toupper(outputType[0]));
+    const std::string outputType = std::get<1>(outTuple);
     outfile << "    " << outputType << '\n';
 
     // Then the data values - the formatting depends on data type
     outfile << "    ";
-    if (outputType == "String") {
+    if (outputType == m_stringType) {
       outfile << '"' << std::get<2>(outTuple) << '"';
     } else {
       outfile << std::get<2>(outTuple);
@@ -356,31 +337,50 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
 /** Apply enginX format field which is required for OpenGenie
  */
 void SaveOpenGenieAscii::applyEnginxFormat() {
-  const std::string stringType = "String";
-
   // xunit & xlabel put in OpenGenie format
   const std::string xunits = "xunits";
   const std::string xlabel = "xlabel";
   const std::string xunitsVal = "Time-of-Flight (\\\\gms)";
+  m_outputVector.push_back(outputTuple(xunits, m_stringType, xunitsVal));
+  m_outputVector.push_back(outputTuple(xlabel, m_stringType, xunitsVal));
 
   // yunit & ylabel put in OpenGenie format
   const std::string yunits = "yunits";
   const std::string ylabel = "ylabel";
   const std::string yunitsVal = "Neutron counts / \\\\gms";
+  m_outputVector.push_back(outputTuple(yunits, m_stringType, yunitsVal));
+  m_outputVector.push_back(outputTuple(ylabel, m_stringType, yunitsVal));
 
+  // Spectrum numbers
   const std::string specNumIdentifier = "spec_no";
-  const std::string specNoToSave = getSpectrumNumAsString(*m_inputWS);
-
-  m_outputVector.reserve(5);
-
+  const std::string specNoToSave = "1";
   m_outputVector.push_back(
-      outputTuple(specNumIdentifier, stringType, specNoToSave));
+      outputTuple(specNumIdentifier, m_stringType, specNoToSave));
 
-  m_outputVector.push_back(outputTuple(xunits, stringType, xunitsVal));
-  m_outputVector.push_back(outputTuple(xlabel, stringType, xunitsVal));
-  m_outputVector.push_back(outputTuple(yunits, stringType, yunitsVal));
-  m_outputVector.push_back(outputTuple(ylabel, stringType, yunitsVal));
+  // Par file that was used
+  const std::string parameter_file_label = "parameter_file";
+  // This can be set to none at the moment as it does not affect the analysis
+  const std::string parameter_value = "None.par";
+  m_outputVector.push_back(
+      outputTuple(parameter_file_label, m_stringType, parameter_value));
+
+// TODO see if we can query the WS for the user name
+
+  const std::string user_name_label = "user_name";
+  const std::string user_name_value = "NotSet";
+  m_outputVector.push_back(outputTuple(user_name_label, m_stringType, user_name_value));
+
 }
+
+void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit, const Kernel::Property *values)
+{
+	const auto positionValues = dynamic_cast<const TimeSeriesProperty<double> *>(values);
+	assert(positionValues);
+
+	const double deltaValue = positionValues->maxValue() - positionValues->minValue();
+	m_outputVector.push_back(outputTuple('d' + unit, m_floatType, std::to_string(deltaValue)));
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid
