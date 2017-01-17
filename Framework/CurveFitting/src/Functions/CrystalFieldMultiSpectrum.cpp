@@ -47,13 +47,31 @@ public:
     throw Exception::NotImplementedError(
         "This method is intentionally not implemented.");
   }
-  /// Decalre the intensity scaling parameters: one per spectrum.
+  std::vector<size_t> m_IntensityScalingIdx;
+  std::vector<size_t> m_PPLambdaIdxChild;
+  std::vector<size_t> m_PPLambdaIdxSelf;
+  /// Declare the intensity scaling parameters: one per spectrum.
   void declareIntensityScaling(size_t nSpec) {
+    m_IntensityScalingIdx.clear();
+    m_PPLambdaIdxChild.resize(nSpec, -1);
+    m_PPLambdaIdxSelf.resize(nSpec, -1);
     for (size_t i = 0; i < nSpec; ++i) {
       auto si = std::to_string(i);
       declareParameter("IntensityScaling" + si, 1.0,
                        "Intensity scaling factor for spectrum " + si);
+      m_IntensityScalingIdx.push_back(parameterIndex("IntensityScaling" + si));
     }
+  }
+  /// Declare the Lambda parameter for susceptibility
+  void declarePPLambda(size_t iSpec) {
+    if (m_PPLambdaIdxSelf.size() <= iSpec) {
+      m_PPLambdaIdxSelf.resize(iSpec + 1, -1);
+      m_PPLambdaIdxChild.resize(iSpec + 1, -1);
+    }
+    auto si = std::to_string(iSpec);
+    declareParameter("Lambda" + si, 0.0, 
+                     "Effective exchange coupling of dataset " + si);
+    m_PPLambdaIdxSelf[iSpec] = parameterIndex("Lambda" + si);
   }
 };
 }
@@ -113,9 +131,11 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
   if (name == "PhysicalProperties") {
     auto physpropId = attr.asVector();
     auto nSpec = physpropId.size();
+    auto &source = dynamic_cast<Peaks &>(*m_source);
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
-      switch (static_cast<int>(physpropId[iSpec])) {
+      auto pptype = static_cast<int>(physpropId[iSpec]);
+      switch (pptype) {
       case MagneticMoment: // Hmag, Hdir, inverse, Unit, powder
         declareAttribute("Hmag" + suffix, Attribute(1.0));
       case Susceptibility: // Hdir, inverse, Unit, powder
@@ -126,6 +146,10 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         declareAttribute("Unit" + suffix, Attribute("bohr"));
         declareAttribute("powder" + suffix, Attribute(false));
         break;
+      }
+      if (pptype == Susceptibility) {
+        source.declarePPLambda(iSpec);
+        m_nOwnParams = m_source->nParams();
       }
     }
   }
@@ -228,7 +252,13 @@ void CrystalFieldMultiSpectrum::calcExcitations(
   const size_t nSpec = m_nPeaks.size();
   // Get intensity scaling parameter "IntensityScaling" + std::to_string(iSpec)
   // using an index instead of a name for performance reasons
-  double intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
+  auto &source = dynamic_cast<Peaks &>(*m_source);
+  double intensityScaling;
+  if (source.m_IntensityScalingIdx.size() == 0) {
+    intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
+  } else {
+    intensityScaling = getParameter(source.m_IntensityScalingIdx[iSpec]);
+  }
   auto nPeaks = eExcitations.size();
   values.expand(2 * nPeaks);
   for (size_t i = 0; i < nPeaks; ++i) {
@@ -285,6 +315,8 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
     spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
     spectrum.setAttribute("powder", getAttribute("powder" + suffix));
+    dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] = 
+        spectrum.parameterIndex("Lambda");
     return retval;
   }
   case Magnetisation: {
@@ -352,6 +384,9 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
   case Susceptibility: {
     auto &suscept = dynamic_cast<CrystalFieldSusceptibility &>(spectrum);
     suscept.setEigensystem(en, wf, nre);
+    auto &source = dynamic_cast<Peaks &>(*m_source);
+    suscept.setParameter(source.m_PPLambdaIdxChild[iSpec], 
+                         getParameter(source.m_PPLambdaIdxSelf[iSpec]));
     break;
   }
   case Magnetisation: {
