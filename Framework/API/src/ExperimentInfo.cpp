@@ -6,6 +6,7 @@
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -202,7 +203,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
-  invalidateInstrumentReferences();
+  m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
@@ -243,7 +244,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
-      invalidateInstrumentReferences();
+      m_spectrumInfoWrapper = nullptr;
       m_detectorInfoWrapper = nullptr;
     }
     if (!m_parmap.unique()) {
@@ -394,7 +395,7 @@ void ExperimentInfo::populateInstrumentParameters() {
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
   populateIfNotLoaded();
-  invalidateInstrumentReferences();
+  m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
 }
@@ -408,7 +409,7 @@ void ExperimentInfo::replaceInstrumentParameters(
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
   populateIfNotLoaded();
-  invalidateInstrumentReferences();
+  m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
 }
@@ -1039,6 +1040,42 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   m_detectorInfoWrapper =
       Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
   return *m_detectorInfoWrapper;
+}
+
+/** Return a reference to the SpectrumInfo object.
+ *
+ * Any modifications of the instrument or instrument parameters will invalidate
+ * this reference.
+ */
+const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
+  if (!m_spectrumInfoWrapper) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (!m_spectrumInfoWrapper)
+      m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(*this);
+  }
+  return *m_spectrumInfoWrapper;
+}
+
+/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
+ */
+SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
+  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
+  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
+  // modifications. This will trigger a copy if required. Note that the
+  // following happens internally:
+  // 1. make_unique creates a new SpectrumInfo, which calls
+  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
+  // count to the ParameterMap is typically not 1, so
+  // invalidateInstrumentReferences() is called.
+  // 2. invalidateInstrumentReferences() resets m_spectrumInfoWrapper, releasing
+  // any parameterized detectors and thus dropping any unneeded references to
+  // the ParameterMap.
+  // 3. Construction of SpectrumInfo continues and the result is assigned to
+  // m_spectrumInfoWrapper.
+
+  // No locking here since this non-const method is not thread safe.
+  m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(*this);
+  return *m_spectrumInfoWrapper;
 }
 
 /** Returns the number of detector groups.

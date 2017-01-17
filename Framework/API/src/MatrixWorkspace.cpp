@@ -5,7 +5,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -241,55 +240,6 @@ const std::string MatrixWorkspace::getTitle() const {
     return title;
   } else
     return Workspace::getTitle();
-}
-
-/** Return a reference to the SpectrumInfo object.
- *
- * Any modifications of the instrument or instrument parameters will invalidate
- * this reference.
- */
-const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
-  if (!m_spectrumInfo) {
-    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
-    if (!m_spectrumInfo)
-      m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
-  }
-  return *m_spectrumInfo;
-}
-
-/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
- */
-SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
-  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
-  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
-  // modifications. This will trigger a copy if required. Note that the
-  // following happens internally:
-  // 1. make_unique creates a new SpectrumInfo, which calls
-  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
-  // count to the ParameterMap is typically not 1, so
-  // invalidateInstrumentReferences() is called.
-  // 2. invalidateInstrumentReferences() resets m_spectrumInfo, releasing any
-  // parameterized detectors and thus dropping any unneeded references to the
-  // ParameterMap.
-  // 3. Construction of SpectrumInfo continues and the result is assigned to
-  // m_spectrumInfo.
-
-  // No locking here since this non-const method is not thread safe.
-  m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
-  return *m_spectrumInfo;
-}
-
-/** Resets the SpectrumInfo object on modification of the Instrument.
- *
- * This needs to be called by any code that causes a reallocation of the
- * instrument or the parameter map since currently SpectrumInfo buffers the
- * result of MatrixWorkspace::getInstrument(). This method should be removed
- * once SpectrumInfo is an independent object.
- */
-void MatrixWorkspace::invalidateInstrumentReferences() const {
-  // None of the methods in ExperimentInfo that calls this is thread safe, so we
-  // do not need to bother with locking here.
-  m_spectrumInfo = nullptr;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {

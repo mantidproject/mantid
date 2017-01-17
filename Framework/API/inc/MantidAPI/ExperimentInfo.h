@@ -31,6 +31,7 @@ class DetectorInfo;
 class ModeratorModel;
 class Run;
 class Sample;
+class SpectrumInfo;
 
 /** This class is shared by a few Workspace types
  * and holds information related to a particular experiment/run:
@@ -161,6 +162,9 @@ public:
   const DetectorInfo &detectorInfo() const;
   DetectorInfo &mutableDetectorInfo();
 
+  const SpectrumInfo &spectrumInfo() const;
+  SpectrumInfo &mutableSpectrumInfo();
+
   virtual size_t numberOfDetectorGroups() const;
   virtual const std::set<detid_t> detectorIDsInGroup(const size_t index) const;
   virtual size_t groupOfDetectorID(const detid_t detID) const;
@@ -168,9 +172,6 @@ public:
 protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
-
-  /// Called when instrument or parameter map is reset to notify child classes.
-  virtual void invalidateInstrumentReferences() const {}
 
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
@@ -219,6 +220,9 @@ private:
   mutable std::mutex m_detectorInfoMutex;
 
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
+  mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
+  mutable std::mutex m_spectrumInfoMutex;
+
 };
 
 /// Shared pointer to ExperimentInfo
