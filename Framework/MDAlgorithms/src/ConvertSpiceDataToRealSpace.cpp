@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
@@ -32,7 +33,6 @@ using namespace Mantid::DataObjects;
 
 DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
-//------------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
@@ -90,7 +90,6 @@ void ConvertSpiceDataToRealSpace::init() {
       "Name of a table workspace containing the detectors' efficiency.");
 }
 
-//------------------------------------------------------------------------------------------------
 /** Exec
  */
 void ConvertSpiceDataToRealSpace::exec() {

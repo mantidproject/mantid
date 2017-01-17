@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -21,7 +22,6 @@ using namespace Mantid::Geometry;
 
 const signal_t THRESHOLD_SIGNAL = 0;
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 IntegratePeaksCWSD::IntegratePeaksCWSD()
@@ -30,7 +30,6 @@ IntegratePeaksCWSD::IntegratePeaksCWSD()
       m_normalizeByTime(false), m_scaleFactor(0), m_maskDets(false),
       m_haveInputPeakWS(false) {}
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksCWSD::init() {
@@ -126,7 +125,7 @@ void IntegratePeaksCWSD::processInputs() {
 
   // Input peaks
   std::vector<double> peak_center = getProperty("PeakCentre");
-  if (peak_center.size() > 0) {
+  if (!peak_center.empty()) {
     // assigned peak center
     if (peak_center.size() != 3)
       throw std::invalid_argument("PeakCentre must have 3 elements.");
@@ -188,7 +187,7 @@ void IntegratePeaksCWSD::processInputs() {
 
   // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
-  if (maskwsname.size() > 0) {
+  if (!maskwsname.empty()) {
     // process mask workspace
     m_maskDets = true;
     m_maskWS = getProperty("MaskWorkspace");
@@ -255,7 +254,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
       // ... debug */
 
       // Check whether this detector is masked
-      if (vecMaskedDetID.size() > 0) {
+      if (!vecMaskedDetID.empty()) {
         detid_t detid = mditer->getInnerDetectorID(iev);
         std::vector<detid_t>::const_iterator it;
 
@@ -490,7 +489,7 @@ IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
       Geometry::Instrument_const_sptr instrument = expinfo->getInstrument();
       newpeak.setInstrument(instrument);
       newpeak.setGoniometerMatrix(expinfo->run().getGoniometerMatrix());
-    } catch (std::exception) {
+    } catch (const std::exception &) {
       throw std::runtime_error(
           "Unable to set instrument and goniometer matrix.");
     }

@@ -19,6 +19,7 @@ FunctionGenerator::FunctionGenerator(API::IFunction_sptr source)
     throw std::logic_error(
         "FunctionGenerator initialised with null source function.");
   }
+  declareAttribute("NumDeriv", Attribute(false));
 }
 
 void FunctionGenerator::init() {}
@@ -157,9 +158,13 @@ void FunctionGenerator::unfix(size_t i) {
 /// Return parameter index from a parameter reference.
 size_t
 FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
-  auto index = m_source->getParameterIndex(ref);
-  if (index < m_nOwnParams) {
-    return index;
+  if (ref.getFunction() == this) {
+    auto index = ref.getIndex();
+    auto np = nParams();
+    if (index < np) {
+      return index;
+    }
+    return np;
   }
   checkTargetFunction();
   return m_target->getParameterIndex(ref) + m_nOwnParams;
@@ -264,6 +269,8 @@ void FunctionGenerator::addTie(API::ParameterTie *tie) {
     m_source->addTie(tie);
   } else {
     checkTargetFunction();
+    tie->reset(m_target.get(), tie->getIndex() - m_nOwnParams,
+               tie->isDefault());
     m_target->addTie(tie);
   }
 }
@@ -291,9 +298,6 @@ API::IFunction::Attribute
 FunctionGenerator::getAttribute(const std::string &attName) const {
   if (IFunction::hasAttribute(attName)) {
     return IFunction::getAttribute(attName);
-  } else if (attName == "NumDeriv") {
-    checkTargetFunction();
-    return m_target->getAttribute(attName);
   } else if (isSourceName(attName)) {
     return m_source->getAttribute(attName);
   } else {
@@ -309,8 +313,6 @@ void FunctionGenerator::setAttribute(const std::string &attName,
     IFunction::setAttribute(attName, att);
     m_dirty = true;
     m_target.reset();
-  } else if (attName == "NumDeriv") {
-    m_target->setAttribute(attName, att);
   } else if (isSourceName(attName)) {
     m_source->setAttribute(attName, att);
     m_dirty = true;
@@ -322,7 +324,7 @@ void FunctionGenerator::setAttribute(const std::string &attName,
 
 /// Check if attribute attName exists
 bool FunctionGenerator::hasAttribute(const std::string &attName) const {
-  if (attName == "NumDeriv" || IFunction::hasAttribute(attName)) {
+  if (IFunction::hasAttribute(attName)) {
     return true;
   }
   if (isSourceName(attName)) {

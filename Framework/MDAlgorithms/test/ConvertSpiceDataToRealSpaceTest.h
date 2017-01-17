@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"

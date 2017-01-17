@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
 from mantid.simpleapi import *
 
+
 def heliumDetectorEff(workspace):
     '''         Calculate the corrected Helium detector values. '''
 
@@ -29,6 +30,7 @@ def heliumDetectorEff(workspace):
   # simple polynomial correction based on a D2O spectrum taken at 1.5 deg
     PolynomialCorrection(InputWorkspace=workspace,OutputWorkspace=workspace,Coefficients="-1.3697,0.8602,-0.7839,0.2866,-0.0447,0.0025")
     return
+
 
 def monitor2Eff(workspace):
     ''' Calculate the corrected monitor2 values. '''
@@ -63,4 +65,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/MagFormFactorCorrection.h"
 #include "MantidKernel/MagneticIon.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"

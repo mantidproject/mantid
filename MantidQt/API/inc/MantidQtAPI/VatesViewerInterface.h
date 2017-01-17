@@ -2,9 +2,9 @@
 #define MANTIDQT_API_VATESVIEWERINTERFACE_H_
 
 #include "DllOption.h"
+#include "IProjectSerialisable.h"
 
 #include <QWidget>
-
 #include <string>
 
 class QString;
@@ -42,7 +42,9 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_API VatesViewerInterface : public QWidget {
+class EXPORT_OPT_MANTIDQT_API VatesViewerInterface
+    : public QWidget,
+      public IProjectSerialisable {
   Q_OBJECT
 public:
   /// Default constructor for plugin mode.
@@ -54,6 +56,7 @@ public:
   VatesViewerInterface(QWidget *parent);
   /// Default destructor.
   ~VatesViewerInterface() override;
+
   /**
    * Function to create the source from the given workspace.
    * @param workspaceName the name of the workspace to visualize
@@ -62,11 +65,17 @@ public:
    */
   virtual void renderWorkspace(QString workspaceName, int workspaceType,
                                std::string instrumentName);
-
   /**
    * Special function of correct widget invocation for plugin mode.
    */
-  virtual void setupPluginMode();
+  virtual void setupPluginMode(int WsType, const std::string &instrumentName);
+
+  /// Static method to create a handle to new window instance
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
+  /// Load the VATES gui from a Mantid project string
+  virtual void loadFromProject(const std::string &lines) = 0;
 
   /// Enum to track the workspace type
   enum WorkspaceType { MDEW, PEAKS, MDHW };

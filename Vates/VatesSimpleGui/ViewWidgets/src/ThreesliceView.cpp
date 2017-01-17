@@ -35,12 +35,16 @@ Kernel::Logger g_log("ThreeSliceView");
 }
 
 ThreeSliceView::ThreeSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager)
+                               RebinnedSourcesManager *rebinnedSourcesManager,
+                               bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui() {
   this->m_ui.setupUi(this);
-  this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
-                                            QString("OrthographicSliceView"));
-  pqActiveObjects::instance().setActiveView(this->m_mainView);
+
+  if (createRenderProxy) {
+    this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
+                                              QString("OrthographicSliceView"));
+    pqActiveObjects::instance().setActiveView(this->m_mainView);
+  }
 }
 
 ThreeSliceView::~ThreeSliceView() {}
@@ -62,9 +66,7 @@ void ThreeSliceView::render() {
 }
 
 void ThreeSliceView::makeThreeSlice() {
-  pqPipelineSource *src = NULL;
-  src = pqActiveObjects::instance().activeSource();
-
+  pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting PeaksWorkspaces
@@ -81,6 +83,10 @@ void ThreeSliceView::makeThreeSlice() {
 
   this->origSrc = src;
 
+  if (this->origSrc == nullptr) {
+    return;
+  }
+
   pqDataRepresentation *drep = builder->createDataRepresentation(
       this->origSrc->getOutputPort(0), this->m_mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
@@ -92,12 +98,18 @@ void ThreeSliceView::renderAll() { this->m_mainView->render(); }
 
 void ThreeSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
-/*
-void ThreeSliceView::correctVisibility()
-{
-  //this->correctColorScaleRange();
+void ThreeSliceView::setView(pqRenderView *view) {
+  clearRenderLayout(this->m_ui.mainRenderFrame);
+  this->m_mainView = view;
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.mainRenderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_mainView->widget());
 }
-*/
+
+ModeControlWidget::Views ThreeSliceView::getViewType() {
+  return ModeControlWidget::Views::THREESLICE;
+}
+
 void ThreeSliceView::correctColorScaleRange() {
   QPair<double, double> range =
       this->origRep->getLookupTable()->getScalarRange();

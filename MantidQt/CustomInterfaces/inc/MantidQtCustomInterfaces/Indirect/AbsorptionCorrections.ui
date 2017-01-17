@@ -462,10 +462,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spSampleNumberDensity">
-        <property name="suffix">
-         <string> A^-3</string>
-        </property>
+       <widget class="QDoubleSpinBox" name="spSampleDensity">
         <property name="decimals">
          <number>5</number>
         </property>
@@ -484,13 +481,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbSampleNumberDensity">
-        <property name="text">
-         <string>Number Density: </string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="3">
        <widget class="QLineEdit" name="leSampleChemicalFormula">
         <property name="sizePolicy">
@@ -499,6 +489,20 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="cbSampleDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -520,20 +524,13 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lbCanNumberDensity">
-        <property name="text">
-         <string>Number Density:</string>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="1">
-       <widget class="QDoubleSpinBox" name="spCanNumberDensity">
+       <widget class="QDoubleSpinBox" name="spCanDensity">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="suffix">
-         <string> A^-3</string>
+         <string/>
         </property>
         <property name="decimals">
          <number>5</number>
@@ -616,6 +613,20 @@
         <property name="text">
          <string>Use Container Corrections</string>
         </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QComboBox" name="cbCanDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -715,14 +726,14 @@
   <tabstop>spCylSampleRadius</tabstop>
   <tabstop>spCylCanRadius</tabstop>
   <tabstop>spCylEvents</tabstop>
-  <tabstop>spSampleNumberDensity</tabstop>
+  <tabstop>spSampleDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>ckUseCanCorrections</tabstop>
   <tabstop>ckScaleCan</tabstop>
   <tabstop>spCanScale</tabstop>
   <tabstop>ckShiftCan</tabstop>
   <tabstop>spCanShift</tabstop>
-  <tabstop>spCanNumberDensity</tabstop>
+  <tabstop>spCanDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>ckKeepFactors</tabstop>
   <tabstop>pbPlot</tabstop>
@@ -829,7 +840,7 @@
   <connection>
    <sender>ckUseCanCorrections</sender>
    <signal>toggled(bool)</signal>
-   <receiver>spCanNumberDensity</receiver>
+   <receiver>spCanDensity</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

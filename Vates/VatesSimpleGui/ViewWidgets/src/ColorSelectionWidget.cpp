@@ -1,9 +1,10 @@
 #include <cfloat>
 
-#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include "pqPresetDialog.h"
 #include "vtk_jsoncpp.h"
@@ -27,7 +28,7 @@ namespace SimpleGui {
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
     : QWidget(parent), m_minHistoric(0.01), m_maxHistoric(0.01),
       m_ignoreColorChangeCallbacks(false),
-      m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(NULL) {
+      m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(nullptr) {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
   this->setEditorStatus(false);
@@ -385,7 +386,7 @@ void ColorSelectionWidget::enableControls(bool state) {
  * to be decremented to cast to a boolean.
  * @return the state of automatic color scaling
  */
-bool ColorSelectionWidget::getAutoScaleState() {
+bool ColorSelectionWidget::getAutoScaleState() const {
   int state = this->m_ui.autoColorScaleCheckBox->isChecked();
   if (Qt::Checked == state) {
     state -= 1;
@@ -399,7 +400,7 @@ bool ColorSelectionWidget::getAutoScaleState() {
  * to be decremented to cast to a boolean.
  * @return the state of logarithmic color scaling
  */
-bool ColorSelectionWidget::getLogScaleState() {
+bool ColorSelectionWidget::getLogScaleState() const {
   int state = this->m_ui.useLogScaleCheckBox->isChecked();
   if (Qt::Checked == state) {
     state -= 1;
@@ -412,7 +413,7 @@ bool ColorSelectionWidget::getLogScaleState() {
  * This function returns the minimum range value for the color scaling.
  * @return current minimum color scaling value
  */
-double ColorSelectionWidget::getMinRange() {
+double ColorSelectionWidget::getMinRange() const {
   return this->m_ui.minValLineEdit->text().toDouble();
 }
 
@@ -420,7 +421,7 @@ double ColorSelectionWidget::getMinRange() {
  * This function returns the maximum range value for the color scaling.
  * @return current maximum color scaling value
  */
-double ColorSelectionWidget::getMaxRange() {
+double ColorSelectionWidget::getMaxRange() const {
   return this->m_ui.maxValLineEdit->text().toDouble();
 }
 
@@ -442,7 +443,7 @@ void ColorSelectionWidget::reset() {
  */
 void ColorSelectionWidget::setColorScaleLock(
     Mantid::VATES::ColorScaleLock *lock) {
-  if (m_colorScaleLock == NULL) {
+  if (!m_colorScaleLock) {
     m_colorScaleLock = lock;
   }
 }
@@ -456,6 +457,39 @@ bool ColorSelectionWidget::isColorScaleLocked() const {
   } else {
     return false;
   }
+}
+
+std::string ColorSelectionWidget::saveToProject() const {
+  using namespace MantidQt::API;
+  TSVSerialiser tsv;
+  tsv.writeLine("Min") << getMinRange();
+  tsv.writeLine("Max") << getMaxRange();
+  tsv.writeLine("AutoScale") << getAutoScaleState();
+  tsv.writeLine("LogScale") << getLogScaleState();
+  return tsv.outputLines();
+}
+
+void ColorSelectionWidget::loadFromProject(const std::string &lines) {
+  using namespace MantidQt::API;
+  TSVSerialiser tsv(lines);
+  bool autoScale, logScale;
+  double min, max;
+
+  tsv.selectLine("AutoScale");
+  tsv >> autoScale;
+  tsv.selectLine("LogScale");
+  tsv >> logScale;
+  tsv.selectLine("Min");
+  tsv >> min;
+  tsv.selectLine("Max");
+  tsv >> max;
+
+  reset();
+
+  m_ui.autoColorScaleCheckBox->setChecked(autoScale);
+  m_ui.useLogScaleCheckBox->setChecked(logScale);
+  m_ui.minValLineEdit->setText(QString::number(min));
+  m_ui.maxValLineEdit->setText(QString::number(max));
 }
 
 } // SimpleGui

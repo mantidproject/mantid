@@ -1,4 +1,6 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -119,7 +121,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         outputWs = GroupWorkspaces(self.outputWorkspaces[0])
 
         for ws in self.outputWorkspaces[1:]:
-            outputWs.add(ws.getName())
+            outputWs.add(ws.name())
 
         RenameWorkspace(outputWs, self.getProperty("OutputWorkspace").valueAsStr)
 
@@ -208,7 +210,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         return AnalysisDataService.retrieve(refinedPeaksName), AnalysisDataService.retrieve(plotNames)
 
-
     def runIndex(self, peaks):
         indexedPeaksName = self.baseName + "_indexed"
 
@@ -224,7 +225,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         pawleyFit = self.getProperty('PawleyFit').value
         removeUnindexed = self.getProperty('RemoveUnindexedPeaksFor2DFit').value
         if removeUnindexed or pawleyFit:
-            indexedPeaks.remove(unindexedPeaks.getName())
+            indexedPeaks.remove(unindexedPeaks.name())
 
         self._removeEmptyTablesFromGroup(indexedPeaks)
 
@@ -282,7 +283,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         for i in range(groupWorkspace.getNumberOfEntries()):
             ws = groupWorkspace.getItem(i)
             if ws.rowCount() == 0:
-                deleteNames.append(ws.getName())
+                deleteNames.append(ws.name())
         for name in deleteNames:
             DeleteWorkspace(name)
 

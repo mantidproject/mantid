@@ -74,8 +74,14 @@ public:
   void userChangedDataset(int index) override {
     emit userChangedDatasetIndex(index);
   }
-  /// Set "compatibility mode" on or off
-  void setCompatibilityMode(bool enabled) override;
+  /// Set multiple fitting mode on or off
+  void setMultiFittingMode(bool enabled) override;
+  /// Remove a plotted guess
+  void doRemoveGuess() override { emit removeGuess(); }
+  /// Plot a guess function
+  void doPlotGuess() override { emit plotGuess(); }
+  /// Whether a guess is plotted or not
+  bool hasGuess() const override;
 
 public slots:
   /// Perform the fit algorithm
@@ -94,12 +100,15 @@ signals:
   void workspacesToFitChanged(int n) override;
   /// Emitted when dataset index to fit is changed
   void userChangedDatasetIndex(int index) override;
+  /// Emitted when "fit to raw data" is changed
+  void fitRawDataClicked(bool enabled) override;
 
 protected:
   void showEvent(QShowEvent *e) override;
 
 private slots:
   void doubleChanged(QtProperty *prop) override;
+  void boolChanged(QtProperty *prop) override;
 
 private:
   /// Get the registered function names
@@ -110,10 +119,8 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
-  /// Layout for extra widgets
-  QVBoxLayout *m_additionalLayout;
-  /// Splitter for additional widgets
-  QSplitter *m_widgetSplitter;
+  /// Splitter for additional widgets and splitter between this and browser
+  QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits

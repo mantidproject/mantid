@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
+  BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -27,6 +28,7 @@ set ( TEST_PY_FILES
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
   DSFinterpTest.py
+  EnergyWindowScanTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
   EnggFitDIFCFromPeaksTest.py
@@ -39,6 +41,7 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
+  GetQsInQENSDataTest.py
   GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
@@ -66,15 +69,19 @@ set ( TEST_PY_FILES
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
+  MatchPeaksTest.py
   MeanTest.py
+  MedianBinWidthTest.py
   MergeCalFilesTest.py
   MolDynTest.py
   MSDFitTest.py
   MuscatSofQWTest.py
+  NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
+  SANSStitchTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SaveNexusPDTest.py
@@ -89,7 +96,6 @@ set ( TEST_PY_FILES
   SortDetectorsTest.py
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
-  Stitch1DManyTest.py
   StringToPngTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
@@ -99,7 +105,6 @@ set ( TEST_PY_FILES
   SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
-  TOFTOFConvertTofToDeltaETest.py
   TOFTOFCropWorkspaceTest.py
   TOFTOFMergeRunsTest.py
   TOSCABankCorrectionTest.py

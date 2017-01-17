@@ -1,12 +1,10 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveRKH.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/LocalDateTime.h>
@@ -20,9 +18,6 @@ DECLARE_ALGORITHM(SaveRKH)
 
 using namespace API;
 
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /**
  * Initialise the algorithm
  */

@@ -11,6 +11,8 @@ import numpy as np
 import os.path
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     _raw_workspace = None
@@ -31,10 +33,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
 
-
     def summary(self):
         return 'Performs an energy transfer reduction for ILL indirect inelastic data.'
-
 
     def PyInit(self):
         # Input options
@@ -90,7 +90,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Whether to plot the output workspace.')
 
-
     def validateInputs(self):
         issues = dict()
 
@@ -107,7 +106,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 issues['RightWorkspace'] = 'Mirror Mode requires this workspace to be set'
 
         return issues
-
 
     def PyExec(self):
         self.log().information('IndirectILLreduction')
@@ -168,7 +166,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.setPropertyValue('LeftWorkspace', self._red_left_workspace)
             self.setPropertyValue('RightWorkspace', self._red_right_workspace)
 
-
     def _reduction(self):
         """
         Run energy conversion for IN16B
@@ -216,7 +213,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             output_workspaces = [self._red_workspace]
 
         return output_workspaces
-
 
     def _run_mirror_mode(self, monitor_ws, grouped_ws):
         """
@@ -290,7 +286,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         return [self._red_left_workspace, self._red_right_workspace, self._red_workspace]
 
-
     def _calculate_energy(self, monitor_ws, grouped_ws, red_ws):
         """
         Convert the input run to energy transfer
@@ -347,7 +342,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         DeleteWorkspace(grouped_ws)
         DeleteWorkspace(monitor_ws)
 
-
     def _monitor_range(self, monitor_ws):
         """
         Get sensible values for the min and max cropping range
@@ -365,7 +359,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         logger.information('Cropping range %f to %f' % (x[imin], x[imax]))
 
         return x[imin], x[imax]
-
 
     def _energy_range(self, ws):
         """

@@ -3,6 +3,7 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -136,7 +137,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
     if (spectrumDomain) {
       size_t wsIndex = spectrumDomain->getWorkspaceIndex();
 
-      MantidVec &yValues = outputWs->dataY(wsIndex);
+      auto &yValues = outputWs->mutableY(wsIndex);
       for (size_t j = 0; j < yValues.size(); ++j) {
         yValues[j] = localValues->getCalculated(j);
       }
@@ -145,10 +146,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
 
   // Assign x-values on all histograms
   for (size_t i = 0; i < m_matrixWorkspace->getNumberHistograms(); ++i) {
-    const MantidVec &originalXValue = m_matrixWorkspace->readX(i);
-    MantidVec &xValues = outputWs->dataX(i);
-    assert(xValues.size() == originalXValue.size());
-    xValues.assign(originalXValue.begin(), originalXValue.end());
+    outputWs->setSharedX(i, m_matrixWorkspace->sharedX(i));
   }
 
   if (m_manager && !outputWorkspacePropertyName.empty()) {
@@ -188,7 +186,7 @@ size_t SeqDomainSpectrumCreator::getDomainSize() const {
   size_t totalSize = 0;
 
   for (size_t i = 0; i < nHist; ++i) {
-    totalSize += m_matrixWorkspace->dataY(i).size();
+    totalSize += m_matrixWorkspace->y(i).size();
   }
 
   return totalSize;
@@ -221,17 +219,12 @@ bool SeqDomainSpectrumCreator::histogramIsUsable(size_t i) const {
     throw std::invalid_argument("No matrix workspace assigned.");
   }
 
-  try {
-    Geometry::IDetector_const_sptr detector = m_matrixWorkspace->getDetector(i);
+  const auto &spectrumInfo = m_matrixWorkspace->spectrumInfo();
 
-    if (!detector) {
-      return true;
-    }
-
-    return !detector->isMasked();
-  } catch (Kernel::Exception::NotFoundError) {
+  if (!spectrumInfo.hasDetectors(i)) {
     return true;
   }
+  return !spectrumInfo.isMasked(i);
 }
 
 } // namespace CurveFitting

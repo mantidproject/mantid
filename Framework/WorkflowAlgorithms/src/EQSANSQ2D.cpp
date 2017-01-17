@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "Poco/NumberFormatter.h"
@@ -47,7 +45,7 @@ void EQSANSQ2D::exec() {
   // If the OutputWorkspace property was not given, use the
   // name of the input workspace as the base name for the output
   std::string outputWSName = getPropertyValue("OutputWorkspace");
-  if (outputWSName.size() == 0) {
+  if (outputWSName.empty()) {
     outputWSName = inputWS->getName();
   }
 

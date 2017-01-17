@@ -1,9 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAlgorithms/GenerateEventsFilter.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -22,7 +19,6 @@ namespace Mantid {
 namespace Algorithms {
 DECLARE_ALGORITHM(GenerateEventsFilter)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 GenerateEventsFilter::GenerateEventsFilter()
@@ -33,7 +29,6 @@ GenerateEventsFilter::GenerateEventsFilter()
       m_splitters(), m_vecSplitterTime(), m_vecSplitterGroup(),
       m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
 
-//----------------------------------------------------------------------------------------------
 /** Declare input
  */
 void GenerateEventsFilter::init() {
@@ -175,7 +170,6 @@ void GenerateEventsFilter::init() {
                   "Number of threads forced to use in the parallel mode. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main execute body
  */
 void GenerateEventsFilter::exec() {
@@ -222,7 +216,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
 
   // Output splitter information workspace
   std::string title = getProperty("TitleOfSplitters");
-  if (title.size() == 0) {
+  if (title.empty()) {
     // Using default
     title = "Splitters";
   }
@@ -269,8 +263,8 @@ void GenerateEventsFilter::processInputTime() {
   std::string s_inptf = this->getProperty("StopTime");
 
   // Default
-  bool defaultstart = (s_inpt0.size() == 0);
-  bool defaultstop = (s_inptf.size() == 0);
+  bool defaultstart = s_inpt0.empty();
+  bool defaultstop = s_inptf.empty();
 
   // Determine format
   bool instringformat = true;
@@ -1680,7 +1674,7 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
   }
 
   // Information
-  if (info.size() > 0) {
+  if (!info.empty()) {
     API::TableRow row = m_filterInfoWS->appendRow();
     row << wsindex << info;
   }
@@ -1828,7 +1822,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   bool norunendset = false;
   try {
     runendtime = m_dataWS->run().endTime();
-  } catch (std::runtime_error err) {
+  } catch (const std::runtime_error &) {
     norunendset = true;
   }
 

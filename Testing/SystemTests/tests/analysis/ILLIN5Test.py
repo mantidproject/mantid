@@ -8,13 +8,13 @@ import unittest
 
 DIFF_PLACES = 12
 
+
 class ILLIN5Tests(unittest.TestCase):
 
     wsData_name = "in5_ws_data"
     wsVana_name = "in5_ws_vana"
     dataDispersionFile = "ILL/ILLIN5_Sample_096003.nxs"
     vanadiumFile = "ILL/ILLIN5_Vana_095893.nxs"
-
 
     def tearDown(self):
         if self.wsData_name in mtd:
@@ -44,7 +44,6 @@ class ILLIN5Tests(unittest.TestCase):
         wsVana = mtd[self.wsVana_name]
         self.assertEqual(wsVana.getNumberHistograms(), 98305)
 
-
         self._run_load(self.dataDispersionFile,vanaFile=None,vanaWS=self.wsVana_name,outWSName=self.wsData_name)
 
         # Check some data
@@ -62,7 +61,7 @@ class ILLIN5Tests(unittest.TestCase):
         """
         ILL Loader
         """
-        LoadILL(Filename=dataFile,FilenameVanadium=None,WorkspaceVanadium=None,OutputWorkspace=outWSName)
+        LoadILLTOF(Filename=dataFile,FilenameVanadium=None,WorkspaceVanadium=None,OutputWorkspace=outWSName)
         self._do_ads_check(outWSName)
 
     def _do_ads_check(self, name):
@@ -71,8 +70,10 @@ class ILLIN5Tests(unittest.TestCase):
 
 #====================================================================================
 
+
 class LoadILLIN5Test(stresstesting.MantidStressTest):
     _success=False
+
     def runTest(self):
         self._success = False
         # Custom code to create and run this single test suite

@@ -1,3 +1,4 @@
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
@@ -7,6 +8,7 @@
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/str.hpp>
 
+using Mantid::API::FileProperty;
 using Mantid::API::MultipleFileProperty;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::PythonInterface::Converters::PySequenceToVector;
@@ -45,8 +47,9 @@ boost::python::object valueAsPyObject(MultipleFileProperty &self) {
 }
 
 MultipleFileProperty *
-createMultipleFileProperty(const std::string &name,
-                           const object &extensions = object()) {
+createMultipleFilePropertyWithAction(const std::string &name,
+                                     unsigned int action,
+                                     const object &extensions = object()) {
   std::vector<std::string> extsAsVector;
   if (!Mantid::PythonInterface::isNone(extensions)) {
     extract<std::string> extractor(extensions);
@@ -56,7 +59,14 @@ createMultipleFileProperty(const std::string &name,
       extsAsVector = PySequenceToVector<std::string>(extensions)();
     }
   }
-  return new MultipleFileProperty(name, extsAsVector);
+  return new MultipleFileProperty(name, action, extsAsVector);
+}
+
+MultipleFileProperty *
+createMultipleFileProperty(const std::string &name,
+                           const object &extensions = object()) {
+  return createMultipleFilePropertyWithAction(
+      name, FileProperty::FileAction::Load, extensions);
 }
 }
 
@@ -70,6 +80,10 @@ void export_MultipleFileProperty() {
       .def("__init__", make_constructor(
                            &createMultipleFileProperty, default_call_policies(),
                            (arg("name"), arg("extensions") = object())))
+      .def("__init__",
+           make_constructor(
+               &createMultipleFilePropertyWithAction, default_call_policies(),
+               (arg("name"), arg("action"), arg("extensions") = object())))
       // Override the base class one to do something more appropriate
       .add_property("value", &valueAsPyObject);
 }

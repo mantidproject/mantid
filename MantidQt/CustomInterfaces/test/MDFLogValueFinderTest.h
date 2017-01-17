@@ -2,6 +2,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/DateAndTime.h"

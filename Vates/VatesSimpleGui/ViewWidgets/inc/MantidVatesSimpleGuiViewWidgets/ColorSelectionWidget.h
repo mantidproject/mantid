@@ -52,18 +52,18 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget
 
 public:
   /// Default constructor.
-  ColorSelectionWidget(QWidget *parent = 0);
+  ColorSelectionWidget(QWidget *parent = nullptr);
   /// Default destructor.
   ~ColorSelectionWidget() override {}
 
   /// Get the auto color scaling state
-  bool getAutoScaleState();
+  bool getAutoScaleState() const;
   /// Get the log scale state
-  bool getLogScaleState();
+  bool getLogScaleState() const;
   /// Get the minimum color range value
-  double getMinRange();
+  double getMinRange() const;
   /// Get the maximum color range value
-  double getMaxRange();
+  double getMaxRange() const;
   /// Load the default color map
   void loadColorMap(bool viewSwitched);
   /// Programmatically enable/disable auto scaling of color range
@@ -82,6 +82,10 @@ public:
   void setColorScaleLock(Mantid::VATES::ColorScaleLock *lock);
   /// Is the color scale locked
   bool isColorScaleLocked() const;
+  /// Save the state of the widget to a Mantid project file
+  std::string saveToProject() const;
+  /// Load the state of the widget from a Mantid project file
+  void loadFromProject(const std::string &lines);
 
 public slots:
   /// Set state for all control widgets.

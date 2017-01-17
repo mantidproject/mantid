@@ -1,8 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAPI/ADSValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
@@ -65,7 +64,7 @@ void GroupWorkspaces::addToGroup(const API::Workspace_sptr &workspace) {
   if (localGroup) {
     addToGroup(localGroup->getNames());
     // Remove the group from the ADS
-    AnalysisDataService::Instance().remove(workspace->name());
+    AnalysisDataService::Instance().remove(workspace->getName());
   } else {
     m_group->addWorkspace(workspace);
   }

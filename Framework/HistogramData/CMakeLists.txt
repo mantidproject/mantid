@@ -1,29 +1,27 @@
 set ( SRC_FILES
-	src/BinEdgeStandardDeviations.cpp
-	src/BinEdgeVariances.cpp
 	src/BinEdges.cpp
 	src/CountStandardDeviations.cpp
 	src/CountVariances.cpp
 	src/Counts.cpp
+	src/Exception.cpp
 	src/Frequencies.cpp
 	src/FrequencyStandardDeviations.cpp
 	src/FrequencyVariances.cpp
 	src/Histogram.cpp
 	src/HistogramMath.cpp
-	src/PointStandardDeviations.cpp
-	src/PointVariances.cpp
+	src/Interpolate.cpp
 	src/Points.cpp
+	src/Rebin.cpp
 )
 
 set ( INC_FILES
 	inc/MantidHistogramData/Addable.h
-	inc/MantidHistogramData/BinEdgeStandardDeviations.h
-	inc/MantidHistogramData/BinEdgeVariances.h
 	inc/MantidHistogramData/BinEdges.h
 	inc/MantidHistogramData/CountStandardDeviations.h
 	inc/MantidHistogramData/CountVariances.h
 	inc/MantidHistogramData/Counts.h
 	inc/MantidHistogramData/EValidation.h
+	inc/MantidHistogramData/Exception.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Frequencies.h
 	inc/MantidHistogramData/FrequencyStandardDeviations.h
@@ -34,6 +32,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/HistogramMath.h
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/HistogramY.h
+	inc/MantidHistogramData/Interpolate.h
 	inc/MantidHistogramData/Iterable.h
 	inc/MantidHistogramData/LinearGenerator.h
 	inc/MantidHistogramData/LogarithmicGenerator.h
@@ -42,6 +41,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/PointVariances.h
 	inc/MantidHistogramData/Points.h
+	inc/MantidHistogramData/Rebin.h
 	inc/MantidHistogramData/Scalable.h
 	inc/MantidHistogramData/StandardDeviationVectorOf.h
 	inc/MantidHistogramData/Validation.h
@@ -53,8 +53,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AddableTest.h
-	BinEdgeStandardDeviationsTest.h
-	BinEdgeVariancesTest.h
 	BinEdgesTest.h
 	CountStandardDeviationsTest.h
 	CountVariancesTest.h
@@ -70,6 +68,7 @@ set ( TEST_FILES
 	HistogramTest.h
 	HistogramXTest.h
 	HistogramYTest.h
+	InterpolateTest.h
 	IterableTest.h
 	LinearGeneratorTest.h
 	LogarithmicGeneratorTest.h
@@ -78,6 +77,7 @@ set ( TEST_FILES
 	PointStandardDeviationsTest.h
 	PointVariancesTest.h
 	PointsTest.h
+	RebinTest.h
 	ScalableTest.h
 	StandardDeviationVectorOfTest.h
 	VarianceVectorOfTest.h
@@ -110,7 +110,8 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET HistogramData PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )
+target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+                        ${GSL_LIBRARIES} ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

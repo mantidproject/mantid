@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -13,7 +15,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreatePeaksWorkspace::init() {
@@ -29,7 +30,6 @@ void CreatePeaksWorkspace::init() {
                   "An output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CreatePeaksWorkspace::exec() {

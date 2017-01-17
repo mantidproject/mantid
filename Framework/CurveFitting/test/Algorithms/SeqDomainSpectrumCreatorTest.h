@@ -17,6 +17,9 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/SpectrumInfo.h"
+
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -49,7 +52,7 @@ public:
   void testSetMatrixWorkspace() {
     TestableSeqDomainSpectrumCreator creator(NULL, "");
     TS_ASSERT_THROWS_NOTHING(creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace(5, 5)));
+        WorkspaceCreationHelper::create2DWorkspace(5, 5)));
 
     TS_ASSERT_EQUALS(creator.m_matrixWorkspace->getNumberHistograms(), 5);
 
@@ -60,7 +63,7 @@ public:
   void testGetDomainSize() {
     TestableSeqDomainSpectrumCreator creator(NULL, "");
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12));
+        WorkspaceCreationHelper::create2DWorkspace123(4, 12));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -84,14 +87,14 @@ public:
     std::set<int64_t> masked;
     masked.insert(0);
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 12, false, masked));
+        WorkspaceCreationHelper::create2DWorkspace123(2, 12, false, masked));
 
     TS_ASSERT(!creator.histogramIsUsable(0));
     TS_ASSERT(creator.histogramIsUsable(1));
 
     // No instrument
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 12));
+        WorkspaceCreationHelper::create2DWorkspace123(2, 12));
     TS_ASSERT(creator.histogramIsUsable(0));
     TS_ASSERT(creator.histogramIsUsable(1));
   }
@@ -99,7 +102,7 @@ public:
   void testCreateDomain() {
     TestableSeqDomainSpectrumCreator creator(NULL, "");
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12));
+        WorkspaceCreationHelper::create2DWorkspace123(4, 12, true));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -131,7 +134,7 @@ public:
     std::set<int64_t> masked;
     masked.insert(2);
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, false, masked));
+        WorkspaceCreationHelper::create2DWorkspace123(4, 12, true, masked));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -164,8 +167,9 @@ public:
     double slope = 2.0;
     // all x values are 1.0
 
+    // TODO is the workspace created with the wrong values here
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12);
+        WorkspaceCreationHelper::create2DWorkspace123(4, 12);
 
     TestableSeqDomainSpectrumCreator creator(NULL, "");
     creator.setMatrixWorkspace(matrixWs);
@@ -179,6 +183,7 @@ public:
     testFunction->initialize();
     testFunction->setParameter("Slope", slope);
 
+    // TODO or are the output values from createOutputWorkspace wrong
     Workspace_sptr outputWs =
         creator.createOutputWorkspace("", testFunction, domain, values);
 
@@ -192,10 +197,10 @@ public:
     // Spectrum 0: 0 + 2 * 1 -> All y-values should be 2
     // Spectrum 1: 1 + 2 * 1 -> All y-values should be 3...etc.
     for (size_t i = 0; i < outputWsMatrix->getNumberHistograms(); ++i) {
-      const std::vector<double> &x = outputWsMatrix->readX(i);
-      const std::vector<double> &y = outputWsMatrix->readY(i);
+      const auto &x = outputWsMatrix->x(i);
+      const auto &y = outputWsMatrix->y(i);
 
-      TS_ASSERT_EQUALS(x, matrixWs->readX(i));
+      TS_ASSERT_EQUALS(x, matrixWs->x(i));
       for (size_t j = 0; j < x.size(); ++j) {
         TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
       }
@@ -209,7 +214,7 @@ public:
     std::set<int64_t> masked;
     masked.insert(2);
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, false, masked);
+        WorkspaceCreationHelper::create2DWorkspace123(4, 12, false, masked);
 
     TestableSeqDomainSpectrumCreator creator(NULL, "");
     creator.setMatrixWorkspace(matrixWs);
@@ -237,13 +242,14 @@ public:
     // Spectrum 0: 0 + 2 * 1 -> All y-values should be 2
     // Spectrum 1: 1 + 2 * 1 -> All y-values should be 3...etc.
     for (size_t i = 0; i < outputWsMatrix->getNumberHistograms(); ++i) {
-      const std::vector<double> &x = outputWsMatrix->readX(i);
-      const std::vector<double> &y = outputWsMatrix->readY(i);
+      const auto &x = outputWsMatrix->x(i);
+      const auto &y = outputWsMatrix->y(i);
 
-      TS_ASSERT_EQUALS(x, matrixWs->readX(i));
+      TS_ASSERT_EQUALS(x, matrixWs->x(i));
+      const auto &spectrumInfo = outputWsMatrix->spectrumInfo();
       for (size_t j = 0; j < x.size(); ++j) {
         // If detector is not masked, there should be values, otherwise 0.
-        if (!outputWsMatrix->getDetector(i)->isMasked()) {
+        if (!spectrumInfo.isMasked(i)) {
           TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
         } else {
           TS_ASSERT_EQUALS(y[j], 0.0);
@@ -255,7 +261,7 @@ public:
   void testCreateOutputWorkspaceWithDistributionAsInput() {
     // Arrange
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, true);
+        WorkspaceCreationHelper::create2DWorkspace123(4, 12, true);
     Mantid::API::WorkspaceHelpers::makeDistribution(matrixWs);
 
     TestableSeqDomainSpectrumCreator creator(NULL, "");
@@ -284,11 +290,11 @@ public:
     double slope = 2.0;
 
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(400, 500);
+        WorkspaceCreationHelper::create2DWorkspace123(400, 500);
     for (size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
-      std::vector<double> &x = matrixWs->dataX(i);
-      std::vector<double> &y = matrixWs->dataY(i);
-      std::vector<double> &e = matrixWs->dataE(i);
+      auto &x = matrixWs->mutableX(i);
+      auto &y = matrixWs->mutableY(i);
+      auto &e = matrixWs->mutableE(i);
 
       for (size_t j = 0; j < x.size(); ++j) {
         x[j] = static_cast<double>(j);
@@ -327,11 +333,11 @@ public:
     }
 
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(400, 50);
+        WorkspaceCreationHelper::create2DWorkspace123(400, 50);
     for (size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
-      std::vector<double> &x = matrixWs->dataX(i);
-      std::vector<double> &y = matrixWs->dataY(i);
-      std::vector<double> &e = matrixWs->dataE(i);
+      auto &x = matrixWs->mutableX(i);
+      auto &y = matrixWs->mutableY(i);
+      auto &e = matrixWs->mutableE(i);
 
       for (size_t j = 0; j < x.size(); ++j) {
         x[j] = static_cast<double>(j);

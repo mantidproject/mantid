@@ -8,6 +8,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -28,8 +29,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::LinearGenerator;
+using namespace Mantid::HistogramData;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -67,15 +67,15 @@ public:
       gens[d] = gen;
     }
 
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numPixels, 1, 1);
+    boost::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
+        numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // --------- Load the instrument -----------
     LoadInstrument *loadInst = new LoadInstrument();
     loadInst->initialize();
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+    loadInst->setProperty("Workspace", retVal);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
@@ -86,10 +86,8 @@ public:
 
     DateAndTime run_start("2010-01-01T00:00:00");
 
-    for (int pix = 0; pix < numPixels; pix++) {
+    for (int pix = 0; pix < numPixels; ++pix) {
       auto &el = retVal->getSpectrum(pix);
-      el.setSpectrumNo(pix);
-      el.setDetectorID(pix);
       // Background
       for (int i = 0; i < numBins; i++) {
         // Two events per bin
@@ -112,9 +110,6 @@ public:
     /// Clean up the generators
     for (size_t d = 0; d < nd; ++d)
       delete gens[d];
-
-    // Set all the histograms at once.
-    retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // Some sanity checks
     TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");

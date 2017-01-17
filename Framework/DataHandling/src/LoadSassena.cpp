@@ -6,6 +6,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -372,9 +373,9 @@ void LoadSassena::exec() {
 
   API::WorkspaceGroup_sptr gws =
       boost::dynamic_pointer_cast<API::WorkspaceGroup>(ows);
-  if (gws && API::AnalysisDataService::Instance().doesExist(gws->name())) {
+  if (gws && API::AnalysisDataService::Instance().doesExist(gws->getName())) {
     // gws->deepRemoveAll(); // remove workspace members
-    API::AnalysisDataService::Instance().deepRemoveGroup(gws->name());
+    API::AnalysisDataService::Instance().deepRemoveGroup(gws->getName());
   } else {
     gws = boost::make_shared<API::WorkspaceGroup>();
     setProperty("OutputWorkspace",

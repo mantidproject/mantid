@@ -1,5 +1,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
@@ -70,8 +72,7 @@ void MaskWorkspace::clearMask() {
   }
 
   // Clear the mask flags
-  Geometry::ParameterMap &pmap = this->instrumentParameters();
-  pmap.clearParametersByName("masked");
+  mutableDetectorInfo().clearMaskFlags();
 }
 
 /**
@@ -94,7 +95,7 @@ size_t MaskWorkspace::getNumberMasked() const {
     } else {
       std::stringstream errss;
       errss << "No instrument is associated with mask workspace "
-            << this->name();
+            << this->getName();
       throw std::runtime_error(errss.str());
     }
   }
@@ -169,7 +170,16 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   }
 
   // the mask bit on the workspace can be set
-  return this->getInstrument()->isDetectorMasked(detectorID);
+  // Performance wise, it is not optimal to call detectorInfo() for every index,
+  // but this method seems to be used rarely enough to justify this until the
+  // Instrument-2.0 implementation has progressed far enough to make this cheap.
+  const auto &detectorInfo = this->detectorInfo();
+  try {
+    return detectorInfo.isMasked(detectorInfo.indexOf(detectorID));
+  } catch (std::out_of_range &) {
+    // The workspace can contain bad detector IDs. DetectorInfo::indexOf throws.
+    return false;
+  }
 }
 
 /**

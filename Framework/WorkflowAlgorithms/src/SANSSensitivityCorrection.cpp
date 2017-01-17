@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSSensitivityCorrection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -8,6 +5,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -253,7 +251,7 @@ void SANSSensitivityCorrection::exec() {
             darkAlg->execute();
             if (darkAlg->existsProperty("OutputMessage"))
               dark_result = darkAlg->getPropertyValue("OutputMessage");
-          } else if (darkCurrentFile.size() > 0) {
+          } else if (!darkCurrentFile.empty()) {
             darkAlg->setProperty("Filename", darkCurrentFile);
             darkAlg->setProperty("PersistentCorrection", false);
             darkAlg->execute();
@@ -262,7 +260,7 @@ void SANSSensitivityCorrection::exec() {
             else
               dark_result = "   Dark current subtracted\n";
           }
-        } else if (darkCurrentFile.size() > 0) {
+        } else if (!darkCurrentFile.empty()) {
           // We need to subtract the dark current for the flood field but no
           // dark
           // current subtraction was set for the sample! Use the default dark
@@ -358,7 +356,7 @@ void SANSSensitivityCorrection::exec() {
     }
     std::string floodWSOutputName =
         getPropertyValue("OutputSensitivityWorkspace");
-    if (floodWSOutputName.size() == 0) {
+    if (floodWSOutputName.empty()) {
       setPropertyValue("OutputSensitivityWorkspace", floodWSName);
       AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
       reductionManager->declareProperty(

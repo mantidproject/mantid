@@ -1,4 +1,7 @@
-#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines, redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import numpy as np
 import re
 import os.path
@@ -82,7 +85,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                              doc='Ignore frequencies below the this threshold. Default is 3.0')
 
         self.declareProperty(StringArrayProperty('Ions', Direction.Input),
-                             doc="List of Ions to use to calculate partial density of states."\
+                             doc="List of Ions to use to calculate partial density of states."
                                  "If left blank, total density of states will be calculated")
 
         self.declareProperty(name='SumContributions', defaultValue=False,
@@ -354,7 +357,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         else:
             s_api.DeleteWorkspace(sum_workspace)
-            partial_ws_names = [ws.getName() for ws in partial_workspaces]
+            partial_ws_names = [ws.name() for ws in partial_workspaces]
             # Sort workspaces
             if calc_ion_index:
                 # Sort by index after '_'
@@ -387,7 +390,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-
     def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
         Converts fractional coordinates to Cartesian coordinates given the unit
@@ -415,7 +417,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         if PEAK_WIDTH_ENERGY_FLAG in self._peak_width:
             try:
-                peak_widths = np.fromiter([eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p])))\
+                peak_widths = np.fromiter([eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p])))
                                            for p in peaks], dtype=float)
             except SyntaxError:
                 raise ValueError('Invalid peak width function (must be either a decimal or function containing "energy")')
@@ -525,7 +527,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 scale_alg.setProperty('Factor', scattering_x_section)
                 scale_alg.execute()
 
-
             rename_alg = self.createChildAlgorithm('RenameWorkspace')
             rename_alg.setProperty('InputWorkspace',self._out_ws_name)
             rename_alg.setProperty('OutputWorkspace',partial_ws_name)
@@ -611,7 +612,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         intensities = []
         for block_vectors in eigenvectors:
             block_intensities = []
-            for mode in xrange(self._num_branches):
+            for mode in range(self._num_branches):
                 # Only select vectors for the ions we're interested in
                 lower, upper = mode * self._num_ions, (mode + 1) * self._num_ions
                 vectors = block_vectors[lower:upper]

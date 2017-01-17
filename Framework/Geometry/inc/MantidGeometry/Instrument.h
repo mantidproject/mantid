@@ -1,9 +1,6 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENT_H_
 #define MANTID_GEOMETRY_INSTRUMENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/IDetector.h"
@@ -14,16 +11,18 @@
 
 #include <string>
 #include <map>
+#include <tuple>
+#include <vector>
 
 namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
+namespace Beamline {
+class DetectorInfo;
+}
 namespace Geometry {
 
-//------------------------------------------------------------------
-// Forward declarations
-//------------------------------------------------------------------
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -86,11 +85,9 @@ public:
   const IDetector *getBaseDetector(const detid_t &detector_id) const;
   bool isMonitor(const detid_t &detector_id) const;
   bool isMonitor(const std::set<detid_t> &detector_ids) const;
-  bool isDetectorMasked(const detid_t &detector_id) const;
-  bool isDetectorMasked(const std::set<detid_t> &detector_ids) const;
 
   /// Returns a pointer to the geometrical object for the given set of IDs
-  IDetector_const_sptr getDetectorG(const std::vector<detid_t> &det_ids) const;
+  IDetector_const_sptr getDetectorG(const std::set<detid_t> &det_ids) const;
 
   /// Returns a list of Detectors for the given detectors ids
   std::vector<IDetector_const_sptr>
@@ -120,12 +117,14 @@ public:
   /// child comp.)
   /// to be a Detector component by adding it to _detectorCache
   void markAsDetector(const IDetector *);
+  void markAsDetectorIncomplete(const IDetector *);
+  void markAsDetectorFinalize();
 
   /// mark a Component which has already been added to the Instrument (as a
   /// child comp.)
   /// to be a monitor and also add it to _detectorCache for possible later
   /// retrieval
-  void markAsMonitor(IDetector *);
+  void markAsMonitor(const IDetector *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -144,8 +143,6 @@ public:
 
   /// Returns a list containing the detector ids of monitors
   std::vector<detid_t> getMonitors() const;
-  /// Returns the number of monitors
-  size_t numMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;
@@ -219,7 +216,7 @@ public:
   static double calcConversion(const double l1, const Kernel::V3D &beamline,
                                const double beamline_norm,
                                const Kernel::V3D &samplePos,
-                               const IDetector_const_sptr &det,
+                               const Kernel::V3D &detectorPos,
                                const double offset);
 
   static double
@@ -253,6 +250,13 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
+  bool isMonitorViaIndex(const size_t index) const;
+
+  bool hasDetectorInfo() const;
+  const Beamline::DetectorInfo &detectorInfo() const;
+  void
+  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+
 private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file,
@@ -265,8 +269,9 @@ private:
   void appendPlottable(const CompAssembly &ca,
                        std::vector<IObjComponent_const_sptr> &lst) const;
 
-  /// Map which holds detector-IDs and pointers to detector components
-  std::map<detid_t, IDetector_const_sptr> m_detectorCache;
+  /// Map which holds detector-IDs and pointers to detector components, and
+  /// monitor flags.
+  std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
@@ -295,9 +300,6 @@ private:
   /// specified
   /// by the user in radian (not degrees)
   std::map<std::string, std::string> m_logfileUnit;
-
-  /// a vector holding detector ids of monitor s
-  std::vector<detid_t> m_monitorCache;
 
   /// Stores the default type of the instrument view: 3D or one of the
   /// "unwrapped"
@@ -329,6 +331,10 @@ private:
 
   /// Pointer to the reference frame object.
   boost::shared_ptr<ReferenceFrame> m_referenceFrame;
+
+  /// Pointer to the DetectorInfo object. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 };
 
 } // namespace Geometry

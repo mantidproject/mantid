@@ -15,17 +15,18 @@ cd "`dirname "${SCRIPT_PATH}"`" > /dev/null
 SCRIPT_PATH="`pwd`";
 popd  > /dev/null
 
-PROG=${SCRIPT_PATH}/bin/ipython
+PROG=${SCRIPT_PATH}/bin/ipython@PYTHON_VERSION_MAJOR@
 
 # Define extra libraries for python
 LOCAL_PYTHONPATH=${SCRIPT_PATH}
+LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
 	LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
-    PROG=$(command -v python)
+    PROG=$(command -v python@PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@)
 fi
 
 # Define MANTIDPATH

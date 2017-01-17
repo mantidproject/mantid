@@ -9,6 +9,9 @@
 #include "MantidAPI/CompositeFunction.h"
 
 namespace Mantid {
+namespace API {
+class DetectorInfo;
+}
 namespace MDAlgorithms {
 
 /** Integrate single-crystal peaks in reciprocal-space.
@@ -44,7 +47,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
   /// Calculate if this Q is on a detector
-  void calculateE1(Geometry::Instrument_const_sptr inst);
+  void calculateE1(const API::DetectorInfo &detectorInfo);
   double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);

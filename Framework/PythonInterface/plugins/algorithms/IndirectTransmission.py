@@ -30,14 +30,12 @@ class IndirectTransmission(PythonAlgorithm):
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates the scattering & transmission for Indirect Geometry spectrometers."
 
-
     def PyInit(self):
         self.declareProperty(name='Instrument', defaultValue='IRIS',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION']),
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION', 'IN16B']),
                              doc='Instrument')
 
         self.declareProperty(name='Analyser', defaultValue='graphite',
@@ -45,14 +43,18 @@ class IndirectTransmission(PythonAlgorithm):
                              doc='Analyser')
 
         self.declareProperty(name='Reflection', defaultValue='002',
-                             validator=StringListValidator(['002', '004', '006', '111']),
+                             validator=StringListValidator(['002', '004', '006', '111', '311']),
                              doc='Reflection')
 
         self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='NumberDensity', defaultValue=0.1,
-                             doc='Number denisty (atoms/Angstrom^3). Default=0.1')
+        self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number density')
+
+        self.declareProperty(name='Density', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3). Default=0.1')
 
         self.declareProperty(name='Thickness', defaultValue=0.1,
                              doc='Sample thickness (cm). Default=0.1')
@@ -66,7 +68,11 @@ class IndirectTransmission(PythonAlgorithm):
         analyser = self.getPropertyValue('Analyser')
         reflection = self.getPropertyValue('Reflection')
         formula = self.getPropertyValue('ChemicalFormula')
-        density = self.getPropertyValue('NumberDensity')
+        densityType = self.getPropertyValue('DensityType')
+        density = self.getProperty('Density').value
+        if densityType == 'Mass Density':
+            mat = MaterialBuilder().setFormula(formula).setMassDensity(density).build()
+            density = mat.numberDensity
         thickness = self.getPropertyValue('Thickness')
 
         # Create an empty instrument workspace
@@ -150,7 +156,6 @@ class IndirectTransmission(PythonAlgorithm):
         DeleteWorkspace(workspace)
 
         self.setProperty("OutputWorkspace", table_ws)
-
 
     def _get_efixed(self, workspace):
         """

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -14,6 +15,8 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -51,7 +54,9 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RefinePowderInstrumentParameters : public API::Algorithm {
+class DLLExport RefinePowderInstrumentParameters
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   RefinePowderInstrumentParameters();
 
@@ -138,16 +143,17 @@ private:
   double calculateD2TOFFunction(API::IFunction_sptr func,
                                 API::FunctionDomain1DVector domain,
                                 API::FunctionValues &values,
-                                const Mantid::MantidVec &rawY,
-                                const Mantid::MantidVec &rawE);
+                                const Mantid::HistogramData::HistogramY &rawY,
+                                const Mantid::HistogramData::HistogramE &rawE);
 
   /// Calculate d-space value from peak's miller index for thermal neutron
   // double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
-  /// Calcualte value n for thermal neutron peak profile
-  void calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
-                                      std::vector<double> vec_d,
-                                      std::vector<double> &vec_n);
+  /// Calculate value n for thermal neutron peak profile
+  void
+  calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
+                                 const Mantid::HistogramData::HistogramX &xVals,
+                                 std::vector<double> &vec_n);
 
   //--------------- Class Variables -------------------
   /// Output Workspace containing the dspacing ~ TOF peak positions

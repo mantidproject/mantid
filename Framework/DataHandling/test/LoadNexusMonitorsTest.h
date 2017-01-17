@@ -4,8 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/LoadNexusMonitors2.h"
-#include "MantidAPI/Sample.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -52,12 +55,11 @@ public:
     TS_ASSERT_EQUALS(WS->dataE(1).size(), 200001);
     TS_ASSERT_DELTA(WS->dataE(1)[3412], 14.03567, 1e-4);
     // Check geometry for a monitor
-    IDetector_const_sptr mon = WS->getDetector(2);
-    TS_ASSERT(mon->isMonitor());
-    TS_ASSERT_EQUALS(mon->getID(), -3);
-    boost::shared_ptr<const IComponent> sample =
-        WS->getInstrument()->getSample();
-    TS_ASSERT_DELTA(mon->getDistance(*sample), 1.426, 1e-6);
+    const auto &specInfo = WS->spectrumInfo();
+    TS_ASSERT(specInfo.isMonitor(2));
+    TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
+    TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)),
+                    1.426, 1e-6);
     // Check if filename is saved
     TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),
                      WS->run().getProperty("Filename")->value());

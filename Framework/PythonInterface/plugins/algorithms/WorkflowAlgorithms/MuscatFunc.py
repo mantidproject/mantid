@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 
+
 class MuscatFunc(PythonAlgorithm):
 
     def category(self):

@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
@@ -22,7 +23,6 @@ DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
 const double BIGNUMBER = 1.0E100;
 
-//----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::init() {
 
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
@@ -76,7 +76,6 @@ void ConvertCWPDMDToSpectra::init() {
                   "is applied to the case that the bin size is small. ");
 }
 
-//----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::exec() {
   // Process input workspaces
   // input data workspace
@@ -464,8 +463,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                  << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
+                  << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -500,7 +499,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
             std::stringstream errss;
             errss << "Event " << iev << " has run ID as " << temprun << ". "
                   << "It has no corresponding ExperimentInfo in MDWorkspace "
-                  << mdws->name() << ".";
+                  << mdws->getName() << ".";
             throw std::runtime_error(errss.str());
           }
           currWavelength = miter->second;

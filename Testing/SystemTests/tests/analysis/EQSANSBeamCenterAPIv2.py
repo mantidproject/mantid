@@ -6,11 +6,13 @@ from mantid.api import *
 
 import os
 
+
 def do_cleanup():
     absfile = FileFinder.getFullPath("EQSANS_4061_event_reduction.log")
     if os.path.exists(absfile):
         os.remove(absfile)
     return True
+
 
 class EQSANSBeamCenter(stresstesting.MantidStressTest):
 
@@ -47,6 +49,7 @@ class EQSANSBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_4061_event_frame2_Iq", 'EQSANSBeamCenter.nxs'
+
 
 class EQSANSBeamCenterEvent(EQSANSBeamCenter):
 

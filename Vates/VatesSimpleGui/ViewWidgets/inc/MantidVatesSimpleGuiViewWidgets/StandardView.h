@@ -53,8 +53,9 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView
 
 public:
   /// Default constructor.
-  StandardView(QWidget *parent = 0,
-               RebinnedSourcesManager *rebinnedSourcesManager = 0);
+  StandardView(QWidget *parent = nullptr,
+               RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
+               bool createRenderProxy = true);
   /// Default destructor.
   ~StandardView() override;
 
@@ -76,6 +77,10 @@ public:
   void updateView() override;
   /// @see ViewBase::closeSubWindows
   void closeSubWindows() override;
+  /// @see ViewBase::setView
+  void setView(pqRenderView *view) override;
+  /// @see ViewBase::getViewType
+  ModeControlWidget::Views getViewType() override;
 
 public slots:
   /// Listen to a change in the active source.
@@ -84,6 +89,8 @@ public slots:
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
+  /// Apply the threshold filter to the current dataset.
+  void onThresholdButtonClicked();
   /// Perform operations when rendering is done.
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.

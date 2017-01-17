@@ -190,12 +190,12 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         self.failed_tests = []
         for current_item in dir(self):
             m = getattr(self, current_item)
-            if current_item.startswith("test_") and type(m) == types.MethodType:
+            if current_item.startswith("test_") and isinstance(m, types.MethodType):
                 self.n_tests += 1
                 t = TestStub(m)
                 result = t.run_test()
                 self._cleanup()
-                if result is None or result == True:
+                if result is None or result:
                     self.n_passed += 1
                 else:
                     self.failed_tests.append(current_item)
@@ -508,8 +508,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
-        property_manager = PropertyManagerDataService.retrieve(ReductionSingleton().get_reduction_table_name())
-        _p = property_manager.getProperty("TransmissionAlgorithm")
+        #property_manager = PropertyManagerDataService.retrieve(ReductionSingleton().get_reduction_table_name())
+        #_p = property_manager.getProperty("TransmissionAlgorithm")
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
         self.assertTrue(_check_result(ws, TEST_DIR + "reduced_transmission.txt", 0.0001))

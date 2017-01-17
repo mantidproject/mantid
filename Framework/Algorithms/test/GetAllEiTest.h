@@ -2,9 +2,9 @@
 #define GETALLEI_TEST_H_
 
 #include <memory>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GetAllEi.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -40,12 +40,11 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
   paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
 
   // test instrument parameters (obtained from workspace):
-  auto moderator = pInstrument->getSource();
-  auto detector1 = ws->getDetector(0);
-  auto detector2 = ws->getDetector(1);
-  double l_chop = chopper->getDistance(*moderator);
-  double l_mon1 = detector1->getDistance(*moderator);
-  double l_mon2 = detector2->getDistance(*moderator);
+  auto moderatorPosition = pInstrument->getSource()->getPos();
+  auto &spectrumInfo = ws->spectrumInfo();
+  double l_chop = chopper->getPos().distance(moderatorPosition);
+  double l_mon1 = spectrumInfo.position(0).distance(moderatorPosition);
+  double l_mon2 = spectrumInfo.position(1).distance(moderatorPosition);
   //,l_mon1(20-9),l_mon2(20-2);
   double t_chop(delay + inital_chop_phase / chopSpeed);
   double Period =
@@ -410,8 +409,9 @@ public:
     Mantid::DataObjects::Workspace2D_sptr tws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, 100,
                                                                      true);
-    auto det1 = tws->getDetector(0);
-    auto det2 = tws->getDetector(4);
+    auto &spectrumInfoT = tws->spectrumInfo();
+    auto det1TPosition = spectrumInfoT.position(0);
+    auto det2TPosition = spectrumInfoT.position(4);
     auto detID1 = tws->getSpectrum(0).getDetectorIDs();
     auto detID2 = tws->getSpectrum(4).getDetectorIDs();
 
@@ -424,12 +424,13 @@ public:
     size_t wsIndex0;
     auto wws = m_getAllEi.buildWorkspaceToFit(tws, wsIndex0);
 
-    auto det1p = wws->getDetector(0);
-    auto det2p = wws->getDetector(1);
+    auto &spectrumInfoW = wws->spectrumInfo();
+    auto det1WPosition = spectrumInfoW.position(0);
+    auto det2WPosition = spectrumInfoW.position(1);
     TSM_ASSERT_EQUALS("should be the same first detector position",
-                      det1p->getRelativePos(), det1->getRelativePos());
+                      det1WPosition, det1TPosition);
     TSM_ASSERT_EQUALS("should be the same second detector position",
-                      det2p->getRelativePos(), det2->getRelativePos());
+                      det2WPosition, det2TPosition);
 
     TSM_ASSERT_EQUALS("Detector's ID for the first spectrum and new workspace "
                       "should coincide",
@@ -443,8 +444,8 @@ public:
     auto Xsp2 = wws->getSpectrum(1).mutableX();
     size_t nSpectra = Xsp2.size();
     TS_ASSERT_EQUALS(nSpectra, 101);
-    TS_ASSERT(boost::math::isinf(Xsp1[nSpectra - 1]));
-    TS_ASSERT(boost::math::isinf(Xsp2[nSpectra - 1]));
+    TS_ASSERT(std::isinf(Xsp1[nSpectra - 1]));
+    TS_ASSERT(std::isinf(Xsp2[nSpectra - 1]));
 
     // for(size_t i=0;i<Xsp1.size();i++){
     //  TS_ASSERT_DELTA(Xsp1[i],Xsp2[i],1.e-6);

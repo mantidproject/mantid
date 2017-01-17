@@ -1,9 +1,11 @@
+from __future__ import (absolute_import, division, print_function)
 import xml.etree.ElementTree as XML
 import os.path
-from mantid.simpleapi import *
+
 
 class MissingSettings(Exception):
     pass
+
 
 class Settings(object):
 
@@ -25,8 +27,6 @@ class Settings(object):
         except:
             raise ValueError("The file %s does not contain valid XML" % filename)
 
-
-
     def __check_file(self, filename):
         path, extension = os.path.splitext(filename)
         if extension.lower().strip() != ".xml":
@@ -45,7 +45,7 @@ class Settings(object):
             if not value:
                 raise ValueError("Missing value for Setting element")
             temp[key] = value
-        self.__contents = dict(frozenset(temp.items()))
+        self.__contents = dict(frozenset(list(temp.items())))
 
     def get_all_entries(self):
         return self.__contents
@@ -55,5 +55,3 @@ class Settings(object):
 
     def get_contents_file(self):
         return self.__filename
-
-

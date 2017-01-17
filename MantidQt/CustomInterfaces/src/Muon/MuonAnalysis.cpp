@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,8 +17,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
@@ -564,8 +561,8 @@ void MuonAnalysis::runSaveGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
-  QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(
+  filter += ";;AllFiles (*)";
+  QString groupingFile = QFileDialog::getSaveFileName(
       this, "Save Grouping file as", prevPath, filter);
 
   // Add extension if the groupingFile specified doesn't have one. (Solving
@@ -603,7 +600,7 @@ void MuonAnalysis::runLoadGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
+  filter += ";;AllFiles (*)";
   QString groupingFile = QFileDialog::getOpenFileName(
       this, "Load Grouping file", prevPath, filter);
   if (groupingFile.isEmpty() || QFileInfo(groupingFile).isDir())
@@ -1933,10 +1930,13 @@ void MuonAnalysis::startUpLook() {
       m_uiForm.groupTable->setItem(i, 0, it);
     }
   }
+
+  // When first started, no data has yet been loaded
+  noDataAvailable();
 }
 
 /**
-* Time zero returend in ms
+* Time zero returned in ms
 */
 double MuonAnalysis::timeZero() {
   return getValidatedDouble(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT,
@@ -2081,9 +2081,12 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
-  // Set compatibility mode on/off as appropriate
-  const bool isCompMode = m_optionTab->getCompatibilityMode();
-  m_fitFunctionPresenter->setCompatibilityMode(isCompMode);
+  connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateDataPresenterOverwrite(int)));
+  m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
+  // Set multi fit mode on/off as appropriate
+  const auto &multiFitState = m_optionTab->getMultiFitState();
+  m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
 
 /**
@@ -2100,36 +2103,32 @@ void MuonAnalysis::allowLoading(bool enabled) {
 *   Check to see if the appending option is true when the previous button has
 * been pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingPreviousRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty()) {
-    return;
-  }
-
-  allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(-1);
-  } else {
-    // Subtact one from the current run and load
-    changeRun(-1);
-  }
-}
+void MuonAnalysis::checkAppendingPreviousRun() { checkAppendingRun(-1); }
 
 /**
 *   Check to see if the appending option is true when the next button has been
 * pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingNextRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty())
+void MuonAnalysis::checkAppendingNextRun() { checkAppendingRun(1); }
+
+/**
+ * Check to see if the appending option is true when the next/previous button
+ * has been pressed, and load accordingly
+ * @param direction :: +1 for "next", -1 for "previous"
+ */
+void MuonAnalysis::checkAppendingRun(const int direction) {
+  const auto &runPath = m_uiForm.mwRunFiles->getText();
+  if (runPath.isEmpty()) {
     return;
+  }
 
+  const int sign = direction < 0 ? -1 : 1;
   allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(1);
+  const auto runString = runPath.split(Poco::Path::separator()).last();
+  if (runString.contains("-")) {
+    setAppendingRun(sign); // append next/previous run
   } else {
-    // Add one to current run and laod
-    changeRun(1);
+    changeRun(sign); // replace with next/previous run
   }
 }
 
@@ -2206,8 +2205,20 @@ void MuonAnalysis::setAppendingRun(int inc) {
 void MuonAnalysis::changeRun(int amountToChange) {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
-  if ((currentFile.isEmpty()))
-    currentFile = m_previousFilenames[0];
+  if ((currentFile.isEmpty())) {
+    if (m_previousFilenames.isEmpty()) {
+      // not a valid file, and no previous valid files
+      QMessageBox::warning(this, tr("Muon Analysis"),
+                           tr("Unable to open the file.\n"
+                              "and no previous valid files available."),
+                           QMessageBox::Ok, QMessageBox::Ok);
+      allowLoading(true);
+      return;
+    } else {
+      // blank box - use previous run
+      currentFile = m_previousFilenames[0];
+    }
+  }
 
   QString run("");
   int runSize(-1);
@@ -2422,8 +2433,8 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(settingsTabUpdatePlot()));
   connect(m_optionTab, SIGNAL(plotStyleChanged()), this,
           SLOT(updateCurrentPlotStyle()));
-  connect(m_optionTab, SIGNAL(compatibilityModeChanged(int)), this,
-          SLOT(compatibilityModeChanged(int)));
+  connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
+          SLOT(multiFitCheckboxChanged(int)));
 }
 
 /**
@@ -2824,6 +2835,7 @@ void MuonAnalysis::noDataAvailable() {
   m_uiForm.groupTablePlotButton->setEnabled(false);
   m_uiForm.pairTablePlotButton->setEnabled(false);
   m_uiForm.guessAlphaButton->setEnabled(false);
+  setAnalysisTabsEnabled(false);
 }
 
 /**
@@ -2834,6 +2846,7 @@ void MuonAnalysis::nowDataAvailable() {
   m_uiForm.groupTablePlotButton->setEnabled(true);
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
+  setAnalysisTabsEnabled(true);
 }
 
 void MuonAnalysis::openDirectoryDialog() {
@@ -2900,7 +2913,7 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataToFitChanged() {
-  if (m_fitDataPresenter) {
+  if (m_fitDataPresenter && m_loaded) { // Only act if some data is loaded
     m_fitDataPresenter->setGrouping(m_groupingHelper.parseGroupingTable());
     m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
     // Set busy cursor while workspaces are being created
@@ -2960,12 +2973,41 @@ void MuonAnalysis::setLoadCurrentRunEnabled(bool enabled) {
 }
 
 /**
- * Called when the "compatibility mode" checkbox is changed on the settings tab.
+ * Called when the "enable multiple fitting" checkbox is changed (settings tab.)
  * Forward this to the fit function presenter.
  */
-void MuonAnalysis::compatibilityModeChanged(int state) {
-  m_fitFunctionPresenter->setCompatibilityMode(state ==
-                                               Qt::CheckState::Checked);
+void MuonAnalysis::multiFitCheckboxChanged(int state) {
+  const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
+                                                ? Muon::MultiFitState::Enabled
+                                                : Muon::MultiFitState::Disabled;
+  m_fitFunctionPresenter->setMultiFitState(multiFitState);
+}
+
+/**
+ * Update the fit data presenter with current overwrite setting
+ * @param state :: [input] (not used) Setting of combo box
+ */
+void MuonAnalysis::updateDataPresenterOverwrite(int state) {
+  Q_UNUSED(state);
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
+  }
+}
+
+/**
+ * Set the following tabs enabled/disabled:
+ * - Grouping Options
+ * - Data Analysis
+ * (based on whether data is available or not)
+ * @param enabled :: [input] Whether to enable or disable tabs
+ */
+void MuonAnalysis::setAnalysisTabsEnabled(const bool enabled) {
+  const std::vector<QWidget *> tabs{m_uiForm.DataAnalysis,
+                                    m_uiForm.GroupingOptions};
+  for (auto *tab : tabs) {
+    const auto &index = m_uiForm.tabWidget->indexOf(tab);
+    m_uiForm.tabWidget->setTabEnabled(index, enabled);
+  }
 }
 
 } // namespace MantidQt

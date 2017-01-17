@@ -1,7 +1,6 @@
 #include "MantidGeometry/Crystal/NiggliCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Quat.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <stdexcept>
 #include <algorithm>

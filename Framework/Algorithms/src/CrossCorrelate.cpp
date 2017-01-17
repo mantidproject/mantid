@@ -77,7 +77,7 @@ void CrossCorrelate::exec() {
   auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(),
                             std::bind2nd(std::greater<double>(), xmin));
   if (minIt == referenceX.cend())
-    throw std::runtime_error("No daWorkspaceIndexMaxta above XMin");
+    throw std::runtime_error("No data above XMin");
   auto maxIt = std::find_if(minIt, referenceX.cend(),
                             std::bind2nd(std::greater<double>(), xmax));
   if (minIt == maxIt)
@@ -135,6 +135,9 @@ void CrossCorrelate::exec() {
   // Create a 2DWorkspace that will hold the result
   const int nY = static_cast<int>(refY.size());
   const int npoints = 2 * nY - 3;
+  if (npoints < 1)
+    throw std::runtime_error("Range is not valid");
+
   MatrixWorkspace_sptr out =
       WorkspaceFactory::Instance().create(inputWS, nspecs, npoints, npoints);
 
@@ -169,7 +172,7 @@ void CrossCorrelate::exec() {
   // Initialise the progress reporting object
   out->mutableX(0) = XX;
   m_progress = new Progress(this, 0.0, 1.0, nspecs);
-  PARALLEL_FOR2(inputWS, out)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {
     PARALLEL_START_INTERUPT_REGION

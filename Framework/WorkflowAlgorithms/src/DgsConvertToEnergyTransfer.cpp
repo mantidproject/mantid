@@ -1,6 +1,6 @@
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -10,6 +10,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -30,7 +31,6 @@ namespace WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsConvertToEnergyTransfer)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsConvertToEnergyTransfer::name() const {
   return "DgsConvertToEnergyTransfer";
@@ -44,9 +44,6 @@ const std::string DgsConvertToEnergyTransfer::category() const {
   return "Workflow\\Inelastic\\UsesPropertyManager";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DgsConvertToEnergyTransfer::init() {
@@ -87,7 +84,6 @@ void DgsConvertToEnergyTransfer::init() {
                         Direction::Input);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void DgsConvertToEnergyTransfer::exec() {
@@ -352,6 +348,7 @@ void DgsConvertToEnergyTransfer::exec() {
         rebin->setProperty("OutputWorkspace", origBkgWsName);
         rebin->setProperty("Params", params);
         rebin->setProperty("PreserveEvents", false);
+        rebin->setProperty("IgnoreBinErrors", true);
         rebin->executeAsChildAlg();
         MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
 
@@ -469,6 +466,7 @@ void DgsConvertToEnergyTransfer::exec() {
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("Params", etBinning);
+  rebin->setProperty("IgnoreBinErrors", true);
   rebin->setProperty("PreserveEvents", preserveEvents);
   rebin->executeAsChildAlg();
   outputWS = rebin->getProperty("OutputWorkspace");
@@ -523,6 +521,7 @@ void DgsConvertToEnergyTransfer::exec() {
   g_log.notice() << "Rebinning data\n";
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
+  rebin->setProperty("IgnoreBinErrors", true);
   if (sofphieIsDistribution) {
     rebin->setProperty("PreserveEvents", false);
   }

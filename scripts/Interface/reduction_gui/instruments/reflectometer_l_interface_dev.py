@@ -8,6 +8,7 @@ try:
 except:
     HAS_STITCHER = False
 
+
 class REFLInterface(InstrumentInterface):
     """
         Defines the widgets for REF_L reduction

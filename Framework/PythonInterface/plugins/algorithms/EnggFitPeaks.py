@@ -5,6 +5,7 @@ import math
 from mantid.kernel import *
 from mantid.api import *
 
+
 class EnggFitPeaks(PythonAlgorithm):
     EXPECTED_DIM_TYPE = 'Time-of-flight'
     PEAK_TYPE = 'BackToBackExponential'
@@ -65,7 +66,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Get expected peaks in TOF for the detector
         in_wks = self.getProperty("InputWorkspace").value
-        dimType = in_wks.getXDimension().getName()
+        dimType = in_wks.getXDimension().name
         if self.EXPECTED_DIM_TYPE != dimType:
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
                              "the X dimension of the input workspace is: '%s'" % (self.EXPECTED_DIM_TYPE, dimType))
@@ -305,10 +306,10 @@ class EnggFitPeaks(PythonAlgorithm):
         run = in_wks.getRun()
         if 1 == in_wks.getNumberHistograms() and run.hasProperty('difc'):
             difc = run.getLogData('difc').value
-            if run.hasProperty('difa'):
-                _difa = run.getLogData('difa').value
-            else:
-                _difa = 0
+            #if run.hasProperty('difa'):
+            #    _difa = run.getLogData('difa').value
+            #else:
+            #    _difa = 0
             if run.hasProperty('tzero'):
                 tzero = run.getLogData('tzero').value
             else:
@@ -393,10 +394,8 @@ class EnggFitPeaks(PythonAlgorithm):
         detTwoTheta = ws.detectorTwoTheta(det)
 
         # hard coded equation to convert dSpacing -> TOF for the single detector
-        dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
-
         # Values (in principle, expected peak positions) in TOF for the detector
-        tof_values = [dSpacingToTof(ep) for ep in dsp_values]
+        tof_values = [252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * ep for ep in dsp_values]
         return tof_values
 
     def _create_fitted_peaks_table(self, tbl_name):
@@ -404,7 +403,7 @@ class EnggFitPeaks(PythonAlgorithm):
         Creates a table where to put peak fitting results to
 
         @param tbl_name :: name of the table workspace (can be empty)
-    	"""
+        """
         table = None
         if not tbl_name:
             alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
@@ -500,7 +499,7 @@ class EnggFitPeaks(PythonAlgorithm):
                 (0 != fitted_params['X0_Err'] and 0 != fitted_params['A_Err'] and
                  0 != fitted_params['B_Err'] and 0 != fitted_params['S_Err'] and
                  0 != fitted_params['I_Err'])
-               )
+                )
 
     def _add_parameters_to_map(self, param_map, param_table):
         """

@@ -1,21 +1,22 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import sip
 import os
 import sys
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 import ui.reflectometer.ui_refl_stitching
 
 import mantidplot
 from mantid.simpleapi import *
-from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
+from LargeScaleStructures.data_stitching import DataSet, Stitcher
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
+
 class StitcherState(BaseScriptElement):
     def __init__(self):
         pass
+
 
 class ReflData(object):
     name = ""
@@ -205,6 +206,7 @@ class ReflData(object):
     def connect_to_scale(self, call_back):
         self._call_back = call_back
 
+
 class StitcherWidget(BaseWidget):
     """
         Widget that present a data catalog to the user
@@ -281,7 +283,6 @@ class StitcherWidget(BaseWidget):
             item.set_scale(ref)
         self.plot_result()
 
-
     def _email_options_changed(self):
         """
             Send-email checkbox has changed states
@@ -323,9 +324,9 @@ class StitcherWidget(BaseWidget):
             message = "Could not scale data\n  %s" % sys.exc_value
             if self._content.scale_to_one_chk.isChecked():
                 message += "\n\nCheck your Q range near the critical edge"
-            QtGui.QMessageBox.warning(self,\
-                "Error scaling data",\
-                message)
+            QtGui.QMessageBox.warning(self,
+                                      "Error scaling data",
+                                      message)
 
     def _pick_specular_ridge(self):
         from LargeScaleStructures import data_stitching
@@ -385,9 +386,9 @@ class StitcherWidget(BaseWidget):
 
             ref_data = item.get_user_data(ref_pol)
             if ref_data is None:
-                QtGui.QMessageBox.warning(self,\
-                    "Invalid choice of reference cross-section",\
-                    "The selected cross-section is empty, please select another one")
+                QtGui.QMessageBox.warning(self,
+                                          "Invalid choice of reference cross-section",
+                                          "The selected cross-section is empty, please select another one")
                 return
             s.append(ref_data)
 
@@ -469,8 +470,8 @@ class StitcherWidget(BaseWidget):
                     self._stitcher.save_combined(fname, as_canSAS=False)
                     file_list.append(fname)
                 else:
-                    pol_list = ["Off_Off", "On_Off",\
-                               "Off_On", "On_On"]
+                    pol_list = ["Off_Off", "On_Off",
+                                "Off_On", "On_On"]
                     for pol in pol_list:
                         try:
                             if AnalysisDataService.doesExist('ref_'+pol):
@@ -549,8 +550,7 @@ class StitcherWidget(BaseWidget):
                     _list_name.append(_name)
                     _list_ts.append(_ts)
 
-                _name_ts = zip(_list_ts, _list_name)
-                _name_ts.sort()
+                _name_ts = sorted(zip(_list_ts, _list_name))
                 _ts_sorted, _name_sorted = zip(*_name_ts)
 
                 for item in _name_sorted:
@@ -558,7 +558,8 @@ class StitcherWidget(BaseWidget):
 
         else: #REF_M
             for item in AnalysisDataService.getObjectNames():
-                if item.startswith("reflectivity") and not item.endswith("scaled") and item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
+                if item.startswith("reflectivity") and not item.endswith("scaled") and \
+                   item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
                     self._add_entry(item)
 
         if len(self._workspace_list)>0:

@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 
 #include <Poco/DOM/Document.h>
@@ -510,9 +511,9 @@ void LoadGroupXMLFile::parseXML() {
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
+        if (valfound && !value.empty())
           finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;
@@ -533,9 +534,9 @@ void LoadGroupXMLFile::parseXML() {
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
+        if (valfound && !value.empty())
           finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;
@@ -558,9 +559,9 @@ void LoadGroupXMLFile::parseXML() {
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
+        if (valfound && !value.empty())
           finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;

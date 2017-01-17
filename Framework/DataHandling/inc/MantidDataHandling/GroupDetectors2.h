@@ -1,12 +1,10 @@
 #ifndef MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 #define MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <map>
 
@@ -216,6 +214,10 @@ private:
   size_t formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
                          DataObjects::EventWorkspace_sptr outputWS,
                          const double prog4Copy);
+
+  /// Returns true if detectors exists and is masked
+  bool isMaskedDetector(const API::SpectrumInfo &detector,
+                        const size_t index) const;
 
   /// Copy the ungrouped spectra from the input workspace to the output
   template <class TIn, class TOut>

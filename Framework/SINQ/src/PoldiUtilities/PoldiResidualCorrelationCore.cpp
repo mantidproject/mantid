@@ -1,4 +1,5 @@
 #include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
+#include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <numeric>
 

@@ -26,7 +26,6 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         """
         return "Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA."
 
-
     def PyInit(self):
         """ Python initialization:  Define input parameters
         """
@@ -57,7 +56,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
 
         i=0
-        while __w.getDetector(i).isMonitor():
+        spectrumInfo = __w.spectrumInfo()
+        while spectrumInfo.isMonitor(i):
             i += 1
         #i is the index of the first true detector
         #now, crop the workspace of the monitors
@@ -71,11 +71,9 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
 
         banks = numdet/8/128
 
-
         f = open(filename,'w')
 
         f.write('<?xml version="1.0" encoding="UTF-8" ?>\n<detector-grouping instrument="'+instrument+'">\n')
-
 
         groupnum = 0
         for i in numpy.arange(banks):
@@ -94,7 +92,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
                     groupnum += 1
         f.write('</detector-grouping>')
         f.close()
-        mantid.simpleapi.DeleteWorkspace(__w.getName())
+        mantid.simpleapi.DeleteWorkspace(__w.name())
         return
 
 mantid.api.AlgorithmFactory.subscribe(GenerateGroupingSNSInelastic)

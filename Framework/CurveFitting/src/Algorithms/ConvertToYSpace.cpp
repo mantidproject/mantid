@@ -4,12 +4,14 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -28,14 +30,12 @@ const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
 */
 ConvertToYSpace::ConvertToYSpace()
     : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),
       m_outputWS(), m_qOutputWS() {}
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToYSpace::name() const { return "ConvertToYSpace"; }
 
@@ -47,9 +47,6 @@ const std::string ConvertToYSpace::category() const {
   return "Transforms\\Units";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /**
 * @param ws The workspace with attached instrument
 * @param index Index of the spectrum
@@ -200,16 +197,26 @@ void ConvertToYSpace::exec() {
   const int64_t nreports = nhist;
   auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
 
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
+  SpectrumInfo *qSpectrumInfo{nullptr};
+  if (m_qOutputWS)
+    qSpectrumInfo = &m_qOutputWS->mutableSpectrumInfo();
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < nhist; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     if (!convert(i)) {
       g_log.warning("No detector defined for index=" + std::to_string(i) +
                     ". Zeroing spectrum.");
-      m_outputWS->maskWorkspaceIndex(i);
-      if (m_qOutputWS)
-        m_qOutputWS->maskWorkspaceIndex(i);
+      m_outputWS->getSpectrum(i).clearData();
+      PARALLEL_CRITICAL(setMasked) {
+        spectrumInfo.setMasked(i, true);
+        if (m_qOutputWS) {
+          m_qOutputWS->getSpectrum(i).clearData();
+          qSpectrumInfo->setMasked(i, true);
+        }
+      }
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -235,12 +242,12 @@ bool ConvertToYSpace::convert(const size_t index) {
     const double k1 = std::sqrt(detPar.efixed /
                                 PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
-    auto &outX = m_outputWS->dataX(index);
-    auto &outY = m_outputWS->dataY(index);
-    auto &outE = m_outputWS->dataE(index);
-    const auto &inX = m_inputWS->readX(index);
-    const auto &inY = m_inputWS->readY(index);
-    const auto &inE = m_inputWS->readE(index);
+    auto &outX = m_outputWS->mutableX(index);
+    auto &outY = m_outputWS->mutableY(index);
+    auto &outE = m_outputWS->mutableE(index);
+    const auto &inX = m_inputWS->x(index);
+    const auto &inY = m_inputWS->y(index);
+    const auto &inE = m_inputWS->e(index);
 
     // The t->y mapping flips the order of the axis so we need to reverse it to
     // have a monotonically increasing axis
@@ -255,8 +262,8 @@ bool ConvertToYSpace::convert(const size_t index) {
       outE[outIndex] = prefactor * inE[j];
 
       if (m_qOutputWS) {
-        m_qOutputWS->dataX(index)[outIndex] = ys;
-        m_qOutputWS->dataY(index)[outIndex] = qs;
+        m_qOutputWS->mutableX(index)[outIndex] = ys;
+        m_qOutputWS->mutableY(index)[outIndex] = qs;
       }
     }
     return true;

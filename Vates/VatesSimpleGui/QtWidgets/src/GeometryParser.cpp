@@ -23,7 +23,7 @@ GeometryParser::GeometryParser(const char *xml) {
   this->pDoc = parser.parseString(Poco::XML::XMLString(xml));
 }
 
-AxisInformation *GeometryParser::getAxisInfo(const std::string dimension) {
+AxisInformation *GeometryParser::getAxisInfo(const std::string &dimension) {
   AxisInformation *axis = new AxisInformation();
 
   Poco::AutoPtr<Poco::XML::NodeList> pNodes =
@@ -49,7 +49,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension) {
   title = label;
   for (unsigned long int j = 0; j < cNodes->length(); ++j) {
     Poco::XML::Node *cNode = cNodes->item(j);
-    Poco::XML::XMLString elem = cNode->nodeName();
+    const Poco::XML::XMLString &elem = cNode->nodeName();
     // Keeping below around in case we go back to using axis name
     /*
         if (elem == Poco::XML::XMLString("Name"))
@@ -72,7 +72,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension) {
   return axis;
 }
 
-double GeometryParser::convertBounds(Poco::XML::XMLString val) {
+double GeometryParser::convertBounds(const Poco::XML::XMLString &val) {
   double temp;
   std::stringstream number(val);
   number >> temp;

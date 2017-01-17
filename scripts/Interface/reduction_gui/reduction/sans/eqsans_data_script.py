@@ -1,10 +1,9 @@
 """
     Data set options for EQSANS reduction
 """
-import xml.dom.minidom
-from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.eqsans_sample_script import SampleData as BaseSampleData
 from reduction_gui.reduction.sans.eqsans_background_script import Background
+
 
 class DataSets(BaseSampleData):
 

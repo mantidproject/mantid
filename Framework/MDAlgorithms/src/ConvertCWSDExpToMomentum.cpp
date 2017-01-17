@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
@@ -6,6 +7,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidAPI/FileProperty.h"
@@ -21,7 +23,6 @@ namespace MDAlgorithms {
 
 DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
@@ -29,7 +30,6 @@ ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
       m_iMonitorCounts(4), m_iTime(5), m_setQRange(true), m_isBaseName(false),
       m_removeBackground(false) {}
 
-//----------------------------------------------------------------------------------------------
 /** Init to declare property
  */
 void ConvertCWSDExpToMomentum::init() {
@@ -37,6 +37,21 @@ void ConvertCWSDExpToMomentum::init() {
       make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "",
                                                       Direction::Input),
       "Name of table workspace for data file names in the experiment.");
+
+  declareProperty(
+      "DetectorSampleDistanceShift", 0.0,
+      "Amount of shift in sample-detector distance from 0.3750 meter.");
+
+  declareProperty(
+      "DetectorCenterXShift", 0.0,
+      "Amount of shift of detector center in X-direction from (115, 128).");
+
+  declareProperty(
+      "DetectorCenterYShift", 0.0,
+      "Amount of shift of detector center in Y-direction from (115, 128).");
+
+  declareProperty("UserDefinedWavelength", EMPTY_DBL(),
+                  "User defined wave length if it is specified.");
 
   declareProperty("CreateVirtualInstrument", false,
                   "Flag to create virtual instrument.");
@@ -88,10 +103,13 @@ void ConvertCWSDExpToMomentum::exec() {
     g_log.error() << "Importing error: " << errmsg << "\n";
     throw std::runtime_error(errmsg);
   }
+  m_detSampleDistanceShift = getProperty("DetectorSampleDistanceShift");
+  m_detXShift = getProperty("DetectorCenterXShift");
+  m_detYShift = getProperty("DetectorCenterYShift");
 
   // background
   std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
-  if (bkgdwsname.size() > 0) {
+  if (!bkgdwsname.empty()) {
     m_removeBackground = true;
     m_backgroundWS = getProperty("BackgroundWorkspace");
     // check background
@@ -215,7 +233,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
 
   // Check whether to add / or \ to m_dataDir
   std::string sep;
-  if (m_dataDir.size() > 0) {
+  if (!m_dataDir.empty()) {
 // Determine system
 #if _WIN64
     const bool isWindows = true;
@@ -227,6 +245,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
 
     if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
+      // cppcheck-suppress knownConditionTrueFalse
     } else if (!isWindows && *m_dataDir.rbegin() != '/')
       sep = "/";
   }
@@ -237,7 +256,6 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     g_log.warning("There are more than 1 experiment to import. "
                   "Make sure that all of them have the same instrument.");
   }
-  size_t numFileNotLoaded(0);
 
   // Loop through all data files in the experiment
   for (size_t ir = 0; ir < numrows; ++ir) {
@@ -261,7 +279,6 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     spicews = loadSpiceData(filename, loaded, errmsg);
     if (!loaded) {
       g_log.error(errmsg);
-      ++numFileNotLoaded;
       continue;
     }
     if (m_removeBackground) {
@@ -280,7 +297,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     try {
       float time_f = m_expDataTableWS->cell<float>(ir, m_iTime);
       time = static_cast<double>(time_f);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       time = m_expDataTableWS->cell<double>(ir, m_iTime);
     }
 
@@ -542,7 +559,7 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
 
   errmsg = errss.str();
 
-  return (errmsg.size() == 0);
+  return (errmsg.empty());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -601,6 +618,15 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
     sizelist[1] = 256;
     loader->setProperty("DetectorGeometry", sizelist);
     loader->setProperty("LoadInstrument", true);
+    loader->setProperty("ShiftedDetectorDistance", m_detSampleDistanceShift);
+    loader->setProperty("DetectorCenterXShift", m_detXShift);
+    loader->setProperty("DetectorCenterYShift", m_detYShift);
+
+    double wavelength = getProperty("UserDefinedWavelength");
+
+    if (wavelength != EMPTY_DBL()) {
+      loader->setProperty("UserSpecifiedWaveLength", wavelength);
+    }
 
     loader->execute();
 

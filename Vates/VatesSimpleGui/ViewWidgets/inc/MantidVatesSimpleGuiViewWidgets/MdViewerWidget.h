@@ -90,7 +90,11 @@ public:
   void renderWorkspace(QString workspaceName, int workspaceType,
                        std::string instrumentName) override;
   /// See MantidQt::API::VatesViewerInterface
-  void setupPluginMode() override;
+  void setupPluginMode(int WsType, const std::string &instrumentName) override;
+  /// Load the state of the window from a Mantid project file
+  void loadFromProject(const std::string &lines) override;
+  /// Save the state of the window to a Mantid project file
+  std::string saveToProject(ApplicationWindow *app) override;
 
 public slots:
   /// Seet MantidQt::API::VatesViewerInterface
@@ -114,7 +118,7 @@ protected slots:
   /// Triggered when panel is changed.
   void panelChanged();
   /// On rebin
-  void onRebin(std::string algorithmType);
+  void onRebin(const std::string &algorithmType);
   /// On  unbin
   void onUnbin();
   /// On switching an MDEvent source to a temporary source.
@@ -210,19 +214,20 @@ private:
   /// Set the signals/slots for the ParaView components based on the view.
   void setParaViewComponentsForView();
   /// Run the necessary setup for the main view.
-  void setupMainView();
+  void setupMainView(ModeControlWidget::Views viewType);
   /// Creates the UI and mode switch connection.
   void setupUiAndConnections();
   /// Create the requested view.
   ViewBase *createAndSetMainViewWidget(QWidget *container,
-                                       ModeControlWidget::Views v);
+                                       ModeControlWidget::Views v,
+                                       bool createRenderProxy = true);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
   /// Update the state of application widgets.
   void updateAppState();
   /// Get the initial view for the current workspace and user setting
   ModeControlWidget::Views getInitialView(int workspaceType,
-                                          std::string instrumentName);
+                                          const std::string &instrumentName);
   /// Check that the view is valid for teh workspace type
   ModeControlWidget::Views
   checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType);
@@ -238,10 +243,10 @@ private:
   void resetCurrentView(int workspaceType, const std::string &instrumentName);
   /// Render rebinned workspace
   pqPipelineSource *
-  prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName,
-                           std::string sourceType);
+  prepareRebinnedWorkspace(const std::string &rebinnedWorkspaceName,
+                           const std::string &sourceType);
   /// Handle drag and drop of peaks workspcaes
-  void handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
+  void handleDragAndDropPeaksWorkspaces(QEvent *e, const QString &text,
                                         QStringList &wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
@@ -249,7 +254,7 @@ private:
   void setColorMap();
   /// Render the original workspace
   pqPipelineSource *
-  renderOriginalWorkspace(const std::string originalWorkspaceName);
+  renderOriginalWorkspace(const std::string &originalWorkspaceName);
 
   /// Remove the rebinning when switching views or otherwise.
   void
@@ -267,6 +272,12 @@ private:
   void restoreViewState(ViewBase *view, ModeControlWidget::Views vtype);
   /// Get the current grid axes setting
   bool areGridAxesOn();
+  /// Load the state of VSI from an XML file
+  bool loadVSIState(const std::string &fileName);
+  /// Setup the view using the last active view and source from a project
+  void setupViewFromProject(ModeControlWidget::Views vtype);
+  /// Set the active objects on the current server
+  void setActiveObjects(pqView *view, pqPipelineSource *source);
 };
 
 } // SimpleGui

@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 def rel_err_less_delta(val, ref, epsilon):
     """
     Checks that a value 'val' does not differ from a reference value 'ref' by 'epsilon'
@@ -22,6 +23,7 @@ def rel_err_less_delta(val, ref, epsilon):
                .format(val, ref, epsilon))
 
     return check
+
 
 class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 
@@ -72,21 +74,21 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 
     def validate(self):
         out_ws = mtd[self.out_ws_name]
-        self.assertEquals(out_ws.getName(), self.out_ws_name)
+        self.assertEquals(out_ws.name(), self.out_ws_name)
         self.assertEqual(out_ws.getNumberHistograms(), 1)
         self.assertEqual(out_ws.blocksize(), 10186)
         self.assertEqual(out_ws.getNEvents(), 10186)
         self.assertEqual(out_ws.getNumDims(), 2)
         self.assertEqual(out_ws.YUnit(), 'Counts')
         dimX = out_ws.getXDimension()
-        self.assertEqual(dimX.getName(), 'Time-of-flight')
+        self.assertEqual(dimX.name, 'Time-of-flight')
         self.assertEqual(dimX.getUnits(), 'microsecond')
         dimY = out_ws.getYDimension()
         self.assertEqual(dimY.getName(), 'Spectrum')
         self.assertEqual(dimY.getUnits(), '')
 
         van_out_ws = mtd[self.van_bank_curves_name]
-        self.assertEquals(van_out_ws.getName(), self.van_bank_curves_name)
+        self.assertEquals(van_out_ws.name(), self.van_bank_curves_name)
         self.assertTrue(van_out_ws.getNumberHistograms(), 3)
         self.assertEqual(out_ws.blocksize(), 10186)
 

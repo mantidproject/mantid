@@ -140,8 +140,8 @@ public:
             0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
         double MaxRC =
             max<double>(0.0, MaxR * (1 - abs(col - PeakCol) / MaxPeakRCSpan));
-        MantidVec dataY;
-        MantidVec dataE;
+        std::vector<double> dataY;
+        std::vector<double> dataE;
 
         for (int chan = 0; chan < NTimes; chan++) {
           double val = max<double>(
@@ -158,8 +158,8 @@ public:
           }
         }
 
-        wsPtr->dataY(wsIndex) = dataY;
-        wsPtr->dataE(wsIndex) = dataE;
+        wsPtr->mutableY(wsIndex) = dataY;
+        wsPtr->mutableE(wsIndex) = dataE;
       }
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());

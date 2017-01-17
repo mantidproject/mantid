@@ -1,11 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -119,7 +118,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
 
     std::string darkWSOutputName =
         getPropertyValue("OutputDarkCurrentWorkspace");
-    if (!(darkWSOutputName.size() == 0))
+    if (!darkWSOutputName.empty())
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
     reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(

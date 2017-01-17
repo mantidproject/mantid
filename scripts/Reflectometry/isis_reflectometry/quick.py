@@ -9,6 +9,7 @@
 '''
 # these need to be moved into one NR folder or so
 # from ReflectometerCors import *
+from __future__ import (absolute_import, division, print_function)
 from isis_reflectometry.l2q import *
 from isis_reflectometry.combineMulti import *
 from mantid.simpleapi import *  # New API
@@ -19,6 +20,7 @@ from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 import math
 import re
 import abc
+from six import with_metaclass
 
 
 def enum(**enums):
@@ -28,9 +30,7 @@ def enum(**enums):
 PolarisationCorrection = enum(PNR=1, PA=2, NONE=3)
 
 
-class CorrectionStrategy(object):
-    __metaclass__ = abc.ABCMeta  # Mark as an abstract class
-
+class CorrectionStrategy(with_metaclass(abc.ABCMeta, object)):
     @abc.abstractmethod
     def apply(self, to_correct):
         pass
@@ -97,15 +97,15 @@ def quick(run, theta=None, pointdet=True, roi=[0, 0], db=[0, 0], trans='', polco
         cAp = idf_defaults['cAp']
         cPp = idf_defaults['cPp']
 
-    return quick_explicit(run=run, i0_monitor_index=i0_monitor_index, lambda_min=lambda_min, lambda_max=lambda_max, \
-                          point_detector_start=point_detector_start, point_detector_stop=point_detector_stop, \
+    return quick_explicit(run=run, i0_monitor_index=i0_monitor_index, lambda_min=lambda_min, lambda_max=lambda_max,
+                          point_detector_start=point_detector_start, point_detector_stop=point_detector_stop,
                           multi_detector_start=multi_detector_start, background_min=background_min,
-                          background_max=background_max, \
-                          int_min=int_min, int_max=int_max, theta=theta, pointdet=pointdet, roi=roi, db=db, trans=trans, \
+                          background_max=background_max,
+                          int_min=int_min, int_max=int_max, theta=theta, pointdet=pointdet, roi=roi, db=db, trans=trans,
                           debug=debug, correction_strategy=correction_strategy,
-                          stitch_start_overlap=stitch_start_overlap, \
+                          stitch_start_overlap=stitch_start_overlap,
                           stitch_end_overlap=stitch_end_overlap, stitch_params=stitch_params, polcorr=polcorr,
-                          crho=crho, calpha=calpha, cAp=cAp, cPp=cPp, \
+                          crho=crho, calpha=calpha, cAp=cAp, cPp=cPp,
                           detector_component_name=detector_component_name, sample_component_name=sample_component_name,
                           correct_positions=correct_positions)
 
@@ -138,18 +138,18 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
     inst = _sample_ws.getInstrument()
     # Some beamline constants from IDF
 
-    print i0_monitor_index
-    print nHist
+    print(i0_monitor_index)
+    print(nHist)
 
     if run == '0':
         RunNumber = '0'
     else:
-        RunNumber = groupGet(_sample_ws.getName(), 'samp', 'run_number')
+        RunNumber = groupGet(_sample_ws.name(), 'samp', 'run_number')
 
     if not pointdet:
         # Proccess Multi-Detector; assume MD goes to the end:
         # if roi or db are given in the function then sum over the apropriate channels
-        print "This is a multidetector run."
+        print("This is a multidetector run.")
 
         _I0M = RebinToWorkspace(WorkspaceToRebin=_monitor_ws, WorkspaceToMatch=_detector_ws)
         IvsLam = _detector_ws / _I0M
@@ -164,23 +164,21 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
         else:
             IvsQ = ConvertUnits(InputWorkspace=ReflectedBeam, Target="MomentumTransfer")
 
-
     # Single Detector processing-------------------------------------------------------------
     else:
-        print "This is a Point-Detector run."
+        print("This is a Point-Detector run.")
         # handle transmission runs
         # process the point detector reflectivity
         _I0P = RebinToWorkspace(WorkspaceToRebin=_monitor_ws, WorkspaceToMatch=_detector_ws)
         IvsLam = Scale(InputWorkspace=_detector_ws, Factor=1)
 
         if not trans:
-            print "No transmission file. Trying default exponential/polynomial correction..."
+            print("No transmission file. Trying default exponential/polynomial correction...")
             IvsLam = correction_strategy.apply(_detector_ws)
             IvsLam = Divide(LHSWorkspace=IvsLam, RHSWorkspace=_I0P)
         else:  # we have a transmission run
             _monInt = Integration(InputWorkspace=_I0P, RangeLower=int_min, RangeUpper=int_max)
             IvsLam = Divide(LHSWorkspace=_detector_ws, RHSWorkspace=_monInt)
-            _names = mtd.getObjectNames()
 
             IvsLam = transCorr(trans, IvsLam, lambda_min, lambda_max, background_min, background_max,
                                int_min, int_max, detector_index_ranges, i0_monitor_index, stitch_start_overlap,
@@ -188,11 +186,9 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
 
         IvsLam = polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp)
 
-
-
         # Convert to I vs Q
         # check if detector in direct beam
-        if theta == None or theta == 0 or theta == '':
+        if theta is None or theta == 0 or theta == '':
             inst = groupGet('IvsLam', 'inst')
             detLocation = inst.getComponentByName(detector_component_name).getPos()
             sampleLocation = inst.getComponentByName(sample_component_name).getPos()
@@ -203,11 +199,11 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
             if not theta:
                 theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation,
                                                                                      beamPos) * 180.0 / math.pi / 2.0
-            print "Det location: ", detLocation, "Calculated theta = ", theta
+            print("Det location: ", detLocation, "Calculated theta = ", theta)
             if correct_positions:  # detector is not in correct place
                 # Get detector angle theta from NeXuS
                 logger.information('The detectorlocation is not at Y=0')
-                print 'Nexus file theta =', theta
+                print('Nexus file theta =', theta)
                 IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name)
             else:
                 IvsQ = ConvertUnits(InputWorkspace=IvsLam, OutputWorkspace="IvsQ", Target="MomentumTransfer")
@@ -248,7 +244,6 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
     Make the transmission correction workspace.
     '''
 
-
     # Check to see whether all optional inputs have been provide. If not we have to get them from the IDF.
     if not all((lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges,
                 i0_monitor_index)):
@@ -283,7 +278,7 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
     if isinstance(transrun, str) and (',' in transrun):
         slam = transrun.split(',')[0]
         llam = transrun.split(',')[1]
-        print "Transmission runs: ", transrun
+        print("Transmission runs: ", transrun)
 
         to_lam = ConvertToWavelength(slam)
         _monitor_ws_slam, _detector_ws_slam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max,
@@ -307,7 +302,7 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
         _mon_int_trans = Integration(InputWorkspace=_i0p_llam, RangeLower=int_min, RangeUpper=int_max)
         _detector_ws_llam = Divide(LHSWorkspace=_detector_ws_llam, RHSWorkspace=_mon_int_trans)
 
-        print stitch_start_overlap, stitch_end_overlap, stitch_params
+        print(stitch_start_overlap, stitch_end_overlap, stitch_params)
         transWS, _outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam,
                                            StartOverlap=stitch_start_overlap, EndOverlap=stitch_end_overlap,
                                            Params=stitch_params)
@@ -343,8 +338,8 @@ def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, backgr
     else:
         logger.debug("Creating new transmission correction workspace.")
         # Make the transmission correction workspace.
-        _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params, \
-                                   lambda_min, lambda_max, background_min, background_max, \
+        _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params,
+                                   lambda_min, lambda_max, background_min, background_max,
                                    int_min, int_max, detector_index_ranges, i0_monitor_index, )
 
     # got sometimes very slight binning diferences, so do this again:
@@ -368,7 +363,7 @@ def polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp):
     else:
         message = "No Polarisation Correction Requested."
         logger.notice(message)
-        print message
+        print(message)
     return IvsLam
 
 
@@ -402,7 +397,7 @@ def get_defaults(run_ws, polcorr=False):
     if polcorr and (polcorr != PolarisationCorrection.NONE):
         def str_to_float_list(_str):
             str_list = _str.split(',')
-            float_list = map(float, str_list)
+            float_list = list(map(float, str_list))
             return float_list
 
         defaults['crho'] = str_to_float_list(instrument.getStringParameter('crho')[0])
@@ -433,10 +428,10 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
     # cPp=[0.972762,0.001828,-0.000261,0.0]
     message = "Performing PNR correction"
     logger.notice(message)
-    print message
+    print(message)
     CloneWorkspace(Wksp, OutputWorkspace='_' + Wksp + '_uncorrected')
     if (not isinstance(mtd[Wksp], WorkspaceGroup)) or (not mtd[Wksp].size() == 2):
-        print "PNR correction works only with exactly 2 periods!"
+        print("PNR correction works only with exactly 2 periods!")
         return mtd[Wksp]
     else:
         Ip = mtd[Wksp][0]
@@ -445,8 +440,6 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
         CloneWorkspace(Ip, OutputWorkspace="PCalpha")
         CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex="0",
                       EndWorkspaceIndex="0")
-        _PCalpha = (mtd['PCalpha'] * 0.0) + 1.0
-        _alpha = mtd['PCalpha']
         # a1=alpha.readY(0)
         # for i in range(0,len(a1)):
         # alpha.dataY(0)[i]=0.0
@@ -455,7 +448,6 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
         CloneWorkspace("PCalpha", OutputWorkspace="PCAp")
         CloneWorkspace("PCalpha", OutputWorkspace="PCPp")
         rho = mtd['PCrho']
-        _Ap = mtd['PCAp']
         Pp = mtd['PCPp']
         # for i in range(0,len(a1)):
         # x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
@@ -507,10 +499,10 @@ def nrPACorrection(Wksp, crho, calpha, cAp, cPp):  # UpUpWksp,UpDownWksp,DownUpW
     # Ipa and Iap appear to be swapped in the sequence on CRISP 4 perido data!
     message = "Performing PA correction"
     logger.notice(message)
-    print message
+    print(message)
     CloneWorkspace(Wksp, OutputWorkspace='_' + Wksp + '_uncorrected')
     if (not isinstance(mtd[Wksp], WorkspaceGroup)) or (not mtd[Wksp].size() == 4):
-        print "PNR correction works only with exactly 4 periods (uu,ud,du,dd)!"
+        print("PNR correction works only with exactly 4 periods (uu,ud,du,dd)!")
         return mtd[Wksp]
     else:
         Ipp = mtd[Wksp][0]
@@ -520,7 +512,6 @@ def nrPACorrection(Wksp, crho, calpha, cAp, cPp):  # UpUpWksp,UpDownWksp,DownUpW
 
         CloneWorkspace(Ipp, OutputWorkspace="PCalpha")
         CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex=0, EndWorkspaceIndex=0)
-        _PCalpha = (mtd['PCalpha'] * 0.0) + 1.0
         alpha = mtd['PCalpha']
         CloneWorkspace("PCalpha", OutputWorkspace="PCrho")
         CloneWorkspace("PCalpha", OutputWorkspace="PCAp")
@@ -603,23 +594,23 @@ def groupGet(wksp, whattoget, field=''):
         if isinstance(mtd[wksp], WorkspaceGroup):
             try:
                 log = mtd[wksp + '_1'].getRun().getLogData(field).value
-                if type(log) is int or type(log) is str:
+                if isinstance(log, int) or isinstance(log, str):
                     res = log
                 else:
                     res = log[len(log) - 1]
             except RuntimeError:
                 res = 0
-                print "Block " + field + " not found."
+                print("Block " + field + " not found.")
         else:
             try:
                 log = mtd[wksp].getRun().getLogData(field).value
-                if type(log) is int or type(log) is str:
+                if isinstance(log, int) or isinstance(log, str):
                     res = log
                 else:
                     res = log[len(log) - 1]
             except RuntimeError:
                 res = 0
-                print "Block " + field + " not found."
+                print("Block " + field + " not found.")
         return res
     elif whattoget == 'wksp':
         if isinstance(mtd[wksp], WorkspaceGroup):
@@ -647,9 +638,9 @@ def _testQuick():
     [_w1lam, _w1q, _th] = quick(94511, theta=0.25, trans='94504')
     [_w2lam, _w2q, _th] = quick(94512, theta=0.65, trans='94504')
     [_w3lam, _w3q, _th] = quick(94513, theta=1.5, trans='94504')
-    _g1 = plotSpectrum("94511_IvsQ", 0)
-    _g2 = plotSpectrum("94512_IvsQ", 0)
-    _g3 = plotSpectrum("94513_IvsQ", 0)
+    plotSpectrum("94511_IvsQ", 0)
+    plotSpectrum("94512_IvsQ", 0)
+    plotSpectrum("94513_IvsQ", 0)
 
     return True
 
@@ -666,7 +657,7 @@ if __name__ == '__main__':
     # Debugging = True  # Turn the debugging on and the testing code off
     Debugging = False  # Turn the debugging off and the testing on
 
-    if Debugging == False:
+    if not Debugging:
         _doAllTests()
     else:  # Debugging code goes below
         rr = quick("N:/SRF93080.raw")

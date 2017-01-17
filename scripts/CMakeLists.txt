@@ -34,6 +34,8 @@ set ( TEST_PY_FILES
       test/DirectEnergyConversionTest.py
       test/ISISDirecInelasticConfigTest.py
       test/IndirectCommonTests.py
+      test/ISIS_Powder_AbstractInstTest.py
+      test/ISIS_Powder_PearlTest.py
       test/PyChopTest.py
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py
@@ -46,6 +48,7 @@ set ( TEST_PY_FILES
       test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
       test/SANSIsisInstrumentTest.py
+      test/SANSReducerTest.py
       test/SANSReductionStepsUserFileTest.py
       test/SettingsTest.py
       test/VesuvioBackgroundTest.py
@@ -54,7 +57,9 @@ set ( TEST_PY_FILES
       test/ReductionSettingsTest.py
       )
 
-
+# Addition tests for SANS components
+add_subdirectory(test/SANS)
+	  
 # python unit tests
 if (PYUNITTEST_FOUND)
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )

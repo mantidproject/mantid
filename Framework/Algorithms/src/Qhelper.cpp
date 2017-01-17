@@ -37,9 +37,9 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 
     // We require the same binning for the input workspace and the q resolution
     // workspace
-    auto reqX = dataWS->readX(0).cbegin();
-    auto qResX = qResolution->readX(0).cbegin();
-    for (; reqX != dataWS->readX(0).end(); ++reqX, ++qResX) {
+    auto reqX = dataWS->x(0).cbegin();
+    auto qResX = qResolution->x(0).cbegin();
+    for (; reqX != dataWS->x(0).end(); ++reqX, ++qResX) {
       if (*reqX != *qResX) {
         throw std::invalid_argument(
             "The QResolution needs to have the same binning as"
@@ -72,13 +72,13 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
       throw std::invalid_argument(
           "The WavelengthAdj workspace must have one spectrum");
     }
-    if (binAdj->readY(0).size() != dataWS->readY(0).size()) {
+    if (binAdj->y(0).size() != dataWS->y(0).size()) {
       throw std::invalid_argument("The WavelengthAdj workspace's bins must "
                                   "match those of the detector bank workspace");
     }
-    auto reqX = dataWS->readX(0).cbegin();
-    auto testX = binAdj->readX(0).cbegin();
-    for (; reqX != dataWS->readX(0).cend(); ++reqX, ++testX) {
+    auto reqX = dataWS->x(0).cbegin();
+    auto testX = binAdj->x(0).cbegin();
+    for (; reqX != dataWS->x(0).cend(); ++reqX, ++testX) {
       if (*reqX != *testX) {
         throw std::invalid_argument("The WavelengthAdj workspace must have "
                                     "matching bins with the detector bank "
@@ -116,7 +116,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     size_t num_histograms = dataWS->getNumberHistograms();
     const auto &spectrumInfo = dataWS->spectrumInfo();
     for (size_t i = 0; i < num_histograms; i++) {
-      double adj = static_cast<double>(detectAdj->readY(i)[0]);
+      double adj = static_cast<double>(detectAdj->y(i)[0]);
       if (adj <= 0.0) {
         bool det_is_masked;
         if (!spectrumInfo.hasDetectors(i)) {
@@ -166,7 +166,7 @@ size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
   R = std::sqrt(R);
 
   const double WMin = l_WCutOver * (l_RCut - R);
-  const MantidVec &Xs = dataWS->readX(wsInd);
+  auto Xs = dataWS->x(wsInd);
   return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
 }
 

@@ -14,8 +14,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 #include <Poco/File.h>
 
 #include <fstream>
@@ -134,7 +132,6 @@ void LoadQKK::exec() {
   std::string instrumentname = "QUOKKA";
   Geometry::Instrument_sptr instrument(
       new Geometry::Instrument(instrumentname));
-  outputWorkspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
 
@@ -211,6 +208,8 @@ void LoadQKK::exec() {
     }
   // Position the detector so the z axis goes through its centre
   bank->setPos(-width / 2, -height / 2, 0);
+
+  outputWorkspace->setInstrument(instrument);
 
   // Set the workspace title
   outputWorkspace->setTitle(entry.getString("experiment/title"));

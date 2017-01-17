@@ -6,6 +6,7 @@ from mantid.kernel import *
 import numpy
 import sys
 
+
 class FilterLogByTime(PythonAlgorithm):
 
     def category(self):

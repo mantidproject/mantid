@@ -9,11 +9,14 @@
 #include "WindowFactory.h"
 
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
-#include "Mantid/MantidUI.h"
 #include "Mantid/MantidMatrixFunction.h"
+#include "Mantid/MantidUI.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 
@@ -22,6 +25,12 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
+using Mantid::Kernel::Logger;
+
+namespace {
+/// static logger
+Logger g_log("ProjectSerialiser");
+}
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
@@ -67,6 +76,9 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
   // folder
   // This is a legacy edgecase because folders are written
   // <folder>\tsettings\tgo\there
+  g_log.notice() << "Reading Mantid Project: "
+                 << window->projectname.toStdString() << "\n";
+
   if (!isTopLevel && lines.size() > 0) {
     std::vector<std::string> lineVec;
     boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -103,6 +115,9 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
     window->d_current_folder = window->projectFolder();
   else
     window->d_current_folder = parent;
+
+  g_log.notice() << "Finished Loading Project: "
+                 << window->projectname.toStdString() << "\n";
 }
 
 /**
@@ -450,6 +465,7 @@ QString ProjectSerialiser::saveAdditionalWindows() {
     auto lines = serialisableWindow->saveToProject(window);
     output += QString::fromStdString(lines);
   }
+
   return output;
 }
 
@@ -697,4 +713,48 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
       window->addSerialisableWindow(dynamic_cast<QObject *>(win));
     }
   }
+
+  if (tsv.selectSection("vsi")) {
+    std::string vatesLines;
+    tsv >> vatesLines;
+
+    auto win = dynamic_cast<VatesViewerInterface *>(
+        VatesViewerInterface::loadFromProject(vatesLines, window, fileVersion));
+    auto subWindow = setupQMdiSubWindow();
+    subWindow->setWidget(win);
+
+    window->connect(window, SIGNAL(shutting_down()), win, SLOT(shutdown()));
+    win->connect(win, SIGNAL(requestClose()), subWindow, SLOT(close()));
+    win->setParent(subWindow);
+
+    QRect geometry;
+    TSVSerialiser tsv2(vatesLines);
+    tsv2.selectLine("geometry");
+    tsv2 >> geometry;
+    subWindow->setGeometry(geometry);
+    subWindow->widget()->show();
+
+    window->mantidUI->setVatesSubWindow(subWindow);
+    window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+  }
+}
+
+/**
+ * Create a new QMdiSubWindow which will become the parent of the Vates window.
+ *
+ * @return  a new handle to a QMdiSubWindow instance
+ */
+QMdiSubWindow *ProjectSerialiser::setupQMdiSubWindow() const {
+  auto subWindow = new QMdiSubWindow();
+
+  QIcon icon;
+  auto iconName =
+      QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png");
+  icon.addFile(iconName, QSize(), QIcon::Normal, QIcon::Off);
+
+  subWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+  subWindow->setWindowIcon(icon);
+  subWindow->setWindowTitle("Vates Simple Interface");
+  window->connect(window, SIGNAL(shutting_down()), subWindow, SLOT(close()));
+  return subWindow;
 }

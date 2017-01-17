@@ -25,9 +25,10 @@ if ( "${UNIX_DIST}" MATCHES "Ubuntu" )
     execute_process( COMMAND ${DPKG_CMD} --print-architecture
       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
       OUTPUT_STRIP_TRAILING_WHITESPACE )
-    # according to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
-    set( CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+    # following Ubuntu convention <foo>_<VersionNumber>-<DebianRevisionNumber>ubuntu1~<UbuntuCodeName>1_<DebianArchitecture>.deb
+    set ( UBUNTU_PACKAGE_RELEASE "ubuntu1~${UNIX_CODENAME}1" )
+    set ( CPACK_PACKAGE_FILE_NAME
+          "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}${UBUNTU_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
   endif ( DPKG_CMD )
 endif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
 

@@ -155,7 +155,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     // check that parameter have been read into the instrument parameter map
     std::vector<V3D> ret1 = paramMap.getV3D("monitors", "pos");
@@ -548,7 +548,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     // get detector corresponding to workspace index 0
     IDetector_const_sptr det = ws->getDetector(69);
@@ -576,7 +576,7 @@ public:
 
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-    ParameterMap &paramMap2 = ws->instrumentParameters();
+    const auto &paramMap2 = ws->constInstrumentParameters();
 
     det = ws->getDetector(69);
 
@@ -609,7 +609,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     boost::shared_ptr<const Instrument> i = ws->getInstrument();
     boost::shared_ptr<const IDetector> det =
@@ -635,7 +635,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName2);
 
     // get parameter map
-    ParameterMap &paramMap2 = ws->instrumentParameters();
+    const auto &paramMap2 = ws->constInstrumentParameters();
 
     i = ws->getInstrument();
     det = i->getDetector(1100); // should be a detector from bank_bsk
@@ -665,7 +665,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     IDetector_const_sptr det = ws->getDetector(101);
     TS_ASSERT_EQUALS(det->getID(), 102046);
@@ -725,7 +725,7 @@ public:
     }
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
     if (ws->getNumberHistograms() < 4)

@@ -1,8 +1,7 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidQtMantidWidgets/DiagResults.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -488,11 +487,11 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts) {
     }
     filter = filter.trimmed();
   }
-  filter.append(";;All Files (*.*)");
+  filter.append(";;All Files (*)");
 
   QString filename;
   if (save) {
-    filename = FileDialogHandler::getSaveFileName(
+    filename = QFileDialog::getSaveFileName(
         this, "Save file", m_prevSets.value("save file dir", "").toString(),
         filter);
     if (!filename.isEmpty()) {

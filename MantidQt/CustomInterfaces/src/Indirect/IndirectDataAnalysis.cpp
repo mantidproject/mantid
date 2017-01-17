@@ -15,9 +15,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 
-#include <QDesktopServices>
-#include <QUrl>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {

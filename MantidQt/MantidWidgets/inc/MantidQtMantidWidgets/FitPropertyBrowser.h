@@ -151,6 +151,8 @@ public:
   void normaliseData(bool on) { m_shouldBeNormalised = on; }
   /// Get the max number of iterations
   int maxIterations() const;
+  /// Get the peak radius for peak functions
+  int getPeakRadius() const;
 
   /// Get the start X
   double startX() const;
@@ -223,7 +225,7 @@ public:
   bool plotCompositeMembers() const;
 
   /// Returns true if the fit should be done against binned (bunched) data.
-  bool rawData() const;
+  bool rawData() const override;
 
   void setADSObserveEnabled(bool enabled);
 
@@ -294,11 +296,12 @@ signals:
 protected slots:
   /// Get the registered function names
   virtual void populateFunctionNames();
+  /// Called when a bool property is changed
+  virtual void boolChanged(QtProperty *prop);
 
 private slots:
 
   void enumChanged(QtProperty *prop);
-  void boolChanged(QtProperty *prop);
   void intChanged(QtProperty *prop);
   virtual void doubleChanged(QtProperty *prop);
   /// Called when one of the parameter values gets changed
@@ -412,6 +415,7 @@ protected:
   QtProperty *m_ignoreInvalidData;
   QtProperty *m_costFunction;
   QtProperty *m_maxIterations;
+  QtProperty *m_peakRadius;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_plotCompositeMembers;

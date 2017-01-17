@@ -7,7 +7,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include <vector>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using Mantid::MDAlgorithms::SmoothMD;
 using namespace Mantid::API;
@@ -370,7 +370,7 @@ public:
                       out->getSignalAt(8));
 
     TSM_ASSERT("Last index should have a smoothed Value of NaN",
-               boost::math::isnan(out->getSignalAt(9)));
+               std::isnan(out->getSignalAt(9)));
   }
 
   void test_gaussian_kernel_sigma_1() {

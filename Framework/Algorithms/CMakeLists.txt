@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
+	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
@@ -50,6 +51,7 @@ set ( SRC_FILES
 	src/ConvertSpectrumAxis.cpp
 	src/ConvertSpectrumAxis2.cpp
 	src/ConvertTableToMatrixWorkspace.cpp
+	src/ConvertToConstantL2.cpp
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
@@ -62,8 +64,8 @@ set ( SRC_FILES
 	src/CopyLogs.cpp
 	src/CopySample.cpp
 	src/CorelliCrossCorrelate.cpp
-	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
+	src/CorrectTOFAxis.cpp
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
@@ -150,6 +152,7 @@ set ( SRC_FILES
 	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
+	src/InterpolationOption.cpp
 	src/InvertMask.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
@@ -235,7 +238,6 @@ set ( SRC_FILES
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
-	src/SANSDirectBeamScaling.cpp
 	src/SampleCorrections/MCAbsorptionStrategy.cpp
 	src/SampleCorrections/MCInteractionVolume.cpp
 	src/SampleCorrections/MayersSampleCorrection.cpp
@@ -292,6 +294,7 @@ set ( SRC_FILES
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
 	src/WienerSmooth.cpp
+	src/WorkflowAlgorithmRunner.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
@@ -325,6 +328,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
+	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
@@ -355,6 +359,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis2.h
 	inc/MantidAlgorithms/ConvertTableToMatrixWorkspace.h
+	inc/MantidAlgorithms/ConvertToConstantL2.h
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
@@ -367,8 +372,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorelliCrossCorrelate.h
-	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
+	inc/MantidAlgorithms/CorrectTOFAxis.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
@@ -456,6 +461,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
+	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
@@ -544,7 +550,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
-	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
 	inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
 	inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
@@ -605,6 +610,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/WienerSmooth.h
+	inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
@@ -642,10 +648,12 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateResolutionTest.h
+	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
@@ -672,6 +680,7 @@ set ( TEST_FILES
 	ConvertSpectrumAxis2Test.h
 	ConvertSpectrumAxisTest.h
 	ConvertTableToMatrixWorkspaceTest.h
+	ConvertToConstantL2Test.h
 	ConvertToDistributionTest.h
 	ConvertToEventWorkspaceTest.h
 	ConvertToHistogramTest.h
@@ -684,8 +693,8 @@ set ( TEST_FILES
 	CopyLogsTest.h
 	CopySampleTest.h
 	CorelliCrossCorrelateTest.h
-	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
+	CorrectTOFAxisTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
@@ -703,6 +712,7 @@ set ( TEST_FILES
 	CreateWorkspaceTest.h
 	CropToComponentTest.h
 	CropWorkspaceTest.h
+	CrossCorrelateTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
 	DeleteLogTest.h
@@ -765,6 +775,7 @@ set ( TEST_FILES
 	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
+	InterpolationOptionTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
@@ -773,6 +784,7 @@ set ( TEST_FILES
 	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
+	MaskDetectorsIfTest.h
 	MaxEnt/MaxentCalculatorTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
@@ -864,6 +876,7 @@ set ( TEST_FILES
 	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
+	Stitch1DManyTest.h
 	Stitch1DTest.h
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h
@@ -881,6 +894,7 @@ set ( TEST_FILES
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
+	UnwrapMonitorTest.h
 	UnwrapMonitorsInTOFTest.h
 	UnwrapSNSTest.h
 	VesuvioL1ThetaResolutionTest.h
@@ -888,6 +902,7 @@ set ( TEST_FILES
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
 	WienerSmoothTest.h
+	WorkflowAlgorithmRunnerTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
 )

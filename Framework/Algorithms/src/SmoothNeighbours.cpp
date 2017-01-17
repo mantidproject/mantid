@@ -1,5 +1,8 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -315,12 +318,6 @@ void SmoothNeighbours::findNeighboursRectangular() {
 void SmoothNeighbours::findNeighboursUbiqutious() {
   g_log.debug(
       "SmoothNeighbours processing NOT assuming rectangular detectors.");
-  /*
-    This will cause the Workspace to rebuild the nearest neighbours map, so that
-    we can pick-up any of the properties specified
-    for this algorithm in the constructor for the NearestNeighboursObject.
-  */
-  inWS->rebuildNearestNeighbours();
 
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
@@ -332,11 +329,11 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   m_neighbours.resize(inWS->getNumberHistograms());
 
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
+  NearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors, nNeighbours);
 
   // Cull by radius
   RadiusFilter radiusFilter(Radius);
 
-  IDetector_const_sptr det;
   // Go through every input workspace pixel
   outWI = 0;
   int sum = getProperty("SumNumberOfNeighbours");
@@ -347,6 +344,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++)
       used[wi] = false;
   }
+  const auto &detectorInfo = inWS->detectorInfo();
   for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++) {
     if (sum > 1)
       if (used[wi])
@@ -355,10 +353,10 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     try {
       // Get the list of detectors in this pixel
       const auto &dets = inWS->getSpectrum(wi).getDetectorIDs();
-      det = inst->getDetector(*dets.begin());
-      if (det->isMonitor())
+      const auto index = detectorInfo.indexOf(*dets.begin());
+      if (detectorInfo.isMonitor(index))
         continue; // skip monitor
-      if (det->isMasked()) {
+      if (detectorInfo.isMasked(index)) {
         // Calibration masks many detectors, but there should be 0s after
         // smoothing
         if (sum == 1)
@@ -366,7 +364,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
         continue; // skip masked detectors
       }
       if (sum > 1) {
-        parent = det->getParent();
+        const auto &det = detectorInfo.detector(index);
+        parent = det.getParent();
         if (parent)
           grandparent = parent->getParent();
       }
@@ -377,8 +376,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     specnum_t inSpec = inWS->getSpectrum(wi).getSpectrumNo();
 
     // Step one - Get the number of specified neighbours
-    SpectraDistanceMap insideGrid =
-        inWS->getNeighboursExact(inSpec, nNeighbours, ignoreMaskedDetectors);
+    SpectraDistanceMap insideGrid = neighbourInfo.getNeighboursExact(inSpec);
 
     // Step two - Filter the results by the radius cut off.
     SpectraDistanceMap neighbSpectra = radiusFilter.apply(insideGrid);
@@ -409,8 +407,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
             // Get the list of detectors in this pixel
             const std::set<detid_t> &dets =
                 inWS->getSpectrum(neighWI).getDetectorIDs();
-            det = inst->getDetector(*dets.begin());
-            neighbParent = det->getParent();
+            const auto &det = detectorInfo.detector(*dets.begin());
+            neighbParent = det.getParent();
             neighbGParent = neighbParent->getParent();
             if (noNeigh >= sum ||
                 neighbParent->getName().compare(parent->getName()) != 0 ||
@@ -515,10 +513,10 @@ double SmoothNeighbours::translateToMeters(const std::string radiusUnits,
     Instrument_const_sptr instrument = fetchInstrument();
 
     // Get the first idetector from the workspace index 0.
-    IDetector_const_sptr firstDet = inWS->getDetector(0);
+    const auto &firstDet = inWS->spectrumInfo().detector(0);
     // Find the bounding box of that detector
     BoundingBox bbox;
-    firstDet->getBoundingBox(bbox);
+    firstDet.getBoundingBox(bbox);
     // Multiply (meters/pixels) by number of pixels, note that enteredRadius
     // takes on meaning of the number of pixels.
     translatedRadius = bbox.width().norm() * enteredRadius;
@@ -620,18 +618,18 @@ void SmoothNeighbours::execWorkspace2D() {
   // API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
 
   // Go through all the output workspace
-  PARALLEL_FOR2(inWS, outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outWS))
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     PARALLEL_START_INTERUPT_REGION
 
     auto &outSpec = outWS->getSpectrum(outWIi);
     // Reset the Y and E vectors
     outSpec.clearData();
-    MantidVec &outY = outSpec.dataY();
+    auto &outY = outSpec.mutableY();
     // We will temporarily carry the squared error
-    MantidVec &outE = outSpec.dataE();
+    auto &outE = outSpec.mutableE();
     // tmp to carry the X Data.
-    MantidVec &outX = outSpec.dataX();
+    auto &outX = outSpec.mutableX();
 
     // Which are the neighbours?
     std::vector<weightedNeighbour> &neighbours = m_neighbours[outWIi];
@@ -642,9 +640,9 @@ void SmoothNeighbours::execWorkspace2D() {
       double weightSquared = weight * weight;
 
       const auto &inSpec = inWS->getSpectrum(inWI);
-      const MantidVec &inY = inSpec.readY();
-      const MantidVec &inE = inSpec.readE();
-      const MantidVec &inX = inSpec.readX();
+      const auto &inY = inSpec.y();
+      const auto &inE = inSpec.e();
+      const auto &inX = inSpec.x();
 
       for (size_t i = 0; i < YLength; i++) {
         // Add the weighted signal
@@ -684,18 +682,13 @@ void SmoothNeighbours::execWorkspace2D() {
   */
 void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outws, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inWS, *outws, false);
 
   // Go through all the output workspace
   size_t numberOfSpectra = outws->getNumberHistograms();
 
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     auto &outSpec = outws->getSpectrum(outWIi);
-    /*
-    g_log.notice() << "[DBx555] Original spectrum number for wsindex " << outWIi
-                   << " = " << outSpec.getSpectrumNo() << '\n';
-    outSpec.setSpectrumNo(outWIi+1);
-    */
 
     // Reset detectors
     outSpec.clearDetectorIDs();
@@ -730,31 +723,24 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
   }
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outws2, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inWS, *outws2, false);
   // Go through all the input workspace
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     const auto &inSpec = inWS->getSpectrum(outWIi);
     auto &outSpec2 = outws2->getSpectrum(outWIi);
-    outSpec2.dataX() = inSpec.dataX();
+    outSpec2.mutableX() = inSpec.x();
     outSpec2.addDetectorIDs(inSpec.getDetectorIDs());
     // Zero the Y and E vectors
     outSpec2.clearData();
-    outSpec2.dataY().assign(YLength, 0.0);
-    outSpec2.dataE().assign(YLength, 0.0);
   }
 
   // Go through all the output workspace
   const size_t numberOfSpectra2 = outws->getNumberHistograms();
   for (int outWIi = 0; outWIi < int(numberOfSpectra2); outWIi++) {
-    const auto &outSpec = outws->getSpectrum(outWIi);
 
     // Which are the neighbours?
     for (const auto &neighbor : m_neighbours[outWIi]) {
-      auto &outSpec2 = outws2->getSpectrum(neighbor.first);
-      // Reset the Y and E vectors
-      outSpec2.dataY() = outSpec.dataY();
-      outSpec2.dataE() = outSpec.dataE();
-      outSpec2.dataX() = outSpec.dataX();
+      outws2->setHistogram(neighbor.first, outws->histogram(outWIi));
     }
   }
   this->setProperty("OutputWorkspace", outws2);
@@ -776,7 +762,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", numberOfSpectra, YLength + 1, YLength));
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(ws, outWS, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*ws, *outWS, false);
   // Ensure thread-safety
   outWS->sortAll(TOF_SORT, nullptr);
 
@@ -784,7 +770,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
                     boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
 
   // Go through all the output workspace
-  PARALLEL_FOR2(ws, outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outWS))
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -816,7 +802,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Give the 0-th X bins to all the output spectra.
-  outWS->setAllX(HistogramData::BinEdges(inWS->refX(0)));
+  outWS->setAllX(inWS->binEdges(0));
   if (expandSumAllPixels)
     spreadPixels(outWS);
 }

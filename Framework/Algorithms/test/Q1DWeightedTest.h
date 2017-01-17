@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -76,12 +77,12 @@ public:
     // For NPixelDivision = 1
     //   Y[1] = 0.0398848*3600; Y[2] = 0.0371762*3600; Y[30] = 0.030971*3600;
     //   Y[80] = 0.0275545*3600; Y[90] = 0.0270528*3600
-    TS_ASSERT_EQUALS(result->dataX(0)[0], 0.01);
-    TS_ASSERT_DELTA(result->dataY(0)[30], 110.9651, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[1], 143.2190, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[2], 134.2864, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[80], 98.3834, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[90], 95.9322, tolerance);
+    TS_ASSERT_EQUALS(result->x(0)[0], 0.01);
+    TS_ASSERT_DELTA(result->y(0)[30], 110.9651, tolerance);
+    TS_ASSERT_DELTA(result->y(0)[1], 143.2190, tolerance);
+    TS_ASSERT_DELTA(result->y(0)[2], 134.2864, tolerance);
+    TS_ASSERT_DELTA(result->y(0)[80], 98.3834, tolerance);
+    TS_ASSERT_DELTA(result->y(0)[90], 95.9322, tolerance);
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -184,8 +185,8 @@ public:
     double tolerance = 1e-12;
 
     // The two wedges shold be identical.
-    for (size_t i = 0; i < wedge1->dataY(0).size(); ++i)
-      TS_ASSERT_DELTA(wedge1->dataY(0)[i], wedge2->dataY(0)[i], tolerance);
+    for (size_t i = 0; i < wedge1->y(0).size(); ++i)
+      TS_ASSERT_DELTA(wedge1->y(0)[i], wedge2->y(0)[i], tolerance);
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);

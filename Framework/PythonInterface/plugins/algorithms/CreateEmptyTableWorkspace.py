@@ -5,6 +5,8 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspacePropert
 from mantid.kernel import Direction
 
 # Create an empty table workspace to be populated by a python script.
+
+
 class CreateEmptyTableWorkspace(PythonAlgorithm):
 
     def summary(self):

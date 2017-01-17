@@ -34,7 +34,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 22/01/2009
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+    Copyright &copy; 2007-2016 ISIS Rutherford Appleton Laboratory, NScD Oak
    Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
@@ -80,8 +80,7 @@ private:
                         API::Progress &progress, size_t &numSpectra,
                         size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
-  void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
-                     API::ISpectrum &outSpec, API::Progress &progress,
+  void doWorkspace2D(API::ISpectrum &outSpec, API::Progress &progress,
                      size_t &numSpectra, size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
@@ -91,6 +90,9 @@ private:
                  std::set<int> &indices);
   specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
 
+  API::MatrixWorkspace_sptr
+  replaceSpecialValues(API::MatrixWorkspace_sptr inputWs);
+
   /// The output spectrum number
   specnum_t m_outSpecNum;
   /// The spectrum to start the integration from
@@ -99,14 +101,16 @@ private:
   int m_maxWsInd;
   /// Set true to keep monitors
   bool m_keepMonitors;
+  /// Set true to remove special values before processing
+  bool m_replaceSpecialValues;
   /// numberOfSpectra in the input
   int m_numberOfSpectra;
   /// Blocksize of the input workspace
   int m_yLength;
-  /// Set of indicies to sum
+  /// Set of indices to sum
   std::set<int> m_indices;
 
-  // if calculateing additional workspace with specially weighted averages is
+  // if calculating additional workspace with specially weighted averages is
   // necessary
   bool m_calculateWeightedSum;
 };

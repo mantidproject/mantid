@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <set>
 #include <fstream>
 
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -129,14 +127,14 @@ void SaveAscii2::exec() {
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
-  if (metaDataString.size() != 0) {
+  if (!metaDataString.empty()) {
     m_metaData = stringListToVector(metaDataString);
     auto containsSpectrumNumber =
         findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
     if (containsSpectrumNumber) {
       try {
         m_specToIndexMap = m_ws->getSpectrumToWorkspaceIndexMap();
-      } catch (std::runtime_error) {
+      } catch (const std::runtime_error &) {
         throw std::runtime_error("SpectrumNumber is present in "
                                  "SpectrumMetaData but the workspace does not "
                                  "have a SpectrumAxis.");
@@ -256,7 +254,7 @@ void SaveAscii2::exec() {
     file << '\n';
   }
   // populate the meta data map
-  if (m_metaData.size() > 0) {
+  if (!m_metaData.empty()) {
     populateAllMetaData();
   }
   if (idx.empty()) {
@@ -399,24 +397,26 @@ SaveAscii2::stringListToVector(std::string &inputString) {
 void SaveAscii2::populateQMetaData() {
   std::vector<std::string> qValues;
   const auto nHist = m_ws->getNumberHistograms();
+  const auto &spectrumInfo = m_ws->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
     const auto specNo = m_ws->getSpectrum(i).getSpectrumNo();
     const auto workspaceIndex = m_specToIndexMap[specNo];
-    const auto detector = m_ws->getDetector(workspaceIndex);
-    double twoTheta(0.0), efixed(0.0);
-    if (!detector->isMonitor()) {
-      twoTheta = 0.5 * m_ws->detectorTwoTheta(*detector);
+    double theta(0.0), efixed(0.0);
+    if (!spectrumInfo.isMonitor(workspaceIndex)) {
+      theta = 0.5 * spectrumInfo.twoTheta(workspaceIndex);
       try {
+        boost::shared_ptr<const Geometry::IDetector> detector(
+            &spectrumInfo.detector(workspaceIndex), NoDeleting());
         efixed = m_ws->getEFixed(detector);
       } catch (std::runtime_error) {
         throw;
       }
     } else {
-      twoTheta = 0.0;
+      theta = 0.0;
       efixed = DBL_MIN;
     }
     // Convert to MomentumTransfer
-    auto qValue = Kernel::UnitConversion::run(twoTheta, efixed);
+    auto qValue = Kernel::UnitConversion::run(theta, efixed);
     auto qValueStr = boost::lexical_cast<std::string>(qValue);
     qValues.push_back(qValueStr);
   }

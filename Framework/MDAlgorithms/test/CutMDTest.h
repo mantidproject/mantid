@@ -8,6 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"

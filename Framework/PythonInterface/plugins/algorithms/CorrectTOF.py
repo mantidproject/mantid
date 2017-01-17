@@ -12,6 +12,7 @@ from mantid.simpleapi import CloneWorkspace, MaskDetectors
 class CorrectTOF (PythonAlgorithm):
     """ Apply time-of-flight correction
     """
+
     def __init__(self):
         PythonAlgorithm.__init__(self)
 
@@ -57,7 +58,7 @@ class CorrectTOF (PythonAlgorithm):
         if table.rowCount() != input_workspace.getNumberHistograms():
             issues['EPPTable'] = "Number of rows in the table must match to the input workspace dimension."
         # table must have 'PeakCentre' column
-        if not 'PeakCentre' in table.getColumnNames():
+        if 'PeakCentre' not in table.getColumnNames():
             issues['EPPTable'] = "EPP Table must have the PeakCentre column."
 
         return issues

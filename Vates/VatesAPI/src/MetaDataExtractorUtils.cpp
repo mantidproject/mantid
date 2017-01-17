@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "boost/pointer_cast.hpp"
 #include <cfloat>
 
@@ -30,11 +31,11 @@ MetaDataExtractorUtils::~MetaDataExtractorUtils() {}
  * @returns The instrument name or an empty string.
  */
 std::string MetaDataExtractorUtils::extractInstrument(
-    Mantid::API::IMDWorkspace_sptr workspace) {
-  Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
-  Mantid::API::IMDHistoWorkspace_sptr histoWorkspace =
-      boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
+    const Mantid::API::IMDWorkspace *workspace) {
+  auto eventWorkspace =
+      dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace);
+  auto histoWorkspace =
+      dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(workspace);
 
   std::string instrument = "";
 
@@ -73,12 +74,13 @@ std::string MetaDataExtractorUtils::extractInstrument(
  * @param workspace Rreference to an IMD workspace
  * @returns The minimum and maximum value of the workspace dataset.
  */
-QwtDoubleInterval
-MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace) {
+QwtDoubleInterval MetaDataExtractorUtils::getMinAndMax(
+    const Mantid::API::IMDWorkspace *workspace) {
   if (!workspace)
     throw std::invalid_argument("The workspace is empty.");
 
-  auto iterators = workspace->createIterators(PARALLEL_GET_MAX_THREADS, 0);
+  auto iterators =
+      workspace->createIterators(PARALLEL_GET_MAX_THREADS, nullptr);
 
   std::vector<QwtDoubleInterval> intervals(iterators.size());
   // cppcheck-suppress syntaxError
@@ -96,17 +98,16 @@ MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace) {
       double minSignal = DBL_MAX;
       double maxSignal = -DBL_MAX;
 
-      auto inf = std::numeric_limits<double>::infinity();
       for (size_t i = 0; i < iterators.size(); i++) {
         delete iterators[i];
 
         double signal;
         signal = intervals[i].minValue();
-        if (signal != inf && signal < minSignal)
+        if (!std::isinf(signal) && signal < minSignal)
           minSignal = signal;
 
         signal = intervals[i].maxValue();
-        if (signal != inf && signal > maxSignal)
+        if (!std::isinf(signal) && signal > maxSignal)
           maxSignal = signal;
       }
 
@@ -157,7 +158,7 @@ MetaDataExtractorUtils::getRange(Mantid::API::IMDIterator *it) {
     double signal = it->getNormalizedSignal();
 
     // Skip any 'infs' as it screws up the color scale
-    if (signal != inf) {
+    if (!std::isinf(signal)) {
       if (signal == 0.0)
         minSignalZeroCheck = signal;
       if (signal < minSignal && signal > 0.0)

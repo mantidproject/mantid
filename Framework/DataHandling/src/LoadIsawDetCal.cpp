@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -15,9 +13,11 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
 
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
 #include <sstream>
 #include <iostream>
 #include <fstream>

@@ -7,10 +7,11 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 #include <fstream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -119,8 +120,7 @@ void SaveLauenorm::exec() {
     Peak &p = peaks[wi];
     double intensity = p.getIntensity();
     double sigI = p.getSigmaIntensity();
-    if (intensity == 0.0 || boost::math::isnan(intensity) ||
-        boost::math::isnan(sigI))
+    if (intensity == 0.0 || !(std::isfinite(sigI)))
       continue;
     if (minIsigI != EMPTY_DBL() && intensity < std::abs(minIsigI * sigI))
       continue;

@@ -49,6 +49,7 @@ public:
     UNUSED_ARG(label)
   }
   virtual void userChangedDataset(int index) { UNUSED_ARG(index) }
+  virtual bool rawData() const = 0;
 };
 
 } // namespace MantidWidgets

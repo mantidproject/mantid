@@ -118,6 +118,11 @@ private:
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
   void loadAdditionalWindows(const std::string &lines, const int fileVersion);
+
+  // Misc functions
+
+  /// Create a handle to a new QMdiSubWindow instance
+  QMdiSubWindow *setupQMdiSubWindow() const;
 };
 }
 }

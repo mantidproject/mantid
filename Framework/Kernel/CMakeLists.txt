@@ -43,7 +43,7 @@ set ( SRC_FILES
 	src/Interpolation.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
-	src/ListValidator.cpp
+	src/LiveListenerInfo.cpp
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
@@ -72,6 +72,8 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/NormalDistribution.cpp
+	src/NullValidator.cpp
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
@@ -147,6 +149,7 @@ set ( INC_FILES
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
+	inc/MantidKernel/CaseInsensitiveMap.h
 	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
@@ -197,6 +200,7 @@ set ( INC_FILES
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
+	inc/MantidKernel/LiveListenerInfo.h
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
@@ -229,6 +233,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
+	inc/MantidKernel/NormalDistribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -237,13 +242,14 @@ set ( INC_FILES
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
+	inc/MantidKernel/PropertyHelper.h
 	inc/MantidKernel/PropertyHistory.h
 	inc/MantidKernel/PropertyManager.h
 	inc/MantidKernel/PropertyManagerDataService.h
 	inc/MantidKernel/PropertyManagerOwner.h
 	inc/MantidKernel/PropertyManagerProperty.h
 	inc/MantidKernel/PropertyManager_fwd.h
-    	inc/MantidKernel/PropertyNexus.h
+	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -293,8 +299,7 @@ set ( INC_FILES
 	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
-  inc/MantidKernel/CaseInsensitiveMap.h
-  inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
@@ -349,6 +354,7 @@ set ( TEST_FILES
 	InternetHelperTest.h
 	InterpolationTest.h
 	ListValidatorTest.h
+	LiveListenerInfoTest.h
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
@@ -376,6 +382,7 @@ set ( TEST_FILES
 	NDRandomNumberGeneratorTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
+	NormalDistributionTest.h
 	NullValidatorTest.h
 	OptionalBoolTest.h
 	ProgressBaseTest.h
@@ -541,8 +548,14 @@ endif ()
 set ( PLUGINS "." )
 if ( MAKE_VATES )
   set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+  if ( MSVC )
+    set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+  else()
+    set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+  endif()
 else ()
   set ( PV_PLUGINS "" )
+  set ( PARAVIEW_PYTHON_PATHS "")
 endif ()
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
@@ -604,15 +617,25 @@ endif ()
 
 set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
-                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
+                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
 )
 
-# Then, at build time, copy into appropriate place
-add_custom_command ( TARGET Kernel POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-)
+ # Then, copy into appropriate place
+if(MSVC)
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+else()
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+endif()
 
 ###########################################################################
 # Installation settings
@@ -635,6 +658,19 @@ endif ()
 set ( ENABLE_WEB_UPDATES 1 )
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+if(MAKE_VATES)
+  if (APPLE)
+    set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;../Python/vtk")
+  elseif (WIN32)
+    set ( PV_LIBS "../lib/paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}" )
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk" )
+  else () #Linux
+    set ( PV_LIBS "${CMAKE_INSTALL_PREFIX}/lib/paraview-${PARAVIEW_VERSION}")
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS};${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk")
+  endif ()
+else ()
+    set ( PARAVIEW_PYTHON_PATHS "")
+endif()
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_WEB_UPDATES}" )
 set ( CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_WEB_UPDATES}" )
 set ( ENABLE_USAGE_REPORTS "1" )

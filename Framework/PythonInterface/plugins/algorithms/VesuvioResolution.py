@@ -1,11 +1,12 @@
 #pylint: disable=no-init
-from mantid.simpleapi import *
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
-import mantid
+from vesuvio.base import VesuvioBase
 
 
-class VesuvioResolution(PythonAlgorithm):
+class VesuvioResolution(VesuvioBase):
 
     _workspace_index = None
     _mass = None
@@ -40,7 +41,6 @@ class VesuvioResolution(PythonAlgorithm):
                                                optional=PropertyMode.Optional),
                              doc='Output resolution workspace in ySpace')
 
-
     def validateInputs(self):
         """
         Does basic validation for inputs.
@@ -67,7 +67,6 @@ class VesuvioResolution(PythonAlgorithm):
 
         return issues
 
-
     def PyExec(self):
         sample_ws = self.getProperty('Workspace').value
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
@@ -79,30 +78,22 @@ class VesuvioResolution(PythonAlgorithm):
         output_ysp = (out_ws_ysp != '')
 
         if output_tof:
-            res_tof = self._calculate_resolution(sample_ws, out_ws_tof)
+            res_tof = self._calculate_resolution(sample_ws)
             self.setProperty('OutputWorkspaceTOF', res_tof)
 
         if output_ysp:
-            y_space_conv = mantid.api.AlgorithmManager.createUnmanaged('ConvertToYSpace')
-            y_space_conv.initialize()
-            y_space_conv.setChild(True)
-            y_space_conv.setAlwaysStoreInADS(True)
-            y_space_conv.setProperty('InputWorkspace', sample_ws)
-            y_space_conv.setProperty('OutputWorkspace', '__yspace_sample')
-            y_space_conv.setProperty('Mass', self._mass)
-            y_space_conv.execute()
-
-            res_ysp = self._calculate_resolution(mtd['__yspace_sample'], out_ws_ysp)
+            y_space_conv = self._execute_child_alg('ConvertToYSpace',
+                                                   return_values='OutputWorkspace',
+                                                   InputWorkspace=sample_ws,
+                                                   Mass=self._mass)
+            res_ysp = self._calculate_resolution(y_space_conv)
             self.setProperty('OutputWorkspaceYSpace', res_ysp)
-            DeleteWorkspace('__yspace_sample')
 
-
-    def _calculate_resolution(self, workspace, output_ws_name):
+    def _calculate_resolution(self, workspace):
         """
         Calculates the resolution function using the VesuvioResolution fit function.
 
         @param workspace The sample workspace
-        @param output_ws_name Name of the output workspace
         """
 
         function = 'name=VesuvioResolution, Mass=%f' % self._mass
@@ -111,26 +102,17 @@ class VesuvioResolution(PythonAlgorithm):
         # Execute the resolution function using fit.
         # Functions can't currently be executed as stand alone objects,
         # so for now we will run fit with zero iterations to achieve the same result.
-        fit = mantid.api.AlgorithmManager.createUnmanaged('Fit')
-        fit.initialize()
-        fit.setChild(True)
-        mantid.simpleapi.set_properties(fit, function, InputWorkspace=workspace, MaxIterations=0,
-                                        CreateOutput=True, Output=fit_naming_stem,
-                                        WorkspaceIndex=self._workspace_index,
-                                        OutputCompositeMembers=True)
-        fit.execute()
-        fit_ws = fit.getProperty('OutputWorkspace').value
+        fit_ws = self._execute_child_alg('Fit', return_values='OutputWorkspace',
+                                         Function=function, InputWorkspace=workspace,
+                                         MaxIterations=0,
+                                         CreateOutput=True, Output=fit_naming_stem,
+                                         WorkspaceIndex=self._workspace_index,
+                                         OutputCompositeMembers=False)
 
         # Extract just the function values from the fit spectrum
-        extract = mantid.api.AlgorithmManager.createUnmanaged('ExtractSingleSpectrum')
-        extract.initialize()
-        extract.setChild(True)
-        extract.setProperty('InputWorkspace', fit_ws)
-        extract.setProperty('OutputWorkspace', output_ws_name)
-        extract.setProperty('WorkspaceIndex', 1)
-        extract.execute()
-
-        res_ws = extract.getProperty('OutputWorkspace').value
+        res_ws = self._execute_child_alg('ExtractSingleSpectrum',
+                                         InputWorkspace=fit_ws,
+                                         WorkspaceIndex=1)
         return res_ws
 
 

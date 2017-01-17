@@ -89,6 +89,10 @@ datasearch.directories = @DATADIRS@
 # points to the ParaView obtained from the Mantid download page
 paraview.path = @PARAVIEW_APP_BIN_DIR@
 
+# A semi-colon(;) separated list of directories to use to search for data
+# Use forward slash / for all paths
+paraview.pythonpaths = @PARAVIEW_PYTHON_PATHS@
+
 # Whether to look for ParaView (0 = try to use, 1 = don't use).
 paraview.ignore = @IGNORE_PARAVIEW@
 
@@ -120,7 +124,6 @@ MultiThreaded.MaxCores = 0
 
 # Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated.
 # Outside this area peak functions return zero.
-curvefitting.peakRadius = 5
 curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4

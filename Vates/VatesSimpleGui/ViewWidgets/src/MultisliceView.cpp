@@ -60,15 +60,19 @@ static void GetOrientations(vtkSMSourceProxy *producer,
 }
 
 MultiSliceView::MultiSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager)
+                               RebinnedSourcesManager *rebinnedSourcesManager,
+                               bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager) {
   this->m_ui.setupUi(this);
-  pqRenderView *tmp =
-      this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
-  this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
-  QObject::connect(this->m_mainView,
-                   SIGNAL(sliceClicked(int, double, int, int)), this,
-                   SLOT(checkSliceClicked(int, double, int, int)));
+  if (createRenderProxy) {
+    pqRenderView *tmp =
+        this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
+
+    this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
+    QObject::connect(this->m_mainView,
+                     SIGNAL(sliceClicked(int, double, int, int)), this,
+                     SLOT(checkSliceClicked(int, double, int, int)));
+  }
 }
 
 MultiSliceView::~MultiSliceView() {}
@@ -96,6 +100,9 @@ void MultiSliceView::setupData() {
 
 void MultiSliceView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
+  if (this->origSrc == nullptr) {
+    return;
+  }
   this->checkSliceViewCompat();
   this->setupData();
   this->resetDisplay();
@@ -104,6 +111,21 @@ void MultiSliceView::render() {
 void MultiSliceView::renderAll() { this->m_mainView->render(); }
 
 void MultiSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
+
+void MultiSliceView::setView(pqRenderView *view) {
+  clearRenderLayout(this->m_ui.renderFrame);
+  this->m_mainView = qobject_cast<pqMultiSliceView *>(view);
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_mainView->widget());
+  QObject::connect(this->m_mainView,
+                   SIGNAL(sliceClicked(int, double, int, int)), this,
+                   SLOT(checkSliceClicked(int, double, int, int)));
+}
+
+ModeControlWidget::Views MultiSliceView::getViewType() {
+  return ModeControlWidget::Views::MULTISLICE;
+}
 
 void MultiSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 
@@ -133,7 +155,7 @@ void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
 void MultiSliceView::checkSliceViewCompat() {
   QString wsName = this->getWorkspaceName();
   if (wsName.isEmpty()) {
-    QObject::disconnect(this->m_mainView, 0, this, 0);
+    QObject::disconnect(this->m_mainView, nullptr, this, nullptr);
   }
 }
 
@@ -161,8 +183,8 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
-  pqPipelineSource *src1 = NULL;
-  pqPipelineSource *src2 = NULL;
+  pqPipelineSource *src1 = nullptr;
+  pqPipelineSource *src2 = nullptr;
   foreach (pqPipelineSource *src, srcs) {
     const QString name(src->getProxy()->GetXMLName());
 
@@ -185,7 +207,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     geomXML = std::string(inGeomXML);
   }
 
-  if (NULL != src2) {
+  if (src2) {
     // Need to see if scaling is applied to axis
     QString scalingProperty("Scaling Factor");
     switch (axisIndex) {

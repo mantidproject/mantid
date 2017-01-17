@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 # Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -30,7 +31,6 @@ import re
 
 import numpy as np
 
-__AGG_IMG_IDX = 0
 
 def _import_pyfits():
     """
@@ -48,6 +48,7 @@ def _import_pyfits():
 
     return pyfits
 
+
 def _import_skimage_io():
     """
     To import skimage io only when it is/can be used
@@ -60,6 +61,7 @@ def _import_skimage_io():
                           "io and the pluging freeimage which are required to support "
                           "several image formats. Error details: {0}".format(exc))
     return skio
+
 
 def make_dirs_if_needed(dirname):
     """
@@ -74,6 +76,8 @@ def make_dirs_if_needed(dirname):
         os.makedirs(absname)
 
 #pylint: disable=too-many-arguments
+
+
 def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
                 rescale_intensity=False):
     """
@@ -112,7 +116,7 @@ def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=Non
 
         too_verbose = False
         if too_verbose:
-            print "pix min: {0}, max: {1}, scale_factor: {2}".format(min_pix, max_pix, scale_factor)
+            print("pix min: {0}, max: {1}, scale_factor: {2}".format(min_pix, max_pix, scale_factor))
         img_data = scale_factor * (old_img_data - min_pix)
         img_data = img_data.astype(dtype=dtype)
 
@@ -139,6 +143,7 @@ def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=Non
         skio.imsave(filename, img_data, plugin='freeimage')
 
     return filename
+
 
 def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
     """
@@ -177,21 +182,19 @@ def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
 
     accum = np.zeros((imgs[0].shape[0], imgs[0].shape[1]), dtype=data_dtype)
 
-    if 'average' == agg_method:
-        __AGG_IMG_IDX = 1
-
     for ifile in img_files:
         hdu = None
         try:
             hdu = pyfits.open(ifile)
         except IOError as exc:
-            print "Got I/O exception trying to open and load {0}: {1}. Ignoring and going on.".format(
-                ifile, str(exc))
+            print("Got I/O exception trying to open and load {0}: {1}. Ignoring and going on.".format(
+                ifile, str(exc)))
             continue
 
         accum = _agg_img(accum, hdu[0].data, agg_method=agg_method)
 
     return accum
+
 
 def _agg_img(acc, img_data, agg_method=None, index=1):
     """
@@ -214,9 +217,9 @@ def _agg_img(acc, img_data, agg_method=None, index=1):
         acc = np.add(acc, img_data)
     elif 'average' == agg_method:
         acc = np.add((index-1)*acc/index, img_data/index)
-        __AGG_IMG_IDX += 1
 
     return acc
+
 
 def _alphanum_key_split(path_str):
     """
@@ -235,6 +238,7 @@ def _alphanum_key_split(path_str):
     """
     ALPHA_NUM_SPLIT_RE = re.compile('([0-9]+)')
     return [ int(c) if c.isdigit() else c for c in ALPHA_NUM_SPLIT_RE.split(path_str) ]
+
 
 def _read_img(filename, file_extension=None):
     """
@@ -262,6 +266,7 @@ def _read_img(filename, file_extension=None):
 
     return img_arr
 
+
 def _read_listed_files(files, slice_img_shape, file_extension, dtype):
     """
     Read several images in a row into a 3d numpy array. Useful when reading all the sample
@@ -285,6 +290,7 @@ def _read_listed_files(files, slice_img_shape, file_extension, dtype):
                                format(ifile, sample_path, str(exc)))
 
     return data
+
 
 def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension, img_shape, data_dtype):
     """
@@ -317,6 +323,8 @@ def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension, i
 
 # This could become a command class. There's already many parameters and it's
 # likely that there will be more.
+
+
 def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None,
                          file_extension='tiff', file_prefix=None,
                          flat_field_prefix=None, dark_field_prefix=None,
@@ -363,7 +371,7 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
     sample_path = os.path.expanduser(sample_path)
 
     if verbose:
-        print "Loading stack of images from {0}".format(sample_path)
+        print("Loading stack of images from {0}".format(sample_path))
 
     if not file_prefix:
         file_prefix = ''
@@ -376,7 +384,7 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
     files_match.sort(key=_alphanum_key_split)
 
     if verbose:
-        print "Found {0} image files in {1}".format(len(files_match), sample_path)
+        print("Found {0} image files in {1}".format(len(files_match), sample_path))
 
     # It is assumed that all images have the same size and properties as the first.
     try:
@@ -404,6 +412,7 @@ def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None
 
     return sample_data, flat_avg, dark_avg
 
+
 def save_recon_as_vertical_slices(recon_data, output_dir, img_format='tiff',
                                   name_prefix='out_recon_slice', zero_fill=6):
     """
@@ -422,6 +431,7 @@ def save_recon_as_vertical_slices(recon_data, output_dir, img_format='tiff',
                     os.path.join(output_dir, name_prefix + str(idx).zfill(zero_fill)),
                     img_format=img_format, dtype='uint16')
 
+
 def save_recon_as_horizontal_slices(recon_data, out_horiz_dir, img_format='tiff',
                                     name_prefix='out_recon_horiz_slice', zero_fill=6):
     """
@@ -439,6 +449,7 @@ def save_recon_as_horizontal_slices(recon_data, out_horiz_dir, img_format='tiff'
                     os.path.join(out_horiz_dir, name_prefix + str(idx).zfill(zero_fill)),
                     img_format=img_format, dtype='uint16')
 
+
 def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     """
     A netCDF, for compatibility/easier interoperation with other tools
@@ -450,7 +461,7 @@ def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     try:
         from scipy.io import netcdf_file
     except ImportError as exc:
-        print " WARNING: could not save NetCDF file. Import error: {0}".format(exc)
+        print(" WARNING: could not save NetCDF file. Import error: {0}".format(exc))
 
     xsize = recon_data.shape[0]
     ysize = recon_data.shape[1]
@@ -461,11 +472,11 @@ def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
     ncfile.createDimension('x', xsize)
     ncfile.createDimension('y', ysize)
     ncfile.createDimension('z', zsize)
-    print " Creating netCDF volume data variable"
+    print(" Creating netCDF volume data variable")
     dtype = 'int16'
     data = ncfile.createVariable('data', np.dtype(dtype).char, ('x','y','z'))
-    print " Data shape: {0}".format(data.shape)
-    print " Loading/assigning data..."
+    print(" Data shape: {0}".format(data.shape))
+    print(" Loading/assigning data...")
 
     # handle differences in pixel type
     save_data = recon_data
@@ -479,8 +490,9 @@ def save_recon_netcdf(recon_data, output_dir, filename='tomo_recon_vol.nc'):
         save_data = save_data.astype(dtype=dtype)
 
     data[:, :, :] = save_data[0:xsize, 0:ysize, 0:zsize]
-    print " Closing netCDF file: {0}".format(nc_path)
+    print(" Closing netCDF file: {0}".format(nc_path))
     ncfile.close()
+
 
 def self_save_zipped_scripts(output_path, this_path):
     """

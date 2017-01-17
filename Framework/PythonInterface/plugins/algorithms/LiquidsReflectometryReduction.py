@@ -16,6 +16,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from functools import reduce #pylint: disable=redefined-builtin
 
+
 class LiquidsReflectometryReduction(PythonAlgorithm):
     number_of_pixels_x=0
     number_of_pixels_y=0
@@ -55,13 +56,13 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background for the normalization")
         self.declareProperty("LowResDataAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the data will be cropped according "+\
+                             doc="If true, the low resolution direction of the data will be cropped according "+
                              "to the lowResDataAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the data")
         self.declareProperty("LowResNormAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the normalization run will be cropped "+\
+                             doc="If true, the low resolution direction of the normalization run will be cropped "+
                              "according to the LowResNormAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
@@ -474,7 +475,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             toks_item = item.split('=')
             if len(toks_item)!=2:
                 return accumulation
-            if type(accumulation)==dict:
+            if isinstance(accumulation, dict):
                 accumulation[toks_item[0].strip()] = toks_item[1].strip()
             else:
                 toks_accum = accumulation.split('=')
@@ -520,20 +521,20 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
             # Sanity check
             if keys[0] != 'IncidentMedium' and keys[1] != 'LambdaRequested' \
-                and keys[2] != 'S1H':
+                    and keys[2] != 'S1H':
                 logger.error("The scaling factor file isn't standard: bad keywords")
             # The S2H key has been changing in the earlier version of REFL reduction.
             # Get the key from the data to make sure we are backward compatible.
             s2h_key = keys[3]
             s2w_key = keys[5]
             if 'IncidentMedium' in data_dict \
-                and data_dict['IncidentMedium'].lower() == incident_medium.strip().lower() \
-                and _value_check('LambdaRequested', data_dict, lr_value) \
-                and _value_check('S1H', data_dict, s1h) \
-                and _value_check(s2h_key, data_dict, s2h):
+                    and data_dict['IncidentMedium'].lower() == incident_medium.strip().lower() \
+                    and _value_check('LambdaRequested', data_dict, lr_value) \
+                    and _value_check('S1H', data_dict, s1h) \
+                    and _value_check(s2h_key, data_dict, s2h):
 
-                if not match_slit_width or (_value_check('S1W', data_dict, s1w) \
-                        and _value_check(s2w_key, data_dict, s2w)):
+                if not match_slit_width or (_value_check('S1W', data_dict, s1w)
+                                            and _value_check(s2w_key, data_dict, s2w)):
                     data_found = data_dict
                     break
 

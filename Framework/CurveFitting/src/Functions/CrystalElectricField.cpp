@@ -527,10 +527,14 @@ double exp_(double z) {
 // calculates all transition intensities for
 // a polycrystalline sample (powder)
 //------------------------------------------
-void intcalc(double pi, double r0, double gj, double z,
-             const DoubleFortranMatrix &jt2, const DoubleFortranVector &e,
-             DoubleFortranMatrix &inten, int dim, double temp) {
-  auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
+void intcalc(double r0, double gj, double z, const DoubleFortranMatrix &jt2,
+             const DoubleFortranVector &e, DoubleFortranMatrix &inten, int dim,
+             double temp) {
+  // Original code from FOCUS calculated integrated intensity in barn
+  // auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
+  // ISIS normalised data is in milibarn/steradian - need to multiply
+  // by 1000 / 4 / PI
+  auto constant = pow(0.5 * r0 * gj, 2) * 1000.;
   if (temp == 0.0) {
     temp = 1.0;
   }
@@ -876,8 +880,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
   auto r0 = c_r0();
   auto gj = ggj[nre - 1];
   DoubleFortranMatrix mat(1, dim, 1, dim);
-  intcalc(pi, r0, gj, occupation_factor, jt2mat, energies, mat, dim,
-          temperature);
+  intcalc(r0, gj, occupation_factor, jt2mat, energies, mat, dim, temperature);
 
   deg_on(energies, mat, degeneration, e_energies, i_energies, de);
 }

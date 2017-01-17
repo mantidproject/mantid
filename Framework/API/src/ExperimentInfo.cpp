@@ -1,27 +1,38 @@
 #include "MantidAPI/ExperimentInfo.h"
 
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
+
+#include "MantidBeamline/DetectorInfo.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
+#include <Poco/SAX/Attributes.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <nexus/NeXusException.hpp>
@@ -37,15 +48,14 @@ namespace {
 Kernel::Logger g_log("ExperimentInfo");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
-      sptr_instrument(new Instrument()) {}
+      sptr_instrument(new Instrument()),
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {}
 
-//---------------------------------------------------------------------------------------
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
  * unlocked.
@@ -55,7 +65,9 @@ ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
   this->copyExperimentInfoFrom(&source);
 }
 
-//---------------------------------------------------------------------------------------
+// Defined as default in source for forward declaration with std::unique_ptr.
+ExperimentInfo::~ExperimentInfo() = default;
+
 /** Copy the experiment info data from another ExperimentInfo instance,
  * e.g. a MatrixWorkspace.
  * @param other :: the source from which to copy ExperimentInfo
@@ -70,9 +82,9 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
+  *m_detectorInfo = *other->m_detectorInfo;
 }
 
-//---------------------------------------------------------------------------------------
 /** Clone this ExperimentInfo class into a new one
  */
 ExperimentInfo *ExperimentInfo::cloneExperimentInfo() const {
@@ -80,8 +92,6 @@ ExperimentInfo *ExperimentInfo::cloneExperimentInfo() const {
   out->copyExperimentInfoFrom(this);
   return out;
 }
-
-//---------------------------------------------------------------------------------------
 
 /// @returns A human-readable description of the object
 const std::string ExperimentInfo::toString() const {
@@ -105,7 +115,8 @@ const std::string ExperimentInfo::toString() const {
   out << "\n";
 
   // parameter files loaded
-  auto paramFileVector = this->instrumentParameters().getParameterFilenames();
+  auto paramFileVector =
+      this->constInstrumentParameters().getParameterFilenames();
   for (auto &itFilename : paramFileVector) {
     out << "Parameters from: " << itFilename;
     out << "\n";
@@ -133,11 +144,51 @@ const std::string ExperimentInfo::toString() const {
   return out.str();
 }
 
-//---------------------------------------------------------------------------------------
+// Helpers for setInstrument and getInstrument
+namespace {
+void checkDetectorInfoSize(const Instrument &instr,
+                           const Beamline::DetectorInfo &detInfo) {
+  const auto numDets = instr.getNumberDetectors();
+  if (numDets != detInfo.size())
+    throw std::runtime_error("ExperimentInfo: size mismatch between "
+                             "DetectorInfo and number of detectors in "
+                             "instrument");
+}
+
+std::unique_ptr<Beamline::DetectorInfo>
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
+  if (newInstr.hasDetectorInfo()) {
+    // We allocate a new DetectorInfo in case there is an Instrument holding a
+    // reference to our current DetectorInfo.
+    const auto &detInfo = newInstr.detectorInfo();
+    checkDetectorInfoSize(oldInstr, detInfo);
+    return Kernel::make_unique<Beamline::DetectorInfo>(detInfo);
+  } else {
+    // If there is no DetectorInfo in the instrument we create a default one.
+    const auto numDets = oldInstr.getNumberDetectors();
+    // Currently monitors flags are stored in the detector cache of the base
+    // instrument. The copy being made here is strictly speaking duplicating
+    // that data, but with future refactoring this will no longer be the case.
+    // Note that monitors will not change after creating a workspace.
+    // Instrument::markAsMonitor works only for the base instrument and it is
+    // not possible to obtain a non-const reference to the base instrument in a
+    // workspace. Thus we do not need to worry about the two copies of monitor
+    // flags running out of sync.
+    std::vector<size_t> monitors;
+    for (size_t i = 0; i < numDets; ++i)
+      if (newInstr.isMonitorViaIndex(i))
+        monitors.push_back(i);
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets, monitors);
+  }
+}
+}
+
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
+  invalidateInstrumentReferences();
+  m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     m_parmap = instr->getParameterMap();
@@ -145,20 +196,22 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
+  m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
 }
 
-//---------------------------------------------------------------------------------------
 /** Get a shared pointer to the parametrized instrument associated with this
 *workspace
 *
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
-                                                         m_parmap);
+  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
+  auto instrument = Geometry::ParComponentFactory::createInstrument(
+      sptr_instrument, m_parmap);
+  instrument->setDetectorInfo(m_detectorInfo);
+  return instrument;
 }
 
-//---------------------------------------------------------------------------------------
 /**  Returns a new copy of the instrument parameters
 *    @return a (new) copy of the instruments parameter map
 */
@@ -173,6 +226,10 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
+      invalidateInstrumentReferences();
+      m_detectorInfoWrapper = nullptr;
+    }
+    if (!m_parmap.unique()) {
       ParameterMap_sptr oldData = m_parmap;
       m_parmap = boost::make_shared<ParameterMap>(*oldData);
     }
@@ -180,7 +237,6 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
   return *m_parmap;
 }
 
-//---------------------------------------------------------------------------------------
 /**  Returns a const reference to the instrument parameters.
 *    @return a const reference to the instrument ParameterMap.
 */
@@ -188,7 +244,6 @@ const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
   return *m_parmap;
 }
 
-//---------------------------------------------------------------------------------------
 /**  Returns a const reference to the instrument parameters.
 *    @return a const reference to the instrument ParameterMap.
 */
@@ -238,7 +293,6 @@ struct ParameterValue {
 ///@endcond
 }
 
-//---------------------------------------------------------------------------------------
 /** Add parameters to the instrument parameter map that are defined in
 * instrument
 *   definition file or parameter file, which may contain parameters that require
@@ -310,27 +364,33 @@ void ExperimentInfo::populateInstrumentParameters() {
   }
 }
 
-//---------------------------------------------------------------------------------------
 /**
  * Replaces current parameter map with a copy of the given map
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap const reference to parameter map whose copy replaces the current
  * parameter map
  */
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
+  invalidateInstrumentReferences();
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
 }
-//---------------------------------------------------------------------------------------
+
 /**
  * exchanges contents of current parameter map with contents of other map)
+ * Careful: Parameters that are stored in DetectorInfo are not automatically
+ * handled.
  * @ pmap reference to parameter map which would exchange its contents with
  * current map
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
+  invalidateInstrumentReferences();
+  m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
 }
 
-//---------------------------------------------------------------------------------------
 /**
  * Caches a lookup for the detector IDs of the members that are part of the same
  * group
@@ -339,16 +399,21 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
  * group.
  */
 void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
-  m_detgroups = mapping;
+  m_detgroups.clear();
+  for (const auto &item : mapping) {
+    m_det2group[item.first] = m_detgroups.size();
+    m_detgroups.push_back(item.second);
+  }
+  // Create default grouping if `mapping` is empty.
+  cacheDefaultDetectorGrouping();
 }
 
-//---------------------------------------------------------------------------------------
 /// Returns the detector IDs that make up the group that this ID is part of
-const std::vector<detid_t> &
+const std::set<detid_t> &
 ExperimentInfo::getGroupMembers(const detid_t detID) const {
-  auto iter = m_detgroups.find(detID);
-  if (iter != m_detgroups.end()) {
-    return iter->second;
+  auto iter = m_det2group.find(detID);
+  if (iter != m_det2group.end()) {
+    return m_detgroups[iter->second];
   } else {
     throw std::runtime_error(
         "ExperimentInfo::getGroupMembers - Unable to find ID " +
@@ -356,7 +421,6 @@ ExperimentInfo::getGroupMembers(const detid_t detID) const {
   }
 }
 
-//---------------------------------------------------------------------------------------
 /**
  * Get a detector or detector group from an ID
  * @param detID ::
@@ -368,12 +432,10 @@ ExperimentInfo::getDetectorByID(const detid_t detID) const {
   if (m_detgroups.empty()) {
     return getInstrument()->getDetector(detID);
   } else {
-    const std::vector<detid_t> &ids = this->getGroupMembers(detID);
+    const auto &ids = this->getGroupMembers(detID);
     return getInstrument()->getDetectorG(ids);
   }
 }
-
-//---------------------------------------------------------------------------------------
 
 /**
  * Set an object describing the moderator properties and take ownership
@@ -397,7 +459,6 @@ ModeratorModel &ExperimentInfo::moderatorModel() const {
   return *m_moderatorModel;
 }
 
-//---------------------------------------------------------------------------------------
 /**
  * Sets a new chopper description at a given point. The point is given by index
  * where 0 is
@@ -443,7 +504,6 @@ ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
   }
 }
 
-//---------------------------------------------------------------------------------------
 /** Get a constant reference to the Sample associated with this workspace.
 * @return const reference to Sample object
 */
@@ -473,7 +533,6 @@ Sample &ExperimentInfo::mutableSample() {
   return *m_sample;
 }
 
-//---------------------------------------------------------------------------------------
 /** Get a constant reference to the Run object associated with this workspace.
 * @return const reference to run object
 */
@@ -524,7 +583,7 @@ Kernel::Property *ExperimentInfo::getLog(const std::string &log) const {
   // If the instrument has a parameter with that name then take the value as a
   // log name
   const std::string logName =
-      instrumentParameters().getString(sptr_instrument.get(), log);
+      constInstrumentParameters().getString(sptr_instrument.get(), log);
   if (logName.empty()) {
     throw std::invalid_argument(
         "ExperimentInfo::getLog - No instrument parameter named \"" + log +
@@ -550,7 +609,7 @@ double ExperimentInfo::getLogAsSingleValue(const std::string &log) const {
   // If the instrument has a parameter with that name then take the value as a
   // log name
   const std::string logName =
-      instrumentParameters().getString(sptr_instrument.get(), log);
+      constInstrumentParameters().getString(sptr_instrument.get(), log);
   if (logName.empty()) {
     throw std::invalid_argument(
         "ExperimentInfo::getLog - No instrument parameter named \"" + log +
@@ -559,7 +618,6 @@ double ExperimentInfo::getLogAsSingleValue(const std::string &log) const {
   return run().getPropertyAsSingleValue(logName);
 }
 
-//---------------------------------------------------------------------------------------
 /** Utility method to get the run number
  *
  * @return the run number (int) or 0 if not found.
@@ -598,9 +656,10 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   if (run().hasProperty(emodeTag)) {
     emodeStr = run().getPropertyValueAsType<std::string>(emodeTag);
   } else if (sptr_instrument &&
-             instrumentParameters().contains(sptr_instrument.get(), emodeTag)) {
+             constInstrumentParameters().contains(sptr_instrument.get(),
+                                                  emodeTag)) {
     Geometry::Parameter_sptr param =
-        instrumentParameters().get(sptr_instrument.get(), emodeTag);
+        constInstrumentParameters().get(sptr_instrument.get(), emodeTag);
     emodeStr = param->asString();
   } else {
     return Kernel::DeltaEMode::Elastic;
@@ -681,7 +740,7 @@ class DummyException {
 public:
   std::string m_validFrom;
   std::string m_validTo;
-  DummyException(std::string validFrom, std::string validTo)
+  DummyException(const std::string &validFrom, const std::string &validTo)
       : m_validFrom(validFrom), m_validTo(validTo) {}
 };
 
@@ -708,7 +767,6 @@ class myContentHandler : public Poco::XML::ContentHandler {
   void startPrefixMapping(const XMLString &, const XMLString &) override {}
 };
 
-//---------------------------------------------------------------------------------------
 /** Return from an IDF the values of the valid-from and valid-to attributes
 *
 *  @param IDFfilename :: Full path of an IDF
@@ -734,7 +792,6 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
   }
 }
 
-//---------------------------------------------------------------------------------------
 /** Return workspace start date as an ISO 8601 string. If this info not stored
 *in workspace the
 *   method returns current date. This date is used for example to retrieve the
@@ -755,7 +812,6 @@ std::string ExperimentInfo::getWorkspaceStartDate() const {
   return date;
 }
 
-//---------------------------------------------------------------------------------------
 /** Return workspace start date as a formatted string (strftime, as
  *  returned by Kernel::DateAndTime) string, if available. If
  *  unavailable, an empty string is returned
@@ -772,7 +828,6 @@ std::string ExperimentInfo::getAvailableWorkspaceStartDate() const {
   return date;
 }
 
-//---------------------------------------------------------------------------------------
 /** Return workspace end date as a formatted string (strftime style,
  *  as returned by Kernel::DateAdnTime) string, if available. If
  *  unavailable, an empty string is returned
@@ -789,7 +844,6 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
   return date;
 }
 
-//---------------------------------------------------------------------------------------
 /** A given instrument may have multiple IDFs associated with it. This method
 *return an identifier which identify a given IDF for a given instrument.
 * An IDF filename is required to be of the form IDFname + _Definition +
@@ -890,7 +944,90 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   return mostRecentIDF;
 }
 
-//--------------------------------------------------------------------------------------------
+/** Return a const reference to the DetectorInfo object.
+ *
+ * Any modifications of the instrument or instrument parameters will invalidate
+ * this reference.
+ */
+const DetectorInfo &ExperimentInfo::detectorInfo() const {
+  if (!m_detectorInfoWrapper) {
+    std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
+    if (!m_detectorInfoWrapper)
+      m_detectorInfoWrapper =
+          Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument());
+  }
+  return *m_detectorInfoWrapper;
+}
+
+/** Return a non-const reference to the DetectorInfo object. Not thread safe.
+ */
+DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
+  // No locking here since this non-const method is not thread safe.
+
+  // We get the non-const ParameterMap reference *first* such that no copy is
+  // triggered unless really necessary. The call to `instrumentParameters`
+  // releases the old m_detectorInfoWrapper to drop the reference count to the
+  // ParameterMap by 1 (DetectorInfo contains a parameterized Instrument, so the
+  // reference count to the ParameterMap is at least 2 if m_detectorInfoWrapper
+  // is not nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then
+  // the ExperimentInfo is not the sole owner of the ParameterMap a copy is
+  // triggered.
+  auto pmap = &instrumentParameters();
+  // Here `getInstrument` creates a parameterized instrument, increasing the
+  // reference count to the ParameterMap. This has do be done *after* getting
+  // the ParameterMap.
+  m_detectorInfoWrapper =
+      Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
+  return *m_detectorInfoWrapper;
+}
+
+/** Returns the number of detector groups.
+ *
+ * This is a virtual method. The default implementation returns grouping
+ * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
+ * more common case is handled by the overload of this method in
+ * MatrixWorkspace. The purpose of this method is to be able to construct
+ * SpectrumInfo based on an ExperimentInfo object, including grouping
+ * information. Grouping information can be cached in ExperimentInfo, or can be
+ * obtained from child classes (MatrixWorkspace). */
+size_t ExperimentInfo::numberOfDetectorGroups() const {
+  std::call_once(m_defaultDetectorGroupingCached,
+                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
+
+  return m_detgroups.size();
+}
+
+/** Returns a set of detector IDs for a group.
+ *
+ * This is a virtual method. The default implementation returns grouping
+ * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
+ * more common case is handled by the overload of this method in
+ * MatrixWorkspace. The purpose of this method is to be able to construct
+ * SpectrumInfo based on an ExperimentInfo object, including grouping
+ * information. Grouping information can be cached in ExperimentInfo, or can be
+ * obtained from child classes (MatrixWorkspace). */
+const std::set<detid_t> &
+ExperimentInfo::detectorIDsInGroup(const size_t index) const {
+  std::call_once(m_defaultDetectorGroupingCached,
+                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
+
+  return m_detgroups.at(index);
+}
+
+/** Sets up a default detector grouping.
+ *
+ * The purpose of this method is to work around potential issues of MDWorkspaces
+ * that do not have grouping information. In such cases a default 1:1
+ * mapping/grouping is generated by this method. See also issue #18252. */
+void ExperimentInfo::cacheDefaultDetectorGrouping() const {
+  if (!m_detgroups.empty())
+    return;
+  for (const auto detID : sptr_instrument->getDetectorIDs()) {
+    m_det2group[detID] = m_detgroups.size();
+    m_detgroups.push_back({detID});
+  }
+}
+
 /** Save the object to an open NeXus file.
  * @param file :: open NeXus file
  */
@@ -901,7 +1038,6 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file) const {
   run().saveNexus(file, "logs");
 }
 
-//--------------------------------------------------------------------------------------------
 /** Load the sample and log info from an open NeXus file.
  * @param file :: open NeXus file
  */
@@ -920,7 +1056,6 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
   }
 }
 
-//--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
  * @param nxFilename :: the filename of the nexus file
@@ -940,7 +1075,6 @@ void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename,
   loadInstrumentInfoNexus(nxFilename, file, parameterStr);
 }
 
-//--------------------------------------------------------------------------------------------
 /** Load the instrument from an open NeXus file.
  * @param nxFilename :: the filename of the nexus file
  * @param file :: open NeXus file
@@ -973,7 +1107,6 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
   setInstumentFromXML(nxFilename, instrumentName, instrumentXml);
 }
 
-//--------------------------------------------------------------------------------------------
 /** Load the instrument from an open NeXus file without reading any parameters
  * (yet).
  * @param nxFilename :: the filename of the nexus file
@@ -1001,7 +1134,6 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
   setInstumentFromXML(nxFilename, instrumentName, instrumentXml);
 }
 
-//-------------------------------------------------------------------------------------------------
 /** Attempt to load an IDF embedded in the Nexus file.
  * @param file :: open NeXus file with instrument group open
  * @param[out] instrumentName :: name of instrument
@@ -1023,7 +1155,6 @@ void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(
   }
 }
 
-//-------------------------------------------------------------------------------------------------
 /** Set the instrument given its name and definition in XML
  *  If the XML string is empty the definition is loaded from the IDF file
  *  specified by the name
@@ -1077,7 +1208,6 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
   }
 }
 
-//-------------------------------------------------------------------------------------------------
 /** Loads the contents of a file and returns the string
  *  The file is assumed to be an IDF, and already checked that
  *  the path is correct.
@@ -1094,7 +1224,6 @@ std::string ExperimentInfo::loadInstrumentXML(const std::string &filename) {
   }
 }
 
-//--------------------------------------------------------------------------------------------
 /** Load the instrument parameters from an open NeXus file if found there.
  * @param file :: open NeXus file in its Instrument group
  * @param[out] parameterStr :: special string for all the parameters.
@@ -1115,7 +1244,6 @@ void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file,
   }
 }
 
-//-------------------------------------------------------------------------------------------------
 /** Parse the result of ParameterMap.asString() into the ParameterMap
  * of the current instrument. The instrument needs to have been loaded
  * already, of course.
@@ -1162,13 +1290,24 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     int size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[4];
-    pmap.add(tokens[1], comp, tokens[2], paramValue);
+
+    if (tokens[2].compare("masked") == 0) {
+      // Do not add masking to ParameterMap, it is stored in DetectorInfo
+      const auto det = dynamic_cast<const Detector *const>(comp);
+      if (!det)
+        throw std::runtime_error(
+            "Found masking for a non-detector component. This is not possible");
+      const auto &type = tokens[1];
+      const std::string name = "dummy";
+      auto param = ParameterFactory::create(type, name);
+      param->fromString(paramValue);
+      bool value = param->value<bool>();
+      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), value);
+    } else {
+      pmap.add(tokens[1], comp, tokens[2], paramValue);
+    }
   }
 }
-
-//------------------------------------------------------------------------------------------------------
-// Private members
-//------------------------------------------------------------------------------------------------------
 
 /**
  * Fill map with instrument parameter first set in xml file
@@ -1191,8 +1330,15 @@ void ExperimentInfo::populateWithParameter(
     pDescription = &paramInfo.m_description;
 
   // Some names are special. Values should be convertible to double
-  if (name.compare("x") == 0 || name.compare("y") == 0 ||
-      name.compare("z") == 0) {
+  if (name.compare("masked") == 0) {
+    // Do not add masking to ParameterMap, it is stored in DetectorInfo
+    const auto det = dynamic_cast<const Detector *const>(paramInfo.m_component);
+    if (!det)
+      throw std::runtime_error(
+          "Found masking for a non-detector component. This is not possible");
+    m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), paramValue);
+  } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
+             name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
   } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
              name.compare("roty") == 0 || name.compare("rotz") == 0) {

@@ -1,8 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
@@ -68,7 +67,6 @@ void ModeratorTzero::exec() {
                                     // emission time, in microseconds
   m_niter = getProperty("Niter");   // number of iterations
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  m_instrument = inputWS->getInstrument(); // pointer to the instrument
   const std::string emode = getProperty("EMode");
 
   // Check if Ei stored in workspace
@@ -80,25 +78,12 @@ void ModeratorTzero::exec() {
   }
 
   // extract formula from instrument parameters
-  std::vector<std::string> t0_formula =
-      m_instrument->getStringParameter("t0_formula");
+  auto t0_formula = inputWS->getInstrument()->getStringParameter("t0_formula");
   if (t0_formula.empty()) {
     g_log.error("Unable to retrieve t0_formula among instrument parameters.");
     return;
   }
   m_formula = t0_formula[0];
-  // Are there source and sample?
-  IComponent_const_sptr source;
-  IComponent_const_sptr sample;
-  double Lss(0); // distance from source to sample
-  try {
-    source = m_instrument->getSource();
-    sample = m_instrument->getSample();
-    Lss = source->getDistance(*sample);
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Unable to calculate source-sample distance.");
-    return;
-  }
 
   // Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS =
@@ -127,9 +112,12 @@ void ModeratorTzero::exec() {
     t0_direct = parser.Eval();
   }
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const double Lss = spectrumInfo.l1();
+
   const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // iterate over the spectra
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -141,20 +129,17 @@ void ModeratorTzero::exec() {
     parser.DefineVar("incidentEnergy", &E1); // associate E1 to this parser
     parser.SetExpr(m_formula);
 
-    IDetector_const_sptr det;
     double L1(Lss); // distance from source to sample
     double L2(-1);  // distance from sample to detector
-    try {
-      det = inputWS->getDetector(i);
-      if (det->isMonitor()) {
+    if (spectrumInfo.hasDetectors(i)) {
+      if (spectrumInfo.isMonitor(i)) {
         // redefine the sample as the monitor
-        L1 = source->getDistance(*det);
+        L1 = Lss + spectrumInfo.l2(i); // L2 in SpectrumInfo defined negative
         L2 = 0;
       } else {
-        L2 = sample->getDistance(*det);
+        L2 = spectrumInfo.l2(i);
       }
-    } // end of try
-    catch (Exception::NotFoundError &) {
+    } else {
       g_log.error() << "Unable to calculate distances to/from detector" << i
                     << '\n';
     }
@@ -167,13 +152,14 @@ void ModeratorTzero::exec() {
 
       if (emode == "Indirect") {
         double t2(-1.0); // time from sample to detector. (-1) signals error
-        if (det->isMonitor()) {
+        if (spectrumInfo.isMonitor(i)) {
           t2 = 0.0;
         } else {
           static const double convFact =
               1.0e-6 *
               sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
-          std::vector<double> wsProp = det->getNumberParameter("Efixed");
+          std::vector<double> wsProp =
+              spectrumInfo.detector(i).getNumberParameter("Efixed");
           if (!wsProp.empty()) {
             double E2 = wsProp.at(0);        //[E2]=meV
             double v2 = convFact * sqrt(E2); //[v2]=meter/microsec
@@ -243,11 +229,6 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   }
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
-  // Get pointers to sample and source
-  IComponent_const_sptr source = m_instrument->getSource();
-  IComponent_const_sptr sample = m_instrument->getSample();
-  double Lss = source->getDistance(*sample); // distance from source to sample
-
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
   if (emode == "Direct") {
@@ -259,30 +240,31 @@ void ModeratorTzero::execEvent(const std::string &emode) {
     t0_direct = parser.Eval();
   }
 
+  const auto &spectrumInfo = outputWS->spectrumInfo();
+  const double Lss = spectrumInfo.l1();
+
   // Loop over the spectra
   const size_t numHists = static_cast<size_t>(outputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     size_t wsIndex = static_cast<size_t>(i);
     EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists
     {
-      IDetector_const_sptr det;
       double L1(Lss); // distance from source to sample
       double L2(-1);  // distance from sample to detector
 
-      try {
-        det = outputWS->getDetector(i);
-        if (det->isMonitor()) {
+      if (spectrumInfo.hasDetectors(i)) {
+        if (spectrumInfo.isMonitor(i)) {
           // redefine the sample as the monitor
-          L1 = source->getDistance(*det);
+          L1 = Lss + spectrumInfo.l2(i); // L2 in SpectrumInfo defined negative
           L2 = 0;
         } else {
-          L2 = sample->getDistance(*det);
+          L2 = spectrumInfo.l2(i);
         }
-      } catch (Exception::NotFoundError &) {
+      } else {
         g_log.error() << "Unable to calculate distances to/from detector" << i
                       << '\n';
       }
@@ -301,13 +283,14 @@ void ModeratorTzero::execEvent(const std::string &emode) {
 
         if (emode == "Indirect") {
           double t2(-1.0); // time from sample to detector. (-1) signals error
-          if (det->isMonitor()) {
+          if (spectrumInfo.isMonitor(i)) {
             t2 = 0.0;
           } else {
             static const double convFact =
                 1.0e-6 * sqrt(2 * PhysicalConstants::meV /
                               PhysicalConstants::NeutronMass);
-            std::vector<double> wsProp = det->getNumberParameter("Efixed");
+            std::vector<double> wsProp =
+                spectrumInfo.detector(i).getNumberParameter("Efixed");
             if (!wsProp.empty()) {
               double E2 = wsProp.at(0);        //[E2]=meV
               double v2 = convFact * sqrt(E2); //[v2]=meter/microsec

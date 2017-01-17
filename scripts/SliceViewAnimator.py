@@ -6,6 +6,7 @@ from wand.drawing import Drawing
 from wand.color import Color
 from PyQt4.QtCore import QByteArray, QBuffer
 
+
 def animate_slice(sliceviewer, name, start, end, filename, num_frames=10, font_size=24):
     """Generate an animated gif of a 2D slice moving through a third dimension.
 

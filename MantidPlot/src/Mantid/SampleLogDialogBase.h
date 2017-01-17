@@ -5,21 +5,26 @@
 // Includes
 //----------------------------------
 #include <QDialog>
-#include <MantidAPI/ExperimentInfo.h>
-
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/LogFilterGenerator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include <memory>
 //----------------------------------
 // Forward declarations
 //----------------------------------
+class MantidUI;
+class ApplicationWindow;
 
+// Qt
+class QBoxLayout;
+class QRadioButton;
 class QTreeWidgetItem;
 class QTreeWidget;
 class QPushButton;
-class QRadioButton;
-class MantidUI;
-class ApplicationWindow;
 class QLabel;
 class QSpinBox;
 class QLineEdit;
+class QLayout;
 
 /**
 This is the base class for the Sample Log Dialog.
@@ -70,7 +75,10 @@ protected slots:
 
   /// Show the stats of the selected log
   virtual void showLogStatistics();
-  virtual void showLogStatisticsOfItem(QTreeWidgetItem *item);
+  virtual void showLogStatisticsOfItem(
+      QTreeWidgetItem *item,
+      const Mantid::API::LogFilterGenerator::FilterType
+          filter = Mantid::API::LogFilterGenerator::FilterType::None);
 
   /// Context menu popup
   virtual void popupMenu(const QPoint &pos);
@@ -85,6 +93,26 @@ protected:
   /// without overriding
   /// This function initalises everything in the tree widget
   void init();
+
+  /// Sets the dialog's window title
+  void setDialogWindowTitle(const QString &wsname);
+
+  /// Sets the QTreeWidget column names to the default values
+  void setTreeWidgetColumnNames();
+
+  /// Adds the import and close button to the layout and connects them
+  void addImportAndCloseButtonsTo(QBoxLayout *qLayout);
+
+  /// Adds the experiment info selector to the layout
+  void addExperimentInfoSelectorTo(QBoxLayout *qLayout);
+
+  /// Sets up the QTreeWidget's connections for functionality
+  void setUpTreeWidgetConnections();
+
+  /// Which type of filtering is selected - in base class case, none
+  virtual Mantid::API::LogFilterGenerator::FilterType getFilterType() const {
+    return Mantid::API::LogFilterGenerator::FilterType::None;
+  }
 
   /// A tree widget
   QTreeWidget *m_tree;
@@ -123,6 +151,23 @@ protected:
     numericArray   ///< for logs that are an array of numeric values (int or
                    /// double)
   };
+};
+
+/// Object that applies a filter to a property for as long as it is in scope.
+/// When scope ends, filter is cleared.
+template <typename T> class ScopedFilter {
+public:
+  ScopedFilter(Mantid::Kernel::TimeSeriesProperty<T> *prop,
+               const std::unique_ptr<Mantid::Kernel::LogFilter> &logFilter)
+      : m_prop(prop) {
+    if (logFilter && logFilter->filter()) {
+      m_prop->filterWith(logFilter->filter());
+    }
+  }
+  ~ScopedFilter() { m_prop->clearFilter(); }
+
+private:
+  Mantid::Kernel::TimeSeriesProperty<T> *m_prop;
 };
 
 #endif // SAMPLELOGDIALOGBASE_H_

@@ -6,6 +6,7 @@
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -196,8 +197,8 @@ public:
   /** Clean the testing workspaces
    */
   void test_Clean() {
-    AnalysisDataService::Instance().remove(m_dataMD->name());
-    AnalysisDataService::Instance().remove(m_monitorMD->name());
+    AnalysisDataService::Instance().remove(m_dataMD->getName());
+    AnalysisDataService::Instance().remove(m_monitorMD->getName());
   }
 
 private:
@@ -258,8 +259,8 @@ private:
     TS_ASSERT(m_monitorMD);
 
     // Clean
-    AnalysisDataService::Instance().remove(datatablews->name());
-    AnalysisDataService::Instance().remove(parentlogws->name());
+    AnalysisDataService::Instance().remove(datatablews->getName());
+    AnalysisDataService::Instance().remove(parentlogws->getName());
 
     return;
   }

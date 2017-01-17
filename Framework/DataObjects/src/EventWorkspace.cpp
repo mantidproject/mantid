@@ -1,7 +1,7 @@
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
@@ -100,6 +100,26 @@ void EventWorkspace::init(const std::size_t &NVectors,
   m_axes[1] = new API::SpectraAxis(this);
 }
 
+void EventWorkspace::init(const std::size_t &NVectors,
+                          const HistogramData::Histogram &histogram) {
+  if (histogram.xMode() != HistogramData::Histogram::XMode::BinEdges)
+    throw std::runtime_error(
+        "EventWorkspace can only be initialized with XMode::BinEdges");
+
+  if (histogram.sharedY() || histogram.sharedE())
+    throw std::runtime_error(
+        "EventWorkspace cannot be initialized non-NULL Y or E data");
+
+  data.resize(NVectors, nullptr);
+  for (size_t i = 0; i < NVectors; i++)
+    data[i] = new EventList(mru, specnum_t(i));
+  this->setAllX(histogram.binEdges());
+
+  m_axes.resize(2);
+  m_axes[0] = new API::RefAxis(histogram.x().size(), this);
+  m_axes[1] = new API::SpectraAxis(this);
+}
+
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
@@ -180,6 +200,39 @@ DateAndTime EventWorkspace::getPulseTimeMax() const {
       tMax = temp;
   }
   return tMax;
+}
+/**
+Get the maximum and mimumum pulse time for events accross the entire workspace.
+@param Tmin minimal pulse time as a DateAndTime.
+@param Tmax maximal pulse time as a DateAndTime.
+*/
+void EventWorkspace::getPulseTimeMinMax(
+    Mantid::Kernel::DateAndTime &Tmin,
+    Mantid::Kernel::DateAndTime &Tmax) const {
+
+  Tmax = DateAndTime::minimum();
+  Tmin = DateAndTime::maximum();
+
+  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
+#pragma omp parallel
+  {
+    DateAndTime tTmax = DateAndTime::minimum();
+    DateAndTime tTmin = DateAndTime::maximum();
+#pragma omp for nowait
+    for (int64_t workspaceIndex = 0; workspaceIndex < numWorkspace;
+         workspaceIndex++) {
+      const EventList &evList = this->getSpectrum(workspaceIndex);
+      DateAndTime tempMin, tempMax;
+      evList.getPulseTimeMinMax(tempMin, tempMax);
+      tTmin = std::min(tTmin, tempMin);
+      tTmax = std::max(tTmax, tempMax);
+    }
+#pragma omp critical
+    {
+      Tmin = std::min(Tmin, tTmin);
+      Tmax = std::max(Tmax, tTmax);
+    }
+  }
 }
 
 /**
@@ -296,16 +349,25 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
-  size_t numWorkspace = this->data.size();
-  for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
-       workspaceIndex++) {
-    const EventList &evList = this->getSpectrum(workspaceIndex);
-    double temp = evList.getTofMin();
-    if (temp < xmin)
-      xmin = temp;
-    temp = evList.getTofMax();
-    if (temp > xmax)
-      xmax = temp;
+  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
+#pragma omp parallel
+  {
+    double tXmin = xmin;
+    double tXmax = xmax;
+#pragma omp for nowait
+    for (int64_t workspaceIndex = 0; workspaceIndex < numWorkspace;
+         workspaceIndex++) {
+      const EventList &evList = this->getSpectrum(workspaceIndex);
+      double temp = evList.getTofMin();
+      tXmin = std::min(temp, tXmin);
+      temp = evList.getTofMax();
+      tXmax = std::max(temp, tXmax);
+    }
+#pragma omp critical
+    {
+      xmin = std::min(xmin, tXmin);
+      xmax = std::max(xmax, tXmax);
+    }
   }
 }
 
@@ -663,10 +725,6 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 
 } // namespace DataObjects
 } // namespace Mantid
-
-///\cond TEMPLATE
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
 
 namespace Mantid {
 namespace Kernel {

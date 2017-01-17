@@ -33,7 +33,7 @@ Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum() {
 
   pqView *view = pqActiveObjects::instance().activeView();
 
-  vtkSMRenderViewProxy *proxy = NULL;
+  vtkSMRenderViewProxy *proxy = nullptr;
 
   if (view) {
     proxy = vtkSMRenderViewProxy::SafeDownCast(view->getViewProxy());
@@ -98,7 +98,7 @@ Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum() {
 void CameraManager::setCameraToPeak(double xpos, double ypos, double zpos,
                                     double peakRadius) {
   pqView *view = pqActiveObjects::instance().activeView();
-  vtkSMRenderViewProxy *proxy = NULL;
+  vtkSMRenderViewProxy *proxy = nullptr;
 
   if (view) {
     proxy = vtkSMRenderViewProxy::SafeDownCast(view->getViewProxy());

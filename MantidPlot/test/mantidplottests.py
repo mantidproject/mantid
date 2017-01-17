@@ -7,6 +7,7 @@ Public methods:
     screenshot(): take a screenshot and save to a report
 
 """
+from __future__ import (absolute_import, division, print_function)
 import sys
 import os
 import unittest
@@ -24,7 +25,7 @@ try:
     qtest = True
 except:
     qtest = False
-    print "QTest not available"
+    print("QTest not available")
 
 def moveMouseToCentre(widget):
     """Moves the mouse over the widget

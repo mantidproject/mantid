@@ -5,11 +5,15 @@
 
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidKernel/Exception.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
 using Mantid::DataHandling::LoadSpiceAscii;
@@ -47,9 +51,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
     TS_ASSERT_THROWS_NOTHING(
@@ -109,9 +113,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOutput", "dSpacing"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("BinningParams", "0.5, 0.01, 5.0"));
@@ -155,9 +159,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOutput", "dSpacing"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParams", "0.01"));
     TS_ASSERT_THROWS_NOTHING(
@@ -243,8 +247,8 @@ public:
     TS_ASSERT(m_monitorMD);
 
     // Clean
-    AnalysisDataService::Instance().remove(datatablews->name());
-    AnalysisDataService::Instance().remove(parentlogws->name());
+    AnalysisDataService::Instance().remove(datatablews->getName());
+    AnalysisDataService::Instance().remove(parentlogws->getName());
   }
 
   //----------------------------------------------------------------------------------------------
@@ -262,9 +266,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
     TS_ASSERT_THROWS_NOTHING(
@@ -323,8 +327,8 @@ public:
   /** Clean the testing workspaces
    */
   void test_Clean() {
-    AnalysisDataService::Instance().remove(m_dataMD->name());
-    AnalysisDataService::Instance().remove(m_monitorMD->name());
+    AnalysisDataService::Instance().remove(m_dataMD->getName());
+    AnalysisDataService::Instance().remove(m_monitorMD->getName());
   }
 
 private:

@@ -1,5 +1,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/RotationSurface.h"
 #include "MantidKernel/Logger.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QCursor>
 #include <QMessageBox>
@@ -76,6 +78,8 @@ void RotationSurface::init() {
   m_u_min = -DBL_MAX;
   m_u_max = DBL_MAX;
 
+  const auto &detectorInfo = m_instrActor->getWorkspace()->detectorInfo();
+
   // Set if one of the threads in the following loop
   // throws an exception
   bool exceptionThrown = false;
@@ -99,7 +103,10 @@ void RotationSurface::init() {
                                   Mantid::Kernel::Exception::NotFoundError &) {
                               }
 
-                              if (!det || det->isMonitor() || (id < 0)) {
+                              if (!det ||
+                                  detectorInfo.isMonitor(
+                                      detectorInfo.indexOf(id)) ||
+                                  (id < 0)) {
                                 // Not a detector or a monitor
                                 // Make some blank, empty thing that won't draw
                                 m_unwrappedDetectors[i] = UnwrappedDetector();
@@ -160,17 +167,13 @@ void RotationSurface::init() {
                         double dV = fabs(m_v_max - m_v_min);
                         double du = dU * 0.05;
                         double dv = dV * 0.05;
-                        if (m_width_max > du &&
-                            m_width_max !=
-                                std::numeric_limits<double>::infinity()) {
+                        if (m_width_max > du && std::isfinite(m_width_max)) {
                           if (du > 0 && !(dU >= m_width_max)) {
                             m_width_max = dU;
                           }
                           du = m_width_max;
                         }
-                        if (m_height_max > dv &&
-                            m_height_max !=
-                                std::numeric_limits<double>::infinity()) {
+                        if (m_height_max > dv && std::isfinite(m_height_max)) {
                           if (dv > 0 && !(dV >= m_height_max)) {
                             m_height_max = dV;
                           }

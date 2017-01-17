@@ -82,8 +82,8 @@ class IqtFitMultiple(PythonAlgorithm):
         # Validate SpecMin/Max
 
         if self._spec_max > maximum_possible_spectra:
-            issues['SpecMax'] = ('SpecMax must be smaller or equal to the ' \
-                                 'number of spectra in the input workspace, %d' % maximum_possible_spectra)
+            issues['SpecMax'] = ('SpecMax must be smaller or equal to the number of '
+                                 'spectra in the input workspace, %d' % maximum_possible_spectra)
         if self._spec_min < 0:
             issues['SpecMin'] = 'SpecMin can not be less than 0'
         if self._spec_max < self._spec_min:

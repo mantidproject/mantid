@@ -45,7 +45,7 @@ void ExtractFFTSpectrum::exec() {
 
   Progress prog(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
 

@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"

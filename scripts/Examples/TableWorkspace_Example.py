@@ -18,4 +18,3 @@ for i in colNames:
 for i in range(peaks.rowCount()):
     row = peaks.row(i)
     print "Spectrum %d has peak at pos %f" % (row['spectrum'], row['centre'])
-

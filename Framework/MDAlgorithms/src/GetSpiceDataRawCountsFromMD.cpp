@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
@@ -17,7 +18,6 @@ using namespace Mantid::Kernel;
 
 DECLARE_ALGORITHM(GetSpiceDataRawCountsFromMD)
 
-//----------------------------------------------------------------------------------------------
 /** Initialization
  * @brief GetSpiceDataRawCountsFromMD::init
  */
@@ -77,7 +77,6 @@ void GetSpiceDataRawCountsFromMD::init() {
                   "be normalized by their monitor counts. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execution body
  * @brief GetSpiceDataRawCountsFromMD::exec
  */
@@ -109,7 +108,7 @@ void GetSpiceDataRawCountsFromMD::exec() {
                               ylabel, donormalize);
   } else if (mode.compare("Sample Log") == 0) {
     std::string samplelogname = getProperty("SampleLogName");
-    if (samplelogname.size() == 0)
+    if (samplelogname.empty())
       throw std::runtime_error(
           "For mode 'Sample Log', value of 'SampleLogName' must be specified.");
     exportSampleLogValue(datamdws, samplelogname, vecX, vecY, xlabel, ylabel);
@@ -221,7 +220,7 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
   std::vector<double> vecDetCounts;
   int runnumber = -1;
   bool get2theta = false;
-  if (xlabel.size() == 0) {
+  if (xlabel.empty()) {
     // xlabel is in default and thus use 2-theta for X
     get2theta = true;
   }
@@ -306,7 +305,7 @@ void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
   ylabel = samplelogname;
 
   // X values
-  if (xlabel.size() == 0) {
+  if (xlabel.empty()) {
     // default
     xlabel = "Pt.";
   }
@@ -383,8 +382,8 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                  << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
+                  << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -461,7 +460,7 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
     // Check property exists
     if (!expinfo->run().hasProperty(samplelogname)) {
       std::stringstream ess;
-      ess << "Workspace " << mdws->name() << "'s " << iexp
+      ess << "Workspace " << mdws->getName() << "'s " << iexp
           << "-th ExperimentInfo with "
              "run number " << thisrunnumber
           << " does not have specified property " << samplelogname;
@@ -514,7 +513,7 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
 
   // Set label
   outws->setYUnitLabel(ylabel);
-  if (xlabel.size() != 0) {
+  if (!xlabel.empty()) {
     try {
       outws->getAxis(0)->setUnit(xlabel);
     } catch (...) {

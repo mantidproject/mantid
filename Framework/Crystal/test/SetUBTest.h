@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidAPI/Sample.h"
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -38,7 +39,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -78,7 +79,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -125,7 +126,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -150,7 +151,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -172,7 +173,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -195,7 +196,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;

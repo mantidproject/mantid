@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -16,17 +13,18 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
 #include <QClipboard>
-#include <QDesktopServices>
+#include <QFileDialog>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
@@ -164,6 +162,41 @@ bool convertPythonBoolStringToBool(QString input) {
   }
 
   return value;
+}
+
+void setTransmissionOnSaveCommand(
+    QString &saveCommand, Mantid::API::MatrixWorkspace_sptr matrix_workspace,
+    const QString &detectorSelection) {
+  if (matrix_workspace->getInstrument()->getName() == "SANS2D")
+    saveCommand += "'front-detector, rear-detector'";
+  if (matrix_workspace->getInstrument()->getName() == "LOQ")
+    saveCommand += "'HAB, main-detector-bank'";
+  if (matrix_workspace->getInstrument()->getName() == "LARMOR")
+    saveCommand += "'" + detectorSelection + "'";
+
+  /* From v2, SaveCanSAS1D is able to save the Transmission workspaces
+  related to the
+  reduced data. The name of workspaces of the Transmission are
+  available at the
+  sample logs. This part add the parameters Transmission=trans_ws_name
+  and
+  TransmissionCan=trans_ws_name_can if they are available at the
+  Workspace Sample log
+  and still available inside MantidPlot. */
+  const Mantid::API::Run &run = matrix_workspace->run();
+  QStringList list;
+  list << "Transmission"
+       << "TransmissionCan";
+  foreach (QString property, list) {
+    if (run.hasProperty(property.toStdString())) {
+      std::string trans_ws_name =
+          run.getLogData(property.toStdString())->value();
+      if (AnalysisDataService::Instance().isValid(trans_ws_name).empty()) {
+        saveCommand += ", " + property + "=\"" +
+                       QString::fromStdString(trans_ws_name) + "\"";
+      }
+    }
+  }
 }
 }
 
@@ -441,11 +474,10 @@ void SANSRunWindow::setupSaveBox() {
           SLOT(setUserFname()));
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(m_uiForm.saveNex_check, "SaveNexus");
   m_savFormats.insert(m_uiForm.saveNIST_Qxy_check, "SaveNISTDAT");
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
-  m_savFormats.insert(m_uiForm.saveCSV_check, "SaveCSV");
+  m_savFormats.insert(m_uiForm.saveNXcanSAS_check, "SaveNXcanSAS");
 
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
        ++i) {
@@ -699,13 +731,13 @@ void SANSRunWindow::readSettings() {
 */
 void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
-  m_uiForm.saveNex_check->setChecked(valueStore.value("nexus", false).toBool());
   m_uiForm.saveCan_check->setChecked(
       valueStore.value("canSAS", false).toBool());
   m_uiForm.saveNIST_Qxy_check->setChecked(
       valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
-  m_uiForm.saveCSV_check->setChecked(valueStore.value("CSV", false).toBool());
+  m_uiForm.saveNXcanSAS_check->setChecked(
+      valueStore.value("NXcanSAS", false).toBool());
 }
 
 /**
@@ -743,11 +775,10 @@ void SANSRunWindow::saveSettings() {
 */
 void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
-  valueStore.setValue("nexus", m_uiForm.saveNex_check->isChecked());
   valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
   valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
-  valueStore.setValue("CSV", m_uiForm.saveCSV_check->isChecked());
+  valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
 }
 /**
  * Run a function from the SANS reduction script, ensuring that the first call
@@ -1634,12 +1665,12 @@ void SANSRunWindow::setGeometryDetails() {
 
   if (boost::dynamic_pointer_cast<const IEventWorkspace>(ws)) {
     // EventWorkspaces have their monitors loaded into a separate workspace.
-    const std::string monitorWsName = ws->name() + "_monitors";
+    const std::string monitorWsName = ws->getName() + "_monitors";
 
     if (!ADS.doesExist(monitorWsName)) {
       g_log.error() << "Expected a sister monitor workspace called \""
                     << monitorWsName << "\" "
-                    << "for the EventWorkspace \"" << ws->name()
+                    << "for the EventWorkspace \"" << ws->getName()
                     << "\", but could not find one "
                     << "so unable to set geometry details.\n";
       return;
@@ -1666,7 +1697,7 @@ void SANSRunWindow::setGeometryDetails() {
     g_log.error() << "The reported incident monitor spectrum number \""
                   << monitorSpectrum
                   << "\" does not have a corresponding workspace index in \""
-                  << monitorWs->name()
+                  << monitorWs->getName()
                   << "\", so unable to set geometry details.\n";
     return;
   }
@@ -1810,7 +1841,7 @@ void SANSRunWindow::setSANS2DGeometry(
   QString code_to_run =
       QString("print ','.join([str(a) for a in "
               "i.ReductionSingleton().instrument.getDetValues('%1')])")
-          .arg(QString::fromStdString(workspace->name()));
+          .arg(QString::fromStdString(workspace->getName()));
 
   QStringList logvalues = runReduceScriptFunction(code_to_run).split(",");
 
@@ -1942,9 +1973,9 @@ void SANSRunWindow::saveFileBrowse() {
                                   ConfigService::Instance().getString(
                                       "defaultsave.directory"))).toString();
 
-  const QString filter = ";;AllFiles (*.*)";
+  const QString filter = ";;AllFiles (*)";
 
-  QString oFile = FileDialogHandler::getSaveFileName(
+  QString oFile = QFileDialog::getSaveFileName(
       this, title, prevPath + "/" + m_uiForm.outfile_edit->text());
 
   if (!oFile.isEmpty()) {
@@ -1973,7 +2004,7 @@ bool SANSRunWindow::browseForFile(const QString &box_title,
   if (box_text.isEmpty()) {
     start_path = m_last_dir;
   }
-  file_filter += ";;AllFiles (*.*)";
+  file_filter += ";;AllFiles (*)";
   QString file_path =
       QFileDialog::getOpenFileName(this, box_title, start_path, file_filter);
   if (file_path.isEmpty() || QFileInfo(file_path).isDir())
@@ -2140,8 +2171,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
 *  @param RunStep name of the RunStep Python object
 *  @param output where the number will be displayed
 */
-void SANSRunWindow::readNumberOfEntries(
-    const QString &RunStep, MantidWidgets::MWRunFiles *const output) {
+void SANSRunWindow::readNumberOfEntries(const QString &RunStep,
+                                        API::MWRunFiles *const output) {
   QString periods = runReduceScriptFunction("print i.ReductionSingleton()." +
                                             RunStep + ".periods_in_file");
   output->setNumberOfEntries(periods.toInt());
@@ -2478,8 +2509,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
 
     QString csv_file(m_uiForm.csv_filename->text());
     if (m_dirty_batch_grid) {
-      QString selected_file = MantidQt::API::FileDialogHandler::getSaveFileName(
-          this, "Save as CSV", m_last_dir);
+      QString selected_file =
+          QFileDialog::getSaveFileName(this, "Save as CSV", m_last_dir);
       csv_file = saveBatchGrid(selected_file);
     }
     py_code.prepend("import SANSBatchMode as batch\n");
@@ -2917,38 +2948,9 @@ void SANSRunWindow::handleDefSaveClick() {
       MatrixWorkspace_sptr matrix_workspace =
           boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
       if (matrix_workspace) {
-        if (matrix_workspace->getInstrument()->getName() == "SANS2D")
-          saveCommand += "'front-detector, rear-detector'";
-        if (matrix_workspace->getInstrument()->getName() == "LOQ")
-          saveCommand += "'HAB, main-detector-bank'";
-        if (matrix_workspace->getInstrument()->getName() == "LARMOR")
-          saveCommand += "'" + m_uiForm.detbank_sel->currentText() + "'";
-
-        /* From v2, SaveCanSAS1D is able to save the Transmission workspaces
-           related to the
-           reduced data. The name of workspaces of the Transmission are
-           available at the
-           sample logs. This part add the parameters Transmission=trans_ws_name
-           and
-           TransmissionCan=trans_ws_name_can if they are available at the
-           Workspace Sample log
-           and still available inside MantidPlot. */
-        const Mantid::API::Run &run = matrix_workspace->run();
-        QStringList list;
-        list << "Transmission"
-             << "TransmissionCan";
-        foreach (QString property, list) {
-          if (run.hasProperty(property.toStdString())) {
-            std::string trans_ws_name =
-                run.getLogData(property.toStdString())->value();
-            if (AnalysisDataService::Instance()
-                    .isValid(trans_ws_name)
-                    .empty()) {
-              saveCommand += ", " + property + "=\"" +
-                             QString::fromStdString(trans_ws_name) + "\"";
-            }
-          }
-        }
+        auto detectorSelection = m_uiForm.detbank_sel->currentText();
+        setTransmissionOnSaveCommand(saveCommand, matrix_workspace,
+                                     detectorSelection);
       }
 
       // Add the sample information to the output
@@ -2961,6 +2963,20 @@ void SANSRunWindow::handleDefSaveClick() {
       saveCommand += ", Geometry='" + geometryName + "', SampleHeight=" +
                      sampleHeight + ", SampleWidth=" + sampleWidth +
                      ", SampleThickness=" + sampleThickness;
+      saveCommand += ")\n";
+    } else if ((*alg) == "SaveNXcanSAS") {
+      saveCommand +=
+          (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
+      Workspace_sptr workspace_ptr =
+          AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
+      MatrixWorkspace_sptr matrix_workspace =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+
+      if (matrix_workspace) {
+        auto detectorSelection = m_uiForm.detbank_sel->currentText();
+        setTransmissionOnSaveCommand(saveCommand, matrix_workspace,
+                                     detectorSelection);
+      }
       saveCommand += ")\n";
     } else
       saveCommand += (*alg) + "('" + m_outputWS + "','" + fname + "')\n";
@@ -3390,8 +3406,8 @@ void SANSRunWindow::resetDefaultOutput(const QString &wsName) {
 * present) file
 *  @param assignFn this is different for can or sample
 */
-bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles &trans,
-                                     MantidWidgets::MWRunFiles &direct,
+bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
+                                     API::MWRunFiles &direct,
                                      const QString &assignFn) {
   // need something to place between names printed by Python that won't be
   // intepreted as the names or removed as white space
@@ -3439,7 +3455,7 @@ bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles &trans,
  * @param[in] assignFn the Python command to run
  * @return true if there were no Python errors, false otherwise
  */
-bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles &runFile,
+bool SANSRunWindow::assignDetBankRun(API::MWRunFiles &runFile,
                                      const QString &assignFn) {
   // need something to place between names printed by Python that won't be
   // intepreted as the names or removed as white space
@@ -3888,7 +3904,7 @@ void SANSRunWindow::handleSlicePushButton() {
 void SANSRunWindow::openHelpPage() {
   const auto helpPageUrl =
       m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
-  QDesktopServices::openUrl(QUrl(helpPageUrl));
+  MantidDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 // Set the validators for inputs
@@ -4038,9 +4054,9 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString &wsName) {
   bool isValid = true;
   if (result != m_constants.getPythonSuccessKeyword()) {
     result.replace(m_constants.getPythonSuccessKeyword(), "");
-    g_log.warning("Not a valid workspace for zero error replacement. Will save "
-                  "original workspace. More info: " +
-                  result.toStdString());
+    g_log.notice("Not a valid workspace for zero error replacement. Will save "
+                 "original workspace. More info: " +
+                 result.toStdString());
     isValid = false;
   }
   return isValid;
@@ -4421,13 +4437,17 @@ bool SANSRunWindow::areSettingsValid(States type) {
   QString message;
   // ------------ GUI INPUT CHECKS ------------
 
-  // We currently do not allow a 2D reduction with a merged flag
+  // We currently do not allow a 2D reduction with a merged flag and fitting
+  // because we can only fit 1D functions
   auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
-  if (type == States::TwoD && isMergedReduction) {
+  auto hasFitEnabled = m_uiForm.frontDetShiftCB->isChecked() ||
+                       m_uiForm.frontDetRescaleCB->isChecked();
+  if (type == States::TwoD && isMergedReduction && hasFitEnabled) {
     isValid = false;
     message +=
-        "A merged Detector Bank selection is currently not supported for 2D "
-        "reductions.\n";
+        "A merged reduction with fitting is currently not supported for 2D "
+        "reductions. You can run a merged reduction wihthout fitting enabled"
+        " for 2D reductions.\n";
   }
 
   // R_MAX -- can be only >0 or -1

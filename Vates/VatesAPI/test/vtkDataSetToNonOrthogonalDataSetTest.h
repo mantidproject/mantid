@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
@@ -268,16 +269,6 @@ public:
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
     TS_ASSERT_THROWS_NOTHING(converter.execute());
-  }
-
-  void testStaticUseForSimpleDataSet() {
-    std::string wsName = createMantidWorkspace(false);
-    vtkSmartPointer<vtkUnstructuredGrid> ds;
-    ds.TakeReference(createSingleVoxelPoints());
-    auto workspaceProvider = Mantid::Kernel::make_unique<
-        ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-    TS_ASSERT_THROWS_NOTHING(vtkDataSetToNonOrthogonalDataSet::exec(
-        ds, wsName, std::move(workspaceProvider)));
   }
 
   void testNonUnitySimpleDataset() {

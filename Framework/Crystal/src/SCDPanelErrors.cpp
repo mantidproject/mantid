@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
@@ -326,7 +324,7 @@ void SCDPanelErrors::setupData() const {
 
   m_bank = getAttribute("Bank").asString();
 
-  g_log.debug() << "Setting up " << m_workspace->name() << " bank " << m_bank
+  g_log.debug() << "Setting up " << m_workspace->getName() << " bank " << m_bank
                 << '\n';
 
   m_setupFinished = true;

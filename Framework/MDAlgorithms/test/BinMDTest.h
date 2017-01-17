@@ -20,7 +20,7 @@
 #include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <cxxtest/TestSuite.h>
 
@@ -185,7 +185,7 @@ public:
         TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
       } else if (functionXML != "NO_FUNCTION") {
         // All NAN cause of implicit function
-        TS_ASSERT(boost::math::isnan(out->getSignalAt(i))); // The implicit
+        TS_ASSERT(std::isnan(out->getSignalAt(i))); // The implicit
         // function should
         // have ensured that
         // no bins were
@@ -643,7 +643,7 @@ public:
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -684,7 +684,7 @@ public:
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -750,7 +750,7 @@ public:
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -821,7 +821,7 @@ public:
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned2->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned2->getOriginalWorkspace(1)->name(), "binned1");
+    TS_ASSERT_EQUALS(binned2->getOriginalWorkspace(1)->getName(), "binned1");
     // Transforms to/from the INTERMEDIATE workspace exist
     TS_ASSERT(binned2->getTransformToOriginal(1));
     TS_ASSERT(binned2->getTransformFromOriginal(1));

@@ -1,19 +1,20 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveGSS.h"
 
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
@@ -48,9 +49,6 @@ bool isConstantDelta(const MantidVec &xAxis) {
   return true;
 }
 
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /** Initialise the algorithm
   */
 void SaveGSS::init() {
@@ -92,7 +90,6 @@ void SaveGSS::init() {
       "otherwise, the continous bank IDs are applied. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Determine the focused position for the supplied spectrum. The position
  * (l1, l2, tth) is returned via the references passed in.
  */
@@ -117,7 +114,7 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
   Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
   if (!det) {
     std::stringstream errss;
-    errss << "Workspace " << wksp->name()
+    errss << "Workspace " << wksp->getName()
           << " does not have detector with spectrum " << spectrum;
     throw std::runtime_error(errss.str());
   }
@@ -128,7 +125,6 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
           (PhysicalConstants::h * 1.e4));
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm
   */
 void SaveGSS::exec() {
@@ -148,7 +144,7 @@ void SaveGSS::exec() {
     errss << "Number of Spectra (" << nHist
           << ") cannot be larger than 99 for GSAS file";
     g_log.error(errss.str());
-    throw new std::invalid_argument(errss.str());
+    throw std::invalid_argument(errss.str());
   }
 
   std::string filename = getProperty("Filename");
@@ -166,8 +162,7 @@ void SaveGSS::exec() {
 
   // Check whether append or not
   if (!split) {
-    const std::string file(filename);
-    Poco::File fileobj(file);
+    Poco::File fileobj(filename);
     if (fileobj.exists() && !append) {
       // Non-append mode and will be overwritten
       g_log.warning() << "Target GSAS file " << filename
@@ -186,7 +181,6 @@ void SaveGSS::exec() {
                 outputFormat);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write GSAS file based on user-specified request
   */
 void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
@@ -215,19 +209,17 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   int nHist = static_cast<int>(inputWS->getNumberHistograms());
   Progress p(this, 0.0, 1.0, nHist);
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int iws = 0; iws < nHist; iws++) {
     // Determine whether to skip the spectrum due to being masked
     if (has_instrument) {
-      try {
-        Geometry::IDetector_const_sptr det =
-            inputWS->getDetector(static_cast<size_t>(iws));
-        if (det->isMasked())
-          continue;
-      } catch (const Kernel::Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(iws)) {
         has_instrument = false;
         g_log.warning() << "There is no detector associated with spectrum "
                         << iws
                         << ". Workspace is treated as NO-INSTRUMENT case. \n";
+      } else if (spectrumInfo.isMasked(iws)) {
+        continue;
       }
     }
 
@@ -330,7 +322,6 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Ensures that when a workspace group is passed as output to this workspace
    *  everything is saved to one file and the bank number increments for each
    *  group member.
@@ -357,7 +348,6 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
     Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write value from a RunInfo property (i.e., log) to a stream
     */
 void writeLogValue(std::ostream &os, const Run &runinfo,
@@ -481,7 +471,6 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   os.flags(fflags);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write a single line for bank
   */
 inline void writeBankLine(std::stringstream &out, const std::string &bintype,
@@ -494,18 +483,16 @@ inline void writeBankLine(std::stringstream &out, const std::string &bintype,
   out.flags(fflags);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Fix error if value is less than zero or infinity
   */
 inline double fixErrorValue(const double value) {
-  if (value <= 0. || boost::math::isnan(value) ||
-      boost::math::isinf(value)) // Negative errors cannot be read by GSAS
+  if (value <= 0. ||
+      !std::isfinite(value)) // Negative errors cannot be read by GSAS
     return 0.;
   else
     return value;
 }
 
-//--------------------------------------------------------------------------------------------
 /**
   */
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
@@ -516,7 +503,7 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
   double bc2 = (X[1] - X[0]) * 32;
   // Logarithmic step
   double bc4 = (X[1] - X[0]) / X[0];
-  if (boost::math::isnan(fabs(bc4)) || boost::math::isinf(bc4))
+  if (!std::isfinite(bc4))
     bc4 = 0; // If X is zero for BANK
 
   // Write out the data header

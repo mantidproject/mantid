@@ -7,6 +7,9 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/Progress.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -34,7 +37,8 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILLTOF : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadILLTOF : public API::IFileLoader<Kernel::NexusDescriptor>,
+                             public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadILLTOF();
@@ -68,6 +72,7 @@ private:
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(std::string filename);
   void addEnergyToRun();
+  void addPulseInterval();
 
   int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
   void loadTimeDetails(NeXus::NXEntry &entry);
@@ -75,6 +80,9 @@ private:
   loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
                            const std::vector<std::vector<int>> &,
                            int vanaCalculatedDetectorElasticPeakPosition = -1);
+  void loadSpectra(size_t &spec, size_t numberOfMonitors, size_t numberOfTubes,
+                   std::vector<Mantid::detid_t> &detectorIDs, NeXus::NXInt data,
+                   Mantid::API::Progress progress);
 
   void runLoadInstrument();
 

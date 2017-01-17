@@ -11,11 +11,13 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <string>
 
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -168,7 +170,8 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
             1, 10, false /*dont clear the events*/);
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 200);
-    ws->maskWorkspaceIndex(2);
+    ws->getSpectrum(2).clearData();
+    ws->mutableSpectrumInfo().setMasked(2, true);
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 0);
   }
 
@@ -532,7 +535,7 @@ public:
 
   void test_sortAll_TOF() {
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     Progress *prog = NULL;
 
     test_in->sortAll(TOF_SORT, prog);
@@ -552,7 +555,7 @@ public:
   void test_sortAll_SingleEventList() {
     int numEvents = 30;
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents, 1);
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
     Progress *prog = NULL;
 
     test_in->sortAll(TOF_SORT, prog);
@@ -570,7 +573,7 @@ public:
   void test_sortAll_byTime_SingleEventList() {
     int numEvents = 30;
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents, 1);
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
     Progress *prog = NULL;
 
     test_in->sortAll(PULSETIME_SORT, prog);
@@ -584,7 +587,7 @@ public:
 
   void test_sortAll_ByTime() {
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     Progress *prog = NULL;
 
     test_in->sortAll(PULSETIME_SORT, prog);
@@ -607,7 +610,7 @@ public:
   {
     int numpix = 100000;
     EventWorkspace_const_sptr ew1 =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(50, numpix);
+        WorkspaceCreationHelper::createRandomEventWorkspace(50, numpix);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpix; i++) {
@@ -624,7 +627,7 @@ public:
     // 50 pixels, 100 bins, 2 events in each
     int numpixels = 900;
     EventWorkspace_sptr ew1 =
-        WorkspaceCreationHelper::CreateEventWorkspace2(numpixels, 100);
+        WorkspaceCreationHelper::createEventWorkspace2(numpixels, 100);
     PARALLEL_FOR_IF(do_parallel)
     for (int i = 0; i < numpixels; i += 3) {
       const MantidVec &Y = ew1->readY(i);
@@ -730,7 +733,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
     TS_ASSERT(ws->isCommonBins());
@@ -749,7 +752,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     TS_ASSERT_THROWS_NOTHING(ws->readY(0));
     TS_ASSERT_THROWS_NOTHING(ws->dataY(0));
@@ -761,7 +764,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     auto hist1 = ws->histogram(0);
     auto hist2 = ws->histogram(0);
@@ -772,7 +775,7 @@ public:
   }
 
   void test_clearing_EventList_clears_MRU() {
-    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(2, 1);
+    auto ws = WorkspaceCreationHelper::createRandomEventWorkspace(2, 1);
     auto y = ws->sharedY(0);
     TS_ASSERT_EQUALS(y.use_count(), 2);
     ws->getSpectrum(0).clear();
@@ -783,7 +786,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     // put two items into MRU
     auto &yOld0 = ws->y(0);
@@ -801,7 +804,7 @@ public:
   }
 
   void test_deleting_spectra_removes_them_from_MRU() {
-    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(2, 1);
+    auto ws = WorkspaceCreationHelper::createRandomEventWorkspace(2, 1);
     auto y = ws->sharedY(0);
     TS_ASSERT_EQUALS(y.use_count(), 2);
 

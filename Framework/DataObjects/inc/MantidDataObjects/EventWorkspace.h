@@ -40,9 +40,16 @@ public:
     return std::unique_ptr<EventWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<EventWorkspace> cloneEmpty() const {
+    return std::unique_ptr<EventWorkspace>(doCloneEmpty());
+  }
+
   // Initialize the pixels
   void init(const std::size_t &, const std::size_t &,
             const std::size_t &) override;
+  void init(const std::size_t &NVectors,
+            const HistogramData::Histogram &histogram) override;
 
   bool threadSafe() const override;
 
@@ -69,8 +76,9 @@ public:
   double getTofMax() const override;
 
   Mantid::Kernel::DateAndTime getPulseTimeMin() const override;
-
   Mantid::Kernel::DateAndTime getPulseTimeMax() const override;
+  void getPulseTimeMinMax(Mantid::Kernel::DateAndTime &xmin,
+                          Mantid::Kernel::DateAndTime &xmax) const;
 
   Mantid::Kernel::DateAndTime
   getTimeAtSampleMin(double tofOffset = 0) const override;
@@ -140,6 +148,7 @@ protected:
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }
+  EventWorkspace *doCloneEmpty() const override { return new EventWorkspace(); }
 
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.

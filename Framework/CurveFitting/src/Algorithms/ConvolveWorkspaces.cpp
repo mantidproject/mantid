@@ -52,9 +52,8 @@ void ConvolveWorkspaces::exec() {
 
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  const size_t numBins = ws1->blocksize();
   Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create(ws1, numHists, numBins + 1, numBins));
+      WorkspaceFactory::Instance().create(ws1));
 
   // First check that the workspace are the same size
   if (numHists != ws2->getNumberHistograms()) {
@@ -63,14 +62,12 @@ void ConvolveWorkspaces::exec() {
 
   prog = new Progress(this, 0.0, 1.0, numHists);
   // Now convolve the histograms
-  PARALLEL_FOR3(ws1, ws2, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *ws2, *outputWS))
   for (int l = 0; l < static_cast<int>(numHists); ++l) {
     PARALLEL_START_INTERUPT_REGION
     prog->report();
-    const MantidVec &X1 = ws1->readX(l);
-    MantidVec &x = outputWS->dataX(l);
-    x = X1;
-    MantidVec &Yout = outputWS->dataY(l);
+    outputWS->setSharedX(l, ws1->sharedX(l));
+    auto &Yout = outputWS->mutableY(l);
     Convolution conv;
 
     auto res = boost::make_shared<TabulatedFunction>();
@@ -85,7 +82,8 @@ void ConvolveWorkspaces::exec() {
 
     conv.addFunction(fun);
     size_t N = Yout.size();
-    FunctionDomain1DView xView(&x[0], N);
+    const double *firstX = &outputWS->mutableX(l)[0];
+    FunctionDomain1DView xView(firstX, N);
     FunctionValues out(xView);
     conv.function(xView, out);
 

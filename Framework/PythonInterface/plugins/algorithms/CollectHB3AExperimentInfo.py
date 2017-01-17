@@ -8,10 +8,12 @@ from mantid.kernel import *
 from six.moves import range #pylint: disable=redefined-builtin
 import os
 
+
 class CollectHB3AExperimentInfo(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN
     """
+
     def __init__(self):
         """ Init
         """
@@ -196,7 +198,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         return
 
-
     def _getProperties(self):
         """ Get properties from user input
         """
@@ -325,7 +326,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                     dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
                     # write each detector's position and ID to table workspace
-                    maxdetid = 0
+                    maxdetid = -1
                     for iws in range(dataws.getNumberHistograms()):
                         detector = dataws.getDetector(iws)
                         detpos = detector.getPos()

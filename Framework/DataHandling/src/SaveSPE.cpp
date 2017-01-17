@@ -1,18 +1,17 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Unit.h"
 
 #include "Poco/File.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <cstdio>
 #include <cmath>
@@ -108,7 +107,7 @@ void SaveSPE::exec() {
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     throw std::invalid_argument("The input workspace must have common binning");
   }
 
@@ -225,11 +224,11 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
   std::vector<int> spuriousSpectra;
   // used only for debugging
   int nMasked = 0;
+  const auto &spectrumInfo = WS->spectrumInfo();
   // Loop over the spectra, writing out Y and then E values for each
   for (int i = 0; i < static_cast<int>(nHist); i++) {
-    try { // need to check if _all_ the detectors for the spectrum are masked,
-          // as we don't have output values for those
-      if (isNumericAxis || !WS->getDetector(i)->isMasked()) {
+    if (spectrumInfo.hasDetectors(i)) {
+      if (isNumericAxis || !spectrumInfo.isMasked(i)) {
         // there's no masking, write the data
         writeHist(WS, outFile, i);
       } else { // all the detectors are masked, write the masking value from the
@@ -238,11 +237,8 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
         writeMaskFlags(outFile);
         nMasked++;
       }
-    } catch (Exception::NotFoundError &) { // WS->getDetector(i) throws this if
-                                           // the detector isn't in the
-                                           // instrument definition file, write
-                                           // mask values and prepare to log
-                                           // what happened
+    } else { // if the detector isn't in the instrument definition file, write
+             // mask values and prepare to log what happened
       spuriousSpectra.push_back(i);
       writeMaskFlags(outFile);
     }
@@ -272,7 +268,7 @@ void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
     Error.resize(inSignal.size());
   }
   for (size_t i = 0; i < inSignal.size(); i++) {
-    if (boost::math::isnan(inSignal[i]) || boost::math::isinf(inSignal[i])) {
+    if (!std::isfinite(inSignal[i])) {
       Signal[i] = SaveSPE::MASK_FLAG;
       Error[i] = SaveSPE::MASK_ERROR;
     } else {

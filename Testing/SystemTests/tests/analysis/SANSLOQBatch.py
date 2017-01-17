@@ -6,6 +6,7 @@ from ISISCommandInterface import *
 from SANSBatchMode import *
 import os.path
 
+
 class SANSLOQBatch(stresstesting.MantidStressTest):
 
     def runTest(self):

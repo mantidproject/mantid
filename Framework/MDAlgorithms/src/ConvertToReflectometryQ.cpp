@@ -4,6 +4,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/Progress.h"
 
@@ -21,6 +22,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 
 #include "MantidMDAlgorithms/ReflectometryTransformKiKf.h"
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
