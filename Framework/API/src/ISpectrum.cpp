@@ -129,6 +129,36 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
  */
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
 
+ISpectrum::ISpectrum(const ISpectrum &other)
+    : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs) {
+  // m_experimentInfo and m_index are not copied: A copy should not refer to the
+  // parent of the source. m_experimentInfo will be nullptr.
+}
+
+ISpectrum::ISpectrum(ISpectrum &&other)
+    : m_specNo(other.m_specNo), detectorIDs(std::move(other.detectorIDs)) {
+  // m_experimentInfo and m_index are not copied: A copy should not refer to the
+  // parent of the source. m_experimentInfo will be nullptr.
+}
+
+ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
+  m_specNo = other.m_specNo;
+  detectorIDs = other.detectorIDs;
+  // m_experimentInfo and m_index are not assigned: The lhs of the assignment
+  // keeps its current values.
+  updateExperimentInfo();
+  return *this;
+}
+
+ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
+  m_specNo = other.m_specNo;
+  detectorIDs = std::move(other.detectorIDs);
+  // m_experimentInfo and m_index are not assigned: The lhs of the assignment
+  // keeps its current values.
+  updateExperimentInfo();
+  return *this;
+}
+
 void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo,
                                   const size_t index) {
   m_experimentInfo = experimentInfo;

@@ -110,6 +110,22 @@ public:
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return spec; }
   const std::string id() const override { return "WorkspaceTester"; }
+  size_t size() const override { return vec.size() * blocksize(); }
+  size_t blocksize() const override {
+    return vec.empty() ? 0 : vec[0].dataY().size();
+  }
+  ISpectrum &getSpectrum(const size_t index) override { return vec[index]; }
+  const ISpectrum &getSpectrum(const size_t index) const override {
+    return vec[index];
+  }
+  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
+                         MantidVec &, bool) const override {}
+  Mantid::Kernel::SpecialCoordinateSystem
+  getSpecialCoordinateSystem() const override {
+    return Mantid::Kernel::None;
+  }
+
+protected:
   void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     spec = numspec;
     vec.resize(spec, SpectrumTester(HistogramData::getHistogramXMode(j, k),
@@ -141,20 +157,6 @@ public:
     m_axes.resize(2);
     m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
-  }
-  size_t size() const override { return vec.size() * blocksize(); }
-  size_t blocksize() const override {
-    return vec.empty() ? 0 : vec[0].dataY().size();
-  }
-  ISpectrum &getSpectrum(const size_t index) override { return vec[index]; }
-  const ISpectrum &getSpectrum(const size_t index) const override {
-    return vec[index];
-  }
-  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
-                         MantidVec &, bool) const override {}
-  Mantid::Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const override {
-    return Mantid::Kernel::None;
   }
 
 private:

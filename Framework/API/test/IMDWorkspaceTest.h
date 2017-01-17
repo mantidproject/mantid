@@ -47,7 +47,7 @@ public:
 
   void testGetXDimension() {
     WorkspaceTester matrixWS;
-    matrixWS.init(1, 1, 1);
+    matrixWS.initialize(1, 1, 1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
         matrixWS.getXDimension();
     std::string id = dimension->getDimensionId();
@@ -57,7 +57,7 @@ public:
 
   void testGetYDimension() {
     WorkspaceTester matrixWS;
-    matrixWS.init(1, 1, 1);
+    matrixWS.initialize(1, 1, 1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension =
         matrixWS.getYDimension();
     std::string id = dimension->getDimensionId();
@@ -81,14 +81,14 @@ public:
 
   void testGetDimensionThrows() {
     WorkspaceTester matrixWS;
-    matrixWS.init(1, 1, 1);
+    matrixWS.initialize(1, 1, 1);
     TSM_ASSERT_THROWS("Id doesn't exist. Should throw during find routine.",
                       matrixWS.getDimensionWithId("3"), std::overflow_error);
   }
 
   void testGetDimension() {
     WorkspaceTester matrixWS;
-    matrixWS.init(1, 1, 1);
+    matrixWS.initialize(1, 1, 1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim =
         matrixWS.getDimensionWithId("yDimension");
     TSM_ASSERT_EQUALS(
@@ -98,7 +98,7 @@ public:
 
   void testGetDimensionOverflow() {
     WorkspaceTester matrixWS;
-    matrixWS.init(1, 1, 1);
+    matrixWS.initialize(1, 1, 1);
     TSM_ASSERT_THROWS(
         "The dimension does not exist. Attempting to get it should throw",
         matrixWS.getDimensionWithId("1"), std::overflow_error);
@@ -106,7 +106,7 @@ public:
 
   void testGetNPoints() {
     WorkspaceTester matrixWS;
-    matrixWS.init(5, 5, 5);
+    matrixWS.initialize(5, 5, 5);
     TSM_ASSERT_EQUALS("The expected number of points have not been returned.",
                       25, matrixWS.getNPoints());
   }

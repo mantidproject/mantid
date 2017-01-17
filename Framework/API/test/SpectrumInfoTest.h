@@ -35,8 +35,8 @@ public:
       : m_workspace(makeDefaultWorkspace()), m_grouped(makeDefaultWorkspace()) {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins + 1,
-                                 numberOfBins);
+    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
+                                       numberOfBins);
 
     // Workspace has 5 detectors, 1 and 4 are masked, 4 and 5 are monitors.
     m_grouped.getSpectrum(GroupOfDets2And3).setDetectorIDs({2, 3}); // no mask
@@ -495,7 +495,7 @@ private:
     WorkspaceTester ws;
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    ws.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    ws.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = true;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
@@ -520,7 +520,7 @@ public:
   SpectrumInfoTestPerformance() : m_workspace() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");

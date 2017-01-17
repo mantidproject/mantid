@@ -85,8 +85,12 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
     m_choppers.push_back(chopper->clone());
   }
   *m_detectorInfo = *other->m_detectorInfo;
-  m_spectrumInfo =
-      Kernel::make_unique<Beamline::SpectrumInfo>(*other->m_spectrumInfo);
+  // We do not copy Beamline::SpectrumInfo (which contains detector grouping
+  // information) for now:
+  // - For MatrixWorkspace, grouping information is still stored in ISpectrum
+  //   and should not be overriden.
+  // - For cached groupings (for MDWorkspaces), grouping was not copied in the
+  //   old implementation either.
 }
 
 /** Clone this ExperimentInfo class into a new one
