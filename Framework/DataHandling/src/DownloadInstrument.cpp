@@ -3,7 +3,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/GitHubApiHelper.h"
 
-//boost
+// boost
 #include <boost/algorithm/string/predicate.hpp>
 
 // Poco
@@ -112,7 +112,7 @@ void DownloadInstrument::exec() {
   for (auto &itMap : fileMap) {
     // download a file
     doDownloadFile(itMap.first, itMap.second);
-    if (boost::algorithm::ends_with(itMap.second,"Facilities.xml")) {
+    if (boost::algorithm::ends_with(itMap.second, "Facilities.xml")) {
       g_log.notice("A new Facilities.xml file has been downloaded, this will "
                    "take effect next time Mantid is started.");
     }
