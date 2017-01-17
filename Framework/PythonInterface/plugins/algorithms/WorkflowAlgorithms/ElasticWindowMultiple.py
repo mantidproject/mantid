@@ -119,24 +119,18 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_ws = '__' + input_ws + '_q2'
 
             elwin_alg = self.createChildAlgorithm("ElasticWindow", enableLogging=False)
+            elwin_alg.setAlwaysStoreInADS(True)
+            elwin_alg.setProperty("InputWorkspace", input_ws)
+            elwin_alg.setProperty("IntegrationRangeStart", self._integration_range_start)
+            elwin_alg.setProperty("IntegrationRangeEnd", self._integration_range_end)
+            elwin_alg.setProperty("OutputInQ", q_ws)
+            elwin_alg.setProperty("OutputInQSquared", q2_ws)
+
             if self._background_range_start != Property.EMPTY_DBL and self._background_range_end != Property.EMPTY_DBL:
-                elwin_alg.setAlwaysStoreInADS(True)
-                elwin_alg.setProperty("InputWorkspace", input_ws)
-                elwin_alg.setProperty("IntegrationRangeStart", self._integration_range_start)
-                elwin_alg.setProperty("IntegrationRangeEnd", self._integration_range_end)
                 elwin_alg.setProperty("BackgroundRangeStart", self._background_range_start)
                 elwin_alg.setProperty("BackgroundRangeEnd", self._background_range_end)
-                elwin_alg.setProperty("OutputInQ", q_ws)
-                elwin_alg.setProperty("OutputInQSquared", q2_ws)
-                elwin_alg.execute()
-            else:
-                elwin_alg.setAlwaysStoreInADS(True)
-                elwin_alg.setProperty("InputWorkspace", input_ws)
-                elwin_alg.setProperty("IntegrationRangeStart", self._integration_range_start)
-                elwin_alg.setProperty("IntegrationRangeEnd", self._integration_range_end)
-                elwin_alg.setProperty("OutputInQ", q_ws)
-                elwin_alg.setProperty("OutputInQSquared", q2_ws)
-                elwin_alg.execute()
+
+            elwin_alg.execute()
 
             log_alg = self.createChildAlgorithm("Logarithm", enableLogging=False)
             log_alg.setProperty("InputWorkspace", q2_ws)
