@@ -90,7 +90,7 @@ _PROP_OUTPUT_INCIDENT_ENERGY_WS = 'OutputIncidentEnergyWorkspace'
 _PROP_OUTPUT_MON_EPP_WS = 'OutputMonitorEPPWorkspace'
 _PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS = \
     'OutputSelfShieldingCorrectionWorkspace'
-_PROP_OUTPUT_THETA_W_WS = 'OutputThetaDeltaEWorkspace'
+_PROP_OUTPUT_THETA_W_WS = 'OutputSofThetaEnergyWorkspace'
 _PROP_OUTPUT_WS = 'OutputWorkspace'
 _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
 _PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakDiagnosticsLowThreshold'

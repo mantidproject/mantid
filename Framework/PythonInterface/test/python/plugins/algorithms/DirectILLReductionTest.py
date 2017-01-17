@@ -455,6 +455,35 @@ class DirectILLReductionTest(unittest.TestCase):
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
         DeleteWorkspace(ws)
 
+    def test_theta_energy_output_workspace(self):
+        outWSName = 'outWS'
+        thetaEnergyWSName = 'out_S_of_theta_energy'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
+            'Diagnostics': 'No Detector Diagnostics',
+            'QRebinningParams' : '0, 0.1, 10.0',
+            'OutputSofThetaEnergyWorkspace': thetaEnergyWSName,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self.assertTrue(self._checkAlgorithmsInHistory(ws,
+                                                       'ConvertSpectrumAxis'))
+        self.assertTrue(mtd.doesExist(thetaEnergyWSName))
+        thetaEnergyWS = mtd[thetaEnergyWSName]
+        axis = thetaEnergyWS.getAxis(0)
+        self.assertEqual(axis.getUnit().name(), 'Energy transfer')
+        axis = thetaEnergyWS.getAxis(1)
+        self.assertEqual(axis.getUnit().name(), 'Scattering angle')
+        DeleteWorkspace(ws)
+        DeleteWorkspace(thetaEnergyWS)
+
     def test_user_mask(self):
         numHistograms = self._testIN5WS.getNumberHistograms()
         userMask = [0, int(3 * numHistograms / 5), numHistograms - 2]
