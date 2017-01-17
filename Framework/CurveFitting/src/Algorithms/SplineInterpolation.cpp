@@ -136,15 +136,17 @@ void SplineInterpolation::exec() {
            "Only the first data set will be used.\n";
   }
 
-  // convert data to binned data as required
+  // convert data to binned data to point data as required
   MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
   MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
-  MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, iws);
+  // setup OutputWorkspace
+  size_t sizeX = mwspt->readX(0).size();
+  size_t sizeY = mwspt->readY(0).size();
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(iwspt, iwspt->getNumberHistograms(), sizeX, sizeY);
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
   if (type == true && binsNo == 2) {
-    // Linear interpolation using gsl
     g_log.information() << "Linear interpolation using 2 points.\n";
   } else {
     m_cspline = boost::make_shared<CubicSpline>();
@@ -158,17 +160,17 @@ void SplineInterpolation::exec() {
         // set up the function that needs to be interpolated
         boost::shared_ptr<gsl_interp_accel> acc(gsl_interp_accel_alloc (), gsl_interp_accel_free);
         boost::shared_ptr<gsl_interp> linear(gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
-        gsl_interp_linear->init(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo);
+        gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo);
         for (int k = 0; k < binsNoInterp; ++k){
-          gsl_interp_linear->eval(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo, mws->x(0)[k], acc.get(), &(outputWorkspace->mutableY(i)[k]));
+          gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(outputWorkspace->mutableY(i)[k]));
           if (order != 0){
-              derivs[order] = WorkspaceFactory::Instance().create(mws, order);
+              derivs[order] = WorkspaceFactory::Instance().create(mwspt, order);
               vAxis->setValue(order, order + 1);
-              derivs[order]->setSharedX(order, mws->sharedX(0));
+              derivs[order]->setSharedX(order, mwspt->sharedX(0));
               if (order == 1)
-                gsl_interp_linear->eval_deriv(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo, mws->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
+                gsl_interp_linear->eval_deriv(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
               if (order == 2)
-                gsl_interp_linear->eval_deriv2(linear.get(), &(iws->x(i)[0]), &(iws->y(i)[0]), binsNo, mws->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
+                gsl_interp_linear->eval_deriv2(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
               derivs[order]->replaceAxis(1, vAxis);
           }
         }
@@ -180,18 +182,18 @@ void SplineInterpolation::exec() {
 
         // check if we want derivatives
         if (order > 0) {
-          derivs[i] = WorkspaceFactory::Instance().create(mws, order);
+          derivs[i] = WorkspaceFactory::Instance().create(mwspt, order);
 
           // calculate the derivatives for each order chosen
           for (int j = 0; j < order; ++j) {
             vAxis->setValue(j, j + 1);
-            derivs[i]->setSharedX(j, mws->sharedX(0));
+            derivs[i]->setSharedX(j, mwspt->sharedX(0));
             calculateDerivatives(mwspt, derivs[i], j + 1);
           }
           derivs[i]->replaceAxis(1, vAxis);
         }
     }
-    outputWorkspace->setSharedX(i, mws->sharedX(0));
+    outputWorkspace->setSharedX(i, mwspt->sharedX(0));
     pgress.report();
   }
 
@@ -200,7 +202,7 @@ void SplineInterpolation::exec() {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (int i = 0; i < histNo; ++i) {
-      setXRange(derivs[i], iws);
+      setXRange(derivs[i], iwspt);
       wsg->addWorkspace(derivs[i]);
     }
     // set y values accorting to integreation range must be set to zero
@@ -208,31 +210,8 @@ void SplineInterpolation::exec() {
   }
 
   // set y values according to the integration range
-  setXRange(outputWorkspace, iws);
+  setXRange(outputWorkspace, iwspt);
   setProperty("OutputWorkspace", outputWorkspace);
-}
-
-/**Copy the meta data for the input workspace to an output workspace and create
- *it with the desired number of spectra.
- * Also labels the axis of each spectra with Yi, where i is the index
- *
- * @param mws :: The input workspace to match
- * @param iws :: The input workspace to interpolate
- * @return The pointer to the newly created workspace
- */
-MatrixWorkspace_sptr
-SplineInterpolation::setupOutputWorkspace(MatrixWorkspace_sptr mws,
-                                          MatrixWorkspace_sptr iws) {
-  size_t numSpec = iws->getNumberHistograms();
-
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create(mws, numSpec);
-
-  // use the vertical axis from the workspace to interpolate on the output WS
-  Axis *vAxis = iws->getAxis(1)->clone(iws.get());
-  outputWorkspace->replaceAxis(1, vAxis);
-
-  return outputWorkspace;
 }
 
 /**Convert a binned workspace to point data

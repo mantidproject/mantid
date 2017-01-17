@@ -76,11 +76,6 @@ private:
 
   boost::shared_ptr<BackgroundFunction> m_cspline;
 
-  /// setup an output workspace using meta data from inws and taking a number of
-  /// spectra
-  API::MatrixWorkspace_sptr setupOutputWorkspace(MatrixWorkspace_sptr mws,
-                                                 MatrixWorkspace_sptr iws);
-
   /// convert a binned workspace to point data. Uses mean of the bins as point
   MatrixWorkspace_sptr convertBinnedData(MatrixWorkspace_sptr workspace) const;
 
