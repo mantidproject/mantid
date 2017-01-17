@@ -103,38 +103,23 @@ void SaveOpenGenieAscii::exec() {
   */
 void SaveOpenGenieAscii::applyEnginxFormat() {
   // xunit & xlabel put in OpenGenie format
-  const std::string xunits = "xunits";
-  const std::string xlabel = "xlabel";
   const std::string xunitsVal = "Time-of-Flight (\\\\gms)";
-  m_outputVector.push_back(outputTuple(xunits, m_stringType, xunitsVal));
-  m_outputVector.push_back(outputTuple(xlabel, m_stringType, xunitsVal));
+  m_outputVector.push_back(outputTuple("xunits", m_stringType, xunitsVal));
+  m_outputVector.push_back(outputTuple("xlabel", m_stringType, xunitsVal));
 
   // yunit & ylabel put in OpenGenie format
-  const std::string yunits = "yunits";
-  const std::string ylabel = "ylabel";
   const std::string yunitsVal = "Neutron counts / \\\\gms";
-  m_outputVector.push_back(outputTuple(yunits, m_stringType, yunitsVal));
-  m_outputVector.push_back(outputTuple(ylabel, m_stringType, yunitsVal));
+  m_outputVector.push_back(outputTuple("yunits", m_stringType, yunitsVal));
+  m_outputVector.push_back(outputTuple("ylabel", m_stringType, yunitsVal));
 
   // Spectrum numbers
-  const std::string specNumIdentifier = "spec_no";
-  const std::string specNoToSave = "1";
-  m_outputVector.push_back(
-      outputTuple(specNumIdentifier, m_stringType, specNoToSave));
+  m_outputVector.push_back(outputTuple("spec_no", m_stringType, "1"));
 
-  // Par file that was used
-  const std::string parameter_file_label = "parameter_file";
+  // Par file that was used in the calibration
   // This can be set to none at the moment as it does not affect the analysis
-  const std::string parameter_value = "None.par";
-  m_outputVector.push_back(
-      outputTuple(parameter_file_label, m_stringType, parameter_value));
+  m_outputVector.push_back(outputTuple("parameter_file", m_stringType, "None.par"));
 
-  // TODO see if we can query the WS for the user name
-
-  const std::string user_name_label = "user_name";
-  const std::string user_name_value = "NotSet";
-  m_outputVector.push_back(
-      outputTuple(user_name_label, m_stringType, user_name_value));
+  m_outputVector.push_back(outputTuple("user_name", m_stringType, "NotSet"));
 }
 
 /**
@@ -143,12 +128,13 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
   */
 void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
                                            const Kernel::Property *values) {
+	// Cast to TimeSeries so we can use the min/max value methods
   const auto positionValues =
-      dynamic_cast<const TimeSeriesProperty<double> *>(values);
-  assert(positionValues);
+      static_cast<const TimeSeriesProperty<double> *>(values);
 
   const double deltaValue =
       positionValues->maxValue() - positionValues->minValue();
+
   m_outputVector.push_back(
       outputTuple('d' + unit, m_floatType, std::to_string(deltaValue)));
 }
@@ -165,12 +151,15 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
 */
 std::vector<std::tuple<std::string, int>>
 SaveOpenGenieAscii::convertWorkspaceToStrings() {
-  // Build x, y and e strings
-  std::string xValsOutput("    "), yValsOutput(xValsOutput),
-      eValsOutput(xValsOutput);
+  // Padding to apply after 10 data values
   const std::string newlineStr = "\n    ";
 
-  int xCount = 0;
+  // Build x, y and e strings - first 4 spaces for correct padding
+  std::string xValsOutput("    "), yValsOutput("    "),
+  eValsOutput("    ");
+  // Number of values seen also used to track 10 values for a newline
+  int xCount(0), yCount(0), eCount(0);
+
   const auto &x = m_inputWS->x(0);
   for (const auto xVal : x) {
     if (xCount % 10 == 0) {
@@ -180,7 +169,6 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
     xValsOutput += std::to_string(xVal) + ' ';
   }
 
-  int yCount = 0;
   const auto &y = m_inputWS->y(0);
   for (const auto yVal : y) {
     if (yCount % 10 == 0) {
@@ -190,7 +178,6 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
     yValsOutput += std::to_string(yVal) + ' ';
   }
 
-  int eCount = 0;
   const auto &e = m_inputWS->e(0);
   for (const auto eVal : e) {
     if (eCount % 10 == 0) {
@@ -214,6 +201,7 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
   * then stored in the output buffer.
   */
 void SaveOpenGenieAscii::getSampleLogs() {
+	// Maps Mantid log names -> Genie save file name
   const std::unordered_map<std::string, std::string> MantidGenieNameMap = {
       {"x", "x_pos"},
       {"y", "y_pos"},
@@ -225,7 +213,7 @@ void SaveOpenGenieAscii::getSampleLogs() {
 
   for (const auto &logEntry : logData) {
     const std::string &logName = logEntry->name();
-    const std::string &type = logEntry->type();
+    const std::string &logType = logEntry->type();
     std::string outName;
     std::string outType;
     std::string outValue;
@@ -248,16 +236,16 @@ void SaveOpenGenieAscii::getSampleLogs() {
       outValue = logEntry->value();
     }
 
-    if ((type.std::string::find("number") != std::string::npos) ||
-        (type.std::string::find("double") != std::string::npos) ||
-        (type.std::string::find("dbl list") != std::string::npos)) {
+    if ((logType.std::string::find("number") != std::string::npos) ||
+        (logType.std::string::find("double") != std::string::npos) ||
+        (logType.std::string::find("dbl list") != std::string::npos)) {
       outType = m_floatType;
-    } else if ((type.std::string::find("TimeValueUnit<bool>") !=
+    } else if ((logType.std::string::find("TimeValueUnit<bool>") !=
                 std::string::npos) ||
-               (type.std::string::find("TimeValueUnit<int>") !=
+               (logType.std::string::find("TimeValueUnit<int>") !=
                 std::string::npos)) {
       outType = m_intType;
-    } else if (type.std::string::find("string") != std::string::npos) {
+    } else if (logType.std::string::find("string") != std::string::npos) {
       outType = m_stringType;
     }
 
@@ -308,7 +296,7 @@ std::ofstream SaveOpenGenieAscii::openFileStream() {
 * strings and stores them in the output buffer
 */
 void SaveOpenGenieAscii::parseWorkspaceData() {
-  // 1 is Bank number - force to 1 at the moment
+  // Bank number - force to 1 at the moment
   const std::string outputType = "GXRealarray\n    1";
 
   const auto xyeTuples = convertWorkspaceToStrings();
@@ -339,23 +327,26 @@ void SaveOpenGenieAscii::parseWorkspaceData() {
   * in the output buffer
   */
 void SaveOpenGenieAscii::storeWorkspaceInformation() {
+	// Run Number
   m_outputVector.push_back(outputTuple(
       "run_no", m_stringType, std::to_string(m_inputWS->getRunNumber())));
+  // Workspace title
   m_outputVector.push_back(
       outputTuple("title", m_stringType, m_inputWS->getTitle()));
+  // Instrument name
   m_outputVector.push_back(outputTuple("inst_name", m_stringType,
                                        m_inputWS->getInstrument()->getName()));
-
   // Number of bins
   m_outputVector.push_back(
       outputTuple("ntc", m_intType, std::to_string(m_inputWS->blocksize())));
-
+  // L1 (Source to sample distance)
   const auto &specInfo = m_inputWS->spectrumInfo();
   m_outputVector.push_back(
       outputTuple("l1", m_floatType, std::to_string(specInfo.l1())));
+  // L2 (Sample to spectrum distance)
   m_outputVector.push_back(
       outputTuple("l2", m_floatType, std::to_string(specInfo.l2(0))));
-
+  // Unsigned scattering angle 2theta 
   const double two_theta = specInfo.twoTheta(0) * 180 / M_PI; // Convert to deg
   m_outputVector.push_back(
       outputTuple("twotheta", m_floatType, std::to_string(two_theta)));
