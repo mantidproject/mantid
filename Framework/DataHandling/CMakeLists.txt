@@ -435,6 +435,7 @@ set ( TEST_FILES
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
+        LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
 	LoadSavuTomoConfigTest.h
