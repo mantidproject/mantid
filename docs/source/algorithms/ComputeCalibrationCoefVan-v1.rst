@@ -21,11 +21,11 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
    :math:`J(y) = \int_0^1 x\cdot\mathrm{coth}\left(\frac{x}{2y}\right)\,\mathrm{d}x`
 
-   where :math:`y=T/T_m` is the ratio of the temperature during the experiment :math:`T` to the Debye temperature :math:`T_m = 389K`, :math:`m_V` is the Vanadium atomic mass (in kg) and :math:`\theta_i` is the polar angle of the i-th detector.
+   where :math:`y=T/T_m` is the ratio of the temperature during the experiment :math:`T` to the Debye temperature :math:`T_m = 389K`, :math:`m_V` is the Vanadium atomic mass (in kg) and :math:`\theta_i` is the polar angle of the i-th detector. By default, the temperature is read from the 'temperature' entry in the sample logs. If the entry is missing, or incorrect, the *Temperature* input property can be used instead.
 
 .. warning::
 
-    If sample log *temperature* is not present in the given Vanadium workspace or temperature is set to an invalid value, T=293K will be taken for the Debye-Waller factor calculation. Algorithm will produce warning in this case.
+    If the input *Temperature* is not specified or the sample log 'temperature' is not present in the given Vanadium workspace, or is set to an invalid value, T=293K will be taken for the Debye-Waller factor calculation. The algorithm will produce a warning in this case.
 
 2. Load the peak centre and sigma from the *EPPTable*. These values are used to calculate sum :math:`S_i` as
 
