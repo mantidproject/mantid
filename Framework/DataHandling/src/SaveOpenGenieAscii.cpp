@@ -92,7 +92,8 @@ void SaveOpenGenieAscii::exec() {
   progressBar.report("Processing log data");
   getSampleLogs();
 
-  auto outputStream = openFileStream();
+  std::ofstream outStream;
+  openFileStream(outStream);
 
   progressBar.report("Writing to file");
   writeDataToFile(outputStream);
@@ -287,16 +288,15 @@ void SaveOpenGenieAscii::inputValidation() {
   *
   * @return:: The opened file as an file stream
   */
-std::ofstream SaveOpenGenieAscii::openFileStream() {
+void SaveOpenGenieAscii::openFileStream(std::ofstream stream) {
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
   // file
-  std::ofstream outfile(filename.c_str());
-  if (!outfile) {
+  stream.name(filename.c_str());
+  if (!stream) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
-  return outfile;
 }
 
 /**
@@ -387,7 +387,8 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   if (getProperty("IncludeHeader")) {
     outfile << "# Open Genie ASCII File #\n"
             << "# label \n"
-            << "GXWorkspace\n" << m_outputVector.size() << '\n';
+            << "GXWorkspace\n"
+            << m_outputVector.size() << '\n';
   }
 
   // Sort by parameter name

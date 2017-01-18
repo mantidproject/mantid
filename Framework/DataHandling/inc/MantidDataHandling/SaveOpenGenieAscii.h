@@ -5,6 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include <iosfwd>
 
 namespace Mantid {
 namespace DataHandling {
@@ -64,7 +65,7 @@ private:
   void inputValidation();
 
   /// Attempts to open the user specified file path as an output stream
-  std::ofstream openFileStream();
+  void openFileStream(std::ofstream stream);
 
   /// Parses and stores the workspace data into the output buffer
   void parseWorkspaceData();
