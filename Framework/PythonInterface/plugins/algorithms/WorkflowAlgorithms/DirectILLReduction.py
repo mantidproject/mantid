@@ -16,16 +16,19 @@ from mantid.simpleapi import (AddSampleLog, ApplyPaalmanPingsCorrection,
                               BinWidthAtX, CalculateFlatBackground,
                               ClearMaskFlag, CloneWorkspace,
                               ComputeCalibrationCoefVan, ConvertSpectrumAxis,
-                              ConvertToConstantL2, ConvertUnits, CorrectKiKf,
-                              CorrectTOFAxis, CreateEmptyTableWorkspace,
-                              CreateSingleValuedWorkspace, CylinderPaalmanPingsCorrection2, DeleteWorkspace,
+                              ConvertToConstantL2, ConvertToPointData, 
+                              ConvertUnits, CorrectKiKf, CorrectTOFAxis,
+                              CreateEmptyTableWorkspace, 
+                              CreateSingleValuedWorkspace,
+                              CylinderPaalmanPingsCorrection2, DeleteWorkspace,
                               DetectorEfficiencyCorUser, Divide,
                               ExtractMonitors, FindEPP,
                               FlatPlatePaalmanPingsCorrection, GetEiMonDet,
                               GroupDetectors, Integration, Load, MaskDetectors,
                               MedianBinWidth, MedianDetectorTest, MergeRuns,
                               Minus, Multiply, NormaliseToMonitor, Plus, Rebin,
-                              Scale, SofQWNormalisedPolygon, SolidAngle)
+                              Scale, SofQWNormalisedPolygon, SolidAngle,
+                              Transpose)
 import numpy
 from scipy import constants
 
@@ -112,6 +115,7 @@ _PROP_SELF_SHIELDING_CORRECTION_WS = 'SelfShieldingCorrectionWorkspace'
 _PROP_SELF_SHIELDING_NUMBER_WAVELENGTHS = 'SelfShieldingNumberWavelengths'
 _PROP_SELF_SHIELDING_STEP_SIZE = 'SelfShieldingStepSize'
 _PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
+_PROP_TRANSPOSE_SAMPLE_OUTPUT = 'Transposing'
 _PROP_USER_MASK = 'MaskedDetectors'
 _PROP_USER_MASK_COMPONENTS = 'MaskedComponents'
 _PROP_VANA_WS = 'VanadiumWorkspace'
@@ -141,6 +145,9 @@ _SAMPLE_SHAPE_SLAB = 'Flat Plate Sample'
 
 _SELF_SHIELDING_CORRECTION_OFF = 'No Self Shielding Correction'
 _SELF_SHIELDING_CORRECTION_ON = 'Apply Self Shielding Correction'
+
+_TRANSPOSING_OFF = 'No Sample Output Transposing'
+_TRANSPOSING_ON = 'Transpose Sample Output'
 
 _WS_CONTENT_DETS = 0
 _WS_CONTENT_MONS = 1
@@ -1050,7 +1057,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                        subalgLogging)
 
         mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, subalgLogging)
-
+        mainWS = self._transpose(mainWS, wsNames, wsCleanup, subalgLogging)
         self._finalize(mainWS, wsCleanup, report)
 
     def PyInit(self):
@@ -1108,6 +1115,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
+        self.declareProperty(name=_PROP_TRANSPOSE_SAMPLE_OUTPUT,
+                             defaultValue=_TRANSPOSING_ON,
+                             validator=StringListValidator([
+                                 _TRANSPOSING_ON,
+                                 _TRANSPOSING_OFF]),
+                             direction=Direction.Input,
+                             doc='Enable or disable ' + _PROP_OUTPUT_WS +
+                                 ' transposing for ' + _REDUCTION_TYPE_SAMPLE +
+                                 ' reductions.')
         self.declareProperty(name=_PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                              defaultValue=3.0,
                              validator=positiveFloat,
@@ -2320,5 +2336,21 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      subalgLogging)
         wsCleanup.cleanup(mainWS)
         return ecSubtractedWS
+
+    def _transpose(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        transposing = self.getProperty(_PROP_TRANSPOSE_SAMPLE_OUTPUT).value
+        if transposing == _TRANSPOSING_OFF:
+            return mainWS
+        pointDataWSName = wsNames.withSuffix('point_data_converted')
+        pointDataWS = ConvertToPointData(InputWorkspace=mainWS,
+                                         OutputWorkspace=pointDataWSName,
+                                         EnableLogging=subalgLogging)
+        transposedWSName = wsNames.withSuffix('transposed')
+        transposedWS = Transpose(InputWorkspace=pointDataWS,
+                                 OutputWorkspace=transposedWSName,
+                                 EnableLogging=subalgLogging)
+        wsCleanup.cleanup(pointDataWS)
+        wsCleanup.cleanup(mainWS)
+        return transposedWS
 
 AlgorithmFactory.subscribe(DirectILLReduction)

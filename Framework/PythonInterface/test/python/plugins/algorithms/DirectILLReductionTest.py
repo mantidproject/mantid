@@ -341,6 +341,32 @@ class DirectILLReductionTest(unittest.TestCase):
         DeleteWorkspace(outECSubtractedWSName)
         DeleteWorkspace(outECWSName)
 
+    def test_final_sample_output_workspace(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
+            'Diagnostics': 'No Detector Diagnostics',
+            'QRebinningParams' : '0, 0.1, 10.0',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertTrue(self._checkAlgorithmsInHistory(ws,
+                                                       'ConvertToPointData',
+                                                       'Transpose'))
+        axis = ws.getAxis(0)
+        self.assertEqual(axis.getUnit().name(), 'q')
+        axis = ws.getAxis(1)
+        self.assertEqual(axis.getUnit().name(), 'Energy transfer')
+        DeleteWorkspace(ws)
+
     def test_input_ws_not_deleted(self):
         outWSName = 'outWS'
         algProperties = {
@@ -371,6 +397,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'OutputWorkspace': outWSName,
             'Reductiontype': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'IndexType': 'Workspace Index',
@@ -385,6 +412,8 @@ class DirectILLReductionTest(unittest.TestCase):
         run_algorithm('DirectILLReduction', **algProperties)
         ws = mtd[outWSName]
         self.assertTrue(self._checkAlgorithmsInHistory(ws, 'Rebin'))
+        axis = ws.getAxis(0)
+        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
         for i in range(ws.getNumberHistograms()):
             xs = ws.readX(i)
             self.assertAlmostEqual(xs[0], rebinningBegin)
@@ -398,6 +427,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'InputWorkspace': self._testIN5WS,
             'Reductiontype': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Manual Rebinning',
@@ -415,6 +445,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'OutputWorkspace': outWSName,
             'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
@@ -427,6 +458,8 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = mtd[outWSName]
         self.assertTrue(self._checkAlgorithmsInHistory(ws, 'BinWidthAtX',
                                                        'Rebin'))
+        axis = ws.getAxis(0)
+        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
         xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
@@ -439,6 +472,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'OutputWorkspace': outWSName,
             'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
@@ -451,6 +485,8 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = mtd[outWSName]
         self.assertTrue(self._checkAlgorithmsInHistory(ws, 'MedianBinWidth',
                                                        'Rebin'))
+        axis = ws.getAxis(0)
+        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
         xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
