@@ -26,6 +26,7 @@ User interface *HFIR 4Circle Reduction* has been modified to allow user to speci
 
 Engineering Diffraction
 -----------------------
+:ref:`algm-SaveOpenGenieAscii` has been rewritten and works with the analyze_scan procedure in OpenGenie. It should also work with other procedures that use a standard set of parameters.
 
 Powder Diffraction
 ------------------
