@@ -7,7 +7,8 @@ def _crop_coords_sanity_checks(coords, data_image, expected_data_shape=3):
     # if nothing is provided make the user aware
     if not isinstance(coords, list) or 4 != len(coords):
         raise ValueError(
-            "Wrong coordinates object when trying to crop: {0}".format(coords))
+            "Error in crop (region of interest) parameter (expecting a list with four integers) "
+            "[left, top, right, bottom]. Got: {0} with {1}".format(coords, type(coords)))
 
     elif not all(isinstance(crd, int) for crd in coords):
         raise ValueError(
@@ -32,19 +33,14 @@ def execute_image(data, region_of_interest, h=None):
     h = Helper.empty_init() if h is None else h
 
     if region_of_interest:
-        try:
-            h.pstart(
-                "Starting image cropping with coordinates: {0}. ...".format(region_of_interest))
+        h.pstart(
+            "Starting image cropping with coordinates: {0}. ...".format(region_of_interest))
 
-            data = _crop_image(data, region_of_interest)
+        data = _crop_image(data, region_of_interest)
 
-            h.pstop("Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
-                                                                                                      data.shape))
+        h.pstop("Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
+                                                                                                  data.shape))
 
-        except ValueError as exc:
-            h.tomo_print(
-                "Error in crop (region of interest) parameter (expecting a list with four integers. "
-                "Got: {0}. Error details: ".format(region_of_interest), exc)
     else:
         h.tomo_print_note(
             "NOT applying cropping to region of interest, because no --region-of-interest coordinates were given.")
@@ -87,21 +83,16 @@ def execute_volume(data, crop_coords, h=None):
     """
     h.check_data_stack(data)
 
-    # list with first-x, first-y, second-x, second-y
+    # list with left, top, right, bottom
     if crop_coords:
-        try:
-            h.pstart(
-                "Starting image cropping with coordinates: {0}. ...".format(crop_coords))
+        h.pstart(
+            "Starting image cropping with coordinates: {0}. ...".format(crop_coords))
 
-            data = _crop_volume(data, crop_coords)
+        data = _crop_volume(data, crop_coords)
 
-            h.pstop("Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
-                                                                                                      data.shape))
+        h.pstop("Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
+                                                                                                  data.shape))
 
-        except ValueError as exc:
-            h.tomo_print(
-                "Error in crop (region of interest) parameter (expecting a list with four integers. "
-                "Got: {0}. Error details: ".format(crop_coords), exc)
     else:
         h.tomo_print("Note: NOT applying cropping to region of interest.")
 

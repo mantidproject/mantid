@@ -12,7 +12,9 @@ def execute(data, cut_off_level, h=None):
         dmin = np.amin(data)
         dmax = np.amax(data)
         rel_cut_off = dmin + cut_off_level * (dmax - dmin)
-        data[data < rel_cut_off] = dmin
+
+        data = np.minimum(data, rel_cut_off)
+
         h.pstop("Finished cut-off step, with pixel data type: {0}.".format(
                 data.dtype))
     else:

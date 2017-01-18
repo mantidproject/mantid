@@ -44,6 +44,6 @@ def execute(data, size, mode, h=None):
             format(data.dtype, size))
 
     else:
-        h.tomo_print_note("NOT applying noise filter /median.")
+        h.tomo_print_note("NOT applying noise filter / median.")
 
     return data

@@ -13,6 +13,9 @@ def execute(data, circular_mask_ratio, h=None):
         h.pstart("Starting circular mask...")
         tomopy.circ_mask(arr=data, axis=0, ratio=circular_mask_ratio, val=0.)
         h.pstart("Finished applying circular mask.")
+    else:
+        h.tomo_print_note(
+            "Not applying circular mask, no --circular-mask was specified.")
 
     return data
 

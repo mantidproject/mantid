@@ -8,7 +8,7 @@ class Saver(object):
         from recon.helper import Helper
         self._h = Helper(config)
 
-        self._output_path = os.path.abspath(config.func.output_path)
+        self._output_path = os.path.abspath(os.path.expanduser(config.func.output_path))
 
         self._overwrite_all = config.func.overwrite_all
         self._data_as_stack = config.func.data_as_stack
@@ -63,7 +63,6 @@ class Saver(object):
         """
         # slices along the vertical (z) axis
         # output_path = 'output_recon_tomopy'
-        from recon.helper import Helper
 
         out_recon_dir = os.path.join(self._output_path, 'reconstructed')
 

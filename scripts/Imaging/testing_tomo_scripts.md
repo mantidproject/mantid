@@ -140,7 +140,7 @@ python tomo_main.py
 --input-path-dark=~/Documents/img/000888/dark
 --region-of-interest='[41.0, 0.0, 233.0, 228.0]'
 --output=~/Documents/img/000888/processed/temp/1
---median-size=3
+--pre-median-size=3
 --cor=104.000000
 --rotation=1
 --max-angle=360.000000
@@ -148,7 +148,7 @@ python tomo_main.py
 --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[41.0, 0.0, 230.0, 228.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
+>python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[41.0, 0.0, 230.0, 228.0]' --output=~/Documents/img/000888/processed/temp/1 --pre-median-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
 
 ---
 
