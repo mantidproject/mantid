@@ -36,7 +36,7 @@ const std::string WorkspaceGroup::toString() const {
   std::string descr = this->id() + "\n";
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    descr += " -- " + workspace->name() + "\n";
+    descr += " -- " + workspace->getName() + '\n';
   }
   return descr;
 }
@@ -94,7 +94,7 @@ void WorkspaceGroup::sortMembersByName() {
   }
   std::sort(m_workspaces.begin(), m_workspaces.end(),
             [](const Workspace_sptr &w1, const Workspace_sptr &w2) {
-              return (w1->name() < w2->name());
+              return (w1->getName() < w2->getName());
             });
 }
 
@@ -123,7 +123,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
 bool WorkspaceGroup::contains(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    if ((*workspace).name() == wsName)
+    if (workspace->getName() == wsName)
       return true;
   }
   return false;
@@ -158,7 +158,7 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   std::vector<std::string> out;
   for (const auto &workspace : m_workspaces) {
-    out.push_back((*workspace).name());
+    out.push_back(workspace->getName());
   }
   return out;
 }
@@ -188,7 +188,7 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
 Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    if ((*workspace).name() == wsName)
+    if (workspace->getName() == wsName)
       return workspace;
   }
   throw std::out_of_range("Workspace " + wsName +
@@ -207,7 +207,7 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   auto it = m_workspaces.begin();
   for (; it != m_workspaces.end(); ++it) {
-    if ((**it).name() == wsName) {
+    if ((**it).getName() == wsName) {
       m_workspaces.erase(it);
       break;
     }
@@ -219,8 +219,8 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
 void WorkspaceGroup::print() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    g_log.debug() << "Workspace name in group vector =  " << (*workspace).name()
-                  << '\n';
+    g_log.debug() << "Workspace name in group vector =  "
+                  << workspace->getName() << '\n';
   }
 }
 
@@ -233,7 +233,7 @@ void WorkspaceGroup::print() const {
 void WorkspaceGroup::removeItem(const size_t index) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // do not allow this way of removing for groups in the ADS
-  if (!name().empty()) {
+  if (!this->getName().empty()) {
     throw std::runtime_error(
         "AnalysisDataService must be used to remove a workspace from group.");
   }
@@ -339,7 +339,7 @@ bool WorkspaceGroup::areNamesSimilar() const {
 
   // Check all the members are of similar names
   for (const auto &workspace : m_workspaces) {
-    const std::string wsName = (*workspace).name();
+    const std::string &wsName = workspace->getName();
     // Find the last underscore _
     std::size_t pos = wsName.find_last_of('_');
     // No underscore = not similar
@@ -348,7 +348,7 @@ bool WorkspaceGroup::areNamesSimilar() const {
     // The part before the underscore has to be the same
     // as the group name to be similar
     std::string commonpart(wsName.substr(0, pos));
-    if (this->name() != commonpart)
+    if (this->getName() != commonpart)
       return false;
   }
   return true;

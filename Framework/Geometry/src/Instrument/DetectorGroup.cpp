@@ -212,22 +212,6 @@ bool DetectorGroup::isParametrized() const {
   return false;
 }
 
-/** Indicates whether this is a monitor.
-*  Will return false if even one member of the group is not flagged as a monitor
-*  @return is detector group a monitor
-*/
-bool DetectorGroup::isMonitor() const {
-  // Would you ever want to group monitors?
-  // For now, treat as NOT a monitor if even one isn't
-  bool isMonitor = true;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if (!(*it).second->isMonitor())
-      isMonitor = false;
-  }
-  return isMonitor;
-}
-
 /** isValid() is true if the point is inside any of the detectors, i.e. one of
 * the
 *  detectors has isValid() == true

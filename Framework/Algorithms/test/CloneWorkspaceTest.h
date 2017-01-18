@@ -166,19 +166,19 @@ public:
     // Try to get the first member
     TS_ASSERT_THROWS_NOTHING(out1 = outgroup->getItem(0))
     // Check its name
-    TS_ASSERT_EQUALS(out1->name(), "clonedgroup_1")
+    TS_ASSERT_EQUALS(out1->getName(), "clonedgroup_1")
     // Check it is indeed a different workspace
     TS_ASSERT_DIFFERS(out1, ingroup->getItem(0))
     // Try to get the second member
     TS_ASSERT_THROWS_NOTHING(out2 = outgroup->getItem(1))
     // Check its name
-    TS_ASSERT_EQUALS(out2->name(), "clonedgroup_2")
+    TS_ASSERT_EQUALS(out2->getName(), "clonedgroup_2")
     // Check it is indeed a different workspace
     TS_ASSERT_DIFFERS(out2, ingroup->getItem(1))
     // Try to get the third member
     TS_ASSERT_THROWS_NOTHING(out3 = outgroup->getItem(2))
     // Check its name
-    TS_ASSERT_EQUALS(out3->name(), "clonedgroup_3")
+    TS_ASSERT_EQUALS(out3->getName(), "clonedgroup_3")
     // Check it is indeed a different workspace
     TS_ASSERT_DIFFERS(out3, ingroup->getItem(2))
 

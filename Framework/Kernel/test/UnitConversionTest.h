@@ -57,14 +57,14 @@ public:
     const double srcValue(1.5); // In angstroms
     const std::string &destUnit = "MomentumTransfer";
 
-    const double l1(10.0), l2(1.1), twoTheta(10.0 * M_PI / 180.0), efixed(12.0);
+    const double l1(10.0), l2(1.1), theta(10.0 * M_PI / 180.0), efixed(12.0);
     const DeltaEMode::Type emode = DeltaEMode::Direct;
 
     const double expected(0.437943919458);
     double result(-1.0);
     TS_ASSERT_THROWS_NOTHING(
-        result = UnitConversion::run(srcUnit, destUnit, srcValue, l1, l2,
-                                     twoTheta, emode, efixed));
+        result = UnitConversion::run(srcUnit, destUnit, srcValue, l1, l2, theta,
+                                     emode, efixed));
     TS_ASSERT_DELTA(result, expected, 1e-12);
   }
 };

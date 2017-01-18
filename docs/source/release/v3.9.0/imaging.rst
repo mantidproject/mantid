@@ -21,5 +21,6 @@ Bug Fixes
 - The reconstruction scripts will now run with TomoPy v1.x.x, however the output is not tested with versions newer than 0.10.x.
 - Selecting the Center of Rotation, Area for Normalsation and Region of Interest will now always follow the exact position of the mouse.
 - Multiple success/warning/error messages will no longer be shown after an operation. 
+|
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Imaging%22>`__

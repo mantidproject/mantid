@@ -29,7 +29,10 @@ SpectrumInfo::~SpectrumInfo() = default;
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
-  return getDetector(index).isMonitor();
+  for (const auto detIndex : getDetectorIndices(index))
+    if (!m_detectorInfo.isMonitor(detIndex))
+      return false;
+  return true;
 }
 
 /// Returns true if the detector(s) associated with the spectrum are masked.
