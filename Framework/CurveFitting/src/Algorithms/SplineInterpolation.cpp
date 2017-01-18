@@ -140,9 +140,10 @@ void SplineInterpolation::exec() {
   MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
   MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
   // setup OutputWorkspace
-  size_t sizeX = mwspt->readX(0).size();
+  // eventually keep x-Values of histograms
+  size_t sizeX = mws->readX(0).size();
   size_t sizeY = mwspt->readY(0).size();
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(iwspt, iwspt->getNumberHistograms(), sizeX, sizeY);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(iws, iwspt->getNumberHistograms(), sizeX, sizeY);
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
@@ -151,8 +152,6 @@ void SplineInterpolation::exec() {
   } else {
     m_cspline = boost::make_shared<CubicSpline>();
   }
-
-  auto vAxis = new NumericAxis(order);
 
   // for each histogram in workspace, calculate interpolation and derivatives
   for (int i = 0; i < histNo; ++i) {
@@ -163,15 +162,18 @@ void SplineInterpolation::exec() {
         gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo);
         for (int k = 0; k < binsNoInterp; ++k){
           gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(outputWorkspace->mutableY(i)[k]));
-          if (order != 0){
-              derivs[order] = WorkspaceFactory::Instance().create(mwspt, order);
-              vAxis->setValue(order, order + 1);
-              derivs[order]->setSharedX(order, mwspt->sharedX(0));
-              if (order == 1)
-                gsl_interp_linear->eval_deriv(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
-              if (order == 2)
-                gsl_interp_linear->eval_deriv2(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[order]->mutableY(i)[k]));
-              derivs[order]->replaceAxis(1, vAxis);
+          if (order > 0){
+            auto vAxis = new NumericAxis(order);
+            derivs[i] = WorkspaceFactory::Instance().create(iws, order, sizeX, sizeY);
+            for (int j = 0; j < order; ++j) {
+              vAxis->setValue(j, j + 1);
+              derivs[i]->setSharedX(j, mws->sharedX(0));
+              if (j == 0)
+                gsl_interp_linear->eval_deriv(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(i)[k]));
+              if (j == 1)
+                gsl_interp_linear->eval_deriv2(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(i)[k]));
+            }
+          derivs[i]->replaceAxis(1, vAxis);
           }
         }
     }
@@ -182,18 +184,19 @@ void SplineInterpolation::exec() {
 
         // check if we want derivatives
         if (order > 0) {
-          derivs[i] = WorkspaceFactory::Instance().create(mwspt, order);
+          auto vAxis2 = new NumericAxis(order);
+          derivs[i] = WorkspaceFactory::Instance().create(iwspt, order, sizeX, sizeY);
 
           // calculate the derivatives for each order chosen
           for (int j = 0; j < order; ++j) {
-            vAxis->setValue(j, j + 1);
-            derivs[i]->setSharedX(j, mwspt->sharedX(0));
+            vAxis2->setValue(j, j + 1);
             calculateDerivatives(mwspt, derivs[i], j + 1);
+            derivs[i]->setSharedX(j, mws->sharedX(0));
           }
-          derivs[i]->replaceAxis(1, vAxis);
+          derivs[i]->replaceAxis(1, vAxis2);
         }
     }
-    outputWorkspace->setSharedX(i, mwspt->sharedX(0));
+    outputWorkspace->setSharedX(i, mws->sharedX(0));
     pgress.report();
   }
 
@@ -202,15 +205,15 @@ void SplineInterpolation::exec() {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (int i = 0; i < histNo; ++i) {
-      setXRange(derivs[i], iwspt);
+      setXRange(derivs[i], iws);
       wsg->addWorkspace(derivs[i]);
     }
-    // set y values accorting to integreation range must be set to zero
+    // set y values accorting to integration range must be set to zero
     setProperty("OutputWorkspaceDeriv", wsg);
   }
 
   // set y values according to the integration range
-  setXRange(outputWorkspace, iwspt);
+  setXRange(outputWorkspace, iws);
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
