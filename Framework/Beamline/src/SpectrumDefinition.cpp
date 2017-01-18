@@ -1,5 +1,7 @@
 #include "MantidBeamline/SpectrumDefinition.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace Beamline {
 

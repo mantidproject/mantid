@@ -3,6 +3,7 @@
 
 #include "MantidBeamline/DllConfig.h"
 
+#include <utility>
 #include <vector>
 
 namespace Mantid {
