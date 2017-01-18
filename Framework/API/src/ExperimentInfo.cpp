@@ -451,6 +451,7 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
  * groups will be set either when initializing a MatrixWorkspace, or by calling
  * `cacheDetectorGroupings` for an ExperimentInfo stored in an MDWorkspace. */
 void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) {
+  populateIfNotLoaded();
   m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
 }
 
@@ -1087,6 +1088,7 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
 /// Return a reference to the Beamline::SpectrumInfo object. Helper for
 /// API::SpectrumInfo, do not use this.
 const Beamline::SpectrumInfo &ExperimentInfo::internalSpectrumInfo() const {
+  populateIfNotLoaded();
   if (!m_spectrumInfo) {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
     if (!m_spectrumInfo)
@@ -1101,6 +1103,7 @@ const Beamline::SpectrumInfo &ExperimentInfo::internalSpectrumInfo() const {
  * this reference.
  */
 const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
+  populateIfNotLoaded();
   if (!m_spectrumInfoWrapper) {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
     if (!m_spectrumInfoWrapper)
@@ -1112,6 +1115,7 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
 /** Return a non-const reference to the SpectrumInfo object. Not thread safe.
  */
 SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
+  populateIfNotLoaded();
   // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
   // call ExperimentInfo::mutableDetectorInfo() which will later be used by
   // modifications. This will trigger a copy if required. Note that the
