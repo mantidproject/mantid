@@ -430,8 +430,8 @@ public:
 
   void test_ExperimentInfo_from_grouped() {
     const ExperimentInfo expInfo(m_grouped);
-    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 5);
-    const SpectrumInfo spectrumInfo(expInfo);
+    const auto &spectrumInfo = expInfo.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 5);
     // We construct from a grouped workspace (via ISpectrum), but grouping is
     // now stored in Beamline::SpectrumInfo as part of ExperimentInfo, so we
     // should also see the grouping here.
@@ -450,14 +450,14 @@ public:
     // we have no control over the order and thus cannot write asserts.
     det2group_map mapping{{1, {1, 2}}};
     expInfo.cacheDetectorGroupings(mapping);
-    const SpectrumInfo spectrumInfo(expInfo);
-    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    const auto &spectrumInfo = expInfo.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
 
     mapping = {{1, {1, 4}}};
     expInfo.cacheDetectorGroupings(mapping);
-    const SpectrumInfo spectrumInfo2(expInfo);
-    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    const auto &spectrumInfo2 = expInfo.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
     TS_ASSERT_EQUALS(spectrumInfo2.isMasked(0), true);
   }
 

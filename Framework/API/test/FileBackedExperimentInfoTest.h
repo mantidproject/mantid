@@ -123,12 +123,6 @@ public:
     fileBacked->cacheDetectorGroupings(mapping);
   }
 
-  void test_detectorIDsInGroup() {
-    auto fileBacked = createTestObject();
-
-    TS_ASSERT_EQUALS(fileBacked->detectorIDsInGroup(0).size(), 1);
-  }
-
   void test_ModeratorModelMethods() {
     auto fileBacked = createTestObject();
     ModeratorModel *source = new FakeSource;

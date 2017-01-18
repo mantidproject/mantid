@@ -166,8 +166,6 @@ public:
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
-  virtual size_t numberOfDetectorGroups() const;
-  virtual const std::set<detid_t> detectorIDsInGroup(const size_t index) const;
   virtual size_t groupOfDetectorID(const detid_t detID) const;
 
 protected:

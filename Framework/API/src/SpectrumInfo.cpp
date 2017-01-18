@@ -29,6 +29,11 @@ SpectrumInfo::SpectrumInfo(ExperimentInfo &experimentInfo)
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
 
+/// Returns the size of the SpectrumInfo, i.e., the number of spectra.
+size_t SpectrumInfo::size() const {
+  return m_experimentInfo.internalSpectrumInfo().size();
+}
+
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
   for (const auto detIndex : getDetectorIndices(index))

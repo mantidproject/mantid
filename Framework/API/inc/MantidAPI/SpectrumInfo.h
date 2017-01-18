@@ -65,6 +65,8 @@ public:
   SpectrumInfo(ExperimentInfo &experimentInfo);
   ~SpectrumInfo();
 
+  size_t size() const;
+
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   double l2(const size_t index) const;

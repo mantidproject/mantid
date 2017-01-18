@@ -1960,19 +1960,6 @@ void MatrixWorkspace::cacheDetectorGroupings(const det2group_map &) {
                            "spectra");
 }
 
-/// Returns the number of detector groups. This is equal to the number of
-/// spectra.
-size_t MatrixWorkspace::numberOfDetectorGroups() const {
-  return getNumberHistograms();
-}
-
-/// Returns a set of detector IDs for a group. This is equal to the detector IDs
-/// of the spectrum at given index.
-const std::set<detid_t>
-MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
-  return getSpectrum(index).getDetectorIDs();
-}
-
 /// Throws an exception. This method is only for MDWorkspaces.
 size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
   throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "

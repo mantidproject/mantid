@@ -9,6 +9,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidBeamline/SpectrumDefinition.h"
+#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -412,22 +414,26 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
-  void test_detectorIDsInGroup() {
+  void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
     using namespace Mantid;
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
-    std::set<detid_t> dets;
-    TS_ASSERT_THROWS_NOTHING(dets = exptInfo->detectorIDsInGroup(0));
-    TS_ASSERT_EQUALS(dets, std::set<detid_t>{1});
+    const auto &spectrumInfo = exptInfo->internalSpectrumInfo();
+    const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(0);
+    TS_ASSERT_EQUALS(spectrumDefinition.size(), 1);
+    TS_ASSERT_EQUALS(spectrumDefinition[0].first, 0); // det index 0 (ID 1)
 
     // Set a mapping
     std::set<detid_t> group{1, 2};
     Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
-    TS_ASSERT_THROWS_NOTHING(dets = exptInfo->detectorIDsInGroup(0));
-    TS_ASSERT_EQUALS(dets, group);
+    const auto &spectrumInfo2 = exptInfo->internalSpectrumInfo();
+    const auto &spectrumDefinition2 = spectrumInfo2.spectrumDefinition(0);
+    TS_ASSERT_EQUALS(spectrumDefinition2.size(), 2);
+    TS_ASSERT_EQUALS(spectrumDefinition2[0].first, 0); // det index 0 (ID 1)
+    TS_ASSERT_EQUALS(spectrumDefinition2[1].first, 1); // det index 1 (ID 2)
   }
 
   void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {

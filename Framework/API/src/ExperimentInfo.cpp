@@ -1109,48 +1109,6 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return *m_spectrumInfoWrapper;
 }
 
-/** Returns the number of detector groups.
- *
- * This is a virtual method. The default implementation returns grouping
- * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
- * more common case is handled by the overload of this method in
- * MatrixWorkspace. The purpose of this method is to be able to construct
- * SpectrumInfo based on an ExperimentInfo object, including grouping
- * information. Grouping information can be cached in ExperimentInfo, or can be
- * obtained from child classes (MatrixWorkspace). */
-size_t ExperimentInfo::numberOfDetectorGroups() const {
-  populateIfNotLoaded();
-  std::call_once(m_defaultDetectorGroupingCached,
-                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
-
-  return m_spectrumInfo->size();
-}
-
-/** Returns a set of detector IDs for a group.
- *
- * This is a virtual method. The default implementation returns grouping
- * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
- * more common case is handled by the overload of this method in
- * MatrixWorkspace. The purpose of this method is to be able to construct
- * SpectrumInfo based on an ExperimentInfo object, including grouping
- * information. Grouping information can be cached in ExperimentInfo, or can be
- * obtained from child classes (MatrixWorkspace). */
-const std::set<detid_t>
-ExperimentInfo::detectorIDsInGroup(const size_t index) const {
-  populateIfNotLoaded();
-  std::call_once(m_defaultDetectorGroupingCached,
-                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
-
-  const auto &detectorIDs = detectorInfo().detectorIDs();
-  std::set<detid_t> detIDs;
-  for (const auto detIndex : m_spectrumInfo->spectrumDefinition(index)) {
-    // first is the detector index. Time index (second) ignored for now.
-    detIDs.emplace(detectorIDs[detIndex.first]);
-  }
-
-  return detIDs;
-}
-
 /** Sets up a default detector grouping.
  *
  * The purpose of this method is to work around potential issues of MDWorkspaces
