@@ -248,11 +248,7 @@ class SNAPReduce(DataProcessorAlgorithm):
     def _alignAndFocus(self, params, calib, cal_File, group):
         # loading the ISAW detcal file will override the default instrument
         if calib == 'DetCal File':
-            if len(cal_File) > 1:
-                LoadIsawDetCal(InputWorkspace='WS', Filename=cal_File[0],
-                               Filename2=cal_File[1])
-            else:  # only one file
-                LoadIsawDetCal(InputWorkspace='WS', Filename=cal_File[0])
+            LoadIsawDetCal(InputWorkspace='WS', Filename=cal_File)
 
         if calib in ['Convert Units', 'DetCal File']:
             ConvertUnits(InputWorkspace='WS',
@@ -364,6 +360,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             cal_File = self.getProperty("CalibrationFilename").value
         elif calib == 'DetCal File':
             cal_File = self.getProperty('DetCalFilename').value
+            cal_File = ','.join(cal_File)
         else:
             cal_File = None
 
