@@ -1,6 +1,5 @@
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
@@ -10,6 +9,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -17,10 +17,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
 
-#include <Poco/File.h>
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
-#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <numeric>
