@@ -58,8 +58,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              validator=FloatBoundedValidator(lower=0.0),
                              direction=Direction.Input,
-                             doc=("Temperature during the experiment, in " +
-                                  "Kelvins."))
+                             doc=("Temperature during the experiment (in " +
+                                  "Kelvins) if the 'temperature' sample log " +
+                                  "is missing or needs to be overriden."))
         return
 
     def validateInputs(self):
