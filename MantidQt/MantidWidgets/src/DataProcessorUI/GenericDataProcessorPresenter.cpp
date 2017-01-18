@@ -347,8 +347,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
       // Reflectometry this property refers to the rebin step, and they want a
       // logarithmic binning. If other technique areas need to use a
       // post-process map we'll need to re-think how to do this.
-      double propValue = boost::lexical_cast<double>(propValueStr);
-      alg->setPropertyValue(propName, std::to_string(-propValue));
+      alg->setPropertyValue(propName, "-" + propValueStr);
     }
   }
 
