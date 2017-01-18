@@ -25,7 +25,7 @@ reading McStas 2.1 histogram and event data.
 for reading McStas 2.0 histogram data. 
 
 Information about the required structure of the input Nexus file
-----------------------------------------------------------------
+################################################################
 
 The input file must have an 
 ``/entry1/simulation/name`` item whose value is ``"mccode"``.
