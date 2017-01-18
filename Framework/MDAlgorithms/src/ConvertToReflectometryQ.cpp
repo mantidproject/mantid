@@ -166,7 +166,7 @@ double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
                                                  // with the time series for
                                                  // stheta
   } catch (Exception::NotFoundError &) {
-	  return theta;
+    return theta;
   }
   return theta;
 }
