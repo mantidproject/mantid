@@ -41,6 +41,12 @@ private:
   /// Execution code
   void exec() override;
 
+  inline void addToOutputBuffer(const std::string outName,
+                                const std::string outType,
+                                const std::string outVal) {
+    m_outputVector.push_back(outputTuple(outName, outType, outVal));
+  }
+
   /// Adds ENGINX related data which is required for OpenGenie
   void applyEnginxFormat();
 
@@ -62,6 +68,9 @@ private:
 
   /// Parses and stores the workspace data into the output buffer
   void parseWorkspaceData();
+
+  /// Stores fields that aren't found in the WS but required by OpenGenie
+  void storeEmptyFields();
 
   /// Stores parameters from the workspace which are required for OpenGenie
   void storeWorkspaceInformation();

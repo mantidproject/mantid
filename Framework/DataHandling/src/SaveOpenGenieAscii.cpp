@@ -63,9 +63,9 @@ void SaveOpenGenieAscii::exec() {
   // estimate as some logs are not included whilst some other params are.
   m_outputVector.reserve(m_inputWS->run().getLogData().size());
 
-  // There are 5 main steps below, whilst this doesn't weigh in the processing
+  // Whilst this doesn't weigh in the processing
   // required it breaks down the algorithm nicely for the moment
-  const int numOfSteps = 5;
+  const int numOfSteps = 6;
   Progress progressBar(this, 0, 1, numOfSteps);
 
   const std::string formatType = getProperty("OpenGenieFormat");
@@ -76,6 +76,10 @@ void SaveOpenGenieAscii::exec() {
     const std::string err_msg("Unrecognized format \"" + formatType + "\"");
     throw std::runtime_error(err_msg);
   }
+
+  // Store empty but required field
+  progressBar.report("Storing empty fields");
+  storeEmptyFields();
 
   // store common workspace properties
   progressBar.report("Processing workspace information");
@@ -104,22 +108,22 @@ void SaveOpenGenieAscii::exec() {
 void SaveOpenGenieAscii::applyEnginxFormat() {
   // xunit & xlabel put in OpenGenie format
   const std::string xunitsVal = "Time-of-Flight (\\\\gms)";
-  m_outputVector.push_back(outputTuple("xunits", m_stringType, xunitsVal));
-  m_outputVector.push_back(outputTuple("xlabel", m_stringType, xunitsVal));
+  addToOutputBuffer("xunits", m_stringType, xunitsVal);
+  addToOutputBuffer("xlabel", m_stringType, xunitsVal);
 
   // yunit & ylabel put in OpenGenie format
   const std::string yunitsVal = "Neutron counts / \\\\gms";
-  m_outputVector.push_back(outputTuple("yunits", m_stringType, yunitsVal));
-  m_outputVector.push_back(outputTuple("ylabel", m_stringType, yunitsVal));
+  addToOutputBuffer("yunits", m_stringType, yunitsVal);
+  addToOutputBuffer("ylabel", m_stringType, yunitsVal);
 
   // Spectrum numbers
-  m_outputVector.push_back(outputTuple("spec_no", m_stringType, "1"));
+  addToOutputBuffer("spec_no", m_stringType, "1");
 
   // Par file that was used in the calibration
   // This can be set to none at the moment as it does not affect the analysis
-  m_outputVector.push_back(outputTuple("parameter_file", m_stringType, "None.par"));
+  addToOutputBuffer("parameter_file", m_stringType, "None.par");
 
-  m_outputVector.push_back(outputTuple("user_name", m_stringType, "NotSet"));
+  addToOutputBuffer("user_name", m_stringType, "NotSet");
 }
 
 /**
@@ -128,15 +132,14 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
   */
 void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
                                            const Kernel::Property *values) {
-	// Cast to TimeSeries so we can use the min/max value methods
+  // Cast to TimeSeries so we can use the min/max value methods
   const auto positionValues =
       static_cast<const TimeSeriesProperty<double> *>(values);
 
   const double deltaValue =
       positionValues->maxValue() - positionValues->minValue();
 
-  m_outputVector.push_back(
-      outputTuple('d' + unit, m_floatType, std::to_string(deltaValue)));
+  addToOutputBuffer('d' + unit, m_floatType, std::to_string(deltaValue));
 }
 
 /**
@@ -155,8 +158,7 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
   const std::string newlineStr = "\n    ";
 
   // Build x, y and e strings - first 4 spaces for correct padding
-  std::string xValsOutput("    "), yValsOutput("    "),
-  eValsOutput("    ");
+  std::string xValsOutput("    "), yValsOutput("    "), eValsOutput("    ");
   // Number of values seen also used to track 10 values for a newline
   int xCount(0), yCount(0), eCount(0);
 
@@ -201,12 +203,12 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
   * then stored in the output buffer.
   */
 void SaveOpenGenieAscii::getSampleLogs() {
-	// Maps Mantid log names -> Genie save file name
+  // Maps Mantid log names -> Genie save file name
   const std::unordered_map<std::string, std::string> MantidGenieNameMap = {
       {"x", "x_pos"},
       {"y", "y_pos"},
       {"z", "z_pos"},
-      {"dae_beam_current", "microamps"},
+      {"gd_prtn_chrg", "microamps"},
       {"dur", "effective_time"}};
 
   const std::vector<Property *> &logData = m_inputWS->run().getLogData();
@@ -227,6 +229,12 @@ void SaveOpenGenieAscii::getSampleLogs() {
     // Calculate dx/dy/dz
     if (outName == "x_pos" || outName == "y_pos" || outName == "z_pos") {
       calculateXYZDelta(foundMapping->first, logEntry);
+    } else if (outName == "microamps") {
+      // From reverse engineering the scripts the effective time is
+      // the microamps * 50 - what 50 represents is not documented
+      const std::string effectiveTime =
+          std::to_string(std::stod(logEntry->value()) * 50.);
+      addToOutputBuffer("effective_time", m_floatType, effectiveTime);
     }
 
     if (ITimeSeriesProperty *timeSeries =
@@ -249,7 +257,7 @@ void SaveOpenGenieAscii::getSampleLogs() {
       outType = m_stringType;
     }
 
-    m_outputVector.push_back(outputTuple(outName, outType, outValue));
+    addToOutputBuffer(outName, outType, outValue);
   }
 }
 
@@ -308,18 +316,39 @@ void SaveOpenGenieAscii::parseWorkspaceData() {
   // then the data into a string
   const auto xDataString = std::to_string(std::get<1>(xTuple)) + " \n" +
                            std::move(std::get<0>(xTuple));
-  m_outputVector.push_back(
-      outputTuple("x", outputType, std::move(xDataString)));
+  addToOutputBuffer("x", outputType, std::move(xDataString));
 
   const auto yDataString = std::to_string(std::get<1>(yTuple)) + " \n" +
                            std::move(std::get<0>(yTuple));
-  m_outputVector.push_back(
-      outputTuple("y", outputType, std::move(yDataString)));
+  addToOutputBuffer("y", outputType, std::move(yDataString));
 
   const auto eDataString = std::to_string(std::get<1>(eTuple)) + " \n" +
                            std::move(std::get<0>(eTuple));
-  m_outputVector.push_back(
-      outputTuple("e", outputType, std::move(eDataString)));
+  addToOutputBuffer("e", outputType, std::move(eDataString));
+}
+
+/**
+  * Stores the default value OpenGENIE uses in the fields that
+  * aren't present in the input workspace but are required to be present
+  * into the output buffer.
+  */
+void SaveOpenGenieAscii::storeEmptyFields() {
+  const std::string floatVal = "999.000";
+  addToOutputBuffer("eurotherm", m_floatType, floatVal);
+  addToOutputBuffer("eurotherm_error", m_floatType, floatVal);
+
+  addToOutputBuffer("load", m_floatType, floatVal);
+  addToOutputBuffer("load_error", m_floatType, floatVal);
+  addToOutputBuffer("macro_strain", m_floatType, floatVal);
+  addToOutputBuffer("macro_strain_error", m_floatType, floatVal);
+  addToOutputBuffer("theta_pos", m_floatType, floatVal);
+  addToOutputBuffer("theta_pos_error", m_floatType, floatVal);
+
+  addToOutputBuffer("pos", m_floatType, floatVal);
+  addToOutputBuffer("pos_error", m_floatType, floatVal);
+  addToOutputBuffer("x_pos_error", m_floatType, floatVal);
+  addToOutputBuffer("y_pos_error", m_floatType, floatVal);
+  addToOutputBuffer("z_pos_error", m_floatType, floatVal);
 }
 
 /**
@@ -327,29 +356,24 @@ void SaveOpenGenieAscii::parseWorkspaceData() {
   * in the output buffer
   */
 void SaveOpenGenieAscii::storeWorkspaceInformation() {
-	// Run Number
-  m_outputVector.push_back(outputTuple(
-      "run_no", m_stringType, std::to_string(m_inputWS->getRunNumber())));
+  // Run Number
+  addToOutputBuffer("run_no", m_stringType,
+                    std::to_string(m_inputWS->getRunNumber()));
   // Workspace title
-  m_outputVector.push_back(
-      outputTuple("title", m_stringType, m_inputWS->getTitle()));
+  addToOutputBuffer("title", m_stringType, m_inputWS->getTitle());
   // Instrument name
-  m_outputVector.push_back(outputTuple("inst_name", m_stringType,
-                                       m_inputWS->getInstrument()->getName()));
+  addToOutputBuffer("inst_name", m_stringType,
+                    m_inputWS->getInstrument()->getName());
   // Number of bins
-  m_outputVector.push_back(
-      outputTuple("ntc", m_intType, std::to_string(m_inputWS->blocksize())));
+  addToOutputBuffer("ntc", m_intType, std::to_string(m_inputWS->blocksize()));
   // L1 (Source to sample distance)
   const auto &specInfo = m_inputWS->spectrumInfo();
-  m_outputVector.push_back(
-      outputTuple("l1", m_floatType, std::to_string(specInfo.l1())));
+  addToOutputBuffer("l1", m_floatType, std::to_string(specInfo.l1()));
   // L2 (Sample to spectrum distance)
-  m_outputVector.push_back(
-      outputTuple("l2", m_floatType, std::to_string(specInfo.l2(0))));
-  // Unsigned scattering angle 2theta 
+  addToOutputBuffer("l2", m_floatType, std::to_string(specInfo.l2(0)));
+  // Unsigned scattering angle 2theta
   const double two_theta = specInfo.twoTheta(0) * 180 / M_PI; // Convert to deg
-  m_outputVector.push_back(
-      outputTuple("twotheta", m_floatType, std::to_string(two_theta)));
+  addToOutputBuffer("twotheta", m_floatType, std::to_string(two_theta));
 }
 
 /** Sorts the output buffer alphabetically and writes out the output
