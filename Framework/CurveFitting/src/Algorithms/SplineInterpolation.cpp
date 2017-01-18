@@ -143,7 +143,8 @@ void SplineInterpolation::exec() {
   // eventually keep x-Values of histograms
   size_t sizeX = mws->readX(0).size();
   size_t sizeY = mwspt->readY(0).size();
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(iws, iwspt->getNumberHistograms(), sizeX, sizeY);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
+      iws, iwspt->getNumberHistograms(), sizeX, sizeY);
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
@@ -155,46 +156,56 @@ void SplineInterpolation::exec() {
 
   // for each histogram in workspace, calculate interpolation and derivatives
   for (int i = 0; i < histNo; ++i) {
-    if (type == true && binsNo == 2){
-        // set up the function that needs to be interpolated
-        std::unique_ptr<gsl_interp_accel, void(*)(gsl_interp_accel*)> acc(gsl_interp_accel_alloc (), gsl_interp_accel_free);
-        std::unique_ptr<gsl_interp, void(*)(gsl_interp*)> linear(gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
-        gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo);
-        for (int k = 0; k < binsNoInterp; ++k){
-          gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(outputWorkspace->mutableY(i)[k]));
-          if (order > 0){
-            auto vAxis = new NumericAxis(order);
-            derivs[i] = WorkspaceFactory::Instance().create(iws, order, sizeX, sizeY);
-            for (int j = 0; j < order; ++j) {
-              vAxis->setValue(j, j + 1);
-              derivs[i]->setSharedX(j, mws->sharedX(0));
-              if (j == 0)
-                gsl_interp_linear->eval_deriv(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(i)[k]));
-              if (j == 1)
-                gsl_interp_linear->eval_deriv2(linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(i)[k]));
-            }
-          derivs[i]->replaceAxis(1, vAxis);
-          }
-        }
-    }
-    else{
-        setInterpolationPoints(iwspt, i);
-        // compare the data set against our spline
-        calculateSpline(mwspt, outputWorkspace, i);
-
-        // check if we want derivatives
+    if (type == true && binsNo == 2) {
+      // set up the function that needs to be interpolated
+      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)> acc(
+          gsl_interp_accel_alloc(), gsl_interp_accel_free);
+      std::unique_ptr<gsl_interp, void (*)(gsl_interp *)> linear(
+          gsl_interp_alloc(gsl_interp_linear, binsNo), gsl_interp_free);
+      gsl_interp_linear->init(linear.get(), &(iwspt->x(i)[0]),
+                              &(iwspt->y(i)[0]), binsNo);
+      for (int k = 0; k < binsNoInterp; ++k) {
+        gsl_interp_linear->eval(linear.get(), &(iwspt->x(i)[0]),
+                                &(iwspt->y(i)[0]), binsNo, mwspt->x(0)[k],
+                                acc.get(), &(outputWorkspace->mutableY(i)[k]));
         if (order > 0) {
-          auto vAxis2 = new NumericAxis(order);
-          derivs[i] = WorkspaceFactory::Instance().create(iwspt, order, sizeX, sizeY);
-
-          // calculate the derivatives for each order chosen
+          auto vAxis = new NumericAxis(order);
+          derivs[i] =
+              WorkspaceFactory::Instance().create(iws, order, sizeX, sizeY);
           for (int j = 0; j < order; ++j) {
-            vAxis2->setValue(j, j + 1);
-            calculateDerivatives(mwspt, derivs[i], j + 1);
+            vAxis->setValue(j, j + 1);
             derivs[i]->setSharedX(j, mws->sharedX(0));
+            if (j == 0)
+              gsl_interp_linear->eval_deriv(
+                  linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo,
+                  mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(i)[k]));
+            if (j == 1)
+              gsl_interp_linear->eval_deriv2(
+                  linear.get(), &(iwspt->x(i)[0]), &(iwspt->y(i)[0]), binsNo,
+                  mwspt->x(0)[k], acc.get(), &(derivs[i]->mutableY(i)[k]));
           }
-          derivs[i]->replaceAxis(1, vAxis2);
+          derivs[i]->replaceAxis(1, vAxis);
         }
+      }
+    } else {
+      setInterpolationPoints(iwspt, i);
+      // compare the data set against our spline
+      calculateSpline(mwspt, outputWorkspace, i);
+
+      // check if we want derivatives
+      if (order > 0) {
+        auto vAxis2 = new NumericAxis(order);
+        derivs[i] =
+            WorkspaceFactory::Instance().create(iwspt, order, sizeX, sizeY);
+
+        // calculate the derivatives for each order chosen
+        for (int j = 0; j < order; ++j) {
+          vAxis2->setValue(j, j + 1);
+          calculateDerivatives(mwspt, derivs[i], j + 1);
+          derivs[i]->setSharedX(j, mws->sharedX(0));
+        }
+        derivs[i]->replaceAxis(1, vAxis2);
+      }
     }
     outputWorkspace->setSharedX(i, mws->sharedX(0));
     pgress.report();
@@ -348,8 +359,8 @@ void SplineInterpolation::setXRange(
     if (nOutsideRight > 0) {
       nOutsideRight += 1;
       g_log.warning() << nOutsideRight - 1 << " x value(s) smaller than "
-                                          "integration range, will not be "
-                                          "calculated.\n";
+                                              "integration range, will not be "
+                                              "calculated.\n";
     }
     if (nOutsideLeft > 0) {
       std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);

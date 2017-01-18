@@ -82,7 +82,7 @@ private:
   /// set the points that define the linear bspline used for interpolation of a
   /// workspace
   void setInterpolationPointsLinear(MatrixWorkspace_const_sptr inputWorkspace,
-                              const int row) const;
+                                    const int row) const;
 
   /// set the points that define the spline used for interpolation of a
   /// workspace
