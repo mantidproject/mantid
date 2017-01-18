@@ -27,7 +27,10 @@ Algorithms
   * :ref:`algm-ReflectometryReductionOneAuto` rebins and scales the output workspace and outputs a third output workspace, :literal:`OutputWorkspaceBinned`.
 
 * :ref:`algm-Stitch1D` documentation has been improved, it now includes a workflow diagram illustrating the different steps in the calculation and a note about how errors are propagated.
+
 * :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces.
+
+* :ref:`algm-ConvertToReflectometryQ` corrects the detector position before performing any type of calculation. Detectors are corrected to an angle theta read from the log value *stheta*.
 
 Reflectometry Reduction Interface
 ---------------------------------

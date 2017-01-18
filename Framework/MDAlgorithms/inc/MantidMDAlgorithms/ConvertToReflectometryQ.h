@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQ_H_
 #define MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQ_H_
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
@@ -48,6 +49,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  Mantid::API::MatrixWorkspace_sptr
+  correctDetectors(Mantid::API::MatrixWorkspace_sptr inputWs, double theta);
 };
 
 } // namespace MDAlgorithms

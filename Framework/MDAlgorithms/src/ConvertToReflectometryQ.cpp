@@ -1,21 +1,21 @@
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAPI/Progress.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -25,12 +25,14 @@
 #include "MantidKernel/Unit.h"
 
 #include "MantidMDAlgorithms/ReflectometryTransformKiKf.h"
-#include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
+#include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 
+#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+
+#include "MantidAPI/ISpectrum.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -140,6 +142,33 @@ void checkOutputDimensionalityChoice(const std::string &outputDimensions) {
       outputDimensions != pSpaceTransform()) {
     throw std::runtime_error("Unknown transformation");
   }
+}
+
+/*
+Get the value of theta from the logs
+@param inputWs : the input workspace
+@return : theta found in the logs
+@throw: runtime_errror if 'stheta' was not found.
+*/
+double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
+
+  double theta = -1.;
+  const Mantid::API::Run &run = inputWs->run();
+  try {
+    Property *p = run.getLogData("stheta");
+    auto incidentThetas =
+        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(p);
+    if (!incidentThetas) {
+      throw std::runtime_error("stheta log not found");
+    }
+    theta =
+        incidentThetas->valuesAsVector().back(); // Not quite sure what to do
+                                                 // with the time series for
+                                                 // stheta
+  } catch (Exception::NotFoundError &) {
+	  return theta;
+  }
+  return theta;
 }
 }
 
@@ -291,30 +320,17 @@ void ConvertToReflectometryQ::exec() {
                                                      // retired as soon as all
                                                      // transforms have been
 
-  // Extract the incient theta angle from the logs if a user provided one is not
-  // given.
+  // Extract the incident theta angle from the logs
+  double thetaFromLogs = getThetaFromLogs(inputWs);
   if (!bUseOwnIncidentTheta) {
-    const Mantid::API::Run &run = inputWs->run();
-    try {
-      Property *p = run.getLogData("stheta");
-      auto incidentThetas =
-          dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(p);
-      if (!incidentThetas) {
-        throw std::runtime_error("stheta log not found");
-      }
-      incidentTheta =
-          incidentThetas->valuesAsVector().back(); // Not quite sure what to do
-                                                   // with the time series for
-                                                   // stheta
-      checkIncidentTheta(incidentTheta);
-      std::stringstream stream;
-      stream << "Extracted initial theta value of: " << incidentTheta;
-      g_log.information(stream.str());
-    } catch (Exception::NotFoundError &) {
-      throw std::runtime_error(
-          "The input workspace does not have a stheta log value.");
-    }
+    // Use the incident theta angle from the logs if a user provided one is not
+    // given.
+    checkIncidentTheta(thetaFromLogs);
+    incidentTheta = thetaFromLogs;
   }
+
+  // Correct the detectors according to theta read from logs
+  inputWs = correctDetectors(inputWs, thetaFromLogs);
 
   // Min max extent values.
   const double dim0min = extents[0];
@@ -411,6 +427,47 @@ void ConvertToReflectometryQ::exec() {
   setProperty("OutputVertexes", vertexes);
   Progress setPropertyProg(this, 0.8, 1.0, 2);
   setPropertyProg.report("Success");
+}
+
+MatrixWorkspace_sptr
+ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_sptr inputWs,
+                                          double theta) {
+
+  if (theta < 0)
+    return inputWs;
+
+  // Obtain the detector IDs that correspond to spectra in the input workspace
+  std::set<Mantid::detid_t> detectorIDs;
+  for (size_t sp = 0; sp < inputWs->getNumberHistograms(); sp++) {
+    auto ids = inputWs->getSpectrum(sp).getDetectorIDs();
+    detectorIDs.insert(ids.begin(), ids.end());
+  }
+
+  // Move the parent component of the selected detectors
+  std::set<std::string> componentsToMove;
+  for (const auto &id : detectorIDs) {
+    auto detector = inputWs->getDetectorByID(id);
+    auto parent = detector->getParent();
+    if (parent) {
+      auto parentType = parent->type();
+      auto detectorName = (parentType == "Instrument") ? detector->getName()
+                                                       : parent->getName();
+      componentsToMove.insert(detectorName);
+    }
+  }
+
+  MatrixWorkspace_sptr outWS = inputWs;
+  for (const auto &component : componentsToMove) {
+    IAlgorithm_sptr alg =
+        createChildAlgorithm("SpecularReflectionPositionCorrect");
+    alg->setProperty("InputWorkspace", outWS);
+    alg->setProperty("TwoTheta", theta);
+    alg->setProperty("DetectorComponentName", component);
+    alg->execute();
+    outWS = alg->getProperty("OutputWorkspace");
+  }
+
+  return outWS;
 }
 
 } // namespace Mantid
