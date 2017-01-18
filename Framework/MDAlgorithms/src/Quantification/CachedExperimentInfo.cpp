@@ -131,7 +131,7 @@ void CachedExperimentInfo::initCaches(
   // Throws if detector does not exist
   // Takes into account possible detector mapping
   const size_t index = m_exptInfo.groupOfDetectorID(detID);
-  const API::SpectrumInfo specInfo(m_exptInfo);
+  const auto &specInfo = m_exptInfo.spectrumInfo();
   const auto &det = specInfo.detector(index);
 
   // Instrument distances

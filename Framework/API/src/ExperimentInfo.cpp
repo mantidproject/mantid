@@ -1065,6 +1065,11 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
 }
 
 const Beamline::SpectrumInfo &ExperimentInfo::internalSpectrumInfo() const {
+  if (!m_spectrumInfo) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (!m_spectrumInfo)
+      cacheDefaultDetectorGrouping();
+  }
   return *m_spectrumInfo;
 }
 
