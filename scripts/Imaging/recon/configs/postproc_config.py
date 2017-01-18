@@ -7,27 +7,28 @@ class PostProcConfig(object):
         """
         Builds a default post-processing configuration with a sensible choice of parameters
         """
-        self.circular_mask = 0.94
+        self.circular_mask = None
         self.cut_off_level_post = 0
-        self.gaussian_filter_size = 0
-        self.gaussian_filter_mode = 0
+        self.gaussian_size = None
+        self.gaussian_mode = 'reflect'
+        self.gaussian_order = 0
 
-        self.median_filter_size = 0
+        self.median_size = 0
         """
-        :param median_filter_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        :param median_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
             The mode parameter determines how the array borders are handled, where cval is the value when
             mode is equal to 'constant'.
         """
-        self.median_filter_mode = 'reflect'
+        self.median_mode = 'reflect'
         self.median_filter3d_size = 0  # TODO unused
 
     def __str__(self):
         return "Circular mask: {0}\n".format(self.circular_mask) \
             + "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level_post) \
-            + "Gaussian filter size: {0}\n".format(self.gaussian_filter_size) \
-            + "Gaussian filter mode: {0}\n".format(self.gaussian_filter_mode) \
-            + "Median filter size:: {0}\n".format(self.median_filter_size) \
-            + "Median filter mode: {0}\n".format(self.median_filter_mode)
+            + "Gaussian filter size: {0}\n".format(self.gaussian_size) \
+            + "Gaussian filter mode: {0}\n".format(self.gaussian_mode) \
+            + "Median filter size:: {0}\n".format(self.median_size) \
+            + "Median filter mode: {0}\n".format(self.median_mode)
 
     def setup_parser(self, parser):
         """
@@ -55,39 +56,50 @@ class PostProcConfig(object):
                  "will be set to the minimum value.")
 
         grp_post.add_argument(
-            "--out-median-filter-size",
+            "--out-median-size",
             required=False,
             type=float,
-            default=self.median_filter_size,
+            default=self.median_size,
             help="Apply median filter (2d) on reconstructed volume with the given window size.(post processing)"
         )
 
         median_modes = ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
         grp_post.add_argument(
-            "--out-median-filter-mode",
+            "--out-median-mode",
             type=str,
             required=False,
-            default=self.median_filter_mode,
+            default=self.median_mode,
             choices=median_modes,
             help="Default: %(default)s\n"
                  "Mode of median filter which determines how the array borders are handled.(post processing)"
         )
 
         grp_post.add_argument(
-            "--out-gaussian-filter-size",
+            "--out-gaussian-size",
             required=False,
             type=float,
-            default=self.median_filter_size,
+            default=self.gaussian_size,
             help="Apply gaussian filter (2d) on reconstructed volume with the given window size."
         )
 
         grp_post.add_argument(
-            "--out-gaussian-filter-mode",
+            "--out-gaussian-mode",
             type=str,
             required=False,
-            default=self.median_filter_mode,
+            default=self.gaussian_mode,
             choices=median_modes,
             help="Default: %(default)s\nMode of gaussian filter which determines how the array borders are handled.(post processing).")
+
+        grp_post.add_argument(
+            "--out-gaussian-order",
+            required=False,
+            type=int,
+            default=self.gaussian_order,
+            help="Default: %(default)d\nThe order of the filter along each axis is given as a sequence of integers, \n"
+            "or as a single number. An order of 0 corresponds to convolution with a Gaussian kernel.\n"
+            "An order of 1, 2, or 3 corresponds to convolution with the first, second or third derivatives of a Gaussian.\n"
+            "Higher order derivatives are not implemented."
+        )
 
         return parser
 
@@ -95,9 +107,10 @@ class PostProcConfig(object):
         self.circular_mask = args.circular_mask
         self.cut_off_level_post = args.cut_off_post
 
-        self.gaussian_filter_size = args.out_gaussian_filter_size
-        self.gaussian_filter_mode = args.out_gaussian_filter_mode
+        self.gaussian_size = args.out_gaussian_size
+        self.gaussian_mode = args.out_gaussian_mode
+        self.gaussian_order = args.out_gaussian_order
 
-        self.median_filter_size = args.median_filter_size
-        self.median_filter_mode = args.median_filter_mode
+        self.median_size = args.out_median_size
+        self.median_mode = args.out_median_mode
         # self.median_filter3d_size = args.median_filter3d_size

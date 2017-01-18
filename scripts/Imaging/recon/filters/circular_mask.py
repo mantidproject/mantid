@@ -1,16 +1,17 @@
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
+from recon.helper import Helper
 
 
-def execute(data, config):
-    ratio = config.post.circular_mask
-    if ratio and ratio > 0 and ratio < 1:
+def execute(data, circular_mask_ratio, h=None):
+    h = Helper.empty_init() if h is None else h
+
+    if circular_mask_ratio and 0 < circular_mask_ratio < 1:
         from recon.tools import tool_importer
         tomopy = tool_importer.do_importing('tomopy')
-        from recon.helper import Helper
-        h = Helper(config)
 
         h.pstart("Starting circular mask...")
-        tomopy.circ_mask(data, axis=0, ratio=ratio)
+        tomopy.circ_mask(arr=data, axis=0, ratio=circular_mask_ratio, val=0.)
         h.pstart("Finished applying circular mask.")
 
     return data
@@ -45,9 +46,9 @@ def _calc_mask(ydim, xdim, ratio):
     """
     Prepare a mask object.
 
-    @param ydim :: size/length of the y dimension (image rows)
-    @param xdim :: size/length of the x dimension (innermost, image columns)
-    @param ratio :: ratio in [0,1] relative to the smaller dimension
+    :param ydim :: size/length of the y dimension (image rows)
+    :param xdim :: size/length of the x dimension (innermost, image columns)
+    :param ratio :: ratio in [0,1] relative to the smaller dimension
 
     Returns :: mask as a numpy array of boolean values (in/out-side mask)
     """

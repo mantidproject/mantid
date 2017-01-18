@@ -1,22 +1,26 @@
 from __future__ import (absolute_import, division, print_function)
+from recon.helper import Helper
 
 
-def execute(data, config, norm_flat_img, norm_dark_img=0):
+def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, h=None):
     """
     Normalise by flat and dark images
 
     :param data :: image stack as a 3d numpy array
-    :param config :: pre-processing configuration
     :param norm_flat_img :: flat (open beam) image to use in normalization
     :param norm_dark_img :: dark image to use in normalization
+    :param clip_min: Pixel values found below this value will be clipped to equal this value
+    :param clip_max: Pixel values found above this value will be clipped to equal this value
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
 
     :returns :: filtered data (stack of images)
     """
-    from recon.helper import Helper
     import numpy as np
 
-    h = Helper(config)
     h.check_data_stack(data)
+
+    h = Helper.empty_init() if h is None else h
 
     if isinstance(norm_flat_img, np.ndarray):
         if 2 != len(norm_flat_img.shape):
@@ -32,8 +36,6 @@ def execute(data, config, norm_flat_img, norm_dark_img=0):
 
         # prevent divide-by-zero issues
         norm_divide[norm_divide == 0] = 1e-6
-        clip_min = config.pre.clip_min
-        clip_max = config.pre.clip_max
 
         # this divide gives bad results
         for idx in range(0, data.shape[0]):

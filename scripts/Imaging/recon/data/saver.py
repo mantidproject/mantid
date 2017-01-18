@@ -8,24 +8,20 @@ class Saver(object):
         from recon.helper import Helper
         self._h = Helper(config)
 
+        self._output_path = os.path.abspath(config.func.output_path)
+
         self._overwrite_all = config.func.overwrite_all
         self._data_as_stack = config.func.data_as_stack
 
         self._readme_fullpath = os.path.join(
-            config.func.output_path, config.func.readme_file_name)
+            self._output_path, config.func.readme_file_name)
 
         self._preproc_dir = config.func.preproc_subdir
         self._save_preproc = config.func.save_preproc
 
-        self._output_path = config.func.output_path
         self._out_slices_file_name_prefix = config.func.out_slices_file_name_prefix
         self._out_horiz_slices_subdir = config.func.out_horiz_slices_subdir
         self._save_horiz_slices = config.func.save_horiz_slices
-
-        # create directory, or throw if not empty and no --overwrite-all
-        self.make_dirs_if_needed(self._output_path)
-
-        pass
 
     def save_single_image(self, data,
                           subdir=None,
@@ -45,6 +41,7 @@ class Saver(object):
         if subdir is not None:
             # using the provided subdir
             preproc_dir = os.path.join(preproc_dir, subdir)
+            preproc_dir = os.path.abspath(preproc_dir)
 
         self._h.pstart(
             "Saving single image {0} dtype: {1}".format(preproc_dir, data.dtype))
@@ -79,7 +76,8 @@ class Saver(object):
         # Sideways slices:
         if self._save_horiz_slices:
             out_horiz_dir = os.path.join(out_recon_dir, 'horiz_slices')
-            print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
+            self._h.tomo_print(
+                "Saving horizontal slices in: {0}".format(out_horiz_dir))
             self.save_recon_as_horizontal_slices(
                 data, out_horiz_dir, self._out_horiz_slices_subdir)
 
@@ -168,8 +166,6 @@ class Saver(object):
         :param img_data :: image data in the usual numpy representation
         :param filename :: file name, including directory and extension
         of the input data is used
-        :param overwrite_all: Overwrite any existing images with conflicting names
-
         :returns:: name of the file saved
         """
 
@@ -253,8 +249,6 @@ class Saver(object):
         exists, otherwise creates it.
 
         :param dirname :: (output) directory to check
-        :param overwrite_all:
-
         """
 
         absname = os.path.abspath(dirname)

@@ -19,3 +19,9 @@
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+try:
+    from recon.helper import Helper
+except ImportError as exc:
+    raise ImportError(
+        "Failed to import Helper class. The installation of the scripts might be corrupted." + str(exc))

@@ -20,6 +20,8 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-import find_cor
-import helper
-import runner
+try:
+    from helper import Helper
+except ImportError as exc:
+    raise ImportError(
+        "Failed to import Helper class." + str(exc))

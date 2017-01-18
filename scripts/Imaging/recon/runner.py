@@ -11,36 +11,38 @@ def execute(config, cmd_line=None):
     readme file(s) for reference.
     """
 
-    import os
-
     from recon.helper import Helper
     h = Helper(config)
+    config.helper = h
 
     from recon.data.saver import Saver
     saver = Saver(config)
+
+    # create directory, or throw if not empty and no --overwrite-all
+    saver.make_dirs_if_needed(config.func.output_path)
 
     h.check_config_integrity(config)
 
     # import early to check if tool is available
     tool = load_tool(config, h)
-    tool.check_algorithm_compatibility(config)
 
     sample, flat, dark = load_data(config, h)
 
     # todo new class for readme
-
     saver.gen_readme_summary_begin(cmd_line, config)
 
     sample = pre_processing(config, sample, flat, dark)
 
     # Save pre-proc images, print inside
     saver.save_preproc_images(sample)
+    if config.func.only_preproc is True:
+        return 14
 
     # ----------------------------------------------------------------
     # Reconstruction
     sample = tool.run_reconstruct(sample, config)
 
-    post_processing()
+    post_processing(sample, config)
 
     # Save output from the reconstruction
     saver.save_recon_output(sample)
@@ -49,88 +51,137 @@ def execute(config, cmd_line=None):
 
     # todo new class for readme
     # saver.gen_readme_summary_end(sample)
+    return 0
 
 
-def pre_processing(config, data, flat, dark):
+def pre_processing(config, sample, flat, dark):
+    h = config.helper
+    if config.func.reuse_preproc is True:
+        h.tomo_print_warning(
+            "Pre-processing steps have been skipped, because --reuse-preproc flag has been passed.")
+        return sample, flat, dark
+
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
-        mcp_corrections, scale_down, median_filter
+        mcp_corrections, scale, median_filter
 
     save_preproc = config.func.save_preproc
     debug = True if config.func.debug else False
 
-    data, flat, dark = rotate_stack.execute(data, config, flat, dark)
+    sample, flat, dark = rotate_stack.execute(
+        sample, config.pre.rotation, flat, dark, h)
     if debug and save_preproc:
-        _debug_save_out_data(data, config, flat, dark, "rotated", "_rotated")
+        _debug_save_out_data(sample, config, flat, dark,
+                             "1rotated", "_rotated")
 
     # the air region coordinates must be within the ROI if this is selected
     if config.pre.crop_before_normalise:
-        data = crop_coords.execute_volume(data, config)
+        sample = crop_coords.execute_volume(
+            sample, config.pre.region_of_interest, h)
 
-        flat = crop_coords.execute_image(flat, config)
-        dark = crop_coords.execute_image(dark, config)
+        flat = crop_coords.execute_image(
+            flat, config.pre.region_of_interest, h)
+        dark = crop_coords.execute_image(
+            dark, config.pre.region_of_interest, h)
 
         if debug and save_preproc:
-            _debug_save_out_data(data, config, flat, dark,
-                                 "cropped", "_cropped")
+            _debug_save_out_data(sample, config, flat, dark,
+                                 "2cropped", "_cropped")
 
     # removes background using images taken when exposed to fully open beam
     # and no beam
-    data = normalise_by_flat_dark.execute(data, config, flat, dark)
+    sample = normalise_by_flat_dark.execute(
+        sample, flat, dark, config.pre.clip_min, config.pre.clip_max, h)
     if debug and save_preproc:
-        _debug_save_out_data(data, config, flat, dark,
-                             "norm_by_flat_dark", "_normalised_by_flat_dark")
+        _debug_save_out_data(sample, config, flat, dark,
+                             "3norm_by_flat_dark", "_normalised_by_flat_dark")
 
     # removes the contrast difference between the stack of images
-    data = normalise_by_air_region.execute(data, config)
+    sample = normalise_by_air_region.execute(sample, config.pre.normalise_air_region,
+                                             config.pre.region_of_interest,
+                                             config.pre.crop_before_normalise, h)
     if debug and save_preproc:
-        _debug_save_out_data(data, config, flat, dark,
-                             "norm_by_air",  "_normalised_by_air")
+        _debug_save_out_data(sample, config, flat, dark,
+                             "4norm_by_air", "_normalised_by_air")
 
     if not config.pre.crop_before_normalise:
         # in this case we don't care about cropping the flat and dark
-        data = crop_coords.execute_volume(data, config)
+        sample = crop_coords.execute_volume(
+            sample, config.pre.region_of_interest, h)
 
         if debug and save_preproc:
-            _debug_save_out_data(data, config, flat, dark,
-                                 "cropped", "_cropped")
+            _debug_save_out_data(sample, config, flat, dark,
+                                 "5cropped", "_cropped")
 
-    # cut_off
-    # data = cut_off.execute(data, config)
+    sample = cut_off.execute(sample, config.pre.cut_off_level_pre, h)
+    if debug and save_preproc:
+        _debug_save_out_data(sample, config, flat, dark,
+                             "6cut_off_pre", "_cut_off_pre")
     # mcp_corrections
     # data = mcp_corrections.execute(data, config)
-    # scale_down, not implemented
-    # data = scale_down.execute(data, config)
 
-    data = median_filter.execute(data, config)
+    sample = scale.execute(sample, config.pre.scale, config.pre.scale_mode, h)
     if debug and save_preproc:
-        _debug_save_out_data(data, config, flat, dark,
-                             "median_filtered", "_median_filtered")
+        _debug_save_out_data(sample, config, flat, dark,
+                             "7scaled", "_scaled")
 
-    return data
+    sample = median_filter.execute(
+        sample, config.pre.median_size, config.pre.median_mode, h)
+    if debug and save_preproc:
+        _debug_save_out_data(sample, config, flat, dark,
+                             "8median_filtered", "_median_filtered")
+
+    return sample
 
 
-def _debug_save_out_data(data, config, flat, dark, out_path_append, image_append):
-    from recon.data import saver
+def _debug_save_out_data(data, config, flat=None, dark=None, out_path_append='', image_append=''):
+    from recon.data.saver import Saver
 
-    import time
+    saver = Saver(config)
 
     saver.save_single_image(
-        data, config, output_path=out_path_append, image_name='sample' + image_append)
-    saver.save_single_image(
-        flat, config, output_path=out_path_append, image_name='flat' + image_append)
-    saver.save_single_image(
-        dark, config, output_path=out_path_append, image_name='dark' + image_append)
+        data, subdir=out_path_append, image_name='sample' + image_append)
+
+    if flat is not None:
+        saver.save_single_image(
+            flat, subdir=out_path_append, image_name='flat' + image_append)
+
+    if dark is not None:
+        saver.save_single_image(
+            dark, subdir=out_path_append, image_name='dark' + image_append)
 
 
-def post_processing():
-    pass
-    # TODO Post-processing
-    # ----------------------------------------------------------------
-    # from recon.filters import circular_mask, gaussian, median_filter, cut_off
-    # circular_mask.execute(recon_data, config)
-    # cut_off.execute(data, config)
-    # gaussian.execute(data, config)
-    # median_filter.execute(data, config)
+def post_processing(recon_data, config):
+    from recon.filters import circular_mask, gaussian, median_filter, cut_off
+
+    h = config.helper
+    debug = True if config.func.debug else False
+
+    recon_data = circular_mask.execute(
+        recon_data, config.post.circular_mask, h)
+    if debug:
+        _debug_save_out_data(recon_data, config, out_path_append='../post_processed/circular_masked',
+                             image_append='_circular_masked')
+
+    recon_data = cut_off.execute(
+        recon_data, config.post.cut_off_level_post, h)
+    if debug:
+        _debug_save_out_data(
+            recon_data, config, out_path_append='../post_processed/cut_off', image_append='_cut_off')
+
+    recon_data = gaussian.execute(recon_data, config.post.gaussian_size, config.post.gaussian_mode,
+                                  config.post.gaussian_order, h)
+    if debug:
+        _debug_save_out_data(
+            recon_data, config, out_path_append='../post_processed/gaussian', image_append='_gaussian')
+
+    recon_data = median_filter.execute(
+        recon_data, config.post.median_size, config.post.median_mode, h)
+
+    if debug:
+        _debug_save_out_data(
+            recon_data, config, out_path_append='../post_processed/median', image_append='_median')
+
+    return recon_data
 
 
 def save_netcdf_volume():
@@ -153,15 +204,16 @@ def load_tool(config, h):
     from recon.tools import tool_importer
     # tomopy is the only supported tool for now
     tool = tool_importer.do_importing(config.func.tool)
+    tool.check_algorithm_compatibility(config)
 
     h.pstop("Tool loaded.")
     return tool
 
 
 def load_data(config, h):
-    h.pstart("Loading data...")
-
     from recon.data import loader
+
+    h.pstart("Loading data...")
 
     sample, flat, dark = loader.read_in_stack(config)
 

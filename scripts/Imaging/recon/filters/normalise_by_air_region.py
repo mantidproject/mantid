@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
+from recon.helper import Helper
 
 
-def execute(data, config):
+def execute(data, air_region, region_of_interest, crop_before_normalise, h=None):
     """
     normalise by beam intensity. This is not directly about proton
     charg - not using the proton charge field as usually found in
@@ -9,35 +10,39 @@ def execute(data, config):
     provided in the pre-processing configuration. TODO: much
     of this method should be moved into filters.
 
-    @param data :: stack of images as a 3d numpy array
-    @param config :: reconstruction configuration
+    :param data :: stack of images as a 3d numpy array
+    :param region_of_interest: Region of interest to ensure that the Air Region is in bounds
+    :param crop_before_normalise: A switch to signify that the image has been cropped.
+            This means the Air Region coordinates will have to be translated onto the cropped image
+    :param air_region: The air region from which sums will be calculated and all images will be normalised
+    :param h: Helper class, if not provided will be initialised with empty constructor
 
-    Returns :: filtered data (stack of images)
+
+    :returns :: filtered data (stack of images)
 
     """
     import numpy as np
-    from recon.helper import Helper
-    h = Helper(config)
+    h = Helper.empty_init() if h is None else h
+
     h.check_data_stack(data)
 
-    normalise_air_region = config.pre.normalise_air_region
-    if normalise_air_region:
-        if not isinstance(normalise_air_region, list) or \
-                4 != len(normalise_air_region):
+    if air_region:
+        if not isinstance(air_region, list) or \
+                4 != len(air_region):
             raise ValueError(
                 "Wrong air region coordinates when trying to use them to normalise images: {0}".
-                format(normalise_air_region))
+                format(air_region))
 
         if not all(
                 isinstance(crd, int)
-                for crd in normalise_air_region):
+                for crd in air_region):
             raise ValueError(
                 "Cannot use non-integer coordinates to use the normalization region "
                 "(air region). Got these coordinates: {0}".format(
-                    normalise_air_region))
+                    air_region))
 
         air_right, air_top, air_left, air_bottom = translate_coords_onto_cropped_picture(
-            config.pre.region_of_interest, normalise_air_region, config)
+            region_of_interest, air_region, crop_before_normalise)
 
         h.pstart("Starting normalization by air region...")
         air_sums = []
@@ -68,14 +73,14 @@ def execute(data, config):
     return data
 
 
-def translate_coords_onto_cropped_picture(crop_coords, normalise_air_region, config):
+def translate_coords_onto_cropped_picture(crop_coords, air_region, crop_before_normalise):
 
-    air_right = normalise_air_region[2]
-    air_top = normalise_air_region[1]
-    air_left = normalise_air_region[0]
-    air_bottom = normalise_air_region[3]
+    air_right = air_region[2]
+    air_top = air_region[1]
+    air_left = air_region[0]
+    air_bottom = air_region[3]
 
-    if not config.pre.crop_before_normalise:
+    if not crop_before_normalise:
         return air_right, air_top, air_left, air_bottom
 
     crop_right = crop_coords[2]

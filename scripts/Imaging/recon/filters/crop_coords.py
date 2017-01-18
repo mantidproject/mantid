@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
+from recon.helper import Helper
 
 
 def _crop_coords_sanity_checks(coords, data_image, expected_data_shape=3):
@@ -18,17 +19,24 @@ def _crop_coords_sanity_checks(coords, data_image, expected_data_shape=3):
             "Wrong data volume when trying to crop: {0}".format(data_image))
 
 
-def execute_image(data, config):
-    from recon.helper import Helper
-    h = Helper(config)
+def execute_image(data, region_of_interest, h=None):
+    """
 
-    crop_coords = config.pre.region_of_interest
-    if crop_coords:
+    :param data :: stack of images as a 3d numpy array
+    :param region_of_interest: coordinates which will be cropped and returned for further processing
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+    :returns :: cropped data (stack of images)
+
+    """
+    h = Helper.empty_init() if h is None else h
+
+    if region_of_interest:
         try:
             h.pstart(
-                "Starting image cropping with coordinates: {0}. ...".format(crop_coords))
+                "Starting image cropping with coordinates: {0}. ...".format(region_of_interest))
 
-            data = _crop_image(data, crop_coords)
+            data = _crop_image(data, region_of_interest)
 
             h.pstop("Finished image cropping with pixel data type: {0}, resulting shape: {1}.".format(data.dtype,
                                                                                                       data.shape))
@@ -36,7 +44,7 @@ def execute_image(data, config):
         except ValueError as exc:
             h.tomo_print(
                 "Error in crop (region of interest) parameter (expecting a list with four integers. "
-                "Got: {0}. Error details: ".format(crop_coords), exc)
+                "Got: {0}. Error details: ".format(region_of_interest), exc)
     else:
         h.tomo_print_note(
             "NOT applying cropping to region of interest, because no --region-of-interest coordinates were given.")
@@ -67,21 +75,19 @@ def _crop_image(data_image, coords):
         return data_image[top:bottom, left:right]
 
 
-def execute_volume(data, config):
+def execute_volume(data, crop_coords, h=None):
     """
     Crop stack of images to a region (region of interest or similar), image by image
 
-    @param data :: stack of images as a 3d numpy array
-    @param config :: reconstruction configuration
+    :param data :: stack of images as a 3d numpy array
+    :param crop_coords: coordinates which will be cropped and returned for further processing
+    :param h: Helper class, if not provided will be initialised with empty constructor
 
-    Returns :: filtered data (stack of images)
+    :returns :: cropped data (stack of images)
     """
-    from recon.helper import Helper
-    h = Helper(config)
     h.check_data_stack(data)
 
     # list with first-x, first-y, second-x, second-y
-    crop_coords = config.pre.region_of_interest
     if crop_coords:
         try:
             h.pstart(

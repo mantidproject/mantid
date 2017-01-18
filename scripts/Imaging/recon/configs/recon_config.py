@@ -25,6 +25,7 @@ class ReconstructionConfig(object):
         self.func = functional_config
         self.pre = preproc_config
         self.post = postproc_config
+        self.helper = None
 
     def __str__(self):
         return str(self.func) + str(self.pre) + str(self.post)

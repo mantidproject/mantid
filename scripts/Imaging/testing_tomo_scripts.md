@@ -25,6 +25,13 @@
 - [SciPy misc imresize](#scipy-misc-imresize)
 - [SciPy timeit misc.imresize vs ndimage.zoom](#scipy-timeit-miscimresize-vs-ndimagezoom)
   - [Bigger data test](#bigger-data-test)
+- [`Helper` class initialisation test](#helper-class-initialisation-test)
+- [Tomo Test runs with as most args as possible](#tomo-test-runs-with-as-most-args-as-possible)
+  - [--only-preproc](#--only-preproc)
+  - [--reuse-preproc](#--reuse-preproc)
+  - [--find-cor](#--find-cor)
+  - [--crop-before-normalise](#--crop-before-normalise)
+  - [no --crop-before-normalise](#no---crop-before-normalise)
 
 <!-- /TOC -->
  
@@ -108,14 +115,14 @@ python tomo_main.py
 --input-path-dark=~/Documents/img/000888/dark
 --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]'
 --output=~/Documents/img/000888/processed/temp/1
---median-filter-size=3
+--median-size=3
 --cor=255.000000
 --rotation=1
 --max-angle=360.000000
 --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --output=~/Documents/img/000888/processed/temp/1 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack
+>python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack
 
 ---
 
@@ -134,7 +141,7 @@ python tomo_main.py
 --input-path-dark=~/Documents/img/000888/dark
 --region-of-interest='[41.0, 0.0, 233.0, 228.0]'
 --output=~/Documents/img/000888/processed/temp/1
---median-filter-size=3
+--median-size=3
 --cor=104.000000
 --rotation=1
 --max-angle=360.000000
@@ -142,7 +149,7 @@ python tomo_main.py
 --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[41.0, 0.0, 230.0, 228.0]' --output=~/Documents/img/000888/processed/temp/1 --median-filter-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
+>python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[41.0, 0.0, 230.0, 228.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
 
 ---
 
@@ -161,7 +168,7 @@ python tomo_main.py
 --input-path-dark=~/Documents/img/000888/dark
 --region-of-interest='[35.0, 232.0, 224.0, 509.0]'
 --output=~/Documents/img/000888/processed/temp/1
---median-filter-size=3
+--median-size=3
 --cor=136.000000
 --rotation=1
 --max-angle=360.000000
@@ -169,7 +176,7 @@ python tomo_main.py
 --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-filter-size=3 --cor=136.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
+>python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=136.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
 ---
 
 ## Full `RB000888_test_stack_larmor_summed_201510` dataset, bolts crop, **BAD** air region
@@ -186,7 +193,7 @@ python tomo_main.py
 --input-path-dark=~/Documents/img/000888/dark
 --region-of-interest='[35.0, 232.0, 224.0, 509.0]'
 --output=~/Documents/img/000888/processed/temp/1
---median-filter-size=3
+--median-size=3
 --cor=104.0
 --rotation=1
 --max-angle=360.000000
@@ -194,7 +201,7 @@ python tomo_main.py
 --crop-before-normalise --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-filter-size=3 --cor=104.0 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalise --data-as-stack
+>python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=104.0 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalise --data-as-stack
 
 <br/>
 
@@ -329,7 +336,7 @@ python tomo_main.py
 --input-path-dark=~/Documents/img/000888/dark 
 --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' 
 -o=~/Documents/img/000888/processed/temp/1 
---median-filter-size=3 
+--median-size=3 
 --cor=255.000000 
 --rotation=1 
 --max-angle=360.000000 
@@ -338,7 +345,7 @@ python tomo_main.py
 -a afewaf # or or algorithm
 ```
 
-> python tomo_main.py -i=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' -o=~/Documents/img/000888/processed/temp/1 --median-filter-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack -t tomopy -a afewaf
+> python tomo_main.py -i=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' -o=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack -t tomopy -a afewaf
 
 
 # SciPy ndimage zoom
@@ -454,3 +461,17 @@ import timeit
 timeit.timeit(stmt='imresize(sample)', setup='from __main__ import sample, loader, imresize; import numpy as np; gc.enable()', number=100)
 timeit.timeit(stmt='zoom(sample)', setup='from __main__ import sample, loader, zoom; import numpy as np; gc.enable()', number=100)
 ```
+
+# `Helper` class initialisation test
+```python
+python -c "from recon.helper import Helper; g=[]; h=Helper(); h=Helper(g)"
+```
+
+# Tomo Test runs with as most args as possible
+
+## --only-preproc
+## --reuse-preproc
+## --find-cor
+## --crop-before-normalise
+## no --crop-before-normalise
+TODO: add all the args below (from paper)

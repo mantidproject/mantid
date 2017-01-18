@@ -28,7 +28,7 @@ class AstraTool(AbstractTool):
     def check_algorithm_compatibility(self, config):
         algorithm = config.func.algorithm.upper()  # get full caps
 
-        if algorithm not in tool_supported_methods():
+        if algorithm not in AstraTool.tool_supported_methods():
             raise ValueError(
                 "The selected algorithm {0} is not supported by Astra.".format(algorithm))
 
@@ -71,8 +71,6 @@ class AstraTool(AbstractTool):
         cor = config.func.cor
         num_iter = config.func.num_iter
 
-        h.tomo_print("Using center of rotation: {0}".format(cor))
-
         # remove xxx_CUDA from the string with the [0:find..]
         iterative_algorithm = False if alg[
             0:alg.find('_')] in ['FBP', 'FB', 'BP'] else True
@@ -89,8 +87,8 @@ class AstraTool(AbstractTool):
             }
 
             h.pstart(
-                "Starting iterative method with Astra. Algorithm: {0}, "
-                "number of iterations: {1}...".format(alg, num_iter))
+                "Starting iterative method with Astra. Center of Rotation: {0}, Algorithm: {1}, "
+                "number of iterations: {2}...".format(cor, alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles,
                                        center=cor, algorithm=self._tomopy.astra, options=options)
@@ -98,7 +96,7 @@ class AstraTool(AbstractTool):
 
             h.pstart(
                 "Starting non-iterative reconstruction algorithm with Astra. "
-                "Algorithm: {0}...".format(alg))
+                "Center of Rotation: {0}, Algorithm: {1}...".format(cor, alg))
 
             options = {
                 'proj_type': proj_type,

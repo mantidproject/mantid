@@ -1,17 +1,22 @@
-def execute(data, config):
+from __future__ import (absolute_import, division, print_function)
+from recon.helper import Helper
+
+
+def execute(data, cut_off_level, h=None):
     # Apply cut-off for the normalization?
-    if cfg.cut_off_level and cfg.cut_off_level > 0.0:
-        self.tomo_print_timed_start(
-            "* Applying cut-off with level: {0}".format(cfg.cut_off_level))
+    h = Helper.empty_init() if h is None else h
+
+    if cut_off_level and cut_off_level > 0.0:
+        import numpy as np
+        h.pstart("Applying cut-off with level: {0}".format(cut_off_level))
         dmin = np.amin(data)
         dmax = np.amax(data)
-        rel_cut_off = dmin + cfg.cut_off_level * (dmax - dmin)
+        rel_cut_off = dmin + cut_off_level * (dmax - dmin)
         data[data < rel_cut_off] = dmin
-        self.tomo_print_timed_stop(
-            "Finished cut-off step, with pixel data type: {0}.".format(
+        h.pstop("Finished cut-off step, with pixel data type: {0}.".format(
                 data.dtype))
     else:
-        self.tomo_print_note(
+        h.tomo_print_note(
             "NOT applying cut-off, because no --cut-off-pre or --cut-off-post was specified.")
 
     return data

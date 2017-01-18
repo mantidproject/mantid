@@ -17,13 +17,13 @@ class PreProcConfig(object):
         self.region_of_interest = None
         self.normalise_air_region = None
         self.crop_before_normalise = None
-        self.median_filter_size = None
+        self.median_size = None
         """
-        :param median_filter_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        :param median_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
             The mode parameter determines how the array borders are handled, where cval is the value when
             mode is equal to 'constant'.
         """
-        self.median_filter_mode = 'reflect'
+        self.median_mode = 'reflect'
         self.stripe_removal_method = 'wavelet-fourier'
 
         # Rotation 90 degrees clockwise (positive) or counterclockwise (negative)
@@ -51,7 +51,7 @@ class PreProcConfig(object):
                + "Cut-off on normalised images: {0}\n".format(self.cut_off_level_pre) \
                + "Corrections for MCP detector: {0}\n".format(self.mcp_corrections) \
                + "Scale down factor for images: {0}\n".format(self.scale) \
-               + "Median filter width: {0}\n".format(self.median_filter_size) \
+               + "Median filter width: {0}\n".format(self.median_size) \
                + "Rotation: {0}\n".format(self.rotation) \
                + "Line projection (line integral/log re-scale): {0}\n".format(self.line_projection) \
                + "Sinogram stripes removal: {0}\n".format(self.stripe_removal_method) \
@@ -68,6 +68,7 @@ class PreProcConfig(object):
             'Pre-processing of input raw images/projections')
 
         grp_pre.add_argument(
+            "-g",
             "--region-of-interest",
             required=False,
             type=str,
@@ -76,6 +77,7 @@ class PreProcConfig(object):
                  "Example: --region-of-interest='[150,234,23,22]'.")
 
         grp_pre.add_argument(
+            "-e",
             "--air-region",
             required=False,
             type=str,
@@ -92,19 +94,19 @@ class PreProcConfig(object):
                  "the algorithms will work on smaller data.")
 
         grp_pre.add_argument(
-            "--median-filter-size",
+            "--median-size",
             type=int,
             required=False,
-            default=self.median_filter_size,
+            default=self.median_size,
             help="Size / width of the median filter(pre - processing)."
         )
 
         median_modes = ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
         grp_pre.add_argument(
-            "--median-filter-mode",
+            "--median-mode",
             type=str,
             required=False,
-            default=self.median_filter_mode,
+            default=self.median_mode,
             choices=median_modes,
             help="Default: %(default)s\n"
                  "Mode of median filter which determines how the array borders are handled."
@@ -165,7 +167,7 @@ class PreProcConfig(object):
         grp_pre.add_argument(
             "--scale-mode",
             required=False,
-            type=float,
+            type=str,
             default=self.scale_mode,
             choices=scale_modes,
             help="Default: %(default)s\n"
@@ -193,8 +195,8 @@ class PreProcConfig(object):
             self.normalise_air_region = [int(val) for val in coords]
 
         self.crop_before_normalise = args.crop_before_normalise
-        self.median_filter_size = args.median_filter_size
-        self.median_filter_mode = args.median_filter_mode
+        self.median_size = args.median_size
+        self.median_mode = args.median_mode
         self.stripe_removal_method = args.remove_stripes
 
         self.rotation = args.rotation

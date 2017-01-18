@@ -36,6 +36,8 @@ class FunctionalConfig(object):
         self.save_horiz_slices = False  # TODO activate for testing only
 
         self.save_preproc = True
+        self.only_preproc = False
+        self.reuse_preproc = False
         self.preproc_subdir = 'pre_processed'
         self.data_as_stack = False
 
@@ -47,8 +49,7 @@ class FunctionalConfig(object):
         self.cor = None
         self.find_cor = False
 
-        # TODO test verbosity works properly on each level
-        self.verbosity = 3  # default 2
+        self.verbosity = 3
 
         # TODO unused (add exception handling funcitons in helper.py)
         # default True
@@ -158,6 +159,18 @@ class FunctionalConfig(object):
             required=False,
             action='store_true',
             help="Save out the pre-processed images.")
+
+        grp_func.add_argument(
+            "--only-preproc",
+            required=False,
+            action='store_true',
+            help="Complete pre-processing of images and exit.")
+
+        grp_func.add_argument(
+            "--reuse-preproc",
+            required=False,
+            action='store_true',
+            help="The images loaded have already been pre-processed. All pre-processing steps will be skipped.")
 
         grp_func.add_argument(
             "--save-horiz-slices",
@@ -304,6 +317,8 @@ class FunctionalConfig(object):
         self.save_horiz_slices = args.save_horiz_slices
 
         self.save_preproc = args.save_preproc
+        self.only_preproc = args.only_preproc
+        self.reuse_preproc = args.reuse_preproc
         self.preproc_subdir = args.preproc_subdir
         self.data_as_stack = args.data_as_stack
 

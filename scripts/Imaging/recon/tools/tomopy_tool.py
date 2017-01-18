@@ -15,13 +15,17 @@ class TomoPyTool(AbstractTool):
 
     def check_algorithm_compatibility(self, config):
         algorithm = config.func.algorithm
-        if algorithm not in tool_supported_methods():
+        if algorithm not in TomoPyTool.tool_supported_methods():
             raise ValueError(
                 "The selected algorithm {0} is not supported by TomoPy.".format(algorithm))
 
     def find_center(self, **kwargs):
         # just forward to tomopy
         return self._tomopy.find_center(**kwargs)
+
+    def circ_mask(self, **kwargs):
+        # just forward to tomopy
+        return self._tomopy.circ_mask(**kwargs)
 
     def import_self(self):
         try:
@@ -56,15 +60,13 @@ class TomoPyTool(AbstractTool):
         cor = config.func.cor
         num_iter = config.func.num_iter
 
-        h.tomo_print("Using center of rotation: {0}".format(cor))
-
         iterative_algorithm = False if alg in ['gridrec', 'fbp'] else True
 
         # run the iterative algorithms
         if iterative_algorithm:
             h.pstart(
-                "Starting iterative method with TomoPy. Algorithm: {0}, "
-                "number of iterations: {1}...".format(alg, num_iter))
+                "Starting iterative method with TomoPy. Center of Rotation: {0}, Algorithm: {1}, "
+                "number of iterations: {2}...".format(cor, alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles, center=cor,
                                        algorithm=alg, num_iter=num_iter)  # , filter_name='parzen')
@@ -72,7 +74,7 @@ class TomoPyTool(AbstractTool):
         else:  # run the non-iterative algorithms
             h.pstart(
                 "Starting non-iterative reconstruction algorithm with TomoPy. "
-                "Algorithm: {0}...".format(alg))
+                "Center of Rotation: {0}, Algorithm: {1}...".format(cor, alg))
             recon = self._tomopy.recon(
                 tomo=data, theta=proj_angles, center=cor, algorithm=alg)
 

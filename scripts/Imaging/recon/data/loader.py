@@ -22,10 +22,6 @@ def read_in_stack(config):
 
     supported_exts = ['tiff', 'tif', 'fits', 'fit', 'png']
 
-    if in_img_format not in supported_exts:
-        raise ValueError("File extension not supported: {0}. Supported extensions: {1}".
-                         format(in_img_format, supported_exts))
-
     sample, flat, dark = read_stack_of_images(
         sample_path, flat_field_path, dark_field_path, in_img_format, argument_data_dtype=config.func.data_dtype)
 
@@ -82,9 +78,12 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     data_dtype = argument_data_dtype
     img_shape = first_sample_img.shape
 
-    sample_data = _load_sample_data(first_sample_img, sample_file_names, img_shape, file_extension, data_dtype)
-    flat_avg = _load_flat_data(flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype)
-    dark_avg = _load_dark_data(dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype)
+    sample_data = _load_sample_data(
+        first_sample_img, sample_file_names, img_shape, file_extension, data_dtype)
+    flat_avg = _load_flat_data(
+        flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype)
+    dark_avg = _load_dark_data(
+        dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype)
 
     return sample_data, flat_avg, dark_avg
 
@@ -131,8 +130,6 @@ def _load_sample_data(first_sample_img, sample_file_names, img_shape, file_exten
 def _get_stack_file_names(path, file_prefix, file_extension):
     import os
     import glob
-    from recon.helper import Helper
-    h = Helper()
 
     path = os.path.expanduser(path)
 
@@ -146,9 +143,6 @@ def _get_stack_file_names(path, file_prefix, file_extension):
     # this is a necessary step, otherwise the file order is not guaranteed to be sequential and we could get randomly
     # ordered stack of images which would produce nonsense
     files_match.sort(key=_alphanum_key_split)
-
-    h.tomo_print(" > Found {0} image files in {1}".format(
-        len(files_match), path), verbosity=3)
 
     return files_match
 
