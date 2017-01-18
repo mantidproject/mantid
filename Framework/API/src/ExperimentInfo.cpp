@@ -445,10 +445,19 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
   cacheDefaultDetectorGrouping();
 }
 
+/** Sets the number of detector groups.
+ *
+ * This method should not need to be called explicitly. The number of detector
+ * groups will be set either when initializing a MatrixWorkspace, or by calling
+ * `cacheDetectorGroupings` for an ExperimentInfo stored in an MDWorkspace. */
 void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) {
   m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
 }
 
+/** Updates the detector grouping for the spectrum with the given `index`.
+ *
+ * This method should not need to be called explicitly. Groupings are updated
+ * automatically when modifying detector IDs in a workspace (via ISpectrum). */
 void ExperimentInfo::updateCachedDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) {
   Beamline::SpectrumDefinition specDef;
@@ -463,17 +472,10 @@ void ExperimentInfo::updateCachedDetectorGrouping(
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
 }
 
-void ExperimentInfo::updateCachedDetectorGroupings() {
-  // This should happen only for MatrixWorkspace and subclasses, the
-  // implementation of ExperimentInfo::updateCachedDetectorGroupings throws --
-  // when grouping is cached for an MDWorkspace there is no way of updating the
-  // grouping. Furthermore, this should never be called from the constructor,
-  // since this is a virtual function call (m_spectrumInfo should always be
-  // nullptr in that case).
-  throw std::runtime_error(
-      "ExperimentInfo::updateCachedDetectorGroupings should never be called.");
-}
-
+/** Adds a detector to the spectrum with the given `index`.
+ *
+ * This method should not need to be called explicitly. Groupings are updated
+ * automatically when modifying detector IDs in a workspace (via ISpectrum). */
 void ExperimentInfo::addDetectorToGroup(const size_t index,
                                         const detid_t detID) {
   auto specDef = m_spectrumInfo->spectrumDefinition(index);
@@ -486,6 +488,10 @@ void ExperimentInfo::addDetectorToGroup(const size_t index,
   }
 }
 
+/** Adds several detectors to the spectrum with the given `index`.
+ *
+ * This method should not need to be called explicitly. Groupings are updated
+ * automatically when modifying detector IDs in a workspace (via ISpectrum). */
 void ExperimentInfo::addDetectorsToGroup(const size_t index,
                                          const std::set<detid_t> &detIDs) {
   auto specDef = m_spectrumInfo->spectrumDefinition(index);
@@ -498,6 +504,24 @@ void ExperimentInfo::addDetectorsToGroup(const size_t index,
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
+}
+
+/** Updates detector groupings for all spectra.
+ *
+ * This method should not need to be called explicitly. It is a helper for
+ * `setInstrument` to workaround the problem that MatrixWorkspace allows setting
+ * detector IDs that do not exist in the instrument, but later become valid when
+ * setting a corresponding instrument. The base class implementation should
+ * never get called. This method is overridden in MatrixWorkspace. */
+void ExperimentInfo::updateCachedDetectorGroupings() {
+  // This should happen only for MatrixWorkspace and subclasses, the
+  // implementation of ExperimentInfo::updateCachedDetectorGroupings throws --
+  // when grouping is cached for an MDWorkspace there is no way of updating the
+  // grouping. Furthermore, this should never be called from the constructor,
+  // since this is a virtual function call (m_spectrumInfo should always be
+  // nullptr in that case).
+  throw std::runtime_error(
+      "ExperimentInfo::updateCachedDetectorGroupings should never be called.");
 }
 
 /**

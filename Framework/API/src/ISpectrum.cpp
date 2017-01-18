@@ -133,18 +133,21 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
  */
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
 
+/// Copy constructor.
 ISpectrum::ISpectrum(const ISpectrum &other)
     : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs) {
   // m_experimentInfo and m_index are not copied: A copy should not refer to the
   // parent of the source. m_experimentInfo will be nullptr.
 }
 
+/// Move constructor.
 ISpectrum::ISpectrum(ISpectrum &&other)
     : m_specNo(other.m_specNo), detectorIDs(std::move(other.detectorIDs)) {
   // m_experimentInfo and m_index are not copied: A copy should not refer to the
   // parent of the source. m_experimentInfo will be nullptr.
 }
 
+/// Copy assignment.
 ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
   m_specNo = other.m_specNo;
   detectorIDs = other.detectorIDs;
@@ -154,6 +157,7 @@ ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
   return *this;
 }
 
+/// Move assignment.
 ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
   m_specNo = other.m_specNo;
   detectorIDs = std::move(other.detectorIDs);
@@ -163,12 +167,19 @@ ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
   return *this;
 }
 
+/** Sets the ExperimentInfo pointer (pointer to the owning workspace).
+ *
+ * This method should not need to be called explicitly, it is called when
+ * getting a mutable reference to an ISpectrum stored in a MatrixWorkspace. The
+ * pointer set by this method is used to push updates of the detector IDs into
+ * the Beamline::SpectrumInfo that is stored in the ExperimentInfo. */
 void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo,
                                   const size_t index) {
   m_experimentInfo = experimentInfo;
   m_index = index;
 }
 
+/// Updates detector IDs in the owning ExperimentInfo.
 void ISpectrum::updateExperimentInfo() const {
   if (m_experimentInfo)
     m_experimentInfo->updateCachedDetectorGrouping(m_index, detectorIDs);

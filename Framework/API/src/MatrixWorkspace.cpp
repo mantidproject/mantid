@@ -1966,6 +1966,13 @@ size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
                            "for MatrixWorkspace, only for MDWorkspaces");
 }
 
+/** Updates detector groupings for all spectra.
+ *
+ * This is used by ExperimentInfo::setInstrument. Detector IDs are currently
+ * stored in ISpectrum, but grouping information needs to be available and
+ * updated in Beamline::SpectrumInfo. This methods deals reinitializes these
+ * indices after an instrument change (since changing the instrument will change
+ * the indices). */
 void MatrixWorkspace::updateCachedDetectorGroupings() {
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     updateCachedDetectorGrouping(i, getSpectrum(i).getDetectorIDs());
