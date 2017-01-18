@@ -5,7 +5,7 @@ from mantid import config
 import os
 
 
-class IndirectQuickReduction(DataProcessorAlgorithm):
+class IndirectQuickDiffraction(DataProcessorAlgorithm):
     _data_files = None
     _load_logs = None
     _calibration_ws = None
@@ -76,13 +76,11 @@ class IndirectQuickReduction(DataProcessorAlgorithm):
 
         # Diffraction Options
         self.declareProperty(IntArrayProperty(name='DiffractionSpectra'),
-                             doc = 'Spectra to use for Diffraction Reduction')
+                             doc='Spectra to use for Diffraction Reduction')
 
         self.declareProperty(FileProperty('DiffractionCalibrationFile', '', action=FileAction.OptionalLoad),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+
-                             '[[DiffractionFocussing]] child algorithms.')
-
-        self.declareProperty(name='DiffractionRebin', defaultValue='', doc ='Rebin parameters for Diffraction Reduction')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
+                                 '[[DiffractionFocussing]] child algorithms.')
 
         # General options
         self.declareProperty(name='MSDFit', defaultValue=False,
@@ -134,7 +132,7 @@ class IndirectQuickReduction(DataProcessorAlgorithm):
         scan_alg.setProperty('Instrument', self._instrument_name)
         scan_alg.setProperty('Mode', self._diff_mode)
         scan_alg.setProperty('SpectraRange', self._diff_spectra)
-        scan_alg.setProperty('RebinParam', self._diff_analyser)
+        scan_alg.setProperty('RebinParam', self._diff_rebin)
         scan_alg.setProperty('GroupingPolicy', self._grouping_method)
         scan_alg.setProperty('OutputWorkspace', self._diff_ws_out)
         scan_alg.execute()
@@ -178,6 +176,12 @@ class IndirectQuickReduction(DataProcessorAlgorithm):
         elif spectra_range[0] > spectra_range[1]:
             issues['SpectraRange'] = 'Range must be in format: lower,upper'
 
+        spectra_range = self.getProperty('DiffractionSpectra').value
+        if len(spectra_range) != 2:
+            issues['DiffractionSpectra'] = 'Range must contain exactly two items'
+        elif spectra_range[0] > spectra_range[1]:
+            issues['DiffractionSpectra'] = 'Range must be in format: lower,upper'
+
         # Validate ranges
         elastic_range = self.getProperty('ElasticRange').value
         if elastic_range is not None:
@@ -219,8 +223,7 @@ class IndirectQuickReduction(DataProcessorAlgorithm):
         self._detailed_balance = self.getProperty('DetailedBalance').value
 
         self._diff_spectra = self.getProperty('DiffractionSpectra').value
-        self._diff_rebin =self.getProperty('DiffractionRebin').value
-        self._diff_analyser = 'diffraction'
+        self._diff_rebin = ''
         self._diff_mode = 'diffspec'
         self._diff_cal = self.getProperty('DiffractionCalibrationFile').value
 
@@ -306,7 +309,7 @@ class IndirectQuickReduction(DataProcessorAlgorithm):
         for run in runs:
             if '-' in run:
                 a, b = run.split('-')
-                run_list.extend(range(int(a), int(b)+1))
+                run_list.extend(range(int(a), int(b) + 1))
             else:
                 run_list.append(int(run))
         for idx in run_list:
@@ -314,4 +317,4 @@ class IndirectQuickReduction(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(IndirectQuickRun)
+AlgorithmFactory.subscribe(IndirectQuickDiffraction)
