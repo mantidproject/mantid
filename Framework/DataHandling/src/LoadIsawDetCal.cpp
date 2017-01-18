@@ -4,15 +4,15 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
@@ -54,7 +54,7 @@ void LoadIsawDetCal::init() {
 namespace {
 const constexpr double DegreesPerRadian = 180.0 / M_PI;
 
-std::string getBankName(const std::string &bankPart, int idnum) {
+std::string getBankName(const std::string &bankPart, const int idnum) {
   if (bankPart == "WISHpanel" && idnum < 10) {
     return bankPart + "0" + std::to_string(idnum);
   } else {
@@ -271,21 +271,20 @@ void LoadIsawDetCal::exec() {
       center(x, y, z, detname, ws);
 
       // These are the ISAW axes
-      V3D rX = V3D(base_x, base_y, base_z);
+      V3D rX(base_x, base_y, base_z);
       rX.normalize();
-      V3D rY = V3D(up_x, up_y, up_z);
+      V3D rY(up_x, up_y, up_z);
       rY.normalize();
       // V3D rZ=rX.cross_prod(rY);
 
       // These are the original axes
-      V3D oX = V3D(1., 0., 0.);
-      V3D oY = V3D(0., 1., 0.);
+      const V3D oX(1., 0., 0.);
+      const V3D oY(0., 1., 0.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
-      double angle1 = oX.angle(rX);
-      angle1 *= DegreesPerRadian;
+      const double angle1 = oX.angle(rX) * DegreesPerRadian;
       // Create the first quaternion
       Quat Q1(angle1, ax1);
 
@@ -294,23 +293,21 @@ void LoadIsawDetCal::exec() {
       Q1.rotate(roY);
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
-      double angle2 = roY.angle(rY);
-      angle2 *= DegreesPerRadian;
+      const double angle2 = roY.angle(rY) * DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
       Quat Rot = Q2 * Q1;
 
       // Then find the corresponding relative position
-      boost::shared_ptr<const IComponent> comp =
-          inst->getComponentByName(detname);
-      boost::shared_ptr<const IComponent> parent = comp->getParent();
+      const auto comp = inst->getComponentByName(detname);
+      const auto parent = comp->getParent();
       if (parent) {
         Quat rot0 = parent->getRelativeRot();
         rot0.inverse();
         Rot *= rot0;
       }
-      boost::shared_ptr<const IComponent> grandparent = parent->getParent();
+      const auto grandparent = parent->getParent();
       if (grandparent) {
         Quat rot0 = grandparent->getRelativeRot();
         rot0.inverse();
@@ -334,8 +331,7 @@ void LoadIsawDetCal::exec() {
 
     bankName = getBankName(bankPart, idnum);
     // Retrieve it
-    boost::shared_ptr<const IComponent> comp =
-        inst->getComponentByName(bankName);
+    auto comp = inst->getComponentByName(bankName);
     // for Corelli with sixteenpack under bank
     if (instname.compare("CORELLI") == 0) {
       std::vector<Geometry::IComponent_const_sptr> children;
@@ -356,21 +352,20 @@ void LoadIsawDetCal::exec() {
       center(x, y, z, detname, ws);
 
       // These are the ISAW axes
-      V3D rX = V3D(base_x, base_y, base_z);
+      V3D rX(base_x, base_y, base_z);
       rX.normalize();
-      V3D rY = V3D(up_x, up_y, up_z);
+      V3D rY(up_x, up_y, up_z);
       rY.normalize();
       // V3D rZ=rX.cross_prod(rY);
 
       // These are the original axes
-      V3D oX = V3D(1., 0., 0.);
-      V3D oY = V3D(0., 1., 0.);
+      const V3D oX(1., 0., 0.);
+      const V3D oY(0., 1., 0.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
-      double angle1 = oX.angle(rX);
-      angle1 *= DegreesPerRadian;
+      double angle1 = oX.angle(rX) * DegreesPerRadian;
       // TODO: find out why this is needed for WISH
       if (instname == "WISH")
         angle1 += 180.0;
@@ -382,20 +377,19 @@ void LoadIsawDetCal::exec() {
       Q1.rotate(roY);
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
-      double angle2 = roY.angle(rY);
-      angle2 *= DegreesPerRadian;
+      const double angle2 = roY.angle(rY) * DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
       Quat Rot = Q2 * Q1;
 
-      boost::shared_ptr<const IComponent> parent = comp->getParent();
+      const auto parent = comp->getParent();
       if (parent) {
         Quat rot0 = parent->getRelativeRot();
         rot0.inverse();
         Rot = Rot * rot0;
       }
-      boost::shared_ptr<const IComponent> grandparent = parent->getParent();
+      const auto grandparent = parent->getParent();
       if (grandparent) {
         Quat rot0 = grandparent->getRelativeRot();
         rot0.inverse();
@@ -427,7 +421,7 @@ void LoadIsawDetCal::exec() {
  * @param ws :: The workspace
  */
 
-void LoadIsawDetCal::center(double x, double y, double z,
+void LoadIsawDetCal::center(const double x, const double y, const double z,
                             const std::string &detname,
                             API::Workspace_sptr ws) {
 
@@ -441,19 +435,21 @@ void LoadIsawDetCal::center(double x, double y, double z,
     throw std::runtime_error(mess.str());
   }
 
-  // Do the move
   using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
+  const TransformType positionType = Absolute;
+  const V3D position(x, y, z);
+
+  // Do the move
   MatrixWorkspace_sptr inputW =
       boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
   if (inputW) {
     Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
                                              positionType);
   } else if (inputP) {
     Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
                                              positionType);
   }
 }
@@ -485,11 +481,10 @@ Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
   } else {
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "workspace which does not seem to be valid as "
-                               "input (must be either MatrixWorkspace or "
-                               "PeaksWorkspace");
+    throw std::runtime_error("Could not get a valid instrument from the "
+                             "workspace which does not seem to be valid as "
+                             "input (must be either MatrixWorkspace or "
+                             "PeaksWorkspace");
   }
 
   return inst;

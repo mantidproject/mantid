@@ -59,14 +59,14 @@ public:
   /// @copydoc Algorithm::validateInputs()
   std::map<std::string, std::string> validateInputs() override;
 
-  /// Function to optimize
-  void center(double x, double y, double z, const std::string &detname,
-              API::Workspace_sptr ws);
-
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+
+  /// Set the center of the supplied detector name
+  void center(const double x, const double y, const double z,
+              const std::string &detname, API::Workspace_sptr ws);
 
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
   std::vector<std::string> getFilenames();
