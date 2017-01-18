@@ -179,7 +179,8 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     }
     // Per spectrum values
     const auto &detPos = spectrumInfo.position(i);
-    const double lambdaFixed = toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
+    const double lambdaFixed =
+        toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
     auto &outY = outputWS->mutableY(i);
