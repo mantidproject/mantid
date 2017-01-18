@@ -80,6 +80,7 @@ CurveFitting
 ------------
 
 - Systemtest, FittingBenchmarks, added for testing fit minimizer benchmarking scripts generating the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This Systemtest also demo how these tables can be created as a standard Mantid script.
+- Recommendations for which fitting to use added to :ref:`FittingMinimzers page <FittingMinimizers>`.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates initial values of a fiting function in given intervals.
 - Fit Function :ref:`FunctionQDepends <func-FunctionQDepends>` as the base class for QENS models depending on Q.
