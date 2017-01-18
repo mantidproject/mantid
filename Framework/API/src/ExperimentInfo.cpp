@@ -1088,6 +1088,8 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   return *m_detectorInfoWrapper;
 }
 
+/// Return a reference to the Beamline::SpectrumInfo object. Helper for
+/// API::SpectrumInfo, do not use this.
 const Beamline::SpectrumInfo &ExperimentInfo::internalSpectrumInfo() const {
   if (!m_spectrumInfo) {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};

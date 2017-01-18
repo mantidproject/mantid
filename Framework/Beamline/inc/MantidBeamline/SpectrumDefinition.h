@@ -8,7 +8,16 @@
 namespace Mantid {
 namespace Beamline {
 
-/** SpectrumDefinition : TODO: DESCRIPTION
+/** SpectrumDefinition is a class that provides a definition of what a spectrum
+  comprises, i.e., indices of all detectors that contribute to the data stored
+  in the spectrum. Indices have two components: The detector index, which refers
+  to a specific detector in the beamline, and a time index, which refers to a
+  specific time period in the position table of moving detectors. The latter
+  index is always zero, except for beamlines with scanning detectors.
+
+
+  @author Simon Heybrock
+  @date 2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -41,9 +50,13 @@ private:
   std::vector<std::pair<size_t, size_t>> m_data;
 
 public:
+  /// Returns an iterator to the first element of the vector of index pairs.
   auto begin() const -> decltype(m_data.begin()) { return m_data.begin(); }
+  /// Returns an iterator to the last element of the vector of index pairs.
   auto end() const -> decltype(m_data.end()) { return m_data.end(); }
+  /// Returns an iterator to the first element of the vector of index pairs.
   auto cbegin() const -> decltype(m_data.cbegin()) { return m_data.cbegin(); }
+  /// Returns an iterator to the last element of the vector of index pairs.
   auto cend() const -> decltype(m_data.cend()) { return m_data.cend(); }
 };
 
