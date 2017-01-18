@@ -31,6 +31,7 @@ Improved
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
 - :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 - :ref:`MaskDetectors <algm-MaskDetectors>` has now a new option to mask detectors by instrument component name.
+- :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>` now accepts multiple files in a single ``Filename`` property.
 
 Renamed
 #######
