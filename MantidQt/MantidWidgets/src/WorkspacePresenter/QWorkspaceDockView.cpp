@@ -1521,13 +1521,14 @@ void QWorkspaceDockView::onClickPlotSpectraAdv() {
 * @param showErrors If true, show error bars. Otherwise no error bars are
 * displayed.
 */
-void QWorkspaceDockView::plotSpectrum(bool showErrors) {
+void QWorkspaceDockView::plotSpectrum(std::string type) {
   const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
   if (userInput.plots.empty()) {
     return;
   }
+  bool showErrors = (type == "Errors");
 
   if (userInput.tiled) {
     m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,

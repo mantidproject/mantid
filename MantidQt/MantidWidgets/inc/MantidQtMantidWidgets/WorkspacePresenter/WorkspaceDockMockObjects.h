@@ -66,7 +66,7 @@ public:
   MOCK_METHOD0(showWorkspaceData, void());
   MOCK_METHOD0(showInstrumentView, void());
   MOCK_METHOD0(saveToProgram, void());
-  MOCK_METHOD1(plotSpectrum, void(bool showErrors));
+  MOCK_METHOD1(plotSpectrum, void(const std::string type));
   MOCK_METHOD0(showColourFillPlot, void());
   MOCK_METHOD0(showDetectorsTable, void());
   MOCK_METHOD0(showBoxDataTable, void());

@@ -312,17 +312,17 @@ void WorkspacePresenter::saveToProgram() {
 
 void WorkspacePresenter::plotSpectrum() {
   auto view = lockView();
-  view->plotSpectrum(false);
+  view->plotSpectrum("Simple");
 }
 
 void WorkspacePresenter::plotSpectrumWithErrors() {
   auto view = lockView();
-  view->plotSpectrum(true);
+  view->plotSpectrum("Errors");
 }
 
 void WorkspacePresenter::plotSpectrumAdvanced() {
   auto view = lockView();
-  view->plotSpectrum(false);
+  view->plotSpectrum("Advanced");
 }
 
 void WorkspacePresenter::showColourFillPlot() {
