@@ -139,6 +139,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 * included based on the
 *  the calculation: W = Wcut (Rcut-R)/Rcut
 *  @param dataWS data workspace
+ * @param spectrumInfo the spectrumInfo associated with the data workspace
 *  @param RCut the radius cut off, should be value of the property RadiusCut
 * (unit is mm)
 *  @param WCut this wavelength cut off, should be equal to the value WaveCut
