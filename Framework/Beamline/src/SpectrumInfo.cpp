@@ -16,11 +16,13 @@ size_t SpectrumInfo::size() const {
   return m_spectrumDefinition->size();
 }
 
+/// Returns a const reference to the SpectrumDefinition of the spectrum.
 const SpectrumDefinition &
 SpectrumInfo::spectrumDefinition(const size_t index) const {
   return (*m_spectrumDefinition)[index];
 }
 
+/// Sets the SpectrumDefinition of the spectrum.
 void SpectrumInfo::setSpectrumDefinition(const size_t index,
                                          SpectrumDefinition def) {
   m_spectrumDefinition.access()[index] = std::move(def);
