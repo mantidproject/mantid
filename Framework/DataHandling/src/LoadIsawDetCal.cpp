@@ -38,15 +38,16 @@ using namespace DataObjects;
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   const auto exts = std::vector<std::string>({".DetCal"});
-  declareProperty(make_unique<API::MultipleFileProperty>("Filename", exts),
-                  "The input filename of the ISAW DetCal file (Two files "
-                  "allowed for SNAP) ");
+  declareProperty(
+      Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
+      "The input filename of the ISAW DetCal file (Two files "
+      "allowed for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
