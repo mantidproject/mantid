@@ -185,7 +185,7 @@ void ReflMainWindowPresenter::checkSettingsPtrValid(
 * @param pointer :: The pointer
 */
 void ReflMainWindowPresenter::checkEventPtrValid(
-    IReflEventTabPresenter *pointer) const {
+  IReflEventTabPresenter *pointer) const {
   if (pointer == nullptr)
     throw std::invalid_argument("Could not read event handling");
 }

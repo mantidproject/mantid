@@ -163,8 +163,8 @@ public:
 
 class MockEventPresenter : public IReflEventPresenter {
 public:
-  MOCK_CONST_METHOD0(getTimeSlicingOptions, std::string());
-  ~MockEventPresenter() override{};
+	MOCK_CONST_METHOD0(getTimeSlicingOptions, std::string());
+	~MockEventPresenter() override {};
 };
 
 class MockEventTabPresenter : public IReflEventTabPresenter {

@@ -228,9 +228,7 @@ void GenericDataProcessorPresenter::process() {
       progressReporter.report();
     }
 
-	const auto items = m_manager->selectedData(false);
-
-	// Post-process (if needed)
+    // Post-process (if needed)
     if (item.second.size() > 1) {
       try {
         postProcessGroup(item.second);
