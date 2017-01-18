@@ -63,13 +63,13 @@ private:
                                             const std::string &prefix,
                                             double startTime, double stopTime);
   // Loads a group of runs
-  bool loadGroup(const GroupData& group);
+  bool loadGroup(const GroupData &group);
   // Process a group of runs which are event workspaces
   bool processGroupAsEventWS(int groupID, const GroupData &group,
                              const std::vector<double> &startTimes,
                              const std::vector<double> &stopTimes);
   // Process a group of runs which are not event workspaces
-  bool processGroupAsNonEventWS(int groupID, const GroupData& group);
+  bool processGroupAsNonEventWS(int groupID, const GroupData &group);
   // Parse time slicing from string
   void parseTimeSlicing(const std::string &timeSlicing,
                         std::vector<double> &startTimes,
