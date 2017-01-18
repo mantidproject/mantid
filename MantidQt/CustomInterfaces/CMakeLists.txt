@@ -556,7 +556,6 @@ set ( TEST_FILES
 	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
 	MuonAnalysisResultTableCreatorTest.h
-	ReflDataProcessorPresenterTest.h
 	ReflEventPresenterTest.h
 	ReflEventTabPresenterTest.h
 	ReflLegacyTransferStrategyTest.h
