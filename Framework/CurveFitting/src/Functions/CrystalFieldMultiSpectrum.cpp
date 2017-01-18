@@ -57,8 +57,10 @@ public:
     m_PPLambdaIdxSelf.resize(nSpec, -1);
     for (size_t i = 0; i < nSpec; ++i) {
       auto si = std::to_string(i);
-      declareParameter("IntensityScaling" + si, 1.0,
-                       "Intensity scaling factor for spectrum " + si);
+      try { // If parameter has already been declared, don't declare it.
+        declareParameter("IntensityScaling" + si, 1.0,
+                         "Intensity scaling factor for spectrum " + si);
+      } catch (std::invalid_argument &) { }
       m_IntensityScalingIdx.push_back(parameterIndex("IntensityScaling" + si));
     }
   }
@@ -69,8 +71,10 @@ public:
       m_PPLambdaIdxChild.resize(iSpec + 1, -1);
     }
     auto si = std::to_string(iSpec);
-    declareParameter("Lambda" + si, 0.0,
-                     "Effective exchange coupling of dataset " + si);
+    try { // If parameter has already been declared, don't declare it.
+      declareParameter("Lambda" + si, 0.0,
+                       "Effective exchange coupling of dataset " + si);
+    } catch (std::invalid_argument &) { }
     m_PPLambdaIdxSelf[iSpec] = parameterIndex("Lambda" + si);
   }
 };
