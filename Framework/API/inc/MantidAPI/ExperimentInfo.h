@@ -80,7 +80,7 @@ public:
 
   void setNumberOfDetectorGroups(const size_t count);
   void updateCachedDetectorGrouping(const size_t index,
-                                     const std::set<detid_t> &detIDs);
+                                    const std::set<detid_t> &detIDs);
   void addDetectorToGroup(const size_t index, const detid_t detID);
   void addDetectorsToGroup(const size_t index, const std::set<detid_t> &detIDs);
 
@@ -222,7 +222,6 @@ private:
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
-
 };
 
 /// Shared pointer to ExperimentInfo

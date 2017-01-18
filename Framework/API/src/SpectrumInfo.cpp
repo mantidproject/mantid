@@ -216,7 +216,7 @@ std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
   const auto &specDef =
       m_experimentInfo.internalSpectrumInfo().spectrumDefinition(index);
   std::vector<size_t> detIndices;
-  for(const auto &index : specDef)
+  for (const auto &index : specDef)
     detIndices.push_back(index.first);
   if (detIndices.empty())
     throw Kernel::Exception::NotFoundError(
