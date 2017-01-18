@@ -7,11 +7,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
 
-#include <gsl/gsl_statistics.h>
-#include <gsl/gsl_multifit_nlin.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_blas.h>
-
 namespace Mantid {
 namespace DataHandling {
 /**
@@ -60,6 +55,10 @@ public:
   const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Isaw";
   }
+
+  /// @copydoc Algorithm::validateInputs()
+  std::map<std::string, std::string> validateInputs() override;
+
   /// Function to optimize
   void center(double x, double y, double z, const std::string &detname,
               API::Workspace_sptr ws);
@@ -70,6 +69,7 @@ private:
   void exec() override;
 
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
+  std::vector<std::string> getFilenames();
 };
 
 } // namespace DataHandling

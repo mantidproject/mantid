@@ -2,6 +2,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -17,12 +18,13 @@
 #include "MantidKernel/V3D.h"
 
 #include <Poco/File.h>
+#include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <numeric>
 #include <cmath>
+#include <fstream>
+#include <iostream>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -43,16 +45,10 @@ void LoadIsawDetCal::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
-  declareProperty(
-      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
-                                     ".DetCal"),
-      "The input filename of the ISAW DetCal file (East banks for SNAP) ");
-
-  declareProperty(
-      make_unique<API::FileProperty>(
-          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
-      "The input filename of the second ISAW DetCal file (West "
-      "banks for SNAP) ");
+  const auto exts = std::vector<std::string>({".DetCal"});
+  declareProperty(make_unique<API::MultipleFileProperty>("Filename", exts),
+                  "The input filename of the ISAW DetCal file (Two files "
+                  "allowed for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
@@ -67,6 +63,43 @@ std::string getBankName(const std::string &bankPart, int idnum) {
     return bankPart + std::to_string(idnum);
   }
 }
+
+std::string getInstName(API::Workspace_const_sptr wksp) {
+  MatrixWorkspace_const_sptr matrixWksp =
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
+  if (matrixWksp) {
+    return matrixWksp->getInstrument()->getName();
+  }
+
+  PeaksWorkspace_const_sptr peaksWksp =
+      boost::dynamic_pointer_cast<const PeaksWorkspace>(wksp);
+  if (peaksWksp) {
+    return peaksWksp->getInstrument()->getName();
+  }
+
+  throw std::runtime_error("Failed to determine instrument name");
+}
+}
+
+std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // two detcal files is only valid for snap
+  std::vector<std::string> filenames = getFilenames();
+  if (filenames.size() == 0) {
+    result["Filename"] = "Must supply .detcal file";
+  } else if (filenames.size() == 2) {
+    Workspace_const_sptr wksp = getProperty("InputWorkspace");
+    const auto instname = getInstName(wksp);
+
+    if (instname.compare("SNAP") != 0) {
+      result["Filename"] = "Two files is only valid for SNAP";
+    }
+  } else if (filenames.size() > 2) {
+    result["Filename"] = "Must supply .detcal file";
+  }
+
+  return result;
 }
 
 /** Executes the algorithm
@@ -84,16 +117,13 @@ void LoadIsawDetCal::exec() {
 
   std::string instname = inst->getName();
 
-  // set-up minimizer
-
-  std::string filename = getProperty("Filename");
-  std::string filename2 = getProperty("Filename2");
+  const auto filenames = getFilenames();
 
   // Output summary to log file
   int count, id, nrows, ncols;
   double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x,
       up_y, up_z;
-  std::ifstream input(filename.c_str(), std::ios_base::in);
+  std::ifstream input(filenames[0].c_str(), std::ios_base::in);
   std::string line;
   std::string detname;
   // Build a list of Rectangular Detectors
@@ -202,9 +232,9 @@ void LoadIsawDetCal::exec() {
     std::stringstream(line) >> count >> id >> nrows >> ncols >> width >>
         height >> depth >> detd >> x >> y >> z >> base_x >> base_y >> base_z >>
         up_x >> up_y >> up_z;
-    if (id == 10 && instname == "SNAP" && filename2 != "") {
+    if (id == 10 && filenames.size() == 2 && instname.compare("SNAP") == 0) {
       input.close();
-      input.open(filename2.c_str());
+      input.open(filenames[1].c_str());
       while (std::getline(input, line)) {
         if (line[0] != '5')
           continue;
@@ -308,9 +338,8 @@ void LoadIsawDetCal::exec() {
     // Retrieve it
     boost::shared_ptr<const IComponent> comp =
         inst->getComponentByName(bankName);
-    if (instname.compare("CORELLI") ==
-        0) // for Corelli with sixteenpack under bank
-    {
+    // for Corelli with sixteenpack under bank
+    if (instname.compare("CORELLI") == 0) {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
           boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
@@ -466,6 +495,17 @@ Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
   }
 
   return inst;
+}
+
+std::vector<std::string> LoadIsawDetCal::getFilenames() {
+  std::vector<std::string> filenamesFromPropertyUnraveld;
+  std::vector<std::vector<std::string>> filenamesFromProperty =
+      this->getProperty("Filename");
+  for (auto outer : filenamesFromProperty) {
+    std::copy(outer.begin(), outer.end(),
+              std::back_inserter(filenamesFromPropertyUnraveld));
+  }
+  return filenamesFromPropertyUnraveld;
 }
 
 } // namespace Algorithm
