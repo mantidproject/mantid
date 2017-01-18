@@ -51,7 +51,7 @@ public:
   averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<DateAndTime> timesAsVector() const = 0;
-  /// Returns the calculated time weighted average value 
+  /// Returns the calculated time weighted average value
   virtual double timeAverageValue() const = 0;
   /// Returns the real size of the time series property map:
   virtual int realSize() const = 0;
