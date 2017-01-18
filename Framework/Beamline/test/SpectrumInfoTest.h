@@ -51,7 +51,8 @@ public:
     SpectrumInfo info(10000);
     int64_t size = static_cast<int64_t>(info.size());
     auto copy(info); // Make a copy to exercise the COW mechanism.
-    _Pragma("omp parallel for") for (int64_t i = 0; i < size; ++i) {
+#pragma omp parallel for
+    for (int64_t i = 0; i < size; ++i) {
       SpectrumDefinition def;
       def.add(i);
       info.setSpectrumDefinition(i, def);
