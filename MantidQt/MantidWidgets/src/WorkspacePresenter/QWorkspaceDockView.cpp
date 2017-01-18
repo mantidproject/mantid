@@ -1518,8 +1518,7 @@ void QWorkspaceDockView::onClickPlotSpectraAdv() {
 
 
 /** Plots one or more spectra from each selected workspace
-* @param showErrors If true, show error bars. Otherwise no error bars are
-* displayed.
+* @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting. 
 */
 void QWorkspaceDockView::plotSpectrum(std::string type) {
   const auto userInput = m_tree->chooseSpectrumFromSelected();
