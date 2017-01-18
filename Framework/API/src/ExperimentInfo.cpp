@@ -478,11 +478,9 @@ void ExperimentInfo::updateCachedDetectorGrouping(
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
 void ExperimentInfo::addDetectorToGroup(const size_t index,
                                         const detid_t detID) {
-  auto specDef = m_spectrumInfo->spectrumDefinition(index);
   try {
     const size_t detIndex = detectorInfo().indexOf(detID);
-    specDef.add(detIndex);
-    m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
+    m_spectrumInfo->mutableSpectrumDefinition(index).add(detIndex);
   } catch (std::out_of_range &) {
     // Silently strip bad detector IDs
   }
@@ -494,16 +492,14 @@ void ExperimentInfo::addDetectorToGroup(const size_t index,
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
 void ExperimentInfo::addDetectorsToGroup(const size_t index,
                                          const std::set<detid_t> &detIDs) {
-  auto specDef = m_spectrumInfo->spectrumDefinition(index);
   for (const auto detID : detIDs) {
     try {
       const size_t detIndex = detectorInfo().indexOf(detID);
-      specDef.add(detIndex);
+      m_spectrumInfo->mutableSpectrumDefinition(index).add(detIndex);
     } catch (std::out_of_range &) {
       // Silently strip bad detector IDs
     }
   }
-  m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
 }
 
 /** Updates detector groupings for all spectra.

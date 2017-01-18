@@ -64,6 +64,7 @@ public:
   size_t size() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
+  SpectrumDefinition &mutableSpectrumDefinition(const size_t index);
   void setSpectrumDefinition(const size_t index, SpectrumDefinition def);
 
 private:
