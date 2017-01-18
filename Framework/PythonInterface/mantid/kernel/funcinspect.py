@@ -100,13 +100,18 @@ def decompile(code_object):
         variables = code_object.co_cellvars + code_object.co_freevars
         n = len(code)
         i = 0
+        e = 0
         while i < n:
             i_offset = i
             i_opcode = ord(code[i])
             i = i + 1
             if i_opcode >= opcode.HAVE_ARGUMENT:
-                i_argument = ord(code[i]) + (ord(code[i+1]) << (4*2))
+                i_argument = ord(code[i]) + (ord(code[i+1]) << (4*2)) + e
                 i = i + 2
+                if i_opcode == opcode.EXTENDED_ARG:
+                    e = i_argument << 16
+                else:
+                    e = 0
                 if i_opcode in opcode.hasconst:
                     i_arg_value = repr(code_object.co_consts[i_argument])
                 elif i_opcode in opcode.hasname:
