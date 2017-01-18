@@ -31,7 +31,6 @@
   - [--reuse-preproc](#--reuse-preproc)
   - [--find-cor](#--find-cor)
   - [--crop-before-normalise](#--crop-before-normalise)
-  - [no --crop-before-normalise](#no---crop-before-normalise)
 
 <!-- /TOC -->
  
@@ -470,8 +469,16 @@ python -c "from recon.helper import Helper; g=[]; h=Helper(); h=Helper(g)"
 # Tomo Test runs with as most args as possible
 
 ## --only-preproc
+
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc
+
 ## --reuse-preproc
+
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc --reuse-preproc
+
 ## --find-cor
+
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc -f 
+
 ## --crop-before-normalise
-## no --crop-before-normalise
-TODO: add all the args below (from paper)
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --crop-before-normalise 

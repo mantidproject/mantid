@@ -94,7 +94,7 @@ class PreProcConfig(object):
                  "the algorithms will work on smaller data.")
 
         grp_pre.add_argument(
-            "--median-size",
+            "--pre-median-size",
             type=int,
             required=False,
             default=self.median_size,
@@ -103,7 +103,7 @@ class PreProcConfig(object):
 
         median_modes = ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
         grp_pre.add_argument(
-            "--median-mode",
+            "--pre-median-mode",
             type=str,
             required=False,
             default=self.median_mode,
@@ -195,8 +195,8 @@ class PreProcConfig(object):
             self.normalise_air_region = [int(val) for val in coords]
 
         self.crop_before_normalise = args.crop_before_normalise
-        self.median_size = args.median_size
-        self.median_mode = args.median_mode
+        self.median_size = args.pre_median_size
+        self.median_mode = args.pre_median_mode
         self.stripe_removal_method = args.remove_stripes
 
         self.rotation = args.rotation
