@@ -3,7 +3,7 @@
 Which minimizers to use with Mantid
 ===================================
 
-Below is listed the current recommendations for which minimizers to use with Mantid:
+Below are listed the current recommendations for which minimizers to use with Mantid:
 
 * By default Mantid uses Levenberg-Marquardt
 
@@ -18,7 +18,7 @@ fitting problems, such as for constrained problems in the future.
 However, to help us facilitate this, please let us know if you have
 any fitting problems that you would like to share.
 
-Further, if you think you have a bright idea for new minimizer please
+Further, if you think you have a bright idea for a new minimizer please
 do not hesitate to either let us know or test out your idea yourself
 using the fit benchmarking tests discussed below.
 
