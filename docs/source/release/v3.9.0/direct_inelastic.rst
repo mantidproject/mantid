@@ -18,6 +18,8 @@ Improvements
 
 - Overly pessimistic error calculation in :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>` have been fixed.
 
+- A new input property *Temperature* has been added to :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`.
+
 New features
 ------------
 
