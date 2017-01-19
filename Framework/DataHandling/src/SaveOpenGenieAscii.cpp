@@ -225,8 +225,7 @@ void SaveOpenGenieAscii::getSampleLogs() {
       {"x", "x_pos"},
       {"y", "y_pos"},
       {"z", "z_pos"},
-      {"gd_prtn_chrg", "microamps"},
-      {"dur", "effective_time"}};
+      {"gd_prtn_chrg", "microamps"}};
 
   const std::vector<Property *> &logData = m_inputWS->run().getLogData();
 
@@ -403,7 +402,8 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   if (getProperty("IncludeHeader")) {
     outfile << "# Open Genie ASCII File #\n"
             << "# label \n"
-            << "GXWorkspace\n" << m_outputVector.size() << '\n';
+            << "GXWorkspace\n"
+            << m_outputVector.size() << '\n';
   }
 
   // Sort by parameter name
