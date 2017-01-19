@@ -15,6 +15,34 @@ public:
   static SpectrumInfoTest *createSuite() { return new SpectrumInfoTest(); }
   static void destroySuite(SpectrumInfoTest *suite) { delete suite; }
 
+  void test_copy() {
+    const SpectrumInfo source(7);
+    const auto copy(source);
+    TS_ASSERT_EQUALS(copy.size(), 7);
+  }
+
+  void test_move() {
+    SpectrumInfo source(7);
+    const auto moved(std::move(source));
+    TS_ASSERT_EQUALS(moved.size(), 7);
+    TS_ASSERT_EQUALS(source.size(), 0);
+  }
+
+  void test_assign() {
+    const SpectrumInfo source(7);
+    SpectrumInfo assignee(1);
+    assignee = source;
+    TS_ASSERT_EQUALS(assignee.size(), 7);
+  }
+
+  void test_move_assign() {
+    SpectrumInfo source(7);
+    SpectrumInfo assignee(1);
+    assignee = std::move(source);
+    TS_ASSERT_EQUALS(assignee.size(), 7);
+    TS_ASSERT_EQUALS(source.size(), 0);
+  }
+
   void test_size() {
     TS_ASSERT_EQUALS(SpectrumInfo(0).size(), 0);
     TS_ASSERT_EQUALS(SpectrumInfo(1).size(), 1);
