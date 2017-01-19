@@ -344,16 +344,6 @@ void TomographyROIViewQtWidget::enableActions(bool enable) {
 
 std::string TomographyROIViewQtWidget::askImagePath(
     const std::string &windowTitle = "Open image") {
-  // get path
-  // QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
-  //                           "(*.fits *.fit *.tiff *.tif *.png);;"
-  //                           "FITS, Flexible Image Transport System images "
-  //                           "(*.fits *.fit);;"
-  //                           "TIFF, Tagged Image File Format "
-  //                           "(*.tif *.tiff);;"
-  //                           "PNG, Portable Network Graphics "
-  //                           "(*.png);;"
-  //                           "Other extensions/all files (*)");
   // only FITS is supported right now
   QString fitsStr = QString("Supported formats: FITS"
                             "(*.fits *.fit);;"
