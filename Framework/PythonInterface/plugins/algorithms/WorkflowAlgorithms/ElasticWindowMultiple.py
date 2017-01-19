@@ -184,7 +184,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 append_alg.execute()
                 self._q2_workspace = append_alg.getProperty("OutputWorkspace").value
 
-
         # Set the vertical axis units
         v_axis_is_sample = len(input_workspace_names) == len(sample_param)
 
