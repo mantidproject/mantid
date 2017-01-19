@@ -184,14 +184,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 append_alg.execute()
                 self._q2_workspace = append_alg.getProperty("OutputWorkspace").value
 
-            # Delete the output workspaces from the ElasticWindow algorithms
-            delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
-            for q_ws in q_workspaces:
-                delete_alg.setProperty("Workspace", q_ws)
-                delete_alg.execute()
-            for q2_ws in q2_workspaces:
-                delete_alg.setProperty("Workspace", q2_ws)
-                delete_alg.execute()
 
         # Set the vertical axis units
         v_axis_is_sample = len(input_workspace_names) == len(sample_param)
