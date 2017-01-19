@@ -153,8 +153,9 @@ void MaskDetectors::exec() {
   }
 
   if (prevMasking) {
-    DataObjects::MaskWorkspace_const_sptr maskWS =
+    auto maskWS =
         boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+
     if (maskWS) {
       if (maskWS->getInstrument()->getDetectorIDs().size() !=
           WS->getInstrument()->getDetectorIDs().size()) {
@@ -171,35 +172,25 @@ void MaskDetectors::exec() {
       } else {
         appendToIndexListFromMaskWS(indexList, maskWS, ranges_info);
       }
-    } else { // not mask workspace
-      auto nHist = prevMasking->getNumberHistograms();
+    } else { // not a mask workspace
+      const auto nHist = prevMasking->getNumberHistograms();
+      auto instrument = WS->getInstrument();
+      auto maskInstrument = prevMasking->getInstrument();
       // Check the provided workspace has the same number of spectra as the
       // input
-      if (nHist > WS->getNumberHistograms()) {
-        // Check the provided workspace has the same number of detectors as the
-        // input. If so add to the detector list
-        auto instrument = WS->getInstrument();
-        auto maskInstrument = prevMasking->getInstrument();
-        if (instrument && maskInstrument &&
-            maskInstrument->getNumberDetectors() ==
-                instrument->getNumberDetectors() &&
-            nHist == instrument->getNumberDetectors()) {
-          appendToDetectorListFromWS(detectorList, WS, prevMasking,
-                                     ranges_info);
-        } else {
-          // We have more spectra in the mask than in the workspace and we also
-          // don't have a list of detector IDs. There's nothing more to try so
-          // give up loudly.
-          g_log.error() << "Input workspace has " << WS->getNumberHistograms()
-                        << " histograms   vs. "
-                        << "Input masking workspace has "
-                        << prevMasking->getNumberHistograms()
-                        << " histograms. \n";
-          throw std::runtime_error(
-              "Size mismatch between two input workspaces.");
-        }
-      } else {
+      if (nHist == WS->getNumberHistograms()) {
         appendToIndexListFromWS(indexList, prevMasking, ranges_info);
+      } else if (instrument && maskInstrument) {
+        const auto inputDetCount = instrument->getNumberDetectors();
+        const auto maskDetCount = maskInstrument->getNumberDetectors();
+        if (inputDetCount != maskDetCount)
+          g_log.warning() << "Number of detectors does not match between "
+                             "mask workspace and input workspace";
+
+        appendToDetectorListFromWS(detectorList, WS, prevMasking, ranges_info);
+      } else {
+        throw std::runtime_error(
+            "Input or mask workspace does not have an instrument.");
       }
     }
   }
