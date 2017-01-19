@@ -22,7 +22,7 @@ class TestClass(unittest.TestCase):
         # generate 10 images with dimensions 10x10, all values 1. float32
         return np.full((10, 10, 10), 1., dtype=np.float32)
 
-    def test_sample():
+    def test_sample(self):
         pass
 
 if __name__ == '__main__':

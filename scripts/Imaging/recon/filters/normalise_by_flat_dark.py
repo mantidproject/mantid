@@ -18,9 +18,8 @@ def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, h=
     """
     import numpy as np
 
-    h.check_data_stack(data)
-
     h = Helper.empty_init() if h is None else h
+    h.check_data_stack(data)
 
     if isinstance(norm_flat_img, np.ndarray):
         if 2 != len(norm_flat_img.shape):

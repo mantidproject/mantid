@@ -14,6 +14,9 @@ class CutOffTest(unittest.TestCase):
         r.func.verbosity = 0
         from recon.helper import Helper
 
+        from recon.filters import cut_off
+        self.alg = cut_off
+
         self.h = Helper(r)
 
     @staticmethod
@@ -23,43 +26,55 @@ class CutOffTest(unittest.TestCase):
         return np.full((10, 10, 10), 1., dtype=np.float32)
 
     def test_not_executed(self):
-        from recon.filters import cut_off
-
         images = self.generate_images()
         control = self.generate_images()
         err_msg = "TEST NOT EXECUTED :: Running cut off with level {0} changed the data!"
 
         cut_off_level = None
-        result = cut_off.execute(images, cut_off_level, self.h)
+        result = self.alg.execute(images, cut_off_level, self.h)
         npt.assert_equal(
             result, control, err_msg=err_msg.format(cut_off_level))
 
         cut_off_level = 0
-        result = cut_off.execute(images, cut_off_level, self.h)
+        result = self.alg.execute(images, cut_off_level, self.h)
         npt.assert_equal(
             result, control, err_msg=err_msg.format(cut_off_level))
 
         cut_off_level = -0.1
-        result = cut_off.execute(images, cut_off_level, self.h)
+        result = self.alg.execute(images, cut_off_level, self.h)
         npt.assert_equal(
             result, control, err_msg=err_msg.format(cut_off_level))
 
     def test_executed(self):
-        from recon.filters import cut_off
-
         images = self.generate_images()
         control = self.generate_images()
         control[3, :, :] = 0.1
 
         images[3, :, :] = 0.1
         cut_off_level = 0.4
-        result = cut_off.execute(images, cut_off_level, self.h)
+        result = self.alg.execute(images, cut_off_level, self.h)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
         images = self.generate_images()
         images[3, :, :] = 0.1
         cut_off_level = 0.001
-        result = cut_off.execute(images, cut_off_level, self.h)
+        result = self.alg.execute(images, cut_off_level, self.h)
+        npt.assert_raises(AssertionError, npt.assert_equal, result, control)
+
+    def test_executed_no_helper(self):
+        images = self.generate_images()
+        control = self.generate_images()
+        control[3, :, :] = 0.1
+
+        images[3, :, :] = 0.1
+        cut_off_level = 0.4
+        result = self.alg.execute(images, cut_off_level)
+        npt.assert_raises(AssertionError, npt.assert_equal, result, control)
+
+        images = self.generate_images()
+        images[3, :, :] = 0.1
+        cut_off_level = 0.001
+        result = self.alg.execute(images, cut_off_level)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
 

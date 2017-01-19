@@ -23,7 +23,7 @@ def execute(data, scale, mode, h=None):
         h.pstart("Starting image resizing to scale {0} with interpolation mode {1}".format(
             scale, interpolation))
 
-        # allocate memory for images
+        # allocate memory for images with new dimensions
         resized_data = np.zeros((num_images, expected_dimy,
                                  expected_dimx), dtype=np.float32)
 

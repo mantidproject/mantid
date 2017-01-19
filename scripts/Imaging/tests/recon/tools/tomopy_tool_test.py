@@ -3,7 +3,7 @@ import unittest
 
 class Class(unittest.TestCase):
 
-    def test_sample():
+    def test_sample(self):
         pass
 
 if __name__ == '__main__':

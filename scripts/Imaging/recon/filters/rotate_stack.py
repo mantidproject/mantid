@@ -47,20 +47,22 @@ def execute(data, rotation, flat=None, dark=None, h=None):
 
     if rotation:
 
-        counterclock_rotations = 4 - rotation
+        # numpy.rot90 rotates counterclockwise
+        # this reverses it, so we rotate clockwise
+        clockwise_rotations = 4 - rotation
 
         h.pstart(
             "Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
-            format(counterclock_rotations * 90, data.dtype))
+            format(clockwise_rotations * 90, data.dtype))
 
-        data = _rotate_stack(data, counterclock_rotations)
+        data = _rotate_stack(data, clockwise_rotations)
         if flat is not None:
-            flat = _rotate_image(flat, counterclock_rotations)
+            flat = _rotate_image(flat, clockwise_rotations)
         if dark is not None:
-            dark = _rotate_image(dark, counterclock_rotations)
+            dark = _rotate_image(dark, clockwise_rotations)
 
         h.pstop("Finished rotation step ({0} degrees clockwise), with pixel data type: {1}."
-                .format(counterclock_rotations * 90, data.dtype))
+                .format(clockwise_rotations * 90, data.dtype))
 
         h.check_data_stack(data)
     else:

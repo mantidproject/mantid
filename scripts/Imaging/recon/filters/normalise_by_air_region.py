@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
+from recon.filters.crop_coords import _crop_coords_sanity_checks
 
 
 def execute(data, air_region, region_of_interest, crop_before_normalise, h=None):
@@ -27,19 +28,8 @@ def execute(data, air_region, region_of_interest, crop_before_normalise, h=None)
     h.check_data_stack(data)
 
     if air_region:
-        if not isinstance(air_region, list) or \
-                4 != len(air_region):
-            raise ValueError(
-                "Wrong air region coordinates when trying to use them to normalise images: {0}".
-                format(air_region))
-
-        if not all(
-                isinstance(crd, int)
-                for crd in air_region):
-            raise ValueError(
-                "Cannot use non-integer coordinates to use the normalization region "
-                "(air region). Got these coordinates: {0}".format(
-                    air_region))
+        _crop_coords_sanity_checks(air_region, data)
+        _crop_coords_sanity_checks(region_of_interest, data)
 
         air_right, air_top, air_left, air_bottom = translate_coords_onto_cropped_picture(
             region_of_interest, air_region, crop_before_normalise)
@@ -80,9 +70,6 @@ def translate_coords_onto_cropped_picture(crop_coords, air_region, crop_before_n
     air_left = air_region[0]
     air_bottom = air_region[3]
 
-    if not crop_before_normalise:
-        return air_right, air_top, air_left, air_bottom
-
     crop_right = crop_coords[2]
     crop_top = crop_coords[1]
     crop_left = crop_coords[0]
@@ -90,6 +77,9 @@ def translate_coords_onto_cropped_picture(crop_coords, air_region, crop_before_n
 
     _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
                                 crop_bottom, crop_left, crop_right, crop_top)
+
+    if not crop_before_normalise:
+        return air_right, air_top, air_left, air_bottom
 
     # Translate the air region coordinates to the crop.
     air_right -= crop_left

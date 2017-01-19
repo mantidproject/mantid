@@ -14,14 +14,16 @@ class CircularMaskTest(unittest.TestCase):
         r.func.verbosity = 0
         from recon.helper import Helper
 
+        from recon.filters import circular_mask
+        self.alg = circular_mask
+
         self.h = Helper(r)
 
-    def test_import(self):
-        """
-        Only check that the filter imports successfully
-        """
-        from recon.filters import circular_mask
-        pass
+    @staticmethod
+    def generate_images():
+        import numpy as np
+        # generate 10 images with dimensions 10x10, all values 1. float32
+        return np.full((10, 10, 10), 1., dtype=np.float32)
 
     def test_not_executed(self):
         """
@@ -35,22 +37,21 @@ class CircularMaskTest(unittest.TestCase):
         # control images
         control = self.generate_images()
         err_msg = "TEST NOT EXECUTED :: Running circular mask with ratio {0} changed the data!"
-        from recon.filters import circular_mask
 
         ratio = 0
-        result = circular_mask.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, self.h)
         npt.assert_equal(result, control, err_msg=err_msg.format(ratio))
 
         ratio = 1
-        result = circular_mask.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, self.h)
         npt.assert_equal(result, control, err_msg=err_msg.format(ratio))
 
         ratio = -1
-        result = circular_mask.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, self.h)
         npt.assert_equal(result, control, err_msg=err_msg.format(ratio))
 
         ratio = None
-        result = circular_mask.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, self.h)
         npt.assert_equal(result, control, err_msg=err_msg.format(ratio))
 
     def test_executed(self):
@@ -63,25 +64,40 @@ class CircularMaskTest(unittest.TestCase):
         # control images
         control = self.generate_images()
 
-        from recon.filters import circular_mask
-
         ratio = 0.001
-        result = circular_mask.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, self.h)
         npt.assert_raises(
             AssertionError, npt.assert_array_equal, result, control)
 
         # reset the input images
         images = self.generate_images()
         ratio = 0.994
-        result = circular_mask.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, self.h)
         npt.assert_raises(
             AssertionError, npt.assert_array_equal, result, control)
 
-    @staticmethod
-    def generate_images():
-        import numpy as np
-        # generate 10 images with dimensions 10x10, all values 1. float32
-        return np.full((10, 10, 10), 1., dtype=np.float32)
+    def test_executed_no_helper(self):
+        """
+        Check that the filter changed the data.
+        """
+        # images that will be put through testing
+        images = self.generate_images()
+
+        # control images
+        control = self.generate_images()
+
+        ratio = 0.001
+        result = self.alg.execute(images, ratio)
+        npt.assert_raises(
+            AssertionError, npt.assert_array_equal, result, control)
+
+        # reset the input images
+        images = self.generate_images()
+        ratio = 0.994
+        result = self.alg.execute(images, ratio)
+        npt.assert_raises(
+            AssertionError, npt.assert_array_equal, result, control)
+
 
 if __name__ == '__main__':
     unittest.main()
