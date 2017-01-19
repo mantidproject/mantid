@@ -52,6 +52,7 @@ set ( TEST_PY_FILES
   IndirectResolutionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
+  IndirectQuickDiffractionTest.py
   ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py
