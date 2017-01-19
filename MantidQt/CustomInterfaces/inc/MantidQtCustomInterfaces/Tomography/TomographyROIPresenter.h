@@ -7,7 +7,6 @@
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
 #include <memory>
-
 #include <boost/scoped_ptr.hpp>
 
 #include <QObject>
