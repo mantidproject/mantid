@@ -43,8 +43,10 @@ const MantidVec &ISpectrum::readE() const { return this->dataE(); }
  * @param detID :: detector ID to insert in set.
  */
 void ISpectrum::addDetectorID(const detid_t detID) {
+  size_t oldSize = detectorIDs.size();
   this->detectorIDs.insert(detID);
-  updateExperimentInfo();
+  if (detectorIDs.size() != oldSize)
+    updateExperimentInfo();
 }
 
 /** Add a set of detector IDs to the set of detector IDs
@@ -52,8 +54,10 @@ void ISpectrum::addDetectorID(const detid_t detID) {
  * @param detIDs :: set of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
+  size_t oldSize = detectorIDs.size();
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
-  updateExperimentInfo();
+  if (detectorIDs.size() != oldSize)
+    updateExperimentInfo();
 }
 
 /** Add a vector of detector IDs to the set of detector IDs
@@ -61,8 +65,10 @@ void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
  * @param detIDs :: vector of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
+  size_t oldSize = detectorIDs.size();
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
-  updateExperimentInfo();
+  if (detectorIDs.size() != oldSize)
+    updateExperimentInfo();
 }
 
 /** Clear the list of detector IDs, then add one.
