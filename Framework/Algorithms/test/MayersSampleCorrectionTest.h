@@ -41,11 +41,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37666067, signal.front(), delta);
+    TS_ASSERT_DELTA(0.37553044, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.26633931, error.front(), delta);
+    TS_ASSERT_DELTA(0.26554012, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {
@@ -96,6 +96,8 @@ private:
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("MultipleScattering", mscatOn);
+    alg->setProperty("MSEvents", 2000);
+    alg->setProperty("MSRuns", 5);
     alg->setPropertyValue("OutputWorkspace", "_unused_for_child");
     alg->execute();
     return alg;
@@ -109,12 +111,12 @@ private:
     using Mantid::Kernel::Material;
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
-    using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+    using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
     const int nhist(1), nbins(100);
     const double xstart(99.5), deltax(1.0);
     // Filled Y with 2.0 and E with sqrt(2)
-    auto testWS = Create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
+    auto testWS = create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
 
     const int nbanks(1);
     // Ids 1->9
@@ -147,7 +149,7 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceWithNoInstrument() {
     const int nhist(1), nbins(1);
     const double xstart(99.5), deltax(1.0);
-    return WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins,
+    return WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins,
                                                             xstart, deltax);
   }
 
@@ -156,11 +158,11 @@ private:
     using Mantid::Geometry::ObjComponent;
     using Mantid::Geometry::Object;
     using Mantid::Kernel::V3D;
-    using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+    using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
     const int nhist(1), nbins(1);
     const double xstart(99.5), deltax(1.0);
-    auto testWS = Create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
+    auto testWS = create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
 
     const int nbanks(1);
     auto testInst = createTestInstrumentCylindrical(nbanks, V3D(0., 0., -14.));

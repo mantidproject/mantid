@@ -236,7 +236,7 @@ void LoadSpiceAscii::parseSPICEAscii(
     // Strip
     boost::trim(line);
     // skip for empyt line
-    if (line.size() == 0)
+    if (line.empty())
       continue;
 
     // Comment line for run information

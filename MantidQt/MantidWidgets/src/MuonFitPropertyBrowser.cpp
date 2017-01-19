@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -404,7 +405,7 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   * @param ws :: The workspace
   */
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
-  QString workspaceName(QString::fromStdString(ws->name()));
+  QString workspaceName(QString::fromStdString(ws->getName()));
 
   if ((workspaceName.contains("_Raw")) ||
       (workspaceName.contains("MuonAnalysis")))

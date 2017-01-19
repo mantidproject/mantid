@@ -136,6 +136,7 @@ fi
 if [[ ${JOB_NAME} == *python3* ]]; then
   PYTHON3_EXECUTABLE=`which python3`
   DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
+  PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 fi
 
 ###############################################################################

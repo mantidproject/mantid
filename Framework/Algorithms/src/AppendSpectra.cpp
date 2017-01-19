@@ -7,7 +7,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/MakeRange.h"
 
+using namespace Mantid::Indexing;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -75,7 +78,7 @@ void AppendSpectra::exec() {
   bool ValidateInputs = this->getProperty("ValidateInputs");
   if (ValidateInputs) {
     // Check that the input workspaces meet the requirements for this algorithm
-    this->validateInputs(ws1, ws2);
+    this->validateInputs(*ws1, *ws2);
   }
 
   const bool mergeLogs = getProperty("MergeLogs");
@@ -99,9 +102,9 @@ void AppendSpectra::exec() {
     throw std::runtime_error(
         "Workspace2D's must have the same number of bins.");
 
-  MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
+  MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
   for (int i = 1; i < number; i++)
-    output = execWS2D(output, ws2);
+    output = execWS2D(*output, *ws2);
   if (mergeLogs)
     combineLogs(ws1->run(), ws2->run(), output->mutableRun());
 
@@ -118,9 +121,9 @@ void AppendSpectra::exec() {
  * @param ws2 The second workspace supplied to the algorithm.
  * @param output The workspace that is going to be returned by the algorithm.
  */
-void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
-                                       API::MatrixWorkspace_const_sptr ws2,
-                                       API::MatrixWorkspace_sptr output) {
+void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1,
+                                       const MatrixWorkspace &ws2,
+                                       MatrixWorkspace &output) {
   specnum_t ws1min;
   specnum_t ws1max;
   getMinMax(ws1, ws1min, ws1max);
@@ -133,22 +136,27 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   if (ws2min > ws1max)
     return;
 
+  auto indexInfo = output.indexInfo();
+  indexInfo.setSpectrumNumbers(
+      makeRange(0, static_cast<specnum_t>(output.getNumberHistograms() - 1)));
+  output.setIndexInfo(indexInfo);
+
   const int yAxisNum = 1;
-  const auto yAxisWS1 = ws1->getAxis(yAxisNum);
-  const auto yAxisWS2 = ws2->getAxis(yAxisNum);
-  auto outputYAxis = output->getAxis(yAxisNum);
-  const auto ws1len = ws1->getNumberHistograms();
+  const auto yAxisWS1 = ws1.getAxis(yAxisNum);
+  const auto yAxisWS2 = ws2.getAxis(yAxisNum);
+  auto outputYAxis = output.getAxis(yAxisNum);
+  const auto ws1len = ws1.getNumberHistograms();
 
   const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
   const bool isNumericAxis = yAxisWS1->isNumeric() && yAxisWS2->isNumeric();
 
   auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
-  for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+  for (size_t i = 0; i < output.getNumberHistograms(); ++i) {
     if (isTextAxis) {
       // check if we're outside the spectra of the first workspace
       const std::string inputLabel =
           i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
-      outputTextAxis->setLabel(i, (inputLabel.size() > 0) ? inputLabel : "");
+      outputTextAxis->setLabel(i, !inputLabel.empty() ? inputLabel : "");
 
     } else if (isNumericAxis) {
       // check if we're outside the spectra of the first workspace
@@ -156,9 +164,6 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
           i < ws1len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1len);
       outputYAxis->setValue(i, inputVal);
     }
-
-    // append the spectra
-    output->getSpectrum(i).setSpectrumNo(specnum_t(i));
   }
 }
 

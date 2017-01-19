@@ -28,6 +28,7 @@
 #include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
 #include <Poco/String.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -454,6 +455,12 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   if (m_indirectPositions)
     createNeutronicInstrument();
 
+  // Instrument::markAsDetector is slow unless the detector IDs in the IDF are
+  // sorted. To circumvent this we use the 2-part interface,
+  // markAsDetectorIncomplete (which does not sort) and markAsDetectorFinalize
+  // (which does the final sorting).
+  m_instrument->markAsDetectorFinalize();
+
   // And give back what we created
   return m_instrument;
 }
@@ -753,7 +760,7 @@ Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
     const Poco::XML::Element *pLocElem) {
   if ((pLocElem->tagName()).compare("location") &&
       (pLocElem->tagName()).compare("locations")) {
-    std::string tagname = pLocElem->tagName();
+    const std::string &tagname = pLocElem->tagName();
     g_log.error("Argument to function getParentComponent must be a pointer to "
                 "an XML element with tag name location or locations.");
     throw std::logic_error(
@@ -1237,7 +1244,7 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(
            pLocElem->getAttribute("mark-as").compare("monitor") == 0)) {
         m_instrument->markAsMonitor(detector);
       } else
-        m_instrument->markAsDetector(detector);
+        m_instrument->markAsDetectorIncomplete(detector);
     }
 
   } catch (Kernel::Exception::ExistsError &) {
@@ -1350,7 +1357,7 @@ void InstrumentDefinitionParser::createRectangularDetector(
           if (m_haveDefaultFacing)
             makeXYplaneFaceComponent(comp, m_defaultFacing);
           // Mark it as a detector (add to the instrument cache)
-          m_instrument->markAsDetector(detector.get());
+          m_instrument->markAsDetectorIncomplete(detector.get());
         }
       }
     }
@@ -1495,7 +1502,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
           if (m_haveDefaultFacing)
             makeXYplaneFaceComponent(comp, m_defaultFacing);
           // Mark it as a detector (add to the instrument cache)
-          m_instrument->markAsDetector(detector.get());
+          m_instrument->markAsDetectorIncomplete(detector.get());
         }
       }
     }

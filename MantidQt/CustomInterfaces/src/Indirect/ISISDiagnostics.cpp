@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -238,7 +239,7 @@ void ISISDiagnostics::algorithmComplete(bool error) {
 
   for (size_t i = 0; i < sliceOutputGroup->size(); i++) {
     QString wsName =
-        QString::fromStdString(sliceOutputGroup->getItem(i)->name());
+        QString::fromStdString(sliceOutputGroup->getItem(i)->getName());
   }
   // Enable plot and save buttons
   m_uiForm.pbSave->setEnabled(true);

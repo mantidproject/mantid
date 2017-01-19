@@ -12,7 +12,6 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
@@ -142,8 +141,7 @@ int vtkSplatterPlot::RequestInformation(vtkInformation *,
     try {
       std::string scalarName = "signal";
       m_presenter = Mantid::Kernel::make_unique<vtkSplatterPlotFactory>(
-            boost::make_shared<NoThresholdRange>(), scalarName, m_numberPoints,
-            m_topPercentile);
+          scalarName, m_numberPoints, m_topPercentile);
 
       // Get the info objects
       vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
@@ -177,8 +175,8 @@ void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
  */
 void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string& message)
 {
-  this->SetProgress(progress);
   this->SetProgressText(message.c_str());
+  this->UpdateProgress(progress);
 }
 
 /**

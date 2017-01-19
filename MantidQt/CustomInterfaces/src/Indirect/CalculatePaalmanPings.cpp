@@ -3,6 +3,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Material.h"
@@ -271,7 +272,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
           AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       convertSpecAlgo->initialize();
       convertSpecAlgo->setProperty("InputWorkspace", factorWs);
-      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->name());
+      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->getName());
       convertSpecAlgo->setProperty("Target", "ElasticQ");
       convertSpecAlgo->setProperty("EMode", "Indirect");
 

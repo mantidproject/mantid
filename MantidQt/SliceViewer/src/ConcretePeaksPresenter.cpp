@@ -628,7 +628,8 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty("InputWorkspace", peaksWS);
-    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
+    alg->setProperty("OutputWorkspace",
+                     peaksWS->getName() + "_peaks_in_region");
     alg->setProperty("Extents", transformedViewableRegion.toExtents());
     alg->setProperty("CheckPeakExtents", false); // consider all peaks as points
     alg->setProperty("PeakRadius", radius);

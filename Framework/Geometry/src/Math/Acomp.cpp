@@ -459,7 +459,7 @@ Units are sorted after this function is returned.
         Express += iu;
     }
   }
-  if (Express.size() > 0) {
+  if (!Express.empty()) {
     Acomp AX;
     try {
       AX.setString(Express);

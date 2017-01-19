@@ -157,6 +157,9 @@ public:
 
   void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) override;
 
+  bool userConfirmation(const std::string &title,
+                        const std::string &body) override;
+
 private slots:
   /// for buttons, run tab, and similar
   void reconstructClicked();

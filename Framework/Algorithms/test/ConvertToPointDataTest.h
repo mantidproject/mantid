@@ -6,6 +6,7 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 using Mantid::Algorithms::ConvertToPointData;
 using Mantid::API::IAlgorithm_sptr;
@@ -25,7 +26,7 @@ public:
   void test_That_Output_Is_The_Same_As_Input_If_Input_Contains_Point_Data() {
     // False indicates a non histogram workspace
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(5, 10, false);
+        WorkspaceCreationHelper::create2DWorkspace123(5, 10, false);
 
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
     TS_ASSERT(outputWS);
@@ -44,7 +45,7 @@ public:
     const int numBins(10);
     const int numSpectra(2);
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(numSpectra, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(numSpectra, numBins);
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
     // add a new vertical axis
     Mantid::API::Axis *const verticalAxis =
@@ -102,7 +103,7 @@ public:
     double xBoundaries[11] = {0.0,  1.0,  3.0,  5.0,  6.0, 7.0,
                               10.0, 13.0, 16.0, 17.0, 17.5};
     const int numSpectra(2);
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
         numSpectra, 11, xBoundaries);
     const size_t numBins = testWS->blocksize();
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
@@ -172,7 +173,7 @@ public:
   }
 
   void setUp() override {
-    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 10000);
+    inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 10000);
   }
 
   void tearDown() override {

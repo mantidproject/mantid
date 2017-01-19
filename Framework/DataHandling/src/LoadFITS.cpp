@@ -4,6 +4,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadFITS.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -472,19 +473,17 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   // Create a group for these new workspaces, if the group already exists, add
   // to it.
-  std::string groupName = outWSName;
-
   size_t fileNumberInGroup = 0;
   WorkspaceGroup_sptr wsGroup;
 
-  if (!AnalysisDataService::Instance().doesExist(groupName)) {
-    wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
-    wsGroup->setTitle(groupName);
+  if (!AnalysisDataService::Instance().doesExist(outWSName)) {
+    wsGroup = boost::make_shared<WorkspaceGroup>();
+    wsGroup->setTitle(outWSName);
   } else {
     // Get the name of the latest file in group to start numbering from
-    if (AnalysisDataService::Instance().doesExist(groupName))
+    if (AnalysisDataService::Instance().doesExist(outWSName))
       wsGroup =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
 
     std::string latestName = wsGroup->getNames().back();
     // Set next file number
@@ -860,10 +859,10 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(nrows); ++i) {
-    auto &dataX = ws->dataX(i);
-    auto &dataY = ws->dataY(i);
-    auto &dataE = ws->dataE(i);
-    std::fill(dataX.begin(), dataX.end(), static_cast<double>(i) * cmpp);
+    auto &xVals = ws->mutableX(i);
+    auto &yVals = ws->mutableY(i);
+    auto &eVals = ws->mutableE(i);
+    xVals = static_cast<double>(i) * cmpp;
 
     for (size_t j = 0; j < ncols; ++j) {
       // Map from 2D->1D index
@@ -890,8 +889,8 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       }
 
       val = fileInfo.scale * val - fileInfo.offset;
-      dataY[j] = val;
-      dataE[j] = sqrt(val);
+      yVals[j] = val;
+      eVals[j] = sqrt(val);
     }
   }
 }

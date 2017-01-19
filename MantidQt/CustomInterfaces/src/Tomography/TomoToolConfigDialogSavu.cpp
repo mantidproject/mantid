@@ -1,3 +1,8 @@
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
+
+#include <boost/lexical_cast.hpp>
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
@@ -382,7 +387,7 @@ void TomoToolConfigDialogSavu::menuSaveClicked() {
   } else {
     AnalysisDataService::Instance().add(createUniqueNameHidden(),
                                         m_currPlugins);
-    std::string csvWorkspaceNames = m_currPlugins->name();
+    std::string csvWorkspaceNames = m_currPlugins->getName();
 
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "SaveTomoConfig");

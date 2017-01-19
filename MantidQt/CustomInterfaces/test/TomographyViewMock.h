@@ -125,6 +125,11 @@ public:
 
   // virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg)
   MOCK_METHOD1(runAggregateBands, void(Mantid::API::IAlgorithm_sptr alg));
+
+  //   virtual bool userConfirmation(const std::string &title, const std::string
+  //   &body)
+  MOCK_METHOD2(userConfirmation,
+               bool(const std::string &title, const std::string &body));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

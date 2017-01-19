@@ -7,17 +7,21 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -246,7 +250,7 @@ public:
     groups[4].push_back(50);
 
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0,
+        WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0,
                                                              1.0);
     WS->getSpectrum(3).clear(false);
     // Switch the event type
@@ -399,7 +403,7 @@ public:
     const int nBins = 1;
     const std::string stem = "test_group_ws";
     Mantid::API::WorkspaceGroup_sptr group_ws =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(nEntries, nHist, nBins,
+        WorkspaceCreationHelper::createWorkspaceGroup(nEntries, nHist, nBins,
                                                       stem);
 
     SaveNexusProcessed alg;
@@ -809,6 +813,47 @@ public:
     savedNexus.close();
     Poco::File(outputFileName).remove();
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_masking() {
+    LoadEmptyInstrument createWorkspace;
+    createWorkspace.initialize();
+    createWorkspace.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
+    createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
+    createWorkspace.execute();
+    auto ws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpace"));
+    ws->mutableDetectorInfo().setMasked(1, true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(2), false);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testSpace");
+    std::string file = "SaveNexusProcessedTest_test_masking.nxs";
+    if (Poco::File(file).exists())
+      Poco::File(file).remove();
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    LoadNexus loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", file);
+    loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+    TS_ASSERT(loadAlg.isExecuted());
+    auto wsReloaded = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(2), false);
+
+    if (clearfiles)
+      Poco::File(file).remove();
+    AnalysisDataService::Instance().remove("testSpace");
   }
 
 private:

@@ -6,6 +6,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
@@ -495,7 +496,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
   if (resultsGroup && paramsTable) {
     const size_t offset = paramsTable->rowCount() - resultsGroup->size();
     for (size_t i = 0; i < resultsGroup->size(); i++) {
-      const std::string oldName = resultsGroup->getItem(i)->name();
+      const std::string oldName = resultsGroup->getItem(i)->getName();
       auto wsName = paramsTable->cell<std::string>(offset + i, 0);
       wsName = wsName.substr(wsName.find_first_of('=') + 1); // strip the "f0="
       const auto wsDetails = MuonAnalysisHelper::parseWorkspaceName(wsName);

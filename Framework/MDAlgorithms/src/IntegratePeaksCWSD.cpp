@@ -125,7 +125,7 @@ void IntegratePeaksCWSD::processInputs() {
 
   // Input peaks
   std::vector<double> peak_center = getProperty("PeakCentre");
-  if (peak_center.size() > 0) {
+  if (!peak_center.empty()) {
     // assigned peak center
     if (peak_center.size() != 3)
       throw std::invalid_argument("PeakCentre must have 3 elements.");
@@ -187,7 +187,7 @@ void IntegratePeaksCWSD::processInputs() {
 
   // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
-  if (maskwsname.size() > 0) {
+  if (!maskwsname.empty()) {
     // process mask workspace
     m_maskDets = true;
     m_maskWS = getProperty("MaskWorkspace");
@@ -254,7 +254,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
       // ... debug */
 
       // Check whether this detector is masked
-      if (vecMaskedDetID.size() > 0) {
+      if (!vecMaskedDetID.empty()) {
         detid_t detid = mditer->getInnerDetectorID(iev);
         std::vector<detid_t>::const_iterator it;
 

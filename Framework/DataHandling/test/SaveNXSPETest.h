@@ -6,6 +6,7 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -28,7 +29,7 @@ using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IDetector_const_sptr;
 
-static const int THEMASKED = 2;
+static const int THEMASKED = 1;
 
 class SaveNXSPETest : public CxxTest::TestSuite {
 public:
@@ -129,7 +130,7 @@ public:
 private:
   MatrixWorkspace_sptr makeWorkspace(int nhist = 3, int nx = 10) {
     auto testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nx, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nx, 1.0);
     // Fill workspace with increasing counter to properly check saving
     for (int i = 0; i < nhist; ++i) {
       auto &outY = testWS->dataY(i);
@@ -152,19 +153,8 @@ private:
             dummy, dummy, dummy);
     inputWS->setInstrument(testInst);
 
-    // Associate detectors with the workspace
-    for (size_t j = 0; j < inputWS->getNumberHistograms(); ++j) {
-      // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j)
-          .setSpectrumNo(static_cast<Mantid::specnum_t>(j + 1));
-    }
-
     // mask the detector
-    ParameterMap *m_Pmap = &(inputWS->instrumentParameters());
-    boost::shared_ptr<const Instrument> instru = inputWS->getInstrument();
-    IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
-    TS_ASSERT(toMask);
-    m_Pmap->addBool(toMask.get(), "masked", true);
+    inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 
     // required to get it passed the algorthms validator
     inputWS->setDistribution(true);

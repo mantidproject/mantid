@@ -77,7 +77,7 @@ def _run_focus():
 
 def _calibration_validation(cls, results):
     _validation_setup(cls)
-    results_name = results[0].getName()
+    results_name = results[0].name()
     reference_file_name = "ISIS_Powder-POLARIS78338_Van_Cal.nxs"
     return results_name, reference_file_name
 

@@ -1,4 +1,4 @@
-.. _BFGS
+.. _BFGS:
 
 BFGS (Broyden-Fletcher-Goldfarb-Shanno) minimizer
 =================================================

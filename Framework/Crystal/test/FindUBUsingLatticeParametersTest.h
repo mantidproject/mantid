@@ -1,6 +1,7 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/DeleteTableRows.h"
 #include "MantidKernel/System.h"
@@ -34,7 +35,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", ws->name()));
+        alg.setPropertyValue("PeaksWorkspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -79,7 +80,7 @@ public:
     TS_ASSERT_DELTA(latt.errorgamma(), 0.0906, 5e-4);
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(ws->name());
+    AnalysisDataService::Instance().remove(ws->getName());
   }
 
   void test_fixAll() {
@@ -89,7 +90,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", ws->name()));
+        alg.setPropertyValue("PeaksWorkspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -126,7 +127,7 @@ public:
     TS_ASSERT_DELTA(latt.gamma(), 90.0, 5e-10);
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(ws->name());
+    AnalysisDataService::Instance().remove(ws->getName());
   }
 
   void test_smallNumberOfPeaks() {
@@ -141,7 +142,7 @@ public:
 
     DataHandling::DeleteTableRows removeRowAlg;
     removeRowAlg.initialize();
-    removeRowAlg.setPropertyValue("TableWorkspace", ws->name());
+    removeRowAlg.setPropertyValue("TableWorkspace", ws->getName());
     removeRowAlg.setProperty("Rows", rows);
     removeRowAlg.execute();
 
@@ -149,7 +150,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", ws->name()));
+        alg.setPropertyValue("PeaksWorkspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -183,7 +184,7 @@ public:
     TS_ASSERT_DELTA(latt.gamma(), 90.0272, 5e-4);
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(ws->name());
+    AnalysisDataService::Instance().remove(ws->getName());
   }
 
 private:

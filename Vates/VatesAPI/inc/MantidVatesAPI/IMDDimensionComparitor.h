@@ -1,7 +1,9 @@
 #ifndef IMD_DIMENSION_COMPARITOR_H
 #define IMD_DIMENSION_COMPARITOR_H
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 namespace Mantid {
 namespace VATES {
@@ -43,13 +45,13 @@ public:
   /// Destructor
   ~IMDDimensionComparitor();
 
-  bool isXDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
+  bool isXDimension(const Mantid::Geometry::IMDDimension &queryDimension);
 
-  bool isYDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
+  bool isYDimension(const Mantid::Geometry::IMDDimension &queryDimension);
 
-  bool isZDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
+  bool isZDimension(const Mantid::Geometry::IMDDimension &queryDimension);
 
-  bool istDimension(Mantid::Geometry::IMDDimension_const_sptr queryDimension);
+  bool istDimension(const Mantid::Geometry::IMDDimension &queryDimension);
 
 private:
   /// imd workspace shared ptr.

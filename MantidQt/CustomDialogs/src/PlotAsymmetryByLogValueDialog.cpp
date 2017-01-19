@@ -6,6 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QLabel>
 #include <QLineEdit>

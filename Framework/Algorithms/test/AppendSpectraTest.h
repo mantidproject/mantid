@@ -4,6 +4,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -66,8 +67,10 @@ public:
 
     // Mask a spectrum and check it is carried over
     const size_t maskTop(5), maskBottom(10);
-    in1->maskWorkspaceIndex(maskTop);
-    in2->maskWorkspaceIndex(maskBottom);
+    in1->getSpectrum(maskTop).clearData();
+    in2->getSpectrum(maskBottom).clearData();
+    in1->mutableSpectrumInfo().setMasked(maskTop, true);
+    in2->mutableSpectrumInfo().setMasked(maskBottom, true);
 
     // Now it should succeed
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace1", "top"));
@@ -94,8 +97,8 @@ public:
                      in2->getAxis(1)->spectraNo(2));
 
     // Check masking
-    TS_ASSERT_EQUALS(output->getDetector(maskTop)->isMasked(), true);
-    TS_ASSERT_EQUALS(output->getDetector(10 + maskBottom)->isMasked(), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(maskTop), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(10 + maskBottom), true);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -145,14 +148,14 @@ public:
   //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces() {
     MatrixWorkspace_sptr ews =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace(10, 10);
 
     // Check it fails if mixing event workspaces and workspace 2Ds
     AppendSpectra alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace1", ews));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace2", WorkspaceCreationHelper::Create2DWorkspace(10, 10)));
+        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "outevent"));
     alg.execute();
@@ -165,12 +168,12 @@ public:
     int numBins = 20;
 
     if (event) {
-      ws1 = WorkspaceCreationHelper::CreateEventWorkspace2(
+      ws1 = WorkspaceCreationHelper::createEventWorkspace2(
           10, numBins); // 2 events per bin
-      ws2 = WorkspaceCreationHelper::CreateEventWorkspace2(5, numBins);
+      ws2 = WorkspaceCreationHelper::createEventWorkspace2(5, numBins);
     } else {
-      ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, numBins);
-      ws2 = WorkspaceCreationHelper::Create2DWorkspace(5, numBins);
+      ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
+      ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
     }
 
     auto ws1Log = new TimeSeriesProperty<std::string>("aLog");

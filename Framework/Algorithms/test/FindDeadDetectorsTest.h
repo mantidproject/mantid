@@ -38,10 +38,9 @@ public:
     // data
     Workspace2D_sptr work_in =
         // the x values look like this -1, 2, 5, 8, 11, 14, 17, 20, 23, 26
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
 
     Instrument_sptr instr(new Instrument);
-    work_in->setInstrument(instr);
 
     // yVeryDead is a detector that never responds and produces no counts
     Counts yVeryDead(sizex, 0);
@@ -78,6 +77,7 @@ public:
       instr->markAsDetector(det);
       work_in->getSpectrum(i).setDetectorID(i);
     }
+    work_in->setInstrument(instr);
 
     FindDeadDetectors alg;
 

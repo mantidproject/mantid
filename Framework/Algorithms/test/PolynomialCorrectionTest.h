@@ -50,7 +50,7 @@ public:
     const std::string wsName = "PolynomialCorrectionTest_inputWS";
     const std::string wsNameOut = "PolynomialCorrectionTest_outputWS";
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add(wsName, inputWS);
 
     Mantid::Algorithms::PolynomialCorrection poly3;
@@ -89,7 +89,7 @@ public:
     const std::string wsName = "PolynomialCorrectionTest_inputWS";
     const std::string wsNameOut = "PolynomialCorrectionTest_outputWS";
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add(wsName, inputWS);
 
     Mantid::Algorithms::PolynomialCorrection poly3;
@@ -126,7 +126,7 @@ public:
   }
 
   void testEvents() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_polyc", evin);

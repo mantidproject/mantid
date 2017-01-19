@@ -11,11 +11,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
@@ -411,7 +411,7 @@ public:
 
   void testConvertQuicklyCommonBins() {
     Workspace2D_sptr input =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     input->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     AnalysisDataService::Instance().add("quickIn", input);
@@ -455,7 +455,7 @@ public:
     // the scaling of Y and E for the distribution case is not testable.
     double deltax = 0.123;
     Workspace2D_sptr input =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 10, x0, deltax);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10, x0, deltax);
     input->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     // Y must have units, otherwise ConvertUnits does not treat data as
@@ -527,11 +527,10 @@ public:
 
   void testDeltaE() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 2663, 5, 7.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     Instrument_sptr testInst(new Instrument);
-    ws->setInstrument(testInst);
     // Make it look like MARI (though not bin boundaries are different to the
     // real MARI file used before)
     // Define a source and sample position
@@ -551,6 +550,7 @@ public:
     physicalPixel->setPos(-0.34732, -3.28797, -2.29022);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
+    ws->setInstrument(testInst);
     ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;

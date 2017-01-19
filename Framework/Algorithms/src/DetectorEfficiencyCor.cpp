@@ -3,10 +3,13 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
@@ -120,6 +123,7 @@ void DetectorEfficiencyCor::exec() {
   int64_t numHists = m_inputWS->getNumberHistograms();
   double numHists_d = static_cast<double>(numHists);
   const int64_t progStep = static_cast<int64_t>(ceil(numHists_d / 100.0));
+  auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numHists; ++i) {
@@ -127,7 +131,7 @@ void DetectorEfficiencyCor::exec() {
 
     m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
     try {
-      correctForEfficiency(i);
+      correctForEfficiency(i, spectrumInfo);
     } catch (Exception::NotFoundError &) {
       // zero the Y data that can't be corrected
       m_outputWS->mutableY(i) *= 0.0;
@@ -180,18 +184,23 @@ void DetectorEfficiencyCor::retrieveProperties() {
   }
 }
 
-/** Corrects a spectra for the detector efficiency calculated from detector
-information
-Gets the detector information and uses this to calculate its efficiency
-*  @param spectraIn :: index of the spectrum to get the efficiency for
-*  @throw invalid_argument if the shape of a detector is isn't a cylinder
-aligned along one axis
-*  @throw NotFoundError if the detector or its gas pressure or wall thickness
-were not found
-*/
-void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
-  IDetector_const_sptr det = m_inputWS->getDetector(spectraIn);
-  if (det->isMonitor() || det->isMasked()) {
+/**
+ * Corrects a spectra for the detector efficiency calculated from detector
+ * information
+ * Gets the detector information and uses this to calculate its efficiency
+ *  @param spectraIn :: index of the spectrum to get the efficiency for
+ *  @param spectrumInfo :: The SpectrumInfo object for the input workspace
+ *  @throw invalid_argument if the shape of a detector is not a cylinder aligned
+ * along one axis
+ *  @throw NotFoundError if the detector or its gas pressure or wall thickness
+ * were not found
+ */
+void DetectorEfficiencyCor::correctForEfficiency(
+    int64_t spectraIn, const SpectrumInfo &spectrumInfo) {
+  if (!spectrumInfo.hasDetectors(spectraIn))
+    throw Exception::NotFoundError("No detectors found", spectraIn);
+
+  if (spectrumInfo.isMonitor(spectraIn) || spectrumInfo.isMasked(spectraIn)) {
     return;
   }
 
@@ -209,9 +218,6 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
                                                         // average the
                                                         // correction computing
                                                         // it for the spectrum
-  if (ndets == 0) {
-    throw Exception::NotFoundError("No detectors found", spectraIn);
-  }
 
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
