@@ -62,6 +62,10 @@ Transmission
 - :ref:`IsoRotDiff <func-IsoRotDiff>` models isotropic rotational diffusion of a particle
   tethered to the origin at a constant distance.
 
+Vesuvio
+#######
+
+- Run numbers can now be input as a range in :ref:`LoadVesuvio <algm-LoadVesuvio>` and :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>`
 
 Improvements
 ------------
