@@ -101,8 +101,6 @@ protected:
 
 private slots:
   void finishedLoadStack(bool error);
-  void readWorkerStdOut(const QString &s);
-  void readWorkerStdErr(const QString &s);
 
 private:
   StackOfImagesDirs checkInputStack(const std::string &path);

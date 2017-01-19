@@ -75,10 +75,6 @@ void TomographyROIPresenter::notify(Notification notif) {
     processPlayStartStop();
     break;
 
-  case ITomographyROIPresenter::FindCoR:
-    processFindCoR();
-    break;
-
   case ITomographyROIPresenter::UpdateColorMap:
     processUpdateColorMap();
     break;
@@ -129,51 +125,6 @@ void TomographyROIPresenter::notify(Notification notif) {
   }
 }
 
-void TomographyROIPresenter::processFindCoR() {
-  // TODO refactor to provide common access to this presenter and the main
-  // presenter
-  m_workerThread.reset();
-  auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
-  m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
-
-  // Specific connections for this presenter
-  // we do this so the thread can independently read the process' output and
-  // only signal the presenter after it's done reading and has something to
-  // share so it doesn't block the presenter
-  connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
-          SLOT(readWorkerStdOut(QString)));
-  connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
-          SLOT(readWorkerStdErr(QString)));
-
-  // remove the user confirmation for running recon, if the recon has finished
-  connect(m_workerThread.get(), SIGNAL(workerFinished()), this,
-          SLOT(workerFinished()));
-
-  connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
-
-  const std::vector<std::string> args = {
-      "C:/Users/QBR77747/Documents/mantid_fourth/mantid/scripts/Imaging/IMAT/"
-      "tomo_reconstruct.py",
-      "-i "
-      "C:/Users/QBR77747/Documents/mantid_workspaces/imaging/"
-      "RB000888_test_stack_larmor_summed_201510/data_stack_larmor_summed",
-      "-o "
-      "C:/Users/QBR77747/Documents/mantid_workspaces/imaging/"
-      "RB000888_test_stack_larmor_summed_201510/processed",
-      "-f 1", "--rotation 1", "--tool tomopy",
-      "--region-of-interest=[48.000000, 33.000000, 216.000000 492.000000]"};
-
-  worker->setup("C:/Anaconda/python.exe", args, "");
-  m_workerThread->start();
-}
-
-void TomographyROIPresenter::readWorkerStdOut(const QString &s) {
-  g_log.information(s.toStdString());
-}
-
-void TomographyROIPresenter::readWorkerStdErr(const QString &s) {
-  g_log.error(s.toStdString());
-}
 
 void TomographyROIPresenter::processInit() {
   ImageStackPreParams p;
