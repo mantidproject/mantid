@@ -48,8 +48,8 @@ namespace MantidWidgets {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> &postprocessMap,
