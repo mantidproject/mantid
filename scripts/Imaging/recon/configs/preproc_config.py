@@ -1,4 +1,3 @@
-# pylint: disable=too-many-instance-attributes
 class PreProcConfig(object):
     """
     All pre-processing options required to run a tomographic reconstruction.

@@ -13,7 +13,7 @@ class PostProcConfig(object):
         self.gaussian_mode = 'reflect'
         self.gaussian_order = 0
 
-        self.median_size = 0
+        self.median_size = None
         """
         :param median_mode: Default: 'reflect', {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
             The mode parameter determines how the array borders are handled, where cval is the value when
