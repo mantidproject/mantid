@@ -1,6 +1,6 @@
 from mantid.kernel import logger
 
-# ABINS modules
+# Abins modules
 from IOmodule import IOmodule
 from KpointsData import KpointsData
 from AtomsData import AtomsDaTa

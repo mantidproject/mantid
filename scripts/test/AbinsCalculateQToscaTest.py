@@ -5,7 +5,7 @@ from AbinsModules.InstrumentProducer import InstrumentProducer
 from AbinsModules import AbinsConstants, AbinsParameters, KpointsData
 
 
-class ABINSCalculateQToscaTest(unittest.TestCase):
+class AbinsCalculateQToscaTest(unittest.TestCase):
 
     def setUp(self):
         producer = InstrumentProducer()

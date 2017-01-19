@@ -7,7 +7,7 @@ Author:
     Krzysztof Dymkowski
 
 Contributors:
-    Leonardo Bernasconi (main author of module LoadCRYSTAL), Leandro Liborio (provider of ab-initio data for benchmarks)
+   Sanghamitra Mukhopadhyay, Elliot Oram, Leonardo Bernasconi, Leandro Liborio
 
 .. summary::
 
@@ -18,14 +18,13 @@ Contributors:
 Description
 -----------
 
-ABINS is a plugin for Mantid which allows scientists to compare experimental and theoretical inelastic neutron
+Abins is a plugin for Mantid which allows scientists to compare experimental and theoretical inelastic neutron
 scattering spectra (INS).
 
-ABINS requires a file with the ab-initio phonon data to perform INS analysis. Currently output data from CASTEP
+Abins requires a file with the ab-initio phonon data to perform INS analysis. Currently output data from CASTEP
 (.phonon) and CRYSTAL (.out) DFT programs can be used to perform analysis. Optionally a user can provide an experimental
 file with measured dynamical structure factor S in order to directly compare theoretical and experimental spectra. A
-user can produce one dimension  INS spectrum which can be compared against TOSCA and TOSCA-like instruments. If
-instrument TwoDMap is chosen one can produce 2D INS spectrum.
+user can produce one dimensional INS spectrum which can be compared against TOSCA and TOSCA-like instruments.
 
 After successfully performed analysis a user obtains a group workspace which stores theoretical and optionally
 experimental spectra. Currently a user can produce theoretical spectrum for the given type of atom (for example for
@@ -34,7 +33,7 @@ theoretical spectrum for the given atom which is a sum over all considered quant
 also produce a total spectrum for the whole considered system. Dynamical structure factor S is calculated for
 all atoms in the system. If needed  a user can also include in a simulation elevated temperature.
 
-ABINS is in constant development and suggestions
+Abins is in constant development and suggestions
 how to make it better are very welcome. For any suggestions of enhancements please contact
 Krzysztof Dymkowski (krzysztof.dymkowski@stfc.ac.uk).
 
@@ -46,9 +45,9 @@ Usage
 
 **Example - loading CASTEP phonon data :**
 
-.. testcode:: ABINSCastepSimple
+.. testcode:: AbinsCastepSimple
 
-    benzene_wrk = ABINS(DFTProgram="CASTEP", PhononFile="benzene.phonon", QuantumOrderEventsNumber="1")
+    benzene_wrk = Abins(DFTProgram="CASTEP", PhononFile="benzene.phonon", QuantumOrderEventsNumber="1")
 
 
     for name in benzene_wrk.getNames():
@@ -56,7 +55,7 @@ Usage
 
 Output:
 
-.. testoutput:: ABINSCastepSimple
+.. testoutput:: AbinsCastepSimple
 
     benzene_wrk_H_total
     benzene_wrk_H
@@ -65,16 +64,16 @@ Output:
 
 **Example - loading CRYSTAL phonon data :**
 
-.. testcode:: ABINSCrystalSimple
+.. testcode:: AbinsCrystalSimple
 
-    wrk=ABINS(DFTProgram="CRYSTAL", PhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
+    wrk=Abins(DFTProgram="CRYSTAL", PhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
 
     for name in wrk.getNames():
         print name
 
 Output:
 
-.. testoutput:: ABINSCrystalSimple
+.. testoutput:: AbinsCrystalSimple
 
     wrk_Na_total
     wrk_Na
@@ -87,11 +86,11 @@ Output:
     wrk_N_total
     wrk_N
 
-**Example - calling ABINS with more arguments:**
+**Example - calling Abins with more arguments:**
 
-.. testcode:: ABINSexplicitParameters
+.. testcode:: AbinsexplicitParameters
 
-    wrk_verbose=ABINS(DFTprogram="CASTEP", PhononFile="benzene.phonon", ExperimentalFile="benzene_experimental.dat",
+    wrk_verbose=Abins(DFTprogram="CASTEP", PhononFile="benzene.phonon", ExperimentalFile="benzene_experimental.dat",
                     Temperature=10, SampleForm="Powder", Instrument="TOSCA", Atoms="H", SumContributions=True,
                     QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
 
@@ -100,7 +99,7 @@ Output:
 
 Output:
 
-.. testoutput:: ABINSexplicitParameters
+.. testoutput:: AbinsexplicitParameters
 
     experimental_wrk
     wrk_verbose_total

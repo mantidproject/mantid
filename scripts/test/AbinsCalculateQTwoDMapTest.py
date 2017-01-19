@@ -28,7 +28,7 @@ from AbinsModules.InstrumentProducer import InstrumentProducer
 from AbinsModules import AbinsParameters
 
 
-class ABINSCalculateQTwoDMapTest(unittest.TestCase):
+class AbinsCalculateQTwoDMapTest(unittest.TestCase):
 
     def setUp(self):
         _core = os.path.normpath("../ExternalData/Testing/Data/UnitTest/")

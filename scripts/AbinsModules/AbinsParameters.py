@@ -1,6 +1,6 @@
 import math
 """
-Parameters for instruments and ABINS
+Parameters for instruments and Abins
 """
 
 # Instruments constants  #############################
@@ -26,7 +26,7 @@ tosca_c = 2.5
 # Instruments constants end ##########################
 
 
-# ABINS internal parameters ##########################
+# Abins internal parameters ##########################
 # Parameters which can be changed by a user if necessary
 
 # name of the group in the hdf file in which extracted  data from DFT phonon calculations are stored
@@ -56,7 +56,7 @@ optimal_size = 5000000  # this is used to create optimal size of chunk energies 
 
 atoms_threads = 3  # number of threads used in parallel calculations over atoms
 q_threads = 1  # number of threads used in parallel calculations over q
-# ABINS internal parameters end ###########################
+# Abins internal parameters end ###########################
 
 q_start = 0.0  # beginning of q interval
 q_end = 30  # end of q interval

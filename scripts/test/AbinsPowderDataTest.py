@@ -8,11 +8,11 @@ def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSPowderDataTest because Python is too old.")
+        logger.warning("Skipping AbinsPowderDataTest because Python is too old.")
 
     is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
     if is_numpy_old:
-        logger.warning("Skipping ABINSPowderDataTest because numpy is too old.")
+        logger.warning("Skipping AbinsPowderDataTest because numpy is too old.")
 
     return is_python_old or is_numpy_old
 
@@ -34,7 +34,7 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_modules)
-class ABINSPowderDataTest(unittest.TestCase):
+class AbinsPowderDataTest(unittest.TestCase):
 
     def test_input(self):
 

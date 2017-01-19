@@ -16,7 +16,7 @@ from AbinsModules import LoadCASTEP, LoadCRYSTAL, CalculateS, AbinsParameters, A
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
-class ABINS(PythonAlgorithm):
+class Abins(PythonAlgorithm):
 
     _dft_program = None
     _phonon_file = None
@@ -81,7 +81,8 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
-                             validator=StringListValidator(AbinsConstants.ALL_INSTRUMENTS),
+                             # validator=StringListValidator(AbinsConstants.ALL_INSTRUMENTS)
+                             validator=StringListValidator(["TOSCA"]),
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -925,6 +926,6 @@ class ABINS(PythonAlgorithm):
         self._calc_partial = (len(self._atoms) > 0)
 
 try:
-    AlgorithmFactory.subscribe(ABINS)
+    AlgorithmFactory.subscribe(Abins)
 except ImportError:
     logger.debug('Failed to subscribe algorithm SimulatedDensityOfStates; The python package may be missing.')

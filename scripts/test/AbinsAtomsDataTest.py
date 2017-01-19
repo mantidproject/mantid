@@ -8,7 +8,7 @@ def old_python():
     """" Check if Python has proper version."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSAtomsDataTest because Python is too old.")
+        logger.warning("Skipping AbinsAtomsDataTest because Python is too old.")
     return is_python_old
 
 
@@ -27,7 +27,7 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_python)
-class ABINSAtomsDataTest(unittest.TestCase):
+class AbinsAtomsDataTest(unittest.TestCase):
     _good_data = {"atom_0": {'sort': 0, 'symbol': 'Si', 'fract_coord': np.asarray([0.,  0.,  0.]), 'mass': 28.085500},
                   "atom_1": {'sort': 1, 'symbol': 'Si', 'fract_coord': np.asarray([0.25,  0.25,  0.25]), 
                              'mass': 28.085500}}

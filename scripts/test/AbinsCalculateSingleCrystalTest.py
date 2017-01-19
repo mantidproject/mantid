@@ -9,7 +9,7 @@ def old_python():
     """" Check if Python has proper version."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSCalculateSingleCrystalTest because Python is too old.")
+        logger.warning("Skipping AbinsCalculateSingleCrystalTest because Python is too old.")
     return is_python_old
 
 
@@ -28,7 +28,7 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_python)
-class ABINSCalculateSingleCrystalTest(unittest.TestCase):
+class AbinsCalculateSingleCrystalTest(unittest.TestCase):
 
     _temperature = 10  # 10 K,  temperature for the benchmark
 

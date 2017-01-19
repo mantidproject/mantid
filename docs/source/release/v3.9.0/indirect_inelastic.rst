@@ -14,7 +14,7 @@ Algorithms
 - :ref:`EnergyWindowScan <algm-EnergyWindowScan>` and :ref:`IndirectQuickRun <algm-IndirectQuickRun>` have been added
   to perform a quick run of *EnergyTransfer*, *Elwin* and optional *MSDFit*
 - A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
-- A new algorithm :ref:`ABINS <algm-ABINS>`  which allows comparison of theoretical and experimental INS.
+- A new algorithm :ref:`Abins <algm-Abins>`  which allows comparison of theoretical and experimental INS.
 Data Reduction
 ##############
 

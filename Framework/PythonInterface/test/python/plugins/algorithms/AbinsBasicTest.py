@@ -1,6 +1,6 @@
 import unittest
 from mantid import logger
-from mantid.simpleapi import mtd, ABINS, Scale, CompareWorkspaces, Load, DeleteWorkspace
+from mantid.simpleapi import mtd, Abins, Scale, CompareWorkspaces, Load, DeleteWorkspace
 from mantid.api import MatrixWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 import numpy as np
@@ -10,11 +10,11 @@ def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSBasicTest because Python is too old.")
+        logger.warning("Skipping AbinsBasicTest because Python is too old.")
 
     is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
     if is_numpy_old:
-        logger.warning("Skipping ABINSBasicTest because numpy is too old.")
+        logger.warning("Skipping AbinsBasicTest because numpy is too old.")
 
     return is_python_old or is_numpy_old
 
@@ -34,10 +34,10 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_modules)
-class ABINSBasicTest(unittest.TestCase):
+class AbinsBasicTest(unittest.TestCase):
 
-    _si2 = "Si2-sc_ABINS"
-    _squaricn = "squaricn_sum_ABINS"
+    _si2 = "Si2-sc_Abins"
+    _squaricn = "squaricn_sum_Abins"
     _dft_program = "CASTEP"
     _temperature = 10.0  # temperature 10 K
     _scale = 1.0
@@ -54,7 +54,7 @@ class ABINSBasicTest(unittest.TestCase):
     _tolerance = 0.0001
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["ABINS", "explicit",  "default", "total",
+        AbinsTestHelpers.remove_output_files(list_of_names=["Abins", "explicit",  "default", "total",
                                                             "squaricn_scale", "benzene_exp"])
         mtd.clear()
 
@@ -62,47 +62,47 @@ class ABINSBasicTest(unittest.TestCase):
         """Test if the correct behaviour of algorithm in case input is not valid"""
 
         #  invalid CASTEP file missing:  Number of branches     6 in the header file
-        self.assertRaises(RuntimeError, ABINS, PhononFile="Si2-sc_wrong.phonon", OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, Abins, PhononFile="Si2-sc_wrong.phonon", OutputWorkspace=self._workspace_name)
 
         # wrong extension of phonon file in case of CASTEP
-        self.assertRaises(RuntimeError, ABINS, PhononFile="Si2-sc.wrong_phonon", OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, Abins, PhononFile="Si2-sc.wrong_phonon", OutputWorkspace=self._workspace_name)
 
         # wrong extension of phonon file in case of CRYSTAL
-        self.assertRaises(RuntimeError, ABINS, DFTprogram="CRYSTAL", PhononFile="MgO.wrong_out",
+        self.assertRaises(RuntimeError, Abins, DFTprogram="CRYSTAL", PhononFile="MgO.wrong_out",
                           OutputWorkspace=self._workspace_name)
 
         # two dots in filename
-        self.assertRaises(RuntimeError, ABINS, PhononFile="Si2.sc.phonon", OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, Abins, PhononFile="Si2.sc.phonon", OutputWorkspace=self._workspace_name)
 
         # no name for workspace
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._si2 + ".phonon", Temperature=self._temperature)
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._si2 + ".phonon", Temperature=self._temperature)
 
         # keyword total in the name of the workspace
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._si2 + ".phonon", Temperature=self._temperature,
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._si2 + ".phonon", Temperature=self._temperature,
                           OutputWorkspace=self._workspace_name + "total")
 
         # negative temperature in K
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._si2 + ".phonon", Temperature=-1.0,
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._si2 + ".phonon", Temperature=-1.0,
                           OutputWorkspace=self._workspace_name)
 
         # negative scale
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._si2 + ".phonon", Scale=-0.2,
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._si2 + ".phonon", Scale=-0.2,
                           OutputWorkspace=self._workspace_name)
 
     # test if intermediate results are consistent
     def test_non_unique_atoms(self):
         """Test scenario in which a user specifies non unique atoms (for example in squaricn that would be "C,C,H").
-           In that case ABINS should terminate and print a meaningful message.
+           In that case Abins should terminate and print a meaningful message.
         """
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._squaricn + ".phonon", Atoms="C,C,H",
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._squaricn + ".phonon", Atoms="C,C,H",
                           OutputWorkspace=self._workspace_name)
 
     def test_non_existing_atoms(self):
         """Test scenario in which  a user requests to create workspaces for atoms which do not exist in the system.
-           In that case ABINS should terminate and give a user a meaningful message about wrong atoms to analyse.
+           In that case Abins should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
         # In _squaricn there is no C atoms
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._squaricn + ".phonon", Atoms="N",
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._squaricn + ".phonon", Atoms="N",
                           OutputWorkspace=self._workspace_name)
 
     def test_scale(self):
@@ -110,7 +110,7 @@ class ABINSBasicTest(unittest.TestCase):
         Test if scaling is correct.
         @return:
         """
-        wrk_ref = ABINS(DFTprogram=self._dft_program,
+        wrk_ref = Abins(DFTprogram=self._dft_program,
                         PhononFile=self._squaricn + ".phonon",
                         Temperature=self._temperature,
                         SampleForm=self._sample_form,
@@ -122,7 +122,7 @@ class ABINSBasicTest(unittest.TestCase):
                         ScaleByCrossSection=self._cross_section_factor,
                         OutputWorkspace=self._squaricn + "_ref")
 
-        wrk = ABINS(DFTprogram=self._dft_program,
+        wrk = Abins(DFTprogram=self._dft_program,
                     PhononFile=self._squaricn + ".phonon",
                     Temperature=self._temperature,
                     SampleForm=self._sample_form,
@@ -144,9 +144,9 @@ class ABINSBasicTest(unittest.TestCase):
         Tests if experimental data is loaded correctly.
         @return:
         """
-        ABINS(DFTprogram=self._dft_program,
-              PhononFile="benzene_ABINS.phonon",
-              ExperimentalFile="benzene_ABINS.dat",
+        Abins(DFTprogram=self._dft_program,
+              PhononFile="benzene_Abins.phonon",
+              ExperimentalFile="benzene_Abins.dat",
               Temperature=self._temperature,
               SampleForm=self._sample_form,
               Instrument=self._instrument_name,
@@ -171,7 +171,7 @@ class ABINSBasicTest(unittest.TestCase):
 
         experimental_file = ""
 
-        wrk_ref = ABINS(DFTprogram=self._dft_program,
+        wrk_ref = Abins(DFTprogram=self._dft_program,
                         PhononFile=self._squaricn + ".phonon",
                         ExperimentalFile=experimental_file,
                         Temperature=self._temperature,
@@ -184,13 +184,13 @@ class ABINSBasicTest(unittest.TestCase):
                         ScaleByCrossSection=self._cross_section_factor,
                         OutputWorkspace=self._squaricn + "_ref")
 
-        wks_all_atoms_explicitly = ABINS(PhononFile=self._squaricn + ".phonon",
+        wks_all_atoms_explicitly = Abins(PhononFile=self._squaricn + ".phonon",
                                          Atoms="H, C, O",
                                          SumContributions=self._sum_contributions,
                                          QuantumOrderEventsNumber=self._quantum_order_events_number,
                                          OutputWorkspace="explicit")
 
-        wsk_all_atoms_default = ABINS(PhononFile=self._squaricn + ".phonon",
+        wsk_all_atoms_default = Abins(PhononFile=self._squaricn + ".phonon",
                                       SumContributions=self._sum_contributions,
                                       QuantumOrderEventsNumber=self._quantum_order_events_number,
                                       OutputWorkspace="default")

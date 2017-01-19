@@ -1,6 +1,6 @@
 import numpy as np
 
-# ABINS modules
+# Abins modules
 from GeneralData import GeneralData
 import AbinsConstants
 

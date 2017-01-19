@@ -10,7 +10,7 @@ def old_python():
     """" Check if Python has proper version."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSFrequencyPowderGeneratorTest because Python is too old.")
+        logger.warning("Skipping AbinsFrequencyPowderGeneratorTest because Python is too old.")
     return is_python_old
 
 
@@ -29,7 +29,7 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_python)
-class ABINSFrequencyPowderGeneratorTest(unittest.TestCase):
+class AbinsFrequencyPowderGeneratorTest(unittest.TestCase):
 
     # reduce rebining parameters for this test
     AbinsParameters.bin_width = 1.0

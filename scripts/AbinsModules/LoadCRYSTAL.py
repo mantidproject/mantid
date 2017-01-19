@@ -41,7 +41,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
         freq, coordinates = self._read_modes()
         coord_lines = self._clear_coord(molecular=molecular, coord_lines=coord_lines)
 
-        # put data into ABINS data structure
+        # put data into Abins data structure
         data = {}
         self._create_atoms_data(data=data, coord_lines=coord_lines, masses=masses)
         self._create_kpoints_data(data=data, freq=freq, atomic_displacements=coordinates,
@@ -319,7 +319,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
                     displacements.append([complex(x), complex(y), complex(z)])
                 logger.debug("Mode " + str(it + 1) + " normalised to " + str(normf))
 
-        # Reshape displacements so that ABINS can use it to create its internal data objects
+        # Reshape displacements so that Abins can use it to create its internal data objects
         # num_k  = 1: currently only data for Gamma point is used in the working powder equations
         # num_atoms: number of atoms in the system
         # num_freq: number of modes
@@ -336,7 +336,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
         displacements = np.reshape(a=displacements, newshape=(self._num_k, num_freq, self._num_atoms, dim))
         data["atomic_displacements"] = np.transpose(a=displacements, axes=(0, 2, 1, 3))
 
-        # In order  to provide compatibility with ABINS internal data structure same additional entries have to
+        # In order  to provide compatibility with Abins internal data structure same additional entries have to
         # be defined.
         data["weights"] = np.asarray([1.0]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")
         data["k_vectors"] = np.asarray([[0.0, 0.0, 0.0]]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")

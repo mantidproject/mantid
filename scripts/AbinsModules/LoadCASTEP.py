@@ -1,7 +1,7 @@
 import numpy as np
 import re
 
-# ABINS modules
+# Abins modules
 from GeneralDFTProgram import GeneralDFTProgram
 import AbinsConstants
 

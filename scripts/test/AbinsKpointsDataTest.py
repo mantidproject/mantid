@@ -8,7 +8,7 @@ def old_python():
     """" Check if Python has proper version."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSKpointsDataTest because Python is too old.")
+        logger.warning("Skipping AbinsKpointsDataTest because Python is too old.")
     return is_python_old
 
 
@@ -27,7 +27,7 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_python)
-class ABINSKpointsDataTest(unittest.TestCase):
+class AbinsKpointsDataTest(unittest.TestCase):
 
     _good_data = {"k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
                   "weights": np.asarray([0.3, 0.2, 0.5]),

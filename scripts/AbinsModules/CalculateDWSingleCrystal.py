@@ -1,6 +1,6 @@
 import numpy as np
 
-# ABINS modules
+# Abins modules
 from DWSingleCrystalData import DWSingleCrystalData
 from AbinsData import AbinsData
 import AbinsConstants

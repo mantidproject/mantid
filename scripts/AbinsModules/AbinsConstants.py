@@ -4,7 +4,7 @@ import numpy as np
 from scipy import constants
 
 # Parameters in this bloc shouldn't be changed by a user. They should be treated as constants.
-# Changing these parameters may lead to non-functional ABINS.
+# Changing these parameters may lead to non-functional Abins.
 
 # power expansion in terms of FUNDAMENTALS and overtones
 # S(Q, n * omega) \simeq (Q^2 * U^2)^n / n! exp(-Q^2 * U^2)
@@ -133,7 +133,7 @@ THRESHOLD = 10e-15
 
 MAX_ORDER = 4  # max quantum order event
 
-NUMPY_VERSION_REQUIRED = "1.6.0"  # ABINS requires numpy 1.6.0 or higher
+NUMPY_VERSION_REQUIRED = "1.6.0"  # Abins requires numpy 1.6.0 or higher
 
 ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
 

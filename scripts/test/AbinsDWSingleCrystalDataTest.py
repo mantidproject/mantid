@@ -8,7 +8,7 @@ def old_python():
     """" Check if Python has proper version."""
     is_python_old = AbinsTestHelpers.old_python()
     if is_python_old:
-        logger.warning("Skipping ABINSDWSingleCrystalTest because Python is too old.")
+        logger.warning("Skipping AbinsDWSingleCrystalTest because Python is too old.")
     return is_python_old
 
 
@@ -27,7 +27,7 @@ def skip_if(skipping_criteria):
 
 
 @skip_if(old_python)
-class ABINSDWSingleCrystalTest(unittest.TestCase):
+class AbinsDWSingleCrystalTest(unittest.TestCase):
     # fake DW tensors for two atoms
     _good_data = np.asarray([[[1.0, 1.0, 1.0],
                               [1.0, 1.0, 1.0],

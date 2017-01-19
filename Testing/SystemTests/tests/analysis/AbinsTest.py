@@ -1,5 +1,5 @@
 import stresstesting
-from mantid.simpleapi import ABINS, mtd, DeleteWorkspace, Scale
+from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
 from AbinsModules import AbinsConstants, AbinsTestHelpers, AbinsParameters
 
 
@@ -63,7 +63,7 @@ class HelperTestingClass(object):
         """
         User performs calculation from scratch (not loaded from hdf file). All data is calculated.
         """
-        ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
+        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions,
               QuantumOrderEventsNumber=str(self._quantum_order_event), Scale=self._scale,
@@ -81,21 +81,21 @@ class HelperTestingClass(object):
         wrk_name = self._system_name
 
         # T = 10 K
-        ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
+        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "init")
 
         # T = 20 K
-        ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
+        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "_mod")
 
         # T = 10 K
-        ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
+        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event),
@@ -110,7 +110,7 @@ class HelperTestingClass(object):
         """
         self.case_from_scratch()
         DeleteWorkspace(self._output_name)
-        ABINS(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
+        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
               Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
@@ -141,7 +141,7 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneScratchABINS"
+        name = "BenzeneScratchAbins"
 
         self.ref_result = name + ".nxs"
         self.set_dft_program("CASTEP")
@@ -170,7 +170,7 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
 
         HelperTestingClass.__init__(self)
 
-        name = "Crystalb3lypScratchABINS"
+        name = "Crystalb3lypScratchAbins"
 
         self.ref_result = name + ".nxs"
         self.set_dft_program("CRYSTAL")
@@ -198,7 +198,7 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneTABINS"
+        name = "BenzeneTAbins"
 
         self.ref_result = name + ".nxs"
         self.set_dft_program("CASTEP")
@@ -223,7 +223,7 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneLargerOrderABINS"
+        name = "BenzeneLargerOrderAbins"
 
         self.ref_result = name + ".nxs"
         self.set_dft_program("CASTEP")
@@ -248,7 +248,7 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneSmallerOrderABINS"
+        name = "BenzeneSmallerOrderAbins"
 
         self.ref_result = name + ".nxs"
         self.set_dft_program("CASTEP")
@@ -305,78 +305,78 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestScratchTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
-    """
-    In this benchmark it is tested if calculation from scratch with input data from CASTEP, for 1-2 order quantum
-    events and for TwoDMap is correct.
-    """
-    _ref_result = None
-    tolerance = None
-
-    def runTest(self):
-
-        HelperTestingClass.__init__(self)
-
-        name = "BenzeneScratchTwoDMapABINS"
-        AbinsParameters.q_start = 0.0  # beginning of q interval
-        AbinsParameters.q_end = 30  # end of q interval
-        AbinsParameters.q_step = 5.0  # sampling of q
-
-        self._ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
-        self.set_name(name)
-        self.set_instrument_name("TwoDMap")
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-        self.case_from_scratch()
-
-    def validate(self):
-
-        self.tolerance = 1e-2
-
-        return self._output_name, self._ref_result
-
-
-class AbinsCASTEPTestScaleTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
-    """
-    In this benchmark it is tested if scaling is correct.
-    """
-    _wrk_1 = None
-    _wrk_2 = None
-
-    def runTest(self):
-        HelperTestingClass.__init__(self)
-
-        AbinsParameters.q_start = 0.0  # beginning of q interval
-        AbinsParameters.q_end = 30  # end of q interval
-        AbinsParameters.q_step = 5.0  # sampling of q
-
-        scaling_factor = 2.0
-
-        name = "BenzeneNoScaleTwoDMap"
-        self.set_dft_program("CASTEP")
-        self.set_name(name)
-        self.set_instrument_name("TwoDMap")
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-        self.case_from_scratch()
-        self._wrk_1 = self._output_name
-
-        Scale(InputWorkspace=self._wrk_1,
-              OutputWorkspace=self._wrk_1,
-              Operation='Multiply',
-              Factor=scaling_factor)
-
-        self._output_name = ""
-        name = "BenzeneScaleTwoDMap"
-        self.set_dft_program("CASTEP")
-        self.set_name(name)
-        self.set_instrument_name("TwoDMap")
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-        self.set_scale(scaling_factor)
-        self.case_from_scratch()
-        self._wrk_2 = self._output_name
-
-    def validateMethod(self):
-        return "validateWorkspaceToWorkspace"
-
-    def validate(self):
-        return self._wrk_1, self._wrk_2
+# class AbinsCASTEPTestScratchTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
+#     """
+#     In this benchmark it is tested if calculation from scratch with input data from CASTEP, for 1-2 order quantum
+#     events and for TwoDMap is correct.
+#     """
+#     _ref_result = None
+#     tolerance = None
+#
+#     def runTest(self):
+#
+#         HelperTestingClass.__init__(self)
+#
+#         name = "BenzeneScratchTwoDMapAbins"
+#         AbinsParameters.q_start = 0.0  # beginning of q interval
+#         AbinsParameters.q_end = 30  # end of q interval
+#         AbinsParameters.q_step = 5.0  # sampling of q
+#
+#         self._ref_result = name + ".nxs"
+#         self.set_dft_program("CASTEP")
+#         self.set_name(name)
+#         self.set_instrument_name("TwoDMap")
+#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+#         self.case_from_scratch()
+#
+#     def validate(self):
+#
+#         self.tolerance = 1e-2
+#
+#         return self._output_name, self._ref_result
+#
+#
+# class AbinsCASTEPTestScaleTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
+#     """
+#     In this benchmark it is tested if scaling is correct.
+#     """
+#     _wrk_1 = None
+#     _wrk_2 = None
+#
+#     def runTest(self):
+#         HelperTestingClass.__init__(self)
+#
+#         AbinsParameters.q_start = 0.0  # beginning of q interval
+#         AbinsParameters.q_end = 30  # end of q interval
+#         AbinsParameters.q_step = 5.0  # sampling of q
+#
+#         scaling_factor = 2.0
+#
+#         name = "BenzeneNoScaleTwoDMap"
+#         self.set_dft_program("CASTEP")
+#         self.set_name(name)
+#         self.set_instrument_name("TwoDMap")
+#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+#         self.case_from_scratch()
+#         self._wrk_1 = self._output_name
+#
+#         Scale(InputWorkspace=self._wrk_1,
+#               OutputWorkspace=self._wrk_1,
+#               Operation='Multiply',
+#               Factor=scaling_factor)
+#
+#         self._output_name = ""
+#         name = "BenzeneScaleTwoDMap"
+#         self.set_dft_program("CASTEP")
+#         self.set_name(name)
+#         self.set_instrument_name("TwoDMap")
+#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+#         self.set_scale(scaling_factor)
+#         self.case_from_scratch()
+#         self._wrk_2 = self._output_name
+#
+#     def validateMethod(self):
+#         return "validateWorkspaceToWorkspace"
+#
+#     def validate(self):
+#         return self._wrk_1, self._wrk_2

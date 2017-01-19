@@ -13,7 +13,7 @@ from mantid.kernel import logger
 # noinspection PyMethodMayBeStatic
 class IOmodule(object):
     """
-    Class for ABINS I/O HDF file operations.
+    Class for Abins I/O HDF file operations.
     """
     def __init__(self, input_filename=None, group_name=None):
 

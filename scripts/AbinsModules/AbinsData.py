@@ -1,5 +1,5 @@
 
-# ABINS modules
+# Abins modules
 from GeneralData import GeneralData
 from KpointsData import KpointsData
 from AtomsData import AtomsDaTa

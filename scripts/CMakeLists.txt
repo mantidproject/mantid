@@ -55,20 +55,19 @@ set ( TEST_PY_FILES
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py
       test/ReductionSettingsTest.py
-      test/ABINSIOmoduleTest.py
-      test/ABINSLoadCASTEPTest.py
-      test/ABINSLoadCRYSTALTest.py
-      test/ABINSCalculateQToscaTest.py
-      test/ABINSFrequencyPowderGeneratorTest.py
-      test/ABINSKpointsDataTest.py
-      test/ABINSAtomsDataTest.py
-      test/ABINSDWSingleCrystalDataTest.py
-      test/ABINSCalculateDWSingleCrystalTest.py
-      test/ABINSPowderDataTest.py
-      test/ABINSCalculatePowderTest.py
-      test/ABINSCalculateSingleCrystalTest.py
-      test/ABINSCalculateSPowderTest.py
-      test/ABINSCalculateSPowder2DTest.py
+      test/AbinsIOmoduleTest.py
+      test/AbinsLoadCASTEPTest.py
+      test/AbinsLoadCRYSTALTest.py
+      test/AbinsCalculateQToscaTest.py
+      test/AbinsFrequencyPowderGeneratorTest.py
+      test/AbinsKpointsDataTest.py
+      test/AbinsAtomsDataTest.py
+      test/AbinsDWSingleCrystalDataTest.py
+      test/AbinsCalculateDWSingleCrystalTest.py
+      test/AbinsPowderDataTest.py
+      test/AbinsCalculatePowderTest.py
+      test/AbinsCalculateSingleCrystalTest.py
+      test/AbinsCalculateSPowderTest.py
       )
 
 # Addition tests for SANS components
