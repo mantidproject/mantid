@@ -5,8 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Unit.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ParameterTie.h"
 #include <string>
 #include <vector>
 
@@ -16,8 +17,6 @@ namespace API {
 // Forward declaration
 //----------------------------------------------------------------------
 class Jacobian;
-class ParameterTie;
-class IConstraint;
 /** Implements the part of IFunction interface dealing with parameters. This
    function has parameters of its own
     as opposed to a CompositeFunction which list of parameters consists only of
@@ -111,10 +110,10 @@ public:
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
   /// Add a new tie
-  void addTie(ParameterTie *tie) override;
+  void addTie(std::unique_ptr<ParameterTie> tie) override;
 
   /// Add a constraint to function
-  void addConstraint(IConstraint *ic) override;
+  void addConstraint(std::unique_ptr<IConstraint> ic) override;
   /// Get constraint of i-th parameter
   IConstraint *getConstraint(size_t i) const override;
   /// Remove a constraint
@@ -143,9 +142,9 @@ private:
   /// Keeps parameter errors
   std::vector<double> m_errors;
   /// Holds parameter ties as <parameter index,tie pointer>
-  std::vector<ParameterTie *> m_ties;
+  std::vector<std::unique_ptr<ParameterTie>> m_ties;
   /// Holds the constraints added to function
-  std::vector<IConstraint *> m_constraints;
+  std::vector<std::unique_ptr<IConstraint>> m_constraints;
   /// Flags of explicitly set parameters
   std::vector<bool> m_explicitlySet;
   /// parameter descriptions

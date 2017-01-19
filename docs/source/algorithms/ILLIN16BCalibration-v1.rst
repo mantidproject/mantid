@@ -6,6 +6,10 @@
 
 .. properties::
 
+.. warning::
+
+   This algorithm is deprecated (20-Nov-2016). Please, use :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` instead.
+
 Description
 -----------
 
@@ -39,7 +43,7 @@ Output:
 
 .. testoutput:: ExILLIN16BCalibration
 
-    Calibration workspace has 24 spectra and 1 bin(s)
+    Calibration workspace has 18 spectra and 1 bin(s)
 
 .. categories::
 

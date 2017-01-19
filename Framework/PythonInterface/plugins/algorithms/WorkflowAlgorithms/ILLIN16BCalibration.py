@@ -20,7 +20,8 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         return 'Workflow\\Inelastic;Inelastic\\Calibration'
 
     def summary(self):
-        return 'Creates a calibration workspace in energy trnasfer for IN16B.'
+        return 'Creates a calibration workspace in energy trnasfer for IN16B.' \
+               'This algorithm is deprecated (20-Nov-2016). Use IndirectILLReductionQENS instead.'
 
     def PyInit(self):
         self.declareProperty(FileProperty(name='Run', defaultValue='',
@@ -47,6 +48,8 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                              doc='Output workspace for calibration data')
 
     def PyExec(self):
+        self.log().error('This algorithm is deprecated (20-Nov-2016). '
+                         'Use IndirectILLReductionQENS instead.')
         self._setup()
 
         temp_raw = '__raw'
