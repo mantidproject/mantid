@@ -164,6 +164,7 @@ public:
   const Beamline::SpectrumInfo &internalSpectrumInfo() const;
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
+  void setSpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo);
 
   void invalidateSpectrumDefinitions();
 

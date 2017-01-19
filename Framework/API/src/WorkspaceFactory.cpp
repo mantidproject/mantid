@@ -118,6 +118,8 @@ void WorkspaceFactoryImpl::initializeFromParent(
     }
   }
 
+  child.setSpectrumInfo(parent.internalSpectrumInfo());
+
   // deal with axis
   for (size_t i = 0; i < parent.m_axes.size(); ++i) {
     const size_t newAxisLength = child.getAxis(i)->length();

@@ -66,10 +66,7 @@ ExperimentInfo::ExperimentInfo()
  */
 ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
   this->copyExperimentInfoFrom(&source);
-  if (source.m_spectrumInfo)
-    m_spectrumInfo =
-        Kernel::make_unique<Beamline::SpectrumInfo>(*source.m_spectrumInfo);
-  m_spectrumDefinitionsNeedUpdate = false;
+  setSpectrumInfo(source.internalSpectrumInfo());
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -1095,6 +1092,12 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   // No locking here since this non-const method is not thread safe.
   m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(*this);
   return *m_spectrumInfoWrapper;
+}
+
+void ExperimentInfo::setSpectrumInfo(
+    const Beamline::SpectrumInfo &spectrumInfo) {
+  m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(spectrumInfo);
+  m_spectrumDefinitionsNeedUpdate = false;
 }
 
 void ExperimentInfo::invalidateSpectrumDefinitions() {
