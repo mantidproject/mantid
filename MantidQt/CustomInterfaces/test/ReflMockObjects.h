@@ -4,18 +4,18 @@
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflEventPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflEventTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflEventView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include <gmock/gmock.h>
@@ -170,6 +170,7 @@ public:
 class MockEventTabPresenter : public IReflEventTabPresenter {
 public:
   std::string getTimeSlicingOptions(int group) const override {
+    UNUSED_ARG(group)
     return std::string();
   };
   ~MockEventTabPresenter() override{};
@@ -225,6 +226,7 @@ public:
     UNUSED_ARG(instName);
   }
   std::string getTimeSlicingOptions(int group) const override {
+    UNUSED_ARG(group);
     return std::string();
   };
 

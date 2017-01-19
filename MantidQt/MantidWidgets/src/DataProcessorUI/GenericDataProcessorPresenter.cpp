@@ -48,8 +48,8 @@ namespace MantidWidgets {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::map<std::string, std::string> &postprocessMap,
@@ -57,8 +57,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
-      m_postprocessMap(postprocessMap), m_loader(loader), m_postprocess(true),
-      m_mainPresenter(), m_tableDirty(false) {
+      m_postprocessMap(postprocessMap), m_loader(loader), m_mainPresenter(),
+      m_postprocess(true), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
