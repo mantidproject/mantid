@@ -44,11 +44,7 @@ const MantidVec &ISpectrum::readE() const { return this->dataE(); }
  */
 void ISpectrum::addDetectorID(const detid_t detID) {
   this->detectorIDs.insert(detID);
-  // Push incremental update. Using updateExperimentInfo would update the full
-  // set, but code that adds many detector IDs one by one (such as SumSpectra)
-  // would suffer from N^2 scaling issues.
-  if (m_experimentInfo)
-    m_experimentInfo->addDetectorToGroup(m_index, detID);
+  updateExperimentInfo();
 }
 
 /** Add a set of detector IDs to the set of detector IDs
@@ -57,9 +53,7 @@ void ISpectrum::addDetectorID(const detid_t detID) {
  */
 void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
-  // Push incremental update. See comment in addDetectorID.
-  if (m_experimentInfo)
-    m_experimentInfo->addDetectorsToGroup(m_index, detIDs);
+  updateExperimentInfo();
 }
 
 /** Add a vector of detector IDs to the set of detector IDs
@@ -68,10 +62,7 @@ void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
  */
 void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
-  // Push incremental update. See comment in addDetectorID.
-  if (m_experimentInfo)
-    m_experimentInfo->addDetectorsToGroup(
-        m_index, std::set<detid_t>(detIDs.begin(), detIDs.end()));
+  updateExperimentInfo();
 }
 
 /** Clear the list of detector IDs, then add one.
@@ -187,7 +178,7 @@ void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo,
 /// Updates detector IDs in the owning ExperimentInfo.
 void ISpectrum::updateExperimentInfo() const {
   if (m_experimentInfo)
-    m_experimentInfo->updateCachedDetectorGrouping(m_index, detectorIDs);
+    m_experimentInfo->invalidateSpectrumDefinitions();
 }
 
 } // namespace Mantid

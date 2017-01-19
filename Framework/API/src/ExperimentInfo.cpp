@@ -69,6 +69,7 @@ ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
   if (source.m_spectrumInfo)
     m_spectrumInfo =
         Kernel::make_unique<Beamline::SpectrumInfo>(*source.m_spectrumInfo);
+  m_spectrumDefinitionsNeedUpdate = false;
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -219,11 +220,9 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
-  // detector grouping.
-  // WARNING: The check of m_spectrumInfo is important, to avoid calling this
-  // virtual function from the constructor.
-  if (m_spectrumInfo)
-    updateCachedDetectorGroupings();
+  // detector grouping. Also the index corresponding to specific IDs may have
+  // changed.
+  invalidateSpectrumDefinitions();
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -450,7 +449,7 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
  * This method should not need to be called explicitly. The number of detector
  * groups will be set either when initializing a MatrixWorkspace, or by calling
  * `cacheDetectorGroupings` for an ExperimentInfo stored in an MDWorkspace. */
-void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) {
+void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
   populateIfNotLoaded();
   m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
 }
@@ -460,7 +459,7 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) {
  * This method should not need to be called explicitly. Groupings are updated
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
 void ExperimentInfo::updateCachedDetectorGrouping(
-    const size_t index, const std::set<detid_t> &detIDs) {
+    const size_t index, const std::set<detid_t> &detIDs) const {
   Beamline::SpectrumDefinition specDef;
   for (const auto detID : detIDs) {
     try {
@@ -473,52 +472,13 @@ void ExperimentInfo::updateCachedDetectorGrouping(
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
 }
 
-/** Adds a detector to the spectrum with the given `index`.
- *
- * This method should not need to be called explicitly. Groupings are updated
- * automatically when modifying detector IDs in a workspace (via ISpectrum). */
-void ExperimentInfo::addDetectorToGroup(const size_t index,
-                                        const detid_t detID) {
-  try {
-    const size_t detIndex = detectorInfo().indexOf(detID);
-    m_spectrumInfo->mutableSpectrumDefinition(index).add(detIndex);
-  } catch (std::out_of_range &) {
-    // Silently strip bad detector IDs
-  }
-}
-
-/** Adds several detectors to the spectrum with the given `index`.
- *
- * This method should not need to be called explicitly. Groupings are updated
- * automatically when modifying detector IDs in a workspace (via ISpectrum). */
-void ExperimentInfo::addDetectorsToGroup(const size_t index,
-                                         const std::set<detid_t> &detIDs) {
-  for (const auto detID : detIDs) {
-    try {
-      const size_t detIndex = detectorInfo().indexOf(detID);
-      m_spectrumInfo->mutableSpectrumDefinition(index).add(detIndex);
-    } catch (std::out_of_range &) {
-      // Silently strip bad detector IDs
-    }
-  }
-}
-
 /** Updates detector groupings for all spectra.
  *
- * This method should not need to be called explicitly. It is a helper for
- * `setInstrument` to workaround the problem that MatrixWorkspace allows setting
- * detector IDs that do not exist in the instrument, but later become valid when
- * setting a corresponding instrument. The base class implementation should
- * never get called. This method is overridden in MatrixWorkspace. */
-void ExperimentInfo::updateCachedDetectorGroupings() {
-  // This should happen only for MatrixWorkspace and subclasses, the
-  // implementation of ExperimentInfo::updateCachedDetectorGroupings throws --
-  // when grouping is cached for an MDWorkspace there is no way of updating the
-  // grouping. Furthermore, this should never be called from the constructor,
-  // since this is a virtual function call (m_spectrumInfo should always be
-  // nullptr in that case).
-  throw std::runtime_error(
-      "ExperimentInfo::updateCachedDetectorGroupings should never be called.");
+ * This method is called when Beamline::SpectrumInfo is not initialized, or when
+ * the spectrum definitions are outdated after calling
+ * invalidateSpectrumDefinitions(). */
+void ExperimentInfo::updateCachedDetectorGroupings() const {
+  cacheDefaultDetectorGrouping();
 }
 
 /**
@@ -1089,10 +1049,12 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
 /// API::SpectrumInfo, do not use this.
 const Beamline::SpectrumInfo &ExperimentInfo::internalSpectrumInfo() const {
   populateIfNotLoaded();
-  if (!m_spectrumInfo) {
+  if (!m_spectrumInfo || m_spectrumDefinitionsNeedUpdate) {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
-    if (!m_spectrumInfo)
-      cacheDefaultDetectorGrouping();
+    if (!m_spectrumInfo || m_spectrumDefinitionsNeedUpdate) {
+      updateCachedDetectorGroupings();
+      m_spectrumDefinitionsNeedUpdate = false;
+    }
   }
   return *m_spectrumInfo;
 }
@@ -1135,6 +1097,10 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return *m_spectrumInfoWrapper;
 }
 
+void ExperimentInfo::invalidateSpectrumDefinitions() {
+  m_spectrumDefinitionsNeedUpdate = true;
+}
+
 /** Sets up a default detector grouping.
  *
  * The purpose of this method is to work around potential issues of MDWorkspaces
@@ -1145,6 +1111,7 @@ void ExperimentInfo::cacheDefaultDetectorGrouping() const {
     return;
   const auto &detIDs = sptr_instrument->getDetectorIDs();
   m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(detIDs.size());
+  m_spectrumDefinitionsNeedUpdate = false;
   size_t specIndex = 0;
   for (const auto detID : detIDs) {
     m_det2group[detID] = specIndex;

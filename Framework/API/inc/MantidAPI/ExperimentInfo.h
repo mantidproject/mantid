@@ -9,6 +9,7 @@
 
 #include "MantidKernel/DeltaEMode.h"
 
+#include <atomic>
 #include <list>
 #include <mutex>
 
@@ -78,11 +79,9 @@ public:
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
 
-  void setNumberOfDetectorGroups(const size_t count);
+  void setNumberOfDetectorGroups(const size_t count) const;
   void updateCachedDetectorGrouping(const size_t index,
-                                    const std::set<detid_t> &detIDs);
-  void addDetectorToGroup(const size_t index, const detid_t detID);
-  void addDetectorsToGroup(const size_t index, const std::set<detid_t> &detIDs);
+                                    const std::set<detid_t> &detIDs) const;
 
   /// Set an object describing the source properties and take ownership
   void setModeratorModel(ModeratorModel *source);
@@ -166,13 +165,15 @@ public:
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
+  void invalidateSpectrumDefinitions();
+
   virtual size_t groupOfDetectorID(const detid_t detID) const;
 
 protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 
-  virtual void updateCachedDetectorGroupings();
+  virtual void updateCachedDetectorGroupings() const;
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
@@ -222,6 +223,7 @@ private:
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
+  mutable std::atomic<bool> m_spectrumDefinitionsNeedUpdate{false};
 };
 
 /// Shared pointer to ExperimentInfo
