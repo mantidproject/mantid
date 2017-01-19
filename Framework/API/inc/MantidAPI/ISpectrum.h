@@ -240,7 +240,7 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
-  void setExperimentInfo(ExperimentInfo *experimentInfo);
+  void setExperimentInfo(ExperimentInfo *experimentInfo, const size_t index);
 
 protected:
   virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
@@ -260,6 +260,7 @@ private:
 
   void updateExperimentInfo() const;
   ExperimentInfo *m_experimentInfo{nullptr};
+  size_t m_index;
 
   /// The spectrum number of this spectrum
   specnum_t m_specNo{0};

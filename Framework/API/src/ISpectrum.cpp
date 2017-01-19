@@ -138,23 +138,23 @@ void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
 /// Copy constructor.
 ISpectrum::ISpectrum(const ISpectrum &other)
     : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs) {
-  // m_experimentInfo is not copied: A copy should not refer to the parent of
-  // the source. m_experimentInfo will be nullptr.
+  // m_experimentInfo and m_index are not copied: A copy should not refer to the
+  // parent of the source. m_experimentInfo will be nullptr.
 }
 
 /// Move constructor.
 ISpectrum::ISpectrum(ISpectrum &&other)
     : m_specNo(other.m_specNo), detectorIDs(std::move(other.detectorIDs)) {
-  // m_experimentInfo is not copied: A copy should not refer to the parent of
-  // the source. m_experimentInfo will be nullptr.
+  // m_experimentInfo and m_index are not copied: A copy should not refer to the
+  // parent of the source. m_experimentInfo will be nullptr.
 }
 
 /// Copy assignment.
 ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
   m_specNo = other.m_specNo;
   detectorIDs = other.detectorIDs;
-  // m_experimentInfo is not assigned: The lhs of the assignment keeps its
-  // current values.
+  // m_experimentInfo and m_index are not assigned: The lhs of the assignment
+  // keeps its current values.
   updateExperimentInfo();
   return *this;
 }
@@ -163,8 +163,8 @@ ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
 ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
   m_specNo = other.m_specNo;
   detectorIDs = std::move(other.detectorIDs);
-  // m_experimentInfo is not assigned: The lhs of the assignment keeps its
-  // current values.
+  // m_experimentInfo and m_index are not assigned: The lhs of the assignment
+  // keeps its current values.
   updateExperimentInfo();
   return *this;
 }
@@ -173,10 +173,12 @@ ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
  *
  * This method should not need to be called explicitly, it is called when
  * getting a mutable reference to an ISpectrum stored in a MatrixWorkspace. The
- * pointer set by this method is used to notify the ExperimentInfo that the
- * SpectrumDefinition stored in its Beamline::SpectrumInfo is outdated */
-void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo) {
+ * pointer set by this method is used to push updates of the detector IDs into
+ * the Beamline::SpectrumInfo that is stored in the ExperimentInfo. */
+void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo,
+                                  const size_t index) {
   m_experimentInfo = experimentInfo;
+  m_index = index;
 }
 
 /// Updates detector IDs in the owning ExperimentInfo.
