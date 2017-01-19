@@ -110,14 +110,14 @@ public:
                        const std::string &title) const override;
 
 protected:
-  // The tree manager, a proxy class to retrieve data from the model
-  std::unique_ptr<DataProcessorTreeManager> m_manager;
-  // A workspace receiver we want to notify
-  DataProcessorMainPresenter *m_mainPresenter;
   // The table view we're managing
   DataProcessorView *m_view;
   // The progress view
   ProgressableView *m_progressView;
+  // A workspace receiver we want to notify
+  DataProcessorMainPresenter *m_mainPresenter;
+  // The tree manager, a proxy class to retrieve data from the model
+  std::unique_ptr<DataProcessorTreeManager> m_manager;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
