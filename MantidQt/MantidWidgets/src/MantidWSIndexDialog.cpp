@@ -51,6 +51,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
   options.plots = getPlots();
   options.waterfall = isWaterfallPlotSelected();
   options.tiled = isTiledPlotSelected();
+  options.errors = isErrorBarsSelected();
   return options;
 }
 
@@ -103,7 +104,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
 }
 
 /**
- * Whether the user checked the "waterfall" box
+ * Whether the user selected "waterfall" 
  * @returns True if waterfall plot selected
  */
 bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
@@ -111,11 +112,19 @@ bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
 }
 
 /**
- * Whether the user checked the "tiled" box
+ * Whether the user selected "tiled" 
  * @returns True if tiled plot selected
  */
 bool MantidWSIndexWidget::isTiledPlotSelected() const {
   return (m_plotOptions->currentText() == "Tiled Plot");
+}
+
+/**
+* Whether the user has selected plot with error bars
+* @returns True if error bars are selected
+*/
+bool MantidWSIndexWidget::isErrorBarsSelected() const {
+  return m_showErrorBars->checkState();
 }
 
 /**
@@ -242,6 +251,9 @@ void MantidWSIndexWidget::initSpectraBox() {
  */
 void MantidWSIndexWidget::initOptionsBoxes() {
   m_optionsBox = new QHBoxLayout;
+
+  m_showErrorBars = new QCheckBox("Show Error Bars");
+  m_optionsBox->addWidget(m_showErrorBars);
 
   if (m_waterfall || m_tiled) {
     m_plotOptions = new QComboBox();
@@ -399,7 +411,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
 }
 
 /**
- * Whether the user checked the "waterfall" box
+ * Whether the user selected the "waterfall" plot
  * @returns True if waterfall plot selected
  */
 bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
@@ -407,11 +419,19 @@ bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
 }
 
 /**
- * Whether the user checked the "tiled" box
+ * Whether the user selected the "tiled" plot
  * @returns True if tiled plot selected
  */
 bool MantidWSIndexDialog::isTiledPlotSelected() const {
   return m_widget.isTiledPlotSelected();
+}
+
+/**
+* Whether the user selected error bars
+* @returns True if error bars selected
+*/
+bool MantidWSIndexDialog::isErrorBarsSelected() const {
+  return m_widget.isErrorBarsSelected();
 }
 
 //----------------------------------

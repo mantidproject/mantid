@@ -254,6 +254,7 @@ public:
     QMultiMap<QString, std::set<int>> plots;
     bool waterfall;
     bool tiled;
+    bool errors;
   };
 
   /// Constructor - same parameters as one of the parent constructors, along
@@ -277,6 +278,8 @@ public:
   void plotAllRequested();
   /// Returns whether the tiled plot option has been selected
   bool isTiledPlotSelected() const;
+  /// Returns whether the error bars option has been selected
+  bool isErrorBarsSelected() const;
 
 private slots:
   /// Called when the wsField has been edited.
@@ -325,6 +328,7 @@ private:
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox;
   QHBoxLayout *m_optionsBox;
   QComboBox *m_plotOptions;
+  QCheckBox *m_showErrorBars;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
@@ -342,7 +346,7 @@ public:
   MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags, QList<QString> wsNames,
                       const bool showWaterfallOption = false,
                       const bool showPlotAll = true,
-                      const bool showTiledOption = false);
+                      const bool showTiledOption = false );
   /// Returns a structure holding all of the selected options
   MantidWSIndexWidget::UserInput getSelections() const;
   /// Returns the QMultiMap that contains all the workspaces that are to be
@@ -353,6 +357,8 @@ public:
   bool isWaterfallPlotSelected() const;
   /// Returns whether the tiled plot option has been selected
   bool isTiledPlotSelected() const;
+  /// Returns whether error bars have been selected
+  bool isErrorBarsSelected() const;
 private slots:
   /// Called when the OK button is pressed.
   void plot();

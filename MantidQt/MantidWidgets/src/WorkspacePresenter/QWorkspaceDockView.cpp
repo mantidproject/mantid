@@ -1527,14 +1527,14 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
   if (userInput.plots.empty()) {
     return;
   }
-  bool showErrors = (type == "Errors");
+  bool showErrorBars = ((type == "Errors") || ( type == "Advanced" && userInput.errors ));
 
   if (userInput.tiled) {
     m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
-                             showErrors);
+                             showErrorBars);
   } else {
     m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
-                       showErrors, nullptr, false, userInput.waterfall);
+                       showErrorBars, nullptr, false, userInput.waterfall);
   }
 }
 
