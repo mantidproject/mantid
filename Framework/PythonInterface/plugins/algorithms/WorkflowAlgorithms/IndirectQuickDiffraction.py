@@ -97,7 +97,6 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         self.declareProperty(name='DiffractionWorkspace', defaultValue='Diffraction',
                              doc='Workspace group for the diffraction results')
 
-
     def PyExec(self):
         setup_progress = Progress(self, 0.0, 0.05, 3)
         setup_progress.report('Getting Parameters')
@@ -236,7 +235,6 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         self._output_ws = self.getProperty('ReducedWorkspace').value
         self._scan_ws = self.getProperty('ScanWorkspace').value
 
-
         # Get the IPF filename
         self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
                                           self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml')
@@ -249,7 +247,6 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
 
-
     def _format_runs(self, runs):
         run_list = []
         for run in runs:
@@ -259,7 +256,7 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
             else:
                 run_list.append(int(run))
         for idx in run_list:
-            self._data_files.append(self._instrument_name.lower() + str(idx)+'.raw')
+            self._data_files.append(self._instrument_name.lower() + str(idx) + '.raw')
 
 
 # Register algorithm with Mantid
