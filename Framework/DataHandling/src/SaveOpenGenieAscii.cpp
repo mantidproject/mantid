@@ -1,5 +1,6 @@
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -96,8 +97,8 @@ void SaveOpenGenieAscii::exec() {
   openFileStream(outStream);
 
   progressBar.report("Writing to file");
-  writeDataToFile(outputStream);
-  outputStream.close();
+  writeDataToFile(outStream);
+  outStream.close();
 
   // Indicate we have finished
   progressBar.report();
@@ -107,6 +108,17 @@ void SaveOpenGenieAscii::exec() {
   * Adds ENGINX specific attributes to the output buffer
   */
 void SaveOpenGenieAscii::applyEnginxFormat() {
+  // Bank number
+  addToOutputBuffer("bank", m_intType, std::to_string(determineEnginXBankId()));
+
+  // Spectrum numbers
+  addToOutputBuffer("spec_no", m_stringType, "1");
+
+  // Par file that was used in the calibration
+  // This can be set to none at the moment as it does not affect the analysis
+  addToOutputBuffer("parameter_file", m_stringType, "None.par");
+  addToOutputBuffer("user_name", m_stringType, "NotSet");
+
   // xunit & xlabel put in OpenGenie format
   const std::string xunitsVal = "Time-of-Flight (\\\\gms)";
   addToOutputBuffer("xunits", m_stringType, xunitsVal);
@@ -116,15 +128,6 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
   const std::string yunitsVal = "Neutron counts / \\\\gms";
   addToOutputBuffer("yunits", m_stringType, yunitsVal);
   addToOutputBuffer("ylabel", m_stringType, yunitsVal);
-
-  // Spectrum numbers
-  addToOutputBuffer("spec_no", m_stringType, "1");
-
-  // Par file that was used in the calibration
-  // This can be set to none at the moment as it does not affect the analysis
-  addToOutputBuffer("parameter_file", m_stringType, "None.par");
-
-  addToOutputBuffer("user_name", m_stringType, "NotSet");
 }
 
 /**
@@ -195,6 +198,20 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
   outDataStrings.push_back(std::make_tuple(yValsOutput, yCount));
   outDataStrings.push_back(std::make_tuple(eValsOutput, eCount));
   return outDataStrings;
+}
+
+int SaveOpenGenieAscii::determineEnginXBankId() {
+  const auto &detectorIds = m_inputWS->getSpectrum(0).getDetectorIDs();
+  const std::string firstDetectorId = std::to_string(*detectorIds.cbegin());
+
+  if (firstDetectorId.length() != 6) {
+    throw std::runtime_error("Could not determine bank number as detector ID"
+                             " was not of expected length");
+  }
+
+  // ENGIN-X format is 1X001, 1X002, 1X003...etc. for detectors
+  // where X = 0 is bank 1. X = 1 is bank 2.
+  return firstDetectorId[1] == '0' ? 1 : 2;
 }
 
 /** Reads the sample logs and converts them from the log name in
@@ -288,11 +305,11 @@ void SaveOpenGenieAscii::inputValidation() {
   *
   * @return:: The opened file as an file stream
   */
-void SaveOpenGenieAscii::openFileStream(std::ofstream stream) {
+void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
   // file
-  stream.name(filename.c_str());
+  stream.open(filename);
   if (!stream) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
@@ -387,7 +404,8 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   if (getProperty("IncludeHeader")) {
     outfile << "# Open Genie ASCII File #\n"
             << "# label \n"
-            << "GXWorkspace\n" << m_outputVector.size() << '\n';
+            << "GXWorkspace\n"
+            << m_outputVector.size() << '\n';
   }
 
   // Sort by parameter name

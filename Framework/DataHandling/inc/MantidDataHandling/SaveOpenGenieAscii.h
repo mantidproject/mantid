@@ -58,6 +58,9 @@ private:
   /// Converts XYE data to OPENGENIE strings and number of data points
   std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();
 
+  /// Determines the ENGIN-X bank from the detectors IDs present
+  int determineEnginXBankId();
+
   /// Parses and stores appropriate output logs into the output buffer
   void getSampleLogs();
 
@@ -65,7 +68,7 @@ private:
   void inputValidation();
 
   /// Attempts to open the user specified file path as an output stream
-  void openFileStream(std::ofstream stream);
+  void openFileStream(std::ofstream &stream);
 
   /// Parses and stores the workspace data into the output buffer
   void parseWorkspaceData();
