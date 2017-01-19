@@ -112,7 +112,7 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         IndirectILLReduction(**self.kwargs)
         red_workspace = mtd[self.kwargs['ReducedWorkspace']]
-        self.assertEqual(24, red_workspace.getNumberHistograms())
+        self.assertEqual(18, red_workspace.getNumberHistograms())
 
 
 if __name__ == '__main__':
