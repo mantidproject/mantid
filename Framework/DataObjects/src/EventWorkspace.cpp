@@ -150,7 +150,7 @@ EventList &EventWorkspace::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
   auto &spec = const_cast<EventList &>(
       static_cast<const EventWorkspace &>(*this).getSpectrum(index));
-  spec.setExperimentInfo(this, index);
+  spec.setExperimentInfo(this);
   return spec;
 }
 
