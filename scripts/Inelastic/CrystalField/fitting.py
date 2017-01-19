@@ -226,7 +226,7 @@ class CrystalField(object):
     def _makeMultiAttributes(self):
         """
         Make the main attribute part of the function string for makeMultiSpectrumFunction()
-        """
+        """ 
         out = ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         out += ',PeakShape=%s' % self.getPeak().name
         out += ',FixAllPeaks=%s' % (1 if self._fixAllPeaks else 0)
@@ -706,6 +706,45 @@ class CrystalField(object):
         x_max += deltaX
         return x_min, x_max
 
+    def check_consistency(self):
+        """ Checks that list input variables are consistent """
+        properties = [self._temperature, self._FWHM, self._intensityScaling]
+        numels = []
+        for prop in properties:
+            if prop is not None:
+                numels.append(len(prop) if hasattr(prop, '__len__') else 1)
+        if len(set(numels)) > 1:
+            errmsg = 'The Temperature, FWHM, and IntensityScaling properties have different '
+            errmsg += 'number of elements implying different number of spectra.'
+            raise ValueError(errmsg)
+        # Now convert one element list to scalars
+        if numels:
+            if hasattr(self.peaks, '__len__'):
+                # This should not occur, but may do if the user changes the temperature(s) after
+                # initialisation. In which case, we reset the peaks, giving a warning. 
+                if len(self.peaks) != numels[0]:
+                    from .function import PeaksFunction
+                    errmsg = 'Internal inconsistency between number of spectra and list of '
+                    errmsg += 'temperatures. Changing number of spectra to match temperature. '
+                    errmsg += 'This may reset some peaks constraints / limits'
+                    warnings.warn(errmsg, RuntimeWarning)
+                    if len(self.peaks) > numels[0]:          # Truncate
+                        self.peaks = self.peaks[0:numels[0]]
+                    else:                                    # Append empty PeaksFunctions
+                        for i in range(len(self.peaks), numels[0]):
+                            self.peaks.append(PeaksFunction(self.peaks[0].name(), firstIndex=0))
+            if numels[0] == 1:
+                if hasattr(self._temperature, '__len__') and self._temperature is not None:
+                    self._temperature = self._temperature[0]
+                    if hasattr(self.peaks, '__len__'):
+                        self.peaks = self.peaks[0]
+                if hasattr(self._FWHM, '__len__') and self._FWHM is not None:
+                    self._FWHM = self._FWHM[0]
+                if hasattr(self._intensityScaling, '__len__') and self._intensityScaling is not None:
+                    self._intensityScaling = self._intensityScaling[0]
+        # Returns the implied number of datasets (for checking CrystalFieldFit)
+        return numels[0] if numels else 0
+
     def __add__(self, other):
         if isinstance(other, CrystalFieldMulti):
             return other.__radd__(self)
@@ -947,6 +986,14 @@ class CrystalFieldMulti(object):
         s = ';ties=(%s)' % ','.join(ties)
         return s
 
+    def check_consistency(self):
+        """ Checks that list input variables are consistent """
+        num_spec = []
+        for site in self.sites:
+            num_spec.append(site.check_consistency())
+        if len(set(num_spec)) > 1:
+            raise ValueError('Number of spectra for each site not consistent with each other')
+
     def __add__(self, other):
         if isinstance(other, CrystalFieldMulti):
             cfm = CrystalFieldMulti()
@@ -1014,6 +1061,7 @@ class CrystalFieldFit(object):
         """
         Run Fit algorithm. Update function parameters.
         """
+        self.check_consistency()
         if isinstance(self._input_workspace, list):
             return self._fit_multi()
         else:
@@ -1031,6 +1079,7 @@ class CrystalFieldFit(object):
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
         from CrystalField.normalisation import split2range
         from mantid.api import mtd
+        self.check_consistency()
         ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
                              Parameters=Parameters)
         constraints = [('%s<%s<%s' % (-bound, parName, bound)) for parName, bound in ranges.items()]
@@ -1155,3 +1204,16 @@ class CrystalFieldFit(object):
     def _set_fit_properties(self, alg):
         for prop in self._fit_properties.items():
             alg.setProperty(*prop)
+
+    def check_consistency(self):
+        """ Checks that list input variables are consistent """
+        num_ws = self.model.check_consistency()
+        errmsg = 'Number of input workspaces not consistent with model'
+        if hasattr(self._input_workspace, '__len__'):
+            if num_ws != len(self._input_workspace):
+                raise ValueError(errmsg)
+            # If single element list, force use of _fit_single()
+            if len(self._input_workspace) == 1:
+                self._input_workspace = self._input_workspace[0]
+        elif num_ws != 1:
+            raise ValueError(errmsg)
