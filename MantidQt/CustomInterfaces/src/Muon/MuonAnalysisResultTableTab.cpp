@@ -25,7 +25,8 @@
 #include <QMessageBox>
 
 #include <algorithm>
-
+namespace{
+const std::string running = "running"; }
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Muon {
@@ -43,7 +44,7 @@ const QString MuonAnalysisResultTableTab::RUN_END_LOG("run_end");
 const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{
     MuonAnalysisResultTableTab::RUN_NUMBER_LOG, "group", "period",
     RUN_START_LOG, RUN_END_LOG, "sample_temp", "sample_magn_field"};
-
+ 
 /**
 * Constructor
 */
@@ -498,26 +499,17 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     std::string wsName = fittedWsList[i].toStdString();
     auto ws = retrieveWSChecked<ExperimentInfo>(wsName + WORKSPACE_POSTFIX);
     const std::vector<Property *> &logData = ws->run().getLogData();
-    const TimeSeriesProperty<bool> *runningLog; // defined here to keep the
-                                                // object in scope. If
-                                                // applicable it is assigned a
-                                                // value within an if statement.
-
-    std::string running = "running"; // define the running log via a string to
-                                     // prevent typos between different
-                                     // occurances.
+    const TimeSeriesProperty<bool> *runningLog=nullptr; 
     Property *runLog =
-        nullptr; // defined here to keep the object in scope. If applicable
-                 // it is assigned a value within an if statement.
-
-    bool foundRunning = ws->run().hasProperty(
-        running); // If a running log is found within the workspace
+        nullptr;  
+    const bool foundRunning = ws->run().hasProperty(
+        running); 
     if (foundRunning) {
       runLog = ws->run().getLogData(running);
       runningLog = dynamic_cast<TimeSeriesProperty<bool> *>(
-          runLog); // need a TimeSeriesProperty <bool> to apply the filter
+          runLog); 
 
-    } else // if runnunglog is empty throw a warning
+    } else 
     {
       Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
       g_log.warning(
@@ -528,9 +520,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
       if (TimeSeriesProperty<double> *log =
               dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
 
-        auto mylog = log->clone(); // clone to preserve the original object
-        if (foundRunning) {        // if the running log exists apply the filter
-                                   // (status) otherwise do not apply a filter
+        auto mylog = log->clone(); 
+        if (foundRunning) {       
           mylog->filterWith(runningLog);
         }
         QString logFile(QFileInfo(prop->name().c_str()).fileName());
@@ -829,3 +820,4 @@ std::string MuonAnalysisResultTableTab::getFileName() {
 }
 }
 }
+
