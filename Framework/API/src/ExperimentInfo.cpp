@@ -1094,12 +1094,24 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return *m_spectrumInfoWrapper;
 }
 
+/** Sets the SpectrumInfo, including the SpectrumDefinition for all spectra.
+ *
+ * This method may only be used if the client code can guarantee that the
+ * spectra defined in the MatrixWorkspace (i.e., the detector IDs stored in the
+ * ISpectra) match the spectrum definitions in `spectrumInfo`. In general it
+ * should not be necessary to use this method: Copy constructors and the
+ * workspace factories take care of copying the SpectrumInfo. */
 void ExperimentInfo::setSpectrumInfo(
     const Beamline::SpectrumInfo &spectrumInfo) {
   m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(spectrumInfo);
   m_spectrumDefinitionsNeedUpdate = false;
 }
 
+/** Notifies the ExperimentInfo that the spectrum definitions have changed.
+ *
+ * ExperimentInfo will rebuild its spectrum definitions before the next use. In
+ * general it should not be necessary to use this method: ISpectrum will take
+ * care of this when its detetor IDs are modified. */
 void ExperimentInfo::invalidateSpectrumDefinitions() {
   m_spectrumDefinitionsNeedUpdate = true;
 }
