@@ -27,7 +27,6 @@ class IndirectQuickDiffractionTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         # Check Reduction
-
         wks = mtd['iris26176_ew_scan_red']
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
@@ -38,7 +37,7 @@ class IndirectQuickDiffractionTest(unittest.TestCase):
 
         # Check ElasticWindowScan
         wks = mtd['iris26176_ew_scan_eisf']
-        self.assertEqual(wks.dataX(0), 1.36593154)
+        self.assertEqual(round(wks.dataX(0)[0], 6), 1.365932)
 
 
 if __name__ == '__main__':
