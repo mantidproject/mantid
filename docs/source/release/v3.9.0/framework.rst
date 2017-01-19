@@ -83,6 +83,7 @@ CurveFitting
 - Recommendations for which fitting to use added to :ref:`FittingMinimzers page <FittingMinimizers>`.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates initial values of a fiting function in given intervals.
+- New property of :ref:`Fit <algm-Fit>` `Exclude` sets ranges that need to be excluded from a fit.
 - Fit Function :ref:`FunctionQDepends <func-FunctionQDepends>` as the base class for QENS models depending on Q.
 
 Improved
