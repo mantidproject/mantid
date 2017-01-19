@@ -490,17 +490,18 @@ void MaskDetectors::appendToDetectorListFromWS(
     const MatrixWorkspace_const_sptr inputWs,
     const MatrixWorkspace_const_sptr maskWs,
     const std::tuple<size_t, size_t, bool> &range_info) {
-  size_t startIndex = std::get<0>(range_info);
-  size_t endIndex = std::get<1>(range_info);
-
+  const auto startIndex = std::get<0>(range_info);
+  const auto endIndex = std::get<1>(range_info);
   const auto &detMap = inputWs->getDetectorIDToWorkspaceIndexMap();
   detectorList.reserve(maskWs->getNumberHistograms());
 
   for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
     if (maskWs->y(i)[0] == 0) {
-      auto id = maskWs->getDetector(i)->getID();
-      if (detMap.at(id) >= startIndex && detMap.at(id) <= endIndex)
-        detectorList.push_back(id);
+      const auto &spec = maskWs->getSpectrum(i);
+      for (const auto &id : spec.getDetectorIDs()) {
+        if (detMap.at(id) >= startIndex && detMap.at(id) <= endIndex)
+          detectorList.push_back(id);
+      }
     }
   }
 }
