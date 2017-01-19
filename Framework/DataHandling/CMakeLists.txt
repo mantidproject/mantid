@@ -402,6 +402,7 @@ set ( TEST_FILES
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadISISNexusTest.h
+        LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
 	LoadIsawDetCalTest.h
@@ -435,6 +436,7 @@ set ( TEST_FILES
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
+        LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
 	LoadSavuTomoConfigTest.h

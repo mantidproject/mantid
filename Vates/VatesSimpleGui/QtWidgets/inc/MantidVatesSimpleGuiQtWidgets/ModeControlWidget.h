@@ -73,7 +73,7 @@ public slots:
   void setToSelectedView(ModeControlWidget::Views view);
 
   /// Convert a string into an enum
-  ModeControlWidget::Views getViewFromString(QString view);
+  ModeControlWidget::Views getViewFromString(const QString &view);
 
 signals:
   /**

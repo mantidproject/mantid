@@ -346,9 +346,10 @@ public:
     mc->setRethrows(true);
     mc->setPropertyValue(
         "Function",
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,"
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,FixAllPeaks=1,"
         "Symmetry=C2v,Temperatures=(44.0, 50.0),FWHMs=(1.0, 1.0),NPeaks=3,"
-        "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
+        "constraints=(0<B20<0.5,3<B22<4,-0.1<B40<0.0,-0.1<B42<0.0,-0.1<B44<0."
+        "0)");
     mc->setProperty("InputWorkspace", ws);
     mc->setProperty("WorkspaceIndex", 0);
     mc->setProperty("InputWorkspace_1", ws);

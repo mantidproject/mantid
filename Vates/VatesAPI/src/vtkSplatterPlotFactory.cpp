@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/Normalization.h"
 
 #include <vtkCellData.h>
+#include <vtkCellType.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
 #include <vtkNew.h>
@@ -211,6 +212,12 @@ void vtkSplatterPlotFactory::doCreate(
   // Add points and scalars
   visualDataSet->SetPoints(points.GetPointer());
   visualDataSet->GetPointData()->SetScalars(signal.GetPointer());
+  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+
+  visualDataSet->Allocate(points->GetNumberOfPoints());
+  for (vtkIdType ptId = 0; ptId < points->GetNumberOfPoints(); ++ptId) {
+    visualDataSet->InsertNextCell(VTK_VERTEX, 1, &ptId);
+  }
 }
 
 /**
@@ -243,22 +250,22 @@ void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
  * scalar data.
  */
 void vtkSplatterPlotFactory::doCreateMDHisto(
-    IMDHistoWorkspace_sptr workspace) const {
+    const IMDHistoWorkspace &workspace) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault
   // from algos modifying wworkspace)
-  ReadLock lock(*workspace);
+  ReadLock lock(workspace);
 
   // Get the geometric information of the bins
-  const int nBinsX = static_cast<int>(workspace->getXDimension()->getNBins());
-  const int nBinsY = static_cast<int>(workspace->getYDimension()->getNBins());
-  const int nBinsZ = static_cast<int>(workspace->getZDimension()->getNBins());
+  const int nBinsX = static_cast<int>(workspace.getXDimension()->getNBins());
+  const int nBinsY = static_cast<int>(workspace.getYDimension()->getNBins());
+  const int nBinsZ = static_cast<int>(workspace.getZDimension()->getNBins());
 
-  const coord_t maxX = workspace->getXDimension()->getMaximum();
-  const coord_t minX = workspace->getXDimension()->getMinimum();
-  const coord_t maxY = workspace->getYDimension()->getMaximum();
-  const coord_t minY = workspace->getYDimension()->getMinimum();
-  const coord_t maxZ = workspace->getZDimension()->getMaximum();
-  const coord_t minZ = workspace->getZDimension()->getMinimum();
+  const coord_t maxX = workspace.getXDimension()->getMaximum();
+  const coord_t minX = workspace.getXDimension()->getMinimum();
+  const coord_t maxY = workspace.getYDimension()->getMaximum();
+  const coord_t minY = workspace.getYDimension()->getMinimum();
+  const coord_t maxZ = workspace.getZDimension()->getMaximum();
+  const coord_t minZ = workspace.getZDimension()->getMinimum();
 
   coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
   coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
@@ -285,13 +292,13 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   vtkNew<vtkVertex> vertex;
 
   // Check if the workspace requires 4D handling.
-  bool do4D = doMDHisto4D(workspace);
+  bool do4D = doMDHisto4D(&workspace);
 
   // Get the transformation that takes the points in the TRANSFORMED space back
   // into the ORIGINAL (not-rotated) space.
   Mantid::API::CoordTransform const *transform = nullptr;
   if (m_useTransform) {
-    transform = workspace->getTransformToOriginal();
+    transform = workspace.getTransformToOriginal();
   }
 
   Mantid::coord_t in[3];
@@ -346,17 +353,17 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
  * @returns The scalar signal.
  */
 signal_t
-vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,
+vtkSplatterPlotFactory::extractScalarSignal(const IMDHistoWorkspace &workspace,
                                             bool do4D, const int x, const int y,
                                             const int z) const {
   signal_t signalScalar;
 
   if (do4D) {
-    signalScalar = workspace->getSignalNormalizedAt(
+    signalScalar = workspace.getSignalNormalizedAt(
         static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z),
         static_cast<size_t>(m_time));
   } else {
-    signalScalar = workspace->getSignalNormalizedAt(
+    signalScalar = workspace.getSignalNormalizedAt(
         static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z));
   }
 
@@ -369,19 +376,13 @@ vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,
  * @returns Is the workspace 4D?
  */
 bool vtkSplatterPlotFactory::doMDHisto4D(
-    IMDHistoWorkspace_sptr workspace) const {
-  bool do4D = false;
-
+    const IMDHistoWorkspace *workspace) const {
   bool bExactMatch = true;
-
-  IMDHistoWorkspace_sptr workspace4D =
-      castAndCheck<IMDHistoWorkspace, 4>(workspace, bExactMatch);
-
-  if (workspace4D) {
-    do4D = true;
+  if (workspace &&
+      checkWorkspace<IMDHistoWorkspace, 4>(*workspace, bExactMatch)) {
+    return true;
   }
-
-  return do4D;
+  return false;
 }
 
 /**
@@ -437,7 +438,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
 
   // Set the instrument
-  m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
+  m_instrument = m_metaDataExtractor->extractInstrument(m_workspace.get());
   double *range = nullptr;
 
   if (dataSet) {
@@ -459,7 +460,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
     // Macro to call the right instance of the
     CALL_MDEVENT_FUNCTION(this->doCreate, eventWorkspace);
   } else {
-    this->doCreateMDHisto(histoWorkspace);
+    this->doCreateMDHisto(*histoWorkspace);
   }
 
   // Add metadata in json format
@@ -476,7 +477,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
  * not an IMDEventWorkspace, throws an invalid argument exception.
  * @param ws : Workspace to use.
  */
-void vtkSplatterPlotFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkSplatterPlotFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   this->m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
   this->validate();
 }
@@ -526,7 +527,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
     m_metadataJsonManager->setMinValue(m_minValue);
     m_metadataJsonManager->setMaxValue(m_maxValue);
     m_metadataJsonManager->setInstrument(
-        m_metaDataExtractor->extractInstrument(m_workspace));
+        m_metaDataExtractor->extractInstrument(m_workspace.get()));
     m_metadataJsonManager->setSpecialCoordinates(
         static_cast<int>(m_workspace->getSpecialCoordinateSystem()));
 

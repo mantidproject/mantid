@@ -132,7 +132,7 @@ private:
   pqPipelineSource *m_rebinnedSource;
 
   std::vector<pqPipelineSource *>
-  findAllRebinnedSourcesForWorkspace(std::string workspaceName);
+  findAllRebinnedSourcesForWorkspace(const std::string &workspaceName);
 
   void swapSources(pqPipelineSource *source1, pqPipelineSource *source2);
 
@@ -142,9 +142,9 @@ private:
                              std::string &outputWorkspace,
                              pqPipelineSource *source,
                              std::string workspaceName,
-                             std::string algorithmType);
+                             const std::string &algorithmType);
 
-  void untrackWorkspaces(std::pair<std::string, std::string> key);
+  void untrackWorkspaces(const std::pair<std::string, std::string> &key);
 
   void copyProperties(pqPipelineFilter *filter1, pqPipelineFilter *filter2);
 

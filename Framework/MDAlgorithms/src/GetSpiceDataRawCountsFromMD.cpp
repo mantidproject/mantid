@@ -382,8 +382,8 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                  << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
+                  << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -460,7 +460,7 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
     // Check property exists
     if (!expinfo->run().hasProperty(samplelogname)) {
       std::stringstream ess;
-      ess << "Workspace " << mdws->name() << "'s " << iexp
+      ess << "Workspace " << mdws->getName() << "'s " << iexp
           << "-th ExperimentInfo with "
              "run number " << thisrunnumber
           << " does not have specified property " << samplelogname;

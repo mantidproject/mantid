@@ -12,6 +12,8 @@ void export_DetectorInfo() {
       .def("size", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "
            "detectors in the instrument.")
+      .def("isMonitor", &DetectorInfo::isMonitor, (arg("self"), arg("index")),
+           "Returns True if the detector is a monitor.")
       .def("isMasked", &DetectorInfo::isMasked, (arg("self"), arg("index")),
            "Returns True if the detector is masked.");
 }
