@@ -25,6 +25,7 @@ ISIS Reflectometry (Polref)
 - The interface is now arranged in two different groups. Groups apply to tabs 'Run' and 'Settings'.
 - Documentation regarding the interface has been updated accordingly.
 - Error messages are displayed if the user either attempts to transfer zero runs or transfer runs with a different strategy to the one they used to search for runs with. 
+- A new tab, 'Event handling' has been added. This tab allows users to select custom time slices to analyze the data.
 
 ISIS Reflectometry
 ##################
