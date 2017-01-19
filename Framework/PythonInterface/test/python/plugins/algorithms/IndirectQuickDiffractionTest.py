@@ -6,6 +6,7 @@ from mantid.api import *
 
 
 class IndirectQuickDiffractionTest(unittest.TestCase):
+
     def test_basic(self):
         """
         Sanity test to ensure the most basic reduction actually completes.
@@ -38,3 +39,7 @@ class IndirectQuickDiffractionTest(unittest.TestCase):
         # Check ElasticWindowScan
         wks = mtd['iris26176_ew_scan_eisf']
         self.assertEqual(wks.dataX(0), 1.36593154)
+
+
+if __name__ == '__main__':
+    unittest.main()

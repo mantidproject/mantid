@@ -14,6 +14,8 @@ Algorithms
 - :ref:`EnergyWindowScan <algm-EnergyWindowScan>` and :ref:`IndirectQuickRun <algm-IndirectQuickRun>` have been added
   to perform a quick run of *EnergyTransfer*, *Elwin* and optional *MSDFit*
 - A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
+- A new quick run algorithm :ref:`IndirectQuickDiffraction <algm-IndirectQuickDiffraction>` has been added that reduces data using
+  *EnergyWindowScan* and also performs a diffraction reduction on the same runs.
 
 Data Reduction
 ##############
