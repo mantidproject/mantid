@@ -51,7 +51,7 @@ New
 
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
 
-- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be 
+- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be
   used to create a workspace with just the detectors, or two workspaces, one with the monitors and one with the detectors.
 
 Improved
@@ -158,7 +158,7 @@ CurveFitting
 - Added a new minimizer belonging to the trust region family of algorithms developped for Mantid by the SCD
   Numerical Analysis Group at RAL. It has better performance characteristics compared to the existing
   minimizers especially when applied to the most difficult fitting problems.
-- Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
+- Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset
   is a histogram with large bins it can improve accuracy of the fit.
 - The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
   minimizer and a comparison against neutron data examples.
@@ -173,7 +173,7 @@ Others
 - The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
   is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
   in a more predictable manner.
-  
+
 
 Python
 ------
