@@ -125,7 +125,6 @@ void TomographyROIPresenter::notify(Notification notif) {
   }
 }
 
-
 void TomographyROIPresenter::processInit() {
   ImageStackPreParams p;
   m_view->setParams(p);
