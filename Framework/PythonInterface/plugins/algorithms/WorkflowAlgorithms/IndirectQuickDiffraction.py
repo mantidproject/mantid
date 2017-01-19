@@ -89,11 +89,14 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Toggle input file summing or sequential processing')
 
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Switch Plot Off/On')
+        # Output
+        self.declareProperty(name='ReducedWorkspace', defaultValue='Reduced',
+                             doc='Workspace group for the resulting workspaces.')
+        self.declareProperty(name='ScanWorkspace', defaultValue='Scan',
+                             doc='Workspace for the scan results.')
+        self.declareProperty(name='DiffractionWorkspace', defaultValue='Diffraction',
+                             doc='Workspace group for the diffraction results')
 
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Switch Save result to nxs file Off/On')
 
     def PyExec(self):
         setup_progress = Progress(self, 0.0, 0.05, 3)
@@ -138,16 +141,7 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         scan_alg.execute()
         logger.information('OutputWorkspace : %s' % self._diff_ws_out)
 
-        post_progress = Progress(self, 0.95, 1.0, 3)
-        if self._plot:
-            post_progress.report('Plotting')
-            self._plot_result()
-
-        if self._save:
-            post_progress.report('Saving')
-            self._save_output()
-
-        post_progress.report('Algorithm Complete')
+        process_prog.report('Algorithm Complete')
 
     def validateInputs(self):
         """
@@ -209,7 +203,6 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         runs = self.getProperty('RunNumbers').value
         self._data_files = []
         self._format_runs(runs)
-        first_file = self._data_files[0]
         self._sum_files = self.getProperty('SumFiles').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._calibration_ws = ''
@@ -226,6 +219,7 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         self._diff_rebin = ''
         self._diff_mode = 'diffspec'
         self._diff_cal = self.getProperty('DiffractionCalibrationFile').value
+        self._diff_ws_out = self.getProperty('DiffractionWorkspace').value
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
         self._grouping_ws = ''
@@ -239,12 +233,9 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
             logger.warning("MSDFit will not run if GroupingMethod is 'All'")
             self._msdfit = False
 
-        self._output_ws = first_file + '_ew_scan_red'
-        self._scan_ws = first_file + '_ew_scan'
-        self._diff_ws_out = first_file + '_diff_scan'
+        self._output_ws = self.getProperty('ReducedWorkspace').value
+        self._scan_ws = self.getProperty('ScanWorkspace').value
 
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
 
         # Get the IPF filename
         self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
@@ -258,51 +249,6 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
 
-    def _save_output(self):
-        from mantid.simpleapi import SaveNexusProcessed
-        workdir = config['defaultsave.directory']
-        el_eq1_path = os.path.join(workdir, self._scan_ws + '_el_eq1.nxs')
-        logger.information('Creating file : %s' % el_eq1_path)
-        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_el_eq1',
-                           Filename=el_eq1_path)
-        el_eq2_path = os.path.join(workdir, self._scan_ws + '_el_eq2.nxs')
-        logger.information('Creating file : %s' % el_eq2_path)
-        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_el_eq2',
-                           Filename=el_eq2_path)
-
-        inel_eq1_path = os.path.join(workdir, self._scan_ws + '_inel_eq1.nxs')
-        logger.information('Creating file : %s' % inel_eq1_path)
-        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_inel_eq1',
-                           Filename=inel_eq1_path)
-        inel_eq2_path = os.path.join(workdir, self._scan_ws + '_inel_eq2.nxs')
-        logger.information('Creating file : %s' % inel_eq2_path)
-        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_inel_eq2',
-                           Filename=inel_eq2_path)
-
-        eisf_path = os.path.join(workdir, self._scan_ws + '_eisf.nxs')
-        logger.information('Creating file : %s' % eisf_path)
-        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_eisf',
-                           Filename=eisf_path)
-
-        if self._msdfit:
-            msd_path = os.path.join(workdir, self._scan_ws + '_msd.nxs')
-            logger.information('Creating file : %s' % msd_path)
-            SaveNexusProcessed(InputWorkspace=self._scan_ws + '_msd',
-                               Filename=msd_path)
-            msd_fit_path = os.path.join(workdir, self._scan_ws + '_msd_fit.nxs')
-            logger.information('Creating file : %s' % msd_fit_path)
-            SaveNexusProcessed(InputWorkspace=self._scan_ws + '_msd_fit',
-                               Filename=msd_fit_path)
-
-    def _plot_result(self):
-        import mantidplot as mp
-        mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True)
-        mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True)
-        mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True)
-        mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True)
-        mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True)
-        if self._msdfit:
-            mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)
 
     def _format_runs(self, runs):
         run_list = []
@@ -313,7 +259,7 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
             else:
                 run_list.append(int(run))
         for idx in run_list:
-            self._data_files.append(self._instrument_name.lower() + str(idx))
+            self._data_files.append(self._instrument_name.lower() + str(idx)+'.raw')
 
 
 # Register algorithm with Mantid
