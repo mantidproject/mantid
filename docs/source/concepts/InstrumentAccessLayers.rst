@@ -1,8 +1,8 @@
-.. _CachingLayers:
+.. _InstrumentAccessLayers:
 
-==============================================
-Caching Layers - SpectrumInfo and DetectorInfo
-==============================================
+===================================================
+Instrument Access via SpectrumInfo and DetectorInfo
+===================================================
 
 .. contents::
   :local:
@@ -11,6 +11,10 @@ Introduction
 ------------
 
 There are two caching layers, ``SpectrumInfo`` and ``DetectorInfo``, that are going to be introduced to Mantid as part of the work towards Instrument 2.0. Eventually these classes will cache commonly accessed information about spectra or detectors, namely masking, monitor flags, L1, L2, 2-theta and position, leading to improved performance and cleaner code.
+
+A spectrum corresponds to (a group of) one or more detectors. Most algorithms work with spectra and thus ``SpectrumInfo`` would be used. Some algorithms work on a lower level (with individual detectors) and thus ``DetectorInfo`` would be used.
+
+In many cases direct access to ``Instrument`` can be removed by using these layers. This will also help in moving to using indexes for enumeration, and only working with IDs for user-facing input.
 
 Current Status
 ##############
@@ -25,9 +29,9 @@ ____________
 DetectorInfo
 ____________
 
-``DetectorInfo`` can be obtained from a call to ``ExperimentInfo::detectorInfo()`` (usually this would be called on a ``MatrixWorkspace``). The wrapper class holds a reference to the parametrised instrument for retrieving the relevant information.
+``DetectorInfo`` can be obtained from a call to ``ExperimentInfo::detectorInfo()`` (usually this method would be called on ``MatrixWorkspace``). The wrapper class holds a reference to the parametrised instrument for retrieving the relevant information.
 
-There is also a real ``DetectorInfo`` class that has masking implemented, which the ``DetectorInfo`` holds a reference to. This is not important for the discussion of the rollout, but all masking operations are now going via the real ``DetectorInfo`` layer.
+There is also a partial implementation of the "real" ``DetectorInfo`` class, in the ``Beamline`` namespace. The real class currently stores the masking information for a detector. The wrapper ``DetectorInfo`` class holds a reference to the real class. This does not affect the rollout, where the wrapper class should be used.
 
 Changes for Rollout
 -------------------
@@ -69,7 +73,7 @@ The try/catch pattern for checking if a spectrum has a detector might look somet
 
   ...
 
-  const aut &spectrumInfo = ws->spectrumInfo();
+  const auto &spectrumInfo = ws->spectrumInfo();
 
   if (spectrumInfo.hasDetectors(wsIndex)) {
     // do stuff
@@ -88,7 +92,7 @@ In this case, which is generally more common, the check is for at least one dete
 
   ...
 
-  const aut &spectrumInfo = ws->spectrumInfo();
+  const auto &spectrumInfo = ws->spectrumInfo();
 
   if (!spectrumInfo.hasUniqueDetector(wsIndex)) {
     // do exception
@@ -116,6 +120,8 @@ ___________
 Complete Examples
 _________________
 
+* `FindCenterOfMassPosition2.cpp <https://github.com/mantidproject/mantid/pull/17394/files#diff-905c244467474fc320eaf3b8c7a9f0dd>`_
+
 * `CreatePSDBleedMask.cpp <https://github.com/mantidproject/mantid/pull/18218/files#diff-f490acf06e76f93898dc7d486c8dfa93>`_
 
 * `HRPDSlabCanAbsorption.cpp <https://github.com/mantidproject/mantid/pull/18464/files#diff-fc151838d9d7cc2e4ea469e98472c791>`_
@@ -137,9 +143,11 @@ The conversion is similar to that for ``SpectrumInfo``. For ``DetectorInfo`` all
 
 **Indexing**
 
-The ``DetectorInfo`` object is accessed by an index going from 0 to the number of detectors. A vector of detector IDs can be obtained from a call to ``detectorInfo.detectorIDs()``. Alternatively the method ``detectorInfo.indexOf(detID)`` can be used to get the index for a particular detector ID. Examples of both of these are given below.
+The ``DetectorInfo`` object is accessed by an index going from 0 to the number of detectors. A vector of detector IDs can be obtained from a call to ``detectorInfo.detectorIDs()``.
 
-Below are example refactorings with different approaches for the indexing.
+It is also possible to use the method ``detectorInfo.indexOf(detID)`` to get the index for a particular detector ID. However, this is a call to a lookup in an unordered map, so is an expensive calculation which should be avoided where possible.
+
+Below is an example refactoring.
 
 **Before refactoring**
 
@@ -167,7 +175,7 @@ Below are example refactorings with different approaches for the indexing.
 
   ...
 
-  const auto &instrument = ws->detectorInfo();
+  const auto &detectorInfo = ws->detectorInfo();
   if (detectorInfo.size() == 0)
     throw runtime_error("There is no instrument in input workspace.")
 
@@ -176,26 +184,6 @@ Below are example refactorings with different approaches for the indexing.
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMasked(i)) {
       maskedDetIds.push_back(detIds[i]);
-    }
-  }
-
-**After - looping over detector IDs**
-
-.. code-block:: c++
-
-  #include "MantidAPI/Detector.h"
-
-  ...
-
-  const auto &instrument = ws->detectorInfo();
-  if (detectorInfo.size() == 0)
-    throw runtime_error("There is no instrument in input workspace.")
-
-  vector<detid_t> detIds = detectorInfo.detectorIDs();
-
-  for (detid_t detId : detIds) {
-    if (detectorInfo.isMasked(detectorInfo.indexOf(detId))) {
-      maskedDetIds.push_back(detId);
     }
   }
 
@@ -211,6 +199,8 @@ See tips for ``SpectrumInfo`` - the same advice applies to using ``DetectorInfo`
 
 Complete Examples
 _________________
+
+* `FindDetectorsInShape.cpp <https://github.com/mantidproject/mantid/commit/177ad14b25db7c40ee10be513512be9ae7dd0da1#diff-7f367da22c1a837b315b4bca5b2b3e24>`_
 
 * `SmoothNeighbours.cpp <https://github.com/mantidproject/mantid/pull/18295/files#diff-26a49ef923e1bdd77677b962528d1e01>`_
 
