@@ -6,7 +6,23 @@ import numpy as np
 
 # TODO write performance test, execution and memory usage!
 def supported_formats():
-    return ['fits', 'fit', 'nxs']
+    try:
+        import pyfits
+        fits_available = True
+    except ImportError:
+        fits_available = False
+
+    try:
+        import h5py
+        h5nxs_available = True
+    except ImportError:
+        h5nxs_available = False
+
+    avail_list = \
+        (['fits', 'fit'] if fits_available else []) + \
+        (['nxs'] if h5nxs_available else [])
+
+    return avail_list
 
 
 def read_in_stack(config):
@@ -17,13 +33,24 @@ def read_in_stack(config):
 
     :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
     """
+    input_path = config.func.input_path
+    input_path_flat = config.func.input_path_flat
+    input_path_dark = config.func.input_path_dark
+    img_format = config.func.in_format
+    data_dtype = config.func.data_dtype
+    h = config.helper
 
-    sample, flat, dark = read_stack_of_images(config.func.input_path,
-                                              config.func.input_path_flat,
-                                              config.func.input_path_dark,
-                                              config.func.in_format,
-                                              argument_data_dtype=config.func.data_dtype,
-                                              h=config.helper)
+    if img_format in ['fits', 'fit']:
+        sample, flat, dark = read_stack_of_images(
+            input_path, input_path_flat, input_path_dark, img_format, data_dtype, h)
+
+    elif img_format in ['nxs']:
+        data_file = _get_stack_file_names(input_path, img_format)
+
+        # It is assumed that all images have the same size and properties as the
+        # first.
+        # read in .nxs file
+        sample, flat, dark = _read_nxs(data_file[0])
 
     from recon.helper import Helper
     Helper.check_data_stack(sample)
@@ -32,8 +59,7 @@ def read_in_stack(config):
 
 
 def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
-                         file_extension='fits', file_prefix='',
-                         flat_file_prefix='', dark_file_prefix='', argument_data_dtype=np.float32, h=None):
+                         img_format='fits', argument_data_dtype=np.float32, h=None):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -47,10 +73,7 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     :param sample_path :: path to sample images. Can be a file or directory
     :param flat_file_path :: (optional) path to open beam / flat image(s). Can be a file or directory
     :param dark_file_path :: (optional) path to dark field image(s). Can be a file or directory
-    :param file_extension :: file extension (typically 'tiff', 'tif', 'fits', or 'fit' (not including the dot)
-    :param file_prefix :: prefix for the image files, to filter files that should not be loaded
-    :param flat_file_prefix :: prefix for the flat field image files
-    :param dark_file_prefix :: prefix for the dark field image files
+    :param img_format :: file extension (typically 'tiff', 'tif', 'fits', or 'fit' (not including the dot)
     :param argument_data_dtype: the type in which the data will be loaded, could be float16, float32, float64, uint16
 
     :return :: 3 numpy arrays: input data volume (3d), average of flatt images (2d),
@@ -58,12 +81,12 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     """
 
     sample_file_names = _get_stack_file_names(
-        sample_path, file_prefix, file_extension)
+        sample_path, img_format)
 
     # It is assumed that all images have the same size and properties as the
     # first.
     try:
-        first_sample_img = _read_img(sample_file_names[0], file_extension)
+        first_sample_img = _read_img(sample_file_names[0], img_format)
     except RuntimeError as exc:
         raise RuntimeError(
             "Could not load at least one image file from: {0}. Details: {1}".
@@ -79,46 +102,34 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     img_shape = first_sample_img.shape
 
     sample_data = _load_sample_data(
-        first_sample_img, sample_file_names, img_shape, file_extension, data_dtype, h)
-    flat_avg = _load_flat_data(
-        flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype, h)
-    dark_avg = _load_dark_data(
-        dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype, h)
+        first_sample_img, sample_file_names, img_shape, img_format, data_dtype, h)
+
+    flat_avg = _load_and_avg_data(
+        flat_file_path, img_shape, img_format, data_dtype, h, "Flat")
+    dark_avg = _load_and_avg_data(
+        dark_file_path, img_shape, img_format, data_dtype, h, "Dark")
 
     return sample_data, flat_avg, dark_avg
 
 
-def _load_dark_data(dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype, h=None):
-    if dark_file_path is not None:
-        dark_file_names = _get_stack_file_names(
-            dark_file_path, dark_file_prefix, file_extension)
+def _load_and_avg_data(file_path, img_shape, img_format, data_dtype, h=None, prog_prefix=None):
+    if file_path is not None:
+        file_names = _get_stack_file_names(
+            file_path, img_format)
 
-        dark_data = _read_listed_files(
-            dark_file_names, img_shape, file_extension, data_dtype, h, "Dark")
-        dark_avg = get_data_average(dark_data)
+        data = _read_listed_files(
+            file_names, img_shape, img_format, data_dtype, h, prog_prefix)
+        avg = get_data_average(data)
     else:
-        dark_avg = None  # subtracting 0 will not change the images
-    return dark_avg
+        avg = None
+    return avg
 
 
-def _load_flat_data(flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype, h=None):
-    if flat_file_path is not None:
-        flat_file_names = _get_stack_file_names(
-            flat_file_path, flat_file_prefix, file_extension)
-
-        flat_data = _read_listed_files(
-            flat_file_names, img_shape, file_extension, data_dtype, h, "Flat")
-        flat_avg = get_data_average(flat_data)
-    else:
-        flat_avg = None  # dividing by 1 will not change the images
-    return flat_avg
-
-
-def _load_sample_data(first_sample_img, sample_file_names, img_shape, file_extension, data_dtype, h=None):
+def _load_sample_data(first_sample_img, sample_file_names, img_shape, img_format, data_dtype, h=None):
     # determine what the loaded data was
     if len(img_shape) == 2:  # the loaded file was a single image
         sample_data = _read_listed_files(
-            sample_file_names, img_shape, file_extension, data_dtype, h, "Sample")
+            sample_file_names, img_shape, img_format, data_dtype, h, "Sample")
     elif len(img_shape) == 3:  # the loaded file was a stack of fits images
         sample_data = first_sample_img
     else:
@@ -127,65 +138,84 @@ def _load_sample_data(first_sample_img, sample_file_names, img_shape, file_exten
     return sample_data
 
 
-def _get_stack_file_names(path, file_prefix, file_extension):
-    import os
-    import glob
-
-    path = os.path.expanduser(path)
-
-    files_match = glob.glob(os.path.join(
-        path, "{0}*.{1}".format(file_prefix, file_extension)))
-
-    if len(files_match) <= 0:
-        raise RuntimeError("Could not find any image files in {0}, with prefix: {1}, extension: {2}".
-                           format(path, file_prefix, file_extension))
-
-    # this is a necessary step, otherwise the file order is not guaranteed to be sequential and we could get randomly
-    # ordered stack of images which would produce nonsense
-    files_match.sort(key=_alphanum_key_split)
-
-    return files_match
-
-
-def _alphanum_key_split(path_str):
+def _read_listed_files(files, img_shape, img_format, dtype, h=None, loop_name=None):
     """
-    From a string to a list of alphabetic and numeric elements. Intended to
-    be used for sequence number/natural sorting. In list.sort() the
-    key can be a list, so here we split the alpha/numeric fields into
-    a list. For example (in the final order after sort() would be applied):
+    Read several images in a row into a 3d numpy array. Useful when reading all the sample
+    images, or all the flat or dark images.
 
-    "angle4" -> ["angle", 4]
-    "angle31" -> ["angle", 31]
-    "angle42" -> ["angle", 42]
-    "angle101" -> ["angle", 101]
+    Tried an multiparallel version of this with Python 2.7 multithreading library.
+    Each type -> Pool, processes and threads, and none gave any improvement
+    over linear loading, it was usually up to 50% slower with MP loading.
 
-    Several variants compared here:
-    https://dave.st.germa.in/blog/2007/12/11/exception-handling-slow/
+    The reason is that the loading is IO Bound, not CPU bound, thus
+    multiple threads or processes accessing the IO doesn't provide any benefit.
+
+    :param files :: list of image file paths given as strings
+    :param img_shape :: shape of every image, assumes they all have the same shape
+    :param img_format :: file name extension if fixed (to set the expected image format)
+    :param dtype :: data type for the output numpy array
+
+    Returns:: a 3d data volume with the size of the first (outermost) dimension equal
+    to the number of files, and the sizes of the second and third dimensions equal to
+    the sizes given in the input img_shape
     """
-    import re
-    alpha_num_split_re = re.compile('([0-9]+)')
-    return [int(c) if c.isdigit() else c for c in alpha_num_split_re.split(path_str)]
+
+    h = Helper.empty_init() if h is None else h
+
+    # Zeroing here to make sure that we can allocate the memory.
+    # If it's not possible better crash here than later
+    data = np.zeros((len(files), img_shape[
+                    0], img_shape[1]), dtype=dtype)
+
+    # FIXME TODO PERFORMANCE CRITICAL
+    # TODO Performance Tests
+    h.prog_init(len(files), desc=loop_name)
+    for idx, in_file in enumerate(files):
+        try:
+            data[idx, :, :] = _read_img(in_file, img_format)
+            h.prog_update(1)
+        except ValueError as exc:
+            raise ValueError(
+                "An image has different width and/or height dimensions! All images must have the same dimensions. "
+                "Error message: " + str(exc))
+        except IOError as exc:
+            raise RuntimeError(
+                "Could not load file {0}. Error details: {1}".format(in_file, str(exc)))
+    h.prog_close()
+    return data
 
 
-def _read_img(filename, file_extension=None):
+def _read_img(filename, img_format=None):
     """
     Read one image and return it as a 2d numpy array
 
     :param filename :: name of the image file, can be relative or absolute path
-    :param file_extension :: extension and effectively format to use ('tiff', 'fits')
+    :param img_format :: extension and effectively format to use ('tiff', 'fits')
     """
-    if file_extension in ['fits', 'fit']:
-        pyfits = import_pyfits()
-        image = pyfits.open(filename)
-        if len(image) < 1:
-            raise RuntimeError(
-                "Could not load at least one FITS image/table file from: {0}".format(filename))
+    # currently the only image type is FITS, but there will be tiff
+    return _read_fits(filename)
 
-        # get the image data
-        img_arr = image[0].data
-    else:  # assume .nxs file for now
-        pass
-    return img_arr
+
+def _read_fits(filename):
+    pyfits = import_pyfits()
+    image = pyfits.open(filename)
+    if len(image) < 1:
+        raise RuntimeError(
+            "Could not load at least one FITS image/table file from: {0}".format(filename))
+
+    # get the image data
+    return image[0].data
+
+
+def _read_nxs(filename):
+    import h5py
+    nexus = h5py.File(filename, 'r')
+    data = nexus["entry1/tomo_entry/instrument/detector/data"]
+    dark = data[-1, :, :]
+
+    flat = data[-2, :, :]
+
+    return data[:-2, :, :], flat, dark
 
 
 def import_pyfits():
@@ -220,49 +250,46 @@ def import_skimage_io():
     return skio
 
 
-def _read_listed_files(files, slice_img_shape, file_extension, dtype, h=None, loop_name=None):
-    """
-    Read several images in a row into a 3d numpy array. Useful when reading all the sample
-    images, or all the flat or dark images.
-
-    Tried an multiparallel version of this with Python 2.7 multithreading library.
-    Each type -> Pool, processes and threads, and none gave any improvement 
-    over linear loading, it was usually up to 50% slower with MP loading.
-
-    The reason is that the loading is IO Bound, not CPU bound, thus
-    multiple threads or processes accessing the IO doesn't provide any benefit.
-
-    :param files :: list of image file paths given as strings
-    :param slice_img_shape :: shape of every image
-    :param file_extension :: file name extension if fixed (to set the expected image format)
-    :param dtype :: data type for the output numpy array
-
-    Returns:: a 3d data volume with the size of the first (outermost) dimension equal
-    to the number of files, and the sizes of the second and third dimensions equal to
-    the sizes given in the input slice_img_shape
-    """
-
-    h = Helper.empty_init() if h is None else h
-
-    # Zeroing here to make sure that we can allocate the memory.
-    # If it's not possible better crash here than later
-    data = np.zeros((len(files), slice_img_shape[
-                    0], slice_img_shape[1]), dtype=dtype)
-
-    # FIXME TODO PERFORMANCE CRITICAL
-    # TODO Performance Tests
-    h.prog_init(len(files), desc=loop_name)
-    for idx, in_file in enumerate(files):
-        try:
-            data[idx, :, :] = _read_img(in_file, file_extension)
-            h.prog_update(1)
-        except IOError as exc:
-            raise RuntimeError(
-                "Could not load file {0}. Error details: {1}".format(in_file, str(exc)))
-    h.prog_close()
-    return data
-
-
 def get_data_average(data):
     avg = np.mean(data, axis=0)
     return avg
+
+
+def _get_stack_file_names(path, img_format):
+    import os
+    import glob
+
+    path = os.path.expanduser(path)
+
+    files_match = glob.glob(os.path.join(
+        path, "{0}*.{1}".format('', img_format)))
+
+    if len(files_match) <= 0:
+        raise RuntimeError("Could not find any image files in {0} with extension: {1}".
+                           format(path, img_format))
+
+    # this is a necessary step, otherwise the file order is not guaranteed to be sequential and we could get randomly
+    # ordered stack of images which would produce nonsense
+    files_match.sort(key=_alphanum_key_split)
+
+    return files_match
+
+
+def _alphanum_key_split(path_str):
+    """
+    From a string to a list of alphabetic and numeric elements. Intended to
+    be used for sequence number/natural sorting. In list.sort() the
+    key can be a list, so here we split the alpha/numeric fields into
+    a list. For example (in the final order after sort() would be applied):
+
+    "angle4" -> ["angle", 4]
+    "angle31" -> ["angle", 31]
+    "angle42" -> ["angle", 42]
+    "angle101" -> ["angle", 101]
+
+    Several variants compared here:
+    https://dave.st.germa.in/blog/2007/12/11/exception-handling-slow/
+    """
+    import re
+    alpha_num_split_re = re.compile('([0-9]+)')
+    return [int(c) if c.isdigit() else c for c in alpha_num_split_re.split(path_str)]

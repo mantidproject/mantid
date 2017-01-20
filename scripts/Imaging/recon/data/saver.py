@@ -3,10 +3,25 @@ import os
 
 
 class Saver(object):
+    """
+    This class doesn't have any try: ... except: ... because when called
+    it's usually at an end point, where there would be no point in recovering.
+
+    However if the directory in which the output should be written out
+    does not exist, it will be created on the first call of make_dirs_if_needed.
+    And if the directory cannot be created/accessed/written to afterwards, it will fail on
+    writing out the Readme Summary beginning, which is early in the reconstruction,
+    before loading any data in, or even the tool.
+
+    That means this class should always fail early before any
+    expensive operations have been performed.
+    """
 
     @staticmethod
     def supported_formats():
-        return ['fits', 'fit', 'nxs']
+        # reuse supported formats, they currently share them
+        from recon.data.loader import supported_formats
+        return supported_formats()
 
     def __init__(self, config):
         from recon.helper import Helper
@@ -95,7 +110,7 @@ class Saver(object):
             "Finished saving slices of the reconstructed volume in: {0}".
             format(out_recon_dir))
 
-    def save_preproc_images(self, data):
+    def save_preproc_images(self, data, flat=None, dark=None):
         """
         Save (pre-processed) images from a data array to image files.
 
@@ -110,11 +125,12 @@ class Saver(object):
             self._h.pstart(
                 "Saving all pre-processed images into {0} dtype: {1}".format(preproc_dir, data.dtype))
 
-            self.save_image_data(data, preproc_dir, 'out_preproc_image')
+            self.save_image_data(
+                data, preproc_dir, 'out_preproc_image', flat, dark)
 
             self._h.pstop("Saving pre-processed images finished.")
 
-    def save_image_data(self, data, output_dir, name_prefix):
+    def save_image_data(self, data, output_dir, name_prefix, flat=None, dark=None):
         """
         Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
         :param data :: data as images/slices stores in numpy array
@@ -124,40 +140,79 @@ class Saver(object):
 
         """
 
+        # save out as stack in fits
+        # DONE - save out as stack in nxs
+        # save out as stack in xxx
+        # ^ branch 1
+
+        # save out individual images in fits
+        # save out individual images in xxx
+        # ^ branch 2
+
         self.make_dirs_if_needed(output_dir)
         if not self._data_as_stack:
-            for idx in range(0, data.shape[0]):
-                self.write_image(data[idx, :, :], os.path.join(
-                    output_dir, name_prefix + str(idx).zfill(6)))
+            self._save_out_individual_files(data, output_dir, name_prefix)
         else:
-            self.write_image(data, os.path.join(
-                output_dir, name_prefix + "_stack".zfill(6)))
+            self._save_out_stack(data, output_dir, name_prefix, flat, dark)
 
-    def write_image(self, img_data, filename):
+    def _save_out_individual_files(self, data, output_dir, name_prefix):
+        if self._img_format not in ['fits', 'fit']:
+            self._h.tomo_print_error(
+                "Cannot save out individual NXS files. Saving out FITS instead.")
+
+        for idx in range(0, data.shape[0]):
+            self._write_fits(data[idx, :, :], os.path.join(
+                output_dir, name_prefix + str(idx).zfill(6) + '.fits'))
+
+    def _save_out_stack(self, data, output_dir, name_prefix, flat=None, dark=None, projection_angles=None):
         """
-        Output image data, given as a numpy array, to a file, in a given image format.
-        Assumes that the output directory exists (must be checked before). The pixel
-        values are rescaled in the range [min_pix, max_pix] which would normally be set
-        to the minimum/maximum values found in a stack of images.
-
-        :param img_data :: image data in the usual numpy representation
-        :param filename :: file name, including directory and extension
-        of the input data is used
-        :returns:: name of the file saved
+        Save out a stack depending on format.
+        :param data:
+        :param output_dir:
+        :param name_prefix:
+        :param flat:
+        :param dark:
+        :param projection_angles:
+        :param control_data:
+        :return:
         """
 
-        from recon.data import loader
-        img_format = self._img_format
+        filename = os.path.join(output_dir, name_prefix + "_stack".zfill(6))
 
-        # from skimage import exposure
-        # img_data = exposure.rescale_intensity(img_data[:, :], out_range='uint16')
+        if self._img_format in ['fits', 'fit']:
+            self._write_fits(data, filename + '.fits')
 
-        fits = loader.import_pyfits()
-        hdu = fits.PrimaryHDU(img_data)
+        elif self._img_format in ['nxs']:
+            self._write_nxs(data, filename + '.nxs',
+                            flat, dark, projection_angles)
+
+    def _write_fits(self, data, filename):
+        # save out in fits
+        # TODO save out and read the flat and dark images too
+
+        from recon.data.loader import import_pyfits
+        fits = import_pyfits()
+        hdu = fits.PrimaryHDU(data)
         hdulist = fits.HDUList([hdu])
-        hdulist.writeto(filename + ".fits", clobber=self._overwrite_all)
+        hdulist.writeto(filename, clobber=self._overwrite_all)
 
-        return filename
+    def _write_nxs(self, data, filename, flat=None, dark=None, projection_angles=None):
+        # Adapted code from Nagella, Srikanth (STFC,RAL,SC)
+        # <srikanth.nagella@stfc.ac.uk>
+        import numpy as np
+        import h5py
+        nxs = h5py.File(filename, 'w')
+        if flat is not None:
+            data = np.append(data, flat, axis=0)  # [-2]
+        if dark is not None:
+            data = np.append(data, dark, axis=0)  # [-1]
+
+        dset = nxs.create_dataset(
+            "entry1/tomo_entry/instrument/detector/data", data=data)
+
+        if projection_angles is not None:
+            rangle = nxs.create_dataset(
+                "entry1/tomo_entry/sample/rotation_angle", data=projection_angles)
 
     def gen_readme_summary_begin(self, cmd_line, config):
         """

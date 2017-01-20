@@ -14,22 +14,19 @@ def execute(config, cmd_line=None):
     from recon.helper import Helper
     h = Helper(config)
     config.helper = h
+    h.check_config_integrity(config)
 
     from recon.data.saver import Saver
     saver = Saver(config)
-
     # create directory, or throw if not empty and no --overwrite-all
     saver.make_dirs_if_needed(config.func.output_path)
-
-    h.check_config_integrity(config)
+    # TODO new class for readme
+    saver.gen_readme_summary_begin(cmd_line, config)
 
     # import early to check if tool is available
     tool = load_tool(config, h)
 
     sample, flat, dark = load_data(config, h)
-
-    # todo new class for readme
-    saver.gen_readme_summary_begin(cmd_line, config)
 
     sample = pre_processing(config, sample, flat, dark)
 
@@ -47,9 +44,7 @@ def execute(config, cmd_line=None):
     # Save output from the reconstruction
     saver.save_recon_output(sample)
 
-    save_netcdf_volume()
-
-    # todo new class for readme
+    # TODO new class for readme
     # saver.gen_readme_summary_end(sample)
     return 0
 
