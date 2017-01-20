@@ -45,7 +45,7 @@ class ISISDisk:
                 self.slot_width = [40, 890, 56, 52, 31]        # width of chopper slots in mm
                 self.variant = 'High flux'
             elif 'RES' in instname or (variant is not None and 'RES' in variant.upper()):
-                self.slot_width = [40, 890, 56, 52, 20]        # width of chopper slots in mm
+                self.slot_width = [40, 890, 56, 52, 15]        # width of chopper slots in mm
                 self.variant = 'High resolution'
             else:
                 self.slot_width = [40, 890, 56, 52, 20]        # width of chopper slots in mm
@@ -111,7 +111,7 @@ class ISISDisk:
                     if len(frequency) == 1:
                         self.freq = [frequency[0]/2., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
                     elif len(frequency) == 2:
-                        self.freq = [frequency[0]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
+                        self.freq = [frequency[0]/2., 10., frequency[1], frequency[1], frequency[0]]
                     elif len(frequency) == 5:
                         self.freq = frequency
                     else:
@@ -355,6 +355,15 @@ class ISISDisk:
         instpars = [self.dist, self.nslot, self.slot_width, self.guide_width, self.radius, self.numDisk,
                     self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind]
         Eis, chop_times, _, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
+        # Removes reps with Ei where there are no neutrons (E<7 meV for Merlin, E>40 meV for LET)
+        if 'MERLIN' in self.instname:
+            idx = Eis > 7            # Keep reps above 7meV
+        elif 'LET' in self.instname:
+            idx = Eis < 30           # Keep reps below 30meV
+        else:
+            idx = len(Eis) * [True]  # Keep all reps
+        Eis = [Eis[i] for i in range(len(Eis)) if idx[i]]
+        lines = [lines[i] for i in range(len(Eis)) if idx[i]]
         if frequency:
             self.setFrequency(oldfreq)
         dist, samDist, DetDist, fracEi = tuple([self.dist, self.chop_samp, self.samp_det, self.frac_ei])

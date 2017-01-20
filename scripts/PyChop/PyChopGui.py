@@ -51,6 +51,7 @@ class PyChopGui(QtGui.QMainWindow):
             self.widgets['PulseRemoverCombo']['Label'].show()
             for fq in range(10, 301, 10):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
+            for fq in range(10, 151, 10):
                 self.widgets['PulseRemoverCombo']['Combo'].addItem(str(fq))
         else:
             self.widgets['PulseRemoverCombo']['Combo'].hide()
@@ -357,7 +358,10 @@ class PyChopGui(QtGui.QMainWindow):
         """
         Callback function for the "Instrument Scientist Mode" menu option
         """
-        if self.instSciAct.isChecked() and 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
+        if 'LET' in self.engine.instname:
+            self.widgets['Chopper2Phase']['Edit'].show()   # Widget should show all the time for LET.
+            self.widgets['Chopper2Phase']['Label'].show()
+        elif self.instSciAct.isChecked() and 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
             self.widgets['Chopper2Phase']['Edit'].show()
             self.widgets['Chopper2Phase']['Label'].show()
             self.widgets['Chopper2Phase']['Edit'].setText('1500')
