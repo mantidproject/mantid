@@ -75,7 +75,7 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
                              doc='Value selection of the sample environment log entry')
 
         # Diffraction Options
-        self.declareProperty(IntArrayProperty(name='DiffractionSpectra'),
+        self.declareProperty(IntArrayProperty(name='DiffractionSpectraRange'),
                              doc='Spectra to use for Diffraction Reduction')
 
         self.declareProperty(FileProperty('DiffractionCalibrationFile', '', action=FileAction.OptionalLoad),
