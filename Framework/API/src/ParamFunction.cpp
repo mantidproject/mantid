@@ -4,8 +4,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ParameterTie.h"
 
 #include <cmath>
 #include <limits>
@@ -19,13 +17,7 @@ Kernel::Logger g_log("ParamFunction");
 
 /// Destructor
 ParamFunction::~ParamFunction() {
-  for (auto &tie : m_ties) {
-    delete tie;
-  }
   m_ties.clear();
-  for (auto &constraint : m_constraints) {
-    delete constraint;
-  }
   m_constraints.clear();
 }
 
@@ -276,19 +268,18 @@ void ParamFunction::unfix(size_t i) {
  * ParamFunction.
  * @param tie :: A pointer to a new tie
  */
-void ParamFunction::addTie(ParameterTie *tie) {
+void ParamFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   size_t iPar = tie->getIndex();
   bool found = false;
   for (auto &m_tie : m_ties) {
     if (m_tie->getIndex() == iPar) {
       found = true;
-      delete m_tie;
-      m_tie = tie;
+      m_tie = std::move(tie);
       break;
     }
   }
   if (!found) {
-    m_ties.push_back(tie);
+    m_ties.push_back(std::move(tie));
   }
 }
 
@@ -305,16 +296,18 @@ void ParamFunction::applyTies() {
  * Used to find ParameterTie for a parameter i
  */
 class ReferenceEqual {
-  const size_t m_i; ///< index to find
+  /// index to find
+  const size_t m_i;
+
 public:
-  /** Constructor
-   */
+  /// Constructor
   explicit ReferenceEqual(size_t i) : m_i(i) {}
-  /**Bracket operator
-   * @param p :: the parameter you are looking for
-   * @return True if found
-   */
-  bool operator()(ParameterReference *p) { return p->getIndex() == m_i; }
+  /// Bracket operator
+  /// @param p :: the element you are looking for
+  /// @return True if found
+  template <class T> bool operator()(const std::unique_ptr<T> &p) {
+    return p->getIndex() == m_i;
+  }
 };
 
 /** Removes i-th parameter's tie if it is tied or does nothing.
@@ -327,7 +320,6 @@ bool ParamFunction::removeTie(size_t i) {
   }
   auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
   if (it != m_ties.end()) {
-    delete *it;
     m_ties.erase(it);
     unfix(i);
     return true;
@@ -345,7 +337,7 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
   }
   auto it = std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(i));
   if (it != m_ties.cend()) {
-    return *it;
+    return it->get();
   }
   return nullptr;
 }
@@ -356,7 +348,6 @@ void ParamFunction::clearTies() {
   for (auto &tie : m_ties) {
     size_t i = getParameterIndex(*tie);
     unfix(i);
-    delete tie;
   }
   m_ties.clear();
 }
@@ -364,19 +355,18 @@ void ParamFunction::clearTies() {
 /** Add a constraint
  *  @param ic :: Pointer to a constraint.
  */
-void ParamFunction::addConstraint(IConstraint *ic) {
+void ParamFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
   size_t iPar = ic->getIndex();
   bool found = false;
   for (auto &constraint : m_constraints) {
     if (constraint->getIndex() == iPar) {
       found = true;
-      delete constraint;
-      constraint = ic;
+      constraint = std::move(ic);
       break;
     }
   }
   if (!found) {
-    m_constraints.push_back(ic);
+    m_constraints.push_back(std::move(ic));
   }
 }
 
@@ -391,7 +381,7 @@ IConstraint *ParamFunction::getConstraint(size_t i) const {
   auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
                          ReferenceEqual(i));
   if (it != m_constraints.cend()) {
-    return *it;
+    return it->get();
   }
   return nullptr;
 }
@@ -403,7 +393,6 @@ void ParamFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);
   for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     if (iPar == (**it).getIndex()) {
-      delete *it;
       m_constraints.erase(it);
       break;
     }
@@ -418,15 +407,8 @@ void ParamFunction::setUpForFit() {
 
 /// Nonvirtual member which removes all declared parameters
 void ParamFunction::clearAllParameters() {
-  for (auto &tie : m_ties) {
-    delete tie;
-  }
   m_ties.clear();
-  for (auto &constraint : m_constraints) {
-    delete constraint;
-  }
   m_constraints.clear();
-
   m_parameters.clear();
   m_parameterNames.clear();
   m_parameterDescriptions.clear();

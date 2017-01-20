@@ -207,6 +207,9 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   auto background =
       API::FunctionFactory::Instance().createInitialized(bkgdShape);
   spectrum->addFunction(background);
+  if (fixAllPeaks) {
+    background->fixAll();
+  }
 
   m_nPeaks[iSpec] = CrystalFieldUtils::buildSpectrumFunction(
       *spectrum, peakShape, values, m_fwhmX[iSpec], m_fwhmY[iSpec],
@@ -228,10 +231,15 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
   peakCalculator.calculateEigenSystem(en, wf, nre);
 
-  auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   auto temperatures = getAttribute("Temperatures").asVector();
-  for (size_t i = 0; i < temperatures.size(); ++i) {
-    updateSpectrum(*fun.getFunction(i), nre, en, wf, temperatures[i], i);
+  auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
+  try {
+    for (size_t i = 0; i < temperatures.size(); ++i) {
+      updateSpectrum(*fun.getFunction(i), nre, en, wf, temperatures[i], i);
+    }
+  } catch (std::out_of_range &) {
+    buildTargetFunction();
+    return;
   }
 }
 
