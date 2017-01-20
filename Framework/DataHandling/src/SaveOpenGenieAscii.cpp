@@ -158,7 +158,7 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
 std::vector<std::tuple<std::string, int>>
 SaveOpenGenieAscii::convertWorkspaceToStrings() {
   // Padding to apply after 10 data values
-  const std::string newlineStr = "\n    ";
+  const std::string newlineStr = "\r\n    ";
 
   // Build x, y and e strings - first 4 spaces for correct padding
   std::string xValsOutput("    "), yValsOutput("    "), eValsOutput("    ");
@@ -222,10 +222,11 @@ int SaveOpenGenieAscii::determineEnginXBankId() {
 void SaveOpenGenieAscii::getSampleLogs() {
   // Maps Mantid log names -> Genie save file name / type
   const std::unordered_map<std::string, std::tuple<std::string, std::string>>
-      MantidGenieNameMap = {{"x", {"x_pos", m_floatType}},
-                            {"y", {"y_pos", m_floatType}},
-                            {"z", {"z_pos", m_floatType}},
-                            {"gd_prtn_chrg", {"microamps", m_floatType}}};
+      MantidGenieNameMap = {
+          {"x", std::make_tuple("x_pos", m_floatType)},
+          {"y", std::make_tuple("y_pos", m_floatType)},
+          {"z", std::make_tuple("z_pos", m_floatType)},
+          {"gd_prtn_chrg", std::make_tuple("microamps", m_floatType)}};
 
   const std::vector<Property *> &logData = m_inputWS->run().getLogData();
 
@@ -294,8 +295,8 @@ void SaveOpenGenieAscii::inputValidation() {
 void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
-  // file
-  stream.open(filename);
+  // Open file as binary so it doesn't convert CRLF to LF on UNIX
+  stream.open(filename, std::ofstream::binary | std::ofstream::out);
   if (!stream) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
@@ -308,7 +309,7 @@ void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
 */
 void SaveOpenGenieAscii::parseWorkspaceData() {
   // Bank number - force to 1 at the moment
-  const std::string outputType = "GXRealarray\n    1";
+  const std::string outputType = "GXRealarray\r\n    1";
 
   const auto xyeTuples = convertWorkspaceToStrings();
   const auto &xTuple = xyeTuples[0];
@@ -317,15 +318,15 @@ void SaveOpenGenieAscii::parseWorkspaceData() {
 
   // Have to put the number of values followed by a space then a new line
   // then the data into a string
-  const auto xDataString = std::to_string(std::get<1>(xTuple)) + " \n" +
+  const auto xDataString = std::to_string(std::get<1>(xTuple)) + " \r\n" +
                            std::move(std::get<0>(xTuple));
   addToOutputBuffer("x", outputType, std::move(xDataString));
 
-  const auto yDataString = std::to_string(std::get<1>(yTuple)) + " \n" +
+  const auto yDataString = std::to_string(std::get<1>(yTuple)) + " \r\n" +
                            std::move(std::get<0>(yTuple));
   addToOutputBuffer("y", outputType, std::move(yDataString));
 
-  const auto eDataString = std::to_string(std::get<1>(eTuple)) + " \n" +
+  const auto eDataString = std::to_string(std::get<1>(eTuple)) + " \r\n" +
                            std::move(std::get<0>(eTuple));
   addToOutputBuffer("e", outputType, std::move(eDataString));
 }
@@ -388,10 +389,10 @@ void SaveOpenGenieAscii::storeWorkspaceInformation() {
 void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   // Write header
   if (getProperty("IncludeHeader")) {
-    outfile << "# Open Genie ASCII File #\n"
-            << "# label \n"
-            << "GXWorkspace\n"
-            << m_outputVector.size() << '\n';
+    outfile << "# Open Genie ASCII File #\r\n"
+            << "# label \r\n"
+            << "GXWorkspace\r\n"
+            << m_outputVector.size() << "\r\n";
   }
 
   // Sort by parameter name
@@ -409,10 +410,10 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
     // If the type is a string the value must be wrapped in quotes
 
     // First the parameter name
-    outfile << "  " << '"' << std::get<0>(outTuple) << '"' << '\n';
+    outfile << "  " << '"' << std::get<0>(outTuple) << '"' << "\r\n";
 
     const std::string outputType = std::get<1>(outTuple);
-    outfile << "    " << outputType << '\n';
+    outfile << "    " << outputType << "\r\n";
 
     // Then the data values - the formatting depends on data type
     outfile << "    ";
@@ -421,7 +422,7 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
     } else {
       outfile << std::get<2>(outTuple);
     }
-    outfile << '\n';
+    outfile << "\r\n";
   }
 }
 
