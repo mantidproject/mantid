@@ -21,7 +21,7 @@ def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, h=
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
-    if isinstance(norm_flat_img, np.ndarray):
+    if norm_flat_img is not None and norm_dark_img is not None and isinstance(norm_flat_img, np.ndarray):
         if 2 != len(norm_flat_img.shape):
             raise ValueError(
                 "Incorrect shape of the flat image ({0}) which should match the "

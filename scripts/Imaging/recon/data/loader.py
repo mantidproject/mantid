@@ -15,15 +15,14 @@ def read_in_stack(config):
     :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
     """
 
-    in_img_format = config.func.in_img_format
-    sample_path = config.func.input_path
-    flat_field_path = config.func.input_path_flat
-    dark_field_path = config.func.input_path_dark
+    supported_exts = ['fits', 'fit']
 
-    supported_exts = ['tiff', 'tif', 'fits', 'fit', 'png']
-
-    sample, flat, dark = read_stack_of_images(
-        sample_path, flat_field_path, dark_field_path, in_img_format, argument_data_dtype=config.func.data_dtype)
+    sample, flat, dark = read_stack_of_images(config.func.input_path,
+                                              config.func.input_path_flat,
+                                              config.func.input_path_dark,
+                                              config.func.in_img_format,
+                                              argument_data_dtype=config.func.data_dtype,
+                                              h=config.helper)
 
     from recon.helper import Helper
     Helper.check_data_stack(sample)
@@ -33,7 +32,7 @@ def read_in_stack(config):
 
 def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
                          file_extension='fits', file_prefix='',
-                         flat_file_prefix='', dark_file_prefix='', argument_data_dtype=np.float32):
+                         flat_file_prefix='', dark_file_prefix='', argument_data_dtype=np.float32, h=None):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -79,46 +78,46 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     img_shape = first_sample_img.shape
 
     sample_data = _load_sample_data(
-        first_sample_img, sample_file_names, img_shape, file_extension, data_dtype)
+        first_sample_img, sample_file_names, img_shape, file_extension, data_dtype, h)
     flat_avg = _load_flat_data(
-        flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype)
+        flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype, h)
     dark_avg = _load_dark_data(
-        dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype)
+        dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype, h)
 
     return sample_data, flat_avg, dark_avg
 
 
-def _load_dark_data(dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype):
+def _load_dark_data(dark_file_prefix, dark_file_path, img_shape, file_extension, data_dtype, h=None):
     if dark_file_path is not None:
         dark_file_names = _get_stack_file_names(
             dark_file_path, dark_file_prefix, file_extension)
 
         dark_data = _read_listed_files(
-            dark_file_names, img_shape, file_extension, data_dtype)
+            dark_file_names, img_shape, file_extension, data_dtype, h)
         dark_avg = get_data_average(dark_data)
     else:
-        dark_avg = 0  # subtracting 0 will not change the images
+        dark_avg = None  # subtracting 0 will not change the images
     return dark_avg
 
 
-def _load_flat_data(flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype):
+def _load_flat_data(flat_file_prefix, flat_file_path, img_shape, file_extension, data_dtype, h=None):
     if flat_file_path is not None:
         flat_file_names = _get_stack_file_names(
             flat_file_path, flat_file_prefix, file_extension)
 
         flat_data = _read_listed_files(
-            flat_file_names, img_shape, file_extension, data_dtype)
+            flat_file_names, img_shape, file_extension, data_dtype, h)
         flat_avg = get_data_average(flat_data)
     else:
-        flat_avg = 1  # dividing by 1 will not change the images
+        flat_avg = None  # dividing by 1 will not change the images
     return flat_avg
 
 
-def _load_sample_data(first_sample_img, sample_file_names, img_shape, file_extension, data_dtype):
+def _load_sample_data(first_sample_img, sample_file_names, img_shape, file_extension, data_dtype, h=None):
     # determine what the loaded data was
     if len(img_shape) == 2:  # the loaded file was a single image
         sample_data = _read_listed_files(
-            sample_file_names, img_shape, file_extension, data_dtype)
+            sample_file_names, img_shape, file_extension, data_dtype, h)
     elif len(img_shape) == 3:  # the loaded file was a stack of fits images
         sample_data = first_sample_img
     else:
@@ -181,7 +180,7 @@ def _read_img(filename, file_extension=None):
             raise RuntimeError(
                 "Could not load at least one FITS image/table file from: {0}".format(filename))
 
-        # Input fits files always contain a single image
+        # get the image data
         img_arr = image[0].data
 
     elif file_extension in ['tiff', 'tif', 'png']:
@@ -227,10 +226,17 @@ def import_skimage_io():
     return skio
 
 
-def _read_listed_files(files, slice_img_shape, file_extension, dtype):
+def _read_listed_files(files, slice_img_shape, file_extension, dtype, h=None):
     """
     Read several images in a row into a 3d numpy array. Useful when reading all the sample
     images, or all the flat or dark images.
+
+    Tried an multiparallel version of this with Python 2.7 multithreading library.
+    Each type -> Pool, processes and threads, and none gave any improvement 
+    over linear loading, it was usually up to 50% slower with MP loading.
+
+    The reason is that the loading is IO Bound, not CPU bound, thus
+    multiple threads or processes accessing the IO doesn't provide any benefit.
 
     :param files :: list of image file paths given as strings
     :param slice_img_shape :: shape of every image
@@ -242,16 +248,20 @@ def _read_listed_files(files, slice_img_shape, file_extension, dtype):
     the sizes given in the input slice_img_shape
     """
 
-    # Zeroing here is good, because we are going to load the data in anyway.
-    # FIXME TODO PERFORMANCE CRITICAL
-    # TODO Performance Tests
+    h = Helper.empty_init() if h is None else h
 
+    # Zeroing here to make sure that we can allocate the memory.
+    # If it's not possible better crash here than later
     data = np.zeros((len(files), slice_img_shape[
                     0], slice_img_shape[1]), dtype=dtype)
 
+    # FIXME TODO PERFORMANCE CRITICAL
+    # TODO Performance Tests
+    h.prog_init(len(files))
     for idx, in_file in enumerate(files):
         try:
             data[idx, :, :] = _read_img(in_file, file_extension)
+            h.prog_update(1)
         except IOError as exc:
             raise RuntimeError(
                 "Could not load file {0}. Error details: {1}".format(in_file, str(exc)))

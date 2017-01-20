@@ -31,6 +31,8 @@
   - [--reuse-preproc](#--reuse-preproc)
   - [--find-cor](#--find-cor)
   - [--crop-before-normalise](#--crop-before-normalise)
+- [Testing the Big Data](#testing-the-big-data)
+- [Chamber Tomo Find COR](#chamber-tomo-find-cor)
 
 <!-- /TOC -->
  
@@ -482,3 +484,35 @@ python -c "from recon.helper import Helper; g=[]; h=Helper(); h=Helper(g)"
 
 ## --crop-before-normalise
 > python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --crop-before-normalise 
+
+# Testing the Big Data
+To drop caches for real performance tests: `alias drop_caches='echo 3 | sudo tee /proc/sys/vm/drop_caches'`
+
+Windows Path: /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/
+
+`python tomo_main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/ -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1 --data-as-stack --only-preproc`
+Stats:
+Images: 500
+Disk Read: ~130MB/s
+Time: ~35s
+Memory: 8016 MB
+Data Type: float32
+
+Linux Path: ~/Documents/img/chamber/
+Images: 500
+Disk: ~130MB/s
+Time: ~35s
+Memory: 8016  MB
+Data Type: float32
+
+# Chamber Tomo Find COR
+
+```python 
+python main.py 
+-i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/1000/pre_processed
+-o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1000_processed
+-g '[384.0, 0.0, 1550.0, 1932.0]'
+-f
+```
+
+>python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/1000/pre_processed -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1000_processed -g '[384.0, 0.0, 1550.0, 1932.0]' -f

@@ -71,7 +71,6 @@ class NormaliseByAirRegionTest(unittest.TestCase):
         images = self.generate_images()
         from copy import deepcopy
         control = deepcopy(images)
-        err_msg = "TEST NOT EXECUTED :: Running normalise_by_air_region with size {0}, mode {1} and order {2} changed the data!"
 
         # empty params
         air = None

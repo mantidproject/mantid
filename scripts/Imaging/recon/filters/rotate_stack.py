@@ -9,7 +9,7 @@ def _rotate_image(data, rotation):
     return data
 
 
-def _rotate_stack(data, rotation):
+def _rotate_stack(data, rotation, h=None):
     """
     WARNING: ONLY WORKS FOR SQUARE IMAGES
     Rotate every image of a stack
@@ -19,9 +19,13 @@ def _rotate_stack(data, rotation):
 
     Returns :: rotated data (stack of images)
     """
+    h = Helper.empty_init() if h is None else h
 
-    for idx in range(0, data.shape[0]):
+    img_count = data.shape[0]
+    # h.prog_init(img_count)
+    for idx in range(0, img_count):
         _rotate_image(data[idx], rotation)
+        # h.prog_update(1)
 
     return data
 
@@ -55,7 +59,7 @@ def execute(data, rotation, flat=None, dark=None, h=None):
             "Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
             format(clockwise_rotations * 90, data.dtype))
 
-        data = _rotate_stack(data, clockwise_rotations)
+        data = _rotate_stack(data, clockwise_rotations, h)
         if flat is not None:
             flat = _rotate_image(flat, clockwise_rotations)
         if dark is not None:

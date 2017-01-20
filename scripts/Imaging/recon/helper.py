@@ -13,13 +13,18 @@ from recon.configs.recon_config import ReconstructionConfig
 
 
 class Helper(object):
+    """
+    Helper class for functions used accross the 
+    """
 
     def __init__(self, config=None):
         """
+        Initialises the Helper class.
+        If a ReconstructionConfig is provided, it will
         :param config: The ReconstructionConfig with which this class will be initialised
         """
 
-        # TODO test
+        # If a config is provided make sure it's the proper class
         if config is not None and not isinstance(config, ReconstructionConfig):
             raise ValueError("The provided config is not of the correct type ReconstructionConfig!\n\t"
                              "    If no config is available (e.g. running a standalone filter) use an empty constructor.")
@@ -28,10 +33,14 @@ class Helper(object):
         self._whole_exec_timer = None
         self._timer_running = False
         self._timer_start = None
+        self._timer_print_prefix = " ---"
+
         self._verbosity = 2 if config is None else config.func.verbosity
         self._no_crash_on_failed_import = False if config is None else config.func.no_crash_on_failed_import
+
         self._cache_last_memory = None
-        self._timer_print_prefix = " ---"
+
+        self._progress_bar = None
 
         if config is None:
             self.tomo_print_warning("Helper class initialised without config!")
@@ -108,7 +117,7 @@ class Helper(object):
 
                 # remove cached memory
                 self._cache_last_memory = None
-                memory_string += ". Memory change: {0}".format(delta_memory)
+                memory_string += ". Memory change: {0} MB".format(delta_memory)
 
         except ImportError:
             memory_string = " <not available on Windows> "
@@ -117,7 +126,6 @@ class Helper(object):
 
     def tomo_print_same_line(self, message, verbosity=2):
         """
-        TODO currently the priority parameter is ignored
         Verbosity levels:
         0 -> debug, print everything
         1 -> information, print information about progress
@@ -142,7 +150,6 @@ class Helper(object):
 
     def tomo_print(self, message, verbosity=2):
         """
-        TODO currently the priority parameter is ignored
         Verbosity levels:
         0 -> debug, print everything
         1 -> information, print information about progress
@@ -156,8 +163,8 @@ class Helper(object):
             0 - Silent, no output at all (not recommended)
             1 - Low verbosity, will output each step that is being performed and important warnings/errors
             2 - Normal verbosity, will output each step and execution time
-            3 - High verbosity, will output the step name, execution time and memory usage before and after each step. 
-                THE MEMORY USAGE DOES NOT WORK ON WINDOWS. 
+            3 - High verbosity, will output the step name, execution time and memory usage before and after each step.
+                THE MEMORY USAGE DOES NOT WORK ON WINDOWS.
                 This will probably use more resources.
         """
 
@@ -175,24 +182,14 @@ class Helper(object):
     def tomo_print_error(self, message, verbosity=1):
         self.tomo_print(" >>> ERROR: " + message, verbosity)
 
-    def handle_exception(self, exception):
-        """
-        TODO The plan for this function is to apply 
-        the --no-crash-on-failed-import (rename to crash on exception?) throughout 
-        the scripts, so that they use a common function
-
-        Currently only re-raises the exception so that it is not lost silently!
-        """
-        raise exception
-
     def pstart(self, message, verbosity=2):
         """
-        On every second call this will terminate and print the timer
-        TODO currently the priority parameter is ignored
+        Print the message and start the execution timer.
+
+        This will conform to the same verbosity restrictions as tomo_print(...).
 
         :param message: Message to be printed
-        :param verbosity: See tomo_print(...) for
-        :return:
+        :param verbosity: See tomo_print(...)
         """
 
         import time
@@ -215,19 +212,12 @@ class Helper(object):
 
     def pstop(self, message, verbosity=2):
         """
-        On every second call this will terminate and print the timer. This will append ". " to the string
-        TODO currently the priority parameter is ignored
+        Print the message and stop the execution timer.
 
-        Verbosity levels:
-        0 -> debug, print everything
-        1 -> information, print information about progress
-        2 -> print only major progress information, i.e data loaded, recon started, recon finished
-
-        Print only messages that have priority >= config verbosity level
+        This will conform to the same verbosity restrictions as tomo_print(...).
 
         :param message: Message to be printed
-        :param verbosity: Importance level depending on which messages will be printed
-        :return:
+        :param verbosity: See tomo_print(...)
         """
 
         import time
@@ -237,7 +227,8 @@ class Helper(object):
         if self._verbosity >= 2 and self._timer_running:
             self._timer_running = False
             timer_string = str(time.time() - self._timer_start)
-            print_string += (message + " Elapsed time: " + timer_string + " sec.")
+            print_string += (message + " Elapsed time: " +
+                             timer_string + " sec.")
 
         if self._verbosity >= 3:
             print_string += " Memory usage after execution: " + self.get_memory_usage_linux()
@@ -262,3 +253,32 @@ class Helper(object):
             # change from timer to string
             self._whole_exec_timer = str(time.time() - self._whole_exec_timer)
             print(message + self._whole_exec_timer + " sec")
+
+    def handle_exception(self, exception):
+        """
+        TODO The plan for this function is to apply
+        the --no-crash-on-failed-import (rename to crash on exception?) throughout
+        the scripts, so that they use a common function
+
+        Currently only re-raises the exception so that it is not lost silently!
+        """
+        raise exception
+
+    def prog_init(self, total, desc="Progress", ascii=False, unit='images'):
+        """
+        Initialises and returns the progress bar if the tqdm library is available.
+
+        Otherwise does nothing, and Helper's progress update function will also do nothing.
+        """
+        try:
+            from tqdm import tqdm
+            self._progress_bar = tqdm(
+                total=total, desc=desc, ascii=ascii, unit=unit)
+        except ImportError:
+            self._progress_bar = None
+            self.tomo_print_note("tqdm library not found, progress bars will not appear. You could install"
+                                 " locally with pip install tqdm")
+
+    def prog_update(self, update):
+        if self._progress_bar is not None:
+            self._progress_bar.update(update)
