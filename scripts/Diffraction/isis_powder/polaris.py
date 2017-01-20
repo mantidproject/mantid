@@ -75,17 +75,6 @@ class Polaris(AbstractInst):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
         return normalised_ws
 
-    def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
-        if not self._inst_settings.solid_angle_on:
-            return ws_to_correct
-
-        corrections = polaris_algs.generate_solid_angle_corrections(run_details=run_details, instrument=self)
-        corrected_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=corrections)
-        common.remove_intermediate_workspace(corrections)
-        common.remove_intermediate_workspace(ws_to_correct)
-        ws_to_correct = corrected_ws
-        return ws_to_correct
-
     def spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
         masking_file_name = self._inst_settings.masking_file_name
         spline_coeff = self._inst_settings.spline_coeff

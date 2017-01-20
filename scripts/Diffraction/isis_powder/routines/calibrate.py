@@ -21,9 +21,6 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration_file_path)
 
-    corrected_van_ws = instrument.apply_solid_angle_efficiency_corr(ws_to_correct=corrected_van_ws,
-                                                                    run_details=run_details)
-
     if absorb:
         corrected_van_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,
                                                      corrected_van_ws=corrected_van_ws, gen_absorb=gen_absorb)

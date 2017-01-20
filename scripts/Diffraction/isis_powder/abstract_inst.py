@@ -123,15 +123,6 @@ class AbstractInst(object):
         """
         return input_workspace
 
-    def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
-        """
-        Applies solid angle corrections calculating them if necessary for the workspace
-        :param ws_to_correct: The workspace to apply the solid angle corrections to
-        :param run_details: The run details for the associated run to allow for loading and saving
-        :return: The corrected workspace
-        """
-        return ws_to_correct
-
     @staticmethod
     def can_auto_gen_vanadium_cal():
         """

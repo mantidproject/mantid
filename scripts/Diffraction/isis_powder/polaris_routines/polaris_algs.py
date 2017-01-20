@@ -28,15 +28,6 @@ def calculate_absorb_corrections(ws_to_correct):
     return ws_to_correct
 
 
-def generate_solid_angle_corrections(run_details, instrument):
-    vanadium_ws = common.load_current_normalised_ws_list(run_number_string=run_details.vanadium_run_numbers,
-                                                         instrument=instrument, input_batching=InputBatchingEnum.Summed)
-    corrections = _calculate_solid_angle_efficiency_corrections(vanadium_ws[0])
-    mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=run_details.solid_angle_corr)
-    common.remove_intermediate_workspace(vanadium_ws)
-    return corrections
-
-
 def get_run_details(run_number, inst_settings):
     yaml_dict = yaml_parser.get_run_dictionary(run_number=run_number, file_path=inst_settings.cal_mapping_file)
 
@@ -49,16 +40,12 @@ def get_run_details(run_number, inst_settings):
     empty_runs = chopper_config["empty_run_numbers"]
     vanadium_runs = chopper_config["vanadium_run_numbers"]
 
-    solid_angle_file_name = _generate_solid_angle_file_name(chopper_on=inst_settings.chopper_on,
-                                                            vanadium_run_string=vanadium_runs)
     splined_vanadium_name = _generate_splined_van_name(chopper_on=inst_settings.chopper_on,
-                                                       sac_applied=inst_settings.solid_angle_on,
                                                        vanadium_run_string=vanadium_runs)
 
     in_calib_dir = os.path.join(inst_settings.calibration_dir, label)
     calibration_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])
     grouping_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])
-    solid_angle_file_path = os.path.join(in_calib_dir, solid_angle_file_name)
     splined_vanadium = os.path.join(in_calib_dir, splined_vanadium_name)
 
     run_details = RunDetails(run_number=run_number)
@@ -69,7 +56,6 @@ def get_run_details(run_number, inst_settings):
     run_details.calibration_file_path = calibration_full_path
     run_details.grouping_file_path = grouping_full_path
     run_details.splined_vanadium_file_path = splined_vanadium
-    run_details.solid_angle_corr = solid_angle_file_path
 
     return run_details
 
@@ -126,45 +112,13 @@ def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
     return output_workspaces
 
 
-def _calculate_solid_angle_efficiency_corrections(vanadium_ws):
-    solid_angle_ws = mantid.SolidAngle(InputWorkspace=vanadium_ws)
-    solid_angle_multiplicand = mantid.CreateSingleValuedWorkspace(DataValue=str(100))
-    solid_angle_ws = mantid.Multiply(LHSWorkspace=solid_angle_ws, RHSWorkspace=solid_angle_multiplicand)
-    common.remove_intermediate_workspace(solid_angle_multiplicand)
-
-    efficiency_ws = mantid.Divide(LHSWorkspace=vanadium_ws, RHSWorkspace=solid_angle_ws)
-    efficiency_ws = mantid.ConvertUnits(InputWorkspace=efficiency_ws, Target="Wavelength")
-    efficiency_ws = mantid.Integration(InputWorkspace=efficiency_ws)
-
-    corrections_ws = mantid.Multiply(LHSWorkspace=solid_angle_ws, RHSWorkspace=efficiency_ws)
-    corrections_divisor_ws = mantid.CreateSingleValuedWorkspace(DataValue=str(100000))
-    corrections_ws = mantid.Divide(LHSWorkspace=corrections_ws, RHSWorkspace=corrections_divisor_ws)
-
-    common.remove_intermediate_workspace(corrections_divisor_ws)
-    common.remove_intermediate_workspace(solid_angle_ws)
-    common.remove_intermediate_workspace(efficiency_ws)
-
-    return corrections_ws
-
-
-def _generate_solid_angle_file_name(chopper_on, vanadium_run_string):
-    if chopper_on:
-        return "SAC_" + vanadium_run_string + "_chopperOn"
-    else:
-        return "SAC_" + vanadium_run_string + "_chopperOff"
-
-
-def _generate_splined_van_name(chopper_on, sac_applied, vanadium_run_string):
+def _generate_splined_van_name(chopper_on, vanadium_run_string):
     output_string = "SVan_" + str(vanadium_run_string) + "_chopper"
     if chopper_on:
         output_string += "On"
     else:
         output_string += "Off"
 
-    if sac_applied:
-        output_string += "_SAC"
-    else:
-        output_string += "_noSAC"
     return output_string
 
 

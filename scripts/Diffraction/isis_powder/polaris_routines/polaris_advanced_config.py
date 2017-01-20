@@ -3,7 +3,6 @@ file_names = {
 }
 
 script_params = {
-    "apply_solid_angle": False,
     "raw_data_cropping_values": (750, 20000),
     "spline_coefficient": 100,
     "vanadium_cropping_values": (800, 19995)
@@ -46,9 +45,6 @@ variable_help = {
     },
 
     "script_params": {
-        "apply_solid_angle": "Specifies if the script should perform solid angle corrections. This is usually "
-                             "defaulted to off and should be overridden in the basic configuration when necessary to "
-                             "avoid them being performed accidentally.",
         "raw_data_cropping_values": "This specifies the valid range in TOF of the raw data. This is applied before any "
                                     "processing takes place to remove negative counts at very low TOF values",
         "spline_coefficient": "The coefficient to use when calculating the vanadium splines during the calibration "
