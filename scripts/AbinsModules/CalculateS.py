@@ -1,4 +1,4 @@
-from __future__ import (division, print_function)
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 try:
@@ -10,7 +10,7 @@ except ImportError:
 
 from IOmodule import IOmodule
 from AbinsData import AbinsData
-from AbinsModules.Instruments import Instrument
+from Instruments import Instrument
 from CalculatePowder import CalculatePowder
 from SingleCrystalData import SingleCrystalData
 from SData import SData

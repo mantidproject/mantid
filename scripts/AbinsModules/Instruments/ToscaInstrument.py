@@ -1,7 +1,7 @@
-from __future__ import (division, print_function)
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
-from Instrument import Instrument
+from .Instrument import Instrument
 from AbinsModules import AbinsParameters
 from AbinsModules import AbinsConstants
 from AbinsModules.FrequencyPowderGenerator import FrequencyPowderGenerator

@@ -1,7 +1,9 @@
-from __future__ import (division, print_function)
-import AbinsParameters
-import AbinsConstants
+from __future__ import (absolute_import, division, print_function)
+
 import numpy as np
+
+import AbinsConstants
+import AbinsParameters
 
 
 # noinspection PyMethodMayBeStatic
