@@ -232,7 +232,6 @@ void SaveOpenGenieAscii::getSampleLogs() {
 
   for (const auto &logEntry : logData) {
     const std::string &logName = logEntry->name();
-    const std::string &logType = logEntry->type();
 
     // Check this log value is known to us
     const auto foundMapping = MantidGenieNameMap.find(logName);
