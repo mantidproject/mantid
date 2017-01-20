@@ -22,6 +22,7 @@ Bug Fixes
 - Issue where Gui changes were not picked up for batch reductions was resolved.
 - Remove SaveNexusProcessed and SaveCSV as an option. Reorder options by dimensionality.
 - Fix for merged reduction with phi masking.
+- Fix SAScollimation issue in SaveCanSAS1D and LoadCanSAS1D.
 
 X uncertainties (delta-Q)
 -------------------------
