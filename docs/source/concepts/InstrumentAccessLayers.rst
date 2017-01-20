@@ -105,9 +105,12 @@ In this case, which is generally more common, the check is for at least one dete
 Access to Detectors
 ___________________
 
-The ``detector(wsIndex)`` method on ``SpectrumInfo`` returns the parameterised detector or detector group for the workspace. This can be used for doing things like moving a component.
+The ``detector(wsIndex)`` method on ``SpectrumInfo`` returns the parameterised detector or detector group for the workspace. As ``SpectrumInfo`` does not provide access to things like ``Object::solidAngle()``, the ``detector()`` method on ``SpectrumInfo`` can be used to get access to these methods.
 
-``SpectrumInfo`` does not provide access to things like ``Object::solidAngle()``. The ``detector()`` method on ``SpectrumInfo`` can also be used to get access to these methods.
+Mutable SpectrumInfo
+____________________
+
+The method ``MatrixWorkspace::mutableSpectrumInfo()`` returns a non-const ``SpectrumInfo`` object. Currently the only method that this access is required for is ``SpectrumInfo::setMasked(const size_t index, bool masked)``.
 
 Useful Tips
 ___________
@@ -197,6 +200,20 @@ ___________________
 
 As for the ``SpectrumInfo`` object ``DetectorInfo`` can return a parameterised detector for the workspace.
 
+Mutable DetectorInfo
+____________________
+
+The method ``ExperimentInfo::mutableDetectorInfo()`` returns a non-const ``DetectorInfo`` object. This allows the methods below to be used.
+
+* ``setMasked(const size_t index, bool masked);``
+* ``clearMaskFlags();``
+* ``setPosition(const size_t index, const Kernel::V3D &position);``
+* ``setRotation(const size_t index, const Kernel::Quat &rotation);``
+* ``setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);``
+* ``setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);``
+
+For a complete example of setting the position of a detector see the changes to the algorithm `ApplyCalibration.cpp <https://github.com/mantidproject/mantid/commit/0c75f46e85c2dc39c2b76ea811f161fdfdef938e#diff-a4ccabae0099bfc22b3b87154cd6ee9e>`_.
+
 Useful Tips
 ___________
 
@@ -215,6 +232,8 @@ _________________
 * `SmoothNeighbours.cpp <https://github.com/mantidproject/mantid/pull/18295/files#diff-26a49ef923e1bdd77677b962528d1e01>`_
 
 * `ClaerMaskFlag.cpp <https://github.com/mantidproject/mantid/pull/18198/files#diff-7f0f739ba6db714eb6ef64b6125e4620>`_
+
+* `ApplyCalibration.cpp <https://github.com/mantidproject/mantid/commit/0c75f46e85c2dc39c2b76ea811f161fdfdef938e#diff-a4ccabae0099bfc22b3b87154cd6ee9e>`_ - for mutable ``DetectorInfo``
 
 Rollout status
 --------------
