@@ -36,6 +36,13 @@ There is also a partial implementation of the "real" ``DetectorInfo`` class, in 
 Changes for Rollout
 -------------------
 
+Performance Tests
+#################
+
+Before starting the refactoring work please take a look at the state of any performance tests that exist for the algorithms. If they exist they should be run to get the "before" timings. If they do not exist please add performance test for any algorithms that are widely used, or might be expected to have a performance increase. See `this performance test <https://github.com/mantidproject/mantid/pull/18189/files#diff-5695221d30495359738f90b83ceb0ba3>`_ added for the ``SpectrumInfo`` rollout for an example of adding such a test.
+
+Each PR should include the runtime metrics for the algorithms changed, so that improvements can be captured for the release notes.
+
 SpectrumInfo
 ############
 
@@ -119,11 +126,6 @@ ___________
 * If a ``SpectrumInfo`` object is required for more than one workspace then include the workspace name in the name of the ``SpectrumInfo`` object, to avoid confusion.
 * Get the ``SpectrumInfo`` object as a const reference and use auto - ``const auto &spectrumInfo = ws->spectrumInfo();``.
 * Do not forget to add the import - ``#include "MantidAPI/SpectrumInfo.h"``.
-
-Performance Tests
-_________________
-
-Please add performance test for any algorithms that are widely used, or might be expected to have a performance increase. See `this performance test <https://github.com/mantidproject/mantid/pull/18189/files#diff-5695221d30495359738f90b83ceb0ba3>`_ added for the ``SpectrumInfo`` rollout for an example of adding such a test.
 
 Complete Examples
 _________________
@@ -218,11 +220,6 @@ Useful Tips
 ___________
 
 See tips for ``SpectrumInfo`` - the same advice applies to using ``DetectorInfo``.
-
-Performance Tests
-_________________
-
-Please add performance test for any algorithms that are widely used, or might be expected to have a performance increase. See `this performance test <https://github.com/mantidproject/mantid/pull/18189/files#diff-5695221d30495359738f90b83ceb0ba3>`_ added for the ``SpectrumInfo`` rollout for an example of adding such a test.
 
 Complete Examples
 _________________
