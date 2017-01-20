@@ -293,7 +293,7 @@ bool StepScan::mergeRuns() {
                    // within a group?)
     IAlgorithm_sptr addScanIndex =
         AlgorithmManager::Instance().create("AddSampleLog");
-    addScanIndex->setPropertyValue("Workspace", ws->name());
+    addScanIndex->setPropertyValue("Workspace", ws->getName());
     addScanIndex->setProperty("LogName", "scan_index");
     addScanIndex->setProperty("LogType", "Number Series");
     addScanIndex->setProperty("LogText", Strings::toString(i + 1));

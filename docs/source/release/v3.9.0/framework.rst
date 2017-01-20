@@ -20,19 +20,22 @@ Improved
 
 - :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
-- All algorithms using `AsciiPointBase` now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects `SaveReflCustomAscii <algm-SaveReflCustomAscii>`, `SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, `SaveANSTOAscii <algm-SaveANSTOAscii>` and `SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
+- All algorithms using AsciiPointBase now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects :ref:`SaveReflCustomAscii <algm-SaveReflCustomAscii>`, :ref:`SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, :ref:`SaveANSTOAscii <algm-SaveANSTOAscii>` and :ref:`SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
+- :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces. The documentation for this algorithm has also been improved.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` has a working progress bar.
 - :ref:`SumSpectra <algm-SumSpectra>` has an option to ignore special floating point values called 'RemoveSpecialValues'. This is off by default but when enabled will ignore values such as NaN or Infinity during the summation of the spectra.  It was also updated to fix special values being used in some cases when the option was selected.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`:
    * an `Interpolation` option has been added. Availabile options are: `Linear` & `CSpline`.
    * the method of selecting the scattering point has ben updated to give better agreement with numerical algorithms such as :ref:`CylinderAbsorption <algm-CylinderAbsorption>`.
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
+- :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
+- :ref:`MaskDetectors <algm-MaskDetectors>` has now a new option to mask detectors by instrument component name.
 
 Renamed
 #######
 
-- CorrectFlightPaths has been renamed to :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>`.
+- ref:`CorrectFlightPaths <algm-ConvertToConstantL2>` has been renamed to :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>`.
 
 Deprecated
 ##########
@@ -47,7 +50,7 @@ Deprecated
 - :ref:`OneStepMDEW	 <algm-OneStepMDEW>`.
 - :ref:`QueryAllRemoteJobs	 <algm-QueryAllRemoteJobs>` use version 2 instead.
 - :ref:`RefinePowderInstrumentParameters	 <algm-RefinePowderInstrumentParameters>` use version 2 instead.
-- :ref:`SetupILLD33Reduction	 <algm-SetupILLD33Reduction>.
+- :ref:`SetupILLD33Reduction	 <algm-SetupILLD33Reduction>`.
 - :ref:`StartRemoteTransaction	 <algm-StartRemoteTransaction>` use version 2 instead.
 - :ref:`LoadILLAscii	 <algm-LoadILLAscii>`.
 - :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` use version 2 instead.
@@ -59,12 +62,12 @@ Removed
 
 The following (previously deprecated) algorithms versions have now been removed:
 
- - LoadEventPreNexus v1
- - LoadLogsForSNSPulsedMagnet v1
- - Lorentzian1D v1
- - ProcessDasNexusLog v1
- - LoadILL v1
- - SANSDirectBeamScaling v1
+- LoadEventPreNexus v1
+- LoadLogsForSNSPulsedMagnet v1
+- Lorentzian1D v1
+- ProcessDasNexusLog v1
+- LoadILL v1
+- SANSDirectBeamScaling v1
 
 
 MD Algorithms (VATES CLI)
@@ -77,8 +80,10 @@ CurveFitting
 ------------
 
 - Systemtest, FittingBenchmarks, added for testing fit minimizer benchmarking scripts generating the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This Systemtest also demo how these tables can be created as a standard Mantid script.
+- Recommendations for which fitting to use added to :ref:`FittingMinimzers page <FittingMinimizers>`.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates initial values of a fiting function in given intervals.
+- New property of :ref:`Fit <algm-Fit>` `Exclude` sets ranges that need to be excluded from a fit.
 - Fit Function :ref:`FunctionQDepends <func-FunctionQDepends>` as the base class for QENS models depending on Q.
 
 Improved
@@ -94,6 +99,9 @@ Improved
 
 Python
 ------
+
+- The function `IMDDimension.getName()` has been deprecated. Use the propery `IMDDimension.name` instead.
+- The duplicate function `Workspace.getName()` has been deprecated. Use `Workspace.name()` instead.
 
 Python Algorithms
 #################

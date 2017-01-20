@@ -123,10 +123,7 @@ boost::shared_ptr<Mantid::Geometry::DetectorGroup>
 createRingOfCylindricalDetectors(const double R_min = 4.5,
                                  const double R_max = 5,
                                  const double z000000000000000 = 4);
-/**
- * Create a group of two monitors
- */
-boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
+
 /** create instrument with cylindrical detectors located in specific angular
  * positions */
 Mantid::Geometry::Instrument_sptr

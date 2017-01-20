@@ -304,13 +304,20 @@ void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
 * Select a shape which contains a point (x,y) of the screen.
 */
 bool Shape2DCollection::selectAtXY(int x, int y, bool edit) {
+  const auto point = m_transform.inverted().map(QPointF(x, y));
+  return selectAtXY(point, edit);
+}
+
+/**
+* Select a shape which contains a point (x, y) of the world.
+*/
+bool Shape2DCollection::selectAtXY(const QPointF &point, bool edit) {
   if (edit) {
     // if shape has to be edited (resized) it must be the only selection
     deselectAll();
   }
-  QPointF p = m_transform.inverted().map(QPointF(x, y));
   foreach (Shape2D *shape, m_shapes) {
-    bool picked = shape->selectAt(p);
+    bool picked = shape->selectAt(point);
     if (picked) {
       addToSelection(shape);
       return true;

@@ -45,17 +45,20 @@ set ( TEST_PY_FILES
   GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
+  ILLIN16BCalibrationTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
   IndirectAnnulusAbsorption2Test.py
   IndirectCylinderAbsorption2Test.py
   IndirectFlatPlateAbsorption2Test.py
+  IndirectILLEnergyTransferTest.py
   IndirectILLReductionTest.py
+  IndirectILLReductionFWSTest.py
+  IndirectILLReductionQENSTest.py
   IndirectResolutionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
-  ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
