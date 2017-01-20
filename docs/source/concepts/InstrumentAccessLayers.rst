@@ -10,7 +10,7 @@ Instrument Access via SpectrumInfo and DetectorInfo
 Introduction
 ------------
 
-There are two caching layers, ``SpectrumInfo`` and ``DetectorInfo``, that are going to be introduced to Mantid as part of the work towards Instrument 2.0. Eventually these classes will cache commonly accessed information about spectra or detectors, namely masking, monitor flags, L1, L2, 2-theta and position, leading to improved performance and cleaner code.
+There are two new layers to access instrument information, ``SpectrumInfo`` and ``DetectorInfo``, that are going to be introduced to Mantid as part of the work towards Instrument 2.0. Eventually these classes will store commonly accessed information about spectra or detectors, namely masking, monitor flags, L1, L2, 2-theta and position, leading to improved performance and cleaner code.
 
 A spectrum corresponds to (a group of) one or more detectors. Most algorithms work with spectra and thus ``SpectrumInfo`` would be used. Some algorithms work on a lower level (with individual detectors) and thus ``DetectorInfo`` would be used.
 
@@ -31,7 +31,7 @@ ____________
 
 ``DetectorInfo`` can be obtained from a call to ``ExperimentInfo::detectorInfo()`` (usually this method would be called on ``MatrixWorkspace``). The wrapper class holds a reference to the parametrised instrument for retrieving the relevant information.
 
-There is also a partial implementation of the "real" ``DetectorInfo`` class, in the ``Beamline`` namespace. The real class currently stores the masking information for a detector. The wrapper ``DetectorInfo`` class holds a reference to the real class. This does not affect the rollout, where the wrapper class should be used.
+There is also a partial implementation of the "real" ``DetectorInfo`` class, in the ``Beamline`` namespace. The real class currently stores the masking information for a detector. The wrapper ``DetectorInfo`` class holds a reference to the real class. This does not affect the rollout, where the wrapper class should still be used in all cases.
 
 Changes for Rollout
 -------------------
@@ -117,6 +117,11 @@ ___________
 * Get the ``SpectrumInfo`` object as a const reference and use auto - ``const auto &spectrumInfo = ws->spectrumInfo();``.
 * Do not forget to add the import - ``#include "MantidAPI/SpectrumInfo.h"``.
 
+Performance Tests
+_________________
+
+Please add performance test for any algorithms that are widely used, or might be expected to have a performance increase. See `this performance test <https://github.com/mantidproject/mantid/pull/18189/files#diff-5695221d30495359738f90b83ceb0ba3>`_ added for the ``SpectrumInfo`` rollout for an example of adding such a test.
+
 Complete Examples
 _________________
 
@@ -197,6 +202,11 @@ ___________
 
 See tips for ``SpectrumInfo`` - the same advice applies to using ``DetectorInfo``.
 
+Performance Tests
+_________________
+
+Please add performance test for any algorithms that are widely used, or might be expected to have a performance increase. See `this performance test <https://github.com/mantidproject/mantid/pull/18189/files#diff-5695221d30495359738f90b83ceb0ba3>`_ added for the ``SpectrumInfo`` rollout for an example of adding such a test.
+
 Complete Examples
 _________________
 
@@ -209,10 +219,7 @@ _________________
 Rollout status
 --------------
 
-See ticket `17743 <https://github.com/mantidproject/mantid/issues/17743>`_ for an overview of the ``SpectrumInfo`` rollout, including completed and algorithms, and remaining algorithms. Please follow the instructions on the ticket for the rollout.
-
-For ``DetectorInfo`` rollout see ticket `????? <https://github.com/mantidproject/mantid/issues/?????>`_. Again, please follow instructions there for the rollout.
-
+See ticket `17743 <https://github.com/mantidproject/mantid/issues/17743>`_ for an overview of the ``SpectrumInfo`` and ``DetectorInfo`` rollout, including completed and algorithms, and remaining algorithms. Please follow the instructions on the ticket for the rollout.
 
 Dealing with problems
 ---------------------
