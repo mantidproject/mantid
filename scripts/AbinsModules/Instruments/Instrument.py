@@ -1,3 +1,6 @@
+from __future__ import (division, print_function)
+
+
 # noinspection PyPep8Naming
 class Instrument(object):
 

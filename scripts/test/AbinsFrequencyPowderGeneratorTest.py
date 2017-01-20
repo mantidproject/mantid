@@ -1,3 +1,4 @@
+from __future__ import (division, print_function)
 import unittest
 from mantid.simpleapi import logger
 

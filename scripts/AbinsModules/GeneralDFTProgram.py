@@ -1,3 +1,4 @@
+from __future__ import (division, print_function)
 from mantid.kernel import logger
 
 # Abins modules

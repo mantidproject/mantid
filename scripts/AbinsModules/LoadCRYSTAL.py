@@ -1,3 +1,4 @@
+from __future__ import (division, print_function)
 import numpy as np
 from math import sqrt
 from mantid.kernel import logger

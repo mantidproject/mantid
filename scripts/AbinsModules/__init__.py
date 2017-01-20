@@ -17,6 +17,7 @@ algorithms and data objects that are:
 
 """
 # flake8: noqa
+from __future__ import (division, print_function)
 from IOmodule import IOmodule
 
 # Frequency generator

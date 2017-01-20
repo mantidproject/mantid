@@ -1,3 +1,4 @@
+from __future__ import (division, print_function)
 class GeneralData(object):
 
     def __init__(self):

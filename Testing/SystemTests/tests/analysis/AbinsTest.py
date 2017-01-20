@@ -1,3 +1,4 @@
+from __future__ import (division, print_function)
 import stresstesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
 from AbinsModules import AbinsConstants, AbinsTestHelpers

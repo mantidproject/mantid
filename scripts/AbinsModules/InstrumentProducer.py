@@ -1,3 +1,4 @@
+from __future__ import (division, print_function)
 from Instruments import ToscaInstrument, TwoDMap
 from AbinsModules import AbinsConstants
 
