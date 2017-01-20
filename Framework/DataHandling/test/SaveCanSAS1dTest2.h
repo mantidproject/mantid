@@ -300,13 +300,17 @@ private:
                                     double expectedHeight) {
     // Create sample workspace
     auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3);
+    auto axis = wsIn->getAxis(0);
+    axis->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    axis->title() = "|Q|";
+
     AnalysisDataService::Instance().addOrReplace("test_worksapce_can_sas_1d",
                                                  wsIn);
     // Save the workspace
     SaveCanSAS1D2 savealg;
     TS_ASSERT_THROWS_NOTHING(savealg.initialize());
     TS_ASSERT(savealg.isInitialized());
-    savealg.setPropertyValue("InputWorkspace", "test_worksapce_can_sas_1d");
+    savealg.setProperty("InputWorkspace", wsIn);
     savealg.setPropertyValue("Filename", m_filename);
     savealg.setPropertyValue("DetectorNames", "HAB");
     savealg.setProperty("Geometry", geometry);
