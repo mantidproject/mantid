@@ -225,7 +225,8 @@ ReflectometryWorkflowBase2::validateTransmissionProperties() const {
     MatrixWorkspace_sptr secondTransmissionRun =
         getProperty("SecondTransmissionRun");
     if (secondTransmissionRun) {
-      const auto xUnitSecond = secondTransmissionRun->getAxis(0)->unit()->unitID();
+      const auto xUnitSecond =
+          secondTransmissionRun->getAxis(0)->unit()->unitID();
       if (xUnitSecond != "TOF")
         results["SecondTransmissionRun"] =
             "Second transmission run must be in TOF";
@@ -324,7 +325,8 @@ ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
 
-  const std::string processingCommands = getPropertyValue("ProcessingInstructions");
+  const std::string processingCommands =
+      getPropertyValue("ProcessingInstructions");
   auto groupAlg = createChildAlgorithm("GroupDetectors");
   groupAlg->initialize();
   groupAlg->setProperty("GroupingPattern", processingCommands);

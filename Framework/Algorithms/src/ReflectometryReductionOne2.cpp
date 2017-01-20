@@ -184,7 +184,8 @@ void ReflectometryReductionOne2::exec() {
         getProperty("MonitorBackgroundWavelengthMin");
     if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() &&
         !backgroundMaxProperty->isDefault()) {
-      const bool integratedMonitors = getProperty("NormalizeByIntegratedMonitors");
+      const bool integratedMonitors =
+          getProperty("NormalizeByIntegratedMonitors");
       const auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
       IvsLam = divide(detectorWS, monitorWS);
     } else {
@@ -297,7 +298,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
 
   const bool match = verifySpectrumMaps(detectorWS, transmissionWS);
   if (!match) {
-    const std::string message = "Spectrum maps between workspaces do NOT match up.";
+    const std::string message =
+        "Spectrum maps between workspaces do NOT match up.";
     if (strictSpectrumChecking) {
       throw std::invalid_argument(message);
     } else {

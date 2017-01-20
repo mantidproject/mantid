@@ -82,7 +82,7 @@ ReflectometryReductionOneAuto2::validateInputs() {
   const std::string secondStr = getPropertyValue("SecondTransmissionRun");
   if (!secondStr.empty()) {
     auto secondTransGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(secondStr);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(secondStr);
     // If it is not a group, we don't need to validate its size
     if (!secondTransGroup)
       return results;
@@ -220,7 +220,8 @@ void ReflectometryReductionOneAuto2::exec() {
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  const auto instructions = populateProcessingInstructions(alg, instrument, inputWS);
+  const auto instructions =
+      populateProcessingInstructions(alg, instrument, inputWS);
 
   // Now that we know the detectors of interest, we can move them if necessary
   // (i.e. if theta is given). If not, we calculate theta from the current
@@ -478,8 +479,10 @@ void ReflectometryReductionOneAuto2::populateTransmissionProperties(
 * @param params :: [output] rebin parameters
 * @return :: the output workspace
 */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(
-    MatrixWorkspace_sptr inputWS, const double theta, std::vector<double> &params) {
+MatrixWorkspace_sptr
+ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
+                                              const double theta,
+                                              std::vector<double> &params) {
 
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
