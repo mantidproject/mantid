@@ -403,7 +403,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             self._beam_width = float(inst.getStringParameter('Workflow.beam-width')[0])
             print(self._beam_height, self._beam_width)
 
-
     def validateInputs(self):
         """
         Validate algorithm options.
