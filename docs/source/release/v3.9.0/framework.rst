@@ -5,6 +5,13 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+
+Changes
+-------
+
+- Mantid is aware of the change to file naming for Vesuvio, you can continue to use EVS or VESUVIO as a prefix when trying to load files from this instrument, and Mantid will map that to the correct filenames.
+
+
 Algorithms
 ----------
 
