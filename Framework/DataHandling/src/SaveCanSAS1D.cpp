@@ -684,16 +684,18 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
 
     // aperture with name
     std::string collimationGeometry = getProperty("Geometry");
-    sasCollimation += "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
+    sasCollimation +=
+        "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
 
     // size
     sasCollimation += "\n\t\t\t\t\t<size>";
 
     // Width
-    sasCollimation +=
-        "\n\t\t\t\t\t\t<x unit=\"mm\">" + std::to_string(collimationWidth) + "</x>";
+    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" +
+                      std::to_string(collimationWidth) + "</x>";
     // Height
-    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" + std::to_string(collimationHeight) + "</y>";
+    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" +
+                      std::to_string(collimationHeight) + "</y>";
 
     sasCollimation += "\n\t\t\t\t\t</size>";
     sasCollimation += "\n\t\t\t\t</aperture>";

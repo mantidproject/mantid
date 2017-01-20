@@ -12,7 +12,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
@@ -290,17 +289,19 @@ public:
     int expectedGeometryFlag = 3;
     double expectedWidth = 1;
     double expectedHeight = 2;
-    do_test_collimation_settings(geometry, width, height,
-                                 expectedGeometryFlag, expectedWidth, expectedHeight);
+    do_test_collimation_settings(geometry, width, height, expectedGeometryFlag,
+                                 expectedWidth, expectedHeight);
   }
 
-
 private:
-  void do_test_collimation_settings(const std::string& geometry, double width, double height,
-                                 int expectedGeometry, double expectedWidth, double expectedHeight) {
+  void do_test_collimation_settings(const std::string &geometry, double width,
+                                    double height, int expectedGeometry,
+                                    double expectedWidth,
+                                    double expectedHeight) {
     // Create sample workspace
     auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3);
-    AnalysisDataService::Instance().addOrReplace("test_worksapce_can_sas_1d", wsIn);
+    AnalysisDataService::Instance().addOrReplace("test_worksapce_can_sas_1d",
+                                                 wsIn);
     // Save the workspace
     SaveCanSAS1D2 savealg;
     TS_ASSERT_THROWS_NOTHING(savealg.initialize());
@@ -319,12 +320,15 @@ private:
     LoadCanSAS1D lAlg;
     TS_ASSERT_THROWS_NOTHING(lAlg.initialize());
     TS_ASSERT(lAlg.isInitialized());
-    lAlg.setPropertyValue("OutputWorkspace", "test_worksapce_can_sas_1d_reloaded");
+    lAlg.setPropertyValue("OutputWorkspace",
+                          "test_worksapce_can_sas_1d_reloaded");
     lAlg.setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(lAlg.execute());
     TS_ASSERT(lAlg.isExecuted());
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieve("test_worksapce_can_sas_1d_reloaded");
-    Mantid::API::MatrixWorkspace_sptr loaded = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(
+        "test_worksapce_can_sas_1d_reloaded");
+    Mantid::API::MatrixWorkspace_sptr loaded =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
     // Check that elements are set correctly
     TS_ASSERT(loaded->sample().getGeometryFlag() == expectedGeometry);
@@ -332,14 +336,14 @@ private:
     TS_ASSERT(loaded->sample().getHeight() == expectedHeight);
 
     // Delete workspaces
-    std::string toDeleteList[2] = {"test_worksapce_can_sas_1d", "test_worksapce_can_sas_1d_reloaded"};
-    for (auto& toDelete: toDeleteList) {
+    std::string toDeleteList[2] = {"test_worksapce_can_sas_1d",
+                                   "test_worksapce_can_sas_1d_reloaded"};
+    for (auto &toDelete : toDeleteList) {
       if (AnalysisDataService::Instance().doesExist(toDelete)) {
         AnalysisDataService::Instance().remove(toDelete);
       }
     }
   }
-
 
   std::string m_workspace1, m_workspace2, m_workspace3, m_filename;
   std::string m_runNum;

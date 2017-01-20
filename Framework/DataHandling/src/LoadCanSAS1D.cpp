@@ -387,10 +387,9 @@ void LoadCanSAS1D::createSampleInformation(
   try {
     auto name = sasCollimationElement->getChildElement("name");
     check(name, "name");
-  } catch(Kernel::Exception::NotFoundError&) {
+  } catch (Kernel::Exception::NotFoundError &) {
     isInValidOldFormat = false;
   }
-
 
   if (isInValidOldFormat) {
     // Get the geometry information
@@ -416,33 +415,33 @@ void LoadCanSAS1D::createSampleInformation(
     }
 
   } else {
-      // Get aperture
-      auto aperture = sasCollimationElement->getChildElement("aperture");
-      if (aperture) {
-          // Get geometry element
-          auto geometry = aperture->getAttribute("name");
-          if (!geometry.empty()) {
-            auto geometryID = getGeometryID(Poco::XML::fromXMLString(geometry));
-            sample.setGeometryFlag(geometryID);
-          }
-
-          // Get size
-          auto size = aperture->getChildElement("size");
-
-          // Get the width information
-          auto widthElement = size->getChildElement("x");
-          if (widthElement) {
-            double width = std::stod(widthElement->innerText());
-            sample.setWidth(width);
-          }
-
-          // Get the height information
-          auto heightElement = size->getChildElement("y");
-          if (heightElement) {
-            double height = std::stod(heightElement->innerText());
-            sample.setHeight(height);
-          }
+    // Get aperture
+    auto aperture = sasCollimationElement->getChildElement("aperture");
+    if (aperture) {
+      // Get geometry element
+      auto geometry = aperture->getAttribute("name");
+      if (!geometry.empty()) {
+        auto geometryID = getGeometryID(Poco::XML::fromXMLString(geometry));
+        sample.setGeometryFlag(geometryID);
       }
+
+      // Get size
+      auto size = aperture->getChildElement("size");
+
+      // Get the width information
+      auto widthElement = size->getChildElement("x");
+      if (widthElement) {
+        double width = std::stod(widthElement->innerText());
+        sample.setWidth(width);
+      }
+
+      // Get the height information
+      auto heightElement = size->getChildElement("y");
+      if (heightElement) {
+        double height = std::stod(heightElement->innerText());
+        sample.setHeight(height);
+      }
+    }
   }
 }
 }
