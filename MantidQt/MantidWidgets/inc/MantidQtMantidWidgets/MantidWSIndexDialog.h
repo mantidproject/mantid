@@ -255,6 +255,8 @@ public:
     bool waterfall;
     bool tiled;
     bool errors;
+    bool surface;
+    bool contour;
   };
 
   /// Constructor - same parameters as one of the parent constructors, along
@@ -278,6 +280,8 @@ public:
   void plotAllRequested();
   /// Returns whether the tiled plot option has been selected
   bool isTiledPlotSelected() const;
+  /// Returns whether surface plot is selected
+  bool isSurfacePlotSelected() const;
   /// Returns whether the error bars option has been selected
   bool isErrorBarsSelected() const;
 
@@ -357,6 +361,8 @@ public:
   bool isWaterfallPlotSelected() const;
   /// Returns whether the tiled plot option has been selected
   bool isTiledPlotSelected() const;
+  /// Returns whether surface plot is selected
+  bool isSurfacePlotSelected() const;
   /// Returns whether error bars have been selected
   bool isErrorBarsSelected() const;
 private slots:

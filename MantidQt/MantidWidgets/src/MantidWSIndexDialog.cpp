@@ -52,6 +52,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
   options.waterfall = isWaterfallPlotSelected();
   options.tiled = isTiledPlotSelected();
   options.errors = isErrorBarsSelected();
+  options.surface = isSurfacePlotSelected();
   return options;
 }
 
@@ -117,6 +118,14 @@ bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
  */
 bool MantidWSIndexWidget::isTiledPlotSelected() const {
   return (m_plotOptions->currentText() == "Tiled Plot");
+}
+
+/**
+* Whether the user selected surface plot
+* @returns True if surfarce plot selected
+*/
+bool MantidWSIndexWidget::isSurfacePlotSelected() const {
+  return (m_plotOptions->currentText() == "Surface Plot of Group");
 }
 
 /**
@@ -264,6 +273,8 @@ void MantidWSIndexWidget::initOptionsBoxes() {
     if (m_tiled) {
       m_plotOptions->addItem(tr("Tiled Plot"));
     }
+    m_plotOptions->addItem(tr("Surface Plot of Group"));
+    m_plotOptions->addItem(tr("Contour Plot of Group"));
     m_optionsBox->addWidget(m_plotOptions);
   }
 
@@ -425,6 +436,15 @@ bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
 bool MantidWSIndexDialog::isTiledPlotSelected() const {
   return m_widget.isTiledPlotSelected();
 }
+
+/**
+* Whether the user selected the surface plot
+* @returns True if surface plot selected
+*/
+bool MantidWSIndexDialog::isSurfacePlotSelected() const {
+  return m_widget.isSurfacePlotSelected();
+}
+
 
 /**
 * Whether the user selected error bars
