@@ -246,8 +246,10 @@ void MaskDetectors::handleMaskByMaskWorkspace(
   bool forceDetIDs = getProperty("ForceInstrumentMasking");
   if (maskWs->getNumberHistograms() != WS->getNumberHistograms() ||
       forceDetIDs) {
+    g_log.notice("Masking using detectors IDs");
     extractMaskedWSDetIDs(detectorList, maskWs);
   } else {
+    g_log.notice("Masking using workspace indicies");
     appendToIndexListFromMaskWS(indexList, maskWs, rangeInfo);
   }
 }
@@ -276,14 +278,22 @@ void MaskDetectors::handleMaskByMatrixWorkspace(
   // Check the provided workspace has the same number of spectra as the
   // input, if so assume index list
   if (nHist == WS->getNumberHistograms()) {
+    g_log.notice("Masking using workspace indicies");
     appendToIndexListFromWS(indexList, maskWs, rangeInfo);
     // Check they both have instrument and then use detector based masking
   } else if (instrument && maskInstrument) {
     const auto inputDetCount = instrument->getNumberDetectors();
     const auto maskDetCount = maskInstrument->getNumberDetectors();
+
+    g_log.notice("Masking using detectors IDs");
+
     if (inputDetCount != maskDetCount)
       g_log.warning() << "Number of detectors does not match between "
                          "mask workspace and input workspace";
+
+    if (instrument->getName() != maskInstrument->getName())
+      g_log.warning() << "Mask is from a different instrument to the input "
+                         "workspace. ";
 
     appendToDetectorListFromWS(detectorList, WS, maskWs, rangeInfo);
     // Not an index list and there's no instrument, so give up.
