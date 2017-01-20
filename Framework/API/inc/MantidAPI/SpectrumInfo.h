@@ -10,6 +10,9 @@
 
 namespace Mantid {
 using detid_t = int32_t;
+namespace Beamline {
+class SpectrumInfo;
+}
 namespace Geometry {
 class IDetector;
 class Instrument;
@@ -89,6 +92,8 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
+  friend class ExperimentInfo;
+
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
@@ -98,6 +103,7 @@ private:
   const ExperimentInfo &m_experimentInfo;
   DetectorInfo *m_mutableDetectorInfo{nullptr};
   const DetectorInfo &m_detectorInfo;
+  const Beamline::SpectrumInfo &m_spectrumInfo;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;

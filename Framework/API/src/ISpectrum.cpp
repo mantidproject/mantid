@@ -184,7 +184,7 @@ void ISpectrum::setExperimentInfo(ExperimentInfo *experimentInfo,
 /// Updates detector IDs in the owning ExperimentInfo.
 void ISpectrum::updateExperimentInfo() const {
   if (m_experimentInfo)
-    m_experimentInfo->invalidateSpectrumDefinitions();
+    m_experimentInfo->invalidateSpectrumDefinition(m_index);
 }
 
 } // namespace Mantid

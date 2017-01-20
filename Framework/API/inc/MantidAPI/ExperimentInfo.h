@@ -9,7 +9,6 @@
 
 #include "MantidKernel/DeltaEMode.h"
 
-#include <atomic>
 #include <list>
 #include <mutex>
 
@@ -80,8 +79,8 @@ public:
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
 
   void setNumberOfDetectorGroups(const size_t count) const;
-  void updateCachedDetectorGrouping(const size_t index,
-                                    const std::set<detid_t> &detIDs) const;
+  void setDetectorGrouping(const size_t index,
+                           const std::set<detid_t> &detIDs) const;
 
   /// Set an object describing the source properties and take ownership
   void setModeratorModel(ModeratorModel *source);
@@ -164,9 +163,10 @@ public:
   const Beamline::SpectrumInfo &internalSpectrumInfo() const;
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
-  void setSpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo);
+  void setSpectrumInfo(const SpectrumInfo &spectrumInfo);
 
-  void invalidateSpectrumDefinitions();
+  void invalidateSpectrumDefinition(const size_t index);
+  void updateSpectrumDefinitionIfNecessary(const size_t index) const;
 
   virtual size_t groupOfDetectorID(const detid_t detID) const;
 
@@ -174,7 +174,7 @@ protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 
-  virtual void updateCachedDetectorGroupings() const;
+  virtual void updateCachedDetectorGrouping(const size_t index) const;
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
@@ -224,7 +224,9 @@ private:
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
-  mutable std::atomic<bool> m_spectrumDefinitionsNeedUpdate{false};
+  // This vector stores boolean flags but uses char to do so since
+  // std::vector<bool> is not thread-safe.
+  mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
 };
 
 /// Shared pointer to ExperimentInfo

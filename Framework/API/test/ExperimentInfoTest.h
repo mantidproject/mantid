@@ -414,15 +414,24 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
-  void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
+  void test_accessing_SpectrumInfo_creates_default_grouping() {
     using namespace Mantid;
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithParameter(*exptInfo, "a", "b");
+
+    // Dummy call that initializes default detector groupings
+    static_cast<void>(exptInfo->spectrumInfo());
 
     const auto &spectrumInfo = exptInfo->internalSpectrumInfo();
     const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(0);
     TS_ASSERT_EQUALS(spectrumDefinition.size(), 1);
     TS_ASSERT_EQUALS(spectrumDefinition[0].first, 0); // det index 0 (ID 1)
+  }
+
+  void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
+    using namespace Mantid;
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithParameter(*exptInfo, "a", "b");
 
     // Set a mapping
     std::set<detid_t> group{1, 2};

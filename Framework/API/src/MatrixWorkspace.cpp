@@ -168,6 +168,8 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   if (m_isInitialized)
     return;
 
+  setNumberOfDetectorGroups(NVectors);
+
   // Invoke init() method of the derived class inside a try/catch clause
   try {
     this->init(NVectors, XLength, YLength);
@@ -191,6 +193,8 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   // Bypass the initialization if the workspace has already been initialized.
   if (m_isInitialized)
     return;
+
+  setNumberOfDetectorGroups(NVectors);
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -1962,18 +1966,14 @@ size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
                            "for MatrixWorkspace, only for MDWorkspaces");
 }
 
-/** Updates detector groupings for all spectra.
+/** Update detector grouping for spectrum with given index.
  *
- * This is used by ExperimentInfo::setInstrument. Detector IDs are currently
- * stored in ISpectrum, but grouping information needs to be available and
- * updated in Beamline::SpectrumInfo. This methods deals reinitializes these
- * indices after an instrument change (since changing the instrument will change
- * the indices). */
-void MatrixWorkspace::updateCachedDetectorGroupings() const {
-  setNumberOfDetectorGroups(getNumberHistograms());
-  for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    updateCachedDetectorGrouping(i, getSpectrum(i).getDetectorIDs());
-  }
+ * This method is called when the detector grouping stored in SpectrumDefinition
+ * at `index` in Beamline::SpectrumInfo is not initialized or outdated. Detector
+ * IDs are currently stored in ISpectrum, but grouping information needs to be
+ * available and updated in Beamline::SpectrumInfo. */
+void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
+  setDetectorGrouping(index, getSpectrum(index).getDetectorIDs());
 }
 
 } // namespace API

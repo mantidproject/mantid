@@ -116,7 +116,7 @@ void WorkspaceFactoryImpl::initializeFromParent(
       // Copy spectrum number and detector IDs
       childSpec.copyInfoFrom(parentSpec);
     }
-    child.setSpectrumInfo(parent.internalSpectrumInfo());
+    child.setSpectrumInfo(parent.spectrumInfo());
   }
 
   // deal with axis

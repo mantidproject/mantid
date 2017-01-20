@@ -420,7 +420,7 @@ public:
 
   void test_ExperimentInfo_basics() {
     const ExperimentInfo expInfo(m_workspace);
-    const SpectrumInfo spectrumInfo(expInfo);
+    const auto &spectrumInfo = expInfo.spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
@@ -457,7 +457,7 @@ public:
     mapping = {{1, {1, 4}}};
     expInfo.cacheDetectorGroupings(mapping);
     const auto &spectrumInfo2 = expInfo.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
+    TS_ASSERT_EQUALS(spectrumInfo2.size(), 1);
     TS_ASSERT_EQUALS(spectrumInfo2.isMasked(0), true);
   }
 
