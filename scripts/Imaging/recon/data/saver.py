@@ -4,11 +4,18 @@ import os
 
 class Saver(object):
 
+    @staticmethod
+    def supported_formats():
+        return ['fits', 'fit', 'nxs']
+
     def __init__(self, config):
         from recon.helper import Helper
         self._h = Helper(config)
 
-        self._output_path = os.path.abspath(os.path.expanduser(config.func.output_path))
+        self._output_path = os.path.abspath(
+            os.path.expanduser(config.func.output_path))
+
+        self._img_format = config.func.out_format
 
         self._overwrite_all = config.func.overwrite_all
         self._data_as_stack = config.func.data_as_stack
@@ -19,7 +26,8 @@ class Saver(object):
         self._preproc_dir = config.func.preproc_subdir
         self._save_preproc = config.func.save_preproc
 
-        self._out_slices_file_name_prefix = config.func.out_slices_file_name_prefix
+        self._out_slices_prefix = config.func.out_slices_prefix
+        self._out_horiz_slices_prefix = config.func.out_horiz_slices_prefix
         self._out_horiz_slices_subdir = config.func.out_horiz_slices_subdir
         self._save_horiz_slices = config.func.save_horiz_slices
 
@@ -61,69 +69,31 @@ class Saver(object):
         :param config :: configuration of the reconstruction, including output paths and formats
         slices saved by default. Useful for testing some tools
         """
-        # slices along the vertical (z) axis
-        # output_path = 'output_recon_tomopy'
 
         out_recon_dir = os.path.join(self._output_path, 'reconstructed')
 
         self._h.pstart(
             "Starting saving slices of the reconstructed volume in: {0}...".format(out_recon_dir))
 
-        self.save_recon_as_vertical_slices(
-            data, out_recon_dir, self._out_slices_file_name_prefix, self._data_as_stack)
+        self.save_image_data(data, out_recon_dir, self._out_slices_prefix)
 
         # Sideways slices:
         if self._save_horiz_slices:
-            out_horiz_dir = os.path.join(out_recon_dir, 'horiz_slices')
-            self._h.tomo_print(
+            # try np swapaxis and save that !
+            out_horiz_dir = os.path.join(
+                out_recon_dir, self._out_horiz_slices_subdir)
+
+            self._h.tomo_print_note(
                 "Saving horizontal slices in: {0}".format(out_horiz_dir))
-            self.save_recon_as_horizontal_slices(
-                data, out_horiz_dir, self._out_horiz_slices_subdir)
+
+            import numpy as np
+            # save out the horizontal slices by flippding the axes
+            self.save_image_data(
+                np.swapaxes(data, 0, 1), out_horiz_dir, self._out_horiz_slices_prefix)
 
         self._h.pstop(
             "Finished saving slices of the reconstructed volume in: {0}".
             format(out_recon_dir))
-
-    def save_recon_as_vertical_slices(self, data, output_dir, name_prefix='out_recon_slice', data_as_stack=False):
-        """
-        Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
-        :param data_as_stack:
-        :param data :: data as images/slices stores in numpy array
-        :param output_dir :: where to save the files
-        :param name_prefix :: prefix for the names of the images - an index is appended to this prefix
-        :param overwrite_all: Overwrite any existing images with conflicting names
-
-        """
-
-        self.make_dirs_if_needed(output_dir)
-        if not data_as_stack:
-            for idx in range(0, data.shape[0]):
-                self.write_image(data[idx, :, :], os.path.join(
-                    output_dir, name_prefix + str(idx).zfill(6)))
-        else:
-            self.write_image(data, os.path.join(
-                output_dir, name_prefix + "_stack".zfill(6)))
-
-    def save_recon_as_horizontal_slices(self, data, out_horiz_dir, name_prefix='out_recon_horiz_slice'):
-        """
-        Save reconstructed volume (3d) into a series of slices along the Y axis (second numpy dimension)
-        :param data :: data as images/slices stores in numpy array
-        :param out_horiz_dir :: where to save the files
-        :param name_prefix :: prefix for the names of the images throughout the horizontal axis
-        :param overwrite_all: Overwrite any existing images with conflicting names
-        the prefix
-        """
-
-        self.make_dirs_if_needed(out_horiz_dir)
-
-        # TODO find out how to flip with numpy
-        # if not config.func.data_as_stack:
-        for idx in range(0, data.shape[1]):
-            self.write_image(data[:, idx, :], os.path.join(
-                out_horiz_dir, name_prefix + str(idx).zfill(6)))
-            # else:
-            # write_image(data[:, idx, :], os.path.join(
-            # out_horiz_dir, name_prefix + str(idx).zfill(6)))
 
     def save_preproc_images(self, data):
         """
@@ -133,27 +103,35 @@ class Saver(object):
         :param config :: The full reconstruction config
         """
 
-        if not self._save_preproc:
-            self._h.tomo_print_warning(
-                "NOT saving out pre-processed images, because no -s/--save-preproc was specified.")
-            return
+        if self._save_preproc:
 
-        preproc_dir = os.path.join(self._output_path, self._preproc_dir)
+            preproc_dir = os.path.join(self._output_path, self._preproc_dir)
 
-        self._h.pstart(
-            "Saving all pre-processed images into {0} dtype: {1}".format(preproc_dir, data.dtype))
+            self._h.pstart(
+                "Saving all pre-processed images into {0} dtype: {1}".format(preproc_dir, data.dtype))
 
-        self.make_dirs_if_needed(preproc_dir)
+            self.save_image_data(data, preproc_dir, 'out_preproc_image')
 
+            self._h.pstop("Saving pre-processed images finished.")
+
+    def save_image_data(self, data, output_dir, name_prefix):
+        """
+        Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
+        :param data :: data as images/slices stores in numpy array
+        :param output_dir :: where to save the files
+        :param name_prefix :: prefix for the names of the images - an index is appended to this prefix
+        :param overwrite_all: Overwrite any existing images with conflicting names
+
+        """
+
+        self.make_dirs_if_needed(output_dir)
         if not self._data_as_stack:
             for idx in range(0, data.shape[0]):
                 self.write_image(data[idx, :, :], os.path.join(
-                    preproc_dir, 'out_preproc_proj_image' + str(idx).zfill(6)))
+                    output_dir, name_prefix + str(idx).zfill(6)))
         else:
             self.write_image(data, os.path.join(
-                preproc_dir, 'out_preproc_proj_images_stack'))
-
-        self._h.pstop("Saving pre-processed images finished.")
+                output_dir, name_prefix + "_stack".zfill(6)))
 
     def write_image(self, img_data, filename):
         """
@@ -169,13 +147,12 @@ class Saver(object):
         """
 
         from recon.data import loader
+        img_format = self._img_format
 
         # from skimage import exposure
         # img_data = exposure.rescale_intensity(img_data[:, :], out_range='uint16')
 
         fits = loader.import_pyfits()
-        # to flip vertically img_data[::-1] ps. saved images are still flipped
-        # vertically
         hdu = fits.PrimaryHDU(img_data)
         hdulist = fits.HDUList([hdu])
         hdulist.writeto(filename + ".fits", clobber=self._overwrite_all)

@@ -37,10 +37,13 @@ def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, h=
         norm_divide[norm_divide == 0] = 1e-6
 
         # this divide gives bad results
+        h.prog_init(data.shape[0], "Norm by Flat/Dark")
         for idx in range(0, data.shape[0]):
             data[idx, :, :] = np.clip(np.true_divide(
                 data[idx, :, :] - norm_dark_img, norm_divide), clip_min, clip_max)
+            h.prog_update(1)
 
+        h.prog_close()
         h.pstop(
             "Finished normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
     else:

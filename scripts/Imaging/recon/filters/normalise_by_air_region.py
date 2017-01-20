@@ -35,17 +35,24 @@ def execute(data, air_region, region_of_interest, crop_before_normalise, h=None)
             region_of_interest, air_region, crop_before_normalise)
 
         h.pstart("Starting normalization by air region...")
+        h.prog_init(data.shape[0], "Calculating air sums")
         air_sums = []
         for idx in range(0, data.shape[0]):
             air_data_sum = data[
                 idx, air_top:air_bottom, air_left:air_right].sum()
             air_sums.append(air_data_sum)
+            h.prog_update(1)
 
+        h.prog_close()
+
+        h.prog_init(data.shape[0], desc="Norm by Air Sums")
         air_sums = np.true_divide(air_sums, np.amax(air_sums))
-
         for idx in range(0, data.shape[0]):
             data[idx, :, :] = np.true_divide(data[idx, :, :],
                                              air_sums[idx])
+            h.prog_update(1)
+
+        h.prog_close()
 
         avg = np.average(air_sums)
         max_avg = np.max(air_sums) / avg
@@ -75,12 +82,11 @@ def translate_coords_onto_cropped_picture(crop_coords, air_region, crop_before_n
     crop_left = crop_coords[0]
     crop_bottom = crop_coords[3]
 
-    _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
-                                crop_bottom, crop_left, crop_right, crop_top)
-
     if not crop_before_normalise:
         return air_right, air_top, air_left, air_bottom
 
+    _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
+                                crop_bottom, crop_left, crop_right, crop_top)
     # Translate the air region coordinates to the crop.
     air_right -= crop_left
     air_top -= crop_top

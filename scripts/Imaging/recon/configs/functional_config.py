@@ -27,12 +27,13 @@ class FunctionalConfig(object):
         self.input_path = None
         self.input_path_flat = None
         self.input_path_dark = None
-        self.in_img_format = 'fits'
+        self.in_format = 'fits'
 
         self.output_path = None
-        self.out_img_format = 'fits'
-        self.out_slices_file_name_prefix = 'out_recon_slice'
-        self.out_horiz_slices_subdir = 'out_recon_horiz_slice'
+        self.out_format = 'fits'
+        self.out_slices_prefix = 'recon_slice'
+        self.out_horiz_slices_prefix = 'recon_horiz'
+        self.out_horiz_slices_subdir = 'horiz_slices'
         self.save_horiz_slices = False  # TODO activate for testing only
 
         self.save_preproc = True
@@ -65,16 +66,21 @@ class FunctionalConfig(object):
         self.num_iter = 5
         self.max_angle = 360.0
 
+        import multiprocessing
+        # get max cores on the system as default
+        self.cores = multiprocessing.cpu_count()
+
     def __str__(self):
         return "Input dir: {0}\n".format(str(self.input_path)) \
                + "Flat dir: {0}\n".format(str(self.input_path_flat)) \
                + "Dark dir: {0}\n".format(str(self.input_path_dark)) \
-               + "In image format: {0}\n".format(str(self.in_img_format)) \
+               + "In image format: {0}\n".format(str(self.in_format)) \
                + "Pre processing images subdir: {0}\n".format(str(self.preproc_subdir)) \
                + "Pre processing images as stack: {0}\n".format(str(self.data_as_stack)) \
                + "Output dir: {0}\n".format(str(self.output_path)) \
-               + "Output image format: {0}\n".format(str(self.out_img_format)) \
-               + "Output slices file name prefix: {0}\n".format(str(self.out_slices_file_name_prefix)) \
+               + "Output image format: {0}\n".format(str(self.out_format)) \
+               + "Output slices file name prefix: {0}\n".format(str(self.out_slices_prefix)) \
+               + "Output horizontal slices file name prefix: {0}\n".format(str(self.out_horiz_slices_prefix)) \
                + "Output horizontal slices subdir: {0}\n".format(str(self.out_horiz_slices_subdir)) \
                + "Debug: {0}\n".format(str(self.debug)) \
                + "Debug port: {0}\n".format(str(self.debug_port)) \
@@ -86,7 +92,8 @@ class FunctionalConfig(object):
                + "Tool: {0}\n".format(str(self.tool)) \
                + "Algorithm: {0}\n".format(str(self.algorithm)) \
                + "Number of iterations: {0}\n".format(str(self.num_iter)) \
-               + "Maximum angle: {0}\n".format(str(self.max_angle))
+               + "Maximum angle: {0}\n".format(str(self.max_angle)) \
+               + "Cores: {0}\n".format(str(self.cores))
 
     def setup_parser(self, parser):
         """
@@ -114,13 +121,13 @@ class FunctionalConfig(object):
             type=str,
             help="Input directory for flat images")
 
-        img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
+        from recon.data import loader
         grp_func.add_argument(
-            "--in-img-format",
+            "--in-format",
             required=False,
             default='fits',
             type=str,
-            choices=img_formats,
+            choices=loader.supported_formats(),
             help="Format/file extension expected for the input images.")
 
         grp_func.add_argument(
@@ -131,13 +138,21 @@ class FunctionalConfig(object):
             type=str,
             help="Where to write the output slice images (reconstructed volume).")
 
+        from recon.data.saver import Saver
         grp_func.add_argument(
-            "--out-img-format",
+            "--out-format",
             required=False,
             default='fits',
             type=str,
-            choices=img_formats,
+            choices=Saver.supported_formats(),
             help="Format/file extension expected for the input images.")
+
+        grp_func.add_argument(
+            "--out-slices-prefix",
+            required=False,
+            default=self.out_slices_prefix,
+            type=str,
+            help="The prefix for the reconstructed slices files.")
 
         grp_func.add_argument(
             "--out-horiz-slices-subdir",
@@ -147,11 +162,11 @@ class FunctionalConfig(object):
             help="The subdirectory for the reconstructed horizontal slices.")
 
         grp_func.add_argument(
-            "--out-slices-file-name-prefix",
+            "--out-horiz-slices-prefix",
             required=False,
-            default=self.out_slices_file_name_prefix,
+            default=self.out_horiz_slices_prefix,
             type=str,
-            help="The prefix for the reconstructed slices files.")
+            help="The prefix for the reconstructed horizontal slices files.")
 
         grp_func.add_argument(
             "-s",
@@ -298,6 +313,13 @@ class FunctionalConfig(object):
             default=self.max_angle,
             help="Maximum angle of the last projection.\nAssuming first angle=0, and uniform angle increment for every projection")
 
+        grp_recon.add_argument(
+            "--cores",
+            required=False,
+            type=int,
+            default=self.cores,
+            help="Number of CPU cores that will be used for reconstruction")
+
         return parser
 
     def update(self, args):
@@ -308,11 +330,12 @@ class FunctionalConfig(object):
         self.input_path = args.input_path
         self.input_path_flat = args.input_path_flat
         self.input_path_dark = args.input_path_dark
-        self.in_img_format = args.in_img_format
+        self.in_format = args.in_format
 
         self.output_path = args.output_path
-        self.out_img_format = args.out_img_format
-        self.out_slices_file_name_prefix = args.out_slices_file_name_prefix
+        self.out_format = args.out_format
+        self.out_slices_prefix = args.out_slices_prefix
+        self.out_horiz_slices_prefix = args.out_horiz_slices_prefix
         self.out_horiz_slices_subdir = args.out_horiz_slices_subdir
         self.save_horiz_slices = args.save_horiz_slices
 
@@ -352,3 +375,4 @@ class FunctionalConfig(object):
         self.algorithm = args.algorithm
         self.num_iter = args.num_iter
         self.max_angle = args.max_angle
+        self.cores = args.cores

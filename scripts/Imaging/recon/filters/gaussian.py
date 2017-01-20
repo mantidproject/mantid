@@ -24,9 +24,13 @@ def execute(data, size, mode, order, h=None):
             "Starting  gaussian filter, with pixel data type: {0}, filter size/width: {1}.".
             format(data.dtype, size))
 
+        h.prog_init(data.shape[0], "Gaussian")
         for idx in range(0, data.shape[0]):
             data[idx] = scipy_ndimage.gaussian_filter(
                 data[idx], size, mode=mode, order=order)
+            h.prog_update()
+
+        h.prog_close()
 
         h.pstop(
             "Finished  gaussian filter, with pixel data type: {0}, filter size/width: {1}.".

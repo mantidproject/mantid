@@ -70,6 +70,7 @@ class AstraTool(AbstractTool):
         alg = config.func.algorithm.upper()  # get upper case
         cor = config.func.cor
         num_iter = config.func.num_iter
+        cores = config.func.cores
 
         # remove xxx_CUDA from the string with the [0:find..]
         iterative_algorithm = False if alg[
@@ -91,7 +92,8 @@ class AstraTool(AbstractTool):
                 "number of iterations: {2}...".format(cor, alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles,
-                                       center=cor, algorithm=self._tomopy.astra, options=options)
+                                       center=cor, ncores=cores, algorithm=self._tomopy.astra, options=options)
+
         else:  # run the non-iterative algorithms
 
             h.pstart(
@@ -104,7 +106,7 @@ class AstraTool(AbstractTool):
             }
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles,
-                                       center=cor, algorithm=self._tomopy.astra, options=options)
+                                       center=cor, ncores=cores, algorithm=self._tomopy.astra, options=options)
 
         h.pstop(
             "Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".

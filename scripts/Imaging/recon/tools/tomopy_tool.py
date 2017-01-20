@@ -59,6 +59,7 @@ class TomoPyTool(AbstractTool):
         alg = config.func.algorithm
         cor = config.func.cor
         num_iter = config.func.num_iter
+        cores = config.func.cores
 
         iterative_algorithm = False if alg in ['gridrec', 'fbp'] else True
 
@@ -69,14 +70,14 @@ class TomoPyTool(AbstractTool):
                 "number of iterations: {2}...".format(cor, alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles, center=cor,
-                                       algorithm=alg, num_iter=num_iter)  # , filter_name='parzen')
+                                       algorithm=alg, num_iter=num_iter, ncore=cores)
 
         else:  # run the non-iterative algorithms
             h.pstart(
                 "Starting non-iterative reconstruction algorithm with TomoPy. "
                 "Center of Rotation: {0}, Algorithm: {1}...".format(cor, alg))
             recon = self._tomopy.recon(
-                tomo=data, theta=proj_angles, center=cor, algorithm=alg)
+                tomo=data, theta=proj_angles, center=cor, ncore=cores, algorithm=alg)
 
         h.pstop(
             "Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".

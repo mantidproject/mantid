@@ -270,8 +270,15 @@ class Helper(object):
 
         Otherwise does nothing, and Helper's progress update function will also do nothing.
         """
+        if desc is None:
+            desc = "Progress"
+
         try:
             from tqdm import tqdm
+            if self._progress_bar is not None:
+                raise ValueError(
+                    "Timer was not closed previously. Please do prog_close()!")
+
             self._progress_bar = tqdm(
                 total=total, desc=desc, ascii=ascii, unit=unit)
         except ImportError:
@@ -279,6 +286,17 @@ class Helper(object):
             self.tomo_print_note("tqdm library not found, progress bars will not appear. You could install"
                                  " locally with pip install tqdm")
 
-    def prog_update(self, update):
+    def prog_update(self, update=1):
+        """
+        This function will do nothing if the tqdm library is not present.
+        """
         if self._progress_bar is not None:
             self._progress_bar.update(update)
+
+    def prog_close(self):
+        """
+        This function will do nothing if the tqdm library is not present.
+        """
+        if self._progress_bar is not None:
+            self._progress_bar.close()
+            self._progress_bar = None

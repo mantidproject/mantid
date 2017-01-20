@@ -27,9 +27,14 @@ def execute(data, scale, mode, h=None):
         resized_data = np.zeros((num_images, expected_dimy,
                                  expected_dimx), dtype=np.float32)
 
+        h.prog_init(num_images, "Scaling images")
         for idx in range(num_images):
             resized_data[idx] = scipy.misc.imresize(
                 data[idx], scale, interp='nearest')
+
+            h.prog_update(1)
+
+        h.prog_close()
 
         h.pstop("Finished image resizing. New shape: {0}".format(
             resized_data.shape))

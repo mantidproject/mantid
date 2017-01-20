@@ -5,6 +5,9 @@ import numpy as np
 
 
 # TODO write performance test, execution and memory usage!
+def supported_formats():
+    return ['fits', 'fit', 'nxs']
+
 
 def read_in_stack(config):
     """
@@ -15,12 +18,10 @@ def read_in_stack(config):
     :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
     """
 
-    supported_exts = ['fits', 'fit']
-
     sample, flat, dark = read_stack_of_images(config.func.input_path,
                                               config.func.input_path_flat,
                                               config.func.input_path_dark,
-                                              config.func.in_img_format,
+                                              config.func.in_format,
                                               argument_data_dtype=config.func.data_dtype,
                                               h=config.helper)
 
@@ -93,7 +94,7 @@ def _load_dark_data(dark_file_prefix, dark_file_path, img_shape, file_extension,
             dark_file_path, dark_file_prefix, file_extension)
 
         dark_data = _read_listed_files(
-            dark_file_names, img_shape, file_extension, data_dtype, h)
+            dark_file_names, img_shape, file_extension, data_dtype, h, "Dark")
         dark_avg = get_data_average(dark_data)
     else:
         dark_avg = None  # subtracting 0 will not change the images
@@ -106,7 +107,7 @@ def _load_flat_data(flat_file_prefix, flat_file_path, img_shape, file_extension,
             flat_file_path, flat_file_prefix, file_extension)
 
         flat_data = _read_listed_files(
-            flat_file_names, img_shape, file_extension, data_dtype, h)
+            flat_file_names, img_shape, file_extension, data_dtype, h, "Flat")
         flat_avg = get_data_average(flat_data)
     else:
         flat_avg = None  # dividing by 1 will not change the images
@@ -117,7 +118,7 @@ def _load_sample_data(first_sample_img, sample_file_names, img_shape, file_exten
     # determine what the loaded data was
     if len(img_shape) == 2:  # the loaded file was a single image
         sample_data = _read_listed_files(
-            sample_file_names, img_shape, file_extension, data_dtype, h)
+            sample_file_names, img_shape, file_extension, data_dtype, h, "Sample")
     elif len(img_shape) == 3:  # the loaded file was a stack of fits images
         sample_data = first_sample_img
     else:
@@ -182,15 +183,8 @@ def _read_img(filename, file_extension=None):
 
         # get the image data
         img_arr = image[0].data
-
-    elif file_extension in ['tiff', 'tif', 'png']:
-        skio = import_skimage_io()
-        img_arr = skio.imread(filename)
-
-    else:
-        raise ValueError(
-            "Don't know how to load a file with this extension: {0}".format(file_extension))
-
+    else:  # assume .nxs file for now
+        pass
     return img_arr
 
 
@@ -226,7 +220,7 @@ def import_skimage_io():
     return skio
 
 
-def _read_listed_files(files, slice_img_shape, file_extension, dtype, h=None):
+def _read_listed_files(files, slice_img_shape, file_extension, dtype, h=None, loop_name=None):
     """
     Read several images in a row into a 3d numpy array. Useful when reading all the sample
     images, or all the flat or dark images.
@@ -257,7 +251,7 @@ def _read_listed_files(files, slice_img_shape, file_extension, dtype, h=None):
 
     # FIXME TODO PERFORMANCE CRITICAL
     # TODO Performance Tests
-    h.prog_init(len(files))
+    h.prog_init(len(files), desc=loop_name)
     for idx, in_file in enumerate(files):
         try:
             data[idx, :, :] = _read_img(in_file, file_extension)
@@ -265,7 +259,7 @@ def _read_listed_files(files, slice_img_shape, file_extension, dtype, h=None):
         except IOError as exc:
             raise RuntimeError(
                 "Could not load file {0}. Error details: {1}".format(in_file, str(exc)))
-
+    h.prog_close()
     return data
 
 

@@ -45,12 +45,6 @@ class NormaliseByAirRegionTest(unittest.TestCase):
         npt.assert_raises(ValueError, self.alg.execute,
                           images, air, roi, crop, self.h)
 
-        # invalid air region coords
-        air = [13, 13, 13, 31]
-        roi = [1, 1, 8, 8]
-        npt.assert_raises(ValueError, self.alg.execute,
-                          images, air, roi, crop, self.h)
-
         # invalid roi region type
         roi = '[1,2,3,4]'
         air = [3, 3, 4, 4]

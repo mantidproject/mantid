@@ -22,11 +22,12 @@ def _rotate_stack(data, rotation, h=None):
     h = Helper.empty_init() if h is None else h
 
     img_count = data.shape[0]
-    # h.prog_init(img_count)
+    h.prog_init(img_count, "Rotating stack")
     for idx in range(0, img_count):
         _rotate_image(data[idx], rotation)
-        # h.prog_update(1)
+        h.prog_update(1)
 
+    h.prog_close()
     return data
 
 

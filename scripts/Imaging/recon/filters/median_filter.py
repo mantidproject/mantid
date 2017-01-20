@@ -35,9 +35,12 @@ def execute(data, size, mode, h=None):
             "Starting noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
             format(data.dtype, size))
 
+        h.prog_init(data.shape[0], "Median filter")
         for idx in range(0, data.shape[0]):
             data[idx] = scipy_ndimage.median_filter(
                 data[idx], size, mode=mode)
+            h.prog_update()
+        h.prog_close()
 
         h.pstop(
             "Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".

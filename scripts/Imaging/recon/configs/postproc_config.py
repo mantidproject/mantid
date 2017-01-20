@@ -56,7 +56,7 @@ class PostProcConfig(object):
                  "will be set to the minimum value.")
 
         grp_post.add_argument(
-            "--out-median-size",
+            "--post-median-size",
             required=False,
             type=float,
             default=self.median_size,
@@ -65,7 +65,7 @@ class PostProcConfig(object):
 
         median_modes = ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
         grp_post.add_argument(
-            "--out-median-mode",
+            "--post-median-mode",
             type=str,
             required=False,
             default=self.median_mode,
@@ -75,7 +75,7 @@ class PostProcConfig(object):
         )
 
         grp_post.add_argument(
-            "--out-gaussian-size",
+            "--post-gaussian-size",
             required=False,
             type=float,
             default=self.gaussian_size,
@@ -83,7 +83,7 @@ class PostProcConfig(object):
         )
 
         grp_post.add_argument(
-            "--out-gaussian-mode",
+            "--post-gaussian-mode",
             type=str,
             required=False,
             default=self.gaussian_mode,
@@ -91,7 +91,7 @@ class PostProcConfig(object):
             help="Default: %(default)s\nMode of gaussian filter which determines how the array borders are handled.(post processing).")
 
         grp_post.add_argument(
-            "--out-gaussian-order",
+            "--post-gaussian-order",
             required=False,
             type=int,
             default=self.gaussian_order,
@@ -107,10 +107,10 @@ class PostProcConfig(object):
         self.circular_mask = args.circular_mask
         self.cut_off_level_post = args.cut_off_post
 
-        self.gaussian_size = args.out_gaussian_size
-        self.gaussian_mode = args.out_gaussian_mode
-        self.gaussian_order = args.out_gaussian_order
+        self.gaussian_size = args.post_gaussian_size
+        self.gaussian_mode = args.post_gaussian_mode
+        self.gaussian_order = args.post_gaussian_order
 
-        self.median_size = args.out_median_size
-        self.median_mode = args.out_median_mode
+        self.median_size = args.post_median_size
+        self.median_mode = args.post_median_mode
         # self.median_filter3d_size = args.median_filter3d_size
