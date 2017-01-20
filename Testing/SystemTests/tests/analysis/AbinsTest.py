@@ -1,6 +1,6 @@
 import stresstesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
-from AbinsModules import AbinsConstants, AbinsTestHelpers, AbinsParameters
+from AbinsModules import AbinsConstants, AbinsTestHelpers
 
 
 class HelperTestingClass(object):
