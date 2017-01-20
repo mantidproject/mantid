@@ -105,9 +105,18 @@ const std::string KafkaTopicSubscriber::topic() const { return m_topicName; }
  * Setup the connection to the broker for the configured topic
  */
 void KafkaTopicSubscriber::subscribe() {
+  subscribe(IGNORE_OFFSET);
+}
+
+/**
+ * Setup the connection to the broker for the configured topic
+ * at a specified offset
+ * @param offset at which to start listening on topic
+ */
+void KafkaTopicSubscriber::subscribe(int64_t offset) {
   createConsumer();
   checkTopicExists();
-  subscribeAtOffset();
+  subscribeAtOffset(offset);
 }
 
 /**
@@ -157,7 +166,7 @@ void KafkaTopicSubscriber::checkTopicExists() const {
 /**
  * Subscribe to a topic at the required offset using rdkafka::assign()
  */
-void KafkaTopicSubscriber::subscribeAtOffset() const {
+void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) const {
   RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
   const int partition = 0;
   int64_t lowOffset, highOffset = 0;

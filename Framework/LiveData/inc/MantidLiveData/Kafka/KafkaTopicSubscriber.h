@@ -47,11 +47,14 @@ public:
   const std::string topic() const;
 
   virtual void subscribe() override;
+  virtual void subscribe(int64_t offset) override;
   virtual void consumeMessage(std::string *payload) override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;
   static const std::string DET_SPEC_TOPIC_SUFFIX;
+
+  static const int64_t IGNORE_OFFSET = -1;
 
 private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
@@ -61,7 +64,7 @@ private:
   void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
                               int64_t confOffset) const;
 
-  void subscribeAtOffset() const;
+  void subscribeAtOffset(int64_t offset) const;
   void checkTopicExists() const;
   void createConsumer();
 };
