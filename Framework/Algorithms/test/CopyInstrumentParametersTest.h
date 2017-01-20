@@ -66,14 +66,11 @@ public:
     // Get instrument of input workspace and move some detectors
     Geometry::ParameterMap *pmap;
     pmap = &(ws1->instrumentParameters());
-    const auto &detectorInfoWs1 = ws1->detectorInfo();
+    auto &detectorInfoWs1 = ws1->mutableDetectorInfo();
     Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
-    const auto &det1 = detectorInfoWs1.detector(detectorInfoWs1.indexOf(1));
-    Geometry::ComponentHelper::moveComponent(det1, *pmap, V3D(6.0, 0.0, 0.7),
-                                             Absolute);
-    const auto &det2 = detectorInfoWs1.detector(detectorInfoWs1.indexOf(2));
-    Geometry::ComponentHelper::moveComponent(det2, *pmap, V3D(6.0, 0.1, 0.7),
-                                             Absolute);
+    detectorInfoWs1.setPosition(0, V3D(6.0, 0.0, 0.7));
+    detectorInfoWs1.setPosition(1, V3D(6.0, 0.1, 0.7));
+
     // add auxiliary instrument parameters
     pmap->addDouble(instrument.get(), "Ei", 100);
     pmap->addString(instrument.get(), "some_param", "some_value");
@@ -130,13 +127,9 @@ public:
     // add auxiliary instrument parameters
     pmap->addDouble(instrument.get(), "Ei", 100);
     pmap->addString(instrument.get(), "some_param", "some_value");
-    const auto &detectorInfoWs1 = ws1->detectorInfo();
-    const auto &det1 = detectorInfoWs1.detector(detectorInfoWs1.indexOf(1));
-    Geometry::ComponentHelper::moveComponent(det1, *pmap, V3D(6.0, 0.0, 0.7),
-                                             Absolute);
-    const auto &det4 = detectorInfoWs1.detector(detectorInfoWs1.indexOf(4));
-    Geometry::ComponentHelper::moveComponent(det4, *pmap, V3D(6.0, 0.1, 0.7),
-                                             Absolute);
+    auto &detectorInfoWs1 = ws1->mutableDetectorInfo();
+    detectorInfoWs1.setPosition(0, V3D(6.0, 0.0, 0.7));
+    detectorInfoWs1.setPosition(3, V3D(6.0, 0.1, 0.7));
 
     // Create output workspace with another parameterized instrument and put
     // into data store
@@ -147,13 +140,11 @@ public:
     dataStore.add(wsName2, ws2);
 
     pmap = &(ws2->instrumentParameters());
-    const auto &detectorInfoWs2 = ws2->detectorInfo();
+    auto &detectorInfoWs2 = ws2->mutableDetectorInfo();
     instrument = ws2->getInstrument();
     pmap->addDouble(instrument.get(), "T", 10);
     pmap->addString(instrument.get(), "some_param", "other_value");
-    const auto &det2 = detectorInfoWs2.detector(2);
-    Geometry::ComponentHelper::moveComponent(det2, *pmap, V3D(6.0, 0.2, 0.7),
-                                             Absolute);
+    detectorInfoWs2.setPosition(1, V3D(6.0, 0.2, 0.7));
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
@@ -239,13 +230,11 @@ public:
                       static_cast<double>(i * 10));
     }
     // calibrate detectors;
-    const auto &detectorInfo = ws1->detectorInfo();
+    auto &detectorInfo = ws1->mutableDetectorInfo();
     for (size_t i = 0; i < n_detectors; i++) {
-      const auto &det = detectorInfo.detector(
-          detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1)));
-      Geometry::ComponentHelper::moveComponent(
-          det, *pmap,
-          V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7), Absolute);
+      auto detIndex = detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
+      detectorInfo.setPosition(
+          detIndex, V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7));
     }
 
     // Create output workspace with another parameterized instrument and put

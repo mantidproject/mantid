@@ -44,18 +44,15 @@ public:
     const size_t detectorIndex = 0; // detector workspace index.
     const auto &spectrumInfo = ws->spectrumInfo();
 
-    const double L1 = source->getPos().distance(sample->getPos());
+    const double L1 = spectrumInfo.l1();
 
     TimeAtSampleStrategyElastic strategy(ws);
     Correction correction = strategy.calculate(detectorIndex);
 
     const double ratio = correction.factor;
 
-    TSM_ASSERT_EQUALS(
-        "L1 / (L1 + L2)",
-        L1 / (L1 +
-              sample->getPos().distance(spectrumInfo.position(detectorIndex))),
-        ratio);
+    TSM_ASSERT_EQUALS("L1 / (L1 + L2)",
+                      L1 / (L1 + spectrumInfo.l2(detectorIndex)), ratio);
   }
 
   void test_L2_monitor() {
