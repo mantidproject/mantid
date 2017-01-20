@@ -160,7 +160,6 @@ public:
   const DetectorInfo &detectorInfo() const;
   DetectorInfo &mutableDetectorInfo();
 
-  const Beamline::SpectrumInfo &internalSpectrumInfo() const;
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
   void setSpectrumInfo(const SpectrumInfo &spectrumInfo);

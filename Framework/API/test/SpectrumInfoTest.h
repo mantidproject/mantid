@@ -9,6 +9,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -51,7 +52,8 @@ public:
   }
 
   void test_constructor() {
-    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(*makeWorkspace(3)));
+    Beamline::SpectrumInfo specInfo(3);
+    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(specInfo, *makeWorkspace(3)));
   }
 
   void test_sourcePosition() {
@@ -113,7 +115,7 @@ public:
   void test_isMasked_unthreaded() {
     size_t count = 1000;
     auto ws = makeWorkspace(count);
-    SpectrumInfo info(*ws);
+    const auto &info = ws->spectrumInfo();
     for (size_t i = 0; i < count; ++i)
       TS_ASSERT_EQUALS(info.isMasked(i), i % 2 == 0);
   }
@@ -121,7 +123,7 @@ public:
   void test_isMasked_threaded() {
     int count = 1000;
     auto ws = makeWorkspace(count);
-    SpectrumInfo info(*ws);
+    const auto &info = ws->spectrumInfo();
     // This attempts to test threading, but probably it is not really exercising
     // much.
     PARALLEL_FOR_IF(Kernel::threadSafe(*ws))

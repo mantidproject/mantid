@@ -7,10 +7,9 @@
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidBeamline/SpectrumDefinition.h"
-#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -419,13 +418,11 @@ public:
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
-    // Dummy call that initializes default detector groupings
-    static_cast<void>(exptInfo->spectrumInfo());
-
-    const auto &spectrumInfo = exptInfo->internalSpectrumInfo();
-    const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(0);
-    TS_ASSERT_EQUALS(spectrumDefinition.size(), 1);
-    TS_ASSERT_EQUALS(spectrumDefinition[0].first, 0); // det index 0 (ID 1)
+    const auto &spectrumInfo = exptInfo->spectrumInfo();
+    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
+        &spectrumInfo.detector(0));
+    TS_ASSERT(!detGroup);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
   }
 
   void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
@@ -438,11 +435,11 @@ public:
     Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
-    const auto &spectrumInfo2 = exptInfo->internalSpectrumInfo();
-    const auto &spectrumDefinition2 = spectrumInfo2.spectrumDefinition(0);
-    TS_ASSERT_EQUALS(spectrumDefinition2.size(), 2);
-    TS_ASSERT_EQUALS(spectrumDefinition2[0].first, 0); // det index 0 (ID 1)
-    TS_ASSERT_EQUALS(spectrumDefinition2[1].first, 1); // det index 1 (ID 2)
+    const auto &spectrumInfo = exptInfo->spectrumInfo();
+    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
+        &spectrumInfo.detector(0));
+    TS_ASSERT(detGroup);
+    TS_ASSERT_EQUALS(detGroup->getDetectorIDs(), (std::vector<detid_t>{1, 2}));
   }
 
   void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {

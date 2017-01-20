@@ -1052,13 +1052,6 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   return *m_detectorInfoWrapper;
 }
 
-/// Return a reference to the Beamline::SpectrumInfo object. Helper for
-/// API::SpectrumInfo, do not use this.
-const Beamline::SpectrumInfo &ExperimentInfo::internalSpectrumInfo() const {
-  populateIfNotLoaded();
-  return *m_spectrumInfo;
-}
-
 /** Return a reference to the SpectrumInfo object.
  *
  * Any modifications of the instrument or instrument parameters will invalidate
@@ -1071,7 +1064,8 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
     if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
       cacheDefaultDetectorGrouping();
     if (!m_spectrumInfoWrapper)
-      m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(*this);
+      m_spectrumInfoWrapper =
+          Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
   }
   return *m_spectrumInfoWrapper;
 }
@@ -1097,7 +1091,8 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   // No locking here since this non-const method is not thread safe.
   if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
     cacheDefaultDetectorGrouping();
-  m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(*this);
+  m_spectrumInfoWrapper =
+      Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
   return *m_spectrumInfoWrapper;
 }
 

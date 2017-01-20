@@ -64,8 +64,10 @@ class ExperimentInfo;
 */
 class MANTID_API_DLL SpectrumInfo {
 public:
-  SpectrumInfo(const ExperimentInfo &experimentInfo);
-  SpectrumInfo(ExperimentInfo &experimentInfo);
+  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
+               const ExperimentInfo &experimentInfo);
+  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
+               ExperimentInfo &experimentInfo);
   ~SpectrumInfo();
 
   size_t size() const;

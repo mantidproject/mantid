@@ -13,18 +13,18 @@
 namespace Mantid {
 namespace API {
 
-SpectrumInfo::SpectrumInfo(const ExperimentInfo &experimentInfo)
+SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
+                           const ExperimentInfo &experimentInfo)
     : m_experimentInfo(experimentInfo),
       m_detectorInfo(experimentInfo.detectorInfo()),
-      m_spectrumInfo(m_experimentInfo.internalSpectrumInfo()),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_spectrumInfo(spectrumInfo), m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
-SpectrumInfo::SpectrumInfo(ExperimentInfo &experimentInfo)
+SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
+                           ExperimentInfo &experimentInfo)
     : m_experimentInfo(experimentInfo),
       m_mutableDetectorInfo(&experimentInfo.mutableDetectorInfo()),
-      m_detectorInfo(*m_mutableDetectorInfo),
-      m_spectrumInfo(m_experimentInfo.internalSpectrumInfo()),
+      m_detectorInfo(*m_mutableDetectorInfo), m_spectrumInfo(spectrumInfo),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
@@ -32,9 +32,7 @@ SpectrumInfo::SpectrumInfo(ExperimentInfo &experimentInfo)
 SpectrumInfo::~SpectrumInfo() = default;
 
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
-size_t SpectrumInfo::size() const {
-  return m_spectrumInfo.size();
-}
+size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
