@@ -1,5 +1,6 @@
 file_names = {
-    "masking_file_name": "VanaPeaks.dat"
+    "masking_file_name": "VanaPeaks.dat",
+    "grouping_file_name": "Master_copy_of_grouping_file_with_essential_masks.cal"
 }
 
 script_params = {
