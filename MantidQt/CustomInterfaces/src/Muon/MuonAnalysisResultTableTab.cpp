@@ -25,9 +25,11 @@
 #include <QMessageBox>
 
 #include <algorithm>
+
 namespace {
-const std::string running = "running";
+const std::string RUNNING_LOG_NAME = "running";
 }
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Muon {
@@ -502,9 +504,9 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     const std::vector<Property *> &logData = ws->run().getLogData();
     const TimeSeriesProperty<bool> *runningLog = nullptr;
     Property *runLog = nullptr;
-    const bool foundRunning = ws->run().hasProperty(running);
+    const bool foundRunning = ws->run().hasProperty(RUNNING_LOG_NAME);
     if (foundRunning) {
-      runLog = ws->run().getLogData(running);
+      runLog = ws->run().getLogData(RUNNING_LOG_NAME);
       runningLog = dynamic_cast<TimeSeriesProperty<bool> *>(runLog);
 
     } else {
@@ -512,7 +514,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
       g_log.warning(
           "No running log found. Filtering will not be applied to the data.\n");
     }
-    for (const auto prop : logData) {
+    for (const auto &prop : logData) {
       // Check if is a timeseries log
       if (TimeSeriesProperty<double> *log =
               dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
