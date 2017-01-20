@@ -89,26 +89,26 @@ public:
     MatrixWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
-    auto workspaceHistory = outWS->getHistory();
+    const auto workspaceHistory = outWS->getHistory();
     AlgorithmHistory_const_sptr workerAlgHistory =
         workspaceHistory.getAlgorithmHistory(0)->getChildAlgorithmHistory(0);
     auto vecPropertyHistories = workerAlgHistory->getProperties();
 
     const double wavelengthMin =
         findPropertyValue<double>(vecPropertyHistories, "WavelengthMin");
-    double wavelengthMax =
+    const double wavelengthMax =
         findPropertyValue<double>(vecPropertyHistories, "WavelengthMax");
-    double monitorBackgroundWavelengthMin = findPropertyValue<double>(
+    const double monitorBackgroundWavelengthMin = findPropertyValue<double>(
         vecPropertyHistories, "MonitorBackgroundWavelengthMin");
-    double monitorBackgroundWavelengthMax = findPropertyValue<double>(
+    const double monitorBackgroundWavelengthMax = findPropertyValue<double>(
         vecPropertyHistories, "MonitorBackgroundWavelengthMax");
-    double monitorIntegrationWavelengthMin = findPropertyValue<double>(
+    const double monitorIntegrationWavelengthMin = findPropertyValue<double>(
         vecPropertyHistories, "MonitorIntegrationWavelengthMin");
-    double monitorIntegrationWavelengthMax = findPropertyValue<double>(
+    const double monitorIntegrationWavelengthMax = findPropertyValue<double>(
         vecPropertyHistories, "MonitorIntegrationWavelengthMax");
-    int i0MonitorIndex =
+    const int i0MonitorIndex =
         findPropertyValue<int>(vecPropertyHistories, "I0MonitorIndex");
-    std::string processingInstructions = findPropertyValue<std::string>(
+    const std::string processingInstructions = findPropertyValue<std::string>(
         vecPropertyHistories, "ProcessingInstructions");
     std::vector<std::string> pointDetectorStartStop;
     boost::split(pointDetectorStartStop, processingInstructions,

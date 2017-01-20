@@ -217,7 +217,7 @@ public:
     alg.setPropertyValue("FirstTransmissionRun", "first_trans");
     alg.setPropertyValue("SecondTransmissionRun", "second_trans");
     alg.setPropertyValue("PolarizationAnalysis", "None");
-    auto results = alg.validateInputs();
+    const auto results = alg.validateInputs();
     TS_ASSERT(!results.count("FirstTransmissionRun"));
     TS_ASSERT(results.count("SecondTransmissionRun"));
 

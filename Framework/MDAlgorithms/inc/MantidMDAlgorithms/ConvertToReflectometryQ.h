@@ -1,7 +1,6 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQ_H_
 #define MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQ_H_
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {

@@ -1,7 +1,6 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "ReflectometryWorkflowBase2.h"
 

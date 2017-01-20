@@ -5,9 +5,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
-#include <map>
-#include <string>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -51,11 +48,11 @@ protected:
   /// Initialize momentum transfer properties
   void initMomentumTransferProperties();
   /// Validate direct beam properties
-  std::map<std::string, std::string> validateDirectBeamProperties();
+  std::map<std::string, std::string> validateDirectBeamProperties() const;
   /// Validate transmission properties
-  std::map<std::string, std::string> validateTransmissionProperties();
+  std::map<std::string, std::string> validateTransmissionProperties() const;
   /// Validate wavelength range
-  std::map<std::string, std::string> validateWavelengthRanges();
+  std::map<std::string, std::string> validateWavelengthRanges() const;
   /// Convert a workspace from TOF to wavelength
   Mantid::API::MatrixWorkspace_sptr
   convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
@@ -77,7 +74,7 @@ protected:
   std::string populateProcessingInstructions(
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument,
-      Mantid::API::MatrixWorkspace_sptr inputWS);
+      Mantid::API::MatrixWorkspace_sptr inputWS) const;
 };
 } // namespace Algorithms
 } // namespace Mantid

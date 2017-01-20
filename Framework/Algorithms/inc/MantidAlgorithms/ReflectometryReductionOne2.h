@@ -1,8 +1,6 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 
 namespace Mantid {

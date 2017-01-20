@@ -2,7 +2,6 @@
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT2_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

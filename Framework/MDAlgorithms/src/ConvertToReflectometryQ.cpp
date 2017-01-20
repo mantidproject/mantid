@@ -2,15 +2,11 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -29,10 +25,6 @@
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 
 #include <boost/make_shared.hpp>
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
-
-#include "MantidAPI/ISpectrum.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -431,7 +423,7 @@ void ConvertToReflectometryQ::exec() {
 
 MatrixWorkspace_sptr
 ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_sptr inputWs,
-                                          double theta) {
+                                          const double theta) {
 
   if (theta < 0)
     return inputWs;

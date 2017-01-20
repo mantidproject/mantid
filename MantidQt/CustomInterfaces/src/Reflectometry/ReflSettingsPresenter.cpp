@@ -7,7 +7,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
-#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -357,7 +356,9 @@ void ReflSettingsPresenter::getInstDefaults() {
   m_view->setInstDefaults(defaults);
 }
 
-/** Generates and returns an instance of the ReflectometryReductionOne algorithm
+/** Generates and returns an instance of the ReflectometryReductionOneAuto
+* algorithm
+* @return :: ReflectometryReductionOneAuto algorithm
 */
 IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
   return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto",
@@ -365,6 +366,7 @@ IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
 }
 
 /** Creates and returns an example empty instrument given an instrument name
+* @return :: Empty instrument of a name
 */
 Instrument_const_sptr
 ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {

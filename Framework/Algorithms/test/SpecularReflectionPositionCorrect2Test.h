@@ -6,10 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cmath>
 
 using Mantid::Algorithms::SpecularReflectionPositionCorrect2;
 using namespace Mantid::API;

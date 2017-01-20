@@ -1,7 +1,6 @@
 #ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2_H_
 #define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTO2_H_
 
-#include "MantidKernel/System.h"
 #include "ReflectometryWorkflowBase2.h"
 
 namespace Mantid {
