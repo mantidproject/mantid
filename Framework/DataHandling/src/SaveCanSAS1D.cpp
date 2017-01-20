@@ -638,10 +638,28 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
 }
 
 /** This method creates an XML element named "SASinstrument"
+ *
+ * The structure for required(r) parts of the SASinstrument and the parts
+ * we want to add is:
+ *
+ * SASinstrument
+ *   name(r)
+ *   SASsource(r)
+ *     radiation(r)
+ *   SAScollimation(r)
+ *     aperature[name]
+ *       size
+ *         x[units]
+ *         y[units]
+ *   SASdetector
+ *     name
+ *
 *  @param sasInstrument :: string for sasinstrument element in the xml
 */
 void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument = "\n\t\t<SASinstrument>";
+
+  // Set name(r)
   std::string sasInstrName = "\n\t\t\t<name>";
   std::string instrname = m_workspace->getInstrument()->getName();
   // look for xml special characters and replace with entity refrence
@@ -650,10 +668,12 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrName += "</name>";
   sasInstrument += sasInstrName;
 
+  // Set SASsource(r)
   std::string sasSource;
   createSASSourceElement(sasSource);
   sasInstrument += sasSource;
 
+  // Set SAScollimation(r)
   // Add the collimation. We add the collimation information if
   // either the width of the height is different from 0
   double collimationHeight = getProperty("SampleHeight");
@@ -661,19 +681,27 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   std::string sasCollimation = "\n\t\t\t<SAScollimation/>";
   if (collimationHeight > 0 || collimationWidth > 0) {
     sasCollimation = "\n\t\t\t<SAScollimation>";
-    // Geometry
+
+    // aperture with name
     std::string collimationGeometry = getProperty("Geometry");
-    sasCollimation += "\n\t\t\t\t<name>" + collimationGeometry + "</name>";
+    sasCollimation += "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
+
+    // size
+    sasCollimation += "\n\t\t\t\t\t<size>";
+
     // Width
     sasCollimation +=
-        "\n\t\t\t\t<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
+        "\n\t\t\t\t\t\t<x unit=\"mm\">" + std::to_string(collimationWidth) + "</x>";
     // Height
-    sasCollimation += "\n\t\t\t\t<Y unit=\"mm\">" +
-                      std::to_string(collimationHeight) + "</Y>";
+    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" + std::to_string(collimationHeight) + "</y>";
+
+    sasCollimation += "\n\t\t\t\t\t</size>";
+    sasCollimation += "\n\t\t\t\t</aperture>";
     sasCollimation += "\n\t\t\t</SAScollimation>";
   }
   sasInstrument += sasCollimation;
 
+  // Set SASdetector
   std::string sasDet;
   createSASDetectorElement(sasDet);
   sasInstrument += sasDet;
