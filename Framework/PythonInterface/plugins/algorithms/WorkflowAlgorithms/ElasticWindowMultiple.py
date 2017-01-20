@@ -12,14 +12,14 @@ def _normalize_to_lowest_temp(elt_ws_name):
     @param elt_ws_name Name of the ELT workspace
     """
 
-    num_hist = mtd[elt_ws_name].getNumberHistograms()
+    num_hist = elt_ws_name.getNumberHistograms()
 
     # Normalize each spectrum in the workspace
     for idx in range(0, num_hist):
-        y_vals = mtd[elt_ws_name].readY(idx)
+        y_vals = elt_ws_name.readY(idx)
         scale = 1.0 / y_vals[0]
         y_vals_scaled = scale * y_vals
-        mtd[elt_ws_name].setY(idx, y_vals_scaled)
+        elt_ws_name.setY(idx, y_vals_scaled)
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
