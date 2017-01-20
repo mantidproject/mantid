@@ -118,13 +118,13 @@ using Kernel::DateAndTime;
  * mapping
  */
 ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
-    const IKafkaBroker &broker, std::string eventTopic,
-    std::string runInfoTopic, std::string spDetTopic)
-    : m_interrupt(false), m_eventStream(broker.subscribe(eventTopic)),
-      m_localEvents(), m_specToIdx(), m_runStart(),
-      m_runStream(broker.subscribe(runInfoTopic)),
-      m_spDetStream(broker.subscribe(spDetTopic)), m_runNumber(-1), m_thread(),
-      m_capturing(false), m_exception(), m_extractWaiting(false) {}
+    std::unique_ptr<IKafkaBroker> broker, const std::string &eventTopic,
+    const std::string &runInfoTopic, const std::string &spDetTopic)
+    : m_broker(std::move(broker)), m_eventTopic(eventTopic),
+      m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
+      m_interrupt(false), m_localEvents(), m_specToIdx(), m_runStart(),
+      m_runNumber(-1), m_thread(), m_capturing(false), m_exception(),
+      m_extractWaiting(false) {}
 
 /**
  * Destructor.
@@ -136,8 +136,32 @@ ISISKafkaEventStreamDecoder::~ISISKafkaEventStreamDecoder() { stopCapture(); }
  * Start capturing from the stream on a separate thread. This is a non-blocking
  * call and will return after the thread has started
  */
-void ISISKafkaEventStreamDecoder::startCapture() noexcept {
-  m_thread = std::thread([this]() { this->captureImpl(); });
+void ISISKafkaEventStreamDecoder::startCapture(bool startNow) {
+
+  // If we are not starting now, then we want to start at offsets corresponding
+  // to the start of the run
+  if (!startNow) {
+    auto runStream = m_broker->subscribe(m_runInfoTopic);
+    std::string rawMsgBuffer;
+    runStream->consumeMessage(&rawMsgBuffer);
+    if (rawMsgBuffer.empty()) {
+      throw std::runtime_error(
+          "ISISKafkaEventStreamDecoder::initLocalCaches() - "
+          "Empty message received from run info "
+          "topic. Unable to continue");
+    }
+    auto runMsg = ISISStream::GetRunInfo(
+        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+    auto eventOffset = runMsg->stream_offset();
+    m_eventStream = m_broker->subscribe(m_eventTopic, eventOffset);
+  } else {
+    m_eventStream = m_broker->subscribe(m_eventTopic);
+  }
+
+  m_runStream = m_broker->subscribe(m_runInfoTopic);
+  m_spDetStream = m_broker->subscribe(m_spDetTopic);
+
+  auto m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
 }
 

@@ -43,9 +43,10 @@ namespace LiveData {
 */
 class DLLExport ISISKafkaEventStreamDecoder {
 public:
-  ISISKafkaEventStreamDecoder(const IKafkaBroker &broker,
-                              std::string eventTopic, std::string runInfoTopic,
-                              std::string spDetTopic);
+  ISISKafkaEventStreamDecoder(std::unique_ptr<IKafkaBroker> broker,
+                              const std::string &eventTopic,
+                              const std::string &runInfoTopic,
+                              const std::string &spDetTopic);
   ~ISISKafkaEventStreamDecoder();
   ISISKafkaEventStreamDecoder(const ISISKafkaEventStreamDecoder &) = delete;
   ISISKafkaEventStreamDecoder &
@@ -54,7 +55,7 @@ public:
 public:
   ///@name Start/stop
   ///@{
-  void startCapture() noexcept;
+  void startCapture(bool startNow = true);
   void stopCapture() noexcept;
   ///@}
 
@@ -87,6 +88,12 @@ private:
 
   API::Workspace_sptr extractDataImpl();
 
+  /// Broker to use to subscribe to topics
+  std::unique_ptr<IKafkaBroker> m_broker;
+  /// Topic names
+  const std::string m_eventTopic;
+  const std::string m_runInfoTopic;
+  const std::string m_spDetTopic;
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
   /// Subscriber for the event stream
@@ -121,7 +128,8 @@ private:
   std::atomic<bool> m_endRun;
   /// Indicate that LoadLiveData is waiting for access to the buffer workspace
   std::atomic<bool> m_extractWaiting;
-  /// Indicate that MonitorLiveData has seen the runStatus since it was set to EndRun
+  /// Indicate that MonitorLiveData has seen the runStatus since it was set to
+  /// EndRun
   bool m_runStatusSeen;
 
   std::atomic<bool> m_extractedEndRunData;

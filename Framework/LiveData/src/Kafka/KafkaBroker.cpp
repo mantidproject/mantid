@@ -25,5 +25,12 @@ KafkaBroker::subscribe(const std::string &topic) const {
   return std::move(subscriber);
 }
 
+std::unique_ptr<IKafkaStreamSubscriber>
+KafkaBroker::subscribe(const std::string &topic, int64_t offset) const {
+  auto subscriber = Kernel::make_unique<KafkaTopicSubscriber>(m_address, topic);
+  subscriber->subscribe(offset);
+  return std::move(subscriber);
+}
+
 } // namespace LiveData
 } // namespace Mantid

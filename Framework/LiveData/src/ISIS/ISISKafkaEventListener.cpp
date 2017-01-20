@@ -19,7 +19,7 @@ ISISKafkaEventListener::ISISKafkaEventListener() {
 
 /// @copydoc ILiveListener::connect
 bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
-  KafkaBroker broker(address.toString());
+  auto broker = Mantid::Kernel::make_unique<KafkaBroker>(address.toString());
   try {
     std::string instrumentName = getProperty("InstrumentName");
     const std::string eventTopic(instrumentName +
@@ -28,7 +28,7 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
         spDetInfoTopic(instrumentName +
                        KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
-        broker, eventTopic, runInfoTopic, spDetInfoTopic);
+        std::move(broker), eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {
     g_log.error() << "ISISKafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
@@ -39,8 +39,19 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
 
 /// @copydoc ILiveListener::start
 void ISISKafkaEventListener::start(Kernel::DateAndTime startTime) {
-  UNUSED_ARG(startTime);
-  m_decoder->startCapture();
+  bool startNow = true;
+  // Workaround for existing LiveListener interface
+  // startTime of 0 means start from now
+  // startTime of 1000000000 nanoseconds from epoch means start from start of
+  // run and we do not support starting from arbitrary time in this listener
+  if (startTime.totalNanoseconds() == 1000000000) {
+    startNow = false;
+  } else if (startTime != 0) {
+    g_log.warning() << "KafkaLiveListener does not currently support starting "
+                       "from arbitrary time."
+                    << std::endl;
+  }
+  m_decoder->startCapture(startNow);
 }
 
 /// @copydoc ILiveListener::extractData
