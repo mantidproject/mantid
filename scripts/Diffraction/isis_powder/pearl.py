@@ -117,8 +117,11 @@ class Pearl(AbstractInst):
                                         x_max=self._inst_settings.van_tof_cropping[-1])
         return cropped_ws
 
-    def generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
-        return pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_match)
+    def apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+        if gen_absorb:
+            pearl_algs.generate_vanadium_absorb_corrections(van_ws=van_ws)
+
+        return pearl_algs.apply_vanadium_absorb_corrections(van_ws=van_ws, run_details=run_details)
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on),

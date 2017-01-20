@@ -105,12 +105,12 @@ class AbstractInst(object):
 
     # Optional overrides
 
+
     @abstractmethod
-    def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
+    def apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
         """
         Generates vanadium absorption corrections to compensate for the container
-        :param calibration_full_paths: PEARL specific - TODO when we re-implement PEARL gen absorb
-        :param ws_to_match: A reference vanadium workspace to match the binning of
+        :param van_ws: A reference vanadium workspace to match the binning of or correct
         :return: A workspace containing the corrections
         """
         raise NotImplementedError("Not implemented for this instrument yet")

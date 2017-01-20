@@ -12,7 +12,7 @@ class MockInstrument(AbstractInst):
     def generate_output_file_name(self, run_number_string):
         return "test_output_string"
 
-    def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
+    def apply_absorb_corrections(self, calibration_full_paths, ws_to_match):
         return None
 
     def spline_vanadium_ws(self, focused_vanadium_banks):

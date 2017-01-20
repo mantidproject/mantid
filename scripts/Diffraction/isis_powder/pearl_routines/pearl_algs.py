@@ -18,6 +18,24 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
     return pearl_attenuated_ws
 
 
+def apply_vanadium_absorb_corrections(van_ws, run_details):
+    absorb_ws = mantid.Load(Filename=run_details.vanadium_absorption_path)
+
+    van_original_units = van_ws.getAxis(0).getUnit().unitID()
+    absorb_units = absorb_ws.getAxis(0).getUnit().unitID()
+    if van_original_units != absorb_units:
+        van_ws = mantid.ConvertUnits(InputWorkspace=van_ws, Target=absorb_units, OutputWorkspace=van_ws)
+
+    van_ws = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws, WorkspaceToMatch=absorb_ws, OutputWorkspace=van_ws)
+    van_ws = mantid.Divide(LHSWorkspace=van_ws, RHSWorkspace=absorb_ws, OutputWorkspace=van_ws)
+
+    if van_original_units != absorb_units:
+        van_ws = mantid.ConvertUnits(InputWorkspace=van_ws, Target=van_original_units, OutputWorkspace=van_ws)
+
+    common.remove_intermediate_workspace(absorb_ws)
+    return van_ws
+
+
 def generate_vanadium_absorb_corrections(van_ws):
     raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
 

@@ -95,8 +95,8 @@ class Polaris(AbstractInst):
                                                             mask_path=masking_file_path)
         return output
 
-    def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
-        return polaris_algs.generate_absorb_corrections(ws_to_correct=ws_to_match)
+    def apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+        return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws)
 
     def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(processed_spectra)

@@ -139,7 +139,7 @@ TODO talk about defaults?
    :ref:`pearl_cal_map_isis-powder-diffraction-ref` to determine the current cycle
    and the vanadium/empty run numbers for the subsequent processing.
    
- - `tt_mode` - Specifies the detectors to be considered whilst focusing.
+ - `tt_mode` - Specifies the detectors to be considered.
    Acceptable options: `tt35`, `tt70`, `tt88`.
  
  - `vanadium_normalisation` - If set to true divides the sample by the vanadium

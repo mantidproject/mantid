@@ -57,7 +57,7 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
 
 
 def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_absorb):
-    absorb_ws = instrument.generate_vanadium_absorb_corrections(run_details, corrected_van_ws)
+    absorb_ws = instrument.apply_absorb_corrections(run_details, corrected_van_ws, gen_absorb=gen_absorb)
     return absorb_ws
 
 

@@ -105,6 +105,6 @@ def _test_splined_vanadium_exists(instrument, run_details):
                           + str(run_details.splined_vanadium_file_path) + " for these settings.\n")
             instrument.generate_auto_vanadium_calibration(run_details=run_details)
         else:
-            ValueError("Processed vanadium runs not found at this path: "
-                       + str(run_details.splined_vanadium_file_path) +
-                       " \nHave you created a vanadium calibration with these settings yet?\n")
+            raise ValueError("Processed vanadium runs not found at this path: "
+                             + str(run_details.splined_vanadium_file_path) +
+                             " \nHave you created a vanadium calibration with these settings yet?\n")
