@@ -5,6 +5,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument.h"
@@ -15,6 +16,8 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+
+constexpr double deg2rad = M_PI / 180.0;
 
 namespace Mantid {
 namespace Algorithms {
@@ -332,7 +335,7 @@ void Q1DWeighted::exec() {
   }
   // set the output property
   std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");
-  if (outputWSGroupName.size() == 0) {
+  if (outputWSGroupName.empty()) {
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSGroupName = outputWSName + "_wedges";
     setPropertyValue("WedgeWorkspace", outputWSGroupName);

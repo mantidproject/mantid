@@ -30,7 +30,7 @@ public:
   }
 
   void test_exec_fail() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
 
     SetGoniometer alg;
@@ -48,7 +48,7 @@ public:
 
   /** Create an "empty" goniometer by NOT giving any axes. */
   void test_exec_emptyGoniometer() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
 
     SetGoniometer alg;
@@ -69,7 +69,7 @@ public:
   }
 
   void test_exec() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
     FrameworkManager::Instance().exec(
         "AddSampleLog", 8, "Workspace", "SetGoniometerTest_ws", "LogName",
@@ -112,7 +112,7 @@ public:
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");
   }
   void test_universal() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetUnivGoniometerTest_ws",
                                                  ws);
     FrameworkManager::Instance().exec(
@@ -152,7 +152,7 @@ public:
    * @param numExpected :: how many axes should be created (0 or 1)
    */
   void do_test_param(std::string axis0, size_t numExpected = 0) {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
     FrameworkManager::Instance().exec(
         "AddSampleLog", 8, "Workspace", "SetGoniometerTest_ws", "LogName",

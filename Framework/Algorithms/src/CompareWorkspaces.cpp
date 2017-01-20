@@ -9,9 +9,11 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -128,8 +130,10 @@ void CompareWorkspaces::exec() {
     std::string message = m_Messages->cell<std::string>(0, 0);
     g_log.notice() << "The workspaces did not match: " << message << '\n';
   } else {
-    std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->name();
-    std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->name();
+    std::string ws1 =
+        Workspace_const_sptr(getProperty("Workspace1"))->getName();
+    std::string ws2 =
+        Workspace_const_sptr(getProperty("Workspace2"))->getName();
     g_log.notice() << "The workspaces \"" << ws1 << "\" and \"" << ws2
                    << "\" matched!\n";
   }
@@ -172,8 +176,8 @@ bool CompareWorkspaces::processGroups() {
   }
 
   if (m_Result && ws1 && ws2) {
-    g_log.notice() << "All workspaces in workspace groups \"" << ws1->name()
-                   << "\" and \"" << ws2->name() << "\" matched!\n";
+    g_log.notice() << "All workspaces in workspace groups \"" << ws1->getName()
+                   << "\" and \"" << ws2->getName() << "\" matched!\n";
   }
 
   setProperty("Result", m_Result);
@@ -1154,11 +1158,11 @@ void CompareWorkspaces::recordMismatch(std::string msg, std::string ws1,
   // Workspace names default to the workspaces currently being compared
   if (ws1.empty()) {
     Workspace_const_sptr w1 = getProperty("Workspace1");
-    ws1 = w1->name();
+    ws1 = w1->getName();
   }
   if (ws2.empty()) {
     Workspace_const_sptr w2 = getProperty("Workspace2");
-    ws2 = w2->name();
+    ws2 = w2->getName();
   }
 
   // Add new row and flag this comparison as a mismatch

@@ -136,8 +136,7 @@ public:
 protected:
   /// Create string property
   QtProperty *apply(const std::string &str) const override {
-    QtProperty *prop = NULL;
-    prop = m_browser->addStringProperty(m_name);
+    QtProperty *prop = m_browser->addStringProperty(m_name);
     m_browser->setStringPropertyValue(prop, QString::fromStdString(str));
     return prop;
   }
@@ -1029,12 +1028,10 @@ void PropertyHandler::addTie(const QString &tieStr) {
   std::string name = parts[0].trimmed().toStdString();
   std::string expr = parts[1].trimmed().toStdString();
   try {
-    Mantid::API::ParameterTie *tie =
-        m_browser->compositeFunction()->tie(name, expr);
-    if (tie == NULL)
-      return;
+    auto &cfun = *m_browser->compositeFunction();
+    cfun.tie(name, expr);
     QString parName = QString::fromStdString(
-        tie->getFunction()->parameterName(static_cast<int>(tie->getIndex())));
+        cfun.parameterLocalName(cfun.parameterIndex(name)));
     foreach (QtProperty *parProp, m_parameters) {
       if (parProp->propertyName() == parName) {
         m_browser->m_changeSlotsEnabled = false;
@@ -1332,10 +1329,10 @@ void PropertyHandler::addConstraint(QtProperty *parProp, bool lo, bool up,
 
   m_constraints.insert(parProp->propertyName(), cnew);
 
-  Mantid::API::IConstraint *c =
+  auto c = std::unique_ptr<Mantid::API::IConstraint>(
       Mantid::API::ConstraintFactory::Instance().createInitialized(m_fun.get(),
-                                                                   ostr.str());
-  m_fun->addConstraint(c);
+                                                                   ostr.str()));
+  m_fun->addConstraint(std::move(c));
   m_browser->m_changeSlotsEnabled = true;
 }
 

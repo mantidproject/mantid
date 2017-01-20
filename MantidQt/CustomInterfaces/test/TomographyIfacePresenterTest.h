@@ -5,8 +5,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 
-#include <cxxtest/TestSuite.h>
 #include "TomographyViewMock.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
@@ -26,8 +26,8 @@ public:
   }
 
   TomographyIfacePresenterTest() {
-    Mantid::API::FrameworkManager::Instance(); // make sure framework is
-                                               // initialized
+    // make sure the framework is initialized
+    Mantid::API::FrameworkManager::Instance();
   }
 
   void setUp() override {
@@ -120,7 +120,7 @@ public:
     // needs one tool at a very minimum
     EXPECT_CALL(mockView, currentReconTool()).Times(1).WillOnce(Return(g_ccpi));
     // and basic tools settings
-    EXPECT_CALL(mockView, reconToolsSettings()).Times(0);
+    EXPECT_CALL(mockView, currentPathsConfig()).Times(0);
 
     // tool config not available
     EXPECT_CALL(mockView, showToolConfig(testing::_)).Times(0);
@@ -133,31 +133,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  // does not really fail, but it cannot do any of the expected updates
-  void test_setupReconToolUnsupportedTool() {
-    testing::NiceMock<MockTomographyIfaceView> mockView;
-    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
-
-    EXPECT_CALL(mockView, systemSettings()).Times(0);
-    EXPECT_CALL(mockView, currentReconTool())
-        .Times(1)
-        .WillRepeatedly(Return(g_ccpi));
-    EXPECT_CALL(mockView, reconToolsSettings()).Times(0);
-
-    // wrong tool => doesn't have a config dialog
-    EXPECT_CALL(mockView, showToolConfig(testing::_)).Times(0);
-
-    // No errors/warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-
-    pres.notify(ITomographyIfacePresenter::SetupReconTool);
-    TSM_ASSERT(
-        "Mock not used as expected. Some EXPECT_CALL conditions were not "
-        "satisfied.",
-        testing::Mock::VerifyAndClearExpectations(&mockView))
-  }
-
+  //   setup reconstruction tool now in preseter, have a unit test
   void test_setupReconToolGood() {
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
@@ -168,10 +144,10 @@ public:
         .Times(2)
         .WillRepeatedly(Return("TomoPy"));
     // and basic tools settings
-    TomoReconToolsUserSettings toolsSettings;
-    EXPECT_CALL(mockView, reconToolsSettings())
+    TomoPathsConfig toolPaths;
+    EXPECT_CALL(mockView, currentPathsConfig())
         .Times(1)
-        .WillOnce(Return(toolsSettings));
+        .WillOnce(Return(toolPaths));
 
     EXPECT_CALL(mockView, showToolConfig(testing::_)).Times(1);
 
@@ -179,6 +155,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
+    pres.notify(ITomographyIfacePresenter::ToolChanged);
     pres.notify(ITomographyIfacePresenter::SetupReconTool);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -193,34 +170,6 @@ public:
     // No errors, but one warning
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-
-    pres.notify(ITomographyIfacePresenter::ViewImg);
-    TSM_ASSERT(
-        "Mock not used as expected. Some EXPECT_CALL conditions were not "
-        "satisfied.",
-        testing::Mock::VerifyAndClearExpectations(&mockView))
-  }
-
-  void test_showImg_good() {
-    testing::NiceMock<MockTomographyIfaceView> mockView;
-    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
-
-    const std::string path = "FITS_small_02.fits";
-    // needs image file name - re-uses a FITS from the unit tests
-    ON_CALL(mockView, showImagePath()).WillByDefault(Return(path));
-    EXPECT_CALL(mockView, showImagePath()).Times(1);
-
-    EXPECT_CALL(
-        mockView,
-        showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(1);
-    EXPECT_CALL(mockView,
-                showImage(testing::Matcher<const std::string &>(testing::_)))
-        .Times(0);
-
-    // No errors, no warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(ITomographyIfacePresenter::ViewImg);
     TSM_ASSERT(
@@ -257,7 +206,6 @@ public:
 
     // would need compute resource and username if logged in
     EXPECT_CALL(mockView, getUsername()).Times(0);
-    EXPECT_CALL(mockView, currentComputeResource()).Times(0);
     EXPECT_CALL(mockView, updateLoginControls(testing::_)).Times(0);
 
     // No errors, no warnings
@@ -275,24 +223,17 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    std::vector<std::string> tools;
-    tools.emplace_back("Astra Toolbox");
-    tools.emplace_back("TomoPy");
-    tools.push_back(g_ccpi);
-    tools.emplace_back("Savu");
+    std::vector<std::string> tools{"Astra", "TomoPy"};
 
-    TSM_ASSERT_EQUALS("There should be 4 tools in this test", tools.size(), 4);
-    // up to this index the tools are supported
-    const size_t indexToolsWork = 1;
-    for (size_t i = 0; i < 3; i++) {
-      EXPECT_CALL(mockView, currentReconTool())
+    TomoPathsConfig toolPaths;
+    for (const auto &tool : tools) {
+      // expect the current paths config will be read only once
+      EXPECT_CALL(mockView, currentPathsConfig())
           .Times(1)
-          .WillOnce(Return(tools[i]));
-      if (i <= indexToolsWork) {
-        EXPECT_CALL(mockView, currentComputeResource()).Times(1);
-      } else {
-        EXPECT_CALL(mockView, currentComputeResource()).Times(0);
-      }
+          .WillOnce(Return(toolPaths));
+
+      // expect the current reconstruction tool will be called only once
+      EXPECT_CALL(mockView, currentReconTool()).Times(1).WillOnce(Return(tool));
 
       EXPECT_CALL(mockView, enableRunReconstruct(testing::_)).Times(1);
       EXPECT_CALL(mockView, enableConfigTool(testing::_)).Times(1);
@@ -313,9 +254,6 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, currentComputeResource())
-        .Times(1)
-        .WillOnce(Return(g_scarfName));
     EXPECT_CALL(mockView, currentReconTool()).Times(0);
 
     // No errors, no warnings
@@ -481,7 +419,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    // EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
     pres.notify(ITomographyIfacePresenter::SetupResourcesAndTools);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -514,7 +452,6 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, currentComputeResource()).Times(0);
     EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
         .Times(1);
 
@@ -533,7 +470,6 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, currentComputeResource()).Times(0);
     EXPECT_CALL(mockView, updateJobsInfoDisplay(testing::_, testing::_))
         .Times(1);
 
@@ -729,10 +665,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  // An attempt at testing a sequence of steps from the user.
-  // TODO: more interesting sessions should follow, but how to do it
-  // without loading too many and too big files?
-  void test_sillySession() {
+  void test_sillySessionRemote() {
     // the user does a few silly things...
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
@@ -745,9 +678,7 @@ public:
 
     // user changes some paths
     pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
-
     EXPECT_CALL(mockView, currentComputeResource())
-        .Times(2)
         .WillRepeatedly(Return(g_scarfName));
 
     // user changes the compute resource
@@ -757,11 +688,13 @@ public:
         .Times(2)
         .WillRepeatedly(Return("TomoPy"));
 
-    TomoReconToolsUserSettings toolsSettings;
-    EXPECT_CALL(mockView, reconToolsSettings())
+    // and basic tools settings
+    EXPECT_CALL(mockView, currentPathsConfig())
         .Times(1)
-        .WillOnce(Return(toolsSettings));
+        .WillOnce(Return(TomoPathsConfig()));
 
+    // the tool changed event sets up the tool's paths
+    pres.notify(ITomographyIfacePresenter::ToolChanged);
     // user opens dialog and sets up a reconstruction tool
     pres.notify(ITomographyIfacePresenter::SetupReconTool);
 
@@ -775,9 +708,68 @@ public:
         .Times(1)
         .WillOnce(Return(roiEtc));
 
-    EXPECT_CALL(mockView, tomopyMethod()).Times(1).WillOnce(Return(""));
+    TomoReconFiltersSettings filters;
+    EXPECT_CALL(mockView, prePostProcSettings())
+        .Times(1)
+        .WillOnce(Return(filters));
 
-    EXPECT_CALL(mockView, astraMethod()).Times(1).WillOnce(Return(""));
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+    // we get one warning from trying to submit a job to remote
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    // finally, user tries to run a reconstruction job
+    pres.notify(ITomographyIfacePresenter::RunReconstruct);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
+  void test_sillySessionLocal() {
+    // the user does a few silly things...
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter *pres =
+        new MantidQt::CustomInterfaces::TomographyIfacePresenter(&mockView);
+
+    EXPECT_CALL(mockView, systemSettings()).Times(0);
+
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
+
+    // user changes some paths
+    pres->notify(ITomographyIfacePresenter::TomoPathsChanged);
+    EXPECT_CALL(mockView, currentComputeResource())
+        .WillRepeatedly(Return("Local"));
+
+    // user changes the compute resource
+    pres->notify(ITomographyIfacePresenter::CompResourceChanged);
+
+    EXPECT_CALL(mockView, currentReconTool())
+        .Times(2)
+        .WillRepeatedly(Return("TomoPy"));
+
+    // and basic tools settings
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
+
+    // the tool changed event sets up the tool's paths
+    pres->notify(ITomographyIfacePresenter::ToolChanged);
+    // user opens dialog and sets up a reconstruction tool
+    pres->notify(ITomographyIfacePresenter::SetupReconTool);
+
+    TomoPathsConfig pathsCfg;
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(pathsCfg));
+
+    ImageStackPreParams roiEtc;
+    EXPECT_CALL(mockView, currentROIEtcParams())
+        .Times(1)
+        .WillOnce(Return(roiEtc));
 
     TomoReconFiltersSettings filters;
     EXPECT_CALL(mockView, prePostProcSettings())
@@ -789,7 +781,8 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // finally, user tries to run a reconstruction job
-    pres.notify(ITomographyIfacePresenter::RunReconstruct);
+    pres->notify(ITomographyIfacePresenter::RunReconstruct);
+
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
@@ -806,6 +799,34 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(ITomographyIfacePresenter::ShutDown);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
+  void test_showImg_good() {
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+
+    const std::string path = "FITS_small_02.fits";
+    // needs image file name - re-uses a FITS from the unit tests
+    ON_CALL(mockView, showImagePath()).WillByDefault(Return(path));
+    EXPECT_CALL(mockView, showImagePath()).Times(1);
+
+    EXPECT_CALL(
+        mockView,
+        showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
+            testing::_))).Times(1);
+    EXPECT_CALL(mockView,
+                showImage(testing::Matcher<const std::string &>(testing::_)))
+        .Times(0);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(ITomographyIfacePresenter::ViewImg);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",

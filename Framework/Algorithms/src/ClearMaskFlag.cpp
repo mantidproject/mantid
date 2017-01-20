@@ -1,9 +1,8 @@
 #include "MantidAlgorithms/ClearMaskFlag.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -16,7 +15,6 @@ using Kernel::Direction;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ClearMaskFlag)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ClearMaskFlag::name() const { return "ClearMaskFlag"; }
 
@@ -28,7 +26,6 @@ const std::string ClearMaskFlag::category() const {
   return "Transforms\\Masking";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ClearMaskFlag::init() {
@@ -41,28 +38,22 @@ void ClearMaskFlag::init() {
                   "the whole instrument.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ClearMaskFlag::exec() {
   MatrixWorkspace_sptr ws = getProperty("Workspace");
   std::string componentName = getPropertyValue("ComponentName");
-
-  // Clear the mask flags
-  Geometry::ParameterMap &pmap = ws->instrumentParameters();
+  auto &detectorInfo = ws->mutableDetectorInfo();
 
   if (!componentName.empty()) {
-    auto instrument = ws->getInstrument();
-    auto component = instrument->getComponentByName(componentName);
-    boost::shared_ptr<const Geometry::ICompAssembly> componentAssembly =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
-    std::vector<Geometry::IComponent_const_sptr> children;
-    componentAssembly->getChildren(children, true);
-    for (auto det : children) {
-      pmap.addBool(det.get(), "masked", false);
+    std::vector<IDetector_const_sptr> detectors;
+    ws->getInstrument()->getDetectorsInBank(detectors, componentName);
+    for (const auto &det : detectors) {
+      auto index = detectorInfo.indexOf(det->getID());
+      detectorInfo.setMasked(index, false);
     }
   } else {
-    pmap.clearParametersByName("masked");
+    detectorInfo.clearMaskFlags();
   }
 }
 

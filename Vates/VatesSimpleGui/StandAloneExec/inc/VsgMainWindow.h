@@ -49,7 +49,7 @@ public:
    * Default constructor.
    * @param parent the parent widget for the main window
    */
-  VsgMainWindow(QWidget *parent = 0);
+  VsgMainWindow(QWidget *parent = nullptr);
   /// Default destructor.
   ~VsgMainWindow() override;
 

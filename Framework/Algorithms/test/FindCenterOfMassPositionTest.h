@@ -7,6 +7,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
@@ -49,7 +50,6 @@ public:
         double dy = (center_y - (double)iy);
         Y[0] = exp(-(dx * dx + dy * dy));
         E[0] = 1;
-        ws->getSpectrum(i).setSpectrumNo(i);
       }
     }
   }

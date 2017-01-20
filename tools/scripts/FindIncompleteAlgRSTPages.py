@@ -2,6 +2,7 @@
 import os
 import re
 import urllib2
+from mantid.api import AlgorithmFactory
 
 
 def readWebPage(url):

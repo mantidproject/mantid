@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCanSAS1D.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -16,8 +13,9 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
-//-----------------------------------------------------------------------------
 namespace {
 void encode(std::string &data) {
   std::string buffer;
@@ -578,7 +576,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
     } else {
       g_log.notice() << "Detector with name " << detectorName
                      << " does not exist in the instrument of the workspace: "
-                     << m_workspace->name() << '\n';
+                     << m_workspace->getName() << '\n';
     }
   }
 }

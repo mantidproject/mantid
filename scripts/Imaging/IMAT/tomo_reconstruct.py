@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 # Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -267,6 +268,7 @@ def grab_postproc_options(args):
 def main_tomo_rec():
     # several dependencies (numpy, scipy) are too out-of-date in standard Python 2.6
     # distributions, as found for example on rhel6
+
     vers = sys.version_info
     if vers < (2,7,0):
         raise RuntimeError("Not running this test as it requires Python >= 2.7. Version found: {0}".
@@ -274,7 +276,7 @@ def main_tomo_rec():
 
     import inspect
 
-    import IMAT.tomorec.io as tomoio
+    import tomorec.io as tomoio
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()

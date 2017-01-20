@@ -1,5 +1,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include <sstream>
 
 namespace Mantid {
 namespace API {
@@ -78,7 +79,7 @@ void AnalysisDataServiceImpl::add(
   group->observeADSNotifications(true);
   for (size_t i = 0; i < group->size(); ++i) {
     auto ws = group->getItem(i);
-    std::string wsName = ws->name();
+    std::string wsName = ws->getName();
     // if anonymous make up a name and add
     if (wsName.empty()) {
       wsName = name + "_" + std::to_string(i + 1);
@@ -117,7 +118,7 @@ void AnalysisDataServiceImpl::addOrReplace(
   group->observeADSNotifications(true);
   for (size_t i = 0; i < group->size(); ++i) {
     auto ws = group->getItem(i);
-    std::string wsName = ws->name();
+    std::string wsName = ws->getName();
     // make up a name for an anonymous workspace
     if (wsName.empty()) {
       wsName = name + "_" + std::to_string(i + 1);
@@ -154,7 +155,7 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
   Workspace_sptr ws;
   try {
     ws = retrieve(name);
-  } catch (Kernel::Exception::NotFoundError) {
+  } catch (const Kernel::Exception::NotFoundError &) {
     // do nothing - remove will do what's needed
   }
   Kernel::DataService<API::Workspace>::remove(name);
@@ -210,9 +211,9 @@ void AnalysisDataServiceImpl::deepRemoveGroup(const std::string &name) {
     WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (gws) {
       // if a member is a group remove its items as well
-      deepRemoveGroup(gws->name());
+      deepRemoveGroup(gws->getName());
     } else {
-      remove(ws->name());
+      remove(ws->getName());
     }
   }
   remove(name);
@@ -258,7 +259,7 @@ AnalysisDataServiceImpl::topLevelItems() const {
       if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
         group->reportMembers(groupMembers);
       }
-    } catch (std::exception &) {
+    } catch (const std::exception &) {
     }
   }
 

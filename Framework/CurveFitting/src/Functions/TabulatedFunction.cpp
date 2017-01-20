@@ -336,7 +336,7 @@ void TabulatedFunction::setupData() const {
 
   size_t index = static_cast<size_t>(getAttribute("WorkspaceIndex").asInt());
 
-  g_log.debug() << "Setting up " << m_workspace->name() << " index " << index
+  g_log.debug() << "Setting up " << m_workspace->getName() << " index " << index
                 << '\n';
 
   const auto &xData = m_workspace->points(index);

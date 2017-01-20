@@ -376,7 +376,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def _getPlotXAxisName(self, lv, ws):
         index = lv.getXAxisDimensionIndex()
         dim = ws.getDimension(index)
-        return dim.getName()
+        return dim.name
 
     def test_mdhistoAutoAxisAssignmentWhenNoIntegration(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
@@ -480,8 +480,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(ws.getNumDims(), 3)
         self.assertEqual(ws.getDimension(0).getNBins(), 10)
         self.assertEqual(ws.getDimension(1).getNBins(), 10)
-        self.assertEqual(ws.getDimension(2).getNBins(), 30)
-        self.assertEqual(ws.getNPoints(), 10*10*30)
+        self.assertEqual(ws.getDimension(2).getNBins(), 1)
+        self.assertEqual(ws.getNPoints(), 10*10)
 
         svw.deleteLater()
 

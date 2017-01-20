@@ -1,14 +1,17 @@
 #ifndef MANTID_KERNEL_IPROPERTYMANAGER_H_
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
-#include <vector>
+
+#ifndef Q_MOC_RUN
+#include <boost/make_shared.hpp>
+#include <boost/type_traits.hpp>
+#endif
+
 #include <unordered_set>
+#include <vector>
 
 namespace Json {
 class Value;
@@ -18,12 +21,10 @@ namespace Mantid {
 
 namespace Kernel {
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
 class Logger;
 class DataItem;
 class DateAndTime;
+class IPropertySettings;
 class PropertyManager;
 template <typename T> class TimeSeriesProperty;
 template <typename T> class Matrix;
@@ -139,8 +140,23 @@ public:
    */
   template <typename T>
   IPropertyManager *setProperty(const std::string &name, const T &value) {
-    setTypedProperty(name, value,
-                     boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+    return doSetProperty(name, value);
+  }
+
+  /** Templated method to set the value of a PropertyWithValue from a
+   * std::unique_ptr
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *setProperty(const std::string &name,
+                                std::unique_ptr<T> value) {
+    setTypedProperty(name, std::move(value),
+                     boost::is_convertible<std::unique_ptr<T>,
+                                           boost::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }
@@ -179,17 +195,9 @@ public:
   /// Return the property manager serialized as a json object.
   virtual ::Json::Value asJson(bool withDefaultValues = false) const = 0;
 
-  /** Give settings to a property to determine when it gets enabled/hidden.
-   * Passes ownership of the given IPropertySettings object to the named
-   * property
-   * @param name :: property name
-   * @param settings :: IPropertySettings     */
   void setPropertySettings(const std::string &name,
-                           std::unique_ptr<IPropertySettings> settings) {
-    Property *prop = getPointerToProperty(name);
-    if (prop)
-      prop->setSettings(std::move(settings));
-  }
+                           std::unique_ptr<IPropertySettings> settings);
+
   /** Set the group for a given property
    * @param name :: property name
    * @param group :: Name of the group it belongs to     */
@@ -288,11 +296,12 @@ protected:
   */
   void declareProperty(
       const std::string &name, const char *value,
-      IValidator_sptr validator = IValidator_sptr(new NullValidator),
-      const std::string &doc = "",
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
+      const std::string &doc = std::string(),
       const unsigned int direction = Direction::Input) {
     // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), validator, doc, direction);
+    declareProperty(name, std::string(value), std::move(validator), doc,
+                    direction);
   }
 
   /** Specialised version of declareProperty template method to prevent the
@@ -314,10 +323,11 @@ protected:
   */
   void declareProperty(
       const std::string &name, const char *value, const std::string &doc,
-      IValidator_sptr validator = IValidator_sptr(new NullValidator),
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
       const unsigned int direction = Direction::Input) {
     // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), validator, doc, direction);
+    declareProperty(name, std::string(value), std::move(validator), doc,
+                    direction);
   }
 
   /** Add a property of string type to the list of managed properties
@@ -426,6 +436,45 @@ public:
   virtual Property *getPointerToProperty(const std::string &name) const = 0;
 
 private:
+  /** Helper method to set the value of a PropertyWithValue
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *doSetProperty(const std::string &name, const T &value) {
+    setTypedProperty(name, value,
+                     boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+    this->afterPropertySet(name);
+    return this;
+  }
+
+  /** Helper method to set the value of a PropertyWithValue, variant for
+   * shared_ptr types. This variant is required to enforce checks for complete
+   * types, do not remove it.
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *doSetProperty(const std::string &name,
+                                  const boost::shared_ptr<T> &value) {
+    // CAREFUL: is_convertible has undefined behavior for incomplete types. If T
+    // is forward-declared in the calling code, e.g., an algorithm that calls
+    // setProperty, compilation and linking do work. However, the BEHAVIOR IS
+    // UNDEFINED and the compiler will not complain, but things crash or go
+    // wrong badly. To circumvent this we call `sizeof` here to force a compiler
+    // error if T is an incomplete type.
+    static_cast<void>(sizeof(T)); // DO NOT REMOVE, enforces complete type
+    setTypedProperty(name, value, boost::is_convertible<T *, DataItem *>());
+    this->afterPropertySet(name);
+    return this;
+  }
+
   /**
    * Set a property value that is not convertible to a DataItem_sptr
    *  @param name :: The name of the property (case insensitive)
@@ -461,6 +510,28 @@ private:
     // T is convertible to DataItem_sptr
     boost::shared_ptr<DataItem> data =
         boost::static_pointer_cast<DataItem>(value);
+    std::string error = getPointerToProperty(name)->setDataItem(data);
+    if (!error.empty()) {
+      throw std::invalid_argument(error);
+    }
+    return this;
+  }
+
+  /**
+   * Set a property value from std::unique_ptr that is convertible to a
+   * DataItem_sptr
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *setTypedProperty(const std::string &name,
+                                     std::unique_ptr<T> value,
+                                     const boost::true_type &) {
+    // T is convertible to DataItem_sptr
+    boost::shared_ptr<DataItem> data(std::move(value));
     std::string error = getPointerToProperty(name)->setDataItem(data);
     if (!error.empty()) {
       throw std::invalid_argument(error);

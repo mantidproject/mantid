@@ -32,7 +32,7 @@ protected:
   int RequestData(vtkInformation *, vtkInformationVector **,
                   vtkInformationVector *) override;
   /// Handle time variation.
-  unsigned long GetMTime() override;
+  vtkMTimeType GetMTime() override;
 
 private:
   /// File name from which to read.

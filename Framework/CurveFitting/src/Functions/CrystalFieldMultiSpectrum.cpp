@@ -63,6 +63,8 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("FWHMX0", Attribute(std::vector<double>()));
   declareAttribute("FWHMY0", Attribute(std::vector<double>()));
   declareAttribute("FWHMVariation", Attribute(0.1));
+  declareAttribute("NPeaks", Attribute(0));
+  declareAttribute("FixAllPeaks", Attribute(false));
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
@@ -193,6 +195,8 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto bkgdShape = IFunction::getAttribute("Background").asUnquotedString();
+  size_t nRequiredPeaks = IFunction::getAttribute("NPeaks").asInt();
+  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
 
   if (!bkgdShape.empty() && bkgdShape.find("name=") != 0 &&
       bkgdShape.front() != '(') {
@@ -203,11 +207,13 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   auto background =
       API::FunctionFactory::Instance().createInitialized(bkgdShape);
   spectrum->addFunction(background);
+  if (fixAllPeaks) {
+    background->fixAll();
+  }
 
   m_nPeaks[iSpec] = CrystalFieldUtils::buildSpectrumFunction(
       *spectrum, peakShape, values, m_fwhmX[iSpec], m_fwhmY[iSpec],
-      fwhmVariation, fwhm);
-
+      fwhmVariation, fwhm, nRequiredPeaks, fixAllPeaks);
   return IFunction_sptr(spectrum);
 }
 
@@ -225,10 +231,15 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
   peakCalculator.calculateEigenSystem(en, wf, nre);
 
-  auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   auto temperatures = getAttribute("Temperatures").asVector();
-  for (size_t i = 0; i < temperatures.size(); ++i) {
-    updateSpectrum(*fun.getFunction(i), nre, en, wf, temperatures[i], i);
+  auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
+  try {
+    for (size_t i = 0; i < temperatures.size(); ++i) {
+      updateSpectrum(*fun.getFunction(i), nre, en, wf, temperatures[i], i);
+    }
+  } catch (std::out_of_range &) {
+    buildTargetFunction();
+    return;
   }
 }
 

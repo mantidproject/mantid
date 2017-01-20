@@ -37,6 +37,7 @@
 #include <QMetaMethod>
 #include <QTreeWidget>
 
+#include <boost/lexical_cast.hpp>
 #include <algorithm>
 
 namespace {

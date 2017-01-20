@@ -5,6 +5,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -56,9 +57,19 @@ std::string MantidEVWorker::workspaceType(const std::string &ws_name) {
   if (!ADS.doesExist(ws_name))
     return std::string("");
 
-  Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(ws_name);
+  WorkspaceGroup_const_sptr wsgroup = ADS.retrieveWS<WorkspaceGroup>(ws_name);
+  if (wsgroup) {
 
-  return outWS->id();
+    std::vector<std::string> group = wsgroup->getNames();
+    Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(group[0]);
+
+    return outWS->id();
+  } else {
+
+    Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(ws_name);
+
+    return outWS->id();
+  }
 }
 
 /**
@@ -770,6 +781,13 @@ bool MantidEVWorker::changeHKL(const std::string &peaks_ws_name,
  *                                    that is background.
  *  @param cylinder_profile_fit       The fitting function for cylinder
  *                                    integration.
+ *  @param adaptiveQBkg                Default is false.   If true,
+ *            BackgroundOuterRadius + AdaptiveQMultiplier *|Q|
+ *            BackgroundInnerRadius + AdaptiveQMultiplier *|Q|
+ *  @param adaptiveQMult       Default is 0.
+ *                PeakRadius + AdaptiveQMultiplier * |Q|
+ *                so each peak has a
+ *                different integration radius.  Q includes the 2*pi factor.
  *
  *  @return true if the unweighted workspace was successfully created and
  *          integrated using IntegratePeaksMD.
@@ -778,7 +796,8 @@ bool MantidEVWorker::sphereIntegrate(
     const std::string &peaks_ws_name, const std::string &event_ws_name,
     double peak_radius, double inner_radius, double outer_radius,
     bool integrate_edge, bool use_cylinder_integration, double cylinder_length,
-    double cylinder_percent_bkg, const std::string &cylinder_profile_fit) {
+    double cylinder_percent_bkg, const std::string &cylinder_profile_fit,
+    bool adaptiveQBkg, double adaptiveQMult) {
   try {
     if (!isPeaksWorkspace(peaks_ws_name))
       return false;
@@ -822,7 +841,8 @@ bool MantidEVWorker::sphereIntegrate(
     alg->setProperty("CylinderLength", cylinder_length);
     alg->setProperty("PercentBackground", cylinder_percent_bkg);
     alg->setProperty("ProfileFunction", cylinder_profile_fit);
-
+    alg->setProperty("AdaptiveQBackground", adaptiveQBkg);
+    alg->setProperty("AdaptiveQMultiplier", adaptiveQMult);
     std::cout << "Integrating temporary MD workspace\n";
 
     bool integrate_OK = alg->execute();
@@ -1108,9 +1128,7 @@ bool MantidEVWorker::getUB(const std::string &peaks_ws_name, bool lab_coords,
  */
 bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
                                  const std::string &md_ws_name,
-                                 const std::string &event_ws_name)
-
-{
+                                 const std::string &event_ws_name) {
   // fail if peaks workspace is not there
   if (!isPeaksWorkspace(peaks_ws_name)) {
     return false;

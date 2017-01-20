@@ -7,6 +7,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Track.h"
+#include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Fast_Exponential.h"
@@ -14,14 +16,14 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using namespace Kernel;
-using namespace Geometry;
 using namespace API;
+using namespace Geometry;
+using HistogramData::interpolateLinearInplace;
+using namespace Kernel;
 using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection()
@@ -144,7 +146,7 @@ void AbsorptionCorrection::exec() {
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Copy over bin boundaries
+    // Copy over bins
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
     if (!spectrumInfo.hasDetectors(i))
@@ -172,11 +174,11 @@ void AbsorptionCorrection::exec() {
       }
     }
 
+    const auto lambdas = m_inputWS->points(i);
     // Get a reference to the Y's in the output WS for storing the factors
-    auto &Y = correctionFactors->dataY(i);
+    auto &Y = correctionFactors->mutableY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
-    const auto lambdas = m_inputWS->points(i);
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
       const double lambda = lambdas[j];
       if (m_emode == 0) // Elastic
@@ -197,14 +199,12 @@ void AbsorptionCorrection::exec() {
       }
     }
 
-    if (m_xStep >
-        1) // Interpolate linearly between points separated by m_xStep,
-           // last point required
-    {
-      // TODO linearlyInterpolateY should be implemented in HistogramData
-      // Until then use old interface
-      VectorHelper::linearlyInterpolateY(m_inputWS->x(i).rawData(), Y,
-                                         static_cast<double>(m_xStep));
+    // Interpolate linearly between points separated by m_xStep,
+    // last point required
+    if (m_xStep > 1) {
+      auto histnew = correctionFactors->histogram(i);
+      interpolateLinearInplace(histnew, m_xStep);
+      correctionFactors->setHistogram(i, histnew);
     }
 
     prog.report();

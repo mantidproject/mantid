@@ -123,7 +123,7 @@ public:
   }
 
   void test_loadWorkspace() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 1, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
@@ -148,7 +148,7 @@ public:
   }
 
   void test_loadWorkspace_nondefault_index() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
@@ -172,7 +172,7 @@ public:
   }
 
   void test_loadWorkspace_nondefault_wrong_index() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
@@ -191,7 +191,7 @@ public:
   }
 
   void test_Derivatives() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 1, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
@@ -252,7 +252,7 @@ public:
   }
 
   void test_factory_create_from_workspace() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 1, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     std::string inif = "name=TabulatedFunction,Workspace=TABULATEDFUNCTIONTEST_"

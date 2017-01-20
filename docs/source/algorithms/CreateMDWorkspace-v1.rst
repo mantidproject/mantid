@@ -38,7 +38,7 @@ Usage
     print "mdws is a " + mdws.id()
     print "with {0} dimensions:".format(mdws.getNumDims())
     for i in range (mdws.getNumDims()):
-        print mdws.getDimension(i).getName()
+        print mdws.getDimension(i).name
 
 Output:
 

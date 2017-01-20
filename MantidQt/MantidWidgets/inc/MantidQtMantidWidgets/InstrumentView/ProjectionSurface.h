@@ -227,6 +227,10 @@ public:
   void changeBorderColor(const QColor &color) {
     m_maskShapes.changeBorderColor(color);
   }
+  /// Save masks to a table workspace
+  void saveShapesToTableWorkspace();
+  /// Load masks from a table workspace
+  void loadShapesFromTableWorkspace(Mantid::API::ITableWorkspace_const_sptr ws);
 
   //-----------------------------------
   //    Peaks overlay methods
@@ -272,8 +276,8 @@ signals:
   // peaks
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
-  void comparePeaks(
-      const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &);
+  void comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                    std::vector<Mantid::Geometry::IPeak *>> &);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -339,8 +343,8 @@ protected:
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
   std::pair<QPointF, QPointF> m_selectedMarkers;
-  std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
-      m_selectedPeaks;
+  std::pair<std::vector<Mantid::Geometry::IPeak *>,
+            std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
   /// use with a new PeakOverlay.
 
 private:
@@ -352,6 +356,8 @@ private:
   void drawMaskShapes(QPainter &painter) const;
   /// Draw the selection rectangle to the surface
   void drawSelectionRect(QPainter &painter) const;
+  /// Check if a peak is visible at a given point
+  bool peakVisibleAtPoint(const QPointF &point) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 

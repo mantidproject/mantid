@@ -333,9 +333,10 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   double centerrightend = center + sigma * 0.5;
   std::ostringstream os;
   os << centerleftend << " < PeakCentre < " << centerrightend;
-  auto *centerbound = API::ConstraintFactory::Instance().createInitialized(
-      gaussianpeak.get(), os.str(), false);
-  gaussianpeak->addConstraint(centerbound);
+  auto centerbound = std::unique_ptr<API::IConstraint>(
+      API::ConstraintFactory::Instance().createInitialized(gaussianpeak.get(),
+                                                           os.str(), false));
+  gaussianpeak->addConstraint(std::move(centerbound));
 
   g_log.debug("Calling createChildAlgorithm : Fit...");
   // 4. Fit

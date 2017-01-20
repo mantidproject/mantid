@@ -32,8 +32,6 @@ public:
   IMDWorkspaceTest() {
     workspace.setTitle("workspace");
     workspace.initialize(2, 4, 3);
-    workspace.getSpectrum(0).setSpectrumNo(1);
-    workspace.getSpectrum(1).setSpectrumNo(2);
     for (int i = 0; i < 4; ++i) {
       workspace.dataX(0)[i] = i;
       workspace.dataX(1)[i] = i + 4;

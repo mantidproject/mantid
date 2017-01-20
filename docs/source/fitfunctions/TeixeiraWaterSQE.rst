@@ -45,17 +45,48 @@ References
 Usage
 -----
 
-**Example - Global fit to a synthetic signal:**
+**Example - Single spectrum fit:**
 
 The signal is modeled by the convolution of a resolution function
-with an elastic signal plus this jump-diffusion model.
-The resolution is modeled as a normal distribution.
-We insert a random noise in the jump-diffusion model.
-Finally, we choose a linear background noise.
-The goal is to find out the residence time and the jump length
-with a fit to the following model:
+with an elastic signal plus this jump-diffusion model. We include a linear background.
+The value of the momentum transfer :math:`Q` is contained in the loaded data
 
 :math:`S(Q,E) = I \cdot R(Q,E) \otimes [EISF\delta(E) + (1-EISF)\cdot TeixeiraWaterSQE(Q,E)] + (a+bE)`
+
+.. testcode:: SingleSpectrumTeixeiraWaterSQE
+
+    from __future__ import (absolute_import, division, print_function)
+    resolution=Load("irs26173_graphite002_res.nxs")
+    data=Load("irs26176_graphite002_red.nxs")
+    function="""
+    (composite=Convolution,FixResolution=false,NumDeriv=true;
+      name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,Scaling=1,XScaling=1,ties=(Scaling=1,XScaling=1);
+      (  name=DeltaFunction,Centre=0,ties=(Centre=0);
+         name=TeixeiraWaterSQE,Centre=0,ties=(Centre=0),constraints=(DiffCoeff<3.0)
+      )
+    );
+    name=LinearBackground"""
+    # Let's fit spectrum with workspace index 5. Appropriate value of Q is picked up
+    # automatically from workspace 'data' and passed on to the fit function
+    out,chi2,covariance,params,curves=Fit(Function=function, InputWorkspace=data,
+        WorkspaceIndex=5, CreateOutput=True, Output="fit", MaxIterations=100)
+    # Check some results
+    drow=params.row(6)
+    DiffCoeff = params.row(6)["Value"]
+    Tau = params.row(7)["Value"]
+    if abs(DiffCoeff-2.1)/2.1 < 0.1 and abs(Tau-1.85)/1.85 < 0.1:
+        print("Optimal parameters within 10% of expected values")
+    else:
+        print(DiffCoeff, Tau, chi2)
+
+
+**Example - Global fit to a synthetic signal:**
+
+The signal is modeled by the model of the previous example.
+The resolution is modeled as a normal distribution.
+We insert a random noise in the jump-diffusion data.
+Finally, we choose a linear background noise.
+The goal is to find out the residence time and the jump length
 
 .. testcode:: ExampleTeixeiraWaterSQE
 
@@ -109,7 +140,7 @@ with a fit to the following model:
     single_model_template="""(composite=Convolution,FixResolution=true,NumDeriv=true;
     name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=_WI_,Scaling=1,Shift=0,XScaling=1;
     (name=DeltaFunction,Height=0.5,Centre=0,constraints=(0<Height<1);
-    name=TeixeiraWaterSQE,Q=_Q_,Height=0.5,Tau=10,DiffCoeff=10,Centre=0;
+    name=TeixeiraWaterSQE,Q=_Q_,Height=0.5,Tau=10,DiffCoeff=5,Centre=0;
     ties=(f1.Height=1-f0.Height,f1.Centre=f0.Centre)));
     name=LinearBackground,A0=0,A1=0"""
     # Now create the string representation of the global model (all spectra, all Q-values):
@@ -135,7 +166,7 @@ with a fit to the following model:
                 "StartX_"+str(wi): "-0.09", "EndX_"+str(wi): "0.09"})
     # Invoke the Fit algorithm using global_model and domain_model:
     output_workspace = "glofit_"+data.name()
-    Fit(Function=global_model, Output=output_workspace, CreateOutput=True, MaxIterations=500, **domain_model)
+    Fit(Function=global_model, Output=output_workspace, CreateOutput=True, MaxIterations=200, **domain_model)
     # Extract DiffCoeff and Tau from workspace glofit_data_Parameters, the output of Fit:
     nparms=0
     parameter_ws = mtd[output_workspace+"_Parameters"]
@@ -161,6 +192,10 @@ with a fit to the following model:
         print("Error. Obtained Tau=",Tau," instead of",tau)
 
 Output:
+
+.. testoutput:: SingleSpectrumTeixeiraWaterSQE
+
+    Optimal parameters within 10% of expected values
 
 .. testoutput:: ExampleTeixeiraWaterSQE
 

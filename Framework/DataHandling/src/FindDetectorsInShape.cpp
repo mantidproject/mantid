@@ -1,9 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/FindDetectorsInShape.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -41,56 +40,35 @@ void FindDetectorsInShape::init() {
 }
 
 void FindDetectorsInShape::exec() {
-  // Get the input workspace
   const MatrixWorkspace_const_sptr WS = getProperty("Workspace");
-
   bool includeMonitors = getProperty("IncludeMonitors");
-
   std::string shapeXML = getProperty("ShapeXML");
 
   // convert into a Geometry object
   Geometry::ShapeFactory sFactory;
-  boost::shared_ptr<Geometry::Object> shape_sptr =
-      sFactory.createShape(shapeXML);
+  auto shape_sptr = sFactory.createShape(shapeXML);
 
-  // get the instrument out of the workspace
-  Instrument_const_sptr instrument_sptr = WS->getInstrument();
-
-  // To get all the detector ID's
-  detid2det_map allDetectors;
-  instrument_sptr->getDetectors(allDetectors);
+  const auto &detectorInfo = WS->detectorInfo();
+  const auto &detIDs = detectorInfo.detectorIDs();
 
   std::vector<int> foundDets;
 
   // progress
-  detid2det_map::size_type objCmptCount = allDetectors.size();
+  detid2det_map::size_type objCmptCount = detectorInfo.size();
   int iprogress_step = static_cast<int>(objCmptCount / 100);
   if (iprogress_step == 0)
     iprogress_step = 1;
   int iprogress = 0;
 
-  // Now go through all
-  detid2det_map::iterator it;
-  detid2det_map::const_iterator it_end = allDetectors.end();
-  for (it = allDetectors.begin(); it != it_end; ++it) {
-    Geometry::IDetector_const_sptr det = it->second;
-
-    // attempt to dynamic cast up to an IDetector
-    boost::shared_ptr<const Geometry::IDetector> detector_sptr =
-        boost::dynamic_pointer_cast<const Geometry::IDetector>(it->second);
-
-    if (detector_sptr) {
-      if ((includeMonitors) || (!detector_sptr->isMonitor())) {
-        // check if the centre of this item is within the user defined shape
-        if (shape_sptr->isValid(detector_sptr->getPos())) {
-          // shape encloses this objectComponent
-          g_log.debug() << "Detector contained in shape "
-                        << detector_sptr->getID() << '\n';
-          foundDets.push_back(detector_sptr->getID());
-        }
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if ((includeMonitors) || (!detectorInfo.isMonitor(i))) {
+      // check if the centre of this item is within the user defined shape
+      if (shape_sptr->isValid(detectorInfo.position(i))) {
+        // shape encloses this objectComponent
+        g_log.debug() << "Detector contained in shape " << detIDs[i] << '\n';
+        foundDets.push_back(detIDs[i]);
       }
     }
-
     iprogress++;
     if (iprogress % iprogress_step == 0) {
       progress(static_cast<double>(iprogress) /

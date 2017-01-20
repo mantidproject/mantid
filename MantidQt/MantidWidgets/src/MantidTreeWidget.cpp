@@ -142,13 +142,17 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
 
 void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
   try {
-    std::string wsName = m_dockWidget->getSelectedWorkspaceNames()[0];
+    auto wsNames = getSelectedWorkspaceNames();
+    if (wsNames.isEmpty()) {
+      return;
+    }
+    auto wsName = wsNames.front();
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
-    grpWSPstr =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(m_ads.retrieve(wsName));
+    grpWSPstr = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
     if (!grpWSPstr) {
-      if (!wsName.empty()) {
-        m_mantidUI->importWorkspace(QString::fromStdString(wsName), false);
+      if (!wsName.isEmpty()) {
+        m_mantidUI->importWorkspace(wsName, false);
         return;
       }
     }
@@ -221,16 +225,17 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
 * @param showWaterfallOpt If true, show the waterfall option on the dialog
 * @param showPlotAll :: [input] If true, show the "Plot All" button on the
 * dialog
+* @param showTiledOpt :: [input] If true, show the "Tiled" option on the dialog
 * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
 * options
 */
-MantidWSIndexWidget::UserInput
-MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
-                                             bool showPlotAll) const {
+MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
+    bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
-    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
+    selectedMatrixWsNameList.append(
+        QString::fromStdString(matrixWs->getName()));
   }
 
   // Check to see if all workspaces have only a single spectrum ...
@@ -247,18 +252,19 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
     const std::set<int> SINGLE_SPECTRUM = {0};
     QMultiMap<QString, std::set<int>> spectrumToPlot;
     foreach (const auto selectedMatrixWs, selectedMatrixWsList) {
-      spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->name()),
+      spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->getName()),
                             SINGLE_SPECTRUM);
     }
     MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
     selections.waterfall = false;
+    selections.tiled = false;
     return selections;
   }
 
   // Else, one or more workspaces
   auto dio = m_mantidUI->createWorkspaceIndexDialog(
-      0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
+      0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll, showTiledOpt);
   dio->exec();
   return dio->getSelections();
 }
@@ -277,7 +283,8 @@ MantidTreeWidget::choosePlotOptions(const QString &type,
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
-    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
+    selectedMatrixWsNameList.append(
+        QString::fromStdString(matrixWs->getName()));
   }
   auto *dlg =
       m_mantidUI->createSurfacePlotDialog(0, selectedMatrixWsNameList, type);

@@ -96,8 +96,6 @@ public:
   double gett1min();
 
 private:
-  Mantid::Geometry::Instrument_const_sptr m_instrument;
-
   // Initialisation code
   void init() override;
   /// Execution code for histogram workspace

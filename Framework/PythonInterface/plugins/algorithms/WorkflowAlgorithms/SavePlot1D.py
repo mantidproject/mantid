@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 
 import mantid
-from mantid.kernel import Direction, StringArrayProperty, StringListValidator
+from mantid.kernel import Direction, IntArrayProperty, StringArrayProperty, StringListValidator
 import sys
 
 try:
@@ -54,6 +54,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                              'Label on the X axis. If empty, it will be taken from workspace')
         self.declareProperty('YLabel', '',
                              'Label on the Y axis. If empty, it will be taken from workspace')
+        self.declareProperty(IntArrayProperty('SpectraList', [], direction=Direction.Input),
+                             'Which spectra to plot')
         self.declareProperty(StringArrayProperty('SpectraNames', [], direction=Direction.Input),
                              'Override with custom names for spectra')
         self.declareProperty('Result', '', Direction.Output)
@@ -74,6 +76,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
     def PyExec(self):
         self._wksp = self.getProperty("InputWorkspace").value
         outputType = self.getProperty('OutputType').value
+
+        self.visibleSpectra = self.getProperty('SpectraList').value
 
         if outputType == 'image':
             result = self.saveImage()
@@ -103,6 +107,15 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             label = LHS + " = " + str(float(ax.label(wkspIndex)))
 
         return (x, y, label)
+
+    def showSpectrum(self, ws, wkspIndex):
+        spectraNum = ws.getSpectrum(wkspIndex).getSpectrumNo()
+
+        # user not specifying which spectra means show them all
+        if len(self.visibleSpectra) <= 0:
+            return True
+
+        return spectraNum in self.visibleSpectra
 
     def getAxesLabels(self, ws, utf8=False):
         xlabel = self.getProperty('XLabel').value
@@ -170,7 +183,12 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 (x, y, label) = self.getData(wksp, i, spectraNames[i])
             else:
                 (x, y, label) = self.getData(wksp, i)
-            data.append(go.Scatter(x=x, y=y, name=label))
+
+            visible = True
+            if not self.showSpectrum(wksp, i):
+                visible = 'legendonly'
+
+            data.append(go.Scatter(x=x, y=y, name=label, visible=visible))
 
         (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=True)
 
@@ -222,6 +240,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                                             nreports=spectra)
 
         for j in range(spectra):
+            if not self.showSpectrum(ws, j):
+                continue
+
             (x, y, plotlabel) = self.getData(ws, j)
 
             ax.plot(x, y, label=plotlabel)

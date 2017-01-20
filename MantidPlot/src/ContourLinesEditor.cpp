@@ -173,16 +173,23 @@ void ContourLinesEditor::insertLevel() {
     return;
 
   int row = table->currentRow();
-  DoubleSpinBox *sb = table_cellWidget<DoubleSpinBox>(row, 0);
 
+  DoubleSpinBox *sb;
   QwtDoubleInterval range = d_spectrogram->data().range();
-  double current_value = sb->value();
-  double previous_value = range.minValue();
-  sb = dynamic_cast<DoubleSpinBox *>(table->cellWidget(row - 1, 0));
-  if (sb)
-    previous_value = sb->value();
+  double val = (range.maxValue() + range.minValue()) / 2.0;
+  if (row >= 0) {
+    sb = table_cellWidget<DoubleSpinBox>(row, 0);
 
-  double val = 0.5 * (current_value + previous_value);
+    double current_value = sb->value();
+    double previous_value = range.minValue();
+    sb = dynamic_cast<DoubleSpinBox *>(table->cellWidget(row - 1, 0));
+    if (sb)
+      previous_value = sb->value();
+    val = 0.5 * (current_value + previous_value);
+  } else {
+    // no rows at present, set insertion point
+    row = 0;
+  }
 
   table->blockSignals(true);
   table->insertRow(row);
@@ -214,6 +221,7 @@ void ContourLinesEditor::insertLevel() {
   lbl->setPixmap(pix);
 
   table->setCellWidget(row, 1, lbl);
+  table->setCurrentCell(row, 1);
   table->blockSignals(false);
 
   enableButtons(table->currentRow());
