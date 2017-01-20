@@ -1,134 +1,133 @@
 set ( SRC_FILES
-        src/AlgorithmSelectorWidget.cpp
-        src/CatalogHelper.cpp
-        src/CatalogSearch.cpp
-        src/CatalogSelector.cpp
-        src/CheckboxHeader.cpp
-        src/ColorBarWidget.cpp
-        src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
-        src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
-        src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
-        src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
-        src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
-        src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
-        src/DataProcessorUI/DataProcessorTwoLevelTreeManager.cpp
-        src/DataProcessorUI/DataProcessorWhiteList.cpp
-        src/DataProcessorUI/GenericDataProcessorPresenter.cpp
-        src/DataProcessorUI/ParseKeyValueString.cpp
-        src/DataProcessorUI/QDataProcessorOneLevelTreeModel.cpp
-        src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp
-        src/DataProcessorUI/QDataProcessorWidget.cpp
-        src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
-        src/DataSelector.cpp
-        src/DiagResults.cpp
-        src/DisplayCurveFit.cpp
-        src/DoubleDialogEditor.cpp
-        src/DoubleSpinBox.cpp
-        src/ErrorCurve.cpp
-        src/FilenameDialogEditor.cpp
-        src/FindDialog.cpp
-        src/FindReplaceDialog.cpp
-        src/FitOptionsBrowser.cpp
-        src/FitPropertyBrowser.cpp
-        src/FormulaDialogEditor.cpp
-        src/FunctionBrowser.cpp
-        src/HintingLineEdit.cpp
-        src/IndirectInstrumentConfig.cpp
-        src/InputController.cpp
-        src/InstrumentSelector.cpp
-        src/InstrumentView/BinDialog.cpp
-        src/InstrumentView/CollapsiblePanel.cpp
-        src/InstrumentView/ColorMapWidget.cpp
-        src/InstrumentView/CompAssemblyActor.cpp
-        src/InstrumentView/ComponentActor.cpp
-        src/InstrumentView/DetXMLFile.cpp
-        src/InstrumentView/GLActor.cpp
-        src/InstrumentView/GLActorCollection.cpp
-        src/InstrumentView/GLActorVisitor.cpp
-        src/InstrumentView/GLColor.cpp
-        src/InstrumentView/GLObject.cpp
-        src/InstrumentView/ICompAssemblyActor.cpp
-        src/InstrumentView/InstrumentActor.cpp
-        src/InstrumentView/InstrumentTreeModel.cpp
-        src/InstrumentView/InstrumentTreeWidget.cpp
-        src/InstrumentView/InstrumentWidget.cpp
-        src/InstrumentView/InstrumentWidgetMaskTab.cpp
-        src/InstrumentView/InstrumentWidgetPickTab.cpp
-        src/InstrumentView/InstrumentWidgetRenderTab.cpp
-        src/InstrumentView/InstrumentWidgetTab.cpp
-        src/InstrumentView/InstrumentWidgetTreeTab.cpp
-        src/InstrumentView/MantidGLWidget.cpp
-        src/InstrumentView/MaskBinsData.cpp
-        src/InstrumentView/ObjCompAssemblyActor.cpp
-        src/InstrumentView/ObjComponentActor.cpp
-        src/InstrumentView/OneCurvePlot.cpp
-        src/InstrumentView/OpenGLError.cpp
-        src/InstrumentView/PanelsSurface.cpp
-        src/InstrumentView/PeakMarker2D.cpp
-        src/InstrumentView/PeakOverlay.cpp
-        src/InstrumentView/Projection3D.cpp
-        src/InstrumentView/ProjectionSurface.cpp
-        src/InstrumentView/RectF.cpp
-        src/InstrumentView/RectangularDetectorActor.cpp
-        src/InstrumentView/RotationSurface.cpp
-        src/InstrumentView/SampleActor.cpp
-        src/InstrumentView/Shape2D.cpp
-        src/InstrumentView/Shape2DCollection.cpp
-        src/InstrumentView/SimpleWidget.cpp
-        src/InstrumentView/StructuredDetectorActor.cpp
-        src/InstrumentView/UCorrectionDialog.cpp
-        src/InstrumentView/UnwrappedCylinder.cpp
-        src/InstrumentView/UnwrappedSphere.cpp
-        src/InstrumentView/UnwrappedSurface.cpp
-        src/InstrumentView/Viewport.cpp
-        src/InstrumentView/XIntegrationControl.cpp
-        src/LineEditWithClear.cpp
-        src/LogValueSelector.cpp
-        src/MWDiag.cpp
-        src/MWRunFiles.cpp
-        src/MWView.cpp
-        src/MantidHelpWindow.cpp
-        src/MantidSurfacePlotDialog.cpp
-        src/MantidTreeWidget.cpp
-        src/MantidTreeWidgetItem.cpp
-        src/MantidWSIndexDialog.cpp
-        src/MessageDisplay.cpp
-        src/MultifitSetupDialog.cpp
-        src/MuonFitDataSelector.cpp
-        src/MuonFitPropertyBrowser.cpp
-        src/MuonFunctionBrowser.cpp
-        src/PeakPicker.cpp
-        src/PeriodicTableWidget.cpp
-        src/PreviewPlot.cpp
-        src/ProcessingAlgoWidget.cpp
+	src/AlgorithmSelectorWidget.cpp
+	src/CatalogHelper.cpp
+	src/CatalogSearch.cpp
+	src/CatalogSelector.cpp
+	src/CheckboxHeader.cpp
+	src/ColorBarWidget.cpp
+	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
+	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
+	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
+	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
+	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
+	src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
+	src/DataProcessorUI/DataProcessorTwoLevelTreeManager.cpp
+	src/DataProcessorUI/DataProcessorWhiteList.cpp
+	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
+	src/DataProcessorUI/ParseKeyValueString.cpp
+	src/DataProcessorUI/QDataProcessorOneLevelTreeModel.cpp
+	src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp
+	src/DataProcessorUI/QDataProcessorWidget.cpp
+	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
+	src/DataSelector.cpp
+	src/DiagResults.cpp
+	src/DisplayCurveFit.cpp
+	src/DoubleDialogEditor.cpp
+	src/DoubleSpinBox.cpp
+	src/ErrorCurve.cpp
+	src/FilenameDialogEditor.cpp
+	src/FindDialog.cpp
+	src/FindReplaceDialog.cpp
+	src/FitOptionsBrowser.cpp
+	src/FitPropertyBrowser.cpp
+	src/FormulaDialogEditor.cpp
+	src/FunctionBrowser.cpp
+	src/HintingLineEdit.cpp
+	src/IndirectInstrumentConfig.cpp
+	src/InputController.cpp
+	src/InstrumentSelector.cpp
+	src/InstrumentView/BinDialog.cpp
+	src/InstrumentView/CollapsiblePanel.cpp
+	src/InstrumentView/ColorMapWidget.cpp
+	src/InstrumentView/CompAssemblyActor.cpp
+	src/InstrumentView/ComponentActor.cpp
+	src/InstrumentView/DetXMLFile.cpp
+	src/InstrumentView/GLActor.cpp
+	src/InstrumentView/GLActorCollection.cpp
+	src/InstrumentView/GLActorVisitor.cpp
+	src/InstrumentView/GLColor.cpp
+	src/InstrumentView/GLObject.cpp
+	src/InstrumentView/ICompAssemblyActor.cpp
+	src/InstrumentView/InstrumentActor.cpp
+	src/InstrumentView/InstrumentTreeModel.cpp
+	src/InstrumentView/InstrumentTreeWidget.cpp
+	src/InstrumentView/InstrumentWidget.cpp
+	src/InstrumentView/InstrumentWidgetMaskTab.cpp
+	src/InstrumentView/InstrumentWidgetPickTab.cpp
+	src/InstrumentView/InstrumentWidgetRenderTab.cpp
+	src/InstrumentView/InstrumentWidgetTab.cpp
+	src/InstrumentView/InstrumentWidgetTreeTab.cpp
+	src/InstrumentView/MantidGLWidget.cpp
+	src/InstrumentView/MaskBinsData.cpp
+	src/InstrumentView/ObjCompAssemblyActor.cpp
+	src/InstrumentView/ObjComponentActor.cpp
+	src/InstrumentView/OneCurvePlot.cpp
+	src/InstrumentView/OpenGLError.cpp
+	src/InstrumentView/PanelsSurface.cpp
+	src/InstrumentView/PeakMarker2D.cpp
+	src/InstrumentView/PeakOverlay.cpp
+	src/InstrumentView/Projection3D.cpp
+	src/InstrumentView/ProjectionSurface.cpp
+	src/InstrumentView/RectF.cpp
+	src/InstrumentView/RectangularDetectorActor.cpp
+	src/InstrumentView/RotationSurface.cpp
+	src/InstrumentView/SampleActor.cpp
+	src/InstrumentView/Shape2D.cpp
+	src/InstrumentView/Shape2DCollection.cpp
+	src/InstrumentView/SimpleWidget.cpp
+	src/InstrumentView/StructuredDetectorActor.cpp
+	src/InstrumentView/UCorrectionDialog.cpp
+	src/InstrumentView/UnwrappedCylinder.cpp
+	src/InstrumentView/UnwrappedSphere.cpp
+	src/InstrumentView/UnwrappedSurface.cpp
+	src/InstrumentView/Viewport.cpp
+	src/InstrumentView/XIntegrationControl.cpp
+	src/LineEditWithClear.cpp
+	src/LogValueSelector.cpp
+	src/MWDiag.cpp
+	src/MWView.cpp
+	src/MantidHelpWindow.cpp
+	src/MantidSurfacePlotDialog.cpp
+	src/MantidTreeWidget.cpp
+	src/MantidTreeWidgetItem.cpp
+	src/MantidWSIndexDialog.cpp
+	src/MessageDisplay.cpp
+	src/MultifitSetupDialog.cpp
+	src/MuonFitDataSelector.cpp
+	src/MuonFitPropertyBrowser.cpp
+	src/MuonFunctionBrowser.cpp
+	src/PeakPicker.cpp
+	src/PeriodicTableWidget.cpp
+	src/PreviewPlot.cpp
+	src/ProcessingAlgoWidget.cpp
         src/ProjectSavePresenter.cpp
         src/ProjectSaveModel.cpp
-        src/PropertyHandler.cpp
-        src/RangeSelector.cpp
-        src/RenameParDialog.cpp
-        src/SafeQwtPlot.cpp
-        src/SaveWorkspaces.cpp
-        src/ScriptEditor.cpp
-        src/SelectFunctionDialog.cpp
-        src/SelectWorkspacesDialog.cpp
-        src/SequentialFitDialog.cpp
-        src/SlicingAlgorithmDialog.cpp
-        src/SlitCalculator.cpp
-        src/StringDialogEditor.cpp
-        src/StringEditorFactory.cpp
-        src/TrackedAction.cpp
-        src/UserFunctionDialog.cpp
-        src/WorkspaceEditorFactory.cpp
-        src/WorkspacePresenter/ADSAdapter.cpp
-        src/WorkspacePresenter/QWorkspaceDockView.cpp
-        src/WorkspacePresenter/WorkspacePresenter.cpp
-        src/WorkspaceSelector.cpp
-        src/pqHelpWindow.cxx
-        src/pythonCalc.cpp
+	src/PropertyHandler.cpp
+	src/RangeSelector.cpp
+	src/RenameParDialog.cpp
+	src/SafeQwtPlot.cpp
+	src/SaveWorkspaces.cpp
+	src/ScriptEditor.cpp
+	src/SelectFunctionDialog.cpp
+	src/SelectWorkspacesDialog.cpp
+	src/SequentialFitDialog.cpp
+	src/SlicingAlgorithmDialog.cpp
+	src/SlitCalculator.cpp
+	src/StringDialogEditor.cpp
+	src/StringEditorFactory.cpp
+	src/TrackedAction.cpp
+	src/UserFunctionDialog.cpp
+	src/WorkspaceEditorFactory.cpp
+	src/WorkspacePresenter/ADSAdapter.cpp
+	src/WorkspacePresenter/QWorkspaceDockView.cpp
+	src/WorkspacePresenter/WorkspacePresenter.cpp
+	src/WorkspaceSelector.cpp
+	src/pqHelpWindow.cxx
+	src/pythonCalc.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
-set ( MOC_FILES 
+set ( MOC_FILES
     inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
@@ -166,7 +165,6 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
     inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
     inc/MantidQtMantidWidgets/MWDiag.h
-    inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/MWView.h
     inc/MantidQtMantidWidgets/PeakPicker.h
     inc/MantidQtMantidWidgets/PeriodicTableWidget.h
@@ -334,7 +332,7 @@ set ( INC_FILES
 )
 
 # QtDesigner UI files to process
-set ( UI_FILES 
+set ( UI_FILES
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsDialog.ui
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWidget.ui
     inc/MantidQtMantidWidgets/DataSelector.ui
@@ -345,7 +343,6 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
     inc/MantidQtMantidWidgets/LogValueSelector.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
-    inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MuonFitDataSelector.ui
@@ -360,11 +357,6 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.ui
-)
-
-# Python unit tests
-set ( TEST_PY_FILES
-  test/MWRunFilesTest.py
 )
 
 set ( TEST_FILES
@@ -402,7 +394,7 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
+qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
@@ -421,7 +413,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
-target_link_libraries ( MantidWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( MantidWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtAPI
             QtPropertyBrowser
             ${CORE_MANTIDLIBS}

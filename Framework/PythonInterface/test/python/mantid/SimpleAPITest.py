@@ -40,6 +40,8 @@ Params(Input:req) *dbl list*       A comma separated list of first bin boundary,
 PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.
 
 FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller than the step size
+
+IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero
 """
         doc = simpleapi.rebin.__doc__
         self.assertTrue(len(doc) > 0 )

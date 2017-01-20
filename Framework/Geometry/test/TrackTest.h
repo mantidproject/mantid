@@ -40,6 +40,9 @@ public:
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
     Object shape;
     A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape, NULL);
+    const auto &linkFront = A.front();
+    const auto &linkBack = A.back();
+    TS_ASSERT_EQUALS(&linkFront, &linkBack);
     Track::LType::const_iterator iterBegin = A.cbegin();
     Track::LType::const_iterator iterEnd = A.cend();
     iterBegin++;

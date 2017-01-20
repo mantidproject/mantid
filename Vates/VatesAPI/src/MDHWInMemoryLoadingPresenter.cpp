@@ -35,10 +35,10 @@ MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }
-  if (NULL == repository) {
+  if (!repository) {
     throw std::invalid_argument("The repository is NULL");
   }
-  if (nullptr == m_view) {
+  if (!m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }
@@ -53,14 +53,13 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   if (!m_repository->canProvideWorkspace(m_wsName)) {
     // The workspace does not exist.
     bCanReadIt = false;
-  } else if (NULL ==
-             boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
-                 m_repository->fetchWorkspace(m_wsName)).get()) {
+  } else if (boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+                 m_repository->fetchWorkspace(m_wsName))) {
     // The workspace can be found, but is not an IMDHistoWorkspace.
-    bCanReadIt = false;
+    bCanReadIt = true;
   } else {
     // The workspace is present, and is of the correct type.
-    bCanReadIt = true;
+    bCanReadIt = false;
   }
   return bCanReadIt;
 }
@@ -203,13 +202,13 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
 
   // Set the minimum and maximum of the workspace data.
   QwtDoubleInterval minMaxContainer =
-      m_metaDataExtractor->getMinAndMax(histoWs);
+      m_metaDataExtractor->getMinAndMax(histoWs.get());
   m_metadataJsonManager->setMinValue(minMaxContainer.minValue());
   m_metadataJsonManager->setMaxValue(minMaxContainer.maxValue());
 
   // Set the instrument which is associated with the workspace.
   m_metadataJsonManager->setInstrument(
-      m_metaDataExtractor->extractInstrument(m_cachedVisualHistoWs));
+      m_metaDataExtractor->extractInstrument(m_cachedVisualHistoWs.get()));
 
   // Set the special coordinates
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);

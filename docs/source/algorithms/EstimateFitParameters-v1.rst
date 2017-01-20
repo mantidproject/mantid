@@ -34,6 +34,12 @@ In this strategy a number (defined by `NSamples` property) of paramter sets are 
 gives the smallest cost function is considered the winner. These best parameters are set to `Function`
 property (it has the `InOut` direction).
 
+If `OutputWorkspace` property is set then more than 1 parameter set can be output. The output workspace is 
+a table workspace in which the first column contains the names of the parameters and the subsequent columns
+have the parameter sets with the smallest cost fnction values. Below is an example of such a workspace.
+
+.. figure:: /images/EstimateFitParameters_output.png
+
 
 Cross Entropy
 #############
@@ -103,9 +109,12 @@ Usage
     
 Output:
 
-.. testoutput:: ExMonteCarloBackToBackExponential
+(You may see different numbers for the parameters when you run this example on your machine.)
 
-    name=BackToBackExponential,I=130.029,A=124.254,B=1.93148,X0=-1.91278,S=1.67663,constraints=(50<I<200,0.1<A<300,0.01<B<10,-5<X0<0,0.001<S<4)
+.. testoutput:: ExMonteCarloBackToBackExponential
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+    name=BackToBackExponential,I=...,A=...,B=...,X0=...,S=...,constraints=(50<I<200,0.1<A<300,0.01<B<10,-5<X0<0,0.001<S<4)
 
 **Example 2.**
 
@@ -157,9 +166,12 @@ Output:
 
 Output:
 
-.. testoutput:: Ex2
+(You may see different numbers for the parameters when you run this example on your machine.)
 
-    name=BackToBackExponential,I=3.89204,A=107.646,B=57.3761,X0=0.0452285,S=1.58316,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4),ties=(A=107.645731,B=57.376105)
+.. testoutput:: Ex2
+    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+    name=BackToBackExponential,I=...,X0=...,S=...,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4),ties=(A=...,B=...)
     
 .. categories::
 

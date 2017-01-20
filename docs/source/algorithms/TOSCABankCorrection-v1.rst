@@ -77,7 +77,7 @@ Output:
 
 .. testoutput:: ExTOSCABankCorrectionAutomatic
 
-    Target peak centre: 1077
+    Target peak centre: 1080
 
 **Example - Manual peak selection.**
 
@@ -95,6 +95,6 @@ Output:
 
 .. testoutput:: ExTOSCABankCorrectionManual
 
-    Target peak centre: 713
+    Target peak centre: 714
 
 .. categories::

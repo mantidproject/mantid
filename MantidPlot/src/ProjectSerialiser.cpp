@@ -13,6 +13,7 @@
 #include "Mantid/MantidUI.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
@@ -24,6 +25,12 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
+using Mantid::Kernel::Logger;
+
+namespace {
+/// static logger
+Logger g_log("ProjectSerialiser");
+}
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
@@ -94,6 +101,9 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
   // folder
   // This is a legacy edgecase because folders are written
   // <folder>\tsettings\tgo\there
+  g_log.notice() << "Reading Mantid Project: "
+                 << window->projectname.toStdString() << "\n";
+
   if (!isTopLevel && lines.size() > 0) {
     std::vector<std::string> lineVec;
     boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -130,6 +140,9 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
     window->d_current_folder = window->projectFolder();
   else
     window->d_current_folder = parent;
+
+  g_log.notice() << "Finished Loading Project: "
+                 << window->projectname.toStdString() << "\n";
 }
 
 /**

@@ -374,7 +374,7 @@ void LoadLiveData::doSortEvents(Mantid::API::Workspace_sptr ws) {
   alg->setProperty("InputWorkspace", eventWS);
   alg->setPropertyValue("SortBy", "X Value");
   alg->executeAsChildAlg();
-  g_log.debug() << tim << " to perform SortEvents on " << ws->name() << '\n';
+  g_log.debug() << tim << " to perform SortEvents on " << ws->getName() << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -509,7 +509,7 @@ void LoadLiveData::exec() {
     size_t n = static_cast<size_t>(out_gws->getNumberOfEntries());
     for (size_t i = 0; i < n; ++i) {
       auto ws = out_gws->getItem(i);
-      std::string itemName = ws->name();
+      const std::string &itemName = ws->getName();
       std::string wsName =
           getPropertyValue("OutputWorkspace") + "_" + std::to_string(i + 1);
       if (wsName != itemName) {

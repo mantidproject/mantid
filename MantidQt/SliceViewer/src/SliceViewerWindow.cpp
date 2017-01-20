@@ -521,7 +521,7 @@ std::string SliceViewerWindow::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
   MantidQt::API::TSVSerialiser tsv, tab;
   tab.writeLine("geometry") << geometry();
-  tab.writeLine("Workspace") << m_ws->name();
+  tab.writeLine("Workspace") << m_ws->getName();
   tab.writeLine("Label") << m_label;
   tab.writeRaw(m_slicer->saveToProject());
 
@@ -540,7 +540,7 @@ std::string SliceViewerWindow::getWindowName() {
 }
 
 std::vector<std::string> SliceViewerWindow::getWorkspaceNames() {
-  return {m_ws->name()};
+  return {m_ws->getName()};
 }
 
 std::string SliceViewerWindow::getWindowType() { return "SliceViewer"; }

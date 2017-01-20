@@ -37,7 +37,8 @@ vtkSmartPointer<vtkDataSet> vtkMD0DFactory::create(ProgressAction &) const {
 }
 
 /// Initalize with a target workspace.
-void vtkMD0DFactory::initialize(Mantid::API::Workspace_sptr) {}
+void vtkMD0DFactory::initialize(
+    const Mantid::API::Workspace_sptr & /*workspace*/) {}
 
 /// Validate the workspace
 void vtkMD0DFactory::validate() const {}

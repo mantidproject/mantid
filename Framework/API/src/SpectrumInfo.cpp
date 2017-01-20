@@ -1,22 +1,25 @@
 #include "MantidAPI/DetectorInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <boost/make_shared.hpp>
 #include <algorithm>
 
 namespace Mantid {
 namespace API {
 
-SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
-    : m_workspace(workspace), m_detectorInfo(workspace.detectorInfo()),
+SpectrumInfo::SpectrumInfo(const ExperimentInfo &experimentInfo)
+    : m_experimentInfo(experimentInfo),
+      m_detectorInfo(experimentInfo.detectorInfo()),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
-SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
-    : m_workspace(workspace),
-      m_mutableDetectorInfo(&workspace.mutableDetectorInfo()),
+SpectrumInfo::SpectrumInfo(ExperimentInfo &experimentInfo)
+    : m_experimentInfo(experimentInfo),
+      m_mutableDetectorInfo(&experimentInfo.mutableDetectorInfo()),
       m_detectorInfo(*m_mutableDetectorInfo),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
@@ -26,12 +29,18 @@ SpectrumInfo::~SpectrumInfo() = default;
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
-  return getDetector(index).isMonitor();
+  for (const auto detIndex : getDetectorIndices(index))
+    if (!m_detectorInfo.isMonitor(detIndex))
+      return false;
+  return true;
 }
 
 /// Returns true if the detector(s) associated with the spectrum are masked.
 bool SpectrumInfo::isMasked(const size_t index) const {
-  return getDetector(index).isMasked();
+  bool masked = true;
+  for (const auto detIndex : getDetectorIndices(index))
+    masked &= m_detectorInfo.isMasked(detIndex);
+  return masked;
 }
 
 /** Returns L2 (distance from sample to spectrum).
@@ -106,7 +115,7 @@ bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
   const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
-  for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
     const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
                                       validDetectorIDs.cend(), id);
     if (it != validDetectorIDs.cend() && *it == id) {
@@ -122,7 +131,7 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
   const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
-  for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
     const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
                                       validDetectorIDs.cend(), id);
     if (it != validDetectorIDs.cend() && *it == id) {
@@ -130,6 +139,14 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
     }
   }
   return count == 1;
+}
+
+/** Set the mask flag of the spectrum with given index. Not thread safe.
+ *
+ * Currently this simply sets the mask flags for the underlying detectors. */
+void SpectrumInfo::setMasked(const size_t index, bool masked) {
+  for (const auto detIndex : getDetectorIndices(index))
+    m_mutableDetectorInfo->setMasked(detIndex, masked);
 }
 
 /// Return a const reference to the detector or detector group of the spectrum
@@ -161,7 +178,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   // Note: This function body has big overlap with the method
   // MatrixWorkspace::getDetector(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
-  const auto &dets = m_workspace.getSpectrum(index).getDetectorIDs();
+  const auto &dets = m_experimentInfo.detectorIDsInGroup(index);
   const size_t ndets = dets.size();
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
@@ -187,7 +204,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
       }
     }
     m_lastDetector[thread] =
-        boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);
+        boost::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
 
   return *m_lastDetector[thread];
@@ -204,6 +221,22 @@ SpectrumInfo::getDetectorVector(const size_t index) const {
     size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
     return {m_lastDetector[thread]};
   }
+}
+
+std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
+  std::vector<size_t> detIndices;
+  const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
+    const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
+                                      validDetectorIDs.cend(), id);
+    if (it != validDetectorIDs.cend() && *it == id) {
+      detIndices.push_back(m_detectorInfo.indexOf(id));
+    }
+  }
+  if (detIndices.empty())
+    throw Kernel::Exception::NotFoundError(
+        "SpectrumInfo: No detectors for this workspace index.", "");
+  return detIndices;
 }
 
 } // namespace API

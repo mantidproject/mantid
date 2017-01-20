@@ -20,7 +20,7 @@ ProjectSaveModel::ProjectSaveModel(
   auto workspaces = getWorkspaces();
   for (auto &ws : workspaces) {
     std::pair<std::string, std::vector<IProjectSerialisable *>> item(
-        ws->name(), std::vector<IProjectSerialisable *>());
+        ws->getName(), std::vector<IProjectSerialisable *>());
     m_workspaceWindows.insert(item);
   }
 
@@ -162,8 +162,8 @@ WorkspaceInfo
 ProjectSaveModel::makeWorkspaceInfoObject(Workspace_const_sptr ws) const {
   WorkspaceIcons icons;
   WorkspaceInfo info;
-  info.name = ws->name();
-  info.numWindows = getWindows(ws->name()).size();
+  info.name = ws->getName();
+  info.numWindows = getWindows(ws->getName()).size();
   info.size = ws->getMemorySizeAsStr();
   info.icon_id = icons.getIconID(ws->id());
   info.type = ws->id();

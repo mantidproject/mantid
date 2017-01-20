@@ -121,7 +121,7 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
         peaks_ws = FindPeaksMD( MDEW, MaxPeaks=num_peaks_to_find,
                                 PeakDistanceThreshold=distance_threshold )
 
-        AnalysisDataService.remove( MDEW.getName() )
+        AnalysisDataService.remove( MDEW.name() )
 #      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
 #               Filename='A'+run_niggli_integrate_file )
 #

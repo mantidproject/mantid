@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 
@@ -87,7 +88,8 @@ private:
   double calculateEi(const double initial_guess);
   /// Get the distance from the source of the detector at the workspace index
   /// given
-  double getDistanceFromSource(const size_t ws_index) const;
+  double getDistanceFromSource(const size_t ws_index,
+                               const API::SpectrumInfo &spectrumInfo) const;
   /// Calculate the peak position within the given window
   double calculatePeakPosition(const size_t ws_index, const double t_min,
                                const double t_max);

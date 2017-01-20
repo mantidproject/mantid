@@ -4,9 +4,7 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
-#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -130,32 +128,16 @@ void Fit::execConcrete() {
     m_function->addConstraints(contstraints);
   }
 
-  // prepare the function for a fit
-  m_function->setUpForFit();
-
-  API::FunctionDomain_sptr domain;
-  API::FunctionValues_sptr values;
-  m_domainCreator->createDomain(domain, values);
-
-  // do something with the function which may depend on workspace
-  m_domainCreator->initFunction(m_function);
-
-  // get the minimizer
-  std::string minimizerName = getPropertyValue("Minimizer");
-  API::IFuncMinimizer_sptr minimizer =
-      API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
+  auto costFunc = getCostFunctionInitialized();
 
   // Try to retrieve optional properties
   int intMaxIterations = getProperty("MaxIterations");
   const size_t maxIterations = static_cast<size_t>(intMaxIterations);
 
-  // get the cost function which must be a CostFuncFitting
-  boost::shared_ptr<CostFunctions::CostFuncFitting> costFunc =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-          API::CostFunctionFactory::Instance().create(
-              getPropertyValue("CostFunction")));
-
-  costFunc->setFittingFunction(m_function, domain, values);
+  // get the minimizer
+  std::string minimizerName = getPropertyValue("Minimizer");
+  API::IFuncMinimizer_sptr minimizer =
+      API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
   minimizer->initialize(costFunc, maxIterations);
 
   const int64_t nsteps = maxIterations * m_function->estimateNoProgressCalls();
@@ -201,7 +183,7 @@ void Fit::execConcrete() {
   setPropertyValue("OutputStatus", errorString);
 
   // degrees of freedom
-  size_t dof = domain->size() - costFunc->nParams();
+  size_t dof = costFunc->getDomain()->size() - costFunc->nParams();
   if (dof == 0)
     dof = 1;
   double rawcostfuncval = minimizer->costFunctionVal();
@@ -238,7 +220,7 @@ void Fit::execConcrete() {
     copyMinimizerOutput(*minimizer);
 
     if (baseName.empty()) {
-      baseName = ws->name();
+      baseName = ws->getName();
       if (baseName.empty()) {
         baseName = "Output";
       }
@@ -352,8 +334,8 @@ void Fit::execConcrete() {
       }
       m_domainCreator->separateCompositeMembersInOutput(unrollComposites,
                                                         convolveMembers);
-      m_domainCreator->createOutputWorkspace(baseName, m_function, domain,
-                                             values);
+      m_domainCreator->createOutputWorkspace(
+          baseName, m_function, costFunc->getDomain(), costFunc->getValues());
     }
   }
 

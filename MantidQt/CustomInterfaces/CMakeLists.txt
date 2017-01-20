@@ -318,6 +318,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyThread.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyProcess.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
@@ -432,6 +434,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h								
+                inc/MantidQtCustomInterfaces/Tomography/TomographyProcess.h								
+                inc/MantidQtCustomInterfaces/Tomography/TomographyThread.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui

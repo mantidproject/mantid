@@ -112,8 +112,8 @@ double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS,
 
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
-  const double factor = Instrument::calcConversion(l1, beamline, beamline_norm,
-                                                   samplePos, detector, offset);
+  const double factor = Instrument::calcConversion(
+      l1, beamline, beamline_norm, samplePos, detector->getPos(), offset);
   return 1. / factor;
 }
 

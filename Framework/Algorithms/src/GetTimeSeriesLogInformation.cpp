@@ -84,7 +84,7 @@ void GetTimeSeriesLogInformation::exec() {
   }
 
   string logname = getProperty("LogName");
-  if (logname.size() == 0)
+  if (logname.empty())
     throw runtime_error("Input log value cannot be an empty string. ");
 
   Kernel::Property *log = m_dataWS->run().getProperty(logname);
@@ -302,7 +302,6 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
   std::ofstream ofs;
   ofs.open(ofilename.c_str(), std::ios::out);
 
-  size_t numbaddt = 0;
   Kernel::DateAndTime t0(ws->run().getProperty("run_start")->value());
 
   for (size_t i = 1; i < abstimevec.size(); i++) {
@@ -310,12 +309,8 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
                                          abstimevec[i - 1].totalNanoseconds()) *
                      1.0E-9;
     double dev = (tempdts - dts) / dts;
-    bool baddt = false;
-    if (fabs(dev) > 0.5)
-      baddt = true;
 
-    if (baddt) {
-      numbaddt++;
+    if (fabs(dev) > 0.5) {
       double deltapulsetimeSec1 =
           static_cast<double>(abstimevec[i - 1].totalNanoseconds() -
                               t0.totalNanoseconds()) *
