@@ -10,24 +10,24 @@ Caching Layers - SpectrumInfo and DetectorInfo
 Introduction
 ------------
 
-There are two caching layers that are going to be introduced to Mantid as part of the work towards Instrument 2.0, `SpectrumInfo` and `DetectorInfo`. Eventually these classes will cache commonly accessed information about spectra or detectors, namely masking, monitor flags, L1, L2, 2-theta and position. Caching the values in these layers will give performance increases, as geometry calculations do not need to be performed every time.
+There are two caching layers, ``SpectrumInfo`` and ``DetectorInfo``, that are going to be introduced to Mantid as part of the work towards Instrument 2.0. Eventually these classes will cache commonly accessed information about spectra or detectors, namely masking, monitor flags, L1, L2, 2-theta and position, leading to improved performance and cleaner code.
 
-Motivation
-##########
+Current Status
+##############
 
-``SpectrumInfo`` and ``DetectorInfo`` are currently implemented as wrapper classes in Mantid. Rolling out the new interfaces now will help with the eventual rollout of Instrument 2.0. It provides cleaner code and will also help with the rollout of indexing changes. It is also necessary to provide the indexing changes required to support scanning instruments.
+``SpectrumInfo`` and ``DetectorInfo`` are currently implemented as wrapper classes in Mantid. Using the new interfaces everywhere now will help with the eventual rollout of Instrument 2.0. It also provides cleaner code and will help with the rollout of planned indexing changes. It is also necessary to provide the addition of time indexing, required to support scanning instruments.
 
 SpectrumInfo
-############
+____________
 
 ``SpectrumInfo`` can be obtained from a call to ``MatrixWorkspace::spectrumInfo()``. The wrapper class holds a reference to a ``DetectorInfo`` object and calls through to this for access to information on masking, monitor flags etc.
 
 DetectorInfo
-############
+____________
 
-``DetectorInfo`` can be obtained from a call to ``ExperimentInfo::detectorInfo()``. The wrapper class holds a reference to the parametrised instrument for retrieving the relevant information.
+``DetectorInfo`` can be obtained from a call to ``ExperimentInfo::detectorInfo()`` (usually this would be called on a ``MatrixWorkspace``). The wrapper class holds a reference to the parametrised instrument for retrieving the relevant information.
 
-There is also a real ``DetectorInfo`` class that has masking implemented. This is not important for the discussion the rollout, and all masking operations are already going via the new caching layers.
+There is also a real ``DetectorInfo`` class that has masking implemented, which the ``DetectorInfo`` holds a reference to. This is not important for the discussion of the rollout, but all masking operations are now going via the real ``DetectorInfo`` layer.
 
 Changes for Rollout
 -------------------
@@ -65,6 +65,12 @@ The try/catch pattern for checking if a spectrum has a detector might look somet
 
 .. code-block:: c++
 
+  #include "MantidAPI/SpectrumInfo.h"
+
+  ...
+
+  const aut &spectrumInfo = ws->spectrumInfo();
+
   if (spectrumInfo.hasDetectors(wsIndex)) {
     // do stuff
   } else {
@@ -72,11 +78,17 @@ The try/catch pattern for checking if a spectrum has a detector might look somet
     return false;
   }
 
-In this case, which is generally more common, the check is for some detectors. It is also possible to check for the existence of a unique detector, see the alternative after example below.
+In this case, which is generally more common, the check is for at least one detector. It is also possible to check for the existence of a unique detector, see the alternative after example below.
 
 **After - check for a unique detector**
 
 .. code-block:: c++
+
+  #include "MantidAPI/SpectrumInfo.h"
+
+  ...
+
+  const aut &spectrumInfo = ws->spectrumInfo();
 
   if (!spectrumInfo.hasUniqueDetector(wsIndex)) {
     // do exception
@@ -89,16 +101,16 @@ In this case, which is generally more common, the check is for some detectors. I
 Access to Detectors
 ___________________
 
-The ``detector()`` method on ``SpectrumInfo`` returns the parameterised detector for the workspace. This can be used for doing thigs like moving a component.
+The ``detector(wsIndex)`` method on ``SpectrumInfo`` returns the parameterised detector or detector group for the workspace. This can be used for doing things like moving a component.
 
 ``SpectrumInfo`` does not provide access to things like ``Object::solidAngle()``. The ``detector()`` method on ``SpectrumInfo`` can also be used to get access to these methods.
 
 Useful Tips
 ___________
 
-* Creation of ``SpectrumInfo`` objects is not cheap. Make sure ``workspace.spectrumInfo()`` is called outside of loops that go over all spectra.
-* If a ``SpectrumInfo`` object is required for different workspaces then include the workspace name in the name of the ``SpectrumInfo`` object to avoid confusion.
-* Get the ``SpectrumInfo`` object as a const reference and use auto - ``const auto &spectrumInfo = workspace->spectrumInfo();``.
+* Creation of ``SpectrumInfo`` objects is not cheap. Make sure ``ws.spectrumInfo()`` is called outside of loops that go over all spectra.
+* If a ``SpectrumInfo`` object is required for more than one workspace then include the workspace name in the name of the ``SpectrumInfo`` object, to avoid confusion.
+* Get the ``SpectrumInfo`` object as a const reference and use auto - ``const auto &spectrumInfo = ws->spectrumInfo();``.
 * Do not forget to add the import - ``#include "MantidAPI/SpectrumInfo.h"``.
 
 Complete Examples
@@ -114,18 +126,95 @@ DetectorInfo
 Basics
 ______
 
+The conversion is similar to that for ``SpectrumInfo``. For ``DetectorInfo`` all instances of ``Instrument::getDetector()`` should be replaced using calls to the ``DetectorInfo`` object obtained from ``MatrixWorkspace::detectorInfo()``. The methods below can then be called on ``DetectorInfo`` instead of on the detector.
+
+* ``isMonitor(detIndex)``
+* ``isMasked(detIndex)``
+* ``l2(detIndex)``
+* ``twoTheta(detIndex)``
+* ``signedTwoTheta(detIndex)``
+* ``position(detIndex)``
+
+**Indexing**
+
+The ``DetectorInfo`` object is accessed by an index going from 0 to the number of detectors. A vector of detector IDs can be obtained from a call to ``detectorInfo.detectorIDs()``. Alternatively the method ``detectorInfo.indexOf(detID)`` can be used to get the index for a particular detector ID. Examples of both of these are given below.
+
+Below are example refactorings with different approaches for the indexing.
+
+**Before refactoring**
+
+.. code-block:: c++
+
+  auto instrument = ws->getInstrument();
+  if (!instrument)
+    throw runtime_error("There is no instrument in input workspace.")
+
+  size_t numdets = instrument->getNumberDetectors();
+  vector<detid_t> detIds = instrument->getDetectorIDs();
+
+  for (size_t i = 0; i < numdets; ++i) {
+    IDetector_const_sptr tmpdetector = instrument->getDetector(detIds[i]);
+    if (tmpdetector->isMasked()) {
+      maskeddetids.push_back(tmpdetid);
+    }
+  }
+
+**After - looping over index**
+
+.. code-block:: c++
+
+  #include "MantidAPI/Detector.h"
+
+  ...
+
+  const auto &instrument = ws->detectorInfo();
+  if (detectorInfo.size() == 0)
+    throw runtime_error("There is no instrument in input workspace.")
+
+  vector<detid_t> detIds = detectorInfo.detectorIDs();
+
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (detectorInfo.isMasked(i)) {
+      maskedDetIds.push_back(detIds[i]);
+    }
+  }
+
+**After - looping over detector IDs**
+
+.. code-block:: c++
+
+  #include "MantidAPI/Detector.h"
+
+  ...
+
+  const auto &instrument = ws->detectorInfo();
+  if (detectorInfo.size() == 0)
+    throw runtime_error("There is no instrument in input workspace.")
+
+  vector<detid_t> detIds = detectorInfo.detectorIDs();
+
+  for (detid_t detId : detIds) {
+    if (detectorInfo.isMasked(detectorInfo.indexOf(detId))) {
+      maskedDetIds.push_back(detId);
+    }
+  }
+
 Access to Detectors
 ___________________
+
+As for the ``SpectrumInfo`` object ``DetectorInfo`` can return a parameterised detector for the workspace.
 
 Useful Tips
 ___________
 
+See tips for ``SpectrumInfo`` - the same advice applies to using ``DetectorInfo``.
+
 Complete Examples
 _________________
 
-* `???.cpp <https://github.com/mantidproject/mantid/pull/...>`_
+* `SmoothNeighbours.cpp <https://github.com/mantidproject/mantid/pull/18295/files#diff-26a49ef923e1bdd77677b962528d1e01>`_
 
-* `???.cpp <https://github.com/mantidproject/mantid/pull/...>`_
+* `ClaerMaskFlag.cpp <https://github.com/mantidproject/mantid/pull/18198/files#diff-7f0f739ba6db714eb6ef64b6125e4620>`_
 
 Rollout status
 --------------
@@ -138,8 +227,7 @@ For ``DetectorInfo`` rollout see ticket `????? <https://github.com/mantidproject
 Dealing with problems
 ---------------------
 
-Please get in touch with Ian Bush, Simon Heybrock or Owen Arnold for any questions about the rollout.
-
+Please get in touch with Ian Bush, Simon Heybrock or Owen Arnold for any questions about the caching layers and rollout.
 
 
 .. categories:: Concepts
