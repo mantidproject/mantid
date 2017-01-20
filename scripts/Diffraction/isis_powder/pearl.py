@@ -32,7 +32,6 @@ class Pearl(AbstractInst):
     def create_calibration_vanadium(self, run_in_range, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         kwargs["perform_attenuation"] = False
-        kwargs["tt_mode"] = "tt88"
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         run_details = self.get_run_details(run_number_string=run_in_range)
