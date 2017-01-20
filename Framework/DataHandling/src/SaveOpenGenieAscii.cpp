@@ -220,27 +220,28 @@ int SaveOpenGenieAscii::determineEnginXBankId() {
   * then stored in the output buffer.
   */
 void SaveOpenGenieAscii::getSampleLogs() {
-  // Maps Mantid log names -> Genie save file name
-  const std::unordered_map<std::string, std::string> MantidGenieNameMap = {
-      {"x", "x_pos"},
-      {"y", "y_pos"},
-      {"z", "z_pos"},
-      {"gd_prtn_chrg", "microamps"}};
+  // Maps Mantid log names -> Genie save file name / type
+  const std::unordered_map<std::string, std::tuple<std::string, std::string>>
+      MantidGenieNameMap = {{"x", {"x_pos", m_floatType}},
+                            {"y", {"y_pos", m_floatType}},
+                            {"z", {"z_pos", m_floatType}},
+                            {"gd_prtn_chrg", {"microamps", m_floatType}}};
 
   const std::vector<Property *> &logData = m_inputWS->run().getLogData();
 
   for (const auto &logEntry : logData) {
     const std::string &logName = logEntry->name();
     const std::string &logType = logEntry->type();
-    std::string outName;
-    std::string outType;
-    std::string outValue;
 
+    // Check this log value is known to us
     const auto foundMapping = MantidGenieNameMap.find(logName);
     if (foundMapping == MantidGenieNameMap.cend()) {
       continue;
     }
-    outName = foundMapping->second;
+
+    const std::string outName = std::get<0>(foundMapping->second);
+    const std::string outType = std::get<1>(foundMapping->second);
+    std::string outValue;
 
     // Calculate dx/dy/dz
     if (outName == "x_pos" || outName == "y_pos" || outName == "z_pos") {
@@ -258,19 +259,6 @@ void SaveOpenGenieAscii::getSampleLogs() {
       outValue = std::to_string(timeSeries->timeAverageValue());
     } else {
       outValue = logEntry->value();
-    }
-
-    if ((logType.std::string::find("number") != std::string::npos) ||
-        (logType.std::string::find("double") != std::string::npos) ||
-        (logType.std::string::find("dbl list") != std::string::npos)) {
-      outType = m_floatType;
-    } else if ((logType.std::string::find("TimeValueUnit<bool>") !=
-                std::string::npos) ||
-               (logType.std::string::find("TimeValueUnit<int>") !=
-                std::string::npos)) {
-      outType = m_intType;
-    } else if (logType.std::string::find("string") != std::string::npos) {
-      outType = m_stringType;
     }
 
     addToOutputBuffer(outName, outType, outValue);
@@ -402,7 +390,8 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   if (getProperty("IncludeHeader")) {
     outfile << "# Open Genie ASCII File #\n"
             << "# label \n"
-            << "GXWorkspace\n" << m_outputVector.size() << '\n';
+            << "GXWorkspace\n"
+            << m_outputVector.size() << '\n';
   }
 
   // Sort by parameter name
