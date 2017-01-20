@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <string>
-#include <Poco/Net/SocketAddress.h>
+#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidGeometry/IDTypes.h"
-#include "MantidAPI/DllConfig.h"
+#include <Poco/Net/SocketAddress.h>
+#include <string>
 
 namespace Mantid {
 namespace API {
@@ -75,9 +75,10 @@ public:
    *  is called (indeed this may be required by some protocols).
    *  @param startTime The timestamp of the earliest data requested (default:
    * now).
-   *                   Ignored if not supported by an implementation.
-   *                   The value of 'now' is zero for compatibility with the SNS
-   * live stream.
+   *      Ignored if not supported by an implementation.
+   *      The value of 'now' is zero
+   *      The value of 'start of run' is 1 second
+   *      for compatibility with the SNS live stream and ISIS Kafka live stream.
    */
   virtual void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) = 0;
 
