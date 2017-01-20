@@ -804,11 +804,11 @@ void IqtFit::singleFit() {
     switch (fitType) {
     case 0: // 1 Exp
     case 2: // 1 Str
-      m_ties = "f1.Intensity = 1-f0.A0";
+      m_ties = "f1.Height = 1-f0.A0";
       break;
     case 1: // 2 Exp
     case 3: // 1 Exp & 1 Str
-      m_ties = "f1.Intensity=1-f2.Intensity-f0.A0";
+      m_ties = "f1.Height=1-f2.Height-f0.A0";
       break;
     default:
       break;
@@ -887,16 +887,16 @@ void IqtFit::singleFitComplete(bool error) {
   if (fitType != 2) {
     // Exp 1
     m_dblManager->setValue(m_properties["Exponential1.Intensity"],
-                           parameters["f1.Intensity"]);
+                           parameters["f1.Height"]);
     m_dblManager->setValue(m_properties["Exponential1.Tau"],
-                           parameters["f1.Tau"]);
+                           parameters["f1.Lifetime"]);
 
     if (fitType == 1) {
       // Exp 2
       m_dblManager->setValue(m_properties["Exponential2.Intensity"],
-                             parameters["f2.Intensity"]);
+                             parameters["f2.Height"]);
       m_dblManager->setValue(m_properties["Exponential2.Tau"],
-                             parameters["f2.Tau"]);
+                             parameters["f2.Lifetime"]);
     }
   }
 
@@ -910,11 +910,11 @@ void IqtFit::singleFitComplete(bool error) {
     }
 
     m_dblManager->setValue(m_properties["StretchedExp.Intensity"],
-                           parameters[fval + "Intensity"]);
+                           parameters[fval + "Height"]);
     m_dblManager->setValue(m_properties["StretchedExp.Tau"],
-                           parameters[fval + "Tau"]);
+                           parameters[fval + "Lifetime"]);
     m_dblManager->setValue(m_properties["StretchedExp.Beta"],
-                           parameters[fval + "Beta"]);
+                           parameters[fval + "Stretching"]);
   }
 
   // Can start updating the guess curve again
