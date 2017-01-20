@@ -243,7 +243,7 @@ See ticket `17743 <https://github.com/mantidproject/mantid/issues/17743>`_ for a
 Dealing with problems
 ---------------------
 
-Please get in touch with Ian Bush, Simon Heybrock or Owen Arnold for any questions about the caching layers and rollout.
+Join #instrument-2_0 on Slack if you need help or have questions. Please also feel free to get in touch with Ian Bush, Simon Heybrock or Owen Arnold directly for any questions about the ``SpectrumInfo``, ``DetectorInfo`` and the rollout.
 
 
 .. categories:: Concepts
