@@ -27,14 +27,14 @@ class Polaris(AbstractInst):
 
         self._ads_workaround = 0
 
-    def focus(self, run_number, input_mode, **kwargs):
+    def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._focus(run_number=run_number, input_batching=input_mode,
+        return self._focus(run_number=self._inst_settings.run_number, input_batching=self._inst_settings.input_mode,
                            do_van_normalisation=self._inst_settings.do_van_normalisation)
 
-    def create_calibration_vanadium(self, run_in_range, **kwargs):
+    def create_calibration_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        run_details = self.get_run_details(run_number_string=int(run_in_range))
+        run_details = self.get_run_details(run_number_string=int(self._inst_settings.run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
 
         return self._create_calibration_vanadium(
@@ -88,7 +88,8 @@ class Polaris(AbstractInst):
         return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws)
 
     def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
-        d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(processed_spectra)
+        d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(run_details=run_details,
+                                                                                  processed_spectra=processed_spectra)
         output_paths = self.generate_out_file_paths(run_details=run_details)
 
         polaris_output.save_polaris_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
