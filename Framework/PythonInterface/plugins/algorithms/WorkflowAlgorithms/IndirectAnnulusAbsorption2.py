@@ -9,28 +9,28 @@ from mantid.kernel import (StringMandatoryValidator, Direction, logger, IntBound
 
 class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     # Sample variables
-    _sample_ws_name = ''
-    _sample_chemical_formula = ''
-    _sample_density_type = None
-    _sample_density = 0.0
-    _sample_inner_radius = 0.0
-    _sample_outer_radius = 0.0
+    _sample_ws_name=''
+    _sample_chemical_formula=''
+    _sample_density_type=None
+    _sample_density=0.0
+    _sample_inner_radius=0.0
+    _sample_outer_radius=0.0
 
     # Container variables
-    _can_ws_name = ''
-    _can_chemical_formula = ''
-    _can_density_type = None
-    _can_density = 0.0
-    _can_inner_radius = 0.0
-    _can_outer_radius = 0.0
-    _use_can_corrections = False
-    _can_scale = 0.0
+    _can_ws_name=''
+    _can_chemical_formula=''
+    _can_density_type=None
+    _can_density=0.0
+    _can_inner_radius=0.0
+    _can_outer_radius=0.0
+    _use_can_corrections=False
+    _can_scale=0.0
 
-    _output_ws = None
-    _ass_ws = None
-    _abs_ws = None
-    _acc_ws = None
-    _events = 0
+    _output_ws=None
+    _ass_ws=None
+    _abs_ws=None
+    _acc_ws=None
+    _events=0
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
@@ -48,8 +48,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass',
-                             validator=StringListValidator(['Mass', 'Number']),
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number']),
                              doc='Use of Mass density or Number density')
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
@@ -71,8 +71,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                              doc='Use Container corrections in subtraction')
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Chemical formula for the Container')
-        self.declareProperty(name='CanDensityType', defaultValue='Mass',
-                             validator=StringListValidator(['Mass', 'Number']),
+        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number']),
                              doc='Container density type.')
         self.declareProperty(name='CanDensity', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
@@ -140,7 +140,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                           'Width': self._beam_width,
                           'Height': self._beam_height})
 
-        if self._sample_density_type == 'Mass':
+        if self._sample_density_type == 'Mass Density':
             sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
                                'SampleMassDensity': self._sample_density}
         if self._sample_density_type == 'Number':
@@ -206,7 +206,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 divide_alg.setProperty("OutputWorkspace", sample_wave_ws)
                 divide_alg.execute()
 
-                if self._sample_density_type == 'Mass':
+                if self._sample_density_type == 'Mass Density':
                     container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
                                           'SampleMassDensity': self._can_density}
                 if self._sample_density_type == 'Number':
@@ -390,15 +390,19 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             self._acc_ws = self._abs_ws + '_acc'
 
         # Get beam size defaults
-        # Hard-coded because the ISIS parameters weren't being picked up
-        inst = mtd[self._sample_ws_name].getInstrument().getName()
-        if self.getPropertyValue("DefaultBeamSize"):
-            if inst == 'IRIS':
-                self._beam_height, self._beam_width = 3.2, 2.1
-            elif inst == 'OSIRIS':
-                self._beam_height, self._beam_width = 4.4, 2.2
-            else:
-                logger.error('Unable to obtain default beam dimensions')
+        inst = mtd[self._sample_ws_name].getInstrument()
+        has_beam = inst.hasParameter('Workflow.beam-height')
+        default = self.getPropertyValue('DefaultBeamSize')
+
+        if default and (has_beam is False):
+            default = False
+            raise ValueError("Instrument has no default beam size; will use inputs")
+
+        if default:
+            self._beam_height = float(inst.getStringParameter('Workflow.beam-height')[0])
+            self._beam_width = float(inst.getStringParameter('Workflow.beam-width')[0])
+            print(self._beam_height, self._beam_width)
+
 
     def validateInputs(self):
         """
@@ -415,14 +419,15 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             issues['UseCanCorrections'] = 'Must specify a can workspace to use can corrections'
 
         # Geometry validation: can inner < sample inner < sample outer < can outer
-        if self._sample_inner_radius <= self._can_inner_radius:
-            issues['SampleInnerRadius'] = 'Must be greater than CanInnerRadius'
-
         if self._sample_outer_radius <= self._sample_inner_radius:
             issues['SampleOuterRadius'] = 'Must be greater than SampleInnerRadius'
 
-        if self._can_outer_radius <= self._sample_outer_radius:
-            issues['CanOuterRadius'] = 'Must be greater than SampleOuterRadius'
+        if self._can_ws_name is not None:
+            if self._sample_inner_radius <= self._can_inner_radius:
+                issues['SampleInnerRadius'] = 'Must be greater than CanInnerRadius'
+
+            if self._can_outer_radius <= self._sample_outer_radius:
+                issues['CanOuterRadius'] = 'Must be greater than SampleOuterRadius'
 
         return issues
 

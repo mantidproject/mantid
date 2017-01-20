@@ -585,7 +585,7 @@
       <item row="0" column="0">
        <widget class="QCheckBox" name="ckBeamSize">
         <property name="text">
-         <string>Use Instrument Default Beam Size (IRIS and OSIRIS)</string>
+         <string>Use Instrument Default Beam Size</string>
         </property>
         <property name="checked">
          <bool>true</bool>

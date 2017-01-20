@@ -9,26 +9,26 @@ from mantid.kernel import (StringMandatoryValidator, Direction, logger, FloatBou
 
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
     # Sample variables
-    _sample_ws_name = None
-    _sample_chemical_formula = None
-    _sample_density_type = None
-    _sample_density = None
-    _sample_radius = None
+    _sample_ws_name=None
+    _sample_chemical_formula=None
+    _sample_density_type=None
+    _sample_density=None
+    _sample_radius=None
 
     # Container variables
-    _can_ws_name = None
-    _use_can_corrections = None
-    _can_chemical_formula = None
-    _can_density_type = None
-    _can_density = None
-    _can_radius = None
-    _can_scale = None
+    _can_ws_name=None
+    _use_can_corrections=None
+    _can_chemical_formula=None
+    _can_density_type=None
+    _can_density=None
+    _can_radius=None
+    _can_scale=None
 
-    _events = None
-    _output_ws = None
-    _abs_ws = None
-    _ass_ws = None
-    _acc_ws = None
+    _events=None
+    _output_ws=None
+    _abs_ws=None
+    _ass_ws=None
+    _acc_ws=None
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
@@ -45,11 +45,11 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                              doc='Sample workspace.')
         self.declareProperty(name='SampleChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass',
-                             validator=StringListValidator(['Mass', 'Number']),
-                             doc='Use of Mass density or Number density')
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number']),
+                             doc='Use of Mass Density or Number density')
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
-                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+                             doc='Mass Density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='SampleRadius', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
@@ -65,11 +65,11 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                              doc='Use can corrections in subtraction')
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Can chemical formula')
-        self.declareProperty(name='CanDensityType', defaultValue='Mass',
-                             validator=StringListValidator(['Mass', 'Number']),
-                             doc='Use of Mass density or Number density')
+        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number']),
+                             doc='Use of Mass Density or Number density')
         self.declareProperty(name='CanDensity', defaultValue=0.1,
-                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+                             doc='Mass Density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='CanRadius', defaultValue=0.2,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can radius')
@@ -128,7 +128,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                           'Width': self._beam_width,
                           'Height': self._beam_height})
 
-        if self._sample_density_type == 'Mass':
+        if self._sample_density_type == 'Mass Density':
             sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
                                'SampleMassDensity': self._sample_density}
         if self._sample_density_type == 'Number':
@@ -185,7 +185,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 divide_alg.setProperty("OutputWorkspace", sample_wave_ws)
                 divide_alg.execute()
 
-                if self._sample_density_type == 'Mass':
+                if self._sample_density_type == 'Mass Density':
                     container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
                                           'SampleMassDensity': self._can_density}
                 if self._sample_density_type == 'Number':
@@ -329,15 +329,18 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             self._acc_ws = self._abs_ws + '_acc'
 
         # Get beam size defaults
-        # Hard-coded because the ISIS parameters weren't being picked up
-        inst = mtd[self._sample_ws_name].getInstrument().getName()
-        if self.getPropertyValue("DefaultBeamSize"):
-            if inst == 'IRIS':
-                self._beam_height, self._beam_width = 3.2, 2.1
-            elif inst == 'OSIRIS':
-                self._beam_height, self._beam_width = 4.4, 2.2
-            else:
-                logger.error('Unable to obtain default beam dimensions')
+        inst = mtd[self._sample_ws_name].getInstrument()
+        has_beam = inst.hasParameter('Workflow.beam-height')
+        default = self.getPropertyValue('DefaultBeamSize')
+
+        if default and (has_beam is False):
+            default = False
+            raise ValueError("Instrument has no default beam size; will use inputs")
+
+        if default:
+            self._beam_height = float(inst.getStringParameter('Workflow.beam-height')[0])
+            self._beam_width = float(inst.getStringParameter('Workflow.beam-width')[0])
+            print(self._beam_height, self._beam_width)
 
     def validateInputs(self):
         """

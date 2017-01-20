@@ -9,30 +9,30 @@ from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBou
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
     # Sample variables
-    _sample_ws_name = None
-    _sample_chemical_formula = None
-    _sample_density_type = None
-    _sample_density = None
-    _sample_height = None
-    _sample_width = None
-    _sample_thickness = None
+    _sample_ws_name=None
+    _sample_chemical_formula=None
+    _sample_density_type=None
+    _sample_density=None
+    _sample_height=None
+    _sample_width=None
+    _sample_thickness=None
     _sample_angle=None
 
     # Container variables
-    _can_ws_name = None
-    _use_can_corrections = None
-    _can_chemical_formula = None
-    _can_density_type = None
-    _can_density = None
-    _can_front_thickness = None
-    _can_back_thickness = None
-    _can_scale = None
+    _can_ws_name=None
+    _use_can_corrections=None
+    _can_chemical_formula=None
+    _can_density_type=None
+    _can_density=None
+    _can_front_thickness=None
+    _can_back_thickness=None
+    _can_scale=None
 
-    _element_size = None
-    _output_ws = None
-    _abs_ws = None
-    _ass_ws = None
-    _acc_ws = None
+    _element_size=None
+    _output_ws=None
+    _abs_ws=None
+    _ass_ws=None
+    _acc_ws=None
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
@@ -392,15 +392,19 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             self._acc_ws = self._abs_ws + '_acc'
 
         # Get beam size defaults
-        # Hard-coded because the ISIS parameters weren't being picked up
-        inst = mtd[self._sample_ws_name].getInstrument().getName()
-        if self.getPropertyValue("DefaultBeamSize"):
-            if inst == 'IRIS':
-                self._beam_height, self._beam_width = 3.2, 2.1
-            elif inst == 'OSIRIS':
-                self._beam_height, self._beam_width = 4.4, 2.2
-            else:
-                logger.error('Unable to obtain default beam dimensions')
+        inst = mtd[self._sample_ws_name].getInstrument()
+        has_beam = inst.hasParameter('Workflow.beam-height')
+        default = self.getPropertyValue('DefaultBeamSize')
+
+        if default and (has_beam is False):
+            default = False
+            raise ValueError("Instrument has no default beam size; will use inputs")
+
+        if default:
+            self._beam_height = float(inst.getStringParameter('Workflow.beam-height')[0])
+            self._beam_width = float(inst.getStringParameter('Workflow.beam-width')[0])
+            print(self._beam_height, self._beam_width)
+
 
     def validateInputs(self):
         """
