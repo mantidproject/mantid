@@ -8,7 +8,7 @@ import inspect
 from functools import (partial)
 from six import string_types, with_metaclass
 
-from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int)
+from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int, std_vector_long)
 
 
 # ---------------------------------------------------------------
@@ -331,7 +331,7 @@ def is_string_vector(value):
 
 
 def is_int_vector(value):
-    return isinstance(value, std_vector_int)
+    return isinstance(value, std_vector_int) or isinstance(value, std_vector_long)
 
 
 def get_module_and_class_name(instance):
