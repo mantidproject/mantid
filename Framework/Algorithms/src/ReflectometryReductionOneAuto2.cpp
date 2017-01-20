@@ -4,10 +4,7 @@
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/make_unique.h"
-
-#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -60,12 +57,10 @@ ReflectometryReductionOneAuto2::validateInputs() {
     return results;
 
   // First transmission run
-  std::string firstStr = getPropertyValue("FirstTransmissionRun");
+  const std::string firstStr = getPropertyValue("FirstTransmissionRun");
   if (!firstStr.empty()) {
-    auto firstTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(firstStr);
     auto firstTransGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(firstStr);
     // If it is not a group, we don't need to validate its size
     if (!firstTransGroup)
       return results;
@@ -84,12 +79,10 @@ ReflectometryReductionOneAuto2::validateInputs() {
   }
 
   // The same for the second transmission run
-  std::string secondStr = getPropertyValue("SecondTransmissionRun");
+  const std::string secondStr = getPropertyValue("SecondTransmissionRun");
   if (!secondStr.empty()) {
-    auto secondTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(secondStr);
     auto secondTransGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(secondStr);
     // If it is not a group, we don't need to validate its size
     if (!secondTransGroup)
       return results;
@@ -118,8 +111,8 @@ void ReflectometryReductionOneAuto2::init() {
       "Input run in TOF or wavelength");
 
   // Analysis mode
-  std::vector<std::string> analysisMode{"PointDetectorAnalysis",
-                                        "MultiDetectorAnalysis"};
+  const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
+                                              "MultiDetectorAnalysis"};
   auto analysisModeValidator =
       boost::make_shared<StringListValidator>(analysisMode);
   declareProperty("AnalysisMode", analysisMode[0], analysisModeValidator,
@@ -227,7 +220,7 @@ void ReflectometryReductionOneAuto2::exec() {
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  auto instructions = populateProcessingInstructions(alg, instrument, inputWS);
+  const auto instructions = populateProcessingInstructions(alg, instrument, inputWS);
 
   // Now that we know the detectors of interest, we can move them if necessary
   // (i.e. if theta is given). If not, we calculate theta from the current
@@ -328,10 +321,10 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
   if (detectorsOfInterest.empty())
     return inputWS;
 
-  std::set<std::string> detectorSet(detectorsOfInterest.begin(),
-                                    detectorsOfInterest.end());
+  const std::set<std::string> detectorSet(detectorsOfInterest.begin(),
+                                          detectorsOfInterest.end());
 
-  double theta = getProperty("ThetaIn");
+  const double theta = getProperty("ThetaIn");
 
   MatrixWorkspace_sptr corrected = inputWS;
 
@@ -360,7 +353,7 @@ double
 ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
                                                MatrixWorkspace_sptr inputWS) {
 
-  auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
+  const auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
   // a workspace that was previously reduced using this algorithm. In this case,
@@ -373,7 +366,7 @@ ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("DetectorComponentName", detectorsOfInterest[0]);
   alg->execute();
-  double theta = alg->getProperty("TwoTheta");
+  const double theta = alg->getProperty("TwoTheta");
   // First factor 0.5 detector position, which isexpected to be at 2 * theta
   // Second factor 0.5 comes from SpecularReflectionCalculateTheta, which
   // outputs 2 * theta
@@ -419,7 +412,7 @@ void ReflectometryReductionOneAuto2::populateTransmissionProperties(
   // No transmission runs, try algorithmic corrections
   // With algorithmic corrections, monitors should not be integrated, see below
 
-  std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
+  const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
 
   if (correctionAlgorithm == "PolynomialCorrection") {
     alg->setProperty("NormalizeByIntegratedMonitors", false);
@@ -486,7 +479,7 @@ void ReflectometryReductionOneAuto2::populateTransmissionProperties(
 * @return :: the output workspace
 */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(
-    MatrixWorkspace_sptr inputWS, double theta, std::vector<double> &params) {
+    MatrixWorkspace_sptr inputWS, const double theta, std::vector<double> &params) {
 
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
@@ -557,7 +550,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(
 */
 bool ReflectometryReductionOneAuto2::checkGroups() {
 
-  std::string wsName = getPropertyValue("InputWorkspace");
+  const std::string wsName = getPropertyValue("InputWorkspace");
 
   try {
     auto ws =
@@ -604,7 +597,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setRethrows(true);
 
   // Copy all the non-workspace properties over
-  std::vector<Property *> props = getProperties();
+  const std::vector<Property *> props = getProperties();
   for (auto &prop : props) {
     if (prop) {
       IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
@@ -758,7 +751,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
     WorkspaceGroup_sptr &transGroup) {
 
-  std::string transSum = "trans_sum";
+  const std::string transSum = "trans_sum";
   Workspace_sptr sumWS = transGroup->getItem(0)->clone();
 
   /// For this step to appear in the history of the output workspaces I need to

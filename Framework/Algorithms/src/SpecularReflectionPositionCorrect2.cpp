@@ -112,10 +112,10 @@ void SpecularReflectionPositionCorrect2::exec() {
   auto upAxis = referenceFrame->pointingUpAxis();
 
   // We just recalculate beam offset.
-  double beamOffset =
+  const double beamOffset =
       sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam());
   // We only correct vertical position
-  double upOffset = (beamOffset * std::tan(twoThetaInRad));
+  const double upOffset = (beamOffset * std::tan(twoThetaInRad));
 
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->initialize();

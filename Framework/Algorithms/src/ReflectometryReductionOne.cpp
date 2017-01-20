@@ -1,8 +1,6 @@
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ListValidator.h"
@@ -10,7 +8,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Unit.h"
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

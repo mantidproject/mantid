@@ -12,7 +12,6 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 

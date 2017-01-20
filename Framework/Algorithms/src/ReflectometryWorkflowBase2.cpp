@@ -183,7 +183,7 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
 * @return :: A map with results of validation
 */
 std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateDirectBeamProperties() {
+ReflectometryWorkflowBase2::validateDirectBeamProperties() const {
 
   std::map<std::string, std::string> results;
 
@@ -191,7 +191,7 @@ ReflectometryWorkflowBase2::validateDirectBeamProperties() {
   Property *directBeamProperty = getProperty("RegionOfDirectBeam");
   if (!directBeamProperty->isDefault()) {
 
-    std::vector<int> directBeamRegion = getProperty("RegionOfDirectBeam");
+    const std::vector<int> directBeamRegion = getProperty("RegionOfDirectBeam");
     if (directBeamRegion.size() != 2) {
       results["RegionOfDirectBeam"] =
           "RegionOfDirect beam requires a lower and upper boundary";
@@ -210,14 +210,14 @@ ReflectometryWorkflowBase2::validateDirectBeamProperties() {
 * @return :: A map with results of validation
 */
 std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateTransmissionProperties() {
+ReflectometryWorkflowBase2::validateTransmissionProperties() const {
 
   std::map<std::string, std::string> results;
 
   MatrixWorkspace_sptr firstTransmissionRun =
       getProperty("FirstTransmissionRun");
   if (firstTransmissionRun) {
-    auto xUnitFirst = firstTransmissionRun->getAxis(0)->unit()->unitID();
+    const auto xUnitFirst = firstTransmissionRun->getAxis(0)->unit()->unitID();
     if (xUnitFirst != "TOF" && xUnitFirst != "Wavelength") {
       results["FirstTransmissionRun"] =
           "First transmission run must be in TOF or wavelength";
@@ -225,7 +225,7 @@ ReflectometryWorkflowBase2::validateTransmissionProperties() {
     MatrixWorkspace_sptr secondTransmissionRun =
         getProperty("SecondTransmissionRun");
     if (secondTransmissionRun) {
-      auto xUnitSecond = secondTransmissionRun->getAxis(0)->unit()->unitID();
+      const auto xUnitSecond = secondTransmissionRun->getAxis(0)->unit()->unitID();
       if (xUnitSecond != "TOF")
         results["SecondTransmissionRun"] =
             "Second transmission run must be in TOF";
@@ -244,7 +244,7 @@ ReflectometryWorkflowBase2::validateTransmissionProperties() {
 * @return :: A map with results of validation
 */
 std::map<std::string, std::string>
-ReflectometryWorkflowBase2::validateWavelengthRanges() {
+ReflectometryWorkflowBase2::validateWavelengthRanges() const {
 
   std::map<std::string, std::string> results;
 
@@ -324,7 +324,7 @@ ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
 
-  std::string processingCommands = getPropertyValue("ProcessingInstructions");
+  const std::string processingCommands = getPropertyValue("ProcessingInstructions");
   auto groupAlg = createChildAlgorithm("GroupDetectors");
   groupAlg->initialize();
   groupAlg->setProperty("GroupingPattern", processingCommands);
@@ -345,10 +345,10 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
 */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
-                                          bool integratedMonitors) {
+                                          const bool integratedMonitors) {
 
   // Extract the monitor workspace
-  int monitorIndex = getProperty("I0MonitorIndex");
+  const int monitorIndex = getProperty("I0MonitorIndex");
   auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
   cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
@@ -359,8 +359,8 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
       cropWorkspaceAlg->getProperty("OutputWorkspace");
 
   // Flat background correction
-  double backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
-  double backgroundMax = getProperty("MonitorBackgroundWavelengthMax");
+  const double backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
+  const double backgroundMax = getProperty("MonitorBackgroundWavelengthMax");
   auto correctMonitorsAlg = createChildAlgorithm("CalculateFlatBackground");
   correctMonitorsAlg->initialize();
   correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
@@ -405,26 +405,26 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
 void ReflectometryWorkflowBase2::populateMonitorProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
-  auto monitorIndex = checkForOptionalInstrumentDefault<int>(
+  const auto monitorIndex = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
   if (monitorIndex.is_initialized())
     alg->setProperty("I0MonitorIndex", monitorIndex.get());
-  auto backgroundMin = checkForOptionalInstrumentDefault<double>(
+  const auto backgroundMin = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMin", instrument,
       "MonitorBackgroundMin");
   if (backgroundMin.is_initialized())
     alg->setProperty("MonitorBackgroundWavelengthMin", backgroundMin.get());
-  auto backgroundMax = checkForOptionalInstrumentDefault<double>(
+  const auto backgroundMax = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMax", instrument,
       "MonitorBackgroundMax");
   if (backgroundMax.is_initialized())
     alg->setProperty("MonitorBackgroundWavelengthMax", backgroundMax.get());
-  auto integrationMin = checkForOptionalInstrumentDefault<double>(
+  const auto integrationMin = checkForOptionalInstrumentDefault<double>(
       this, "MonitorIntegrationWavelengthMin", instrument,
       "MonitorIntegralMin");
   if (integrationMin.is_initialized())
     alg->setProperty("MonitorIntegrationWavelengthMin", integrationMin.get());
-  auto integrationMax = checkForOptionalInstrumentDefault<double>(
+  const auto integrationMax = checkForOptionalInstrumentDefault<double>(
       this, "MonitorIntegrationWavelengthMax", instrument,
       "MonitorIntegralMax");
   if (integrationMax.is_initialized())
@@ -440,20 +440,20 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
 */
 std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument,
-    MatrixWorkspace_sptr inputWS) {
+    MatrixWorkspace_sptr inputWS) const {
 
   if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
-    std::string instructions = getProperty("ProcessingInstructions");
+    const std::string instructions = getProperty("ProcessingInstructions");
     alg->setProperty("ProcessingInstructions", instructions);
     return instructions;
   }
 
-  std::string analysisMode = getProperty("AnalysisMode");
+  const std::string analysisMode = getProperty("AnalysisMode");
 
   if (analysisMode == "PointDetectorAnalysis") {
-    std::vector<double> pointStart =
+    const std::vector<double> pointStart =
         instrument->getNumberParameter("PointDetectorStart");
-    std::vector<double> pointStop =
+    const std::vector<double> pointStop =
         instrument->getNumberParameter("PointDetectorStop");
 
     if (pointStart.empty() || pointStop.empty())
@@ -465,20 +465,15 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
     const int detStart = static_cast<int>(pointStart[0]);
     const int detStop = static_cast<int>(pointStop[0]);
 
-    if (detStart == detStop) {
-      auto instructions = std::to_string(detStart);
-      alg->setProperty("ProcessingInstructions", instructions);
-      return instructions;
-    } else {
-      auto instructions =
-          std::to_string(detStart) + ":" + std::to_string(detStop);
-      alg->setProperty("ProcessingInstructions", instructions);
-      return instructions;
-    }
+    auto instructions = std::to_string(detStart);
+    if (detStart != detStop)
+      instructions += ":" + std::to_string(detStop);
+    alg->setProperty("ProcessingInstructions", instructions);
+    return instructions;
   }
 
   else {
-    std::vector<double> multiStart =
+    const std::vector<double> multiStart =
         instrument->getNumberParameter("MultiDetectorStart");
     if (multiStart.empty())
       throw std::runtime_error("Could not find 'MultiDetectorStart in "

@@ -4,8 +4,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/make_shared.hpp>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -133,13 +131,13 @@ ReflectometryReductionOne2::validateInputs() {
 
   std::map<std::string, std::string> results;
 
-  auto wavelength = validateWavelengthRanges();
+  const auto wavelength = validateWavelengthRanges();
   results.insert(wavelength.begin(), wavelength.end());
 
-  auto directBeam = validateDirectBeamProperties();
+  const auto directBeam = validateDirectBeamProperties();
   results.insert(directBeam.begin(), directBeam.end());
 
-  auto transmission = validateTransmissionProperties();
+  const auto transmission = validateTransmissionProperties();
   results.insert(transmission.begin(), transmission.end());
 
   return results;
@@ -150,7 +148,7 @@ ReflectometryReductionOne2::validateInputs() {
 void ReflectometryReductionOne2::exec() {
   MatrixWorkspace_sptr runWS = getProperty("InputWorkspace");
 
-  auto xUnitID = runWS->getAxis(0)->unit()->unitID();
+  const auto xUnitID = runWS->getAxis(0)->unit()->unitID();
 
   // Neither TOF or Lambda? Abort.
   if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
@@ -173,7 +171,7 @@ void ReflectometryReductionOne2::exec() {
     // Normalization by direct beam (optional)
     Property *directBeamProperty = getProperty("RegionOfDirectBeam");
     if (!directBeamProperty->isDefault()) {
-      auto directBeam = makeDirectBeamWS(IvsLam);
+      const auto directBeam = makeDirectBeamWS(IvsLam);
       detectorWS = divide(detectorWS, directBeam);
     }
 
@@ -186,8 +184,8 @@ void ReflectometryReductionOne2::exec() {
         getProperty("MonitorBackgroundWavelengthMin");
     if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() &&
         !backgroundMaxProperty->isDefault()) {
-      bool integratedMonitors = getProperty("NormalizeByIntegratedMonitors");
-      auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
+      const bool integratedMonitors = getProperty("NormalizeByIntegratedMonitors");
+      const auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
       IvsLam = divide(detectorWS, monitorWS);
     } else {
       IvsLam = detectorWS;
@@ -221,12 +219,11 @@ void ReflectometryReductionOne2::exec() {
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::makeDirectBeamWS(MatrixWorkspace_sptr inputWS) {
 
-  std::string processingCommands;
-
   std::vector<int> directBeamRegion = getProperty("RegionOfDirectBeam");
   // Sum over the direct beam.
-  processingCommands = std::to_string(directBeamRegion[0]) + "-" +
-                       std::to_string(directBeamRegion[1]);
+  const std::string processingCommands = std::to_string(directBeamRegion[0]) +
+                                         "-" +
+                                         std::to_string(directBeamRegion[1]);
 
   auto groupDirectBeamAlg = this->createChildAlgorithm("GroupDetectors");
   groupDirectBeamAlg->initialize();
@@ -300,7 +297,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
 
   const bool match = verifySpectrumMaps(detectorWS, transmissionWS);
   if (!match) {
-    std::string message = "Spectrum maps between workspaces do NOT match up.";
+    const std::string message = "Spectrum maps between workspaces do NOT match up.";
     if (strictSpectrumChecking) {
       throw std::invalid_argument(message);
     } else {

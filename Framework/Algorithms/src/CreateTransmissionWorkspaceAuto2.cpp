@@ -35,8 +35,8 @@ void CreateTransmissionWorkspaceAuto2::init() {
                   "Second transmission run workspace in TOF.");
 
   // Analysis mode
-  std::vector<std::string> analysisMode{"PointDetectorAnalysis",
-                                        "MultiDetectorAnalysis"};
+  const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
+                                              "MultiDetectorAnalysis"};
   auto analysisModeValidator =
       boost::make_shared<StringListValidator>(analysisMode);
   declareProperty("AnalysisMode", analysisMode[0], analysisModeValidator,

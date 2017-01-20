@@ -1,10 +1,7 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/RebinParamsValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -94,7 +91,7 @@ CreateTransmissionWorkspace2::validateInputs() {
   // Validate wavelength range
   // Validate monitor background range
   // Validate monitor integration range
-  auto wavelength = validateWavelengthRanges();
+  const auto wavelength = validateWavelengthRanges();
   results.insert(wavelength.begin(), wavelength.end());
 
   return results;
@@ -138,7 +135,7 @@ void CreateTransmissionWorkspace2::exec() {
 * @return :: the normalized workspace
 */
 MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
-    MatrixWorkspace_sptr IvsLam) {
+    const MatrixWorkspace_sptr IvsLam) {
 
   // Detector workspace
   MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsLam);
@@ -163,9 +160,9 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
 
   Property *intMinProperty = getProperty("MonitorIntegrationWavelengthMin");
   Property *intMaxProperty = getProperty("MonitorIntegrationWavelengthMax");
-  bool integratedMonitors =
-      (intMinProperty->isDefault() || intMaxProperty->isDefault()) ? false
-                                                                   : true;
+  const bool integratedMonitors =
+      !(intMinProperty->isDefault() || intMaxProperty->isDefault());
+
   auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
 
   return divide(detectorWS, monitorWS);
