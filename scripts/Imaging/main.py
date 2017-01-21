@@ -44,7 +44,7 @@ def check_version_info():
     python_version = sys.version_info
     if python_version < (2, 7, 0):
         raise RuntimeError(
-            "Not running this test as it requires Python >= 2.7. Version found: {0}".
+            "Not running this script as it requires Python >= 2.7. Version found: {0}".
             format(python_version))
 
 

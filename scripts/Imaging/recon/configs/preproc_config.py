@@ -69,6 +69,7 @@ class PreProcConfig(object):
         grp_pre.add_argument(
             "-g",
             "--region-of-interest",
+            nargs='*',
             required=False,
             type=str,
             help="Crop original images using these coordinates, after rotating the images.\n"
@@ -79,6 +80,7 @@ class PreProcConfig(object):
             "-e",
             "--air-region",
             required=False,
+            nargs='*',
             type=str,
             help="Air region /region for normalisation.\n"
                  "For best results it should avoid being blocked by any object.\n"
@@ -183,15 +185,23 @@ class PreProcConfig(object):
         return parser
 
     def update(self, args):
-        import ast
 
         if args.region_of_interest:
-            roi_coords = ast.literal_eval(args.region_of_interest)
-            self.region_of_interest = [int(val) for val in roi_coords]
+            if len(args.region_of_interest) < 4:
+                raise ValueError(
+                    "Not enough arguments provided for the Region of Interest! Expecting 4, but found {0}: {1}"
+                    .format(len(args.region_of_interest), args.region_of_interest))
+
+            self.region_of_interest = [int(val)
+                                       for val in args.region_of_interest]
 
         if args.air_region:
-            coords = ast.literal_eval(args.air_region)
-            self.normalise_air_region = [int(val) for val in coords]
+            if len(args.air_region) < 4:
+                raise ValueError(
+                    "Not enough arguments provided for the Region of Interest! Expecting 4, but found {0}: {1}"
+                    .format(len(args.air_region), args.air_region))
+
+            self.normalise_air_region = [int(val) for val in args.air_region]
 
         self.crop_before_normalise = args.crop_before_normalise
         self.median_size = args.pre_median_size
