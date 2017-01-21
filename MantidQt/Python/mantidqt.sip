@@ -1356,7 +1356,7 @@ MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QStri
 
 
 private:
-  WidgetFactory(const WidgetFactory&);
+  WidgetFactory(const MantidQt::SliceViewer::WidgetFactory &);
   WidgetFactory();
 %Docstring
 WidgetFactory::WidgetFactory()
