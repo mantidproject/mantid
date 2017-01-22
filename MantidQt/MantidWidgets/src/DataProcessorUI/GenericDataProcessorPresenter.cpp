@@ -209,14 +209,20 @@ void GenericDataProcessorPresenter::process() {
 
   for (const auto &item : items) {
 
+    // Group with updated columns
+    GroupData newGroup;
+
     // Reduce rows sequentially
 
+    // Loop over rows within this group
     for (const auto &data : item.second) {
-      // item.second -> set of vectors containing data
+      // data.first -> index of this row within the group
+      // data.second -> vector containing data
 
       try {
         auto newData = reduceRow(data.second);
         m_manager->update(item.first, data.first, newData);
+	 newGroup[data.first] = newData;
         progressReporter.report();
 
       } catch (std::exception &ex) {
@@ -231,7 +237,7 @@ void GenericDataProcessorPresenter::process() {
     // Post-process (if needed)
     if (item.second.size() > 1) {
       try {
-        postProcessGroup(item.second);
+        postProcessGroup(newGroup);
         progressReporter.report();
       } catch (std::exception &ex) {
         m_mainPresenter->giveUserCritical(ex.what(), "Error");
