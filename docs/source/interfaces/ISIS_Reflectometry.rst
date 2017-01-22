@@ -11,7 +11,7 @@ Purpose
 -------
 This user interface allows for batch processing of data reduction for
 reflectometry data. The actual data reduction is performed with
-:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`.
+:ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`.
 Wherever possible, this interface attempts to use reasonable defaults,
 either loaded from the instruments' parameter files, or calculated from
 the provided data, to minimise the amount of user input required.
@@ -61,7 +61,7 @@ In addition the table workspace should be opened as well and the processing tabl
 
 Let's process the first group, which consists of the first two rows of the
 table (13460 and 13462). The simplest way to do this is simply to select the
-two rows we want to process, and then click on **Process**.
+group we want to process, and then click on **Process**.
 
 .. tip::
   If you receive an error, consult the `Troubleshooting`_ section of this document for guidance on fixing it.
@@ -78,16 +78,16 @@ TRANS_13463_13464
   on ``TOF_13463`` and ``TOF_13464``. The X axis is wavelength in Å.
 
 IvsQ_13460
-  This is the output workspace of :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`. The X
+  This is the output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`. The X
   axis is momentum transfer in Å\ :sup:`-1`\ .
 
 IvsLam_13460
-  This is the wavelength output workspace of :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`.
+  This is the wavelength output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`.
   The X axis is wavelength in Å.
 
 IvsQ_13460_13462
   This workspace is the result of stitching ``IvsQ_13460`` and ``IvsQ_13462`` together using
-  :ref:`Stitch1D <algm-Stitch1D>`. The X axis is momentum transfer in Å\ :sup:`-1`\ .
+  :ref:`Stitch1DMany <algm-Stitch1DMany>`. The X axis is momentum transfer in Å\ :sup:`-1`\ .
 
 Layout
 ------
@@ -205,13 +205,6 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 | Insert Group     | Adds a new group after the first selected group, or at   |
 |                  | the end of the table if no groups were selected.         |
 +------------------+----------------------------------------------------------+
-| Delete Row       | Deletes any selected rows. If no rows are selected,      |
-|                  | nothing happens. If the single row of a group is selected|
-|                  | for deletion, the group will also be deleted.            |
-+------------------+----------------------------------------------------------+
-| Delete Group     | Deletes any selected Groups. If no groups are selected,  |
-|                  | nothing happens.                                         |
-+------------------+----------------------------------------------------------+
 | Group Rows       | Takes all the selected rows and places them in a group   |
 |                  | together, separate from any other group.                 |
 +------------------+----------------------------------------------------------+
@@ -227,7 +220,12 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 | Clear Rows       | Resets the cells in any selected rows to their initial   |
 |                  | value, in other words, blank.                            |
 +------------------+----------------------------------------------------------+
-| Help             | Opens this documentation for viewing.                    |
+| Delete Row       | Deletes any selected rows. If no rows are selected,      |
+|                  | nothing happens. If the single row of a group is selected|
+|                  | for deletion, the group will also be deleted.            |
++------------------+----------------------------------------------------------+
+| Delete Group     | Deletes any selected Groups. If no groups are selected,  |
+|                  | nothing happens.                                         |
 +------------------+----------------------------------------------------------+
 | What's This      | Provides guidance on what various parts of the interface |
 |                  | are for.                                                 |
@@ -250,7 +248,7 @@ Columns
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | Angle               | No        | Contains the angle used during the run, in                                      |
 |                     |           | degrees. If left blank,                                                         |
-|                     |           | :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`               |
+|                     |           | :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`       |
 |                     |           | will calculate theta using                                                      |
 |                     |           | :ref:`SpecularReflectionCalculateTheta <algm-SpecularReflectionCalculateTheta>`.|
 |                     |           |                                                                                 |
@@ -382,6 +380,33 @@ Hovering over the highlighted run with your cursor will allow you to see why the
    :alt: Showing tooltip from failed transfer.
 
 
+Event Handling tab
+~~~~~~~~~~~~~~~~~~
+
+The *Event Handling* tab can be used to analyze event workspaces. Currently, it contains a text box where
+a custom python list can be specified to indicate the time slices to analyze. When this text box is empty,
+no event analysis will be performed, runs will be loaded using :ref:`LoadISISNexus <algm-LoadISISNexus>` and
+analyzed as histogram workspaces. When this text box is not empty, runs will be loaded using
+:ref:`LoadEventNexus <algm-LoadEventNexus>` and the interface will try to parse the user
+input to obtain a set of start times and stop times. These define different time slices that will be
+passed on to :ref:`FilterByTime <algm-FilterByTime>`. Each time slice will be normalized by the total
+proton charge and reduced as described in the previous section. Note that, if any of the runs in a group could
+not be loaded as an event workspace, the interface will load the runs within that group as histogram workspaces
+and no event analysis will be performed for that group. A warning message will be shown when the reduction is complete
+indicating that some groups could not be processed as event data.
+
+Time slices must be indicated as a list of comma-separated numbers. There are different possibilities:
+
+- If a single number is provided, e.g. ``100``, the interface will extract a single slice starting at the start of the
+  run, and ending at ``100`` seconds.
+- If two numbers are provided, e.g. ``100, 200``, the interface will extract a single slice starting ``100`` seconds
+  after the start of the run and stopping at 200 seconds after the start of the run.
+- If more than two numbers are provided, e.g. ``100, 200, 300``, the interface will extract two slices, the
+  first one starting at ``100`` seconds after the start of the run and ending at ``200`` seconds after the
+  start of the run, and the second one starting at ``200`` seconds and ending at ``300`` seconds.
+
+Workspaces will be named according to the slice, e.g ``IvsQ_13460_0_100``, ``IvsLam_13460_0_100``, etc.
+
 Settings tab
 ~~~~~~~~~~~~
 
@@ -395,7 +420,7 @@ following algorithms:
 
 - :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
   (applied to **Transmission Run(s)**).
-- :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, main reduction algorithm.
+- :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`, main reduction algorithm.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` (note that at least a bin width must be
   specified for this algorithm to run successfully, for instance *Params="-0.03"*).
 
@@ -468,6 +493,18 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | to specify if you want a Title and/or Q Resolution   |
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
+
+Groups
+------
+
+Tabs **Runs**, **Event Handling** and **Settings** contain a tool box with two different groups. These groups
+are useful when users need to apply different options to runs measured during the same experiment. For instance,
+if some runs need to be analyzed with a wavelength range of ``LambdaMin=1, LambdaMax=17`` but others need a
+wavelength range of ``LambdaMin=1.5, LambdaMax=15``, users may want to transfer the first set to the processing
+table in the first group and the second set to the processing table in the second group. The interface will
+use the settings in the first group to reduce runs in the first processing table, and the settings in the
+second group to reduce runs in the second processing table. The process is analogous for time slicing options
+specified in the **Event Handling** tab.
 
 .. _ISIS_Reflectomety-Options:
 
