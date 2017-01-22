@@ -222,7 +222,7 @@ void GenericDataProcessorPresenter::process() {
       try {
         auto newData = reduceRow(data.second);
         m_manager->update(item.first, data.first, newData);
-	 newGroup[data.first] = newData;
+        newGroup[data.first] = newData;
         progressReporter.report();
 
       } catch (std::exception &ex) {
