@@ -72,7 +72,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
       /*The name of the algorithm */
       "ReflectometryReductionOneAuto",
       /*Prefixes to the output workspaces*/
-      std::vector<std::string>{"IvsQ_", "IvsQ_binned_", "IvsLam_"},
+      std::vector<std::string>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
       /*The blacklist*/
       std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
                             "OutputWorkspace", "OutputWorkspaceBinned",
