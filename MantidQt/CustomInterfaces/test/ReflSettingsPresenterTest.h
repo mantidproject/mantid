@@ -74,7 +74,7 @@ public:
         .WillOnce(Return("2"));
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
-        .WillOnce(Return("\"3,4\""));
+        .WillOnce(Return("3,4"));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
@@ -113,7 +113,7 @@ public:
         .WillOnce(Return("0.54,0.33,1.81"));
     EXPECT_CALL(mockView, getDirectBeam())
         .Times(Exactly(1))
-        .WillOnce(Return("\"0,3\""));
+        .WillOnce(Return("0,3"));
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(Exactly(1))
         .WillOnce(Return("PNR"));
@@ -149,7 +149,7 @@ public:
         .WillOnce(Return("-0.02"));
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
-        .WillOnce(Return("\"3,4\""));
+        .WillOnce(Return("3,4"));
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(Exactly(1))
         .WillOnce(Return("INTER00013463,INTER00013464"));

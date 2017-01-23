@@ -229,7 +229,7 @@ class CrystalField(object):
         """
         out = ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         out += ',PeakShape=%s' % self.getPeak().name
-        out += ',FixAllPeaks=%s' % self._fixAllPeaks
+        out += ',FixAllPeaks=%s' % (1 if self._fixAllPeaks else 0)
         if self.background is not None:
             out += ',Background=%s' % self.background[0].nameString()
         out += ',Temperatures=(%s)' % ','.join(map(str, self._temperature))
@@ -849,7 +849,7 @@ class CrystalFieldMulti(object):
         ties = self.getTies()
         if len(ties) > 0:
             fun += ';ties=(%s)' % ties
-        return fun
+        return 'composite=CompositeFunction,NumDeriv=1;' + fun
 
     def makeMultiSpectrumFunction(self):
         fun = ';'.join([a.makeMultiSpectrumFunction() for a in self.sites])
@@ -857,7 +857,7 @@ class CrystalFieldMulti(object):
         ties = self.getTies()
         if len(ties) > 0:
             fun += ';ties=(%s)' % ties
-        return fun
+        return 'composite=CompositeFunction,NumDeriv=1;' + fun
 
     def ties(self, **kwargs):
         """Set ties on the parameters."""
