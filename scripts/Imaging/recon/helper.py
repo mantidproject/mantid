@@ -94,6 +94,32 @@ class Helper(object):
             res = None
             pass
 
+    @staticmethod
+    def execute_async(data=None, partial_func=None, cores=1, chunksize=None, name=None, h=None):
+        h = Helper.empty_init() if h is None else h
+        from multiprocessing import Pool
+
+        if chunksize is None:
+            chunksize = 1  # TODO use proper calculation
+
+        pool = Pool(cores)
+        h.prog_init(data.shape[0], name)
+        # imap_unordered gives the images back in random order!
+        for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
+            data[i] = res_data
+            h.prog_update()
+        h.prog_close()
+
+        return data
+
+    @staticmethod
+    def multiprocessing_available():
+        try:
+            from multiprocessing import Pool
+            return True
+        except ImportError:
+            return False
+
     def get_memory_usage_linux(self):
         try:
             # Windows doesn't seem to have resource package, so this will

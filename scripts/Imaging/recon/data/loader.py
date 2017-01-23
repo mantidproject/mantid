@@ -104,6 +104,8 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     sample_data = _load_sample_data(
         first_sample_img, sample_file_names, img_shape, img_format, data_dtype, h)
 
+    # this removes the image number dimension, because we do not need it
+    img_shape = img_shape[1:]
     flat_avg = _load_and_avg_data(
         flat_file_path, img_shape, img_format, data_dtype, h, "Flat")
     dark_avg = _load_and_avg_data(

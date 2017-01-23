@@ -509,10 +509,7 @@ Data Type: float32
 
 ```python 
 python main.py 
--i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/1000/pre_processed
--o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1000_processed
--g '[384.0, 0.0, 1550.0, 1932.0]'
--f
+bsub -I python /work/imat/imat_recon/scripts/main.py -i /work/imat/chamber_tomo/temp/full_stack/ -k /work/imat/chamber_tomo/Dark/ -l /work/imat/chamber_tomo/Flat/ -o /work/imat/chamber_tomo/temp/full_preproc --out-format fits --only-preproc --data-as-stack -w --in-format fits -g '[384.0, 0.0, 1550.0, 1932.0]' -e '[384.0, 686.0, 476.0, 804.0]' --pre-median-size 3
 ```
 
 >python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/1000/pre_processed -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1000_processed -g '[384.0, 0.0, 1550.0, 1932.0]' -f

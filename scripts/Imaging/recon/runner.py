@@ -59,12 +59,13 @@ def pre_processing(config, sample, flat, dark):
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
         mcp_corrections, scale, median_filter
 
+    cores = config.func.cores
     save_preproc = config.func.save_preproc
     debug = True if config.func.debug else False
 
     sample, flat, dark = rotate_stack.execute(
         sample, config.pre.rotation, flat, dark, h)
-    if debug and save_preproc:
+    if debug and save_preproc and config.pre.rotation:
         _debug_save_out_data(sample, config, flat, dark,
                              "1rotated", "_rotated")
 
@@ -86,7 +87,7 @@ def pre_processing(config, sample, flat, dark):
     # and no beam
     sample = normalise_by_flat_dark.execute(
         sample, flat, dark, config.pre.clip_min, config.pre.clip_max, h)
-    if debug and save_preproc:
+    if debug and save_preproc and flat is not None and dark is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "3norm_by_flat_dark", "_normalised_by_flat_dark")
 
@@ -94,7 +95,7 @@ def pre_processing(config, sample, flat, dark):
     sample = normalise_by_air_region.execute(sample, config.pre.normalise_air_region,
                                              config.pre.region_of_interest,
                                              config.pre.crop_before_normalise, h)
-    if debug and save_preproc:
+    if debug and save_preproc and config.pre.normalise_air_region:
         _debug_save_out_data(sample, config, flat, dark,
                              "4norm_by_air", "_normalised_by_air")
 
@@ -108,19 +109,19 @@ def pre_processing(config, sample, flat, dark):
                                  "5cropped", "_cropped")
 
     sample = cut_off.execute(sample, config.pre.cut_off_level_pre, h)
-    if debug and save_preproc:
+    if debug and save_preproc and config.pre.cut_off_level_pre:
         _debug_save_out_data(sample, config, flat, dark,
                              "6cut_off_pre", "_cut_off_pre")
     # mcp_corrections
     # data = mcp_corrections.execute(data, config)
 
     sample = scale.execute(sample, config.pre.scale, config.pre.scale_mode, h)
-    if debug and save_preproc:
+    if debug and save_preproc and config.pre.scale:
         _debug_save_out_data(sample, config, flat, dark,
                              "7scaled", "_scaled")
 
     sample = median_filter.execute(
-        sample, config.pre.median_size, config.pre.median_mode, h)
+        sample, config.pre.median_size, config.pre.median_mode, cores=cores, h=h)
     if debug and save_preproc:
         _debug_save_out_data(sample, config, flat, dark,
                              "8median_filtered", "_median_filtered")

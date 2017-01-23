@@ -71,8 +71,8 @@ class Saver(object):
 
         self.make_dirs_if_needed(preproc_dir)
 
-        self.write_image(data, os.path.join(
-            preproc_dir, image_name + str(image_index).zfill(6)))
+        self.save_image_data(
+            data, preproc_dir, image_name + str(image_index).zfill(6))
 
         self._h.pstop("Finished saving single image.")
 
