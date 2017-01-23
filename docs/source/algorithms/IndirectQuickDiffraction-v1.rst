@@ -26,7 +26,7 @@ Usage
 
 .. testcode:: IndirectQuickDiffraction
 
-    IndirectQuickDiffraction(RunNumbers='IRS21360.RAW',Instrument='IRIS', Analyser='graphite', Reflection='002', SpectraRange=[3,53],
+    IndirectQuickDiffraction(RunNumbers='21360',Instrument='IRIS', Analyser='graphite', Reflection='002', SpectraRange=[3,53],
                              ElasticRange=[-0.5,0], InelasticRange=[0,0.5],GroupingMethod='All', DiffractionSpectraRange=[105,112])
 
 
