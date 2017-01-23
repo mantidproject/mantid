@@ -299,7 +299,7 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values and set them in view
-  std::vector<std::string> defaults(7);
+  std::vector<std::string> defaults(6);
   defaults[0] = alg->getPropertyValue("AnalysisMode");
   defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
 
