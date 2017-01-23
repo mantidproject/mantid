@@ -40,7 +40,7 @@ class PreProcConfig(object):
         self.cut_off_level_pre = 0  # TODO unused
         self.mcp_corrections = True
         self.rebin = None
-        self.scale_mode = 'bilinear'
+        self.rebin_mode = 'bilinear'
 
         self.line_projection = True  # TODO unused
 
@@ -160,17 +160,17 @@ class PreProcConfig(object):
             "--rebin",
             required=False,
             type=float,
-            help="rebin factor by which the images will be scaled. This could be any positive float number.\n"
+            help="Rebin factor by which the images will be rebinned. This could be any positive float number.\n"
             "If not specified no scaling will be done."
         )
 
-        scale_modes = ['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']
+        rebin_modes = ['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']
         grp_pre.add_argument(
             "--rebin-mode",
             required=False,
             type=str,
-            default=self.scale_mode,
-            choices=scale_modes,
+            default=self.rebin_mode,
+            choices=rebin_modes,
             help="Default: %(default)s\n"
             "Specify which interpolation mode will be used for the scaling of the image."
         )
@@ -216,6 +216,6 @@ class PreProcConfig(object):
         self.cut_off_level_pre = args.cut_off_pre
         self.mcp_corrections = args.mcp_corrections
         self.rebin = args.rebin
-        self.scale_mode = args.scale_mode
+        self.rebin_mode = args.rebin_mode
 
         # self.line_projection = args.line_projection

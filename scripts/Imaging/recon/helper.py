@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-
+import sys
 """
 Class for commonly used functions across the modules
 
@@ -40,10 +40,21 @@ class Helper(object):
 
         self._cache_last_memory = None
 
+        self._note_str = " > Note: "
+        self._warning_str = " >> WARNING: "
+        self._error_str = " >>> ERROR: "
+
+        # for timer
         self._progress_bar = None
+        # for custom timer
+        self._iter = None
+        self._total = None
 
         if config is None:
             self.tomo_print_warning("Helper class initialised without config!")
+
+        # sneaky copy of the config
+        self._config = config
 
     def get_verbosity(self):
         return self._verbosity
@@ -65,6 +76,10 @@ class Helper(object):
     @staticmethod
     def empty_init():
         return Helper()
+
+    @staticmethod
+    def empty_init_conf():
+        return Helper(ReconstructionConfig())
 
     @staticmethod
     def check_data_stack(data):
@@ -112,13 +127,30 @@ class Helper(object):
 
         return data
 
-    @staticmethod
-    def multiprocessing_available():
+    def multiprocessing_available(self):
         try:
             from multiprocessing import Pool
             return True
         except ImportError:
             return False
+
+    def progress_available(self):
+        try:
+            from tqdm import tqdm
+        except ImportError:
+            self.tomo_print_note(
+                "Progress bar library TQDM not available. "
+                "To install locally please use pip install tqdm. "
+                "Falling back to ASCII progress bar.")
+
+    def run_import_checks(self):
+        self.progress_available()
+
+        if not self.multiprocessing_available():
+            self.tomo_print_note("Multiprocessing not available.")
+        else:
+            self.tomo_print_note(
+                "Running reconstruction on {0} cores.".format(self._config.func.cores))
 
     def get_memory_usage_linux(self):
         try:
@@ -200,13 +232,13 @@ class Helper(object):
             print(message)
 
     def tomo_print_note(self, message, verbosity=2):
-        self.tomo_print(" > Note: " + message, verbosity)
+        self.tomo_print(self._note_str + message, verbosity)
 
     def tomo_print_warning(self, message, verbosity=2):
-        self.tomo_print(" >> WARNING: " + message, verbosity)
+        self.tomo_print(self._warning_str + message, verbosity)
 
     def tomo_print_error(self, message, verbosity=1):
-        self.tomo_print(" >>> ERROR: " + message, verbosity)
+        self.tomo_print(self._error_str + message, verbosity)
 
     def pstart(self, message, verbosity=2):
         """
@@ -296,33 +328,38 @@ class Helper(object):
 
         Otherwise does nothing, and Helper's progress update function will also do nothing.
         """
-        if desc is None:
-            desc = "Progress"
-
         try:
             from tqdm import tqdm
             if self._progress_bar is not None:
                 raise ValueError(
                     "Timer was not closed previously. Please do prog_close()!")
-
+            raise ImportError
             self._progress_bar = tqdm(
                 total=total, desc=desc, ascii=ascii, unit=unit)
         except ImportError:
-            self._progress_bar = None
-            self.tomo_print_note("tqdm library not found, progress bars will not appear. You could install"
-                                 " locally with pip install tqdm")
+            try:
+                from recon.custom_timer import CustomTimer
+                self._progress_bar = CustomTimer(total, desc)
+            except ImportError:
+                self._progress_bar = None
 
-    def prog_update(self, update=1):
+    def prog_update(self, value=1):
         """
-        This function will do nothing if the tqdm library is not present.
+        This function will print a simple ascii bar if tqdm is not present.
         """
         if self._progress_bar is not None:
-            self._progress_bar.update(update)
+            self._progress_bar.update(value)
+        else:
+            print(".", end='')
+            sys.stdout.flush()
 
     def prog_close(self):
         """
         This function will do nothing if the tqdm library is not present.
         """
-        if self._progress_bar is not None:
+        from tqdm import tqdm
+
+        if isinstance(self._progress_bar, tqdm):
             self._progress_bar.close()
-            self._progress_bar = None
+
+        self._progress_bar = None

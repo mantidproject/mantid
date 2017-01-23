@@ -15,8 +15,7 @@ def execute(config, cmd_line=None):
     h = Helper(config)
     config.helper = h
     h.check_config_integrity(config)
-    h.tomo_print_note(
-        "Executing reconstruction with {0} cores.".format(config.func.cores))
+    h.run_import_checks()
 
     from recon.data.saver import Saver
     saver = Saver(config)
@@ -117,7 +116,7 @@ def pre_processing(config, sample, flat, dark):
     # mcp_corrections
     # data = mcp_corrections.execute(data, config)
 
-    sample = rebin.execute(sample, config.pre.rebin, config.pre.scale_mode, h)
+    sample = rebin.execute(sample, config.pre.rebin, config.pre.rebin_mode, h)
     if debug and save_preproc and config.pre.rebin:
         _debug_save_out_data(sample, config, flat, dark,
                              "7scaled", "_scaled")
