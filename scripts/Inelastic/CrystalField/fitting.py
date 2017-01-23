@@ -532,6 +532,12 @@ class CrystalField(object):
     def isPhysicalPropertyOnly(self):
         return self.Temperature is None and self.PhysicalProperty
 
+    @property
+    def numPhysicalPropertyData(self):
+        if self._physprop:
+            return len(self._physprop) if hasattr(self._physprop, '__len__') else 1
+        return 0
+
     def ties(self, **kwargs):
         """Set ties on the field parameters.
 
@@ -1253,14 +1259,6 @@ class CrystalFieldMulti(object):
         s = ';ties=(%s)' % ','.join(ties)
         return s
 
-    def check_consistency(self):
-        """ Checks that list input variables are consistent """
-        num_spec = []
-        for site in self.sites:
-            num_spec.append(site.check_consistency())
-        if len(set(num_spec)) > 1:
-            raise ValueError('Number of spectra for each site not consistent with each other')
-
     @property
     def isPhysicalPropertyOnly(self):
         return all([a.isPhysicalPropertyOnly for a in self.sites])
@@ -1273,6 +1271,24 @@ class CrystalFieldMulti(object):
     def PhysicalProperty(self, value):
         for a in self.sites:
             a.PhysicalProperty = value
+
+    @property
+    def numPhysicalPropertyData(self):
+        num_spec = []
+        for a in self.sites:
+            num_spec.append(a.numPhysicalPropertyData)
+        if len(set(num_spec)) > 1:
+            raise ValueError('Number of physical properties datasets for each site not consistent')
+        return num_spec[0]
+
+    def check_consistency(self):
+        """ Checks that list input variables are consistent """
+        num_spec = []
+        for site in self.sites:
+            num_spec.append(site.check_consistency())
+        if len(set(num_spec)) > 1:
+            raise ValueError('Number of spectra for each site not consistent with each other')
+        return num_spec[0]
 
     def __add__(self, other):
         if isinstance(other, CrystalFieldMulti):
@@ -1490,7 +1506,7 @@ class CrystalFieldFit(object):
 
     def check_consistency(self):
         """ Checks that list input variables are consistent """
-        num_ws = self.model.check_consistency()
+        num_ws = self.model.check_consistency() + self.model.numPhysicalPropertyData
         errmsg = 'Number of input workspaces not consistent with model'
         if hasattr(self._input_workspace, '__len__'):
             if num_ws != len(self._input_workspace):
