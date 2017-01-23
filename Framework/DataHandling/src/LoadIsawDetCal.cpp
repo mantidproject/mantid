@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
@@ -48,6 +49,12 @@ void LoadIsawDetCal::init() {
       Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
       "The input filename of the ISAW DetCal file (Two files "
       "allowed for SNAP) ");
+
+  declareProperty(
+      Kernel::make_unique<API::FileProperty>(
+          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
+      "The input filename of the second ISAW DetCal file (West "
+      "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
@@ -499,6 +506,12 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
     std::copy(outer.begin(), outer.end(),
               std::back_inserter(filenamesFromPropertyUnraveld));
   }
+
+  // shouldn't be used except for legacy cases
+  const std::string filename2 = this->getProperty("Filename2");
+  if (!filename2.empty())
+    filenamesFromPropertyUnraveld.push_back(filename2);
+
   return filenamesFromPropertyUnraveld;
 }
 
