@@ -5,14 +5,6 @@ UI & Usability Changes
 .. contents:: Table of Contents
    :local:
 
-Installation
-------------
-
-Windows
-#######
-
-OS X
-####
 
 User Interface
 --------------
@@ -21,12 +13,14 @@ User Interface
 
 Instrument View
 ###############
+
  - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
  - Added the ability to drag and drop mask workspaces onto the instrument view. This will apply the store workspace to the view.
  - Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views. 
 
 Plotting Improvements
 #####################
+
 - Fixed a bug where left and right Y axes went out of sync when a fit was run.
 - Exposed the ``plotSubplots`` command to Python. This creates a tiled (multilayer) plot with one workspace per tile.
 
@@ -47,6 +41,18 @@ Custom Interfaces
 
 - Indirect Data Reduction (facility ILL, instrument IN16B) is face-lifted to incorporate the new reduction algorithms options.
 
+
+SliceViewer Improvements
+------------------------
+
+- Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
+.. figure:: ../../images/sliceViewerNonOrthogonal.png
+   :class: screenshot
+   :width: 450px
+   :align: right
+
+   SliceViewer with nonorthogonal view 
+
 Bugs Resolved
 -------------
 
@@ -66,23 +72,6 @@ Bugs Resolved
 - Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
 - Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
 
-SliceViewer Improvements
-------------------------
-- Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
-.. figure:: ../../images/sliceViewerNonOrthogonal.png
-   :class: screenshot
-   :width: 450px
-   :align: right
-
-   SliceViewer with nonorthogonal view 
-
-Full list of
-`GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
-and
-`Documentation <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Documentation%22>`_
-changes on GitHub
-
-
 VSI Improvements
 ----------------
 
@@ -93,3 +82,10 @@ VSI Improvements
 - Changed the fallback for when MDHistoworkspace was opened in the (incompatible) SplatterPlot view to the MultiSlice view.
 - Faster initial loading of a MDHistoworkspace in the MultiSlice and ThreeSlice view.
 - Drawing of a MDHistoWorkspace is now carried out in parallel using vtkSMPTools.
+
+
+Full list of
+`GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
+and
+`Documentation <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Documentation%22>`_
+changes on GitHub
