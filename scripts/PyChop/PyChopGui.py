@@ -149,6 +149,8 @@ class PyChopGui(QtGui.QMainWindow):
             self.calculate()
             self.plot_res()
             self.plot_frame()
+            if self.instSciAct.isChecked():
+                self.update_script()
         except ValueError as err:
             msg = QtGui.QMessageBox()
             msg.setText(str(err))
@@ -369,6 +371,12 @@ class PyChopGui(QtGui.QMainWindow):
         else:
             self.widgets['Chopper2Phase']['Edit'].hide()
             self.widgets['Chopper2Phase']['Label'].hide()
+        if self.instSciAct.isChecked():
+            self.tabs.insertTab(self.scrtabID, self.scrtab, 'ScriptOutput')
+            self.scrtab.show()
+        else:
+            self.tabs.removeTab(self.scrtabID)
+            self.scrtab.hide()
 
     def plot_frame(self):
         """
@@ -489,6 +497,31 @@ class PyChopGui(QtGui.QMainWindow):
         fid = open(fname, 'w')
         fid.write(self.genText())
         fid.close()
+
+    def update_script(self):
+        """
+        Updates the text window with information about the previous calculation.
+        """
+        if self.widgets['MultiRepCheck'].isChecked():
+            out = self.engine.getMultiWidths()
+            new_str = '\n'
+            for ie, ee in enumerate(out['Eis']):
+                res = out['Energy'][ie]
+                percent = res / ee * 100
+                chop_width = out['Chopper'][ie]
+                mod_width = out['Moderator'][ie]
+                new_str += 'Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ee, res * 1000, percent)
+                new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
+        else:
+            ei =  self.engine.getEi()
+            out = self.engine.getWidths()
+            res = out['Energy']
+            percent = res / ei * 100
+            chop_width = out['Chopper']
+            mod_width = out['Moderator']
+            new_str = '\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ei, res * 1000, percent)
+            new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
+        self.scredt.append(new_str)
 
     def onHelp(self):
         """
@@ -672,12 +705,23 @@ class PyChopGui(QtGui.QMainWindow):
         self.reptabbox.addWidget(self.repfig_controls)
         self.reptab.setLayout(self.reptabbox)
 
+        self.scrtab = QtGui.QWidget(self.tabs)
+        self.scredt = QtGui.QTextEdit()
+        self.scrcls = QtGui.QPushButton("Clear")
+        self.scrcls.clicked.connect(lambda: self.scredt.clear())
+        self.scrbox = QtGui.QVBoxLayout()
+        self.scrbox.addWidget(self.scredt)
+        self.scrbox.addWidget(self.scrcls)
+        self.scrtab.setLayout(self.scrbox)
+        self.scrtab.hide()
+
         self.tabs.addTab(self.restab, 'Resolution')
         self.tabs.addTab(self.flxtab, 'Flux-Ei')
         self.tabs.addTab(self.frqtab, 'Flux-Freq')
         self.tabs.addTab(self.reptab, 'Time-Distance')
         self.tdtabID = 3
         self.tabs.setTabEnabled(self.tdtabID, False)
+        self.scrtabID = 4
         self.rightPanel.addWidget(self.tabs)
 
         self.menuOptions = QtGui.QMenu('Options')

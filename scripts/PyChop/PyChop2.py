@@ -120,6 +120,12 @@ class PyChop2:
         """
         return self.object.getResFlux(*args)
 
+    def getWidths(self, *args):
+        """
+        ! Returns the individual time widths that go into the calculated energy widths as a dict
+        """
+        return self.object.getWidths(*args)
+
     def __getMultiRepObject(self):
         """
         Private method to obtain multi-rep information
@@ -152,6 +158,12 @@ class PyChop2:
         ! For instruments which support multi-rep mode, returns the flux for each rep
         """
         return self.__getMultiRepObject().getMultiRepFlux(*args)
+
+    def getMultiWidths(self, *args):
+        """
+        ! Returns the individual time widths that go into the calculated energy widths as a dict
+        """
+        return self.__getMultiRepObject().getMultiWidths(*args)
 
     def plotMultiRepFrame(self, *args):
         """

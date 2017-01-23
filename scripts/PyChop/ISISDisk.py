@@ -194,9 +194,12 @@ class ISISDisk:
                 res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
             if len(ie_list) == 1:
                 res_list = res
+                res_el = res_el[ie_list] 
+                chop_width = chop_width[ie_list] 
+                mod_width = mod_width[ie_list] 
             else:
                 res_list.append(res)
-        return Eis, res_list, res_el, percent, ie_list
+        return Eis, res_list, res_el, percent, ie_list, chop_width, mod_width
 
     def getElasticResolution(self, Ei_in=None, frequency=None):
         """
@@ -209,15 +212,52 @@ class ISISDisk:
             oldfreq = self.freq
             self.setFrequency(frequency)
         if 'LET' in self.instname:
-            _, _, res_el, percent, _ = self.__LETgetResolution(True, 0., Ei_in)
+            _, _, res_el, percent, _, chop_width, mod_width = self.__LETgetResolution(True, 0., Ei_in)
         elif 'MERLIN' in self.instname:
             merlin = ISISFermi('Merlin', self.variant, self.freq[-1])
             res_el = merlin.getResolution(0., Ei)
             percent = res_el / Ei
+            v_van, tmod, tchp = merlin.getVanVar(Ei)
+            chop_width = tchp * 1.e6
+            mod_width = tmod * 1.e6
         if frequency:
             self.setFrequency(oldfreq)
         # now calculate the resolution and flux.
-        return res_el, percent
+        return res_el, percent, chop_width, mod_width
+
+    def getWidths(self, Ei_in=None, frequency=None):
+        """
+        Returns the time widths contributing to the calculated energy width
+        """
+        res_el, percent, tchp, tmod = self.getElasticResolution(Ei_in, frequency)
+        return {"Moderator":tmod, "Chopper":tchp, "Energy":res_el}
+
+    def getMultiWidths(self, Ei_in=None, frequency=None):
+        """
+        Returns the time widths contributing to the calculated energy width for all reps
+        """
+        Ei = self.Ei if Ei_in is None else Ei_in
+        if not Ei:
+            raise ValueError('Incident energy has not been specified')
+        if frequency:
+            oldfreq = self.freq
+            self.setFrequency(frequency)
+        Eis, _, res_el, percent, _, chop_width, mod_width = self.__LETgetResolution(False, 0., Ei)
+        if 'MERLIN' in self.instname:
+            merlin = ISISFermi('Merlin', self.variant, self.freq[-1])
+            tchp = []
+            tmod = []
+            for ee in Eis:
+                res_el.append(merlin.getResolution(0., Ei))
+                v_van, mod_width, chop_width = merlin.getVanVar(ee)
+                tchp.append(chop_width * 1.e6)
+                tmod.append(mod_width * 1.e6)
+        else:
+            tchp = chop_width
+            tmod = mod_width
+        if frequency:
+            self.setFrequency(oldfreq)
+        return {"Eis":Eis, "Moderator":tmod, "Chopper":tchp, "Energy":res_el}
 
     def getResolution(self, Etrans=None, Ei_in=None, frequency=None):
         """
@@ -230,12 +270,12 @@ class ISISDisk:
             oldfreq = self.freq
             self.setFrequency(frequency)
         if 'LET' in self.instname:
-            _, res, _, _, _ = self.__LETgetResolution(True, Etrans, Ei_in)
+            _, res, _, _, _, _, _ = self.__LETgetResolution(True, Etrans, Ei)
         elif 'MERLIN' in self.instname:
             if Etrans is None:
                 Etrans = np.linspace(0.05*Ei, 0.95*Ei, 19, endpoint=True)
             merlin = ISISFermi('Merlin', self.variant, self.freq[-1])
-            res = merlin.getResolution(Etrans, Ei)
+            res = merlin.getResolution(Etrans, Ei, None, True)
         else:
             raise RuntimeError('Instrument name has not been set')
         if frequency:
@@ -253,7 +293,7 @@ class ISISDisk:
             oldfreq = self.freq
             self.setFrequency(frequency)
         if 'LET' in self.instname:
-            _, _, _, percent, ie_list = self.__LETgetResolution(True, 0., Ei)
+            _, _, _, percent, ie_list, _, _ = self.__LETgetResolution(True, 0., Ei)
             flux = MulpyRep.calcFlux(Ei, self.freq[-1], [percent[ie_list[0]]], self.slot_width[-1])[0]
         elif 'MERLIN' in self.instname:
             merlin = ISISFermi('Merlin', self.variant, self.freq[-1])
@@ -295,7 +335,7 @@ class ISISDisk:
             oldfreq = self.freq
             self.setFrequency(frequency)
         if 'LET' in self.instname:
-            _, res, _, _, _ = self.__LETgetResolution(False, Etrans, Ei)
+            _, res, _, _, _, _, _ = self.__LETgetResolution(False, Etrans, Ei)
         elif 'MERLIN' in self.instname:
             merlin = ISISFermi('Merlin', self.variant, self.freq[-1])
             Eis = self.getAllowedEi()
@@ -319,10 +359,10 @@ class ISISDisk:
             oldfreq = self.freq
             self.setFrequency(frequency)
         if 'LET' in self.instname:
-            Eis, _, _, percent, _ = self.__LETgetResolution(False, 0., Ei)
+            Eis, _, _, percent, _, _, _ = self.__LETgetResolution(False, 0., Ei)
             flux = MulpyRep.calcFlux(Eis, self.freq[-1], percent, self.slot_width[-1])
         elif 'MERLIN' in self.instname:
-            Eis, _, _, percent, _ = self.__LETgetResolution(False, 0., Ei)
+            Eis, _, _, percent, _, _, _ = self.__LETgetResolution(False, 0., Ei)
             merlin = ISISFermi('Merlin', self.variant, self.freq[-1])
             flux = []
             for ee in Eis:
