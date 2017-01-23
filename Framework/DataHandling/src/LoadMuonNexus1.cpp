@@ -655,15 +655,15 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
   // Put it into a vector, discarding the 1st entry, which is rubbish
   // But note that the last (overflow) bin is kept
   // For Nexus, not sure if above is the case, hence give all data for now
-  MantidVec &Y = localWorkspace->dataY(hist);
-  Y.assign(nxload.counts + i * lengthIn,
-           nxload.counts + i * lengthIn + lengthIn);
+  localWorkspace->mutableY(hist).assign(
+      nxload.counts + i * lengthIn, nxload.counts + i * lengthIn + lengthIn);
 
   // Create and fill another vector for the errors, containing sqrt(count)
-  MantidVec &E = localWorkspace->dataE(hist);
   typedef double (*uf)(double);
   uf dblSqrt = std::sqrt;
-  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+  auto &Y = localWorkspace->mutableY(hist);
+  std::transform(Y.begin(), Y.end(), localWorkspace->mutableE(hist).begin(),
+                 dblSqrt);
   // Populate the workspace. Loop starts from 1, hence i-1
 
   // Create and fill another vector for the X axis
@@ -673,7 +673,7 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
   auto timeChannelsVec = boost::make_shared<HistogramData::HistogramX>(
       timeChannels, timeChannels + lengthIn + 1);
 
-  localWorkspace->setX(hist, timeChannelsVec);
+  localWorkspace->setSharedX(hist, timeChannelsVec);
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
   // Muon v1 files: always a one-to-one mapping between spectra and detectors
   localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
