@@ -20,7 +20,7 @@ Features
 Bug Fixes
 ---------
 
-- Fixed for beam center finder.
+- Fix for beam center finder.
 - Fixed loading of multiperiod event files.
 - Fixed period selection when loading multiperiod files.
 - Fixed process note for SaveCanSAS1D.
