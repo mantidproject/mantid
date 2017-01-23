@@ -109,7 +109,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         ref = SimulatedDensityOfStates(PHONONFile=self._phonon_file)
         ref = Scale(ref, Factor=10)
 
-        self.assertEqual(CheckWorkspacesMatch(wks, ref), 'Success!')
+        self.assertTrue(CompareWorkspaces(wks, ref)[0])
 
     def test_bin_width(self):
         import math

@@ -118,8 +118,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
                                  EPPTable=self._table,
                                  OutputWorkspace=outputWorkspaceName)
         self.assertTrue(alg_test.isExecuted())
-        self.assertEqual("Success!", CheckWorkspacesMatch(backup,
-                         self._input_ws))
+        self.assertTrue(CompareWorkspaces(backup, self._input_ws)[0])
         DeleteWorkspace(backup)
 
     def tearDown(self):
