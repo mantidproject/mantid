@@ -58,15 +58,16 @@ def pre_processing(config, sample, flat, dark):
         return sample
 
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
-        mcp_corrections, rebin, median_filter
+        mcp_corrections, rebin, median_filter, gaussian
 
     cores = config.func.cores
+    chunksize = config.func.chunksize
     save_preproc = config.func.save_preproc
     debug = True if config.func.debug else False
 
     sample, flat, dark = rotate_stack.execute(
-        sample, config.pre.rotation, flat, dark, h)
-    if debug and save_preproc and config.pre.rotation:
+        sample, config.pre.rotation, flat, dark, cores=cores, chunksize=chunksize, h=h)
+    if debug and save_preproc and config.pre.rotation is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "1rotated", "_rotated")
 
@@ -87,7 +88,7 @@ def pre_processing(config, sample, flat, dark):
     # removes background using images taken when exposed to fully open beam
     # and no beam
     sample = normalise_by_flat_dark.execute(
-        sample, flat, dark, config.pre.clip_min, config.pre.clip_max, cores=cores, h=h)
+        sample, flat, dark, config.pre.clip_min, config.pre.clip_max, cores=cores, chunksize=chunksize, h=h)
     if debug and save_preproc and flat is not None and dark is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "3norm_by_flat_dark", "_normalised_by_flat_dark")
@@ -96,7 +97,7 @@ def pre_processing(config, sample, flat, dark):
     sample = normalise_by_air_region.execute(sample, config.pre.normalise_air_region,
                                              config.pre.region_of_interest,
                                              config.pre.crop_before_normalise, h)
-    if debug and save_preproc and config.pre.normalise_air_region:
+    if debug and save_preproc and config.pre.normalise_air_region is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "4norm_by_air", "_normalised_by_air")
 
@@ -117,15 +118,21 @@ def pre_processing(config, sample, flat, dark):
     # data = mcp_corrections.execute(data, config)
 
     sample = rebin.execute(sample, config.pre.rebin, config.pre.rebin_mode, h)
-    if debug and save_preproc and config.pre.rebin:
+    if debug and save_preproc and config.pre.rebin is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "7scaled", "_scaled")
 
     sample = median_filter.execute(
-        sample, config.pre.median_size, config.pre.median_mode, cores=cores, h=h)
-    if debug and save_preproc:
+        sample, config.pre.median_size, config.pre.median_mode, cores=cores, chunksize=chunksize, h=h)
+    if debug and save_preproc and config.pre.median_size is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "8median_filtered", "_median_filtered")
+
+    sample = gaussian.execute(sample, config.pre.gaussian_size, config.pre.gaussian_mode,
+                              config.pre.gaussian_order, cores=cores, chunksize=chunksize, h=h)
+    if debug and save_preproc and config.pre.gaussian_size is not None:
+        _debug_save_out_data(sample, config, flat, dark,
+                             "9gaussian", "_gaussian")
 
     return sample
 
@@ -155,26 +162,26 @@ def post_processing(recon_data, config):
 
     recon_data = circular_mask.execute(
         recon_data, config.post.circular_mask, h)
-    if debug:
+    if debug and config.post.circular_mask is not None:
         _debug_save_out_data(recon_data, config, out_path_append='../post_processed/circular_masked',
                              image_append='_circular_masked')
 
     recon_data = cut_off.execute(
         recon_data, config.post.cut_off_level_post, h)
-    if debug:
+    if debug and config.post.cut_off_level_post is not None:
         _debug_save_out_data(
             recon_data, config, out_path_append='../post_processed/cut_off', image_append='_cut_off')
 
     recon_data = gaussian.execute(recon_data, config.post.gaussian_size, config.post.gaussian_mode,
                                   config.post.gaussian_order, h)
-    if debug:
+    if debug and config.post.gaussian_size is not None:
         _debug_save_out_data(
             recon_data, config, out_path_append='../post_processed/gaussian', image_append='_gaussian')
 
     recon_data = median_filter.execute(
         recon_data, config.post.median_size, config.post.median_mode, h)
 
-    if debug:
+    if debug and config.post.median_size is not None:
         _debug_save_out_data(
             recon_data, config, out_path_append='../post_processed/median', image_append='_median')
 

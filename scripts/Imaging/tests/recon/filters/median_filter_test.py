@@ -33,7 +33,7 @@ class MedianTest(unittest.TestCase):
 
         size = None
         mode = None
-        result = self.alg.execute(images, size, mode, self.h)
+        result = self.alg.execute(images, size, mode, h=self.h)
         npt.assert_equal(result, control)
 
     def test_executed(self):
@@ -43,7 +43,7 @@ class MedianTest(unittest.TestCase):
 
         size = 3
         mode = 'reflect'
-        result = self.alg.execute(images, size, mode, self.h)
+        result = self.alg.execute(images, size, mode, h=self.h)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
     def test_executed_no_helper(self):

@@ -46,9 +46,6 @@ class Helper(object):
 
         # for timer
         self._progress_bar = None
-        # for custom timer
-        self._iter = None
-        self._total = None
 
         if config is None:
             self.tomo_print_warning("Helper class initialised without config!")
@@ -118,7 +115,8 @@ class Helper(object):
             chunksize = 1  # TODO use proper calculation
 
         pool = Pool(cores)
-        h.prog_init(data.shape[0], name + " " + str(cores) + "c")
+        h.prog_init(data.shape[0], name + " " +
+                    str(cores) + "c " + str(chunksize) + "chs")
         # imap_unordered gives the images back in random order!
         for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
             data[i] = res_data
@@ -333,7 +331,6 @@ class Helper(object):
             if self._progress_bar is not None:
                 raise ValueError(
                     "Timer was not closed previously. Please do prog_close()!")
-            raise ImportError
             self._progress_bar = tqdm(
                 total=total, desc=desc, ascii=ascii, unit=unit)
         except ImportError:

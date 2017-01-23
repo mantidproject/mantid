@@ -24,9 +24,9 @@ def execute(data, size, mode, cores=1, chunksize=None, h=None):
 
     if size and size > 1:
         if h.multiprocessing_available():
-            data = execute_par(data, size, mode, cores, chunksize, h)
+            data = _execute_par(data, size, mode, cores, chunksize, h)
         else:
-            data = execute_seq(data, size, mode, h)
+            data = _execute_seq(data, size, mode, h)
 
     else:
         h.tomo_print_note("NOT applying noise filter / median.")
@@ -35,7 +35,7 @@ def execute(data, size, mode, cores=1, chunksize=None, h=None):
     return data
 
 
-def execute_seq(data, size, mode, h=None):
+def _execute_seq(data, size, mode, h=None):
     """
     Sequential version of the Median Filter using scipy.ndimage
 
@@ -64,7 +64,7 @@ def execute_seq(data, size, mode, h=None):
         format(data.dtype, size))
 
 
-def execute_par(data, size, mode, cores=1, chunksize=None, h=None):
+def _execute_par(data, size, mode, cores=1, chunksize=None, h=None):
     """
     Parallel version of the Median Filter using scipy.ndimage
 
@@ -82,10 +82,13 @@ def execute_par(data, size, mode, cores=1, chunksize=None, h=None):
     from functools import partial
     f = partial(scipy_ndimage.median_filter, size=size, mode=mode)
 
-    h.pstart("Starting PARALLEL median filter")
+    h.pstart("Starting PARALLEL median filter, with pixel data type: {0}, filter size/width: {1}.".
+             format(data.dtype, size))
+
     data = Helper.execute_async(data, f, cores, chunksize, "Median Filter", h)
 
-    h.pstop("End of PARALLEL median filter")
+    h.pstop("Finished PARALLEL median filter, with pixel data type: {0}, filter size/width: {1}.".
+            format(data.dtype, size))
 
     return data
 

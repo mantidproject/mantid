@@ -69,6 +69,8 @@ class FunctionalConfig(object):
         import multiprocessing
         # get max cores on the system as default
         self.cores = multiprocessing.cpu_count()
+        # how to spread the image load per worker
+        self.chunksize = None
 
     def __str__(self):
         return "Input dir: {0}\n".format(str(self.input_path)) \
@@ -318,7 +320,14 @@ class FunctionalConfig(object):
             required=False,
             type=int,
             default=self.cores,
-            help="Number of CPU cores that will be used for reconstruction")
+            help="Number of CPU cores that will be used for reconstruction.")
+
+        grp_recon.add_argument(
+            "--chunksize",
+            required=False,
+            type=int,
+            default=self.chunksize,
+            help="How to spread the load on each worker.")
 
         return parser
 
@@ -376,3 +385,4 @@ class FunctionalConfig(object):
         self.num_iter = args.num_iter
         self.max_angle = args.max_angle
         self.cores = args.cores
+        self.chunksize = args.chunksize

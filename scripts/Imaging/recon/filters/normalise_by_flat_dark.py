@@ -20,11 +20,11 @@ def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, co
                     norm_flat_img.shape, data[0].shape))
 
         if h.multiprocessing_available():
-            execute_par(data, norm_flat_img, norm_dark_img,
-                        clip_min, clip_max, cores, chunksize, h)
+            _execute_par(data, norm_flat_img, norm_dark_img,
+                         clip_min, clip_max, cores, chunksize, h)
         else:
-            execute_seq(data, norm_flat_img, norm_dark_img,
-                        clip_min, clip_max, h)
+            _execute_seq(data, norm_flat_img, norm_dark_img,
+                         clip_min, clip_max, h)
 
     else:
         h.tomo_print_note(
@@ -35,7 +35,7 @@ def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, co
     return data
 
 
-def execute_par(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
+def _execute_par(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
     """
     Normalise by flat and dark images
 
@@ -44,6 +44,8 @@ def execute_par(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5
     :param norm_dark_img :: dark image to use in normalization
     :param clip_min: Pixel values found below this value will be clipped to equal this value
     :param clip_max: Pixel values found above this value will be clipped to equal this value
+    :param cores:
+    :param chunksize:
     :param h: Helper class, if not provided will be initialised with empty constructor
 
 

@@ -23,6 +23,11 @@ class PreProcConfig(object):
             mode is equal to 'constant'.
         """
         self.median_mode = 'reflect'
+
+        self.gaussian_size = None
+        self.gaussian_mode = 'reflect'
+        self.gaussian_order = 0
+
         self.stripe_removal_method = 'wavelet-fourier'
 
         # Rotation 90 degrees clockwise (positive) or counterclockwise (negative)
@@ -182,6 +187,32 @@ class PreProcConfig(object):
             action='store_true',
             help="Perform corrections specific to images taken with the MCP detector.")
 
+        grp_pre.add_argument(
+            "--pre-gaussian-size",
+            required=False,
+            type=float,
+            default=self.gaussian_size,
+            help="Apply gaussian filter (2d) on reconstructed volume with the given window size."
+        )
+
+        grp_pre.add_argument(
+            "--pre-gaussian-mode",
+            type=str,
+            required=False,
+            default=self.gaussian_mode,
+            choices=median_modes,
+            help="Default: %(default)s\nMode of gaussian filter which determines how the array borders are handled.(pre processing).")
+
+        grp_pre.add_argument(
+            "--pre-gaussian-order",
+            required=False,
+            type=int,
+            default=self.gaussian_order,
+            help="Default: %(default)d\nThe order of the filter along each axis is given as a sequence of integers, \n"
+            "or as a single number. An order of 0 corresponds to convolution with a Gaussian kernel.\n"
+            "An order of 1, 2, or 3 corresponds to convolution with the first, second or third derivatives of a Gaussian.\n"
+            "Higher order derivatives are not implemented.")
+
         return parser
 
     def update(self, args):
@@ -206,6 +237,11 @@ class PreProcConfig(object):
         self.crop_before_normalise = args.crop_before_normalise
         self.median_size = args.pre_median_size
         self.median_mode = args.pre_median_mode
+
+        self.gaussian_size = args.pre_gaussian_size
+        self.gaussian_mode = args.pre_gaussian_mode
+        self.gaussian_order = args.pre_gaussian_order
+
         self.stripe_removal_method = args.remove_stripes
 
         self.rotation = args.rotation

@@ -32,12 +32,12 @@ class NormaliseByFlatDarkTest(unittest.TestCase):
         err_msg = "TEST NOT EXECUTED :: Running normalise_by_flat_dark with size {0}, mode {1} and order {2} changed the data!"
 
         # empty params
-        result = self.alg.execute(sample, self.h)
+        result = self.alg.execute(sample, h=self.h)
         npt.assert_equal(result, control)
 
         # bad flat nd array
         npt.assert_raises(ValueError, self.alg.execute,
-                          sample, flat[0], self.h)
+                          sample, flat[0], h=self.h)
 
     def test_executed(self):
         self.do_execute(self.h)
@@ -51,17 +51,17 @@ class NormaliseByFlatDarkTest(unittest.TestCase):
         control = deepcopy(sample)
         import numpy as np
 
-        result = self.alg.execute(sample, flat, dark, 0, 1.5, helper)
+        result = self.alg.execute(sample, flat, dark, 0, 1.5, h=helper)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
         control = np.full((10, 10, 10), 2.)
         # clip min, should return twos
-        result = self.alg.execute(sample, flat, dark, 2., None, helper)
+        result = self.alg.execute(sample, flat, dark, 2., None, h=helper)
         npt.assert_equal(result, control)
 
         control = np.zeros(1000).reshape(10, 10, 10)
         # clip max, should also be zeros
-        result = self.alg.execute(sample, flat, dark, -3, 0, helper)
+        result = self.alg.execute(sample, flat, dark, -3, 0, h=helper)
         npt.assert_equal(result, control)
 
 if __name__ == '__main__':
