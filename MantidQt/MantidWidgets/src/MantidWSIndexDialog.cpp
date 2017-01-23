@@ -129,6 +129,14 @@ bool MantidWSIndexWidget::isSurfacePlotSelected() const {
 }
 
 /**
+* Whether the user selected contour plot
+* @returns True if surfarce plot selected
+*/
+bool MantidWSIndexWidget::isContourPlotSelected() const {
+  return (m_plotOptions->currentText() == "Contour Plot of Group");
+}
+
+/**
 * Whether the user has selected plot with error bars
 * @returns True if error bars are selected
 */
@@ -445,6 +453,13 @@ bool MantidWSIndexDialog::isSurfacePlotSelected() const {
   return m_widget.isSurfacePlotSelected();
 }
 
+/**
+* Whether the user selected the surface plot
+* @returns True if surface plot selected
+*/
+bool MantidWSIndexDialog::isContourPlotSelected() const {
+  return m_widget.isContourPlotSelected();
+}
 
 /**
 * Whether the user selected error bars
