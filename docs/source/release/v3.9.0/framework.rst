@@ -45,10 +45,23 @@ Improved
 
 - :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 - :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`: The calculation of the azimuth angle has been fixed. Previously it was set equal to the Mantid definition of phi but the old code defined it as the angle away from the scattering plane.
+- :ref:`MatchPeaks <algm-MatchPeaks>` performs circular shift operation (numpy roll) along the x-axis to align the peaks in the spectra.
+- :ref:`FindEPP <algm-FindEPP>` is improved to better determine the initial parameters and range for the fitting.
+- :ref:`StartLiveData <algm-StartLiveData>` can now accept LiveListener properties as parameters, based on the value of the "Instrument" parameter.
 Renamed
 #######
 
 - :ref:`CorrectFlightPaths <algm-ConvertToConstantL2>` has been renamed to :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>`.
+
+Bug Fixes
+#########
+
+- Bin masking information was incorrectly saved when converting workspaces into nexus files, which is now fixed.
+- :ref:`LoadEventNexus <algm-LoadEventNexus>` should no longer leak memory when the execution is cancelled.
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` will now load the stored workspace names from a processed Nexus file in the case of multiperiod data.
+- If a run is aborted and restarted, the ``running`` log in the workspace will correctly reflect this. (``running`` will be false at all times before the abort.)
+- Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.
+- Issues with :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` with  **Return Background** option returning fake values has been fixed.
 
 Deprecated
 ##########
@@ -69,7 +82,8 @@ Deprecated
 - :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` is deprecated in favour of v2.
 - :ref:`SubmitRemoteJob	 <algm-SubmitRemoteJob>` is deprecated in favour of v2.
 - :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:'TransposeMD <algm_TransposeMD>'.
-
+- The Python function `IMDDimension.getName()` has been deprecated in favour of `IMDDimension.name'.
+- The duplicate Python function `Workspace.getName()` has been deprecated in favour of `Workspace.name()'.
 Removed
 #######
 
@@ -103,24 +117,6 @@ Improved
 
 - The output and normalization MDHistoWorkspaces from :ref:`MDNormSCD <algm-MDNormSCD>` and :ref:`MDNormDirectSC <algm-MDNormDirectSC>` have the 'displayNormalization' set to 'NoNormalization'. For older outputs, the `setDisplayNormalization` function is now exposed to python.
 
-Python
-------
-
-- The function `IMDDimension.getName()` has been deprecated in favour of `IMDDimension.name'.
-- The duplicate function `Workspace.getName()` has been deprecated in favour of `Workspace.name()'.
-
-Python Algorithms
-#################
-
-- :ref:`MatchPeaks <algm-MatchPeaks>` performs circular shift operation (numpy roll) along the x-axis to align the peaks in the spectra.
-- :ref:`FindEPP <algm-FindEPP>` is improved to better determine the initial parameters and range for the fitting.
-- :ref:`StartLiveData <algm-StartLiveData>` can now accept LiveListener properties as parameters, based on the value of the "Instrument" parameter.
-- Bin masking information was incorrectly saved when converting workspaces into nexus files, which is now fixed.
-- :ref:`LoadEventNexus <algm-LoadEventNexus>` should no longer leak memory when the execution is cancelled.
-- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` will now load the stored workspace names from a processed Nexus file in the case of multiperiod data.
-- If a run is aborted and restarted, the ``running`` log in the workspace will correctly reflect this. (``running`` will be false at all times before the abort.)
-- Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.
-- Issues with :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` with  **Return Background** option returning fake values has been fixed.
 
 Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`__
