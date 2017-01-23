@@ -956,7 +956,7 @@ class CrystalField(object):
         if numels:
             if hasattr(self.peaks, '__len__'):
                 # This should not occur, but may do if the user changes the temperature(s) after
-                # initialisation. In which case, we reset the peaks, giving a warning. 
+                # initialisation. In which case, we reset the peaks, giving a warning.
                 if len(self.peaks) != numels[0]:
                     from .function import PeaksFunction
                     errmsg = 'Internal inconsistency between number of spectra and list of '
