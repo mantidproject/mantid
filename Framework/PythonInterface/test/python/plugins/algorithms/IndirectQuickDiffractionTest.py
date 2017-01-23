@@ -13,7 +13,7 @@ class IndirectQuickDiffractionTest(unittest.TestCase):
         """
 
         IndirectQuickDiffraction(RunNumbers='38633', Instrument='IRIS', Analyser='graphite', Reflection='002', SpectraRange=[3, 53],
-                                 ElasticRange=[-0.5, 0], InelasticRange=[0, 0.5], GroupingMethod='All', DiffractionSpectra=[105, 112])
+                                 ElasticRange=[-0.5, 0], InelasticRange=[0, 0.5], GroupingMethod='All', DiffractionSpectraRange=[105, 112])
 
         # Check Diffraction
         wks = mtd['Diffraction']

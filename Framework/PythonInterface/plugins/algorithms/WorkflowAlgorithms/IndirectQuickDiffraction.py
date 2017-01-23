@@ -169,11 +169,11 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         elif spectra_range[0] > spectra_range[1]:
             issues['SpectraRange'] = 'Range must be in format: lower,upper'
 
-        spectra_range = self.getProperty('DiffractionSpectra').value
+        spectra_range = self.getProperty('DiffractionSpectraRange').value
         if len(spectra_range) != 2:
-            issues['DiffractionSpectra'] = 'Range must contain exactly two items'
+            issues['DiffractionSpectraRange'] = 'Range must contain exactly two items'
         elif spectra_range[0] > spectra_range[1]:
-            issues['DiffractionSpectra'] = 'Range must be in format: lower,upper'
+            issues['DiffractionSpectraRange'] = 'Range must be in format: lower,upper'
 
         # Validate ranges
         elastic_range = self.getProperty('ElasticRange').value
@@ -214,7 +214,7 @@ class IndirectQuickDiffraction(DataProcessorAlgorithm):
         self._inelastic_range = self.getProperty('InelasticRange').value
         self._detailed_balance = self.getProperty('DetailedBalance').value
 
-        self._diff_spectra = self.getProperty('DiffractionSpectra').value
+        self._diff_spectra = self.getProperty('DiffractionSpectraRange').value
         self._diff_rebin = ''
         self._diff_mode = 'diffspec'
         self._diff_cal = self.getProperty('DiffractionCalibrationFile').value
