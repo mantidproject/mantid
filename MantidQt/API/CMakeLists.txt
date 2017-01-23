@@ -70,7 +70,6 @@ set ( MOC_FILES
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidWidget.h
-  inc/MantidQtAPI/NonOrthogonal.h
   inc/MantidQtAPI/MWRunFiles.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
@@ -111,6 +110,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/MdConstants.h
 	inc/MantidQtAPI/MdPlottingCmapsProvider.h
 	inc/MantidQtAPI/MdSettings.h
+	inc/MantidQtAPI/NonOrthogonal.h
 	inc/MantidQtAPI/pixmaps.h
 	inc/MantidQtAPI/PlotAxis.h
 	inc/MantidQtAPI/PowerScaleEngine.h
