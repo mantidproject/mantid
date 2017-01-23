@@ -76,7 +76,8 @@ void Stitch1DMany::init() {
                       scaleFactorFromPeriodValidator, Direction::Input),
                   "Provided index of period to obtain scale factor from. "
                   "Periods are indexed from 1. Used only if stitching group "
-                  "workspaces and UseManualScaleFactor is false.");
+                  "workspaces, UseManualScaleFactor is true and "
+                  "ManualScaleFactor is set to default.");
 }
 
 /** Load and validate the algorithm's properties.

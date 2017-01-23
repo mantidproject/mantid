@@ -55,9 +55,9 @@ The algorithm workflow is as follows:
    scale factor are outputted.
 #. If group workspaces are supplied, the algorithm checks whether or not to
    scale workspaces using scale factors from a specific period (given by
-   :literal:`ScaleFactorFromPeriod`). This is done if either
-   :literal:`UseManualScaleFactor` is false, or :literal:`UseManualScaleFactor`
-   is true and :literal:`ManualScaleFactor` is set to its default value.
+   :literal:`ScaleFactorFromPeriod`). This is done only if
+   :literal:`UseManualScaleFactor` is true and :literal:`ManualScaleFactor` is
+   set to its default value.
 #. If not using :literal:`ScaleFactorFromPeriod`, the algorithm collects the
    workspaces belonging to each period across all groups and calls
    :literal:`Stitch1DMany` for each period. As a selection of non-group
@@ -78,6 +78,12 @@ The algorithm workflow is as follows:
    stored in a vector while the out scale factors are appended and outputted.
    Finally step 5 is performed, grouping the workspaces into a single one that
    is outputted.
+
+In the diagram below, all input parameters other than
+:literal:`InputWorkspaces`, :literal:`UseManualScaleFactor`,
+:literal:`ManualScaleFactor` and :literal:`ScaleFactorFromPeriod` have been
+omitted as they do not serve any purpose other than to be passed to the
+:literal:`Stitch1DMany` algorithm.
 
 .. diagram:: Stitch1DMany-v1_wkflw.dot
 
