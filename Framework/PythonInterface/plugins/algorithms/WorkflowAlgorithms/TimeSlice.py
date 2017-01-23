@@ -58,7 +58,7 @@ class TimeSlice(PythonAlgorithm):
         return 'Inelastic\\Utility'
 
     def summary(self):
-        return 'Performa an integration on a raw file over a specified time of flight range'
+        return 'Perform an integration on a raw file over a specified time of flight range'
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
@@ -216,8 +216,6 @@ class TimeSlice(PythonAlgorithm):
 
         @param raw_file Name of file to process
         """
-        from IndirectCommon import CheckHistZero
-
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
         CropWorkspace(InputWorkspace=raw_file,
@@ -225,7 +223,7 @@ class TimeSlice(PythonAlgorithm):
                       StartWorkspaceIndex=int(self._spectra_range[0]) - 1,
                       EndWorkspaceIndex=int(self._spectra_range[1]) - 1)
 
-        num_hist = CheckHistZero(raw_file)[0]
+        num_hist = self.CheckHistZero(raw_file)[0]
 
         # Use calibration file if desired
         if self._calib_ws is not None:
@@ -258,5 +256,28 @@ class TimeSlice(PythonAlgorithm):
 
         return slice_file
 
+    def CheckHistZero(self, inWS):
+        """
+        Retrieves basic info on a workspace
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+        Args:
+          @param inWS  2D workspace
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+               boundaries minus one. It is assumed all histograms have the same
+               number of X-points.
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        x_in = mtd[inWS].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO points')
+        return num_hist, ntc
 
 AlgorithmFactory.subscribe(TimeSlice)

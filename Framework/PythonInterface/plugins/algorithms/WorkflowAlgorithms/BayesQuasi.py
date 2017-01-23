@@ -44,7 +44,7 @@ class BayesQuasi(PythonAlgorithm):
     def summary(self):
         return "This algorithm runs the Fortran QLines programs which fits a Delta function of"+\
                " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"+\
-               " whole function is then convoled with the resolution function."
+               " whole function is then convolved with the resolution function."
 
     def version(self):
         return 1
@@ -148,12 +148,12 @@ class BayesQuasi(PythonAlgorithm):
         erange = [self._e_min, self._e_max]
         nbins = [self._sam_bins, self._res_bins]
         setup_prog.report('Converting to binary for Fortran')
-        #convert true/false to 1/0 for fortran
+        #convert true/false to 1/0 for Fortran
         o_el = 1 if self._elastic else 0
         o_w1 = 1 if self._width else 0
         o_res = 1 if self._res_norm else 0
 
-        #fortran code uses background choices defined using the following numbers
+        #Fortran code uses background choices defined using the following numbers
         setup_prog.report('Encoding input options')
         if self._background == 'Sloping':
             o_bgd = 2
@@ -172,7 +172,7 @@ class BayesQuasi(PythonAlgorithm):
 
         array_len = 4096                           # length of array in Fortran
         setup_prog.report('Checking X Range')
-        CheckXrange(erange,'Energy')
+        self.CheckXrange(erange,'Energy')
 
         nbin,nrbin = nbins[0], nbins[1]
 
@@ -181,7 +181,7 @@ class BayesQuasi(PythonAlgorithm):
 
         # Check for trailing and leading zeros in data
         setup_prog.report('Checking for leading and trailing zeros in the data')
-        first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
+        first_data_point, last_data_point = self.IdentifyDataBoundaries(self._samWS)
         if first_data_point > self._e_min:
             logger.warning("Sample workspace contains leading zeros within the energy range.")
             logger.warning("Updating eMin: eMin = " + str(first_data_point))
@@ -195,12 +195,12 @@ class BayesQuasi(PythonAlgorithm):
         erange = [self._e_min, self._e_max]
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._samWS,self._resWS)
+        self.CheckAnalysers(self._samWS,self._resWS)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._samWS)
         theta, Q = GetThetaQ(self._samWS)
 
-        nsam,ntc = CheckHistZero(self._samWS)
+        nsam,ntc = self.CheckHistZero(self._samWS)
 
         totalNoSam = nsam
 
@@ -208,7 +208,7 @@ class BayesQuasi(PythonAlgorithm):
         if not self._loop:
             nsam = 1
 
-        nres = CheckHistZero(self._resWS)[0]
+        nres = self.CheckHistZero(self._resWS)[0]
 
         setup_prog.report('Checking Histograms')
         if self._program == 'QL':
@@ -216,7 +216,7 @@ class BayesQuasi(PythonAlgorithm):
                 prog = 'QLr'                        # res file
             else:
                 prog = 'QLd'                        # data file
-                CheckHistSame(self._samWS,'Sample',self._resWS,'Resolution')
+                self.CheckHistSame(self._samWS,'Sample',self._resWS,'Resolution')
         elif self._program == 'QSe':
             if nres == 1:
                 prog = 'QSe'                        # res file
@@ -360,7 +360,7 @@ class BayesQuasi(PythonAlgorithm):
                                   Nspec=3, UnitX='MomentumTransfer')
             outWS = self.C2Fw(fname)
         if self._program == 'QSe':
-            comp_prog.report('Runnning C2Se')
+            comp_prog.report('Running C2Se')
             outWS = self.C2Se(fname)
 
         log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
@@ -373,7 +373,7 @@ class BayesQuasi(PythonAlgorithm):
         s_api.CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
         log_prog.report('Adding sample logs to Fit workspace')
         self._add_sample_logs(fitWS, prog, erange, nbins)
-        log_prog.report('Finialising log copying')
+        log_prog.report('Finalising log copying')
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
@@ -417,7 +417,6 @@ class BayesQuasi(PythonAlgorithm):
         asc = self._read_ascii_file(sname+'.qse')
         var = asc[3].split()                            #split line on spaces
         nspec = var[0]
-        var = ExtractInt(asc[6])
         first = 7
         Xout = []
         Yf, Yi, Yb = [], [], []
@@ -480,30 +479,30 @@ class BayesQuasi(PythonAlgorithm):
 
     def SeBlock(self, a, index):                                 #read Ascii block of Integers
         index += 1
-        val = ExtractFloat(a[index])               #Q,AMAX,HWHM
+        val = self.ExtractFloat(a[index])               #Q,AMAX,HWHM
         Q = val[0]
         AMAX = val[1]
         HWHM = val[2]
         index += 1
-        val = ExtractFloat(a[index])               #A0
+        val = self.ExtractFloat(a[index])               #A0
         int0 = [AMAX*val[0]]
         index += 1
-        val = ExtractFloat(a[index])                #AI,FWHM index peak
+        val = self.ExtractFloat(a[index])                #AI,FWHM index peak
         fw = [2.*HWHM*val[1]]
         integer = [AMAX*val[0]]
         index += 1
-        val = ExtractFloat(a[index])                 #SIG0
+        val = self.ExtractFloat(a[index])                 #SIG0
         int0.append(val[0])
         index += 1
-        val = ExtractFloat(a[index])                  #SIG3K
+        val = self.ExtractFloat(a[index])                  #SIG3K
         integer.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
         index += 1
-        val = ExtractFloat(a[index])                  #SIG1K
+        val = self.ExtractFloat(a[index])                  #SIG1K
         fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
         index += 1
-        be = ExtractFloat(a[index])                  #EXPBET
+        be = self.ExtractFloat(a[index])                  #EXPBET
         index += 1
-        val = ExtractFloat(a[index])                  #SIG2K
+        val = self.ExtractFloat(a[index])                  #SIG2K
         be.append(math.sqrt(math.fabs(val[0])+1.0e-20))
         index += 1
         return index, Q, int0 ,fw , integer, be                                      #values as list
@@ -590,7 +589,7 @@ class BayesQuasi(PythonAlgorithm):
             amplitude_data, width_data = [], []
             amplitude_error, width_error  = [], []
 
-            #read data from file output by fortran code
+            #read data from file output by Fortran code
             file_name = sname + '.ql' +str(nl)
             x_data, peak_data, peak_error = self._read_ql_file(file_name, nl)
             x_data = np.asarray(x_data)
@@ -616,7 +615,7 @@ class BayesQuasi(PythonAlgorithm):
                 y.append(width)
                 y.append(EISF)
 
-            #iterlace amplitude and width errors of the peaks
+            #interlace amplitude and width errors of the peaks
             e.append(np.asarray(height_error))
             for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
                 e.append(amp)
@@ -647,16 +646,16 @@ class BayesQuasi(PythonAlgorithm):
         #yield a list of floats from a list of lines of text
         #encapsulates the iteration over a block of lines
         for line in block:
-            yield ExtractFloat(line)
+            yield self.ExtractFloat(line)
 
     def _read_ql_file(self, file_name, nl):
-        #offet to ignore header
+        #offset to ignore header
         header_offset = 8
         block_size = 4+nl*3
 
         asc = self._read_ascii_file(file_name)
         #extract number of blocks from the file header
-        num_blocks = int(ExtractFloat(asc[3])[0])
+        num_blocks = int(self.ExtractFloat(asc[3])[0])
 
         q_data = []
         amp_data, FWHM_data, height_data = [], [], []
@@ -721,6 +720,148 @@ class BayesQuasi(PythonAlgorithm):
             height_error.append(block_height_e)
 
         return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
+
+    def CheckXrange(self, x_range, range_type):
+        if not ((len(x_range) == 2) or (len(x_range) == 4)):
+            raise ValueError(range_type + ' - Range must contain either 2 or 4 numbers')
+
+        for lower, upper in zip(x_range[::2], x_range[1::2]):
+            if math.fabs(lower) < 1e-5:
+                raise ValueError('%s - input minimum (%f) is zero' % (range_type, lower))
+            if math.fabs(upper) < 1e-5:
+                raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
+            if upper < lower:
+                raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
+
+    def CheckAnalysers(self, in1WS, in2WS):
+        """
+        Check workspaces have identical analysers and reflections
+        Args:
+        @param in1WS - first 2D workspace
+        @param in2WS - second 2D workspace
+        Returns:
+        @return None
+        Raises:
+        @exception ValueError - workspaces have different analysers
+        @exception ValueError - workspaces have different reflections
+        """
+        ws1 = s_api.mtd[in1WS]
+        try:
+            analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+            reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+        except IndexError:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
+        ws2 = s_api.mtd[in2WS]
+        try:
+            analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+            reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+        except:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+
+        if analyser_1 != analyser_2:
+            raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+        elif reflection_1 != reflection_2:
+            raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
+        else:
+            logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+
+    def CheckHistZero(self, inWS):
+        """
+        Retrieves basic info on a workspace
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+        Args:
+          @param inWS  2D workspace
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+               boundaries minus one. It is assumed all histograms have the same
+               number of X-points.
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        x_in = s_api.mtd[inWS].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO points')
+        return num_hist, ntc
+
+    def CheckHistSame(self, in1WS, name1, in2WS, name2):
+        """
+        Check workspaces have same number of histograms and bin boundaries
+        Args:
+          @param in1WS - first 2D workspace
+          @param name1 - single-word descriptor of first 2D workspace
+          @param in2WS - second 2D workspace
+          @param name2 - single-word descriptor of second 2D workspace
+        Returns:
+          @return None
+        Raises:
+          ValueError: number of histograms is different
+          ValueError: number of bin boundaries in the histograms is different
+        """
+        num_hist_1 = s_api.mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
+        x_1 = s_api.mtd[in1WS].readX(0)
+        x_len_1 = len(x_1)
+        num_hist_2 = s_api.mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
+        x_2 = s_api.mtd[in2WS].readX(0)
+        x_len_2 = len(x_2)
+        if num_hist_1 != num_hist_2:  # Check that no. groups are the same
+            error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
+            error_2 = '%s (%s) histograms (%d)' % (name2, in2WS, num_hist_2)
+            error = error_1 + ' not = ' + error_2
+            raise ValueError(error)
+        elif x_len_1 != x_len_2:
+            error_1 = '%s (%s) array length (%d)' % (name1, in1WS, x_len_1)
+            error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
+            error = error_1 + ' not = ' + error_2
+            raise ValueError(error)
+
+    def ExtractFloat(self, data_string):
+        """
+        Extract float values from an ASCII string
+        """
+        values = data_string.split()
+        values = [float(v) for v in values]
+        return values
+
+    def IdentifyDataBoundaries(self, sample_ws):
+        """
+        Identifies and returns the first and last no zero data point in a workspace
+        For multiple workspace spectra, the data points that are closest to the centre
+        out of all the spectra in the workspace are returned
+        """
+
+        sample_ws = s_api.mtd[sample_ws]
+        nhists = sample_ws.getNumberHistograms()
+        start_data_idx, end_data_idx = 0,0
+        # For all spectra in the workspace
+        for spectra in range(0, nhists):
+            # Obtain first and last non zero values
+            y_data = sample_ws.readY(spectra)
+            spectra_start_data = self.firstNonZero(y_data)
+            spectra_end_data = self.firstNonZero(list(reversed(y_data)))
+            # Replace workspace start and end if data is closer to the center
+            if spectra_start_data > start_data_idx:
+                start_data_idx = spectra_start_data
+            if spectra_end_data > end_data_idx:
+                end_data_idx = spectra_end_data
+        # Convert Bin index to data value
+        x_data = sample_ws.readX(0)
+        first_data_point = x_data[start_data_idx]
+        last_data_point = x_data[len(x_data) - end_data_idx - 2]
+        return first_data_point, last_data_point
+
+    def firstNonZero(self, data):
+        """
+        Returns the index of the first non zero value in the list
+        """
+        for i in range(len(data)):
+            if data[i] != 0:
+                return i
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)

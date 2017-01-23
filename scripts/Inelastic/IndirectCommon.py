@@ -6,7 +6,6 @@ import mantid.simpleapi as s_api
 from mantid import config, logger
 
 
-import os.path
 import math
 import datetime
 import re
@@ -25,15 +24,11 @@ def EndTime(prog):
     logger.notice('----------')
 
 
-def get_run_number(ws_name):
+def getInstrRun(ws_name):
     """
-    Gets the run number for a given workspace.
-
-    Attempts to get from logs and falls back to parsing the workspace name for
-    something that looks like a run number.
-
-    @param ws_name Name of workspace
-    @return Parsed run number
+    Get the instrument name and run number from a workspace.
+    @param ws_name - name of the workspace
+    @return tuple of form (instrument, run number)
     """
 
     workspace = s_api.mtd[ws_name]
@@ -45,19 +40,6 @@ def get_run_number(ws_name):
             run_number = match.group(2)
         else:
             raise RuntimeError("Could not find run number associated with workspace.")
-
-    return run_number
-
-
-def getInstrRun(ws_name):
-    """
-    Get the instrument name and run number from a workspace.
-
-    @param ws_name - name of the workspace
-    @return tuple of form (instrument, run number)
-    """
-
-    run_number = get_run_number(ws_name)
 
     instrument = s_api.mtd[ws_name].getInstrument().getName()
     if instrument != '':
@@ -125,57 +107,6 @@ def getEfixed(workspace):
     raise ValueError('No Efixed parameter found')
 
 
-def checkUnitIs(ws, unit_id, axis_index=0):
-    """
-    Check that the workspace has the correct units by comparing
-    against the UnitID.
-    """
-    axis = s_api.mtd[ws].getAxis(axis_index)
-    unit = axis.getUnit()
-    return unit.unitID() == unit_id
-
-
-def getDefaultWorkingDirectory():
-    """
-    Get the default save directory and check it's valid.
-    """
-    workdir = config['defaultsave.directory']
-
-    if not os.path.isdir(workdir):
-        raise IOError("Default save directory is not a valid path!")
-
-    return workdir
-
-
-def createQaxis(inputWS):
-    result = []
-    workspace = s_api.mtd[inputWS]
-    num_hist = workspace.getNumberHistograms()
-    if workspace.getAxis(1).isSpectra():
-        inst = workspace.getInstrument()
-        sample_pos = inst.getSample().getPos()
-        beam_pos = sample_pos - inst.getSource().getPos()
-        for i in range(0, num_hist):
-            efixed = getEfixed(inputWS)
-            detector = workspace.getDetector(i)
-            theta = detector.getTwoTheta(sample_pos, beam_pos) / 2
-            lamda = math.sqrt(81.787 / efixed)
-            q = 4 * math.pi * math.sin(theta) / lamda
-            result.append(q)
-    else:
-        axis = workspace.getAxis(1)
-        msg = 'Creating Axis based on Detector Q value: '
-        if not axis.isNumeric():
-            msg += 'Input workspace must have either spectra or numeric axis.'
-            raise ValueError(msg)
-        if axis.getUnit().unitID() != 'MomentumTransfer':
-            msg += 'Input must have axis values of Q'
-            raise ValueError(msg)
-        for i in range(0, num_hist):
-            result.append(float(axis.label(i)))
-    return result
-
-
 def GetWSangles(inWS):
     num_hist = s_api.mtd[inWS].getNumberHistograms()  # get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
@@ -225,24 +156,6 @@ def GetThetaQ(ws):
     return theta, q
 
 
-def ExtractFloat(data_string):
-    """
-    Extract float values from an ASCII string
-    """
-    values = data_string.split()
-    values = [float(v) for v in values]
-    return values
-
-
-def ExtractInt(data_string):
-    """
-    Extract int values from an ASCII string
-    """
-    values = data_string.split()
-    values = [int(v) for v in values]
-    return values
-
-
 def PadArray(inarray, nfixed):
     """
     Pad a list to specified size.
@@ -253,119 +166,6 @@ def PadArray(inarray, nfixed):
     outarray.extend(inarray)
     outarray += [0] * padding
     return outarray
-
-
-def CheckAnalysers(in1WS, in2WS):
-    """
-    Check workspaces have identical analysers and reflections
-
-    Args:
-      @param in1WS - first 2D workspace
-      @param in2WS - second 2D workspace
-
-    Returns:
-      @return None
-
-    Raises:
-      @exception Valuerror - workspaces have different analysers
-      @exception Valuerror - workspaces have different reflections
-    """
-    ws1 = s_api.mtd[in1WS]
-    try:
-        analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
-        reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
-    except IndexError:
-        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
-    ws2 = s_api.mtd[in2WS]
-    try:
-        analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
-        reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
-    except:
-        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
-
-    if analyser_1 != analyser_2:
-        raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
-    elif reflection_1 != reflection_2:
-        raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
-    else:
-        logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
-
-
-def CheckHistZero(inWS):
-    """
-    Retrieves basic info on a worskspace
-
-    Checks the workspace is not empty, then returns the number of histogram and
-    the number of X-points, which is the number of bin boundaries minus one
-
-    Args:
-      @param inWS  2D workspace
-
-    Returns:
-      @return num_hist - number of histograms in the workspace
-      @return ntc - number of X-points in the first histogram, which is the number of bin
-           boundaries minus one. It is assumed all histograms have the same
-           number of X-points.
-
-    Raises:
-      @exception ValueError - Worskpace has no histograms
-    """
-    num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
-    if num_hist == 0:
-        raise ValueError('Workspace ' + inWS + ' has NO histograms')
-    x_in = s_api.mtd[inWS].readX(0)
-    ntc = len(x_in) - 1  # no. points from length of x array
-    if ntc == 0:
-        raise ValueError('Workspace ' + inWS + ' has NO points')
-    return num_hist, ntc
-
-
-def CheckHistSame(in1WS, name1, in2WS, name2):
-    """
-    Check workspaces have same number of histograms and bin boundaries
-
-    Args:
-      @param in1WS - first 2D workspace
-      @param name1 - single-word descriptor of first 2D workspace
-      @param in2WS - second 2D workspace
-      @param name2 - single-word descriptor of second 2D workspace
-
-    Returns:
-      @return None
-
-    Raises:
-      Valuerror: number of histograms is different
-      Valuerror: number of bin boundaries in the histograms is different
-    """
-    num_hist_1 = s_api.mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
-    x_1 = s_api.mtd[in1WS].readX(0)
-    x_len_1 = len(x_1)
-    num_hist_2 = s_api.mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
-    x_2 = s_api.mtd[in2WS].readX(0)
-    x_len_2 = len(x_2)
-    if num_hist_1 != num_hist_2:  # Check that no. groups are the same
-        error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
-        error_2 = '%s (%s) histograms (%d)' % (name2, in2WS, num_hist_2)
-        error = error_1 + ' not = ' + error_2
-        raise ValueError(error)
-    elif x_len_1 != x_len_2:
-        error_1 = '%s (%s) array length (%d)' % (name1, in1WS, x_len_1)
-        error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
-        error = error_1 + ' not = ' + error_2
-        raise ValueError(error)
-
-
-def CheckXrange(x_range, range_type):
-    if not ((len(x_range) == 2) or (len(x_range) == 4)):
-        raise ValueError(range_type + ' - Range must contain either 2 or 4 numbers')
-
-    for lower, upper in zip(x_range[::2], x_range[1::2]):
-        if math.fabs(lower) < 1e-5:
-            raise ValueError('%s - input minimum (%f) is zero' % (range_type, lower))
-        if math.fabs(upper) < 1e-5:
-            raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
-        if upper < lower:
-            raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
 
 
 def CheckElimits(erange, Xin):
@@ -393,7 +193,7 @@ def getInstrumentParameter(ws, param_name):
     inst = s_api.mtd[ws].getInstrument()
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
-    # if statements becuase there's no way to dynamically get the type.
+    # if statements because there's no way to dynamically get the type.
     func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
                 'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
 
@@ -407,118 +207,3 @@ def getInstrumentParameter(ws, param_name):
         raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
 
     return param
-
-
-def convertToElasticQ(input_ws, output_ws=None):
-    """
-    Helper function to convert the spectrum axis of a sample to ElasticQ.
-
-    @param input_ws - the name of the workspace to convert from
-    @param output_ws - the name to call the converted workspace
-    """
-
-    if output_ws is None:
-        output_ws = input_ws
-
-    axis = s_api.mtd[input_ws].getAxis(1)
-    if axis.isSpectra():
-        e_fixed = getEfixed(input_ws)
-        s_api.ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
-                                  OutputWorkspace=output_ws)
-
-    elif axis.isNumeric():
-        # Check that units are Momentum Transfer
-        if axis.getUnit().unitID() != 'MomentumTransfer':
-            raise RuntimeError('Input must have axis values of Q')
-
-        s_api.CloneWorkspace(input_ws, OutputWorkspace=output_ws)
-
-    else:
-        raise RuntimeError('Input workspace must have either spectra or numeric axis.')
-
-
-def transposeFitParametersTable(params_table, output_table=None):
-    """
-    Transpose the parameter table created from a multi domain Fit.
-
-    This function will make the output consistent with PlotPeakByLogValue.
-    @param params_table - the parameter table output from Fit.
-    @param output_table - name to call the transposed table. If omitted,
-            the output_table will be the same as the params_table
-    """
-    params_table = s_api.mtd[params_table]
-
-    table_ws = '__tmp_table_ws'
-    table_ws = s_api.CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
-
-    param_names = params_table.column(0)[:-1]  # -1 to remove cost function
-    param_values = params_table.column(1)[:-1]
-    param_errors = params_table.column(2)[:-1]
-
-    # Find the number of parameters per function
-    func_index = param_names[0].split('.')[0]
-    num_params = 0
-    for i, name in enumerate(param_names):
-        if name.split('.')[0] != func_index:
-            num_params = i
-            break
-
-    # Create columns with parameter names for headers
-    column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
-    column_error_names = [name + '_Err' for name in column_names]
-    column_names = list(zip(column_names, column_error_names))
-    table_ws.addColumn('double', 'axis-1')
-    for name, error_name in column_names:
-        table_ws.addColumn('double', name)
-        table_ws.addColumn('double', error_name)
-
-    # Output parameter values to table row
-    for i in range(0, params_table.rowCount() - 1, num_params):
-        row_values = param_values[i:i + num_params]
-        row_errors = param_errors[i:i + num_params]
-        row = [value for pair in zip(row_values, row_errors) for value in pair]
-        row = [i / num_params] + row
-        table_ws.addRow(row)
-
-    if output_table is None:
-        output_table = params_table.name()
-
-    s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
-
-
-def IndentifyDataBoundaries(sample_ws):
-    """
-    Indentifies and returns the first and last no zero data point in a workspace
-
-    For multiple workspace spectra, the data points that are closest to the centre
-    out of all the spectra in the workspace are returned
-    """
-
-    sample_ws = s_api.mtd[sample_ws]
-    nhists = sample_ws.getNumberHistograms()
-    start_data_idx, end_data_idx = 0, 0
-    # For all spectra in the workspace
-    for spectra in range(0, nhists):
-        # Obtain first and last non zero values
-        y_data = sample_ws.readY(spectra)
-        spectra_start_data = firstNonZero(y_data)
-        spectra_end_data = firstNonZero(list(reversed(y_data)))
-        # Replace workspace start and end if data is closer to the center
-        if spectra_start_data > start_data_idx:
-            start_data_idx = spectra_start_data
-        if spectra_end_data > end_data_idx:
-            end_data_idx = spectra_end_data
-    # Convert Bin index to data value
-    x_data = sample_ws.readX(0)
-    first_data_point = x_data[start_data_idx]
-    last_data_point = x_data[len(x_data) - end_data_idx - 2]
-    return first_data_point, last_data_point
-
-
-def firstNonZero(data):
-    """
-    Returns the index of the first non zero value in the list
-    """
-    for i in range(len(data)):
-        if data[i] != 0:
-            return i

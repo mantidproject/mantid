@@ -7,11 +7,12 @@ Force for ILL backscattering raw
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
+
 import sys
 import math
 import os.path
 import numpy as np
-from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfixed
+from IndirectCommon import StartTime, EndTime, getEfixed
 
 MTD_PLOT = import_mantidplot()
 
@@ -477,6 +478,7 @@ def RunParas(ascWS, _instr, run, title):
 def IN13Start(instr, run, ana, refl, _rejectZ, _useM, _mapPath, Plot, Save):  # Ascii start routine
     StartTime('IN13')
     IN13Read(instr, run, ana, refl, Plot, Save)
+
     EndTime('IN13')
 
 
@@ -496,6 +498,7 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     instr = text[:4]
     next, Ival = Iblock(asc, 5)
     nsubsp = Ival[0]
+
     nspec = Ival[153] - 2
     # text block
     text = asc[25]
@@ -507,7 +510,7 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     ltemp = int(f1)
     f2 = f1 - 10 * ltemp
     if f2 >= 0.:
-        ltemp = ltemp + 1
+        ltemp += 1
     wave = 2.0 * Fval[81]
 
     logger.information('No. sub-spectra : ' + str(nsubsp))
@@ -622,3 +625,21 @@ def IN13Paras(ascWS, run, title, wave):
     runTitle = ws.getRun()['run_title'].value.strip()
     logger.information('Run : ' + runNo + ' ; Title : ' + runTitle)
     logger.information('Wavelength : ' + str(wave))
+
+
+def ExtractFloat(data_string):
+    """
+    Extract float values from an ASCII string
+    """
+    values = data_string.split()
+    values = [float(v) for v in values]
+    return values
+
+
+def ExtractInt(data_string):
+    """
+    Extract int values from an ASCII string
+    """
+    values = data_string.split()
+    values = [int(v) for v in values]
+    return values

@@ -122,7 +122,7 @@ class TransformToIqt(PythonAlgorithm):
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
         workflow_prog = Progress(self, start=0.0, end=0.3, nreports=8)
-        workflow_prog.report('Croping Workspace')
+        workflow_prog.report('Cropping Workspace')
         CropWorkspace(InputWorkspace=self._sample,
                       OutputWorkspace='__TransformToIqt_sample_cropped',
                       Xmin=self._e_min,
@@ -133,7 +133,7 @@ class TransformToIqt(PythonAlgorithm):
         num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
-        workflow_prog.report('Attemping to Access IPF')
+        workflow_prog.report('Attempting to Access IPF')
         try:
             workflow_prog.report('Access IPF')
             instrument = mtd[self._sample].getInstrument()
@@ -200,10 +200,9 @@ class TransformToIqt(PythonAlgorithm):
         """
         Run TransformToIqt.
         """
-        from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
         trans_prog = Progress(self, start=0.3, end=0.8, nreports=15)
         try:
-            CheckAnalysers(self._sample, self._resolution)
+            self.CheckAnalysers(self._sample, self._resolution)
         except ValueError:
             # A genuine error the shows that the two runs are incompatible
             raise
@@ -212,9 +211,9 @@ class TransformToIqt(PythonAlgorithm):
             logger.warning('Could not check for matching analyser and reflection')
 
         # Process resolution data
-        num_res_hist = CheckHistZero(self._resolution)[0]
+        num_res_hist = self.CheckHistZero(self._resolution)[0]
         if num_res_hist > 1:
-            CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
+            self.CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
         rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
         trans_prog.report('Rebinning Workspace')
@@ -244,7 +243,7 @@ class TransformToIqt(PythonAlgorithm):
                OutputWorkspace='__sam')
 
         # Resolution
-        trans_prog.report('Rebinnig Resolution')
+        trans_prog.report('Rebinning Resolution')
         Rebin(InputWorkspace=self._resolution,
               OutputWorkspace='__res_data',
               Params=rebin_param)
@@ -254,7 +253,7 @@ class TransformToIqt(PythonAlgorithm):
         trans_prog.report('Converting Resolution to data points')
         ConvertToPointData(InputWorkspace='__res_data',
                            OutputWorkspace='__res_data')
-        trans_prog.report('Extractig FFT Resolution spectrum')
+        trans_prog.report('Extracting FFT Resolution spectrum')
         ExtractFFTSpectrum(InputWorkspace='__res_data',
                            OutputWorkspace='__res_fft',
                            FFTPart=2)
@@ -294,6 +293,92 @@ class TransformToIqt(PythonAlgorithm):
         DeleteWorkspace('__res_fft')
         DeleteWorkspace('__res')
 
+    def CheckAnalysers(self, in1WS, in2WS):
+        """
+        Check workspaces have identical analysers and reflections
+        Args:
+        @param in1WS - first 2D workspace
+        @param in2WS - second 2D workspace
+        Returns:
+        @return None
+        Raises:
+        @exception ValueError - workspaces have different analysers
+        @exception ValueError - workspaces have different reflections
+        """
+        ws1 = mtd[in1WS]
+        try:
+            analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+            reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+        except IndexError:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
+        ws2 = mtd[in2WS]
+        try:
+            analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+            reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+        except:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+
+        if analyser_1 != analyser_2:
+            raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+        elif reflection_1 != reflection_2:
+            raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
+        else:
+            logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+
+    def CheckHistZero(self, inWS):
+        """
+        Retrieves basic info on a workspace
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+        Args:
+          @param inWS  2D workspace
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+               boundaries minus one. It is assumed all histograms have the same
+               number of X-points.
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        x_in = mtd[inWS].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO points')
+        return num_hist, ntc
+
+    def CheckHistSame(self, in1WS, name1, in2WS, name2):
+        """
+        Check workspaces have same number of histograms and bin boundaries
+        Args:
+          @param in1WS - first 2D workspace
+          @param name1 - single-word descriptor of first 2D workspace
+          @param in2WS - second 2D workspace
+          @param name2 - single-word descriptor of second 2D workspace
+        Returns:
+          @return None
+        Raises:
+          ValueError: number of histograms is different
+          ValueError: number of bin boundaries in the histograms is different
+        """
+        num_hist_1 = mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
+        x_1 = mtd[in1WS].readX(0)
+        x_len_1 = len(x_1)
+        num_hist_2 = mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
+        x_2 = mtd[in2WS].readX(0)
+        x_len_2 = len(x_2)
+        if num_hist_1 != num_hist_2:  # Check that no. groups are the same
+            error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
+            error_2 = '%s (%s) histograms (%d)' % (name2, in2WS, num_hist_2)
+            error = error_1 + ' not = ' + error_2
+            raise ValueError(error)
+        elif x_len_1 != x_len_2:
+            error_1 = '%s (%s) array length (%d)' % (name1, in1WS, x_len_1)
+            error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
+            error = error_1 + ' not = ' + error_2
+            raise ValueError(error)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(TransformToIqt)

@@ -9,6 +9,7 @@ import mantid.simpleapi as s_api
 from mantid import config, logger
 import os
 import numpy as np
+import math
 
 if is_supported_f2py_platform():
     Que     = import_f2py("Quest")
@@ -101,7 +102,7 @@ class BayesStretch(PythonAlgorithm):
         run_f2py_compatibility_test()
 
         from IndirectBayes import (CalcErange, GetXYE)
-        from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ, CheckHistZero)
+        from IndirectCommon import (getEfixed, GetThetaQ)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         logger.information('BayesStretch input')
         logger.information('Sample is %s' % self._sam_name)
@@ -114,16 +115,16 @@ class BayesStretch(PythonAlgorithm):
         workdir = self._establish_save_path()
 
         setup_prog.report('Checking X Range')
-        CheckXrange(self._erange, 'Energy')
+        self.CheckXrange(self._erange, 'Energy')
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._sam_name, self._res_name)
+        self.CheckAnalysers(self._sam_name, self._res_name)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._sam_name)
         theta, Q = GetThetaQ(self._sam_name)
 
         setup_prog.report('Checking Histograms')
-        nsam,ntc = CheckHistZero(self._sam_name)
+        nsam,ntc = self.CheckHistZero(self._sam_name)
 
         #check if we're performing a sequential fit
         if not self._loop:
@@ -237,7 +238,7 @@ class BayesStretch(PythonAlgorithm):
 
         log_prog.report('Adding sample logs to Contour workspace')
         self._add_sample_logs(contour_ws, self._erange, self._nbins[0])
-        log_prog.report('Finialising log copying')
+        log_prog.report('Finalising log copying')
 
         self.setProperty('OutputWorkspaceFit', fit_ws)
         self.setProperty('OutputWorkspaceContour', contour_ws)
@@ -342,5 +343,72 @@ class BayesStretch(PythonAlgorithm):
         # [sample_bins, resNorm_bins=1]
         self._nbins = [self._sam_bins, 1]
 
+    def CheckXrange(self, x_range, range_type):
+        if not ((len(x_range) == 2) or (len(x_range) == 4)):
+            raise ValueError(range_type + ' - Range must contain either 2 or 4 numbers')
+
+        for lower, upper in zip(x_range[::2], x_range[1::2]):
+            if math.fabs(lower) < 1e-5:
+                raise ValueError('%s - input minimum (%f) is zero' % (range_type, lower))
+            if math.fabs(upper) < 1e-5:
+                raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
+            if upper < lower:
+                raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
+
+    def CheckAnalysers(self, in1WS, in2WS):
+        """
+        Check workspaces have identical analysers and reflections
+        Args:
+        @param in1WS - first 2D workspace
+        @param in2WS - second 2D workspace
+        Returns:
+        @return None
+        Raises:
+        @exception ValueError - workspaces have different analysers
+        @exception ValueError - workspaces have different reflections
+        """
+        ws1 = s_api.mtd[in1WS]
+        try:
+            analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+            reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+        except IndexError:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
+        ws2 = s_api.mtd[in2WS]
+        try:
+            analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+            reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+        except:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+
+        if analyser_1 != analyser_2:
+            raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+        elif reflection_1 != reflection_2:
+            raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
+        else:
+            logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+
+    def CheckHistZero(self, inWS):
+        """
+        Retrieves basic info on a workspace
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+        Args:
+          @param inWS  2D workspace
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+               boundaries minus one. It is assumed all histograms have the same
+               number of X-points.
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        x_in = s_api.mtd[inWS].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO points')
+        return num_hist, ntc
 
 AlgorithmFactory.subscribe(BayesStretch)         # Register algorithm with Mantid

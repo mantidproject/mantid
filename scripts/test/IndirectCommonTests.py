@@ -21,26 +21,6 @@ class IndirectCommonTests(unittest.TestCase):
     def tearDown(self):
         config = self._config_defaults
 
-    def test_getInstrRun_from_name(self):
-        ws = self.make_dummy_QENS_workspace()
-        (instrument, run_number) = indirect_common.getInstrRun(ws)
-
-        self.assertEqual(run_number, '1')
-        self.assertEqual(instrument, 'irs')
-
-    def test_getInstrRun_from_workspace(self):
-        ws = self.make_dummy_QENS_workspace(add_logs=False)
-        ws = RenameWorkspace(ws, OutputWorkspace="IRS26173")
-
-        (instrument, run_number) = indirect_common.getInstrRun(ws.name())
-
-        self.assertEqual(run_number, '26173')
-        self.assertEqual(instrument, 'irs')
-
-    def test_getInstrRun_failure(self):
-        ws = self.make_dummy_QENS_workspace(add_logs=False)
-        self.assertRaises(RuntimeError, indirect_common.getInstrRun, ws)
-
     def test_getWSprefix_ISIS(self):
         config['default.facility'] = 'ISIS'
         ws = self.make_dummy_QENS_workspace()
@@ -71,22 +51,6 @@ class IndirectCommonTests(unittest.TestCase):
         ws = CreateSampleWorkspace()
         self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
 
-    def test_getDefaultWorkingDirectory(self):
-        config['defaultsave.directory'] = os.path.expanduser('~')
-        workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEquals(os.path.expanduser('~'), workdir,
-                          "The working directory does not match the expected one")
-
-    def test_getDefaultWorkingDirectory_failure(self):
-        config['defaultsave.directory'] = ''
-        self.assertRaises(IOError, indirect_common.getDefaultWorkingDirectory)
-
-    def test_createQaxis(self):
-        ws = self.make_dummy_QENS_workspace()
-        expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526, 0.6487809073399486]
-        actual_result = indirect_common.createQaxis(ws)
-        self.assert_lists_almost_match(expected_result, actual_result)
-
     def test_GetWSangles(self):
         ws = self.make_dummy_QENS_workspace()
         expected_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
@@ -101,89 +65,11 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
 
-    def test_ExtractFloat(self):
-        data = "0.0 1 .2 3e-3 4.3 -5.5 6.0"
-        expected_result = [0, 1, 0.2, 3e-3, 4.3, -5.5, 6.0]
-        actual_result = indirect_common.ExtractFloat(data)
-        self.assert_lists_almost_match(expected_result, actual_result)
-
-    def test_ExtractInt(self):
-        data = "-2 -1 0 1 2 3 4 5"
-        expected_result = [-2, -1, 0, 1, 2, 3, 4, 5]
-        actual_result = indirect_common.ExtractInt(data)
-        self.assert_lists_match(expected_result, actual_result)
-
     def test_PadArray(self):
         data = [0,1,2,3,4,5]
         expected_result = [0,1,2,3,4,5,0,0,0,0]
         actual_result = indirect_common.PadArray(data, 10)
         self.assert_lists_match(expected_result, actual_result)
-
-    def test_CheckAnalysers(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
-        ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
-
-        self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
-
-    def test_CheckAnalysers_fails_on_analyser_mismatch(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name="ws1", analyser='graphite')
-        ws2 = self.make_dummy_QENS_workspace(output_name="ws2", analyser='fmica')
-
-        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
-
-    def test_CheckAnalysers_fails_on_reflection_mismatch(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name="ws1", reflection='002')
-        ws2 = self.make_dummy_QENS_workspace(output_name="ws2", reflection='004')
-
-        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
-
-    def test_CheckAnalysers_raises_runtimeError_with_no_inst_data(self):
-        ws1 = self.make_dummy_workspace_without_instrument('test_ws1')
-        ws2 = self.make_dummy_workspace_without_instrument('test_ws2')
-        self.assertRaises(RuntimeError, indirect_common.CheckAnalysers, ws1, ws2)
-
-    def test_CheckHistZero(self):
-        ws = self.make_dummy_QENS_workspace()
-        self.assert_does_not_raise(ValueError, indirect_common.CheckHistZero, ws)
-
-    def test_CheckHistSame(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
-        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
-        self.assert_does_not_raise(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
-
-    def test_CheckHistSame_fails_on_x_range_mismatch(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
-        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
-        CropWorkspace(ws2, XMin=10, OutputWorkspace=ws2)
-
-        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
-
-    def test_CheckHistSame_fails_on_spectrum_range_mismatch(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
-        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
-        CropWorkspace(ws2, StartWorkspaceIndex=2, OutputWorkspace=ws2)
-
-        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
-
-    def test_CheckXrange(self):
-        x_range = [1,10]
-        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_with_two_ranges(self):
-        x_range = [1,10,15,20]
-        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_lower_close_to_zero(self):
-        x_range = [-5,0]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_upper_close_to_zero(self):
-        x_range = [0,5]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_invalid_range(self):
-        x_range = [10,5]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
 
     def test_CheckElimits(self):
         energy_range = [-0.5, 0.5]
@@ -204,63 +90,6 @@ class IndirectCommonTests(unittest.TestCase):
         energy_range = [0.5, -0.5]
         x_range = np.arange(-0.5, 0.51, 0.01)
         self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
-
-    def test_convertToElasticQ(self):
-        ws = self.make_dummy_QENS_workspace()
-        indirect_common.convertToElasticQ(ws)
-        self.assert_workspace_units_match_expected('MomentumTransfer', ws)
-        self.assert_has_numeric_axis(ws)
-
-    def test_convertToElasticQ_output_in_different_workspace(self):
-        ws = self.make_dummy_QENS_workspace()
-        output_workspace = 'ws2'
-        indirect_common.convertToElasticQ(ws, output_ws=output_workspace)
-
-        #check original wasn't modified
-        self.assert_workspace_units_match_expected('Label', ws)
-        self.assert_has_spectrum_axis(ws)
-
-        #check new workspace matches what we expect
-        self.assert_workspace_units_match_expected('MomentumTransfer', output_workspace)
-        self.assert_has_numeric_axis(output_workspace)
-
-    def test_convertToElasticQ_workspace_already_in_Q(self):
-        ws = self.make_dummy_QENS_workspace()
-        e_fixed = indirect_common.getEfixed(ws)
-        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
-
-        indirect_common.convertToElasticQ(ws)
-
-        self.assert_workspace_units_match_expected('MomentumTransfer', ws)
-        self.assert_has_numeric_axis(ws)
-
-    def test_convertToElasticQ_with_numeric_axis_not_in_Q(self):
-        ws = self.make_dummy_QENS_workspace()
-
-        #convert spectrum axis to units of Q
-        e_fixed = indirect_common.getEfixed(ws)
-        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
-        #set the units to be something we didn't expect
-        unit = mtd[ws].getAxis(1).setUnit("Label")
-        unit.setLabel('Random Units', '')
-
-        self.assertRaises(RuntimeError, indirect_common.convertToElasticQ, ws)
-
-    def test_transposeFitParametersTable(self):
-        ws = self.make_dummy_QENS_workspace()
-        params_table = self.make_multi_domain_parameter_table(ws)
-        indirect_common.transposeFitParametersTable(params_table)
-        self.assert_table_workspace_dimensions(params_table, expected_row_count=5, expected_column_count=11)
-
-    def test_transposeFitParametersTable_rename_output(self):
-        ws = self.make_dummy_QENS_workspace()
-        params_table = self.make_multi_domain_parameter_table(ws)
-        output_name = "new_table"
-
-        indirect_common.transposeFitParametersTable(params_table, output_name)
-
-        self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
-        self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)
 
     #-----------------------------------------------------------
     # Custom assertion functions
