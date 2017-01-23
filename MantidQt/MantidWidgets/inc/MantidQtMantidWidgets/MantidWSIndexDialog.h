@@ -282,6 +282,8 @@ public:
   bool isTiledPlotSelected() const;
   /// Returns whether surface plot is selected
   bool isSurfacePlotSelected() const;
+  /// Returns whether contour plot is selected
+  bool isContourPlotSelected() const;
   /// Returns whether the error bars option has been selected
   bool isErrorBarsSelected() const;
 
@@ -363,6 +365,8 @@ public:
   bool isTiledPlotSelected() const;
   /// Returns whether surface plot is selected
   bool isSurfacePlotSelected() const;
+  /// Returns whether surface plot is selected
+  bool isContourPlotSelected() const;
   /// Returns whether error bars have been selected
   bool isErrorBarsSelected() const;
 private slots:
