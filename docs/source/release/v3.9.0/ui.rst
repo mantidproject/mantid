@@ -76,7 +76,6 @@ SliceViewer Improvements
 ------------------------
 
  - Added ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled, peak viewer and line vewer tools are disabled.
- 
 .. figure:: ../../images/sliceViewerNonOrthogonal.png
    :class: screenshot
    :width: 450px
