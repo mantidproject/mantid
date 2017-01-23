@@ -12,9 +12,9 @@ User Interface
 Instrument View
 ###############
 
- - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
- - Added the ability to drag and drop mask workspaces onto the instrument view. This will apply the store workspace to the view.
- - Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views. 
+- New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
+- Added the ability to drag and drop mask workspaces onto the instrument view. This will apply the store workspace to the view.
+- Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views. 
 
 Plotting Improvements
 #####################
@@ -37,7 +37,7 @@ Algorithm Toolbox
 Python
 ######
 
-- ParaView's python scripting interface is available from within MantidPlot and mantidpython. Type `from paraview.simple import *` to get started. Additional documentation is available `here<http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
+- ParaView's python scripting interface is available from within MantidPlot and mantidpython. Type `from paraview.simple import *` to get started. Additional documentation is available `here <http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
 
 Custom Interfaces
 -----------------
@@ -49,7 +49,8 @@ SliceViewer Improvements
 ------------------------
 
 - Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
-.. figure:: ../../images/sliceViewerNonOrthogonal.png
+
+.. figure:: ../../images/SliceViewerNonOrthogonal.png
    :class: screenshot
    :width: 450px
    :align: right
