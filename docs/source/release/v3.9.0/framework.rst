@@ -5,12 +5,16 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+Facility Updates
+----------------
+
+- Mantid now supports automatic updates to the facilities.xml file in the same way that it does the instrument definitions.  This allows extensions and changes to the list of supported instruments without needing to install a new release of Mantid.
+  - This has been initially put into place to support a data file naming change for Vesuvio, but will help for future changes as well.
 
 Changes
 -------
 
 - Mantid is aware of the change to file naming for Vesuvio, you can continue to use EVS or VESUVIO as a prefix when trying to load files from this instrument, and Mantid will map that to the correct filenames.
-
 
 Algorithms
 ----------
@@ -38,6 +42,7 @@ Improved
    - The method of selecting the scattering point has ben updated to give better agreement with numerical algorithms (e.g. :ref:`CylinderAbsorption <algm-CylinderAbsorption>`).
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
 - :ref:`MaskDetectors <algm-MaskDetectors>` has a new option to mask detectors by the instrument's component name. It can accept a masked workspace with a differing number of spectra to the input workspace, providing that the number of detectors match. This can be useful in the case of hardware grouped detectors.
+
 - :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 - :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`: The calculation of the azimuth angle has been fixed. Previously it was set equal to the Mantid definition of phi but the old code defined it as the angle away from the scattering plane.
 Renamed

@@ -1628,6 +1628,12 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
 }
 /**
  * Fills the internal cache of instrument definition directories
+ *
+ * This will normally contain from Index 0
+ * - The download directory (win %appdata%/mantidproject/mantid/instrument)
+ *   (linux $home/.mantid/instrument )
+ * - The user instrument area /etc/mantid/instrument (not on windows)
+ * - The install directory/instrument
  */
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_InstrumentDirs.clear();
@@ -1689,14 +1695,31 @@ bool ConfigServiceImpl::addDirectoryifExists(
 void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   clearFacilities();
 
-  std::string instrDir = getString("instrumentDefinition.directory");
-  std::string fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
+  // search all of the instrument directories
+  std::vector<std::string> directoryNames = getInstrumentDirectories();
+  std::string fileName = "";
+  for (const auto &instrDir : directoryNames) {
+    fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
+
+    Poco::File facilitiesFile(fileName);
+    // stop when you find the first one
+    if (facilitiesFile.exists())
+      break;
+  }
 
   // Set up the DOM parser and parse xml file
   Poco::XML::DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc;
 
   try {
+    if (fileName.empty()) {
+      std::string directoryNamesList =
+          boost::algorithm::join(directoryNames, ", ");
+      throw std::runtime_error(
+          "Could not find a facilities info file! Searched for " +
+          directoryNamesList);
+    }
+
     try {
       pDoc = pParser.parse(fileName);
     } catch (...) {
