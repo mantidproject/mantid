@@ -22,8 +22,7 @@ Data Reduction
 - :ref:`LoadILLIndirect-v2 <algm-LoadILLIndirect-v2>` now checks in the ``.nxs`` files which single detectors (SD) are enabled, and loads only those instead of all, while moving them to the correct anlge read from the file.
 - New :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` algorithm performs initial data reduction steps for IN16B instrument data at ILL.
 - New :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` algorithm performs complete multiple file reduction for Quasi-Elastic Neutron Scattering (QENS) data from IN16B instrument at ILL.
-- New :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` algorithm performs complete multiple file reduction for
-the elastic and inelastic fixed-window scan data from IN16B instrument at ILL.
+- New :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` algorithm performs complete multiple file reduction for the elastic and inelastic fixed-window scan data from IN16B instrument at ILL.
 - Deprecated :ref:`IndirectILLReduction <algm-IndirectILLReduction>` and :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithms.
 - When plotting *ConvFit* results "Two Lorentzians" will produce plots for both lorentzians
 
