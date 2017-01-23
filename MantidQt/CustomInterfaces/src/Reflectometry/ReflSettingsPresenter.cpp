@@ -319,8 +319,6 @@ void ReflSettingsPresenter::getExpDefaults() {
   if (!cPp.empty())
     defaults[5] = cPp[0];
 
-  defaults[6] = alg->getPropertyValue("ScaleFactor");
-
   m_view->setExpDefaults(defaults);
 }
 
@@ -361,8 +359,7 @@ void ReflSettingsPresenter::getInstDefaults() {
 * @return :: ReflectometryReductionOneAuto algorithm
 */
 IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
-  return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto",
-                                             1);
+  return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 }
 
 /** Creates and returns an example empty instrument given an instrument name
