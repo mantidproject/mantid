@@ -35,3 +35,6 @@ class CustomTimer(object):
 
         if self._iter == self._total:
             print()
+
+    def close(self):
+        pass

@@ -354,9 +354,8 @@ class Helper(object):
         """
         This function will do nothing if the tqdm library is not present.
         """
-        from tqdm import tqdm
 
-        if isinstance(self._progress_bar, tqdm):
+        if self._progress_bar is not None:
             self._progress_bar.close()
 
         self._progress_bar = None
