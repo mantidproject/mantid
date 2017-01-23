@@ -104,10 +104,17 @@ const std::string KafkaTopicSubscriber::topic() const { return m_topicName; }
 /**
  * Setup the connection to the broker for the configured topic
  */
-void KafkaTopicSubscriber::subscribe() {
+void KafkaTopicSubscriber::subscribe() { subscribe(IGNORE_OFFSET); }
+
+/**
+ * Setup the connection to the broker for the configured topic
+ * at a specified offset
+ * @param offset at which to start listening on topic
+ */
+void KafkaTopicSubscriber::subscribe(int64_t offset) {
   createConsumer();
   checkTopicExists();
-  subscribeAtOffset();
+  subscribeAtOffset(offset);
 }
 
 /**
@@ -157,23 +164,29 @@ void KafkaTopicSubscriber::checkTopicExists() const {
 /**
  * Subscribe to a topic at the required offset using rdkafka::assign()
  */
-void KafkaTopicSubscriber::subscribeAtOffset() const {
+void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) const {
   RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
   const int partition = 0;
-  int64_t lowOffset, highOffset = 0;
   auto topicPartition = RdKafka::TopicPartition::create(m_topicName, partition);
-  // This gets the lowest and highest offsets available on the brokers
-  m_consumer->query_watermark_offsets(m_topicName, partition, &lowOffset,
-                                      &highOffset, -1);
   // Offset of message to start at
   int64_t confOffset;
-  if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX) ||
-      endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
-    // For these topics get the last message available
-    confOffset = highOffset - 1;
+
+  if (offset == IGNORE_OFFSET) {
+    int64_t lowOffset, highOffset = 0;
+    // This gets the lowest and highest offsets available on the brokers
+    m_consumer->query_watermark_offsets(m_topicName, partition, &lowOffset,
+                                        &highOffset, -1);
+
+    if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX) ||
+        endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
+      // For these topics get the last message available
+      confOffset = highOffset - 1;
+    } else {
+      // For other topics start at the next available message
+      confOffset = highOffset;
+    }
   } else {
-    // For other topics start at the next available message
-    confOffset = highOffset;
+    confOffset = offset;
   }
   topicPartition->set_offset(confOffset);
   error = m_consumer->assign({topicPartition});

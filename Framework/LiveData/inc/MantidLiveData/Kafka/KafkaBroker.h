@@ -36,6 +36,8 @@ public:
 
   std::unique_ptr<IKafkaStreamSubscriber>
   subscribe(const std::string &topic) const override;
+  std::unique_ptr<IKafkaStreamSubscriber>
+  subscribe(const std::string &topic, int64_t offset) const override;
 
 private:
   std::string m_address;
