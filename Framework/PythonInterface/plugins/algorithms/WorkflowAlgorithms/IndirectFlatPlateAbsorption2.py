@@ -28,7 +28,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
     _can_back_thickness=None
     _can_scale=None
 
-    _element_size=None
     _output_ws=None
     _abs_ws=None
     _ass_ws=None
@@ -398,12 +397,11 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
         if default and (has_beam is False):
             default = False
-            raise ValueError("Instrument has no default beam size; will use inputs")
+            logger.error("Instrument has no default beam size; will use inputs")
 
         if default:
             self._beam_height = float(inst.getStringParameter('Workflow.beam-height')[0])
             self._beam_width = float(inst.getStringParameter('Workflow.beam-width')[0])
-            print(self._beam_height, self._beam_width)
 
     def validateInputs(self):
         """
