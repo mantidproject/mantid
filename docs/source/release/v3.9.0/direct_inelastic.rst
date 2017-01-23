@@ -16,6 +16,10 @@ Improvements
 
 - :ref:`LoadILLTOF <algm-LoadILLTOF>` has been upgraded to version 2. The new version loads the TOF axis as defined by the 'time_of_flight' field in the NeXus file. Consequently, the *FilenameVanadium* and *WorkspaceVanadium* input properties were removed and no 'EPP' entry is added to the sample logs anymore.
 
+- Overly pessimistic error calculation in :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>` have been fixed.
+
+- A new input property *Temperature* has been added to :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`.
+
 New features
 ------------
 

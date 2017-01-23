@@ -105,7 +105,7 @@ public:
         d = angles5638[2] - fitInfoFix5637->Double(i, 1);
       else if (nm == "omega5638")
         d = angles5638[0] - fitInfoFix5637->Double(i, 1);
-      TS_ASSERT_DELTA(d, 0, .3);
+      TS_ASSERT_DELTA(d, 0, .4);
     }
   }
 

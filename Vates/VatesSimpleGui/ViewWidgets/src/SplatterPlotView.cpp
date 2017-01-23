@@ -52,6 +52,9 @@ namespace SimpleGui {
 
 namespace {
 Mantid::Kernel::Logger g_log("SplatterPlotView");
+const char *g_defaultRepresentation = "Point Gaussian";
+const double g_defaultOpacity = 0.5;
+const double g_defaultRadius = 0.005;
 }
 
 SplatterPlotView::SplatterPlotView(
@@ -146,7 +149,7 @@ void SplatterPlotView::render() {
     return;
   }
 
-  const char *renderType = "Point Gaussian";
+  const char *renderType = g_defaultRepresentation;
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -196,8 +199,9 @@ void SplatterPlotView::render() {
       builder->createDataRepresentation(src->getOutputPort(0), this->m_view);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
   if (!isPeaksWorkspace) {
-    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(0.5);
-    vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius").Set(0.005);
+    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(g_defaultOpacity);
+    vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius")
+        .Set(g_defaultRadius);
   } else {
     vtkSMPropertyHelper(drep->getProxy(), "LineWidth").Set(2);
   }
@@ -284,6 +288,13 @@ void SplatterPlotView::onThresholdButtonClicked() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->m_threshSource = builder->createFilter(
       "filters", MantidQt::API::MdConstants::Threshold, this->m_splatSource);
+  auto filterProxy =
+      builder->createDataRepresentation(this->m_threshSource->getOutputPort(0),
+                                        this->m_view)->getProxy();
+  vtkSMPropertyHelper(filterProxy, "Representation")
+      .Set(g_defaultRepresentation);
+  vtkSMPropertyHelper(filterProxy, "Opacity").Set(g_defaultOpacity);
+  vtkSMPropertyHelper(filterProxy, "GaussianRadius").Set(g_defaultRadius);
   emit this->lockColorControls();
 }
 
@@ -459,10 +470,11 @@ void SplatterPlotView::createPeaksFilter() {
     pqDataRepresentation *dataRepresentation =
         m_peaksFilter->getRepresentation(this->m_view);
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation")
-        .Set("Point Gaussian");
+        .Set(g_defaultRepresentation);
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "GaussianRadius")
-        .Set(0.005);
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity").Set(0.5);
+        .Set(g_defaultOpacity);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity")
+        .Set(g_defaultRadius);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
     if (!this->isPeaksWorkspace(this->origSrc)) {
