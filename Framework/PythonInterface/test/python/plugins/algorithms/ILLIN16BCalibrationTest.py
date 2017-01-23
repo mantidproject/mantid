@@ -24,7 +24,7 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
                                        MirrorMode=False,
                                        PeakRange=[-0.001, 0.002])
 
-        self.assertEqual(calib_ws.getNumberHistograms(), 24)
+        self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
 
 
@@ -33,7 +33,7 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
                                        MirrorMode=True,
                                        PeakRange=[-0.001, 0.002])
 
-        self.assertEqual(calib_ws.getNumberHistograms(), 24)
+        self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
 
 

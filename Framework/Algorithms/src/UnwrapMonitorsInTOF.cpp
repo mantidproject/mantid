@@ -339,8 +339,19 @@ void UnwrapMonitorsInTOF::exec() {
     auto points = getPoints(outputWorkspace.get(), workspaceIndex);
     auto counts =
         getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
-    Mantid::HistogramData::Histogram histogram(points, counts);
-    outputWorkspace->setHistogram(workspaceIndex, histogram);
+    // Get the input histogram
+    auto inputHistogram = inputWorkspace->histogram(workspaceIndex);
+    auto spectrumIsHistogramData =
+        inputHistogram.xMode() ==
+        Mantid::HistogramData::Histogram::XMode::BinEdges;
+    if (spectrumIsHistogramData) {
+      Mantid::HistogramData::BinEdges binEdges(points);
+      Mantid::HistogramData::Histogram histogram(binEdges, counts);
+      outputWorkspace->setHistogram(workspaceIndex, histogram);
+    } else {
+      Mantid::HistogramData::Histogram histogram(points, counts);
+      outputWorkspace->setHistogram(workspaceIndex, histogram);
+    }
   }
   setProperty("OutputWorkspace", outputWorkspace);
 }

@@ -20,7 +20,9 @@ Bug Fixes
 - Fix for LARMOR multi-period loading. The initial rotation was not correctly applied to all child workspaces.
 - IDF bug when using Larmor in batch mode was resolved.
 - Issue where Gui changes were not picked up for batch reductions was resolved.
+- Remove SaveNexusProcessed and SaveCSV as an option. Reorder options by dimensionality.
 - Fix for merged reduction with phi masking.
+- Fix SAScollimation issue in SaveCanSAS1D and LoadCanSAS1D.
 
 X uncertainties (delta-Q)
 -------------------------
