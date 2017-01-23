@@ -42,12 +42,6 @@ Algorithm Toolbox
 
 - Added compressorType option to :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>`.
 
-Scripting Window
-################
-
-Documentation
-#############
-
 Custom Interfaces
 -----------------
 
