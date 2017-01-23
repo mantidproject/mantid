@@ -363,7 +363,7 @@ Measure based search transfer uses the log-values within nexus files from the ex
 Failed transfers
 ================
 When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, if a Measure-based run has an invalid measurement id.
-In the image below we select two runs from the Search table that we wish to transfer to the processing table.
+In the image below we select three runs from the Search table that we wish to transfer to the processing table.
 
 .. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.JPG
    :alt: Selecting runs from search table to transfer to processing table
