@@ -17,14 +17,13 @@ OS X
 User Interface
 --------------
 
-- ParaView's python scripting interface is available from within MantidPlot and mantidpython. Type `from paraview.simple import *` to get started.
-  `Additional documentation <http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
+- ParaView's python scripting interface is available from within MantidPlot and mantidpython. Type `from paraview.simple import *` to get started. Additional documentation is available `here<http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
 
 Instrument View
 ###############
  - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
- - Added the ability to drag and drog mask workspaces onto the instrument view. This will apply the store workspace to the view.
- - Added the ability to store masking/ROI/grouping shapes to a table workspace which can be dragged & dropped back onto different instrument views 
+ - Added the ability to drag and drop mask workspaces onto the instrument view. This will apply the store workspace to the view.
+ - Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views. 
 
 Plotting Improvements
 #####################
@@ -41,7 +40,7 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
-- Add compressorType option to SaveMDWorkspaceToVTK.
+- Added compressorType option to :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>`.
 
 Scripting Window
 ################
@@ -61,13 +60,13 @@ Bugs Resolved
 - The Spectrum Viewer now reports two theta and azimuthal angle correctly.
 - Fixed crash when clicking "Help->Ask for Help" on Linux-based systems with Firefox set as the default browser.
 - The "Filter log values by" option in the Sample Logs dialog now works out the log statistics with the correct filter applied, and deals correctly with aborted runs.
-- Fixed crash when loading data and the algorithm widget is hidden
-- Fixed exception being thrown when saving project with custom interfaces open
+- Fixed crash when loading data and the algorithm widget is hidden.
+- Fixed exception being thrown when saving a project with custom interfaces open.
 - The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
 - Fixed a bug where enabling auto rebinning in the slice viewer and zooming would not rebin the workspace if it was a histogram workspace.
 - Legend placement has been fixed in the "tiled plot"/``plotSubplots`` option, and these graphs now use Mantid's default plot style options.
 - Fixed a bug where saving a plot created from columns of a table window are loaded back as a blank plot from a Mantid project.
-- Fix a bug where saving a tiled plot saved to a project file would be reloaded with different size plots.
+- Fixed a bug where saving a tiled plot to a project file, would be reloaded with different size plots when opened.
 - Fixed a bug where minimised windows would not stay minimised after being serialised to a Mantid project
 - Fixed a bug where changing the integration range of the instrument view would clear the applied zooming.
 - Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
@@ -75,9 +74,7 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
-
- - Added ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled, peak viewer and line vewer tools are disabled.
- 
+- Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
 .. figure:: ../../images/sliceViewerNonOrthogonal.png
    :class: screenshot
    :width: 450px
@@ -99,6 +96,6 @@ VSI Improvements
 - The sources and views more reliably show progress in the VSI status bar. 
 - Added a button to the standard view which applies the threshold filter.
 - Update the cut button to match the equivalent ParaView icon.
-- Changed the fallback for a MDHistoworkspace opened in the (incompatible) SplatterPlot view to the MultiSlice view.
+- Changed the fallback for when MDHistoworkspace was opened in the (incompatible) SplatterPlot view to the MultiSlice view.
 - Faster initial loading of a MDHistoworkspace in the MultiSlice and ThreeSlice view.
 - Drawing of a MDHistoWorkspace is now carried out in parallel using vtkSMPTools.
