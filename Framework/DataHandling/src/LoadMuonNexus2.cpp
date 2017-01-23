@@ -1,5 +1,4 @@
 #include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -7,17 +6,18 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
@@ -247,14 +247,16 @@ void LoadMuonNexus2::doExec() {
       index_spectrum[spectrum_index[i]] = i;
     }
 
-    int counter = 0;
+    int wsIndex = 0;
+    localWorkspace->mutableX(0) = timeBins;
     for (int spec = static_cast<int>(m_spec_min);
          spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
-      loadData(counts, timeBins, counter, period, i, localWorkspace);
-      localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[i]);
-      localWorkspace->getSpectrum(counter).setDetectorIDs(detMapping.at(i));
-      counter++;
+      localWorkspace->setSharedX(wsIndex, localWorkspace->sharedX(0));
+      loadData(counts, wsIndex, period, i, localWorkspace);
+      localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[i]);
+      localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(i));
+      wsIndex++;
       progress.report();
     }
 
@@ -262,10 +264,11 @@ void LoadMuonNexus2::doExec() {
     if (m_list) {
       for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
-        loadData(counts, timeBins, counter, period, k, localWorkspace);
-        localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[k]);
-        localWorkspace->getSpectrum(counter).setDetectorIDs(detMapping.at(k));
-        counter++;
+        localWorkspace->setSharedX(wsIndex, localWorkspace->sharedX(0));
+        loadData(counts, wsIndex, period, k, localWorkspace);
+        localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[k]);
+        localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(k));
+        wsIndex++;
         progress.report();
       }
     }
@@ -293,15 +296,9 @@ void LoadMuonNexus2::doExec() {
 /** loadData
 *  Load the counts data from an NXInt into a workspace
 */
-void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts,
-                              const std::vector<double> &timeBins, int wsIndex,
+void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts, int wsIndex,
                               int period, int spec,
                               API::MatrixWorkspace_sptr localWorkspace) {
-  MantidVec &X = localWorkspace->dataX(wsIndex);
-  MantidVec &Y = localWorkspace->dataY(wsIndex);
-  MantidVec &E = localWorkspace->dataE(wsIndex);
-  X.assign(timeBins.begin(), timeBins.end());
-
   int nBins = 0;
   int *data = nullptr;
 
@@ -312,14 +309,15 @@ void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts,
     nBins = counts.dim1();
     data = &counts(spec, 0);
   } else {
-    throw std::runtime_error("Data have unsupported dimansionality");
+    throw std::runtime_error("Data have unsupported dimensionality");
   }
   assert(nBins + 1 == static_cast<int>(timeBins.size()));
 
+  auto &Y = localWorkspace->mutableY(wsIndex);
+  auto &E = localWorkspace->mutableE(wsIndex);
   Y.assign(data, data + nBins);
-  typedef double (*uf)(double);
-  uf dblSqrt = std::sqrt;
-  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+  std::transform(Y.begin(), Y.end(), E.begin(),
+                 [](double y) { return sqrt(y); });
 }
 
 /**  Load logs from Nexus file. Logs are expected to be in
