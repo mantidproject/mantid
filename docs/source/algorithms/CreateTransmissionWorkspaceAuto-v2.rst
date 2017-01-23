@@ -16,12 +16,12 @@ defaults by providing your own values.
 The first transmission run is the only mandatory property. If :literal:`ProcessingInstructions` is not set its value is inferred from other properties:
 
 * If :literal:`AnalysisMode = PointDetectorAnalaysis` and :literal:`PointDetectorStart = PointDetectorStop` then :literal:`ProcessingInstructions` is set to :literal:`PointDetectorStart`.
-* If :literal:`AnalysisMode = PointDetectorAnalaysis` and :literal:`PointDetectorStart != PointDetectorStop` then :literal:`ProcessingInstructions` is set to :literal`PointDetectorStart:PointDetectorStop`.
+* If :literal:`AnalysisMode = PointDetectorAnalaysis` and :literal:`PointDetectorStart != PointDetectorStop` then :literal:`ProcessingInstructions` is set to :literal:`PointDetectorStart:PointDetectorStop`.
 * If :literal:`AnalysisMode = MultiDetectorAnalaysis` then the spectrum range from :literal:`MultiDetectorStart` to the last spectrum in the input workspace is used.
 
 When :literal:`WavelengthMin` and/or :literal:`WavelengthMax` are not provided, the algorithm will
 search for :literal:`LambdaMin` and :literal:`LambdaMax` in the parameter file. If monitor properties,
-:literal:`I0MonitorIndex`, :literal:`MonitorBackgroundWavelenghtMin`, :literal:`MonitorBackgroundWavelengthMax`,
+:literal:`I0MonitorIndex`, :literal:`MonitorBackgroundWavelengthMin`, :literal:`MonitorBackgroundWavelengthMax`,
 :literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelengthMax`, are not set, the
 algorithm will search for :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundMin`, :literal:`MonitorBackgroundMax`,
 :literal:`MonitorIntegralMin` and :literal:`MonitorIntegralMax` respectively.

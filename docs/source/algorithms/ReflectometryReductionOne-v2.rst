@@ -48,7 +48,7 @@ interest by the direct beam, and monitor normalization (if :literal:`I0MonitorIn
 :literal:`MonitorBackgroundWavelengthMin` and :literal:`MonitorBackgroundWavelengthMax` are all specified),
 in which case the detectors of interest will be divided by monitors. Detectors can be normalized
 by integrated monitors by setting :literal:`NormalizeByIntegratedMonitors` to true, in which case
-:literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelenthMax` will
+:literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelengthMax` will
 be used as the integration range. Finally, the resulting workspace will be cropped according to
 :literal:`WavelengthMin` and :literal:`WavelengthMax`, which are both mandatory properties.
 A summary of the steps is shown in the workflow diagram below.
@@ -78,7 +78,7 @@ When normalizing by transmission run, this algorithm will run
 :ref:`algm-CreateTransmissionWorkspace` as a child algorithm, with properties :literal:`WavelengthMin`,
 :literal:`WavelengthMax`, :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundWavelengthMin`,
 :literal:`MonitorBackgroundWavelengthMax`, :literal:`MonitorIntegrationWavelengthMin`,
-:literal:`MonitorIntegrationWavelengthMax`, and :literal:`ProcessingCommands`. 
+:literal:`MonitorIntegrationWavelengthMax`, and :literal:`ProcessingInstructions`.
 In addition, when both :literal:`FirstTransmissionRun` and :literal:`SecondTransmissionRun`
 are provided the stitching parameters :literal:`Params`, as well as :literal:`StartOverlap` and
 :literal:`EndOverlap` will be used by :ref:`algm-CreateTransmissionWorkspace` to create the
