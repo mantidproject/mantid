@@ -1,16 +1,19 @@
-#ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
-#define MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
+#ifndef MANTID_CURVEFITTING_CRYSTALFIELDMOMENT_H
+#define MANTID_CURVEFITTING_CRYSTALFIELDMOMENT_H
 
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
-#include "MantidAPI/IFunctionGeneral.h"
+#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidAPI/IFunction1D.h"
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
 /**
-  CrystalFieldPeaks is a function that calculates crystal field peak
-  positions and intensities.
+  CrystalFieldMoment is a function that calculates the induced
+  magnetic moment (in bohr magnetons per ion, Am^2 or erg/Gauss) at some
+  applied external magnetic field (in Tesla or Gauss) as a function of
+  temperature (in Kelvin) for a particular crystal field splitting.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -33,25 +36,25 @@ namespace Functions {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldPeaks : public CrystalFieldPeaksBase,
-                                                  public API::IFunctionGeneral {
+
+class MANTID_CURVEFITTING_DLL CrystalFieldMoment : public CrystalFieldPeaksBase,
+                                                   public API::IFunction1D {
 public:
-  CrystalFieldPeaks();
-  std::string name() const override;
-  size_t getNumberDomainColumns() const override;
-  size_t getNumberValuesPerArgument() const override;
-  void functionGeneral(const API::FunctionDomainGeneral &generalDomain,
-                       API::FunctionValues &values) const override;
-  size_t getDefaultDomainSize() const override;
+  CrystalFieldMoment();
+  std::string name() const override { return "CrystalFieldMoment"; }
+  const std::string category() const override { return "General"; }
+  void setHamiltonian(const ComplexFortranMatrix &ham, const int nre);
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
 private:
-  /// Store the default domain size after first
-  /// function evaluation
-  mutable size_t m_defaultDomainSize;
+  ComplexFortranMatrix m_ham;
+  int m_nre;
+  bool m_setDirect;
 };
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /* MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_ */
+#endif /* MANTID_CURVEFITTING_CRYSTALFIELDMOMENT_H */
