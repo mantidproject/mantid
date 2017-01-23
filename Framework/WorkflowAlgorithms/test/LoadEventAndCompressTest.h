@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(wsWithChunks->getNumberEvents(),
                      wsNoChunks->getNumberEvents());
     auto checkAlg =
-        AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+        AlgorithmManager::Instance().create("CompareWorkspaces");
     checkAlg->setPropertyValue("Workspace1", WS_NAME_NO_CHUNKS);
     checkAlg->setPropertyValue("Workspace2", WS_NAME_CHUNKS);
     checkAlg->execute();

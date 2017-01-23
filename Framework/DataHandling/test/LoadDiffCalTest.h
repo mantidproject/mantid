@@ -71,7 +71,7 @@ public:
 
     if (ws) {
       auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+          AlgorithmManager::Instance().create("CompareWorkspaces");
       checkAlg->setProperty("Workspace1", calWSIn);
       checkAlg->setProperty("Workspace2", ws);
       checkAlg->execute();

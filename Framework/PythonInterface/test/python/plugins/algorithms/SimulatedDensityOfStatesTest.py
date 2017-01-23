@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid import logger
 from mantid.api import ITableWorkspace
-from mantid.simpleapi import (SimulatedDensityOfStates, CheckWorkspacesMatch,
+from mantid.simpleapi import (SimulatedDensityOfStates, CompareWorkspaces,
                               Scale, CreateEmptyTableWorkspace)
 
 
@@ -156,8 +156,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         total = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                          SpectrumType=spec_type)
 
-        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance),
-                          'Success!')
+        self.assertTrue(CompareWorkspaces(summed, total, tolerance)[0])
 
     def test_partial_cross_section_scale(self):
         spec_type = 'DOS'
@@ -183,8 +182,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                          SpectrumType=spec_type,
                                          ScaleByCrossSection='Incoherent')
 
-        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance),
-                          'Success!')
+        self.assertTrue(CompareWorkspaces(summed, total, tolerance)[0])
 
     def test_ion_table(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,

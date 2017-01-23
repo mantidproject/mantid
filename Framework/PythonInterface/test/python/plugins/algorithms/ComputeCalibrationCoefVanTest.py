@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import (DeleteWorkspace, CreateSampleWorkspace,
                               AddSampleLog, EditInstrumentGeometry,
-                              CloneWorkspace, CheckWorkspacesMatch, FindEPP)
+                              CloneWorkspace, CompareWorkspaces, FindEPP)
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 from scipy.constants import N_A, hbar, k
