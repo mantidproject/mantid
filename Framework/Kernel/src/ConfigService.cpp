@@ -1630,7 +1630,7 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
  * Fills the internal cache of instrument definition directories
  *
  * This will normally contain from Index 0
- * - The download directory (win %appdata%\mantidproject\mantid\instrument)
+ * - The download directory (win %appdata%/mantidproject/mantid/instrument)
  *   (linux $home/.mantid/instrument )
  * - The user instrument area /etc/mantid/instrument (not on windows)
  * - The install directory/instrument
