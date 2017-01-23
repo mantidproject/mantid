@@ -14,8 +14,8 @@ class ScaleTest(unittest.TestCase):
         r.func.verbosity = 0
         from recon.helper import Helper
 
-        from recon.filters import scale
-        self.alg = scale
+        from recon.filters import rebin
+        self.alg = rebin
 
         self.h = Helper(r)
 
@@ -29,24 +29,24 @@ class ScaleTest(unittest.TestCase):
         sample = self.generate_images()
         from copy import deepcopy
         control = deepcopy(sample)
-        err_msg = "TEST NOT EXECUTED :: Running scale with size {0}, mode {1} and order {2} changed the data!"
+        err_msg = "TEST NOT EXECUTED :: Running rebin with size {0}, mode {1} and order {2} changed the data!"
 
         # bad params
-        scale = None
+        rebin = None
         mode = 'nearest'
-        result = self.alg.execute(sample, scale, mode, self.h)
+        result = self.alg.execute(sample, rebin, mode, self.h)
         npt.assert_equal(result, control)
 
-        scale = -1
-        result = self.alg.execute(sample, scale, mode, self.h)
+        rebin = -1
+        result = self.alg.execute(sample, rebin, mode, self.h)
         npt.assert_equal(result, control)
 
-        scale = 0
-        result = self.alg.execute(sample, scale, mode, self.h)
+        rebin = 0
+        result = self.alg.execute(sample, rebin, mode, self.h)
         npt.assert_equal(result, control)
 
-        scale = -0
-        result = self.alg.execute(sample, scale, mode, self.h)
+        rebin = -0
+        result = self.alg.execute(sample, rebin, mode, self.h)
         npt.assert_equal(result, control)
 
     def test_executed(self):
@@ -58,16 +58,16 @@ class ScaleTest(unittest.TestCase):
     def do_execute(self, helper):
         sample = self.generate_images()
 
-        scale = 2.  # twice the size
-        expected_shape = int(sample.shape[1] * scale)
+        rebin = 2.  # twice the size
+        expected_shape = int(sample.shape[1] * rebin)
         mode = 'nearest'
-        result = self.alg.execute(sample, scale, mode, helper)
+        result = self.alg.execute(sample, rebin, mode, helper)
         npt.assert_equal(result.shape[1], expected_shape)
         npt.assert_equal(result.shape[2], expected_shape)
 
-        scale = 5.  # five times the size
-        expected_shape = int(sample.shape[1] * scale)
-        result = self.alg.execute(sample, scale, mode, helper)
+        rebin = 5.  # five times the size
+        expected_shape = int(sample.shape[1] * rebin)
+        result = self.alg.execute(sample, rebin, mode, helper)
         npt.assert_equal(result.shape[1], expected_shape)
         npt.assert_equal(result.shape[2], expected_shape)
 

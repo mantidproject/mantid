@@ -39,7 +39,7 @@ class PreProcConfig(object):
 
         self.cut_off_level_pre = 0  # TODO unused
         self.mcp_corrections = True
-        self.scale = None
+        self.rebin = None
         self.scale_mode = 'bilinear'
 
         self.line_projection = True  # TODO unused
@@ -49,10 +49,10 @@ class PreProcConfig(object):
                + "Normalise by air region: {0}\n".format(self.normalise_air_region) \
                + "Cut-off on normalised images: {0}\n".format(self.cut_off_level_pre) \
                + "Corrections for MCP detector: {0}\n".format(self.mcp_corrections) \
-               + "Scale down factor for images: {0}\n".format(self.scale) \
+               + "rebin down factor for images: {0}\n".format(self.rebin) \
                + "Median filter width: {0}\n".format(self.median_size) \
                + "Rotation: {0}\n".format(self.rotation) \
-               + "Line projection (line integral/log re-scale): {0}\n".format(self.line_projection) \
+               + "Line projection (line integral/log re-rebin): {0}\n".format(self.line_projection) \
                + "Sinogram stripes removal: {0}\n".format(self.stripe_removal_method) \
                + "Clip min value: {0}\n".format(self.clip_min) \
                + "Clip max value: {0}\n".format(self.clip_max)
@@ -157,16 +157,16 @@ class PreProcConfig(object):
                  "will be set to the minimum value.")
 
         grp_pre.add_argument(
-            "--scale",
+            "--rebin",
             required=False,
             type=float,
-            help="Scale factor by which the images will be scaled. This could be any positive float number.\n"
+            help="rebin factor by which the images will be scaled. This could be any positive float number.\n"
             "If not specified no scaling will be done."
         )
 
         scale_modes = ['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']
         grp_pre.add_argument(
-            "--scale-mode",
+            "--rebin-mode",
             required=False,
             type=str,
             default=self.scale_mode,
@@ -215,7 +215,7 @@ class PreProcConfig(object):
 
         self.cut_off_level_pre = args.cut_off_pre
         self.mcp_corrections = args.mcp_corrections
-        self.scale = args.scale
+        self.rebin = args.rebin
         self.scale_mode = args.scale_mode
 
         # self.line_projection = args.line_projection

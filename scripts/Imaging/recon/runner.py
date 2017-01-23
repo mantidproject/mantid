@@ -15,6 +15,8 @@ def execute(config, cmd_line=None):
     h = Helper(config)
     config.helper = h
     h.check_config_integrity(config)
+    h.tomo_print_note(
+        "Executing reconstruction with {0} cores.".format(config.func.cores))
 
     from recon.data.saver import Saver
     saver = Saver(config)
@@ -57,7 +59,7 @@ def pre_processing(config, sample, flat, dark):
         return sample
 
     from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
-        mcp_corrections, scale, median_filter
+        mcp_corrections, rebin, median_filter
 
     cores = config.func.cores
     save_preproc = config.func.save_preproc
@@ -86,7 +88,7 @@ def pre_processing(config, sample, flat, dark):
     # removes background using images taken when exposed to fully open beam
     # and no beam
     sample = normalise_by_flat_dark.execute(
-        sample, flat, dark, config.pre.clip_min, config.pre.clip_max, h)
+        sample, flat, dark, config.pre.clip_min, config.pre.clip_max, cores=cores, h=h)
     if debug and save_preproc and flat is not None and dark is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "3norm_by_flat_dark", "_normalised_by_flat_dark")
@@ -115,8 +117,8 @@ def pre_processing(config, sample, flat, dark):
     # mcp_corrections
     # data = mcp_corrections.execute(data, config)
 
-    sample = scale.execute(sample, config.pre.scale, config.pre.scale_mode, h)
-    if debug and save_preproc and config.pre.scale:
+    sample = rebin.execute(sample, config.pre.rebin, config.pre.scale_mode, h)
+    if debug and save_preproc and config.pre.rebin:
         _debug_save_out_data(sample, config, flat, dark,
                              "7scaled", "_scaled")
 

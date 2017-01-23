@@ -63,7 +63,8 @@ def execute_par(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5
     f = partial(_apply_normalise, dark=norm_dark_img,
                 norm_divide=norm_divide, clip_min=clip_min, clip_max=clip_max)
 
-    data = Helper.execute_async(data, f, 8, 8, "Norm by Flat/Dark", h)
+    data = Helper.execute_async(
+        data, f, cores, chunksize, "Norm by Flat/Dark", h)
 
     h.pstop(
         "Finished PARALLEL normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))

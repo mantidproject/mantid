@@ -103,7 +103,7 @@ class Helper(object):
             chunksize = 1  # TODO use proper calculation
 
         pool = Pool(cores)
-        h.prog_init(data.shape[0], name)
+        h.prog_init(data.shape[0], name + " " + str(cores) + "c")
         # imap_unordered gives the images back in random order!
         for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
             data[i] = res_data

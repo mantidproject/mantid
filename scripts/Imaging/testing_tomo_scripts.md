@@ -361,13 +361,13 @@ import scipy.ndimage as sn
 sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 print(rsample.shape)
-scale = 0.6565
+rebin = 0.6565
 num_images = rsample.shape[0]
-expected_dims = round(rsample.shape[1]*scale)  # this will give the shape calculated by scipy
+expected_dims = round(rsample.shape[1]*rebin)  # this will give the shape calculated by scipy
 boop = np.zeros((num_images, expected_dims, expected_dims), dtype=np.float32)
 print(boop.shape) 
 for idx in xrange(rsample.shape[0]):
-    boop[idx] = sn.zoom(rsample[idx], scale)
+    boop[idx] = sn.zoom(rsample[idx], rebin)
     rsample[idx] = 0
 
 plt.imshow(boop[0], cmap='Greys_r'); plt.show()
@@ -384,13 +384,13 @@ import scipy.misc as sm
 sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 print(rsample.shape)
-scale = 1.5
+rebin = 1.5
 num_images = rsample.shape[0]
-expected_dims = round(rsample.shape[1]*scale)  # this will give the shape calculated by scipy
+expected_dims = round(rsample.shape[1]*rebin)  # this will give the shape calculated by scipy
 boop = np.zeros((num_images, expected_dims, expected_dims), dtype=np.float32)
 print(boop.shape) 
 for idx in xrange(rsample.shape[0]):
-    boop[idx] = sm.imresize(rsample[idx], scale, interp='bicubic')
+    boop[idx] = sm.imresize(rsample[idx], rebin, interp='bicubic')
     rsample[idx] = 0
 
 plt.imshow(boop[0], cmap='Greys_r'); plt.show()
@@ -472,18 +472,18 @@ python -c "from recon.helper import Helper; g=[]; h=Helper(); h=Helper(g)"
 
 ## --only-preproc
 
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc
 
 ## --reuse-preproc
 
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc --reuse-preproc
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc --reuse-preproc
 
 ## --find-cor
 
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc -f 
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc -f 
 
 ## --crop-before-normalise
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --scale 0.5 --scale-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --crop-before-normalise 
+> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --crop-before-normalise 
 
 # Testing the Big Data
 To drop caches for real performance tests: `alias drop_caches='echo 3 | sudo tee /proc/sys/vm/drop_caches'`
