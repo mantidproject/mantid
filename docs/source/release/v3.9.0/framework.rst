@@ -34,8 +34,8 @@ Improved
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` has a working progress bar.
 - :ref:`SumSpectra <algm-SumSpectra>` has an option to ignore special floating point values called 'RemoveSpecialValues'. This is off by default. When enabled it will ignore values such as NaN or Infinity during the summation of the spectra.  It was also updated to fix special values being used in some cases when the option was selected.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`:
-   *Aan `Interpolation` option has been added. The availabile options are: `Linear` & `CSpline`.
-   * The method of selecting the scattering point has ben updated to give better agreement with numerical algorithms (e.g. :ref:`CylinderAbsorption <algm-CylinderAbsorption>`).
+   - An `Interpolation` option has been added. The availabile options are: `Linear` & `CSpline`.
+   - The method of selecting the scattering point has ben updated to give better agreement with numerical algorithms (e.g. :ref:`CylinderAbsorption <algm-CylinderAbsorption>`).
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
 - :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting.
 - :ref:`MaskDetectors <algm-MaskDetectors>` has a new option to mask detectors by the instrument's component name.
@@ -70,20 +70,12 @@ Removed
 #######
 
 The following (previously deprecated) algorithms versions have now been removed:
-
 - LoadEventPreNexus v1
 - LoadLogsForSNSPulsedMagnet v1
 - Lorentzian1D v1
 - ProcessDasNexusLog v1
 - LoadILL v1
 - SANSDirectBeamScaling v1
-
-
-MD Algorithms (VATES CLI)
-#########################
-
-Performance
------------
 
 CurveFitting
 ------------
@@ -92,7 +84,7 @@ CurveFitting
 - Recommendations for which fitting method to use for a given data set has been added to :ref:`FittingMinimzers page <FittingMinimizers>`.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates the initial values of a fiting function in given intervals.
--  `Exclude` is new property of :ref:`Fit <algm-Fit>`, which allows for a user defined range to be excluded from a fit. 
+- `Exclude` is new property of :ref:`Fit <algm-Fit>`, which allows for a user defined range to be excluded from a fit. 
 - Fit Function :ref:`FunctionQDepends <func-FunctionQDepends>` as the base class for QENS models depending on Q.
 
 Improved
