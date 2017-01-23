@@ -70,8 +70,7 @@ public:
     TS_ASSERT(ws);
 
     if (ws) {
-      auto checkAlg =
-          AlgorithmManager::Instance().create("CompareWorkspaces");
+      auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
       checkAlg->setProperty("Workspace1", calWSIn);
       checkAlg->setProperty("Workspace2", ws);
       checkAlg->execute();
