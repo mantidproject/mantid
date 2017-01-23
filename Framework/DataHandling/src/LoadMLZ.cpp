@@ -1,5 +1,4 @@
 #include "MantidDataHandling/LoadMLZ.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
@@ -7,6 +6,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
@@ -364,25 +364,22 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   }
 
   // Assign calculated bins to first X axis
-  m_localWorkspace->dataX(0)
-      .assign(detectorTofBins.begin(), detectorTofBins.end());
+  m_localWorkspace->mutableX(0) = detectorTofBins;
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      if (spec > 0) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
-      }
+      m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(0));
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
 
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(spec).assign(data_p,
+                                              data_p + m_numberOfChannels);
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
+      auto &E = m_localWorkspace->mutableE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadMLZ::calculateError);
+                     [](double dat) { return sqrt(dat); });
 
       ++spec;
       progress.report();
