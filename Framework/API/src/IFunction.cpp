@@ -1166,7 +1166,7 @@ void IFunction::fixAll() {
 /// Free all parameters
 void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i);
+    unfix(i);
   }
 }
 

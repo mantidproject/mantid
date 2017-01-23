@@ -49,6 +49,8 @@ typedef void (IFunction::*setParameterType2)(const std::string &,
                                              const double &value, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints, 1, 2)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -122,9 +124,9 @@ void export_IFunction() {
            (arg("self"), arg("name")),
            "Return the value of the named attribute")
 
-      .def("storeAttributeValue", &IFunctionAdapter::storeAttributePythonValue,
+      .def("setAttributeValue", &IFunctionAdapter::setAttributePythonValue,
            (arg("self"), arg("name"), arg("value")),
-           "Store an attribute value in the default cache")
+           "Set a value of a named attribute")
 
       .def("declareParameter", &IFunctionAdapter::declareFitParameter,
            (arg("self"), arg("name"), arg("init_value"), arg("description")),
@@ -138,6 +140,54 @@ void export_IFunction() {
       .def("declareParameter", &IFunctionAdapter::declareFitParameterZeroInit,
            (arg("self"), arg("name")),
            "Declare a fitting parameter settings its default value to 0.0")
+
+      .def("fixParameter", &IFunction::fix, (arg("self"), arg("i")),
+           "Fix the ith parameter")
+
+      .def("fixParameter", &IFunction::fixParameter, (arg("self"), arg("name")),
+           "Fix the named parameter")
+
+      .def("freeParameter", &IFunction::unfix, (arg("self"), arg("i")),
+           "Free the ith parameter")
+
+      .def("freeParameter", &IFunction::unfixParameter,
+           (arg("self"), arg("name")), "Free the named parameter")
+
+      .def("isFixed", &IFunction::isFixed, (arg("self"), arg("i")),
+           "Return whether the ith parameter is fixed or tied")
+
+      .def("fixAll", &IFunction::fixAll, (arg("self")), "Fix all parameters")
+
+      .def("freeAll", &IFunction::unfixAll, (arg("self")),
+           "Free all parameters")
+
+      .def("tie", &IFunction::tie,
+           tie_Overloads(
+               (arg("self"), arg("name"), arg("expr"), arg("isDefault")),
+               "Tie a named parameter to an expression"))
+
+      .def("removeTie", (bool (IFunction::*)(size_t)) & IFunction::removeTie,
+           (arg("self"), arg("i")), "Remove the tie of the ith parameter")
+
+      .def("removeTie",
+           (void (IFunction::*)(const std::string &)) & IFunction::removeTie,
+           (arg("self"), arg("name")), "Remove the tie of the named parameter")
+
+      .def("addConstraints", &IFunction::addConstraints,
+           addConstraints_Overloads(
+               (arg("self"), arg("constraints"), arg("isDefault")),
+               "Constrain named parameters"))
+
+      .def("removeConstraint", &IFunction::removeConstraint,
+           (arg("self"), arg("name")),
+           "Remove the constraint on the named parameter")
+
+      .def("getNumberDomains", &IFunction::getNumberDomains, (arg("self")),
+           "Get number of domains of a multi-domain function")
+
+      .def("createEquivalentFunctions", &IFunctionAdapter::createEquivalentFunctions,
+           (arg("self")), "Split this function (if needed) into a list of "
+                          "independent functions")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
