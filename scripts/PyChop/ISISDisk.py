@@ -194,9 +194,9 @@ class ISISDisk:
                 res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
             if len(ie_list) == 1:
                 res_list = res
-                res_el = res_el[ie_list] 
-                chop_width = chop_width[ie_list] 
-                mod_width = mod_width[ie_list] 
+                res_el = res_el[ie_list]
+                chop_width = chop_width[ie_list]
+                mod_width = mod_width[ie_list]
             else:
                 res_list.append(res)
         return Eis, res_list, res_el, percent, ie_list, chop_width, mod_width
