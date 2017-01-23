@@ -25,6 +25,7 @@
 	src/MdPlottingCmapsProvider.cpp
 	src/MdSettings.cpp
 	src/Message.cpp
+	src/NonOrthogonal.cpp
 	src/MWRunFiles.cpp
 	src/OptionsPropertyWidget.cpp
 	src/pixmaps.cpp
@@ -37,6 +38,7 @@
         src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
         src/QwtRasterDataMD.cpp
+        src/QwtRasterDataMDNonOrthogonal.cpp
 	src/QwtWorkspaceBinData.cpp
 	src/QwtWorkspaceSpectrumData.cpp
 	src/RepoModel.cpp
@@ -68,6 +70,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidWidget.h
+  inc/MantidQtAPI/NonOrthogonal.h
   inc/MantidQtAPI/MWRunFiles.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
@@ -116,6 +119,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/PythonThreading.h
         inc/MantidQtAPI/QScienceSpinBox.h
         inc/MantidQtAPI/QwtRasterDataMD.h
+        inc/MantidQtAPI/QwtRasterDataMDNonOrthogonal.h
         inc/MantidQtAPI/QwtWorkspaceBinData.h
 	inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
 	inc/MantidQtAPI/ScaleEngine.h
@@ -145,6 +149,7 @@ set( TEST_FILES
    FileDialogHandlerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
+   NonOrthogonalTest.h
    PlotAxisTest.h
    QwtWorkspaceBinDataTest.h
    QwtWorkspaceSpectrumDataTest.h
@@ -209,6 +214,7 @@ endif()
 ###########################################################################
 
 add_subdirectory ( test )
+
 
 ###########################################################################
 # Installation settings
