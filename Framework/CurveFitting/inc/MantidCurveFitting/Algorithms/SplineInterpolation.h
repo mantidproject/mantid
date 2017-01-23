@@ -61,11 +61,14 @@ public:
   /// Summary of algorithm's purpose. @see Algorithm::summary
   const std::string summary() const override {
     return "Interpolates a set of spectra onto a spline defined by a second "
-           "input workspace. A linear interpolation can be performed if the "
-           "second input workspace has only two points Optionally, this "
-           "algorithm can also calculate derivatives of order 1 or 2 as a side "
-           "product. If X-values are not strictly ascending, then the X-, Y-, "
-           "and E- values of the workspaces will be sorted accordingly.";
+           "input workspace. Optionally, this algorithm can also calculate "
+           "derivatives of order 1 or 2 as a side product or performs a "
+           "linear interpolation if the WorkspaceToInterpolate has only two "
+           "points. If X-values are not strictly ascending, then the X-, Y-, "
+           "and E- values of the workspaces will be sorted accordingly. "
+           "Some workspace properties like the instrument (not its size or "
+           "vertical axis description) will be copied from the "
+           "ReferenceWorkspace.";
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;

@@ -20,7 +20,7 @@ Improved
 
 - :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
-- :ref:`SplineInterpolation <algm-SplineInterpolation>` treats the input WorkspacesToInterpolate containing two points if desired: the user has the option to do a linear interpolation.
+- :ref:`SplineInterpolation <algm-SplineInterpolation>` treats the input WorkspacesToInterpolate containing two points if desired: the user has the option to do a linear interpolation. Furthermore, a new option ReferenceWorkspace defines from which InputWorkspace properties will be copied.
 - All algorithms using AsciiPointBase now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects :ref:`SaveReflCustomAscii <algm-SaveReflCustomAscii>`, :ref:`SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, :ref:`SaveANSTOAscii <algm-SaveANSTOAscii>` and :ref:`SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
 - :ref:`ReplaceSpecialValues <algm_ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces. The documentation for this algorithm has also been improved.

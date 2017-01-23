@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
 
 namespace Mantid {
@@ -59,6 +60,13 @@ void SplineInterpolation::init() {
   declareProperty("Linear2Points", false,
                   "Set to true to perform linear interpolation for 2 points "
                   "instead.");
+
+  std::vector<std::string> inputWorkspaces = {"WorkspaceToMatch", "WorkspaceToInterpolate"};
+  declareProperty("ReferenceWorkspace", "WorkspaceToMatch",
+                  boost::make_shared<StringListValidator>(inputWorkspaces),
+                  "OutputWorkspace will copy properties from the selected "
+                  "workspace properties (e.g. instrument) except its "
+                  "dimensions.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -114,9 +122,12 @@ void SplineInterpolation::exec() {
 
   const bool type = getProperty("Linear2Points");
 
+  const std::string refWorkspace = getProperty("ReferenceWorkspace");
+
   // set input workspaces
   MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
   MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
+  MatrixWorkspace_sptr refws = getProperty(refWorkspace);
 
   // avoid x-value sorting in CubicSpline and ensure sorting if Linear2Points
   ensureXIncreasing(mws);
@@ -143,8 +154,12 @@ void SplineInterpolation::exec() {
   // eventually keep x-Values of histograms
   size_t sizeX = mws->readX(0).size();
   size_t sizeY = mwspt->readY(0).size();
+  // setup output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      iws, iwspt->getNumberHistograms(), sizeX, sizeY);
+      refws, iwspt->getNumberHistograms(), sizeX, sizeY);
+  // get vertical axis from WorkspaceToInterpolate
+  Axis *outputAxis = iws->getAxis(1)->clone(iws.get());
+  outputWorkspace->replaceAxis(1, outputAxis);
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
@@ -171,7 +186,7 @@ void SplineInterpolation::exec() {
         if (order > 0) {
           auto vAxis = new NumericAxis(order);
           derivs[i] =
-              WorkspaceFactory::Instance().create(iws, order, sizeX, sizeY);
+              WorkspaceFactory::Instance().create(refws, order, sizeX, sizeY);
           for (int j = 0; j < order; ++j) {
             vAxis->setValue(j, j + 1);
             derivs[i]->setSharedX(j, mws->sharedX(0));

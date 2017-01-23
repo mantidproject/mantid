@@ -26,6 +26,10 @@ derivatives of each of the interpolated points as a side product.
 Setting the DerivOrder property to zero will force the algorithm to
 calculate no derivatives.
 
+Workspace characteristics (except its size and the description of the
+vertical axis) can be copied from the WorkspaceToMatch (default) or
+the WorkspaceToInterpolate.
+
 Please note that the OutputWorkspace will have constant zero error values.
 
 For Histogram Workspaces
@@ -45,7 +49,7 @@ boundaries are used.
 Usage
 -----
 
-**Example - interpolate between points in one workspace to match a reference workspace:**  
+**Example - interpolate between points in one workspace to match a second workspace:**  
 
 .. testcode:: ExSplineInterpolation
 
@@ -59,23 +63,33 @@ Usage
     #create some random points to interpolate between
     dataX2 = np.arange(1, 110, 10) * 0.07
     dataY2 = np.random.random_sample(dataX2.size) 
-    ws_to_interpolate = CreateWorkspace(dataX2, dataY2)
+    ws = CreateWorkspace(dataX2, dataY2)
 
-    #interpolate using the reference workspace
-    interpolated_ws_1 = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws_to_interpolate)
+    #interpolate
+    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws)
+
+**Example - output the derivatives of the interpolated workspace:**  
+
+.. testcode:: ExSplineInterpolationDeriv
+
+    import numpy as np
+
+    #create a smooth function for interpolation
+    dataX1 = np.arange(1, 100) * 0.07
+    dataY1 = np.sin(dataX1)
+    spline_ws = CreateWorkspace(dataX1, dataY1)
+
+    #create some random points to interpolate between
+    dataX2 = np.arange(1,110,10) * 0.07
+    dataY2 = np.random.random_sample(dataX2.size) 
+    ws = CreateWorkspace(dataX2, dataY2)
 
     #interpolate using the reference workspace and output a group workspace of derivatives for each spectrum
-    interpolated_ws_2 = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws_to_interpolate, DerivOrder=2, OutputWorkspaceDeriv='derivs')
+    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=2, OutputWorkspaceDeriv='derivs')
 
-Output:
+**Example - linear interpolation when the WorkspaceToInterpolate has two points:**
 
-.. testoutput:: ExSplineInterpolation2Points
-
-    The interpolated workspaces are identical: mtd['interpolated_ws_1'].extractY() == mtd['interpolated_ws_2'].extractY()
-
-**Example - linear interpolation of two points:**
-
-..testcode:: ExSplineInterpolationLinearOption
+.. testcode:: ExSplineInterpolationLinearOption
 
     import numpy as np
 
@@ -89,8 +103,27 @@ Output:
     dataY2 = np.array([0.1, 0.15])
     ws_to_interpolate = CreateWorkspace(dataX2, dataY2)
 
-    #interpolate using the reference workspace
+    #interpolate linear
     interpolated_ws = SplineInterpolation(WorkspaceToMatch=ws_to_match, WorkspaceToInterpolate=ws_to_interpolate, Linear2Points=True)
+
+**Example - change the ReferenceWorkspace:**  
+
+.. testcode:: ExSplineInterpolation
+
+    import numpy as np
+
+    #create a smooth function for interpolation
+    dataX1 = np.arange(1, 100) * 0.07
+    dataY1 = np.sin(dataX1)
+    spline_ws = CreateWorkspace(dataX1, dataY1)
+
+    #create some random points to interpolate between
+    dataX2 = np.arange(1, 110, 10) * 0.07
+    dataY2 = np.random.random_sample(dataX2.size) 
+    ws = CreateWorkspace(dataX2, dataY2)
+
+    #interpolate
+    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, ReferenceWorkspace='WorkspaceToInterpolate')
     
 .. categories::
 
