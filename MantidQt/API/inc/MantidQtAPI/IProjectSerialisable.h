@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 class ApplicationWindow;
 
@@ -55,6 +56,12 @@ public:
 
   /// Serialises to a string that can be saved to a project file.
   virtual std::string saveToProject(ApplicationWindow *app) = 0;
+  /// Returns a list of workspace names that are used by this window
+  virtual std::vector<std::string> getWorkspaceNames() = 0;
+  /// Returns the user friendly name of the window
+  virtual std::string getWindowName() = 0;
+  /// Returns the type of the window
+  virtual std::string getWindowType() = 0;
 };
 
 } // namespace API

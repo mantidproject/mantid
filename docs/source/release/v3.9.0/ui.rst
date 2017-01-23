@@ -9,8 +9,6 @@ UI & Usability Changes
 User Interface
 --------------
 
-- ParaView's python scripting interface is available from within MantidPlot and mantidpython. Type `from paraview.simple import *` to get started. Additional documentation is available `here <http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
-
 Instrument View
 ###############
 
@@ -35,6 +33,11 @@ Algorithm Toolbox
 #################
 
 - Added compressorType option to :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>`.
+
+Python
+######
+
+- ParaView's python scripting interface is available from within MantidPlot and mantidpython. Type `from paraview.simple import *` to get started. Additional documentation is available `here <http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
 
 Custom Interfaces
 -----------------
