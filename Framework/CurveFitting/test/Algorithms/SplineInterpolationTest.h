@@ -130,6 +130,30 @@ public:
     TS_ASSERT(alg.isExecuted());
   }
 
+  void testReferenceWorkspace() {
+
+    MatrixWorkspace_sptr mws =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
+                                                               0, 20, 1, true);
+    MatrixWorkspace_sptr iws =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
+                                                               0, 20, 1, false);
+
+    SplineInterpolation alg;
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "Anon");
+    alg.setProperty("WorkspaceToInterpolate", iws);
+    alg.setProperty("WorkspaceToMatch", mws);
+    alg.setProperty("ReferenceWorkspace", "WorkspaceToInterpolate");
+
+    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT(!ows->isHistogramData());
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+  }
+
   void testExecMultipleSpectra() {
     int order(2), spectra(3);
 
