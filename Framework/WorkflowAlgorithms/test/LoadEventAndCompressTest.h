@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidWorkflowAlgorithms/LoadEventAndCompress.h"
 
@@ -82,11 +82,11 @@ public:
     TS_ASSERT_EQUALS(wsWithChunks->getNumberEvents(),
                      wsNoChunks->getNumberEvents());
     auto checkAlg =
-        FrameworkManager::Instance().createAlgorithm("CheckWorkspacesMatch");
+        AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
     checkAlg->setPropertyValue("Workspace1", WS_NAME_NO_CHUNKS);
     checkAlg->setPropertyValue("Workspace2", WS_NAME_CHUNKS);
     checkAlg->execute();
-    TS_ASSERT_EQUALS(checkAlg->getPropertyValue("Result"), "Success!");
+    TS_ASSERT(checkAlg->getProperty("Result"));
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WS_NAME_NO_CHUNKS);
