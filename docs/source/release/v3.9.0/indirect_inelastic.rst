@@ -32,6 +32,7 @@ Data Analysis
 
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
 - :ref:`GetQsInQENSData <algm-GetQsInQENSData>` Extracts or computes Q values from a MatrixWorkspace.
+- *Elwin* now uses sample environment units found in sample logs
 
 
 Improvements
@@ -62,6 +63,10 @@ Transmission
 - :ref:`IsoRotDiff <func-IsoRotDiff>` models isotropic rotational diffusion of a particle
   tethered to the origin at a constant distance.
 
+Vesuvio
+#######
+
+- Run numbers can now be input as a range in :ref:`LoadVesuvio <algm-LoadVesuvio>` and :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>`
 
 Improvements
 ------------
