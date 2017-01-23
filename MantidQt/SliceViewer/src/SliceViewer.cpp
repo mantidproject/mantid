@@ -1713,9 +1713,8 @@ void SliceViewer::checkForHKLDimension() {
       const auto useNonOrthogonal = isHKL;
       switchQWTRaster(useNonOrthogonal);
     }
-    emit setNonOrthogonalbtn(); // true lets button decide what to enable
-                                // depending on workspace/axes etc
   }
+  emit setNonOrthogonalbtn();
 }
 //==============================================================================
 //================================ PYTHON METHODS ==============================
