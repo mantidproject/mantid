@@ -218,7 +218,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   // detector grouping. Also the index corresponding to specific IDs may have
   // changed.
   std::fill(m_spectrumDefinitionNeedsUpdate.begin(),
-            m_spectrumDefinitionNeedsUpdate.end(), static_cast<char>(true));
+            m_spectrumDefinitionNeedsUpdate.end(), 1);
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -451,7 +451,7 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
   populateIfNotLoaded();
   if (m_spectrumInfo)
     m_spectrumDefinitionNeedsUpdate.clear();
-  m_spectrumDefinitionNeedsUpdate.resize(count, static_cast<char>(true));
+  m_spectrumDefinitionNeedsUpdate.resize(count, 1);
   m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
   m_spectrumInfoWrapper = nullptr;
 }
@@ -472,7 +472,7 @@ void ExperimentInfo::setDetectorGrouping(
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
-  m_spectrumDefinitionNeedsUpdate.at(index) = static_cast<char>(false);
+  m_spectrumDefinitionNeedsUpdate.at(index) = 0;
 }
 
 /** Update detector grouping for spectrum with given index.
@@ -1119,12 +1119,12 @@ void ExperimentInfo::setSpectrumInfo(const SpectrumInfo &spectrumInfo) {
 void ExperimentInfo::invalidateSpectrumDefinition(const size_t index) {
   // This uses a vector of char, such that flags for different indices can be
   // set from different threads (std::vector<bool> is not thread-safe).
-  m_spectrumDefinitionNeedsUpdate.at(index) = static_cast<char>(true);
+  m_spectrumDefinitionNeedsUpdate.at(index) = 1;
 }
 
 void ExperimentInfo::updateSpectrumDefinitionIfNecessary(
     const size_t index) const {
-  if (static_cast<bool>(m_spectrumDefinitionNeedsUpdate.at(index)))
+  if (m_spectrumDefinitionNeedsUpdate.at(index) != 0)
     updateCachedDetectorGrouping(index);
 }
 
@@ -1145,7 +1145,7 @@ void ExperimentInfo::cacheDefaultDetectorGrouping() const {
     Beamline::SpectrumDefinition specDef;
     specDef.add(detIndex);
     m_spectrumInfo->setSpectrumDefinition(specIndex, std::move(specDef));
-    m_spectrumDefinitionNeedsUpdate.at(specIndex) = static_cast<char>(false);
+    m_spectrumDefinitionNeedsUpdate.at(specIndex) = 0;
     specIndex++;
   }
 }
