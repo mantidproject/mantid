@@ -37,10 +37,9 @@ Improved
    - An `Interpolation` option has been added. The availabile options are: `Linear` & `CSpline`.
    - The method of selecting the scattering point has ben updated to give better agreement with numerical algorithms (e.g. :ref:`CylinderAbsorption <algm-CylinderAbsorption>`).
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
-- :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting.
-- :ref:`MaskDetectors <algm-MaskDetectors>` has a new option to mask detectors by the instrument's component name.
-- :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` the calculation of the azimuth angle has been fixed. Previously it was set equal to the Mantid definition of phi, but the old code defined it as the angle away from the scattering plane.
-
+- :ref:`MaskDetectors <algm-MaskDetectors>` has a new option to mask detectors by the instrument's component name. It can accept a masked workspace with a differing number of spectra to the input workspace, providing that the number of detectors match. This can be useful in the case of hardware grouped detectors.
+- :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
+- :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`: The calculation of the azimuth angle has been fixed. Previously it was set equal to the Mantid definition of phi but the old code defined it as the angle away from the scattering plane.
 Renamed
 #######
 
