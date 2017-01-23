@@ -44,7 +44,7 @@ The "data" here is generated from the function itself.
 
 The `x`-axis is the temperature in Kelvin, and the magnetic moment (`y`-axis) is in Am\ :sup:`2`\ /mol (SI units), and the "measurement" was done with a field of 0.01 Tesla along the [110] direction of the crystal field (not necessarily the crystallographic [110] direction).
 
-.. code:: ExampleCrystalFieldMoment
+.. testcode:: ExampleCrystalFieldMoment
 
     import numpy as np
     
@@ -62,7 +62,7 @@ The `x`-axis is the temperature in Kelvin, and the magnetic moment (`y`-axis) is
     EvaluateFunction(fun, ws, OutputWorkspace='data')
     
      # Change parameters slightly and fit to the reference data
-    fun = 'name=CrystalFieldMoment,Ion=Ce,Symmetry=C2v,B20=0.4,B22=0.04,B40=-0.03,B42=-0.1,B44=-0.1,'
+    fun = 'name=CrystalFieldMoment,Ion=Ce,Symmetry=C2v,B20=0.37,B22=0.04,B40=-0.032,B42=-0.12,B44=-0.13,'
     fun += 'Hmag=0.01, Hdir=(1,1,0), Unit=SI,'
     fun += 'ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)'
     
@@ -75,7 +75,7 @@ The `x`-axis is the temperature in Kelvin, and the magnetic moment (`y`-axis) is
     for i in range(parws.rowCount()):
         row = parws.row(i)
         if row['Value'] != 0:
-            print "%7s = % 7.5g" % (row['Name'], row['Value'])
+            print "%7s = % 7.2g" % (row['Name'], row['Value'])
 
 .. testcleanup:: ExampleCrystalFieldMoment
 
@@ -83,12 +83,12 @@ Output:
 
 .. testoutput:: ExampleCrystalFieldMoment
 
-        B20 =  0.37745
-        B22 =  0.016732
-        B40 = -0.032093
-        B42 = -0.11298
-        B44 = -0.12685
-    Cost function value =  9.7067e-18
+        B20 =    0.38
+        B22 =    0.04
+        B40 =  -0.032
+        B42 =   -0.12
+        B44 =   -0.13
+    Cost function value =  9e-22
 
 .. attributes::
 

@@ -48,7 +48,7 @@ The "data" here is generated from the function itself, for a field along the [11
 
 The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs units of m\ :sup:`3`\ /mol (==emu/mol).
 
-.. code:: ExampleCrystalFieldSusceptibility
+.. testcode:: ExampleCrystalFieldSusceptibility
 
     import numpy as np
 
@@ -79,7 +79,7 @@ The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs uni
     for i in range(parws.rowCount()):
         row = parws.row(i)
         if row['Value'] != 0:
-            print "%7s = % 7.5g" % (row['Name'], row['Value'])
+            print "%7s = % 7.2g" % (row['Name'], row['Value'])
 
 .. testcleanup:: ExampleCrystalFieldSusceptibility
 
@@ -87,12 +87,12 @@ Output:
 
 .. testoutput:: ExampleCrystalFieldSusceptibility
 
-        B20 =  0.37737
-        B22 =  0.039788
-        B40 = -0.031787
-        B42 = -0.11611
-        B44 = -0.12544
-    Cost function value =  1.0921e-14
+        B20 =    0.38
+        B22 =    0.04
+        B40 =  -0.032
+        B42 =   -0.12
+        B44 =   -0.13
+    Cost function value =  1.1e-14
 
 .. attributes::
 
