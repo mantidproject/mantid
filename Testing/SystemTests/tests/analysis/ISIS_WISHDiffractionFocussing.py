@@ -7,7 +7,7 @@ import numpy as np
 class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
-        return ["WISH00035991.raw", "35922_h00_RW.cal"]
+        return ["WISH00035991.raw", "35922_h00_RW.cal", "35991-foc-h00.nxs"]
 
     def requiredMemoryMB(self):
         return 4000
@@ -69,6 +69,10 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
             self.assertTrue(os.path.exists(os.path.join(path, ws + ".dat")))
             self.assertTrue(os.path.exists(os.path.join(path, ws + ".nxs")))
 
+            exp_workspace = Load(os.path.join(path, ws + ".nxs"), OutputWorkspace="tmp")
+            result = mtd[ws]
+            self.assertTrue(result.equals(exp_workspace, 1e-7))
+
 
 class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
 
@@ -82,7 +86,8 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
                 "35988-foc-h00.nxs",
                 "35991-foc-h00.nxs",
                 "35992-foc-h00.nxs",
-                "35993-foc-h00.nxs"]
+                "35993-foc-h00.nxs",
+                "WISHDiffractionFocussingResult.nxs"]
 
     def requiredMemoryMB(self):
         pass
@@ -147,8 +152,15 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
 
         GroupWorkspaces(output_names, OutputWorkspace=group_name)
 
-        self.assertEqual(table.rowCount(), 8)
-        self.assertEqual(len(output_names), 8)
+        self.table = table
+        self.output_names = output_names
+
+    def validate(self):
+        self.assertEqual(self.table.rowCount(), 8)
+        self.assertEqual(len(self.output_names), 8)
+        result = Load("WISHDiffractionFocussingResult.nxs")
+        value, _ = CompareWorkspaces(self.table, result)
+        self.assertTrue(value)
 
 
 def create_table(name, columns, num_rows):
