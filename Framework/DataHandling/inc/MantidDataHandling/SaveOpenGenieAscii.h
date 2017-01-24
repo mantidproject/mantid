@@ -55,8 +55,10 @@ private:
   void calculateXYZDelta(const std::string &unit,
                          const Kernel::Property *values);
 
-  /// Converts XYE data to OPENGENIE strings and number of data points
-  std::vector<std::tuple<std::string, int>> convertWorkspaceToStrings();
+  /// Converts XYE data to a tuple containing the OPENGENIE string and number of
+  /// data points
+  template <typename T>
+  std::tuple<std::string, int> convertWorkspaceData(const T &histoData);
 
   /// Determines the ENGIN-X bank from the detectors IDs present
   int determineEnginXBankId();

@@ -43,7 +43,7 @@ void SaveOpenGenieAscii::init() {
                   "The filename to use for the saved data");
   declareProperty("IncludeHeader", true,
                   "Whether to include the header lines (default: true)");
-  std::vector<std::string> header{"ENGIN-X Format", "Basic Format"};
+  std::vector<std::string> header{"ENGIN-X Format"};
   declareProperty("OpenGenieFormat", "ENGIN-X Format",
                   boost::make_shared<Kernel::StringListValidator>(header),
                   "The format required to successfully load the file to "
@@ -69,12 +69,10 @@ void SaveOpenGenieAscii::exec() {
   Progress progressBar(this, 0, 1, numOfSteps);
 
   const std::string formatType = getProperty("OpenGenieFormat");
+  // If we had a basic format this is where the specialization would go
   if (formatType == "ENGIN-X Format") {
     progressBar.report("Generating ENGINX header");
     applyEnginxFormat();
-  } else {
-    const std::string err_msg("Unrecognized format \"" + formatType + "\"");
-    throw std::runtime_error(err_msg);
   }
 
   // Store empty but required field
@@ -131,7 +129,11 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
 
 /**
   * Calculates the delta in the logged (i.e. not data) X Y Z values by
-  * from the minimum and maximum logged values
+  * from the minimum and maximum logged values and stores them in the
+  * output buffer
+  *
+  * @param unit :: The axis of this delta (e.g. 'X' or 'Y') as a string
+  * @param values :: Pointer to the time series log values to process
   */
 void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
                                            const Kernel::Property *values) {
@@ -146,57 +148,34 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
 }
 
 /**
-* Converts the workspace data into strings which are compatible
-* with OpenGenie and stores them into a tuple with the number
-* of data points for X Y and E
-*
-* @return :: Returns a vector of tuples - the tuples being the raw
-* data as a string and the number of data points. The first entry in
-* the vector is X, second Y, and final element E data
-*
-*/
-std::vector<std::tuple<std::string, int>>
-SaveOpenGenieAscii::convertWorkspaceToStrings() {
+  * Converts histogram X/Y/E data into a string representation
+  * to be written out and the number of data points
+  *
+  * @tparam histoData :: The histogram data to process
+  *
+  * @return :: An OpenGenie compatible string representation and
+  * the number of data points as packed as a tuple
+  */
+template <typename T>
+std::tuple<std::string, int>
+SaveOpenGenieAscii::convertWorkspaceData(const T &histoData) {
   // Padding to apply after 10 data values
-  const std::string newlineStr = "\r\n    ";
+  const std::string newLineStr = "\r\n    ";
 
-  // Build x, y and e strings - first 4 spaces for correct padding
-  std::string xValsOutput("    "), yValsOutput("    "), eValsOutput("    ");
-  // Number of values seen also used to track 10 values for a newline
-  int xCount(0), yCount(0), eCount(0);
+  // First 4 spaces for correct padding
+  std::string outputString("    ");
+  int valueCount(0);
 
-  const auto &x = m_inputWS->x(0);
-  for (const auto xVal : x) {
-    if (xCount % 10 == 0) {
-      xValsOutput += newlineStr;
+  // Working on primitive type so don't take ref
+  for (const auto val : histoData) {
+    if (valueCount % 10 == 0) {
+      outputString += newLineStr;
     }
-    xCount++;
-    xValsOutput += std::to_string(xVal) + ' ';
+    valueCount++;
+    outputString += std::to_string(val) + ' ';
   }
 
-  const auto &y = m_inputWS->y(0);
-  for (const auto yVal : y) {
-    if (yCount % 10 == 0) {
-      yValsOutput += newlineStr;
-    }
-    yCount++;
-    yValsOutput += std::to_string(yVal) + ' ';
-  }
-
-  const auto &e = m_inputWS->e(0);
-  for (const auto eVal : e) {
-    if (eCount % 10 == 0) {
-      eValsOutput += newlineStr;
-    }
-    eCount++;
-    eValsOutput += std::to_string(eVal) + ' ';
-  }
-
-  std::vector<std::tuple<std::string, int>> outDataStrings;
-  outDataStrings.push_back(std::make_tuple(xValsOutput, xCount));
-  outDataStrings.push_back(std::make_tuple(yValsOutput, yCount));
-  outDataStrings.push_back(std::make_tuple(eValsOutput, eCount));
-  return outDataStrings;
+  return std::make_tuple(outputString, valueCount);
 }
 
 /**
@@ -317,10 +296,9 @@ void SaveOpenGenieAscii::parseWorkspaceData() {
   // Bank number - force to 1 at the moment
   const std::string outputType = "GXRealarray\r\n    1";
 
-  const auto xyeTuples = convertWorkspaceToStrings();
-  const auto &xTuple = xyeTuples[0];
-  const auto &yTuple = xyeTuples[1];
-  const auto &eTuple = xyeTuples[2];
+  const auto &xTuple = convertWorkspaceData(m_inputWS->x(0));
+  const auto &yTuple = convertWorkspaceData(m_inputWS->y(0));
+  const auto &eTuple = convertWorkspaceData(m_inputWS->e(0));
 
   // Have to put the number of values followed by a space then a new line
   // then the data into a string
