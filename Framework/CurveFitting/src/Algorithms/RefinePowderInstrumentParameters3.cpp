@@ -6,6 +6,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <iomanip>
+
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -86,13 +88,12 @@ void RefinePowderInstrumentParameters3::init() {
       "Algorithm to calculate the standard error of peak positions.");
 
   // Damping factor
-  declareProperty(
-      "Damping", 1.0,
-      "Damping factor for (1) minimizer 'damping'. (2) Monte Calro. ");
+  declareProperty("Damping", 1.0, "Damping factor for (1) minimizer 'Damped "
+                                  "Gauss-Newton'. (2) Monte Carlo. ");
 
   // Anealing temperature
   declareProperty("AnnealingTemperature", 1.0,
-                  "Starting aneealing temperature.");
+                  "Starting annealing temperature.");
 
   // Monte Carlo iterations
   declareProperty("MonteCarloIterations", 100,
@@ -113,8 +114,7 @@ void RefinePowderInstrumentParameters3::exec() {
   parseTableWorkspaces();
 
   // 3. Set up main function for peak positions
-  ThermalNeutronDtoTOFFunction rawfunc;
-  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
+  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>();
   m_positionFunc->initialize();
 
   // 3. Fit
@@ -275,7 +275,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
 
     // If empty string, fit is default to be false
     bool fit = false;
-    if (fitq.size() > 0) {
+    if (!fitq.empty()) {
       if (fitq[0] == 'F' || fitq[0] == 'f')
         fit = true;
     }
@@ -374,7 +374,6 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 
   // 3. Monte Carlo starts
   double chisqx = chisq0;
-  int numtotalacceptance = 0;
   int numrecentacceptance = 0;
   int numrecentsteps = 0;
 
@@ -419,7 +418,6 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
       }
 
       // e) MC strategy control
-      ++numtotalacceptance;
       ++numrecentacceptance;
       ++numrecentsteps;
     }
@@ -1226,10 +1224,9 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
         double upperbound = param.maxvalue;
         if (lowerbound >= -DBL_MAX * 0.1 || upperbound <= DBL_MAX * 0.1) {
           // If there is a boundary
-          Constraints::BoundaryConstraint *bc =
-              new Constraints::BoundaryConstraint(
-                  function.get(), parname, lowerbound, upperbound, false);
-          function->addConstraint(bc);
+          auto bc = Kernel::make_unique<Constraints::BoundaryConstraint>(
+              function.get(), parname, lowerbound, upperbound, false);
+          function->addConstraint(std::move(bc));
         }
       } else {
         // If fix.

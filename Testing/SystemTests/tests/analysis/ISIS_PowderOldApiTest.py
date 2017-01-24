@@ -154,7 +154,7 @@ def _validate_wrapper(cls, focus_mode):
     cls.disableChecking.append('Sample')
     cls.disableChecking.append('SpectraMap')
     out_name = "PEARL_routines_fmode_" + focus_mode
-    mantid.LoadNexus(Filename=DIRS[0] + "PEARL/Focus_Test/DataOut/PEARL92476_92479.nxs",
+    mantid.LoadNexus(Filename=DIRS[0] + "PEARL/Focus_Test/DataOut/15_4/Mantid_Tester/PEARL92476_92479.nxs",
                      OutputWorkspace=out_name)
-    reference_file_name = "PEARL92476_92479_" + focus_mode + ".nxs"
+    reference_file_name = "ISIS_Powder-PEARL92476_92479_" + focus_mode + ".nxs"
     return out_name, reference_file_name

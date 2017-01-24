@@ -76,6 +76,12 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
+  /// Remove a plotted guess
+  void doRemoveGuess() override { emit removeGuess(); }
+  /// Plot a guess function
+  void doPlotGuess() override { emit plotGuess(); }
+  /// Whether a guess is plotted or not
+  bool hasGuess() const override;
 
 public slots:
   /// Perform the fit algorithm
@@ -113,10 +119,8 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
-  /// Layout for extra widgets
-  QVBoxLayout *m_additionalLayout;
-  /// Splitter for additional widgets
-  QSplitter *m_widgetSplitter;
+  /// Splitter for additional widgets and splitter between this and browser
+  QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits

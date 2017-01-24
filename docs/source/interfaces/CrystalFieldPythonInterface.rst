@@ -6,7 +6,7 @@ Crystal Field Python Interface
 .. contents::
   :local:
 
-The python facilities for Crystal Field calculations are avalable in Mantid from module `CrystalField`.
+The python facilities for Crystal Field calculations are available in Mantid from module `CrystalField`.
 There are two main classes the module provides: `CrystalFiled` that defines various properties of a crystal
 field and `CrystalFieldFit` that manages the fitting process.
 
@@ -14,7 +14,7 @@ field and `CrystalFieldFit` that manages the fitting process.
 Setting up crystal field parameters
 -----------------------------------
 
-A crystal field computation starts with cretaing an instance of the `CrystalField` class. The constructor
+A crystal field computation starts with creating an instance of the `CrystalField` class. The constructor
 has two mandatory arguments: `Ion` - a symbolic name of the ion, and `Symmetry` - a name of the symmetry group
 of the field. The rest of the parameters are optional.
 
@@ -33,7 +33,7 @@ The minimum code to create a crystal field object is::
   cf = CrystalField('Ce', 'C2v')
   
 Names of the crystal field parameters have the form `Bnn` and `IBnn` where `nn` are two digits between 0 and 6.
-The `Bnn` is a real and the `IBnn` is an imaginary part of a complex parameter. If a parameter isn't set explicitely
+The `Bnn` is a real and the `IBnn` is an imaginary part of a complex parameter. If a parameter isn't set explicitly
 its default value is 0. To set a parameter pass it to the `CrystalField` constructor as a keyword argument, e.g.::
 
   cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770)
@@ -42,7 +42,7 @@ An alternative way to set a parameter is to use the square brackets with a `Crys
 
   cf['B40'] = -0.031
   
-Wich can also be used to query the value of a parameter::
+Which can also be used to query the value of a parameter::
 
   b = cf['B40']
 
@@ -104,7 +104,7 @@ The new output::
  [[   0.           24.40061976   42.49771237]
   [ 216.71156467   88.30985303    5.04430056]]
   
-To calcualte a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
+To calculate a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
 of Lorentzian is assumed. To set a different shape use the `setPeaks` method::
 
@@ -176,7 +176,7 @@ A background has two components: a peak and a general background function. Set a
     cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
                                background=Function('LinearBackground', A0=1.0, A1=0.01))
     
-Here is an example of how to access the prameters of the background::
+Here is an example of how to access the parameters of the background::
     
     h = cf.background.peak.param['Height']
     a1 = cf.background.background.param['A1']
@@ -185,7 +185,7 @@ Here is an example of how to access the prameters of the background::
 Setting Ties and Constraints
 ----------------------------
 
-Seting ties and constraints are done by calling the `ties` and `constraints` methods of the `CrystalField` class or its components.
+Setting ties and constraints are done by calling the `ties` and `constraints` methods of the `CrystalField` class or its components.
 To `Bnn` parameters are tied by the `CrystalField` class directly specifying the tied parameter as a keyword argument::
 
   cf.ties(B20=1.0, B40='B20/2')
@@ -203,7 +203,7 @@ For the parameters of the background the syntax is the same but the methods are 
     
 The names of the peak parameters both in ties and constraints must include the index of the peak to which they belong. Here we follow
 the naming convention of the :ref:`func-CompositeFunction`: f<n>.<name>, where <n> stands for an integer index staring at 0 and <name>
-is the name of the parameter. For example, `f1.Sigma`, `f3.FWHM`. Because names now contain the period symmbol '.' keyword arguments
+is the name of the parameter. For example, `f1.Sigma`, `f3.FWHM`. Because names now contain the period symbol '.' keyword arguments
 cannot be used. Instead we must pass strings containing ties::
 
     cf.peaks.ties('f2.FWHM=2*f1.FWHM', 'f3.FWHM=2*f2.FWHM')
@@ -256,7 +256,7 @@ Example of setting a resolution model::
     rm = ResolutionModel(my_func, xstart=0.0, xend=120.0, accuracy=0.01)
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
 
-When a resolution model is set the peak width will be constrained to have a value close to the model. The degree of deviation is controled by the
+When a resolution model is set the peak width will be constrained to have a value close to the model. The degree of deviation is controlled by the
 `FWHMVariation` parameter. It has the default of 0.1 and is an absolute maximum difference a width can have. If set to 0 the widths will be fixed
 to their calculated values (depending on the instant values of their peak centres). For example::
 
@@ -280,7 +280,7 @@ become lists. Here is an example of defining a `CrystalField` object with two sp
     cf.background[1].peak.param['Sigma'] = 0.8
     cf.background[1].background.param['A0'] = 1.1
 
-Note how `Temperature`, `FWHM`, `peaks` and `background` become lists. They must have the same size. Ties and constraints similarily
+Note how `Temperature`, `FWHM`, `peaks` and `background` become lists. They must have the same size. Ties and constraints similarly
 change::
 
     # The B parameters are common for all spectra - syntax doesn't change
@@ -305,7 +305,7 @@ The resolution model also needs to be initialised from a list::
     rm = ResolutionModel([func0, func1], 0, 100, accuracy = 0.01)
 
 
-To calcualte a spectrum call the same method `getSpectrum` but pass the pectrum index as its first parameter::
+To calculate a spectrum call the same method `getSpectrum` but pass the spectrum index as its first parameter::
 
   # Calculate second spectrum, use the generated x-values
   sp = cf.getSpectrum(1)
@@ -332,6 +332,12 @@ If there are multiple ions define `CrystalField` objects for each ion separately
     cf2 = CrystalField('Pr', 'C2v', **params)
     cf = cf1 + cf2
 
+The expression that combines the `CrystalField` objects also defines the contributions of each site into the overall intensity.
+The higher the coefficient of the object in the expression the higher its relative contribution. For example::
+
+    cf = 2*cf1 + cf2
+
+means that the intensity of `cf1` should be twice that of `cf2`.
 
 Fitting
 -------
@@ -351,5 +357,212 @@ Then call `fit()` method::
     fit.fit()
     
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
-  
+
+Finding Initial Parameters
+--------------------------
+
+If the initial values of the fitting parameters are not known they can be estimated using `estimate_parameters()` method.
+It randomly searches the parameter space in a given region such that the calculated spectra are as close to the
+fit data as possible. The method uses :ref:`EstimateFitParameters <algm-EstimateFitParameters>` internally. See
+algorithm's description for the available properties.
+Here is an example of a fit with initial estimation::
+
+    from CrystalField.fitting import makeWorkspace
+    from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+    # Create some crystal field data
+    origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=44.0, FWHM=1.1)
+    x, y = origin.getSpectrum()
+    ws = makeWorkspace(x, y)
+
+    # Define a CrystalField object with parameters slightly shifted.
+    cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+
+    # Set any ties on the field parameters.
+    cf.ties(B20=0.37737)
+    # Create a fit object
+    fit = CrystalFieldFit(cf, InputWorkspace=ws)
+    # Find initial values for the field parameters.
+    # You need to define the energy splitting and names of parameters to estimate.
+    # Optionally additional constraints can be set on tied parameters (eg, peak centres).
+    fit.estimate_parameters(EnergySplitting=50,
+                            Parameters=['B22', 'B40', 'B42', 'B44'],
+                            Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45',
+                            NSamples=1000)
+    print 'Returned', fit.get_number_estimates(), 'sets of parameters.'
+    # The first set (the smallest chi squared) is selected by default.
+    # Select a different parameter set if required
+    fit.select_estimated_parameters(3)
+    print cf['B22'], cf['B40'], cf['B42'], cf['B44']
+    # Run fit
+    fit.fit()
+
+Calculating Physical Properties
+-------------------------------
+
+In addition to the inelastic neutron spectrum, various physical properties arising from the crystal field interaction
+can be calculated. These include the crystal field contribution to the magnetic heat capacity, the magnetic 
+susceptibility, and magnetisation. The calculated values can be invoked using the `getHeatCapacity()`, 
+`getSusceptibility()` and `getMagneticMoment()` methods. 
+
+To calculate the heat capacity use::
+
+    Cv = cf.getHeatCapacity()       # Calculates Cv(T) for 1<T<300K in 1K steps  (default)
+    pyplot.plot(*Cv)                # Returns a tuple of (x, y) values
+
+    T = np.arange(1,900,5)
+    Cv = cf.getHeatCapacity(T)      # Calculates Cv(T) for specified values of T (1 to 900K in 5K steps here)
+    pyplot.plot(T, Cv[1])
+
+    # Temperatures from a single spectrum workspace
+    ws = CreateWorkspace(T, T, T)
+    Cv = cf.getHeatCapacity(ws)     # Use the x-values of a workspace as the temperatures
+    ws_calc = CreateWorkspace(*Cv)
+    plot(ws_calc, 0)                # Creates workspace from data and plots it (plots the first spectrum, index 0)
+
+    # Temperatures from a multi-spectrum workspace
+    ws = CreateWorkspace(T, T, T, NSpec=2)
+    Cv = cf.getHeatCapacity(ws, 1)  # Uses the second spectrum's x-values for T (e.g. 450<T<900)
+    plot(*Cv)
+
+All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in 
+Jmol\ :sup:`-1`\ K\ :sup:`-1`\ .
+The theory is described in :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`.
+
+The molar susceptibility is calculated using Van Vleck's formula, and requires in addition knowledge of the applied 
+field direction (default is `[0, 0, 1]` where the field is along the crystal field quantisation direction)::
+
+    chi_v = cf.getSusceptibility(T, Hdir=[1, 1, 1])
+
+The field direction is a Cartesian vector with coordinates defined with the `z`-axis parallel to the quantisation
+direction of the crystal field parameters (usually taken to be the highest symmetry rotation axis). To calculate
+for a powder averaged field direction use::
+
+    chi_v_powder = cf.getSusceptibility(T, Hdir='powder')
+
+The powder averaging is done by taking the mean of the susceptibility (or magnetisation) along the :math:`x`,
+:math:`y` and :math:`z` directions (e.g. :math:`\chi^{\mathrm{pow}} = (\chi^x + \chi^y + \chi^z)/3`).
+
+Note that the function calculates the *molar* magnetic susceptibility, and by default outputs it in *cgs* units
+(cm\ :sup:`3`/mol or emu/mol). To obtain the result in SI units (m\ :sup:`3`/mol)
+use::
+
+    chi_v_cgs = cf.getSusceptibility(T, Hdir=[1, 1, 0], Unit='SI')
+
+In addition, "atomic" units (:math:`\mu_B/\mathrm{T}/\mathrm{ion}`) can also be obtained using::
+
+    chi_v_bohr = cf.getSusceptibility(T, Unit='bohr')
+
+The theory is described in the :ref:`CrystalFieldSusceptibility <func-CrystalFieldSusceptibility>` function page.
+
+The magnetic moment is calculated by adding a Zeeman interaction to the crystal field Hamiltonian and diagonalising 
+the combined matrix, from which the expectation of the magnetic moment operator is calculated. The moment can
+be calculated as a function of temperature or applied field magnitude::
+
+    moment_t = cf.getMagneticMoment(Temperature=T, Hdir=[1, 1, 1], Hmag=0.1) # Calcs M(T) with at 0.1T field||[111]
+    H = np.linspace(0, 30, 121)
+    moment_h = cf.getMagneticMoment(Hmag=H, Hdir='powder', Temperature=10)   # Calcs M(H) at 10K for powder sample
+
+By default, the magnetisation is calculated in atomic units of bohr magnetons per magnetic ion. Alternatively, the 
+SI or cgs molar magnetic moments can be calculated::
+
+    moment_SI = cf.getMagneticMoment(H, [1, 1, 1], Unit='SI')         # M(H) in Am^2/mol at 1K for H||[111]
+    moment_cgs = cf.getMagneticMoment(100, Temperature=T, Unit='cgs') # M(T) in emu/mol in a field of 100G || [001]
+
+Please note that if cgs units are used, then the magnetic field must be specified in *Gauss* rather than *Tesla*
+(1T == 10000G). Note also that the cgs unit "emu/mol" in this case is "erg/Gauss/mol" quantifying a molar magnetic
+moment. 
+
+Finally, please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
+should divide this by the molar volume of the material. 
+By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details 
+and a description of the theory, see the :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>` and 
+:ref:`CrystalFieldMoment <func-CrystalFieldMoment>` pages.
+
+Fitting Physical Properties
+---------------------------
+
+Instead of fitting the inelastic neutron spectrum, the physical properties can be fitted using a similar interface
+to that described above. The main difference is that some experimental setup information has to be given - especially
+for the susceptibility and magnetisation. This is done by specifying an instance of the `PhysicalProperties` helper
+class as the `PhysicalProperty` attribute of `CrystalField`, either as a keyword argument in the constructor::
+
+    from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
+    # Fits a heat capacity dataset - you must have subtracted the phonon contribution by some method already
+    # and the data must be in J/mol/K.
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                      PhysicalProperty=PhysicalProperties('Cv'))
+    fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+    fitcv.fit()
+
+or separately after construction::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    cf.PhysicalProperty = PhysicalProperties('Cv')
+    fitcv = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+    fitcv.fit()
+
+    # Fits a susceptibility dataset. Data is the volume susceptibility in SI units
+    cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder', Unit='SI')
+    fit_chi = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+    fit_chi.fit()
+
+    # Fits a magnetisation dataset. Data is in emu/mol, and was measured at 5K with the field || [111].
+    cf.PhysicalProperty = PhysicalProperties('M(H)', Temperature=5, Hdir=[1, 1, 1], Unit='cgs')
+    fit_mag = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+    fit_mag.fit()
+
+    # Fits a magnetisation vs temperature dataset. Data is in Am^2/mol, measured with a 0.1T field || [110]
+    cf.PhysicalProperty = PhysicalProperties('M(T)', Hmag=0.1, Hdir=[1, 1, 0], Unit='SI')
+    fit_moment = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+    fit_moment.fit()
+
+Unfortunately only 1D datasets can be fitted (e.g. M(H, T) cannot be fitted as a simultaneous function of field and
+temperature).
+
+Simultaneous Fitting of Physical Properties and Inelastic Neutron Spectra
+-------------------------------------------------------------------------
+
+Finally, physical properties data and neutron spectra may be fitted simultaneously. In this case, all the inelastic
+neutron spectra must be specified first in the list of input workspaces, with the physical properties dataset(s)
+following in the same order as specified in the `PhysicalProperty` attribute, which for multiple physical
+properties should be a list. E.g.::
+
+    # Fits an INS spectrum (at 10K) and the heat capacity simultaneously
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    cf.Temperature = 10
+    cf.FWHM = 1.5
+    cf.PhysicalProperty = PhysicalProperties('Cv')
+    fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_10K, ws_cp])
+    fit.fit()
+
+    # Fits two INS spectra (at 44K and 50K) and the heat capacity, susceptibility and magnetisation simultaneously.
+    PPCv = PhysicalProperty('Cv')
+    PPchi = PhysicalProperty('susc', 'powder', Unit='cgs')
+    PPMag = PhysicalProperty('M(H)', 5, [1, 1, 1], 'bohr')
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                      Temperature=[44.0, 50], FWHM=[1.1, 0.9], PhysicalProperty=[PPCv, PPchi, PPMag] )
+    fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws_ins_44K, ws_ins_50K, ws_cp, ws_chi, ws_mag])
+    fit.fit()
+
+Note that `PhysicalProperty` requires the type of physical property (either `'Cv'` or `'Cp'` or `'heatcap'` for
+heat capacity; `'susc'` or `'chi'` for susceptibility; `'mag'` or `'M(H)'` for magnetic moment vs applied field;
+or `'mom'` or `'M(T)'` for moment vs temperature) as the first argument. subsequent arguments are optional, and
+are in the following order::
+
+    PhysicalProperties('Cp')  # No further parameters required for heat capacity
+    PhysicalProperties('chi', hdir, inverse, unit)
+    PhysicalProperties('chi', unit)
+    PhysicalProperties('mag', hdir, temp, unit)
+    PhysicalProperties('mag', unit)
+    PhysicalProperties('M(T)', hmag, hdir, inverse, unit)
+    PhysicalProperties('M(T)', unit)
+
+Or these parameters may be specified using keyword arguments, with the keywords: `'Hdir'`, `'Hmag'`, `'Inverse'`, 
+`'Unit'`, and `'Temperature'` (note these are case sensitive, and not all parameters apply to all types of 
+physical properties). The default values (`Hdir=[0,0,1]`, `Hmag=1`, `Inverse=False`, `Unit='cgs'` and 
+`Temperature=1` are used if nothing is specified for a particular attribute.
+
 .. categories:: Interfaces Indirect

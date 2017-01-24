@@ -240,11 +240,6 @@ public:
                      ndets - 1); // skipMonitors
   }
 
-  void testNumMonitors() {
-    TS_ASSERT_EQUALS(instrument.numMonitors(), 1);
-    TS_ASSERT_EQUALS(Instrument().numMonitors(), 0);
-  }
-
   void testDetector() {
     TS_ASSERT_THROWS(instrument.getDetector(0), Exception::NotFoundError);
     TS_ASSERT_EQUALS(instrument.getDetector(1).get(), det);
@@ -301,10 +296,8 @@ public:
 
   void test_GetDetector_With_A_List_Returns_A_Group() {
     const size_t ndets(3);
-    std::vector<detid_t> detIDs(ndets);
-    detIDs[0] = 1;
-    detIDs[1] = 10;
-    detIDs[2] = 11;
+    std::set<detid_t> detIDs{1, 10, 11};
+    std::vector<detid_t> detIDsVec(detIDs.begin(), detIDs.end());
 
     IDetector_const_sptr det;
     TS_ASSERT_THROWS_NOTHING(det = instrument.getDetectorG(detIDs));
@@ -315,14 +308,12 @@ public:
     TS_ASSERT_EQUALS(detGroup->nDets(), ndets);
     std::vector<detid_t> memberIDs = detGroup->getDetectorIDs();
     for (size_t i = 0; i < ndets; ++i) {
-      TS_ASSERT_EQUALS(memberIDs[i], detIDs[i]);
+      TS_ASSERT_EQUALS(memberIDs[i], detIDsVec[i]);
     }
   }
 
   void test_GetDetectors_Throws_With_Invalid_IDs() {
-    const size_t ndets(1);
-    std::vector<detid_t> detIDs(ndets);
-    detIDs[0] = 10000;
+    std::set<detid_t> detIDs{10000};
 
     std::vector<IDetector_const_sptr> dets;
     TS_ASSERT_THROWS(dets = instrument.getDetectors(detIDs),

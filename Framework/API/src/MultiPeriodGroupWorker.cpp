@@ -1,10 +1,12 @@
 #include "MantidAPI/MultiPeriodGroupWorker.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 
@@ -94,8 +96,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     }
   }
 
-  if ((vecMultiPeriodWorkspaceGroups.size() != 0) &&
-      (vecWorkspaceGroups.size() != 0)) {
+  if (!vecMultiPeriodWorkspaceGroups.empty() && !vecWorkspaceGroups.empty()) {
     throw std::invalid_argument(
         "The input contains a mix of multi-period and other workspaces.");
   }
@@ -135,7 +136,8 @@ std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(
   std::string prefix;
   std::string inputWorkspaces;
   for (const auto &vecWorkspaceGroup : vecWorkspaceGroups) {
-    inputWorkspaces += prefix + vecWorkspaceGroup->getItem(periodIndex)->name();
+    inputWorkspaces +=
+        prefix + vecWorkspaceGroup->getItem(periodIndex)->getName();
     prefix = ",";
   }
   return inputWorkspaces;
@@ -282,7 +284,7 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(
         if (nPeriods != benchMarkGroupSize) {
           throw std::runtime_error("Missmatch between nperiods log and the "
                                    "number of workspaces in the input group: " +
-                                   vecMultiPeriodGroups[i]->name());
+                                   vecMultiPeriodGroups[i]->getName());
         }
         Property *currentPeriodProperty =
             currentNestedWS->run().getLogData("current_period");
@@ -290,7 +292,7 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(
         if (currentPeriod != (j + 1)) {
           throw std::runtime_error("Multiperiod group workspaces must be "
                                    "ordered by current_period. Correct: " +
-                                   currentNestedWS->name());
+                                   currentNestedWS->getName());
         }
       }
     }

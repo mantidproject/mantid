@@ -44,7 +44,6 @@ except ImportError as exc:
     raise ImportError(IMPORT_ERR_MSG.format("'tool_imports' (for third party "
                                             "tools such as Tomopy and Astra)",
                                             exc))
-
 try:
     from . import reconstruction_command
 except ImportError as exc:

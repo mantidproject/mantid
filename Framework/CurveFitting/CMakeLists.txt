@@ -1,8 +1,10 @@
 set ( SRC_FILES
 	src/Algorithms/CalculateChiSquared.cpp
+	src/Algorithms/CalculateCostFunction.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
+	src/Algorithms/EstimateFitParameters.cpp
 	src/Algorithms/EstimatePeakErrors.cpp
 	src/Algorithms/EvaluateFunction.cpp
 	src/Algorithms/Fit.cpp
@@ -30,7 +32,7 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
-	src/FuncMinimizers/DampingMinimizer.cpp
+	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
@@ -61,6 +63,10 @@ set ( SRC_FILES
 	src/Functions/CrystalFieldMultiSpectrum.cpp
 	src/Functions/CrystalFieldPeakUtils.cpp
 	src/Functions/CrystalFieldSpectrum.cpp
+	src/Functions/CrystalFieldHeatCapacity.cpp
+	src/Functions/CrystalFieldMagnetisation.cpp
+	src/Functions/CrystalFieldMoment.cpp
+	src/Functions/CrystalFieldSusceptibility.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
@@ -76,6 +82,7 @@ set ( SRC_FILES
 	src/Functions/FlatBackground.cpp
 	src/Functions/FullprofPolynomial.cpp
 	src/Functions/FunctionGenerator.cpp
+	src/Functions/FunctionQDepends.cpp
 	src/Functions/GausDecay.cpp
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
@@ -90,7 +97,6 @@ set ( SRC_FILES
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
-	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
 	src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
@@ -147,9 +153,11 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
+	inc/MantidCurveFitting/Algorithms/CalculateCostFunction.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
+	inc/MantidCurveFitting/Algorithms/EstimateFitParameters.h
 	inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
 	inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
 	inc/MantidCurveFitting/Algorithms/Fit.h
@@ -181,7 +189,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
@@ -212,6 +220,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeakUtils.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
+	inc/MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMagnetisation.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMoment.h
+	inc/MantidCurveFitting/Functions/CrystalFieldSusceptibility.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
@@ -227,6 +239,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/FlatBackground.h
 	inc/MantidCurveFitting/Functions/FullprofPolynomial.h
 	inc/MantidCurveFitting/Functions/FunctionGenerator.h
+	inc/MantidCurveFitting/Functions/FunctionQDepends.h
 	inc/MantidCurveFitting/Functions/GausDecay.h
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
@@ -241,7 +254,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
-	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
 	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
@@ -302,8 +314,10 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	Algorithms/CalculateChiSquaredTest.h
+	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
+	Algorithms/EstimateFitParametersTest.h
 	Algorithms/EstimatePeakErrorsTest.h
 	Algorithms/EvaluateFunctionTest.h
 	Algorithms/FitPowderDiffPeaksTest.h
@@ -332,7 +346,7 @@ set ( TEST_FILES
 	FortranMatrixTest.h
 	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
-	FuncMinimizers/DampingMinimizerTest.h
+	FuncMinimizers/DampedGaussNewtonMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
 	FuncMinimizers/FRConjugateGradientTest.h
 	FuncMinimizers/LevenbergMarquardtMDTest.h
@@ -358,6 +372,10 @@ set ( TEST_FILES
 	Functions/CrystalFieldTest.h
 	Functions/CrystalFieldMultiSpectrumTest.h
 	Functions/CrystalFieldSpectrumTest.h
+	Functions/CrystalFieldHeatCapacityTest.h
+	Functions/CrystalFieldSusceptibilityTest.h
+	Functions/CrystalFieldMagnetisationTest.h
+	Functions/CrystalFieldMomentTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
 	Functions/DiffRotDiscreteCircleTest.h
@@ -370,6 +388,7 @@ set ( TEST_FILES
 	Functions/ExpDecayTest.h
 	Functions/FlatBackgroundTest.h
 	Functions/FullprofPolynomialTest.h
+	Functions/FunctionQDependsTest.h
 	Functions/GausDecayTest.h
 	Functions/GausOscTest.h
 	Functions/GaussianComptonProfileTest.h
@@ -381,7 +400,6 @@ set ( TEST_FILES
     Functions/KerenTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
-	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
 	Functions/MultivariateGaussianComptonProfileTest.h

@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -17,6 +18,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/AutoPtr.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include <fstream>
 
@@ -252,7 +254,7 @@ void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
 
       // display the line we gathered:
       boost::algorithm::trim(line);
-      if (line.size() > 0)
+      if (!line.empty())
         lines.push_back(line);
     }
 
@@ -651,7 +653,7 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl,
                     << "'" << v[i] << "'\n";
       string candidate = v[i];
       boost::algorithm::trim(candidate);
-      if (candidate.size() > 0) {
+      if (!candidate.empty()) {
         cwl = atof(candidate.c_str());
         break;
       }

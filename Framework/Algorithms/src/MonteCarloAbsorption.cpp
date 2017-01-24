@@ -1,10 +1,9 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
+#include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -53,11 +52,11 @@ struct EFixedProvider {
     }
   }
   inline DeltaEMode::Type emode() const { return m_emode; }
-  inline double value(const IDetector_const_sptr &det) const {
+  inline double value(const Mantid::detid_t detID) const {
     if (m_emode != DeltaEMode::Indirect)
       return m_value;
     else
-      return m_expt.getEFixed(det);
+      return m_expt.getEFixed(detID);
   }
 
 private:
@@ -103,6 +102,9 @@ void MonteCarloAbsorption::init() {
       "The number of \"neutron\" events to generate per simulated point");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
+
+  InterpolationOption interpolateOpt;
+  declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
 }
 
 /**
@@ -113,9 +115,11 @@ void MonteCarloAbsorption::exec() {
   const int nevents = getProperty("EventsPerPoint");
   const int nlambda = getProperty("NumberOfWavelengthPoints");
   const int seed = getProperty("SeedValue");
+  InterpolationOption interpolateOpt;
+  interpolateOpt.set(getPropertyValue("Interpolation"));
 
-  auto outputWS =
-      doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda, seed);
+  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
+                               seed, interpolateOpt);
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -127,11 +131,13 @@ void MonteCarloAbsorption::exec() {
  * @param nlambda Number of wavelength points to simulate. The remainder
  * are computed using interpolation
  * @param seed Seed value for the random number generator
+ * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @return A new workspace containing the correction factors & errors
  */
 MatrixWorkspace_sptr
 MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
-                                   size_t nevents, int nlambda, int seed) {
+                                   size_t nevents, int nlambda, int seed,
+                                   const InterpolationOption &interpolateOpt) {
   auto outputWS = createOutputWorkspace(inputWS);
   // Cache information about the workspace that will be used repeatedly
   auto instrument = inputWS.getInstrument();
@@ -158,6 +164,8 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents);
 
+  const auto &spectrumInfo = outputWS->spectrumInfo();
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -166,15 +174,13 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     // The input was cloned so clear the errors out
     outE = 0.0;
     // Final detector position
-    IDetector_const_sptr detector;
-    try {
-      detector = outputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       continue;
     }
     // Per spectrum values
-    const auto &detPos = detector->getPos();
-    const double lambdaFixed = toWavelength(efixed.value(detector));
+    const auto &detPos = spectrumInfo.position(i);
+    const double lambdaFixed =
+        toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
     auto &outY = outputWS->mutableY(i);
@@ -203,7 +209,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     // Interpolate through points not simulated
     if (lambdaStepSize > 1) {
       auto histnew = outputWS->histogram(i);
-      interpolateLinearInplace(histnew, lambdaStepSize);
+      interpolateOpt.applyInplace(histnew, lambdaStepSize);
       outputWS->setHistogram(i, histnew);
     }
 

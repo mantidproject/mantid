@@ -48,7 +48,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfFileInput" native="true">
+        <widget class="MantidQt::API::MWRunFiles" name="rfFileInput" native="true">
          <property name="label" stdset="0">
           <string/>
          </property>
@@ -101,9 +101,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::WorkspaceSelector</class>

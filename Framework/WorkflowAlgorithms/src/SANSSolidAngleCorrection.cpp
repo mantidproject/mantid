@@ -1,17 +1,13 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyManager.h"
 
@@ -28,16 +24,11 @@ DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
 /// Returns the angle between the sample-to-pixel vector and its
 /// projection on the X-Z plane.
-static double getYTubeAngle(const IDetector &det,
-                            const MatrixWorkspace &workspace) {
-
-  // Get the sample position
-  Geometry::IComponent_const_sptr sample =
-      workspace.getInstrument()->getSample();
-  const V3D samplePos = sample->getPos();
+static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
+  const V3D samplePos = spectrumInfo.samplePosition();
 
   // Get the vector from the sample position to the detector pixel
-  V3D sampleDetVec = det.getPos() - samplePos;
+  V3D sampleDetVec = spectrumInfo.position(i) - samplePos;
 
   // Get the projection of that vector on the X-Z plane
   V3D inPlane = V3D(sampleDetVec);
@@ -110,29 +101,20 @@ void SANSSolidAngleCorrection::exec() {
   // Number of X bins
   const int xLength = static_cast<int>(inputWS->readY(0).size());
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
     outputWS->dataX(i) = inputWS->readX(i);
 
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
       continue;
+    }
 
     // Skip if we have a monitor or if the detector is masked.
-    if (det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     const MantidVec &YIn = inputWS->readY(i);
@@ -145,11 +127,11 @@ void SANSSolidAngleCorrection::exec() {
     const bool is_tube = getProperty("DetectorTubes");
     const bool is_wing = getProperty("DetectorWing");
 
-    const double tanTheta = tan(inputWS->detectorTwoTheta(*det));
+    const double tanTheta = tan(spectrumInfo.twoTheta(i));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube || is_wing) {
-      const double tanAlpha = tan(getYTubeAngle(*det, *inputWS));
+      const double tanAlpha = tan(getYTubeAngle(spectrumInfo, i));
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
       if (is_tube)
         corr = alpha_term * theta_term * theta_term;
@@ -188,35 +170,28 @@ void SANSSolidAngleCorrection::execEvent() {
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
   progress.report("Solid Angle Correction");
 
+  const auto &spectrumInfo = outputEventWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputEventWS))
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
-    IDetector_const_sptr det;
-    try {
-      det = outputEventWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    if (!det)
       continue;
+    }
 
     // Skip if we have a monitor or if the detector is masked.
-    if (det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan(outputEventWS->detectorTwoTheta(*det));
+    const double tanTheta = tan(spectrumInfo.twoTheta(i));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube) {
-      const double tanAlpha = tan(getYTubeAngle(*det, *inputWS));
+      const double tanAlpha = tan(getYTubeAngle(spectrumInfo, i));
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
       corr = alpha_term * theta_term * theta_term;
     } else {

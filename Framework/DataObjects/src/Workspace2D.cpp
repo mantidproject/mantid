@@ -3,7 +3,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/VectorHelper.h"
@@ -22,7 +21,7 @@ DECLARE_WORKSPACE(Workspace2D)
 Workspace2D::Workspace2D() : m_noVectors(0) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
-    : MatrixWorkspace(other), m_noVectors(other.m_noVectors),
+    : HistoWorkspace(other), m_noVectors(other.m_noVectors),
       m_monitorList(other.m_monitorList) {
   data.resize(m_noVectors);
 
@@ -93,6 +92,38 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   // Add axes that reference the data
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(XLength, this);
+  m_axes[1] = new API::SpectraAxis(this);
+}
+
+void Workspace2D::init(const std::size_t &NVectors,
+                       const HistogramData::Histogram &histogram) {
+  m_noVectors = NVectors;
+  data.resize(m_noVectors);
+
+  HistogramData::Histogram initializedHistogram(histogram);
+  if (!histogram.sharedY()) {
+    if (histogram.yMode() == HistogramData::Histogram::YMode::Frequencies) {
+      initializedHistogram.setFrequencies(histogram.size(), 0.0);
+      initializedHistogram.setFrequencyStandardDeviations(histogram.size(),
+                                                          0.0);
+    } else { // YMode::Counts or YMode::Uninitialized -> default to Counts
+      initializedHistogram.setCounts(histogram.size(), 0.0);
+      initializedHistogram.setCountStandardDeviations(histogram.size(), 0.0);
+    }
+  }
+
+  for (size_t i = 0; i < m_noVectors; i++) {
+    data[i] = new Histogram1D(initializedHistogram.xMode(),
+                              initializedHistogram.yMode());
+    data[i]->setHistogram(initializedHistogram);
+    // Default spectrum number = starts at 1, for workspace index 0.
+    data[i]->setSpectrumNo(specnum_t(i + 1));
+    data[i]->setDetectorID(detid_t(i + 1));
+  }
+
+  // Add axes that reference the data
+  m_axes.resize(2);
+  m_axes[0] = new API::RefAxis(initializedHistogram.x().size(), this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
@@ -318,10 +349,6 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 
 } // namespace DataObjects
 } // NamespaceMantid
-
-///\cond TEMPLATE
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid {
 namespace Kernel {

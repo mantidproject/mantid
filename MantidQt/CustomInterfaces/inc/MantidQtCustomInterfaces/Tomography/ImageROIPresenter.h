@@ -74,6 +74,9 @@ protected:
   void processBrowseImage();
   void processBrowseStack();
   void processNewStack(bool singleImage);
+  void processLoadSingleImage();
+  void processLoadStackOfImages();
+  void setupAlgorithmRunnerAfterLoad();
   void processChangeImageType();
   void processChangeRotation();
   void processPlayStartStop();

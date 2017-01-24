@@ -10,6 +10,10 @@
 #include <vector>
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramX;
+}
 namespace Algorithms {
 
 /** ReflectometryWorkflowBase : Abstract workflow algortithm base class
@@ -117,7 +121,8 @@ private:
                const OptionalMinMax &backgroundMinMax);
 
   /// Make a unity workspace
-  API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double> &x);
+  API::MatrixWorkspace_sptr
+  makeUnityWorkspace(const HistogramData::HistogramX &x);
 };
 } // namespace Algorithms
 } // namespace Mantid

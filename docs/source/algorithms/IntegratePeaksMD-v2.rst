@@ -60,6 +60,13 @@ the provided radii. Errors are also summed in quadrature.
    -  The volume of integration is :math:`V_{shell}`.
    -  **BackgroundInnerRadius** allows you to give some space between
       the peak and the background area.
+   -  The top 1% of the background events are removed so that there are no intensity spikes near the edges.
+
+-  **AdaptiveQMultiplier** can be used for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes so each peak has a different integration radius.  Q includes the 2*pi factor.
+
+   -  PeakRadius + AdaptiveQMultiplier * **|Q|** 
+   -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** 
+   -  BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**
 
 Background Subtraction
 ######################

@@ -591,7 +591,7 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
         LoadNexus(self.input_workspace,
                   OutputWorkspace=self.input_workspace)
 
-        SofQWMoments(Sample=self.input_workspace, EnergyMin=self.e_min,
+        SofQWMoments(InputWorkspace=self.input_workspace, EnergyMin=self.e_min,
                      EnergyMax=self.e_max, Scale=self.scale,
                      OutputWorkspace=self.input_workspace + '_Moments')
 
@@ -778,8 +778,8 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
                                                            self.endx, 0,
                                                            self.spec_max)
 
-        self.result_names = [iqt_ws.getName(),
-                             iqtfitSeq_ws.getName()]
+        self.result_names = [iqt_ws.name(),
+                             iqtfitSeq_ws.name()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -898,7 +898,7 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
                                    DryRun=False)
 
         # Test IqtFitMultiple
-        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.getName(),
+        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.name(),
                                                          self.func,
                                                          self.ftype,
                                                          self.startx,
@@ -906,8 +906,8 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
                                                          self.spec_min,
                                                          self.spec_max)
 
-        self.result_names = [iqt_ws.getName(),
-                             iqtfitSeq_ws.getName()]
+        self.result_names = [iqt_ws.name(),
+                             iqtfitSeq_ws.name()]
 
         #remove workspaces from mantid
         for sample in self.samples:
@@ -1024,6 +1024,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             BackgroundType=self.bg,
             SpecMin=self.spectra_min,
             SpecMax=self.spectra_max,
+            PeakRadius=5,
             OutputWorkspace='result')
 
     def _validate_properties(self):

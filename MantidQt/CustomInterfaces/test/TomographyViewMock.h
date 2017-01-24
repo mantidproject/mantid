@@ -57,12 +57,6 @@ public:
   // std::string currentReconTool() const {}
   MOCK_CONST_METHOD0(currentReconTool, std::string());
 
-  // std::string astraMethod() const {}
-  MOCK_CONST_METHOD0(astraMethod, std::string());
-
-  // std::string tomopyMethod() const {}
-  MOCK_CONST_METHOD0(tomopyMethod, std::string());
-
   // void updateLoginControls(bool loggedIn) {}
   MOCK_METHOD1(updateLoginControls, void(bool loggedIn));
 
@@ -97,7 +91,9 @@ public:
                      MantidQt::CustomInterfaces::ImageStackPreParams());
 
   // void showToolConfig(const std::string &name) {}
-  MOCK_METHOD1(showToolConfig, void(const std::string &name));
+  MOCK_METHOD1(
+      showToolConfig,
+      void(MantidQt::CustomInterfaces::TomoToolConfigDialogBase &dialog));
 
   // virtual void updateJobsInfoDisplay( const
   //    std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
@@ -116,11 +112,6 @@ public:
                      MantidQt::CustomInterfaces::TomoSystemSettings());
 
   // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
-  // reconToolsSettings() const
-  MOCK_CONST_METHOD0(reconToolsSettings,
-                     MantidQt::CustomInterfaces::TomoReconToolsUserSettings());
-
-  // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
   // prePostProcSettings() const
   MOCK_CONST_METHOD0(prePostProcSettings,
                      MantidQt::CustomInterfaces::TomoReconFiltersSettings());
@@ -134,6 +125,11 @@ public:
 
   // virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg)
   MOCK_METHOD1(runAggregateBands, void(Mantid::API::IAlgorithm_sptr alg));
+
+  //   virtual bool userConfirmation(const std::string &title, const std::string
+  //   &body)
+  MOCK_METHOD2(userConfirmation,
+               bool(const std::string &title, const std::string &body));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

@@ -131,8 +131,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-
-        << "";
+        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
     row = ws->appendRow();
     row << "0"
         << "12346"
@@ -142,7 +141,7 @@ private:
         << "2.9"
         << "0.04"
         << "1"
-        << "";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "24681"
@@ -1284,9 +1283,9 @@ public:
   }
 
   /*
-   * Test processing workspaces with non-standard names, with
-   * and without run_number information in the sample log.
-   */
+  * Test processing workspaces with non-standard names, with
+  * and without run_number information in the sample log.
+  */
   void testProcessCustomNames() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
@@ -1307,8 +1306,8 @@ public:
         << "0.1"
         << "1.6"
         << "0.04"
-
-        << "1";
+        << "1"
+        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
     row = ws->appendRow();
     row << "1"
         << "dataB"
@@ -1317,8 +1316,8 @@ public:
         << "1.4"
         << "2.9"
         << "0.04"
-
-        << "1";
+        << "1"
+        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
 
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB");
@@ -2188,7 +2187,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2244,10 +2244,12 @@ public:
     rowlist[1].insert(0);
     rowlist[1].insert(1);
 
-    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
-                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0', "
+        "CorrectDetectorPositions=0\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2279,7 +2281,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2324,9 +2327,11 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
-                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
+    const std::string expected =
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0', "
+        "CorrectDetectorPositions=0\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -3141,6 +3146,92 @@ public:
     TS_ASSERT_THROWS(presenter.getPostprocessedWorkspaceName(
                          std::map<int, std::vector<std::string>>()),
                      std::runtime_error);
+  }
+
+  void testPostprocessMap() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+
+    std::map<std::string, std::string> postprocesssMap = {{"dQ/Q", "Params"}};
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor(),
+        postprocesssMap);
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // Open a table
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    createTOFWorkspace("12345", "12345");
+    createTOFWorkspace("12346", "12346");
+
+    std::set<int> grouplist;
+    grouplist.insert(0);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return("Params='-0.10'"));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
+
+    // Check output workspace was stitched with params = '-0.04'
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
+
+    MatrixWorkspace_sptr out =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "IvsQ_TOF_12345_TOF_12346");
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[0], 0.100, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[1], 0.104, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[2], 0.10816, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[3], 0.11248, 1e-5);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
+    AnalysisDataService::Instance().remove("12345");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
+    AnalysisDataService::Instance().remove("12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 };
 

@@ -379,21 +379,21 @@ public:
     IFunction_sptr fun1 =
         FunctionFactory::Instance().createInitialized(fun->asString());
 
-    fun1->setParameter(0, 0.);
-    fun1->setParameter(1, 0.);
+    fun1->setParameter(0, 1.);
+    fun1->setParameter(1, 2.);
     fun1->setParameter(2, 0.);
     fun1->setParameter(3, 789);
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 0.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
     TS_ASSERT_EQUALS(fun1->getParameter(2), 0.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
 
     fun1->applyTies();
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(2), 28.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
+    TS_ASSERT_EQUALS(fun1->getParameter(2), 3.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
   }
 
@@ -433,9 +433,9 @@ public:
   void test_MultiDomainFunction_creation_moreComplex() {
     const std::string fnString =
         "composite=MultiDomainFunction,NumDeriv=true;(name=FunctionFactoryTest_"
-        "FunctA,a0=0,a1=0.5;name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,ties="
+        "FunctA,a0=0,a1=0.5;name=FunctionFactoryTest_FunctB,b0=0.1,ties="
         "(b1=0.2),$domains=i);(name=FunctionFactoryTest_FunctA,a0=0,a1=0.5;"
-        "name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,$domains=i);ties=(f1.f1."
+        "name=FunctionFactoryTest_FunctB,b0=0.1,$domains=i);ties=(f1.f1."
         "b1=f0.f1.b1)";
     IFunction_sptr fun;
     TS_ASSERT_THROWS_NOTHING(

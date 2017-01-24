@@ -1,4 +1,26 @@
-.. _FittingMinimizers:
+﻿.. _FittingMinimizers:
+
+Which minimizers to use with Mantid
+===================================
+
+Below are listed the current recommendations for which minimizers to use with Mantid:
+
+* By default Mantid uses Levenberg-Marquardt
+
+  We can also recommend Trust Region, in particular where stability is important
+* For Bayesian analysis, we currently support only one minimizer, which is FABADA
+
+The above recommendations are based on the results presented in the sections
+following this section.
+
+We hope to be able to provide recommendations for subsets of neutron
+fitting problems, such as for constrained problems in the future.
+However, to help us facilitate this, please let us know if you have
+any fitting problems that you would like to share.
+
+Further, if you think you have a bright idea for a new minimizer please
+do not hesitate to either let us know or test out your idea yourself
+using the fit benchmarking tests discussed below.
 
 Comparing Minimizers
 ====================
@@ -25,25 +47,16 @@ Several minimizers are included with Mantid and can be selected in the
 or when using the algorithm :ref:`Fit <algm-Fit>` The following
 options are available:
 
-- `Simplex <https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method>`__
-- `SteepestDescent <https://en.wikipedia.org/wiki/Gradient_descent>`__
-- `Conjugate gradient (Fletcher-Reeves imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
-- `Conjugate gradient (Polak-Ribiere imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
-- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`__
-- `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ (default)
-- Levenberg-MarquardtMD
-
-  A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
-- Damping 
-
-  A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
+- `Simplex <../fitminimizers/Simplex.html>`__
+- `SteepestDescent <../fitminimizers/GradientDescent.html>`__
+- `Conjugate gradient (Fletcher-Reeves imp.) <../fitminimizers/FletcherReeves.html>`__
+- `Conjugate gradient (Polak-Ribiere imp.) <../fitminimizers/PolakRibiere.html>`__
+- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../fitminimizers/BFGS.html>`__
+- `Levenberg-Marquardt <../fitminimizers/LevenbergMarquardt.html>`__ (default)
+- `Levenberg-MarquardtMD <../fitminimizers/LevenbergMarquardtMD.html>`__
+- `Damped Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__
 - :ref:`FABADA <FABADA>`
-- `Trust region
-  <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust
-  region algorithm <https://en.wikipedia.org/wiki/Trust_region>`__ that,
-  at each iteration, calculates and returns the step that reduces the
-  model by an acceptable amount by solving (or approximating a
-  solution to) the trust-region subproblem
+- `Trust region <../fitminimizers/TrustRegion.html>`__
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
@@ -63,7 +76,7 @@ information of the cost function (second-order partial derivatives of
 a Hessian matrix). Some algorithms like BFGS approximate the Hessian by the
 gradient values of successive iterations. The Levenberg-Marquard
 algorithm is a modified Gauss-Newton that introduces an adaptive term
-to prevent unstability when the approximated Hessian is not positive
+to prevent instability when the approximated Hessian is not positive
 defined. An in-depth description of the methods is beyond the scope of
 these pages. More information can be found from the links and general
 references on optimization methods such as [Kelley1999]_ and
@@ -138,7 +151,7 @@ following information:
 - Initial values (starting point) of the function parameters
 - Optional: reference best values for the parameters (some may refer to these as certified values), i.e. target parameter values for the minimizers   
 
-The current problems have been obtained from the following benchmarks and sources:
+The current problems have been obtained from the following sources:
 
 - `NIST nonlinear regression problems
   <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.

@@ -4,7 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h"
-#include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadAscii2.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -28,7 +29,7 @@ namespace {
 */
 void importDataFromColumnFile(string filename, string datawsname) {
   // 1. Call LoadAscii
-  DataHandling::LoadAscii loader;
+  DataHandling::LoadAscii2 loader;
   loader.initialize();
 
   loader.setProperty("FileName", filename);

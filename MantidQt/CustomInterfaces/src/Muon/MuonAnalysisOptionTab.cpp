@@ -66,10 +66,10 @@ void MuonAnalysisOptionTab::initLayout() {
 
   m_autoSaver.beginGroup("GeneralOptions");
   m_autoSaver.registerWidget(m_uiForm.plotCreation, "plotCreation", 0);
-  m_autoSaver.registerWidget(m_uiForm.newPlotPolicy, "newPlotPolicy", 0);
+  m_autoSaver.registerWidget(m_uiForm.newPlotPolicy, "newPlotPolicy", 1);
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
-  m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 1);
+  m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 0);
   m_autoSaver.registerWidget(m_uiForm.chkEnableMultiFit, "enableMultiFit",
                              false);
   m_autoSaver.endGroup();

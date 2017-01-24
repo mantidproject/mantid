@@ -15,7 +15,9 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid::API;
@@ -148,7 +150,7 @@ public:
     LoadParameterFile loaderPF;
     TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
     loaderPF.setPropertyValue("Filename", filename);
-    loaderPF.setPropertyValue("Workspace", m_ws->name());
+    loaderPF.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
     TS_ASSERT(loaderPF.isExecuted());
   }
@@ -157,7 +159,7 @@ public:
     SaveParameterFile saverPF;
     TS_ASSERT_THROWS_NOTHING(saverPF.initialize());
     saverPF.setPropertyValue("Filename", filename);
-    saverPF.setPropertyValue("Workspace", m_ws->name());
+    saverPF.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(saverPF.execute());
     TS_ASSERT(saverPF.isExecuted());
   }

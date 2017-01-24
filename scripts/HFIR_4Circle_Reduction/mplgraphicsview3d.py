@@ -53,7 +53,6 @@ class MplPlot3dCanvas(FigureCanvas):
         Clear all the figures from canvas
         :return:
         """
-        print '[DB-INFO] There are %d plots in current plot list.' % len(self._currPlotList)
         for plt in self._currPlotList:
             # del plt
             self._myAxes.collections.remove(plt)

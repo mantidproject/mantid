@@ -95,6 +95,8 @@ def allEventWorkspaces(*args):
 
 
 def getBasename(filename):
+    if type(filename) == list:
+        filename = filename[0]
     name = os.path.split(filename)[-1]
     for extension in EXTENSIONS_NXS:
         name = name.replace(extension, '')
@@ -268,6 +270,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._outTypes = self.getProperty("SaveAs").value.lower()
 
         samRuns = self.getProperty("Filename").value
+        if type(samRuns[0]) == list:
+            linearizedRuns = []
+            for item in samRuns:
+                linearizedRuns.extend(item)
+            samRuns = linearizedRuns[:] # deep copy
         self._determineInstrument(samRuns[0])
 
         preserveEvents = self.getProperty("PreserveEvents").value
@@ -973,24 +980,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # Determine characterization
         if mtd.doesExist("characterizations"):
             # get the correct row of the table if table workspace 'charactersizations' exists
-
-            #pylint: disable=unused-variable
-            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
-                                                      Characterizations="characterizations",
-                                                      ReductionProperties="__snspowderreduction",
-                                                      BackRun=self.getProperty("BackgroundNumber").value,
-                                                      NormRun=self.getProperty("VanadiumNumber").value,
-                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
-                                                      FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
-                                                      WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
+            api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
+                                             Characterizations="characterizations",
+                                             ReductionProperties="__snspowderreduction",
+                                             BackRun=self.getProperty("BackgroundNumber").value,
+                                             NormRun=self.getProperty("VanadiumNumber").value,
+                                             NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
+                                             FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                             WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
         else:
-            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
-                                                      ReductionProperties="__snspowderreduction",
-                                                      BackRun=self.getProperty("BackgroundNumber").value,
-                                                      NormRun=self.getProperty("VanadiumNumber").value,
-                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
-                                                      FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
-                                                      WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
+            api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
+                                             ReductionProperties="__snspowderreduction",
+                                             BackRun=self.getProperty("BackgroundNumber").value,
+                                             NormRun=self.getProperty("VanadiumNumber").value,
+                                             NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
+                                             FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                             WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
 
         # convert the result into a dict
         return PropertyManagerDataService.retrieve("__snspowderreduction")
@@ -1244,7 +1249,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 van_run_ws_name = self._loadAndSum([van_run_number], van_run_ws_name, **vanFilterWall)
 
             # load the vanadium background (if appropriate)
-            van_bkgd_run_number_list = self._info["empty"].value
+            van_bkgd_run_number_list = self._info["vanadium_background"].value
             van_bkgd_run_number_list = ['%s_%d' % (self._instrument, value)
                                         for value in van_bkgd_run_number_list]
             if not noRunSpecified(van_bkgd_run_number_list):
