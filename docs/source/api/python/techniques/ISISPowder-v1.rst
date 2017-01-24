@@ -1,4 +1,4 @@
-.. _isis-powder-diffraction-ref
+.. _isis-powder-diffraction-ref:
 
 ================================
 ISIS Powder Diffraction Scripts
@@ -32,8 +32,22 @@ network to automatically handle finding the files whilst it is on the network.
 
 YAML Configuration Files
 ^^^^^^^^^^^^^^^^^^^^^^^^
+The basic configuration files are written in YAML then can be passed as a parameter whilst configuring the scripts. 
+This avoids having to respecify paths or settings which rarely change such as the location of the calibration folder.
+These use a simple format of key : value pair in YAML syntax. For example:
 
+.. code-block:: yaml
 
+  # Comments are indicated by a '#' at the start of the comment
+  # By using ' ' characters around values they do not need to be escaped
+  user_name : 'Mantid_Documentation'
+  output_directory : '<Path\to\your\output\folder>'  
+
+Would set the key `user_name` to the value `Mantid_Documentation` when using the basic configuration file.
+The value can be overridden at the commandline and a warning will be emitted so the user is aware of the new
+value the key is set to. 
+
+For a list of valid keys (also known as parameters), their values and purpose refer to the instrument documentation.
 
 PEARL
 -----
@@ -42,14 +56,54 @@ PEARL
 
 Calibration Folder
 ^^^^^^^^^^^^^^^^^^
-TODO talk about structure of calibration folder/required folders and what is put in
-...etc.
+Within the top level of the calibration folder the following files must be present:
+ - .cal files containing grouping information (for all tt_modes)
+ - .nxs file with absorption corrections (if using absorption corrections)
+ - Folder for each cycle label (e.g. 10_2) containing a .cal file with detector offsets
+   for that cycle
+
+The names of the .cal grouping files and .nxs absorption file is set in the advanced
+configuration file: :ref:`pearl_adv_script_params_isis-powder-diffraction-ref`
+
+The label for the run the user is processing and the appropriate offset filename is
+taken from the calibration mapping file: :ref:`pearl_cal_map_isis-powder-diffraction-ref`.
 
 .. _pearl_cal_map_isis-powder-diffraction-ref:
 
 Calibration Configuration File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TODO talk about the calibration mapping file
+The calibration mapping file allows users to specify ranges of runs and their 
+common properties to all of them. These include the vanadium and empty run numbers,
+offset file and label for those runs.
+
+A breakdown of an example layout is below:
+
+File structure:
+
+.. code-block:: yaml
+
+  123-130, 135-140:                               <--- Line 1
+    label : "10_1"                                <--- Line 2
+    vanadium_run_numbers : "123-125"              <--- Line 3
+    empty_run_numbers : "135-137"                 <--- Line 4
+    calibration_file : "offsets_example_10_1.cal" <--- Line 5
+
+  141-150:
+
+Line 1 holds the range of run numbers that this block (a block is the lines starting 
+with consistent number of spaces throughout) holds details for. In this case it specifies
+runs 123-130 (inclusive) and runs 135-140 (inclusive) should use the following details.
+Additionally a single range of runs can be unbounded such as `200-` which would match
+runs >= 200. There is several sanity checks in place that ensure there is not multiple
+unbounded entries and that all other runs specified are not within the unbounded range. 
+
+Lines 2 - 5 can be placed in any order and specifies various properties common to these files.
+
+- Line 2 specifically holds the label which is used in the calibration and output directories.
+- Line 3 is the vanadium run numbers to use when creating a calibration for this label
+- Line 4 holds the instrument empty run numbers
+- Line 5 is the name of the offsets file which will be used whilst aligning detectors. See 
+  :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
 
 .. _pearl_focus_mode_isis-powder-diffraction-ref:
 
@@ -86,13 +140,13 @@ Script configuration parameters
 The following parameters must be included in the object construction step. 
 They be either manually specified or set in the configuration file:
  
- - `calibration_directory` - This folder must contain various files such as 
+- `calibration_directory` - This folder must contain various files such as 
    detector offsets and detector grouping information. Additionally calibrated
    vanadium data will be stored here for later data processing. 
    
- - `user_name` - Used to create a folder with that name in the output directory
+- `user_name` - Used to create a folder with that name in the output directory
 
- - `output_directory` - This folder is where all processed data will be saved. 
+- `output_directory` - This folder is where all processed data will be saved. 
  
 Basic Script Parameters
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -102,108 +156,91 @@ in the output window informing the user of the old and new values.
 
 TODO talk about defaults?
 
- - `attenuation_file_name` - The attenuation file name, this file must be located in
-   the top level directory of the calibration directory. More information 
-   here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
- 
- - `config_file` - The full path to the YAML configuration file. This is described
-   in more detail here: :ref:`yaml_isis-powder-diffraction-ref`
+- `attenuation_file_name` - The attenuation file name, this file must be located in
+  the top level directory of the calibration directory. More information 
+  here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
+- `config_file` - The full path to the YAML configuration file. This is described
+  in more detail here: :ref:`yaml_isis-powder-diffraction-ref`
+- `calbiration_config_path` - The full path to the calibration configuration file 
+  a description of the file is here: :ref:`pearl_cal_map_isis-powder-diffraction-ref`
+- `do_absorb_corrections` - Used during a vanadium calibration and focusing:
+  In a vanadium calibration if set to true the calibration will correct for 
+  absorption and scattering in a cylindrical sample. 
+  
+  During focusing if set to true this will load a calibration which 
+  has had the absorption corrections performed, if false it will use a calibration
+  where the absorption corrections have not been performed.
+- `focus_mode` - More information found here: :ref:`pearl_focus_mode_isis-powder-diffraction-ref` .
+  Acceptable options: `all`, `groups`, `trans` and `mods`.
+- `long_mode` - Processes data in 20,000-40,000μs instead of the usual 0-20,000μs window.
+- `perform_attenuation` - If set to true uses the user specified attenuation file 
+  (see `attenuation_file_name`) and applies the correction.
+- `run_number` - Used during focusing a single run or range of runs can be specified 
+  here. This range is inclusive e.g. 10-12 will be runs 10,11,12. 
+  These runs will be first summed together before any processing is performed
+  on them if there are multiple runs specified.
+- `run_in_range` - Only used during vanadium calibration. The run specified 
+  here is used with the calibration mapping file see: 
+  :ref:`pearl_cal_map_isis-powder-diffraction-ref` to determine the current cycle
+  and the vanadium/empty run numbers for the subsequent processing.
+- `tt_mode` - Specifies the detectors to be considered.
+  Acceptable options: `tt35`, `tt70`, `tt88`.
+- `vanadium_normalisation` - If set to true divides the sample by the vanadium
+  vanadium calibration during the focusing step.
 
- - `calbiration_config_path` - The full path to the calibration configuration file 
-   a description of the file is here: :ref:`pearl_cal_map_isis-powder-diffraction-ref`
-   
- - `do_absorb_corrections` - Used during a vanadium calibration and focusing:
-   
-   In a vanadium calibration if set to true the calibration will correct for 
-   absorption and scattering in a cylindrical sample. 
-   
-   During focusing if set to true this will load a calibration which 
-   has had the absorption corrections performed, if false it will use a calibration
-   where the absorption corrections have not been performed.
-   
- - `focus_mode` - More information found here: :ref:`pearl_focus_mode_isis-powder-diffraction-ref` .
-   Acceptable options: `all`, `groups`, `trans` and `mods`.
- 
- - `long_mode` - Processes data in 20,000-40,000μs instead of the usual 0-20,000μs window.
- 
- - `perform_attenuation` - If set to true uses the user specified attenuation file 
-   (see `attenuation_file_name`) and applies the correction.
-   
- - `run_number` - Used during focusing a single run or range of runs can be specified 
-   here. This range is inclusive e.g. 10-12 will be runs 10,11,12. 
-   These runs will be first summed together before any processing is performed
-   on them if there are multiple runs specified.
-   
- - `run_in_range` - Only used during vanadium calibration. The run specified 
-   here is used with the calibration mapping file see: 
-   :ref:`pearl_cal_map_isis-powder-diffraction-ref` to determine the current cycle
-   and the vanadium/empty run numbers for the subsequent processing.
-   
- - `tt_mode` - Specifies the detectors to be considered.
-   Acceptable options: `tt35`, `tt70`, `tt88`.
- 
- - `vanadium_normalisation` - If set to true divides the sample by the vanadium
-   vanadium calibration during the focusing step.
-   
+.. _pearl_adv_script_params_isis-powder-diffraction-ref:
+
 Advanced Script Parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
- - `monitor_lambda_crop_range` - The range in dSpacing to crop a monitor workspace 
-   to whilst calculating the current normalisation. This is should be stored as a tuple 
-   of both values. This is used with `long_mode` so there is a set of values for 
-   `long_mode` off and on. 
-   
- - `monitor_integration_range` - The maximum and minimum contribution a bin can provide
-   whilst integrating the monitor spectra. Any values that fall outside of this range
-   are not added in. This should be stored as a tuple of both values. This is 
-   used with `long_mode` so there is a set of values for `long_mode` off and on. 
-   
- - `monitor_spectrum_number` - The spectrum number of the current monitor.
- 
- - `monitor_spline_coefficient` - The number of b-spline coefficients to use whilst
-   taking a background spline of the monitor.
-   
- - `raw_data_tof_cropping` - Stores the window in TOF which the data should be
-   cropped down to before any processing. This is used with `long_mode` so there
-   is a set of values for `long_mode` off and on. Each should be a tuple of the minimum
-   and maximum time of flight. It should also be greater than `vanadium_tof_cropping`
-   and `tof_cropping_values`
-   
- - `spline_coefficient` - The number of b-spline coefficients to use whilst taking
-   a background spline of the focused vanadium data. 
-   
- - `tof_cropping_values` - Stores per bank the TOF which the focussed data should
-   be cropped to. This does not affect the `vanadium_tof_cropping` which must be larger
-   than the interval between the smallest and largest cropping values. This is
-   stored as a list of tuple pairs with one tuple per bank. This is used with `long_mode`
-   so there is a set of values for `long_mode` off and on. 
-   
- - `tt_88_grouping` - The file name for the `.cal` file with grouping details for
-   the instrument in `TT88` mode. This must be located in the top level directory
-   of the calibration folder. More information can be found 
-   here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
-   
- - `tt_70_grouping` - The file name for the `.cal` file with grouping details for 
-   the instrument in `TT70` mode. See `tt_88_grouping` for more details.
-   
- - `tt_35_grouping` - The file name for the `.cal` file with grouping details for
-   the instrument in `TT35` mode. See `tt_88_grouping` for more details.
-   
- - `vanadium_absorb_file` - The file name for the vanadium absorption corrections. 
-   This must be located in the top level directory of the calibration folder. 
-   More information here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
- 
- - `vanadium_tof_cropping` - The range in TOF to crop the calibrated vanadium
-   file to after focusing. This must be less than `raw_data_tof_cropping` and
-   larger than `tof_cropping_values`. The cropping is applied before a spline is
-   taken of the vanadium sample. 
+- `monitor_lambda_crop_range` - The range in dSpacing to crop a monitor workspace 
+  to whilst calculating the current normalisation. This is should be stored as a tuple 
+  of both values. This is used with `long_mode` so there is a set of values for 
+  `long_mode` off and on. 
+- `monitor_integration_range` - The maximum and minimum contribution a bin can provide
+  whilst integrating the monitor spectra. Any values that fall outside of this range
+  are not added in. This should be stored as a tuple of both values. This is 
+  used with `long_mode` so there is a set of values for `long_mode` off and on. 
+- `monitor_spectrum_number` - The spectrum number of the current monitor.
+- `monitor_spline_coefficient` - The number of b-spline coefficients to use whilst
+  taking a background spline of the monitor.
+- `raw_data_tof_cropping` - Stores the window in TOF which the data should be
+  cropped down to before any processing. This is used with `long_mode` so there
+  is a set of values for `long_mode` off and on. Each should be a tuple of the minimum
+  and maximum time of flight. It should also be greater than `vanadium_tof_cropping`
+  and `tof_cropping_values`
+- `spline_coefficient` - The number of b-spline coefficients to use whilst taking
+  a background spline of the focused vanadium data. 
+- `tof_cropping_values` - Stores per bank the TOF which the focussed data should
+  be cropped to. This does not affect the `vanadium_tof_cropping` which must be larger
+  than the interval between the smallest and largest cropping values. This is
+  stored as a list of tuple pairs with one tuple per bank. This is used with `long_mode`
+  so there is a set of values for `long_mode` off and on. 
+- `tt_88_grouping` - The file name for the `.cal` file with grouping details for
+  the instrument in `TT88` mode. This must be located in the top level directory
+  of the calibration folder. More information can be found 
+  here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
+- `tt_70_grouping` - The file name for the `.cal` file with grouping details for 
+  the instrument in `TT70` mode. See `tt_88_grouping` for more details.
+- `tt_35_grouping` - The file name for the `.cal` file with grouping details for
+  the instrument in `TT35` mode. See `tt_88_grouping` for more details.
+- `vanadium_absorb_file` - The file name for the vanadium absorption corrections. 
+  This must be located in the top level directory of the calibration folder. 
+  More information here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
+- `vanadium_tof_cropping` - The range in TOF to crop the calibrated vanadium
+  file to after focusing. This must be less than `raw_data_tof_cropping` and
+  larger than `tof_cropping_values`. The cropping is applied before a spline is
+  taken of the vanadium sample. 
    
 .. _pearl_config_scripts_isis-powder-diffraction-ref:
 
 Configuring the scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^
-TODO add some text here
-Code example with comments:
-::
+The scripts are object oriented - in simple terms it means you ask for
+an instrument object - in this case PEARL and give it a name. Any parameters
+you set with that name stay with that name and do not affect other objects 
+with different names. This can be see with the code examples below:
+
+.. code-block:: python
 
  # First import the relevant scripts for PEARL
  from isis_powder.pearl import Pearl  
@@ -212,21 +249,24 @@ The scripts can be setup in 3 ways:
 
 1.  Explicitly setting parameters for example :- user_name, calibration_directory 
 and output_directory...etc.:
-::
+
+.. code-block:: python
 
  pearl_manually_specified = Pearl(user_name="Mantid", 
                                   calibration_directory="<Path to calibration folder>",
                                   output_directory="<Path to output folder>", ...etc.)
 
 2. Using user configuration files. This eliminates having to specify several parameters
-::
+
+.. code-block:: python
  
  config_file_path = <path to your configuration file>
  pearl_object_config_file = Pearl(user_name="Mantid2", config_file=config_file_path)
  
 3. Using a combination of both, any parameter can be overridden from the 
 configuration file without changing it:
-::
+
+.. code-block:: python
 
  # This will use "My custom location" instead of the location set in the configuration file
  pearl_object_override = Pearl(user_name="Mantid3", config_file=config_file_path,
@@ -242,14 +282,16 @@ Vanadium Calibration
 Following on from the examples configuring the scripts (see: 
 :ref:`pearl_config_scripts_isis-powder-diffraction-ref`) we can run a vanadium
 calibration with the `create_calibration_vanadium` method. 
+
 TODO the following parameters are needed...
-::
+
+.. code-block:: python
 
  # Lets use the "pearl_object_override" which stores in "My custom location"
  # from the previous examples
  pearl_object_override.create_calibration_vanadium(run_in_range=12345, 
                                                    do_absorb_corrections=True
-                                                   long_mode=False)
+                                                   long_mode=False, tt_mode=tt88)
 
 This will generate a calibration for the specified vanadium and empty runs 
 specified in the calibration mapping file (see: :ref:`pearl_cal_map_isis-powder-diffraction-ref`)
@@ -264,13 +306,17 @@ Focusing
 ^^^^^^^^^^
 Using the examples from the configured scripts (see: :ref:`pearl_config_scripts_isis-powder-diffraction-ref`)
 we can run focusing with the `focus` method:
+
 TODO the following parameters are needed...
-::
+
+.. code-block:: python
 
   # Using pearl_object_config_file which was using a configuration file
   # We will focus runs 10000-10010 which sums up the runs inclusively 
   pearl_object_config_file.focus(run_number="10000-10010")
-  
-  
-  
 
+
+POLARIS
+-------
+
+TODO
