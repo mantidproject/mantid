@@ -12,6 +12,8 @@ import opcode
 import inspect
 import sys
 
+PY36 = sys.version_info >= (3, 6)
+
 #-------------------------------------------------------------------------------
 def replace_signature(func, varnames):
     """
@@ -106,18 +108,18 @@ def decompile(code_object):
     instructions = []
     n = len(code)
     i = 0
-    e = 0
+
     while i < n:
         i_offset = i
         i_opcode = opcode_from_bytecode(code[i])
         i = i + 1
         if i_opcode >= opcode.HAVE_ARGUMENT:
-            i_argument = opcode_from_bytecode(code[i]) + (opcode_from_bytecode(code[i+1]) << (4*2)) + e
-            i = i + 2
-            if i_opcode == opcode.EXTENDED_ARG:
-                e = iarg << 16
+            if PY36: # from 3.6 bytecode is now 16-bit not 8-bit
+                i_argument = code[i]
+                i = i + 1
             else:
-                e = 0
+                i_argument = opcode_from_bytecode(code[i]) + (opcode_from_bytecode(code[i+1]) << (4*2))
+                i = i + 2
             if i_opcode in opcode.hasconst:
                 i_arg_value = repr(code_object.co_consts[i_argument])
                 i_arg_type = 'CONSTANT'
@@ -161,7 +163,8 @@ __operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW'
                         'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
                         'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT',
                         'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
-                        'INPLACE_OR', 'COMPARE_OP'])
+                        'INPLACE_OR', 'COMPARE_OP',
+                        'CALL_FUNCTION_EX'])
 #--------------------------------------------------------------------------------------
 
 def process_frame(frame):

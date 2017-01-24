@@ -37,9 +37,9 @@ public:
   void removePresenter(const std::string &peaksWorkspaceName);
   void updateWorkspaces(const std::vector<std::string> &peaksWorkspaceNames);
   void sortPeaksWorkspace(const std::string &, const bool) override {}
-  void sortPeaksWorkspace(
-      const std::string &columnToSortBy, const bool sortedAscending,
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
+  void sortPeaksWorkspace(const std::string &columnToSortBy,
+                          const bool sortedAscending,
+                          const Mantid::API::IPeaksWorkspace *peaksWS);
   bool hasPeaks();
 
 private:

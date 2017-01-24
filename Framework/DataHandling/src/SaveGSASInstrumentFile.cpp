@@ -234,7 +234,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
 
   vector<double> vecdouble;
   for (auto &str : strs) {
-    if (str.size() > 0) {
+    if (!str.empty()) {
       double item = atof(str.c_str());
       vecdouble.push_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
@@ -257,7 +257,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
 
   vector<unsigned int> vecinteger;
   for (auto &str : strs) {
-    if (str.size() > 0) {
+    if (!str.empty()) {
       int item = atoi(str.c_str());
       if (item < 0) {
         throw runtime_error(

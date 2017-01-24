@@ -21,7 +21,7 @@ bool ADSWorkspaceProvider<Workspace_Type>::canProvideWorkspace(
   bool bCanProvide = false;
   try {
     bCanProvide =
-        (NULL !=
+        (nullptr !=
          AnalysisDataService::Instance().retrieveWS<Workspace_Type>(wsName));
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     bCanProvide = false;

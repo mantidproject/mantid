@@ -27,25 +27,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
  * be used
  */
 int LoadILLTOF::confidence(Kernel::NexusDescriptor &descriptor) const {
-
-  // fields existent only at the ILL
-  if (descriptor.pathExists("/entry0/wavelength") &&
-      descriptor.pathExists("/entry0/experiment_identifier") &&
-      descriptor.pathExists("/entry0/mode") &&
-      !descriptor.pathExists(
-          "/entry0/dataSD") // This one is for LoadILLIndirect
-      &&
-      !descriptor.pathExists(
-          "/entry0/instrument/VirtualChopper") // This one is for
-                                               // LoadILLReflectometry
-      ) {
-    return 80;
-  } else {
-    return 0;
-  }
+  UNUSED_ARG(descriptor)
+  // This loader is deprecated.
+  return 0;
 }
 
 LoadILLTOF::LoadILLTOF() : API::IFileLoader<Kernel::NexusDescriptor>() {
+  useAlgorithm("LoadILLTOF", 2);
   m_instrumentName = "";
   m_wavelength = 0;
   m_channelWidth = 0;

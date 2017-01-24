@@ -43,7 +43,7 @@ void CalculateCostFunction::initConcrete() {
 void CalculateCostFunction::execConcrete() {
 
   if (!m_costFunction) {
-    m_costFunction = getCostFunctionProperty();
+    m_costFunction = getCostFunctionInitialized();
   }
 
   // Get the result.

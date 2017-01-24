@@ -11,17 +11,23 @@
 #ifndef WORKSPACECREATIONHELPER_H_
 #define WORKSPACECREATIONHELPER_H_
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/make_unique.h"
 
@@ -74,6 +80,26 @@ private:
   std::unique_ptr<Mantid::API::Progress> m_Progress;
   /// logger -> to provide logging,
   static Mantid::Kernel::Logger &g_log;
+};
+
+/// A struct containing the cells of an EPP table row.
+struct EPPTableRow {
+  /// FindEPP algorithm fitting success status.
+  enum class FitStatus { SUCCESS, FAILURE };
+
+  /// Construct a row with the default values.
+  EPPTableRow() = default;
+  /// Construct a row with errors set to zero.
+  EPPTableRow(const double peakCentre, const double sigma, const double height,
+              const FitStatus fitStatus);
+  double peakCentre = 0;
+  double peakCentreError = 0;
+  double sigma = 0;
+  double sigmaError = 0;
+  double height = 0;
+  double heightError = 0;
+  double chiSq = 0;
+  FitStatus fitStatus = FitStatus::SUCCESS;
 };
 
 /// Adds a workspace to the ADS
@@ -324,11 +350,21 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
 Mantid::API::MatrixWorkspace_sptr
 create2DWorkspaceWithReflectometryInstrument(double startX = 0);
 
+/// Create a 2D workspace with one monitor and three detectors based around
+/// a virtual reflectometry instrument.
+Mantid::API::MatrixWorkspace_sptr
+create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX = 0);
+
 void createInstrumentForWorkspaceWithDistances(
     Mantid::API::MatrixWorkspace_sptr workspace,
     const Mantid::Kernel::V3D &samplePosition,
     const Mantid::Kernel::V3D &sourcePosition,
     const std::vector<Mantid::Kernel::V3D> &detectorPositions);
-}
+
+/// Create a table workspace corresponding to what the FindEPP algorithm gives.
+Mantid::API::ITableWorkspace_sptr
+createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
+
+} // namespace WorkspaceCreationHelper
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

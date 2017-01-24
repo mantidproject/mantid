@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
@@ -11,16 +10,17 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <QLabel>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QDoubleValidator>
 #include <QCloseEvent>
-#include <QShowEvent>
+#include <QDoubleValidator>
+#include <QFileDialog>
 #include <QGroupBox>
-#include <QSettings>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
+#include <QShowEvent>
+#include <QVBoxLayout>
 
 namespace {
 void setDetectorNamesOnCanSasFormat(QString &saveCommands,
@@ -387,8 +387,8 @@ void SaveWorkspaces::saveFileBrowse() {
   QFileDialog::Option userCon = m_append->isChecked()
                                     ? QFileDialog::DontConfirmOverwrite
                                     : static_cast<QFileDialog::Option>(0);
-  QString oFile = API::FileDialogHandler::getSaveFileName(
-      this, title, prevPath, filter, NULL, userCon);
+  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter,
+                                               NULL, userCon);
 
   if (!oFile.isEmpty()) {
     m_fNameEdit->setText(oFile);

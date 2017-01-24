@@ -254,7 +254,7 @@ void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
 
       // display the line we gathered:
       boost::algorithm::trim(line);
-      if (line.size() > 0)
+      if (!line.empty())
         lines.push_back(line);
     }
 
@@ -653,7 +653,7 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl,
                     << "'" << v[i] << "'\n";
       string candidate = v[i];
       boost::algorithm::trim(candidate);
-      if (candidate.size() > 0) {
+      if (!candidate.empty()) {
         cwl = atof(candidate.c_str());
         break;
       }

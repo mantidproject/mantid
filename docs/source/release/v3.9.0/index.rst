@@ -41,8 +41,8 @@ Please cite any usage of Mantid as follows:
 
 If you want to cite this specific release please use:
 
-- *Mantid 3.9: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.9    
-  `Full author list <http://data.datacite.org/10.5286/SOFTWARE/MANTID3.9>`_ 
+- *Mantid 3.9: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.9
+  `Full author list <http://data.datacite.org/10.5286/SOFTWARE/MANTID3.9>`_
 
 Changes
 -------
@@ -56,6 +56,7 @@ Changes
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>
    Diffraction <diffraction>
+   Imaging <imaging>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
 

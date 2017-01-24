@@ -347,7 +347,7 @@ MatrixWorkspace_sptr Integration::getOutputWorkspace(MatrixWorkspace_sptr inWS,
   if (inWS->id() == "RebinnedOutput") {
     MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
         "Workspace2D", maxSpec - minSpec + 1, 2, 1);
-    API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, true);
+    API::WorkspaceFactory::Instance().initializeFromParent(*inWS, *outWS, true);
     return outWS;
   } else {
     return API::WorkspaceFactory::Instance().create(inWS, maxSpec - minSpec + 1,

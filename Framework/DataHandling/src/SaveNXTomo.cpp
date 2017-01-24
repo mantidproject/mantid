@@ -369,9 +369,6 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   writeLogValues(workspace, nxFile, numFiles);
   writeIntensityValue(workspace, nxFile, numFiles);
   writeImageKeyValue(workspace, nxFile, numFiles);
-
-  ++numFiles;
-
   delete[] dataArr;
 }
 

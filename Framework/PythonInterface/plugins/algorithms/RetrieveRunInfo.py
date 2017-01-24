@@ -92,7 +92,7 @@ class Intervals(object):
 def sumWsList(wsList, summedWsName = None):
     if len(wsList) == 1:
         if summedWsName is not None:
-            CloneWorkspace(InputWorkspace=wsList[0].getName(), OutputWorkspace=summedWsName)
+            CloneWorkspace(InputWorkspace=wsList[0].name(), OutputWorkspace=summedWsName)
             return mtd[summedWsName]
         return wsList[0]
 
@@ -103,9 +103,9 @@ def sumWsList(wsList, summedWsName = None):
             sumws += wsList[i]
 
     if summedWsName is None:
-        summedWsName = "_PLUS_".join([ws.getName() for ws in wsList])
+        summedWsName = "_PLUS_".join([ws.name() for ws in wsList])
 
-    RenameWorkspace(InputWorkspace=sumws.getName(), OutputWorkspace=summedWsName)
+    RenameWorkspace(InputWorkspace=sumws.name(), OutputWorkspace=summedWsName)
 
     return mtd[summedWsName]
 
@@ -236,9 +236,9 @@ class RetrieveRunInfo(PythonAlgorithm):
         ws_iter = FileBackedWsIterator(filenames)
         for ws in ws_iter:
             # Create a single row table for each file.
-            temp_table_name = ws.getName() + "_INFO"
+            temp_table_name = ws.name() + "_INFO"
             CreateLogPropertyTable(
-                InputWorkspaces=ws.getName(),
+                InputWorkspaces=ws.name(),
                 LogPropertyNames=', '.join(PROP_NAMES),
                 GroupPolicy="First", # Include only the 1st child of any groups.
                 OutputWorkspace=temp_table_name)

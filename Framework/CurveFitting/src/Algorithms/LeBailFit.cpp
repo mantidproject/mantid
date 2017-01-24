@@ -913,7 +913,7 @@ void LeBailFit::parseInstrumentParametersTable() {
   } else {
     g_log.information()
         << "[DB] Starting to parse instrument parameter table workspace "
-        << parameterWS->name() << ".\n";
+        << parameterWS->getName() << ".\n";
   }
 
   // 2. Import data to maps
@@ -970,7 +970,7 @@ void LeBailFit::parseInstrumentParametersTable() {
       newparameter.name = striter->second;
     } else {
       std::stringstream errmsg;
-      errmsg << "Parameter (table) workspace " << parameterWS->name()
+      errmsg << "Parameter (table) workspace " << parameterWS->getName()
              << " does not contain column 'Name'.  It is not a valid input.  "
                 "Quit ";
       g_log.error() << errmsg.str() << "\n";
@@ -991,7 +991,7 @@ void LeBailFit::parseInstrumentParametersTable() {
       newparameter.fit = tofit;
     } else {
       std::stringstream errmsg;
-      errmsg << "Parameter (table) workspace " << parameterWS->name()
+      errmsg << "Parameter (table) workspace " << parameterWS->getName()
              << " does not contain column 'FitOrTie'.  It is not a valid "
                 "input.  Quit ";
       g_log.error() << errmsg.str() << "\n";
@@ -1004,7 +1004,7 @@ void LeBailFit::parseInstrumentParametersTable() {
       newparameter.curvalue = dbliter->second;
     } else {
       std::stringstream errmsg;
-      errmsg << "Parameter (table) workspace " << parameterWS->name()
+      errmsg << "Parameter (table) workspace " << parameterWS->getName()
              << " does not contain column 'Value'.  It is not a valid input.  "
                 "Quit ";
       g_log.error() << errmsg.str() << "\n";
@@ -1060,7 +1060,7 @@ void LeBailFit::parseInstrumentParametersTable() {
 
   g_log.information()
       << "[DB]: Successfully Imported Peak Parameters TableWorkspace "
-      << parameterWS->name() << ". Imported " << m_funcParameters.size()
+      << parameterWS->getName() << ". Imported " << m_funcParameters.size()
       << " parameters. "
       << "\n";
 }
@@ -1151,7 +1151,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
   if (colnames.size() < 2) {
     stringstream errss;
     errss << "Input background parameter table workspace "
-          << bkgdparamws->name() << " has only " << colnames.size()
+          << bkgdparamws->getName() << " has only " << colnames.size()
           << " columns, which is fewer than 2 columns as required. ";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
@@ -1182,7 +1182,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
     // Remove extra white spaces
     boost::algorithm::trim(parname);
 
-    if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos")) {
+    if (!parname.empty() && (parname[0] == 'A' || parname == "Bkpos")) {
       // Insert parameter name starting with A or Bkpos (special case for
       // FullprofPolynomial)
       parmap.emplace(parname, parvalue);
@@ -1406,8 +1406,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 4. Set axis
   m_outputWS->getAxis(0)->setUnit("TOF");
 
-  API::TextAxis *tAxis = nullptr;
-  tAxis = new API::TextAxis(nspec);
+  API::TextAxis *tAxis = new API::TextAxis(nspec);
   tAxis->setLabel(0, "Data");
   tAxis->setLabel(1, "Calc");
   tAxis->setLabel(2, "Diff");
