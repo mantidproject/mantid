@@ -626,13 +626,23 @@ void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const {
   auto windowRect = getSurfaceBounds();
   windowRect.findTransform(transform, painter.viewport());
 
-  painter.setPen(Qt::blue);
-
-  QPolygonF poly;
-  for (auto &origin : m_selectedAlignmentMarkers) {
-    auto point = transform.map(origin);
+  // draw the 4th peak in a different colour
+  if (!m_selectedAlignmentPeakPosition.isNull()) {
+    painter.setPen(Qt::green);
+    auto point = transform.map(m_selectedAlignmentPeakPosition);
     painter.drawEllipse(point, 8, 8);
   }
+
+  // draw highlight around the first three peaks
+  QPolygonF poly;
+  painter.setPen(Qt::blue);
+  for (auto &origin : m_selectedAlignmentMarkers) {
+    if(origin != m_selectedAlignmentPeakPosition) {
+      auto point = transform.map(origin);
+      painter.drawEllipse(point, 8, 8);
+    }
+  }
+
 }
 
 /**
@@ -743,6 +753,7 @@ void ProjectionSurface::clearAlignmentPlane() {
   m_selectedAlignmentPlane.clear();
   m_selectedAlignmentMarkers.clear();
   m_selectedAlignmentPeak = nullptr;
+  m_selectedAlignmentPeakPosition = QPointF();
 }
 
 /**
@@ -929,7 +940,8 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
     }
   }
 
-  if (!peak)
+  // check we found a peak
+  if (!marker || !peak)
       return;
 
   if (m_selectedAlignmentPlane.size() < 3) {
@@ -945,6 +957,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
     }
   } else {
     m_selectedAlignmentPeak = peak;
+    m_selectedAlignmentPeakPosition = origin;
   }
 
   if (m_selectedAlignmentPlane.size() >= 3 && m_selectedAlignmentPeak)

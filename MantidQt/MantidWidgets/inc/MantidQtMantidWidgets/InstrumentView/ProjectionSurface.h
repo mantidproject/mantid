@@ -352,6 +352,7 @@ protected:
   std::vector<Mantid::Kernel::V3D> m_selectedAlignmentPlane;
   std::vector<QPointF> m_selectedAlignmentMarkers;
   Mantid::Geometry::IPeak *m_selectedAlignmentPeak;
+  QPointF m_selectedAlignmentPeakPosition;
   std::pair<std::vector<Mantid::Geometry::IPeak *>,
             std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
   std::pair<QPointF, QPointF> m_selectedMarkers;
