@@ -67,6 +67,10 @@ public:
     }
   }
 
+  /// this method is called after the worker's process has been successfully
+  /// initialised. It is necessary to do that after the initialisation of the
+  /// worker, because otherwise it does not have an assigned PID yet, as it is
+  /// not running on the OS
   void setProcessPID(const qint64 pid) { m_workerPID = pid; }
 
   qint64 getProcessPID() const { return m_workerPID; }
@@ -99,13 +103,13 @@ public slots:
 
 signals:
   void workerFinished(const qint64, const int);
-  void stdOutReady(const QString &s) const;
-  void stdErrReady(const QString &s) const;
+  void stdOutReady(const QString &) const;
+  void stdErrReady(const QString &) const;
 
 private:
   bool m_workerRunning = false;
   /// Holder for the current running process' PID
-  qint64 m_workerPID;
+  qint64 m_workerPID = 0;
   TomographyProcess *const m_worker;
 };
 } // CustomInterfaces

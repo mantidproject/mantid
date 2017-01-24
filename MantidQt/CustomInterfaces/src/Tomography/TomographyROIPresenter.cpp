@@ -4,8 +4,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyROIView.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -16,16 +18,16 @@ namespace {
 Mantid::Kernel::Logger g_log("ImageROI");
 }
 
-const std::string ImageROIPresenter::g_wsgName =
+const std::string TomographyROIPresenter::g_wsgName =
     "__tomography_gui_stack_fits_viewer_sample_images";
-const std::string ImageROIPresenter::g_wsgFlatsName =
+const std::string TomographyROIPresenter::g_wsgFlatsName =
     "__tomography_gui_stack_fits_viewer_flat_images";
-const std::string ImageROIPresenter::g_wsgDarksName =
+const std::string TomographyROIPresenter::g_wsgDarksName =
     "__tomography_gui_stack_fits_viewer_dark_images";
 
-bool ImageROIPresenter::g_warnIfUnexpectedFileExtensions = false;
+bool TomographyROIPresenter::g_warnIfUnexpectedFileExtensions = false;
 
-ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
+TomographyROIPresenter::TomographyROIPresenter(ITomographyROIView *view)
     : m_playStatus(false), m_stackPath(), m_view(view),
       m_model(new ImageStackPreParams()) {
   if (!m_view) {
@@ -37,98 +39,98 @@ ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
       Mantid::Kernel::make_unique<MantidQt::API::BatchAlgorithmRunner>();
 }
 
-ImageROIPresenter::~ImageROIPresenter() { cleanup(); }
+TomographyROIPresenter::~TomographyROIPresenter() { cleanup(); }
 
-void ImageROIPresenter::cleanup() {}
+void TomographyROIPresenter::cleanup() {}
 
-void ImageROIPresenter::notify(Notification notif) {
+void TomographyROIPresenter::notify(Notification notif) {
 
   switch (notif) {
 
-  case IImageROIPresenter::Init:
+  case ITomographyROIPresenter::Init:
     processInit();
     break;
 
-  case IImageROIPresenter::BrowseImage:
+  case ITomographyROIPresenter::BrowseImage:
     processBrowseImage();
     break;
 
-  case IImageROIPresenter::BrowseStack:
+  case ITomographyROIPresenter::BrowseStack:
     processBrowseStack();
     break;
 
-  case IImageROIPresenter::ChangeImageType:
+  case ITomographyROIPresenter::ChangeImageType:
     processChangeImageType();
     break;
 
-  case IImageROIPresenter::ChangeRotation:
+  case ITomographyROIPresenter::ChangeRotation:
     processChangeRotation();
     break;
 
-  case IImageROIPresenter::UpdateImgIndex:
+  case ITomographyROIPresenter::UpdateImgIndex:
     processUpdateImgIndex();
     break;
 
-  case IImageROIPresenter::PlayStartStop:
+  case ITomographyROIPresenter::PlayStartStop:
     processPlayStartStop();
     break;
 
-  case IImageROIPresenter::UpdateColorMap:
+  case ITomographyROIPresenter::UpdateColorMap:
     processUpdateColorMap();
     break;
 
-  case IImageROIPresenter::ColorRangeUpdated:
+  case ITomographyROIPresenter::ColorRangeUpdated:
     processColorRangeUpdated();
     break;
 
-  case IImageROIPresenter::SelectCoR:
+  case ITomographyROIPresenter::SelectCoR:
     processSelectCoR();
     break;
 
-  case IImageROIPresenter::SelectROI:
+  case ITomographyROIPresenter::SelectROI:
     processSelectROI();
     break;
 
-  case IImageROIPresenter::SelectNormalization:
+  case ITomographyROIPresenter::SelectNormalization:
     processSelectNormalization();
     break;
 
-  case IImageROIPresenter::FinishedCoR:
+  case ITomographyROIPresenter::FinishedCoR:
     processFinishedCoR();
     break;
 
-  case IImageROIPresenter::FinishedROI:
+  case ITomographyROIPresenter::FinishedROI:
     processFinishedROI();
     break;
 
-  case IImageROIPresenter::FinishedNormalization:
+  case ITomographyROIPresenter::FinishedNormalization:
     processFinishedNormalization();
     break;
 
-  case IImageROIPresenter::ResetCoR:
+  case ITomographyROIPresenter::ResetCoR:
     processResetCoR();
     break;
 
-  case IImageROIPresenter::ResetROI:
+  case ITomographyROIPresenter::ResetROI:
     processResetROI();
     break;
 
-  case IImageROIPresenter::ResetNormalization:
+  case ITomographyROIPresenter::ResetNormalization:
     processResetNormalization();
     break;
 
-  case IImageROIPresenter::ShutDown:
+  case ITomographyROIPresenter::ShutDown:
     processShutDown();
     break;
   }
 }
 
-void ImageROIPresenter::processInit() {
+void TomographyROIPresenter::processInit() {
   ImageStackPreParams p;
   m_view->setParams(p);
 }
 
-void ImageROIPresenter::processBrowseImage() {
+void TomographyROIPresenter::processBrowseImage() {
   const std::string path = m_view->askSingleImagePath();
 
   if (path.empty())
@@ -138,7 +140,7 @@ void ImageROIPresenter::processBrowseImage() {
   processLoadSingleImage();
 }
 
-void ImageROIPresenter::processBrowseStack() {
+void TomographyROIPresenter::processBrowseStack() {
   const std::string path = m_view->askImgOrStackPath();
 
   if (path.empty())
@@ -159,7 +161,8 @@ void ImageROIPresenter::processBrowseStack() {
  * @return a stack of images built from the path passed, not
  * necessarily correct (check with isValid())
  */
-StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
+StackOfImagesDirs
+TomographyROIPresenter::checkInputStack(const std::string &path) {
   StackOfImagesDirs soid(path, true);
 
   const std::string soiPath = soid.sampleImagesDir();
@@ -177,7 +180,7 @@ StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
   return soid;
 }
 
-void ImageROIPresenter::processLoadSingleImage() {
+void TomographyROIPresenter::processLoadSingleImage() {
   try {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
     if (ads.doesExist(g_wsgName)) {
@@ -199,7 +202,7 @@ void ImageROIPresenter::processLoadSingleImage() {
   setupAlgorithmRunnerAfterLoad();
 }
 
-void ImageROIPresenter::processLoadStackOfImages() {
+void TomographyROIPresenter::processLoadStackOfImages() {
   StackOfImagesDirs soid("");
   try {
     soid = checkInputStack(m_stackPath);
@@ -232,7 +235,7 @@ void ImageROIPresenter::processLoadStackOfImages() {
   setupAlgorithmRunnerAfterLoad();
 }
 
-void ImageROIPresenter::setupAlgorithmRunnerAfterLoad() {
+void TomographyROIPresenter::setupAlgorithmRunnerAfterLoad() {
   // reset any previous connections
   m_algRunner.get()->disconnect();
   connect(m_algRunner.get(), SIGNAL(batchComplete(bool)), this,
@@ -242,7 +245,7 @@ void ImageROIPresenter::setupAlgorithmRunnerAfterLoad() {
   m_algRunner->executeBatchAsync();
 }
 
-void ImageROIPresenter::finishedLoadStack(bool error) {
+void TomographyROIPresenter::finishedLoadStack(bool error) {
   if (error) {
     m_view->userWarning("Could not load the stack of images",
 
@@ -343,19 +346,19 @@ void ImageROIPresenter::finishedLoadStack(bool error) {
   m_view->enableActions(true);
 }
 
-void ImageROIPresenter::processChangeImageType() {
+void TomographyROIPresenter::processChangeImageType() {
   m_view->updateImageType(m_view->currentImageTypeStack());
 }
 
-void ImageROIPresenter::processChangeRotation() {
+void TomographyROIPresenter::processChangeRotation() {
   m_view->updateRotationAngle(m_view->currentRotationAngle());
 }
 
-void ImageROIPresenter::processUpdateImgIndex() {
+void TomographyROIPresenter::processUpdateImgIndex() {
   m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
-void ImageROIPresenter::processPlayStartStop() {
+void TomographyROIPresenter::processPlayStartStop() {
   auto wsg = m_view->currentImageTypeStack();
   if (!wsg)
     return;
@@ -378,7 +381,7 @@ void ImageROIPresenter::processPlayStartStop() {
   }
 }
 
-void ImageROIPresenter::processUpdateColorMap() {
+void TomographyROIPresenter::processUpdateColorMap() {
   std::string filename = m_view->askColorMapFile();
   if (filename.empty())
     return;
@@ -386,55 +389,55 @@ void ImageROIPresenter::processUpdateColorMap() {
   m_view->updateColorMap(filename);
 }
 
-void ImageROIPresenter::processColorRangeUpdated() {
+void TomographyROIPresenter::processColorRangeUpdated() {
   m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
-void ImageROIPresenter::processSelectCoR() {
-  m_view->changeSelectionState(IImageROIView::SelectCoR);
+void TomographyROIPresenter::processSelectCoR() {
+  m_view->changeSelectionState(ITomographyROIView::SelectCoR);
 }
 
-void ImageROIPresenter::processSelectROI() {
-  m_view->changeSelectionState(IImageROIView::SelectROIFirst);
+void TomographyROIPresenter::processSelectROI() {
+  m_view->changeSelectionState(ITomographyROIView::SelectROIFirst);
 }
 
-void ImageROIPresenter::processSelectNormalization() {
-  m_view->changeSelectionState(IImageROIView::SelectNormAreaFirst);
+void TomographyROIPresenter::processSelectNormalization() {
+  m_view->changeSelectionState(ITomographyROIView::SelectNormAreaFirst);
 }
 
-void ImageROIPresenter::processFinishedCoR() {
-  m_view->changeSelectionState(IImageROIView::SelectNone);
+void TomographyROIPresenter::processFinishedCoR() {
+  m_view->changeSelectionState(ITomographyROIView::SelectNone);
 }
 
-void ImageROIPresenter::processFinishedROI() {
-  m_view->changeSelectionState(IImageROIView::SelectNone);
+void TomographyROIPresenter::processFinishedROI() {
+  m_view->changeSelectionState(ITomographyROIView::SelectNone);
 }
 
-void ImageROIPresenter::processFinishedNormalization() {
-  m_view->changeSelectionState(IImageROIView::SelectNone);
+void TomographyROIPresenter::processFinishedNormalization() {
+  m_view->changeSelectionState(ITomographyROIView::SelectNone);
 }
 
-void ImageROIPresenter::processResetCoR() {
+void TomographyROIPresenter::processResetCoR() {
   m_view->resetCoR();
-  m_view->changeSelectionState(IImageROIView::SelectNone);
+  m_view->changeSelectionState(ITomographyROIView::SelectNone);
 }
 
-void ImageROIPresenter::processResetROI() {
+void TomographyROIPresenter::processResetROI() {
   m_view->resetROI();
-  m_view->changeSelectionState(IImageROIView::SelectNone);
+  m_view->changeSelectionState(ITomographyROIView::SelectNone);
 }
 
-void ImageROIPresenter::processResetNormalization() {
+void TomographyROIPresenter::processResetNormalization() {
   m_view->resetNormArea();
-  m_view->changeSelectionState(IImageROIView::SelectNone);
+  m_view->changeSelectionState(ITomographyROIView::SelectNone);
 }
 
-void ImageROIPresenter::processShutDown() { m_view->saveSettings(); }
+void TomographyROIPresenter::processShutDown() { m_view->saveSettings(); }
 
-void ImageROIPresenter::loadFITSStack(const StackOfImagesDirs &soid,
-                                      const std::string &wsgName,
-                                      const std::string &wsgFlatsName,
-                                      const std::string &wsgDarksName) {
+void TomographyROIPresenter::loadFITSStack(const StackOfImagesDirs &soid,
+                                           const std::string &wsgName,
+                                           const std::string &wsgFlatsName,
+                                           const std::string &wsgDarksName) {
   const std::vector<std::string> &imgs = soid.sampleFiles();
   if (imgs.empty())
     return;
@@ -450,8 +453,8 @@ void ImageROIPresenter::loadFITSStack(const StackOfImagesDirs &soid,
   loadFITSList(darks, wsgDarksName);
 }
 
-void ImageROIPresenter::loadFITSList(const std::vector<std::string> &imgs,
-                                     const std::string &wsName) {
+void TomographyROIPresenter::loadFITSList(const std::vector<std::string> &imgs,
+                                          const std::string &wsName) {
 
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   try {
@@ -499,7 +502,7 @@ void ImageROIPresenter::loadFITSList(const std::vector<std::string> &imgs,
  *input
  * to LoadFITS or similar algorithms
  */
-std::string ImageROIPresenter::filterImagePathsForFITSStack(
+std::string TomographyROIPresenter::filterImagePathsForFITSStack(
     const std::vector<std::string> &paths) {
   std::string allPaths = "";
 
@@ -572,8 +575,8 @@ std::string ImageROIPresenter::filterImagePathsForFITSStack(
   return allPaths;
 }
 
-void ImageROIPresenter::loadFITSImage(const std::string &path,
-                                      const std::string &wsName) {
+void TomographyROIPresenter::loadFITSImage(const std::string &path,
+                                           const std::string &wsName) {
   // get fits file into workspace and retrieve it from the ADS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
   try {

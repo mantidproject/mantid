@@ -1,42 +1,42 @@
-#ifndef MANTID_CUSTOMINTERFACES_IMAGEROIPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_IMAGEROIPRESENTERTEST_H
+#ifndef MANTID_CUSTOMINTERFACES_TOMOGRAPHYROIPRESENTERTEST_H
+#define MANTID_CUSTOMINTERFACES_TOMOGRAPHYROIPRESENTERTEST_H
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
 
-#include "ImageROIViewMock.h"
+#include "TomographyROIViewMock.h"
 
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
 using testing::Return;
 
-class ImageROIPresenterTest : public CxxTest::TestSuite {
+class TomographyROIPresenterTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ImageROIPresenterTest *createSuite() {
-    return new ImageROIPresenterTest();
+  static TomographyROIPresenterTest *createSuite() {
+    return new TomographyROIPresenterTest();
   }
 
-  static void destroySuite(ImageROIPresenterTest *suite) { delete suite; }
+  static void destroySuite(TomographyROIPresenterTest *suite) { delete suite; }
 
-  ImageROIPresenterTest() {
+  TomographyROIPresenterTest() {
     Mantid::API::FrameworkManager::Instance(); // make sure the framework is
                                                // initialized
   }
 
   void setUp() override {
-    m_view.reset(new testing::NiceMock<MockImageROIView>());
+    m_view.reset(new testing::NiceMock<MockTomographyROIView>());
     m_presenter.reset(
-        new MantidQt::CustomInterfaces::ImageROIPresenter(m_view.get()));
+        new MantidQt::CustomInterfaces::TomographyROIPresenter(m_view.get()));
   }
 
   void tearDown() override {
@@ -44,8 +44,8 @@ public:
   }
 
   void test_initOK() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, setParams(testing::_)).Times(1);
 
@@ -60,7 +60,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(ImageROIPresenter::Init);
+    pres.notify(TomographyROIPresenter::Init);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -69,8 +69,8 @@ public:
   }
 
   void test_initWithWrongParams() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, setParams(testing::_)).Times(1);
 
@@ -80,7 +80,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(ImageROIPresenter::Init);
+    pres.notify(TomographyROIPresenter::Init);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -89,8 +89,8 @@ public:
   }
 
   void test_browseSingleImg_EmptyPath() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, askImgOrStackPath()).Times(0);
     EXPECT_CALL(mockView, askSingleImagePath()).Times(1);
@@ -113,7 +113,7 @@ public:
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::BrowseImage);
+    pres.notify(ITomographyROIPresenter::BrowseImage);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -122,8 +122,8 @@ public:
   }
 
   void test_browseStack_EmptyPath() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, askImgOrStackPath()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, askSingleImagePath()).Times(0);
@@ -146,7 +146,7 @@ public:
         .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::BrowseStack);
+    pres.notify(ITomographyROIPresenter::BrowseStack);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -155,8 +155,8 @@ public:
   }
 
   void test_browseStack_WrongPath() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, askImgOrStackPath())
         .Times(1)
@@ -185,9 +185,9 @@ public:
     // TSM_ASSERT_THROWS("There should be an exception if there is an unexpected
     // "
     //                  "error with the images path",
-    //                  pres.notify(IImageROIPresenter::BrowseImgOrStack),
+    //                  pres.notify(ITomographyROIPresenter::BrowseImgOrStack),
     //                  Poco::FileNotFoundException);
-    pres.notify(IImageROIPresenter::BrowseStack);
+    pres.notify(ITomographyROIPresenter::BrowseStack);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -196,8 +196,8 @@ public:
   }
 
   void test_changeImageType() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     Mantid::API::WorkspaceGroup_sptr stack;
     EXPECT_CALL(mockView, currentImageTypeStack())
@@ -213,7 +213,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::ChangeImageType);
+    pres.notify(ITomographyROIPresenter::ChangeImageType);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -222,8 +222,8 @@ public:
   }
 
   void test_changeRotation() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentRotationAngle()).Times(1).WillOnce(Return(0));
     EXPECT_CALL(mockView, updateRotationAngle(0.0f)).Times(1);
@@ -232,7 +232,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::ChangeRotation);
+    pres.notify(ITomographyROIPresenter::ChangeRotation);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -241,8 +241,8 @@ public:
   }
 
   void test_updateImgIndex() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     int idx = 0;
     EXPECT_CALL(mockView, currentImgIndex()).Times(1).WillOnce(Return(idx));
@@ -253,7 +253,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::UpdateImgIndex);
+    pres.notify(ITomographyROIPresenter::UpdateImgIndex);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -263,8 +263,8 @@ public:
 
   // when the user clicks on 'play', with no images
   void test_playStartEmpty() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, currentImgIndex()).Times(0);
 
@@ -280,7 +280,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::PlayStartStop);
+    pres.notify(ITomographyROIPresenter::PlayStartStop);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -290,8 +290,8 @@ public:
 
   // try to play a single image => a warning will pop up
   void test_playStartSingleImage() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     auto stack = boost::make_shared<Mantid::API::WorkspaceGroup>();
     auto img = boost::make_shared<WorkspaceTester>();
@@ -312,7 +312,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
-    pres.notify(IImageROIPresenter::PlayStartStop);
+    pres.notify(ITomographyROIPresenter::PlayStartStop);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -322,8 +322,8 @@ public:
 
   // when the user clicks on 'play' with a reasonable stack of images
   void test_playOK() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     auto stack = boost::make_shared<Mantid::API::WorkspaceGroup>();
     auto img = boost::make_shared<WorkspaceTester>();
@@ -346,7 +346,7 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // start to play
-    pres.notify(IImageROIPresenter::PlayStartStop);
+    pres.notify(ITomographyROIPresenter::PlayStartStop);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -357,8 +357,8 @@ public:
   // when the user clicks on 'play', then 'stop', with a reasonable stack of
   // images
   void test_playStartStop() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     auto stack = boost::make_shared<Mantid::API::WorkspaceGroup>();
     auto img = boost::make_shared<WorkspaceTester>();
@@ -381,9 +381,9 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // start first
-    pres.notify(IImageROIPresenter::PlayStartStop);
+    pres.notify(ITomographyROIPresenter::PlayStartStop);
     // then stop
-    pres.notify(IImageROIPresenter::PlayStartStop);
+    pres.notify(ITomographyROIPresenter::PlayStartStop);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -392,8 +392,8 @@ public:
   }
 
   void test_updateColorMapEmpty() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, askColorMapFile()).Times(1).WillOnce(Return(""));
 
@@ -404,7 +404,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::UpdateColorMap);
+    pres.notify(ITomographyROIPresenter::UpdateColorMap);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -413,8 +413,8 @@ public:
   }
 
   void test_updateColorMapOK() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     const std::string filename = "test_inexistent_colormap.map";
     EXPECT_CALL(mockView, askColorMapFile())
@@ -427,7 +427,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::UpdateColorMap);
+    pres.notify(ITomographyROIPresenter::UpdateColorMap);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -436,8 +436,8 @@ public:
   }
 
   void test_changeColorRange() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, askColorMapFile()).Times(0);
 
@@ -449,7 +449,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::ColorRangeUpdated);
+    pres.notify(ITomographyROIPresenter::ColorRangeUpdated);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -458,17 +458,17 @@ public:
   }
 
   void test_selectCoR() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, changeSelectionState(IImageROIView::SelectCoR))
+    EXPECT_CALL(mockView, changeSelectionState(ITomographyROIView::SelectCoR))
         .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::SelectCoR);
+    pres.notify(ITomographyROIPresenter::SelectCoR);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -477,11 +477,11 @@ public:
   }
 
   void test_resetCoR() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, resetCoR()).Times(1);
-    EXPECT_CALL(mockView, changeSelectionState(IImageROIView::SelectNone))
+    EXPECT_CALL(mockView, changeSelectionState(ITomographyROIView::SelectNone))
         .Times(1);
 
     // just a few calls that should not happen
@@ -500,7 +500,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::ResetCoR);
+    pres.notify(ITomographyROIPresenter::ResetCoR);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -509,17 +509,17 @@ public:
   }
 
   void test_selectROI() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, changeSelectionState(IImageROIView::SelectROIFirst))
-        .Times(1);
+    EXPECT_CALL(mockView, changeSelectionState(
+                              ITomographyROIView::SelectROIFirst)).Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::SelectROI);
+    pres.notify(ITomographyROIPresenter::SelectROI);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -528,17 +528,17 @@ public:
   }
 
   void test_finishROI() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, changeSelectionState(IImageROIView::SelectNone))
+    EXPECT_CALL(mockView, changeSelectionState(ITomographyROIView::SelectNone))
         .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::FinishedROI);
+    pres.notify(ITomographyROIPresenter::FinishedROI);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -547,11 +547,11 @@ public:
   }
 
   void test_resetROI() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, resetROI()).Times(1);
-    EXPECT_CALL(mockView, changeSelectionState(IImageROIView::SelectNone))
+    EXPECT_CALL(mockView, changeSelectionState(ITomographyROIView::SelectNone))
         .Times(1);
 
     // just a few calls that should not happen
@@ -570,7 +570,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::ResetROI);
+    pres.notify(ITomographyROIPresenter::ResetROI);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -579,17 +579,18 @@ public:
   }
 
   void test_selectNormalization() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, changeSelectionState(
-                              IImageROIView::SelectNormAreaFirst)).Times(1);
+    EXPECT_CALL(mockView,
+                changeSelectionState(ITomographyROIView::SelectNormAreaFirst))
+        .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::SelectNormalization);
+    pres.notify(ITomographyROIPresenter::SelectNormalization);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -598,17 +599,17 @@ public:
   }
 
   void test_finishNormalization() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, changeSelectionState(IImageROIView::SelectNone))
+    EXPECT_CALL(mockView, changeSelectionState(ITomographyROIView::SelectNone))
         .Times(1);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::FinishedNormalization);
+    pres.notify(ITomographyROIPresenter::FinishedNormalization);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -617,11 +618,11 @@ public:
   }
 
   void test_resetNormalization() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, resetNormArea()).Times(1);
-    EXPECT_CALL(mockView, changeSelectionState(IImageROIView::SelectNone))
+    EXPECT_CALL(mockView, changeSelectionState(ITomographyROIView::SelectNone))
         .Times(1);
 
     // just a few calls that should not happen
@@ -641,7 +642,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IImageROIPresenter::ResetNormalization);
+    pres.notify(ITomographyROIPresenter::ResetNormalization);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -650,15 +651,15 @@ public:
   }
 
   void test_shutDown() {
-    testing::NiceMock<MockImageROIView> mockView;
-    MantidQt::CustomInterfaces::ImageROIPresenter pres(&mockView);
+    testing::NiceMock<MockTomographyROIView> mockView;
+    MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, saveSettings()).Times(1);
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(ImageROIPresenter::ShutDown);
+    pres.notify(TomographyROIPresenter::ShutDown);
 
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
@@ -668,11 +669,12 @@ public:
 
 private:
   // boost::shared_ptr
-  boost::scoped_ptr<testing::NiceMock<MockImageROIView>> m_view;
-  boost::scoped_ptr<MantidQt::CustomInterfaces::ImageROIPresenter> m_presenter;
+  boost::scoped_ptr<testing::NiceMock<MockTomographyROIView>> m_view;
+  boost::scoped_ptr<MantidQt::CustomInterfaces::TomographyROIPresenter>
+      m_presenter;
 
   // To have one FITS, etc.
   Mantid::API::MatrixWorkspace_sptr m_ws;
 };
 
-#endif // MANTID_CUSTOMINTERFACES_IMAGEROIPRESENTERTEST_H
+#endif // MANTID_CUSTOMINTERFACES_TOMOGRAPHYROIPRESENTERTEST_H
