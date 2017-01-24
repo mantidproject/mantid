@@ -169,6 +169,9 @@ class _IntermediateWSCleanup:
     Manages intermediate workspace cleanup.
     '''
     def __init__(self, cleanupMode, deleteAlgorithmLogging):
+        '''
+        Initializes an instance of the class.
+        '''
         self._deleteAlgorithmLogging = deleteAlgorithmLogging
         self._doDelete = cleanupMode == _CLEANUP_DELETE
         self._protected = set()
@@ -964,24 +967,46 @@ def _rebin(ws, params, wsNames, algorithmLogging):
 
 
 class DirectILLReduction(DataProcessorAlgorithm):
+    '''
+    A data reduction workflow algorithm for the direct geometry TOF
+    spectrometers at ILL.
+    '''
 
     def __init__(self):
+        '''
+        Initializes an instance of the algorithm.
+        '''
         DataProcessorAlgorithm.__init__(self)
 
     def category(self):
+        '''
+        Returns the algorithm's category.
+        '''
         return 'Workflow\\Inelastic'
 
     def name(self):
+        '''
+        Returns the algorithm's name.
+        '''
         return 'DirectILLReduction'
 
     def summary(self):
+        '''
+        Returns a summary of the algorithm.
+        '''
         return 'Data reduction workflow for the direct geometry ' + \
                'time-of-flight spectrometers at ILL.'
 
     def version(self):
+        '''
+        Returns the algorithm's version.
+        '''
         return 1
 
     def PyExec(self):
+        '''
+        Executes the data reduction workflow.
+        '''
         report = _Report()
         subalgLogging = False
         if self.getProperty(_PROP_SUBALG_LOGGING).value == \
@@ -1107,6 +1132,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self._finalize(mainWS, wsCleanup, report)
 
     def PyInit(self):
+        '''
+        Initializes the algorithm's input and output properties.
+        '''
         # Validators.
         greaterThanUnityFloat = FloatBoundedValidator(lower=1)
         mandatoryPositiveInt = CompositeValidator()
