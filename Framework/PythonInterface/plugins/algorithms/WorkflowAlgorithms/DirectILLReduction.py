@@ -17,11 +17,10 @@ from mantid.simpleapi import (AddSampleLog, ApplyPaalmanPingsCorrection,
                               BinWidthAtX, CalculateFlatBackground,
                               ClearMaskFlag, CloneWorkspace,
                               ComputeCalibrationCoefVan, ConvertSpectrumAxis,
-                              ConvertToConstantL2, ConvertToPointData, 
+                              ConvertToConstantL2, ConvertToPointData,
                               ConvertUnits, CorrectKiKf, CorrectTOFAxis,
-                              CreateEmptyTableWorkspace, 
-                              CreateSingleValuedWorkspace,
-                              CylinderPaalmanPingsCorrection2, DeleteWorkspace,
+                              CreateEmptyTableWorkspace,
+                              CreateSingleValuedWorkspace, DeleteWorkspace,
                               DetectorEfficiencyCorUser, Divide,
                               ExtractMonitors, FindEPP,
                               FlatPlatePaalmanPingsCorrection, GetEiMonDet,
@@ -414,7 +413,7 @@ def _medianDeltaTheta(ws):
     thetas = list()
     spectrumInfo = ws.spectrumInfo()
     for i in range(ws.getNumberHistograms()):
-        if (not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i) and 
+        if (not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i) and
                 not spectrumInfo.isMonitor(i)):
             det = ws.getDetector(i)
             twoTheta = ws.detectorTwoTheta(det)
@@ -431,13 +430,11 @@ def _minMaxQ(ws):
     Estimates the start and end q bins for S(theta, w) workspace.
     '''
     Ei = ws.run().getProperty('Ei').value * 1e-3 * constants.e  # in Joules
-    axis = ws.getAxis(1)
-    maxTheta = numpy.radians(axis.getMax())
     xs = ws.readX(0)
     minW = xs[0] * 1e-3 * constants.e  # in Joules
     maxEf = Ei - minW
     # In Ånströms
-    maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2 * \
+    maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2 *
                      (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
     minQ = 0.0
     return (minQ, maxQ)
@@ -1274,7 +1271,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                 values='',
                                 direction=Direction.Input),
             doc='List of instrument components to mask.')
-        self.setPropertyGroup(_PROP_USER_MASK_COMPONENTS, _PROPGROUP_DET_DIAGNOSTICS)
+        self.setPropertyGroup(_PROP_USER_MASK_COMPONENTS,
+                              _PROPGROUP_DET_DIAGNOSTICS)
         self.declareProperty(name=_PROP_DET_DIAGNOSTICS,
                              defaultValue=_DIAGNOSTICS_YES,
                              validator=StringListValidator([
@@ -1651,13 +1649,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                     _PROP_REDUCTION_TYPE + ' is ' + _REDUCTION_TYPE_VANA + \
                     ' or ' + _REDUCTION_TYPE_SAMPLE + '.'
         if reductionType == _REDUCTION_TYPE_SAMPLE:
-            if (self.getProperty(_PROP_REBINNING_MODE_W).value == _REBIN_MANUAL_W and self.getProperty(_PROP_REBINNING_PARAMS_W).isDefault):
+            if (self.getProperty(_PROP_REBINNING_MODE_W).value ==
+                    _REBIN_MANUAL_W and
+                    self.getProperty(_PROP_REBINNING_PARAMS_W).isDefault):
                 issues[_PROP_REBINNING_PARAMS_W] = \
                     'Energy rebinning parameters must be given in manual ' + \
                     'rebinning mode'
             if (self.getProperty(_PROP_REBINNING_MODE_Q).value ==
-                _REBIN_MANUAL_Q and
-                self.getProperty(_PROP_REBINNING_PARAMS_Q).isDefault):
+                    _REBIN_MANUAL_Q and
+                    self.getProperty(_PROP_REBINNING_PARAMS_Q).isDefault):
                 issues[_PROP_REBINNING_PARAMS_Q] = \
                     'q rebinning parameters must be given in manual ' + \
                     'rebinning mode.'

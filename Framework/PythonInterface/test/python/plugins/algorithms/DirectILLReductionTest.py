@@ -87,7 +87,6 @@ def _fillTemplateWorkspace(templateWS):
                  LogText=str(float(_wavelength(E_i))),
                  LogType='Number',
                  NumberType='Double')
-    
     pulseInterval = \
         tofMonitorDetector + (monitorElasticIndex - elasticIndex) * binWidth
     AddSampleLog(Workspace=ws,
@@ -181,7 +180,8 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         diagnosticsWS = mtd[diagnosticsWSName]
-        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName], diagnosticsWS)
+        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName],
+                                                  diagnosticsWS)
         self.assertEqual(diagnosticsWS.getNumberHistograms(),
                          nHistograms - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
@@ -213,7 +213,8 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         diagnosticsWS = mtd[diagnosticsWSName]
-        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName], diagnosticsWS)
+        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName],
+                                                  diagnosticsWS)
         self.assertEqual(diagnosticsWS.getNumberHistograms(),
                          self._testIN5WS.getNumberHistograms() - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
@@ -244,7 +245,8 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         diagnosticsWS = mtd[diagnosticsWSName]
-        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName], diagnosticsWS)
+        self._checkDiagnosticsAlgorithmsInHistory(mtd[outWSName],
+                                                  diagnosticsWS)
         self.assertEqual(diagnosticsWS.getNumberHistograms(),
                          nHistograms - 1)
         self.assertEqual(diagnosticsWS.blocksize(), 1)
@@ -335,7 +337,8 @@ class DirectILLReductionTest(unittest.TestCase):
             self.fail('Algorithm threw and exception')
         self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_ecScaling'))
         self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_scaled_EC'))
-        self.assertTrue(mtd.doesExist(outECSubtractedWSName + '_EC_subtracted'))
+        self.assertTrue(mtd.doesExist(outECSubtractedWSName +
+                                      '_EC_subtracted'))
         DeleteWorkspace(ecWS)
         DeleteWorkspace(outWSName)
         DeleteWorkspace(outECSubtractedWSName)
@@ -446,7 +449,6 @@ class DirectILLReductionTest(unittest.TestCase):
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
         DeleteWorkspace(ws)
 
-
     def test_final_sample_output_workspace(self):
         outWSName = 'outWS'
         algProperties = {
@@ -543,7 +545,6 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(axis.getUnit().name(), 'Momentum transfer')
         self.assertAlmostEquals(ws.readX(0)[0], qMin)
         self.assertAlmostEquals(ws.readX(0)[-1], qMax)
-        binWidth = ws.readX(0)[1] - ws.readX(0)[0]
         xs = ws.extractX()[:, :-1]  # The last bin may be smaller, ignoring.
         numpy.testing.assert_almost_equal(numpy.diff(xs), qStep, decimal=5)
         DeleteWorkspace(ws)
@@ -565,7 +566,6 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         self.assertRaises(RuntimeError, run_algorithm, 'DirectILLReduction',
                           **algProperties)
-
 
     def test_theta_energy_output_workspace(self):
         outWSName = 'outWS'
@@ -654,7 +654,7 @@ class DirectILLReductionTest(unittest.TestCase):
             return algName in algNames
 
     def _checkDiagnosticsAlgorithmsInHistory(self, outWS, diagnosticsWS):
-        self.assertTrue(self._checkAlgorithmsInHistory(outWS, 
+        self.assertTrue(self._checkAlgorithmsInHistory(outWS,
                                                        'MedianDetectorTest',
                                                        'MaskDetectors'))
         self.assertTrue(self._checkAlgorithmsInHistory(diagnosticsWS,
