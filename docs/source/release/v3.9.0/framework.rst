@@ -78,7 +78,7 @@ Deprecated
 - :ref:`LoadILLAscii	 <algm-LoadILLAscii>`.
 - :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` is deprecated in favour of v2.
 - :ref:`SubmitRemoteJob	 <algm-SubmitRemoteJob>` is deprecated in favour of v2.
-- :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:`TransposeMD <algm_TransposeMD>`.
+- :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:`TransposeMD <algm-TransposeMD>`.
 - The Python function `IMDDimension.getName()` has been deprecated in favour of `IMDDimension.name`.
 - The duplicate Python function `Workspace.getName()` has been deprecated in favour of `Workspace.name()`.
 
