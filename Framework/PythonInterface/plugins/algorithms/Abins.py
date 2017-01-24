@@ -6,6 +6,7 @@ except ImportError:
     PATHOS_FOUND = False
 
 import numpy as np
+import six
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
 # noinspection PyProtectedMember
@@ -730,7 +731,7 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         pkt_per_peak = AbinsParameters.pkt_per_peak
-        if not (isinstance(pkt_per_peak, (int, long)) and 1 <= pkt_per_peak <= 1000):
+        if not (isinstance(pkt_per_peak, six.integer_types) and 1 <= pkt_per_peak <= 1000):
             raise RuntimeError("Invalid value of pkt_per_peak" + message_end)
 
         # bin width is expressed in cm^-1
@@ -773,7 +774,7 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         optimal_size = AbinsParameters.optimal_size
-        if not (isinstance(optimal_size, (int, long)) and optimal_size > 0):
+        if not (isinstance(optimal_size, six.integer_types) and optimal_size > 0):
             raise RuntimeError("Invalid value of optimal_size" + message_end)
 
     def _check_threads(self, message_end=None):

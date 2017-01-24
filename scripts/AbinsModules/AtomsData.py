@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
+import six
 import AbinsModules
 
 
@@ -45,7 +46,7 @@ class AtomsDaTa(AbinsModules.GeneralData):
 
         # "sort"
         sort = item["sort"]
-        if not isinstance(sort, int):
+        if not (isinstance(sort, six.integer_types) or np.issubdtype(sort.dtype, np.integer)):
             raise ValueError("Parameter sort  should be integer.")
         if sort < 0:
             raise ValueError("Parameter sort cannot be negative.")

@@ -1,10 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 import h5py
 import numpy as np
+import six
 import subprocess
 import shutil
 import hashlib
-import  AbinsModules
+import AbinsModules
 import os
 
 
@@ -292,38 +293,40 @@ class IOmodule(object):
     def _convert_unicode_to_string_core(self, item=None):
         """
         Convert atom element from unicode to str
+        but only in Python 2 where unicode handling is a mess
         @param item: converts unicode to item
         @return: converted element
         """
         assert isinstance(item, unicode)
-        return str(item).replace("u'", "'")
+        return item.encode('utf-8')
 
     def _convert_unicode_to_str(self, object_to_check=None):
         """
-        Converts unicode to Python str, works for nested dicts and lists (recursive algorithm).
+        Converts unicode to Python str, works for nested dicts and lists (recursive algorithm). Only required
+        for Python 2 where a mismatch with unicode/str objects is a problem for dictionary lookup
 
         @param object_to_check: dictionary, or list with names which should be converted from unicode to string.
         """
+        if six.PY2:
+            if isinstance(object_to_check, list):
+                for i in range(len(object_to_check)):
+                    object_to_check[i] = self._convert_unicode_to_str(object_to_check[i])
 
-        if isinstance(object_to_check, list):
-            for i in range(len(object_to_check)):
-                object_to_check[i] = self._convert_unicode_to_str(object_to_check[i])
+            elif isinstance(object_to_check, dict):
+                for item in object_to_check:
+                    if isinstance(item, unicode):
 
-        elif isinstance(object_to_check, dict):
-            for item in object_to_check:
-                if isinstance(item, unicode):
+                        decoded_item = self._convert_unicode_to_string_core(item)
+                        item_dict = object_to_check[item]
+                        del object_to_check[item]
+                        object_to_check[decoded_item] = item_dict
+                        item = decoded_item
 
-                    decoded_item = self._convert_unicode_to_string_core(item)
-                    item_dict = object_to_check[item]
-                    del object_to_check[item]
-                    object_to_check[decoded_item] = item_dict
-                    item = decoded_item
+                    object_to_check[item] = self._convert_unicode_to_str(object_to_check[item])
 
-                object_to_check[item] = self._convert_unicode_to_str(object_to_check[item])
-
-        # unicode element
-        elif isinstance(object_to_check, unicode):
-            object_to_check = self._convert_unicode_to_string_core(object_to_check)
+            # unicode element
+            elif isinstance(object_to_check, unicode):
+                object_to_check = self._convert_unicode_to_string_core(object_to_check)
 
         return object_to_check
 
@@ -416,7 +419,7 @@ class IOmodule(object):
                 data = f.read(buf)
                 if not data:
                     break
-                sha.update(data)
+                sha.update(data.encode('utf-8'))
 
         return sha.hexdigest()
 

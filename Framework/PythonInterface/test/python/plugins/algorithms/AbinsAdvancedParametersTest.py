@@ -3,6 +3,7 @@ import unittest
 import os
 from mantid.simpleapi import mtd, logger
 import numpy as np
+import six
 from mantid.simpleapi import Abins, DeleteWorkspace
 
 from AbinsModules import AbinsParameters, AbinsTestHelpers
@@ -295,7 +296,10 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         good_names = [self._wrk_name, self._wrk_name + "_Si", self._wrk_name + "_Si_total"]
         Abins(PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
         names = mtd.getObjectNames()
-        self.assertAlmostEqual(0, cmp(good_names, names))
+        # Builtin cmp has been removed in Python 3
+        def _cmp(a, b):
+            return (a > b) - (a < b)
+        self.assertAlmostEqual(0, _cmp(good_names, names))
 
 if __name__ == "__main__":
     unittest.main()

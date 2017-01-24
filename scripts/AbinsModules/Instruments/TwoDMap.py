@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
+import six
 
 from .Instrument import Instrument
 from AbinsModules import AbinsParameters
@@ -23,7 +24,7 @@ class TwoDMap(Instrument):
         Returns Q powder data for index input_data.
         :param input_data: index of Q2
         """
-        if isinstance(input_data, (int, long)) and 0 <= input_data < self._q_powder.size:
+        if isinstance(input_data, six.integer_types) and 0 <= input_data < self._q_powder.size:
 
             return self._q_powder[input_data]
         else:
