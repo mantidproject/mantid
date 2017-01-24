@@ -95,7 +95,6 @@ for platform in PLATFORMS:
     url = URL+"-"+platform+"/lastCompletedBuild/testReport/api/json"
     params = {}
 
-    print("URL:", url)
     request = requests.get(url, params=params)
 
     if request.status_code != 200:
