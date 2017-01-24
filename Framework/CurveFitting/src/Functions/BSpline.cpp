@@ -6,6 +6,8 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <gsl/gsl_version.h>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
