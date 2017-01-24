@@ -67,6 +67,7 @@ Vesuvio
 #######
 
 - Run numbers can now be input as a range in :ref:`LoadVesuvio <algm-LoadVesuvio>` and :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>`
+- Position of monitors has been updated
 
 Improvements
 ------------
