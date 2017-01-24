@@ -20,10 +20,14 @@ def execute(config):
 
     # import all used filters
     from recon.filters import rotate_stack, crop_coords
+    cores = config.func.cores
+    chunksize = config.func.chunksize
 
-    sample, flat, dark = rotate_stack.execute(sample, config.pre.rotation, flat, dark, h)
+    sample, flat, dark = rotate_stack.execute(
+        sample, config.pre.rotation, flat, dark, cores=cores, chunksize=chunksize, h=h)
 
-    sample = crop_coords.execute_volume(sample, config.pre.region_of_interest, h)
+    sample = crop_coords.execute_volume(
+        sample, config.pre.region_of_interest, h)
 
     num_projections = sample.shape[0]
     projection_angle_increment = float(config.func.max_angle) / num_projections
@@ -55,7 +59,8 @@ def execute(config):
             current_slice_index += int(size / checked_projections)
             slice_indices.append(current_slice_index)
 
-    left_crop_pos = config.pre.region_of_interest[0]
+    left_crop_pos = config.pre.region_of_interest[
+        0] if config.pre.region_of_interest is not None else 0
     image_width = sample.shape[2]
 
     # if crop coords match with the image width then the full image was
@@ -66,15 +71,17 @@ def execute(config):
         "Starting COR calculation on {0} projections.".format(checked_projections))
 
     calculated_cors = []
+    h.prog_init(len(slice_indices), "Center of Rotation", unit='calculations')
     for slice_idx in slice_indices:
         cor = tool.find_center(
             tomo=sample, theta=projection_angles, ind=slice_idx, emission=False)
 
         print_proper_message(cor, h, pixels_from_left_side, slice_idx)
+        h.prog_update()
 
         calculated_cors.append(cor)
-
-    h.pstop("Finished COR calculation.", 2)
+    h.prog_close()
+    h.pstop("Finished COR calculation.")
 
     average_cor_relative_to_crop = sum(calculated_cors) / len(calculated_cors)
     average_cor_relative_to_full_image = sum(
