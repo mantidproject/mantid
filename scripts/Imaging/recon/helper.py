@@ -14,7 +14,7 @@ from recon.configs.recon_config import ReconstructionConfig
 
 class Helper(object):
     """
-    Helper class for functions used accross the 
+    Helper class for functions used accross the
     """
 
     def __init__(self, config=None):
@@ -109,18 +109,28 @@ class Helper(object):
     @staticmethod
     def execute_async(data=None, partial_func=None, cores=1, chunksize=None, name=None, h=None):
         h = Helper.empty_init() if h is None else h
+        import copy
+        import numpy as np
         from multiprocessing import Pool
+
+        import time
 
         if chunksize is None:
             chunksize = 1  # TODO use proper calculation
 
         pool = Pool(cores)
+        # imap_unordered gives the images back in random order!
+        # map and map_async cannot replace the data in place and end up
+        # doubling the memory. They do not improve speed performance either
+        # imap seems to be the best choice
         h.prog_init(data.shape[0], name + " " +
                     str(cores) + "c " + str(chunksize) + "chs")
-        # imap_unordered gives the images back in random order!
         for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
-            data[i] = res_data
+            data[i, :, :] = res_data[:, :]
             h.prog_update()
+
+        pool.close()
+        pool.join()
         h.prog_close()
 
         return data

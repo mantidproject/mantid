@@ -4,19 +4,19 @@
 
 - [Contents](#contents)
 - [Utility](#utility)
-  - [Merge pre-processing images into a stack. This will not apply any filters as pre-processing, it will just pack all of the images into a stack](#merge-pre-processing-images-into-a-stack-this-will-not-apply-any-filters-as-pre-processing-it-will-just-pack-all-of-the-images-into-a-stack)
+    - [Merge pre-processing images into a stack. This will not apply any filters as pre-processing, it will just pack all of the images into a stack](#merge-pre-processing-images-into-a-stack-this-will-not-apply-any-filters-as-pre-processing-it-will-just-pack-all-of-the-images-into-a-stack)
 - [Find Center Runs](#find-center-runs)
-  - [Single image and no crop](#single-image-and-no-crop)
-  - [Full `RB000888 test stack larmor summed 201510`, spheres crop](#full-rb000888-test-stack-larmor-summed-201510-spheres-crop)
+    - [Single image and no crop](#single-image-and-no-crop)
+    - [Full `RB000888 test stack larmor summed 201510`, spheres crop](#full-rb000888-test-stack-larmor-summed-201510-spheres-crop)
 - [Run Reconstruction](#run-reconstruction)
-  - [Single Image <br>](#single-image-br)
-  - [Full `RB000888 test stack larmor summed 201510`, bolts crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-bolts-crop-good-air-region)
-  - [Full `RB000888 test stack larmor summed 201510`, spheres crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-spheres-crop-good-air-region)
-  - [Full `RB000888_test_stack_larmor_summed_201510` dataset, bolts crop, **BAD** air region](#full-rb000888_test_stack_larmor_summed_201510-dataset-bolts-crop-bad-air-region)
+    - [Single Image <br>](#single-image-br)
+    - [Full `RB000888 test stack larmor summed 201510`, bolts crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-bolts-crop-good-air-region)
+    - [Full `RB000888 test stack larmor summed 201510`, spheres crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-spheres-crop-good-air-region)
+    - [Full `RB000888_test_stack_larmor_summed_201510` dataset, bolts crop, **BAD** air region](#full-rb000888_test_stack_larmor_summed_201510-dataset-bolts-crop-bad-air-region)
 - [ImageJ `GetSelectionCoordinates` Macro](#imagej-getselectioncoordinates-macro)
 - [Python local tests](#python-local-tests)
-  - [Pyfits load image stack](#pyfits-load-image-stack)
-  - [Test loading single images and image stack](#test-loading-single-images-and-image-stack)
+    - [Pyfits load image stack](#pyfits-load-image-stack)
+    - [Test loading single images and image stack](#test-loading-single-images-and-image-stack)
 - [Plot Circular Mask](#plot-circular-mask)
 - [Normalise by background comparison](#normalise-by-background-comparison)
 - [Astra Reconstructions](#astra-reconstructions)
@@ -24,13 +24,13 @@
 - [SciPy ndimage zoom](#scipy-ndimage-zoom)
 - [SciPy misc imresize](#scipy-misc-imresize)
 - [SciPy timeit misc.imresize vs ndimage.zoom](#scipy-timeit-miscimresize-vs-ndimagezoom)
-  - [Bigger data test](#bigger-data-test)
+    - [Bigger data test](#bigger-data-test)
 - [`Helper` class initialisation test](#helper-class-initialisation-test)
 - [Tomo Test runs with as most args as possible](#tomo-test-runs-with-as-most-args-as-possible)
-  - [--only-preproc](#--only-preproc)
-  - [--reuse-preproc](#--reuse-preproc)
-  - [--find-cor](#--find-cor)
-  - [--crop-before-normalise](#--crop-before-normalise)
+    - [--only-preproc](#--only-preproc)
+    - [--reuse-preproc](#--reuse-preproc)
+    - [--find-cor](#--find-cor)
+    - [--crop-before-normalise](#--crop-before-normalise)
 - [Testing the Big Data](#testing-the-big-data)
 - [Chamber Tomo Find COR](#chamber-tomo-find-cor)
 
@@ -509,7 +509,7 @@ Data Type: float32
 
 ```python 
 python main.py 
-bsub -I python /work/imat/imat_recon/scripts/main.py -i /work/imat/chamber_tomo/temp/full_stack/ -k /work/imat/chamber_tomo/Dark/ -l /work/imat/chamber_tomo/Flat/ -o /work/imat/chamber_tomo/temp/full_preproc --out-format fits --only-preproc --data-as-stack -w --in-format fits -g '[384.0, 0.0, 1550.0, 1932.0]' -e '[384.0, 686.0, 476.0, 804.0]' --pre-median-size 3
+bsub -I python /work/imat/imat_recon/scripts/main.py -i /work/imat/chamber_tomo/temp/full_stack/ -k /work/imat/chamber_tomo/Dark/ -l /work/imat/chamber_tomo/Flat/ -o /work/imat/chamber_tomo/temp/full_preproc --out-format fits --only-preproc --data-as-stack -w --in-format fits -R 384 0 1550 1932 -A 384 686 476 804 --pre-median-size 3
 ```
 
 >python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/1000/pre_processed -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1000_processed -g '[384.0, 0.0, 1550.0, 1932.0]' -f

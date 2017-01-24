@@ -13,14 +13,14 @@ class CustomTimer(object):
         self._total = total
         self._iter = 0
         self._prefix = prefix + ": "
-        self._bar_len = 60
+        self._bar_len = 40
 
     def update(self, iterations):
         self._iter += iterations
-        # how much is filled
-        rows, columns = os.popen('stty size', 'r').read().split()
 
-        self._bar_len = int(int(columns) / 2)
+        # this can cause random crashes on SCARF
+        # rows, columns = os.popen('stty size', 'r').read().split()
+        # give a default length
 
         filled_len = int(
             round(self._bar_len * self._iter / float(self._total)))

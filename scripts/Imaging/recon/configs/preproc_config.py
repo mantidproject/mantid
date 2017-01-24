@@ -72,7 +72,7 @@ class PreProcConfig(object):
             'Pre-processing of input raw images/projections')
 
         grp_pre.add_argument(
-            "-g",
+            "-R",
             "--region-of-interest",
             nargs='*',
             required=False,
@@ -82,7 +82,7 @@ class PreProcConfig(object):
                  "Example: --region-of-interest='[150,234,23,22]'.")
 
         grp_pre.add_argument(
-            "-e",
+            "-A",
             "--air-region",
             required=False,
             nargs='*',

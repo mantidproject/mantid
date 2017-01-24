@@ -29,7 +29,6 @@ def execute(data, air_region, region_of_interest, crop_before_normalise, h=None)
 
     if air_region:
         _crop_coords_sanity_checks(air_region, data)
-        _crop_coords_sanity_checks(region_of_interest, data)
 
         air_right, air_top, air_left, air_bottom = translate_coords_onto_cropped_picture(
             region_of_interest, air_region, crop_before_normalise)
@@ -77,14 +76,15 @@ def translate_coords_onto_cropped_picture(crop_coords, air_region, crop_before_n
     air_left = air_region[0]
     air_bottom = air_region[3]
 
+    if not crop_before_normalise:
+        return air_right, air_top, air_left, air_bottom
+
     crop_right = crop_coords[2]
     crop_top = crop_coords[1]
     crop_left = crop_coords[0]
     crop_bottom = crop_coords[3]
 
-    if not crop_before_normalise:
-        return air_right, air_top, air_left, air_bottom
-
+    _crop_coords_sanity_checks(region_of_interest, data)
     _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
                                 crop_bottom, crop_left, crop_right, crop_top)
     # Translate the air region coordinates to the crop.
