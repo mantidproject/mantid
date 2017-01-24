@@ -1039,18 +1039,19 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
 
-                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
-                                             thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
-                                             OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
-                                             ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax, Version=1)
+                    _wq, _wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
+                                                                   thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
+                                                                   OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
+                                                                   ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                                   MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
+                                                                   Version=1)
 
                     wqBinned, wq, wlam = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
-                                                                 thetaIn=angle, OutputWorkspaceBinned=runno+'_IvsQ_binned_'+str(i+1),
-                                                                 OutputWorkspace=runno+'_IvsQ_'+str(i+1),
-                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
-                                                                 ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                 MomentumTransferMin=Qmin, MomentumTransferMax=Qmax)
+                                                                       thetaIn=angle, OutputWorkspaceBinned=runno+'_IvsQ_binned_'+str(i+1),
+                                                                       OutputWorkspace=runno+'_IvsQ_'+str(i+1),
+                                                                       OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
+                                                                       ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                                       MomentumTransferMin=Qmin, MomentumTransferMax=Qmax)
 
                     wqGroupBinned.append(wqBinned)
                     wqGroup.append(wq)
@@ -1062,18 +1063,19 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
-                                             thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
-                                             OutputWorkspaceWavelength=runno+'_IvsLam',
-                                             ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax, Version=1)
+                _wq, _wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
+                                                               thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
+                                                               OutputWorkspaceWavelength=runno+'_IvsLam',
+                                                               ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                               MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
+                                                               Version=1)
 
                 wqBinned, wq, wlam = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
-                                                             thetaIn=angle, OutputWorkspaceBinned=runno+'_IvsQ_binned',
-                                                             OutputWorkspace=runno+'_IvsQ',
-                                                             OutputWorkspaceWavelength=runno+'_IvsLam',
-                                                             ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                             MomentumTransferMin=Qmin, MomentumTransferMax=Qmax)
+                                                                   thetaIn=angle, OutputWorkspaceBinned=runno+'_IvsQ_binned',
+                                                                   OutputWorkspace=runno+'_IvsQ',
+                                                                   OutputWorkspaceWavelength=runno+'_IvsLam',
+                                                                   ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                                   MomentumTransferMin=Qmin, MomentumTransferMax=Qmax)
 
             cleanup()
         else:
