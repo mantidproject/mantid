@@ -1,9 +1,8 @@
 #pylint: disable=invalid-name
 #!/usr/bin/env python
 
-import ast
 import datetime
-import urllib
+import requests # python-requests
 
 URL = "http://builds.mantidproject.org/job/master_systemtests"
 PLATFORMS=['rhel7','rhel6', 'osx', 'win7', 'ubuntu']
@@ -94,11 +93,15 @@ failed = {}
 totalCount = 0
 
 for platform in PLATFORMS:
-    url = URL+"-"+PLATFORMS[0]+"/lastCompletedBuild/testReport/api/python"
-    request=urllib.urlopen(url)
-    if request.getcode() != 200:
+    url = URL+"-"+platform+"/lastCompletedBuild/testReport/api/json"
+    params = {}
+
+    print "URL:", url
+    request = requests.get(url, params=params)
+
+    if request.status_code != 200:
         raise RuntimeError("'%s' returned %d" % (url, request.getcode()))
-    json = ast.literal_eval(request.read())
+    json = request.json()
 
     label=platform
     totalCount += int(json['failCount'])+int(json['passCount'])+int(json['skipCount'])
