@@ -154,7 +154,6 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/InputController.h
-    inc/MantidQtMantidWidgets/IProjectSaveView.h
     inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
     inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
     inc/MantidQtMantidWidgets/MantidTreeWidget.h
