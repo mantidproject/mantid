@@ -14,8 +14,8 @@ class CutOffTest(unittest.TestCase):
         r.func.verbosity = 0
         from recon.helper import Helper
 
-        from recon.filters import cut_off
-        self.alg = cut_off
+        from recon.filters import outliers
+        self.alg = outliers
 
         self.h = Helper(r)
 
@@ -30,20 +30,20 @@ class CutOffTest(unittest.TestCase):
         control = self.generate_images()
         err_msg = "TEST NOT EXECUTED :: Running cut off with level {0} changed the data!"
 
-        cut_off_level = None
-        result = self.alg.execute(images, cut_off_level, self.h)
+        outliers_level = None
+        result = self.alg.execute(images, outliers_level, self.h)
         npt.assert_equal(
-            result, control, err_msg=err_msg.format(cut_off_level))
+            result, control, err_msg=err_msg.format(outliers_level))
 
-        cut_off_level = 0
-        result = self.alg.execute(images, cut_off_level, self.h)
+        outliers_level = 0
+        result = self.alg.execute(images, outliers_level, self.h)
         npt.assert_equal(
-            result, control, err_msg=err_msg.format(cut_off_level))
+            result, control, err_msg=err_msg.format(outliers_level))
 
-        cut_off_level = -0.1
-        result = self.alg.execute(images, cut_off_level, self.h)
+        outliers_level = -0.1
+        result = self.alg.execute(images, outliers_level, self.h)
         npt.assert_equal(
-            result, control, err_msg=err_msg.format(cut_off_level))
+            result, control, err_msg=err_msg.format(outliers_level))
 
     def test_executed(self):
         images = self.generate_images()
@@ -51,14 +51,14 @@ class CutOffTest(unittest.TestCase):
         control[3, :, :] = 0.1
 
         images[3, :, :] = 0.1
-        cut_off_level = 0.4
-        result = self.alg.execute(images, cut_off_level, self.h)
+        outliers_level = 0.4
+        result = self.alg.execute(images, outliers_level, self.h)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
         images = self.generate_images()
         images[3, :, :] = 0.1
-        cut_off_level = 0.001
-        result = self.alg.execute(images, cut_off_level, self.h)
+        outliers_level = 0.001
+        result = self.alg.execute(images, outliers_level, self.h)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
     def test_executed_no_helper(self):
@@ -67,14 +67,14 @@ class CutOffTest(unittest.TestCase):
         control[3, :, :] = 0.1
 
         images[3, :, :] = 0.1
-        cut_off_level = 0.4
-        result = self.alg.execute(images, cut_off_level)
+        outliers_level = 0.4
+        result = self.alg.execute(images, outliers_level)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
         images = self.generate_images()
         images[3, :, :] = 0.1
-        cut_off_level = 0.001
-        result = self.alg.execute(images, cut_off_level)
+        outliers_level = 0.001
+        result = self.alg.execute(images, outliers_level)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
 

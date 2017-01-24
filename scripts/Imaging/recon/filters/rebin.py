@@ -2,48 +2,74 @@ from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
 
 
-# FIXME possible memory crash
-def execute(data, rebin, mode, h=None):
+def execute(data, rebin, mode, cores=1, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
+    h.check_data_stack(data)
 
     if rebin and 0 < rebin:
-        import numpy as np
-        h.check_data_stack(data)
-        import scipy.misc
-
-        interpolation = mode
-
-        num_images = data.shape[0]
-
-        # use SciPy's calculation to find the expected dimensions
-        # int to avoid visible deprecation warning
-        expected_dimy = int(rebin * data.shape[1])
-        expected_dimx = int(rebin * data.shape[2])
-
-        h.pstart("Starting image resizing to rebin {0} with interpolation mode {1}".format(
-            rebin, interpolation))
-
-        # allocate memory for images with new dimensions
-        resized_data = np.zeros((num_images, expected_dimy,
-                                 expected_dimx), dtype=np.float32)
-
-        h.prog_init(num_images, "Scaling images")
-        for idx in range(num_images):
-            resized_data[idx] = scipy.misc.imresize(
-                data[idx], rebin, interp=mode)
-
-            h.prog_update(1)
-
-        h.prog_close()
-
-        h.pstop("Finished image resizing. New shape: {0}".format(
-            resized_data.shape))
-        h.check_data_stack(resized_data)
-
-        return resized_data
+        if not h.multiprocessing_available():
+            data = _execute_par(data, rebin, mode, cores, chunksize, h)
+        else:
+            data = _execute_seq(data, rebin, mode, h)
     else:
-        h.tomo_print_note("Not applying any scaling.")
-        return data
+        h.tomo_print_note("Not applying any rebinning.")
+
+    h.check_data_stack(data)
+    return data
+
+
+def _execute_par(data, rebin, mode, cores=1, chunksize=None, h=None):
+    import scipy.misc
+
+    resized_data = _create_reshaped_array(data.shape, rebin)
+
+    from functools import partial
+    f = partial(scipy.misc.imresize, size=rebin, interp=mode)
+
+    resized_data = Helper.execute_async(
+        data, f, cores, chunksize, "Rebinning", h, output_data=resized_data)
+
+    h.pstop("Finished PARALLEL image resizing. New shape: {0}".format(
+        resized_data.shape))
+
+    return resized_data
+
+
+def _execute_seq(data, rebin, mode, h=None):
+    import scipy.misc
+
+    resized_data = _create_reshaped_array(data.shape, rebin)
+
+    h.prog_init(num_images, "Rebinning images")
+    for idx in range(num_images):
+        resized_data[idx] = scipy.misc.imresize(
+            data[idx], rebin, interp=mode)
+
+        h.prog_update(1)
+
+    h.prog_close()
+
+    h.pstop("Finished image resizing. New shape: {0}".format(
+        resized_data.shape))
+
+    return resized_data
+
+
+def _create_reshaped_array(old_shape, rebin):
+    import numpy as np
+    num_images = old_shape[0]
+
+    # use SciPy's calculation to find the expected dimensions
+    # int to avoid visible deprecation warning
+    expected_dimy = int(rebin * old_shape[1])
+    expected_dimx = int(rebin * old_shape[2])
+
+    h.pstart("Starting image resizing to rebin {0} with interpolation mode {1}".format(
+        rebin, mode))
+
+    # allocate memory for images with new dimensions
+    return np.zeros((num_images, expected_dimy,
+                     expected_dimx), dtype=np.float32)
 
 
 def _execute_custom(data, config):

@@ -8,7 +8,8 @@ class PostProcConfig(object):
         Builds a default post-processing configuration with a sensible choice of parameters
         """
         self.circular_mask = None
-        self.cut_off_level_post = 0
+        self.outliers_threshold = None
+        self.outliers_mode = None
         self.gaussian_size = None
         self.gaussian_mode = 'reflect'
         self.gaussian_order = 0
@@ -24,7 +25,7 @@ class PostProcConfig(object):
 
     def __str__(self):
         return "Circular mask: {0}\n".format(self.circular_mask) \
-            + "Cut-off on reconstructed volume: {0}\n".format(self.cut_off_level_post) \
+            + "Cut-off on reconstructed volume: {0}\n".format(self.outliers_threshold) \
             + "Gaussian filter size: {0}\n".format(self.gaussian_size) \
             + "Gaussian filter mode: {0}\n".format(self.gaussian_mode) \
             + "Median filter size:: {0}\n".format(self.median_size) \
@@ -48,12 +49,19 @@ class PostProcConfig(object):
                  "of the slices.\nEmpty or zero implies no masking.")
 
         grp_post.add_argument(
-            "--cut-off-post",
+            "--post-outliers",
             required=False,
             type=float,
-            help="Cut off level (percentage) for reconstructed volume.\n"
-            "Pixels below this percentage with respect to maximum intensity in the stack "
-                 "will be set to the minimum value.")
+            help="Outliers threshold for reconstructed volume.\n"
+            "Pixels below and/or above (depending on mode) this threshold will be clipped.")
+
+        outliers_mode = ['dark', 'bright', 'both']
+        grp_post.add_argument(
+            "--post-outliers-mode",
+            required=False,
+            type=str,
+            choices=outliers_mode,
+            help="Which pixels to clip, only dark ones, bright ones or both.")
 
         grp_post.add_argument(
             "--post-median-size",
@@ -105,7 +113,9 @@ class PostProcConfig(object):
 
     def update(self, args):
         self.circular_mask = args.circular_mask
-        self.cut_off_level_post = args.cut_off_post
+
+        self.outliers_threshold = args.post_outliers
+        self.outliers_mode = args.post_outliers_mode
 
         self.gaussian_size = args.post_gaussian_size
         self.gaussian_mode = args.post_gaussian_mode

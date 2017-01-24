@@ -57,7 +57,7 @@ def pre_processing(config, sample, flat, dark):
             "Pre-processing steps have been skipped, because --reuse-preproc flag has been passed.")
         return sample
 
-    from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, cut_off, \
+    from recon.filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, outliers, \
         mcp_corrections, rebin, median_filter, gaussian
 
     cores = config.func.cores
@@ -110,14 +110,16 @@ def pre_processing(config, sample, flat, dark):
             _debug_save_out_data(sample, config, flat, dark,
                                  "5cropped", "_cropped")
 
-    sample = cut_off.execute(sample, config.pre.cut_off_level_pre, h)
-    if debug and save_preproc and config.pre.cut_off_level_pre:
+    sample = outliers.execute(
+        sample, config.pre.outliers_threshold, config.pre.outliers_mode, h)
+    if debug and save_preproc and config.pre.outliers_threshold:
         _debug_save_out_data(sample, config, flat, dark,
-                             "6cut_off_pre", "_cut_off_pre")
+                             "6outliers", "_outliers")
     # mcp_corrections
     # data = mcp_corrections.execute(data, config)
 
-    sample = rebin.execute(sample, config.pre.rebin, config.pre.rebin_mode, h)
+    sample = rebin.execute(sample, config.pre.rebin,
+                           config.pre.rebin_mode, cores=cores, chunksize=chunksize, h=h)
     if debug and save_preproc and config.pre.rebin is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "7scaled", "_scaled")
@@ -155,7 +157,7 @@ def _debug_save_out_data(data, config, flat=None, dark=None, out_path_append='',
 
 
 def post_processing(recon_data, config):
-    from recon.filters import circular_mask, gaussian, median_filter, cut_off
+    from recon.filters import circular_mask, gaussian, median_filter, outliers
 
     h = config.helper
     debug = True if config.func.debug else False
@@ -163,27 +165,27 @@ def post_processing(recon_data, config):
     recon_data = circular_mask.execute(
         recon_data, config.post.circular_mask, h)
     if debug and config.post.circular_mask is not None:
-        _debug_save_out_data(recon_data, config, out_path_append='../post_processed/circular_masked',
+        _debug_save_out_data(recon_data, config, out_path_append='../post_processed/1circular_masked',
                              image_append='_circular_masked')
 
-    recon_data = cut_off.execute(
-        recon_data, config.post.cut_off_level_post, h)
-    if debug and config.post.cut_off_level_post is not None:
+    recon_data = outliers.execute(
+        recon_data, config.post.outliers_threshold, config.post.outliers_mode, h)
+    if debug and config.post.outliers_threshold is not None:
         _debug_save_out_data(
-            recon_data, config, out_path_append='../post_processed/cut_off', image_append='_cut_off')
+            recon_data, config, out_path_append='../post_processed/2outliers', image_append='_outliers')
 
     recon_data = gaussian.execute(recon_data, config.post.gaussian_size, config.post.gaussian_mode,
                                   config.post.gaussian_order, h)
     if debug and config.post.gaussian_size is not None:
         _debug_save_out_data(
-            recon_data, config, out_path_append='../post_processed/gaussian', image_append='_gaussian')
+            recon_data, config, out_path_append='../post_processed/3gaussian', image_append='_gaussian')
 
     recon_data = median_filter.execute(
         recon_data, config.post.median_size, config.post.median_mode, h)
 
     if debug and config.post.median_size is not None:
         _debug_save_out_data(
-            recon_data, config, out_path_append='../post_processed/median', image_append='_median')
+            recon_data, config, out_path_append='../post_processed/4median', image_append='_median')
 
     return recon_data
 

@@ -42,7 +42,8 @@ class PreProcConfig(object):
         # blocked by any object
         # self.normalise_proton_charge = False
 
-        self.cut_off_level_pre = 0  # TODO unused
+        self.outliers_threshold = None
+        self.outliers_mode = None
         self.mcp_corrections = True
         self.rebin = None
         self.rebin_mode = 'bilinear'
@@ -52,7 +53,7 @@ class PreProcConfig(object):
     def __str__(self):
         return "Region of interest (crop coordinates): {0}\n".format(self.region_of_interest) \
                + "Normalise by air region: {0}\n".format(self.normalise_air_region) \
-               + "Cut-off on normalised images: {0}\n".format(self.cut_off_level_pre) \
+               + "Cut-off on normalised images: {0}\n".format(self.outliers_threshold) \
                + "Corrections for MCP detector: {0}\n".format(self.mcp_corrections) \
                + "rebin down factor for images: {0}\n".format(self.rebin) \
                + "Median filter width: {0}\n".format(self.median_size) \
@@ -154,12 +155,20 @@ class PreProcConfig(object):
         )
 
         grp_pre.add_argument(
-            "--cut-off-pre",
+            "--pre-outliers",
             required=False,
             type=float,
-            help="Cut off level (percentage) for pre processed images.\n"
-                 "Pixels below this percentage with respect to maximum intensity in the stack "
+            help="Outliers threshold for pre-processed images.\n"
+                 "Pixels below this threshold with respect to maximum intensity in the stack "
                  "will be set to the minimum value.")
+
+        outliers_mode = ['dark', 'bright', 'both']
+        grp_pre.add_argument(
+            "--pre-outliers-mode",
+            required=False,
+            type=str,
+            choices=outliers_mode,
+            help="Which pixels to clip, only dark ones, bright ones or both.")
 
         grp_pre.add_argument(
             "--rebin",
@@ -249,7 +258,8 @@ class PreProcConfig(object):
         self.clip_min = args.clip_min
         self.clip_max = args.clip_max
 
-        self.cut_off_level_pre = args.cut_off_pre
+        self.outliers_threshold = args.pre_outliers
+        self.outliers_mode = args.pre_outliers_mode
         self.mcp_corrections = args.mcp_corrections
         self.rebin = args.rebin
         self.rebin_mode = args.rebin_mode

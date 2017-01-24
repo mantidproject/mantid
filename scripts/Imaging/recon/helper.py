@@ -107,16 +107,16 @@ class Helper(object):
             pass
 
     @staticmethod
-    def execute_async(data=None, partial_func=None, cores=1, chunksize=None, name=None, h=None):
+    def execute_async(data=None, partial_func=None, cores=1, chunksize=None, name=None, h=None, output_data=None):
         h = Helper.empty_init() if h is None else h
-        import copy
-        import numpy as np
-        from multiprocessing import Pool
-
-        import time
 
         if chunksize is None:
             chunksize = 1  # TODO use proper calculation
+
+        if output_data is None:
+            output_data = data[:]
+
+        from multiprocessing import Pool
 
         pool = Pool(cores)
         # imap_unordered gives the images back in random order!
@@ -126,14 +126,14 @@ class Helper(object):
         h.prog_init(data.shape[0], name + " " +
                     str(cores) + "c " + str(chunksize) + "chs")
         for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
-            data[i, :, :] = res_data[:, :]
+            output_data[i, :, :] = res_data[:, :]
             h.prog_update()
 
         pool.close()
         pool.join()
         h.prog_close()
 
-        return data
+        return output_data
 
     def multiprocessing_available(self):
         try:
