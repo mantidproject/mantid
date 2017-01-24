@@ -2,12 +2,12 @@
 Mantid 3.9.0 Release Notes
 ==========================
 
-.. figure:: ../../images/ReleaseUnderConstruction.jpg
+.. figure:: ../../images/release39.png
    :class: screenshot
    :width: 550px
    :align: right
 
-   Release image
+   The Slice Viewer now is able to display data with non orthogonal axes
 
 .. contents:: Table of Contents
    :local:

@@ -591,7 +591,7 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
         LoadNexus(self.input_workspace,
                   OutputWorkspace=self.input_workspace)
 
-        SofQWMoments(Sample=self.input_workspace, EnergyMin=self.e_min,
+        SofQWMoments(InputWorkspace=self.input_workspace, EnergyMin=self.e_min,
                      EnergyMax=self.e_max, Scale=self.scale,
                      OutputWorkspace=self.input_workspace + '_Moments')
 
@@ -954,9 +954,9 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.num_bins = 4
 
         # Iqt Fit
-        self.func = r'name=LinearBackground,A0=0.213439,A1=0,ties=(A1=0);name=UserFunction,'\
-                    'Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.786561,Tau=0.0247894,'\
-                    'Beta=1;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0.213439,A1=0,ties=(A1=0);name=StretchExp,'\
+                    'Height=0.786561,Lifetime=0.0247894,'\
+                    'Stretching=1;ties=(f1.Height=1-f0.A0)'
         self.ftype = '1E_s'
         self.startx = 0.0
         self.endx = 0.12
@@ -986,8 +986,8 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 50
 
         # Iqt Fit
-        self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
-            'Intensity=0.415512,Beta=0.022653;ties=(f1.Intensity=1-f0.A0,f1.Tau=0.05)'
+        self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=StretchExp,'\
+            'Height=0.415512,Stretching=0.022653;ties=(f1.Height=1-f0.A0,f1.Lifetime=0.05)'
         self.ftype = '1S_s'
         self.startx = 0.0
         self.endx = 0.156250

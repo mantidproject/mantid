@@ -157,7 +157,7 @@ def validation_message(error_message, instruction, variables):
     @return: a formatted validation message string.
     """
     message = ""
-    for key, value in variables.items():
+    for key, value in sorted(variables.items()):
         message += "{0}: {1}\n".format(key, value)
     message += instruction
     return {error_message: message}
