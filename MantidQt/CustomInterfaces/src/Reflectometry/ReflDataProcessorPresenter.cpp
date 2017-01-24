@@ -139,17 +139,17 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
   for (const auto &row : group) {
 
     // The run number
-    std::string runno = row.second.at(0);
+    std::string runNo = row.second.at(0);
     // Try loading as event workspace
-    bool eventWS = loadEventRun(runno);
+    bool eventWS = loadEventRun(runNo);
     if (!eventWS) {
       // This run could not be loaded as event workspace. We need to load and
       // process the whole group as non-event data.
       for (const auto &rowNew : group) {
         // The run number
-        std::string runno = rowNew.second.at(0);
+        std::string runNo = rowNew.second.at(0);
         // Load as non-event workspace
-        loadNonEventRun(runno);
+        loadNonEventRun(runNo);
       }
       // Remove monitors which were loaded as separate workspaces
       for (const auto &run : loadedRuns) {
@@ -157,7 +157,7 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
       }
       return false;
     }
-    loadedRuns.insert(runno);
+    loadedRuns.insert(runNo);
   }
   return true;
 }
@@ -182,11 +182,11 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     // Vector containing data for this row
     auto data = row.second;
     // The run number
-    std::string runno = row.second.at(0);
+    std::string runNo = row.second.at(0);
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        auto wsName = takeSlice(runno, startTimes[i], stopTimes[i]);
+        auto wsName = takeSlice(runNo, startTimes[i], stopTimes[i]);
         std::vector<std::string> slice(data);
         slice[0] = wsName;
         auto newData = reduceRow(slice);
@@ -237,7 +237,7 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
     // Vector containing data for this row
     auto data = row.second;
     // The run number
-    std::string runno = row.second.at(0);
+    std::string runNo = row.second.at(0);
     // Reduce this row
     auto newData = reduceRow(data);
     // Update the tree
@@ -297,17 +297,17 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
 
 /** Loads an event workspace and puts it into the ADS
 *
-* @param runno :: the run number as a string
+* @param runNo :: the run number as a string
 * @return :: True if algorithm was executed. False otherwise
 */
-bool ReflDataProcessorPresenter::loadEventRun(const std::string &runno) {
+bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runno;
+  std::string runName = "TOF_" + runNo;
 
   IAlgorithm_sptr algLoadRun =
       AlgorithmManager::Instance().create("LoadEventNexus");
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runno);
+  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
   algLoadRun->setProperty("OutputWorkspace", runName);
   algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
@@ -316,32 +316,32 @@ bool ReflDataProcessorPresenter::loadEventRun(const std::string &runno) {
 
 /** Loads a non-event workspace and puts it into the ADS
 *
-* @param runno :: the run number as a string
+* @param runNo :: the run number as a string
 */
-void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runno) {
+void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runno;
+  std::string runName = "TOF_" + runNo;
 
   IAlgorithm_sptr algLoadRun =
       AlgorithmManager::Instance().create("LoadISISNexus");
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runno);
+  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
   algLoadRun->setProperty("OutputWorkspace", runName);
   algLoadRun->execute();
 }
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
-* @param runno :: the run number as a string
+* @param runNo :: the run number as a string
 * @param startTime :: start time
 * @param stopTime :: stop time
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
-std::string ReflDataProcessorPresenter::takeSlice(const std::string &runno,
+std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
                                                   double startTime,
                                                   double stopTime) {
 
-  std::string runName = "TOF_" + runno;
+  std::string runName = "TOF_" + runNo;
   std::string sliceName = runName + "_" + std::to_string((int)startTime) + "_" +
                           std::to_string((int)stopTime);
   std::string monName = runName + "_monitors";

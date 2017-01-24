@@ -75,11 +75,11 @@ private:
                         std::vector<double> &startTimes,
                         std::vector<double> &stopTimes);
   // Load a run as event workspace
-  bool loadEventRun(const std::string &runno);
+  bool loadEventRun(const std::string &runNo);
   // Load a run (non-event workspace)
-  void loadNonEventRun(const std::string &runno);
+  void loadNonEventRun(const std::string &runNo);
   // Take a slice from event workspace
-  std::string takeSlice(const std::string &runno, double startTime,
+  std::string takeSlice(const std::string &runNo, double startTime,
                         double stopTime);
 };
 }

@@ -48,4 +48,4 @@ IReflEventTabPresenter *QtReflEventTabView::getPresenter() const {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
