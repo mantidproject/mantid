@@ -113,6 +113,8 @@ protected slots:
   void emitExternalProcessOutput(const qint64 pid, const int exitCode);
 
 private:
+  /// Update the model's filter, COR and ROI/Area of norm settings
+  /// and build the runnable and arguments
   void prepareSubmissionArguments(const bool local, std::string &runnable,
                                   std::vector<std::string> &args,
                                   std::string &allOpts);

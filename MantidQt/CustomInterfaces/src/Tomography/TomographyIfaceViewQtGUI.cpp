@@ -154,7 +154,7 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  * @param parent Parent window (most likely the Mantid main app window).
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
+    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIWidget(nullptr),
       m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
       m_currentReconTool("TomoPy"), m_imgPath(""), m_logMsgs(),
       m_systemSettings(), m_settings(),
@@ -177,8 +177,8 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
   // this is a Qt widget, let Qt manage the pointer
-  m_tabROIW = new TomographyROIViewQtWidget(m_ui.tabMain);
-  m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
+  m_tabROIWidget = new TomographyROIViewQtWidget(m_ui.tabMain);
+  m_ui.tabMain->addTab(m_tabROIWidget, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
   m_uiTabFilters.setupUi(tabFiltersW);
@@ -226,10 +226,10 @@ void TomographyIfaceViewQtGUI::initLayout() {
 
 void TomographyIfaceViewQtGUI::doSetupSectionRoi() {
   // connect the auto CoR button to run an external python process
-  connect(m_tabROIW,
+  connect(m_tabROIWidget,
           SIGNAL(findCORClicked(std::string, std::vector<std::string>)), this,
           SLOT(runExternalProcess(std::string, std::vector<std::string>)));
-  connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIW,
+  connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIWidget,
           SLOT(readCoRFromProcessOutput(QString)));
 }
 
@@ -1174,8 +1174,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -1274,9 +1274,9 @@ std::string TomographyIfaceViewQtGUI::getPassword() const {
 }
 
 void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
-  bool enable = 0 != status;
+  bool enable(0 != status);
 
-  // grab new value and enable/disable related widgets
+      // grab new value and enable/disable related widgets
   m_pathsConfig.m_pathOpenBeamEnabled = enable;
   m_uiTabSetup.lineEdit_path_flats->setEnabled(enable);
   m_uiTabSetup.pushButton_flats_dir->setEnabled(enable);
@@ -1284,7 +1284,7 @@ void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
 }
 
 void TomographyIfaceViewQtGUI::darksPathCheckStatusChanged(int status) {
-  bool enable = 0 != status;
+  bool enable(0 != status);
 
   m_pathsConfig.m_pathDarkEnabled = enable;
   m_uiTabSetup.lineEdit_path_darks->setEnabled(enable);
