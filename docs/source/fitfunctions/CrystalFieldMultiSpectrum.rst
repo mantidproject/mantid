@@ -13,7 +13,7 @@ This function calculates multiple spectra of a crystal electric field acting upo
 in Mantid and under active development. More documentation will follow as the development progresses.
 
 Here is an example of how to fit function's parameters to a spectrum. All parameters disallowed by symmetry are fixed automatically.
-Any other parameters that need fixing has to be tied explicitly. Peak centres (in meV) and intensitiaes (in mb/sr) are also fixed and computed 
+Any other parameters that need fixing has to be tied explicitly. Peak centres (in meV) and intensities (in mb/sr) are also fixed and computed 
 from the field parameters with the :ref:`CrystalFieldPeaks <func-CrystalFieldPeaks>` function. Any other peak parameter can be set using
 the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFunction>` for more details).
 

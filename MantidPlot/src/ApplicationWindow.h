@@ -44,6 +44,7 @@ Description          : QtiPlot's main window
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
+#include "ProjectSaveView.h"
 #include "Script.h"
 #include "Scripted.h"
 #include "ScriptingEnv.h"
@@ -269,6 +270,10 @@ public slots:
   void saveProjectAs(const QString &fileName = QString(),
                      bool compress = false);
   bool saveProject(bool compress = false);
+  /// Show the project saver dialog
+  void prepareSaveProject();
+  /// Update application window post save
+  void postSaveProject();
 
   //! Set the project status to modifed
   void modifiedProject();
@@ -597,6 +602,7 @@ public slots:
   bool hidden(QWidget *window);
   void closeActiveWindow();
   void closeWindow(MdiSubWindow *window);
+  void prepareToCloseMantid();
 
   //!  Does all the cleaning work before actually deleting a window!
   void removeWindowFromLists(MdiSubWindow *w);
@@ -1022,7 +1028,6 @@ public slots:
   // parentFolder or to the current folder if no parent folder is specified.
   Folder *appendProject(const QString &file_name, Folder *parentFolder = 0);
   void saveAsProject();
-  void saveFolderAsProject(Folder *f);
 
   //!  adds a folder list item to the list view "lv"
   void addFolderListViewItem(Folder *f);
@@ -1452,6 +1457,8 @@ private:
   QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QMdiArea *d_workspace;
+
+  MantidQt::MantidWidgets::ProjectSaveView *m_projectSaveView;
 
   QToolBar *standardTools, *plotTools, *displayBar;
   QToolBar *formatToolBar;

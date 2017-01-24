@@ -93,6 +93,7 @@ public:
   std::string getWorkspaceNameStdString() const;
   void renameWorkspace(const std::string &workspace);
   SurfaceType getSurfaceType() const { return m_surfaceType; }
+  Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
   /// Get pointer to the projection surface
   boost::shared_ptr<ProjectionSurface> getSurface() const;
   /// True if the GL instrument display is currently on

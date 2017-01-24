@@ -6,6 +6,10 @@
 
 .. properties::
 
+.. warning::
+
+   This algorithm is deprecated (20-Nov-2016). Please, use :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` instead.
+
 Description
 -----------
 
@@ -47,8 +51,10 @@ Output:
 
 .. testoutput:: ExIndirectILLReduction
 
-    Reduced workspace has 24 spectra
+    Reduced workspace has 18 spectra
     Raw workspace has 2057 spectra
+
+
 
 **Example - Running IndirectILLReduction in mirror mode**
 
@@ -71,9 +77,9 @@ Output:
 .. testoutput:: ExIndirectILLReductionMirrorMode
 
     Raw workspace has 2057 spectra
-    Reduced workspace has 24 spectra
-    Reduced left workspace has 24 spectra
-    Reduced right workspace has 24 spectra
+    Reduced workspace has 18 spectra
+    Reduced left workspace has 18 spectra
+    Reduced right workspace has 18 spectra
 
 .. categories::
 
