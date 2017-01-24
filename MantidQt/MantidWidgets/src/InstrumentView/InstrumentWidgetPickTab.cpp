@@ -992,12 +992,13 @@ void ComponentInfoController::displayComparePeaksInfo(
 void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
     const Mantid::Geometry::IPeak *peak) {
+
   if (planePeaks.size() < 3)
     return;
 
-  auto pos1 = planePeaks[0];
-  auto pos2 = planePeaks[1];
-  auto pos3 = planePeaks[2];
+  const auto pos1 = planePeaks[0];
+  const auto pos2 = planePeaks[1];
+  const auto pos3 = planePeaks[2];
 
   // find vectors in plane & plane normal
   auto u = pos2 - pos1;
@@ -1006,11 +1007,11 @@ void ComponentInfoController::displayAlignPeaksInfo(
 
   // find projection of beam direction onto plane
   // this is so we always orientate to a common reference direction
-  auto instrument = peak->getInstrument();
-  auto samplePos = instrument->getSample()->getPos();
-  auto sourcePos = instrument->getSource()->getPos();
-  auto beam = samplePos - sourcePos;
-  auto proj = beam - n * (beam.scalar_prod(n) / (pow(n.norm(), 2)));
+  const auto instrument = peak->getInstrument();
+  const auto samplePos = instrument->getSample()->getPos();
+  const auto sourcePos = instrument->getSource()->getPos();
+  const auto beam = samplePos - sourcePos;
+  const auto proj = beam - n * (beam.scalar_prod(n) / (pow(n.norm(), 2)));
 
   // update in-plane vectors
   u = proj;
@@ -1021,10 +1022,10 @@ void ComponentInfoController::displayAlignPeaksInfo(
   n.normalize();
 
   // now compute in plane & out of plane angles
-  auto pos4 = peak->getQSampleFrame();
-  auto x = pos4.scalar_prod(u);
-  auto y = pos4.scalar_prod(v);
-  auto z = pos4.scalar_prod(n);
+  const auto pos4 = peak->getQSampleFrame();
+  const auto x = pos4.scalar_prod(u);
+  const auto y = pos4.scalar_prod(v);
+  const auto z = pos4.scalar_prod(n);
 
   Mantid::Kernel::V3D p(x, y, z);
   // compute the elevation angle from the plane
