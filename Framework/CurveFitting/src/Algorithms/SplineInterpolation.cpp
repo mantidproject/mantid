@@ -61,7 +61,8 @@ void SplineInterpolation::init() {
                   "Set to true to perform linear interpolation for 2 points "
                   "instead.");
 
-  std::vector<std::string> inputWorkspaces = {"WorkspaceToMatch", "WorkspaceToInterpolate"};
+  std::vector<std::string> inputWorkspaces = {"WorkspaceToMatch",
+                                              "WorkspaceToInterpolate"};
   declareProperty("ReferenceWorkspace", "WorkspaceToMatch",
                   boost::make_shared<StringListValidator>(inputWorkspaces),
                   "OutputWorkspace will copy properties from the selected "
