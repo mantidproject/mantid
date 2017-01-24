@@ -2,11 +2,10 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from math import sqrt
 from mantid.kernel import logger
-from GeneralDFTProgram import GeneralDFTProgram
-import AbinsConstants
+import AbinsModules
 
 
-class LoadCRYSTAL(GeneralDFTProgram):
+class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     """
     Class for loading CRYSTAL DFT phonon data. Main author of this module is Leonardo Bernasconi.
     """
@@ -171,8 +170,9 @@ class LoadCRYSTAL(GeneralDFTProgram):
                 mass = masses[l[2]]
             else:
                 raise ValueError("Mass not available for element " + l[2])
-            data["atoms"]["atom_%s" % i] = {"symbol": l[2].capitalize(), "mass": mass, "sort": i,
-                                            "fract_coord": np.asarray(l[3:6]).astype(dtype=AbinsConstants.FLOAT_TYPE)}
+            data["atoms"]["atom_%s" % i] = {
+                "symbol": l[2].capitalize(), "mass": mass, "sort": i,
+                "fract_coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
 
     def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
                              masses=None):
@@ -184,7 +184,7 @@ class LoadCRYSTAL(GeneralDFTProgram):
         :param atomic_coordinates: atomic coordinates
         """
         #     a) Put frequencies into dictionary
-        data["frequencies"] = np.asarray([freq]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")
+        data["frequencies"] = np.asarray([freq]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
 
         #     b) Normalise atomic displacements and put them into data dictionary
         i = -1
@@ -339,7 +339,8 @@ class LoadCRYSTAL(GeneralDFTProgram):
 
         # In order  to provide compatibility with Abins internal data structure same additional entries have to
         # be defined.
-        data["weights"] = np.asarray([1.0]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")
-        data["k_vectors"] = np.asarray([[0.0, 0.0, 0.0]]).astype(dtype=AbinsConstants.FLOAT_TYPE, casting="safe")
-        data["unit_cell"] = np.zeros(shape=(dim, dim), dtype=AbinsConstants.FLOAT_TYPE)
+        data["weights"] = np.asarray([1.0]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+        data["k_vectors"] = np.asarray([[0.0, 0.0, 0.0]]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE,
+                                                                 casting="safe")
+        data["unit_cell"] = np.zeros(shape=(dim, dim), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
         # TODO: it would make LoadCRYSTAL more robust if these parameters can be read from CRYSTAL output

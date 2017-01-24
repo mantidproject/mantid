@@ -1,11 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-
-from GeneralData import GeneralData
-import AbinsConstants
+import AbinsModules
 
 
-class PowderData(GeneralData):
+class PowderData(AbinsModules.GeneralData):
     """
     Class for storing powder data.
     """
@@ -32,9 +30,9 @@ class PowderData(GeneralData):
 
         if not isinstance(items, dict):
             raise ValueError("Invalid value. Dictionary with the following entries : %s" %
-                             AbinsConstants.ALL_KEYWORDS_POWDER_DATA + " was expected.")
+                             AbinsModules.AbinsConstants.ALL_KEYWORDS_POWDER_DATA + " was expected.")
 
-        if sorted(items.keys()) != sorted(AbinsConstants.ALL_KEYWORDS_POWDER_DATA):
+        if sorted(items.keys()) != sorted(AbinsModules.AbinsConstants.ALL_KEYWORDS_POWDER_DATA):
             raise ValueError("Invalid structure of the dictionary.")
 
         if not isinstance(items["a_tensors"], np.ndarray):

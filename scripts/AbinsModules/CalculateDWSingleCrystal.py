@@ -2,9 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 # Abins modules
-from DWSingleCrystalData import DWSingleCrystalData
-from AbinsData import AbinsData
-import AbinsConstants
+import AbinsModules
 
 
 class CalculateDWSingleCrystal(object):
@@ -24,7 +22,7 @@ class CalculateDWSingleCrystal(object):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = float(temperature)
 
-        if isinstance(abins_data, AbinsData):
+        if isinstance(abins_data, AbinsModules.AbinsData):
             self._abins_data = abins_data
         else:
             raise ValueError("Improper value of input Abins data.")
@@ -45,25 +43,26 @@ class CalculateDWSingleCrystal(object):
         Working equation implemented according to:
         https://forge.epn-campus.eu/html/ab2tds/debye_waller.html
         """
-        dw = DWSingleCrystalData(temperature=self._temperature, num_atoms=self._num_atoms)
+        dw = AbinsModules.DWSingleCrystalData(temperature=self._temperature, num_atoms=self._num_atoms)
 
         data = self._abins_data.extract()
         num_atoms = len(data["atoms_data"])
         mass_hartree_factor = np.asarray([1.0 / (data["atoms_data"]["atom_%s" % atom]["mass"] * 2)
                                           for atom in range(num_atoms)])
         frequencies_hartree = data["k_points_data"]["frequencies"]
-        temperature_hartree = self._temperature * AbinsConstants.K_2_HARTREE
+        temperature_hartree = self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE
 
         weights = data["k_points_data"]["weights"]
-        atomic_displacements = data["k_points_data"]["atomic_displacements"] / AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+        atomic_displacements = \
+            data["k_points_data"]["atomic_displacements"] / AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
 
         coth_factor = 1.0 / (2.0 * temperature_hartree)  # coth( coth_factor * omega)
 
         tanh = np.tanh(np.multiply(coth_factor, frequencies_hartree))
         coth_over_omega = np.divide(1.0, np.multiply(tanh, frequencies_hartree))  # coth(...)/omega
 
-        item_k = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE)  # stores DW for one atom
-        item_freq = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE)
+        item_k = np.zeros((3, 3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)  # stores DW for one atom
+        item_freq = np.zeros((3, 3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         for num in range(self._num_atoms):
             item_k.fill(0.0)  # erase stored information so that it can be filled with content for the next atom
@@ -71,7 +70,7 @@ class CalculateDWSingleCrystal(object):
             for k in range(self._num_k):
 
                 # correction for acoustic modes at Gamma point
-                if np.linalg.norm(data["k_points_data"]["k_vectors"][k]) < AbinsConstants.SMALL_K:
+                if np.linalg.norm(data["k_points_data"]["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
                     start = 3
                 else:
                     start = 0

@@ -1,11 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 # Abins modules
-from GeneralData import GeneralData
-from KpointsData import KpointsData
-from AtomsData import AtomsDaTa
+import AbinsModules
 
 
-class AbinsData(GeneralData):
+class AbinsData(AbinsModules.GeneralData):
     """
     Class for storing input DFT data.
     """
@@ -23,12 +21,12 @@ class AbinsData(GeneralData):
         @param atoms_data: object of type AtomsData
         """
 
-        if isinstance(k_points_data, KpointsData):
+        if isinstance(k_points_data, AbinsModules.KpointsData):
             self._kpoints_data = k_points_data
         else:
             raise ValueError("Invalid type of k-points data.")
 
-        if isinstance(atoms_data, AtomsDaTa):
+        if isinstance(atoms_data, AbinsModules.AtomsDaTa):
             self._atoms_data = atoms_data
         else:
             raise ValueError("Invalid type of atoms data.")

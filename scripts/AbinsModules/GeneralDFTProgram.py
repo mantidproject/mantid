@@ -1,12 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
-
-# Abins modules
-from IOmodule import IOmodule
-from KpointsData import KpointsData
-from AtomsData import AtomsDaTa
-from AbinsData import AbinsData
-import AbinsParameters
+import AbinsModules
 
 
 # noinspection PyMethodMayBeStatic
@@ -21,7 +15,8 @@ class GeneralDFTProgram(object):
         self._num_atoms = None
         self._sample_form = None
         self._dft_program = None
-        self._clerk = IOmodule(input_filename=input_dft_filename, group_name=AbinsParameters.dft_group)
+        self._clerk = AbinsModules.IOmodule(input_filename=input_dft_filename,
+                                            group_name=AbinsModules.AbinsParameters.dft_group)
 
     def read_phonon_file(self):
         """
@@ -147,7 +142,7 @@ class GeneralDFTProgram(object):
         @return: Returns an object of type AbinsData
         """
 
-        k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
+        k_points = AbinsModules.KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
 
         # 1D [k] (one entry corresponds to weight of one k-point)
         k_points.set({"weights": data["weights"],
@@ -160,10 +155,10 @@ class GeneralDFTProgram(object):
                       "atomic_displacements": data["atomic_displacements"]
                       })
 
-        atoms = AtomsDaTa(num_atoms=self._num_atoms)
+        atoms = AbinsModules.AtomsDaTa(num_atoms=self._num_atoms)
         atoms.set(data["atoms"])
 
-        result_data = AbinsData()
+        result_data = AbinsModules.AbinsData()
         result_data.set(k_points_data=k_points, atoms_data=atoms)
         return result_data
 

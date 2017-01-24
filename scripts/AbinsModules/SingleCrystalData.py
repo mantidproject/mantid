@@ -1,10 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
-from GeneralData import GeneralData
-from DWSingleCrystalData import DWSingleCrystalData
-from AbinsData import AbinsData
+import AbinsModules
 
 
-class SingleCrystalData(GeneralData):
+class SingleCrystalData(AbinsModules.GeneralData):
     """
     Class for storing the data in case sample has a form of single crystal.
     """
@@ -22,12 +20,12 @@ class SingleCrystalData(GeneralData):
         @param dw_crystal_data: object of type DwCrystalData with DW for the case of crystal.
         """
 
-        if isinstance(abins_data, AbinsData):
+        if isinstance(abins_data, AbinsModules.AbinsData):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
-        if isinstance(dw_crystal_data, DWSingleCrystalData):
+        if isinstance(dw_crystal_data, AbinsModules.DWSingleCrystalData):
             self._dw_crystal_data = dw_crystal_data
         else:
             raise ValueError("Object of type DwCrystalData was expected.")

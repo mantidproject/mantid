@@ -1,9 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 import re
 import platform
-import AbinsConstants
 import os
-from mantid.api import FileFinder
+import AbinsModules
 
 
 # Module with helper functions used to create tests.
@@ -32,7 +31,7 @@ def is_numpy_valid(string=None):
     :return: False if version of numpy  is valid otherwise True
     """
 
-    return version_as_tuple(string=string) < version_as_tuple(AbinsConstants.NUMPY_VERSION_REQUIRED)
+    return version_as_tuple(string=string) < version_as_tuple(AbinsModules.AbinsConstants.NUMPY_VERSION_REQUIRED)
 
 
 def old_python():
@@ -50,6 +49,7 @@ def find_file(filename=None):
     :param filename: name of file to find
     :return: full path for the file with the testing data
     """
+    from mantid.api import FileFinder
     return FileFinder.Instance().getFullPath(filename)
 
 

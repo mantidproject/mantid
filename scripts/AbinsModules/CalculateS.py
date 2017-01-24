@@ -1,23 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
-import numpy as np
-
+import AbinsModules
 try:
     # noinspection PyUnresolvedReferences
     from pathos.multiprocessing import ProcessingPool, ThreadingPool
     PATHOS_FOUND = True
 except ImportError:
     PATHOS_FOUND = False
-
-from IOmodule import IOmodule
-from AbinsData import AbinsData
-from Instruments import Instrument
-from CalculatePowder import CalculatePowder
-from SingleCrystalData import SingleCrystalData
-from SData import SData
-from AbinsModules import FrequencyPowderGenerator
-
-import AbinsParameters
-import AbinsConstants
+import numpy as np
 
 
 # noinspection PyMethodMayBeStatic
@@ -42,24 +31,24 @@ class CalculateS(object):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = float(temperature)
 
-        if sample_form in AbinsConstants.ALL_SAMPLE_FORMS:
+        if sample_form in AbinsModules.AbinsConstants.ALL_SAMPLE_FORMS:
             self._sample_form = sample_form
         else:
             raise ValueError("Invalid sample form %s" % sample_form)
 
-        if isinstance(abins_data, AbinsData):
+        if isinstance(abins_data, AbinsModules.AbinsData):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
-        min_order = AbinsConstants.FUNDAMENTALS
-        max_order = AbinsConstants.FUNDAMENTALS + AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS
+        min_order = AbinsModules.AbinsConstants.FUNDAMENTALS
+        max_order = AbinsModules.AbinsConstants.FUNDAMENTALS + AbinsModules.AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS
         if isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order:
             self._quantum_order_num = quantum_order_num
         else:
             raise ValueError("Invalid number of quantum order events.")
 
-        if isinstance(instrument, Instrument):
+        if isinstance(instrument, AbinsModules.Instruments.Instrument):
             self._instrument = instrument
         else:
             raise ValueError("Unknown instrument %s" % instrument)
@@ -73,24 +62,25 @@ class CalculateS(object):
         else:
             raise ValueError("Invalid name of input file. String was expected!")
 
-        self._clerk = IOmodule(input_filename=filename,
-                               group_name=(AbinsParameters.s_data_group + "/%s" % self._instrument + "/" +
-                                           self._sample_form + "/%sK" % self._temperature))
+        self._clerk = AbinsModules.IOmodule(
+            input_filename=filename,
+            group_name=(AbinsModules.AbinsParameters.s_data_group + "/%s" % self._instrument + "/" +
+                        self._sample_form + "/%sK" % self._temperature))
 
         if self._sample_form == "Powder":
-            self._freq_generator = FrequencyPowderGenerator()
+            self._freq_generator = AbinsModules.FrequencyPowderGenerator()
         else:
             raise ValueError("Only powder case is implemented at the moment.")
 
-        self._calculate_order = {AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
-                                 AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
-                                 AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
-                                 AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
+        self._calculate_order = {AbinsModules.AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
+                                 AbinsModules.AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
+                                 AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
+                                 AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        self._bins = np.arange(start=AbinsParameters.min_wavenumber,
-                               stop=AbinsParameters.max_wavenumber,
-                               step=AbinsParameters.bin_width,
-                               dtype=AbinsConstants.FLOAT_TYPE)
+        self._bins = np.arange(start=AbinsModules.AbinsParameters.min_wavenumber,
+                               stop=AbinsModules.AbinsParameters.max_wavenumber,
+                               step=AbinsModules.AbinsParameters.bin_width,
+                               dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         self._powder_atoms_data = None
         self._a_traces = None
@@ -103,9 +93,9 @@ class CalculateS(object):
         # Powder case: calculate A and B tensors
         if self._sample_form == "Powder":
 
-            powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
+            powder_calculator = AbinsModules.CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
             powder_data = powder_calculator.get_formatted_data()
-            if self._instrument.get_name() in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+            if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
                 calculate_s_powder = self._calculate_s_powder_1d
             else:
                 calculate_s_powder = self._calculate_s_powder_2d
@@ -125,7 +115,8 @@ class CalculateS(object):
         @param coeff: coefficients which correspond to  freq
         @return: large enough s, and corresponding freq, coeff
         """
-        threshold = max(np.max(a=s) * AbinsParameters.s_relative_threshold, AbinsParameters.s_absolute_threshold)
+        threshold = max(np.max(a=s) * AbinsModules.AbinsParameters.s_relative_threshold,
+                        AbinsModules.AbinsParameters.s_absolute_threshold)
 
         indices = s > threshold
         # noinspection PyUnresolvedReferences
@@ -137,10 +128,10 @@ class CalculateS(object):
 
         else:
 
-            s = np.zeros(shape=AbinsConstants.MIN_SIZE, dtype=AbinsConstants.FLOAT_TYPE)
-            s.fill(AbinsConstants.S_THRESHOLD)
-            freq = freq[:AbinsConstants.MIN_SIZE]
-            coeff = coeff[:AbinsConstants.MIN_SIZE]
+            s = np.zeros(shape=AbinsModules.AbinsConstants.MIN_SIZE, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+            s.fill(AbinsModules.AbinsConstants.S_THRESHOLD)
+            freq = freq[:AbinsModules.AbinsConstants.MIN_SIZE]
+            coeff = coeff[:AbinsModules.AbinsConstants.MIN_SIZE]
 
         return s, freq, coeff
 
@@ -155,7 +146,7 @@ class CalculateS(object):
         # look for index of Gamma point
         num_k = k_data["k_vectors"].shape[0]
         for k in range(num_k):
-            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.SMALL_K:
+            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
                 gamma_pkt_index = k
                 break
         if gamma_pkt_index == -1:
@@ -173,14 +164,14 @@ class CalculateS(object):
         :param powder_data: object of type PowderData with with A and B tensors
         :return:  object of type SData with 2D dynamical structure factors for the powder case
         """
-        if self._instrument.get_name() not in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+        if self._instrument.get_name() not in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
             raise ValueError("Instrument for 2D S map was expected.")
 
         q2_size = self._instrument.get_q_powder_size()
         q2_indices = range(q2_size)
         self._powder_atoms_data = powder_data.extract()
         if PATHOS_FOUND:
-            p_local = ThreadingPool(nodes=AbinsParameters.q_threads)
+            p_local = ThreadingPool(nodes=AbinsModules.AbinsParameters.q_threads)
             result = p_local.map(self._calculate_s_powder_core, q2_indices)
         else:
             result = []
@@ -194,16 +185,17 @@ class CalculateS(object):
 
         for atom in range(num_atoms):
             atoms_items["atom_%s" % atom] = {"s": dict()}
-            for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+            for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
+                               self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
                 atoms_items["atom_%s" % atom]["s"]["order_%s" % order] = np.zeros(
-                    shape=(q2_size, self._bins.size - AbinsConstants.FIRST_BIN_INDEX),
-                    dtype=AbinsConstants.FLOAT_TYPE)
+                    shape=(q2_size, self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX),
+                    dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
                 for q2_i in q2_indices:
                     atoms_items["atom_%s" % atom]["s"]["order_%s" % order][q2_i] =\
                         result[q2_i]["atom_%s" % atom]["s"]["order_%s" % order]
 
-        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        atoms_items.update({"frequencies": self._bins[AbinsConstants.FIRST_BIN_INDEX:]})
+        s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
+        atoms_items.update({"frequencies": self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]})
         s_data.set(items=atoms_items)
         return s_data
 
@@ -215,10 +207,10 @@ class CalculateS(object):
                             the case of powder
         @return: object of type SData with 1D dynamical structure factors for the powder case
         """
-        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
         self._powder_atoms_data = powder_data.extract()
         data = self._calculate_s_powder_core()
-        data.update({"frequencies": self._bins[AbinsConstants.FIRST_BIN_INDEX:]})
+        data.update({"frequencies": self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]})
         s_data.set(items=data)
 
         return s_data
@@ -234,7 +226,7 @@ class CalculateS(object):
         q_multiplied = [q_indx] * num_atoms
 
         if PATHOS_FOUND:
-            p_local = ProcessingPool(nodes=AbinsParameters.atoms_threads)
+            p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.atoms_threads)
             result = p_local.map(self._calculate_s_powder_one_atom, atoms, q_multiplied)
         else:
             result = []
@@ -260,9 +252,9 @@ class CalculateS(object):
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
 
         if k_points_data["frequencies"][0].size == 3 * num_atoms:  # use case: crystal
-            first_frequency = AbinsConstants.FIRST_OPTICAL_PHONON
+            first_frequency = AbinsModules.AbinsConstants.FIRST_OPTICAL_PHONON
         else:  # use case: molecule
-            first_frequency = AbinsConstants.FIRST_MOLECULAR_VIBRATION
+            first_frequency = AbinsModules.AbinsConstants.FIRST_MOLECULAR_VIBRATION
         self._fundamentals_freq = k_points_data["frequencies"][0][first_frequency:]
 
         # sort atoms over atom type so that parallelisation is more efficient
@@ -296,13 +288,15 @@ class CalculateS(object):
         s = {}
 
         local_freq = np.copy(self._fundamentals_freq)
-        local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=AbinsConstants.INT_TYPE)
+        local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size,
+                                dtype=AbinsModules.AbinsConstants.INT_TYPE)
         fund_coeff = np.copy(local_coeff)
 
-        for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+        for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
+                           self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
 
             # in case there is large number of transitions chop it into chunks and process chunk by chunk
-            if local_freq.size * self._fundamentals_freq.size > AbinsParameters.optimal_size:
+            if local_freq.size * self._fundamentals_freq.size > AbinsModules.AbinsParameters.optimal_size:
 
                 chunked_fundamentals, chunked_fundamentals_coeff = self._prepare_chunks(local_freq=local_freq,
                                                                                         order=order, s=s)
@@ -313,7 +307,7 @@ class CalculateS(object):
                     part_local_coeff = np.copy(local_coeff)
 
                     # number of transitions can only go up
-                    for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+                    for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
 
                         part_local_freq, part_local_coeff, part_broad_spectrum = self._helper_atom(
                             atom=atom, local_freq=part_local_freq, local_coeff=part_local_coeff,
@@ -343,23 +337,23 @@ class CalculateS(object):
         """
         fund_size = self._fundamentals_freq.size
         l_size = local_freq.size
-        opt_size = float(AbinsParameters.optimal_size)
+        opt_size = float(AbinsModules.AbinsParameters.optimal_size)
 
-        chunk_size = max(1.0, np.floor(opt_size / (l_size * 2**(AbinsConstants.MAX_ORDER - order))))
+        chunk_size = max(1.0, np.floor(opt_size / (l_size * 2**(AbinsModules.AbinsConstants.MAX_ORDER - order))))
         chunk_num = int(np.ceil(float(fund_size) / chunk_size))
         new_dim = int(chunk_num * chunk_size)
-        new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsConstants.FLOAT_TYPE)
-        new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsConstants.INT_TYPE)
+        new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsModules.AbinsConstants.INT_TYPE)
         new_fundamentals[:fund_size] = self._fundamentals_freq
         new_fundamentals_coeff[:fund_size] = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size,
-                                                       dtype=AbinsConstants.INT_TYPE)
+                                                       dtype=AbinsModules.AbinsConstants.INT_TYPE)
 
         new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
         new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
-        total_size = self._bins.size - AbinsConstants.FIRST_BIN_INDEX
-        for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
-            s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
+        total_size = self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX
+        for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
+            s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return new_fundamentals, new_fundamentals_coeff
 
@@ -383,9 +377,9 @@ class CalculateS(object):
 
         if local_freq.any():  # check if local_freq has non-zero values
 
-            if self._instrument.get_name() in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+            if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq)
-            elif self._instrument.get_name() in AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+            elif self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
                 q2 = self._instrument.calculate_q_powder(input_data=q_indx)
             else:
                 raise ValueError("Unsupported instrument.")
@@ -429,8 +423,8 @@ class CalculateS(object):
         @return: s for the first quantum order event for the given atom
         """
         trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
 
         s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
 
@@ -452,8 +446,8 @@ class CalculateS(object):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the second quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
 
         dw = np.exp(-q2 * a_trace / 3.0 * coth * coth)
         q4 = q2 ** 2
@@ -506,8 +500,8 @@ class CalculateS(object):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the third quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
         s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
@@ -527,8 +521,8 @@ class CalculateS(object):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the forth quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
         s = 27.0 / 9850.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
@@ -536,7 +530,7 @@ class CalculateS(object):
 
     def _calculate_s_crystal(self, crystal_data=None):
 
-        if not isinstance(crystal_data, SingleCrystalData):
+        if not isinstance(crystal_data, AbinsModules.SingleCrystalData):
 
             raise ValueError("Input parameter should be of type CrystalData.")
             # TODO: implement calculation of S for the single crystal scenario
@@ -550,8 +544,8 @@ class CalculateS(object):
         """
         inds = np.digitize(x=array_x, bins=self._bins)
         output_array_y = np.asarray(a=[array_y[inds == i].sum()
-                                       for i in range(AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
-                                    dtype=AbinsConstants.FLOAT_TYPE)
+                                       for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
+                                    dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_y
 
@@ -567,10 +561,10 @@ class CalculateS(object):
             output_array_y = array_y
         else:
             inds = np.digitize(x=array_x, bins=self._bins)
-            output_array_x = self._bins[AbinsConstants.FIRST_BIN_INDEX:]
+            output_array_x = self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]
             output_array_y = np.asarray(a=[array_y[inds == i].sum()
-                                           for i in range(AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
-                                        dtype=AbinsConstants.FLOAT_TYPE)
+                                           for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
+                                        dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_x, output_array_y
 
@@ -581,12 +575,14 @@ class CalculateS(object):
         """
         if array_y is None:
             # number of frequencies = self._bins.size - AbinsConstants.FIRST_BIN_INDEX
-            output_y = np.zeros(shape=self._bins.size - AbinsConstants.FIRST_BIN_INDEX, dtype=AbinsConstants.FLOAT_TYPE)
+            output_y = np.zeros(shape=self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX,
+                                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
         elif array_y.any():
-            output_y = self._rebin_data_full(array_x=self._bins[AbinsConstants.FIRST_BIN_INDEX:], array_y=array_y)
+            output_y = self._rebin_data_full(array_x=self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:],
+                                             array_y=array_y)
         else:
-            output_y = np.zeros(shape=self._bins.size - AbinsConstants.FIRST_BIN_INDEX,
-                                dtype=AbinsConstants.FLOAT_TYPE)
+            output_y = np.zeros(shape=self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX,
+                                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_y
 
@@ -626,7 +622,8 @@ class CalculateS(object):
             n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
             for i in range(n_atom):
                 temp_data["atom_%s" % i] = {"s": dict()}
-                for j in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+                for j in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
+                               self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
 
                     temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
                     temp_data["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
@@ -634,7 +631,7 @@ class CalculateS(object):
             # reduce the data which is loaded to only this data which is required by the user
             data["datasets"]["data"] = temp_data
 
-        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
         s_data.set(items=data["datasets"]["data"])
 
         return s_data

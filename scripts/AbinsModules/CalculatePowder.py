@@ -1,10 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from IOmodule import IOmodule
-from PowderData import PowderData
-from AbinsData import AbinsData
-import AbinsParameters
-import AbinsConstants
+
+import AbinsModules
 from mantid.kernel import logger
 
 
@@ -19,11 +16,12 @@ class CalculatePowder(object):
         @param abins_data: object of type AbinsData with data from input DFT file
         """
 
-        if not isinstance(abins_data, AbinsData):
+        if not isinstance(abins_data, AbinsModules.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
         self._abins_data = abins_data
 
-        self._clerk = IOmodule(input_filename=filename, group_name=AbinsParameters.powder_data_group)
+        self._clerk = AbinsModules.IOmodule(input_filename=filename,
+                                            group_name=AbinsModules.AbinsParameters.powder_data_group)
 
     def _get_gamma_data(self, k_data=None):
         """
@@ -36,7 +34,7 @@ class CalculatePowder(object):
         # look for index of Gamma point
         num_k = k_data["k_vectors"].shape[0]
         for k in range(num_k):
-            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.SMALL_K:
+            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
                 gamma_pkt_index = k
                 break
         if gamma_pkt_index == -1:
@@ -62,12 +60,12 @@ class CalculatePowder(object):
         atoms_data = data["atoms_data"]
 
         if k_data["frequencies"].size == 3 * num_atoms:  # use case: crystal
-            first_frequency = AbinsConstants.FIRST_OPTICAL_PHONON
+            first_frequency = AbinsModules.AbinsConstants.FIRST_OPTICAL_PHONON
         else:  # use case: molecule
-            first_frequency = AbinsConstants.FIRST_MOLECULAR_VIBRATION
+            first_frequency = AbinsModules.AbinsConstants.FIRST_MOLECULAR_VIBRATION
         frequencies = k_data["frequencies"][first_frequency:]
 
-        powder = PowderData(num_atoms=num_atoms)
+        powder = AbinsModules.PowderData(num_atoms=num_atoms)
 
         # Notation for  indices:
         #     num_freq -- number of optical phonons (total number of phonons - acoustic phonons)
@@ -79,16 +77,16 @@ class CalculatePowder(object):
         masses = np.asarray([([atoms_data["atom_%s" % atom]["mass"]] * frequencies.size) for atom in range(num_atoms)])
 
         # disp[num_atoms, num_freq, dim]
-        disp = displacements[:, AbinsConstants.FIRST_OPTICAL_PHONON:]
+        disp = displacements[:, AbinsModules.AbinsConstants.FIRST_OPTICAL_PHONON:]
 
         # factor[num_atoms, num_freq]
-        factor = np.einsum('ij,j->ij', masses, AbinsConstants.ACLIMAX_CONSTANT / frequencies)
+        factor = np.einsum('ij,j->ij', masses, AbinsModules.AbinsConstants.ACLIMAX_CONSTANT / frequencies)
 
         # b_tensors[num_atoms, num_freq, dim, dim]
         b_tensors = np.einsum('ijkl,ij->ijkl', np.einsum('lki, lkj->lkij', disp, disp).real, factor)
 
-        indices = b_tensors < AbinsConstants.THRESHOLD
-        b_tensors[indices] = AbinsConstants.THRESHOLD
+        indices = b_tensors < AbinsModules.AbinsConstants.THRESHOLD
+        b_tensors[indices] = AbinsModules.AbinsConstants.THRESHOLD
 
         # a_tensors[num_atoms, dim, dim]
         a_tensors = np.sum(a=b_tensors, axis=1)
@@ -136,7 +134,7 @@ class CalculatePowder(object):
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
-        powder_data = PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"].shape[0])
+        powder_data = AbinsModules.PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"].shape[0])
         powder_data.set(data["datasets"]["powder_data"])
 
         return powder_data

@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-import AbinsParameters
+import AbinsModules
 import math
 import numpy as np
 from scipy import constants
@@ -46,7 +46,7 @@ M_2_HARTREE = constants.codata.value("atomic mass unit-hartree relationship")  #
 
 ALL_INSTRUMENTS = ["TwoDMap", "TOSCA"]  # supported instruments
 
-#ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
+# ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
 
 # keywords which define data structure of KpointsData
@@ -73,7 +73,8 @@ INT_ID = np.dtype(np.uint16).num
 INT_TYPE = np.dtype(np.uint16)
 
 # maximum number of entries in the workspace
-TOTAL_WORKSPACE_SIZE = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0))
+TOTAL_WORKSPACE_SIZE = int(round(AbinsModules.AbinsParameters.max_wavenumber /
+                                 float(AbinsModules.AbinsParameters.bin_width), 0))
 HIGHER_ORDER_QUANTUM_EVENTS = 3  # number of quantum order effects taken into account
 HIGHER_ORDER_QUANTUM_EVENTS_DIM = HIGHER_ORDER_QUANTUM_EVENTS
 MAX_ARRAY_SIZE = 1000000  # maximum size for storing frequencies for each quantum order

@@ -1,10 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from GeneralData import GeneralData
-import AbinsConstants
+import AbinsModules
 
 
-class AtomsDaTa(GeneralData):
+class AtomsDaTa(AbinsModules.GeneralData):
 
     def __init__(self, num_atoms=None):
         super(AtomsDaTa, self).__init__()
@@ -26,11 +25,11 @@ class AtomsDaTa(GeneralData):
         if not isinstance(item, dict):
             raise ValueError("Every element of AtomsData has  a form of the dictionary.")
 
-        if not sorted(item.keys()) == sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_DATA):
+        if not sorted(item.keys()) == sorted(AbinsModules.AbinsConstants.ALL_KEYWORDS_ATOMS_DATA):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if not item["symbol"] in AbinsConstants.ALL_SYMBOLS:
+        if not item["symbol"] in AbinsModules.AbinsConstants.ALL_SYMBOLS:
             raise ValueError("Invalid value of symbol.")
 
         # "fract_coord"
@@ -41,7 +40,7 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if fract_coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if fract_coord.dtype.num != AbinsConstants.FLOAT_ID:
+        if fract_coord.dtype.num != AbinsModules.AbinsConstants.FLOAT_ID:
             raise ValueError("All coordinates should be real numbers.")
 
         # "sort"

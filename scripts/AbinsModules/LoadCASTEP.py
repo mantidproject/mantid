@@ -1,13 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
-
-# Abins modules
-from GeneralDFTProgram import GeneralDFTProgram
-import AbinsConstants
+import AbinsModules
 
 
-class LoadCASTEP(GeneralDFTProgram):
+class LoadCASTEP(AbinsModules.GeneralDFTProgram):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
@@ -133,7 +130,7 @@ class LoadCASTEP(GeneralDFTProgram):
 
         dim = 3  # we have 3D space
         # in general case eigenvectors are complex
-        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=AbinsConstants.COMPLEX_TYPE)
+        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=AbinsModules.AbinsConstants.COMPLEX_TYPE)
         for freq in range(self._num_phonons):
             for atom in range(self._num_atoms):
 
@@ -230,7 +227,8 @@ class LoadCASTEP(GeneralDFTProgram):
         file_data.update({"frequencies": np.asarray(frequencies),
                           "weights": np.asarray(weights),
                           "k_vectors": np.asarray(k_vectors),
-                          "atomic_displacements": np.asarray(eigenvectors) * AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+                          "atomic_displacements":
+                              np.asarray(eigenvectors) * AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
                           })
 
         self._recover_symmetry_points(data=file_data)

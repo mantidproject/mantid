@@ -1,11 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from GeneralData import GeneralData
-import AbinsConstants
-import AbinsParameters
+import AbinsModules
 
 
-class SData(GeneralData):
+class SData(AbinsModules.GeneralData):
     """
     Class for storing S(Q, omega)
     """
@@ -17,7 +15,7 @@ class SData(GeneralData):
             raise ValueError("Invalid value of temperature.")
         self._temperature = float(temperature)
 
-        if sample_form in AbinsConstants.ALL_SAMPLE_FORMS:
+        if sample_form in AbinsModules.AbinsConstants.ALL_SAMPLE_FORMS:
             self._sample_form = sample_form
         else:
             raise ValueError("Invalid sample form %s" % sample_form)
@@ -32,24 +30,24 @@ class SData(GeneralData):
             raise ValueError("New value of S  should have a form of a dict.")
 
         for item in items:
-            if AbinsConstants.ATOM_LABEL in item:
+            if AbinsModules.AbinsConstants.ATOM_LABEL in item:
 
                 if not isinstance(items[item], dict):
                     raise ValueError("New value of item from S data should have a form of dictionary.")
 
-                if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
+                if sorted(items[item].keys()) != sorted(AbinsModules.AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
                     raise ValueError("Invalid structure of the dictionary.")
 
-                for order in items[item][AbinsConstants.S_LABEL]:
-                    if not isinstance(items[item][AbinsConstants.S_LABEL][order], np.ndarray):
+                for order in items[item][AbinsModules.AbinsConstants.S_LABEL]:
+                    if not isinstance(items[item][AbinsModules.AbinsConstants.S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
 
             elif "frequencies" == item:
 
-                bins = np.arange(start=AbinsParameters.min_wavenumber,
-                                 stop=AbinsParameters.max_wavenumber,
-                                 step=AbinsParameters.bin_width,
-                                 dtype=AbinsConstants.FLOAT_TYPE)
+                bins = np.arange(start=AbinsModules.AbinsParameters.min_wavenumber,
+                                 stop=AbinsModules.AbinsParameters.max_wavenumber,
+                                 step=AbinsModules.AbinsParameters.bin_width,
+                                 dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
                 if not np.array_equal(items[item], bins[1:]):
                     raise ValueError("Invalid frequencies.")

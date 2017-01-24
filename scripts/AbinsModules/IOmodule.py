@@ -4,7 +4,7 @@ import numpy as np
 import subprocess
 import shutil
 import hashlib
-from AbinsModules import AbinsParameters
+import  AbinsModules
 import os
 
 
@@ -426,7 +426,7 @@ class IOmodule(object):
         Returns: string representation of hash for  file  with advanced parameters
                  which contains only hexadecimal digits
         """
-        return self._calculate_hash(filename=AbinsParameters.__file__.replace(".pyc", ".py"))
+        return self._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
 
     def get_input_filename(self):
         return self._input_filename
