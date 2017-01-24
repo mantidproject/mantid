@@ -68,6 +68,19 @@ The `x`-axis is given in Kelvin, and the heat capacity (`y`-axis) is in Joules p
         if row['Value'] != 0:
             print "%7s = % 7.5g" % (row['Name'], row['Value'])
 
+.. testcleanup:: ExampleCrystalFieldHeatCapacity
+
+.. testoutput:: ExampleCrystalFieldHeatCapacity
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+        B20 = ...
+        B22 = ...
+        B40 = ...
+        B42 = ...
+        B44 = ...
+    Cost function value = ...
+
 Output (the numbers you see on your machine may vary):
 
 .. code::
