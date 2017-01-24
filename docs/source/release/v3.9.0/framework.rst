@@ -83,6 +83,7 @@ Deprecated
 - :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:'TransposeMD <algm_TransposeMD>'.
 - The Python function `IMDDimension.getName()` has been deprecated in favour of `IMDDimension.name'.
 - The duplicate Python function `Workspace.getName()` has been deprecated in favour of `Workspace.name()'.
+
 Removed
 #######
 
@@ -100,6 +101,7 @@ CurveFitting
 
 - Systemtest and FittingBenchmarks have been added for testing the minimizer, the scripts generate the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This Systemtest also demo how these tables can be created as a standard Mantid script.
 - Recommendations for which fitting method to use for a given data set has been added to :ref:`FittingMinimzers page <FittingMinimizers>`.
+- Improved documentation of the these fitting minimizers.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates the initial values of a fiting function in given intervals.
 - `Exclude` is new property of :ref:`Fit <algm-Fit>`, which allows for a user defined range to be excluded from a fit.

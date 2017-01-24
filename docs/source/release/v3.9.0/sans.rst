@@ -23,6 +23,8 @@ Bug Fixes
 - Remove SaveNexusProcessed and SaveCSV as an option. Reorder options by dimensionality.
 - Fix for merged reduction with phi masking.
 - Fix SAScollimation issue in SaveCanSAS1D and LoadCanSAS1D.
+- Improved CropToComponent and removed detector ordering.
+
 
 X uncertainties (delta-Q)
 -------------------------

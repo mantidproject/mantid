@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import re
+from six import string_types
 
 parNamePattern = re.compile(r'([a-zA-Z][\w.]+)')
 
@@ -637,7 +638,7 @@ class PhysicalProperties(object):
         self._hdir = [0., 0., 1.]
         self._hmag = 1.
         self._physpropTemperature = 1.
-        self._typeid = self._str2id(typeid) if isinstance(typeid, basestring) else int(typeid)
+        self._typeid = self._str2id(typeid) if isinstance(typeid, string_types) else int(typeid)
         try:
             initialiser = getattr(self, 'init' + str(self._typeid))
         except AttributeError:
@@ -660,7 +661,7 @@ class PhysicalProperties(object):
     def _checkhdir(self, hdir):
         import numpy as np
         try:
-            if isinstance(hdir, basestring):
+            if isinstance(hdir, string_types):
                 if 'powder' in hdir.lower():
                     return 'powder'
                 else:
@@ -693,7 +694,7 @@ class PhysicalProperties(object):
     @Inverse.setter
     def Inverse(self, value):
         if (self._typeid == 2 or self._typeid == 4):
-            if isinstance(value, basestring):
+            if isinstance(value, string_types):
                 self._suscInverseFlag = value.lower() in ['true', 't', '1', 'yes', 'y']
             else:
                 self._suscInverseFlag = bool(value)  # In some cases will always be true...
@@ -733,7 +734,7 @@ class PhysicalProperties(object):
             raise ValueError('No environment arguments should be specified for heat capacity')
 
     def _parseargs(self, mapping, *args, **kwargs):
-        args = filter(None, list(args))
+        args = [_f for _f in list(args) if _f]
         # Handles special case of first argument being a unit type
         if len(args) > 0:
             try:

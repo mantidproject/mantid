@@ -96,6 +96,7 @@ set ( TEST_PY_FILES
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
+  SofQWMomentsScanTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
