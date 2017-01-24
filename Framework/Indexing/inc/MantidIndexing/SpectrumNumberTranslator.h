@@ -42,15 +42,11 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
-  SpectrumNumberTranslator(std::vector<SpectrumNumber> spectrumNumbers,
+  SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
                            const Partitioner &partitioner,
                            const PartitionIndex &partition)
       : m_partition(partition) {
     partitioner.checkValid(m_partition);
-
-    // This sort is the reason for taking the spectrumNumbers argument by value.
-    // We must sort such that the min/max variant of makeIndexSet() makes sense.
-    std::sort(spectrumNumbers.begin(), spectrumNumbers.end());
 
     size_t currentIndex = 0;
     for (size_t i = 0; i < spectrumNumbers.size(); ++i) {
@@ -76,12 +72,13 @@ public:
     static_cast<void>(m_partitions.at(min));
     static_cast<void>(m_partitions.at(max));
 
-    const auto begin = m_indices.lower_bound(min);
-    const auto end = m_indices.upper_bound(max);
-    if (begin == m_indices.end() || end == m_indices.begin() || begin == end)
-      return SpectrumIndexSet(0);
-    return SpectrumIndexSet(begin->second, std::prev(end)->second,
-                            m_indices.size());
+    // The order of spectrum numbers can be arbitrary so we need to iterate.
+    std::vector<size_t> indices;
+    for(const auto &index : m_indices) {
+      if(index.first >= min && index.first <= max)
+        indices.push_back(index.second);
+    }
+    return SpectrumIndexSet(indices, m_indices.size());
   }
 
   SpectrumIndexSet makeIndexSet(GlobalSpectrumIndex min,

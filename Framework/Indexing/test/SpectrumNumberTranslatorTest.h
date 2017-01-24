@@ -21,10 +21,11 @@ public:
   }
 
   SpectrumNumberTranslator makeTranslator(int ranks, int rank) {
-    // SpectrumNumber       1 2 4 5
-    // GlobalSpectrumIndex 0 1 2 3
-    // Rank                 1 2 1 2
-    // Local index          0 1 0 1
+    // SpectrumNumber       2 1 4 5
+    // GlobalSpectrumIndex  0 1 2 3
+    // for 3 ranks:
+    // Rank                 0 1 2 0
+    // Local index          0 0 0 1
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     return {spectrumNumbers,
@@ -74,7 +75,7 @@ public:
                      std::logic_error);
   }
 
-  void test_spectrum_numbers_are_sorted() {
+  void test_spectrum_numbers_order_preserved() {
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
@@ -84,10 +85,10 @@ public:
                              std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0));
 
-    TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({-1}))[0], 0);
+    TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({1}))[0], 0);
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({0}))[0], 1);
-    TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({1}))[0], 2);
-    TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({4}))[0], 3);
+    TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({4}))[0], 2);
+    TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({-1}))[0], 3);
   }
 
   void test_makeIndexSet_full_1_rank() {
@@ -101,13 +102,16 @@ public:
   }
 
   void test_makeIndexSet_full_3_ranks() {
-    auto translator = makeTranslator(3, 1);
-    auto set = translator.makeIndexSet();
-    // spectrumNumbers 1,2,4,5:
-    // 1 % 3 = 1, 4 % 3 = 1
-    TS_ASSERT_EQUALS(set.size(), 2);
-    TS_ASSERT_EQUALS(set[0], 0);
-    TS_ASSERT_EQUALS(set[1], 1);
+    auto set0 = makeTranslator(3, 0).makeIndexSet();
+    TS_ASSERT_EQUALS(set0.size(), 2);
+    TS_ASSERT_EQUALS(set0[0], 0);
+    TS_ASSERT_EQUALS(set0[1], 1);
+    auto set1 = makeTranslator(3, 1).makeIndexSet();
+    TS_ASSERT_EQUALS(set1.size(), 1);
+    TS_ASSERT_EQUALS(set1[0], 0);
+    auto set2 = makeTranslator(3, 2).makeIndexSet();
+    TS_ASSERT_EQUALS(set2.size(), 1);
+    TS_ASSERT_EQUALS(set2[0], 0);
   }
 
   void test_makeIndexSet_minmax_range_failures() {
@@ -134,12 +138,13 @@ public:
     auto translator = makeTranslator(1, 0);
     auto set = translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(4));
     TS_ASSERT_EQUALS(set.size(), 2);
-    TS_ASSERT_EQUALS(set[0], 1);
+    // Spectrum numbers are not ordered so there is a gap in the indices.
+    TS_ASSERT_EQUALS(set[0], 0);
     TS_ASSERT_EQUALS(set[1], 2);
   }
 
   void test_makeIndexSet_minmax_full_3_ranks() {
-    auto translator = makeTranslator(3, 1);
+    auto translator = makeTranslator(3, 0);
     auto set = translator.makeIndexSet(SpectrumNumber(1), SpectrumNumber(5));
     TS_ASSERT_EQUALS(set.size(), 2);
     TS_ASSERT_EQUALS(set[0], 0);
@@ -147,29 +152,29 @@ public:
   }
 
   void test_makeIndexSet_minmax_partial_3_ranks() {
-    auto translator = makeTranslator(3, 1);
-    auto set = translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(4));
+    auto translator = makeTranslator(3, 0);
+    auto set = translator.makeIndexSet(SpectrumNumber(4), SpectrumNumber(5));
     TS_ASSERT_EQUALS(set.size(), 1);
     TS_ASSERT_EQUALS(set[0], 1);
   }
 
   void test_makeIndexSet_minmax_3_ranks_no_overlap() {
-    // Rank 0 has no spectra
+    // Rank 0 has spectrum numbers 2 and 5
     auto t0 = makeTranslator(3, 0);
     TS_ASSERT_EQUALS(
-        t0.makeIndexSet(SpectrumNumber(1), SpectrumNumber(5)).size(), 0);
-    // Rank 1 has spectrum numbers 1 and 4
+        t0.makeIndexSet(SpectrumNumber(1), SpectrumNumber(1)).size(), 0);
+    TS_ASSERT_EQUALS(
+        t0.makeIndexSet(SpectrumNumber(4), SpectrumNumber(4)).size(), 0);
+    // Rank 1 has spectrum numbers 1
     auto t1 = makeTranslator(3, 1);
     TS_ASSERT_EQUALS(
-        t1.makeIndexSet(SpectrumNumber(5), SpectrumNumber(5)).size(), 0);
-    TS_ASSERT_EQUALS(
-        t1.makeIndexSet(SpectrumNumber(2), SpectrumNumber(2)).size(), 0);
-    // Rank 2 has spectrum numbers 2 and 5
+        t1.makeIndexSet(SpectrumNumber(2), SpectrumNumber(5)).size(), 0);
+    // Rank 2 has spectrum numbers 4
     auto t2 = makeTranslator(3, 2);
     TS_ASSERT_EQUALS(
-        t2.makeIndexSet(SpectrumNumber(1), SpectrumNumber(1)).size(), 0);
+        t2.makeIndexSet(SpectrumNumber(1), SpectrumNumber(2)).size(), 0);
     TS_ASSERT_EQUALS(
-        t2.makeIndexSet(SpectrumNumber(4), SpectrumNumber(4)).size(), 0);
+        t2.makeIndexSet(SpectrumNumber(5), SpectrumNumber(5)).size(), 0);
   }
 
   void test_makeIndexSet_minmax_GlobalSpectrumIndex_param_check_3_ranks() {
@@ -194,14 +199,14 @@ public:
   }
 
   void test_makeIndexSet_minmax_GlobalSpectrumIndex_3_ranks() {
-    auto translator = makeTranslator(3, 1);
+    auto translator = makeTranslator(3, 0);
     auto set =
         translator.makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(3));
     TS_ASSERT_EQUALS(set.size(), 2);
     TS_ASSERT_EQUALS(set[0], 0);
     TS_ASSERT_EQUALS(set[1], 1);
     set =
-        translator.makeIndexSet(GlobalSpectrumIndex(1), GlobalSpectrumIndex(2));
+        translator.makeIndexSet(GlobalSpectrumIndex(2), GlobalSpectrumIndex(3));
     TS_ASSERT_EQUALS(set.size(), 1);
     TS_ASSERT_EQUALS(set[0], 1);
   }
@@ -227,12 +232,12 @@ public:
   }
 
   void test_makeIndexSet_partial_3_ranks() {
-    auto translator = makeTranslator(3, 1);
-    // 1 is on this rank
+    auto translator = makeTranslator(3, 0);
+    // 2 is on this rank
     auto set1 = translator.makeIndexSet(makeSpectrumNumbers({1, 2}));
     TS_ASSERT_EQUALS(set1.size(), 1);
     TS_ASSERT_EQUALS(set1[0], 0);
-    // 4 is on this rank
+    // 5 is on this rank
     auto set2 = translator.makeIndexSet(makeSpectrumNumbers({4, 5}));
     TS_ASSERT_EQUALS(set2.size(), 1);
     TS_ASSERT_EQUALS(set2[0], 1);
@@ -251,7 +256,7 @@ public:
   }
 
   void test_makeIndexSet_GlobalSpectrumIndex_partial_3_ranks_range_checks() {
-    auto t = makeTranslator(3, 1);
+    auto t = makeTranslator(3, 0);
     TS_ASSERT_THROWS(t.makeIndexSet(makeGlobalSpectrumIndices({-1})),
                      std::out_of_range);
     TS_ASSERT_THROWS(t.makeIndexSet(makeGlobalSpectrumIndices({4})),
@@ -262,12 +267,12 @@ public:
   }
 
   void test_makeIndexSet_GlobalSpectrumIndex_partial_3_ranks() {
-    auto translator = makeTranslator(3, 1);
+    auto translator = makeTranslator(3, 0);
     // 0 is on this rank
     auto set1 = translator.makeIndexSet(makeGlobalSpectrumIndices({0, 1}));
     TS_ASSERT_EQUALS(set1.size(), 1);
     TS_ASSERT_EQUALS(set1[0], 0);
-    // 2 is on this rank
+    // 3 is on this rank
     auto set2 = translator.makeIndexSet(makeGlobalSpectrumIndices({2, 3}));
     TS_ASSERT_EQUALS(set2.size(), 1);
     TS_ASSERT_EQUALS(set2[0], 1);
