@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayLengthValidator.cpp
+  src/ArrayOrderedPairsValidator.cpp
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
@@ -141,6 +142,7 @@ set ( INC_FILES
 	inc/MantidKernel/ANN/ANNx.h
 	inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/ArrayLengthValidator.h
+  inc/MantidKernel/ArrayOrderedPairsValidator.h
 	inc/MantidKernel/ArrayProperty.h
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
@@ -307,6 +309,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	ArrayBoundedValidatorTest.h
 	ArrayLengthValidatorTest.h
+  ArrayOrderedPairsValidatorTest.h
 	ArrayPropertyTest.h
 	AtomTest.h
 	BinFinderTest.h
