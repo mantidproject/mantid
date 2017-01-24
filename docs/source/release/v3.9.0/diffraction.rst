@@ -17,6 +17,10 @@ Crystal Improvements
 
 :ref:`algm-IntegrateEllipsoids` has a new option, AdaptiveQMultiplier, for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes.  These are the same as the adaptive options in :ref:`algm-IntegratePeaksMD`.
 
+General Diffraction
+-------------------
+A new version of :ref:`algm-ConvertToDiffractionMDWorkspace-v3` has been created that now automatically calculates extents using :ref:`algm-ConvertToMDMinMaxLocal` if none are provided.
+
 Single Crystal Diffraction
 --------------------------
 HB3A's IDF is modified to allow its detector center shifted from default position.

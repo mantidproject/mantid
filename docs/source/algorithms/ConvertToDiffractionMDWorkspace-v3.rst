@@ -17,21 +17,12 @@ The calculations apply only to elastic diffraction experiments. The
 conversion can be done either to Q-space in the lab or sample frame, or
 to HKL of the crystal.
 
-Version 2 of the algorithm is the wrapper around :ref:`algm-ConvertToMD` algorithm, used for
-diffraction workflow and for supporting the interface of the previous specialized version of this
-algorithm.  Old specialized version of this algorithm also exists.
-
-See the :ref:`algm-ConvertToDiffractionMDWorkspace-v1` for details of the old and  :ref:`algm-ConvertToMD` for this algorithms implementations.
-
-The main difference between the results produced by the version one and two of this algorithm
-is the type of the workspace, produced by default.
-Version one is producing :ref:`MDLeanEvent\<3\> <MDWorkspace>`-s workspace
-and this version generates :ref:`MDEvent\<3\> <MDWorkspace>`-s workspace.
-
-To obtain a workspace containing :ref:`MDLeanEvent\<3\> <MDWorkspace>`-s,
-and fine-tune the output workspace properties,
-one has to create OutputWorkspace using :ref:`algm-CreateMDWorkspace` algorithm first.
-
+Version 3 of this algorithm will by default automatically calculate the extents 
+of the MD workspace using the :ref:`algm-ConvertToMDMinMaxLocal` algorithm. 
+Old version of this algorithm (version 2) also still exists which uses the fixed 
+bounds +/- 50. See the :ref:`algm-ConvertToDiffractionMDWorkspace-v2` for 
+details of the old implementation and :ref:`algm-ConvertToMDMinMaxLocal` for 
+information on how extents are now calculated.
 
 
 Types of Conversion
@@ -59,9 +50,8 @@ Where :math:`\theta` is *half* of the neutron scattering angle
 (conventionally called :math:`2\theta`). :math:`\lambda` is the neutron
 wavelength in *Angstroms*.
 
-This correction is also done by the
-:ref:`algm-AnvredCorrection` algorithm, and will be set to
-false if that algorithm has been run on the input workspace.
+This correction is also done by the :ref:`algm-AnvredCorrection` algorithm, and 
+will be set to false if that algorithm has been run on the input workspace.
 
 Usage
 
@@ -72,7 +62,7 @@ Usage
    # create or load event workspace
    events = CreateSampleWorkspace(OutputWorkspace='events', WorkspaceType='Event', Function='Multiple Peaks')
    # convert to  MD workspace
-   md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150, Version=2)
+   md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150)
 
    # A way to look at these results as a text:
    print "Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims())
@@ -82,7 +72,7 @@ Usage
 
 .. testoutput:: ExConvertToDiffractionMDWorkspace
 
-   Resulting MD workspace has 194783 events and 3 dimensions
+   Resulting MD workspace has 81058 events and 3 dimensions
    Workspace Type is:  MDEventWorkspace<MDEvent,3>
 
 
