@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/AddPeak.h"
-
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -48,20 +47,20 @@ void AddPeak::exec() {
   const double height = getProperty("Height");
   const double count = getProperty("BinCount");
 
-  const DetectorInfo& detectorInfo = runWS->detectorInfo();
+  const DetectorInfo &detectorInfo = runWS->detectorInfo();
   const V3D samplePosition = detectorInfo.samplePosition();
   const size_t detectorIndex = detectorInfo.indexOf(detID);
 
   double theta2 = detectorInfo.twoTheta(detectorIndex);
-  const Mantid::Geometry::IDetector& det = detectorInfo.detector(detectorIndex);
+  const Mantid::Geometry::IDetector &det = detectorInfo.detector(detectorIndex);
   double phi = det.getPhi();
 
   // In the inelastic convention, Q = ki - kf.
   double Qx = -sin(theta2) * cos(phi);
   double Qy = -sin(theta2) * sin(phi);
   double Qz = 1.0 - cos(theta2);
-  double l1 = detectorInfo.l1(); 
-  double l2 = detectorInfo.l2(detectorIndex); 
+  double l1 = detectorInfo.l1();
+  double l2 = detectorInfo.l2(detectorIndex);
 
   Mantid::Kernel::Unit_sptr unit = runWS->getAxis(0)->unit();
   if (unit->unitID() != "TOF") {
@@ -80,7 +79,7 @@ void AddPeak::exec() {
         const Mantid::Geometry::ParameterMap &pmap =
             runWS->constInstrumentParameters();
         Mantid::Geometry::Parameter_sptr par =
-            pmap.getRecursive(&det,"Efixed");
+            pmap.getRecursive(&det, "Efixed");
         if (par) {
           efixed = par->value<double>();
         }
@@ -90,7 +89,7 @@ void AddPeak::exec() {
     } else {
       // m_emode = 0; // Elastic
       // This should be elastic if Ei and Efixed are not set
-      // TODO?
+      // TODO
     }
     std::vector<double> xdata(1, tof);
     std::vector<double> ydata;
