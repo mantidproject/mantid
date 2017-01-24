@@ -17,7 +17,6 @@ Algorithms
 - A new algorithm :ref:`Abins <algm-Abins>`  which allows comparison of theoretical and experimental INS.
 - A 'QuickRun' algorithm :ref:`SofQWMomentsScan <algm-SofQWMomentsScan>` that reduces data and runs through :ref:`SofQW <algm-SofQW>` and :ref:`SofQWMoments <algm-SofQWMoments>`.
 
->>>>>>> upstream/master
 Data Reduction
 ##############
 
