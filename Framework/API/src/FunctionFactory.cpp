@@ -278,9 +278,9 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
  */
 void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
                                         const Expression &expr) const {
-  IConstraint *c =
-      ConstraintFactory::Instance().createInitialized(fun.get(), expr);
-  fun->addConstraint(c);
+  auto c = std::unique_ptr<IConstraint>(
+      ConstraintFactory::Instance().createInitialized(fun.get(), expr));
+  fun->addConstraint(std::move(c));
 }
 
 /**

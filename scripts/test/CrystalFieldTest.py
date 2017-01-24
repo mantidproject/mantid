@@ -3,6 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
+from scipy.constants import physical_constants
 
 # Import mantid to setup the python paths to the bundled scripts
 import mantid
@@ -11,6 +12,7 @@ from mantid.simpleapi import CalculateChiSquared, EvaluateFunction, mtd
 from mantid.kernel import ConfigService
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
+
 
 class BackgroundTest(unittest.TestCase):
 
@@ -94,14 +96,14 @@ class CrystalFieldTests(unittest.TestCase):
         for i in range(9):
             self.assertAlmostEqual(expectedEigenvalues[i], en[i], 1)
         # Now test the eigenvectors by computing the dipole transition matrix elements. Use the magnetic field
-        #   terms but divide by gJ*uB (gJ=0.8 for U4+/Pr3+ and uB=0.6715)
+        #   terms but divide by gJ*uB (gJ=0.8 for U4+/Pr3+ and uB=0.05788 meV/T)
         _, _, hx = energies(2, BextX=1.0)
         _, _, hy = energies(2, BextY=1.0)
         _, _, hz = energies(2, BextZ=1.0)
         ix = np.dot(np.conj(np.transpose(wf)), np.dot(hx, wf))
         iy = np.dot(np.conj(np.transpose(wf)), np.dot(hy, wf))
         iz = np.dot(np.conj(np.transpose(wf)), np.dot(hz, wf))
-        gJuB = 0.53716
+        gJuB = 0.8 * physical_constants['Bohr magneton in eV/T'][0] * 1000.
         trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
         # For some reason, in the paper I also divided the matrix elements by a factor of 4. (not sure why)
         trans = trans / (gJuB ** 2) / 4
@@ -342,7 +344,7 @@ class CrystalFieldTests(unittest.TestCase):
 
         x0, y0 = cf.getSpectrum()
         x1, y1 = cf.getSpectrum(1)
-        # Original test was for FOCUS convention - intensity in barn. 
+        # Original test was for FOCUS convention - intensity in barn.
         # Now use ISIS convention with intensity in milibarn/steradian
         y0 = y0 / c_mbsr
         y1 = y1 / c_mbsr
@@ -355,6 +357,42 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y1[139], 2.1635845058245273, 8)
         self.assertAlmostEqual(y1[150], 2.1826462206185795, 8)
 
+    def test_api_CrystalField_physical_properties(self):
+        from CrystalField import CrystalField
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+        # Test Heat capacity calculations
+        TCv, Cv = cf.getHeatCapacity() 
+        self.assertAlmostEqual(TCv[150], 151, 4)
+        self.assertAlmostEqual(Cv[100], 4.2264, 3)
+        self.assertAlmostEqual(Cv[150], 5.9218, 3)
+        self.assertAlmostEqual(Cv[200], 5.4599, 3)
+
+        # Test susceptibility calculations
+        Tchi_powder, chi_powder = cf.getSusceptibility(np.linspace(1,300,50), Hdir='powder')
+        self.assertAlmostEqual(Tchi_powder[10], 62.02, 2)
+        self.assertAlmostEqual(chi_powder[5], 1.92026e-2, 6)
+        self.assertAlmostEqual(chi_powder[10], 1.03471e-2, 6)
+        self.assertAlmostEqual(chi_powder[15], 0.73004e-2, 6)
+
+        # Test M(T) calculations
+        Tmt_powder, mt_powder = cf.getMagneticMoment(1., Temperature=np.linspace(1,300,50), Hdir='powder', Unit='cgs')
+        self.assertAlmostEqual(chi_powder[5], mt_powder[5], 6)
+        self.assertAlmostEqual(chi_powder[10], mt_powder[10], 6)
+        self.assertAlmostEqual(chi_powder[15], mt_powder[15], 6)
+        _, invmt_powder_SI = cf.getMagneticMoment(1., Temperature=np.linspace(1,300,50), Hdir='powder', Unit='SI', Inverse=True)
+        self.assertAlmostEqual(chi_powder[5] * 10, 1 / invmt_powder_SI[5], 2)
+        self.assertAlmostEqual(chi_powder[10] * 10, 1 / invmt_powder_SI[10], 2)
+        self.assertAlmostEqual(chi_powder[15] * 10, 1 / invmt_powder_SI[15], 2)
+
+        # Test M(H) calculations
+        Hmag_SI, mag_SI = cf.getMagneticMoment(np.linspace(0,30,15), Temperature=10, Hdir=[0,1,-1], Unit='SI')
+        self.assertAlmostEqual(mag_SI[1], 1.8139, 3)
+        self.assertAlmostEqual(mag_SI[5], 6.7859, 3)
+        self.assertAlmostEqual(mag_SI[9], 8.2705, 3)
+        _, mag_bohr = cf.getMagneticMoment(np.linspace(0,30,15), Temperature=10, Hdir=[0,1,-1], Unit='bohr')
+        self.assertAlmostEqual(mag_SI[1] / 5.5849, mag_bohr[1], 3)
+        self.assertAlmostEqual(mag_SI[5] / 5.5849, mag_bohr[5], 3)
+        self.assertAlmostEqual(mag_SI[9] / 5.5849, mag_bohr[9], 3)
 
 class CrystalFieldFitTest(unittest.TestCase):
 
@@ -442,7 +480,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.10000812804, 4)
         self.assertAlmostEqual(cf.peaks.param[2]['Amplitude'], 0.429808829601*c_mbsr, 2)
 
-
     def test_CrystalFieldFit_multi_spectrum(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -528,7 +565,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertNotEqual(cf.peaks[1].param[3]['PeakCentre'], 0.0)
         self.assertNotEqual(cf.peaks[1].param[3]['FWHM'], 0.0)
         self.assertNotEqual(cf.peaks[1].param[3]['Amplitude'], 0.0)
-
 
     def test_CrystalFieldFit_multi_spectrum_simple_background(self):
         from CrystalField.fitting import makeWorkspace
@@ -649,6 +685,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
         fit.fit()
 
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
@@ -680,9 +717,11 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         cf1 = CrystalField('Ce', 'C2v', B40=-0.02, B42=-0.11, B44=-0.12, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
         cf1.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf1.FixAllPeaks = True
         cf2 = CrystalField('Pr', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0],
                            ToleranceIntensity=6.0, ToleranceEnergy=1.0)
         cf2.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf2.FixAllPeaks = True
         cf = cf1 + cf2
 
         chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws1, InputWorkspace_1=ws2)[1]
@@ -690,6 +729,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
         fit.fit()
 
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
@@ -1236,6 +1276,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
         # Run fit
         fit.fit()
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < 100.0)
 
     def test_monte_carlo_multi_spectrum(self):
@@ -1249,7 +1290,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws2 = makeWorkspace(*origin.getSpectrum(1))
 
         # Define a CrystalField object with parameters slightly shifted.
-        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=9,
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=11,
                           Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
 
         # Set the ties
@@ -1257,10 +1298,11 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
         # Create a fit object
         fit = CrystalFieldFit(cf, InputWorkspace=[ws1, ws2])
-        fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
+        fit.monte_carlo(NSamples=1000, Constraints='20<f0.f1.PeakCentre<45,20<f0.f2.PeakCentre<45')
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertTrue(cf.chi2 > 0.0)
+        self.assertTrue(cf.chi2 < 200.0)
 
     def test_multi_ion_intensity_scaling(self):
         from CrystalField import CrystalField, CrystalFieldFit
@@ -1502,6 +1544,63 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         self.assertTrue(np.all(out1 / y1 > 1.49999999999))
         self.assertTrue(np.all(out1 / y1 < 1.50000000001))
+
+    def test_CrystalFieldFit_physical_properties(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544, 
+                              Temperature=[10, 100], FWHM=[1.1, 1.2])
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
+        wscv = makeWorkspace(*origin.getHeatCapacity())
+        wschi = makeWorkspace(*origin.getSusceptibility(Hdir='powder'))
+        wsmag = makeWorkspace(*origin.getMagneticMoment(Hdir=[0,1,0]))
+        wsmom = makeWorkspace(*origin.getMagneticMoment(H=100, T=np.linspace(1,300,300), Unit='cgs'))
+
+        # Fits single physical properties dataset
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
+        cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder')
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=wschi, MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+        
+        # Fits multiple physical properties
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
+        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[wschi, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
+        # Fits one INS spectrum and one physical property
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12, Temperature=10, FWHM=1.1)
+        cf.PhysicalProperty = PhysicalProperties('M(H)',Hdir=[0,1,0])
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
+        # Fits multiple INS spectra and multiple physical properties
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12, 
+                          Temperature=[10, 100], FWHM=[1.1, 1.2])
+        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, ws1, wschi, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
 
 
 if __name__ == "__main__":

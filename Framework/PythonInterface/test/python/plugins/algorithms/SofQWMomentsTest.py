@@ -23,13 +23,10 @@ class SofQWMomentsTest(unittest.TestCase):
         ws = SofQW(ws, '0.4, 0.1, 1.8', EMode='Indirect', EFixed='1.845')
         ws = SofQWMoments(ws)
 
-        workspaces = ws.getNames()
-        self.assertEquals(len(workspaces), 4)
+        nHists = ws.getNumberHistograms()
+        self.assertEquals(nHists, 5)
 
-        for wsname in workspaces:
-            ws = mtd[wsname]
-            self.assertEquals(ws.getNumberHistograms(), 1)
-            self.assertEquals(ws.blocksize(), 14)
+        self.assertEquals(ws.blocksize(), 14)
 
 if __name__=="__main__":
     unittest.main()

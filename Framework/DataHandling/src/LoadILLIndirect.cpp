@@ -66,7 +66,7 @@ int LoadILLIndirect::confidence(Kernel::NexusDescriptor &descriptor) const {
        (descriptor.pathExists("/entry0/instrument/Doppler/doppler_frequency") &&
         descriptor.pathExists("/entry0/dataSD/dataSD")) // IN16B old
        )) {
-    return 80;
+    return 70;
   } else {
     return 0;
   }

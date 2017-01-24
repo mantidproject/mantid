@@ -53,7 +53,7 @@ public:
 
     alg.setPropertyValue("Filename", file);
     Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(alg.confidence(descr), 80);
+    TS_ASSERT_EQUALS(alg.confidence(descr), 70);
   }
 
   void doExecTest(const std::string &file) {

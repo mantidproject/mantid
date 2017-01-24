@@ -6,10 +6,10 @@ from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fil
     PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
     ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, DiffractionFocussing, \
-    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadDetectorsGroupingFile, LoadMask, \
-    LoadNexusProcessed, LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, \
-    PreprocessDetectorsToMD, Rebin, RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, \
-    SaveAscii, SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
+    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadMask, LoadNexusProcessed, \
+    LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, \
+    RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
+    SaveGSS, SaveNexusProcessed, mtd
 import os
 import numpy as np
 
@@ -226,22 +226,25 @@ class SNAPReduce(DataProcessorAlgorithm):
     def _getMaskWSname(self):
         masking = self.getProperty("Masking").value
         maskWSname = None
-        if masking == 'Custom - xml masking file':
-            maskWSname = 'CustomMask'
-            LoadMask(InputFile=self.getProperty('MaskingFilename').value,
-                     Instrument='SNAP', OutputWorkspace=maskWSname)
-        elif masking == 'Horizontal':
-            maskWSname = 'HorizontalMask'
-            if not mtd.doesExist('HorizontalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Horizontal_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace=maskWSname)
-        elif masking == 'Vertical':
-            maskWSname = 'VerticalMask'
-            if not mtd.doesExist('VerticalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Vertical_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace=maskWSname)
+        maskFile = None
+
+        # none and workspace are special
+        if masking == 'None':
+            pass
         elif masking == "Masking Workspace":
             maskWSname = str(self.getProperty("MaskingWorkspace").value)
+
+        # deal with files
+        elif masking == 'Custom - xml masking file':
+            maskWSname = 'CustomMask'
+            maskFile = self.getProperty('MaskingFilename').value
+        elif masking == 'Horizontal' or masking == 'Vertical':
+            maskWSname = masking + 'Mask' # append the work 'Mask' for the wksp name
+            if not mtd.doesExist(maskWSname): # only load if it isn't already loaded
+                maskFile = '/SNS/SNAP/shared/libs/%s_Mask.xml' % masking
+
+        if maskFile is not None:
+            LoadMask(InputFile=maskFile, Instrument='SNAP', OutputWorkspace=maskWSname)
 
         return maskWSname
 
@@ -326,18 +329,15 @@ class SNAPReduce(DataProcessorAlgorithm):
         else:
             normWS = None
 
-        group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4_Grouping'}
-        group = self.getProperty("GroupDetectorsBy").value
+        group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4Grouping'}
+        group = self.getProperty('GroupDetectorsBy').value
         real_name = group_to_real.get(group, group)
 
         if not mtd.doesExist(group):
-            if group == "2_4 Grouping":
-                group = real_name
-                LoadDetectorsGroupingFile(InputFile=r'/SNS/SNAP/shared/libs/SNAP_group_2_4.xml',
-                                          OutputWorkspace=group)
-            else:
-                CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
-                                        OutputWorkspace=group)
+            if group == '2_4 Grouping':
+                group = '2_4_Grouping'
+            CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
+                                    OutputWorkspace=group)
 
         Process_Mode = self.getProperty("ProcessingMode").value
 
