@@ -10,6 +10,7 @@ Algorithms
 
 - :ref:`algm-Stitch1D` documentation has been improved, it now includes a workflow diagram illustrating the different steps in the calculation and a note about how errors are propagated.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces.
+- :ref:`algm-Stitch1DMany` documentation has been updated accordingly and improved, it includes more detail on algorithm properties and adds a workflow description and diagram.
 
 Reflectometry Reduction Interface
 ---------------------------------
