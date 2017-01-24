@@ -59,7 +59,7 @@ class AbinsBasicTest(unittest.TestCase):
                                                             "squaricn_scale", "benzene_exp"])
         mtd.clear()
 
-    def xtest_wrong_input(self):
+    def test_wrong_input(self):
         """Test if the correct behaviour of algorithm in case input is not valid"""
 
         #  invalid CASTEP file missing:  Number of branches     6 in the header file
@@ -91,14 +91,14 @@ class AbinsBasicTest(unittest.TestCase):
                           OutputWorkspace=self._workspace_name)
 
     # test if intermediate results are consistent
-    def xtest_non_unique_atoms(self):
+    def test_non_unique_atoms(self):
         """Test scenario in which a user specifies non unique atoms (for example in squaricn that would be "C,C,H").
            In that case Abins should terminate and print a meaningful message.
         """
         self.assertRaises(RuntimeError, Abins, PhononFile=self._squaricn + ".phonon", Atoms="C,C,H",
                           OutputWorkspace=self._workspace_name)
 
-    def xtest_non_existing_atoms(self):
+    def test_non_existing_atoms(self):
         """Test scenario in which  a user requests to create workspaces for atoms which do not exist in the system.
            In that case Abins should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
@@ -106,7 +106,7 @@ class AbinsBasicTest(unittest.TestCase):
         self.assertRaises(RuntimeError, Abins, PhononFile=self._squaricn + ".phonon", Atoms="N",
                           OutputWorkspace=self._workspace_name)
 
-    def xtest_scale(self):
+    def test_scale(self):
         """
         Test if scaling is correct.
         @return:
@@ -140,7 +140,7 @@ class AbinsBasicTest(unittest.TestCase):
         (result, messages) = CompareWorkspaces(wrk, ref, Tolerance=self._tolerance)
         self.assertEqual(result, True)
 
-    def xtest_exp(self):
+    def test_exp(self):
         """
         Tests if experimental data is loaded correctly.
         @return:
