@@ -357,8 +357,7 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   if (getProperty("IncludeHeader")) {
     outfile << "# Open Genie ASCII File #\r\n"
             << "# label \r\n"
-            << "GXWorkspace\r\n"
-            << m_outputVector.size() << "\r\n";
+            << "GXWorkspace\r\n" << m_outputVector.size() << "\r\n";
   }
 
   // Sort by parameter name
