@@ -12,6 +12,7 @@
 #include "WorkspaceCreationHelperTest.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
@@ -63,17 +64,17 @@ public:
 
     TS_ASSERT(appCalib.isExecuted());
 
-    IDetector_const_sptr det = ws->getDetector(0);
-    int id = det->getID();
-    V3D newPos = det->getPos();
+    const auto &spectrumInfo = ws->spectrumInfo();
+
+    int id = spectrumInfo.detector(0).getID();
+    V3D newPos = spectrumInfo.position(0);
     TS_ASSERT_EQUALS(id, 1);
     TS_ASSERT_DELTA(newPos.X(), 1.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Z(), 2.0, 0.0001);
 
-    det = ws->getDetector(ndets - 1);
-    id = det->getID();
-    newPos = det->getPos();
+    id = spectrumInfo.detector(ndets - 1).getID();
+    newPos = spectrumInfo.position(ndets - 1);
     TS_ASSERT_EQUALS(id, ndets);
     TS_ASSERT_DELTA(newPos.X(), 1.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Y(), 0.01 * (ndets - 1), 0.0001);

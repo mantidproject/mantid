@@ -75,7 +75,12 @@ public:
     ComplexFortranMatrix bkq(0, 6, 0, 6);
     zeroAllEntries(bmol, bext, bkq);
 
-    bmol(1) = 10.;
+    // The internal (molecular) field is not rotated. So we leave it at zero
+    // else in the rotated case (en2) it will be in a different [physical]
+    // direction and so give a different splitting. The external field
+    // is rotated in the code, so we set it to some value to check the
+    // rotation works.
+    bext(1) = 10.;
     bkq(2, 0) = 0.3365;
     bkq(2, 2) = 7.4851;
     bkq(4, 0) = 0.4062;
@@ -102,7 +107,7 @@ public:
       en2 = en;
     }
     for (size_t i = 1; i < en1.size(); ++i) {
-      TS_ASSERT_LESS_THAN(1.0, fabs(en1.get(i) - en2.get(i)));
+      TS_ASSERT_DELTA(en1.get(i), en2.get(i), 1e-6);
     }
   }
 
