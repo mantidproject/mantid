@@ -70,9 +70,20 @@ The `x`-axis is given in Kelvin, and the heat capacity (`y`-axis) is in Joules p
 
 .. testcleanup:: ExampleCrystalFieldHeatCapacity
 
-Output:
-
 .. testoutput:: ExampleCrystalFieldHeatCapacity
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+        B20 = ...
+        B22 = ...
+        B40 = ...
+        B42 = ...
+        B44 = ...
+    Cost function value = ...
+
+Output (the numbers you see on your machine may vary):
+
+.. code::
 
         B20 =  0.40709
         B22 =  0.020272
@@ -85,8 +96,6 @@ Output:
 
    Ion;String;Mandatory;An element name for a rare earth ion. Possible values are: Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb.
    Symmetry;String;C1;A symbol for a symmetry group. Setting `Symmetry` automatically zeros and fixes all forbidden parameters. Possible values are: C1, Ci, C2, Cs, C2h, C2v, D2, D2h, C4, S4, C4h, D4, C4v, D2d, D4h, C3, S6, D3, C3v, D3d, C6, C3h, C6h, D6, C6v, D3h, D6h, T, Td, Th, O, Oh
-
-.. attributes::
 
 .. properties::
 
