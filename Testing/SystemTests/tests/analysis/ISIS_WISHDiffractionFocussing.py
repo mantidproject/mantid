@@ -60,18 +60,17 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
             DeleteWorkspace(run_number)
 
         GroupWorkspaces(self._focused_workspaces, OutputWorkspace=group_name)
+        self.focused = self._focused_workspaces[0]
 
     def validate(self):
         self.assertEqual(len(self._focused_workspaces), 1)
+        ws = self.focused
 
-        for ws in self._focused_workspaces:
-            path = config.getString("defaultsave.directory")
-            self.assertTrue(os.path.exists(os.path.join(path, ws + ".dat")))
-            self.assertTrue(os.path.exists(os.path.join(path, ws + ".nxs")))
+        path = config.getString("defaultsave.directory")
+        self.assertTrue(os.path.exists(os.path.join(path, ws + ".dat")))
+        self.assertTrue(os.path.exists(os.path.join(path, ws + ".nxs")))
 
-            exp_workspace = Load(os.path.join(path, ws + ".nxs"), OutputWorkspace="tmp")
-            result = mtd[ws]
-            self.assertTrue(result.equals(exp_workspace, 1e-7))
+        return ws, "35991-foc-h00.nxs"
 
 
 class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
@@ -158,9 +157,7 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
     def validate(self):
         self.assertEqual(self.table.rowCount(), 8)
         self.assertEqual(len(self.output_names), 8)
-        result = Load("WISHDiffractionFocussingResult.nxs")
-        value, _ = CompareWorkspaces(self.table, result)
-        self.assertTrue(value)
+        return self.table.name() , "WISHDiffractionFocussingResult.nxs"
 
 
 def create_table(name, columns, num_rows):
