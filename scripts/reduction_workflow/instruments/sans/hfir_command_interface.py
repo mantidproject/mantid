@@ -537,7 +537,7 @@ def MaskRectangle(x_min, x_max, y_min, y_max):
 def MaskDetectors(det_list):
     if "MaskedDetectorList" in ReductionSingleton().reduction_properties:
         ReductionSingleton().reduction_properties[
-            "MaskedDetectorList"].extend(det_list)
+            "MaskedDetectorList"].set(det_list)
     else:
         ReductionSingleton().reduction_properties[
             "MaskedDetectorList"] = det_list
