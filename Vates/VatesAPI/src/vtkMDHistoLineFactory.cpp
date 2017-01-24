@@ -160,7 +160,7 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
 }
 
 void vtkMDHistoLineFactory::initialize(
-    Mantid::API::Workspace_sptr wspace_sptr) {
+    const Mantid::API::Workspace_sptr &wspace_sptr) {
   m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
 }
 

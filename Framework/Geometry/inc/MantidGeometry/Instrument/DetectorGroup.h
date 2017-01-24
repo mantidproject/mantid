@@ -1,9 +1,6 @@
 #ifndef MANTID_GEOMETRY_DETECTORGROUP_H_
 #define MANTID_GEOMETRY_DETECTORGROUP_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -67,7 +64,6 @@ public:
   double getPhiOffset(const double &offset) const override;
   double solidAngle(const Kernel::V3D &observer) const override;
   bool isParametrized() const override;
-  bool isMonitor() const override;
   bool isValid(const Kernel::V3D &point) const override;
   bool isOnSide(const Kernel::V3D &point) const override;
   /// Try to find a point that lies within (or on) the object

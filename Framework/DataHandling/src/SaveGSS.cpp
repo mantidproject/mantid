@@ -114,7 +114,7 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
   Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
   if (!det) {
     std::stringstream errss;
-    errss << "Workspace " << wksp->name()
+    errss << "Workspace " << wksp->getName()
           << " does not have detector with spectrum " << spectrum;
     throw std::runtime_error(errss.str());
   }

@@ -556,12 +556,12 @@ void InstrumentWidgetPickTab::initSurface() {
   connect(surface, SIGNAL(singleComponentPicked(size_t)), this,
           SLOT(singleComponentPicked(size_t)));
   connect(
-      surface,
-      SIGNAL(comparePeaks(
-          std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)),
-      this,
-      SLOT(comparePeaks(
-          std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)));
+      surface, SIGNAL(comparePeaks(
+                   const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                   std::vector<Mantid::Geometry::IPeak *>> &)),
+      this, SLOT(comparePeaks(
+                const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                std::vector<Mantid::Geometry::IPeak *>> &)));
   connect(surface, SIGNAL(alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
                                      const Mantid::Geometry::IPeak *)),
           this, SLOT(alignPeaks(const std::vector<Mantid::Kernel::V3D>,
@@ -598,6 +598,10 @@ void InstrumentWidgetPickTab::initSurface() {
 boost::shared_ptr<ProjectionSurface>
 InstrumentWidgetPickTab::getSurface() const {
   return m_instrWidget->getSurface();
+}
+
+const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const {
+  return m_instrWidget;
 }
 
 /**
@@ -693,8 +697,9 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_plotController->updatePlot();
 }
 
-void InstrumentWidgetPickTab::comparePeaks(const std::pair<
-    Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
+void InstrumentWidgetPickTab::comparePeaks(
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
@@ -943,42 +948,43 @@ ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
   return QString::fromStdString(text.str());
 }
 
-QString ComponentInfoController::displayPeakAngles(
-    std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks) {
+QString ComponentInfoController::displayPeakAngles(const std::pair<
+    Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
 
-  auto pos1 = peak1->getDetector()->getPos();
-  auto pos2 = peak2->getDetector()->getPos();
+  auto pos1 = peak1->getQSampleFrame();
+  auto pos2 = peak2->getQSampleFrame();
+  auto angle = pos1.angle(pos2);
+  angle *= double_constants::radian;
 
-  auto angle = pos1.angle(pos2) * double_constants::radian;
-  auto distance = pos1 - pos2;
-  auto dirAngles = distance.directionAngles();
-
-  text << "Angle between: " << angle << "\n";
-  text << "Direction angles: ";
-  text << " a: " << dirAngles[0];
-  text << " b: " << dirAngles[1];
-  text << " c: " << dirAngles[2];
-  text << "\n";
+  text << "Angle: " << angle << "\n";
 
   return QString::fromStdString(text.str());
 }
 
 void ComponentInfoController::displayComparePeaksInfo(
-    std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks) {
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   std::stringstream text;
-  auto peak1 = peaks.first;
-  auto peak2 = peaks.second;
 
-  text << "First Peak \n";
-  text << displayPeakInfo(peak1).toStdString();
+  text << "Comparison Information\n";
+  auto peaksFromDetectors =
+      std::make_pair(peaks.first.front(), peaks.second.front());
+  text << displayPeakAngles(peaksFromDetectors).toStdString();
+
   text << "-------------------------------\n";
-  text << "Second Peak \n";
-  text << displayPeakInfo(peak2).toStdString();
+  text << "First Detector Peaks \n";
+  for (auto peak : peaks.first)
+    text << displayPeakInfo(peak).toStdString();
+
   text << "-------------------------------\n";
-  text << displayPeakAngles(peaks).toStdString();
+  text << "Second Detector Peaks \n";
+  for (auto peak : peaks.second)
+    text << displayPeakInfo(peak).toStdString();
+
+  text << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
@@ -1660,7 +1666,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     alg->setProperty("DataE", E);
     alg->setProperty("NSpec", static_cast<int>(X.size() / nbins));
     alg->setProperty("UnitX", unitX);
-    alg->setPropertyValue("ParentWorkspace", parentWorkspace->name());
+    alg->setPropertyValue("ParentWorkspace", parentWorkspace->getName());
     alg->execute();
 
     if (!detids.empty()) {
@@ -1773,7 +1779,7 @@ void DetectorPlotController::addPeak(double x, double y) {
     std::string peakTableName;
     bool newPeaksWorkspace = false;
     if (tw) {
-      peakTableName = tw->name();
+      peakTableName = tw->getName();
     } else {
       peakTableName = "SingleCrystalPeakTable";
       // This does need to get the instrument from the workspace as it's doing
@@ -1811,7 +1817,7 @@ void DetectorPlotController::addPeak(double x, double y) {
     // Run the AddPeak algorithm
     auto alg =
         Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
-    alg->setPropertyValue("RunWorkspace", ws->name());
+    alg->setPropertyValue("RunWorkspace", ws->getName());
     alg->setPropertyValue("PeaksWorkspace", peakTableName);
     alg->setProperty("DetectorID", m_currentDetID);
     alg->setProperty("TOF", x);

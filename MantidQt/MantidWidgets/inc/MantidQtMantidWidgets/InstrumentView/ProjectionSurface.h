@@ -243,6 +243,7 @@ public:
   void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
   void clearAlignmentPlane();
+  void clearComparisonPeaks();
   bool hasPeakOverlays() const { return !m_peakShapes.isEmpty(); }
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const { return m_peakLabelPrecision; }
@@ -278,10 +279,10 @@ signals:
   // peaks
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
-  void comparePeaks(
-      const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &);
   void alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
                   const Mantid::Geometry::IPeak *);
+  void comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                    std::vector<Mantid::Geometry::IPeak *>> &);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -347,14 +348,13 @@ protected:
   mutable bool m_showPeakLabels;    ///< flag to show peak hkl labels
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
-  std::pair<QPointF, QPointF> m_selectedMarkers;
-  std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
-      m_selectedPeaks;
 
   std::vector<Mantid::Kernel::V3D> m_selectedAlignmentPlane;
   std::vector<QPointF> m_selectedAlignmentMarkers;
   Mantid::Geometry::IPeak *m_selectedAlignmentPeak;
-  /// use with a new PeakOverlay.
+  std::pair<std::vector<Mantid::Geometry::IPeak *>,
+            std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
+  std::pair<QPointF, QPointF> m_selectedMarkers;
 
 private:
   /// Draw a line between two peak markers
@@ -367,6 +367,8 @@ private:
   void drawSelectionRect(QPainter &painter) const;
   /// Draw the alignment markers on the surface
   void drawPeakAlignmentMarkers(QPainter &painter) const;
+  /// Check if a peak is visible at a given point
+  bool peakVisibleAtPoint(const QPointF &point) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 

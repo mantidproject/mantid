@@ -50,6 +50,11 @@ Scripting Window
 Documentation
 #############
 
+Custom Interfaces
+-----------------
+
+- Indirect Data Reduction (facility ILL, instrument IN16B) is face-lifted to incorporate the new reduction algorithms options.
+
 Bugs Resolved
 -------------
 
@@ -66,12 +71,20 @@ Bugs Resolved
 - Fix a bug where saving a tiled plot saved to a project file would be reloaded with different size plots.
 - Fixed a bug where minimised windows would not stay minimised after being serialised to a Mantid project
 - Fixed a bug where changing the integration range of the instrument view would clear the applied zooming.
+- Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
 - Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
 
 SliceViewer Improvements
 ------------------------
 
-|
+ - Added ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled, peak viewer and line vewer tools are disabled.
+ 
+.. figure:: ../../images/sliceViewerNonOrthogonal.png
+   :class: screenshot
+   :width: 450px
+   :align: right
+
+   SliceViewer with nonorthogonal view 
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_

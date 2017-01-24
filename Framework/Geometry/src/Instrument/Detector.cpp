@@ -17,7 +17,7 @@ using Kernel::Quat;
  * @param map: pointer to the ParameterMap
  * */
 Detector::Detector(const Detector *base, const ParameterMap *map)
-    : ObjComponent(base, map), m_id(base->m_id), m_isMonitor(false) {}
+    : ObjComponent(base, map), m_id(base->m_id) {}
 
 /** Constructor
  *  @param name :: The name of the component
@@ -25,7 +25,7 @@ Detector::Detector(const Detector *base, const ParameterMap *map)
  *  @param parent :: The parent component
  */
 Detector::Detector(const std::string &name, int id, IComponent *parent)
-    : IDetector(), ObjComponent(name, parent), m_id(id), m_isMonitor(false) {}
+    : IDetector(), ObjComponent(name, parent), m_id(id) {}
 
 /** Constructor
  *  @param name :: The name of the component
@@ -36,8 +36,7 @@ Detector::Detector(const std::string &name, int id, IComponent *parent)
  */
 Detector::Detector(const std::string &name, int id,
                    boost::shared_ptr<Object> shape, IComponent *parent)
-    : IDetector(), ObjComponent(name, shape, parent), m_id(id),
-      m_isMonitor(false) {}
+    : IDetector(), ObjComponent(name, shape, parent), m_id(id) {}
 
 /** Gets the detector id
  *  @returns the detector id
@@ -121,25 +120,6 @@ det_topology Detector::getTopology(V3D &center) const {
   center = this->getPos();
   return rect;
 }
-
-/// Is the detector a monitor?
-///@return true if it is a monitor
-bool Detector::isMonitor() const {
-  if (m_map) {
-    const Detector *d = dynamic_cast<const Detector *>(m_base);
-    if (d) {
-      return d->isMonitor();
-    }
-  }
-
-  return m_isMonitor;
-}
-
-/** Sets the flag for whether this detector object is a monitor
- *  @param flag :: True to mark the detector a monitor (default), false
- * otherwise
- */
-void Detector::markAsMonitor(const bool flag) { m_isMonitor = flag; }
 
 /// Helper for legacy access mode. Returns a reference to the ParameterMap.
 const ParameterMap &Detector::parameterMap() const { return *m_map; }

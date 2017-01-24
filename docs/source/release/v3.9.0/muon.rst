@@ -21,6 +21,7 @@ Muon Analysis
 - The layout of the new fitting tab UI has been improved to give more space for the fitting function, and enable the relative space given to each section to be adjusted by the user.
 - Fixed a bug where stale plot guesses would be left on the graph in some situations.
 - Fixed a bug with load current run that meant it would be actually loading old data due to caching. Data from current run files is no longer cached behind the scenes.
+- The default Plot Policy has been changed to **Use Previous Window**.  This avoids the speed and stability issues that could occur with **Create New Window** once hundreds of graph windows had accumulated over several days of an experiement.
 
 Algorithms
 ----------

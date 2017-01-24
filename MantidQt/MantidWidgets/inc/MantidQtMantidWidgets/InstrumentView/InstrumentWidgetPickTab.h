@@ -88,6 +88,7 @@ public:
   bool addToDisplayContextMenu(QMenu &) const override;
   void selectTool(const ToolType tool);
   boost::shared_ptr<ProjectionSurface> getSurface() const;
+  const InstrumentWidget *getInstrumentWidget() const;
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
@@ -106,10 +107,11 @@ private slots:
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
-  void comparePeaks(const std::pair<Mantid::Geometry::IPeak *,
-                                    Mantid::Geometry::IPeak *> &peaks);
   void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
                   const Mantid::Geometry::IPeak *peak);
+  void
+  comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                               std::vector<Mantid::Geometry::IPeak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
@@ -190,7 +192,8 @@ public:
 public slots:
   void displayInfo(size_t pickID);
   void displayComparePeaksInfo(
-      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
+      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                      std::vector<Mantid::Geometry::IPeak *>> &peaks);
   void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
                              const Mantid::Geometry::IPeak *peak);
   void clear();
@@ -199,8 +202,8 @@ private:
   QString displayDetectorInfo(Mantid::detid_t detid);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
-  QString displayPeakAngles(
-      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
+  QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
+                                            Mantid::Geometry::IPeak *> &peaks);
   QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
   QString getPeakOverlayInfo();
 
