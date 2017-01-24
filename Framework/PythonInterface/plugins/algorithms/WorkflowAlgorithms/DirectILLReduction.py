@@ -336,6 +336,10 @@ def _createDetectorGroups(ws):
 
 def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
                                   reportWSName, algorithmLogging):
+    '''
+    Creates a table workspace containing information used for detector
+    diagnostics.
+    '''
     PLOT_TYPE_X = 1
     PLOT_TYPE_Y = 2
     reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName,
@@ -1797,6 +1801,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return mainWS, monWS
 
     def _convertListToWorkspaceIndices(self, indices, ws):
+        '''
+        Converts a list of spectrum nubmers/detector IDs to workspace indices.
+        '''
         return [self._convertToWorkspaceIndex(i, ws) for i in indices]
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
@@ -2407,6 +2414,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return ecSubtractedWS
 
     def _transpose(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        '''
+        Transposes the final output workspace.
+        '''
         transposing = self.getProperty(_PROP_TRANSPOSE_SAMPLE_OUTPUT).value
         if transposing == _TRANSPOSING_OFF:
             return mainWS
