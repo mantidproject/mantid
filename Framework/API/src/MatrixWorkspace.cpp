@@ -1968,6 +1968,10 @@ MatrixWorkspace::detectorIDs(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
 }
 
+void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
+  m_indexInfo->invalidateCachedSpectrumNumbers();
+}
+
 /// Cache a lookup of grouped detIDs to member IDs. Always throws
 /// std::runtime_error since MatrixWorkspace supports detector grouping via
 /// spectra instead of the caching mechanism.

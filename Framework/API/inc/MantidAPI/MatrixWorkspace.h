@@ -537,6 +537,8 @@ public:
   // End image methods
   //=====================================================================================
 
+  void invalidateCachedSpectrumNumbers();
+
   void cacheDetectorGroupings(const det2group_map &mapping) override;
   size_t groupOfDetectorID(const detid_t detID) const override;
 

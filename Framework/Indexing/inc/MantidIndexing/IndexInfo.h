@@ -4,6 +4,7 @@
 #include "MantidIndexing/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include <atomic>
 #include <functional>
 #include <set>
 #include <vector>
@@ -15,6 +16,7 @@ using detid_t = int32_t;
 class SpectrumDefinition;
 
 namespace Indexing {
+class SpectrumNumberTranslator;
 
 /** IndexInfo is an object for holding information about spectrum numbers and
   detector IDs associated to the spectra in a workspace.
@@ -65,6 +67,8 @@ public:
       std::function<const std::set<specnum_t> &(const size_t)> getDetectorIDs);
 
   IndexInfo(const IndexInfo &other);
+  ~IndexInfo();
+
   // Assignment is not needed currently, disabling this for now.
   IndexInfo &operator=(const IndexInfo &) = delete;
 
@@ -81,6 +85,8 @@ public:
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
   spectrumDefinitions() const;
+
+  void invalidateCachedSpectrumNumbers();
 
 private:
   /// True if class is legacy wrapper.
@@ -100,6 +106,9 @@ private:
 
   Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
       nullptr};
+
+  std::unique_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator;
+  std::atomic<bool> m_spectrumNumberTranslatorNeedsUpdate{true};
 };
 
 } // namespace Indexing

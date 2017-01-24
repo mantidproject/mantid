@@ -1,4 +1,5 @@
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumNumberTranslator.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -58,6 +59,9 @@ IndexInfo::IndexInfo(const IndexInfo &other) {
     m_detectorIDs = other.m_detectorIDs;
   }
 }
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+IndexInfo::~IndexInfo() = default;
 
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
@@ -136,6 +140,10 @@ void IndexInfo::setSpectrumDefinitions(
 const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
 IndexInfo::spectrumDefinitions() const {
   return m_spectrumDefinitions;
+}
+
+void IndexInfo::invalidateCachedSpectrumNumbers() {
+  m_spectrumNumberTranslatorNeedsUpdate = true;
 }
 
 } // namespace Indexing
