@@ -108,7 +108,7 @@ void SaveOpenGenieAscii::exec() {
   */
 void SaveOpenGenieAscii::applyEnginxFormat() {
   // Bank number
-  addToOutputBuffer("bank", m_intType, std::to_string(determineEnginXBankId()));
+  determineEnginXBankId();
 
   // Spectrum numbers
   addToOutputBuffer("spec_no", m_stringType, "1");
@@ -187,23 +187,23 @@ void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData,
 
 /**
   * Determines the current bank from the ENGIN-X detector IDs
-  * if the ID is does not match the expected length it will
-  * throw.
-  *
-  * @return :: The focused bank number in this workspace
+  * and stores the value in the output buffer if successful
   */
-int SaveOpenGenieAscii::determineEnginXBankId() {
+void SaveOpenGenieAscii::determineEnginXBankId() {
   const auto &detectorIds = m_inputWS->getSpectrum(0).getDetectorIDs();
   const std::string firstDetectorId = std::to_string(*detectorIds.cbegin());
 
   if (firstDetectorId.length() != 6) {
-    throw std::runtime_error("Could not determine bank number as detector ID"
-                             " was not of expected length");
+    g_log.warning("Could not determine bank ID as detector ID in ENGIN-X "
+                  "workspace did not match expected format. You will need"
+                  "manually specify the bank in OpenGenie");
+    return;
   }
 
   // ENGIN-X format is 1X001, 1X002, 1X003...etc. for detectors
   // where X = 0 is bank 1. X = 1 is bank 2.
-  return firstDetectorId[1] == '0' ? 1 : 2;
+  const int bankNumber = firstDetectorId[1] == '0' ? 1 : 2;
+  addToOutputBuffer("bank", m_intType, std::to_string(bankNumber));
 }
 
 /** Reads the sample logs and converts them from the log name in

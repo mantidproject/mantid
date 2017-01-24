@@ -61,7 +61,7 @@ private:
   void convertWorkspaceData(const T &histoData, const char &axis);
 
   /// Determines the ENGIN-X bank from the detectors IDs present
-  int determineEnginXBankId();
+  void determineEnginXBankId();
 
   /// Parses and stores appropriate output logs into the output buffer
   void getSampleLogs();
