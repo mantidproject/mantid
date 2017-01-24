@@ -148,13 +148,13 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
 }
 
 /**
-  * Converts histogram X/Y/E data into a string representation
-  * to be written out and the number of data points
+  * Converts histogram X/Y/E data into a compatible string representation
+  * and calculates the number of data points that were parsed
   *
-  * @tparam histoData :: The histogram data to process
+  * @tparam histoData :: The histogram data to parse
   *
   * @return :: An OpenGenie compatible string representation and
-  * the number of data points as packed as a tuple
+  * the number of data points packed into a tuple
   */
 template <typename T>
 std::tuple<std::string, int>
