@@ -162,7 +162,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
         if theta and correct_positions:
             IvsQ = l2q(ReflectedBeam, detector_component_name, theta, sample_component_name)
         else:
-            IvsQ = ConvertUnits(InputWorkspace=ReflectedBeam, OutputWorkspace="IvsQ_binned", Target="MomentumTransfer")
+            IvsQ = ConvertUnits(InputWorkspace=ReflectedBeam, Target="MomentumTransfer")
 
     # Single Detector processing-------------------------------------------------------------
     else:
@@ -206,7 +206,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
                 print('Nexus file theta =', theta)
                 IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name)
             else:
-                IvsQ = ConvertUnits(InputWorkspace=IvsLam, Target="MomentumTransfer")
+                IvsQ = ConvertUnits(InputWorkspace=IvsLam, OutputWorkspace="IvsQ", Target="MomentumTransfer")
 
         else:
             if correct_positions:
@@ -215,9 +215,9 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
                     IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name)
                 except AttributeError:
                     logger.warning("detector_component_name " + detector_component_name + " is unknown")
-                    IvsQ = ConvertUnits(InputWorkspace=IvsLam, Target="MomentumTransfer")
+                    IvsQ = ConvertUnits(InputWorkspace=IvsLam, OutputWorkspace="IvsQ", Target="MomentumTransfer")
             else:
-                IvsQ = ConvertUnits(InputWorkspace=IvsLam, Target="MomentumTransfer")
+                IvsQ = ConvertUnits(InputWorkspace=IvsLam, OutputWorkspace="IvsQ", Target="MomentumTransfer")
 
     RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace=RunNumber + '_IvsLam')
     if isinstance(IvsLam, WorkspaceGroup):
@@ -225,7 +225,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
         for ws in IvsLam:
             RenameWorkspace(ws, OutputWorkspace=RunNumber + '_IvsLam_' + str(counter))
             counter += 1
-    RenameWorkspace(InputWorkspace=IvsQ, OutputWorkspace=RunNumber + '_IvsQ_binned')
+    RenameWorkspace(InputWorkspace=IvsQ, OutputWorkspace=RunNumber + '_IvsQ')
 
     # delete all temporary workspaces unless in debug mode (debug=1)
 
@@ -233,7 +233,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
         cleanup()
         if mtd.doesExist('IvsLam'):
             DeleteWorkspace('IvsLam')
-    return mtd[RunNumber + '_IvsLam'], mtd[RunNumber + '_IvsQ_binned'], theta
+    return mtd[RunNumber + '_IvsLam'], mtd[RunNumber + '_IvsQ'], theta
 
 
 def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params,
@@ -638,9 +638,9 @@ def _testQuick():
     [_w1lam, _w1q, _th] = quick(94511, theta=0.25, trans='94504')
     [_w2lam, _w2q, _th] = quick(94512, theta=0.65, trans='94504')
     [_w3lam, _w3q, _th] = quick(94513, theta=1.5, trans='94504')
-    plotSpectrum("94511_IvsQ_binned", 0)
-    plotSpectrum("94512_IvsQ_binned", 0)
-    plotSpectrum("94513_IvsQ_binned", 0)
+    plotSpectrum("94511_IvsQ", 0)
+    plotSpectrum("94512_IvsQ", 0)
+    plotSpectrum("94513_IvsQ", 0)
 
     return True
 
