@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -109,7 +110,7 @@ class StateFunctionsTest(unittest.TestCase):
         expected_text = "var1: 12\n" \
                         "var2: test\n" \
                         "" + instruction
-        self.assertTrue(val_message.keys()[0] == error_message)
+        self.assertTrue(list(val_message.keys())[0] == error_message)
         self.assertTrue(val_message[error_message] == expected_text)
 
     def test_that_can_find_can_reduction_if_it_exists(self):
