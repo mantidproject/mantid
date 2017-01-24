@@ -79,28 +79,34 @@ void ReflDataProcessorPresenter::process() {
     // Group of runs
     GroupData group = item.second;
 
-    // First load the runs.
-    bool allEventWS = loadGroup(group);
-    if (!allEventWS)
-      allGroupsWereEvent = false;
+    try {
+      // First load the runs.
+      bool allEventWS = loadGroup(group);
 
-    if (allEventWS) {
-      // Process the group
-      if (processGroupAsEventWS(item.first, group, startTimes, stopTimes))
-        errors = true;
+      if (allEventWS) {
+        // Process the group
+        if (processGroupAsEventWS(item.first, group, startTimes, stopTimes))
+          errors = true;
 
-      // Notebook not implemented yet
-      if (m_view->getEnableNotebook()) {
-        GenericDataProcessorPresenter::giveUserWarning(
-            "Notebook not implemented for sliced data yet",
-            "Notebook will not be generated");
+        // Notebook not implemented yet
+        if (m_view->getEnableNotebook()) {
+          GenericDataProcessorPresenter::giveUserWarning(
+              "Notebook not implemented for sliced data yet",
+              "Notebook will not be generated");
+        }
+
+      } else {
+        // Process the group
+        if (processGroupAsNonEventWS(item.first, group))
+          errors = true;
+        // Notebook
       }
 
-    } else {
-      // Process the group
-      if (processGroupAsNonEventWS(item.first, group))
-        errors = true;
-      // Notebook
+      if (!allEventWS)
+        allGroupsWereEvent = false;
+
+    } catch (...) {
+      errors = true;
     }
     progressReporter.report();
   }
