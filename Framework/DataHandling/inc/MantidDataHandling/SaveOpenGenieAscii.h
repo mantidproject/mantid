@@ -55,10 +55,10 @@ private:
   void calculateXYZDelta(const std::string &unit,
                          const Kernel::Property *values);
 
-  /// Converts XYE data to a tuple containing the OPENGENIE string and number of
-  /// data points
+  /// Converts XYE data to a tuple containing the OPENGENIE string and store
+  /// it into the output buffer
   template <typename T>
-  std::tuple<std::string, int> convertWorkspaceData(const T &histoData);
+  void convertWorkspaceData(const T &histoData, const char &axis);
 
   /// Determines the ENGIN-X bank from the detectors IDs present
   int determineEnginXBankId();
@@ -71,9 +71,6 @@ private:
 
   /// Attempts to open the user specified file path as an output stream
   void openFileStream(std::ofstream &stream);
-
-  /// Parses and stores the workspace data into the output buffer
-  void parseWorkspaceData();
 
   /// Stores fields that aren't found in the WS but required by OpenGenie
   void storeEmptyFields();

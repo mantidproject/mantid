@@ -85,7 +85,9 @@ void SaveOpenGenieAscii::exec() {
 
   // store x, y, e to vector
   progressBar.report("Processing workspace data");
-  parseWorkspaceData();
+  convertWorkspaceData(m_inputWS->x(0), 'x');
+  convertWorkspaceData(m_inputWS->y(0), 'y');
+  convertWorkspaceData(m_inputWS->e(0), 'e');
 
   progressBar.report("Processing log data");
   getSampleLogs();
@@ -149,18 +151,19 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
 
 /**
   * Converts histogram X/Y/E data into a compatible string representation
-  * and calculates the number of data points that were parsed
+  * and stores that into the output buffer
   *
   * @tparam histoData :: The histogram data to parse
+  * @param axis :: The axis being processed (i.e 'x') as a character
   *
-  * @return :: An OpenGenie compatible string representation and
-  * the number of data points packed into a tuple
   */
 template <typename T>
-std::tuple<std::string, int>
-SaveOpenGenieAscii::convertWorkspaceData(const T &histoData) {
+void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData,
+                                              const char &axis) {
   // Padding to apply after 10 data values
   const std::string newLineStr = "\r\n    ";
+  // Bank number - force to 1 at the moment
+  const std::string outputType = "GXRealarray\r\n    1";
 
   // First 4 spaces for correct padding
   std::string outputString("    ");
@@ -175,7 +178,11 @@ SaveOpenGenieAscii::convertWorkspaceData(const T &histoData) {
     outputString += std::to_string(val) + ' ';
   }
 
-  return std::make_tuple(outputString, valueCount);
+  // Have to put the number of values (second member of pair)
+  // followed by a space then a new line then the data into a string
+  auto outDataString =
+      std::to_string(valueCount) + " \r\n" + std::move(outputString);
+  addToOutputBuffer(std::string(1, axis), outputType, std::move(outDataString));
 }
 
 /**
@@ -207,12 +214,12 @@ int SaveOpenGenieAscii::determineEnginXBankId() {
   */
 void SaveOpenGenieAscii::getSampleLogs() {
   // Maps Mantid log names -> Genie save file name / type
-  const std::unordered_map<std::string, std::tuple<std::string, std::string>>
+  const std::unordered_map<std::string, std::pair<std::string, std::string>>
       mantidGenieLogMapping = {
-          {"x", std::make_tuple("x_pos", m_floatType)},
-          {"y", std::make_tuple("y_pos", m_floatType)},
-          {"z", std::make_tuple("z_pos", m_floatType)},
-          {"gd_prtn_chrg", std::make_tuple("microamps", m_floatType)}};
+          {"x", std::make_pair("x_pos", m_floatType)},
+          {"y", std::make_pair("y_pos", m_floatType)},
+          {"z", std::make_pair("z_pos", m_floatType)},
+          {"gd_prtn_chrg", std::make_pair("microamps", m_floatType)}};
 
   const std::vector<Property *> &logData = m_inputWS->run().getLogData();
 
@@ -225,8 +232,10 @@ void SaveOpenGenieAscii::getSampleLogs() {
       continue;
     }
 
-    const std::string outName = std::get<0>(foundMapping->second);
-    const std::string outType = std::get<1>(foundMapping->second);
+    // Second member of map is the OpenGenie Name / Type as a pair
+    // First member of pair is name, second member of pair is the type
+    const std::string outName = foundMapping->second.first;
+    const std::string outType = foundMapping->second.second;
     std::string outValue;
 
     // Calculate dx/dy/dz
@@ -286,33 +295,6 @@ void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
-}
-
-/**
-* Parses the X Y E data from the workspace into OpenGENIE compatible
-* strings and stores them in the output buffer
-*/
-void SaveOpenGenieAscii::parseWorkspaceData() {
-  // Bank number - force to 1 at the moment
-  const std::string outputType = "GXRealarray\r\n    1";
-
-  const auto &xTuple = convertWorkspaceData(m_inputWS->x(0));
-  const auto &yTuple = convertWorkspaceData(m_inputWS->y(0));
-  const auto &eTuple = convertWorkspaceData(m_inputWS->e(0));
-
-  // Have to put the number of values followed by a space then a new line
-  // then the data into a string
-  const auto xDataString = std::to_string(std::get<1>(xTuple)) + " \r\n" +
-                           std::move(std::get<0>(xTuple));
-  addToOutputBuffer("x", outputType, std::move(xDataString));
-
-  const auto yDataString = std::to_string(std::get<1>(yTuple)) + " \r\n" +
-                           std::move(std::get<0>(yTuple));
-  addToOutputBuffer("y", outputType, std::move(yDataString));
-
-  const auto eDataString = std::to_string(std::get<1>(eTuple)) + " \r\n" +
-                           std::move(std::get<0>(eTuple));
-  addToOutputBuffer("e", outputType, std::move(eDataString));
 }
 
 /**
