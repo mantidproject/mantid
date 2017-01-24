@@ -204,14 +204,13 @@ public:
     for (size_t i = 0; i < outWS->size(); ++i) {
       std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", groupWS->getItem(i));
       checkAlg->setProperty("Workspace2", outWS->getItem(i));
       checkAlg->execute();
-      const std::string result = checkAlg->getProperty("Result");
-      TS_ASSERT_EQUALS("Success!", result);
+      TS_ASSERT(checkAlg->getProperty("Result"));
     }
   }
 };
