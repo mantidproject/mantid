@@ -52,10 +52,10 @@ public:
 
   /**
    * This method must be called after the process has emitted started().
-   * Otherwise the returned PID is wrong, as it has not been assigned 
+   * Otherwise the returned PID is wrong, as it has not been assigned
    * a PID from the OS.
-   * 
-   * The PID here is read after the process emits started() 
+   *
+   * The PID here is read after the process emits started()
    * by a connection to addJobToStatus() by the Presenter.
    */
   qint64 getPID() const {

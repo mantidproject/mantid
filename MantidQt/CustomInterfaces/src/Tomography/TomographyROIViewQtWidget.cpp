@@ -1349,7 +1349,8 @@ void TomographyROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
   try {
     centreOfRotationValue = std::stoi(cor_number);
   } catch (std::invalid_argument &) {
-    // output centreOfRotationValue cannot be converted, do not change anything and just return
+    // output centreOfRotationValue cannot be converted, do not change anything
+    // and just return
     // silently
     return;
   }

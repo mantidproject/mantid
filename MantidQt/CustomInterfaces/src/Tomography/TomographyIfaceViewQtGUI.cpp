@@ -1174,8 +1174,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-        &localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+        localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -1276,7 +1276,7 @@ std::string TomographyIfaceViewQtGUI::getPassword() const {
 void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
   bool enable(0 != status);
 
-      // grab new value and enable/disable related widgets
+  // grab new value and enable/disable related widgets
   m_pathsConfig.m_pathOpenBeamEnabled = enable;
   m_uiTabSetup.lineEdit_path_flats->setEnabled(enable);
   m_uiTabSetup.pushButton_flats_dir->setEnabled(enable);

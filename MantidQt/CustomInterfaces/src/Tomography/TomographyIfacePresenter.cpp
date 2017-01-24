@@ -162,7 +162,7 @@ void TomographyIfacePresenter::processRunExternalProcess() {
   // still prepare submission arguments to get the defaults
   const bool local = true;
   prepareSubmissionArguments(local, runnable, args, allOpts);
-  
+
   // if custom external is provided, overwrite the default one
   runnable = !cachedExec.empty() ? cachedExec : runnable;
 
@@ -172,7 +172,7 @@ void TomographyIfacePresenter::processRunExternalProcess() {
     allOpts += arg;
   }
 
-  setupAndRunLocalExternalProcess(runnable,args, allOpts);
+  setupAndRunLocalExternalProcess(runnable, args, allOpts);
 }
 
 void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
