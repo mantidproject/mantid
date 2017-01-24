@@ -644,7 +644,6 @@ void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const {
       painter.drawEllipse(point, 8, 8);
     }
   }
-
 }
 
 /**
@@ -757,7 +756,7 @@ void ProjectionSurface::clearAlignmentPlane() {
 }
 
 /**
- * Remove all peaks used to define comparison peaks 
+ * Remove all peaks used to define comparison peaks
  */
 void ProjectionSurface::clearComparisonPeaks() {
   m_selectedPeaks.first.clear();
@@ -861,11 +860,13 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
     for (const auto &marker : peakMarkers) {
       auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
       if (!peak)
-          continue;
+        continue;
 
-      if ((!m_selectedPeaks.first.empty() && m_selectedPeaks.first.front() == peak) ||
-          (!m_selectedPeaks.second.empty() && m_selectedPeaks.second.front() == peak)) {
-          clearComparisonPeaks();
+      if ((!m_selectedPeaks.first.empty() &&
+           m_selectedPeaks.first.front() == peak) ||
+          (!m_selectedPeaks.second.empty() &&
+           m_selectedPeaks.second.front() == peak)) {
+        clearComparisonPeaks();
       }
 
       // check if erased peak matches one of our alignment peaks
@@ -950,7 +951,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
 
   // check we found a peak
   if (!marker || !peak)
-      return;
+    return;
 
   if (m_selectedAlignmentPlane.size() < 3) {
     // check Q value is not already in the plane list
