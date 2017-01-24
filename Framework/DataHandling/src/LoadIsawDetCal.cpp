@@ -102,7 +102,7 @@ std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
       result["Filename"] = "Two files is only valid for SNAP";
     }
   } else if (filenames.size() > 2) {
-    result["Filename"] = "Must supply .detcal file";
+    result["Filename"] = "Supply at most two .detcal files";
   }
 
   return result;
@@ -502,7 +502,7 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
   std::vector<std::string> filenamesFromPropertyUnraveld;
   std::vector<std::vector<std::string>> filenamesFromProperty =
       this->getProperty("Filename");
-  for (auto outer : filenamesFromProperty) {
+  for (const auto &outer : filenamesFromProperty) {
     std::copy(outer.begin(), outer.end(),
               std::back_inserter(filenamesFromPropertyUnraveld));
   }
