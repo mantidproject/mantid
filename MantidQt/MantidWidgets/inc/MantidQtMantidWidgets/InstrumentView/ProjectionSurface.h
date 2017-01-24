@@ -349,10 +349,9 @@ protected:
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
 
-  std::vector<Mantid::Kernel::V3D> m_selectedAlignmentPlane;
-  std::vector<QPointF> m_selectedAlignmentMarkers;
-  Mantid::Geometry::IPeak *m_selectedAlignmentPeak;
-  QPointF m_selectedAlignmentPeakPosition;
+  std::vector<std::pair<Mantid::Kernel::V3D, QPointF>> m_selectedAlignmentPlane;
+  std::pair<Mantid::Geometry::IPeak *, QPointF> m_selectedAlignmentPeak;
+
   std::pair<std::vector<Mantid::Geometry::IPeak *>,
             std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
   std::pair<QPointF, QPointF> m_selectedMarkers;
