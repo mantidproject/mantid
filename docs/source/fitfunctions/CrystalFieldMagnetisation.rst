@@ -76,20 +76,31 @@ The `x`-axis is given in Tesla, and the magnetisation (`y`-axis) is in bohr magn
     for i in range(parws.rowCount()):
         row = parws.row(i)
         if row['Value'] != 0:
-            print "%7s = % 7.2g" % (row['Name'], row['Value'])
+            print "%7s = % 7.5g" % (row['Name'], row['Value'])
 
 .. testcleanup:: ExampleCrystalFieldMagnetisation
 
-Output:
-
 .. testoutput:: ExampleCrystalFieldMagnetisation
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
-        B20 =     0.4
-        B22 =    0.03
-        B40 =   -0.03
-        B42 =   -0.12
-        B44 =   -0.15
-    Cost function value =  1.3e-14
+        B20 =  0...
+        B22 =  0...
+        B40 = -0...
+        B42 = -0...
+        B44 = -0...
+    Cost function value = ...
+
+Output (the numbers you see on your machine may vary):
+
+.. code::
+
+        B20 =  0.39541
+        B22 =  0.030001
+        B40 = -0.029841
+        B42 = -0.11611
+        B44 = -0.1481
+    Cost function value =  1.2987e-14
 
 .. attributes::
 

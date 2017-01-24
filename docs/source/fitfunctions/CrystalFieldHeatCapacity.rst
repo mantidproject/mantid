@@ -54,7 +54,7 @@ The `x`-axis is given in Kelvin, and the heat capacity (`y`-axis) is in Joules p
     EvaluateFunction(fun, ws, OutputWorkspace='data')
     
      # Change parameters slightly and fit to the reference data
-    fun = 'name=CrystalFieldHeatCapacity,Ion=Ce,Symmetry=C2v,B20=0.377,B22=0.0397,B40=-0.0318,B42=-0.116,B44=-0.125,'
+    fun = 'name=CrystalFieldHeatCapacity,Ion=Ce,Symmetry=C2v,B20=0.4,B22=0.04,B40=-0.03,B42=-0.1,B44=-0.1,'
     fun += 'ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)'
     
     # (set MaxIterations=0 to see the starting point)
@@ -66,27 +66,36 @@ The `x`-axis is given in Kelvin, and the heat capacity (`y`-axis) is in Joules p
     for i in range(parws.rowCount()):
         row = parws.row(i)
         if row['Value'] != 0:
-            print "%7s = % 7.2g" % (row['Name'], row['Value'])
+            print "%7s = % 7.5g" % (row['Name'], row['Value'])
 
 .. testcleanup:: ExampleCrystalFieldHeatCapacity
 
-Output:
-
 .. testoutput:: ExampleCrystalFieldHeatCapacity
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
-        B20 =    0.37
-        B22 =   0.012
-        B40 =  -0.032
-        B42 =   -0.11
-        B44 =   -0.13
-    Cost function value =  1.6e-15
+        B20 =  0...
+        B22 =  0...
+        B40 = -0...
+        B42 = -0...
+        B44 = -0...
+    Cost function value = ...
+
+Output (the numbers you see on your machine may vary):
+
+.. code::
+
+        B20 =  0.40709
+        B22 =  0.020272
+        B40 = -0.031454
+        B42 = -0.10724
+        B44 = -0.1314
+    Cost function value =  4.4642e-15
 
 .. attributes::
 
    Ion;String;Mandatory;An element name for a rare earth ion. Possible values are: Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb.
    Symmetry;String;C1;A symbol for a symmetry group. Setting `Symmetry` automatically zeros and fixes all forbidden parameters. Possible values are: C1, Ci, C2, Cs, C2h, C2v, D2, D2h, C4, S4, C4h, D4, C4v, D2d, D4h, C3, S6, D3, C3v, D3d, C6, C3h, C6h, D6, C6v, D3h, D6h, T, Td, Th, O, Oh
-
-.. attributes::
 
 .. properties::
 
