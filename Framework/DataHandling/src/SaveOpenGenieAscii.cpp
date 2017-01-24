@@ -153,7 +153,7 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
   * Converts histogram X/Y/E data into a compatible string representation
   * and stores that into the output buffer
   *
-  * @tparam histoData :: The histogram data to parse
+  * @param histoData :: The histogram data to parse
   * @param axis :: The axis being processed (i.e 'x') as a character
   *
   */
