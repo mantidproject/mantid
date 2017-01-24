@@ -1,20 +1,13 @@
 """
-Mantid
-======
+Abins is a plugin for Mantid which allows scientists to compare experimental and theoretical inelastic neutron
+scattering spectra (INS). Abins is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or any later
+version.
 
-http://www.mantidproject.org
-
-The Mantid project provides a platform that supports high-performance computing
-on neutron and muon data. The framework provides a set of common services,
-algorithms and data objects that are:
-
-    - Instrument or technique independent;
-    - Supported on multiple target platforms (Windows, Linux, Mac OS X);
-    - Easily extensible by Instruments Scientists/Users;
-    - Open source and freely redistributable to visiting scientists;
-    - Provides functionalities for Scripting, Visualization, Data transformation,
-      Implementing Algorithms, Virtual Instrument Geometry.
-
+Abins is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 """
 # flake8: noqa
 from __future__ import (absolute_import, division, print_function)
