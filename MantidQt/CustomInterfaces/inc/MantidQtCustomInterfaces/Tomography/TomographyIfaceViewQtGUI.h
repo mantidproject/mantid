@@ -139,7 +139,7 @@ public:
   TomoPathsConfig currentPathsConfig() const override { return m_pathsConfig; }
 
   ImageStackPreParams currentROIEtcParams() const override {
-    return m_tabROIW->userSelection();
+    return m_tabROIWidget->userSelection();
   }
 
   std::map<std::string, std::string>
@@ -307,7 +307,7 @@ private:
   Ui::TomographyIfaceQtTabEnergy m_uiTabEnergy;
   Ui::TomographyIfaceQtTabSystemSettings m_uiTabSystemSettings;
 
-  TomographyROIViewQtWidget *m_tabROIW;
+  TomographyROIViewQtWidget *m_tabROIWidget;
   ImggFormatsConvertViewQtWidget *m_tabImggFormats;
 
   std::vector<std::string> m_processingJobsIDs;

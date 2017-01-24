@@ -781,10 +781,10 @@ void TomographyIfaceModel::logErrMsg(const std::string &msg) {
  * @returns A string like "x1, y1, x2, y2"
  */
 std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
-  std::string s_left = std::to_string(coords.second.X());
-  std::string s_top = std::to_string(coords.first.Y());
-  std::string s_right = std::to_string(coords.first.X());
-  std::string s_bottom = std::to_string(coords.second.Y());
+  const std::string s_left = std::to_string(coords.second.X());
+  const std::string s_top = std::to_string(coords.first.Y());
+  const std::string s_right = std::to_string(coords.first.X());
+  const std::string s_bottom = std::to_string(coords.second.Y());
 
   return s_left + ", " + s_top + ", " + s_right + ", " + s_bottom;
 }

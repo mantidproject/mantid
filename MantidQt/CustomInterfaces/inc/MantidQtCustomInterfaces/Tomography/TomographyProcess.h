@@ -51,17 +51,12 @@ public:
   std::string getName() const { return m_workerName; }
 
   /**
-   * This method must be called AFTER the process has been executed.
-   * Otherwise the returned PID is not the correct one, because if the process
-   * is not executed, it is not assigned a PID from the OS.
+   * This method must be called after the process has emitted started().
+   * Otherwise the returned PID is wrong, as it has not been assigned
+   * a PID from the OS.
    *
-   * More to that, usually the execution is queued up and not executed directly
-   * after starting the thread, that means that the process ID should be read at
-   * a later point, not immediatelly after starting the thread.
-   *
-   * The PID here is read after the process has launched successfully and
-   * emitted the started() signal, and is being added to the job list
-   * (addJobToStatus function) by the Presenter.
+   * The PID here is read after the process emits started()
+   * by a connection to addJobToStatus() by the Presenter.
    */
   qint64 getPID() const {
     auto pid = this->pid();

@@ -348,10 +348,10 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   if (!sipAPI__qti->api_find_class) {
     throw std::runtime_error("sipAPI_qti->api_find_class is undefined");
   }
-  sipWrapperType *klass = sipFindClass(val->metaObject()->className());
+  const sipTypeDef *klass = sipFindType(val->metaObject()->className());
   if (!klass)
     return false;
-  pyobj = sipConvertFromInstance(val, klass, NULL);
+  pyobj = sipConvertFromType(val, klass, NULL);
 
   if (!pyobj)
     return false;
