@@ -1273,7 +1273,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
         # Create a fit object
         fit = CrystalFieldFit(cf, InputWorkspace=ws)
-        fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
+        fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', Seed=123)
         # Run fit
         fit.fit()
         self.assertTrue(cf.chi2 > 0.0)
@@ -1298,7 +1298,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
         # Create a fit object
         fit = CrystalFieldFit(cf, InputWorkspace=[ws1, ws2])
-        fit.monte_carlo(NSamples=1000, Constraints='20<f0.f1.PeakCentre<45,20<f0.f2.PeakCentre<45')
+        fit.monte_carlo(NSamples=1000, Constraints='20<f0.f1.PeakCentre<45,20<f0.f2.PeakCentre<45', Seed=123)
         # Run fit
         fit.fit()
         self.assertTrue(cf.chi2 > 0.0)
