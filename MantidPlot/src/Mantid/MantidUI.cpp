@@ -1336,18 +1336,22 @@ Table *MantidUI::createDetectorTable(
       spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
       // R is actually L2 (same as R if sample is at (0,0,0))
       R = spectrumInfo.l2(wsIndex);
-      // Theta is actually 'twoTheta' (twice the scattering angle), if Z is the
-      // beam direction this corresponds to theta in spherical coordinates.
-      try {
-        theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex)
-                                   : spectrumInfo.twoTheta(wsIndex);
-        theta *= 180.0 / M_PI; // To degrees
-      } catch (const Mantid::Kernel::Exception::InstrumentDefinitionError &ex) {
-        // Log the error and leave theta as it is
-        g_log.error(ex.what());
+      // Theta is actually 'twoTheta' for detectors (twice the scattering
+      // angle), if Z is the beam direction this corresponds to theta in
+      // spherical coordinates.
+      // For monitors we follow historic behaviour and display theta
+      const bool isMonitor = spectrumInfo.isMonitor(wsIndex);
+      if (!isMonitor) {
+        try {
+          theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex)
+                                     : spectrumInfo.twoTheta(wsIndex);
+          theta *= 180.0 / M_PI; // To degrees
+        } catch (const std::exception &ex) {
+          // Log the error and leave theta as it is
+          g_log.error(ex.what());
+        }
       }
-      QString isMonitor = spectrumInfo.isMonitor(wsIndex) ? "yes" : "no";
-
+      const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
       // Y/E
       if (include_data) {
@@ -1371,8 +1375,8 @@ Table *MantidUI::createDetectorTable(
         }
       }
 
-      colValues << QVariant(phi)        // rtp
-                << QVariant(isMonitor); // monitor
+      colValues << QVariant(phi)               // rtp
+                << QVariant(isMonitorDisplay); // monitor
     } catch (...) {
       // spectrumNo=-1, detID=0
       colValues << QVariant(-1) << QVariant("0");
