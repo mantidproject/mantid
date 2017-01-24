@@ -34,7 +34,7 @@ public:
 
 private:
   /// Typedef of a tuple containing the name, type and value as strings
-  using outputTuple = std::tuple<std::string, std::string, std::string>;
+  using OutputBufferEntry = std::tuple<std::string, std::string, std::string>;
 
   /// Initialisation code
   void init() override;
@@ -42,10 +42,10 @@ private:
   /// Execution code
   void exec() override;
 
-  inline void addToOutputBuffer(const std::string outName,
-                                const std::string outType,
-                                const std::string outVal) {
-    m_outputVector.push_back(outputTuple(outName, outType, outVal));
+  inline void addToOutputBuffer(const std::string &outName,
+                                const std::string &outType,
+                                const std::string &outVal) {
+    m_outputVector.push_back(OutputBufferEntry(outName, outType, outVal));
   }
 
   /// Adds ENGINX related data which is required for OpenGenie
@@ -83,7 +83,7 @@ private:
   void writeDataToFile(std::ofstream &outfile);
 
   /// Output buffer which holds the tuples to be written
-  std::vector<outputTuple> m_outputVector;
+  std::vector<OutputBufferEntry> m_outputVector;
   /// Workspace to save
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// Output type - String

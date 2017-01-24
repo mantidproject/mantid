@@ -47,7 +47,7 @@ void SaveOpenGenieAscii::init() {
   declareProperty("OpenGenieFormat", "ENGIN-X Format",
                   boost::make_shared<Kernel::StringListValidator>(header),
                   "The format required to successfully load the file to "
-                  "OpenGnie: ENGIN-X Format (default)");
+                  "OpenGenie: ENGIN-X Format (default)");
 }
 
 /**
@@ -199,6 +199,13 @@ SaveOpenGenieAscii::convertWorkspaceToStrings() {
   return outDataStrings;
 }
 
+/**
+  * Determines the current bank from the ENGIN-X detector IDs
+  * if the ID is does not match the expected length it will
+  * throw.
+  *
+  * @return :: The focused bank number in this workspace
+  */
 int SaveOpenGenieAscii::determineEnginXBankId() {
   const auto &detectorIds = m_inputWS->getSpectrum(0).getDetectorIDs();
   const std::string firstDetectorId = std::to_string(*detectorIds.cbegin());
@@ -222,7 +229,7 @@ int SaveOpenGenieAscii::determineEnginXBankId() {
 void SaveOpenGenieAscii::getSampleLogs() {
   // Maps Mantid log names -> Genie save file name / type
   const std::unordered_map<std::string, std::tuple<std::string, std::string>>
-      MantidGenieNameMap = {
+      mantidGenieLogMapping = {
           {"x", std::make_tuple("x_pos", m_floatType)},
           {"y", std::make_tuple("y_pos", m_floatType)},
           {"z", std::make_tuple("z_pos", m_floatType)},
@@ -234,8 +241,8 @@ void SaveOpenGenieAscii::getSampleLogs() {
     const std::string &logName = logEntry->name();
 
     // Check this log value is known to us
-    const auto foundMapping = MantidGenieNameMap.find(logName);
-    if (foundMapping == MantidGenieNameMap.cend()) {
+    const auto foundMapping = mantidGenieLogMapping.find(logName);
+    if (foundMapping == mantidGenieLogMapping.cend()) {
       continue;
     }
 
@@ -390,12 +397,13 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   if (getProperty("IncludeHeader")) {
     outfile << "# Open Genie ASCII File #\r\n"
             << "# label \r\n"
-            << "GXWorkspace\r\n" << m_outputVector.size() << "\r\n";
+            << "GXWorkspace\r\n"
+            << m_outputVector.size() << "\r\n";
   }
 
   // Sort by parameter name
   std::sort(m_outputVector.begin(), m_outputVector.end(),
-            [](const outputTuple &t1, const outputTuple &t2) {
+            [](const OutputBufferEntry &t1, const OutputBufferEntry &t2) {
               return std::get<0>(t1) < std::get<0>(t2);
             });
 
