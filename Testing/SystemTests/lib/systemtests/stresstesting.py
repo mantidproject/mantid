@@ -312,7 +312,7 @@ class MantidStressTest(unittest.TestCase):
         for d in self.disableChecking:
             checker.setPropertyValue("Check"+d,"0")
         checker.execute()
-        if not checker.getPropertyValue("Result"):
+        if not checker.getProperty("Result").value:
             print(self.__class__.__name__)
             if mismatchName:
                 SaveNexus(InputWorkspace=valNames[0],Filename=self.__class__.__name__+mismatchName+'-mismatch.nxs')
