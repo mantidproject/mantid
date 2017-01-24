@@ -341,6 +341,112 @@ class DirectILLReductionTest(unittest.TestCase):
         DeleteWorkspace(outECSubtractedWSName)
         DeleteWorkspace(outECWSName)
 
+    def test_energy_rebinning_manual_mode(self):
+        rebinningBegin = -2.3
+        rebinningEnd = 4.2
+        binWidth = 0.66
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'Reductiontype': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
+            'EnergyRebinningMode': 'Manual Energy Rebinning',
+            'EnergyRebinningParams': '{0}, {1}, {2}'.format(rebinningBegin,
+                                                            binWidth,
+                                                            rebinningEnd),
+            'QRebinningMode': 'Rebin to Median 2Theta',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'Rebin'))
+        axis = ws.getAxis(0)
+        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
+        for i in range(ws.getNumberHistograms()):
+            xs = ws.readX(i)
+            self.assertAlmostEqual(xs[0], rebinningBegin)
+            self.assertAlmostEqual(xs[-1], rebinningEnd)
+            for j in range(len(xs) - 2):
+                # Skip the last bin which is smaller.
+                self.assertAlmostEqual(xs[j+1] - xs[j], binWidth)
+
+    def test_energy_rebinning_manul_mode_fails_without_params(self):
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'Reductiontype': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Manual Energy Rebinning',
+            'QRebinningMode': 'Rebin to Median 2Theta',
+            'child': True,
+            'rethrow': True
+        }
+        self.assertRaises(RuntimeError, run_algorithm, 'DirectILLReduction',
+                          **algProperties)
+
+    def test_energy_rebinning_to_elastic_bin_width(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
+            'QRebinningMode': 'Rebin to Median 2Theta',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'BinWidthAtX',
+                                                       'Rebin'))
+        axis = ws.getAxis(0)
+        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
+        binWidth = ws.readX(0)[1] - ws.readX(0)[0]
+        xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
+        numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
+        DeleteWorkspace(ws)
+
+    def test_energy_rebinning_to_median_bin_width(self):
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'Transposing': 'No Sample Output Transposing',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Rebin to Median Bin Width',
+            'QRebinningMode': 'Rebin to Median 2Theta',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'MedianBinWidth',
+                                                       'Rebin'))
+        axis = ws.getAxis(0)
+        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
+        binWidth = ws.readX(0)[1] - ws.readX(0)[0]
+        xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
+        numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
+        DeleteWorkspace(ws)
+
+
     def test_final_sample_output_workspace(self):
         outWSName = 'outWS'
         algProperties = {
@@ -352,7 +458,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
             'Diagnostics': 'No Detector Diagnostics',
-            'QRebinningParams' : '0, 0.1, 10.0',
+            'QRebinningMode': 'Rebin to Median 2Theta',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -387,110 +493,79 @@ class DirectILLReductionTest(unittest.TestCase):
         finally:
             DeleteWorkspace(outWSName)
 
-    def test_rebinning_manual_mode(self):
-        rebinningBegin = -2.3
-        rebinningEnd = 4.2
-        binWidth = 0.66
-        outWSName = 'outWS'
-        algProperties = {
-            'InputWorkspace': self._testIN5WS,
-            'OutputWorkspace': outWSName,
-            'Reductiontype': 'Sample',
-            'Cleanup': 'Delete Intermediate Workspaces',
-            'Transposing': 'No Sample Output Transposing',
-            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
-            'Diagnostics': 'No Detector Diagnostics',
-            'IndexType': 'Workspace Index',
-            'DetectorsAtL2': '12, 38',
-            'EnergyRebinningMode': 'Manual Rebinning',
-            'EnergyRebinningParams': '{0}, {1}, {2}'.format(rebinningBegin,
-                                                            binWidth,
-                                                            rebinningEnd),
-            'QRebinningParams' : '0, 0.1, 10.0',
-            'rethrow': True
-        }
-        run_algorithm('DirectILLReduction', **algProperties)
-        ws = mtd[outWSName]
-        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'Rebin'))
-        axis = ws.getAxis(0)
-        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
-        for i in range(ws.getNumberHistograms()):
-            xs = ws.readX(i)
-            self.assertAlmostEqual(xs[0], rebinningBegin)
-            self.assertAlmostEqual(xs[-1], rebinningEnd)
-            for j in range(len(xs) - 2):
-                # Skip the last bin which is smaller.
-                self.assertAlmostEqual(xs[j+1] - xs[j], binWidth)
-
-    def test_rebinning_manul_mode_fails_without_params(self):
-        algProperties = {
-            'InputWorkspace': self._testIN5WS,
-            'Reductiontype': 'Sample',
-            'Cleanup': 'Delete Intermediate Workspaces',
-            'Transposing': 'No Sample Output Transposing',
-            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
-            'Diagnostics': 'No Detector Diagnostics',
-            'EnergyRebinningMode': 'Manual Rebinning',
-            'QRebinningParams': '0.1',
-            'child': True,
-            'rethrow': True
-        }
-        self.assertRaises(RuntimeError, run_algorithm, 'DirectILLReduction',
-                          **algProperties)
-
-    def test_rebinning_to_elastic_bin_width(self):
+    def test_q_rebinning_auto_mode(self):
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
             'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
-            'Transposing': 'No Sample Output Transposing',
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
-            'QRebinningParams' : '0, 0.1, 10.0',
+            'QRebinningMode': 'Rebin to Median 2Theta',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
         ws = mtd[outWSName]
-        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'BinWidthAtX',
-                                                       'Rebin'))
         axis = ws.getAxis(0)
-        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
+        self.assertTrue(axis.getUnit().name(), 'Momentum transfer')
+        self.assertAlmostEquals(ws.readX(0)[0], 0.0)
         binWidth = ws.readX(0)[1] - ws.readX(0)[0]
-        xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
+        xs = ws.extractX()[:, :-1]  # The last bin may be smaller, ignoring.
         numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
         DeleteWorkspace(ws)
 
-    def test_rebinning_to_median_bin_width(self):
+    def test_q_rebinning_manual_mode(self):
+        outWSName = 'outWS'
+        qMin = 0.1
+        qMax = 1.3
+        qStep = 0.042
+        algProperties = {
+            'InputWorkspace': self._testIN5WS,
+            'OutputWorkspace': outWSName,
+            'ReductionType': 'Sample',
+            'Cleanup': 'Delete Intermediate Workspaces',
+            'IndexType': 'Workspace Index',
+            'DetectorsAtL2': '12, 38',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
+            'Diagnostics': 'No Detector Diagnostics',
+            'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
+            'QRebinningMode': 'Manual q Rebinning',
+            'QRebinningParams': '{0}, {1}, {2}'.format(qMin, qStep, qMax),
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        ws = mtd[outWSName]
+        axis = ws.getAxis(0)
+        self.assertTrue(axis.getUnit().name(), 'Momentum transfer')
+        self.assertAlmostEquals(ws.readX(0)[0], qMin)
+        self.assertAlmostEquals(ws.readX(0)[-1], qMax)
+        binWidth = ws.readX(0)[1] - ws.readX(0)[0]
+        xs = ws.extractX()[:, :-1]  # The last bin may be smaller, ignoring.
+        numpy.testing.assert_almost_equal(numpy.diff(xs), qStep, decimal=5)
+        DeleteWorkspace(ws)
+
+    def test_q_rebinning_manual_mode_fails_without_params(self):
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': outWSName,
             'ReductionType': 'Sample',
             'Cleanup': 'Delete Intermediate Workspaces',
-            'Transposing': 'No Sample Output Transposing',
-            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
+            'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
-            'EnergyRebinningMode': 'Rebin to Median Bin Width',
-            'QRebinningParams' : '0, 0.1, 10.0',
+            'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
+            'QRebinningMode': 'Manual q Rebinning',
             'rethrow': True
         }
-        run_algorithm('DirectILLReduction', **algProperties)
-        ws = mtd[outWSName]
-        self.assertTrue(self._checkAlgorithmsInHistory(ws, 'MedianBinWidth',
-                                                       'Rebin'))
-        axis = ws.getAxis(0)
-        self.assertTrue(axis.getUnit().name(), 'Energy transfer')
-        binWidth = ws.readX(0)[1] - ws.readX(0)[0]
-        xs = ws.extractX()[:, :-1]  # The last bin is smaller, ignoring.
-        numpy.testing.assert_almost_equal(numpy.diff(xs), binWidth, decimal=5)
-        DeleteWorkspace(ws)
+        self.assertRaises(RuntimeError, run_algorithm, 'DirectILLReduction',
+                          **algProperties)
+
 
     def test_theta_energy_output_workspace(self):
         outWSName = 'outWS'
@@ -504,7 +579,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
             'Diagnostics': 'No Detector Diagnostics',
-            'QRebinningParams' : '0, 0.1, 10.0',
+            'QRebinningMode': 'Rebin to Median 2Theta',
             'OutputSofThetaEnergyWorkspace': thetaEnergyWSName,
             'rethrow': True
         }

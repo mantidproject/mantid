@@ -98,6 +98,7 @@ _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
 _PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakDiagnosticsLowThreshold'
 _PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST = \
     'ElasticPeakDiagnosticsErrorThreshold'
+_PROP_REBINNING_MODE_Q = 'QRebinningMode'
 _PROP_REBINNING_MODE_W = 'EnergyRebinningMode'
 _PROP_REBINNING_PARAMS_Q = 'QRebinningParams'
 _PROP_REBINNING_PARAMS_W = 'EnergyRebinningParams'
@@ -134,7 +135,9 @@ _PROPGROUP_TOF_AXIS_CORRECTION = 'TOF Axis Correction for Elastic Channel'
 
 _REBIN_AUTO_ELASTIC_PEAK = 'Rebin to Bin Width at Elastic Peak'
 _REBIN_AUTO_MEDIAN_BIN_WIDTH = 'Rebin to Median Bin Width'
-_REBIN_MANUAL = 'Manual Rebinning'
+_REBIN_AUTO_Q = 'Rebin to Median 2Theta'
+_REBIN_MANUAL_Q = 'Manual q Rebinning'
+_REBIN_MANUAL_W = 'Manual Energy Rebinning'
 
 _REDUCTION_TYPE_EC = 'Empty Container'
 _REDUCTION_TYPE_SAMPLE = 'Sample'
@@ -397,6 +400,51 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
                                     AveragingWindowWidth=windowWidth,
                                     EnableLogging=algorithmLogging)
     return bkgWS
+
+
+def _medianDeltaTheta(ws):
+    '''
+    Calculates the median theta spacing for S(theta, w) workspace.
+    '''
+    thetas = list()
+    spectrumInfo = ws.spectrumInfo()
+    for i in range(ws.getNumberHistograms()):
+        if (not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i) and 
+                not spectrumInfo.isMonitor(i)):
+            det = ws.getDetector(i)
+            twoTheta = ws.detectorTwoTheta(det)
+            thetas.append(twoTheta)
+    if not thetas:
+        raise RuntimeError('No usable detectors for median DTheta ' +
+                           'calculation.')
+    dThetas = numpy.diff(thetas)
+    return numpy.median(dThetas[dThetas > numpy.radians(0.1)])
+
+
+def _minMaxQ(ws):
+    '''
+    Estimates the start and end q bins for S(theta, w) workspace.
+    '''
+    Ei = ws.run().getProperty('Ei').value * 1e-3 * constants.e  # in Joules
+    axis = ws.getAxis(1)
+    maxTheta = numpy.radians(axis.getMax())
+    xs = ws.readX(0)
+    minW = xs[0] * 1e-3 * constants.e  # in Joules
+    maxEf = Ei - minW
+    # In Ånströms
+    maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2 * \
+                     (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
+    minQ = 0.0
+    return (minQ, maxQ)
+
+
+def _deltaQ(ws):
+    '''
+    Estimates a q bin width for S(theta, w) workspace.
+    '''
+    deltaTheta = _medianDeltaTheta(ws)
+    wavelength = ws.run().getProperty('wavelength').value
+    return 2.0 * constants.pi / wavelength * deltaTheta
 
 
 def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
@@ -1487,7 +1535,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([
                                  _REBIN_AUTO_ELASTIC_PEAK,
                                  _REBIN_AUTO_MEDIAN_BIN_WIDTH,
-                                 _REBIN_MANUAL]),
+                                 _REBIN_MANUAL_W]),
                              direction=Direction.Input,
                              doc='Energy rebinnin mode.')
         self._enabledBySampleReduction(_PROP_REBINNING_MODE_W)
@@ -1496,8 +1544,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              doc='Manual energy rebinning parameters.')
         self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_W)
         self.setPropertyGroup(_PROP_REBINNING_PARAMS_W, _PROPGROUP_REBINNING)
+        self.declareProperty(name=_PROP_REBINNING_MODE_Q,
+                             defaultValue=_REBIN_AUTO_Q,
+                             validator=StringListValidator([
+                                 _REBIN_AUTO_Q,
+                                 _REBIN_MANUAL_Q]),
+                             direction=Direction.Input,
+                             doc='q rebinning mode.')
+        self._enabledBySampleReduction(_PROP_REBINNING_MODE_Q)
+        self.setPropertyGroup(_PROP_REBINNING_MODE_Q, _PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_Q),
-                             doc='Rebinning parameters for q.')
+                             doc='Manual q rebinning parameters.')
         self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_Q)
         self.setPropertyGroup(_PROP_REBINNING_PARAMS_Q, _PROPGROUP_REBINNING)
         # Rest of the output properties.
@@ -1589,10 +1646,16 @@ class DirectILLReduction(DataProcessorAlgorithm):
                     _PROP_REDUCTION_TYPE + ' is ' + _REDUCTION_TYPE_VANA + \
                     ' or ' + _REDUCTION_TYPE_SAMPLE + '.'
         if reductionType == _REDUCTION_TYPE_SAMPLE:
-            if self.getProperty(_PROP_REBINNING_PARAMS_Q).isDefault:
-                issues[_PROP_REBINNING_PARAMS_Q] = _PROP_REBINNING_PARAMS_Q + \
-                    ' is mandatory when ' + _PROP_REDUCTION_TYPE + ' is ' + \
-                    _REDUCTION_TYPE_SAMPLE + '.'
+            if (self.getProperty(_PROP_REBINNING_MODE_W).value == _REBIN_MANUAL_W and self.getProperty(_PROP_REBINNING_PARAMS_W).isDefault):
+                issues[_PROP_REBINNING_PARAMS_W] = \
+                    'Energy rebinning parameters must be given in manual ' + \
+                    'rebinning mode'
+            if (self.getProperty(_PROP_REBINNING_MODE_Q).value ==
+                _REBIN_MANUAL_Q and
+                self.getProperty(_PROP_REBINNING_PARAMS_Q).isDefault):
+                issues[_PROP_REBINNING_PARAMS_Q] = \
+                    'q rebinning parameters must be given in manual ' + \
+                    'rebinning mode.'
         selfShielding = \
             self.getProperty(_PROP_SELF_SHIELDING_CORRECTION).value
         if selfShielding == _SELF_SHIELDING_CORRECTION_ON:
@@ -2132,7 +2195,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             params = [binWidth]
             report.notice('Rebinned energy axis to bin width {}.'
                           .format(binWidth))
-        elif mode == _REBIN_MANUAL:
+        elif mode == _REBIN_MANUAL_W:
             params = self.getProperty(_PROP_REBINNING_PARAMS_W).value
         else:
             raise RuntimeError('Unknown ' + _PROP_REBINNING_MODE_W)
@@ -2311,7 +2374,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
         Runs the SofQWNormalisedPolygon algorithm.
         '''
         sOfQWWSName = wsNames.withSuffix('sofqw')
-        qBinning = self.getProperty(_PROP_REBINNING_PARAMS_Q).value
+        qRebinningMode = self.getProperty(_PROP_REBINNING_MODE_Q).value
+        if qRebinningMode == _REBIN_AUTO_Q:
+            qMin, qMax = _minMaxQ(mainWS)
+            dq = _deltaQ(mainWS)
+            qBinning = '{0}, {1}, {2}'.format(qMin, dq, qMax)
+        else:
+            qBinning = self.getProperty(_PROP_REBINNING_PARAMS_Q).value
         Ei = mainWS.run().getLogData('Ei').value
         sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
                                          OutputWorkspace=sOfQWWSName,
