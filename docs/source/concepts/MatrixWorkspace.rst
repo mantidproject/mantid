@@ -55,7 +55,7 @@ If you want to check if a variable points to something that is a Matrix Workspac
     histoWS = CreateSampleWorkspace(WorkspaceType="Histogram")
 
     if isinstance(histoWS, MatrixWorkspace):
-        print histoWS.getName() + " is a " + histoWS.id() + \
+        print histoWS.name() + " is a " + histoWS.id() + \
                  " and can be treated as a MatrixWorkspace"
 
     print "\nFor more workspace types"

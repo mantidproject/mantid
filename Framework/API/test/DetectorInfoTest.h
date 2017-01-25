@@ -32,11 +32,10 @@ public:
         m_workspace, includeMonitors, startYNegative, instrumentName);
 
     std::set<int64_t> toMask{0, 3};
-    ParameterMap &pmap = m_workspace.instrumentParameters();
+    auto &detInfo = m_workspace.mutableDetectorInfo();
     for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
       if (toMask.find(i) != toMask.end()) {
-        IDetector_const_sptr det = m_workspace.getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
+        detInfo.setMasked(i, true);
       }
     }
 
@@ -340,12 +339,11 @@ private:
       inst->markAsDetector(det);
     }
     ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
+    auto &detInfo = ws->mutableDetectorInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
-      const auto &det = ws->getDetector(i);
       if (i % 2 == 0)
-        pmap.addBool(det->getComponentID(), "masked", true);
+        detInfo.setMasked(i, true);
     }
     return std::move(ws);
   }

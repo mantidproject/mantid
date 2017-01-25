@@ -55,9 +55,24 @@ set ( TEST_PY_FILES
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py
       test/ReductionSettingsTest.py
+      test/AbinsIOmoduleTest.py
+      test/AbinsLoadCASTEPTest.py
+      test/AbinsLoadCRYSTALTest.py
+      test/AbinsCalculateQToscaTest.py
+      test/AbinsFrequencyPowderGeneratorTest.py
+      test/AbinsKpointsDataTest.py
+      test/AbinsAtomsDataTest.py
+      test/AbinsDWSingleCrystalDataTest.py
+      test/AbinsCalculateDWSingleCrystalTest.py
+      test/AbinsPowderDataTest.py
+      test/AbinsCalculatePowderTest.py
+      test/AbinsCalculateSingleCrystalTest.py
+      test/AbinsCalculateSPowderTest.py
       )
 
-
+# Addition tests for SANS components
+add_subdirectory(test/SANS)
+	  
 # python unit tests
 if (PYUNITTEST_FOUND)
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )

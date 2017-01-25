@@ -12,6 +12,10 @@
 
 namespace Mantid {
 
+namespace Indexing {
+class IndexInfo;
+}
+
 namespace Kernel {
 class DateAndTime;
 }
@@ -70,9 +74,12 @@ public:
   // axes.
   friend class WorkspaceFactoryImpl;
 
-  /// Initialize
   void initialize(const std::size_t &NVectors, const std::size_t &XLength,
                   const std::size_t &YLength);
+  void initialize(const std::size_t &NVectors,
+                  const HistogramData::Histogram &histogram);
+  void initialize(const Indexing::IndexInfo &indexInfo,
+                  const HistogramData::Histogram &histogram);
 
   MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
   /// Delete
@@ -80,6 +87,14 @@ public:
 
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
+
+  /// Returns a default-initialized clone of the workspace
+  MatrixWorkspace_uptr cloneEmpty() const {
+    return MatrixWorkspace_uptr(doCloneEmpty());
+  }
+
+  const Indexing::IndexInfo &indexInfo() const;
+  void setIndexInfo(const Indexing::IndexInfo &indexInfo);
 
   using IMDWorkspace::toString;
   /// String description of state
@@ -542,6 +557,8 @@ protected:
   /// be overloaded.
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength) = 0;
+  virtual void init(const std::size_t &NVectors,
+                    const HistogramData::Histogram &histogram) = 0;
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
@@ -554,6 +571,7 @@ protected:
 
 private:
   MatrixWorkspace *doClone() const override = 0;
+  virtual MatrixWorkspace *doCloneEmpty() const = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr
@@ -563,6 +581,13 @@ private:
   /// Copy data from an image.
   void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t),
                 const MantidImage &image, size_t start, bool parallelExecution);
+
+  // Helper functions for IndexInfo, as a workaround while spectrum numbers and
+  // detector IDs are still stored in ISpectrum.
+  specnum_t spectrumNumber(const size_t index) const;
+  const std::set<detid_t> &detectorIDs(const size_t index) const;
+
+  std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
 
   /// Has this workspace been initialised?
   bool m_isInitialized{false};

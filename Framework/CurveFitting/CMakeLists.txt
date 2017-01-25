@@ -63,6 +63,10 @@ set ( SRC_FILES
 	src/Functions/CrystalFieldMultiSpectrum.cpp
 	src/Functions/CrystalFieldPeakUtils.cpp
 	src/Functions/CrystalFieldSpectrum.cpp
+	src/Functions/CrystalFieldHeatCapacity.cpp
+	src/Functions/CrystalFieldMagnetisation.cpp
+	src/Functions/CrystalFieldMoment.cpp
+	src/Functions/CrystalFieldSusceptibility.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
@@ -93,7 +97,6 @@ set ( SRC_FILES
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
-	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
 	src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
@@ -217,6 +220,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeakUtils.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
+	inc/MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMagnetisation.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMoment.h
+	inc/MantidCurveFitting/Functions/CrystalFieldSusceptibility.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
@@ -247,7 +254,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
-	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
 	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
@@ -366,6 +372,10 @@ set ( TEST_FILES
 	Functions/CrystalFieldTest.h
 	Functions/CrystalFieldMultiSpectrumTest.h
 	Functions/CrystalFieldSpectrumTest.h
+	Functions/CrystalFieldHeatCapacityTest.h
+	Functions/CrystalFieldSusceptibilityTest.h
+	Functions/CrystalFieldMagnetisationTest.h
+	Functions/CrystalFieldMomentTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
 	Functions/DiffRotDiscreteCircleTest.h
@@ -390,7 +400,6 @@ set ( TEST_FILES
     Functions/KerenTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
-	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
 	Functions/MultivariateGaussianComptonProfileTest.h

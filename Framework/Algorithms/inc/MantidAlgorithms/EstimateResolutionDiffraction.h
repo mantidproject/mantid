@@ -62,9 +62,6 @@ private:
   ///
   void retrieveInstrumentParameters();
 
-  /// Create output workspace
-  void createOutputWorkspace();
-
   /// Calculate detector resolution
   void estimateDetectorResolution();
 

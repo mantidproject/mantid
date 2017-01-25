@@ -9,6 +9,8 @@
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
@@ -24,6 +26,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
@@ -92,6 +95,13 @@ ExperimentInfo *ExperimentInfo::cloneExperimentInfo() const {
 
 /// @returns A human-readable description of the object
 const std::string ExperimentInfo::toString() const {
+  try {
+    populateIfNotLoaded();
+  } catch (std::exception &) {
+    // Catch any errors so that the string returned has as much information
+    // as possible
+  }
+
   std::ostringstream out;
 
   Geometry::Instrument_const_sptr inst = this->getInstrument();
@@ -163,7 +173,19 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
     const auto numDets = oldInstr.getNumberDetectors();
-    return Kernel::make_unique<Beamline::DetectorInfo>(numDets);
+    // Currently monitors flags are stored in the detector cache of the base
+    // instrument. The copy being made here is strictly speaking duplicating
+    // that data, but with future refactoring this will no longer be the case.
+    // Note that monitors will not change after creating a workspace.
+    // Instrument::markAsMonitor works only for the base instrument and it is
+    // not possible to obtain a non-const reference to the base instrument in a
+    // workspace. Thus we do not need to worry about the two copies of monitor
+    // flags running out of sync.
+    std::vector<size_t> monitors;
+    for (size_t i = 0; i < numDets; ++i)
+      if (newInstr.isMonitorViaIndex(i))
+        monitors.push_back(i);
+    return Kernel::make_unique<Beamline::DetectorInfo>(numDets, monitors);
   }
 }
 }
@@ -190,6 +212,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
+  populateIfNotLoaded();
   checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
@@ -201,6 +224,7 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
 *    @return a (new) copy of the instruments parameter map
 */
 Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
+  populateIfNotLoaded();
   // TODO: Here duplicates cow_ptr. Figure out if there's a better way
 
   // Use a double-check for sharing so that we only
@@ -226,6 +250,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
 *    @return a const reference to the instrument ParameterMap.
 */
 const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
+  populateIfNotLoaded();
   return *m_parmap;
 }
 
@@ -234,6 +259,7 @@ const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
 */
 const Geometry::ParameterMap &
 ExperimentInfo::constInstrumentParameters() const {
+  populateIfNotLoaded();
   return *m_parmap;
 }
 
@@ -285,6 +311,7 @@ struct ParameterValue {
 * method.
 */
 void ExperimentInfo::populateInstrumentParameters() {
+  populateIfNotLoaded();
   // Get instrument and sample
   boost::shared_ptr<const Instrument> instrument =
       getInstrument()->baseInstrument();
@@ -358,6 +385,7 @@ void ExperimentInfo::populateInstrumentParameters() {
  */
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
+  populateIfNotLoaded();
   invalidateInstrumentReferences();
   m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
@@ -371,6 +399,7 @@ void ExperimentInfo::replaceInstrumentParameters(
  * current map
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
+  populateIfNotLoaded();
   invalidateInstrumentReferences();
   m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
@@ -384,6 +413,7 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
  * group.
  */
 void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
+  populateIfNotLoaded();
   m_detgroups.clear();
   for (const auto &item : mapping) {
     m_det2group[item.first] = m_detgroups.size();
@@ -396,6 +426,7 @@ void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
 /// Returns the detector IDs that make up the group that this ID is part of
 const std::set<detid_t> &
 ExperimentInfo::getGroupMembers(const detid_t detID) const {
+  populateIfNotLoaded();
   auto iter = m_det2group.find(detID);
   if (iter != m_det2group.end()) {
     return m_detgroups[iter->second];
@@ -414,6 +445,7 @@ ExperimentInfo::getGroupMembers(const detid_t detID) const {
  */
 Geometry::IDetector_const_sptr
 ExperimentInfo::getDetectorByID(const detid_t detID) const {
+  populateIfNotLoaded();
   if (m_detgroups.empty()) {
     return getInstrument()->getDetector(detID);
   } else {
@@ -428,6 +460,7 @@ ExperimentInfo::getDetectorByID(const detid_t detID) const {
  * transferred to this object
  */
 void ExperimentInfo::setModeratorModel(ModeratorModel *source) {
+  populateIfNotLoaded();
   if (!source) {
     throw std::invalid_argument(
         "ExperimentInfo::setModeratorModel - NULL source object found.");
@@ -437,6 +470,7 @@ void ExperimentInfo::setModeratorModel(ModeratorModel *source) {
 
 /// Returns a reference to the source properties object
 ModeratorModel &ExperimentInfo::moderatorModel() const {
+  populateIfNotLoaded();
   if (!m_moderatorModel) {
     throw std::runtime_error("ExperimentInfo::moderatorModel - No source "
                              "desciption has been defined");
@@ -455,6 +489,7 @@ ModeratorModel &ExperimentInfo::moderatorModel() const {
  */
 void ExperimentInfo::setChopperModel(ChopperModel *chopper,
                                      const size_t index) {
+  populateIfNotLoaded();
   if (!chopper) {
     throw std::invalid_argument(
         "ExperimentInfo::setChopper - NULL chopper object found.");
@@ -477,6 +512,7 @@ void ExperimentInfo::setChopperModel(ChopperModel *chopper,
  * @return A reference to a const chopper object
  */
 ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
+  populateIfNotLoaded();
   if (index < m_choppers.size()) {
     auto iter = m_choppers.begin();
     std::advance(iter, index);
@@ -493,6 +529,7 @@ ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
 * @return const reference to Sample object
 */
 const Sample &ExperimentInfo::sample() const {
+  populateIfNotLoaded();
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_sample;
 }
@@ -504,6 +541,7 @@ const Sample &ExperimentInfo::sample() const {
 * @return reference to sample object
 */
 Sample &ExperimentInfo::mutableSample() {
+  populateIfNotLoaded();
   // Use a double-check for sharing so that we only
   // enter the critical region if absolutely necessary
   if (!m_sample.unique()) {
@@ -522,6 +560,7 @@ Sample &ExperimentInfo::mutableSample() {
 * @return const reference to run object
 */
 const Run &ExperimentInfo::run() const {
+  populateIfNotLoaded();
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_run;
 }
@@ -533,6 +572,7 @@ const Run &ExperimentInfo::run() const {
 * @return reference to Run object
 */
 Run &ExperimentInfo::mutableRun() {
+  populateIfNotLoaded();
   // Use a double-check for sharing so that we only
   // enter the critical region if absolutely necessary
   if (!m_run.unique()) {
@@ -560,6 +600,7 @@ Run &ExperimentInfo::mutableRun() {
  * @return A pointer to the property
  */
 Kernel::Property *ExperimentInfo::getLog(const std::string &log) const {
+  populateIfNotLoaded();
   try {
     return run().getProperty(log);
   } catch (Kernel::Exception::NotFoundError &) {
@@ -586,6 +627,7 @@ Kernel::Property *ExperimentInfo::getLog(const std::string &log) const {
  * @return A pointer to the property
  */
 double ExperimentInfo::getLogAsSingleValue(const std::string &log) const {
+  populateIfNotLoaded();
   try {
     return run().getPropertyAsSingleValue(log);
   } catch (Kernel::Exception::NotFoundError &) {
@@ -608,6 +650,7 @@ double ExperimentInfo::getLogAsSingleValue(const std::string &log) const {
  * @return the run number (int) or 0 if not found.
  */
 int ExperimentInfo::getRunNumber() const {
+  populateIfNotLoaded();
   const Run &thisRun = run();
   if (!thisRun.hasProperty("run_number")) {
     // No run_number property, default to 0
@@ -636,6 +679,7 @@ int ExperimentInfo::getRunNumber() const {
  * checks the sample log & instrument in this order
  */
 Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
+  populateIfNotLoaded();
   static const char *emodeTag = "deltaE-mode";
   std::string emodeStr;
   if (run().hasProperty(emodeTag)) {
@@ -662,6 +706,7 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
  * @return The current EFixed value
  */
 double ExperimentInfo::getEFixed(const detid_t detID) const {
+  populateIfNotLoaded();
   IDetector_const_sptr det = getInstrument()->getDetector(detID);
   return getEFixed(det);
 }
@@ -674,6 +719,7 @@ double ExperimentInfo::getEFixed(const detid_t detID) const {
  */
 double
 ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
+  populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
   if (emode == Kernel::DeltaEMode::Direct) {
     try {
@@ -715,6 +761,7 @@ ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
 }
 
 void ExperimentInfo::setEFixed(const detid_t detID, const double value) {
+  populateIfNotLoaded();
   IDetector_const_sptr det = getInstrument()->getDetector(detID);
   Geometry::ParameterMap &pmap = instrumentParameters();
   pmap.addDouble(det.get(), "Efixed", value);
@@ -786,6 +833,7 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
 *available)
 */
 std::string ExperimentInfo::getWorkspaceStartDate() const {
+  populateIfNotLoaded();
   std::string date;
   try {
     date = run().startTime().toISO8601String();
@@ -804,6 +852,7 @@ std::string ExperimentInfo::getWorkspaceStartDate() const {
  *  @return workspace start date as a string (empty if no date available)
  */
 std::string ExperimentInfo::getAvailableWorkspaceStartDate() const {
+  populateIfNotLoaded();
   std::string date;
   try {
     date = run().startTime().toFormattedString();
@@ -820,6 +869,7 @@ std::string ExperimentInfo::getAvailableWorkspaceStartDate() const {
  *  @return workspace end date as a string (empty if no date available)
  */
 std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
+  populateIfNotLoaded();
   std::string date;
   try {
     date = run().endTime().toFormattedString();
@@ -935,6 +985,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
  * this reference.
  */
 const DetectorInfo &ExperimentInfo::detectorInfo() const {
+  populateIfNotLoaded();
   if (!m_detectorInfoWrapper) {
     std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
     if (!m_detectorInfoWrapper)
@@ -947,6 +998,7 @@ const DetectorInfo &ExperimentInfo::detectorInfo() const {
 /** Return a non-const reference to the DetectorInfo object. Not thread safe.
  */
 DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
+  populateIfNotLoaded();
   // No locking here since this non-const method is not thread safe.
 
   // We get the non-const ParameterMap reference *first* such that no copy is
@@ -976,6 +1028,7 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
  * information. Grouping information can be cached in ExperimentInfo, or can be
  * obtained from child classes (MatrixWorkspace). */
 size_t ExperimentInfo::numberOfDetectorGroups() const {
+  populateIfNotLoaded();
   std::call_once(m_defaultDetectorGroupingCached,
                  &ExperimentInfo::cacheDefaultDetectorGrouping, this);
 
@@ -993,6 +1046,7 @@ size_t ExperimentInfo::numberOfDetectorGroups() const {
  * obtained from child classes (MatrixWorkspace). */
 const std::set<detid_t> &
 ExperimentInfo::detectorIDsInGroup(const size_t index) const {
+  populateIfNotLoaded();
   std::call_once(m_defaultDetectorGroupingCached,
                  &ExperimentInfo::cacheDefaultDetectorGrouping, this);
 
@@ -1275,7 +1329,22 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     int size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[4];
-    pmap.add(tokens[1], comp, tokens[2], paramValue);
+
+    if (tokens[2].compare("masked") == 0) {
+      // Do not add masking to ParameterMap, it is stored in DetectorInfo
+      const auto det = dynamic_cast<const Detector *const>(comp);
+      if (!det)
+        throw std::runtime_error(
+            "Found masking for a non-detector component. This is not possible");
+      const auto &type = tokens[1];
+      const std::string name = "dummy";
+      auto param = ParameterFactory::create(type, name);
+      param->fromString(paramValue);
+      bool value = param->value<bool>();
+      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), value);
+    } else {
+      pmap.add(tokens[1], comp, tokens[2], paramValue);
+    }
   }
 }
 
@@ -1300,8 +1369,15 @@ void ExperimentInfo::populateWithParameter(
     pDescription = &paramInfo.m_description;
 
   // Some names are special. Values should be convertible to double
-  if (name.compare("x") == 0 || name.compare("y") == 0 ||
-      name.compare("z") == 0) {
+  if (name.compare("masked") == 0) {
+    // Do not add masking to ParameterMap, it is stored in DetectorInfo
+    const auto det = dynamic_cast<const Detector *const>(paramInfo.m_component);
+    if (!det)
+      throw std::runtime_error(
+          "Found masking for a non-detector component. This is not possible");
+    m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), paramValue);
+  } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
+             name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
   } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
              name.compare("roty") == 0 || name.compare("rotz") == 0) {
@@ -1327,6 +1403,11 @@ void ExperimentInfo::populateWithParameter(
   } else { // assume double
     paramMap.addDouble(paramInfo.m_component, name, paramValue, pDescription);
   }
+}
+
+void ExperimentInfo::populateIfNotLoaded() const {
+  // The default implementation does nothing. Used by subclasses
+  // (FileBackedExperimentInfo) to load content from files upon access.
 }
 
 } // namespace Mantid
