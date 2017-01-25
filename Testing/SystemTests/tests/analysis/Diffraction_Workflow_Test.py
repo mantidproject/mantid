@@ -46,7 +46,7 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
         # Convert to Q space
         ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_MD2',LorentzCorrection='0',
-                                        OutputDimensions='Q (lab frame)', SplitInto='2',SplitThreshold='150') #,Version=1
+                                        OutputDimensions='Q (lab frame)', Extents=[-50, 50], SplitInto='2',SplitThreshold='150')
         # Find peaks (Reduced number of peaks so file comparison with reference does not fail with small differences)
         FindPeaksMD(InputWorkspace=ws+'_MD2',MaxPeaks='20',OutputWorkspace=ws+'_peaksLattice')
         # 3d integration to centroid peaks
@@ -75,7 +75,7 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         ## TODO conventional cell
 
         # And index to HKL
-        dummy_alg = IndexPeaks(PeaksWorkspace=ws+'_peaksFFT', Tolerance='0.12')
+        IndexPeaks(PeaksWorkspace=ws+'_peaksFFT', Tolerance='0.12')
 
         # Integrate peaks in Q space using spheres
         IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',
@@ -144,7 +144,7 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         ol = s.getOrientedLattice()
         self.assertDelta( ol.a(), 4.714, 0.01, "Correct lattice a value not found.")
         self.assertDelta( ol.b(), 6.06, 0.01, "Correct lattice b value not found.")
-        self.assertDelta( ol.c(), 10.42, 0.01, "Correct lattice c value not found.")
+        self.assertDelta( ol.c(), 10.41, 0.01, "Correct lattice c value not found.")
         self.assertDelta( ol.alpha(), 90, 0.4, "Correct lattice angle alpha value not found.")
         self.assertDelta( ol.beta(), 90, 0.4, "Correct lattice angle beta value not found.")
         self.assertDelta( ol.gamma(), 90, 0.4, "Correct lattice angle gamma value not found.")

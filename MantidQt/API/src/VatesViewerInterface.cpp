@@ -9,7 +9,8 @@ VatesViewerInterface::VatesViewerInterface(QWidget *parent) : QWidget(parent) {}
 
 VatesViewerInterface::~VatesViewerInterface() {}
 
-void VatesViewerInterface::setupPluginMode() {}
+void VatesViewerInterface::setupPluginMode(
+    int /*WsType*/, const std::string & /*instrumentName*/) {}
 
 void VatesViewerInterface::renderWorkspace(QString workSpaceName,
                                            int workspaceType,

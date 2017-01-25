@@ -23,7 +23,7 @@ private:
 
 public:
   void testIt() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         SinFunction(), 1, 0.1, 10.1, 0.1, true);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     // Mask some bins out to test that functionality
@@ -66,7 +66,7 @@ public:
     constexpr double xRangeEnd = 2500.1;
     constexpr double xRangeStep = 0.1;
 
-    ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         SinFunction(), nspec, xRangeStart, xRangeEnd, xRangeStep, true);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     // Mask some bins out to test that functionality

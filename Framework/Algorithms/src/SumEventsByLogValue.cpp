@@ -4,6 +4,7 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -82,7 +83,7 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   } catch (Exception::NotFoundError &) {
     errors["LogName"] = "The log '" + m_logName +
                         "' does not exist in the workspace '" +
-                        m_inputWorkspace->name() + "'.";
+                        m_inputWorkspace->getName() + "'.";
     return errors;
   }
 
@@ -305,14 +306,15 @@ void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
   if (!monitorWorkspace)
     return;
 
+  const auto &spectrumInfo = monitorWorkspace->spectrumInfo();
+
   const int xLength = maxVal - minVal + 1;
   // Loop over the spectra - there will be one per monitor
   for (std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms();
        ++spec) {
     try {
       // Create a column for this monitor
-      const std::string monitorName =
-          monitorWorkspace->getDetector(spec)->getName();
+      const std::string monitorName = spectrumInfo.detector(spec).getName();
       auto monitorCounts = outputWorkspace->addColumn("int", monitorName);
       const IEventList &eventList = monitorWorkspace->getSpectrum(spec);
       // Accumulate things in a local vector before transferring to the table

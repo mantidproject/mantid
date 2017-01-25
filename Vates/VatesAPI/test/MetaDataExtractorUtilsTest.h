@@ -16,6 +16,7 @@
 
 #include <qwt_double_interval.h>
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -51,7 +52,7 @@ public:
 
     // Act
     MetaDataExtractorUtils extractor;
-    QwtDoubleInterval minMax = extractor.getMinAndMax(histoWorkspace);
+    QwtDoubleInterval minMax = extractor.getMinAndMax(histoWorkspace.get());
 
     // Assert
     TSM_ASSERT("Should find the a min which is smaller/equal to max ",
@@ -66,7 +67,7 @@ public:
     MetaDataExtractorUtils extractor;
 
     // Act
-    QwtDoubleInterval minMax = extractor.getMinAndMax(eventWorkspace);
+    QwtDoubleInterval minMax = extractor.getMinAndMax(eventWorkspace.get());
 
     // Assert
     TSM_ASSERT("Should find the a min which is smaller/equal to max ",
@@ -84,7 +85,7 @@ public:
     MetaDataExtractorUtils extractor;
 
     // Act
-    std::string instrument = extractor.extractInstrument(histoWorkspace);
+    std::string instrument = extractor.extractInstrument(histoWorkspace.get());
 
     // Assert
     TSM_ASSERT("Should find an empty instrment for invalid workspace",

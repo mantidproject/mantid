@@ -92,7 +92,7 @@ public:
   }
 
   void test_event() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     evin->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
@@ -160,7 +160,6 @@ private:
       ws2D->setX(i, cow_xv);
       ws2D->dataY(i) = {1, 2, 3, 4, 5};
       ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
-      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

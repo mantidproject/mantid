@@ -35,15 +35,14 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QPrintDialog>
 #include <QTextCodec>
 #include <QTextStream>
 #include <Qsci/qsciprinter.h>
-#include <QPrintDialog>
 
 #include "ApplicationWindow.h"
 #include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Note)
@@ -99,8 +98,8 @@ QString Note::exportASCII(const QString &filename) {
     QString dir(Mantid::Kernel::ConfigService::Instance()
                     .getString("defaultsave.directory")
                     .c_str());
-    fn = MantidQt::API::FileDialogHandler::getSaveFileName(
-        this, tr("Save Text to File"), dir, filter, &selectedFilter);
+    fn = QFileDialog::getSaveFileName(this, tr("Save Text to File"), dir,
+                                      filter, &selectedFilter);
   } else
     fn = filename;
 
@@ -195,3 +194,5 @@ std::string Note::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("</note>");
   return tsv.outputLines();
 }
+
+std::vector<std::string> Note::getWorkspaceNames() { return {}; }

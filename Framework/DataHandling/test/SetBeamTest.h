@@ -27,7 +27,7 @@ public:
   }
 
   void test_Beam_Size_Parameters_Stored_On_Instrument_Source() {
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     inputWS->setInstrument(testInst);
 
@@ -52,7 +52,7 @@ public:
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Workspace_Without_Instrument_Not_Accepted() {
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", inputWS),
@@ -60,7 +60,7 @@ public:
   }
 
   void test_No_Geometry_Inputs_Not_Accepted() {
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     inputWS->setInstrument(testInst);
 
@@ -71,7 +71,7 @@ public:
 
   void test_Missing_Geometry_Inputs_Not_Accepted() {
     using Mantid::Kernel::PropertyManager;
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     inputWS->setInstrument(testInst);
 

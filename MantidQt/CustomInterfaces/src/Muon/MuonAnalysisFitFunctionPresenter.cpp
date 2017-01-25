@@ -88,7 +88,7 @@ void MuonAnalysisFitFunctionPresenter::updateFunction() {
   const Mantid::API::IFunction_sptr function =
       funcString.isEmpty() ? nullptr // last function has been removed
                            : m_funcBrowser->getGlobalFunction();
-  m_fitBrowser->setFunction(function);
+  setFunctionInModel(function);
 }
 
 /**
@@ -251,6 +251,32 @@ void MuonAnalysisFitFunctionPresenter::setMultiFitState(
     Muon::MultiFitState state) {
   m_fitBrowser->setMultiFittingMode(state == Muon::MultiFitState::Enabled);
   m_multiFitState = state;
+}
+
+/**
+ * Set the given function in the model (fit property browser).
+ *
+ * If and only if multi fit mode is enabled, need to deal with plot guess too.
+ * Remove the guess (if one is plotted) before updating the function, then
+ * replot if necessary afterwards.
+ * This ensures the guess is updated and prevents stale guesses in the plot.
+ *
+ * If multi fit mode is off, the user sets the function in the model directly so
+ * it works fine as is - no need to update the guess as it already happens.
+ *
+ * @param function :: [input] Function to set in the model
+ */
+void MuonAnalysisFitFunctionPresenter::setFunctionInModel(
+    const Mantid::API::IFunction_sptr &function) {
+  const bool updateGuess = m_multiFitState == Muon::MultiFitState::Enabled &&
+                           m_fitBrowser->hasGuess();
+  if (updateGuess) {
+    m_fitBrowser->doRemoveGuess();
+  }
+  m_fitBrowser->setFunction(function);
+  if (updateGuess) {
+    m_fitBrowser->doPlotGuess();
+  }
 }
 
 } // namespace CustomInterfaces

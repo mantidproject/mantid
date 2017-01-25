@@ -6,18 +6,19 @@
 #endif
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/cow_ptr.h"
-#include <cstddef>
 #include <iosfwd>
-#include <set>
 #include <vector>
 
 namespace Mantid {
+namespace Kernel {
+class DateAndTime;
+class SplittingInterval;
+typedef std::vector<SplittingInterval> TimeSplitterType;
+class Unit;
+}
 namespace DataObjects {
 class EventWorkspaceMRU;
 

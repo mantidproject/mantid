@@ -1,4 +1,5 @@
-# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes,
+# pylint: disable = too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *
@@ -986,13 +987,13 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 trans1 = converter.get_workspace_from_list(0)
 
                 transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,
-                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
+                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0, Version=1)
             elif size == 2:
                 trans1 = converter.get_workspace_from_list(0)
                 trans2 = converter.get_workspace_from_list(1)
                 transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,
                                                                   SecondTransmissionRun=trans2, Params=0.02,
-                                                                  StartOverlap=10.0, EndOverlap=12.0)
+                                                                  StartOverlap=10.0, EndOverlap=12.0, Version=1)
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
 
@@ -1031,7 +1032,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                                                  thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
                                                                  OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
                                                                  ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                 MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
+                                                                 MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
+                                                                 Version=1)
                     wqGroup.append(wq)
                     wlamGroup.append(wlam)
                     thetaGroup.append(th)
@@ -1044,7 +1046,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                                              thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
                                                              OutputWorkspaceWavelength=runno+'_IvsLam',
                                                              ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
+                                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
+                                                             Version=1)
 
             cleanup()
         else:

@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -16,7 +17,7 @@ using Kernel::Quat;
  * @param map: pointer to the ParameterMap
  * */
 Detector::Detector(const Detector *base, const ParameterMap *map)
-    : ObjComponent(base, map), m_id(base->m_id), m_isMonitor(false) {}
+    : ObjComponent(base, map), m_id(base->m_id) {}
 
 /** Constructor
  *  @param name :: The name of the component
@@ -24,7 +25,7 @@ Detector::Detector(const Detector *base, const ParameterMap *map)
  *  @param parent :: The parent component
  */
 Detector::Detector(const std::string &name, int id, IComponent *parent)
-    : IDetector(), ObjComponent(name, parent), m_id(id), m_isMonitor(false) {}
+    : IDetector(), ObjComponent(name, parent), m_id(id) {}
 
 /** Constructor
  *  @param name :: The name of the component
@@ -35,8 +36,7 @@ Detector::Detector(const std::string &name, int id, IComponent *parent)
  */
 Detector::Detector(const std::string &name, int id,
                    boost::shared_ptr<Object> shape, IComponent *parent)
-    : IDetector(), ObjComponent(name, shape, parent), m_id(id),
-      m_isMonitor(false) {}
+    : IDetector(), ObjComponent(name, shape, parent), m_id(id) {}
 
 /** Gets the detector id
  *  @returns the detector id
@@ -121,38 +121,14 @@ det_topology Detector::getTopology(V3D &center) const {
   return rect;
 }
 
-/** Returns true if the detector is masked. Only Parametrized instruments
- * can have masked detectors.
- *  @return false
- */
-bool Detector::isMasked() const {
-  if (m_map) {
-    Parameter_sptr par = m_map->get(m_base, "masked");
-    if (par)
-      return par->value<bool>();
-  }
-  // If you get to here, instead of the Detector method, then it isn't masked
-  return false;
-}
+/// Helper for legacy access mode. Returns a reference to the ParameterMap.
+const ParameterMap &Detector::parameterMap() const { return *m_map; }
 
-/// Is the detector a monitor?
-///@return true if it is a monitor
-bool Detector::isMonitor() const {
-  if (m_map) {
-    const Detector *d = dynamic_cast<const Detector *>(m_base);
-    if (d) {
-      return d->isMonitor();
-    }
-  }
+/// Helper for legacy access mode. Returns the index of the detector.
+size_t Detector::index() const { return m_index; }
 
-  return m_isMonitor;
-}
-
-/** Sets the flag for whether this detector object is a monitor
- *  @param flag :: True to mark the detector a monitor (default), false
- * otherwise
- */
-void Detector::markAsMonitor(const bool flag) { m_isMonitor = flag; }
+/// Helper for legacy access mode. Sets the index of the detector.
+void Detector::setIndex(const size_t index) { m_index = index; }
 
 } // Namespace Geometry
 } // Namespace Mantid

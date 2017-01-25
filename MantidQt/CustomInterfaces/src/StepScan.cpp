@@ -5,7 +5,9 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <QFileInfo>
 #include <QUrl>
@@ -124,7 +126,6 @@ void StepScan::startLiveListener() {
         "This interface requires event data.\nThe live data for " +
             QString::fromStdString(m_instrument) + " is in histogram form");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
-    m_uiForm.mWRunFiles->liveButtonSetEnabled(false);
     return;
   }
 
@@ -292,7 +293,7 @@ bool StepScan::mergeRuns() {
                    // within a group?)
     IAlgorithm_sptr addScanIndex =
         AlgorithmManager::Instance().create("AddSampleLog");
-    addScanIndex->setPropertyValue("Workspace", ws->name());
+    addScanIndex->setPropertyValue("Workspace", ws->getName());
     addScanIndex->setProperty("LogName", "scan_index");
     addScanIndex->setProperty("LogType", "Number Series");
     addScanIndex->setProperty("LogText", Strings::toString(i + 1));

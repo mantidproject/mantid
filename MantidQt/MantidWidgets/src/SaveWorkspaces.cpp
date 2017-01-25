@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
@@ -11,16 +10,17 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <QLabel>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QDoubleValidator>
 #include <QCloseEvent>
-#include <QShowEvent>
+#include <QDoubleValidator>
+#include <QFileDialog>
 #include <QGroupBox>
-#include <QSettings>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
+#include <QShowEvent>
+#include <QVBoxLayout>
 
 namespace {
 void setDetectorNamesOnCanSasFormat(QString &saveCommands,
@@ -127,19 +127,16 @@ void SaveWorkspaces::setupLine2(
   QPushButton *cancel = new QPushButton("Cancel");
   connect(cancel, SIGNAL(clicked()), this, SLOT(close()));
 
-  QCheckBox *saveNex = new QCheckBox("Nexus");
-  QCheckBox *saveNXcanSAS = new QCheckBox("NxCanSAS");
   QCheckBox *saveNIST = new QCheckBox("NIST Qxy");
-  QCheckBox *saveCan = new QCheckBox("CanSAS");
   QCheckBox *saveRKH = new QCheckBox("RKH");
-  QCheckBox *saveCSV = new QCheckBox("CSV");
+  QCheckBox *saveNXcanSAS = new QCheckBox("NXcanSAS");
+  QCheckBox *saveCan = new QCheckBox("CanSAS");
+
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(saveNex, "SaveNexus");
-  m_savFormats.insert(saveNXcanSAS, "SaveNXcanSAS");
   m_savFormats.insert(saveNIST, "SaveNISTDAT");
-  m_savFormats.insert(saveCan, "SaveCanSAS1D");
   m_savFormats.insert(saveRKH, "SaveRKH");
-  m_savFormats.insert(saveCSV, "SaveCSV");
+  m_savFormats.insert(saveNXcanSAS, "SaveNXcanSAS");
+  m_savFormats.insert(saveCan, "SaveCanSAS1D");
   setupFormatTicks(defSavs);
 
   m_append = new QCheckBox("Append");
@@ -153,12 +150,10 @@ void SaveWorkspaces::setupLine2(
   ly_saveConts->addStretch();
 
   QVBoxLayout *ly_saveFormats = new QVBoxLayout;
-  ly_saveFormats->addWidget(saveNex);
-  ly_saveFormats->addWidget(saveNXcanSAS);
   ly_saveFormats->addWidget(saveNIST);
-  ly_saveFormats->addWidget(saveCan);
   ly_saveFormats->addWidget(saveRKH);
-  ly_saveFormats->addWidget(saveCSV);
+  ly_saveFormats->addWidget(saveNXcanSAS);
+  ly_saveFormats->addWidget(saveCan);
   QGroupBox *gb_saveForms = new QGroupBox(tr("Save Formats"));
   gb_saveForms->setLayout(ly_saveFormats);
   ly_saveConts->addWidget(gb_saveForms);
@@ -172,12 +167,10 @@ void SaveWorkspaces::setupLine2(
   gb_saveForms->setToolTip(formatsTip);
   save->setToolTip(formatsTip);
   cancel->setToolTip(formatsTip);
-  saveNex->setToolTip(formatsTip);
   saveNXcanSAS->setToolTip(formatsTip);
   saveNIST->setToolTip(formatsTip);
   saveCan->setToolTip(formatsTip);
   saveRKH->setToolTip(formatsTip);
-  saveCSV->setToolTip(formatsTip);
   m_append->setToolTip(formatsTip);
 }
 /** Sets up some controls from what is in the QSettings
@@ -277,8 +270,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if (algorithm != "SaveCSV" && algorithm != "SaveNISTDAT" &&
-        algorithm != "SaveNXcanSAS") {
+    if (algorithm != "SaveNISTDAT" && algorithm != "SaveNXcanSAS") {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";
     }
@@ -332,11 +324,6 @@ void SaveWorkspaces::saveSel() {
     if (i.key()->isChecked()) { // we need to save in this format
 
       bool toAppend = m_append->isChecked();
-      if (toAppend) { // SaveCSV doesn't support appending
-        if (i.value() == "SaveCSV") {
-          toAppend = false;
-        }
-      }
 
       try {
         saveCommands += saveList(m_workspaces->selectedItems(), i.value(),
@@ -387,8 +374,8 @@ void SaveWorkspaces::saveFileBrowse() {
   QFileDialog::Option userCon = m_append->isChecked()
                                     ? QFileDialog::DontConfirmOverwrite
                                     : static_cast<QFileDialog::Option>(0);
-  QString oFile = API::FileDialogHandler::getSaveFileName(
-      this, title, prevPath, filter, NULL, userCon);
+  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter,
+                                               NULL, userCon);
 
   if (!oFile.isEmpty()) {
     m_fNameEdit->setText(oFile);

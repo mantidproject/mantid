@@ -3,11 +3,15 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D2.h"
-#include "MantidDataHandling/LoadCanSAS1D.h"
+#include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
@@ -30,7 +34,6 @@ public:
         m_workspace3("SaveCanSAS1dTest2_in3"), m_filename("./savecansas1d2.xml")
 
   {
-
     LoadRaw3 loader;
     if (!loader.isInitialized())
       loader.initialize();
@@ -279,7 +282,73 @@ public:
     TS_ASSERT_DELTA(ws2d->dataE(0).back(), 0, tolerance);
   }
 
+  void test_that_can_save_and_load_full_collimation_information() {
+    std::string geometry = "Disc";
+    double width = 1;
+    double height = 2;
+    int expectedGeometryFlag = 3;
+    double expectedWidth = 1;
+    double expectedHeight = 2;
+    do_test_collimation_settings(geometry, width, height, expectedGeometryFlag,
+                                 expectedWidth, expectedHeight);
+  }
+
 private:
+  void do_test_collimation_settings(const std::string &geometry, double width,
+                                    double height, int expectedGeometry,
+                                    double expectedWidth,
+                                    double expectedHeight) {
+    // Create sample workspace
+    auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3);
+    auto axis = wsIn->getAxis(0);
+    axis->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    axis->title() = "|Q|";
+
+    AnalysisDataService::Instance().addOrReplace("test_worksapce_can_sas_1d",
+                                                 wsIn);
+    // Save the workspace
+    SaveCanSAS1D2 savealg;
+    TS_ASSERT_THROWS_NOTHING(savealg.initialize());
+    TS_ASSERT(savealg.isInitialized());
+    savealg.setProperty("InputWorkspace", wsIn);
+    savealg.setPropertyValue("Filename", m_filename);
+    savealg.setPropertyValue("DetectorNames", "HAB");
+    savealg.setProperty("Geometry", geometry);
+    savealg.setProperty("SampleWidth", width);
+    savealg.setProperty("SampleHeight", height);
+
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    TS_ASSERT(savealg.isExecuted());
+
+    // retrieve the data that we saved to check it
+    LoadCanSAS1D lAlg;
+    TS_ASSERT_THROWS_NOTHING(lAlg.initialize());
+    TS_ASSERT(lAlg.isInitialized());
+    lAlg.setPropertyValue("OutputWorkspace",
+                          "test_worksapce_can_sas_1d_reloaded");
+    lAlg.setPropertyValue("Filename", m_filename);
+    TS_ASSERT_THROWS_NOTHING(lAlg.execute());
+    TS_ASSERT(lAlg.isExecuted());
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(
+        "test_worksapce_can_sas_1d_reloaded");
+    Mantid::API::MatrixWorkspace_sptr loaded =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+
+    // Check that elements are set correctly
+    TS_ASSERT(loaded->sample().getGeometryFlag() == expectedGeometry);
+    TS_ASSERT(loaded->sample().getWidth() == expectedWidth);
+    TS_ASSERT(loaded->sample().getHeight() == expectedHeight);
+
+    // Delete workspaces
+    std::string toDeleteList[2] = {"test_worksapce_can_sas_1d",
+                                   "test_worksapce_can_sas_1d_reloaded"};
+    for (auto &toDelete : toDeleteList) {
+      if (AnalysisDataService::Instance().doesExist(toDelete)) {
+        AnalysisDataService::Instance().remove(toDelete);
+      }
+    }
+  }
+
   std::string m_workspace1, m_workspace2, m_workspace3, m_filename;
   std::string m_runNum;
   MatrixWorkspace_sptr ws;

@@ -4,20 +4,23 @@
 #include <cxxtest/TestSuite.h>
 
 #include <sstream>
-#include <string>
 #include <stdexcept>
+#include <string>
 
-#include "MantidAlgorithms/RemoveBins.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/RemoveBins.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class RemoveBinsTest : public CxxTest::TestSuite {
 public:
@@ -55,10 +58,10 @@ public:
     // 10   20   30   40   X
     //     2     5     6       Y
 
-    TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
-    TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
-    TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 10);
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 2);
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 4);
+    TS_ASSERT_EQUALS(outputWS->y(0).size(), 3);
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 10);
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 2);
   }
 
   void testRemoveFromBack() {
@@ -85,12 +88,12 @@ public:
     // 0   10   20   30    X
     //   0     2     5        Y
 
-    TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
-    TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
-    TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
-    TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 30);
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 5);
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 4);
+    TS_ASSERT_EQUALS(outputWS->y(0).size(), 3);
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 0);
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 0);
+    TS_ASSERT_EQUALS(outputWS->x(0)[3], 30);
+    TS_ASSERT_EQUALS(outputWS->y(0)[2], 5);
   }
 
   void testRemoveFromMiddle() {
@@ -118,14 +121,14 @@ public:
     // 0   10   20   30   40   X
     //   0     2     4     6       Y
 
-    TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 5);
-    TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 4);
-    TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
-    TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 30);
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[1], 1.5);
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 3);
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[3], 6);
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 5);
+    TS_ASSERT_EQUALS(outputWS->y(0).size(), 4);
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 0);
+    TS_ASSERT_EQUALS(outputWS->x(0)[3], 30);
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 0);
+    TS_ASSERT_EQUALS(outputWS->y(0)[1], 1.5);
+    TS_ASSERT_EQUALS(outputWS->y(0)[2], 3);
+    TS_ASSERT_EQUALS(outputWS->y(0)[3], 6);
   }
 
   void testSingleSpectrum() {
@@ -144,13 +147,13 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("input2D");
     MatrixWorkspace_const_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output4");
-    TS_ASSERT_EQUALS(inputWS->readX(0), outputWS->readX(0))
-    TS_ASSERT_EQUALS(inputWS->readX(1), outputWS->readX(1))
-    TS_ASSERT_EQUALS(inputWS->readY(1), outputWS->readY(1))
-    TS_ASSERT_EQUALS(inputWS->readE(1), outputWS->readE(1))
+    TS_ASSERT_EQUALS(inputWS->x(0).rawData(), outputWS->x(0).rawData())
+    TS_ASSERT_EQUALS(inputWS->x(1).rawData(), outputWS->x(1).rawData())
+    TS_ASSERT_EQUALS(inputWS->y(1).rawData(), outputWS->y(1).rawData())
+    TS_ASSERT_EQUALS(inputWS->e(1).rawData(), outputWS->e(1).rawData())
     for (int i = 0; i < 4; ++i) {
-      TS_ASSERT_EQUALS(outputWS->readY(0)[i], 0.0)
-      TS_ASSERT_EQUALS(outputWS->readE(0)[i], 0.0)
+      TS_ASSERT_EQUALS(outputWS->y(0)[i], 0.0)
+      TS_ASSERT_EQUALS(outputWS->e(0)[i], 0.0)
     }
 
     AnalysisDataService::Instance().remove("output4");
@@ -173,13 +176,13 @@ public:
     MatrixWorkspace_const_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputWSName);
-    TS_ASSERT_EQUALS(inputWS->readX(1), outputWS->readX(1))
-    TS_ASSERT_EQUALS(inputWS->readX(0), outputWS->readX(0))
-    TS_ASSERT_EQUALS(inputWS->readY(0), outputWS->readY(0))
-    TS_ASSERT_EQUALS(inputWS->readE(0), outputWS->readE(0))
+    TS_ASSERT_EQUALS(inputWS->x(1).rawData(), outputWS->x(1).rawData())
+    TS_ASSERT_EQUALS(inputWS->x(0).rawData(), outputWS->x(0).rawData())
+    TS_ASSERT_EQUALS(inputWS->y(0).rawData(), outputWS->y(0).rawData())
+    TS_ASSERT_EQUALS(inputWS->e(0).rawData(), outputWS->e(0).rawData())
     for (int i = 0; i < 4; ++i) {
-      TS_ASSERT_EQUALS(outputWS->readY(1)[i], 0.0)
-      TS_ASSERT_EQUALS(outputWS->readE(1)[i], 0.0)
+      TS_ASSERT_EQUALS(outputWS->y(1)[i], 0.0)
+      TS_ASSERT_EQUALS(outputWS->e(1)[i], 0.0)
     }
 
     AnalysisDataService::Instance().remove(outputWSName);
@@ -211,7 +214,7 @@ public:
     MatrixWorkspace_const_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("result1");
 
-    TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 1994);
   }
 
   Workspace2D_sptr makeDummyWorkspace2D() {
@@ -220,16 +223,16 @@ public:
     testWorkspace->setTitle("input2D");
     testWorkspace->initialize(2, 5, 4);
 
-    BinEdges X{0, 10, 20, 30, 40};
+    BinEdges X(5, LinearGenerator(0, 10));
     std::vector<double> Y{0, 2, 5, 6};
     std::vector<double> E{0, 2, 5, 6};
 
     testWorkspace->setBinEdges(0, X);
     testWorkspace->setBinEdges(1, X);
-    testWorkspace->dataY(0) = Y;
-    testWorkspace->dataE(0) = E;
-    testWorkspace->dataY(1) = Y;
-    testWorkspace->dataE(1) = E;
+    testWorkspace->mutableY(0) = Y;
+    testWorkspace->mutableE(0) = E;
+    testWorkspace->mutableY(1) = std::move(Y);
+    testWorkspace->mutableE(1) = std::move(E);
 
     testWorkspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
@@ -246,4 +249,57 @@ private:
   RemoveBins alg4;
 };
 
+class RemoveBinsTestPerformance : public CxxTest::TestSuite {
+public:
+  static RemoveBinsTestPerformance *createSuite() {
+    return new RemoveBinsTestPerformance();
+  }
+
+  static void destroySuite(RemoveBinsTestPerformance *suite) { delete suite; }
+
+  RemoveBinsTestPerformance() {
+    auto wksp = boost::make_shared<Workspace2D>();
+    wksp->setTitle("input");
+    wksp->initialize(numHists, 10000, 9999);
+    BinEdges edges(10000, LinearGenerator(0, 10));
+
+    for (size_t i = 0; i < numHists; i++)
+      wksp->setBinEdges(i, edges);
+
+    wksp->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    AnalysisDataService::Instance().addOrReplace("input", wksp);
+  }
+
+  ~RemoveBinsTestPerformance() {
+    AnalysisDataService::Instance().remove("input");
+    AnalysisDataService::Instance().remove("outputBack");
+    AnalysisDataService::Instance().remove("outputMiddle");
+  }
+
+  void testRemoveFromBack() {
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("OutputWorkspace", "outputBack");
+    alg.setPropertyValue("XMin", "80000");
+    alg.setPropertyValue("XMax", "100000");
+    alg.setPropertyValue("Interpolation", "Linear");
+    alg.execute();
+  }
+
+  void testRemoveFromMiddle() {
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("OutputWorkspace", "outputMiddle");
+    alg.setPropertyValue("XMin", "32000");
+    alg.setPropertyValue("XMax", "53000");
+    alg.setPropertyValue("Interpolation", "Linear");
+    alg.execute();
+  }
+
+private:
+  const size_t numHists = 10000;
+  RemoveBins alg;
+};
 #endif /*RemoveBinsTest_H_*/

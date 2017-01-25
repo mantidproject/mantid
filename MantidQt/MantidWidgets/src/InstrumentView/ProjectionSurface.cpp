@@ -316,11 +316,15 @@ void ProjectionSurface::updateView(bool picking) {
 }
 
 void ProjectionSurface::updateDetectors() {
+  // updating detectors should not reset the view rect
+  // cache the value here are reapply after updating the detectors
+  auto viewRectCache = m_viewRect;
   clear();
   this->init();
   // if integration range in the instrument actor has changed
   // update visiblity of peak markers
   setPeakVisibility();
+  m_viewRect = viewRectCache;
 }
 
 /// Send a redraw request to the surface owner
@@ -515,21 +519,54 @@ void ProjectionSurface::setPeakVisibility() const {
   }
 }
 
+/** Check a peak is visible at the given point
+ *
+ * Will return true if any peak in any overlay was found to be positioned at
+ * the given point.
+ *
+ * @param point :: the point to check for peaks
+ * @return true if any peaks was found at the given point
+ */
+bool ProjectionSurface::peakVisibleAtPoint(const QPointF &point) const {
+  bool visible = false;
+  for (const auto po : m_peakShapes) {
+    po->selectAtXY(point);
+    auto markers = po->getSelectedPeakMarkers();
+    visible =
+        std::any_of(markers.begin(), markers.end(),
+                    [](PeakMarker2D *marker) { return marker->isVisible(); });
+
+    if (visible)
+      return true;
+  }
+
+  return false;
+}
+
 /**
  * Draw a line between peak markers being compared
  * @param painter :: The QPainter object to draw the line with
  */
 void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const {
-  if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
-    QTransform transform;
-    auto windowRect = getSurfaceBounds();
-    windowRect.findTransform(transform, painter.viewport());
-    auto p1 = transform.map(m_selectedMarkers.first);
-    auto p2 = transform.map(m_selectedMarkers.second);
+  const auto &firstOrigin = m_selectedMarkers.first;
+  const auto &secondOrigin = m_selectedMarkers.second;
 
-    painter.setPen(Qt::red);
-    painter.drawLine(p1, p2);
-  }
+  // Check is user has selected enough peaks
+  if (firstOrigin.isNull() || secondOrigin.isNull())
+    return;
+
+  // Check if the integration range is such that some peaks are visible
+  if (!peakVisibleAtPoint(firstOrigin) || !peakVisibleAtPoint(secondOrigin))
+    return;
+
+  // Draw line between peaks
+  QTransform transform;
+  auto windowRect = getSurfaceBounds();
+  windowRect.findTransform(transform, painter.viewport());
+  auto p1 = transform.map(firstOrigin);
+  auto p2 = transform.map(secondOrigin);
+  painter.setPen(Qt::red);
+  painter.drawLine(p1, p2);
 }
 
 /**
@@ -594,6 +631,22 @@ void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor,
 }
 
 /**
+ * Save shapes drawn on the view to a table workspace
+ */
+void ProjectionSurface::saveShapesToTableWorkspace() {
+  m_maskShapes.saveToTableWorkspace();
+}
+
+/**
+ * Load shapes from a table workspace on to the view.
+ * @param ws :: table workspace to load shapes from
+ */
+void ProjectionSurface::loadShapesFromTableWorkspace(
+    Mantid::API::ITableWorkspace_const_sptr ws) {
+  m_maskShapes.loadFromTableWorkspace(ws);
+}
+
+/**
 * Return a combined list of peak parkers from all overlays
 * @param detID :: The detector ID of interest
 */
@@ -647,6 +700,10 @@ void ProjectionSurface::clearPeakOverlays() {
     m_peakShapesStyle = 0;
     emit peaksWorkspaceDeleted();
   }
+  m_selectedPeaks.first.clear();
+  m_selectedPeaks.second.clear();
+  m_selectedMarkers.first = QPointF();
+  m_selectedMarkers.second = QPointF();
 }
 
 /**
@@ -738,47 +795,67 @@ void ProjectionSurface::touchComponentAt(int x, int y) {
 void ProjectionSurface::erasePeaks(const QRect &rect) {
   foreach (PeakOverlay *po, m_peakShapes) {
     po->selectIn(rect);
+    auto peakMarkers = po->getSelectedPeakMarkers();
+
+    // clear selected peak markers
+    for (const auto &marker : peakMarkers) {
+      auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
+      if (m_selectedPeaks.first.front() == peak ||
+          m_selectedPeaks.second.front() == peak) {
+        m_selectedPeaks.first.clear();
+        m_selectedPeaks.second.clear();
+        m_selectedMarkers.first = QPointF();
+        m_selectedMarkers.second = QPointF();
+      }
+    }
+
     po->removeSelectedShapes();
   }
 }
 
 void ProjectionSurface::comparePeaks(const QRect &rect) {
   // Find the selected peak across all of the peak overlays.
-  // If more than one peak was found in the selection area just
-  // take the first peak.
-  PeakMarker2D *marker = nullptr;
-  Mantid::Geometry::IPeak *peak = nullptr;
   QPointF origin;
-  foreach (PeakOverlay *po, m_peakShapes) {
+  std::vector<Mantid::Geometry::IPeak *> peaks;
+  for (auto *po : m_peakShapes) {
     po->selectIn(rect);
     const auto markers = po->getSelectedPeakMarkers();
-    if (markers.length() > 0) {
-      marker = markers.first();
-      origin = marker->origin();
-      peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-      break;
+
+    // make the assumption that the first peak found in the recticle is the one
+    // we wanted.
+    if (markers.length() > 0 && origin.isNull()) {
+      origin = markers.first()->origin();
+    }
+
+    for (const auto &marker : markers) {
+      // only collect peaks in the same detector & with the same origin
+      if (marker->origin() == origin) {
+        auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
+        peaks.push_back(peak);
+      }
     }
   }
 
-  if (!m_selectedPeaks.first) {
+  if (m_selectedPeaks.first.empty()) {
     // No peaks have been selected yet
-    m_selectedPeaks.first = peak;
+    m_selectedPeaks.first = peaks;
     m_selectedMarkers.first = origin;
-  } else if (!m_selectedPeaks.second) {
+  } else if (m_selectedPeaks.second.empty()) {
     // Two peaks have now been selected
-    m_selectedPeaks.second = peak;
+    m_selectedPeaks.second = peaks;
     m_selectedMarkers.second = origin;
-  } else if (m_selectedPeaks.first && m_selectedPeaks.second) {
+  } else if (!m_selectedPeaks.first.empty() &&
+             !m_selectedPeaks.second.empty()) {
     // Two peaks have already been selected. Clear the pair and store
     // the new peak as the first entry
-    m_selectedPeaks.first = peak;
+    m_selectedPeaks.first = peaks;
     m_selectedMarkers.first = origin;
-    m_selectedPeaks.second = nullptr;
+    m_selectedPeaks.second.clear();
     m_selectedMarkers.second = QPointF();
   }
 
   // Only emit the signal to update when we have two peaks
-  if (m_selectedPeaks.first && m_selectedPeaks.second) {
+  if (!m_selectedPeaks.first.empty() && !m_selectedPeaks.second.empty()) {
     emit comparePeaks(m_selectedPeaks);
   }
 }
@@ -795,7 +872,7 @@ void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
   foreach (PeakOverlay *po, m_peakShapes) {
-    names << QString::fromStdString(po->getPeaksWorkspace()->name());
+    names << QString::fromStdString(po->getPeaksWorkspace()->getName());
   }
   return names;
 }

@@ -3,12 +3,15 @@
 
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
+#include <limits>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -24,8 +27,7 @@ public:
     this->inputSpace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nTestHist,
                                                                      102, true);
-    this->inputSpace->instrumentParameters().addBool(
-        inputSpace->getDetector(1).get(), "masked", true);
+    inputSpace->mutableSpectrumInfo().setMasked(1, true);
 
     inputSpace->mutableE(5)[38] = 0.0;
   }
@@ -38,8 +40,10 @@ public:
   }
 
   void testExecWithLimits() {
-    if (!alg.isInitialized())
+    if (!alg.isInitialized()) {
       alg.initialize();
+      alg.setRethrows(true);
+    }
 
     // Set the properties
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputSpace));
@@ -184,7 +188,7 @@ public:
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;
-    EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, numBins, numEvents);
     AnalysisDataService::Instance().addOrReplace(inName, input);
 
@@ -219,7 +223,7 @@ public:
   void testRebinnedOutputSum() {
     AnalysisDataService::Instance().clear();
     RebinnedOutput_sptr ws =
-        WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = "rebinTest";
     std::string outName = "rebin_sum";
 
@@ -235,6 +239,7 @@ public:
     alg3.setPropertyValue("InputWorkspace", inName);
     alg3.setPropertyValue("OutputWorkspace", outName);
     alg3.setProperty("IncludeMonitors", false);
+    alg3.setProperty("RemoveSpecialValues", true);
     alg3.execute();
     TS_ASSERT(alg3.isExecuted());
 
@@ -246,12 +251,12 @@ public:
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(output->blocksize(), 6);
     // Row with full acceptance
-    TS_ASSERT_EQUALS(output->mutableY(0)[1], 1.);
-    TS_ASSERT_DELTA(output->mutableE(0)[1], 0.40824829046386296, 1.e-5);
+    TS_ASSERT_EQUALS(output->y(0)[1], 1.);
+    TS_ASSERT_DELTA(output->e(0)[1], 0.40824829046386296, 1.e-5);
     TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
     // Row with limited, but non-zero acceptance, shouldn't have nans!
-    TS_ASSERT_DELTA(output->mutableY(0)[5], 0.66666, 1.e-5);
-    TS_ASSERT_DELTA(output->mutableE(0)[5], 0.47140452079103173, 1.e-5);
+    TS_ASSERT_DELTA(output->y(0)[5], 0.66666, 1.e-5);
+    TS_ASSERT_DELTA(output->e(0)[5], 0.47140452079103173, 1.e-5);
     TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
 
     TS_ASSERT(output->run().hasProperty("NumAllSpectra"))
@@ -345,7 +350,7 @@ public:
     int nHist = 4;
 
     MatrixWorkspace_sptr tws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins);
     std::string inName = "rebinTest";
     std::string outName = "sumWS";
 
@@ -422,6 +427,80 @@ public:
     AnalysisDataService::Instance().remove(outName);
   }
 
+  void testRemoveSpecialValuesOn() {
+    constexpr size_t numOfHistos = 2;
+    auto inWs =
+        WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
+    auto &yVals = inWs->mutableY(1);
+
+    yVals[0] = std::numeric_limits<double>::infinity();
+    yVals[1] = NAN;
+
+    Mantid::Algorithms::SumSpectra sumSpectraAlg;
+    sumSpectraAlg.initialize();
+    sumSpectraAlg.setRethrows(true);
+
+    sumSpectraAlg.setProperty("InputWorkspace", inWs);
+    const std::string outWsName = "testSpecialVals";
+    sumSpectraAlg.setPropertyValue("OutputWorkspace", outWsName);
+    sumSpectraAlg.setProperty("RemoveSpecialValues", true);
+
+    TS_ASSERT_THROWS_NOTHING(sumSpectraAlg.execute());
+    TS_ASSERT(sumSpectraAlg.isExecuted());
+
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieve(outWsName));
+    Workspace2D_const_sptr output2D =
+        boost::dynamic_pointer_cast<const Workspace2D>(output);
+
+    auto outYVals = output2D->y(0);
+    // We expect one less because of inf and NaN
+    TS_ASSERT_EQUALS(outYVals[0], 2.);
+    TS_ASSERT_EQUALS(outYVals[1], 2.);
+    // Should get the correct amount now
+    TS_ASSERT_EQUALS(outYVals[2], 4.);
+
+    AnalysisDataService::Instance().remove(outWsName);
+  }
+
+  void testRemoveSpecialValuesOff() {
+    constexpr size_t numOfHistos = 2;
+    auto inWs =
+        WorkspaceCreationHelper::create2DWorkspace123(numOfHistos, 3, true);
+    auto &yVals = inWs->mutableY(1);
+
+    yVals[0] = std::numeric_limits<double>::infinity();
+    yVals[1] = NAN;
+
+    Mantid::Algorithms::SumSpectra sumSpectraAlg;
+    sumSpectraAlg.initialize();
+    sumSpectraAlg.setRethrows(true);
+
+    sumSpectraAlg.setProperty("InputWorkspace", inWs);
+    const std::string outWsName = "testSpecialVals";
+    sumSpectraAlg.setPropertyValue("OutputWorkspace", outWsName);
+    sumSpectraAlg.setProperty("RemoveSpecialValues", false);
+
+    TS_ASSERT_THROWS_NOTHING(sumSpectraAlg.execute());
+    TS_ASSERT(sumSpectraAlg.isExecuted());
+
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieve(outWsName));
+    Workspace2D_const_sptr output2D =
+        boost::dynamic_pointer_cast<const Workspace2D>(output);
+
+    auto outYVals = output2D->y(0);
+    // We expect a NaN and an Inf to propagate here
+    TS_ASSERT_EQUALS(std::isnormal(outYVals[0]), false);
+    TS_ASSERT_EQUALS(std::isnormal(outYVals[1]), false);
+    // Should get the correct amount now
+    TS_ASSERT_EQUALS(outYVals[2], 4.);
+
+    AnalysisDataService::Instance().remove(outWsName);
+  }
+
 private:
   int nTestHist;
   Mantid::Algorithms::SumSpectra alg; // Test with range limits
@@ -441,9 +520,9 @@ public:
   }
 
   SumSpectraTestPerformance() {
-    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(40000, 10000);
+    input = WorkspaceCreationHelper::create2DWorkspaceBinned(40000, 10000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(20000, 1000, 2000);
+        WorkspaceCreationHelper::createEventWorkspace(20000, 1000, 2000);
   }
 
   void testExec2D() {

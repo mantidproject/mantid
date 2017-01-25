@@ -84,7 +84,7 @@ namespace GraphOptions
   enum ScaleType {Linear, Log10};
 
   enum Axis{Left, Right, Bottom, Top};
-  
+
   enum CurveType {
   Line,
   Scatter,
@@ -194,13 +194,13 @@ public:
 
 };
 
-namespace MantidWidgets
+namespace API
 {
 
 class MWRunFiles : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 %End
 public:
 void setLabelMinWidth(const int);
@@ -1356,6 +1356,7 @@ MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QStri
 
 
 private:
+  WidgetFactory(const MantidQt::Factory::WidgetFactory&);
   WidgetFactory();
 %Docstring
 WidgetFactory::WidgetFactory()

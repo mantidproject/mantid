@@ -32,7 +32,8 @@ std::string MetadataJsonManager::getSerializedJson() {
  * Read in the serialized JSON data and opulate the JSON container
  * @param serializedJson The serialized JSON string.
  */
-void MetadataJsonManager::readInSerializedJson(std::string serializedJson) {
+void MetadataJsonManager::readInSerializedJson(
+    const std::string &serializedJson) {
   Json::Reader reader;
   metadataContainer.clear();
 
@@ -106,7 +107,7 @@ double MetadataJsonManager::getMinValue() { return minValue; }
  * Set the instrument.
  * @param instrument The instrument associated with the workspace.
  */
-void MetadataJsonManager::setInstrument(std::string instrument) {
+void MetadataJsonManager::setInstrument(const std::string &instrument) {
   this->instrument = instrument;
 }
 

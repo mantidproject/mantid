@@ -7,10 +7,12 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  *
@@ -263,17 +265,9 @@ void AnvredCorrection::execEvent() {
 
   const int64_t numHists =
       static_cast<int64_t>(m_inputWS->getNumberHistograms());
-
-  const std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
-  // Create a new outputworkspace with not much in it
-  auto correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
-                                               1));
-
+  std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
+  auto correctionFactors = create<EventWorkspace>(*m_inputWS);
   correctionFactors->sortAll(TOF_SORT, nullptr);
-  // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(
-      m_inputWS, correctionFactors, true);
   bool inPlace = (this->getPropertyValue("InputWorkspace") ==
                   this->getPropertyValue("OutputWorkspace"));
   if (inPlace)
@@ -351,8 +345,6 @@ void AnvredCorrection::execEvent() {
 
     correctionFactors->getSpectrum(i) += events;
 
-    auto &dets = eventW->getSpectrum(i).getDetectorIDs();
-    correctionFactors->getSpectrum(i).addDetectorIDs(dets);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getSpectrum(i).clear();
@@ -369,8 +361,7 @@ void AnvredCorrection::execEvent() {
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
+  setProperty("OutputWorkspace", std::move(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
   this->cleanup();

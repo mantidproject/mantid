@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -402,7 +403,7 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   * @param ws :: The workspace
   */
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
-  QString workspaceName(QString::fromStdString(ws->name()));
+  QString workspaceName(QString::fromStdString(ws->getName()));
 
   if ((workspaceName.contains("_Raw")) ||
       (workspaceName.contains("MuonAnalysis")))
@@ -582,7 +583,21 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
  * @param sequential :: [input] Whether fit is sequential or not
  */
 void MuonFitPropertyBrowser::continueAfterChecks(bool sequential) {
-  emit functionUpdateAndFitRequested(sequential);
+	emit functionUpdateAndFitRequested(sequential);
+}
+
+/**
+ * Returns whether or not a guess is plotted
+ * @returns :: True if a plot guess is plotted, false if not.
+ */
+bool MuonFitPropertyBrowser::hasGuess() const {
+  auto *handler = getHandler();
+  if (handler) {
+    const bool hasPlot = handler->hasPlot(); // don't allow caller to modify
+    return hasPlot;
+  } else {
+    return false;
+  }
 }
 
 } // MantidQt

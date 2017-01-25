@@ -3,6 +3,7 @@
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"
@@ -161,8 +162,9 @@ void Q1D2::exec() {
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
     // const size_t wavStart = waveLengthCutOff(i);
-    const size_t wavStart = helper.waveLengthCutOff(
-        m_dataWS, getProperty("RadiusCut"), getProperty("WaveCut"), i);
+    const size_t wavStart = helper.waveLengthCutOff(m_dataWS, spectrumInfo,
+                                                    getProperty("RadiusCut"),
+                                                    getProperty("WaveCut"), i);
     if (wavStart >= m_dataWS->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;
@@ -382,11 +384,17 @@ void Q1D2::calculateNormalization(
 void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
                        const size_t wsIndex, double &weight,
                        double &error) const {
-  const V3D samplePos = m_dataWS->getInstrument()->getSample()->getPos();
+  const auto &detectorInfo = m_dataWS->detectorInfo();
+  const V3D samplePos = detectorInfo.samplePosition();
 
-  if (m_doSolidAngle)
-    weight = m_dataWS->getDetector(wsIndex)->solidAngle(samplePos);
-  else
+  if (m_doSolidAngle) {
+    weight = 0.0;
+    for (const auto detID : m_dataWS->getSpectrum(wsIndex).getDetectorIDs()) {
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index))
+        weight += detectorInfo.detector(index).solidAngle(samplePos);
+    }
+  } else
     weight = 1.0;
 
   if (weight < 1e-200) {

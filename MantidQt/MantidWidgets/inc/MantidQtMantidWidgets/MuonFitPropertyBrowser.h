@@ -80,6 +80,12 @@ public:
   void setMultiFittingMode(bool enabled) override;
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
+  /// Remove a plotted guess
+  void doRemoveGuess() override { emit removeGuess(); }
+  /// Plot a guess function
+  void doPlotGuess() override { emit plotGuess(); }
+  /// Whether a guess is plotted or not
+  bool hasGuess() const override;
 
 public slots:
   /// Perform the fit algorithm

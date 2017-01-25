@@ -227,7 +227,7 @@ void PDDetermineCharacterizations::getInformationFromTable(
             columnNames.end()) {
           g_log.warning() << "Failed to find container name \"" << canName
                           << "\" in characterizations table \""
-                          << m_characterizations->name() << "\"\n";
+                          << m_characterizations->getName() << "\"\n";
         } else {
           const auto canRuns =
               m_characterizations->getRef<std::string>(canName, i);

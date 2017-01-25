@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid {
@@ -46,7 +47,7 @@ private:
   void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
                  DataObjects::OffsetsWorkspace_sptr &offsetsWS, double l1,
                  double beamlineNorm, Kernel::V3D &beamline,
-                 Kernel::V3D &samplePos, detid2det_map &allDetectors);
+                 Kernel::V3D &samplePos, const API::DetectorInfo &detectorInfo);
 };
 
 } // namespace Algorithms
