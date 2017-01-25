@@ -310,7 +310,8 @@ public:
   void testNestedUnary() {
     Expression expression;
     TS_ASSERT_THROWS_NOTHING(expression.parse("- - -1"));
-    TS_ASSERT_EQUALS(expression.str(), "-( -( -1))"); // this is not the same as input
+    TS_ASSERT_EQUALS(expression.str(),
+                     "-( -( -1))"); // this is not the same as input
     TS_ASSERT_EQUALS(expression.size(), 1);
     TS_ASSERT_EQUALS(expression.name(), "-");
     TS_ASSERT_EQUALS(expression[0].name(), "-");
@@ -327,8 +328,10 @@ public:
     TS_ASSERT_EQUALS(expression.str(), "(((a+b+sin(x))))");
     TS_ASSERT_EQUALS(expression.bracketsRemoved().str(), "a+b+sin(x)");
     TS_ASSERT_EQUALS(expression.bracketsRemoved().name(), "+");
-    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().str(), "a+b+sin(x)");
-    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().name(), "+");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().str(),
+                     "a+b+sin(x)");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().name(),
+                     "+");
   }
 
   void testBrackets1() {
@@ -472,9 +475,10 @@ public:
       expression.parse("x+sinsinsinsinsin(y-3*1+2+3+4+5+6+7+0");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()), "Unmatched bracket "
-                                              "at\n\n...nsinsinsin(y-3*1+2+3+4+"
-                                              "5+...\n             ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()),
+                       "Unmatched bracket "
+                       "at\n\n...nsinsinsin(y-3*1+2+3+4+"
+                       "5+...\n             ^\n");
     }
   }
 
@@ -518,9 +522,10 @@ public:
       expression.parse("x+y+ + + +");
       TS_FAIL("Expected an exception.");
     } catch (Expression::ParsingError &error) {
-      TS_ASSERT_EQUALS(std::string(error.what()), "A binary operator isn't "
-                                              "followed by a value at\n\nx+y+ "
-                                              "+ + +\n         ^\n");
+      TS_ASSERT_EQUALS(std::string(error.what()),
+                       "A binary operator isn't "
+                       "followed by a value at\n\nx+y+ "
+                       "+ + +\n         ^\n");
     }
   }
 
