@@ -1,10 +1,10 @@
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidQtAPI/HelpWindow.h"
@@ -154,7 +154,7 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  * @param parent Parent window (most likely the Mantid main app window).
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
+    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIWidget(nullptr),
       m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
       m_currentReconTool("TomoPy"), m_imgPath(""), m_logMsgs(),
       m_systemSettings(), m_settings(),
@@ -177,8 +177,8 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
   // this is a Qt widget, let Qt manage the pointer
-  m_tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
-  m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
+  m_tabROIWidget = new TomographyROIViewQtWidget(m_ui.tabMain);
+  m_ui.tabMain->addTab(m_tabROIWidget, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
   m_uiTabFilters.setupUi(tabFiltersW);
@@ -208,6 +208,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   doSetupSectionSetup();
   doSetupSectionRun();
   doSetupSectionFilters();
+  doSetupSectionRoi();
 
   // extra / experimental tabs:
   doSetupSectionVisualize();
@@ -221,6 +222,22 @@ void TomographyIfaceViewQtGUI::initLayout() {
   // it will know what compute resources and tools we have available:
   // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(ITomographyIfacePresenter::SetupResourcesAndTools);
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionRoi() {
+  // connect the auto CoR button to run an external python process
+  connect(m_tabROIWidget,
+          SIGNAL(findCORClicked(std::string, std::vector<std::string>)), this,
+          SLOT(runExternalProcess(std::string, std::vector<std::string>)));
+  connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIWidget,
+          SLOT(readCoRFromProcessOutput(QString)));
+}
+
+void TomographyIfaceViewQtGUI::runExternalProcess(
+    const std::string &exec, const std::vector<std::string> &args) {
+  m_extExec = exec;
+  m_extArgs = args;
+  m_presenter->notify(ITomographyIfacePresenter::RunExternalProcess);
 }
 
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
@@ -1257,15 +1274,7 @@ std::string TomographyIfaceViewQtGUI::getPassword() const {
 }
 
 void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
-  bool enable = 0 != status;
-  // Alternative behavior, whereby disabling would also imply clearing:
-  // TODOVIEW: not totally clear at the moment what users will prefer
-  // if (!enable) {
-  //   m_pathsConfig.updatePathOpenBeam("");
-  // } else {
-  //   m_uiTabSetup.lineEdit_path_flats->setText(
-  //       QString::fromStdString(m_pathsConfig));
-  // }
+  bool enable(0 != status);
 
   // grab new value and enable/disable related widgets
   m_pathsConfig.m_pathOpenBeamEnabled = enable;
@@ -1275,15 +1284,8 @@ void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
 }
 
 void TomographyIfaceViewQtGUI::darksPathCheckStatusChanged(int status) {
-  bool enable = 0 != status;
-  // Alternative behavior, whereby disabling would also imply clearing:
-  // TODOVIEW: not totally clear at the moment what users will prefer
-  // if (!enable) {
-  //   m_pathsConfig.updatePathDarks("");
-  // } else {
-  //   m_uiTabSetup.lineEdit_path_darks->setText(
-  //       QString::fromStdString(m_pathsConfig));
-  // }
+  bool enable(0 != status);
+
   m_pathsConfig.m_pathDarkEnabled = enable;
   m_uiTabSetup.lineEdit_path_darks->setEnabled(enable);
   m_uiTabSetup.pushButton_darks_dir->setEnabled(enable);
@@ -2034,6 +2036,10 @@ void TomographyIfaceViewQtGUI::closeEvent(QCloseEvent *event) {
 void TomographyIfaceViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Tomographic_Reconstruction"));
+}
+
+void TomographyIfaceViewQtGUI::emitExternalProcessFinished(const QString &str) {
+  emit externalProcessFinished(str);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

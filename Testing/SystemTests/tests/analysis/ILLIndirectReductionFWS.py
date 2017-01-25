@@ -40,7 +40,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         self._run_ifws()
 
-        #self._run_efws()
+        self._run_efws()
 
         self._run_sum_interpolate()
 

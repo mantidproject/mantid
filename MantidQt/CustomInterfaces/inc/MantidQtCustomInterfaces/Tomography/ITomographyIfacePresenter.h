@@ -44,12 +44,13 @@ public:
     TomoPathsChanged, ///< user selects tomography data paths
     TomoPathsEditedByUser, ///< user edits manually paths that may modify other
     /// paths
-    LogInRequested,        ///< user hits 'log in' or similar
-    LogOutRequested,       ///< user hits 'log out' or similar
-    SetupReconTool,        ///< To start the setup (open dialog, etc.)
-    RunReconstruct,        ///< user hits 'reconstruct' or similar
-    RefreshJobs,           ///< get updated jobs info in the table/tree
-    CancelJobFromTable,    ///< cancel one job from the list
+    LogInRequested,     ///< user hits 'log in' or similar
+    LogOutRequested,    ///< user hits 'log out' or similar
+    SetupReconTool,     ///< To start the setup (open dialog, etc.)
+    RunReconstruct,     ///< user hits 'reconstruct' or similar
+    RunExternalProcess, /// M run external process using the cached parameters
+    RefreshJobs,        ///< get updated jobs info in the table/tree
+    CancelJobFromTable, ///< cancel one job from the list
     VisualizeJobFromTable, ///< open visualization window for one job
     ViewImg,               ///< user wants to view an image (2D)
     AggregateEnergyBands,  ///< run aggregate bands (in the background)

@@ -72,6 +72,7 @@ protected:
   void processToolChanged();
   void processTomoPathsChanged();
   void processTomoPathsEditedByUser();
+  void processRunExternalProcess();
   void processLogin();
   void processLogout();
   void processSetupReconTool();
@@ -104,18 +105,28 @@ signals:
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
-  void readWorkerStdOut(const QString &s);
-  void readWorkerStdErr(const QString &s);
+  void readWorkerStdOut(const QString &workerString);
+  void readWorkerStdErr(const QString &workerString);
   void addProcessToJobList();
   void reconProcessFailedToStart();
   void workerFinished(const qint64 pid, const int exitCode);
+  void emitExternalProcessOutput(const qint64 pid, const int exitCode);
 
 private:
+  /// Update the model's filter, COR and ROI/Area of norm settings
+  /// and build the runnable and arguments
+  void prepareSubmissionArguments(const bool local, std::string &runnable,
+                                  std::vector<std::string> &args,
+                                  std::string &allOpts);
   /// Asks the user for permission to cancel the running reconstruction
   bool userConfirmationToCancelRecon();
   void setupAndRunLocalReconstruction(const std::string &runnable,
                                       const std::vector<std::string> &args,
                                       const std::string &allOpts);
+
+  void setupAndRunLocalExternalProcess(const std::string &runnable,
+                                       const std::vector<std::string> &args,
+                                       const std::string &allOpts);
   /// creates the correct dialog pointer and sets it to the member variable
   void createConfigDialogUsingToolName(const std::string &toolName);
 
@@ -158,6 +169,8 @@ private:
   QTimer *m_keepAliveTimer;
 
   std::unique_ptr<TomographyThread> m_workerThread;
+  QString m_workerOutputCache;
+  QString m_workerErrorCache;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 

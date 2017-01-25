@@ -3176,6 +3176,8 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
   return table;
 }
 
+std::vector<std::string> Table::getWorkspaceNames() { return {}; }
+
 std::string Table::saveTableMetadata() {
   MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("header");
@@ -3253,6 +3255,25 @@ void Table::recordSelection() {
     setSelectedCol(-1);
   }
 }
+
+/**
+ * Set the text alignment of the given cell
+ * @param row :: [input] Row of the cell
+ * @param col :: [input] Column of the cell
+ * @param alignment :: [input] Alignment flags to give the cell
+ */
+void Table::setTextAlignment(int row, int col,
+                             QFlags<Qt::AlignmentFlag> alignment) {
+  auto *cell = d_table->item(row, col);
+  if (cell) {
+    cell->setTextAlignment(alignment);
+  }
+}
+
+/**
+ * Resizes column widths to their contents
+ */
+void Table::resizeColumnsToContents() { d_table->resizeColumnsToContents(); }
 
 /*****************************************************************************
  *
