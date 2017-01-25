@@ -1,13 +1,12 @@
 #include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
-#include "MantidKernel/VectorHelper.h"
 
 /*  Following A.J.Schultz's anvred, scaling the vanadium spectra:
  */
@@ -63,6 +62,8 @@ void NormaliseVanadium::exec() {
   const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
   double L1 = pos.norm();
 
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
@@ -79,24 +80,13 @@ void NormaliseVanadium::exec() {
     const auto &Yin = inSpec.y();
     const auto &Ein = inSpec.e();
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = m_inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+    // If no detector is found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i))
       continue;
 
     // This is the scattered beam direction
     Instrument_const_sptr inst = m_inputWS->getInstrument();
-    V3D dir = det->getPos() - samplePos;
+    V3D dir = spectrumInfo.position(i) - samplePos;
     double L2 = dir.norm();
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
