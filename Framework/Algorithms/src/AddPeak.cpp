@@ -48,7 +48,6 @@ void AddPeak::exec() {
   const double count = getProperty("BinCount");
 
   const DetectorInfo &detectorInfo = runWS->detectorInfo();
-  const V3D samplePosition = detectorInfo.samplePosition();
   const size_t detectorIndex = detectorInfo.indexOf(detID);
 
   double theta2 = detectorInfo.twoTheta(detectorIndex);
