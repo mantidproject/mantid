@@ -40,7 +40,7 @@ fi
 
 # BUILD_PACKAGE can be provided as a job parameter on the pull requests
 # except RHEL7 as we always need to it to do the system tests
-if [[ ${JOB_NAME} == *pull_requests* ]]; then
+if [[ ${JOB_NAME} == *pull_requests* ]] && [[ -n ${BUILD_PACKAGE} ]]; then
   BUILDPKG=${BUILD_PACKAGE}
 fi
 
