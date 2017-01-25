@@ -1145,7 +1145,7 @@ class CWSCDReductionControl(object):
         :param normalization: normalization set up (by time or ...)
         :param mask_ws_name: mask workspace name or None
         :param scale_factor: integrated peaks' scaling factor
-        :return:
+        :return: dictionary of Pts.
         """
         # check
         assert isinstance(exp, int)
@@ -1154,7 +1154,6 @@ class CWSCDReductionControl(object):
         assert len(peak_centre) == 3
         assert isinstance(merge_peaks, bool)
 
-        # VZ-FUTURE - combine the download and naming for common use
         # get spice file
         spice_table_name = get_spice_table_name(exp, scan)
         if AnalysisDataService.doesExist(spice_table_name) is False:
@@ -1224,6 +1223,37 @@ class CWSCDReductionControl(object):
         self._myPeakInfoDict[(exp, scan)].set_pt_intensity(pt_dict)
 
         return True, pt_dict
+
+    def gauss_correction_peak_intensity(self, pt_dict):
+        """
+        fit the peak with Gaussian, get rid of
+        :param pt_dict:
+        :return:
+        """
+        import numpy
+        import scipy
+        from scipy.optimize import curve_fit
+
+        def gaussian_linear_background(x, *p):
+            # gaussian + linear background
+            A, mu, sigma, b = p
+            return A * numpy.exp(-(x - mu) ** 2 / (2. * sigma ** 2)) + b
+
+        # TODO/NOW/ISSUE/ - Implement & Test!
+        assert isinstance(pt_dict, dict), 'Input must be a dictionary but not {0}'.format(type(pt_dict))
+
+        # TODO/ISSUE/NOW - Estimate p0 by 'observatoin
+        p0 = [4.5, 10., 5., 1.5]
+
+        vec_x = numpy.array(sorted(pt_dict.keys())) * 1.
+
+        coeff, var_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y, p0=p0)
+
+
+
+
+
+        # convert to vector
 
     @staticmethod
     def load_scan_survey_file(csv_file_name):
