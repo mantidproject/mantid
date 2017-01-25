@@ -309,6 +309,8 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
           SLOT(vectorDoubleChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(parameterChanged(QtProperty *)));
+  connect(m_vectorSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(vectorSizeChanged(QtProperty *)));
 
   QVBoxLayout *layout = new QVBoxLayout(w);
   QGridLayout *buttonsLayout = new QGridLayout();
