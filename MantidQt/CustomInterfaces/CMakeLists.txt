@@ -88,14 +88,19 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableCreator.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
-  src/Muon/MuonSequentialFitDialog.cpp
-  src/Reflectometry/MeasurementItem.cpp
+	src/Muon/MuonSequentialFitDialog.cpp
+	src/Reflectometry/MeasurementItem.cpp
+	src/Reflectometry/QtReflEventTabView.cpp
+	src/Reflectometry/QtReflEventView.cpp
 	src/Reflectometry/QtReflMainWindowView.cpp
 	src/Reflectometry/QtReflRunsTabView.cpp
 	src/Reflectometry/QtReflSaveTabView.cpp
 	src/Reflectometry/QtReflSettingsTabView.cpp
 	src/Reflectometry/QtReflSettingsView.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
+	src/Reflectometry/ReflDataProcessorPresenter.cpp
+	src/Reflectometry/ReflEventPresenter.cpp
+	src/Reflectometry/ReflEventTabPresenter.cpp
 	src/Reflectometry/ReflGenericDataProcessorPresenterFactory.cpp
 	src/Reflectometry/ReflLegacyTransferStrategy.cpp
 	src/Reflectometry/ReflMainWindowPresenter.cpp
@@ -252,7 +257,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
-  inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflEventPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflEventTabPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflEventView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
@@ -266,6 +274,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflEventPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflEventTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h
@@ -416,6 +427,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QtReflEventTabView.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QtReflEventView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflSaveTabView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h
@@ -495,6 +508,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/ReflEventTabWidget.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/ReflEventWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflSaveTabWidget.ui
@@ -541,7 +556,9 @@ set ( TEST_FILES
 	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
 	MuonAnalysisResultTableCreatorTest.h
-  ReflLegacyTransferStrategyTest.h
+	ReflEventPresenterTest.h
+	ReflEventTabPresenterTest.h
+	ReflLegacyTransferStrategyTest.h
 	ReflMainWindowPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h

@@ -1,15 +1,17 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLEVENTTABPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_IREFLEVENTTABPRESENTER_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
-#include <memory>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+class IReflMainWindowPresenter;
+
+/** @class IReflEventTabPresenter
+
+IReflEventTabPresenter is an interface which defines the functions that need
+to be implemented by a concrete 'Event' tab presenter
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,16 +34,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory {
+class IReflEventTabPresenter {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
-
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  std::unique_ptr<ReflDataProcessorPresenter> create();
+  virtual ~IReflEventTabPresenter(){};
+  /// Time-slicing
+  virtual std::string getTimeSlicingOptions(int group) const = 0;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /* MANTID_CUSTOMINTERFACES_IREFLEVENTTABPRESENTER_H */

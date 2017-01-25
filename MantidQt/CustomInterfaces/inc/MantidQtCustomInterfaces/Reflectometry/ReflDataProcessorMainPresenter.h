@@ -1,15 +1,11 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-
-#include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
-#include <memory>
+#ifndef MANTIDQTMANTIDWIDGETS_REFLDATAPROCESSORMAINPRESENTER_H
+#define MANTIDQTMANTIDWIDGETS_REFLDATAPROCESSORMAINPRESENTER_H
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
+/** @class ReflDataProcessorMainPresenter
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+TODO: description
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,16 +28,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory {
+class ReflDataProcessorMainPresenter {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
+  virtual ~ReflDataProcessorMainPresenter(){};
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  std::unique_ptr<ReflDataProcessorPresenter> create();
+  /// Return true if event analysis has to be performed
+  virtual bool eventAnalysis() const = 0;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /* MANTIDQTMANTIDWIDGETS_REFLDATAPROCESSORMAINPRESENTER_H */

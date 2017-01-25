@@ -1,15 +1,19 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLEVENTVIEW_H
+#define MANTID_CUSTOMINTERFACES_IREFLEVENTVIEW_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
-#include <memory>
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+class IReflEventPresenter;
+
+/** @class IReflEventView
+
+IReflEventView is the base view class for the Reflectometry "Event Handling"
+tab. It contains no QT specific functionality as that should be handled by a
+subclass.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,16 +36,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory {
-public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  std::unique_ptr<ReflDataProcessorPresenter> create();
+class DLLExport IReflEventView {
+public:
+  /// Constructor
+  IReflEventView(){};
+  /// Destructor
+  virtual ~IReflEventView(){};
+  /// Returns the presenter managing this view
+  virtual IReflEventPresenter *getPresenter() const = 0;
+
+  virtual std::string getTimeSlices() const = 0;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /* MANTID_CUSTOMINTERFACES_IREFLEVENTVIEW_H */

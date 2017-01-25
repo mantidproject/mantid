@@ -1,15 +1,19 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTER_H
 
-#include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
-#include <memory>
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+// Forward decs
+class IReflEventView;
+
+/** @class ReflEventPresenter
+
+ReflEventPresenter is a presenter class for the widget 'Event' in the
+Reflectometry (Polref) Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,16 +36,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflEventPresenter
+    : public IReflEventPresenter {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
+  /// Constructor
+  ReflEventPresenter(IReflEventView *view);
+  /// Destructor
+  ~ReflEventPresenter() override;
 
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  std::unique_ptr<ReflDataProcessorPresenter> create();
+  /// Returns global options for time slicing
+  std::string getTimeSlicingOptions() const override;
+
+private:
+  /// The view we are managing
+  IReflEventView *m_view;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /* MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTER_H */
