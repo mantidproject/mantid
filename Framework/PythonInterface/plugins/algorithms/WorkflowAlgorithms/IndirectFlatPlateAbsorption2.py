@@ -274,7 +274,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
             else:
                 prog.report('Calculating container scaling')
-                prog.report('Calculating container scaling')
                 minus_alg.setProperty("LHSWorkspace", sample_wave_ws)
                 minus_alg.setProperty("RHSWorkspace", can1_wave_ws)
                 minus_alg.setProperty("OutputWorkspace", sample_wave_ws)
