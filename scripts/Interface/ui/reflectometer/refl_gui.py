@@ -1039,19 +1039,27 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
 
-                    _wq, _wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
-                                                                   thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
-                                                                   OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
-                                                                   ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                   MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
-                                                                   Version=1)
-
-                    wqBinned, wq, wlam = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
-                                                                       thetaIn=angle, OutputWorkspaceBinned=runno+'_IvsQ_binned_'+str(i+1),
-                                                                       OutputWorkspace=runno+'_IvsQ_'+str(i+1),
-                                                                       OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
-                                                                       ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                       MomentumTransferMin=Qmin, MomentumTransferMax=Qmax)
+                    alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+                    alg.initialize()
+                    alg.setProperty("InputWorkspace", ws[i])
+                    alg.setProperty("FirstTransmissionRun", group_trans_ws)
+                    if angle is not None:
+                        alg.setProperty("ThetaIn", angle)
+                    alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned_'+str(i+1))
+                    alg.setProperty("OutputWorkspace", runno+'_IvsQ_'+str(i+1))
+                    alg.setProperty("OutputWorkspaceWavelength", runno+'_IvsLam_'+str(i+1))
+                    alg.setProperty("ScaleFactor", factor)
+                    if Qstep is not None:
+                        alg.setProperty("MomentumTransferStep", Qstep)
+                    if Qmin is not None:
+                        alg.setProperty("MomentumTransferMin", Qmin)
+                    if Qmax is not None:
+                        alg.setProperty("MomentumTransferMax", Qmax)
+                    alg.execute()
+                    wqBinned = mtd[runno+'_IvsQ_binned_'+str(i+1)]
+                    wq = mtd[runno+'_IvsQ_'+str(i+1)]
+                    wlam = mtd[runno+'_IvsLam_'+str(i+1)]
+                    th = alg.getProperty("ThetaIn").value
 
                     wqGroupBinned.append(wqBinned)
                     wqGroup.append(wq)
@@ -1063,19 +1071,27 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                _wq, _wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
-                                                               thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
-                                                               OutputWorkspaceWavelength=runno+'_IvsLam',
-                                                               ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                               MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
-                                                               Version=1)
-
-                wqBinned, wq, wlam = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
-                                                                   thetaIn=angle, OutputWorkspaceBinned=runno+'_IvsQ_binned',
-                                                                   OutputWorkspace=runno+'_IvsQ',
-                                                                   OutputWorkspaceWavelength=runno+'_IvsLam',
-                                                                   ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                   MomentumTransferMin=Qmin, MomentumTransferMax=Qmax)
+                alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+                alg.initialize()
+                alg.setProperty("InputWorkspace", ws)
+                alg.setProperty("FirstTransmissionRun", transmission_ws)
+                if angle is not None:
+                    alg.setProperty("ThetaIn", angle)
+                alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned')
+                alg.setProperty("OutputWorkspace", runno+'_IvsQ')
+                alg.setProperty("OutputWorkspaceWavelength", runno+'_IvsLam')
+                alg.setProperty("ScaleFactor", factor)
+                if Qstep is not None:
+                    alg.setProperty("MomentumTransferStep", Qstep)
+                if Qmin is not None:
+                    alg.setProperty("MomentumTransferMin", Qmin)
+                if Qmax is not None:
+                    alg.setProperty("MomentumTransferMax", Qmax)
+                alg.execute()
+                wqBinned = mtd[runno+'_IvsQ_binned']
+                wq = mtd[runno+'_IvsQ']
+                wlam = mtd[runno+'_IvsLam']
+                th = alg.getProperty("ThetaIn").value
 
             cleanup()
         else:
