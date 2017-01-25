@@ -29,4 +29,4 @@ class ReflectometryQuickPointDetector(stresstesting.MantidStressTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '13460_IvsQ_binned','QuickReferenceResult.nxs'
+        return '13460_IvsQ','QuickReferenceResult.nxs'
