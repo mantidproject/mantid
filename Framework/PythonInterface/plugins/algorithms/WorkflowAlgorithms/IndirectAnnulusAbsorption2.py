@@ -396,7 +396,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
         if default and (has_beam is False):
             default = False
-            logger.error("Instrument has no default beam size; will use inputs")
+            logger.warning("Instrument has no default beam size; will use inputs")
 
         if default:
             self._beam_height = float(inst.getStringParameter('Workflow.beam-height')[0])

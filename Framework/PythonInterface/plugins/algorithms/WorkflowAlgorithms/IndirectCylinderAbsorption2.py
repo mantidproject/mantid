@@ -335,7 +335,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
         if default and (has_beam is False):
             default = False
-            logger.error("Instrument has no default beam size; will use inputs")
+            logger.warning("Instrument has no default beam size; will use inputs")
 
         if default:
             self._beam_height = float(inst.getStringParameter('Workflow.beam-height')[0])
@@ -349,8 +349,9 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         self._setup()
         issues = dict()
 
-        if self._sample_radius >= self._can_radius:
-            issues['CanRadius'] = 'Must be greater than SampleRadius'
+        if self._can_ws_name is not None:
+            if self._sample_radius >= self._can_radius:
+                issues['CanRadius'] = 'Must be greater than SampleRadius'
 
         if self._use_can_corrections and self._can_chemical_formula == '':
             issues['CanChemicalFormula'] = 'Must be set to use can corrections'
