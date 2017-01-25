@@ -119,7 +119,9 @@ void SampleTransmission::calculate() {
     // Convert values to binning params using the 'C' locale.
     std::ostringstream binning;
     binning.imbue(std::locale::classic());
-    binning << m_uiForm.spSingleLow->value() << ',' << m_uiForm.spSingleWidth->value() << ',' << m_uiForm.spSingleHigh->value();
+    binning << m_uiForm.spSingleLow->value() << ','
+            << m_uiForm.spSingleWidth->value() << ','
+            << m_uiForm.spSingleHigh->value();
     transCalcAlg->setProperty("WavelengthRange", binning.str());
     break;
   }
