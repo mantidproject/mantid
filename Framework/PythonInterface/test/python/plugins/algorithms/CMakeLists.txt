@@ -3,6 +3,8 @@
 ##
 
 set ( TEST_PY_FILES
+  AbinsBasicTest.py
+  AbinsAdvancedParametersTest.py
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py

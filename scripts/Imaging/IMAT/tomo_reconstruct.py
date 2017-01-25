@@ -54,10 +54,10 @@ import sys
 import os
 from os import path
 # So insert in the path the directory that contains this file
-sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
+sys.path.insert(0, os.path.split(path.dirname(__file__))[0])  # noqa
 
-from IMAT.tomorec import reconstruction_command as tomocmd
-import IMAT.tomorec.configs as tomocfg
+from tomorec import reconstruction_command as tomocmd
+import tomorec.configs as tomocfg
 
 
 def setup_cmd_options():
@@ -69,99 +69,192 @@ def setup_cmd_options():
 
     import argparse
 
-    parser = argparse.ArgumentParser(description='Run tomographic reconstruction via third party tools')
+    parser = argparse.ArgumentParser(
+        description='Run tomographic reconstruction via third party tools')
 
     grp_req = parser.add_argument_group('Mandatory/required options')
 
-    grp_req.add_argument("-i","--input-path", required=True, type=str, help="Input directory")
+    grp_req.add_argument(
+        "-i", "--input-path", required=True, type=str, help="Input directory")
 
-    grp_req.add_argument("-o","--output-path", required=True, type=str,
-                         help="Where to write the output slice images (reconstructred volume)")
+    grp_req.add_argument(
+        "-o",
+        "--output-path",
+        required=True,
+        type=str,
+        help="Where to write the output slice images (reconstructed volume)")
 
-    grp_req.add_argument("-c","--cor", required=True, type=float,
-                         help="Center of rotation (in pixels). rotation around y axis is assumed")
+    grp_req.add_argument(
+        "-c",
+        "--cor",
+        required=False,
+        type=float,
+        help="Provide a pre-calculated centre of rotation. If one is not provided it will be automatically calculated"
+    )
+
+    grp_req.add_argument(
+        "-f",
+        "--find-cor",
+        action='store_true',
+        required=False,
+        help="Find the center of rotation (in pixels). rotation around y axis is assumed"
+    )
 
     grp_recon = parser.add_argument_group('Reconstruction options')
 
-    grp_recon.add_argument("-t","--tool", required=False, type=str,
-                           help="Tomographic reconstruction tool to use")
+    grp_recon.add_argument(
+        "-t",
+        "--tool",
+        required=False,
+        type=str,
+        help="Tomographic reconstruction tool to use")
 
-    grp_recon.add_argument("-a","--algorithm", required=False, type=str,
-                           help="Reconstruction algorithm (tool dependent)")
+    grp_recon.add_argument(
+        "-a",
+        "--algorithm",
+        required=False,
+        type=str,
+        help="Reconstruction algorithm (tool dependent)")
 
-    grp_recon.add_argument("-n","--num-iter", required=False, type=int,
-                           help="Number of iterations (only valid for iterative methods "
-                           "(example: SIRT, ART, etc.).")
+    grp_recon.add_argument(
+        "-n",
+        "--num-iter",
+        required=False,
+        type=int,
+        help="Number of iterations (only valid for iterative methods "
+        "(example: SIRT, ART, etc.).")
 
-    grp_recon.add_argument("--max-angle", required=False, type=float,
-                           help="Maximum angle (of the last projection), assuming first angle=0, and "
-                           "uniform angle increment for every projection (note: this "
-                           "is overriden by the angles found in the input FITS headers)")
+    grp_recon.add_argument(
+        "--max-angle",
+        required=False,
+        type=float,
+        help="Maximum angle (of the last projection), assuming first angle=0, and "
+        "uniform angle increment for every projection (note: this "
+        "is overriden by the angles found in the input FITS headers)")
 
-    grp_pre = parser.add_argument_group('Pre-processing of input raw images/projections')
+    grp_pre = parser.add_argument_group(
+        'Pre-processing of input raw images/projections')
 
-    grp_pre.add_argument("--input-path-flat", required=False, default=None,
-                         type=str, help="Input directory for flat images")
+    grp_pre.add_argument(
+        "--input-path-flat",
+        required=False,
+        default=None,
+        type=str,
+        help="Input directory for flat images")
 
-    grp_pre.add_argument("--input-path-dark", required=False, default=None,
-                         type=str, help="Input directory for flat images")
+    grp_pre.add_argument(
+        "--input-path-dark",
+        required=False,
+        default=None,
+        type=str,
+        help="Input directory for flat images")
 
     img_formats = ['tiff', 'fits', 'tif', 'fit', 'png']
-    grp_pre.add_argument("--in-img-format", required=False, default='fits', type=str,
-                         help="Format/file extension expected for the input images. Supported: {0}".
-                         format(img_formats))
+    grp_pre.add_argument(
+        "--in-img-format",
+        required=False,
+        default='fits',
+        type=str,
+        help="Format/file extension expected for the input images. Supported: {0}".
+        format(img_formats))
 
-    grp_pre.add_argument("--out-img-format", required=False, default='tiff', type=str,
-                         help="Format/file extension expected for the input images. Supported: {0}".
-                         format(img_formats))
+    grp_pre.add_argument(
+        "--out-img-format",
+        required=False,
+        default='tiff',
+        type=str,
+        help="Format/file extension expected for the input images. Supported: {0}".
+        format(img_formats))
 
-    grp_pre.add_argument("--region-of-interest", required=False, type=str,
-                         help="Region of interest (crop original "
-                         "images to these coordinates, given as comma separated values: x1,y1,x2,y2. If not "
-                         "given, the whole images are used.")
+    grp_pre.add_argument(
+        "--region-of-interest",
+        required=False,
+        type=str,
+        help="Region of interest (crop original "
+        "images to these coordinates, given as comma separated values: x1,y1,x2,y2. If not "
+        "given, the whole images are used.")
 
-    grp_pre.add_argument("--air-region", required=False, type=str,
-                         help="Air region /region for normalization. "
-                         "If not provided, the normalization against beam intensity fluctuations in this "
-                         "region will not be performed")
+    grp_pre.add_argument(
+        "--air-region",
+        required=False,
+        type=str,
+        help="Air region /region for normalization. "
+        "If not provided, the normalization against beam intensity fluctuations in this "
+        "region will not be performed")
 
-    grp_pre.add_argument("--median-filter-size", type=int,
-                         required=False, help="Size/width of the median filter (pre-processing")
+    grp_pre.add_argument(
+        "--median-filter-size",
+        type=int,
+        required=False,
+        help="Size/width of the median filter (pre-processing")
 
-    grp_pre.add_argument("--remove-stripes", default='wf', required=False, type=str,
-                         help="Methods supported: 'wf' (Wavelet-Fourier)")
+    grp_pre.add_argument(
+        "--remove-stripes",
+        default='wf',
+        required=False,
+        type=str,
+        help="Methods supported: 'wf' (Wavelet-Fourier)")
 
-    grp_pre.add_argument("--rotation", required=False, type=int,
-                         help="Rotate images by 90 degrees a number of "
-                         "times. The rotation is clockwise unless a negative number is given which indicates "
-                         "rotation counterclocwise")
+    grp_pre.add_argument(
+        "--rotation",
+        required=False,
+        type=int,
+        help="Rotate images by 90 degrees a number of "
+        "times. The rotation is clockwise unless a negative number is given which indicates "
+        "rotation counterclocwise")
 
-    grp_pre.add_argument("--scale-down", required=False, type=int,
-                         help="Scale down factor, to reduce the size of "
-                         "the images for faster (lower-resolution) reconstruction. For example a factor of 2 "
-                         "reduces 1kx1k images to 512x512 images (combining blocks of 2x2 pixels into a single "
-                         "pixel. The output pixels are calculated as the average of the input pixel blocks.")
+    grp_pre.add_argument(
+        "--scale-down",
+        required=False,
+        type=int,
+        help="Scale down factor, to reduce the size of "
+        "the images for faster (lower-resolution) reconstruction. For example a factor of 2 "
+        "reduces 1kx1k images to 512x512 images (combining blocks of 2x2 pixels into a single "
+        "pixel. The output pixels are calculated as the average of the input pixel blocks."
+    )
 
-    grp_pre.add_argument("--mcp-corrections", default='yes', required=False, type=str,
-                         help="Perform corrections specific to images taken with the MCP detector")
+    grp_pre.add_argument(
+        "--mcp-corrections",
+        default='yes',
+        required=False,
+        type=str,
+        help="Perform corrections specific to images taken with the MCP detector"
+    )
 
-    grp_post = parser.add_argument_group('Post-processing of the reconstructed volume')
+    grp_post = parser.add_argument_group(
+        'Post-processing of the reconstructed volume')
 
-    grp_post.add_argument("--circular-mask", required=False, type=float, default=0.94,
-                          help="Radius of the circular mask to apply on the reconstructed volume. "
-                          "It is given in [0,1] relative to the size of the smaller dimension/edge "
-                          "of the slices. Empty or zero implies no masking.")
+    grp_post.add_argument(
+        "--circular-mask",
+        required=False,
+        type=float,
+        default=0.94,
+        help="Radius of the circular mask to apply on the reconstructed volume. "
+        "It is given in [0,1] relative to the size of the smaller dimension/edge "
+        "of the slices. Empty or zero implies no masking.")
 
-    grp_post.add_argument("--cut-off", required=False, type=float,
-                          help="Cut off level (percentage) for reconstructed "
-                          "volume. pixels below this percentage with respect to maximum intensity in the stack "
-                          "will be set to the minimum value.")
+    grp_post.add_argument(
+        "--cut-off",
+        required=False,
+        type=float,
+        help="Cut off level (percentage) for reconstructed "
+        "volume. pixels below this percentage with respect to maximum intensity in the stack "
+        "will be set to the minimum value.")
 
-    grp_post.add_argument("--out-median-filter", required=False, type=float,
-                          help="Apply median filter (2d) on reconstructed volume with the given window size.")
+    grp_post.add_argument(
+        "--out-median-filter",
+        required=False,
+        type=float,
+        help="Apply median filter (2d) on reconstructed volume with the given window size."
+    )
 
-    parser.add_argument("-v", "--verbose", action="count", default=1, help="Verbosity level. Default: 1. "
-                        "User zero to supress outputs.")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=1,
+        help="Verbosity level. Default: 1. "
+        "User zero to supress outputs.")
 
     return parser
 
@@ -209,14 +302,17 @@ def grab_preproc_options(args):
         pre_config.mcp_corrections = True
 
     if args.median_filter_size:
-        if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():
-            raise RuntimeError("The median filter size/width must be an integer")
+        if isinstance(args.median_filter_size,
+                      str) and not args.median_filter_size.isdigit():
+            raise RuntimeError(
+                "The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
     if 'wf' == args.remove_stripes:
         pre_config.stripe_removal_method = 'wavelet-fourier'
 
-    pre_config.cor = int(args.cor)
+    if args.cor:
+        pre_config.cor = int(args.cor)
 
     return pre_config
 
@@ -270,20 +366,17 @@ def main_tomo_rec():
     # distributions, as found for example on rhel6
 
     vers = sys.version_info
-    if vers < (2,7,0):
-        raise RuntimeError("Not running this test as it requires Python >= 2.7. Version found: {0}".
-                           format(vers))
+    if vers < (2, 7, 0):
+        raise RuntimeError(
+            "Not running this test as it requires Python >= 2.7. Version found: {0}".
+            format(vers))
 
     import inspect
 
-    import tomorec.io as tomoio
+    import IMAT.tomorec.io as tomoio
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()
-
-    # Save myself early. Save command this command line script and all packages/subpackages
-    tomoio.self_save_zipped_scripts(args.output_path,
-                                    os.path.abspath(inspect.getsourcefile(lambda:0)))
 
     # Grab and check pre-processing options + algorithm setup + post-processing options
     preproc_config = grab_preproc_options(args)
@@ -291,11 +384,28 @@ def main_tomo_rec():
     postproc_config = grab_postproc_options(args)
 
     cmd_line = " ".join(sys.argv)
-    cfg = tomocfg.ReconstructionConfig(preproc_config, alg_config, postproc_config)
+    cfg = tomocfg.ReconstructionConfig(preproc_config, alg_config,
+                                       postproc_config)
+
     # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
-    cmd.do_recon(cfg, cmd_line=cmd_line)
+    # start the whole execution timer
+    cmd.tomo_total_timer()
+
+    if (args.find_cor):
+        cmd.tomo_print(" >>> Finding COR <<<")
+        cmd.find_center(cfg)
+    else:
+        # Save myself early. Save command this command line script and all packages/subpackages
+        tomoio.self_save_zipped_scripts(
+            args.output_path,
+            os.path.abspath(inspect.getsourcefile(lambda: 0)))
+        cmd.tomo_print(" >>> Running reconstruction <<<")
+        cmd.do_recon(cfg, cmd_line=cmd_line)
+
+    # end the whole execution timer
+    cmd.tomo_total_timer()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main_tomo_rec()
