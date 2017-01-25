@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidKernel/System.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Crystal/StructureFactorCalculator.h>
@@ -25,7 +26,9 @@ public:
   PredictPeaks();
 
   /// Algorithm's name for identification
-  const std::string name() const override { return "PredictPeaks"; };
+  const std::string name() const override {
+    return "PredictPeaks";
+  };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Using a known crystal lattice and UB matrix, predict where single "
@@ -34,7 +37,9 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override {
+    return 1;
+  };
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -65,6 +70,9 @@ private:
 private:
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
+
+  /// Space group if specified
+  std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
 
   /// Run number of input workspace
   int m_runNumber;
