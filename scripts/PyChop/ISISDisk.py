@@ -194,11 +194,15 @@ class ISISDisk:
                 res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
             if len(ie_list) == 1:
                 res_list = res
-                res_el = res_el[ie_list]
-                chop_width = chop_width[ie_list]
-                mod_width = mod_width[ie_list]
             else:
                 res_list.append(res)
+        # Multiply by distances to get widths at detector position
+        chop_width = np.array(chop_width) * (self.samp_det + self.chop_samp + lastChopDist) / lastChopDist
+        mod_width = np.array(mod_width) * (self.chop_samp + self.samp_det) / lastChopDist
+        if len(ie_list) == 1:
+            chop_width = chop_width[ie_list]
+            mod_width = mod_width[ie_list]
+            res_el = res_el[ie_list]
         return Eis, res_list, res_el, percent, ie_list, chop_width, mod_width
 
     def getElasticResolution(self, Ei_in=None, frequency=None):
