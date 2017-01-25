@@ -331,9 +331,9 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         # Get beam size defaults
         inst = mtd[self._sample_ws_name].getInstrument()
         has_beam = inst.hasParameter('Workflow.beam-height')
-        default = self.getPropertyValue('DefaultBeamSize')
+        default = self.getProperty('DefaultBeamSize').value
 
-        if default and (has_beam is False):
+        if default and not has_beam:
             default = False
             logger.warning("Instrument has no default beam size; will use inputs")
 
