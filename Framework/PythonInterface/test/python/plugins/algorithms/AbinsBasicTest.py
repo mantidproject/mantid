@@ -72,9 +72,6 @@ class AbinsBasicTest(unittest.TestCase):
         self.assertRaises(RuntimeError, Abins, DFTprogram="CRYSTAL", PhononFile="MgO.wrong_out",
                           OutputWorkspace=self._workspace_name)
 
-        # two dots in filename
-        self.assertRaises(RuntimeError, Abins, PhononFile="Si2.sc.phonon", OutputWorkspace=self._workspace_name)
-
         # no name for workspace
         self.assertRaises(RuntimeError, Abins, PhononFile=self._si2 + ".phonon", Temperature=self._temperature)
 
