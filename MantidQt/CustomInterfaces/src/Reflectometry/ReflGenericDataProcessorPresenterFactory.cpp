@@ -9,7 +9,7 @@ using namespace MantidQt::MantidWidgets;
 /**
 * Creates a Reflectometry Data Processor Presenter
 */
-std::unique_ptr<GenericDataProcessorPresenter>
+std::unique_ptr<ReflDataProcessorPresenter>
 ReflGenericDataProcessorPresenterFactory::create() {
 
   // The whitelist, elements will appear in order in the table
@@ -109,7 +109,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // Value is property name of the post-processing algorithm
   std::map<std::string, std::string> postprocessMap = {{"dQ/Q", "Params"}};
 
-  return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+  return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor, postprocessMap,
       "LoadISISNexus");
 }

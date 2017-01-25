@@ -165,6 +165,7 @@ public slots:
   void setText(int row, int col, const QString &text);
   void setRandomValues();
   void setAscValues();
+  void setTextAlignment(int row, int col, QFlags<Qt::AlignmentFlag> alignment);
 
   virtual void cellEdited(int, int col);
   void moveCurrentCell();
@@ -196,6 +197,7 @@ public slots:
   void showAllColumns();
   void hideColumn(int col, bool = true);
   bool isColumnHidden(int col) { return d_table->isColumnHidden(col); };
+  void resizeColumnsToContents();
   //@}
 
   //! \name Sorting

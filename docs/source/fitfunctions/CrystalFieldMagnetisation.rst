@@ -46,7 +46,7 @@ The "data" here is generated from the function itself.
 
 The `x`-axis is given in Tesla, and the magnetisation (`y`-axis) is in bohr magnetons per magnetic ion (:math:`\mu_B`/ion).
 
-.. code:: ExampleCrystalFieldMagnetisation
+.. testcode:: ExampleCrystalFieldMagnetisation
 
     import numpy as np
     
@@ -80,9 +80,20 @@ The `x`-axis is given in Tesla, and the magnetisation (`y`-axis) is in bohr magn
 
 .. testcleanup:: ExampleCrystalFieldMagnetisation
 
-Output:
-
 .. testoutput:: ExampleCrystalFieldMagnetisation
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+        B20 =  0...
+        B22 =  0...
+        B40 = -0...
+        B42 = -0...
+        B44 = -0...
+    Cost function value = ...
+
+Output (the numbers you see on your machine may vary):
+
+.. code::
 
         B20 =  0.39541
         B22 =  0.030001

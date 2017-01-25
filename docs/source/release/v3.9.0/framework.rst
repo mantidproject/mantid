@@ -9,8 +9,7 @@ Changes
 -------
 
 - Mantid now supports automatic updates to the facilities.xml file in the same way that it does the instrument definitions.  This allows extensions and changes to the list of supported instruments without needing to install a new release of Mantid.
-  - This has been initially put into place to support a data file naming change for Vesuvio, but will help for future changes as well.
-
+- This has been initially put into place to support a data file naming change for Vesuvio, but will help for future changes as well.
 - Mantid is aware of the change to file naming for Vesuvio, you can continue to use EVS or VESUVIO as a prefix when trying to load files from this instrument, and Mantid will map that to the correct filenames.
 
 Algorithms
@@ -20,7 +19,7 @@ New
 ###
 
 - :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>` is the new name for CorrectFlightPaths.
-- :ref:`BinWidthAtX <algm-BinWidthAtX>` calculates the bin width at X, averaged over all histograms. 
+- :ref:`BinWidthAtX <algm-BinWidthAtX>` calculates the bin width at X, averaged over all histograms.
 - :ref:`MedianBinWidth <algm-MedianBinWidth>` provides the median bin widths of histograms.
 
 
@@ -38,13 +37,15 @@ Improved
    - An `Interpolation` option has been added. The availabile options are: `Linear` & `CSpline`.
    - The method of selecting the scattering point has ben updated to give better agreement with numerical algorithms (e.g. :ref:`CylinderAbsorption <algm-CylinderAbsorption>`).
 - :ref:`SetSample <algm-SetSample>` now accepts an Angle argument for defining a rotated flat plate sample.
+- :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 - :ref:`MaskDetectors <algm-MaskDetectors>` has a new option to mask detectors by the instrument's component name. It can accept a masked workspace with a differing number of spectra to the input workspace, providing that the number of detectors match. This can be useful in the case of hardware grouped detectors.
-
+- :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>` now accepts multiple files in a single ``Filename`` property.
 - :ref:`SavePlot1D <algm-SavePlot1D>` now supports optional ``SpectraList`` for plotting
 - :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`: The calculation of the azimuth angle has been fixed. Previously it was set equal to the Mantid definition of phi but the old code defined it as the angle away from the scattering plane.
 - :ref:`MatchPeaks <algm-MatchPeaks>` performs circular shift operation (numpy roll) along the x-axis to align the peaks in the spectra.
 - :ref:`FindEPP <algm-FindEPP>` is improved to better determine the initial parameters and range for the fitting.
 - :ref:`StartLiveData <algm-StartLiveData>` can now accept LiveListener properties as parameters, based on the value of the "Instrument" parameter.
+
 Renamed
 #######
 
@@ -78,9 +79,9 @@ Deprecated
 - :ref:`LoadILLAscii	 <algm-LoadILLAscii>`.
 - :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` is deprecated in favour of v2.
 - :ref:`SubmitRemoteJob	 <algm-SubmitRemoteJob>` is deprecated in favour of v2.
-- :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:'TransposeMD <algm_TransposeMD>'.
-- The Python function `IMDDimension.getName()` has been deprecated in favour of `IMDDimension.name'.
-- The duplicate Python function `Workspace.getName()` has been deprecated in favour of `Workspace.name()'.
+- :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:`TransposeMD <algm-TransposeMD>`.
+- The Python function `IMDDimension.getName()` has been deprecated in favour of `IMDDimension.name`.
+- The duplicate Python function `Workspace.getName()` has been deprecated in favour of `Workspace.name()`.
 
 Removed
 #######
@@ -102,7 +103,7 @@ CurveFitting
 - Improved documentation of the these fitting minimizers.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates the initial values of a fiting function in given intervals.
-- `Exclude` is new property of :ref:`Fit <algm-Fit>`, which allows for a user defined range to be excluded from a fit. 
+- `Exclude` is new property of :ref:`Fit <algm-Fit>`, which allows for a user defined range to be excluded from a fit.
 - Fit Function :ref:`FunctionQDepends <func-FunctionQDepends>` as the base class for QENS models depending on Q.
 
 Improved

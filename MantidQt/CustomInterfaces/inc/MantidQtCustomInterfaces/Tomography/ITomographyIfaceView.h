@@ -12,6 +12,8 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
+#include <QString>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -329,6 +331,25 @@ public:
    */
   virtual bool userConfirmation(const std::string &title,
                                 const std::string &body) = 0;
+
+  /**
+   * Returns the cached executable string. This will be cached by calls from the
+   * tabs, and allow the execution of any external program
+   */
+  virtual std::string getCachedExecutable() const = 0;
+
+  /**
+   * Returns the cached arguments string. This will be cached by calls from the
+   * tabs, and allow the execution of any external program
+   */
+  virtual std::vector<std::string> getCachedArguments() const = 0;
+
+  /**
+   * Emit the external process output signal so that it can be processed by it's
+   * receivers. The signals are connected inside the View's concrete class'
+   * @param str the output string of the process
+   */
+  virtual void emitExternalProcessFinished(const QString &str) = 0;
 };
 
 } // namespace CustomInterfaces

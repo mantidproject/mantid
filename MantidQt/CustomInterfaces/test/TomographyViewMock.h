@@ -4,6 +4,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
+#include <QString>
+
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
@@ -130,6 +132,15 @@ public:
   //   &body)
   MOCK_METHOD2(userConfirmation,
                bool(const std::string &title, const std::string &body));
+
+  //   virtual std::string getCachedExecutable() const = 0;
+  MOCK_CONST_METHOD0(getCachedExecutable, std::string());
+
+  //  virtual std::vector<std::string> getCachedArguments() const = 0;
+  MOCK_CONST_METHOD0(getCachedArguments, std::vector<std::string>());
+
+  //  virtual void externalProcessFinished(const QString &str) = 0;
+  MOCK_METHOD1(emitExternalProcessFinished, void(const QString &str));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
