@@ -1030,10 +1030,10 @@ void ComponentInfoController::displayAlignPeaksInfo(
   n.normalize();
 
   // now compute in plane & out of plane angles
-  const auto pos4 = peak->getQSampleFrame();
-  const auto x = pos4.scalar_prod(u);
-  const auto y = pos4.scalar_prod(v);
-  const auto z = pos4.scalar_prod(n);
+  const auto pos3 = peak->getQSampleFrame();
+  const auto x = pos3.scalar_prod(u);
+  const auto y = pos3.scalar_prod(v);
+  const auto z = pos3.scalar_prod(n);
 
   const V3D p(x, y, z);
   // compute the elevation angle from the plane
