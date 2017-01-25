@@ -226,7 +226,8 @@ void TomographyIfaceViewQtGUI::doSetupSectionRoi() {
           SIGNAL(findCORClickedSignal(std::string, std::vector<std::string>)),
           this,
           SLOT(runExternalProcess(std::string, std::vector<std::string>)));
-  connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIWidget,SLOT(readCoRFromProcessOutput(QString)));
+  connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIWidget,
+          SLOT(readCoRFromProcessOutput(QString)));
 
   connect(m_tabROIWidget, SIGNAL(imageOrStackLoadedSignal(std::string)), this,
           SLOT(imageOrStackLoadedInRoi(std::string)));
