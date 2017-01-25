@@ -593,7 +593,7 @@ protected:
   }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
-    if (m_value.empty()) {
+    if (m_value.empty() || m_value == "EMPTY") {
       v.clear();
       return;
     }
