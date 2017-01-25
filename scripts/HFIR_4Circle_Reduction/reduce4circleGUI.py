@@ -363,6 +363,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_indexFrom.addItem('By calculation')
         self.ui.comboBox_indexFrom.addItem('From SPICE')
 
+        # normalization to peak
+        self.ui.comboBox_ptCountType.clear()
+        self.ui.comboBox_ptCountType.addItem('Time')
+        self.ui.comboBox_ptCountType.addItem('Monitor')
+        self.ui.comboBox_ptCountType.addItem('Absolute')
+
         # tab
         self.ui.tabWidget.setCurrentIndex(0)
 
