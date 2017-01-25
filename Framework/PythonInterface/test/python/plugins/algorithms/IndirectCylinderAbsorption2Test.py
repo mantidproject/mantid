@@ -124,11 +124,11 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
 
         corrected, fact = IndirectCylinderAbsorption(SampleWorkspace=self._red_ws,
                                                      SampleChemicalFormula='H2-O',
-                                                     SampleDensityType='Number',
+                                                     SampleDensityType='Number Density',
                                                      SampleDensity=0.5,
                                                      CanWorkspace=self._can_ws,
                                                      CanChemicalFormula='V',
-                                                     CanDensityType='Number',
+                                                     CanDensityType='Number Density',
                                                      CanDensity=0.5,
                                                      Events=200,
                                                      UseCanCorrections=True)
@@ -143,11 +143,11 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
 
         corrected, fact = IndirectCylinderAbsorption(SampleWorkspace=self._red_ws,
                                                      SampleChemicalFormula='H2-O',
-                                                     SampleDensityType='Mass',
+                                                     SampleDensityType='Mass Density',
                                                      SampleDensity=0.5,
                                                      CanWorkspace=self._can_ws,
                                                      CanChemicalFormula='V',
-                                                     CanDensityType='Mass',
+                                                     CanDensityType='Mass Density',
                                                      CanDensity=0.5,
                                                      Events=200,
                                                      UseCanCorrections=True)

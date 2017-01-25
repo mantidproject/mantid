@@ -49,7 +49,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
         self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number']),
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Use of Mass density or Number density')
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
@@ -72,7 +72,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Chemical formula for the Container')
         self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number']),
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
                              doc='Container density type.')
         self.declareProperty(name='CanDensity', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
@@ -143,7 +143,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         if self._sample_density_type == 'Mass Density':
             sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
                                'SampleMassDensity': self._sample_density}
-        if self._sample_density_type == 'Number':
+        if self._sample_density_type == 'Number Density':
             sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
                                'SampleNumberDensity': self._sample_density}
         SetSample(sample_wave_ws,
@@ -209,7 +209,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 if self._sample_density_type == 'Mass Density':
                     container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
                                           'SampleMassDensity': self._can_density}
-                if self._sample_density_type == 'Number':
+                if self._sample_density_type == 'Number Density':
                     container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
                                           'SampleNumberDensity': self._can_density}
 
