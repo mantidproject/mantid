@@ -993,6 +993,8 @@ void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
     const Mantid::Geometry::IPeak *peak) {
 
+  using Mantid::Kernel::V3D;
+
   if (planePeaks.size() < 2)
     return;
 
@@ -1011,10 +1013,16 @@ void ComponentInfoController::displayAlignPeaksInfo(
   auto n = u.cross_prod(v);
 
   const auto beam = samplePos - sourcePos;
-  const auto proj = beam - n * (beam.scalar_prod(n) / n.norm2());
+
+  // Check if the chosen vectors result in a vector that is parallel
+  // to the beam axis. If not take the projection, else use the beam
+  if(!beam.cross_prod(n).nullVector()) {
+    u = beam - n * (beam.scalar_prod(n) / n.norm2());
+  } else {
+    u = beam;
+  }
 
   // update in-plane vectors
-  u = proj;
   v = u.cross_prod(n);
 
   u.normalize();
@@ -1027,7 +1035,7 @@ void ComponentInfoController::displayAlignPeaksInfo(
   const auto y = pos4.scalar_prod(v);
   const auto z = pos4.scalar_prod(n);
 
-  const Mantid::Kernel::V3D p(x, y, z);
+  const V3D p(x, y, z);
   // compute the elevation angle from the plane
   const auto R = p.norm();
   auto theta = (R != 0) ? asin(z / R) : 0.0;
