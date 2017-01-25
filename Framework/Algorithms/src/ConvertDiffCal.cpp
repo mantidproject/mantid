@@ -3,7 +3,9 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -90,6 +92,89 @@ double getOffset(OffsetsWorkspace_const_sptr offsetsWS, const detid_t detid) {
   }
   return offset;
 }
+namespace {
+
+//------------------------------------------------------------------------------------------------
+/** Get several instrument parameters used in tof to D-space conversion
+ *
+ */
+void getInstrumentParameters(const Instrument &instrument, double &l1,
+                             Kernel::V3D &beamline, double &beamline_norm,
+                             Kernel::V3D &samplePos) {
+  using namespace Mantid::Geometry;
+  // Get some positions
+  const IComponent_const_sptr sourceObj = instrument.getSource();
+  if (sourceObj == nullptr) {
+    throw Mantid::Kernel::Exception::InstrumentDefinitionError(
+        "Failed to get source component from instrument");
+  }
+  const Kernel::V3D sourcePos = sourceObj->getPos();
+  samplePos = instrument.getSample()->getPos();
+  beamline = samplePos - sourcePos;
+  beamline_norm = 2.0 * beamline.norm();
+
+  // Get the distance between the source and the sample (assume in metres)
+  IComponent_const_sptr sample = instrument.getSample();
+  try {
+    l1 = instrument.getSource()->getDistance(*sample);
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    throw Mantid::Kernel::Exception::InstrumentDefinitionError(
+        "Unable to calculate source-sample distance ", instrument.getName());
+  }
+}
+double calcConversion(const double l1, const Kernel::V3D &beamline,
+                      const double beamline_norm, const Kernel::V3D &samplePos,
+                      const Kernel::V3D &detPos, const double offset) {
+  if (offset <=
+      -1.) // not physically possible, means result is negative d-spacing
+  {
+    std::stringstream msg;
+    msg << "Encountered offset of " << offset
+        << " which converts data to negative d-spacing\n";
+    throw std::logic_error(msg.str());
+  }
+
+  // Now detPos will be set with respect to samplePos
+  Kernel::V3D relDetPos = detPos - samplePos;
+  // 0.5*cos(2theta)
+  double l2 = relDetPos.norm();
+  double halfcosTwoTheta =
+      relDetPos.scalar_prod(beamline) / (l2 * beamline_norm);
+  // This is sin(theta)
+  double sinTheta = sqrt(0.5 - halfcosTwoTheta);
+  const double numerator = (1.0 + offset);
+  sinTheta *= (l1 + l2);
+  const double CONSTANT = (PhysicalConstants::h * 1e10) /
+                          (2.0 * PhysicalConstants::NeutronMass * 1e6);
+
+  return (numerator * CONSTANT) / sinTheta;
+}
+
+//-----------------------------------------------------------------------
+/** Calculate the conversion factor (tof -> d-spacing)
+ * for a LIST of detectors assigned to a single spectrum.
+ */
+double calcConversion(const double l1, const Kernel::V3D &beamline,
+                      const double beamline_norm, const Kernel::V3D &samplePos,
+                      const boost::shared_ptr<const Instrument> &instrument,
+                      const std::vector<detid_t> &detectors,
+                      const std::map<detid_t, double> &offsets) {
+  double factor = 0.;
+  double offset;
+  for (auto detector : detectors) {
+    auto off_iter = offsets.find(detector);
+    if (off_iter != offsets.cend()) {
+      offset = offsets.find(detector)->second;
+    } else {
+      offset = 0.;
+    }
+    factor +=
+        calcConversion(l1, beamline, beamline_norm, samplePos,
+                       instrument->getDetector(detector)->getPos(), offset);
+  }
+  return factor / static_cast<double>(detectors.size());
+}
+}
 
 /**
  * @param offsetsWS
@@ -106,14 +191,14 @@ double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS,
   double l1;
   Kernel::V3D beamline, samplePos;
   double beamline_norm;
-  instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
+  getInstrumentParameters(*instrument, l1, beamline, beamline_norm, samplePos);
 
   Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
 
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
-  const double factor = Instrument::calcConversion(
-      l1, beamline, beamline_norm, samplePos, detector->getPos(), offset);
+  const double factor = calcConversion(l1, beamline, beamline_norm, samplePos,
+                                       detector->getPos(), offset);
   return 1. / factor;
 }
 
