@@ -583,7 +583,7 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
  * @param sequential :: [input] Whether fit is sequential or not
  */
 void MuonFitPropertyBrowser::continueAfterChecks(bool sequential) {
-	emit functionUpdateAndFitRequested(sequential);
+  emit functionUpdateAndFitRequested(sequential);
 }
 
 /**
