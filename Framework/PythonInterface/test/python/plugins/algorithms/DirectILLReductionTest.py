@@ -11,25 +11,26 @@ import unittest
 
 
 def _timeOfFlight(energy, length):
+    """Calculate the time-flight from energy and flight length."""
     velocity = numpy.sqrt(2 * energy * 1e-3 * constants.e / constants.m_n)
     return length / velocity * 1e6
 
 
 def _wavelength(energy):
+    """Calculate the wavelength from energy."""
     velocity = numpy.sqrt(2 * energy * 1e-3 * constants.e / constants.m_n)
     return constants.h / (velocity * constants.m_n) * 1e10
 
 
 def _gaussian(x, height, x0, sigma):
+    """Return a point in the gaussian curve."""
     x = x - x0
     sigma2 = 2 * sigma * sigma
     return height * numpy.exp(- x * x / sigma2)
 
 
 def _fillTemplateWorkspace(templateWS):
-    '''
-    Fills a workspace with somewhat sane data.
-    '''
+    """Fill a workspace with somewhat sane data."""
     nHistograms = templateWS.getNumberHistograms()
     E_i = 23.0
     nBins = 128
@@ -645,15 +646,21 @@ class DirectILLReductionTest(unittest.TestCase):
             self.assertAlmostEqual(outWS.readY(i)[0], 0.000497, 5)
         DeleteWorkspace(outWSName)
 
-    def _checkAlgorithmsInHistory(self, ws, *arg):
+    def _checkAlgorithmsInHistory(self, ws, *args):
+        """Return true if algorithm names listed in *args are found in the
+        workspace's history.
+        """
         history = ws.getHistory()
         reductionHistory = history.getAlgorithmHistory(history.size() - 1)
         algHistories = reductionHistory.getChildHistories()
         algNames = [alg.name() for alg in algHistories]
-        for algName in arg:
+        for algName in args:
             return algName in algNames
 
     def _checkDiagnosticsAlgorithmsInHistory(self, outWS, diagnosticsWS):
+        """Assert if the outWS and diagnosticsWS contain the correct
+        algorithms.
+        """
         self.assertTrue(self._checkAlgorithmsInHistory(outWS,
                                                        'MedianDetectorTest',
                                                        'MaskDetectors'))

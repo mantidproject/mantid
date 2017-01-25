@@ -155,59 +155,47 @@ _WS_CONTENT_MONS = 1
 
 
 class _DiagnosticsSettings:
-    '''
-    Holds settings for MedianDetectorTest.
-    '''
+    """A class to hold settings for MedianDetectorTest."""
+
     def __init__(self, lowThreshold, highThreshold, significanceTest):
+        """Initialize an instance of the class."""
         self.lowThreshold = lowThreshold
         self.highThreshold = highThreshold
         self.significanceTest = significanceTest
 
 
 class _IntermediateWSCleanup:
-    '''
-    Manages intermediate workspace cleanup.
-    '''
+    """A class to manage intermediate workspace cleanup."""
+
     def __init__(self, cleanupMode, deleteAlgorithmLogging):
-        '''
-        Initializes an instance of the class.
-        '''
+        """Initialize an instance of the class."""
         self._deleteAlgorithmLogging = deleteAlgorithmLogging
         self._doDelete = cleanupMode == _CLEANUP_DELETE
         self._protected = set()
         self._toBeDeleted = set()
 
     def cleanup(self, *args):
-        '''
-        Deletes the given workspaces.
-        '''
+        """Delete the workspaces listed in *args."""
         for ws in args:
             self._delete(ws)
 
     def cleanupLater(self, *args):
-        '''
-        Marks the given workspaces to be cleaned up later.
-        '''
+        """Mark the workspaces listed in *args to be cleaned up later."""
         map(self._toBeDeleted.add, map(str, args))
 
     def finalCleanup(self):
-        '''
-        Deletes all workspaces marked to be cleaned up later.
-        '''
+        """Delete all workspaces marked to be cleaned up later."""
         for ws in self._toBeDeleted:
             self._delete(ws)
 
     def protect(self, *args):
-        '''
-        Marks the given workspaces to be never deleted.
-        '''
+        """Mark the workspaces listed in *args to be never deleted."""
         map(self._protected.add, map(str, args))
 
     def _delete(self, ws):
-        '''
-        Deletes the given workspace if it is not protected, and
+        """Delete the given workspace in ws if it is not protected, and
         deletion is actually turned on.
-        '''
+        """
         if not self._doDelete:
             return
         ws = str(ws)
@@ -217,84 +205,61 @@ class _IntermediateWSCleanup:
 
 
 class _NameSource:
-    '''
-    Provides names for intermediate workspaces.
-    '''
+    """A class to provide names for intermediate workspaces."""
+
     def __init__(self, prefix, cleanupMode):
-        '''
-        Initializes an instance of the class.
-        '''
+        """Initialize an instance of the class."""
         self._names = set()
         self._prefix = prefix
         if cleanupMode == _CLEANUP_DELETE:
             self._prefix = '__' + prefix
 
     def withSuffix(self, suffix):
-        '''
-        Returns a workspace name with given suffix applied.
-        '''
+        """Returns a workspace name with given suffix applied."""
         return self._prefix + '_' + suffix
 
 
 class _Report:
-    '''
-    Logger for final report generation.
-    '''
+    """A logger for final report generation."""
+
     _LEVEL_NOTICE = 0
     _LEVEL_WARNING = 1
     _LEVEL_ERROR = 2
 
     class _Entry:
-        '''
-        Private class for report entries.
-        '''
+        """A private class for report entries."""
+
         def __init__(self, text, loggingLevel):
-            '''
-            Initializes an entry.
-            '''
+            """Initialize an entry."""
             self._text = text
             self._loggingLevel = loggingLevel
 
         def contents(self):
-            '''
-            Returns the contents of this entry.
-            '''
+            """Return the contents of this entry."""
             return self._text
 
         def level(self):
-            '''
-            Returns the logging level of this entry.
-            '''
+            """Return the logging level of this entry."""
             return self._loggingLevel
 
     def __init__(self):
-        '''
-        Initializes a report.
-        '''
+        """Initialize a report."""
         self._entries = list()
 
     def error(self, text):
-        '''
-        Adds an error entry to this report.
-        '''
+        """Add an error entry to this report."""
         self._entries.append(_Report._Entry(text, _Report._LEVEL_ERROR))
 
     def notice(self, text):
-        '''
-        Adds an information entry to this report.
-        '''
+        """Add an information entry to this report."""
         self._entries.append(_Report._Entry(text, _Report._LEVEL_NOTICE))
 
     def warning(self, text):
-        '''
-        Adds a warning entry to this report.
-        '''
+        """Add a warning entry to this report."""
         self._entries.append(_Report._Entry(text, _Report._LEVEL_WARNING))
 
     def toLog(self, log):
-        '''
-        Writes this report to a log.
-        '''
+        """Write this report to a log."""
         for entry in self._entries:
             loggingLevel = entry.level()
             if loggingLevel == _Report._LEVEL_NOTICE:
@@ -306,10 +271,9 @@ class _Report:
 
 
 def _createDetectorGroups(ws):
-    '''
-    Finds detectors with (almost) same theta and groups them. Masked detectors
-    are ignored.
-    '''
+    """Find detectors with (almost) same theta and group them. Masked
+    detectors are ignored.
+    """
     numHistograms = ws.getNumberHistograms()
     assignedDets = list()
     groups = list()
@@ -337,10 +301,9 @@ def _createDetectorGroups(ws):
 
 def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
                                   reportWSName, algorithmLogging):
-    '''
-    Creates a table workspace containing information used for detector
+    """Return a table workspace containing information used for detector
     diagnostics.
-    '''
+    """
     PLOT_TYPE_X = 1
     PLOT_TYPE_Y = 2
     reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName,
@@ -358,9 +321,7 @@ def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
 
 
 def _groupsToGroupingPattern(groups):
-    '''
-    Returns a grouping pattern suitable for the GroupDetectors algorithm.
-    '''
+    """Return a grouping pattern suitable for the GroupDetectors algorithm."""
     pattern = ''
     for group in groups:
         for index in group:
@@ -370,10 +331,9 @@ def _groupsToGroupingPattern(groups):
 
 
 def _loadFiles(inputFilename, wsNames, wsCleanup, algorithmLogging):
-    '''
-    Loads files specified by filenames, merging them into a single
+    """Load files specified by inputFilename, merging them into a single
     workspace.
-    '''
+    """
     # TODO Explore ways of loading data file-by-file and merging pairwise.
     #      Should save some memory (IN5!).
     rawWSName = wsNames.withSuffix('raw')
@@ -389,9 +349,7 @@ def _loadFiles(inputFilename, wsNames, wsCleanup, algorithmLogging):
 
 
 def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
-    '''
-    Returns a flat background workspace.
-    '''
+    """Return a flat background workspace."""
     if wsType == _WS_CONTENT_DETS:
         bkgWSName = wsNames.withSuffix('flat_bkg_for_detectors')
     else:
@@ -408,9 +366,7 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
 
 
 def _medianDeltaTheta(ws):
-    '''
-    Calculates the median theta spacing for S(theta, w) workspace.
-    '''
+    """Calculate the median theta spacing for a S(theta, w) workspace."""
     thetas = list()
     spectrumInfo = ws.spectrumInfo()
     for i in range(ws.getNumberHistograms()):
@@ -427,9 +383,7 @@ def _medianDeltaTheta(ws):
 
 
 def _minMaxQ(ws):
-    '''
-    Estimates the start and end q bins for S(theta, w) workspace.
-    '''
+    """Estimate the start and end q bins for a S(theta, w) workspace."""
     Ei = ws.run().getProperty('Ei').value * 1e-3 * constants.e  # in Joules
     xs = ws.readX(0)
     minW = xs[0] * 1e-3 * constants.e  # in Joules
@@ -442,9 +396,7 @@ def _minMaxQ(ws):
 
 
 def _deltaQ(ws):
-    '''
-    Estimates a q bin width for S(theta, w) workspace.
-    '''
+    """Estimate a q bin width for a S(theta, w) workspace."""
     deltaTheta = _medianDeltaTheta(ws)
     wavelength = ws.run().getProperty('wavelength').value
     return 2.0 * constants.pi / wavelength * deltaTheta
@@ -452,9 +404,7 @@ def _deltaQ(ws):
 
 def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
                      wsCleanup, algorithmLogging):
-    '''
-    Subtracts a scaled flat background from a workspace.
-    '''
+    """Subtract a scaled flat background from a workspace."""
     if wsType == _WS_CONTENT_DETS:
         subtractedWSName = wsNames.withSuffix('flat_bkg_subtracted_detectors')
         scaledBkgWSName = wsNames.withSuffix('flat_bkg_for_detectors_scaled')
@@ -474,9 +424,7 @@ def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
 
 
 def _findEPP(ws, wsType, wsNames, algorithmLogging):
-    '''
-    Returns EPP table for a workspace.
-    '''
+    """Return an EPP table for a workspace."""
     if wsType == _WS_CONTENT_DETS:
         eppWSName = wsNames.withSuffix('epp_detectors')
     else:
@@ -488,9 +436,7 @@ def _findEPP(ws, wsType, wsNames, algorithmLogging):
 
 
 def _reportSinglePeakDiagnostics(report, diagnostics, wsIndex):
-    '''
-    Reports the result of zero count diagnostics for a single diagnose.
-    '''
+    """Report the result of zero count diagnostics for a single diagnose."""
     diagnose = diagnostics.readY(wsIndex)[0]
     if diagnose == 0:
         pass  # Nothing to report.
@@ -510,9 +456,7 @@ def _reportSinglePeakDiagnostics(report, diagnostics, wsIndex):
 
 
 def _reportSingleBkgDiagnostics(report, diagnostics, wsIndex):
-    '''
-    Reports the result of background diagnostics for a single diagnose.
-    '''
+    """Report the result of background diagnostics for a single diagnose."""
     diagnose = diagnostics.readY(wsIndex)[0]
     if diagnose == 0:
         pass  # Nothing to report.
@@ -531,9 +475,7 @@ def _reportSingleBkgDiagnostics(report, diagnostics, wsIndex):
 
 
 def _reportDiagnostics(report, peakDiagnostics, bkgDiagnostics):
-    '''
-    Parses the mask workspaces and fills in the report accordingly.
-    '''
+    """Parse the mask workspaces and fills in the report accordingly."""
     for i in range(peakDiagnostics.getNumberHistograms()):
         _reportSinglePeakDiagnostics(report,
                                      peakDiagnostics,
@@ -544,9 +486,7 @@ def _reportDiagnostics(report, peakDiagnostics, bkgDiagnostics):
 
 
 def _medianEPP(eppWS, eppIndices):
-    '''
-    Calculates the median 'PeakCentre' for given workpsace indices.
-    '''
+    """Calculate the median 'PeakCentre' for given workpsace indices."""
     centres = list()
     sigmas = list()
     for rowIndex in eppIndices:
@@ -564,9 +504,7 @@ def _medianEPP(eppWS, eppIndices):
 def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                        sigmaMultiplier, noisyBkgSettings, wsNames,
                        wsCleanup, report, reportWSName, algorithmLogging):
-    '''
-    Returns a diagnostics workspace.
-    '''
+    """Return a diagnostics workspace."""
     # 1. Diagnose elastic peak region.
     constantL2WSName = wsNames.withSuffix('constant_L2')
     constantL2WS = ConvertToConstantL2(InputWorkspace=ws,
@@ -637,9 +575,7 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
 
 
 def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
-    '''
-    Mask detectors according to diagnostics.
-    '''
+    """Mask detectors according to diagnostics."""
     maskedWSName = wsNames.withSuffix('diagnostics_applied')
     maskedWS = CloneWorkspace(InputWorkspace=ws,
                               OutputWorkspace=maskedWSName,
@@ -654,9 +590,7 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace,
                               monEPPWorkspace, eiCalibrationDets,
                               eiCalibrationMon, wsNames, log,
                               algorithmLogging):
-    '''
-    Returns the calibrated incident energy.
-    '''
+    """Return the calibrated incident energy."""
     instrument = detWorkspace.getInstrument().getName()
     eiWorkspace = None
     if instrument in ['IN4', 'IN6']:
@@ -684,9 +618,7 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace,
 
 def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
                                     algorithmLogging):
-    '''
-    Updates incident energy and wavelength in the sample logs.
-    '''
+    """Update incident energy and wavelength in the sample logs."""
     originalEnergy = ws.getRun().getLogData('Ei').value
     originalWavelength = ws.getRun().getLogData('wavelength').value
     energy = eiWS.readY(0)[0]
@@ -726,9 +658,7 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
 
 def _applySelfShieldingCorrections(ws, ecWS, ecScaling, correctionsWS, wsNames,
                                    algorithmLogging):
-    '''
-    Applies a self-shielding corrections workspace.
-    '''
+    """Apply a self-shielding corrections workspace."""
     correctedWSName = wsNames.withSuffix('self_shielding_applied')
     correctedWS = ApplyPaalmanPingsCorrection(
         SampleWorkspace=ws,
@@ -742,10 +672,9 @@ def _applySelfShieldingCorrections(ws, ecWS, ecScaling, correctionsWS, wsNames,
 
 def _applySelfShieldingCorrectionsNoEC(ws, correctionsWS, wsNames,
                                        algorithmLogging):
-    '''
-    Applies a self-shielding corrections workspace without subtracting an empty
-    container.
-    '''
+    """Apply a self-shielding corrections workspace without subtracting an
+    empty container.
+    """
     correctedWSName = wsNames.withSuffix('self_shielding_applied')
     correctedWS = ApplyPaalmanPingsCorrection(
         SampleWorkspace=ws,
@@ -757,9 +686,7 @@ def _applySelfShieldingCorrectionsNoEC(ws, correctionsWS, wsNames,
 
 def _normalizeToMonitor(ws, monWS, monEPPWS, sigmaMultiplier, monIndex,
                         wsNames, wsCleanup, algorithmLogging):
-    '''
-    Normalizes to monitor counts.
-    '''
+    """Normalize to monitor counts."""
     normalizedWSName = wsNames.withSuffix('normalized_to_monitor')
     normalizationFactorWsName = \
         wsNames.withSuffix('normalization_factor_monitor')
@@ -782,9 +709,7 @@ def _normalizeToMonitor(ws, monWS, monEPPWS, sigmaMultiplier, monIndex,
 
 
 def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
-    '''
-    Normalizes to 'actual_time' sample log.
-    '''
+    """Normalize to the 'actual_time' sample log."""
     normalizedWSName = wsNames.withSuffix('normalized_to_time')
     normalizationFactorWsName = wsNames.withSuffix('normalization_factor_time')
     time = ws.getLogData('actual_time').value
@@ -807,9 +732,9 @@ def _selfShieldingCorrectionsCylinder(ws, ecWS, sampleChemicalFormula,
                                       sampleOuterR, containerOuterR, beamWidth,
                                       beamHeight, stepSize, numberWavelengths,
                                       wsNames, algorithmLogging):
-    '''
-    Calculates the self-shielding corrections workspace for cylindrical sample.
-    '''
+    """Calculate the self-shielding corrections workspace for cylindrical
+    sample.
+    """
     from mantid.simpleapi import CylinderPaalmanPingsCorrection
     selfShieldingWSName = \
         wsNames.withSuffix('self_shielding_corrections_with_ec')
@@ -841,10 +766,9 @@ def _selfShieldingCorrectionsCylinderNoEC(ws, sampleChemicalFormula,
                                           beamWidth, beamHeight, stepSize,
                                           numberWavelengths, wsNames,
                                           algorithmLogging):
-    '''
-    Calculates the self-shielding corrections workspace for cylindrical sample
-    without using empty container data.
-    '''
+    """Calculate the self-shielding corrections workspace for cylindrical
+    sample without using empty container data.
+    """
     from mantid.simpleapi import CylinderPaalmanPingsCorrection
     selfShieldingWSName = \
         wsNames.withSuffix('self_shielding_corrections')
@@ -872,9 +796,9 @@ def _selfShieldingCorrectionsSlab(ws, ecWS, sampleChemicalFormula,
                                   sampleAngle, containerFrontThickness,
                                   containerBackThickness, numberWavelengths,
                                   wsNames, algorithmLogging):
-    '''
-    Calculates the self-shielding corrections workspace for flat plate sample.
-    '''
+    """Calculate the self-shielding corrections workspace for flat plate
+    sample.
+    """
     selfShieldingWSName = \
         wsNames.withSuffix('self_shielding_corrections_with_ec')
     selfShieldingWS = FlatPlatePaalmanPingsCorrection(
@@ -901,10 +825,9 @@ def _selfShieldingCorrectionsSlabNoEC(ws, sampleChemicalFormula,
                                       sampleNumberDensity, sampleThickness,
                                       sampleAngle, numberWavelengths, wsNames,
                                       algorithmLogging):
-    '''
-    Calculates the self-shielding corrections workspace for flat plate sample
+    """Calculate the self-shielding corrections workspace for flat plate sample
     without using empty container data.
-    '''
+    """
     selfShieldingWSName = \
         wsNames.withSuffix('self_shielding_corrections')
     selfShieldingWS = FlatPlatePaalmanPingsCorrection(
@@ -922,9 +845,7 @@ def _selfShieldingCorrectionsSlabNoEC(ws, sampleChemicalFormula,
 
 
 def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
-    '''
-    Subtracts empty container.
-    '''
+    """Subtract empty container."""
     # out = in - ecScaling * EC
     scalingWSName = wsNames.withSuffix('ecScaling')
     scalingWS = \
@@ -955,9 +876,7 @@ def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
 
 
 def _rebin(ws, params, wsNames, algorithmLogging):
-    '''
-    Rebins a workspace.
-    '''
+    """Rebin a workspace."""
     rebinnedWSName = wsNames.withSuffix('rebinned')
     rebinnedWS = Rebin(InputWorkspace=ws,
                        OutputWorkspace=rebinnedWSName,
@@ -967,46 +886,33 @@ def _rebin(ws, params, wsNames, algorithmLogging):
 
 
 class DirectILLReduction(DataProcessorAlgorithm):
-    '''
-    A data reduction workflow algorithm for the direct geometry TOF
+    """A data reduction workflow algorithm for the direct geometry TOF
     spectrometers at ILL.
-    '''
+    """
 
     def __init__(self):
-        '''
-        Initializes an instance of the algorithm.
-        '''
+        """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
 
     def category(self):
-        '''
-        Returns the algorithm's category.
-        '''
+        """Return the algorithm's category."""
         return 'Workflow\\Inelastic'
 
     def name(self):
-        '''
-        Returns the algorithm's name.
-        '''
+        """Return the algorithm's name."""
         return 'DirectILLReduction'
 
     def summary(self):
-        '''
-        Returns a summary of the algorithm.
-        '''
+        """Return a summary of the algorithm."""
         return 'Data reduction workflow for the direct geometry ' + \
                'time-of-flight spectrometers at ILL.'
 
     def version(self):
-        '''
-        Returns the algorithm's version.
-        '''
+        """Return the algorithm's version."""
         return 1
 
     def PyExec(self):
-        '''
-        Executes the data reduction workflow.
-        '''
+        """Executes the data reduction workflow."""
         report = _Report()
         subalgLogging = False
         if self.getProperty(_PROP_SUBALG_LOGGING).value == \
@@ -1132,9 +1038,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self._finalize(mainWS, wsCleanup, report)
 
     def PyInit(self):
-        '''
-        Initializes the algorithm's input and output properties.
-        '''
+        """Initialize the algorithm's input and output properties."""
         # Validators.
         greaterThanUnityFloat = FloatBoundedValidator(lower=1)
         mandatoryPositiveInt = CompositeValidator()
@@ -1654,9 +1558,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                               _PROPGROUP_OPTIONAL_OUTPUT)
 
     def validateInputs(self):
-        '''
-        Checks for issues with user input.
-        '''
+        """Check for issues with user input."""
         issues = dict()
 
         fileGiven = not self.getProperty(_PROP_INPUT_FILE).isDefault
@@ -1739,9 +1641,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return issues
 
     def _applyUserMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
-        '''
-        Applies user mask to a workspace.
-        '''
+        """Apply user mask to a workspace."""
         userMask = self.getProperty(_PROP_USER_MASK).value
         indexType = self.getProperty(_PROP_INDEX_TYPE).value
         maskComponents = self.getProperty(_PROP_USER_MASK_COMPONENTS).value
@@ -1771,9 +1671,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _calibrateEi(self, mainWS, detEPPWS, monWS, monEPPWS, wsNames,
                      wsCleanup, report, subalgLogging):
-        '''
-        Performs and applies incident energy calibration.
-        '''
+        """Perform and apply incident energy calibration."""
         eiCalibration = \
             self.getProperty(_PROP_INCIDENT_ENERGY_CALIBRATION).value
         if eiCalibration == _INCIDENT_ENERGY_CALIBRATION_YES:
@@ -1826,15 +1724,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return mainWS, monWS
 
     def _convertListToWorkspaceIndices(self, indices, ws):
-        '''
-        Converts a list of spectrum nubmers/detector IDs to workspace indices.
-        '''
+        """Convert a list of spectrum nubmers/detector IDs to workspace
+        indices.
+        """
         return [self._convertToWorkspaceIndex(i, ws) for i in indices]
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Converts the X units from time-of-flight to energy transfer.
-        '''
+        """Convert the X axis units from time-of-flight to energy transfer."""
         energyConvertedWSName = wsNames.withSuffix('energy_converted')
         energyConvertedWS = ConvertUnits(InputWorkspace=mainWS,
                                          OutputWorkspace=energyConvertedWSName,
@@ -1845,9 +1741,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return energyConvertedWS
 
     def _convertToWorkspaceIndex(self, i, ws):
-        '''
-        Converts given number to workspace index.
-        '''
+        """Convert given number to workspace index."""
         indexType = self.getProperty(_PROP_INDEX_TYPE).value
         if indexType == _INDEX_TYPE_WS_INDEX:
             return i
@@ -1862,9 +1756,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _correctByDetectorEfficiency(self, mainWS, wsNames, wsCleanup,
                                      subalgLogging):
-        '''
-        Applies detector efficiency corrections.
-        '''
+        """Apply detector efficiency corrections."""
         correctedWSName = wsNames.withSuffix('detector_efficiency_corrected')
         correctedWS = \
             DetectorEfficiencyCorUser(InputWorkspace=mainWS,
@@ -1874,9 +1766,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return correctedWS
 
     def _correctByKiKf(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Applies the k_i / k_f correction.
-        '''
+        """Apply the k_i / k_f correction."""
         correctedWSName = wsNames.withSuffix('kikf')
         correctedWS = CorrectKiKf(InputWorkspace=mainWS,
                                   OutputWorkspace=correctedWSName,
@@ -1885,9 +1775,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return correctedWS
 
     def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Adjusts the TOF axis to get the elastic channel correct.
-        '''
+        """Adjust the TOF axis to get the elastic channel correct."""
         correctedWSName = wsNames.withSuffix('tof_axis_corrected')
         referenceWS = self.getProperty(_PROP_REFERENCE_TOF_AXIS_WS).value
         if referenceWS:
@@ -1919,9 +1807,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return correctedWS
 
     def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Creates an EPP table for a detector workspace.
-        '''
+        """Create an EPP table for a detector workspace."""
         detEPPInWS = self.getProperty(_PROP_EPP_WS).value
         if not detEPPInWS:
             detEPPWS = _findEPP(mainWS,
@@ -1937,9 +1823,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return detEPPWS
 
     def _createEPPWSMon(self, monWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Creates an EPP table for a monitor workspace.
-        '''
+        """Create an EPP table for a monitor workspace."""
         monEPPInWS = self.getProperty(_PROP_MON_EPP_WS).value
         if not monEPPInWS:
             monEPPWS = _findEPP(monWS,
@@ -1956,9 +1840,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _detDiagnostics(self, mainWS, bkgWS, detEPPWS, wsNames, wsCleanup,
                         report, subalgLogging):
-        '''
-        Performs and applies detector diagnostics.
-        '''
+        """Perform and apply detector diagnostics."""
         if self.getProperty(_PROP_DET_DIAGNOSTICS).value == \
                 _DIAGNOSTICS_YES:
             diagnosticsInWS = \
@@ -2025,9 +1907,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return mainWS
 
     def _enabledByNonECReduction(self, prop):
-        '''
-        Enables a property if reduction type is Vanadium or Sample.
-        '''
+        """Enable a property if reduction type is Vanadium or Sample."""
         self.setPropertySettings(prop,
                                  EnabledWhenProperty(
                                      _PROP_REDUCTION_TYPE,
@@ -2035,9 +1915,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      _REDUCTION_TYPE_EC))
 
     def _enabledBySampleReduction(self, prop):
-        '''
-        Enables a property if reduction type is Sample.
-        '''
+        """Enable a property if reduction type is Sample."""
         self.setPropertySettings(prop,
                                  EnabledWhenProperty(
                                      _PROP_REDUCTION_TYPE,
@@ -2045,9 +1923,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      _REDUCTION_TYPE_SAMPLE))
 
     def _enabledBySelfShieldingCorrection(self, prop):
-        '''
-        Enables a property if self-shielding corrections are enabled.
-        '''
+        """Enable a property if self-shielding corrections are enabled."""
         self.setPropertySettings(prop,
                                  EnabledWhenProperty(
                                      _PROP_SELF_SHIELDING_CORRECTION,
@@ -2055,17 +1931,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      _SELF_SHIELDING_CORRECTION_ON))
 
     def _finalize(self, outWS, wsCleanup, report):
-        '''
-        Does final cleanup, reporting and sets the output property.
-        '''
+        """Do final cleanup, reporting and set the output property."""
         self.setProperty(_PROP_OUTPUT_WS, outWS)
         wsCleanup.finalCleanup()
         report.toLog(self.log())
 
     def _flatBkgDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Subtracts flat background from detector workspace.
-        '''
+        """Subtract flat background from a detector workspace."""
         bkgInWS = self.getProperty(_PROP_FLAT_BKG_WS).value
         windowWidth = self.getProperty(_PROP_FLAT_BKG_WINDOW).value
         if not bkgInWS:
@@ -2091,9 +1963,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return bkgSubtractedWS, bkgWS
 
     def _flatBkgMon(self, monWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Subtracts flat background from monitor workspace.
-        '''
+        """Subtract flat background from a monitor workspace."""
         windowWidth = self.getProperty(_PROP_FLAT_BKG_WINDOW).value
         monBkgWS = _createFlatBkg(monWS,
                                   _WS_CONTENT_MONS,
@@ -2113,9 +1983,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return bkgSubtractedMonWS
 
     def _groupDetectors(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Groups detectors with similar thetas.
-        '''
+        """Group detectors with similar thetas."""
         groups = _createDetectorGroups(mainWS)
         groupingPattern = _groupsToGroupingPattern(groups)
         groupedWSName = wsNames.withSuffix('grouped_detectors')
@@ -2129,9 +1997,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return groupedWS
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
-        '''
-        Returns the raw input workspace.
-        '''
+        """Return the raw input workspace."""
         inputFile = self.getProperty(_PROP_INPUT_FILE).value
         if inputFile:
             mainWS = _loadFiles(inputFile,
@@ -2145,9 +2011,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _normalize(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup,
                    subalgLogging):
-        '''
-        Normalizes to monitor or time.
-        '''
+        """Normalize to monitor or measurement time."""
         normalisationMethod = self.getProperty(_PROP_NORMALISATION).value
         if normalisationMethod != _NORM_METHOD_OFF:
             if normalisationMethod == _NORM_METHOD_MON:
@@ -2176,9 +2040,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return mainWS
 
     def _normalizeToVana(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Normalizes to vanadium workspace.
-        '''
+        """Normalize to vanadium workspace."""
         vanaWS = self.getProperty(_PROP_VANA_WS).value
         if vanaWS:
             vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
@@ -2192,10 +2054,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,
                                   subalgLogging):
-        '''
-        If requested, converts the spectrum axis to theta and save the result
+        """If requested, convert the spectrum axis to theta and save the result
         into the proper output property.
-        '''
+        """
         thetaWSName = self.getProperty(_PROP_OUTPUT_THETA_W_WS).valueAsStr
         if thetaWSName:
             thetaWSName = self.getProperty(_PROP_OUTPUT_THETA_W_WS).value
@@ -2208,9 +2069,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report,
                   subalgLogging):
-        '''
-        Rebins the horizontal axis of a workspace.
-        '''
+        """Rebin the horizontal axis of a workspace."""
         mode = self.getProperty(_PROP_REBINNING_MODE_W).value
         if mode == _REBIN_AUTO_ELASTIC_PEAK:
             binWidth = BinWidthAtX(InputWorkspace=mainWS,
@@ -2236,10 +2095,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return rebinnedWS
 
     def _selfShieldingAndEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Calculates and applies self shielding corrections and empty can
-        subtraction.
-        '''
+        """Calculate and apply self shielding corrections and subtract empty
+        container.
+        """
         ecWS = self.getProperty(_PROP_EC_WS).value
         selfShielding = self.getProperty(_PROP_SELF_SHIELDING_CORRECTION).value
         if not ecWS and selfShielding == _SELF_SHIELDING_CORRECTION_OFF:
@@ -2389,9 +2247,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return correctedWS
 
     def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Extracts monitors to a separate workspace.
-        '''
+        """Extract monitors to a separate workspace."""
         detWSName = wsNames.withSuffix('extracted_detectors')
         monWSName = wsNames.withSuffix('extracted_monitors')
         detWS, monWS = ExtractMonitors(InputWorkspace=mainWS,
@@ -2402,9 +2258,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return detWS, monWS
 
     def _sOfQW(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Runs the SofQWNormalisedPolygon algorithm.
-        '''
+        """Run the SofQWNormalisedPolygon algorithm."""
         sOfQWWSName = wsNames.withSuffix('sofqw')
         qRebinningMode = self.getProperty(_PROP_REBINNING_MODE_Q).value
         if qRebinningMode == _REBIN_AUTO_Q:
@@ -2425,9 +2279,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return sOfQWWS
 
     def _subtractEC(self, mainWS, ecInWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Subtracts the empty container workspace.
-        '''
+        """Subtract the empty container workspace without self-shielding
+        corrections.
+        """
         ecScaling = self.getProperty(_PROP_EC_SCALING_FACTOR).value
         ecSubtractedWS = _subtractEC(mainWS,
                                      ecInWS,
@@ -2439,9 +2293,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         return ecSubtractedWS
 
     def _transpose(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        '''
-        Transposes the final output workspace.
-        '''
+        """Transpose the final output workspace."""
         transposing = self.getProperty(_PROP_TRANSPOSE_SAMPLE_OUTPUT).value
         if transposing == _TRANSPOSING_OFF:
             return mainWS
