@@ -79,7 +79,8 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 DECLARE_FUNCTION(CrystalFieldMagnetisation)
 
 CrystalFieldMagnetisation::CrystalFieldMagnetisation()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), m_setDirect(false) {
+    : CrystalFieldPeaksBase(), API::IFunction1D(), m_nre(0),
+      m_setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
