@@ -993,25 +993,25 @@ void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
     const Mantid::Geometry::IPeak *peak) {
 
-  if (planePeaks.size() < 3)
+  if (planePeaks.size() < 2)
     return;
 
   const auto pos1 = planePeaks[0];
   const auto pos2 = planePeaks[1];
-  const auto pos3 = planePeaks[2];
-
-  // find vectors in plane & plane normal
-  auto u = pos2 - pos1;
-  auto v = pos3 - pos1;
-  auto n = u.cross_prod(v);
 
   // find projection of beam direction onto plane
   // this is so we always orientate to a common reference direction
   const auto instrument = peak->getInstrument();
   const auto samplePos = instrument->getSample()->getPos();
   const auto sourcePos = instrument->getSource()->getPos();
+
+  // find vectors in plane & plane normal
+  auto u = pos2 - pos1;
+  auto v = samplePos - pos1;
+  auto n = u.cross_prod(v);
+
   const auto beam = samplePos - sourcePos;
-  const auto proj = beam - n * (beam.scalar_prod(n) / (pow(n.norm(), 2)));
+  const auto proj = beam - n * (beam.scalar_prod(n) / n.norm2());
 
   // update in-plane vectors
   u = proj;
@@ -1027,9 +1027,9 @@ void ComponentInfoController::displayAlignPeaksInfo(
   const auto y = pos4.scalar_prod(v);
   const auto z = pos4.scalar_prod(n);
 
-  Mantid::Kernel::V3D p(x, y, z);
+  const Mantid::Kernel::V3D p(x, y, z);
   // compute the elevation angle from the plane
-  auto R = p.norm();
+  const auto R = p.norm();
   auto theta = (R != 0) ? asin(z / R) : 0.0;
   // compute in-plane angle
   auto phi = atan2(y, x);

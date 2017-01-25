@@ -953,7 +953,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
   if (!marker || !peak)
     return;
 
-  if (m_selectedAlignmentPlane.size() < 3) {
+  if (m_selectedAlignmentPlane.size() < 2) {
     // check Q value is not already in the plane list
     // We only want unique vectors to define the plane
     const auto result = std::find_if(
@@ -970,7 +970,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
     m_selectedAlignmentPeak = std::make_pair(peak, origin);
   }
 
-  if (m_selectedAlignmentPlane.size() >= 3 && m_selectedAlignmentPeak.first) {
+  if (m_selectedAlignmentPlane.size() >= 2 && m_selectedAlignmentPeak.first) {
     // create vector V3Ds for the plane
     std::vector<Mantid::Kernel::V3D> qValues;
     std::transform(
