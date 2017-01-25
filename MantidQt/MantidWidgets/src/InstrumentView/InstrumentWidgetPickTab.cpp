@@ -1016,7 +1016,7 @@ void ComponentInfoController::displayAlignPeaksInfo(
 
   // Check if the chosen vectors result in a vector that is parallel
   // to the beam axis. If not take the projection, else use the beam
-  if(!beam.cross_prod(n).nullVector()) {
+  if (!beam.cross_prod(n).nullVector()) {
     u = beam - n * (beam.scalar_prod(n) / n.norm2());
   } else {
     u = beam;
