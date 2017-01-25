@@ -80,14 +80,13 @@ public:
   // void updateRotationAngle(float angle)
   MOCK_METHOD1(updateRotationAngle, void(float));
 
-  // std::string askSingleImagePath();
-  MOCK_METHOD0(askSingleImagePath, std::string());
-
   // std::string askImgOrStackPath();
-  MOCK_METHOD0(askImgOrStackPath, std::string());
+  MOCK_METHOD1(askImagePath, std::string(const std::string &));
 
   // std::string askColorMapFile();
   MOCK_METHOD0(askColorMapFile, std::string());
+
+  MOCK_METHOD1(imageOrStackLoaded, void(const std::string &));
 
   // void updateColorMap(const std::string &filename);
   MOCK_METHOD1(updateColorMap, void(const std::string &));
