@@ -40,11 +40,10 @@ void calculate(double *out, const double *xValues, const size_t nData,
     // Calculates the diagonal of the magnetic moment operator <wf|mu|wf>
     DoubleFortranVector moment;
     calculateMagneticMoment(ev, Hmag, nre, moment);
-    double expfact;
     double Z = 0.;
     double M = 0.;
     for (auto iE = 1; iE <= nlevels; iE++) {
-      expfact = exp(-beta * en(iE));
+      double expfact = exp(-beta * en(iE));
       Z += expfact;
       M += moment(iE) * expfact;
     }
