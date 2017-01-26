@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_FILTEREVENTSTEST_H_
 #define MANTID_ALGORITHMS_FILTEREVENTSTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidDataObjects/EventList.h"
@@ -12,10 +12,8 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <random>
@@ -61,16 +59,16 @@ public:
     int64_t tofdt = 10 * 1000 * 1000;
     size_t numpulses = 5;
 
-    DataObjects::EventWorkspace_sptr eventws =
+    EventWorkspace_sptr eventws =
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
 
     TS_ASSERT_EQUALS(eventws->getNumberEvents(), 500);
 
-    DataObjects::EventList elist = eventws->getSpectrum(0);
+    EventList elist = eventws->getSpectrum(0);
     TS_ASSERT_EQUALS(elist.getNumberEvents(), 50);
     TS_ASSERT(elist.hasDetectorID(1));
 
-    DataObjects::SplittersWorkspace_sptr splittersws =
+    SplittersWorkspace_sptr splittersws =
         createSplitter(runstart_i64, pulsedt, tofdt);
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), 5);
 
@@ -99,11 +97,11 @@ public:
     int64_t tofdt = 10 * 1000 * 1000;
     size_t numpulses = 5;
 
-    DataObjects::EventWorkspace_sptr inpWS =
+    EventWorkspace_sptr inpWS =
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
-    DataObjects::SplittersWorkspace_sptr splws =
+    SplittersWorkspace_sptr splws =
         createSplitter(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
@@ -125,8 +123,8 @@ public:
     TS_ASSERT_EQUALS(numsplittedws, 4);
 
     // Check Workspace group 0
-    DataObjects::EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws0 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
@@ -134,30 +132,30 @@ public:
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
 
     // Check Workspace group 1
-    DataObjects::EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws1 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
     TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 11);
 
     // Check Workspace group 2
-    DataObjects::EventWorkspace_sptr filteredws2 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws2 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
     TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 21);
 
-    DataObjects::EventList elist3 = filteredws2->getSpectrum(3);
+    EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
-    DataObjects::TofEvent eventmin = elist3.getEvent(0);
+    TofEvent eventmin = elist3.getEvent(0);
     TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(),
                      runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
 
-    DataObjects::TofEvent eventmax = elist3.getEvent(20);
+    TofEvent eventmax = elist3.getEvent(20);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
                      runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
@@ -198,11 +196,11 @@ public:
     int64_t tofdt = 10 * 1000 * 1000;
     size_t numpulses = 5;
 
-    DataObjects::EventWorkspace_sptr inpWS =
+    EventWorkspace_sptr inpWS =
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
-    DataObjects::SplittersWorkspace_sptr splws =
+    SplittersWorkspace_sptr splws =
         createSplitter(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
@@ -224,36 +222,36 @@ public:
     TS_ASSERT_EQUALS(numsplittedws, 3);
 
     // 4.1 Workspace group 0
-    DataObjects::EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws0 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
 
     // 4.2 Workspace group 1
-    DataObjects::EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws1 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     // 4.3 Workspace group 2
-    DataObjects::EventWorkspace_sptr filteredws2 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws2 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS01_3"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
 
-    DataObjects::EventList elist3 = filteredws2->getSpectrum(3);
+    EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
-    DataObjects::TofEvent eventmin = elist3.getEvent(0);
+    TofEvent eventmin = elist3.getEvent(0);
     TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(),
                      runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
 
-    DataObjects::TofEvent eventmax = elist3.getEvent(20);
+    TofEvent eventmax = elist3.getEvent(20);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
                      runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
@@ -281,11 +279,11 @@ public:
     int64_t tofdt = 10 * 1000 * 1000;
     size_t numpulses = 5;
 
-    DataObjects::EventWorkspace_sptr inpWS =
+    EventWorkspace_sptr inpWS =
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("EventData", inpWS);
 
-    DataObjects::SplittersWorkspace_sptr splws =
+    SplittersWorkspace_sptr splws =
         createFastFreqLogSplitter(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
     TS_ASSERT_EQUALS(splws->rowCount(), static_cast<size_t>(numpulses) * 2);
@@ -314,8 +312,8 @@ public:
 
     // 4. Get output
     // 4.1 Workspace group 0
-    DataObjects::EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws0 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("SplittedDataX_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
@@ -324,19 +322,19 @@ public:
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
 
     // 4.2 Workspace group 1
-    DataObjects::EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws1 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("SplittedDataX_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 10);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
 
     // 4.3 Some individual events
-    DataObjects::EventList elist3 = filteredws1->getSpectrum(3);
+    EventList elist3 = filteredws1->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
     if (elist3.getNumberEvents() > 0) {
-      DataObjects::TofEvent eventmin = elist3.getEvent(0);
+      TofEvent eventmin = elist3.getEvent(0);
       TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64);
       TS_ASSERT_DELTA(eventmin.tof(), 80 * 1000, 1.0E-4);
     }
@@ -359,7 +357,7 @@ public:
   /** Test filtering with correction of direct geometry
     */
   void test_FilterElasticCorrection() {
-    DataObjects::EventWorkspace_sptr ws =
+    EventWorkspace_sptr ws =
         createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -418,7 +416,7 @@ public:
   /** Test filtering with correction of direct geometry
     */
   void test_FilterDGCorrection() {
-    DataObjects::EventWorkspace_sptr ws =
+    EventWorkspace_sptr ws =
         createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -471,7 +469,7 @@ public:
     */
   void test_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
-    DataObjects::EventWorkspace_sptr ws =
+    EventWorkspace_sptr ws =
         createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
 
@@ -501,17 +499,18 @@ public:
                        ws->getNumberHistograms());
       TS_ASSERT_EQUALS(outcorrws->x(0).size(), 2);
 
-      Kernel::V3D samplepos = ws->getInstrument()->getSample()->getPos();
+      const auto &spectrumInfo = ws->spectrumInfo();
+
+      const auto &samplepos = spectrumInfo.samplePosition();
 
       for (size_t iws = 0; iws < outcorrws->getNumberHistograms(); ++iws) {
         const ParameterMap &pmap = ws->constInstrumentParameters();
 
-        IDetector_const_sptr det = ws->getDetector(iws);
-        Kernel::V3D detpos = det->getPos();
-        Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
+        const auto &det = spectrumInfo.detector(iws);
+        Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
         double efix = par->value<double>();
 
-        double l2 = samplepos.distance(detpos);
+        double l2 = samplepos.distance(spectrumInfo.position(iws));
 
         double shift = -l2 / sqrt(efix * 2. * PhysicalConstants::meV /
                                   PhysicalConstants::NeutronMass);
@@ -555,7 +554,7 @@ public:
     int64_t tofdt = 10 * 1000 * 1000;
     size_t numpulses = 5;
 
-    DataObjects::EventWorkspace_sptr inpWS =
+    EventWorkspace_sptr inpWS =
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test10", inpWS);
 
@@ -581,37 +580,37 @@ public:
     TS_ASSERT_EQUALS(numsplittedws, 3);
 
     // Workspace 0
-    DataObjects::EventWorkspace_sptr filteredws0 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws0 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
 
     // Workspace 1
-    DataObjects::EventWorkspace_sptr filteredws1 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws1 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     // Workspace 2
-    DataObjects::EventWorkspace_sptr filteredws2 =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+    EventWorkspace_sptr filteredws2 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
     // Check spectrum 3 of workspace 2
-    DataObjects::EventList elist3 = filteredws2->getSpectrum(3);
+    EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
 
-    DataObjects::TofEvent eventmin = elist3.getEvent(0);
+    TofEvent eventmin = elist3.getEvent(0);
     TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(),
                      runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
 
-    DataObjects::TofEvent eventmax = elist3.getEvent(26);
+    TofEvent eventmax = elist3.getEvent(26);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
                      runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
@@ -637,12 +636,12 @@ public:
    * int64_t format of unit nanosecond
     * @param numpulses : number of pulses in the event workspace
    */
-  DataObjects::EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64,
+  EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64,
                                                         int64_t pulsedt,
                                                         int64_t tofdt,
                                                         size_t numpulses) {
     // 1. Create an EventWorkspace with 10 detectors
-    DataObjects::EventWorkspace_sptr eventWS =
+    EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
@@ -665,7 +664,7 @@ public:
         pchargeLog->addValue(pulsetime, 1.);
         for (size_t e = 0; e < 10; e++) {
           double tof = static_cast<double>(e * tofdt / 1000);
-          DataObjects::TofEvent event(tof, pulsetime);
+          TofEvent event(tof, pulsetime);
           elist.addEventQuickly(event);
         }
       } // FOR each pulse
@@ -686,17 +685,18 @@ public:
     *nanosecond
     * @param pulsedt : pulse length in int64_t format with unit nanosecond
    */
-  DataObjects::EventWorkspace_sptr
+  EventWorkspace_sptr
   createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
     // is generated
-    DataObjects::EventWorkspace_sptr eventWS =
+    EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
     // L1 = 10
-    Kernel::V3D samplepos = eventWS->getInstrument()->getSample()->getPos();
-    Kernel::V3D sourcepos = eventWS->getInstrument()->getSource()->getPos();
+    const auto &spectrumInfo = eventWS->spectrumInfo();
+    const auto &samplepos = spectrumInfo.samplePosition();
+    Kernel::V3D sourcepos = spectrumInfo.sourcePosition();
     double l1 = samplepos.distance(sourcepos);
 
     Kernel::DateAndTime runstart(runstart_i64);
@@ -736,27 +736,31 @@ public:
    * nanosecond
     * @param pulsedt : pulse length in int64_t format with unit nanosecond
     */
-  DataObjects::EventWorkspace_sptr
+  EventWorkspace_sptr
   createEventWorkspaceInDirect(int64_t runstart_i64, int64_t pulsedt) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
     // is generated
-    DataObjects::EventWorkspace_sptr eventWS =
+    EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
-
     // Add EFixed to each detector
     const ParameterMap &pmap = eventWS->constInstrumentParameters();
 
     for (size_t i = 0; i < 10; ++i) {
-      Geometry::IDetector_const_sptr det = eventWS->getDetector(i);
-      Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
+
+      const auto &spectrumInfo = eventWS->spectrumInfo();
+
+      if (!spectrumInfo.hasUniqueDetector(i))
+        continue;
+      const auto &det = spectrumInfo.detector(i);
+      Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
       if (par) {
         // No need to set up E-Fix
         // double efix = par->value<double>();
         ;
       } else {
 
-        eventWS->setEFixed(det->getID(), 2.08);
+        eventWS->setEFixed(det.getID(), 2.08);
       }
     }
 
@@ -781,11 +785,11 @@ public:
    * @param pulsedt
    * @return
    */
-  DataObjects::EventWorkspace_sptr
+  EventWorkspace_sptr
   createEventWorkspaceElastic(int64_t runstart_i64, int64_t pulsedt) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
     // is generated
-    DataObjects::EventWorkspace_sptr eventWS =
+    EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
@@ -825,11 +829,11 @@ public:
    * int64_t format of unit nanosecond
     * @param numpulses : number of pulses in the event workspace
    */
-  DataObjects::SplittersWorkspace_sptr
+  SplittersWorkspace_sptr
   createSplitter(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt) {
-    DataObjects::SplittersWorkspace_sptr splitterws =
-        boost::shared_ptr<DataObjects::SplittersWorkspace>(
-            new DataObjects::SplittersWorkspace);
+    SplittersWorkspace_sptr splitterws =
+        boost::shared_ptr<SplittersWorkspace>(
+            new SplittersWorkspace);
 
     // 1. Splitter 0: 0 ~ 3+ (first pulse)
     int64_t t0 = runstart_i64;
@@ -935,8 +939,8 @@ public:
 
     // 1. Create an empty splitter workspace
     SplittersWorkspace_sptr splitterws =
-        boost::shared_ptr<DataObjects::SplittersWorkspace>(
-            new DataObjects::SplittersWorkspace);
+        boost::shared_ptr<SplittersWorkspace>(
+            new SplittersWorkspace);
 
     // 2. Create splitters
     for (size_t i = 0; i < numpulses; ++i) {
@@ -969,8 +973,8 @@ public:
     corrtable->addColumn("double", "Correction");
 
     // 2. Add rows
-    Instrument_const_sptr instrument = inpws->getInstrument();
-    vector<int> detids = instrument->getDetectorIDs();
+    const auto &detectorInfo = inpws->detectorInfo();
+    const auto detids = detectorInfo.detectorIDs();
     for (size_t i = 0; i < detids.size(); ++i) {
       int detid = detids[i];
       double factor = 0.75;
