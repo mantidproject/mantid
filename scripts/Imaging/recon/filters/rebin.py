@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
+from parallel import shared_mem as psm
 
 
 def execute(data, rebin, mode, cores=1, chunksize=None, h=None):
@@ -23,11 +24,10 @@ def _execute_par(data, rebin, mode, cores=1, chunksize=None, h=None):
 
     resized_data = _create_reshaped_array(data.shape, rebin)
 
-    from functools import partial
-    f = partial(scipy.misc.imresize, size=rebin, interp=mode)
+    h.pstart("Starting PARALLEL image resizing.")
+    f = psm.create_partial(scipy.misc.imresize, forward_function=psm.inplace_forward_func, size=rebin, interp=mode, output=resized_data)
 
-    resized_data = Helper.execute_async(
-        data, f, cores, chunksize, "Rebinning", h, output_data=resized_data)
+    resized_data = psm.execute(data, f, cores, chunksize, "Rebinning", h, output_data=resized_data)
 
     h.pstop("Finished PARALLEL image resizing. New shape: {0}".format(
         resized_data.shape))
@@ -38,8 +38,9 @@ def _execute_par(data, rebin, mode, cores=1, chunksize=None, h=None):
 def _execute_seq(data, rebin, mode, h=None):
     import scipy.misc
 
+    h.pstart("Starting image resizing.")
     resized_data = _create_reshaped_array(data.shape, rebin)
-
+    num_images = resized_data.shape[0]
     h.prog_init(num_images, "Rebinning images")
     for idx in range(num_images):
         resized_data[idx] = scipy.misc.imresize(
@@ -56,7 +57,6 @@ def _execute_seq(data, rebin, mode, h=None):
 
 
 def _create_reshaped_array(old_shape, rebin):
-    import numpy as np
     num_images = old_shape[0]
 
     # use SciPy's calculation to find the expected dimensions
@@ -64,12 +64,8 @@ def _create_reshaped_array(old_shape, rebin):
     expected_dimy = int(rebin * old_shape[1])
     expected_dimx = int(rebin * old_shape[2])
 
-    h.pstart("Starting image resizing to rebin {0} with interpolation mode {1}".format(
-        rebin, mode))
-
     # allocate memory for images with new dimensions
-    return np.zeros((num_images, expected_dimy,
-                     expected_dimx), dtype=np.float32)
+    return psm.create_shared_array((num_images, expected_dimy, expected_dimx))
 
 
 def _execute_custom(data, config):

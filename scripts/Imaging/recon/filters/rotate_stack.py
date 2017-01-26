@@ -3,22 +3,14 @@ import numpy as np
 from recon.helper import Helper
 
 
-def _rotate_image(data, rotation=None):
+def _rotate_image_inplace(data, rotation=None):
     # rot90 rotates counterclockwise; config.pre.rotation rotates clockwise
     data[:, :] = np.rot90(data[:, :], rotation)
-    return data
 
 
-def _rotate_stack(data, rotation, h=None):
-    """
-    WARNING: ONLY WORKS FOR SQUARE IMAGES
-    Rotate every image of a stack
-
-    :param data :: image stack as a 3d numpy array
-    :param rotation :: rotation for the image
-
-    Returns :: rotated data (stack of images)
-    """
+def _rotate_image(data, rotation=None):
+    # rot90 rotates counterclockwise; config.pre.rotation rotates clockwise
+    return np.rot90(data[:, :], rotation)
 
 
 def execute(data, rotation, flat=None, dark=None, cores=1, chunksize=None, h=None):
@@ -101,11 +93,11 @@ def _execute_par(data, rotation, cores=1, chunksize=None, h=None):
         "Starting PARALLEL rotation step ({0} degrees clockwise), with pixel data type: {1}...".
         format(rotation * 90, data.dtype))
 
-    from functools import partial
-    f = partial(_rotate_image, rotation=rotation)
+    from parallel import shared_mem as psm
 
-    data = Helper.execute_async(
-        data, f, cores=cores, chunksize=chunksize, name="Rotation", h=h)
+    f = psm.create_partial(_rotate_image_inplace, forward_function=psm.inplace_forward_func, rotation=rotation)
+
+    data = psm.execute(data, f, cores=cores, chunksize=chunksize, name="Rotation", h=h)
 
     h.pstop("Finished PARALLEL rotation step ({0} degrees clockwise), with pixel data type: {1}."
             .format(rotation * 90, data.dtype))

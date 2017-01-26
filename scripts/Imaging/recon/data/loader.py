@@ -104,8 +104,8 @@ def load_stack(sample_path, flat_file_path=None, dark_file_path=None,
     sample_data = _load_sample_data(
         first_sample_img, sample_file_names, img_shape, img_format, data_dtype, h)
 
-    # this removes the image number dimension, because we do not need it
-    img_shape = img_shape[1:]
+    # this removes the image number dimension, if we loaded a stack of images
+    img_shape = img_shape[1:] if len(img_shape) > 2 else img_shape
     flat_avg = _load_and_avg_data(
         flat_file_path, img_shape, img_format, data_dtype, h, "Flat")
     dark_avg = _load_and_avg_data(
@@ -166,8 +166,11 @@ def _read_listed_files(files, img_shape, img_format, dtype, h=None, loop_name=No
 
     # Zeroing here to make sure that we can allocate the memory.
     # If it's not possible better crash here than later
-    data = np.zeros((len(files), img_shape[
-                    0], img_shape[1]), dtype=dtype)
+    from parallel import shared_mem as psm
+    data = psm.create_shared_array(
+        (len(files), img_shape[0], img_shape[1]), dtype=dtype)
+    # data = np.zeros((len(files), img_shape[
+    #     0], img_shape[1]), dtype=dtype)
 
     # FIXME TODO PERFORMANCE CRITICAL
     # TODO Performance Tests

@@ -14,6 +14,21 @@ def inplace_forward_func(func, i, **kwargs):
     Forward a function that WILL NOT return some data, and will just overwrite it inplace.
     Use if the parameter function does NOT have a return statement, and thus will not return any data.
 
+    You HAVE to be careful when using this, for example the func:
+    def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
+        data = np.clip(np.true_divide(
+            data - dark, norm_divide), clip_min, clip_max)
+
+    DOES NOT CHANGE THE DATA! Because the data = ... variable inside is just a local variable that is discarded.
+
+    The proper way to write this function is:
+    def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
+        data[:] = np.clip(np.true_divide(
+            data - dark, norm_divide), clip_min, clip_max)
+
+    Notice the data[:], what this does is refer to the ACTUAL parameter, and then changes it's contents, as [:] gives
+    a reference back to the inner contents.
+
     :param func: Function that will be executed
     :param i: index from the shared_data on which to operate
     :param kwargs: kwargs to forward to the function func that will be executed

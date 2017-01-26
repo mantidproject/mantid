@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
 
+__module__ = 'gaussian_p'
 
 def execute(data, size, mode, order, cores=1, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
@@ -72,14 +73,15 @@ def _execute_par(data, size, mode, order, cores=1, chunksize=None, h=None):
 
     scipy_ndimage = import_scipy_ndimage()
 
-    from functools import partial
-    f = partial(scipy_ndimage.gaussian_filter,
+    from parallel import shared_mem as psm
+
+    f = psm.create_partial(scipy_ndimage.gaussian_filter, forward_function=psm.forward_func,
                 sigma=size, mode=mode, order=order)
 
     h.pstart(
         "Starting PARALLEL gaussian filter, with pixel data type: {0}, filter size/width: {1}.".
         format(data.dtype, size))
-    data = Helper.execute_async(data, f, cores, chunksize, "Gaussian", h)
+    data = psm.execute(data, f, cores, chunksize, "Gaussian", h)
 
     h.pstop(
         "Finished  gaussian filter, with pixel data type: {0}, filter size/width: {1}.".

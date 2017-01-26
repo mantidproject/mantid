@@ -2,6 +2,36 @@ from __future__ import (absolute_import, division, print_function)
 import os
 
 
+def write_fits(data, filename, overwrite=False):
+    # save out in fits
+    # TODO save out and read the flat and dark images too ?
+
+    from recon.data.loader import import_pyfits
+    fits = import_pyfits()
+    hdu = fits.PrimaryHDU(data)
+    hdulist = fits.HDUList([hdu])
+    hdulist.writeto(filename, clobber=overwrite)
+
+
+def write_nxs(data, filename, flat=None, dark=None, projection_angles=None, overwrite=False):
+    # Adapted code from Nagella, Srikanth (STFC,RAL,SC)
+    # <srikanth.nagella@stfc.ac.uk>
+    import numpy as np
+    import h5py
+    nxs = h5py.File(filename, 'w')
+    if flat is not None:
+        data = np.append(data, flat, axis=0)  # [-2]
+    if dark is not None:
+        data = np.append(data, dark, axis=0)  # [-1]
+
+    dset = nxs.create_dataset(
+        "entry1/tomo_entry/instrument/detector/data", data=data)
+
+    if projection_angles is not None:
+        rangle = nxs.create_dataset(
+            "entry1/tomo_entry/sample/rotation_angle", data=projection_angles)
+
+
 class Saver(object):
     """
     This class doesn't have any try: ... except: ... because when called
@@ -22,36 +52,6 @@ class Saver(object):
         # reuse supported formats, they currently share them
         from recon.data.loader import supported_formats
         return supported_formats()
-
-    @staticmethod
-    def write_fits(data, filename, overwrite=False):
-        # save out in fits
-        # TODO save out and read the flat and dark images too
-
-        from recon.data.loader import import_pyfits
-        fits = import_pyfits()
-        hdu = fits.PrimaryHDU(data)
-        hdulist = fits.HDUList([hdu])
-        hdulist.writeto(filename, clobber=overwrite)
-
-    @staticmethod
-    def write_nxs(data, filename, flat=None, dark=None, projection_angles=None, overwrite=False):
-        # Adapted code from Nagella, Srikanth (STFC,RAL,SC)
-        # <srikanth.nagella@stfc.ac.uk>
-        import numpy as np
-        import h5py
-        nxs = h5py.File(filename, 'w')
-        if flat is not None:
-            data = np.append(data, flat, axis=0)  # [-2]
-        if dark is not None:
-            data = np.append(data, dark, axis=0)  # [-1]
-
-        dset = nxs.create_dataset(
-            "entry1/tomo_entry/instrument/detector/data", data=data)
-
-        if projection_angles is not None:
-            rangle = nxs.create_dataset(
-                "entry1/tomo_entry/sample/rotation_angle", data=projection_angles)
 
     def __init__(self, config):
         from recon.helper import Helper

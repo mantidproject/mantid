@@ -79,14 +79,17 @@ def _execute_par(data, size, mode, cores=1, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     scipy_ndimage = import_scipy_ndimage()
 
-    from functools import partial
-    f = partial(scipy_ndimage.median_filter, size=size, mode=mode)
+    from parallel import shared_mem as psm
+    f = psm.create_partial(scipy_ndimage.median_filter, forward_function=psm.forward_func,
+                           size=size, mode=mode)
+    # from functools import partial
+    # f = partial(scipy_ndimage.median_filter, size=size, mode=mode)
 
     h.pstart("Starting PARALLEL median filter, with pixel data type: {0}, filter size/width: {1}.".
              format(data.dtype, size))
 
-    data = Helper.execute_async(data, f, cores, chunksize, "Median Filter", h)
-
+    # data = Helper.execute_async(data, f, cores, chunksize, "Median Filter", h)
+    data = psm.execute(data, f, cores, chunksize, "Median Filter", h)
     h.pstop("Finished PARALLEL median filter, with pixel data type: {0}, filter size/width: {1}.".
             format(data.dtype, size))
 

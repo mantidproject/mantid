@@ -3,12 +3,17 @@ from recon.helper import Helper
 import numpy as np
 
 
+def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
+    data[:] = np.clip(np.true_divide(
+        data - dark, norm_divide), clip_min, clip_max)
+
+
 def _apply_normalise(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
     return np.clip(np.true_divide(
         data - dark, norm_divide), clip_min, clip_max)
 
 
-def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
+def execute(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
@@ -35,7 +40,7 @@ def execute(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, co
     return data
 
 
-def _execute_par(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
+def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
     """
     Normalise by flat and dark images
 
@@ -60,13 +65,12 @@ def _execute_par(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.
 
     # prevent divide-by-zero issues
     norm_divide[norm_divide == 0] = 1e-6
+    from parallel import shared_mem as psm
+    f = psm.create_partial(_apply_normalise_inplace, forward_function=psm.inplace_forward_func,
+                           dark=norm_dark_img, norm_divide=norm_divide, clip_min=clip_min,
+                           clip_max=clip_max)
 
-    from functools import partial
-    f = partial(_apply_normalise, dark=norm_dark_img,
-                norm_divide=norm_divide, clip_min=clip_min, clip_max=clip_max)
-
-    data = Helper.execute_async(
-        data, f, cores, chunksize, "Norm by Flat/Dark", h)
+    data = psm.execute(data, f, cores, chunksize, "Norm by Flat/Dark", h)
 
     h.pstop(
         "Finished PARALLEL normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
@@ -74,7 +78,7 @@ def _execute_par(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.
     return data
 
 
-def execute_not(data, norm_flat_img=1, norm_dark_img=0, clip_min=0, clip_max=1.5, h=None):
+def _execute_seq(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, h=None):
     """
     Normalise by flat and dark images
 

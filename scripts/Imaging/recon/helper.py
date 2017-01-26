@@ -129,7 +129,7 @@ class Helper(object):
                     str(cores) + "c " + str(chunksize) + "chs")
 
         for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
-            # output_data[i, :, :] = res_data[:, :]
+            output_data[i, :, :] = res_data[:, :]
             h.prog_update()
 
         pool.close()
