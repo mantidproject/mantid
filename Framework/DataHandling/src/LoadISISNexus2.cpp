@@ -1286,15 +1286,16 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   if ((totNumOfSpectra != static_cast<size_t>(n_vms_compat_spectra)) ||
       (spectraID_max - spectraID_min + 1 !=
        static_cast<int64_t>(n_vms_compat_spectra))) {
-      // At this point we normally throw since there is a mismatch between the number
-      // spectra of the detectors+monitors and the entry in NSP1, but in the
-      // case of multiple time regimes this comparison is not any longer valid.
-      // Hence we only throw if the file does not correspond to a multiple time
-      // regime file.
-      if (!isMultipleTimeRegimeFile(entry)) {
-          throw std::runtime_error("LoadISISNexus: There seems to be an "
-                                   "inconsistency in the spectrum numbers.");
-      }
+    // At this point we normally throw since there is a mismatch between the
+    // number
+    // spectra of the detectors+monitors and the entry in NSP1, but in the
+    // case of multiple time regimes this comparison is not any longer valid.
+    // Hence we only throw if the file does not correspond to a multiple time
+    // regime file.
+    if (!isMultipleTimeRegimeFile(entry)) {
+      throw std::runtime_error("LoadISISNexus: There seems to be an "
+                               "inconsistency in the spectrum numbers.");
+    }
   }
 
   return separateMonitors;
@@ -1313,7 +1314,7 @@ bool LoadISISNexus2::isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const {
     NXClass instrument = entry.openNXGroup("instrument");
     NXClass dae = instrument.openNXGroup("dae");
     hasMultipleTimeRegimes = dae.containsGroup("time_channels_3");
-  } catch(...) {
+  } catch (...) {
   }
   return hasMultipleTimeRegimes;
 }
