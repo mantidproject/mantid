@@ -9,6 +9,7 @@
 #include "MantidKernel/EmptyValues.h"
 
 #include <atomic>
+#include <mutex>
 
 namespace Mantid {
 
@@ -607,7 +608,8 @@ private:
   /// containing workspace (null if none).
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
 
-  std::atomic<bool> m_indexInfoNeedsUpdate{true};
+  mutable std::atomic<bool> m_indexInfoNeedsUpdate{true};
+  mutable std::mutex m_indexInfoMutex;
 
 protected:
   /// Getter for the dimension id based on the axis.

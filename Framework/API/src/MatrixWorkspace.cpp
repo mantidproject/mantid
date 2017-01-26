@@ -44,23 +44,13 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace()
     : IMDWorkspace(), ExperimentInfo(), m_axes(),
-      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
-          std::bind(&MatrixWorkspace::getNumberHistograms, this),
-          std::bind(&MatrixWorkspace::spectrumNumber, this,
-                    std::placeholders::_1),
-          std::bind(&MatrixWorkspace::detectorIDs, this,
-                    std::placeholders::_1))),
       m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
       m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other),
-      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
-          std::bind(&MatrixWorkspace::getNumberHistograms, this),
-          std::bind(&MatrixWorkspace::spectrumNumber, this,
-                    std::placeholders::_1),
-          std::bind(&MatrixWorkspace::detectorIDs, this,
-                    std::placeholders::_1))) {
+    : IMDWorkspace(other), ExperimentInfo(other) {
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(other.indexInfo());
+  m_indexInfoNeedsUpdate = false;
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = other.m_axes[i]->clone(this);
@@ -85,14 +75,41 @@ MatrixWorkspace::~MatrixWorkspace() {
 
 /** Returns a const reference to the IndexInfo object of the workspace.
  *
- * Used for access to spectrum number and detector ID information of spectra. */
+ * Used for access to spectrum number and detector ID information of spectra.
+ * Writing spectrum number or detector ID groupings of any spectrum in the
+ * workspace will invalidate this reference. */
 const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
-  // API::SpectrumInfo::sharedSpectrumDefinitions updates definitions before
-  // returning. We always set spectrum definitions, since definitions that were
-  // previously set into the IndexInfo may have run out of sync (due to a
-  // copy-on-write mechanism).
-  m_indexInfo->setSpectrumDefinitions(
-      spectrumInfo().sharedSpectrumDefinitions());
+  // Individual SpectrumDefinitions in SpectrumInfo may have changed. Due to a
+  // copy-on-write mechanism the definitions stored in IndexInfo may then be out
+  // of sync.
+  if (m_indexInfo->spectrumDefinitions().get() !=
+      spectrumInfo().sharedSpectrumDefinitions().get()) {
+    std::lock_guard<std::mutex> lock(m_indexInfoMutex);
+    if (m_indexInfo->spectrumDefinitions().get() !=
+        spectrumInfo().sharedSpectrumDefinitions().get()) {
+      m_indexInfo->setSpectrumDefinitions(
+          spectrumInfo().sharedSpectrumDefinitions());
+      // Changed SpectrumDefinitions implies that detector IDs in ISpectrum have
+      // changed.
+      std::vector<std::vector<detid_t>> detIDs;
+      for (size_t i = 0; i < getNumberHistograms(); ++i) {
+        const auto &set = getSpectrum(i).getDetectorIDs();
+        detIDs.emplace_back(set.begin(), set.end());
+      }
+      m_indexInfo->setDetectorIDs(std::move(detIDs));
+    }
+  }
+  // If spectrum numbers are set in ISpectrum this flag will be true.
+  if (m_indexInfoNeedsUpdate) {
+    std::lock_guard<std::mutex> lock(m_indexInfoMutex);
+    if (m_indexInfoNeedsUpdate) {
+      std::vector<specnum_t> spectrumNumbers;
+      for (size_t i = 0; i < getNumberHistograms(); ++i)
+        spectrumNumbers.push_back(getSpectrum(i).getSpectrumNo());
+      m_indexInfo->setSpectrumNumbers(std::move(spectrumNumbers));
+      m_indexInfoNeedsUpdate = false;
+    }
+  }
   return *m_indexInfo;
 }
 
@@ -112,6 +129,8 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
     auto ids = indexInfo.detectorIDs(i);
     spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
   }
+  *m_indexInfo = indexInfo;
+  m_indexInfoNeedsUpdate = false;
   // This sets the SpectrumDefinitions for the SpectrumInfo, which may seem
   // counterintuitive at first -- why would setting IndexInfo modify internals
   // of SpectrumInfo? However, logically it would not make sense to assign
@@ -186,6 +205,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
     return;
 
   setNumberOfDetectorGroups(NVectors);
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -212,6 +232,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
     return;
 
   setNumberOfDetectorGroups(NVectors);
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
