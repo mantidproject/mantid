@@ -34,7 +34,7 @@ def execute(config, cmd_line=None):
     # Save pre-proc images, print inside
     saver.save_preproc_images(sample)
     if config.func.only_preproc is True:
-        return 14
+        return sample
 
     # ----------------------------------------------------------------
     # Reconstruction
@@ -47,7 +47,7 @@ def execute(config, cmd_line=None):
 
     # TODO new class for readme
     # saver.gen_readme_summary_end(sample)
-    return 0
+    return sample
 
 
 def pre_processing(config, sample, flat, dark):
@@ -221,7 +221,7 @@ def load_data(config, h):
 
     h.pstart("Loading data...")
 
-    sample, flat, dark = loader.read_in_stack(config)
+    sample, flat, dark = loader.load_stack_config(config)
 
     h.pstop("Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
         sample.shape, sample.dtype))

@@ -107,13 +107,15 @@ class Helper(object):
             pass
 
     @staticmethod
-    def execute_async(data=None, partial_func=None, cores=1, chunksize=None, name=None, h=None, output_data=None):
+    def execute_async(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, output_data=None):
         h = Helper.empty_init() if h is None else h
 
         if chunksize is None:
             chunksize = 1  # TODO use proper calculation
 
         if output_data is None:
+            # this will just increase the reference counter,
+            # no data will be copied
             output_data = data[:]
 
         from multiprocessing import Pool
@@ -125,8 +127,9 @@ class Helper(object):
         # imap seems to be the best choice
         h.prog_init(data.shape[0], name + " " +
                     str(cores) + "c " + str(chunksize) + "chs")
+
         for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
-            output_data[i, :, :] = res_data[:, :]
+            # output_data[i, :, :] = res_data[:, :]
             h.prog_update()
 
         pool.close()
@@ -135,9 +138,10 @@ class Helper(object):
 
         return output_data
 
-    def multiprocessing_available(self):
+    @staticmethod
+    def multiprocessing_available():
         try:
-            from multiprocessing import Pool
+            import multiprocessing
             return True
         except ImportError:
             return False
@@ -356,9 +360,6 @@ class Helper(object):
         """
         if self._progress_bar is not None:
             self._progress_bar.update(value)
-        else:
-            print(".", end='')
-            sys.stdout.flush()
 
     def prog_close(self):
         """

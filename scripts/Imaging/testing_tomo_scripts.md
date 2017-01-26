@@ -32,7 +32,7 @@
     - [--find-cor](#--find-cor)
     - [--crop-before-normalise](#--crop-before-normalise)
 - [Testing the Big Data](#testing-the-big-data)
-- [Chamber Tomo Find COR](#chamber-tomo-find-cor)
+- [SCARF Chamber Tomo Find COR](#scarf-chamber-tomo-find-cor)
 
 <!-- /TOC -->
  
@@ -234,7 +234,7 @@ import matplotlib.pyplot as plt
 from recon.filters import rotate_stack
 
 # load single images
-sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
+sample = loader.load_stack('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 plt.imshow(rsample[0,232:509,35:224], cmap='Greys_r')  # spheres
 plt.show()
@@ -252,7 +252,7 @@ plt.show()
 import tomopy 
 plt.imshow(tomopy.circ_mask(csample, axis=0, ratio=0.98)[0, :, :]); plt.show()
 # load a stack of images
-sample = loader.read_stack_of_images('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/gridrec/pre_processed', argument_data_dtype=np.float32)[0]
+sample = loader.load_stack('/media/matt/Windows/Documents/mantid_workspaces/imaging/RB000888_test_stack_larmor_summed_201510/processed/gridrec/pre_processed', argument_data_dtype=np.float32)[0]
 ```
 
 # Plot Circular Mask
@@ -263,7 +263,7 @@ import matplotlib.pyplot as plt
 from recon.filters import rotate_stack
 
 # load single images
-sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
+sample = loader.load_stack('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 csample = rsample[:, 0:228,41:233]
 import tomopy 
@@ -284,8 +284,8 @@ from recon.configs.recon_config import ReconstructionConfig
 
 config = ReconstructionConfig.emtpy_init()
 
-sample, flat, dark = loader.read_stack_of_images(sample_path='~/Documents/img/000888/data_full', flat_file_path='~/Documents/img/000888/flat', dark_file_path='~/Documents/img/000888/dark', argument_data_dtype=np.float32)
-tsample, tflat, tdark = loader.read_stack_of_images(sample_path='~/Documents/img/000888/data_full', flat_file_path='~/Documents/img/000888/flat', dark_file_path='~/Documents/img/000888/dark', argument_data_dtype=np.float32)
+sample, flat, dark = loader.load_stack(sample_path='~/Documents/img/000888/data_full', flat_file_path='~/Documents/img/000888/flat', dark_file_path='~/Documents/img/000888/dark', argument_data_dtype=np.float32)
+tsample, tflat, tdark = loader.load_stack(sample_path='~/Documents/img/000888/data_full', flat_file_path='~/Documents/img/000888/flat', dark_file_path='~/Documents/img/000888/dark', argument_data_dtype=np.float32)
 r = 3
 
 sample = rs._rotate_stack(sample, r)
@@ -315,7 +315,7 @@ import matplotlib.pyplot as plt
 from recon.filters import rotate_stack
 
 # load single images
-sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
+sample = loader.load_stack('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 csample = rsample[:, 0:228,41:233]
 num_proj = csample.shape[0]
@@ -358,7 +358,7 @@ from recon.filters import rotate_stack
 import scipy.ndimage as sn
 
 # load single images
-sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
+sample = loader.load_stack('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 print(rsample.shape)
 rebin = 0.6565
@@ -381,7 +381,7 @@ import matplotlib.pyplot as plt
 from recon.filters import rotate_stack
 import scipy.misc as sm
 # load single images
-sample = loader.read_stack_of_images('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
+sample = loader.load_stack('~/Documents/img/000888/data_full', argument_data_dtype=np.float32)[0]
 rsample = rotate_stack._rotate_stack(sample, 3)
 print(rsample.shape)
 rebin = 1.5
@@ -408,7 +408,7 @@ import scipy.misc as sm
 import scipy.ndimage as sn
 from recon.helper import Helper
 
-sample = loader.read_stack_of_images("~/Documents/img/000888/data_full")[0]
+sample = loader.load_stack("~/Documents/img/000888/data_full")[0]
 
 def imresize(sample):
     boop = np.zeros((143, 336, 336), dtype=np.float32)
@@ -441,7 +441,7 @@ import scipy.misc as sm
 import scipy.ndimage as sn
 from recon.helper import Helper
 
-sample = loader.read_stack_of_images("~/Documents/img/000888/data_full")[0]
+sample = loader.load_stack("~/Documents/img/000888/data_full")[0]
 sample = np.concatenate(sample, sample)
 def imresize(sample):
     boop = np.zeros((143, 336, 336), dtype=np.float32)
@@ -505,11 +505,13 @@ Time: ~35s
 Memory: 8016  MB
 Data Type: float32
 
-# Chamber Tomo Find COR
+# SCARF Chamber Tomo Find COR
 
 ```python 
 python main.py 
-bsub -I python /work/imat/imat_recon/scripts/main.py -i /work/imat/chamber_tomo/temp/full_stack/ -k /work/imat/chamber_tomo/Dark/ -l /work/imat/chamber_tomo/Flat/ -o /work/imat/chamber_tomo/temp/full_preproc --out-format fits --only-preproc --data-as-stack -w --in-format fits -R 384 0 1550 1932 -A 384 686 476 804 --pre-median-size 3
+bsub -I python /work/imat/imat_recon/scripts/main.py 
+
+-i /work/imat/chamber_tomo/temp/full_stack/ -k /work/imat/chamber_tomo/Dark/ -l /work/imat/chamber_tomo/Flat/ -o /work/imat/chamber_tomo/temp/full_preproc --out-format fits --only-preproc --data-as-stack -w --in-format fits -R 384 0 1550 1932 -A 384 686 476 804 --pre-median-size 3
 ```
 
 >python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/1000/pre_processed -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1000_processed -g '[384.0, 0.0, 1550.0, 1932.0]' -f

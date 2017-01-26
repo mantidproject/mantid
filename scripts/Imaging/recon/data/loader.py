@@ -25,7 +25,7 @@ def supported_formats():
     return avail_list
 
 
-def read_in_stack(config):
+def load_stack_config(config):
     """
     Loads a stack, including sample, white and dark images.
 
@@ -41,7 +41,7 @@ def read_in_stack(config):
     h = config.helper
 
     if img_format in ['fits', 'fit']:
-        sample, flat, dark = read_stack_of_images(
+        sample, flat, dark = load_stack(
             input_path, input_path_flat, input_path_dark, img_format, data_dtype, h)
 
     elif img_format in ['nxs']:
@@ -58,8 +58,8 @@ def read_in_stack(config):
     return sample, flat, dark
 
 
-def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
-                         img_format='fits', argument_data_dtype=np.float32, h=None):
+def load_stack(sample_path, flat_file_path=None, dark_file_path=None,
+               img_format='fits', argument_data_dtype=np.float32, h=None):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -77,7 +77,7 @@ def read_stack_of_images(sample_path, flat_file_path=None, dark_file_path=None,
     :param argument_data_dtype: the type in which the data will be loaded, could be float16, float32, float64, uint16
 
     :return :: 3 numpy arrays: input data volume (3d), average of flatt images (2d),
-    average of dark images(2d)
+               average of dark images(2d)
     """
 
     sample_file_names = _get_stack_file_names(

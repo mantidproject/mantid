@@ -41,6 +41,7 @@ class FunctionalConfig(object):
         self.reuse_preproc = False
         self.preproc_subdir = 'pre_processed'
         self.data_as_stack = False
+        self.convert = False
 
         import numpy as np
 
@@ -108,7 +109,7 @@ class FunctionalConfig(object):
             "-i", "--input-path", required=True, type=str, help="Input directory", default=self.input_path)
 
         grp_func.add_argument(
-            "-l",
+            "-F",
             "--input-path-flat",
             required=False,
             default=self.input_path_flat,
@@ -116,7 +117,7 @@ class FunctionalConfig(object):
             help="Input directory for flat images")
 
         grp_func.add_argument(
-            "-k",
+            "-D",
             "--input-path-dark",
             required=False,
             default=self.input_path_dark,
@@ -272,6 +273,13 @@ class FunctionalConfig(object):
             default=self.debug_port,
             help='Port on which a debugger is listening.')
 
+        grp_func.add_argument(
+            "--convert",
+            required=False,
+            action='store_true',
+            default=self.convert,
+            help='Shortcut to activate --reuse-preproc and --only-preproc.')
+
         grp_recon = parser.add_argument_group('Reconstruction options')
 
         supported_tools = ['tomopy', 'astra']
@@ -386,3 +394,12 @@ class FunctionalConfig(object):
         self.max_angle = args.max_angle
         self.cores = args.cores
         self.chunksize = args.chunksize
+        self.convert = args.convert
+
+        self.handle_special_arguments()
+
+    def handle_special_arguments(self):
+        # --convert is special case that substitutes those 2 args
+        if self.convert is True:
+            self.reuse_preproc = True
+            self.only_preproc = True
