@@ -5,11 +5,8 @@ from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 
 
-def old_modules():
-    """" Check if there are proper versions of  Python and numpy."""
-    is_python_old = AbinsTestHelpers.old_python()
-    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
-    return is_python_old or is_numpy_old
+def skip_tests():
+    return not hasattr(np, "einsum")
 
 
 class HelperTestingClass(object):
@@ -147,7 +144,7 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
     tolerance = None
 
     def skipTests(self):
-        return old_modules()
+        return skip_tests()
 
     def runTest(self):
 
@@ -179,7 +176,7 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     tolerance = None
 
     def skipTests(self):
-        return old_modules()
+        return skip_tests()
 
     def runTest(self):
 
@@ -210,7 +207,7 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
     _ref_result = None
 
     def skipTests(self):
-        return old_modules()
+        return skip_tests()
 
     def runTest(self):
 
@@ -238,7 +235,7 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
     _ref_result = None
 
     def skipTests(self):
-        return old_modules()
+        return skip_tests()
 
     def runTest(self):
 
@@ -266,7 +263,7 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
     _ref_result = None
 
     def skipTests(self):
-        return old_modules()
+        return skip_tests()
 
     def runTest(self):
 
@@ -292,7 +289,7 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
         _wrk_2 = None
 
         def skipTests(self):
-            return old_modules()
+            return skip_tests()
 
         def runTest(self):
             HelperTestingClass.__init__(self)
