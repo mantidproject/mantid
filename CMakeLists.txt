@@ -34,6 +34,12 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 #Set package name here
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
+
+###########################################################################
+# EIGEN EIGEN EIGEN EIGEN EIGEN EIGEN EIGEN EIGEN EIGEN EIGEN EIGEN EIGEN
+###########################################################################
+include ( Eigen )
+
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
