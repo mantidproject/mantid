@@ -9,10 +9,9 @@ from recon.helper import Helper
 shared_data = None
 
 
-def inplace_forward_func(func, i, **kwargs):
+def inplace_fwd_func(func, i, **kwargs):
     """
-    Forward a function that WILL NOT return some data, and will just overwrite it inplace.
-    Use if the parameter function does NOT have a return statement, and thus will not return any data.
+    Use if the parameter function does NOT have a return statement, and will overwrite the data in place.
 
     You HAVE to be careful when using this, for example the func:
     def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
@@ -37,16 +36,16 @@ def inplace_forward_func(func, i, **kwargs):
     func(shared_data[i], **kwargs)
 
 
-def forward_func(func, i, **kwargs):
+def fwd_func(func, i, **kwargs):
     """
-    Forward a function that WILL RETURN some data, and will not just overwrite it inplace.
-    Use if the parameter function DOES have a return statement, and thus will return some data back.
+    Use if the parameter function will perform an operation on the input data, DOES have a return statement,
+    and will store it back in the same container.
 
     If a function seems to give back unexpected Nones or nans, then it might not be returning anything,
-    and is doing all the calculations and overwriting in place. In that case use forward_func_inplace
-    as a forward_function parameter for create_partial, creating something like:
+    and is doing all the calculations and overwriting in place. In that case use fwd_func_inplace
+    as a fwd_function parameter for create_partial, creating something like:
 
-    f = parallel.create_partial(func_to_be_executed, parallel.inplace_forward_func, **kwargs)
+    f = parallel.create_partial(func_to_be_executed, parallel.inplace_fwd_func, **kwargs)
 
     :param func: Function that will be executed
     :param i: index from the shared_data on which to operate
@@ -56,22 +55,22 @@ def forward_func(func, i, **kwargs):
     shared_data[i] = func(shared_data[i], **kwargs)
 
 
-def create_partial(func, forward_function=forward_func, **kwargs):
+def create_partial(func, fwd_function=fwd_func, **kwargs):
     """
     Create a partial using functools.partial, to forward the kwargs to the parallel execution of imap.
 
     :param func: Function that will be executed
-    :param forward_function: The function will be forwarded through function. It must be one of:
-            - shared_parallel.forward_func: if the function returns a value
-            - shared_parallel.inplace_forward_func: if the function will overwrite the data in place
+    :param fwd_function: The function will be forwarded through function. It must be one of:
+            - shared_parallel.fwd_func: if the function returns a value
+            - shared_parallel.inplace_fwd_func: if the function will overwrite the data in place
     :param kwargs: kwargs to forward to the function func that will be executed
     :return:
     """
     from functools import partial
-    return partial(forward_function, func, **kwargs)
+    return partial(fwd_function, func, **kwargs)
 
 
-def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, output_data=None, show_timer=True):
+def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, show_timer=True):
     """
     Executes a function in parallel with shared memory between the processes.
     The array must have been created using parallel.create_shared_array(shape, dtype).
@@ -103,8 +102,7 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     :param cores: number of cores that the processing will use
     :param chunksize: chunk of work per process(worker)
     :param name: the string that will be appended in front of the progress bar
-    :param h: ...
-    :param output_data:
+    :param h: the helper class
     :return:
     """
     h = Helper.empty_init() if h is None else h
@@ -112,16 +110,10 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     if chunksize is None:
         chunksize = 1  # TODO use proper calculation
 
-    # handle the edge case of having a different output that input i.e. rebin,
-    # crop, etc
-    if output_data is None:
-        # get data reference to original with [:]
-        output_data = data[:]
-
     global shared_data
     # get reference to output data
     # if different shape it will get the reference to the new array
-    shared_data = output_data[:]
+    shared_data = data[:]
 
     from multiprocessing import Pool
     pool = Pool(cores)

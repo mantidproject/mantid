@@ -3,6 +3,7 @@ from recon.helper import Helper
 
 __module__ = 'gaussian_p'
 
+
 def execute(data, size, mode, order, cores=1, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
@@ -75,8 +76,8 @@ def _execute_par(data, size, mode, order, cores=1, chunksize=None, h=None):
 
     from parallel import shared_mem as psm
 
-    f = psm.create_partial(scipy_ndimage.gaussian_filter, forward_function=psm.forward_func,
-                sigma=size, mode=mode, order=order)
+    f = psm.create_partial(scipy_ndimage.gaussian_filter, fwd_function=psm.fwd_func,
+                           sigma=size, mode=mode, order=order)
 
     h.pstart(
         "Starting PARALLEL gaussian filter, with pixel data type: {0}, filter size/width: {1}.".

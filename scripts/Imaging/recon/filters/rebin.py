@@ -1,33 +1,40 @@
 from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
-from parallel import shared_mem as psm
+from parallel import exclusive_mem as pem
+
+"""
+REBIN does not use shared_memory, because it has to resize the array!
+However the information that needs to be copied is 0s, so it should not be expensive to do so!
+"""
 
 
-def execute(data, rebin, mode, cores=1, chunksize=None, h=None):
+def execute(data, rebin_param, mode, cores=1, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
-    if rebin and 0 < rebin:
-        if not h.multiprocessing_available():
-            data = _execute_par(data, rebin, mode, cores, chunksize, h)
+    if rebin_param and 0 < rebin_param:
+        if h.multiprocessing_available():
+            data = _execute_par(data, rebin_param, mode, cores, chunksize, h)
         else:
-            data = _execute_seq(data, rebin, mode, h)
+            data = _execute_seq(data, rebin_param, mode, h)
     else:
-        h.tomo_print_note("Not applying any rebinning.")
+        h.tomo_print_note("Not applying any rebin_paramning.")
 
     h.check_data_stack(data)
     return data
 
 
-def _execute_par(data, rebin, mode, cores=1, chunksize=None, h=None):
+def _execute_par(data, rebin_param, mode, cores=1, chunksize=None, h=None):
     import scipy.misc
 
-    resized_data = _create_reshaped_array(data.shape, rebin)
+    resized_data = _create_reshaped_array(data.shape, rebin_param)
 
     h.pstart("Starting PARALLEL image resizing.")
-    f = psm.create_partial(scipy.misc.imresize, forward_function=psm.inplace_forward_func, size=rebin, interp=mode, output=resized_data)
 
-    resized_data = psm.execute(data, f, cores, chunksize, "Rebinning", h, output_data=resized_data)
+    f = pem.create_partial(scipy.misc.imresize, size=rebin_param, interp=mode)
+
+    resized_data = pem.execute(
+        data, f, cores, chunksize, "Rebinning", h, output_data=resized_data)
 
     h.pstop("Finished PARALLEL image resizing. New shape: {0}".format(
         resized_data.shape))
@@ -35,16 +42,16 @@ def _execute_par(data, rebin, mode, cores=1, chunksize=None, h=None):
     return resized_data
 
 
-def _execute_seq(data, rebin, mode, h=None):
+def _execute_seq(data, rebin_param, mode, h=None):
     import scipy.misc
 
     h.pstart("Starting image resizing.")
-    resized_data = _create_reshaped_array(data.shape, rebin)
+    resized_data = _create_reshaped_array(data.shape, rebin_param)
     num_images = resized_data.shape[0]
     h.prog_init(num_images, "Rebinning images")
     for idx in range(num_images):
         resized_data[idx] = scipy.misc.imresize(
-            data[idx], rebin, interp=mode)
+            data[idx], rebin_param, interp=mode)
 
         h.prog_update(1)
 
@@ -56,16 +63,16 @@ def _execute_seq(data, rebin, mode, h=None):
     return resized_data
 
 
-def _create_reshaped_array(old_shape, rebin):
+def _create_reshaped_array(old_shape, rebin_param):
     num_images = old_shape[0]
 
     # use SciPy's calculation to find the expected dimensions
     # int to avoid visible deprecation warning
-    expected_dimy = int(rebin * old_shape[1])
-    expected_dimx = int(rebin * old_shape[2])
+    expected_dimy = int(rebin_param * old_shape[1])
+    expected_dimx = int(rebin_param * old_shape[2])
 
     # allocate memory for images with new dimensions
-    return psm.create_shared_array((num_images, expected_dimy, expected_dimx))
+    return pem.create_shared_array((num_images, expected_dimy, expected_dimx))
 
 
 def _execute_custom(data, config):

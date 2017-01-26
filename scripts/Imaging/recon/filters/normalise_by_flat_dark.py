@@ -66,7 +66,7 @@ def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_
     # prevent divide-by-zero issues
     norm_divide[norm_divide == 0] = 1e-6
     from parallel import shared_mem as psm
-    f = psm.create_partial(_apply_normalise_inplace, forward_function=psm.inplace_forward_func,
+    f = psm.create_partial(_apply_normalise_inplace, fwd_function=psm.inplace_fwd_func,
                            dark=norm_dark_img, norm_divide=norm_divide, clip_min=clip_min,
                            clip_max=clip_max)
 

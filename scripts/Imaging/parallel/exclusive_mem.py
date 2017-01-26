@@ -1,10 +1,21 @@
 from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
+import numpy as np
 
 """
 The difference between recon.parallel and recon.shared_parallel is that the latter uses a shared memory array between
 the processes, to avoid copy-on-read/write the data to each process' virtual memory space.
+
+This also means that this class potentially uses more memory.
+
+Exclusive memory needs to be used when the input array has a different shape from the input array.
+However they can only have different shapes in the X and Y dimensions. The number of images (Z) must remain the same.
 """
+
+
+def create_shared_array(shape, dtype=np.float32):
+    from parallel import shared_mem
+    return shared_mem.create_shared_array(shape, dtype)
 
 
 def create_partial(func, **kwargs):
@@ -21,7 +32,8 @@ def create_partial(func, **kwargs):
     return partial(func, **kwargs)
 
 
-def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, output_data=None, show_timer=True):
+def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, output_data=None,
+            show_timer=True):
     """
     Executes a function in parallel, but does not share the memory between processes.
     Every process will copy-on-read/write the data to its own virtual memory region, perform the calculation
@@ -34,13 +46,13 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     - imap seems to be the best choice
 
 
-    :param data:
-    :param partial_func:
-    :param cores:
-    :param chunksize:
-    :param name:
-    :param h:
-    :param output_data:
+    :param data: the data array that will be processed in parallel
+    :param partial_func: a function constructed using partial to pass the correct arguments
+    :param cores: number of cores that the processing will use
+    :param chunksize: chunk of work per process(worker)
+    :param name: the string that will be appended in front of the progress bar
+    :param h: the helper class
+    :param output_data: the output array in which the results will be stored
     :return:
     """
     h = Helper.empty_init() if h is None else h
@@ -61,7 +73,8 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
         h.prog_init(img_num, name + " " + str(cores) +
                     "c " + str(chunksize) + "chs")
 
-    for i, res_data in enumerate(pool.imap(partial_func, output_data, chunksize=chunksize)):
+    # passing the data triggers a copy-on-write in the child process, even if it only reads the data
+    for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
         output_data[i, :, :] = res_data[:, :]
         h.prog_update()
 

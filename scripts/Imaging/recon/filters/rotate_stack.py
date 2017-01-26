@@ -95,9 +95,11 @@ def _execute_par(data, rotation, cores=1, chunksize=None, h=None):
 
     from parallel import shared_mem as psm
 
-    f = psm.create_partial(_rotate_image_inplace, forward_function=psm.inplace_forward_func, rotation=rotation)
+    f = psm.create_partial(_rotate_image_inplace,
+                           fwd_function=psm.inplace_fwd_func, rotation=rotation)
 
-    data = psm.execute(data, f, cores=cores, chunksize=chunksize, name="Rotation", h=h)
+    data = psm.execute(data, f, cores=cores,
+                       chunksize=chunksize, name="Rotation", h=h)
 
     h.pstop("Finished PARALLEL rotation step ({0} degrees clockwise), with pixel data type: {1}."
             .format(rotation * 90, data.dtype))

@@ -10,22 +10,25 @@ from recon.helper import Helper
 
 
 class ParallelTest(unittest.TestCase):
+
     def test_shared_performance(self, runs=10, cores='8', chunksize='8'):
         import timeit
         print("shared_perf:", timeit.timeit(
-            stmt='sp.execute(data,f,h=h,cores=' + cores + ',chunksize=' + chunksize + ',show_timer=False)',
+            stmt='sp.execute(data,f,h=h,cores=' + cores +
+            ',chunksize=' + chunksize + ',show_timer=False)',
             setup='from recon.memory_debugger import inplace_in_func, '
                   '_create_testing_array, _create_test_helper;'
                   'from recon.parallel import shared_parallel as sp;'
                   'data = _create_testing_array();'
                   'h = _create_test_helper();'
-                  'f = sp.create_partial(inplace_in_func, forward_function=sp.forward_func, size=42);',
+                  'f = sp.create_partial(inplace_in_func, fwd_function=sp.fwd_func, size=42);',
             number=runs), end='')
 
     def test_not_shared_performance(self, runs=10, cores='8', chunksize='8'):
         import timeit
         print("not shared_perf:", timeit.timeit(
-            stmt='p.execute(data,f,h=h,cores=' + cores + ',chunksize=' + chunksize + ',show_timer=False)',
+            stmt='p.execute(data,f,h=h,cores=' + cores +
+            ',chunksize=' + chunksize + ',show_timer=False)',
             setup='from recon.memory_debugger import return_from_func_but_data_changed_inside, '
                   '_create_testing_array, _create_test_helper; '
                   'from recon.parallel import parallel as p;'
@@ -34,7 +37,7 @@ class ParallelTest(unittest.TestCase):
                   'h = _create_test_helper();'
                   'f = p.create_partial(return_from_func_but_data_changed_inside, size=42)', number=runs), end='')
 
-    def test_forward_func_processing_inplace(self):
+    def test_fwd_func_processing_inplace(self):
         """
         Test if forwarding a function that expects a return from the function,
         but doesn't get one, turns all the data into nans
@@ -51,14 +54,14 @@ class ParallelTest(unittest.TestCase):
         h = _create_test_helper()
 
         f = sp.create_partial(
-            inplace_in_func, forward_function=sp.forward_func, size=42)
+            inplace_in_func, fwd_function=sp.fwd_func, size=42)
 
         data = sp.execute(data, f, h=h, show_timer=False)
         npt.assert_equal(data, control)
 
-    def test_forward_func_processing_not_inplace(self):
+    def test_fwd_func_processing_not_inplace(self):
         """
-        Test if using forward_func with a function that doesn't change the data in place returns the proper result
+        Test if using fwd_func with a function that doesn't change the data in place returns the proper result
 
         Expected: The data should be correctly changed
         """
@@ -72,15 +75,15 @@ class ParallelTest(unittest.TestCase):
 
         # uses a a partial function that DOES NOT change the data inside
         f = sp.create_partial(
-            return_from_func_no_data_change_inside, forward_function=sp.forward_func, size=42)
+            return_from_func_no_data_change_inside, fwd_function=sp.fwd_func, size=42)
 
         data = sp.execute(data, f, h=h, show_timer=False)
 
         npt.assert_equal(data, control)
 
-    def test_forward_func_processing_not_inplace2(self):
+    def test_fwd_func_processing_not_inplace2(self):
         """
-        Test if using forward_func with a function that doesn't change the data in place returns the proper result
+        Test if using fwd_func with a function that doesn't change the data in place returns the proper result
 
         Expected: The data should be correctly changed
         """
@@ -94,15 +97,15 @@ class ParallelTest(unittest.TestCase):
 
         # uses a different partial function, that DOES change the data inside
         f = sp.create_partial(
-            return_from_func_but_data_changed_inside, forward_function=sp.forward_func, size=42)
+            return_from_func_but_data_changed_inside, fwd_function=sp.fwd_func, size=42)
 
         data = sp.execute(data, f, h=h, show_timer=False)
 
         npt.assert_raises(AssertionError, npt.assert_equal, data, control)
 
-    def test_inplace_forward_func_processing_inplace(self):
+    def test_inplace_fwd_func_processing_inplace(self):
         """
-        Test if using inplace_forward_func with a function that changes the data inplace gives proper result
+        Test if using inplace_fwd_func with a function that changes the data inplace gives proper result
 
         Expected: The data should be correctly changed
         """
@@ -115,14 +118,14 @@ class ParallelTest(unittest.TestCase):
         h = _create_test_helper()
 
         f = sp.create_partial(
-            inplace_in_func, forward_function=sp.inplace_forward_func, size=42)
+            inplace_in_func, fwd_function=sp.inplace_fwd_func, size=42)
 
         data = sp.execute(data, f, show_timer=False, h=h)
         npt.assert_raises(AssertionError, npt.assert_equal, data, control)
 
-    def test_inplace_forward_func_processing_not_inplace(self):
+    def test_inplace_fwd_func_processing_not_inplace(self):
         """
-        Test if inplace_forward_func with a function that does return data
+        Test if inplace_fwd_func with a function that does return data
 
         Expected: The data should not be changed
         """
@@ -136,15 +139,15 @@ class ParallelTest(unittest.TestCase):
         control = deepcopy(data)
 
         f = sp.create_partial(
-            return_from_func_no_data_change_inside, forward_function=sp.inplace_forward_func, size=42)
+            return_from_func_no_data_change_inside, fwd_function=sp.inplace_fwd_func, size=42)
 
         data = sp.execute(data, f, show_timer=False, h=h)
 
         npt.assert_equal(data, control)
 
-    def test_inplace_forward_func_processing_not_inplace2(self):
+    def test_inplace_fwd_func_processing_not_inplace2(self):
         """
-        Test if inplace_forward_func with a function that does return data
+        Test if inplace_fwd_func with a function that does return data
 
         Expected: The data should not be changed
         """
@@ -160,7 +163,7 @@ class ParallelTest(unittest.TestCase):
         # uses a different partial function, that changes the data inside,
         # and since it's a shared array it will be changed on the check as well
         f = sp.create_partial(
-            return_from_func_but_data_changed_inside, forward_function=sp.inplace_forward_func, size=42)
+            return_from_func_but_data_changed_inside, fwd_function=sp.inplace_fwd_func, size=42)
 
         data = sp.execute(data, f, show_timer=False, h=h)
 
@@ -199,7 +202,7 @@ def return_from_func_no_data_change_inside(func_data, size=3):
 
 if __name__ == '__main__':
     unittest.main()
-    # test_inplace_forward_func_processing_not_inplace()
+    # test_inplace_fwd_func_processing_not_inplace()
     # big shape tests individual process performance per image
     # test_shape = (50, 512, 512)
 
@@ -221,12 +224,11 @@ if __name__ == '__main__':
     # from recon.parallel import shared_parallel as sp
     #
     # f = sp.create_partial(
-    #     set_to_inplace, forward_function=sp.inplace_forward_func, size=42)
+    #     set_to_inplace, fwd_function=sp.inplace_fwd_func, size=42)
     # for chunk in range(1, 10):
     #     print("chunksize", chunk)
     #
     #     test_shared_performance(runs, cores, str(chunk))
-
 
     # reset data
     # data = np.zeros(test_shape)

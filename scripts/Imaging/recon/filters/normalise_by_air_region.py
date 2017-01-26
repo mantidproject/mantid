@@ -2,8 +2,86 @@ from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
 from recon.filters.crop_coords import _crop_coords_sanity_checks
 
+def execute(data, *args, **kwargs):
+    # TODO
+    return data
 
-def execute(data, air_region, region_of_interest, crop_before_normalise, h=None):
+def _calc_air_sum(i, data=None, air_right=None, air_top=None, air_left=None, air_bottom=None):
+    return data[i, air_top:air_bottom, air_left:air_right].sum()
+
+
+def _execute_par(data, air_region, region_of_interest, crop_before_normalise, h=None):
+    """
+    normalise by beam intensity. This is not directly about proton
+    charg - not using the proton charge field as usually found in
+    experiment/nexus files. This uses an area of normalization, if
+    provided in the pre-processing configuration. TODO: much
+    of this method should be moved into filters.
+
+    :param data :: stack of images as a 3d numpy array
+    :param region_of_interest: Region of interest to ensure that the Air Region is in bounds
+    :param crop_before_normalise: A switch to signify that the image has been cropped.
+            This means the Air Region coordinates will have to be translated onto the cropped image
+    :param air_region: The air region from which sums will be calculated and all images will be normalised
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+
+    :returns :: filtered data (stack of images)
+
+    """
+    import numpy as np
+    h = Helper.empty_init() if h is None else h
+
+    h.check_data_stack(data)
+
+    if air_region:
+        _crop_coords_sanity_checks(air_region, data)
+
+        air_right, air_top, air_left, air_bottom = translate_coords_onto_cropped_picture(
+            region_of_interest, air_region, crop_before_normalise)
+
+        h.pstart("Starting normalization by air region...")
+        img_num = data.shape[0]
+
+        # initialise same number of air sums
+        air_sums = [0] * img_num
+
+        from parallel import exclusive_mem as pem
+        # TODO need to use exclusive memory to have a differently shaped output array!!
+        f = psm.create_partial(_calc_air_sum, fwd_function=psm.fwd_func, data=data,
+                               air_right=air_right, air_top=air_top, air_left=air_left, air_bottom=air_bottom)
+
+        air_sums = psm.execute(data, f, cores, chunksize,
+                               "Calculating air sums", h, air_sums)
+
+        # we can use shared for this because the output == input arrays
+        from parallel import shared_mem as psm
+        h.prog_init(img_num, desc="Norm by Air Sums")
+        air_sums = np.true_divide(air_sums, np.amax(air_sums))
+        for idx in range(0, img_num):
+            data[idx, :, :] = np.true_divide(data[idx, :, :],
+                                             air_sums[idx])
+            h.prog_update(1)
+
+        h.prog_close()
+
+        avg = np.average(air_sums)
+        max_avg = np.max(air_sums) / avg
+        min_avg = np.min(air_sums) / avg
+
+        h.pstop(
+            "Finished normalization by air region. Average: {0}, max ratio: {1}, min ratio: {2}.".
+            format(avg, max_avg, min_avg))
+
+    else:
+        h.tomo_print_note(
+            "NOT normalizing by air region, because no --air-region coordinates were given.")
+
+    h.check_data_stack(data)
+    return data
+
+
+def _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h=None):
     """
     normalise by beam intensity. This is not directly about proton
     charg - not using the proton charge field as usually found in
