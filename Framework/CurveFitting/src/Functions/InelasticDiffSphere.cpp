@@ -270,9 +270,9 @@ void InelasticDiffSphere::setWorkspace(
 
     try {
       double efixed = workspace->getEFixed(det.getID());
-      double usignTheta = 0.5 * workspace->detectorTwoTheta(det);
+      double usingTheta = 0.5 * workspace->detectorTwoTheta(det);
 
-      double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+      double q = Mantid::Kernel::UnitConversion::run(usingTheta, efixed);
 
       m_qValueCache.push_back(q);
     } catch (std::runtime_error &) {
