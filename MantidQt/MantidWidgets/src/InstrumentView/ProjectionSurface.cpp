@@ -873,7 +873,7 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
       auto result = std::find_if(m_selectedAlignmentPlane.cbegin(),
                                  m_selectedAlignmentPlane.cend(),
                                  [peak](const std::pair<V3D, QPointF> &item) {
-                                   return item.first == peak->getQLabFrame();
+                                   return item.first == peak->getQSampleFrame();
                                  });
 
       if (result != m_selectedAlignmentPlane.cend()) {
@@ -959,7 +959,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
     const auto result = std::find_if(
         m_selectedAlignmentPlane.cbegin(), m_selectedAlignmentPlane.cend(),
         [peak](const std::pair<V3D, QPointF> &item) {
-          return item.first == peak->getQLabFrame();
+          return item.first == peak->getQSampleFrame();
         });
 
     if (result == m_selectedAlignmentPlane.cend()) {
