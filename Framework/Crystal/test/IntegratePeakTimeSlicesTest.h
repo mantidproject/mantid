@@ -17,9 +17,11 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -97,44 +99,36 @@ public:
     boost::shared_ptr<Geometry::Detector> pixelp =
         bankR->getAtXY(PeakCol, PeakRow);
 
-    Geometry::IDetector_const_sptr pix = wsPtr->getDetector(522);
-
     // Now get Peak.
     double PeakTime = 18000 + (PeakChan + .5) * 100;
 
-    Mantid::Kernel::Units::Wavelength wl;
-    Kernel::V3D pos = Kernel::V3D(instP->getSource()->getPos());
-    pos -= instP->getSample()->getPos();
-    double L1 = pos.norm();
-    Kernel::V3D pos1 = pixelp->getPos();
-    pos1 -= instP->getSample()->getPos();
-    double L2 = pos1.norm();
-    double dummy, phi;
-    pos1.getSpherical(dummy, phi, dummy);
-    double ScatAng = phi / 180 * M_PI;
+    const auto &spectrumInfo = wsPtr->spectrumInfo();
+    const auto &detectorInfo = wsPtr->detectorInfo();
+    const auto detID = pixelp->getID();
+    const auto wsIndex = detectorInfo.indexOf(detID);
+    const double L1 = spectrumInfo.l1();
+    double L2 = spectrumInfo.l2(wsIndex);
+    double ScatAng = detectorInfo.twoTheta(wsIndex) / 180 * M_PI;
     std::vector<double> x;
     x.push_back(PeakTime);
 
+    Mantid::Kernel::Units::Wavelength wl;
     wl.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0);
     double wavelength = x[0];
 
-    Peak peak(instP, pixelp->getID(), wavelength);
+    Peak peak(instP, detID, wavelength);
 
     // Now set up data in workspace2D
     double dQ = 0;
-    double Q0 = calcQ(bankR, instP, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
+    const double Q0 = calcQ(detectorInfo, detID, 1000.0 + 30.0 * 50);
 
     double TotIntensity = 0;
-
-    const detid2index_map map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
 
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++) {
 
         boost::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
-
-        detid2index_map::const_iterator it = map.find(detP->getID());
-        size_t wsIndex = (*it).second;
+        const auto wsIndex = detectorInfo.indexOf(detP->getID());
 
         double MaxR = max<double>(
             0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
@@ -153,7 +147,9 @@ public:
           dataY.push_back(val);
           dataE.push_back(sqrt(val));
           if ((val - 1.4) > MaxPeakIntensity * .1) {
-            double Q = calcQ(bankR, instP, row, col, 1000.0 + chan * 50);
+            boost::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
+            const auto id = detP->getID();
+            const auto Q = calcQ(detectorInfo, id, 1000.0 + chan * 50);
             dQ = max<double>(dQ, fabs(Q - Q0));
           }
         }
@@ -237,18 +233,16 @@ private:
   /**
    *   Calculates Q
    */
-  double calcQ(RectangularDetector_const_sptr bankP,
-               boost::shared_ptr<const Instrument> instPtr, int row, int col,
+  double calcQ(const DetectorInfo &detectorInfo, const detid_t detID,
                double time) {
-    boost::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
-
-    double L2 = detP->getDistance(*(instPtr->getSample()));
+    const auto wsIndex = detectorInfo.indexOf(detID);
+    const auto L2 = detectorInfo.l2(wsIndex);
 
     Kernel::Units::MomentumTransfer Q;
     std::vector<double> x;
     x.push_back(time);
-    double L1 = instPtr->getSample()->getDistance(*(instPtr->getSource()));
-    Kernel::V3D pos = detP->getPos();
+    const auto L1 = detectorInfo.l1();
+    const auto pos = detectorInfo.position(wsIndex);
     double ScatAng = fabs(asin(pos.Z() / pos.norm()));
 
     Q.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0.0);
