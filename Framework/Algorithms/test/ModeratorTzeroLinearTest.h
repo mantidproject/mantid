@@ -27,7 +27,7 @@ void addToInstrument(MatrixWorkspace_sptr testWS,
     testWS->instrumentParameters().addString(
         testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
     auto &pmap = testWS->instrumentParameters();
-    const auto &spectrumInfo = testWS->mutableSpectrumInfo();
+    const auto &spectrumInfo = testWS->spectrumInfo();
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       pmap.addDouble(&spectrumInfo.detector(ihist), "Efixed", evalue);
     }

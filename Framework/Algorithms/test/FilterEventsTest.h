@@ -498,8 +498,6 @@ public:
 
       const auto &spectrumInfo = ws->spectrumInfo();
 
-      const auto &samplepos = spectrumInfo.samplePosition();
-
       for (size_t iws = 0; iws < outcorrws->getNumberHistograms(); ++iws) {
         const ParameterMap &pmap = ws->constInstrumentParameters();
 
@@ -507,7 +505,7 @@ public:
         Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
         double efix = par->value<double>();
 
-        double l2 = samplepos.distance(spectrumInfo.position(iws));
+        double l2 = spectrumInfo.l2(iws);
 
         double shift = -l2 / sqrt(efix * 2. * PhysicalConstants::meV /
                                   PhysicalConstants::NeutronMass);
@@ -691,9 +689,7 @@ public:
 
     // L1 = 10
     const auto &spectrumInfo = eventWS->spectrumInfo();
-    const auto &samplepos = spectrumInfo.samplePosition();
-    Kernel::V3D sourcepos = spectrumInfo.sourcePosition();
-    double l1 = samplepos.distance(sourcepos);
+    double l1 = spectrumInfo.l1();
 
     Kernel::DateAndTime runstart(runstart_i64);
 
@@ -746,8 +742,6 @@ public:
 
       const auto &spectrumInfo = eventWS->spectrumInfo();
 
-      if (!spectrumInfo.hasUniqueDetector(i))
-        continue;
       const auto &det = spectrumInfo.detector(i);
       Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
       if (par) {
