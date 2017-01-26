@@ -9,8 +9,6 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidAPI/SpectrumInfo.h"
-
-#include <boost/lexical_cast.hpp>
 // third party libraries
 // N/A
 // standard library
