@@ -9,6 +9,10 @@ SpectrumInfo::SpectrumInfo(const size_t numberOfDetectors)
     : m_spectrumDefinition(Kernel::make_cow<std::vector<SpectrumDefinition>>(
           numberOfDetectors)) {}
 
+SpectrumInfo::SpectrumInfo(
+    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinition)
+    : m_spectrumDefinition(std::move(spectrumDefinition)) {}
+
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
 size_t SpectrumInfo::size() const {
   if (!m_spectrumDefinition)
@@ -26,6 +30,11 @@ SpectrumInfo::spectrumDefinition(const size_t index) const {
 void SpectrumInfo::setSpectrumDefinition(const size_t index,
                                          SpectrumDefinition def) {
   m_spectrumDefinition.access()[index] = std::move(def);
+}
+
+const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
+SpectrumInfo::sharedSpectrumDefinitions() const {
+  return m_spectrumDefinition;
 }
 
 } // namespace Beamline

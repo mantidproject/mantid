@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <list>
 #include <mutex>
@@ -18,6 +19,7 @@ class Property;
 }
 namespace Beamline {
 class DetectorInfo;
+class SpectrumDefinition;
 class SpectrumInfo;
 }
 namespace Geometry {
@@ -162,7 +164,6 @@ public:
 
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
-  void setSpectrumInfo(const SpectrumInfo &spectrumInfo);
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
@@ -172,6 +173,9 @@ public:
 protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
+
+  void setSpectrumDefinitions(Kernel::cow_ptr<
+      std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions);
 
   virtual void updateCachedDetectorGrouping(const size_t index) const;
   /// Description of the source object

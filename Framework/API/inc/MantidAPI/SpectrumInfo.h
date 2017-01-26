@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -75,6 +76,8 @@ public:
 
   const Beamline::SpectrumDefinition &
   spectrumDefinition(const size_t index) const;
+  const Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>> &
+  sharedSpectrumDefinitions() const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;

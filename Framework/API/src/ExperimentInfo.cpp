@@ -66,7 +66,7 @@ ExperimentInfo::ExperimentInfo()
  */
 ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
   this->copyExperimentInfoFrom(&source);
-  setSpectrumInfo(source.spectrumInfo());
+  setSpectrumDefinitions(source.spectrumInfo().sharedSpectrumDefinitions());
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -1096,18 +1096,20 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return *m_spectrumInfoWrapper;
 }
 
-/** Sets the SpectrumInfo, including the SpectrumDefinition for all spectra.
- *
- * This method may only be used if the client code can guarantee that the
- * spectra defined in the MatrixWorkspace (i.e., the detector IDs stored in the
- * ISpectra) match the spectrum definitions in `spectrumInfo`. In general it
- * should not be necessary to use this method: Copy constructors and the
- * workspace factories take care of copying the SpectrumInfo. */
-void ExperimentInfo::setSpectrumInfo(const SpectrumInfo &spectrumInfo) {
-  m_spectrumInfo =
-      Kernel::make_unique<Beamline::SpectrumInfo>(spectrumInfo.m_spectrumInfo);
-  m_spectrumDefinitionNeedsUpdate =
-      spectrumInfo.m_experimentInfo.m_spectrumDefinitionNeedsUpdate;
+/// Sets the SpectrumDefinition for all spectra.
+void ExperimentInfo::setSpectrumDefinitions(Kernel::cow_ptr<
+    std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions) {
+  if (spectrumDefinitions) {
+    m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(
+        std::move(spectrumDefinitions));
+    m_spectrumDefinitionNeedsUpdate.resize(0);
+    m_spectrumDefinitionNeedsUpdate.resize(m_spectrumInfo->size(), 0);
+  } else {
+    // Keep the old m_spectrumInfo which should have the correct size, but
+    // invalidate all definitions.
+    std::fill(m_spectrumDefinitionNeedsUpdate.begin(),
+              m_spectrumDefinitionNeedsUpdate.end(), 1);
+  }
   m_spectrumInfoWrapper = nullptr;
 }
 

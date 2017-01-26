@@ -92,6 +92,12 @@ MatrixWorkspace::~MatrixWorkspace() {
  *
  * Used for access to spectrum number and detector ID information of spectra. */
 const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
+  // API::SpectrumInfo::sharedSpectrumDefinitions updates definitions before
+  // returning. We always set spectrum definitions, since definitions that were
+  // previously set into the IndexInfo may have run out of sync (due to a
+  // copy-on-write mechanism).
+  m_indexInfo->setSpectrumDefinitions(
+      spectrumInfo().sharedSpectrumDefinitions());
   return *m_indexInfo;
 }
 
@@ -111,6 +117,22 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
     auto ids = indexInfo.detectorIDs(i);
     spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
   }
+  // This sets the SpectrumDefinitions for the SpectrumInfo, which may seem
+  // counterintuitive at first -- why would setting IndexInfo modify internals
+  // of SpectrumInfo? However, logically it would not make sense to assign
+  // SpectrumDefinitions in an assignment of SpectrumInfo: Changing
+  // SpectrumDefinitions requires also changes at a higher level of a workspace
+  // (in particular the histograms, which would need to be regrouped as well).
+  // Thus, assignment of SpectrumInfo should just check for compatible
+  // SpectrumDefinitions and assign other data (such as per-spectrum masking
+  // flags, which do not exist yet). Furthermore, since currently detector
+  // groupings are still stored in ISpectrum (in addition to the
+  // SpectrumDefinitions in SpectrumInfo), an assigment of SpectrumDefinitions
+  // in SpectrumInfo would lead to inconsistent workspaces. SpectrumDefinitions
+  // are thus assigned by IndexInfo, which acts at a highler level and is
+  // typically used at construction time of a workspace, i.e., there is no data
+  // in histograms yet which would need to be regrouped.
+  setSpectrumDefinitions(indexInfo.spectrumDefinitions());
 }
 
 /// @returns A human-readable string of the current state

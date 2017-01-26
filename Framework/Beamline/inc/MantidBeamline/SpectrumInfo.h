@@ -60,11 +60,15 @@ class SpectrumDefinition;
 class MANTID_BEAMLINE_DLL SpectrumInfo {
 public:
   SpectrumInfo(const size_t numberOfDetectors);
+  SpectrumInfo(
+      Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinition);
 
   size_t size() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
   void setSpectrumDefinition(const size_t index, SpectrumDefinition def);
+  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
+  sharedSpectrumDefinitions() const;
 
 private:
   Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinition;

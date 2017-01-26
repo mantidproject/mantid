@@ -41,6 +41,13 @@ SpectrumInfo::spectrumDefinition(const size_t index) const {
   return m_spectrumInfo.spectrumDefinition(index);
 }
 
+const Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>> &
+SpectrumInfo::sharedSpectrumDefinitions() const {
+  for (size_t i = 0; i < size(); ++i)
+    m_experimentInfo.updateSpectrumDefinitionIfNecessary(i);
+  return m_spectrumInfo.sharedSpectrumDefinitions();
+}
+
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
   for (const auto detIndex : getDetectorIndices(index))

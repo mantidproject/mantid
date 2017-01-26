@@ -13,6 +13,10 @@ namespace Mantid {
 using specnum_t = int32_t;
 using detid_t = int32_t;
 
+namespace Beamline {
+class SpectrumDefinition;
+}
+
 namespace Indexing {
 
 /** IndexInfo is an object for holding information about spectrum numbers and
@@ -76,6 +80,11 @@ public:
   void setDetectorIDs(const std::vector<detid_t> &detectorIDs) & ;
   void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) & ;
 
+  void setSpectrumDefinitions(Kernel::cow_ptr<
+      std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions);
+  const Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>> &
+  spectrumDefinitions() const;
+
 private:
   /// True if class is legacy wrapper.
   bool m_isLegacy{false};
@@ -91,6 +100,9 @@ private:
 
   Kernel::cow_ptr<std::vector<specnum_t>> m_spectrumNumbers;
   Kernel::cow_ptr<std::vector<std::vector<detid_t>>> m_detectorIDs;
+
+  Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>>
+      m_spectrumDefinitions{nullptr};
 };
 
 } // namespace Indexing
