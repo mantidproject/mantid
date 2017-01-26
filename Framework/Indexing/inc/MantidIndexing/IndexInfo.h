@@ -4,7 +4,6 @@
 #include "MantidIndexing/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <atomic>
 #include <functional>
 #include <set>
 #include <vector>
@@ -86,8 +85,6 @@ public:
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
   spectrumDefinitions() const;
 
-  void invalidateCachedSpectrumNumbers();
-
 private:
   /// True if class is legacy wrapper.
   bool m_isLegacy{false};
@@ -108,7 +105,6 @@ private:
       nullptr};
 
   std::unique_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator;
-  std::atomic<bool> m_spectrumNumberTranslatorNeedsUpdate{true};
 };
 
 } // namespace Indexing

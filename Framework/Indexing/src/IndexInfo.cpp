@@ -142,9 +142,5 @@ IndexInfo::spectrumDefinitions() const {
   return m_spectrumDefinitions;
 }
 
-void IndexInfo::invalidateCachedSpectrumNumbers() {
-  m_spectrumNumberTranslatorNeedsUpdate = true;
-}
-
 } // namespace Indexing
 } // namespace Mantid

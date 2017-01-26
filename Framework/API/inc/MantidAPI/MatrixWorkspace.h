@@ -8,6 +8,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
 
+#include <atomic>
+
 namespace Mantid {
 
 namespace Indexing {
@@ -604,6 +606,8 @@ private:
   /// A workspace holding monitor data relating to the main data in the
   /// containing workspace (null if none).
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
+
+  std::atomic<bool> m_indexInfoNeedsUpdate{true};
 
 protected:
   /// Getter for the dimension id based on the axis.

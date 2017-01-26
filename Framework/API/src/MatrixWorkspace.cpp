@@ -1969,7 +1969,7 @@ MatrixWorkspace::detectorIDs(const size_t index) const {
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
-  m_indexInfo->invalidateCachedSpectrumNumbers();
+  m_indexInfoNeedsUpdate = true;
 }
 
 /// Cache a lookup of grouped detIDs to member IDs. Always throws
