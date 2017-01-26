@@ -121,7 +121,7 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
 
     // Compute the factor
     double offset = 0.0;
-    double factor = Instrument::calcConversion(
+    double factor = Geometry::Conversion::tofToDSpacingFactor(
         l1, beamline, beamline_norm, samplePos, det->getPos(), offset);
     offset = dspace[detectorID] / factor - 1.0;
     // Save in the map

@@ -265,9 +265,9 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
   double tmin = 0.;
   if (isEmpty(m_wavelengthMin)) {
     std::map<detid_t, double> offsets; // just an empty offsets map
-    double dspmap =
-        Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
-                                   m_instrument, detNumbers, offsets);
+    double dspmap = Geometry::Conversion::tofToDSpacingFactor(
+        m_L1, beamline, beamline_norm, samplePos, m_instrument, detNumbers,
+        offsets);
 
     // this is related to the reference tof
     double sqrtdmin =
