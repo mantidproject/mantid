@@ -9,6 +9,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidAPI/SpectrumInfo.h"
+
+#include <boost/lexical_cast.hpp>
 // third party libraries
 // N/A
 // standard library
@@ -136,9 +138,13 @@ std::vector<double> FunctionQDepends::extractQValues(
     size_t numHist = workspace.getNumberHistograms();
     for (size_t wi = 0; wi < numHist; wi++) {
       try {
-        Mantid::Geometry::IDetector_const_sptr detector;
-        detector = workspace.getDetector(wi);
-        double efixed = workspace.getEFixed(detector);
+        if (!spectrumInfo.hasDetectors(wi))
+          throw Kernel::Exception::NotFoundError(
+              "Error - No detectors for this workspace at index " +
+                  std::to_string(wi),
+              "");
+        const auto detID = spectrumInfo.detector(wi).getID();
+        double efixed = workspace.getEFixed(detID);
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
         double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
         qs.push_back(q);
