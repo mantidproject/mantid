@@ -1,7 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
+import numpy as np
 import stresstesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
 from AbinsModules import AbinsConstants, AbinsTestHelpers
+
+
+def old_modules():
+    """" Check if there are proper versions of  Python and numpy."""
+    is_python_old = AbinsTestHelpers.old_python()
+    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
+    return is_python_old or is_numpy_old
 
 
 class HelperTestingClass(object):
@@ -138,6 +146,9 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
     _ref_result = None
     tolerance = None
 
+    def skipTests(self):
+        return old_modules()
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -167,6 +178,9 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     _ref_result = None
     tolerance = None
 
+    def skipTests(self):
+        return old_modules()
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -195,6 +209,9 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
     """
     _ref_result = None
 
+    def skipTests(self):
+        return old_modules()
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -219,6 +236,9 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
     """
     _ref_result = None
+
+    def skipTests(self):
+        return old_modules()
 
     def runTest(self):
 
@@ -245,6 +265,9 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
     """
     _ref_result = None
 
+    def skipTests(self):
+        return old_modules()
+
     def runTest(self):
 
         HelperTestingClass.__init__(self)
@@ -267,6 +290,9 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
         """
         _wrk_1 = None
         _wrk_2 = None
+
+        def skipTests(self):
+            return old_modules()
 
         def runTest(self):
             HelperTestingClass.__init__(self)
