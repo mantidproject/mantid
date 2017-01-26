@@ -528,18 +528,16 @@ void ProjectionSurface::setPeakVisibility() const {
  * @return true if any peaks was found at the given point
  */
 bool ProjectionSurface::peakVisibleAtPoint(const QPointF &point) const {
-  bool visible = false;
   for (const auto po : m_peakShapes) {
     po->selectAtXY(point);
     auto markers = po->getSelectedPeakMarkers();
-    visible =
+    bool visible =
         std::any_of(markers.begin(), markers.end(),
                     [](PeakMarker2D *marker) { return marker->isVisible(); });
-
-    if (visible)
+    if (visible) {
       return true;
+    }
   }
-
   return false;
 }
 
