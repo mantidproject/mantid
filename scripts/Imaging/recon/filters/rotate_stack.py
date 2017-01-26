@@ -76,7 +76,7 @@ def _execute_seq(data, rotation, h=None):
     img_count = data.shape[0]
     h.prog_init(img_count, "Rotating stack")
     for idx in range(0, img_count):
-        _rotate_image(data[idx], rotation)
+        data[idx] = _rotate_image(data[idx], rotation)
         h.prog_update(1)
 
     h.prog_close()

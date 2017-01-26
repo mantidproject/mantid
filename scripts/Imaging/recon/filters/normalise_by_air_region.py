@@ -1,16 +1,23 @@
 from __future__ import (absolute_import, division, print_function)
 from recon.helper import Helper
 from recon.filters.crop_coords import _crop_coords_sanity_checks
+import numpy as np
 
-def execute(data, *args, **kwargs):
+
+def execute(data, air_region, region_of_interest, crop_before_normalise, h=None):
     # TODO
-    return data
-
-def _calc_air_sum(i, data=None, air_right=None, air_top=None, air_left=None, air_bottom=None):
-    return data[i, air_top:air_bottom, air_left:air_right].sum()
+    return _execute_par(data, air_region, region_of_interest, crop_before_normalise, 8, None, h)
 
 
-def _execute_par(data, air_region, region_of_interest, crop_before_normalise, h=None):
+def _calc_air_sum(data, air_sums, air_right=None, air_top=None, air_left=None, air_bottom=None):
+    return data.sum()
+
+
+def _divide_by_air_sum(data=None, air_sums=None):
+    data[:] = np.true_divide(data, air_sums)
+
+
+def _execute_par(data, air_region, region_of_interest, crop_before_normalise, cores=1, chunksize=None, h=None):
     """
     normalise by beam intensity. This is not directly about proton
     charg - not using the proton charge field as usually found in
@@ -29,7 +36,6 @@ def _execute_par(data, air_region, region_of_interest, crop_before_normalise, h=
     :returns :: filtered data (stack of images)
 
     """
-    import numpy as np
     h = Helper.empty_init() if h is None else h
 
     h.check_data_stack(data)
@@ -44,26 +50,27 @@ def _execute_par(data, air_region, region_of_interest, crop_before_normalise, h=
         img_num = data.shape[0]
 
         # initialise same number of air sums
-        air_sums = [0] * img_num
+        from parallel import two_shared_mem as ptsm
+        from parallel import utility as pu
 
-        from parallel import exclusive_mem as pem
+        air_sums = pu.create_shared_array((img_num, 1, 1))
+        # turn into a 1D array, from 3D that is returned
+        air_sums = air_sums.reshape(img_num)
+
         # TODO need to use exclusive memory to have a differently shaped output array!!
-        f = psm.create_partial(_calc_air_sum, fwd_function=psm.fwd_func, data=data,
-                               air_right=air_right, air_top=air_top, air_left=air_left, air_bottom=air_bottom)
+        f = ptsm.create_partial(_calc_air_sum, fwd_function=ptsm.fwd_func_return_to_second, air_right=air_right,
+                                air_top=air_top, air_left=air_left, air_bottom=air_bottom)
 
-        air_sums = psm.execute(data, f, cores, chunksize,
-                               "Calculating air sums", h, air_sums)
+        # TODO might have to remove two shared memory
+        # TODO try passing data[:, air_top:air_bottom, air_left:air_right]
+        data, air_sums = ptsm.execute(data, air_sums, f, cores, chunksize,
+                                      "Calculating air sums", h)
 
         # we can use shared for this because the output == input arrays
-        from parallel import shared_mem as psm
-        h.prog_init(img_num, desc="Norm by Air Sums")
-        air_sums = np.true_divide(air_sums, np.amax(air_sums))
-        for idx in range(0, img_num):
-            data[idx, :, :] = np.true_divide(data[idx, :, :],
-                                             air_sums[idx])
-            h.prog_update(1)
+        # WARNING this copied the whole data for every index, 100 indices = 100*data
+        f2 = ptsm.create_partial(_divide_by_air_sum, fwd_function=ptsm.inplace_fwd_func)
 
-        h.prog_close()
+        data, air_sums = ptsm.execute(data, air_sums, f2, cores, chunksize, "Norm by Air Sums", h)
 
         avg = np.average(air_sums)
         max_avg = np.max(air_sums) / avg
@@ -71,7 +78,7 @@ def _execute_par(data, air_region, region_of_interest, crop_before_normalise, h=
 
         h.pstop(
             "Finished normalization by air region. Average: {0}, max ratio: {1}, min ratio: {2}.".
-            format(avg, max_avg, min_avg))
+                format(avg, max_avg, min_avg))
 
     else:
         h.tomo_print_note(
@@ -116,7 +123,7 @@ def _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h=
         air_sums = []
         for idx in range(0, data.shape[0]):
             air_data_sum = data[
-                idx, air_top:air_bottom, air_left:air_right].sum()
+                           idx, air_top:air_bottom, air_left:air_right].sum()
             air_sums.append(air_data_sum)
             h.prog_update(1)
 
@@ -137,7 +144,7 @@ def _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h=
 
         h.pstop(
             "Finished normalization by air region. Average: {0}, max ratio: {1}, min ratio: {2}.".
-            format(avg, max_avg, min_avg))
+                format(avg, max_avg, min_avg))
 
     else:
         h.tomo_print_note(
@@ -148,7 +155,6 @@ def _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h=
 
 
 def translate_coords_onto_cropped_picture(crop_coords, air_region, crop_before_normalise):
-
     air_right = air_region[2]
     air_top = air_region[1]
     air_left = air_region[0]
@@ -181,8 +187,8 @@ def _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
                                 crop_bottom, crop_left, crop_right, crop_top):
     # sanity check just in case
     if air_top < crop_top or \
-            air_bottom > crop_bottom or \
-            air_left < crop_left or \
-            air_right > crop_right:
+                    air_bottom > crop_bottom or \
+                    air_left < crop_left or \
+                    air_right > crop_right:
         raise ValueError(
             "Selected air region is outside of the cropped data range.")

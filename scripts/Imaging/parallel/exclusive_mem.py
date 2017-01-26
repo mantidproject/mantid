@@ -13,11 +13,6 @@ However they can only have different shapes in the X and Y dimensions. The numbe
 """
 
 
-def create_shared_array(shape, dtype=np.float32):
-    from parallel import shared_mem
-    return shared_mem.create_shared_array(shape, dtype)
-
-
 def create_partial(func, **kwargs):
     """
     Create a partial using functools.partial, to forward the kwargs to the parallel execution of imap.
@@ -75,7 +70,7 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
 
     # passing the data triggers a copy-on-write in the child process, even if it only reads the data
     for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
-        output_data[i, :, :] = res_data[:, :]
+        output_data[i] = res_data[:]
         h.prog_update()
 
     pool.close()
@@ -83,11 +78,3 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     h.prog_close()
 
     return output_data
-
-
-def multiprocessing_available():
-    try:
-        import multiprocessing
-        return True
-    except ImportError:
-        return False
