@@ -34,7 +34,7 @@ def execute(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1
     else:
         h.tomo_print_note(
             "Cannot apply normalization by flat/dark images because no valid flat image has been "
-            "provided with -l/--input-path-flat and -k/--input-path-dark.")
+            "provided with -F/--input-path-flat and -D/--input-path-dark.")
 
     h.check_data_stack(data)
     return data
