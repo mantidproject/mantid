@@ -34,7 +34,7 @@ def execute(config, cmd_line=None):
     # Save pre-proc images, print inside
     saver.save_preproc_images(sample)
     if config.func.only_preproc is True:
-        return sample
+        return 14
 
     # ----------------------------------------------------------------
     # Reconstruction
@@ -47,7 +47,7 @@ def execute(config, cmd_line=None):
 
     # TODO new class for readme
     # saver.gen_readme_summary_end(sample)
-    return sample
+    return 0
 
 
 def pre_processing(config, sample, flat, dark):

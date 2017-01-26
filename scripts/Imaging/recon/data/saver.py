@@ -14,7 +14,7 @@ class Saver(object):
     before loading any data in, or even the tool.
 
     That means this class should always fail early before any
-    expensive operations have been performed.
+    expensive operations have been attempted.
     """
 
     @staticmethod
@@ -22,6 +22,36 @@ class Saver(object):
         # reuse supported formats, they currently share them
         from recon.data.loader import supported_formats
         return supported_formats()
+
+    @staticmethod
+    def write_fits(data, filename, overwrite=False):
+        # save out in fits
+        # TODO save out and read the flat and dark images too
+
+        from recon.data.loader import import_pyfits
+        fits = import_pyfits()
+        hdu = fits.PrimaryHDU(data)
+        hdulist = fits.HDUList([hdu])
+        hdulist.writeto(filename, clobber=overwrite)
+
+    @staticmethod
+    def write_nxs(data, filename, flat=None, dark=None, projection_angles=None, overwrite=False):
+        # Adapted code from Nagella, Srikanth (STFC,RAL,SC)
+        # <srikanth.nagella@stfc.ac.uk>
+        import numpy as np
+        import h5py
+        nxs = h5py.File(filename, 'w')
+        if flat is not None:
+            data = np.append(data, flat, axis=0)  # [-2]
+        if dark is not None:
+            data = np.append(data, dark, axis=0)  # [-1]
+
+        dset = nxs.create_dataset(
+            "entry1/tomo_entry/instrument/detector/data", data=data)
+
+        if projection_angles is not None:
+            rangle = nxs.create_dataset(
+                "entry1/tomo_entry/sample/rotation_angle", data=projection_angles)
 
     def __init__(self, config):
         from recon.helper import Helper
@@ -161,8 +191,8 @@ class Saver(object):
                 "Cannot save out individual NXS files. Saving out FITS instead.")
 
         for idx in range(0, data.shape[0]):
-            self._write_fits(data[idx, :, :], os.path.join(
-                output_dir, name_prefix + str(idx).zfill(6) + '.fits'))
+            write_fits(data[idx, :, :], os.path.join(
+                output_dir, name_prefix + str(idx).zfill(6) + '.fits'), self._overwrite_all)
 
     def _save_out_stack(self, data, output_dir, name_prefix, flat=None, dark=None, projection_angles=None):
         """
@@ -180,39 +210,11 @@ class Saver(object):
         filename = os.path.join(output_dir, name_prefix + "_stack".zfill(6))
 
         if self._img_format in ['fits', 'fit']:
-            self._write_fits(data, filename + '.fits')
+            write_fits(data, filename + '.fits', self._overwrite_all)
 
         elif self._img_format in ['nxs']:
-            self._write_nxs(data, filename + '.nxs',
-                            flat, dark, projection_angles)
-
-    def _write_fits(self, data, filename):
-        # save out in fits
-        # TODO save out and read the flat and dark images too
-
-        from recon.data.loader import import_pyfits
-        fits = import_pyfits()
-        hdu = fits.PrimaryHDU(data)
-        hdulist = fits.HDUList([hdu])
-        hdulist.writeto(filename, clobber=self._overwrite_all)
-
-    def _write_nxs(self, data, filename, flat=None, dark=None, projection_angles=None):
-        # Adapted code from Nagella, Srikanth (STFC,RAL,SC)
-        # <srikanth.nagella@stfc.ac.uk>
-        import numpy as np
-        import h5py
-        nxs = h5py.File(filename, 'w')
-        if flat is not None:
-            data = np.append(data, flat, axis=0)  # [-2]
-        if dark is not None:
-            data = np.append(data, dark, axis=0)  # [-1]
-
-        dset = nxs.create_dataset(
-            "entry1/tomo_entry/instrument/detector/data", data=data)
-
-        if projection_angles is not None:
-            rangle = nxs.create_dataset(
-                "entry1/tomo_entry/sample/rotation_angle", data=projection_angles)
+            write_nxs(data, filename + '.nxs',
+                      flat, dark, projection_angles, self._overwrite_all)
 
     def gen_readme_summary_begin(self, cmd_line, config):
         """

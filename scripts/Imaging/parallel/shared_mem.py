@@ -4,12 +4,6 @@ import multiprocessing
 
 from recon.helper import Helper
 
-"""
-The difference between recon.parallel and recon.shared_parallel is that the latter uses a shared memory array between
-the processes, to avoid copy-on-read/write the data to each process' virtual memory space.
-"""
-
-
 # this global is necessary for the child processes to access the original
 # array and overwrite the values in-place
 shared_data = None
@@ -103,7 +97,8 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     if chunksize is None:
         chunksize = 1  # TODO use proper calculation
 
-    # handle the edge case of having a different output that input i.e. rebin, crop, etc
+    # handle the edge case of having a different output that input i.e. rebin,
+    # crop, etc
     if output_data is None:
         # get data reference to original with [:]
         output_data = data[:]
@@ -145,7 +140,8 @@ def create_shared_array(shape, dtype=np.float32):
         ctype = ctypes.c_double
         dtype = np.float64
 
-    shared_array_base = multiprocessing.Array(ctype, shape[0] * shape[1] * shape[2])
+    shared_array_base = multiprocessing.Array(
+        ctype, shape[0] * shape[1] * shape[2])
 
     # create a numpy array from shared array
     data = np.frombuffer(shared_array_base.get_obj(), dtype=dtype)
