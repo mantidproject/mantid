@@ -1,10 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
+import numpy as np
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 
+
 def skip_tests():
     return not hasattr(np, "einsum")
+
 
 class HelperTestingClass(object):
     def __init__(self):
