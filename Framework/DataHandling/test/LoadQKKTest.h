@@ -53,6 +53,17 @@ public:
     Mantid::Geometry::IDetector_const_sptr det;
     for (size_t i = 0; i < data->getNumberHistograms(); ++i) {
       TS_ASSERT_THROWS_NOTHING(det = data->getDetector(i));
+
+      auto x = data->x(i);
+      TS_ASSERT_EQUALS(x.size(), 2);
+      TS_ASSERT_EQUALS(x[0], 1);
+      TS_ASSERT_EQUALS(x[1], 2);
+
+      auto y = data->y(i);
+      TS_ASSERT_EQUALS(y[0], 0.0);
+
+      auto e = data->e(i);
+      TS_ASSERT_EQUALS(e[0], 0.0);
     }
   }
 };
