@@ -1,17 +1,15 @@
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
 #include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
-// Mantid Headers from the same project (N/A)
-// Mantid headers from other projects
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitConversion.h"
-// third party library headers
+
 #include <boost/math/special_functions/bessel.hpp>
-// standard library headers
+
 #include <cmath>
 #include <limits>
 
@@ -260,19 +258,19 @@ void InelasticDiffSphere::setWorkspace(
     return;
 
   size_t numHist = workspace->getNumberHistograms();
+  const auto &spectrumInfo = workspace->spectrumInfo();
   for (size_t idx = 0; idx < numHist; idx++) {
-    Mantid::Geometry::IDetector_const_sptr det;
-    try {
-      det = workspace->getDetector(idx);
-    } catch (Kernel::Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(idx)) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       break;
     }
 
+    const auto &det = spectrumInfo.detector(idx);
+
     try {
-      double efixed = workspace->getEFixed(det);
-      double usignTheta = 0.5 * workspace->detectorTwoTheta(*det);
+      double efixed = workspace->getEFixed(det.getID());
+      double usignTheta = 0.5 * workspace->detectorTwoTheta(det);
 
       double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
 
