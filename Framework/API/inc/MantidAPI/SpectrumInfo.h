@@ -11,6 +11,7 @@
 namespace Mantid {
 using detid_t = int32_t;
 namespace Beamline {
+class SpectrumDefinition;
 class SpectrumInfo;
 }
 namespace Geometry {
@@ -71,6 +72,9 @@ public:
   ~SpectrumInfo();
 
   size_t size() const;
+
+  const Beamline::SpectrumDefinition &
+  spectrumDefinition(const size_t index) const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;

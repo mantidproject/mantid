@@ -34,6 +34,13 @@ SpectrumInfo::~SpectrumInfo() = default;
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
 size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
 
+/// Returns a const reference to the SpectrumDefinition of the spectrum.
+const Beamline::SpectrumDefinition &
+SpectrumInfo::spectrumDefinition(const size_t index) const {
+  m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
+  return m_spectrumInfo.spectrumDefinition(index);
+}
+
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
   for (const auto detIndex : getDetectorIndices(index))
@@ -122,16 +129,14 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
-  m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
-  return m_spectrumInfo.spectrumDefinition(index).size() > 0;
+  return spectrumDefinition(index).size() > 0;
 }
 
 /// Returns true if the spectrum is associated with exactly one detector.
 bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
-  m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
-  return m_spectrumInfo.spectrumDefinition(index).size() == 1;
+  return spectrumDefinition(index).size() == 1;
 }
 
 /** Set the mask flag of the spectrum with given index. Not thread safe.
@@ -171,8 +176,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   // Note: This function body has big overlap with the method
   // MatrixWorkspace::getDetector(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
-  m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
-  const auto &specDef = m_spectrumInfo.spectrumDefinition(index);
+  const auto &specDef = spectrumDefinition(index);
   const size_t ndets = specDef.size();
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
@@ -211,11 +215,9 @@ SpectrumInfo::getDetectorVector(const size_t index) const {
 }
 
 std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
-  m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
-  const auto &specDef = m_spectrumInfo.spectrumDefinition(index);
   std::vector<size_t> detIndices;
-  for (const auto &index : specDef)
-    detIndices.push_back(index.first);
+  for (const auto &def : spectrumDefinition(index))
+    detIndices.push_back(def.first);
   if (detIndices.empty())
     throw Kernel::Exception::NotFoundError(
         "SpectrumInfo: No detectors for this workspace index.", "");
