@@ -1067,6 +1067,34 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
       m_spectrumInfoWrapper =
           Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
   }
+  // Rebuild any spectrum definitions that are out of date. Accessing
+  // `API::SpectrumInfo` will rebuild invalid spectrum definitions as it
+  // encounters them (if detector IDs in an `ISpectrum` are changed), however we
+  // need to deal with one special case here:
+  // If two algorithms (or two threads in the same algorithm) access the same
+  // workspace for reading at the same time, calls to
+  // `updateSpectrumDefinitionIfNecessary` done by `API::SpectrumInfo` break
+  // thread-safety. `Algorithm` sets a read-lock, but this lazy update method is
+  // `const` and will modify internals of the workspace nevertheless. We thus
+  // need explicit locking here. Note that we do not need extra locking in the
+  // case of `ExperimentInfo::mutableSpectrumInfo` or other calls to
+  // `updateSpectrumDefinitionIfNecessary` done by `API::SpectrumInfo`: If the
+  // workspace is only read-locked, this update will ensure that no updates will
+  // be triggered by SpectrumInfo, since changing detector IDs in an `ISpectrum`
+  // is not possible for a read-only workspace. If the workspace is write-locked
+  // detector IDs in ISpectrum may change, but the write-lock by `Algorithm`
+  // guarantees that there is no concurrent reader and thus updating is safe.
+  if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
+                  m_spectrumDefinitionNeedsUpdate.cend(),
+                  [](char i) { return i == 1; })) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
+                    m_spectrumDefinitionNeedsUpdate.cend(),
+                    [](char i) { return i == 1; })) {
+      for (size_t i = 0; i < m_spectrumInfoWrapper->size(); ++i)
+        updateSpectrumDefinitionIfNecessary(i);
+    }
+  }
   return *m_spectrumInfoWrapper;
 }
 
