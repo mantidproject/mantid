@@ -341,8 +341,8 @@ public:
         3, 1, false);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
-    const auto &spectrumInfo = testWS->mutableSpectrumInfo();
     auto &pmap = testWS->instrumentParameters();
+    const auto &spectrumInfo = testWS->spectrumInfo();
     pmap.addDouble(&spectrumInfo.detector(0), "Efixed", 0.4);
     pmap.addDouble(&spectrumInfo.detector(1), "Efixed", 0.1);
     pmap.addDouble(&spectrumInfo.detector(2), "Efixed", 0.025);
