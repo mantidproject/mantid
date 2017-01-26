@@ -43,6 +43,17 @@ public:
     TS_ASSERT_EQUALS(source.size(), 0);
   }
 
+  void test_copy_on_write() {
+    const SpectrumInfo source(1);
+    TS_ASSERT_EQUALS(source.spectrumDefinition(0).size(), 0);
+    auto copy(source);
+    SpectrumDefinition def;
+    def.add(0);
+    copy.setSpectrumDefinition(0, def);
+    TS_ASSERT_EQUALS(source.spectrumDefinition(0).size(), 0);
+    TS_ASSERT_EQUALS(copy.spectrumDefinition(0).size(), 1);
+  }
+
   void test_size() {
     TS_ASSERT_EQUALS(SpectrumInfo(0).size(), 0);
     TS_ASSERT_EQUALS(SpectrumInfo(1).size(), 1);
