@@ -357,8 +357,7 @@ public:
   /** Test filtering with correction of direct geometry
     */
   void test_FilterElasticCorrection() {
-    EventWorkspace_sptr ws =
-        createEventWorkspaceElastic(0, 1000000);
+    EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
 
@@ -416,8 +415,7 @@ public:
   /** Test filtering with correction of direct geometry
     */
   void test_FilterDGCorrection() {
-    EventWorkspace_sptr ws =
-        createEventWorkspaceDirect(0, 1000000);
+    EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
     MatrixWorkspace_sptr splws = createMatrixSplittersDG();
@@ -469,8 +467,7 @@ public:
     */
   void test_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
-    EventWorkspace_sptr ws =
-        createEventWorkspaceInDirect(0, 1000000);
+    EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
 
     MatrixWorkspace_sptr splws = createMatrixSplittersDG();
@@ -637,9 +634,8 @@ public:
     * @param numpulses : number of pulses in the event workspace
    */
   EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64,
-                                                        int64_t pulsedt,
-                                                        int64_t tofdt,
-                                                        size_t numpulses) {
+                                           int64_t pulsedt, int64_t tofdt,
+                                           size_t numpulses) {
     // 1. Create an EventWorkspace with 10 detectors
     EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
@@ -685,8 +681,8 @@ public:
     *nanosecond
     * @param pulsedt : pulse length in int64_t format with unit nanosecond
    */
-  EventWorkspace_sptr
-  createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt) {
+  EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64,
+                                                 int64_t pulsedt) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
     // is generated
     EventWorkspace_sptr eventWS =
@@ -736,8 +732,8 @@ public:
    * nanosecond
     * @param pulsedt : pulse length in int64_t format with unit nanosecond
     */
-  EventWorkspace_sptr
-  createEventWorkspaceInDirect(int64_t runstart_i64, int64_t pulsedt) {
+  EventWorkspace_sptr createEventWorkspaceInDirect(int64_t runstart_i64,
+                                                   int64_t pulsedt) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
     // is generated
     EventWorkspace_sptr eventWS =
@@ -785,8 +781,8 @@ public:
    * @param pulsedt
    * @return
    */
-  EventWorkspace_sptr
-  createEventWorkspaceElastic(int64_t runstart_i64, int64_t pulsedt) {
+  EventWorkspace_sptr createEventWorkspaceElastic(int64_t runstart_i64,
+                                                  int64_t pulsedt) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
     // is generated
     EventWorkspace_sptr eventWS =
@@ -829,11 +825,10 @@ public:
    * int64_t format of unit nanosecond
     * @param numpulses : number of pulses in the event workspace
    */
-  SplittersWorkspace_sptr
-  createSplitter(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt) {
+  SplittersWorkspace_sptr createSplitter(int64_t runstart_i64, int64_t pulsedt,
+                                         int64_t tofdt) {
     SplittersWorkspace_sptr splitterws =
-        boost::shared_ptr<SplittersWorkspace>(
-            new SplittersWorkspace);
+        boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
 
     // 1. Splitter 0: 0 ~ 3+ (first pulse)
     int64_t t0 = runstart_i64;
@@ -939,8 +934,7 @@ public:
 
     // 1. Create an empty splitter workspace
     SplittersWorkspace_sptr splitterws =
-        boost::shared_ptr<SplittersWorkspace>(
-            new SplittersWorkspace);
+        boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
 
     // 2. Create splitters
     for (size_t i = 0; i < numpulses; ++i) {

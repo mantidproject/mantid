@@ -162,8 +162,8 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
     // Add ten more at #10 so that it fails
     for (int i = 0; i < 10; i++)
-      work_in->getSpectrum(10).addEventQuickly(
-          TofEvent((i + 0.5), run_start + double(i)));
+      work_in->getSpectrum(10)
+          .addEventQuickly(TofEvent((i + 0.5), run_start + double(i)));
 
     AnalysisDataService::Instance().add("testdead_in", work_in);
 
