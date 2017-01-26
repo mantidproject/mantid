@@ -34,6 +34,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
+using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::BinEdges;
 using namespace Mantid::NeXus;
 
 /// Empty default constructor
@@ -252,8 +255,8 @@ void LoadMuonNexus2::doExec() {
     for (int spec = static_cast<int>(m_spec_min);
          spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
-      localWorkspace->setSharedX(wsIndex, localWorkspace->sharedX(0));
-      loadData(counts, wsIndex, period, i, localWorkspace);
+      localWorkspace->setHistogram(
+          wsIndex, loadData(localWorkspace->binEdges(0), counts, period, i));
       localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[i]);
       localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(i));
       wsIndex++;
@@ -264,8 +267,8 @@ void LoadMuonNexus2::doExec() {
     if (m_list) {
       for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
-        localWorkspace->setSharedX(wsIndex, localWorkspace->sharedX(0));
-        loadData(counts, wsIndex, period, k, localWorkspace);
+        localWorkspace->setHistogram(
+            wsIndex, loadData(localWorkspace->binEdges(0), counts, period, k));
         localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[k]);
         localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(k));
         wsIndex++;
@@ -273,7 +276,7 @@ void LoadMuonNexus2::doExec() {
       }
     }
     // Just a sanity check
-    assert(counter == total_specs);
+    assert(wsIndex == total_specs);
 
     bool autogroup = getProperty("AutoGroup");
 
@@ -296,9 +299,9 @@ void LoadMuonNexus2::doExec() {
 /** loadData
 *  Load the counts data from an NXInt into a workspace
 */
-void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts, int wsIndex,
-                              int period, int spec,
-                              API::MatrixWorkspace_sptr localWorkspace) {
+Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
+                                   const Mantid::NeXus::NXInt &counts,
+                                   int period, int spec) {
   int nBins = 0;
   int *data = nullptr;
 
@@ -311,13 +314,8 @@ void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts, int wsIndex,
   } else {
     throw std::runtime_error("Data have unsupported dimensionality");
   }
-  assert(nBins + 1 == static_cast<int>(timeBins.size()));
 
-  auto &Y = localWorkspace->mutableY(wsIndex);
-  auto &E = localWorkspace->mutableE(wsIndex);
-  Y.assign(data, data + nBins);
-  std::transform(Y.begin(), Y.end(), E.begin(),
-                 [](double y) { return sqrt(y); });
+  return Histogram(edges, Counts(data, data + nBins));
 }
 
 /**  Load logs from Nexus file. Logs are expected to be in
