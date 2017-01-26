@@ -4120,109 +4120,21 @@ p, li { white-space: pre-wrap; }
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_11">
             <item>
-             <layout class="QGridLayout" name="gridLayout_13">
-              <item row="0" column="5">
-               <spacer name="horizontalSpacer_17">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Expanding</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="10">
-               <widget class="QLineEdit" name="lineEdit_background">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEdit_scanIntegratePeak">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="readOnly">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>Scan Number</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QPushButton" name="pushButton_nextScanIntegrate">
-                <property name="text">
-                 <string>Next</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="6">
-               <widget class="QLabel" name="label_34">
-                <property name="text">
-                 <string>Peak Radius</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="11">
-               <widget class="QPushButton" name="pushButton_integratePeak">
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Integrate Peak</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="7">
-               <widget class="QLineEdit" name="lineEdit_peakRadius">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="9">
-               <widget class="QLabel" name="label_46">
-                <property name="text">
-                 <string>Background</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_peakIntegraeInfo">
-              <property name="text">
-               <string>TextLabel</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <layout class="QGridLayout" name="gridLayout_15">
-              <item row="0" column="0">
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_peakIntegraeInfo_2">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>(General Information)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
                <widget class="PeakIntegrationTableWidget" name="tableWidget_peakIntegration">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -4236,9 +4148,119 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item row="1" column="1">
-               <layout class="QGridLayout" name="gridLayout_20">
-                <item row="1" column="3">
-                 <spacer name="horizontalSpacer_20">
+               <layout class="QHBoxLayout" name="horizontalLayout_21">
+                <item>
+                 <widget class="QLabel" name="label_32">
+                  <property name="text">
+                   <string>Raw Peak Intensity</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_rawSinglePeakIntensity">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_39">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_45">
+                  <property name="text">
+                   <string>Gaussian Corrected Intensity</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEdit_gaussianPeakIntensity">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_38">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item row="2" column="1">
+               <widget class="IntegratedPeakView" name="graphicsView_integratedPeakView">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <layout class="QGridLayout" name="gridLayout_21">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_5">
+                  <property name="text">
+                   <string>Scan Number</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="lineEdit_scanIntegratePeak">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="readOnly">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="1">
+               <layout class="QGridLayout" name="gridLayout_13">
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="comboBox_ptCountType"/>
+                </item>
+                <item row="0" column="6">
+                 <spacer name="horizontalSpacer_17">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -4253,57 +4275,7 @@ p, li { white-space: pre-wrap; }
                   </property>
                  </spacer>
                 </item>
-                <item row="1" column="5">
-                 <widget class="QPushButton" name="pushButton_handPickBkgd">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;User hand-pick background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Customize Bkgd</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="5">
-                 <widget class="QPushButton" name="pushButton_fitBkgd">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fit by Gaussian for background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Fit Background</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QComboBox" name="comboBox_ptCountType">
-                  <item>
-                   <property name="text">
-                    <string>Absolute</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Normalized by Time</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Normalized by Monitor</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item row="1" column="1">
+                <item row="0" column="2">
                  <widget class="QComboBox" name="comboBox_maskNames2">
                   <item>
                    <property name="text">
@@ -4312,18 +4284,7 @@ p, li { white-space: pre-wrap; }
                   </item>
                  </widget>
                 </item>
-                <item row="0" column="6">
-                 <widget class="QCheckBox" name="checkBox_peakIntTabLorentzCorr">
-                  <property name="text">
-                   <string>Lorentz Correction</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="1" column="0">
-               <layout class="QGridLayout" name="gridLayout_21">
-                <item row="1" column="0">
+                <item row="0" column="3">
                  <widget class="QPushButton" name="pushButton_calBkgd">
                   <property name="font">
                    <font>
@@ -4342,17 +4303,27 @@ p, li { white-space: pre-wrap; }
                   </property>
                  </widget>
                 </item>
+                <item row="0" column="4">
+                 <widget class="QPushButton" name="pushButton_fitGaussian">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fit by Gaussian for background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>Correct By Gaussian</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="5">
+                 <widget class="QCheckBox" name="checkBox_peakIntTabLorentzCorr">
+                  <property name="text">
+                   <string>Lorentz Correction</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
-              </item>
-              <item row="0" column="1">
-               <widget class="IntegratedPeakView" name="graphicsView_integratedPeakView">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
               </item>
              </layout>
             </item>
