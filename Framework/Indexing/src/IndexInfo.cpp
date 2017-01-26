@@ -124,8 +124,8 @@ void IndexInfo::setDetectorIDs(
       Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>>(nullptr);
 }
 
-void IndexInfo::setSpectrumDefinitions(
-    Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions) {
+void IndexInfo::setSpectrumDefinitions(Kernel::cow_ptr<
+    std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions) {
   m_spectrumDefinitions = spectrumDefinitions;
 }
 
