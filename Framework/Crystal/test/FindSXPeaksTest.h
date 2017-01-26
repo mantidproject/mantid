@@ -2,6 +2,7 @@
 #define FIND_SX_PEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -43,13 +44,12 @@ public:
   void testSXPeakConstructorThrowsIfNegativeIntensity() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     double intensity = -1; // Negative intensity.
     std::vector<int> spectra(1, 1);
-    double detectorDistance = 3;
     TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
-                      SXPeak(0.001, 0.02, 0.01, intensity, spectra,
-                             detectorDistance, 1, instrument),
+                      SXPeak(0.001, 0.02, intensity, spectra,
+                             0, spectrumInfo),
                       std::invalid_argument);
   }
 
@@ -57,41 +57,46 @@ public:
   void testSXPeakConstructorThrowsIfSpectraSizeZero() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     double intensity = 1;
     std::vector<int> spectra; // Zero size spectra list
-    double detectorDistance = 3;
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
-               instrument),
+        SXPeak(0.001, 0.02, intensity, spectra, 0,
+               spectrumInfo),
         std::invalid_argument);
   }
 
-  // Test out of bounds construction arguments.
-  void testSXPeakConstructorThrowsIfNegativeDetectorDistance() {
+  void testSXPeakConstructorThrowsWithGroupedDetectors() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
+    Mantid::DataHandling::GroupDetectors2 grouper;
+    grouper.initialize();
+    grouper.setChild(true);
+    grouper.setProperty("InputWorkspace", workspace);
+    const std::string outWSName("unused_for_child");
+    grouper.setProperty("OutputWorkspace", outWSName);
+    grouper.setPropertyValue("GroupingPattern", "1-9");
+    grouper.execute();
+    MatrixWorkspace_sptr groupedWS = grouper.getProperty("OutputWorkspace");
+    const auto &spectrumInfo = groupedWS->spectrumInfo();
     double intensity = 1;
     std::vector<int> spectra(1, 1);
-    double detectorDistance = -1; // Negative detector distance
     TSM_ASSERT_THROWS(
-        "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
-               instrument),
+        "SXPeak: Should not construct with spectrum having multiple detectors",
+        SXPeak(0.001, 0.02, intensity, spectra, 0,
+               spectrumInfo),
         std::invalid_argument);
   }
 
   void testSXPeakGetters() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     double intensity = 1;
     std::vector<int> spectra(1, 1);
-    double detectorDistance = 3;
-    SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2,
-                instrument);
+    SXPeak peak(0.001, 0.02, intensity, spectra, 1,
+                spectrumInfo);
 
     TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1,
                       peak.getIntensity());
