@@ -159,6 +159,10 @@ void SaveAscii2::exec() {
 
   // Check whether we need to write the fourth column
   m_writeDX = getProperty("WriteXError");
+  if(!m_ws->hasDx(0) && m_writeDX)
+  {
+	throw std::runtime_error("x data errors have been requested but do not exist.");
+  }
   const std::string choice = getPropertyValue("Separator");
   const std::string custom = getPropertyValue("CustomSeparator");
   // If the custom separator property is not empty, then we use that under any
