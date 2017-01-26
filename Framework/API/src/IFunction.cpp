@@ -748,25 +748,26 @@ void IFunction::setMatrixWorkspace(
 
     const auto &paramMap = workspace->constInstrumentParameters();
 
-    Geometry::IDetector const * detectorPtr = nullptr;
+    Geometry::IDetector const *detectorPtr = nullptr;
     size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
       // Note JZ oct 2011 - I'm not sure why the code uses the first detector
       // and not the group. Ask Roman.
-      auto firstDetectorId = *workspace->getSpectrum(wi).getDetectorIDs().begin();
+      auto firstDetectorId =
+          *workspace->getSpectrum(wi).getDetectorIDs().begin();
 
-      const auto& detectorInfo = workspace->detectorInfo();
+      const auto &detectorInfo = workspace->detectorInfo();
       const auto detectorIndex = detectorInfo.indexOf(firstDetectorId);
-      const auto& detector = detectorInfo.detector(detectorIndex);
+      const auto &detector = detectorInfo.detector(detectorIndex);
       detectorPtr = &detector;
     } else {
       // Get the detector (single) at this workspace index
-      const auto& spectrumInfo = workspace->spectrumInfo();
-      const auto& detector = spectrumInfo.detector(wi);
+      const auto &spectrumInfo = workspace->spectrumInfo();
+      const auto &detector = spectrumInfo.detector(wi);
       detectorPtr = &detector;
-     }
+    }
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
