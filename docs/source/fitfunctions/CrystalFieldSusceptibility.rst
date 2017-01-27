@@ -46,9 +46,9 @@ Example
 Here is an example of how to the crystal field parameters to a susceptibility dataset. All parameters disallowed by symmetry are fixed automatically.
 The "data" here is generated from the function itself, for a field along the [111] direction with respects to the crystal field parameters (not necessarily the [111] crystallographic direction).
 
-The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs units of m\ :sup:`3`\ /mol (==emu/mol).
+The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs units of cm\ :sup:`3`\ /mol (==emu/mol).
 
-.. code:: ExampleCrystalFieldSusceptibility
+.. testcode:: ExampleCrystalFieldSusceptibility
 
     import numpy as np
 
@@ -83,9 +83,20 @@ The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs uni
 
 .. testcleanup:: ExampleCrystalFieldSusceptibility
 
-Output:
-
 .. testoutput:: ExampleCrystalFieldSusceptibility
+   :hide:
+   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+        B20 =  0...
+        B22 =  0...
+        B40 = -0...
+        B42 = -0...
+        B44 = -0...
+    Cost function value = ...
+
+Output (the numbers you see on your machine may vary):
+
+.. code::
 
         B20 =  0.37737
         B22 =  0.039788

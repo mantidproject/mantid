@@ -366,20 +366,28 @@ ReflRunsTabPresenter::getPreprocessingOptions() const {
   return options;
 }
 
-/** Requests global pre-processing options. Options are supplied by the main
+/** Requests global processing options. Options are supplied by the main
 * presenter
-* @return :: Global pre-processing options
+* @return :: Global processing options
 */
 std::string ReflRunsTabPresenter::getProcessingOptions() const {
   return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
-/** Requests global pre-processing options. Options are supplied by the main
+/** Requests global post-processing options. Options are supplied by the main
 * presenter
-* @return :: Global pre-processing options
+* @return :: Global post-processing options
 */
 std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
   return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
+}
+
+/** Requests global time-slicing options. Options are supplied by the main
+* presenter
+* @return :: Global time-slicing options
+*/
+std::string ReflRunsTabPresenter::getTimeSlicingOptions() const {
+  return m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup());
 }
 
 /**

@@ -14,6 +14,7 @@ Algorithms
 - :ref:`EnergyWindowScan <algm-EnergyWindowScan>` and :ref:`IndirectQuickRun <algm-IndirectQuickRun>` have been added
   to perform a quick run of *EnergyTransfer*, *Elwin* and optional *MSDFit*
 - A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
+- A new algorithm :ref:`Abins <algm-Abins>`  which allows comparison of theoretical and experimental INS.
 - A 'QuickRun' algorithm :ref:`SofQWMomentsScan <algm-SofQWMomentsScan>` that reduces data and runs through :ref:`SofQW <algm-SofQW>` and :ref:`SofQWMoments <algm-SofQWMoments>`.
 
 Data Reduction
@@ -52,6 +53,7 @@ Absorption
 ~~~~~~~~~~
 
 - Option to calculate number density from mass density
+- Absorption geometry has been updated to use the :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` method
 
 Tools
 #####
@@ -67,6 +69,7 @@ Vesuvio
 #######
 
 - Run numbers can now be input as a range in :ref:`LoadVesuvio <algm-LoadVesuvio>` and :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>`
+- Position of monitors has been updated
 
 Improvements
 ------------
@@ -74,6 +77,7 @@ Improvements
 - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
 - TOSCA instrument definition file has been updated
 - When plotting from interfaces the plots now display error bars as standard
+- *I(Q, t)Fit* now uses the ExpDecay and StretchedExp functions already in Mantid
 
 Bugfixes
 --------

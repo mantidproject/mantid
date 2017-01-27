@@ -638,6 +638,7 @@ class PhysicalProperties(object):
         self._hdir = [0., 0., 1.]
         self._hmag = 1.
         self._physpropTemperature = 1.
+        self._lambda = 0.    # Exchange parameter (for susceptibility only)
         self._typeid = self._str2id(typeid) if isinstance(typeid, string_types) else int(typeid)
         try:
             initialiser = getattr(self, 'init' + str(self._typeid))
@@ -728,6 +729,15 @@ class PhysicalProperties(object):
         if (self._typeid == 3):
             self._physpropTemperature = float(value)
 
+    @property
+    def Lambda(self):
+        return self._lambda if (self._typeid == 2) else None
+
+    @Lambda.setter
+    def Lambda(self, value):
+        if (self._typeid == 2):
+            self._lambda = float(value)
+
     def init1(self, *args, **kwargs):
         """ Initialises environment for heat capacity data """
         if len(args) > 0:
@@ -744,19 +754,13 @@ class PhysicalProperties(object):
                 pass
         for i in range(len(mapping)):
             if len(args) > i:
-                try:
-                    setattr(self, mapping[i], args[i])
-                except:
-                    raise RuntimeError('%s:%s' % (str(mapping[i]), str(args[i])))
+                setattr(self, mapping[i], args[i])
             elif mapping[i] in kwargs.keys():
-                try:
-                    setattr(self, mapping[i], kwargs[mapping[i]])
-                except:
-                    raise RuntimeError('%s:%s' % (str(mapping[i]), str(kwargs[mapping[i]])))
+                setattr(self, mapping[i], kwargs[mapping[i]])
 
     def init2(self, *args, **kwargs):
         """ Initialises environment for susceptibility data """
-        mapping = ['Hdir', 'Inverse', 'Unit']
+        mapping = ['Hdir', 'Inverse', 'Unit', 'Lambda']
         self._parseargs(mapping, *args, **kwargs)
 
     def init3(self, *args, **kwargs):
@@ -785,6 +789,8 @@ class PhysicalProperties(object):
             else:            # either susceptibility or M(T)
                 out += ',inverse=%s' % (1 if self._suscInverseFlag else 0)
                 out += (',Hmag=%s' % (self._hmag)) if self._typeid==3 else ''
+                if self._typeid == 2 and self._lambda != 0:
+                    out += ',Lambda=%s' % (self._lambda)
         return out
 
     def envString(self, dataset=0):
@@ -800,4 +806,6 @@ class PhysicalProperties(object):
             if self._typeid != 3:  # either susceptibility or M(T)
                 out += ',inverse%s=%s' % (dataset, 1 if self._suscInverseFlag else 0)
                 out += (',Hmag%s=%s' % (dataset, self._hmag)) if self._typeid==3 else ''
+                if self._typeid == 2 and self._lambda != 0:
+                    out += ',Lambda%s=%s' % (dataset, self._lambda)
         return out
