@@ -236,6 +236,12 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakCompare->setIcon(QIcon(":/PickTools/selection-peak-compare.png"));
   m_peakCompare->setToolTip("Compare single crystal peak(s)");
 
+  m_peakAlign = new QPushButton();
+  m_peakAlign->setCheckable(true);
+  m_peakAlign->setAutoExclusive(true);
+  m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-plane.png"));
+  m_peakAlign->setToolTip("Crystal peak alignment tool");
+
   QGridLayout *toolBox = new QGridLayout();
   toolBox->addWidget(m_zoom, 0, 0);
   toolBox->addWidget(m_edit, 0, 1);
@@ -249,6 +255,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_peak, 1, 2);
   toolBox->addWidget(m_peakSelect, 1, 3);
   toolBox->addWidget(m_peakCompare, 1, 4);
+  toolBox->addWidget(m_peakAlign, 1, 5);
   toolBox->setColumnStretch(6, 1);
   toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -257,6 +264,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_peak, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakSelect, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakCompare, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_peakAlign, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -418,6 +426,10 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_selectionType = ComparePeak;
     m_activeTool->setText("Tool: Compare crystal peak(s)");
     surfaceMode = ProjectionSurface::ComparePeakMode;
+  } else if (m_peakAlign->isChecked()) {
+    m_selectionType = AlignPeak;
+    m_activeTool->setText("Tool: Align crystal peak(s)");
+    surfaceMode = ProjectionSurface::AlignPeakMode;
   } else if (m_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
@@ -544,12 +556,16 @@ void InstrumentWidgetPickTab::initSurface() {
   connect(surface, SIGNAL(singleComponentPicked(size_t)), this,
           SLOT(singleComponentPicked(size_t)));
   connect(
-      surface,
-      SIGNAL(comparePeaks(
-          std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)),
-      this,
-      SLOT(comparePeaks(
-          std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)));
+      surface, SIGNAL(comparePeaks(
+                   const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                   std::vector<Mantid::Geometry::IPeak *>> &)),
+      this, SLOT(comparePeaks(
+                const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                std::vector<Mantid::Geometry::IPeak *>> &)));
+  connect(surface, SIGNAL(alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
+                                     const Mantid::Geometry::IPeak *)),
+          this, SLOT(alignPeaks(const std::vector<Mantid::Kernel::V3D>,
+                                const Mantid::Geometry::IPeak *)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
@@ -582,6 +598,10 @@ void InstrumentWidgetPickTab::initSurface() {
 boost::shared_ptr<ProjectionSurface>
 InstrumentWidgetPickTab::getSurface() const {
   return m_instrWidget->getSurface();
+}
+
+const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const {
+  return m_instrWidget;
 }
 
 /**
@@ -677,9 +697,16 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_plotController->updatePlot();
 }
 
-void InstrumentWidgetPickTab::comparePeaks(const std::pair<
-    Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
+void InstrumentWidgetPickTab::comparePeaks(
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
+}
+
+void InstrumentWidgetPickTab::alignPeaks(
+    const std::vector<Mantid::Kernel::V3D> &planePeaks,
+    const Mantid::Geometry::IPeak *peak) {
+  m_infoController->displayAlignPeaksInfo(planePeaks, peak);
 }
 
 /**
@@ -921,42 +948,106 @@ ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
   return QString::fromStdString(text.str());
 }
 
-QString ComponentInfoController::displayPeakAngles(
-    std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks) {
+QString ComponentInfoController::displayPeakAngles(const std::pair<
+    Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
 
-  auto pos1 = peak1->getDetector()->getPos();
-  auto pos2 = peak2->getDetector()->getPos();
+  auto pos1 = peak1->getQSampleFrame();
+  auto pos2 = peak2->getQSampleFrame();
+  auto angle = pos1.angle(pos2);
+  angle *= double_constants::radian;
 
-  auto angle = pos1.angle(pos2) * double_constants::radian;
-  auto distance = pos1 - pos2;
-  auto dirAngles = distance.directionAngles();
-
-  text << "Angle between: " << angle << "\n";
-  text << "Direction angles: ";
-  text << " a: " << dirAngles[0];
-  text << " b: " << dirAngles[1];
-  text << " c: " << dirAngles[2];
-  text << "\n";
+  text << "Angle: " << angle << "\n";
 
   return QString::fromStdString(text.str());
 }
 
 void ComponentInfoController::displayComparePeaksInfo(
-    std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks) {
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   std::stringstream text;
-  auto peak1 = peaks.first;
-  auto peak2 = peaks.second;
 
-  text << "First Peak \n";
-  text << displayPeakInfo(peak1).toStdString();
+  text << "Comparison Information\n";
+  auto peaksFromDetectors =
+      std::make_pair(peaks.first.front(), peaks.second.front());
+  text << displayPeakAngles(peaksFromDetectors).toStdString();
+
   text << "-------------------------------\n";
-  text << "Second Peak \n";
-  text << displayPeakInfo(peak2).toStdString();
+  text << "First Detector Peaks \n";
+  for (auto peak : peaks.first)
+    text << displayPeakInfo(peak).toStdString();
+
   text << "-------------------------------\n";
-  text << displayPeakAngles(peaks).toStdString();
+  text << "Second Detector Peaks \n";
+  for (auto peak : peaks.second)
+    text << displayPeakInfo(peak).toStdString();
+
+  text << "\n";
+
+  m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
+}
+
+void ComponentInfoController::displayAlignPeaksInfo(
+    const std::vector<Mantid::Kernel::V3D> &planePeaks,
+    const Mantid::Geometry::IPeak *peak) {
+
+  using Mantid::Kernel::V3D;
+
+  if (planePeaks.size() < 2)
+    return;
+
+  const auto pos1 = planePeaks[0];
+  const auto pos2 = planePeaks[1];
+
+  // find projection of beam direction onto plane
+  // this is so we always orientate to a common reference direction
+  const auto instrument = peak->getInstrument();
+  const auto samplePos = instrument->getSample()->getPos();
+  const auto sourcePos = instrument->getSource()->getPos();
+
+  // find vectors in plane & plane normal
+  auto u = pos2 - pos1;
+  auto v = samplePos - pos1;
+  auto n = u.cross_prod(v);
+
+  const auto beam = samplePos - sourcePos;
+
+  // Check if the chosen vectors result in a vector that is parallel
+  // to the beam axis. If not take the projection, else use the beam
+  if (!beam.cross_prod(n).nullVector()) {
+    u = beam - n * (beam.scalar_prod(n) / n.norm2());
+  } else {
+    u = beam;
+  }
+
+  // update in-plane vectors
+  v = u.cross_prod(n);
+
+  u.normalize();
+  v.normalize();
+  n.normalize();
+
+  // now compute in plane & out of plane angles
+  const auto pos3 = peak->getQSampleFrame();
+  const auto x = pos3.scalar_prod(u);
+  const auto y = pos3.scalar_prod(v);
+  const auto z = pos3.scalar_prod(n);
+
+  const V3D p(x, y, z);
+  // compute the elevation angle from the plane
+  const auto R = p.norm();
+  auto theta = (R != 0) ? asin(z / R) : 0.0;
+  // compute in-plane angle
+  auto phi = atan2(y, x);
+
+  // convert angles to degrees
+  theta *= double_constants::radian;
+  phi *= double_constants::radian;
+
+  std::stringstream text;
+  text << " theta: " << theta << " phi: " << phi << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }

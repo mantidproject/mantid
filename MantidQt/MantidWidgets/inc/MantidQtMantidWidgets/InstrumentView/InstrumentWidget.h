@@ -93,6 +93,7 @@ public:
   std::string getWorkspaceNameStdString() const;
   void renameWorkspace(const std::string &workspace);
   SurfaceType getSurfaceType() const { return m_surfaceType; }
+  Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
   /// Get pointer to the projection surface
   boost::shared_ptr<ProjectionSurface> getSurface() const;
   /// True if the GL instrument display is currently on
@@ -195,6 +196,7 @@ public slots:
   /// Overlay a workspace with the given name
   bool overlay(const QString &wsName);
   void clearPeakOverlays();
+  void clearAlignmentPlane();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
   void setShowPeakLabelsFlag(bool on);
@@ -248,7 +250,7 @@ protected:
   SimpleWidget *m_simpleDisplay;
 
   // Context menu actions
-  QAction *m_clearPeakOverlays;
+  QAction *m_clearPeakOverlays, *m_clearAlignment;
 
   /// The name of workspace that this window is associated with. The
   /// InstrumentActor holds a pointer to the workspace itself.

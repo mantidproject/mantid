@@ -287,7 +287,7 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
 
   /* Create the top level group */
 
-  /*QtProperty* fitGroup = */ m_groupManager->addProperty("Fit");
+  m_groupManager->addProperty("Fit");
 
   connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(enumChanged(QtProperty *)));
@@ -309,6 +309,8 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
           SLOT(vectorDoubleChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(parameterChanged(QtProperty *)));
+  connect(m_vectorSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(vectorSizeChanged(QtProperty *)));
 
   QVBoxLayout *layout = new QVBoxLayout(w);
   QGridLayout *buttonsLayout = new QGridLayout();
@@ -1789,6 +1791,17 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem *current) {
  * @param prop :: A property managed by m_vectorDoubleManager.
  */
 void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop) {
+  PropertyHandler *h = getHandler()->findHandler(prop);
+  if (!h)
+    return;
+  h->setVectorAttribute(prop);
+}
+
+/**
+ * Slot. Responds to changing a vector attribute size
+ * @param prop :: A property managed by m_vectorSizeManager.
+ */
+void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop) {
   PropertyHandler *h = getHandler()->findHandler(prop);
   if (!h)
     return;
