@@ -362,12 +362,10 @@ class CrystalFieldTests(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.035, Temperature=[10.0, 10.0], FWHM=1.0)
         self.assertEqual(cf.check_consistency(), 2)
         cf = CrystalField('Ce', 'C2v', B20=0.035, Temperature=[5, 10], FWHM=[0.5,1,2])
-        with self.assertRaises(ValueError):
-            cf.check_consistency()
+        self.assertRaises(ValueError, cf.check_consistency)
         cf = CrystalField('Ce', 'C2v', B20=0.035, Temperature=[5, 10], FWHM=[0.5,1])
         cf.IntensityScaling = [1,2,3,4]
-        with self.assertRaises(ValueError):
-            cf.check_consistency()
+        self.assertRaises(ValueError, cf.check_consistency)
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                           Temperature=[4.0], FWHM=0.1, ToleranceIntensity=0.001*c_mbsr)
         cf.IntensityScaling = [1]
@@ -689,8 +687,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws = makeWorkspace(x, y)
         cf.IntensityScaling = [1, 2]
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws], MaxIterations=200)
-        with self.assertRaises(ValueError):
-            fit.fit()
+        self.assertRaises(ValueError, fit.fit)
         cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5], FWHM=0.5, IntensityScaling=[1])
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=1)
         self.assertEquals(fit.check_consistency(), None)
