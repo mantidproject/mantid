@@ -13,7 +13,7 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
 1. Calculate the Debye-Waller factor according to Sears and Shelley *Acta Cryst. A* **47**, 441 (1991):
 
-   :math:`D_i = \exp\left(-B_i\cdot\frac{4\pi\sin\theta_i}{\lambda^2}\right)`
+   :math:`D_i = \exp\left[-B_i\cdot\left(\frac{4\pi\sin\theta_i}{\lambda}\right)^2\right]`
 
    :math:`B_i = \frac{3\hbar^2\cdot 10^{20}}{2m_VkT_m}\cdot J(y)`
 
