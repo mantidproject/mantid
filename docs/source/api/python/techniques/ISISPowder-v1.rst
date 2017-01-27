@@ -38,6 +38,11 @@ just before calling a method). If there was previously a value set a notice will
 appear in the output window informing the user of the old and new values. The
 script will use the value most recently set.
 
+In alternative words  terms it means you ask for
+an instrument object and give it a name. Any parameters
+you set with that name stay with that name and do not affect other objects
+with different names.
+
 The parameters are read in order from the following locations:
 
 - Advanced configuration file
@@ -282,10 +287,8 @@ Advanced Script Parameters
 
 Configuring the scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^
-The scripts are object oriented - in simple terms it means you ask for
-an instrument object - in this case PEARL and give it a name. Any parameters
-you set with that name stay with that name and do not affect other objects
-with different names.
+The scripts are object oriented for more information on this concept see
+:ref:`script_param_overview_isis-powder-diffraction-ref`
 
 The following parameters must be included in the object construction step.
 They can either be manually specified or set in the configuration file:
@@ -294,7 +297,8 @@ They can either be manually specified or set in the configuration file:
 - output_directory
 - user_name
 
-This can be see with the code examples below:
+First the relevant scripts must be imported with the instrument specific customisations
+as follows:
 
 .. code-block:: python
 
@@ -303,7 +307,7 @@ This can be see with the code examples below:
 
 The scripts can be setup in 3 ways:
 
-1.  Explicitly setting parameters for example :- user_name, calibration_directory
+1. Explicitly setting parameters for example :- user_name, calibration_directory
 and output_directory...etc.:
 
 .. code-block:: python
@@ -312,7 +316,8 @@ and output_directory...etc.:
                                   calibration_directory="<Path to calibration folder>",
                                   output_directory="<Path to output folder>", ...etc.)
 
-2. Using user configuration files. This eliminates having to specify several parameters
+2. Using user configuration files see :ref:`yaml_basic_conf_isis-powder-diffraction-ref`.
+   This eliminates having to specify several common parameters
 
 .. code-block:: python
 
@@ -518,4 +523,85 @@ Advanced Script Parameters
   cropped down to after focusing. This value is stored as a tuple of the minimum
   and maximum values. The TOF window should be smaller than `raw_data_cropping_values`
   but larger than `tof_cropping_ranges`
+
+Configuring the Scripts
+^^^^^^^^^^^^^^^^^^^^^^^
+The scripts are objected oriented - for more information on this concept see
+:ref:`script_param_overview_isis-powder-diffraction-ref`
+
+The following parameters must be included in the object construction step.
+They can either be manually specified or set in the configuration file:
+
+- calibration_directory
+- output_directory
+- user_name
+
+The first step is importing the correct scripts for the Polaris instrument:
+
+
+.. code-block:: python
+
+  # First import the scripts for Polaris
+  from isis_powder.polaris import Polaris
+
+The scripts can be setup in 3 ways:
+
+1. Explicitly setting all parameters:
+
+.. code-block:: python
+
+  polaris_manually_specified = Polaris(user_name="Mantid",
+                                       calibration_directory="<Path to Calibration folder>",
+                                       output_directory="<Path to output folder>")
+
+2. Using user configuration files see :ref:`yaml_basic_conf_isis-powder-diffraction-ref`.
+   This eliminates having to specify common parameters:
+
+.. code-block:: python
+
+  config_file_path = "<path_to_your_config_file">
+  polaris_using_config_file = Polaris(user_name="Mantid2", config_file=config_file_path)
+
+3. Using a combination of both, a parameter set from the script will override the
+   configuration parameter without changing the configuration file.
+
+.. code-block:: python
+
+  # This will use "My custom location" instead of the value set in the configuration file
+  polaris_overriden = Polaris(user_name="Mantid3", config_file=config_file_path,
+                              output_directory="My custom location")
+
+
+Vanadium Calibration
+^^^^^^^^^^^^^^^^^^^^
+Within the objects now configured we can run the vanadium calibrations. This
+is done with the `create_calibration_vanadium` method.
+
+This will generate a calibration for the matching vanadium and empty runs in
+the calibration mapping file (see :ref:`polaris_calibration_map-powder-diffraction-ref`)
+and store it into the calibration folder under the appropriate label.
+
+*Note: This only needs to be completed once per cycle for each set of options used.
+The splined vanadium will automatically be loaded during focusing so the
+vanadium calibration step should not be part of your focusing scripts.*
+
+TODO the following parameters are needed.
+
+.. code-block:: python
+
+  # Using the manually specified object where we put in the calibration folder
+  # location when configuring the scripts
+  polaris_manually_specified.create_calibration_vanadium(run_in_range="123", ...)
+
+Focusing
+^^^^^^^^
+Using the examples for the configured scripts we can now run the focusing method:
+
+TODO required parameters
+
+.. code-block:: python
+
+  # We will use the object which has the output_directory overridden to
+  # "My custom location"
+  polaris_overriden.focus(run_number="140-150", input_mode="Individual"...)
 
