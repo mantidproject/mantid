@@ -267,8 +267,7 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
             g_log.warning()
                 << "Error when trying to extract parameters from this line:  "
                 << line << ". This calibration file may not load correctly. "
-                           "Error details: "
-                << rexc.what() << '\n';
+                           "Error details: " << rexc.what() << '\n';
           }
         } else {
           g_log.warning() << "Could not parse correctly a parameters "
@@ -987,8 +986,7 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
         << "The calibration calculations failed. One of the "
            "algorithms did not execute correctly. See log messages for "
            "further details. Error: " +
-               std::string(rexc.what())
-        << '\n';
+               std::string(rexc.what()) << '\n';
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -1535,8 +1533,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
   g_lastValidRun = runNo;
 
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: "
-                 << dir << '\n';
+                    "this directory: " << dir << '\n';
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1581,8 +1578,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         loadDetectorGroupingCSV(dgFile, bankIDs, specs);
       } catch (std::runtime_error &re) {
         g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what()
-                      << '\n';
+                             ". Detailed error: " + re.what() << '\n';
         bankIDs.clear();
         specs.clear();
       }
@@ -1598,8 +1594,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo + " into: "
-                   << effectiveFilenames[idx] << '\n';
+                          ") for run " + runNo +
+                          " into: " << effectiveFilenames[idx] << '\n';
     try {
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
@@ -1608,13 +1604,12 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       g_log.error() << "The focusing calculations failed. One of the algorithms"
                        "did not execute correctly. See log messages for "
                        "further details. Error: " +
-                           std::string(rexc.what())
-                    << '\n';
+                           std::string(rexc.what()) << '\n';
     } catch (std::invalid_argument &ia) {
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
-                       "See log messages for details. Error: "
-                    << ia.what() << '\n';
+                       "See log messages for details. Error: " << ia.what()
+                    << '\n';
     }
   }
 
@@ -1643,8 +1638,8 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
     auto delimPos = line.find_first_of(delim);
     if (std::string::npos == delimPos) {
       throw std::runtime_error(
-          "In file '" + dgFile +
-          "', wrong format in line: " + boost::lexical_cast<std::string>(li) +
+          "In file '" + dgFile + "', wrong format in line: " +
+          boost::lexical_cast<std::string>(li) +
           " which does not contain any delimiters (comma, etc.)");
     }
 
@@ -1658,10 +1653,10 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
             boost::lexical_cast<std::string>(li) + ", the bank ID is empty!");
       }
       if (spec.empty()) {
-        throw std::runtime_error(
-            "In file '" + dgFile +
-            "', wrong format in line: " + boost::lexical_cast<std::string>(li) +
-            ", the list of spectrum Nos is empty!");
+        throw std::runtime_error("In file '" + dgFile +
+                                 "', wrong format in line: " +
+                                 boost::lexical_cast<std::string>(li) +
+                                 ", the list of spectrum Nos is empty!");
       }
 
       size_t bankID = boost::lexical_cast<size_t>(bstr);
@@ -1671,8 +1666,8 @@ void EnggDiffractionPresenter::loadDetectorGroupingCSV(
       throw std::runtime_error(
           "In file '" + dgFile +
           "', issue found when trying to interpret line: " +
-          boost::lexical_cast<std::string>(li) +
-          ". Error description: " + re.what());
+          boost::lexical_cast<std::string>(li) + ". Error description: " +
+          re.what());
     }
   }
 }
@@ -1711,8 +1706,7 @@ void EnggDiffractionPresenter::focusingFinished() {
     if (lastRun != lastValid) {
       g_log.warning()
           << "Focussing process has been stopped, last successful "
-             "run number: "
-          << g_lastValidRun
+             "run number: " << g_lastValidRun
           << " , total number of focus run that could not be processed: "
           << (lastRun - lastValid) << '\n';
       m_view->showStatus("Focusing stopped. Ready");
@@ -1876,9 +1870,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
-            boost::lexical_cast<std::string>(bank) +
-            ". Error description: " + re.what() +
-            " Please check also the log messages for details.";
+            boost::lexical_cast<std::string>(bank) + ". Error description: " +
+            re.what() + " Please check also the log messages for details.";
     throw;
   }
   g_log.notice() << "Produced focused workspace: " << outWSName << '\n';
@@ -1895,9 +1888,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
-            boost::lexical_cast<std::string>(bank) +
-            ". Error description: " + re.what() +
-            " Please check also the log messages for details.";
+            boost::lexical_cast<std::string>(bank) + ". Error description: " +
+            re.what() + " Please check also the log messages for details.";
     throw;
   }
   g_log.notice() << "Saved focused workspace as file: " << fullFilename << '\n';
@@ -1970,8 +1962,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what())
-                    << '\n';
+                           std::string(ia.what()) << '\n';
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -1980,15 +1971,14 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what())
-                    << '\n';
+                           std::string(re.what()) << '\n';
       throw;
     }
   } else {
     g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run "
-                   << vanNo << ". Re-using these files: " << preIntegFilename
-                   << ", and " << preCurvesFilename << '\n';
+                      "Vanadium run " << vanNo
+                   << ". Re-using these files: " << preIntegFilename << ", and "
+                   << preCurvesFilename << '\n';
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS, vanNo, specNos);
@@ -2257,9 +2247,8 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "Coult not run the algorithm " +
-                         rebinName +
-                         " successfully. Error description: " + re.what() +
-                         ".\n";
+                         rebinName + " successfully. Error description: " +
+                         re.what() + ".\n";
     return;
   }
 
@@ -2361,9 +2350,8 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "Coult not run the algorithm " +
-                         rebinName +
-                         " successfully. Error description: " + re.what() +
-                         ".\n";
+                         rebinName + " successfully. Error description: " +
+                         re.what() + ".\n";
     return;
   }
 
@@ -2747,13 +2735,12 @@ std::string EnggDiffractionPresenter::DifcZeroWorkspaceFactory(
 
                            " if (i == 1):\n"
                            "  difc=" +
-      boost::lexical_cast<std::string>(difc[bank1]) + "\n" +
-      "  tzero=" + boost::lexical_cast<std::string>(tzero[bank1]) + "\n" +
-      " else:\n"
+      boost::lexical_cast<std::string>(difc[bank1]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank1]) + "\n" + " else:\n"
 
-      "  difc=" +
-      boost::lexical_cast<std::string>(difc[bank2]) + "\n" +
-      "  tzero=" + boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
+                                                              "  difc=" +
+      boost::lexical_cast<std::string>(difc[bank2]) + "\n" + "  tzero=" +
+      boost::lexical_cast<std::string>(tzero[bank2]) + "\n" +
 
       " for irow in range(0, bank_ws.rowCount()):\n"
       "  xVal.append(bank_ws.cell(irow, 0))\n"
@@ -2885,8 +2872,8 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
     }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to user "
-                     "directory: "
-                  << dir.toString() << ". Error details: " << e.what() << '\n';
+                     "directory: " << dir.toString()
+                  << ". Error details: " << e.what() << '\n';
   } catch (std::runtime_error &re) {
     g_log.error() << "Error while finding/creating a user path: "
                   << dir.toString() << ". Error details: " << re.what() << '\n';
@@ -2917,8 +2904,8 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
     }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to "
-                     "general directory: "
-                  << dir.toString() << ". Error details: " << e.what() << '\n';
+                     "general directory: " << dir.toString()
+                  << ". Error details: " << e.what() << '\n';
   } catch (std::runtime_error &re) {
     g_log.error() << "Error while finding/creating a general path: "
                   << dir.toString() << ". Error details: " << re.what() << '\n';
