@@ -2,6 +2,7 @@ import stresstesting
 from mantid.simpleapi import *
 from mantid import config
 
+
 class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
     # cache default instrument and datadirs
