@@ -1824,28 +1824,17 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
 
   std::string outWSName;
-  std::string specNumsOpenGenie;
   if (!dgFile.empty()) {
     // doing focus "texture"
     outWSName = "engggui_focusing_output_ws_texture_bank_" +
                 boost::lexical_cast<std::string>(bank);
-    specNumsOpenGenie = specNos;
   } else if (specNos.empty()) {
     // doing focus "normal" / by banks
     outWSName = "engggui_focusing_output_ws_bank_" +
                 boost::lexical_cast<std::string>(bank);
-
-    // specnum for opengenie according to bank number
-    if (boost::lexical_cast<std::string>(bank) == "1") {
-      specNumsOpenGenie = "1 - 1200";
-    } else if (boost::lexical_cast<std::string>(bank) == "2") {
-      specNumsOpenGenie = "1201 - 1400";
-    }
-
   } else {
     // doing focus "cropped"
     outWSName = "engggui_focusing_output_ws_cropped";
-    specNumsOpenGenie = specNos;
   }
   try {
     auto alg =
@@ -1869,7 +1858,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+        "Could not run the algorithm EnggCalibrate successfully for bank " +
             boost::lexical_cast<std::string>(bank) + ". Error description: " +
             re.what() + " Please check also the log messages for details.";
     throw;
@@ -1887,7 +1876,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+        "Could not run the algorithm EnggCalibrate successfully for bank " +
             boost::lexical_cast<std::string>(bank) + ". Error description: " +
             re.what() + " Please check also the log messages for details.";
     throw;
@@ -2096,8 +2085,6 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 
-  const std::string specNosBank1 = "1-2000";
-  const std::string specNosBank2 = "1201-2400";
   const std::string northBank = "North";
   const std::string southBank = "South";
 
