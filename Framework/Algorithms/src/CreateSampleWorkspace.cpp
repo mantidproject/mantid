@@ -17,7 +17,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidIndexing/MakeRange.h"
 
 #include <cmath>
 #include <ctime>

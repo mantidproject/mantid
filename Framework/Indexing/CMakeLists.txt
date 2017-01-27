@@ -16,7 +16,6 @@ set ( INC_FILES
 	inc/MantidIndexing/IndexInfo.h
 	inc/MantidIndexing/IndexSet.h
 	inc/MantidIndexing/IndexType.h
-	inc/MantidIndexing/MakeRange.h
 	inc/MantidIndexing/PartitionIndex.h
 	inc/MantidIndexing/Partitioner.h
 	inc/MantidIndexing/RoundRobinPartitioner.h
@@ -33,7 +32,6 @@ set ( TEST_FILES
 	IndexInfoTest.h
 	IndexSetTest.h
 	IndexTypeTest.h
-	MakeRangeTest.h
 	PartitionIndexTest.h
 	PartitionerTest.h
 	RoundRobinPartitionerTest.h
