@@ -1,8 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd
 from mantid.simpleapi import (CreateWorkspace, Load, ConvertUnits,
                               SplineInterpolation, ApplyPaalmanPingsCorrection,
                               DeleteWorkspace)
@@ -47,7 +46,6 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
 
         self._corrections_ws = corrections
 
-
     def tearDown(self):
         """
         Remove workspaces from ADS.
@@ -56,7 +54,6 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(mtd['can_ws'])
         DeleteWorkspace(self._corrections_ws)
-
 
     def _verify_workspace(self, ws, correction_type):
         """
@@ -79,13 +76,11 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
             log_correction_type = logs['corrections_type'].value
             self.assertEqual(log_correction_type, correction_type)
 
-
     def test_can_subtraction(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CanWorkspace=self._can_ws)
 
         self._verify_workspace(corr, 'can_subtraction')
-
 
     def test_can_subtraction_with_can_scale(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
@@ -101,35 +96,36 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
 
         self._verify_workspace(corr, 'can_subtraction')
 
-
     def test_sample_corrections_only(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws)
+        corr = ApplyPaalmanPingsCorrection(
+            SampleWorkspace=self._sample_ws,
+            CorrectionsWorkspace=self._corrections_ws)
 
         self._verify_workspace(corr, 'sample_corrections_only')
 
-
     def test_sample_and_can_corrections(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws,
-                                           CanWorkspace=self._can_ws)
+        corr = ApplyPaalmanPingsCorrection(
+            SampleWorkspace=self._sample_ws,
+            CorrectionsWorkspace=self._corrections_ws,
+            CanWorkspace=self._can_ws)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
-
     def test_sample_and_can_corrections_with_can_scale(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws,
-                                           CanWorkspace=self._can_ws,
-                                           CanScaleFactor=0.9)
+        corr = ApplyPaalmanPingsCorrection(
+            SampleWorkspace=self._sample_ws,
+            CorrectionsWorkspace=self._corrections_ws,
+            CanWorkspace=self._can_ws,
+            CanScaleFactor=0.9)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
     def test_sample_and_can_corrections_with_can_shift(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws,
-                                           CanWorkspace=self._can_ws,
-                                           CanShiftFactor = 0.03)
+        corr = ApplyPaalmanPingsCorrection(
+            SampleWorkspace=self._sample_ws,
+            CorrectionsWorkspace=self._corrections_ws,
+            CanWorkspace=self._can_ws,
+            CanShiftFactor=0.03)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
@@ -191,5 +187,5 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         DeleteWorkspace(sample_1)
         DeleteWorkspace(container_1)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
