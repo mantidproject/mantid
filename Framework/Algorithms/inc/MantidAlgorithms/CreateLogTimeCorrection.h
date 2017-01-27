@@ -78,7 +78,6 @@ private:
 
   std::map<int, double> m_l2map;
   std::map<int, double> m_correctionMap;
-  double m_L1 = 0.0;
 };
 
 } // namespace Algorithms
