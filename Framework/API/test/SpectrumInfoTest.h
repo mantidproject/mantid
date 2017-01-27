@@ -417,6 +417,15 @@ public:
     TS_ASSERT_THROWS(spectrumInfo.detector(0), std::out_of_range);
   }
 
+  void test_no_detector_twice() {
+    // Regression test: Make sure that *repeated* access also fails.
+    const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
+    TS_ASSERT_THROWS(spectrumInfo.detector(0),
+                     std::out_of_range);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0),
+                     std::out_of_range);
+  }
+
   void test_ExperimentInfo_basics() {
     const ExperimentInfo expInfo(m_workspace);
     const SpectrumInfo spectrumInfo(expInfo);
