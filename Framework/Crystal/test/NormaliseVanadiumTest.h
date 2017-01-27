@@ -50,8 +50,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   size_t nd = 1;
   // Make a random generator for each dimensions
   typedef boost::variate_generator<boost::mt19937 &,
-                                   boost::uniform_real<double>>
-      gen_t;
+                                   boost::uniform_real<double>> gen_t;
   gen_t *gens[1];
   for (size_t d = 0; d < nd; ++d) {
     double min = -1.;
@@ -189,13 +188,9 @@ public:
     delete suite;
   }
 
-  void setUp() override {
-    normaliseVanadiumAlg = createAlgorithm();
-  }
+  void setUp() override { normaliseVanadiumAlg = createAlgorithm(); }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove("TOPAZ");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("TOPAZ"); }
 
   void testNormaliseVanadiumPerformance() {
     TS_ASSERT_THROWS_NOTHING(normaliseVanadiumAlg->execute());

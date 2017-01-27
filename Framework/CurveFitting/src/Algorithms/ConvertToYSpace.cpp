@@ -75,8 +75,8 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   detpar.l2 = spectrumInfo.l2(index);
   detpar.pos = spectrumInfo.position(index);
   detpar.theta = spectrumInfo.twoTheta(index);
-  detpar.t0 = getComponentParameter(det, pmap, "t0") *
-              1e-6; // Convert to seconds
+  detpar.t0 =
+      getComponentParameter(det, pmap, "t0") * 1e-6; // Convert to seconds
   detpar.efixed = getComponentParameter(det, pmap, "efixed");
   return detpar;
 }
@@ -97,7 +97,7 @@ ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
 
   if (!&comp)
     throw std::invalid_argument(
-      "ComptonProfile - Cannot retrieve parameter from NULL component");
+        "ComptonProfile - Cannot retrieve parameter from NULL component");
 
   double result(0.0);
   if (const auto &group =

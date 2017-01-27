@@ -168,7 +168,8 @@ public:
     convertToYSpaceAlg->setChild(false);
     convertToYSpaceAlg->setProperty("InputWorkspace", testWS);
     convertToYSpaceAlg->setProperty("Mass", 1.0097);
-    convertToYSpaceAlg->setProperty("QWorkspace", "ConvertToYSpace_Test_qSpace");
+    convertToYSpaceAlg->setProperty("QWorkspace",
+                                    "ConvertToYSpace_Test_qSpace");
   }
 
   void testConvertToYSpaceTestPerformance() {

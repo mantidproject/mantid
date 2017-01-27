@@ -193,7 +193,7 @@ void AnvredCorrection::exec() {
     std::string bankName;
 
     const auto &det = spectrumInfo.detector(i);
-    if (m_useScaleFactors) 
+    if (m_useScaleFactors)
       scale_init(det, inst, L2, depth, pathlength, bankName);
 
     Mantid::Kernel::Units::Wavelength wl;
