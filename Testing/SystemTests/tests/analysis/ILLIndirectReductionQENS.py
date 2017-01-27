@@ -1,8 +1,6 @@
 import stresstesting
 from mantid.simpleapi import *
 from mantid import config
-import unittest
-from testhelpers import *
 
 class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
@@ -40,33 +38,25 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
                 'UnmirrorOption' : 0,
                 'OutputWorkspace' : 'zero'}
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 0")
+        IndirectILLReductionQENS(**args)
 
         args['UnmirrorOption'] = 1
 
         args['OutputWorkspace'] = 'both'
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 1")
+        IndirectILLReductionQENS(**args)
 
         args['UnmirrorOption'] = 2
 
         args['OutputWorkspace'] = 'left'
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 2")
+        IndirectILLReductionQENS(**args)
 
         args['UnmirrorOption'] = 3
 
         args['OutputWorkspace'] = 'right'
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 3")
+        IndirectILLReductionQENS(**args)
 
         summed = Plus(mtd['left_red'].getItem(0),mtd['right_red'].getItem(0))
 
@@ -88,9 +78,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
                 'UnmirrorOption': 4,
                 'OutputWorkspace': 'vana4'}
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 4")
+        IndirectILLReductionQENS(**args)
 
         args['AlignmentRun'] = '136553.nxs'
 
@@ -98,9 +86,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         args['OutputWorkspace'] = 'vana5'
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 5")
+        IndirectILLReductionQENS(**args)
 
         result = CompareWorkspaces('vana4_red', 'vana5_red')
 
@@ -113,9 +99,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
                 'UnmirrorOption': 6,
                 'OutputWorkspace': 'vana6'}
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 6")
+        IndirectILLReductionQENS(**args)
 
         args['AlignmentRun'] = '136553.nxs'
 
@@ -123,9 +107,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         args['OutputWorkspace'] = 'vana7'
 
-        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 7")
+        IndirectILLReductionQENS(**args)
 
         result = CompareWorkspaces('vana6_red','vana7_red')
 
