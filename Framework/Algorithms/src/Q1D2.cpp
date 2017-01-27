@@ -162,8 +162,9 @@ void Q1D2::exec() {
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
     // const size_t wavStart = waveLengthCutOff(i);
-    const size_t wavStart = helper.waveLengthCutOff(
-        m_dataWS, getProperty("RadiusCut"), getProperty("WaveCut"), i);
+    const size_t wavStart = helper.waveLengthCutOff(m_dataWS, spectrumInfo,
+                                                    getProperty("RadiusCut"),
+                                                    getProperty("WaveCut"), i);
     if (wavStart >= m_dataWS->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;

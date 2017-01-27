@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -13,6 +14,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Expression.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -139,23 +141,25 @@ public:
   void testAsString() {
     Gaussian gaus;
     gaus.initialize();
-    BoundaryConstraint *bc = new BoundaryConstraint;
-    Expression expr;
-    expr.parse("Sigma<20");
-    bc->initialize(&gaus, expr, false);
+    {
+      auto bc = Kernel::make_unique<BoundaryConstraint>();
+      Expression expr;
+      expr.parse("Sigma<20");
+      bc->initialize(&gaus, expr, false);
 
-    TS_ASSERT_EQUALS(bc->getParameterName(), "Sigma");
-    TS_ASSERT_DELTA(bc->upper(), 20, 0.0001);
-    TS_ASSERT(!bc->hasLower());
+      TS_ASSERT_EQUALS(bc->getParameterName(), "Sigma");
+      TS_ASSERT_DELTA(bc->upper(), 20, 0.0001);
+      TS_ASSERT(!bc->hasLower());
+      gaus.addConstraint(std::move(bc));
+    }
 
-    gaus.addConstraint(bc);
     IFunction_sptr fun =
         FunctionFactory::Instance().createInitialized(gaus.asString());
     TS_ASSERT(fun);
 
     IConstraint *c = fun->getConstraint(2);
     TS_ASSERT(c);
-    bc = dynamic_cast<BoundaryConstraint *>(c);
+    auto bc = dynamic_cast<BoundaryConstraint *>(c);
     TS_ASSERT(bc);
 
     TS_ASSERT_EQUALS(bc->getParameterName(), "Sigma");
@@ -167,17 +171,17 @@ public:
     Gaussian gaus;
     gaus.initialize();
 
-    BoundaryConstraint *bcSigma = new BoundaryConstraint;
+    auto bcSigma = Kernel::make_unique<BoundaryConstraint>();
     Expression exprSigma;
     exprSigma.parse("Sigma<20");
     bcSigma->initialize(&gaus, exprSigma, false);
-    gaus.addConstraint(bcSigma);
+    gaus.addConstraint(std::move(bcSigma));
 
-    BoundaryConstraint *bcHeight = new BoundaryConstraint;
+    auto bcHeight = Kernel::make_unique<BoundaryConstraint>();
     Expression exprHeight;
     exprHeight.parse("1.3<Height<3.4");
     bcHeight->initialize(&gaus, exprHeight, false);
-    gaus.addConstraint(bcHeight);
+    gaus.addConstraint(std::move(bcHeight));
 
     IFunction_sptr fun =
         FunctionFactory::Instance().createInitialized(gaus.asString());

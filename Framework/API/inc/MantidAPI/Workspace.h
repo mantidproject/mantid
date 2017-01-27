@@ -69,8 +69,6 @@ public:
   Workspace_uptr clone() const { return Workspace_uptr(doClone()); }
   Workspace &operator=(const Workspace &other) = delete;
   // DataItem interface
-  /// Name
-  const std::string name() const override { return this->getName(); }
   /** Marks the workspace as safe for multiple threads to edit data
    * simutaneously.
    * Workspace creation is always considered to be a single threaded operation.
@@ -83,7 +81,7 @@ public:
   void setComment(const std::string &);
   virtual const std::string getTitle() const;
   const std::string &getComment() const;
-  const std::string &getName() const;
+  const std::string &getName() const override;
   bool isDirty(const int n = 1) const;
   /// Get the footprint in memory in bytes.
   virtual size_t getMemorySize() const = 0;

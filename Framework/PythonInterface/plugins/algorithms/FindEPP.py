@@ -48,7 +48,7 @@ class FindEPP(PythonAlgorithm):
 
         # check for zero or negative signal
         if height <= 0.:
-            self.log().warning("Workspace %s, detector %d has maximum <= 0" % (self.workspace.getName(), index))
+            self.log().warning("Workspace %s, detector %d has maximum <= 0" % (self.workspace.name(), index))
             return result
 
         # Get the positions around the max, where the y value first drops down 0.5*height
@@ -75,7 +75,7 @@ class FindEPP(PythonAlgorithm):
         self.log().debug("(spectrum %d) : FWHM lower edge is %d, upper edge is %d" % (index,fwhm_neg,fwhm_pos))
 
         if fwhm_pos - fwhm_neg + 1 < 3:
-            self.log().warning("Spectrum " + str(index) + " in workspace " + self.workspace.getName() +
+            self.log().warning("Spectrum " + str(index) + " in workspace " + self.workspace.name() +
                                " has a too narrow peak. Cannot guess sigma. Check your data.")
             return result
 

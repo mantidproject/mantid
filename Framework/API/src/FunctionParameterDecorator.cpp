@@ -1,7 +1,9 @@
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterReference.h"
+#include "MantidAPI/ParameterTie.h"
 
 namespace Mantid {
 namespace API {
@@ -220,12 +222,11 @@ bool FunctionParameterDecorator::hasAttribute(
   return m_wrappedFunction->hasAttribute(attName);
 }
 
-ParameterTie *FunctionParameterDecorator::tie(const std::string &parName,
-                                              const std::string &expr,
-                                              bool isDefault) {
+void FunctionParameterDecorator::tie(const std::string &parName,
+                                     const std::string &expr, bool isDefault) {
   throwIfNoFunctionSet();
 
-  return m_wrappedFunction->tie(parName, expr, isDefault);
+  m_wrappedFunction->tie(parName, expr, isDefault);
 }
 
 void FunctionParameterDecorator::applyTies() {
@@ -258,10 +259,11 @@ ParameterTie *FunctionParameterDecorator::getTie(size_t i) const {
   return m_wrappedFunction->getTie(i);
 }
 
-void FunctionParameterDecorator::addConstraint(IConstraint *ic) {
+void FunctionParameterDecorator::addConstraint(
+    std::unique_ptr<IConstraint> ic) {
   throwIfNoFunctionSet();
 
-  m_wrappedFunction->addConstraint(ic);
+  m_wrappedFunction->addConstraint(std::move(ic));
 }
 
 IConstraint *FunctionParameterDecorator::getConstraint(size_t i) const {
@@ -298,10 +300,10 @@ void FunctionParameterDecorator::declareParameter(
 }
 
 /// Forwads addTie-call to the decorated function.
-void FunctionParameterDecorator::addTie(ParameterTie *tie) {
+void FunctionParameterDecorator::addTie(std::unique_ptr<ParameterTie> tie) {
   throwIfNoFunctionSet();
 
-  m_wrappedFunction->addTie(tie);
+  m_wrappedFunction->addTie(std::move(tie));
 }
 
 /**

@@ -29,7 +29,10 @@ SpectrumInfo::~SpectrumInfo() = default;
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
-  return getDetector(index).isMonitor();
+  for (const auto detIndex : getDetectorIndices(index))
+    if (!m_detectorInfo.isMonitor(detIndex))
+      return false;
+  return true;
 }
 
 /// Returns true if the detector(s) associated with the spectrum are masked.
@@ -56,7 +59,8 @@ double SpectrumInfo::l2(const size_t index) const {
   return l2 / static_cast<double>(dets.size());
 }
 
-/** Returns the scattering angle 2 theta (angle w.r.t. to beam direction).
+/** Returns the scattering angle 2 theta in radians (angle w.r.t. to beam
+ *direction).
  *
  * Throws an exception if the spectrum is a monitor.
  */
@@ -75,7 +79,7 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   return twoTheta / static_cast<double>(dets.size());
 }
 
-/** Returns the signed scattering angle 2 theta (angle w.r.t. to beam
+/** Returns the signed scattering angle 2 theta in radians (angle w.r.t. to beam
  * direction).
  *
  * Throws an exception if the spectrum is a monitor.

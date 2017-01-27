@@ -11,6 +11,7 @@
 
 #include <string>
 #include <map>
+#include <tuple>
 #include <vector>
 
 namespace Mantid {
@@ -123,7 +124,7 @@ public:
   /// child comp.)
   /// to be a monitor and also add it to _detectorCache for possible later
   /// retrieval
-  void markAsMonitor(IDetector *);
+  void markAsMonitor(const IDetector *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -142,8 +143,6 @@ public:
 
   /// Returns a list containing the detector ids of monitors
   std::vector<detid_t> getMonitors() const;
-  /// Returns the number of monitors
-  size_t numMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;
@@ -251,6 +250,8 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
+  bool isMonitorViaIndex(const size_t index) const;
+
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
   void
@@ -268,8 +269,9 @@ private:
   void appendPlottable(const CompAssembly &ca,
                        std::vector<IObjComponent_const_sptr> &lst) const;
 
-  /// Map which holds detector-IDs and pointers to detector components
-  std::vector<std::pair<detid_t, IDetector_const_sptr>> m_detectorCache;
+  /// Map which holds detector-IDs and pointers to detector components, and
+  /// monitor flags.
+  std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
@@ -298,9 +300,6 @@ private:
   /// specified
   /// by the user in radian (not degrees)
   std::map<std::string, std::string> m_logfileUnit;
-
-  /// a vector holding detector ids of monitor s
-  std::vector<detid_t> m_monitorCache;
 
   /// Stores the default type of the instrument view: 3D or one of the
   /// "unwrapped"

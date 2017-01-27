@@ -463,8 +463,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                  << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
+                  << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -499,7 +499,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
             std::stringstream errss;
             errss << "Event " << iev << " has run ID as " << temprun << ". "
                   << "It has no corresponding ExperimentInfo in MDWorkspace "
-                  << mdws->name() << ".";
+                  << mdws->getName() << ".";
             throw std::runtime_error(errss.str());
           }
           currWavelength = miter->second;

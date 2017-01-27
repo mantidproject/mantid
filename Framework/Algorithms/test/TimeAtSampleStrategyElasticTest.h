@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Geometry;
@@ -41,9 +42,9 @@ public:
     auto source = instrument->getSource();
 
     const size_t detectorIndex = 0; // detector workspace index.
-    auto detector = ws->getDetector(detectorIndex);
+    const auto &spectrumInfo = ws->spectrumInfo();
 
-    const double L1 = source->getPos().distance(sample->getPos());
+    const double L1 = spectrumInfo.l1();
 
     TimeAtSampleStrategyElastic strategy(ws);
     Correction correction = strategy.calculate(detectorIndex);
@@ -51,8 +52,7 @@ public:
     const double ratio = correction.factor;
 
     TSM_ASSERT_EQUALS("L1 / (L1 + L2)",
-                      L1 / (L1 + sample->getPos().distance(detector->getPos())),
-                      ratio);
+                      L1 / (L1 + spectrumInfo.l2(detectorIndex)), ratio);
   }
 
   void test_L2_monitor() {

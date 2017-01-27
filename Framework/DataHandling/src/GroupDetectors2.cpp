@@ -271,11 +271,11 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
             groupingWS_sptr);
     if (groupWS) {
       g_log.debug() << "Extracting grouping from GroupingWorkspace ("
-                    << groupWS->name() << ")\n";
+                    << groupWS->getName() << ")\n";
       processGroupingWorkspace(groupWS, workspace, unUsedSpec);
     } else {
       g_log.debug() << "Extracting grouping from MatrixWorkspace ("
-                    << groupingWS_sptr->name() << ")\n";
+                    << groupingWS_sptr->getName() << ")\n";
       processMatrixWorkspace(groupingWS_sptr, workspace, unUsedSpec);
     }
     return;

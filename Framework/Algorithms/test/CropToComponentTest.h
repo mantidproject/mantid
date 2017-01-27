@@ -131,7 +131,7 @@ public:
                       std::runtime_error)
   }
 
-  void test_that_det_ids_can_be_ordered() {
+  void test_that_det_ids_are_ordered() {
     // Arrange
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
@@ -148,36 +148,24 @@ public:
     Mantid::Algorithms::CropToComponent crop;
     crop.setChild(true);
     crop.initialize();
-    crop.setProperty("InputWorkspace", workspace);
-    crop.setProperty("OutputWorkspace", "unordered");
-    crop.setProperty("ComponentNames", componentNames);
-    crop.setProperty("OrderByDetId", false);
-    crop.execute();
-    TS_ASSERT(crop.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr unOrderedWorkspace =
-        crop.getProperty("OutputWorkspace");
-
+    crop.setRethrows(true);
     crop.setProperty("InputWorkspace", workspace);
     crop.setProperty("OutputWorkspace", "ordered");
     crop.setProperty("ComponentNames", componentNames);
-    crop.setProperty("OrderByDetId", true);
     crop.execute();
     TS_ASSERT(crop.isExecuted())
     Mantid::API::MatrixWorkspace_sptr orderedWorkspace =
         crop.getProperty("OutputWorkspace");
 
     // Assert
-    // Test the first theree spectrum numbers.
-    // The unordered workspace should show: 3, 131 259
+    // Test the first three spectrum numbers.
     // The ordered workspace should show: 3, 4, 5
+    // Without the implemneted ordering we would get 3, 131, 259
     std::array<size_t, 3> indices{{0, 1, 2}};
-    std::array<size_t, 3> expectedUnordered{{3, 131, 259}};
     std::array<size_t, 3> expectedOrdered{{3, 4, 5}};
 
     for (auto index : indices) {
-      const auto &specUnordered = unOrderedWorkspace->getSpectrum(index);
       const auto &specOrdered = orderedWorkspace->getSpectrum(index);
-      TS_ASSERT_EQUALS(specUnordered.getSpectrumNo(), expectedUnordered[index]);
       TS_ASSERT_EQUALS(specOrdered.getSpectrumNo(), expectedOrdered[index]);
     }
 

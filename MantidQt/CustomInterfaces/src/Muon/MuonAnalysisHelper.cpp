@@ -295,6 +295,8 @@ void WidgetAutoSaver::saveWidgetValue() {
     settings.setValue(senderName, w->isChecked());
   } else if (auto w = qobject_cast<QComboBox *>(sender)) {
     settings.setValue(senderName, w->currentIndex());
+  } else if (auto w = qobject_cast<QSpinBox *>(sender)) {
+    settings.setValue(senderName, w->value());
   }
   // ... add more as neccessary
 }
@@ -319,6 +321,8 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
     w->setChecked(value.toBool());
   } else if (auto w = qobject_cast<QComboBox *>(widget)) {
     w->setCurrentIndex(value.toInt());
+  } else if (auto w = qobject_cast<QSpinBox *>(widget)) {
+    w->setValue(value.toInt());
   }
   // ... add more as neccessary
 }
@@ -1090,10 +1094,10 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
     if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
         const auto &ws = group->getItem(i);
-        if (ws->name().find("_Parameters") != std::string::npos) {
+        if (ws->getName().find("_Parameters") != std::string::npos) {
           params = getKeysFromTable(
               boost::dynamic_pointer_cast<ITableWorkspace>(ws));
-        } else if (ws->name().find("_Workspace") != std::string::npos) {
+        } else if (ws->getName().find("_Workspace") != std::string::npos) {
           ++nRuns;
         }
       }
@@ -1103,7 +1107,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
       params = getKeysFromTable(table);
     } else {
       throw std::invalid_argument(
-          "Unexpected workspace type for " + ws->name() +
+          "Unexpected workspace type for " + ws->getName() +
           " (expected WorkspaceGroup or ITableWorkspace)");
     }
     fitProperties.emplace_back(nRuns, params);
