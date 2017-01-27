@@ -408,7 +408,7 @@ class FunctionalConfig(object):
         self.handle_special_arguments()
 
     def handle_special_arguments(self):
-        # --convert is special case that substitutes those 2 args
+        # --convert is special case that substitutes --reuse-preproc and --only-preproc
         if self.convert is True:
             self.reuse_preproc = True
             self.only_preproc = True

@@ -138,7 +138,7 @@ class Saver(object):
 
         self._h.pstop(
             "Finished saving slices of the reconstructed volume in: {0}".
-                format(out_recon_dir))
+            format(out_recon_dir))
 
     def save_preproc_images(self, data, flat=None, dark=None):
         """
@@ -215,17 +215,20 @@ class Saver(object):
             write_nxs(data, filename + '.nxs',
                       flat, dark, projection_angles, self._overwrite_all)
 
-    def make_dirs_if_needed(self, dirname):
+    def make_dirs_if_needed(self, dirname=None):
         """
         Makes sure that the directory needed (for example to save a file)
         exists, otherwise creates it.
 
         :param dirname :: (output) directory to check
         """
+        if dirname is None:
+            path = self._output_path
+        else:
+            path = os.path.abspath(os.path.expanduser(dirname))
 
-        absname = os.path.abspath(dirname)
-        if not os.path.exists(absname):
-            os.makedirs(absname)
-        elif os.listdir(absname) and not self._overwrite_all:
+        if not os.path.exists(path):
+            os.makedirs(path)
+        elif os.listdir(path) and not self._overwrite_all:
             raise RuntimeError(
                 "The output directory is NOT empty! This can be overridden with -w/--overwrite-all")

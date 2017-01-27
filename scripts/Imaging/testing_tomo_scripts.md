@@ -41,13 +41,10 @@
 ## Merge pre-processing images into a stack. This will not apply any filters as pre-processing, it will just pack all of the images into a stack
 
 ```python
-python tomo_main.py  
--i=~/Documents/img/000888/data_full  
--o=~/Documents/img/000888/processed/temp/1  
---data-as-stack
+python main.py -i=~/Documents/img/000888/data_full -o=~/Documents/img/test_stack/ --data-as-stack --convert
 ```
 For Copy/Paste to terminal:
->python tomo_main.py -i=~/Documents/img/000888/data_full -o=~/Documents/img/000888/processed/temp/1 --data-as-stack
+>python main.py -i=~/Documents/img/000888/data_full -o=~/Documents/img/000888/processed/temp/1 --data-as-stack
 
 
 <br/>
@@ -57,7 +54,7 @@ For Copy/Paste to terminal:
 ## Single image and no crop
 
 ```python
-python tomo_main.py  
+python main.py  
 --num-iter=5  
 --input-path=~/Documents/img/000888/data_single  
 --input-path-flat=~/Documents/img/000888/flat  
@@ -71,7 +68,7 @@ python tomo_main.py
 ```
 
 For Copy/Paste to terminal:
->python tomo_main.py --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[0.000000, 0.000000, 511.000000, 511.000000]' --rotation=1 --max-angle=360.000000 --find-cor --output=~/Documents/img/000888/processed/temp/1 --tool=tomopy 
+>python main.py --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[0.000000, 0.000000, 511.000000, 511.000000]' --rotation=1 --max-angle=360.000000 --find-cor --output=~/Documents/img/000888/processed/temp/1 --tool=tomopy 
 
 EXPECTED RESULTS:
 > COR: 265.0
@@ -81,7 +78,7 @@ EXPECTED RESULTS:
 ## Full `RB000888 test stack larmor summed 201510`, spheres crop
 
 ```python
-python tomo_main.py  
+python main.py  
 -n=5  
 -i=~/Documents/img/000888/data_full  
 -iflat=~/Documents/img/000888/flat  
@@ -93,7 +90,7 @@ python tomo_main.py
 --output=~/Documents/img/000888/processed/temp/1
 ```
 
->python tomo_main.py -n=5 -i=~/Documents/img/000888/data_full -iflat=~/Documents/img/000888/flat -idark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --rotation=1 --max-angle=360.000000 --find-cor -t=tomopy --output=~/Documents/img/000888/processed/temp/1
+>python main.py -n=5 -i=~/Documents/img/000888/data_full -iflat=~/Documents/img/000888/flat -idark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --rotation=1 --max-angle=360.000000 --find-cor -t=tomopy --output=~/Documents/img/000888/processed/temp/1
 
 EXPECTED RESULTS:
 
@@ -107,7 +104,7 @@ EXPECTED RESULTS:
 ## Single Image <br>
 
 ```python
-python tomo_main.py
+python main.py
 --tool=tomopy
 --algorithm=gridrec
 --num-iter=5
@@ -123,7 +120,7 @@ python tomo_main.py
 --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack
+>python main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack
 
 ---
 
@@ -133,7 +130,7 @@ For Copy/Paste to terminal:
 - ### Better results/Air Region if run wihout `--crop-before-normalise`
 
 ```python
-python tomo_main.py 
+python main.py 
 --tool=tomopy
 --algorithm=gridrec
 --num-iter=5
@@ -151,7 +148,7 @@ python tomo_main.py
 -data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[41.0, 0.0, 230.0, 228.0]' --output=~/Documents/img/000888/processed/temp/1 --pre-median-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
+>python main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[41.0, 0.0, 230.0, 228.0]' --output=~/Documents/img/000888/processed/temp/1 --pre-median-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
 
 ---
 
@@ -161,7 +158,7 @@ For Copy/Paste to terminal:
 - ### Better results/Air Region if run wihout `--crop-before-normalise`
 
 ```python
-python tomo_main.py 
+python main.py 
 --tool=tomopy
 --algorithm=gridrec
 --num-iter=5
@@ -178,7 +175,7 @@ python tomo_main.py
 --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=136.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
+>python main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=136.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
 ---
 
 ## Full `RB000888_test_stack_larmor_summed_201510` dataset, bolts crop, **BAD** air region
@@ -186,7 +183,7 @@ For Copy/Paste to terminal:
 - ### **WORKING** Air Region **[189.000000, 100.000000, 209.000000, 135.000000]** for crop if `--crop-before-normalise` is SPECIFIED <div id='id-section1'/>
 
 ```python
-python tomo_main.py
+python main.py
 --tool=tomopy
 --algorithm=gridrec
 --num-iter=5
@@ -203,7 +200,7 @@ python tomo_main.py
 --crop-before-normalise --data-as-stack
 ```
 For Copy/Paste to terminal:
->python tomo_main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=104.0 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalise --data-as-stack
+>python main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[35.0, 232.0, 224.0, 509.0]' --output=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=104.0 --rotation=1 --max-angle=360.000000 --air-region='[189.000000, 100.000000, 209.000000, 135.000000]' --crop-before-normalise --data-as-stack
 
 <br/>
 
@@ -332,7 +329,7 @@ proj_geom = astra.create_proj_geom('parallel', 0.55, 512, proj_angles)
 # Wrong tool/algorithm tests
 
 ```python
-python tomo_main.py 
+python main.py 
 -i=~/Documents/img/000888/data_single 
 --input-path-flat=~/Documents/img/000888/flat 
 --input-path-dark=~/Documents/img/000888/dark 
@@ -347,7 +344,7 @@ python tomo_main.py
 -a afewaf # or or algorithm
 ```
 
-> python tomo_main.py -i=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' -o=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack -t tomopy -a afewaf
+> python main.py -i=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[36.000000, 227.000000, 219.000000, 510.000000]' -o=~/Documents/img/000888/processed/temp/1 --median-size=3 --cor=255.000000 --rotation=1 --max-angle=360.000000 --data-as-stack -t tomopy -a afewaf
 
 
 # SciPy ndimage zoom
@@ -473,25 +470,25 @@ python -c "from recon.helper import Helper; g=[]; h=Helper(); h=Helper(g)"
 
 ## --only-preproc
 
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc
+> python main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc
 
 ## --reuse-preproc
 
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc --reuse-preproc
+> python main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc --reuse-preproc
 
 ## --find-cor
 
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc -f 
+> python main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --only-preproc -f 
 
 ## --crop-before-normalise
-> python tomo_main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --crop-before-normalise 
+> python main.py -i ~/Documents/img/000888/data_full -l ~/Documents/img/000888/flat -k ~/Documents/img/000888/dark -o ~Documents/img/000888/processed/temp/1 -s -w -c 104.0 -t tomopy -a fbp -n 5 -g '[35.0, 232.0, 224.0, 509.0]' -e '[189.000000, 100.000000, 209.000000, 135.000000]' -r 1 -v 3 -d --pre-median-size=3 --pre-median-mode='wrap' --data-dtype='float32' --max-angle=360.0 --rebin 0.5 --rebin-mode 'bicubic' --circular-mask 0.96 --clip-min 0 --clip-max 1.5 --cut-off-pre 0.01 --cut-off-post 0.01 --out-gaussian-size 3 --out-gaussian-mode mirror --out-median-size=3 --out-median-mode='wrap' --data-as-stack --save-horiz --crop-before-normalise 
 
 # Testing the Big Data
 To drop caches for real performance tests: `alias drop_caches='echo 3 | sudo tee /proc/sys/vm/drop_caches'`
 
 Windows Path: /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/
 
-`python tomo_main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/ -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1 --data-as-stack --only-preproc`
+`python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/ -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1 --data-as-stack --only-preproc`
 Stats:
 Images: 500
 Disk Read: ~130MB/s

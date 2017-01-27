@@ -20,7 +20,7 @@ def execute(config, cmd_line):
     from recon.data.saver import Saver
     saver = Saver(config, h)
     # create directory, or throw if not empty and no --overwrite-all
-    saver.make_dirs_if_needed(config.func.output_path)
+    saver.make_dirs_if_needed()
 
     from recon.data.readme import Readme
     readme = Readme(config, saver)
@@ -39,7 +39,7 @@ def execute(config, cmd_line):
     # Save pre-proc images, print inside
     saver.save_preproc_images(sample)
     if config.func.only_preproc is True:
-        h.tomo_print_note("Only preproc selected with --only-preproc, exiting...")
+        h.tomo_print_note("Only pre-processing run, exiting.")
         readme.end()
         return 14
 

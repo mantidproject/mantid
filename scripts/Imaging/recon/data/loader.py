@@ -50,10 +50,6 @@ def load(input_path=None, input_path_flat=None, input_path_dark=None,
 
 def _do_nxs_load(img_format, input_path):
     data_file = get_file_names(input_path, img_format)
-    # It is assumed that all images have the same size and properties as the
-    # first.
-    # read in .nxs file
-    # TODO make use of shared memory array! otherwise nothing will work
     sample, flat, dark = nxsread(data_file[0])
     return dark, flat, sample
 
@@ -106,18 +102,19 @@ def _do_fits_load(sample_path=None, flat_file_path=None, dark_file_path=None,
     # this removes the image number dimension, if we loaded a stack of images
     img_shape = img_shape[1:] if len(img_shape) > 2 else img_shape
     flat_avg = _load_and_avg_data(
-        flat_file_path, img_shape, img_format, data_dtype, h, "Flat")
+        flat_file_path, img_shape, img_format, data_dtype, "Flat", h)
     dark_avg = _load_and_avg_data(
-        dark_file_path, img_shape, img_format, data_dtype, h, "Dark")
+        dark_file_path, img_shape, img_format, data_dtype, "Dark", h)
 
     return sample_data, flat_avg, dark_avg
 
 
-def _load_and_avg_data(file_path, img_shape, img_format, data_dtype, h=None, prog_prefix=None):
+def _load_and_avg_data(file_path, img_shape, img_format, data_dtype, prog_prefix=None, h=None):
     if file_path is not None:
         file_names = get_file_names(file_path, img_format)
 
-        data = _load_files(file_names, img_shape, img_format, data_dtype, h, prog_prefix)
+        data = _load_files(file_names, img_shape, img_format,
+                           data_dtype, prog_prefix, h)
         return get_data_average(data)
 
 
@@ -136,7 +133,7 @@ def _load_sample_data(sample_file_names, img_shape, img_format, data_dtype,
     return sample_data
 
 
-def _load_files(files, img_shape, img_format, dtype, loop_name=None, h=None):
+def _load_files(files, img_shape, img_format, dtype, name=None, h=None):
     """
     Reads image files in a row into a 3d numpy array. Useful when reading all the sample
     images, or all the flat or dark images.
@@ -166,7 +163,7 @@ def _load_files(files, img_shape, img_format, dtype, loop_name=None, h=None):
     data = psm.create_shared_array(
         (len(files), img_shape[0], img_shape[1]), dtype=dtype)
 
-    h.prog_init(len(files), desc=loop_name)
+    h.prog_init(len(files), desc=name)
     for idx, in_file in enumerate(files):
         try:
             data[idx, :, :] = imread(in_file, img_format)[:]
@@ -218,7 +215,7 @@ def _load_stack(file_name, img_shape, img_format, dtype, name, cores=1, chunksiz
     from parallel import shared_mem as psm
     data = psm.create_shared_array(img_shape, dtype=dtype)
     if parallel_load:
-        return _do_stack_load_par(chunksize, cores, data, file_name, img_format, name, h)
+        return _do_stack_load_par(data, file_name, img_format, cores, chunksize, name, h)
     else:
         return _do_stack_load_seq(data, file_name, img_format, img_shape, name, h)
 
@@ -246,13 +243,14 @@ def _do_stack_load_seq(data, file_name, img_format, img_shape, name, h):
     return data
 
 
-def _do_stack_load_par(chunksize, cores, data, file_name, img_format, name, h):
+def _do_stack_load_par(data, file_name, img_format, cores, chunksize, name, h):
     # this runs faster on SCARFfunc
     from parallel import two_shared_mem as ptsm
     f = ptsm.create_partial(_move_data, fwd_function=ptsm.inplace_fwd_func)
     # this will open the file but not read all of it in!
     new_data = imread(file_name[0], img_format)
-    # move the data in parallel, this causes 8 processes to try and read the IO at once, thus the slowdown
+    # move the data in parallel, this causes 8 processes to try and read the
+    # IO at once, thus the slowdown
     ptsm.execute(new_data, data, f, cores, chunksize, name, h=h)
     return data
 
@@ -284,6 +282,7 @@ def _load_fits(filename):
 def nxsread(filename):
     import h5py
     nexus = h5py.File(filename, 'r')
+    # TODO use shared memory array
     data = nexus["entry1/tomo_entry/instrument/detector/data"]
     dark = data[-1, :, :]
 
@@ -325,8 +324,7 @@ def import_skimage_io():
 
 
 def get_data_average(data):
-    avg = np.mean(data, axis=0)
-    return avg
+    return np.mean(data, axis=0)
 
 
 def get_file_names(path, img_format):
