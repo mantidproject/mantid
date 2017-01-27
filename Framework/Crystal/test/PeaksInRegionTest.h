@@ -31,7 +31,7 @@ private:
                        double yMaxFromPeak, double zMinFromPeak,
                        double zMaxFromPeak) {
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
-    const auto detectorIds = ws->detectorInfo().detectorIDs();
+    const auto &detectorIds = ws->detectorInfo().detectorIDs();
     Peak &peak = ws->getPeak(0);
     peak.setDetectorID(detectorIds.front());
     Mantid::Kernel::V3D position;
