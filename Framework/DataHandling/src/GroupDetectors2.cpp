@@ -586,6 +586,7 @@ void GroupDetectors2::processGroupingWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
+  const auto &spectrumInfo = groupWS->spectrumInfo();
   const size_t nspec = groupWS->getNumberHistograms();
   for (size_t i = 0; i < nspec; ++i) {
     // read spectra from groupingws
@@ -601,15 +602,14 @@ void GroupDetectors2::processGroupingWorkspace(
 
       // translate to detectors
       std::vector<detid_t> det_ids;
-      try {
-        const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-        Geometry::DetectorGroup_const_sptr detGroup =
-            boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-        if (detGroup) {
-          det_ids = detGroup->getDetectorIDs();
-
-        } else {
-          det_ids.push_back(det->getID());
+      if (spectrumInfo.hasDetectors(i)) {
+        const auto &det = spectrumInfo.detector(i);
+        try {
+          const Geometry::DetectorGroup &detGroup =
+              dynamic_cast<const Geometry::DetectorGroup &>(det);
+          det_ids = detGroup.getDetectorIDs();
+        } catch (const std::bad_cast &e) {
+          det_ids.push_back(det.getID());
         }
 
         for (auto det_id : det_ids) {
@@ -621,7 +621,7 @@ void GroupDetectors2::processGroupingWorkspace(
             unUsedSpec[targetWSIndex] = (USED);
           }
         }
-      } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+      } else {
         // the detector was not found - don't add it
       }
     }
@@ -654,6 +654,7 @@ void GroupDetectors2::processMatrixWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
+  const auto &spectrumInfo = groupWS->spectrumInfo();
   const size_t nspec = groupWS->getNumberHistograms();
   for (size_t i = 0; i < nspec; ++i) {
     // read spectra from groupingws
@@ -668,14 +669,14 @@ void GroupDetectors2::processMatrixWorkspace(
 
     // translate to detectors
     std::vector<detid_t> det_ids;
-    try {
-      const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
+    if (spectrumInfo.hasDetectors(i)) {
+      const auto &det = spectrumInfo.detector(i);
 
-      Geometry::DetectorGroup_const_sptr detGroup =
-          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
+      try {
+        const Geometry::DetectorGroup &detGroup =
+            dynamic_cast<const Geometry::DetectorGroup &>(det);
 
-      if (detGroup) {
-        det_ids = detGroup->getDetectorIDs();
+        det_ids = detGroup.getDetectorIDs();
 
         for (auto det_id : det_ids) {
           // translate detectors to target det ws indexes
@@ -686,8 +687,10 @@ void GroupDetectors2::processMatrixWorkspace(
             unUsedSpec[targetWSIndex] = (USED);
           }
         }
+      } catch (const std::bad_cast &) {
+        // Ignore detectors that are not in groups.
       }
-    } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    } else {
       // the detector was not found - don't add it
     }
   }
