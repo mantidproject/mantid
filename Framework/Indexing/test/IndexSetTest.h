@@ -85,6 +85,40 @@ public:
     TS_ASSERT_EQUALS(set[0], 1);
     TS_ASSERT_EQUALS(set[1], 2);
   }
+
+  void test_iterator_basics() {
+    const IndexSetTester set(3);
+    auto it = set.begin();
+    TS_ASSERT_DIFFERS(it, set.end());
+    TS_ASSERT_EQUALS(*it, 0);
+    TS_ASSERT_THROWS_NOTHING(++it);
+    TS_ASSERT_EQUALS(*it, 1);
+    TS_ASSERT_THROWS_NOTHING(++it);
+    TS_ASSERT_EQUALS(*it, 2);
+    TS_ASSERT_THROWS_NOTHING(++it);
+    TS_ASSERT_EQUALS(it, set.end());
+    TS_ASSERT_THROWS_NOTHING(++it);
+    TS_ASSERT_EQUALS(it, set.end());
+  }
+
+  void test_iterator_random_access() {
+    const IndexSetTester set(3);
+    auto it = set.begin();
+    TS_ASSERT_EQUALS(it + 3, set.end());
+    TS_ASSERT_EQUALS(it[0], 0);
+    TS_ASSERT_EQUALS(it[1], 1);
+    TS_ASSERT_EQUALS(it[2], 2);
+    TS_ASSERT(it < set.end());
+    TS_ASSERT_THROWS_NOTHING(--it);
+    TS_ASSERT_EQUALS(*it, 0);
+    auto it2 = set.end();
+    TS_ASSERT_THROWS_NOTHING(--it2);
+    TS_ASSERT_EQUALS(*it2, 2);
+    TS_ASSERT_THROWS_NOTHING(--it2);
+    TS_ASSERT_EQUALS(*it2, 1);
+    TS_ASSERT_THROWS_NOTHING(--it2);
+    TS_ASSERT_EQUALS(*it2, 0);
+  }
 };
 
 #endif /* MANTID_INDEXING_INDEXSETTEST_H_ */

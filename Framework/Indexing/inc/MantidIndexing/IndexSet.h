@@ -1,6 +1,9 @@
 #ifndef MANTID_INDEXING_INDEXSET_H_
 #define MANTID_INDEXING_INDEXSET_H_
 
+#include <boost/iterator/iterator_facade.hpp>
+
+#include <algorithm>
 #include <set>
 #include <stdexcept>
 #include <vector>
@@ -40,6 +43,49 @@ namespace detail {
 */
 template <class T> class IndexSet {
 public:
+  class const_iterator
+      : public boost::iterator_facade<const_iterator, size_t,
+                                      boost::random_access_traversal_tag,
+                                      size_t> {
+  public:
+    const_iterator(const IndexSet &indexSet, const size_t index)
+        : m_indexSet(indexSet), m_index(index) {}
+
+  private:
+    friend class boost::iterator_core_access;
+
+    void increment() {
+      if (m_index < m_indexSet.size())
+        ++m_index;
+    }
+
+    bool equal(const const_iterator &other) const {
+      return (&m_indexSet == &other.m_indexSet) && (m_index == other.m_index);
+    }
+
+    size_t dereference() const { return m_indexSet[m_index]; }
+
+    void decrement() {
+      if (m_index > 0)
+        --m_index;
+    }
+    void advance(int64_t delta) {
+      m_index = delta < 0 ? std::max(static_cast<int64_t>(0),
+                                     static_cast<int64_t>(m_index) + delta)
+                          : std::min(m_indexSet.size(), m_index + delta);
+    }
+    int64_t distance_to(const const_iterator &other) const {
+      return static_cast<int64_t>(other.m_index) -
+             static_cast<int64_t>(m_index);
+    }
+
+    const IndexSet &m_indexSet;
+    size_t m_index;
+  };
+
+  const_iterator begin() const { return const_iterator(*this, 0); }
+  const_iterator end() const { return const_iterator(*this, size()); }
+
   IndexSet(size_t fullRange);
   IndexSet(int64_t min, int64_t max, size_t fullRange);
   IndexSet(const std::vector<size_t> &indices, size_t fullRange);
@@ -94,7 +140,7 @@ IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
   std::set<size_t> index_set(indices.cbegin(), indices.cend());
   if (!index_set.empty() && *(index_set.rbegin()) >= fullRange)
     throw std::out_of_range("IndexSet: specified index is out of range");
-  m_indices = std::vector<size_t>(begin(index_set), end(index_set));
+  m_indices = std::vector<size_t>(index_set.begin(), index_set.end());
   m_size = m_indices.size();
 }
 
