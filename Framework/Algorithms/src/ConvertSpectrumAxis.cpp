@@ -86,7 +86,7 @@ void ConvertSpectrumAxis::exec() {
     Kernel::Unit_sptr fromUnit = inputWS->getAxis(0)->unit();
     Kernel::Unit_sptr toUnit = UnitFactory::Instance().create(unitTarget);
     std::vector<double> emptyVector;
-    const double l1 = spectrumInfo.l1(); 
+    const double l1 = spectrumInfo.l1();
     const std::string emodeStr = getProperty("EMode");
     int emode = 0;
     if (emodeStr == "Direct")
