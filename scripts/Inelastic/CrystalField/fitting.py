@@ -193,7 +193,7 @@ class CrystalField(object):
         out += ',FixAllPeaks=%s' % (1 if self._fixAllPeaks else 0)
         out += ',PeakShape=%s' % self.getPeak(i).name
         if self._intensityScaling is not None:
-            out += ',IntensityScaling=%s' % self._intensityScaling
+            out += ',IntensityScaling=%s' % self._getIntensityScaling(i)
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
         if len(self._fieldParameters) > 0:
@@ -945,42 +945,53 @@ class CrystalField(object):
 
     def check_consistency(self):
         """ Checks that list input variables are consistent """
-        properties = [self._temperature, self._FWHM, self._intensityScaling]
-        numels = []
-        for prop in properties:
-            if prop is not None:
-                numels.append(len(prop) if islistlike(prop) else 1)
-        if len(set(numels)) > 1:
+        # Number of datasets is implied by temperature. 
+        nDataset = len(self._temperature) if islistlike(self._temperature) else 1
+        nFWHM = len(self._FWHM) if islistlike(self._FWHM) else 1
+        nIntensity = len(self._intensityScaling) if islistlike(self._intensityScaling) else 1
+        nPeaks = len(self.peaks) if islistlike(self.peaks) else 1
+        # Consistent if temperature, FWHM, intensityScale are lists with same len
+        # Or if FWHM, intensityScale are 1-element list or scalar
+        if (nFWHM != nDataset and nFWHM != 1) or (nIntensity != nDataset and nIntensity != 1):
             errmsg = 'The Temperature, FWHM, and IntensityScaling properties have different '
             errmsg += 'number of elements implying different number of spectra.'
             raise ValueError(errmsg)
-        # Now convert one element list to scalars
-        if numels:
-            if islistlike(self.peaks):
-                # This should not occur, but may do if the user changes the temperature(s) after
-                # initialisation. In which case, we reset the peaks, giving a warning.
-                if len(self.peaks) != numels[0]:
-                    from .function import PeaksFunction
-                    errmsg = 'Internal inconsistency between number of spectra and list of '
-                    errmsg += 'temperatures. Changing number of spectra to match temperature. '
-                    errmsg += 'This may reset some peaks constraints / limits'
-                    warnings.warn(errmsg, RuntimeWarning)
-                    if len(self.peaks) > numels[0]:          # Truncate
-                        self.peaks = self.peaks[0:numels[0]]
-                    else:                                    # Append empty PeaksFunctions
-                        for i in range(len(self.peaks), numels[0]):
-                            self.peaks.append(PeaksFunction(self.peaks[0].name(), firstIndex=0))
-            if numels[0] == 1:
-                if islistliket(self._temperature) and self._temperature is not None:
-                    self._temperature = self._temperature[0]
-                    if islistlike(self.peaks):
-                        self.peaks = self.peaks[0]
-                if islistlike(self._FWHM) and self._FWHM is not None:
-                    self._FWHM = self._FWHM[0]
-                if islistlike(self._intensityScaling) and self._intensityScaling is not None:
-                    self._intensityScaling = self._intensityScaling[0]
-        # Returns the implied number of datasets (for checking CrystalFieldFit)
-        return numels[0] if numels else 0
+        # This should not occur, but may do if the user changes the temperature(s) after
+        # initialisation. In which case, we reset the peaks, giving a warning.
+        if nPeaks != nDataset:
+            from .function import PeaksFunction
+            errmsg = 'Internal inconsistency between number of spectra and list of '
+            errmsg += 'temperatures. Changing number of spectra to match temperature. '
+            errmsg += 'This may reset some peaks constraints / limits'
+            warnings.warn(errmsg, RuntimeWarning)
+            if len(self.peaks) > numels[0]:          # Truncate
+                self.peaks = self.peaks[0:numels[0]]
+            else:                                    # Append empty PeaksFunctions
+                for i in range(len(self.peaks), numels[0]):
+                    self.peaks.append(PeaksFunction(self.peaks[0].name(), firstIndex=0))
+        # Convert to all scalars if only one dataset
+        if nDataset == 1:
+            if islistlike(self._temperature) and self._temperature is not None:
+                self._temperature = self._temperature[0]
+                if islistlike(self.peaks):
+                    self.peaks = self.peaks[0]
+            if islistlike(self._FWHM) and self._FWHM is not None:
+                self._FWHM = self._FWHM[0]
+            if islistlike(self._intensityScaling) and self._intensityScaling is not None:
+                self._intensityScaling = self._intensityScaling[0]
+        # Convert to list of same size if multidatasets
+        else:
+            if nFWHM == 1 and self._FWHM is not None:
+                if islistlike(self._FWHM):
+                    self._FWHM *= nDataset
+                else:
+                    self._FWHM = nDataset * [self._FWHM]
+            if nIntensity == 1 and self._intensityScaling is not None:
+                if islistlike(self._intensityScaling):
+                    self._intensityScaling *= nDataset
+                else:
+                    self._intensityScaling = nDataset * [self._intensityScaling]
+        return nDataset
 
     def __add__(self, other):
         if isinstance(other, CrystalFieldMulti):
@@ -1023,8 +1034,19 @@ class CrystalField(object):
             nFWHM = len(self._FWHM)
             if i >= -nFWHM and i < nFWHM:
                 return float(self._FWHM[i])
+            elif nFWHM == 1:
+                return self._FWHM[0]
             else:
                 raise RuntimeError('Cannot get FWHM for spectrum %s. Only %s FWHM are given.' % (i, nFWHM))
+
+    def _getIntensityScaling(self, i):
+        """Get default intensity scaling value for i-th spectrum."""
+        if self._intensityScaling is None:
+            raise RuntimeError('Default intensityScaling must be set.')
+        if islistlike(self._intensityScaling):
+            return self._intensityScaling[i] if len(self._intensityScaling) > 1 else self._intensityScaling[0]
+        else:
+            return self._intensityScaling
 
     def _getPeaksFunction(self, i):
         if isinstance(self.peaks, list):
