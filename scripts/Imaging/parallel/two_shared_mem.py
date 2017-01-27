@@ -37,9 +37,37 @@ def inplace_fwd_func(func, i, **kwargs):
     func(shared_data[i], second_shared_data[i], **kwargs)
 
 
-def fwd_func_return_to_first(func, i, **kwargs):
+def inplace_fwd_func_second_2d(func, i, **kwargs):
     """
     Use if the parameter function does NOT have a return statement, and will overwrite the data in place.
+    Use to share a single 2D second_shared_data, i.e. a single averaged flat image.
+
+    You HAVE to be careful when using this, for example the func:
+    def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
+        data = np.clip(np.true_divide(
+            data - dark, norm_divide), clip_min, clip_max)
+
+    DOES NOT CHANGE THE DATA! Because the data = ... variable inside is just a local variable that is discarded.
+
+    The proper way to write this function is:
+    def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
+        data[:] = np.clip(np.true_divide(
+            data - dark, norm_divide), clip_min, clip_max)
+
+    Notice the data[:], what this does is refer to the ACTUAL parameter, and then changes it's contents, as [:] gives
+    a reference back to the inner contents.
+
+    :param func: Function that will be executed
+    :param i: index from the shared_data on which to operate
+    :param kwargs: kwargs to forward to the function func that will be executed
+    :return: nothing is returned, as the data is replaced in place
+    """
+    func(shared_data[i], second_shared_data, **kwargs)
+
+
+def fwd_func_return_to_first(func, i, **kwargs):
+    """
+    Use if the parameter function does have a return statement. The result will be stored in the first shared_data.
 
     You HAVE to be careful when using this, for example the func:
     def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
@@ -66,7 +94,7 @@ def fwd_func_return_to_first(func, i, **kwargs):
 
 def fwd_func_return_to_second(func, i, **kwargs):
     """
-    Use if the parameter function does NOT have a return statement, and will overwrite the data in place.
+    Use if the parameter function does have a return statement. The result will be stored in the second shared_data.
 
     You HAVE to be careful when using this, for example the func:
     def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):

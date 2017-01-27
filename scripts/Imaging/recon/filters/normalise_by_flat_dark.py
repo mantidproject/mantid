@@ -3,9 +3,9 @@ from recon.helper import Helper
 import numpy as np
 
 
-def _apply_normalise_inplace(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
+def _apply_normalise_inplace(data, norm_divide, clip_min=None, clip_max=None):
     data[:] = np.clip(np.true_divide(
-        data - dark, norm_divide), clip_min, clip_max)
+        data, norm_divide), clip_min, clip_max)
 
 
 def _apply_normalise(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):
@@ -66,12 +66,14 @@ def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_
 
     # prevent divide-by-zero issues
     norm_divide[norm_divide == 0] = 1e-6
-    from parallel import shared_mem as psm
-    f = psm.create_partial(_apply_normalise_inplace, fwd_function=psm.inplace_fwd_func,
-                           dark=norm_dark_img, norm_divide=norm_divide, clip_min=clip_min,
-                           clip_max=clip_max)
 
-    data = psm.execute(data, f, cores, chunksize, "Norm by Flat/Dark", h)
+    data = np.subtract(data, norm_dark_img)
+
+    from parallel import two_shared_mem as ptsm
+    f = ptsm.create_partial(_apply_normalise_inplace, fwd_function=ptsm.inplace_fwd_func_second_2d,
+                            clip_min=clip_min, clip_max=clip_max)
+
+    data = ptsm.execute(data, f, cores, chunksize, "Norm by Flat/Dark", h)
 
     h.pstop(
         "Finished PARALLEL normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
