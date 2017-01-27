@@ -65,27 +65,6 @@ public:
         std::invalid_argument);
   }
 
-  void testSXPeakConstructorThrowsWithGroupedDetectors() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    Mantid::DataHandling::GroupDetectors2 grouper;
-    grouper.initialize();
-    grouper.setChild(true);
-    grouper.setProperty("InputWorkspace", workspace);
-    const std::string outWSName("unused_for_child");
-    grouper.setProperty("OutputWorkspace", outWSName);
-    grouper.setPropertyValue("GroupingPattern", "1-9");
-    grouper.execute();
-    MatrixWorkspace_sptr groupedWS = grouper.getProperty("OutputWorkspace");
-    const auto &spectrumInfo = groupedWS->spectrumInfo();
-    double intensity = 1;
-    std::vector<int> spectra(1, 1);
-    TSM_ASSERT_THROWS(
-        "SXPeak: Should not construct with spectrum having multiple detectors",
-        SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
-        std::invalid_argument);
-  }
-
   void testSXPeakGetters() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
