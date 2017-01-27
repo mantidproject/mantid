@@ -109,7 +109,7 @@ public:
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
     const auto& detectorInfo = output2D->detectorInfo();
-    const detIndex = detectorInfo.indexOf(103);
+    const auto detIndex = detectorInfo.indexOf(103);
     const auto& det103 = detectorInfo.detector(detIndex);
     TS_ASSERT_EQUALS(det103.getID(), 103);
     TS_ASSERT_EQUALS(det103.getName(), "pixel");
@@ -541,7 +541,7 @@ public:
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
     const auto& detectorInfo = output2D->detectorInfo();
-    const detectorIndex = detectorInfo.indexOf(103);
+    const auto detectorIndex = detectorInfo.indexOf(103);
     const auto& detector103 = detectorInfo.detector(detectorIndex);
 
     TS_ASSERT_EQUALS(detector103.getID(), 103);

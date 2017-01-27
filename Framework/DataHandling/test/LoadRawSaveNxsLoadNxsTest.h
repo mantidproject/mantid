@@ -161,7 +161,7 @@ public:
       size_t detectorIndex;
       auto hasDetector(true);
       try {
-        detctorIndex = detectorInfo.indexOf(103);
+        detectorIndex = detectorInfo.indexOf(103);
       } catch(std::out_of_range&) {
         hasDetector = false;
       }
@@ -174,7 +174,7 @@ public:
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Y(), 0.1164, 0.01);
         double d = detectorInfo.position(detectorIndex).distance(samplepos->getPos());
         TS_ASSERT_DELTA(d, 2.1561, 0.0001);
-        double cmpDistance = detector103->getDistance(*samplepos);
+        double cmpDistance = detector103.getDistance(*samplepos);
         TS_ASSERT_DELTA(cmpDistance, 2.1561, 0.0001);
       }
     }
