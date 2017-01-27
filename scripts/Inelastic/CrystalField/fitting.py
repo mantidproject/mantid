@@ -22,8 +22,10 @@ def makeWorkspace(xArray, yArray):
     alg.execute()
     return alg.getProperty('OutputWorkspace').value
 
+
 def islistlike(arg):
     return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__"))
+
 
 #pylint: disable=too-many-instance-attributes,too-many-public-methods
 class CrystalField(object):
@@ -945,7 +947,9 @@ class CrystalField(object):
 
     def check_consistency(self):
         """ Checks that list input variables are consistent """
-        # Number of datasets is implied by temperature. 
+        if not self._temperature:
+            return 0
+        # Number of datasets is implied by temperature.
         nDataset = len(self._temperature) if islistlike(self._temperature) else 1
         nFWHM = len(self._FWHM) if islistlike(self._FWHM) else 1
         nIntensity = len(self._intensityScaling) if islistlike(self._intensityScaling) else 1
@@ -964,10 +968,10 @@ class CrystalField(object):
             errmsg += 'temperatures. Changing number of spectra to match temperature. '
             errmsg += 'This may reset some peaks constraints / limits'
             warnings.warn(errmsg, RuntimeWarning)
-            if len(self.peaks) > numels[0]:          # Truncate
-                self.peaks = self.peaks[0:numels[0]]
+            if len(self.peaks) > nDataset:           # Truncate
+                self.peaks = self.peaks[0:nDataset]
             else:                                    # Append empty PeaksFunctions
-                for i in range(len(self.peaks), numels[0]):
+                for i in range(len(self.peaks), nDataset):
                     self.peaks.append(PeaksFunction(self.peaks[0].name(), firstIndex=0))
         # Convert to all scalars if only one dataset
         if nDataset == 1:
