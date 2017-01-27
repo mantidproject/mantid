@@ -5,6 +5,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -32,12 +33,14 @@ public:
     // First we want to load a workspace to work with.
     prepareWorkspace();
 
+    const auto& detectorInfo = m_ws->detectorInfo();
+
     // Now let's set some parameters
     setParam("nickel-holder", "testDouble1", 1.23);
     setParam("nickel-holder", "testDouble2", 1.00);
     setParam("nickel-holder", "testString1", "hello world");
     setParam("nickel-holder", "testString2", "unchanged");
-    setParamByDetID(1301, "testDouble", 2.17);
+    setParamByDetID(1301, "testDouble", 2.17, detectorInfo);
     setFitParam("nickel-holder", "A", ", BackToBackExponential , S ,  ,  ,  ,  "
                                       ", "
                                       "sqrt(188.149*centre^4+6520.945*centre^2)"
@@ -52,7 +55,7 @@ public:
     // Change some parameters - these changes should not have an effect
     setParam("nickel-holder", "testDouble1", 3.14);
     setParam("nickel-holder", "testString1", "broken");
-    setParamByDetID(1301, "testDouble", 7.89);
+    setParamByDetID(1301, "testDouble", 7.89, detectorInfo);
     setFitParam("nickel-holder", "B", "someString");
 
     // Load the saved parameters back in
@@ -63,7 +66,7 @@ public:
     checkParam("nickel-holder", "testDouble2", 1.00);
     checkParam("nickel-holder", "testString1", "hello world");
     checkParam("nickel-holder", "testString2", "unchanged");
-    checkParamByDetID(1301, "testDouble", 2.17);
+    checkParamByDetID(1301, "testDouble", 2.17, detectorInfo);
     checkFitParam("nickel-holder", "A",
                   ", BackToBackExponential , S ,  ,  ,  ,  , "
                   "sqrt(188.149*centre^4+6520.945*centre^2) , dSpacing , TOF , "
@@ -84,13 +87,10 @@ public:
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
-  void setParamByDetID(int id, std::string pName, double value) {
-    Instrument_const_sptr inst = m_ws->getInstrument();
+  void setParamByDetID(int id, std::string pName, double value, const DetectorInfo& detectorInfo) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    IDetector_const_sptr det = inst->getDetector(id);
-    IComponent_const_sptr comp =
-        boost::dynamic_pointer_cast<const IComponent>(det);
-    paramMap.addDouble(comp->getComponentID(), pName, value);
+    const auto& detector = detectorInfo.detector(detectorInfo.indexOf(id));
+    paramMap.addDouble(detector.getComponentID(), pName, value);
   }
 
   void setFitParam(std::string cName, std::string pName, std::string value) {
@@ -118,13 +118,10 @@ public:
     TS_ASSERT_DELTA(value, values.front(), 0.0001);
   }
 
-  void checkParamByDetID(int id, std::string pName, double value) {
-    Instrument_const_sptr inst = m_ws->getInstrument();
+  void checkParamByDetID(int id, std::string pName, double value, const DetectorInfo& detectorInfo) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    IDetector_const_sptr det = inst->getDetector(id);
-    IComponent_const_sptr comp =
-        boost::dynamic_pointer_cast<const IComponent>(det);
-    Parameter_sptr param = paramMap.get(comp.get(), pName);
+    const auto& detector = detectorInfo.detector(detectorInfo.indexOf(id));
+    Parameter_sptr param = paramMap.get(&detector, pName);
     double pValue = param->value<double>();
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
