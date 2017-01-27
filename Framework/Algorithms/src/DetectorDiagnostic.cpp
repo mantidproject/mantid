@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/DetectorDiagnostic.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
@@ -559,9 +560,11 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
                              "detector to spectra map. Try with LevelUp=0.");
   }
 
-  for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
-    auto anc = instrument->getDetector(d)->getAncestors();
+  const SpectrumInfo &spectrumInfo = countsWS->spectrumInfo();
+
+  for (size_t i = 0; i < countsWS->getNumberHistograms(); ++i) {
+
+    auto anc = spectrumInfo.detector(i).getAncestors();
     if (anc.size() < static_cast<size_t>(m_parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");
       m_parents = 0;
