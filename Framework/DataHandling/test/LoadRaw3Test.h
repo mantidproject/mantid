@@ -108,9 +108,9 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
-    const auto& detectorInfo = output2D->detectorInfo();
+    const auto &detectorInfo = output2D->detectorInfo();
     const auto detIndex = detectorInfo.indexOf(103);
-    const auto& det103 = detectorInfo.detector(detIndex);
+    const auto &det103 = detectorInfo.detector(detIndex);
     TS_ASSERT_EQUALS(det103.getID(), 103);
     TS_ASSERT_EQUALS(det103.getName(), "pixel");
     TS_ASSERT_DELTA(detectorInfo.position(detIndex).X(), 0.4013, 0.01);
@@ -429,8 +429,8 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
-    const auto& detectorInfo = output2D->detectorInfo();
-    const auto& detector = detectorInfo.detector(detectorInfo.indexOf(60));
+    const auto &detectorInfo = output2D->detectorInfo();
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(60));
     TS_ASSERT_EQUALS(detector.getID(), 60);
 
     const auto &pmap = output2D->constInstrumentParameters();
@@ -540,9 +540,9 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
-    const auto& detectorInfo = output2D->detectorInfo();
+    const auto &detectorInfo = output2D->detectorInfo();
     const auto detectorIndex = detectorInfo.indexOf(103);
-    const auto& detector103 = detectorInfo.detector(detectorIndex);
+    const auto &detector103 = detectorInfo.detector(detectorIndex);
 
     TS_ASSERT_EQUALS(detector103.getID(), 103);
     TS_ASSERT_EQUALS(detector103.getName(), "pixel");

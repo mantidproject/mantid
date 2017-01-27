@@ -55,8 +55,8 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
 
-    const auto& detectorInfo = output->detectorInfo();
-    const auto& det = detectorInfo.detector(detectorInfo.indexOf(1008));
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
     TS_ASSERT_EQUALS(det.getID(), 1008);
     TS_ASSERT_EQUALS(det.getName(), "combined translation6");
     Parameter_sptr param = paramMap.get(&det, "fjols");
@@ -69,14 +69,13 @@ public:
     descr = param->getDescription();
     TS_ASSERT_EQUALS(descr, "test description. Full test description.");
 
-    const auto& det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
+    const auto &det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
 
     TS_ASSERT_EQUALS(det2.getID(), 1301);
     TS_ASSERT_EQUALS(det2.getName(), "pixel");
     param = paramMap.get(&det2, "testDouble");
     TS_ASSERT_DELTA(param->value<double>(), 25.0, 0.0001);
-    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"),
-                     "hello world");
+    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"), "hello world");
 
     param = paramMap.get(&det2, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test hello word.");
@@ -148,8 +147,8 @@ public:
             wsName));
 
     const auto &paramMap = output->constInstrumentParameters();
-    const auto& detectorInfo = output->detectorInfo();
-    const auto& det = detectorInfo.detector(detectorInfo.indexOf(1008));
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
     TS_ASSERT_EQUALS(det.getID(), 1008);
     TS_ASSERT_EQUALS(det.getName(), "combined translation6");
     Parameter_sptr param = paramMap.get(&det, "fjols");
@@ -161,13 +160,12 @@ public:
     std::string descr = param->getDescription();
     TS_ASSERT_EQUALS(descr, "test description2. Full test description2.");
 
-    const auto& det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
+    const auto &det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
     TS_ASSERT_EQUALS(det2.getID(), 1301);
     TS_ASSERT_EQUALS(det2.getName(), "pixel");
     param = paramMap.get(&det2, "testDouble");
     TS_ASSERT_DELTA(param->value<double>(), 27.0, 0.0001);
-    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"),
-                     "goodbye world");
+    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"), "goodbye world");
 
     param = paramMap.get(&det2, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test goodbye world.");

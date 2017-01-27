@@ -51,9 +51,9 @@ public:
     Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(ws);
     TS_ASSERT(data);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 192 * 192);
-    const auto& spectrumInfo = data->spectrumInfo();
+    const auto &spectrumInfo = data->spectrumInfo();
     for (size_t i = 0; i < data->getNumberHistograms(); ++i) {
-      TS_ASSERT_THROWS_NOTHING(const auto& det = spectrumInfo.detector(i));
+      TS_ASSERT_THROWS_NOTHING(const auto &det = spectrumInfo.detector(i));
     }
   }
 };

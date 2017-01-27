@@ -89,14 +89,14 @@ public:
       BinEdges x(6, LinearGenerator(10.0, 1.0));
       Counts y(5, 1.0);
       CountStandardDeviations e(5, 1.0);
-      const auto& spectrumInfo = space2D->spectrumInfo();
+      const auto &spectrumInfo = space2D->spectrumInfo();
 
       for (size_t j = 0; j < space2D->getNumberHistograms(); ++j) {
         space2D->setBinEdges(j, x);
         space2D->setCounts(j, y);
         space2D->setCountStandardDeviations(j, e);
         space2D->getSpectrum(j).setSpectrumNo(static_cast<int>(j + 1));
-        const auto& detector = spectrumInfo.detector(j);
+        const auto &detector = spectrumInfo.detector(j);
         auto id = detector.getID();
         space2D->getSpectrum(j).setDetectorID(id);
       }
@@ -563,7 +563,7 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto& det = spectrumInfo.detector(i);
+      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 0 || i == 2 || i == 5) {
         TSM_ASSERT_EQUALS("Detector with id: " +
@@ -629,7 +629,7 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto& det = spectrumInfo.detector(i);
+      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 1 || i == 2 || i == 5) {
         TSM_ASSERT_EQUALS("Detector with id: " +
@@ -699,7 +699,7 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto& det = spectrumInfo.detector(i);
+      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 1 || i == 2 || i == 5) {
         TSM_ASSERT_EQUALS("Detector with id: " +
@@ -768,7 +768,7 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      const auto& det = spectrumInfo.detector(i);
+      const auto &det = spectrumInfo.detector(i);
 
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 2) {

@@ -194,8 +194,8 @@ public:
     TS_ASSERT(source);
 
     // modify spectra-detector map on the sample workspace to check masking
-    const auto& detectorInfo = source->detectorInfo();
-    const std::vector<detid_t>& detIDs  = detectorInfo.detectorIDs();
+    const auto &detectorInfo = source->detectorInfo();
+    const std::vector<detid_t> &detIDs = detectorInfo.detectorIDs();
     size_t index = 0;
     auto it = --detIDs.end();
     for (; it > detIDs.begin(); --it) {
@@ -269,13 +269,13 @@ public:
     for (size_t i = 0; i < n_steps; ++i) {
       bool source_masked = spectrumInfoSource.isMasked(i);
       if (source_masked) {
-        const auto & detector = spectrumInfoSource.detector(i);
+        const auto &detector = spectrumInfoSource.detector(i);
         const auto detectorId = detector.getID();
         maskSourceDet.push_back(detectorId);
       }
       bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
-        const auto& detector = spectrumInfoTarget.detector(i);
+        const auto &detector = spectrumInfoTarget.detector(i);
         const auto detectorId = detector.getID();
         maskTargDet.push_back(detectorId);
       }

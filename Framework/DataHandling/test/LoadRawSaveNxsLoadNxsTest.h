@@ -157,22 +157,23 @@ public:
       TS_ASSERT_EQUALS(samplepos->getName(), "some-surface-holder");
       TS_ASSERT_DELTA(samplepos->getPos().X(), 0.0, 0.01);
 
-      const auto& detectorInfo = output->detectorInfo();
+      const auto &detectorInfo = output->detectorInfo();
       size_t detectorIndex;
       auto hasDetector(true);
       try {
         detectorIndex = detectorInfo.indexOf(103);
-      } catch(std::out_of_range&) {
+      } catch (std::out_of_range &) {
         hasDetector = false;
       }
 
       if (hasDetector) {
-        const auto& detector103 = detectorInfo.detector(detectorIndex);
+        const auto &detector103 = detectorInfo.detector(detectorIndex);
         TS_ASSERT_EQUALS(detector103.getID(), 103);
         TS_ASSERT_EQUALS(detector103.getName(), "linear-detector-pixel");
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 12.403, 0.01);
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Y(), 0.1164, 0.01);
-        double d = detectorInfo.position(detectorIndex).distance(samplepos->getPos());
+        double d =
+            detectorInfo.position(detectorIndex).distance(samplepos->getPos());
         TS_ASSERT_DELTA(d, 2.1561, 0.0001);
         double cmpDistance = detector103.getDistance(*samplepos);
         TS_ASSERT_DELTA(cmpDistance, 2.1561, 0.0001);

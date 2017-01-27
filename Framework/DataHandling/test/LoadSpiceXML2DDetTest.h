@@ -178,7 +178,7 @@ public:
     size_t center_col = 128;
     size_t center_row = 115;
     size_t center_ws_index = (center_row - 1) + (center_col - 1) * 256;
-    const auto& spectrumInfo = outws->spectrumInfo();
+    const auto &spectrumInfo = outws->spectrumInfo();
     const auto det_center = spectrumInfo.position(center_ws_index);
     // distance to sample
     double dist_r = det_center.distance(sample);
@@ -188,20 +188,20 @@ public:
     TS_ASSERT_DELTA(det_center.Y(), 0.0, 0.0000001);
 
     // check the sequence of the detector to each ws index
-    const auto& detector0 = spectrumInfo.detector(0);
+    const auto &detector0 = spectrumInfo.detector(0);
     const auto det0id = detector0.getID();
     TS_ASSERT_EQUALS(det0id, 0);
-    const auto& detector1 = spectrumInfo.detector(1);
+    const auto &detector1 = spectrumInfo.detector(1);
     const auto det1id = detector1.getID();
     TS_ASSERT_EQUALS(det1id, 1);
-    const auto& detectorLast = spectrumInfo.detector(256 * 255 + 255);
+    const auto &detectorLast = spectrumInfo.detector(256 * 255 + 255);
     const auto detlastid = detectorLast.getID();
     TS_ASSERT_EQUALS(detlastid, 255 * 256 + 255);
     // test the whole sequence
     for (size_t irow = 1; irow < 250; ++irow)
       for (size_t jcol = 10; jcol < 20; ++jcol) {
         size_t iws = irow + jcol * 256;
-        const auto& detector = spectrumInfo.detector(iws);
+        const auto &detector = spectrumInfo.detector(iws);
         const auto detid = detector.getID();
         TS_ASSERT_EQUALS(detid, static_cast<detid_t>(iws));
       }
@@ -238,22 +238,22 @@ public:
     size_t row_ll = 0;
     size_t col_ll = 2;
     size_t ws_index_ll = row_ll + col_ll * 256;
-    const auto det_ll_pos  = spectrumInfo.position(ws_index_ll);
+    const auto det_ll_pos = spectrumInfo.position(ws_index_ll);
 
     size_t row_lr = 0;
     size_t col_lr = 2 * 127 - 2;
     size_t ws_index_lr = row_lr + col_lr * 256;
-    const auto det_lr_pos  = spectrumInfo.position(ws_index_lr);
+    const auto det_lr_pos = spectrumInfo.position(ws_index_lr);
 
     size_t row_ul = 114 * 2;
     size_t col_ul = 2;
     size_t ws_index_ul = row_ul + col_ul * 256;
-    const auto det_ul_pos  = spectrumInfo.position(ws_index_ul);
+    const auto det_ul_pos = spectrumInfo.position(ws_index_ul);
 
     size_t row_ur = 114 * 2;
     size_t col_ur = 2 * 127 - 2;
     size_t ws_index_ur = row_ur + col_ur * 256;
-    const auto det_ur_pos  = spectrumInfo.position(ws_index_ur);
+    const auto det_ur_pos = spectrumInfo.position(ws_index_ur);
 
     double det_size = 0.0508; // meter
     int num_pixel = 256;
@@ -342,7 +342,7 @@ public:
     size_t center_row = 115 - 1;
     size_t center_col = 128 - 1;
     size_t center_ws_index = 256 * center_col + center_row;
-    const auto& spectrumInfo = outws->spectrumInfo();
+    const auto &spectrumInfo = outws->spectrumInfo();
     const auto center_det_pos = spectrumInfo.position(center_ws_index);
     TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);
     double sample_center_distance = sample.distance(center_det_pos);
@@ -424,9 +424,9 @@ public:
     size_t center_col = 128;
     size_t center_row = 115;
     size_t center_ws_index = (center_row - 1) + (center_col - 1) * 256;
-    const auto& spectrumInfo = outws->spectrumInfo();
+    const auto &spectrumInfo = outws->spectrumInfo();
     const auto center_det_pos = spectrumInfo.position(center_ws_index);
-        // distance to sample
+    // distance to sample
     double dist_r = center_det_pos.distance(sample);
     TS_ASSERT_DELTA(dist_r, 0.3750 + 0.1, 0.0001);
     // center of the detector at 15 degree
@@ -550,7 +550,7 @@ public:
     size_t center_col = 137 - 1;
     size_t center_ws_index = 256 * center_col + center_row;
     // y should be 0. in the Z-Y plane
-    const auto& spectrumInfo = outws->spectrumInfo();
+    const auto &spectrumInfo = outws->spectrumInfo();
     const auto center_det_pos = spectrumInfo.position(center_ws_index);
 
     TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);

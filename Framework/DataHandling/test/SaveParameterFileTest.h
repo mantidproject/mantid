@@ -33,7 +33,7 @@ public:
     // First we want to load a workspace to work with.
     prepareWorkspace();
 
-    const auto& detectorInfo = m_ws->detectorInfo();
+    const auto &detectorInfo = m_ws->detectorInfo();
 
     // Now let's set some parameters
     setParam("nickel-holder", "testDouble1", 1.23);
@@ -87,9 +87,10 @@ public:
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
-  void setParamByDetID(int id, std::string pName, double value, const DetectorInfo& detectorInfo) {
+  void setParamByDetID(int id, std::string pName, double value,
+                       const DetectorInfo &detectorInfo) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    const auto& detector = detectorInfo.detector(detectorInfo.indexOf(id));
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
     paramMap.addDouble(detector.getComponentID(), pName, value);
   }
 
@@ -118,9 +119,10 @@ public:
     TS_ASSERT_DELTA(value, values.front(), 0.0001);
   }
 
-  void checkParamByDetID(int id, std::string pName, double value, const DetectorInfo& detectorInfo) {
+  void checkParamByDetID(int id, std::string pName, double value,
+                         const DetectorInfo &detectorInfo) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    const auto& detector = detectorInfo.detector(detectorInfo.indexOf(id));
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
     Parameter_sptr param = paramMap.get(&detector, pName);
     double pValue = param->value<double>();
     TS_ASSERT_DELTA(value, pValue, 0.0001);
