@@ -1,8 +1,8 @@
 import stresstesting
 from mantid.simpleapi import *
 from mantid import config
-from testhelpers import run_algorithm
-
+import unittest
+from testhelpers import *
 
 class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
