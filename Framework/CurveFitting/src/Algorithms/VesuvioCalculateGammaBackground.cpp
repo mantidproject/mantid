@@ -540,6 +540,8 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   m_foils1.resize(nfoils);
   for (size_t i = 0; i < nfoils; ++i) {
     const auto &foil0 = foils0[i];
+    if (!foil0)
+      throw std::invalid_argument("Error - foil component is NULL.");
     auto thetaRng0 = calculateThetaRange(foil0, m_foilRadius,
                                          refFrame->pointingHorizontal());
     FoilInfo descr;
@@ -552,6 +554,8 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     m_foils0[i] = descr; // copy
 
     const auto &foil1 = foils1[i];
+    if (!foil1)
+      throw std::invalid_argument("Error - foil component is NULL.");
     auto thetaRng1 = calculateThetaRange(foil1, m_foilRadius,
                                          refFrame->pointingHorizontal());
     descr.thetaMin = thetaRng1.first;

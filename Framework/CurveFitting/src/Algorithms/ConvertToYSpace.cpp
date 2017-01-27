@@ -94,11 +94,6 @@ double
 ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
                                        const Geometry::ParameterMap &pmap,
                                        const std::string &name) {
-
-  if (!&comp)
-    throw std::invalid_argument(
-        "ComptonProfile - Cannot retrieve parameter from NULL component");
-
   double result(0.0);
   if (const auto &group =
           dynamic_cast<const Geometry::DetectorGroup *>(&comp)) {
