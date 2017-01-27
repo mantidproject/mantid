@@ -772,7 +772,7 @@ void IFunction::setMatrixWorkspace(
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
         Geometry::Parameter_sptr param =
-            paramMap.getRecursive(&(*detectorPtr), parameterName(i), "fitting");
+            paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
           const Geometry::FitParameter &fitParam =
