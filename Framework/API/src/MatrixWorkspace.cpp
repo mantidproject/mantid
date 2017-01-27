@@ -1978,17 +1978,6 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
 }
 
-/// Private helper method for IndexInfo
-specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
-  return getSpectrum(index).getSpectrumNo();
-}
-
-/// Private helper method for IndexInfo
-const std::set<detid_t> &
-MatrixWorkspace::detectorIDs(const size_t index) const {
-  return getSpectrum(index).getDetectorIDs();
-}
-
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
   m_indexInfoNeedsUpdate = true;
 }
