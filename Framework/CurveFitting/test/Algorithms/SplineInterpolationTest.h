@@ -77,7 +77,6 @@ public:
     alg.setPropertyValue("OutputWorkspace", "Anon");
     alg.setProperty("WorkspaceToInterpolate", iws);
     alg.setProperty("WorkspaceToMatch", mws);
-
     alg.setProperty("Linear2Points", true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -108,26 +107,25 @@ public:
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
         WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
-                                                               3, 20, 1, false);
+                                                               3.3, 20, 1, false);
 
     SplineInterpolation alg;
     alg.initialize();
+    alg.isInitialized();
+    alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
     alg.setProperty("WorkspaceToInterpolate", iws);
     alg.setProperty("WorkspaceToMatch", mws);
-    alg.setProperty("Linear2Points", true);
-
-    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
-    const auto &xt = ows->x(0);
-    const auto &yt = ows->y(0);
-
-    // check output: first four points should have constant y values
-    for (size_t j = 0; j < 3; ++j) {
-      TS_ASSERT_DELTA(yt[j], xt[3] * 2, 1e-15);
-    }
-
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
+    const auto &yt = ows->y(0);
+    const auto &yiws = iws->y(0);
+    // check output: first four points should have constant y values
+    for (size_t j = 0; j < 4; ++j) {
+      TS_ASSERT_DELTA(yt[j], yiws[0], 1e-15);
+    }
   }
 
   void testReferenceWorkspace() {
@@ -139,19 +137,25 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
 
+    // Add a unit
+    iws->getAxis(0)->setUnit("Time");
+
     SplineInterpolation alg;
     alg.initialize();
+    alg.isInitialized();
+    alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
     alg.setProperty("WorkspaceToInterpolate", iws);
     alg.setProperty("WorkspaceToMatch", mws);
     alg.setProperty("ReferenceWorkspace", "WorkspaceToInterpolate");
-
-    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
-
-    TS_ASSERT(!ows->isHistogramData());
-
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
+    // Check the axis values are preserved
+    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(ows->getAxis(0)->unit()->caption(), "t");
+    TS_ASSERT(mws->getAxis(0)->unit()->caption() != "t");
+    TS_ASSERT(ows->isHistogramData());
   }
 
   void testExecMultipleSpectra() {

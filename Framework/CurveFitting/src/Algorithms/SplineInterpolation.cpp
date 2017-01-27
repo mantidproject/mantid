@@ -232,7 +232,6 @@ void SplineInterpolation::exec() {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (int i = 0; i < histNo; ++i) {
-      setXRange(derivs[i], iws);
       wsg->addWorkspace(derivs[i]);
     }
     // set y values accorting to integration range must be set to zero
@@ -343,8 +342,8 @@ void SplineInterpolation::calculateSpline(
 }
 
 /** Check if the supplied x value falls within the interpolation range.
- * This is in particular important for the Linear function and not for
- * the CubicSpline
+ * Y values larger or smaller than the interpolation range will be set
+ * to the first or last y value of the WorkspaceToInterpolate
  *
  * @param inputWorkspace :: The input workspace
  * @param interpolationWorkspace :: The interpolation workspace
@@ -372,19 +371,20 @@ void SplineInterpolation::setXRange(
         nOutsideRight++;
     }
     double *yValues = &(inputWorkspace->mutableY(n)[0]);
+    const auto &yRef = interpolationWorkspace->y(n);
     if (nOutsideRight > 0) {
       nOutsideRight += 1;
-      g_log.warning() << nOutsideRight - 1 << " x value(s) smaller than "
+      g_log.warning() << nOutsideRight - 1 << " x value(s) larger than "
                                               "integration range, will not be "
                                               "calculated.\n";
     }
     if (nOutsideLeft > 0) {
-      std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);
-      g_log.warning() << nOutsideLeft << " x value(s) larger than integration "
+      std::fill_n(yValues, nOutsideLeft, yRef[0]);
+      g_log.warning() << nOutsideLeft << " x value(s) smaller than integration "
                                          "range, will not be calculated.\n";
     }
     for (size_t k = nData - nOutsideRight; k < nData; ++k)
-      yValues[k] = yValues[nData - nOutsideRight];
+      yValues[k] = yRef[nintegData - 1];
   }
 }
 

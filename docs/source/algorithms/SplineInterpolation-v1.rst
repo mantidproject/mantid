@@ -12,7 +12,11 @@ Description
 The algorithm performs interpolation of points onto a cubic spline. The
 algorithm takes two input workspaces: one that is used to define the
 spline and one that contains a number of spectra to be interpolated onto
-the spline.
+the spline. Values smaller or larger than the interpolation range will
+be set to the first and last value of the WorkspaceToInterpolate,
+respectively. This applies only for the OutputWorkspace and for example
+not for the workspace of derivatives, where all y values outside of the
+interpolation range will be zero.
 
 If multiple spectra are defined in the WorkspaceToInterpolate workspace,
 they will all be interpolated against the first spectra in
@@ -30,7 +34,7 @@ Workspace characteristics (except its size and the description of the
 vertical axis) can be copied from the WorkspaceToMatch (default) or
 the WorkspaceToInterpolate.
 
-Please note that the OutputWorkspace will have constant zero error values.
+Please note that the interpolation will not calculate error values.
 
 For Histogram Workspaces
 ########################
