@@ -35,7 +35,7 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
 3. Finally, the correction coefficients :math:`K_i` are calculated as
 
-   :math:`K_i = D_i\times S_i`
+   :math:`K_i = \frac{S_i}{D_i}`
 
 Workspace containing these correction coefficients is created as an output and can be used as a RHS workspace in :ref:`algm-Divide` to apply correction to the LHS workspace.
 
@@ -78,13 +78,13 @@ Usage
     print 'Spectrum 4 of the input workspace is filled with: ', round(wsVana.readY(999)[0], 1)
     print 'Spectrum 4 of the corrected workspace is filled with: ', round(wsCorr.readY(999)[0], 5)
 
-Output:    
+Output:
 
 .. testoutput:: ExComputeCalibrationCoefVan
 
-    Spectrum 4 of the output workspace is filled with:  6596.0
+    Spectrum 4 of the output workspace is filled with:  6897.0
     Spectrum 4 of the input workspace is filled with:  1.0
-    Spectrum 4 of the corrected workspace is filled with:  0.00015
+    Spectrum 4 of the corrected workspace is filled with:  0.00014
 
 .. categories::
 
