@@ -14,9 +14,10 @@ namespace Indexing {
 /// 1 and no detector IDs.
 IndexInfo::IndexInfo(const size_t globalSize)
     : m_size(globalSize),
-      m_spectrumNumbers(Kernel::make_cow<std::vector<specnum_t>>(globalSize)),
+      m_spectrumNumbers(
+          Kernel::make_cow<std::vector<SpectrumNumber>>(globalSize)),
       m_detectorIDs(
-          Kernel::make_cow<std::vector<std::vector<detid_t>>>(globalSize)) {
+          Kernel::make_cow<std::vector<std::vector<DetectorID>>>(globalSize)) {
   // Default to spectrum numbers 1...globalSize
   auto &specNums = m_spectrumNumbers.access();
   std::iota(specNums.begin(), specNums.end(), 1);
@@ -24,8 +25,8 @@ IndexInfo::IndexInfo(const size_t globalSize)
 
 /// Construct with given spectrum number and vector of detector IDs for each
 /// index.
-IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
-                     std::vector<std::vector<detid_t>> &&detectorIDs)
+IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
+                     std::vector<std::vector<DetectorID>> &&detectorIDs)
     : m_size(spectrumNumbers.size()) {
   if (spectrumNumbers.size() != detectorIDs.size())
     throw std::runtime_error("IndexInfo: Size mismatch between spectrum number "
@@ -41,25 +42,37 @@ IndexInfo::~IndexInfo() = default;
 size_t IndexInfo::size() const { return m_size; }
 
 /// Returns the spectrum number for given index.
-specnum_t IndexInfo::spectrumNumber(const size_t index) const {
+SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
   return (*m_spectrumNumbers)[index];
 }
 
 /// Return a vector of the detector IDs for given index.
-const std::vector<detid_t> &IndexInfo::detectorIDs(const size_t index) const {
+const std::vector<DetectorID> &
+IndexInfo::detectorIDs(const size_t index) const {
   return (*m_detectorIDs)[index];
 }
 
 /// Set a spectrum number for each index.
-void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
+void IndexInfo::setSpectrumNumbers(
+    std::vector<SpectrumNumber> &&spectrumNumbers) & {
   if (size() != spectrumNumbers.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
 }
 
+void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
+                                   const SpectrumNumber max) & {
+  if (static_cast<int64_t>(size()) !=
+      static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1)
+    throw std::runtime_error(
+        "IndexInfo: Size mismatch when setting new spectrum numbers");
+  auto &data = m_spectrumNumbers.access();
+  std::iota(data.begin(), data.end(), static_cast<int32_t>(min));
+}
+
 /// Set a single detector ID for each index.
-void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
+void IndexInfo::setDetectorIDs(const std::vector<DetectorID> &detectorIDs) & {
   if (size() != detectorIDs.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new detector IDs");
@@ -74,7 +87,7 @@ void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
 
 /// Set a vector of detector IDs for each index.
 void IndexInfo::setDetectorIDs(
-    std::vector<std::vector<detid_t>> &&detectorIDs) & {
+    std::vector<std::vector<DetectorID>> &&detectorIDs) & {
   if (size() != detectorIDs.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new detector IDs");

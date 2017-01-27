@@ -303,7 +303,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
   CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  std::vector<detid_t> detIDs;
+  std::vector<Indexing::DetectorID> detIDs;
   for (int wi = 0; wi < numMonitors + numPixels; wi++)
     detIDs.push_back(wi < numMonitors ? start_at_pixelID + numPixels + wi
                                       : start_at_pixelID + wi - numMonitors);
@@ -323,7 +323,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
-  std::vector<detid_t> detIDs;
+  std::vector<Indexing::DetectorID> detIDs;
   for (int wi = 0; wi < numPixels + numMonitors; wi++)
     detIDs.push_back(wi < numMonitors ? start_at_pixelID + numPixels + wi
                                       : start_at_pixelID + wi - numMonitors);

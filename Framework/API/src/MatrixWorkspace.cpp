@@ -89,7 +89,7 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
         spectrumInfo().sharedSpectrumDefinitions()) {
       // Changed SpectrumDefinitions implies that detector IDs in ISpectrum have
       // changed.
-      std::vector<std::vector<detid_t>> detIDs;
+      std::vector<std::vector<Indexing::DetectorID>> detIDs;
       for (size_t i = 0; i < getNumberHistograms(); ++i) {
         const auto &set = getSpectrum(i).getDetectorIDs();
         detIDs.emplace_back(set.begin(), set.end());
@@ -106,7 +106,7 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   if (m_indexInfoNeedsUpdate) {
     std::lock_guard<std::mutex> lock(m_indexInfoMutex);
     if (m_indexInfoNeedsUpdate) {
-      std::vector<specnum_t> spectrumNumbers;
+      std::vector<Indexing::SpectrumNumber> spectrumNumbers;
       for (size_t i = 0; i < getNumberHistograms(); ++i)
         spectrumNumbers.push_back(getSpectrum(i).getSpectrumNo());
       m_indexInfo->setSpectrumNumbers(std::move(spectrumNumbers));
@@ -128,9 +128,11 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto &spectrum = getSpectrum(i);
-    spectrum.setSpectrumNo(indexInfo.spectrumNumber(i));
-    auto ids = indexInfo.detectorIDs(i);
-    spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
+    spectrum.setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
+    std::set<detid_t> ids;
+    for (const auto id : indexInfo.detectorIDs(i))
+      ids.insert(static_cast<detid_t>(id));
+    spectrum.setDetectorIDs(std::move(ids));
   }
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;

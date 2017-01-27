@@ -2,6 +2,8 @@
 #define MANTID_INDEXING_INDEXINFO_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/DetectorID.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <functional>
@@ -10,8 +12,12 @@
 
 namespace Mantid {
 
+<<<<<<< 208a5dde8dfafc5b56bfdaa2c35baa69748103b0
 using specnum_t = int32_t;
 using detid_t = int32_t;
+=======
+namespace Beamline {
+>>>>>>> Re #18522. Use new type-safe detector IDs in spectrum numbers.
 class SpectrumDefinition;
 
 namespace Indexing {
@@ -58,18 +64,20 @@ class SpectrumNumberTranslator;
 class MANTID_INDEXING_DLL IndexInfo {
 public:
   explicit IndexInfo(const size_t globalSize);
-  IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
-            std::vector<std::vector<detid_t>> &&detectorIDs);
+  IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
+            std::vector<std::vector<DetectorID>> &&detectorIDs);
   ~IndexInfo();
 
   size_t size() const;
 
-  specnum_t spectrumNumber(const size_t index) const;
-  const std::vector<detid_t> &detectorIDs(const size_t index) const;
+  SpectrumNumber spectrumNumber(const size_t index) const;
+  const std::vector<DetectorID> &detectorIDs(const size_t index) const;
 
-  void setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & ;
-  void setDetectorIDs(const std::vector<detid_t> &detectorIDs) & ;
-  void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) & ;
+  void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers) & ;
+  void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max) &
+      ;
+  void setDetectorIDs(const std::vector<DetectorID> &detectorIDs) & ;
+  void setDetectorIDs(std::vector<std::vector<DetectorID>> &&detectorIDs) & ;
 
   void setSpectrumDefinitions(
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
@@ -78,11 +86,10 @@ public:
 
 private:
   size_t m_size;
-  Kernel::cow_ptr<std::vector<specnum_t>> m_spectrumNumbers;
-  Kernel::cow_ptr<std::vector<std::vector<detid_t>>> m_detectorIDs;
-
-  Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
-      nullptr};
+  Kernel::cow_ptr<std::vector<SpectrumNumber>> m_spectrumNumbers;
+  Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
+  Kernel::cow_ptr<std::vector<SpectrumDefinition>>
+      m_spectrumDefinitions{nullptr};
 
   std::unique_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator;
 };

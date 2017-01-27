@@ -99,12 +99,13 @@ void FindDeadDetectors::exec() {
     } else {
       ++countSpec;
       y = deadValue;
-      const specnum_t specNo = indexInfo.spectrumNumber(i);
+      const auto specNo = indexInfo.spectrumNumber(i);
       // Write the spectrum number to file
-      file << i << " " << specNo;
+      file << i << " " << static_cast<int32_t>(specNo);
       // Get the list of detectors for this spectrum and iterate over
       const auto &dets = indexInfo.detectorIDs(i);
-      for (const auto &det : dets) {
+      for (const auto &id : dets) {
+        const auto det = static_cast<detid_t>(id);
         // Write the detector ID to file, log & the FoundDead output property
         file << " " << det;
         // we could write dead detectors to the log but if they are viewing the
