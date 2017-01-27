@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/DetectorDiagnostic.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
