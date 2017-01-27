@@ -1262,8 +1262,6 @@ double calcConversion(const double l1, const Kernel::V3D &beamline,
   double sinTheta = sqrt(0.5 - halfcosTwoTheta);
   const double numerator = (1.0 + offset);
   sinTheta *= (l1 + l2);
-  const double CONSTANT = (PhysicalConstants::h * 1e10) /
-                          (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
   return (numerator * CONSTANT) / sinTheta;
 }
