@@ -46,14 +46,14 @@ public:
                            const Partitioner &partitioner,
                            const PartitionIndex &partition);
 
-  SpectrumIndexSet makeIndexSet();
-  SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max);
+  SpectrumIndexSet makeIndexSet() const;
+  SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
   SpectrumIndexSet makeIndexSet(GlobalSpectrumIndex min,
-                                GlobalSpectrumIndex max);
+                                GlobalSpectrumIndex max) const;
   SpectrumIndexSet
-  makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers);
+  makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
   SpectrumIndexSet
-  makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices);
+  makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
 private:
   struct SpectrumNumberHash {

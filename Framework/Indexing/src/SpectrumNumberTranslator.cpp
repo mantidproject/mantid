@@ -26,12 +26,13 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
 }
 
 // Full set
-SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() {
+SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() const {
   return SpectrumIndexSet(m_indices.size());
 }
 
-SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
-                                                        SpectrumNumber max) {
+SpectrumIndexSet
+SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
+                                       SpectrumNumber max) const {
   // Range check
   static_cast<void>(m_partitions.at(min));
   static_cast<void>(m_partitions.at(max));
@@ -47,7 +48,7 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
 
 SpectrumIndexSet
 SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
-                                       GlobalSpectrumIndex max) {
+                                       GlobalSpectrumIndex max) const {
   if (min > max)
     throw std::logic_error(
         "SpectrumIndexTranslator: specified min is larger than max.");
@@ -65,7 +66,7 @@ SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
 }
 
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
-    const std::vector<SpectrumNumber> &spectrumNumbers) {
+    const std::vector<SpectrumNumber> &spectrumNumbers) const {
   std::vector<size_t> indices;
   for (const auto &spectrumNumber : spectrumNumbers)
     if (m_partitions.at(spectrumNumber) == m_partition)
@@ -74,7 +75,7 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
 }
 
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
-    const std::vector<GlobalSpectrumIndex> &globalIndices) {
+    const std::vector<GlobalSpectrumIndex> &globalIndices) const {
   std::vector<size_t> indices;
   for (const auto &globalIndex : globalIndices) {
     if (globalIndex >= m_partitions.size())

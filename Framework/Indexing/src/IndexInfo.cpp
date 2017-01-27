@@ -1,4 +1,5 @@
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -21,6 +22,7 @@ IndexInfo::IndexInfo(const size_t globalSize)
   // Default to spectrum numbers 1...globalSize
   auto &specNums = m_spectrumNumbers.access();
   std::iota(specNums.begin(), specNums.end(), 1);
+  makeSpectrumNumberTranslator();
 }
 
 /// Construct with given spectrum number and vector of detector IDs for each
@@ -33,6 +35,7 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
                              "and detector ID vectors");
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
   m_detectorIDs.access() = std::move(detectorIDs);
+  makeSpectrumNumberTranslator();
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -59,6 +62,7 @@ void IndexInfo::setSpectrumNumbers(
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
+  makeSpectrumNumberTranslator();
 }
 
 void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
@@ -69,6 +73,7 @@ void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   auto &data = m_spectrumNumbers.access();
   std::iota(data.begin(), data.end(), static_cast<int32_t>(min));
+  makeSpectrumNumberTranslator();
 }
 
 /// Set a single detector ID for each index.
@@ -114,6 +119,22 @@ void IndexInfo::setSpectrumDefinitions(
 const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
 IndexInfo::spectrumDefinitions() const {
   return m_spectrumDefinitions;
+}
+
+SpectrumIndexSet IndexInfo::makeIndexSet(
+    const std::vector<SpectrumNumber> &spectrumNumbers) const {
+  return m_spectrumNumberTranslator->makeIndexSet(spectrumNumbers);
+}
+
+void IndexInfo::makeSpectrumNumberTranslator() {
+  // TODO We are not setting monitors currently. This is ok as long as we have
+  // exactly one partition.
+  PartitionIndex partition = 0;
+  RoundRobinPartitioner partitioner(
+      1, partition, Partitioner::MonitorStrategy::CloneOnEachPartition,
+      std::vector<GlobalSpectrumIndex>{});
+  m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
+      *m_spectrumNumbers, partitioner, partition);
 }
 
 } // namespace Indexing

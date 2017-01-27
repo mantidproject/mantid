@@ -85,13 +85,13 @@ public:
   spectrumDefinitions() const;
 
 private:
+  void makeSpectrumNumberTranslator();
   size_t m_size;
   Kernel::cow_ptr<std::vector<SpectrumNumber>> m_spectrumNumbers;
   Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
   Kernel::cow_ptr<std::vector<SpectrumDefinition>>
       m_spectrumDefinitions{nullptr};
-
-  std::unique_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator;
+  Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{nullptr};
 };
 
 } // namespace Indexing
