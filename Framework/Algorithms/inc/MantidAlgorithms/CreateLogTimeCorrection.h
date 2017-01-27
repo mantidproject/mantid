@@ -8,6 +8,9 @@
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
+namespace API {
+class DetectorInfo;
+}
 namespace Algorithms {
 
 /** CreateLogTimeCorrection : Create correction file and workspace to correct
@@ -61,11 +64,11 @@ private:
   void exec() override;
 
   /// Get instrument geometry setup including L2 for each detector and L1
-  void getInstrumentSetup();
+  double getInstrumentSetup(const Mantid::API::DetectorInfo &detectorInfo);
 
   /// Calculate the log time correction for each pixel, i.e., correcton from
   /// event time at detector to time at sample
-  void calculateCorrection();
+  void calculateCorrection(const double l1);
 
   /// Write L2 map and correction map to a TableWorkspace
   DataObjects::TableWorkspace_sptr generateCorrectionTable();
@@ -73,8 +76,6 @@ private:
   /// Write correction map to a text file
   void writeCorrectionToFile(std::string filename);
 
-  API::MatrixWorkspace_sptr m_dataWS;
-  Geometry::Instrument_const_sptr m_instrument;
   std::map<int, double> m_l2map;
   std::map<int, double> m_correctionMap;
   double m_L1 = 0.0;

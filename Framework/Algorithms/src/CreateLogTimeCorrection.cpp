@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
@@ -44,12 +46,11 @@ void CreateLogTimeCorrection::init() {
   */
 void CreateLogTimeCorrection::exec() {
   // 1. Process input
-  m_dataWS = getProperty("InputWorkspace");
-  m_instrument = m_dataWS->getInstrument();
+  MatrixWorkspace_sptr dataWS = getProperty("InputWorkspace");
 
   //   Check whether the output workspace name is same as input
   string outwsname = getPropertyValue("OutputWorkspace");
-  if (outwsname.compare(m_dataWS->getName()) == 0) {
+  if (outwsname.compare(dataWS->getName()) == 0) {
     stringstream errmsg;
     errmsg << "It is not allowed to use the same name by both input matrix "
               "workspace and output table workspace.";
@@ -58,10 +59,10 @@ void CreateLogTimeCorrection::exec() {
   }
 
   // 2. Explore geometry
-  getInstrumentSetup();
+  const double l1 = getInstrumentSetup(dataWS->detectorInfo());
 
   // 3. Calculate log time correction
-  calculateCorrection();
+  calculateCorrection(l1);
 
   // 4. Output
   TableWorkspace_sptr outWS = generateCorrectionTable();
@@ -77,36 +78,28 @@ void CreateLogTimeCorrection::exec() {
 //----------------------------------------------------------------------------------------------
 /** Get instrument geometry setup including L2 for each detector and L1
   */
-void CreateLogTimeCorrection::getInstrumentSetup() {
-  // 1. Get sample position and source position
-  IComponent_const_sptr sample = m_instrument->getSample();
-  if (!sample) {
-    throw runtime_error("No sample has been set.");
-  }
-  V3D samplepos = sample->getPos();
-
-  IComponent_const_sptr source = m_instrument->getSource();
-  if (!source) {
-    throw runtime_error("No source has been set.");
-  }
-  V3D sourcepos = source->getPos();
-  m_L1 = sourcepos.distance(samplepos);
+double
+CreateLogTimeCorrection::getInstrumentSetup(const DetectorInfo &detectorInfo) {
 
   // 2. Get detector IDs
-  std::vector<detid_t> detids = m_instrument->getDetectorIDs(true);
-  for (auto &detid : detids) {
-    IDetector_const_sptr detector = m_instrument->getDetector(detid);
-    V3D detpos = detector->getPos();
-    double l2 = detpos.distance(samplepos);
-    m_l2map.emplace(detid, l2);
+
+  std::vector<detid_t> detids = detectorInfo.detectorIDs();
+  for (size_t index = 0; index < detectorInfo.size(); ++index) {
+    if (!detectorInfo.isMonitor(index)) {
+      double l2 = detectorInfo.l2(index);
+      m_l2map.emplace(detids[index], l2);
+    }
   }
 
+  const double l1 = detectorInfo.l1();
   // 3. Output information
-  g_log.information() << "Sample position = " << samplepos << "; "
-                      << "Source position = " << sourcepos << ", L1 = " << m_L1
+  g_log.information() << "Sample position = " << detectorInfo.samplePosition()
                       << "; "
-                      << "Number of detector/pixels = " << detids.size()
+                      << "Source position = " << detectorInfo.sourcePosition()
+                      << ", L1 = " << l1 << "; "
+                      << "Number of detector/pixels = " << detectorInfo.size()
                       << ".\n";
+  return l1;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -114,12 +107,12 @@ void CreateLogTimeCorrection::getInstrumentSetup() {
  * time at detector
   * to time at sample
   */
-void CreateLogTimeCorrection::calculateCorrection() {
+void CreateLogTimeCorrection::calculateCorrection(const double l1) {
   map<int, double>::iterator miter;
   for (miter = m_l2map.begin(); miter != m_l2map.end(); ++miter) {
     int detid = miter->first;
     double l2 = miter->second;
-    double corrfactor = m_L1 / (m_L1 + l2);
+    double corrfactor = l1 / (l1 + l2);
     m_correctionMap.emplace(detid, corrfactor);
   }
 }
@@ -154,7 +147,6 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable() {
 
   return tablews;
 }
-
 //----------------------------------------------------------------------------------------------
 /** Write correction map to a text file
   */
