@@ -45,3 +45,8 @@ from .InstrumentProducer import InstrumentProducer
 from . import AbinsParameters
 from . import AbinsConstants
 from . import AbinsTestHelpers
+
+# set utf8 enconding for ABINS so that it can read German surnames from output DFT programs without any error
+import sys
+reload(sys)
+sys.setdefaultencoding('UTF8')
