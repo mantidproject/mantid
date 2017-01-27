@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
@@ -89,14 +90,15 @@ public:
     const auto sample = ws->getInstrument()->getSample();
     TS_ASSERT_DELTA(sample->getDistance(*source), 40., 1e-4);
 
-    const auto det0 = ws->getDetector(0);
-    TS_ASSERT_DELTA(det0->getDistance(*sample), 2.2222, 1e-4);
-    TS_ASSERT_DELTA(det0->getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) *
+    const auto& spectrumInfo = ws->spectrumInfo();
+    const auto& det0 = spectrumInfo.detector(0);
+    TS_ASSERT_DELTA(det0.getDistance(*sample), 2.2222, 1e-4);
+    TS_ASSERT_DELTA(det0.getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) *
                         180. / M_PI,
                     58.308, 1e-4);
-    const auto det1 = ws->getDetector(1);
-    TS_ASSERT_DELTA(det1->getDistance(*sample), 2.060, 1e-4);
-    TS_ASSERT_DELTA(det1->getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) *
+    const auto& det1 = spectrumInfo.detector(0);
+    TS_ASSERT_DELTA(det1.getDistance(*sample), 2.060, 1e-4);
+    TS_ASSERT_DELTA(det1.getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) *
                         180. / M_PI,
                     154.257, 1e-4);
   }
