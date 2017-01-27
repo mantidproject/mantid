@@ -13,7 +13,8 @@ def execute(data, rebin_param, mode, cores=1, chunksize=None, h=None):
     h.check_data_stack(data)
 
     if rebin_param and 0 < rebin_param:
-        if h.multiprocessing_available():
+        from parallel import utility as pu
+        if pu.multiprocessing_available():
             data = _execute_par(data, rebin_param, mode, cores, chunksize, h)
         else:
             data = _execute_seq(data, rebin_param, mode, h)

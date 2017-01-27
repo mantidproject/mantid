@@ -24,7 +24,8 @@ def execute(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1
                 "shape of the sample images ({1})".format(
                     norm_flat_img.shape, data[0].shape))
 
-        if h.multiprocessing_available():
+        from parallel import utility as pu
+        if pu.multiprocessing_available():
             _execute_par(data, norm_flat_img, norm_dark_img,
                          clip_min, clip_max, cores, chunksize, h)
         else:

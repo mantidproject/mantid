@@ -49,16 +49,11 @@ def check_version_info():
 
 
 def main():
+    import sys
     check_version_info()
 
     import tomo_argparser
     config = tomo_argparser.grab_full_config()
-
-    from recon.helper import Helper
-    helper = Helper(config)
-
-    # first call, start timer
-    helper.total_reconstruction_timer()
 
     if config.func.debug:
         if config.func.debug_port is not None:
@@ -73,13 +68,9 @@ def main():
     else:
         # run recon stuff
         import recon.runner
-        import sys
         cmd_line = " ".join(sys.argv)
         res = recon.runner.execute(config, cmd_line)
 
-    # end timer
-    helper.total_reconstruction_timer()
-    helper.tomo_print(str(res), 0)  # always print the last output
     return res
 
 main()

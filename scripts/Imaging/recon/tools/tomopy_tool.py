@@ -41,11 +41,10 @@ class TomoPyTool(AbstractTool):
 
         return tomopy
 
-    def run_reconstruct(self, data, config):
+    def run_reconstruct(self, data, config, h):
         import numpy as np
         from recon.helper import Helper
-
-        h = Helper(config)
+        h = Helper.empty_init() if h is None else h
 
         h.check_data_stack(data)
 

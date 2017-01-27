@@ -37,7 +37,8 @@ def execute(data, rotation, flat=None, dark=None, cores=1, chunksize=None, h=Non
     if rotation:
         clockwise_rotations = 4 - rotation
 
-        if h.multiprocessing_available():
+        from parallel import utility as pu
+        if pu.multiprocessing_available():
             _execute_par(data, clockwise_rotations, cores, chunksize, h)
         else:
             _execute_seq(data, clockwise_rotations, h)

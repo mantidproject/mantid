@@ -52,11 +52,11 @@ class AstraTool(AbstractTool):
         print("Astra using CUDA: {0}".format(astra.astra.use_cuda()))
         return astra
 
-    def run_reconstruct(self, data, config):
+    def run_reconstruct(self, data, config, h):
         import numpy as np
         from recon.helper import Helper
 
-        h = Helper(config)
+        h = Helper.empty_init() if h is None else h
 
         h.check_data_stack(data)
 

@@ -23,7 +23,8 @@ def execute(data, size, mode, cores=1, chunksize=None, h=None):
     h.check_data_stack(data)
 
     if size and size > 1:
-        if h.multiprocessing_available():
+        from parallel import utility as pu
+        if pu.multiprocessing_available():
             data = _execute_par(data, size, mode, cores, chunksize, h)
         else:
             data = _execute_seq(data, size, mode, h)

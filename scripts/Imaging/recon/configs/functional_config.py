@@ -72,6 +72,7 @@ class FunctionalConfig(object):
         self.cores = multiprocessing.cpu_count()
         # how to spread the image load per worker
         self.chunksize = None
+        self.parallel_load = False
 
     def __str__(self):
         return "Input dir: {0}\n".format(str(self.input_path)) \
@@ -337,6 +338,13 @@ class FunctionalConfig(object):
             default=self.chunksize,
             help="How to spread the load on each worker.")
 
+        grp_recon.add_argument(
+            "--parallel-load",
+            required=False,
+            action='store_true',
+            default=self.parallel_load,
+            help="How to spread the load on each worker.")
+
         return parser
 
     def update(self, args):
@@ -394,6 +402,7 @@ class FunctionalConfig(object):
         self.max_angle = args.max_angle
         self.cores = args.cores
         self.chunksize = args.chunksize
+        self.parallel_load = args.parallel_load
         self.convert = args.convert
 
         self.handle_special_arguments()

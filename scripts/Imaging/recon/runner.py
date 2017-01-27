@@ -1,28 +1,33 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def execute(config, cmd_line=None):
+def execute(config, cmd_line):
     """
     Run a reconstruction using a particular tool, algorithm and setup
 
     :param config :: The full configuration, after being read from the parameters
-
     :param cmd_line :: command line text if running from the CLI. When provided it will be written in the output
+    :param h:
     readme file(s) for reference.
     """
 
     from recon.helper import Helper
     h = Helper(config)
+    h.total_execution_timer()
     config.helper = h
     h.check_config_integrity(config)
-    h.run_import_checks()
 
     from recon.data.saver import Saver
-    saver = Saver(config)
+    saver = Saver(config, h)
     # create directory, or throw if not empty and no --overwrite-all
     saver.make_dirs_if_needed(config.func.output_path)
-    # TODO new class for readme
-    saver.gen_readme_summary_begin(cmd_line, config)
+
+    from recon.data.readme import Readme
+    readme = Readme(config, saver)
+    readme.begin(cmd_line, config)
+
+    h.set_readme(readme)
+    h.run_import_checks()
 
     # import early to check if tool is available
     tool = load_tool(config, h)
@@ -34,19 +39,20 @@ def execute(config, cmd_line=None):
     # Save pre-proc images, print inside
     saver.save_preproc_images(sample)
     if config.func.only_preproc is True:
+        h.tomo_print_note("Only preproc selected with --only-preproc, exiting...")
+        readme.end()
         return 14
 
     # ----------------------------------------------------------------
     # Reconstruction
     sample = tool.run_reconstruct(sample, config)
 
-    post_processing(sample, config)
+    sample = post_processing(sample, config)
 
     # Save output from the reconstruction
     saver.save_recon_output(sample)
-
-    # TODO new class for readme
-    # saver.gen_readme_summary_end(sample)
+    h.total_execution_timer()
+    readme.end()
     return 0
 
 
@@ -220,8 +226,17 @@ def load_data(config, h):
     from recon.data import loader
 
     h.pstart("Loading data...")
+    input_path = config.func.input_path
+    input_path_flat = config.func.input_path_flat
+    input_path_dark = config.func.input_path_dark
+    img_format = config.func.in_format
+    data_dtype = config.func.data_dtype
+    cores = config.func.cores
+    chunksize = config.func.chunksize
+    parallel_load = config.func.parallel_load
 
-    sample, flat, dark = loader.load_config(config)
+    sample, flat, dark = loader.load(input_path, input_path_flat, input_path_dark,
+                                     img_format, data_dtype, cores, chunksize, parallel_load, h)
 
     h.pstop("Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
         sample.shape, sample.dtype))

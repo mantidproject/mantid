@@ -25,10 +25,8 @@ class Helper(object):
         """
 
         # If a config is provided make sure it's the proper class
-        if config is not None and not isinstance(config, ReconstructionConfig):
-            raise ValueError("The provided config is not of the correct type ReconstructionConfig!\n\t"
-                             "    If no config is available (e.g. running a standalone filter) use an empty constructor.")
-            # so much space so it aligns in the terminal
+        if config is not None:
+            self.check_config_integrity(config)
 
         self._whole_exec_timer = None
         self._timer_running = False
@@ -53,6 +51,8 @@ class Helper(object):
         # sneaky copy of the config
         self._config = config
 
+        self._readme = None
+
     def get_verbosity(self):
         return self._verbosity
 
@@ -60,7 +60,7 @@ class Helper(object):
     def check_config_integrity(config):
         if not config or not isinstance(config, ReconstructionConfig):
             raise ValueError(
-                "Cannot run a reconstruction without a valid configuration")
+                "The provided config is not of the correct type ReconstructionConfig!")
 
         if not config.func.input_path:
             raise ValueError(
@@ -76,7 +76,7 @@ class Helper(object):
 
     @staticmethod
     def empty_init_conf():
-        return Helper(ReconstructionConfig())
+        return Helper(ReconstructionConfig.empty_init())
 
     @staticmethod
     def check_data_stack(data):
@@ -106,46 +106,6 @@ class Helper(object):
             res = None
             pass
 
-    @staticmethod
-    def execute_async(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, output_data=None):
-        h = Helper.empty_init() if h is None else h
-
-        if chunksize is None:
-            chunksize = 1  # TODO use proper calculation
-
-        if output_data is None:
-            # this will just increase the reference counter,
-            # no data will be copied
-            output_data = data[:]
-
-        from multiprocessing import Pool
-
-        pool = Pool(cores)
-        # imap_unordered gives the images back in random order!
-        # map and map_async cannot replace the data in place and end up
-        # doubling the memory. They do not improve speed performance either
-        # imap seems to be the best choice
-        h.prog_init(data.shape[0], name + " " +
-                    str(cores) + "c " + str(chunksize) + "chs")
-
-        for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
-            output_data[i, :, :] = res_data[:, :]
-            h.prog_update()
-
-        pool.close()
-        pool.join()
-        h.prog_close()
-
-        return output_data
-
-    @staticmethod
-    def multiprocessing_available():
-        try:
-            import multiprocessing
-            return True
-        except ImportError:
-            return False
-
     def progress_available(self):
         try:
             from tqdm import tqdm
@@ -156,9 +116,10 @@ class Helper(object):
                 "Falling back to ASCII progress bar.")
 
     def run_import_checks(self):
+        from parallel import utility as pu
         self.progress_available()
 
-        if not self.multiprocessing_available():
+        if not pu.multiprocessing_available():
             self.tomo_print_note("Multiprocessing not available.")
         else:
             self.tomo_print_note(
@@ -196,20 +157,8 @@ class Helper(object):
 
     def tomo_print_same_line(self, message, verbosity=2):
         """
-        Verbosity levels:
-        0 -> debug, print everything
-        1 -> information, print information about progress
-        2 -> print only major progress information, i.e data loaded, recon started, recon finished
-
-        Print only messages that have priority >= config verbosity level
-
         :param message: Message to be printed
-        :param verbosity: Default 2, messages with existing levels:
-
-            0 - Silent, no output at all (not recommended)
-            1 - Low verbosity, will output each step that is being performed
-            2 - Normal verbosity, will output each step and execution time
-            3 - High verbosity, will output the step name, execution time and memory usage before and after each step
+        :param verbosity: See tomo_print(...)
         :return:
         """
 
@@ -241,6 +190,7 @@ class Helper(object):
         # will be printed if the message verbosity is lower or equal
         # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
         if verbosity <= self._verbosity:
+            self._readme.append(message)
             print(message)
 
     def tomo_print_note(self, message, verbosity=2):
@@ -255,8 +205,6 @@ class Helper(object):
     def pstart(self, message, verbosity=2):
         """
         Print the message and start the execution timer.
-
-        This will conform to the same verbosity restrictions as tomo_print(...).
 
         :param message: Message to be printed
         :param verbosity: See tomo_print(...)
@@ -275,16 +223,11 @@ class Helper(object):
         if self._verbosity >= 3:
             print_string += " Memory usage before execution: " + self.get_memory_usage_linux()
 
-        # will be printed if the message verbosity is lower or equal
-        # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
-        if verbosity <= self._verbosity:
-            print(self._timer_print_prefix, print_string)
+        self.tomo_print(self._timer_print_prefix + print_string, verbosity)
 
     def pstop(self, message, verbosity=2):
         """
         Print the message and stop the execution timer.
-
-        This will conform to the same verbosity restrictions as tomo_print(...).
 
         :param message: Message to be printed
         :param verbosity: See tomo_print(...)
@@ -303,12 +246,9 @@ class Helper(object):
         if self._verbosity >= 3:
             print_string += " Memory usage after execution: " + self.get_memory_usage_linux()
 
-        # will be printed if the message verbosity is lower or equal
-        # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
-        if verbosity <= self._verbosity:
-            print(self._timer_print_prefix, print_string)
+        self.tomo_print(self._timer_print_prefix + print_string, verbosity)
 
-    def total_reconstruction_timer(self, message="Total execution time was "):
+    def total_execution_timer(self, message="Total execution time was "):
         """
         This will ONLY be used to time the WHOLE execution time.
         The first call to this will be in tomo_reconstruct.py and it will start it.abs
@@ -322,17 +262,11 @@ class Helper(object):
         else:
             # change from timer to string
             self._whole_exec_timer = str(time.time() - self._whole_exec_timer)
-            print(message + self._whole_exec_timer + " sec")
+            message += self._whole_exec_timer + " sec"
+            if self._readme is not None:
+                self._readme += message
+            print(message)
 
-    def handle_exception(self, exception):
-        """
-        TODO The plan for this function is to apply
-        the --no-crash-on-failed-import (rename to crash on exception?) throughout
-        the scripts, so that they use a common function
-
-        Currently only re-raises the exception so that it is not lost silently!
-        """
-        raise exception
 
     def prog_init(self, total, desc="Progress", ascii=False, unit='images'):
         """
@@ -370,3 +304,6 @@ class Helper(object):
             self._progress_bar.close()
 
         self._progress_bar = None
+
+    def set_readme(self, readme):
+        self._readme = readme
