@@ -117,7 +117,8 @@ public:
 
     // Now set up data in workspace2D
     double dQ = 0;
-    double Q0 = calcQ(bankR, detectorInfo, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
+    double Q0 =
+        calcQ(bankR, detectorInfo, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
 
     double TotIntensity = 0;
 
