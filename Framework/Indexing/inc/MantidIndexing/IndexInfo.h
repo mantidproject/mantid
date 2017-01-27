@@ -65,7 +65,7 @@ public:
   size_t size() const;
 
   specnum_t spectrumNumber(const size_t index) const;
-  std::vector<detid_t> detectorIDs(const size_t index) const;
+  const std::vector<detid_t> &detectorIDs(const size_t index) const;
 
   void setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & ;
   void setDetectorIDs(const std::vector<detid_t> &detectorIDs) & ;

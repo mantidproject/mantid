@@ -191,6 +191,32 @@ public:
     TS_ASSERT_EQUALS(ws.indexInfo().spectrumDefinitions().get(), defs.get());
   }
 
+  void test_clone_shares_data_in_IndexInfo() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    const auto clone = ws.clone();
+    const auto &info1 = ws.indexInfo();
+    const auto &info2 = clone->indexInfo();
+    // Spectrum numbers should also be shared, but there is no access by
+    // reference, so we cannot check.
+    TS_ASSERT_EQUALS(&info1.detectorIDs(0), &info2.detectorIDs(0));
+    TS_ASSERT(info1.spectrumDefinitions()); // should not be nullptr
+    TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
+  }
+
+  void test_WorkspaceFactory_shares_data_in_IndexInfo() {
+    const auto ws =
+        WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
+    const auto copy = WorkspaceFactory::Instance().create(ws);
+    const auto &info1 = ws->indexInfo();
+    const auto &info2 = copy->indexInfo();
+    // Spectrum numbers should also be shared, but there is no access by
+    // reference, so we cannot check.
+    TS_ASSERT_EQUALS(&info1.detectorIDs(0), &info2.detectorIDs(0));
+    TS_ASSERT(info1.spectrumDefinitions()); // should not be nullptr
+    TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
+  }
+
   void test_toString_Produces_Expected_Contents() {
     auto testWS = boost::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);

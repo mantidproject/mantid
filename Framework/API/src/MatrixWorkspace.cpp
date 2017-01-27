@@ -82,13 +82,11 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   // Individual SpectrumDefinitions in SpectrumInfo may have changed. Due to a
   // copy-on-write mechanism the definitions stored in IndexInfo may then be out
   // of sync.
-  if (m_indexInfo->spectrumDefinitions().get() !=
-      spectrumInfo().sharedSpectrumDefinitions().get()) {
+  if (m_indexInfo->spectrumDefinitions() !=
+      spectrumInfo().sharedSpectrumDefinitions()) {
     std::lock_guard<std::mutex> lock(m_indexInfoMutex);
-    if (m_indexInfo->spectrumDefinitions().get() !=
-        spectrumInfo().sharedSpectrumDefinitions().get()) {
-      m_indexInfo->setSpectrumDefinitions(
-          spectrumInfo().sharedSpectrumDefinitions());
+    if (m_indexInfo->spectrumDefinitions() !=
+        spectrumInfo().sharedSpectrumDefinitions()) {
       // Changed SpectrumDefinitions implies that detector IDs in ISpectrum have
       // changed.
       std::vector<std::vector<detid_t>> detIDs;
@@ -97,6 +95,11 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
         detIDs.emplace_back(set.begin(), set.end());
       }
       m_indexInfo->setDetectorIDs(std::move(detIDs));
+      // IndexInfo clears the spectrum definitions when setting new detector IDs
+      // (to reduce the risk for mismatch, when used outside MatrixWorkspace),
+      // we thus set new definitions *after* settings IDs.
+      m_indexInfo->setSpectrumDefinitions(
+          spectrumInfo().sharedSpectrumDefinitions());
     }
   }
   // If spectrum numbers are set in ISpectrum this flag will be true.

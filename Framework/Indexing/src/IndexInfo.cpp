@@ -46,7 +46,7 @@ specnum_t IndexInfo::spectrumNumber(const size_t index) const {
 }
 
 /// Return a vector of the detector IDs for given index.
-std::vector<detid_t> IndexInfo::detectorIDs(const size_t index) const {
+const std::vector<detid_t> &IndexInfo::detectorIDs(const size_t index) const {
   return (*m_detectorIDs)[index];
 }
 
