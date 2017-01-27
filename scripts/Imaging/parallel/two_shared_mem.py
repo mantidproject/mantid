@@ -187,11 +187,6 @@ def execute(data=None, second_data=None, partial_func=None, cores=1, chunksize=N
     pool = Pool(cores)
     img_num = data.shape[0]
 
-    assert img_num == second_data.shape[0], "Data arrays cannot have different number of members in the Z dimension, " \
-                                            "e.g. if passing a 3D array as first argument and 1D array as second " \
-                                            "argument, the length of the 1D array must be the same as the " \
-                                            "Z dimension (image number) in the 3D array."
-
     if show_timer:
         h.prog_init(img_num, name + " " + str(cores) +
                     "c " + str(chunksize) + "chs")
