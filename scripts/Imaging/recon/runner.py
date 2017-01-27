@@ -221,7 +221,7 @@ def load_data(config, h):
 
     h.pstart("Loading data...")
 
-    sample, flat, dark = loader.load_stack_config(config)
+    sample, flat, dark = loader.load_config(config)
 
     h.pstop("Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
         sample.shape, sample.dtype))

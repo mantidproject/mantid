@@ -4,7 +4,6 @@ from recon.helper import Helper
 import numpy as np
 
 
-# TODO write performance test, execution and memory usage!
 def supported_formats():
     try:
         import pyfits
@@ -25,7 +24,7 @@ def supported_formats():
     return avail_list
 
 
-def load_stack_config(config):
+def load_config(config):
     """
     Loads a stack, including sample, white and dark images.
 
@@ -41,25 +40,25 @@ def load_stack_config(config):
     h = config.helper
 
     if img_format in ['fits', 'fit']:
-        sample, flat, dark = load_stack(
+        sample, flat, dark = load(
             input_path, input_path_flat, input_path_dark, img_format, data_dtype, h)
 
     elif img_format in ['nxs']:
-        data_file = _get_stack_file_names(input_path, img_format)
+        data_file = get_file_names(input_path, img_format)
 
         # It is assumed that all images have the same size and properties as the
         # first.
         # read in .nxs file
+        # TODO make use of shared memory array! otherwise nothing will work
         sample, flat, dark = _read_nxs(data_file[0])
 
-    from recon.helper import Helper
     Helper.check_data_stack(sample)
 
     return sample, flat, dark
 
 
-def load_stack(sample_path, flat_file_path=None, dark_file_path=None,
-               img_format='fits', argument_data_dtype=np.float32, h=None):
+def load(sample_path, flat_file_path=None, dark_file_path=None,
+         img_format='fits', argument_data_dtype=np.float32, h=None):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -70,39 +69,33 @@ def load_stack(sample_path, flat_file_path=None, dark_file_path=None,
     in ImageJ and related imaging tools, using the last digits to sort
     the images in the stack.
 
+    Usual type in fits is 16-bit pixel depth, data type is denoted with:
+        '>i2' - uint16
+        '>f2' - float16
+        '>f4' - float32
+
     :param sample_path :: path to sample images. Can be a file or directory
     :param flat_file_path :: (optional) path to open beam / flat image(s). Can be a file or directory
     :param dark_file_path :: (optional) path to dark field image(s). Can be a file or directory
     :param img_format :: file extension (typically 'tiff', 'tif', 'fits', or 'fit' (not including the dot)
     :param argument_data_dtype: the type in which the data will be loaded, could be float16, float32, float64, uint16
 
-    :return :: 3 numpy arrays: input data volume (3d), average of flatt images (2d),
-               average of dark images(2d)
+    :return :: 3 numpy arrays: input data volume (3D), average of flatt images (2D),
+               average of dark images(2D)
     """
 
-    sample_file_names = _get_stack_file_names(
-        sample_path, img_format)
+    sample_file_names = get_file_names(sample_path, img_format)
 
-    # It is assumed that all images have the same size and properties as the
-    # first.
-    try:
-        first_sample_img = _read_img(sample_file_names[0], img_format)
-    except RuntimeError as exc:
-        raise RuntimeError(
-            "Could not load at least one image file from: {0}. Details: {1}".
-            format(sample_path, str(exc)))
+    # Assumed that all images have the same size and properties as the first.
+    first_sample_img = imread(sample_file_names[0], img_format)
 
-    # data_dtype = first_sample_img.dtype
-    # usual type in fits with 16-bit pixel depth
-    # '>i2' uint16
-    # '>f4' float32
-    # (type letter i,f,etc, number is *8, eg f4 = float8*4 = float32
-    # force float32 on everything
+    # force provided data type on all images
     data_dtype = argument_data_dtype
+
+    # get the shape of all images
     img_shape = first_sample_img.shape
 
-    sample_data = _load_sample_data(
-        first_sample_img, sample_file_names, img_shape, img_format, data_dtype, h)
+    sample_data = _load_sample_data(sample_file_names, img_shape, img_format, data_dtype, h)
 
     # this removes the image number dimension, if we loaded a stack of images
     img_shape = img_shape[1:] if len(img_shape) > 2 else img_shape
@@ -116,33 +109,29 @@ def load_stack(sample_path, flat_file_path=None, dark_file_path=None,
 
 def _load_and_avg_data(file_path, img_shape, img_format, data_dtype, h=None, prog_prefix=None):
     if file_path is not None:
-        file_names = _get_stack_file_names(
-            file_path, img_format)
+        file_names = get_file_names(file_path, img_format)
 
-        data = _read_listed_files(
-            file_names, img_shape, img_format, data_dtype, h, prog_prefix)
-        avg = get_data_average(data)
-    else:
-        avg = None
-    return avg
+        data = _load_files(file_names, img_shape, img_format, data_dtype, h, prog_prefix)
+        return get_data_average(data)
 
 
-def _load_sample_data(first_sample_img, sample_file_names, img_shape, img_format, data_dtype, h=None):
+def _load_sample_data(sample_file_names, img_shape, img_format, data_dtype, h=None):
     # determine what the loaded data was
     if len(img_shape) == 2:  # the loaded file was a single image
-        sample_data = _read_listed_files(
+        sample_data = _load_files(
             sample_file_names, img_shape, img_format, data_dtype, h, "Sample")
     elif len(img_shape) == 3:  # the loaded file was a stack of fits images
-        sample_data = first_sample_img
+        sample_data = _load_stack(
+            sample_file_names, img_shape, img_format, data_dtype, h, "Sample")
     else:
         raise ValueError("Data loaded has invalid shape: {0}", img_shape)
 
     return sample_data
 
 
-def _read_listed_files(files, img_shape, img_format, dtype, h=None, loop_name=None):
+def _load_files(files, img_shape, img_format, dtype, h=None, loop_name=None):
     """
-    Read several images in a row into a 3d numpy array. Useful when reading all the sample
+    Reads image files in a row into a 3d numpy array. Useful when reading all the sample
     images, or all the flat or dark images.
 
     Tried an multiparallel version of this with Python 2.7 multithreading library.
@@ -165,39 +154,72 @@ def _read_listed_files(files, img_shape, img_format, dtype, h=None, loop_name=No
     h = Helper.empty_init() if h is None else h
 
     # Zeroing here to make sure that we can allocate the memory.
-    # If it's not possible better crash here than later
+    # If it's not possible better crash here than later.
     from parallel import shared_mem as psm
     data = psm.create_shared_array(
         (len(files), img_shape[0], img_shape[1]), dtype=dtype)
-    # data = np.zeros((len(files), img_shape[
-    #     0], img_shape[1]), dtype=dtype)
 
-    # FIXME TODO PERFORMANCE CRITICAL
-    # TODO Performance Tests
     h.prog_init(len(files), desc=loop_name)
     for idx, in_file in enumerate(files):
         try:
-            data[idx, :, :] = _read_img(in_file, img_format)
+            data[idx, :, :] = imread(in_file, img_format)[:]
             h.prog_update(1)
         except ValueError as exc:
             raise ValueError(
                 "An image has different width and/or height dimensions! All images must have the same dimensions. "
-                "Error message: " + str(exc))
+                "Expected dimensions: {0} Error message: {1}".format(img_shape, exc))
         except IOError as exc:
             raise RuntimeError(
-                "Could not load file {0}. Error details: {1}".format(in_file, str(exc)))
+                "Could not load file {0}. Error details: {1}".format(in_file, exc))
     h.prog_close()
     return data
 
 
-def _read_img(filename, img_format=None):
+def _load_stack(file_name, img_shape, img_format, dtype, h, name):
+    """
+    Load a single image file that is expected to be a stack of images.
+
+    Parallel execution is about 50%-100% slower, with the following code:
+
+    # the function that will move the data
+    def _move_data(input_data, output_data):
+        output_data[:] = input_data[:]
+
+    f = ptsm.create_partial(_move_data, fwd_function=ptsm.inplace_fwd_func)
+    # this will open the file but not read all of it in!
+    new_data = imread(file_name[0], img_format)
+    # move the data in parallel, this causes 8 processes to try and read the IO at once, thus the slowdown
+    ptsm.execute(new_data, data, f, cores=8, chunksize=None, name=name, h=h)
+
+    :param file_name :: list of image file paths given as strings
+    :param img_shape :: shape of every image, assumes they all have the same shape
+    :param img_format :: file name extension if fixed (to set the expected image format)
+    :param dtype :: data type for the output numpy array
+    :return:
+    """
+    # create shared array
+    from parallel import shared_mem as psm
+    data = psm.create_shared_array(img_shape, dtype=dtype)
+    # this will open the file but not read all of it in
+    new_data = imread(file_name[0], img_format)
+    h.prog_init(img_shape[0], name)
+    for i in range(img_shape[0]):
+        data[i] = new_data[i]
+        h.prog_update()
+    h.prog_close()
+    return data
+
+
+def imread(filename, img_format=None):
     """
     Read one image and return it as a 2d numpy array
 
     :param filename :: name of the image file, can be relative or absolute path
-    :param img_format :: extension and effectively format to use ('tiff', 'fits')
+    :param img_format: format of the image ('fits')
     """
     # currently the only image type is FITS, but there will be tiff
+    # TODO if img_format == fits load fits
+    # TODO if img_format == tiff load tiff
     return _read_fits(filename)
 
 
@@ -260,7 +282,7 @@ def get_data_average(data):
     return avg
 
 
-def _get_stack_file_names(path, img_format):
+def get_file_names(path, img_format):
     import os
     import glob
 
