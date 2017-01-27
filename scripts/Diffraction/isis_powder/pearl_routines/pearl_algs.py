@@ -44,6 +44,7 @@ def generate_vanadium_absorb_corrections(van_ws):
     mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
                                                       <radius val="0.005" /> </sphere>')
 
+    calibration_full_paths = None
     absorb_ws = \
         mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
                                     ScatteringXSection="5.1", SampleNumberDensity="0.072",

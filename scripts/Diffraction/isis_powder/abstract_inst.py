@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 
 from six import add_metaclass
 
-from isis_powder.routines import calibrate, focus, common
+from isis_powder.routines import calibrate, focus
 
 
 # This class provides common hooks for instruments to override
@@ -104,8 +104,6 @@ class AbstractInst(object):
         return None
 
     # Optional overrides
-
-
     @abstractmethod
     def apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
         """

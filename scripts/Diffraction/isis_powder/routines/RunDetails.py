@@ -19,4 +19,3 @@ class RunDetails(object):
         self.splined_vanadium_file_path = None
         self.vanadium_absorption_path = None
         self.vanadium_run_numbers = None
-

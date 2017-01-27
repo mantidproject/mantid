@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-import warnings
 import yaml
 from isis_powder.routines import common as common
 from isis_powder.routines import yaml_sanity

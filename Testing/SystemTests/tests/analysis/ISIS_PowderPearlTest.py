@@ -3,7 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import stresstesting
 
-import mantid.simpleapi as mantid
 from mantid import config
 
 from isis_powder.pearl import Pearl
@@ -95,4 +94,3 @@ def _setup_pearl_instrument(tt_mode):
                       calibration_directory=_get_calibration_dir(), output_directory=_get_output_dir(),
                       calibration_config_path=calibration_map_file_path)
     return pearl_obj
-

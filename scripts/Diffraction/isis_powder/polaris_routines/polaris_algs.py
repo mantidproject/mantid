@@ -3,7 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import os
 from isis_powder.routines import common, yaml_parser
-from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.routines.RunDetails import RunDetails
 from isis_powder.polaris_routines import polaris_advanced_config
 
