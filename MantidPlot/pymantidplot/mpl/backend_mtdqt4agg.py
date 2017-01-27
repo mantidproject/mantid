@@ -4,20 +4,23 @@ Matplotlib backend for MantidPlot.
 It uses qt4agg for rendering but the ensures that any rendering calls
 are done on the main thread of the application as the default
 mode for MantidPlot is to run all python scripts asynchronously.
-
 Providing this backend allows users to work with the standard matplotlib
 API without modification
 """
-from __future__ import division, print_function
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 try:
-    from matplotlib.backends.qt_compat import QtCore, QtGui
+    # Newer matplotlib has qt_compat
+    from matplotlib.backends.qt_compat import QtCore, QtWidgets
 except ImportError:
-    from matplotlib.backends.qt4_compat import QtCore, QtGui
+    # whereas older has qt4_compat with no QtWidgets
+    from matplotlib.backends.qt4_compat import QtCore
+    from matplotlib.backends.qt4_compat import QtGui as QtWidgets
 
-from matplotlib.backends.backend_qt4agg import draw_if_interactive #pylint: disable=unused-import
-from matplotlib.backends.backend_qt4agg import new_figure_manager as _new_fig_mgr_qt4agg
-from matplotlib.backends.backend_qt4agg import show as _show_qt4agg
+# Import everyting from the *real* matplotlib backend
+from matplotlib.backends.backend_qt4agg import *
+
 
 class QAppThreadCall(QtCore.QObject):
     """
@@ -27,7 +30,7 @@ class QAppThreadCall(QtCore.QObject):
 
     def __init__(self, callable_obj):
         QtCore.QObject.__init__(self)
-        self.moveToThread(QtGui.qApp.thread())
+        self.moveToThread(QtWidgets.qApp.thread())
         self.callable_obj = callable_obj
         # Help should then give the correct doc
         self.__call__.__func__.__doc__ = callable_obj.__doc__
@@ -43,7 +46,7 @@ class QAppThreadCall(QtCore.QObject):
         it invokes the do_call method as a slot via a
         BlockingQueuedConnection.
         """
-        if QtCore.QThread.currentThread() == QtGui.qApp.thread():
+        if QtCore.QThread.currentThread() == QtWidgets.qApp.thread():
             return self.callable_obj(*args, **kwargs)
         else:
             self._clear_func_props()
@@ -75,6 +78,11 @@ class QAppThreadCall(QtCore.QObject):
         self._args = args
         self._kwargs = kwargs
 
-# Wrap Qt4Agg methods
-show = QAppThreadCall(_show_qt4agg) #pylint: disable=invalid-name
-new_figure_manager = QAppThreadCall(_new_fig_mgr_qt4agg) #pylint: disable=invalid-name
+# Wrap the required functions
+show = QAppThreadCall(show)
+new_figure_manager = QAppThreadCall(new_figure_manager)
+try:
+    # New in v1.5 but we need to work with older versions still
+    new_figure_manager_given_figure = QAppThreadCall(new_figure_manager_given_figure)
+except AttributeError:
+    pass
