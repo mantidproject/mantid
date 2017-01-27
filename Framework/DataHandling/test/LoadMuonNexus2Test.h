@@ -103,33 +103,6 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    /*
-    //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check Child Algorithm is running
-    properly
-    //----------------------------------------------------------------------
-    Instrument_sptr i = output->getInstrument();
-    Mantid::Geometry::IObjComponent_sptr source = i->getSource();
-
-    Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
-    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
-
-
-    TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
-
-    Mantid::Geometry::Detector *ptrDet103 =
-    dynamic_cast<Mantid::Geometry::Detector*>(i->getDetector(103));
-    TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
-    */
-    //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check Child Algorithm is running
-    // properly
-    //----------------------------------------------------------------------
     Property *l_property =
         output->run().getLogData(std::string("temperature_1_log"));
     TimeSeriesProperty<double> *l_timeSeriesDouble =
@@ -453,33 +426,6 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    /*
-    //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check Child Algorithm is running
-    properly
-    //----------------------------------------------------------------------
-    Instrument_sptr i = output->getInstrument();
-    Mantid::Geometry::IObjComponent_sptr source = i->getSource();
-
-    Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
-    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
-
-
-    TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
-
-    Mantid::Geometry::Detector *ptrDet103 =
-    dynamic_cast<Mantid::Geometry::Detector*>(i->getDetector(103));
-    TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
-    */
-    //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check Child Algorithm is running
-    // properly
-    //----------------------------------------------------------------------
     Property *l_property =
         output->run().getLogData(std::string("temperature_1_log"));
     TimeSeriesProperty<double> *l_timeSeriesDouble =
