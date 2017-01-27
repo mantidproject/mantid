@@ -120,6 +120,14 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   setInputController(ComparePeakMode, compareController);
   connect(compareController, SIGNAL(selection(QRect)), this,
           SLOT(comparePeaks(QRect)));
+
+  // create and connect the peak alignment controller
+  auto alignIcon = new QPixmap(":/PickTools/selection-pointer.png");
+  InputControllerSelection *alignController =
+      new InputControllerSelection(this, alignIcon);
+  setInputController(AlignPeakMode, alignController);
+  connect(alignController, SIGNAL(selection(QRect)), this,
+          SLOT(alignPeaks(QRect)));
 }
 
 ProjectionSurface::~ProjectionSurface() {
@@ -205,6 +213,8 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
       drawMaskShapes(painter);
       drawPeakMarkers(painter);
       drawPeakComparisonLine(painter);
+      drawPeakAlignmentMarkers(painter);
+
       painter.end();
     }
   } else if (!picking) {
@@ -214,6 +224,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
     drawMaskShapes(painter);
     drawPeakMarkers(painter);
     drawPeakComparisonLine(painter);
+    drawPeakAlignmentMarkers(painter);
     drawSelectionRect(painter);
 
     getController()->onPaint(painter);
@@ -258,6 +269,7 @@ void ProjectionSurface::drawSimple(QWidget *widget) const {
   drawMaskShapes(painter);
   drawPeakMarkers(painter);
   drawPeakComparisonLine(painter);
+  drawPeakAlignmentMarkers(painter);
   drawSelectionRect(painter);
 
   getController()->onPaint(painter);
@@ -603,6 +615,35 @@ void ProjectionSurface::drawSelectionRect(QPainter &painter) const {
 }
 
 /**
+ * Draw the peak alignment marker objects on the surface
+ * @param painter :: The QPainter object to draw the markers with
+ */
+void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const {
+  QTransform transform;
+  auto windowRect = getSurfaceBounds();
+  windowRect.findTransform(transform, painter.viewport());
+
+  auto outOfPlanePoint = m_selectedAlignmentPeak.second;
+  // draw the 4th peak in a different colour
+  if (!outOfPlanePoint.isNull()) {
+    painter.setPen(Qt::green);
+    auto point = transform.map(outOfPlanePoint);
+    painter.drawEllipse(point, 8, 8);
+  }
+
+  // draw highlight around the first three peaks
+  QPolygonF poly;
+  painter.setPen(Qt::blue);
+  for (auto &item : m_selectedAlignmentPlane) {
+    auto origin = item.second;
+    if (origin != outOfPlanePoint) {
+      auto point = transform.map(origin);
+      painter.drawEllipse(point, 8, 8);
+    }
+  }
+}
+
+/**
 * Returns the current controller. If the controller doesn't exist throws a
 * logic_error exceotion.
 */
@@ -698,6 +739,23 @@ void ProjectionSurface::clearPeakOverlays() {
     m_peakShapesStyle = 0;
     emit peaksWorkspaceDeleted();
   }
+
+  clearAlignmentPlane();
+  clearComparisonPeaks();
+}
+
+/**
+ * Remove all peaks used to define alignment plane
+ */
+void ProjectionSurface::clearAlignmentPlane() {
+  m_selectedAlignmentPlane.clear();
+  m_selectedAlignmentPeak = std::make_pair(nullptr, QPointF());
+}
+
+/**
+ * Remove all peaks used to define comparison peaks
+ */
+void ProjectionSurface::clearComparisonPeaks() {
   m_selectedPeaks.first.clear();
   m_selectedPeaks.second.clear();
   m_selectedMarkers.first = QPointF();
@@ -791,19 +849,32 @@ void ProjectionSurface::touchComponentAt(int x, int y) {
 }
 
 void ProjectionSurface::erasePeaks(const QRect &rect) {
-  foreach (PeakOverlay *po, m_peakShapes) {
+  for (auto po : m_peakShapes) {
     po->selectIn(rect);
     auto peakMarkers = po->getSelectedPeakMarkers();
 
     // clear selected peak markers
     for (const auto &marker : peakMarkers) {
       auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-      if (m_selectedPeaks.first.front() == peak ||
-          m_selectedPeaks.second.front() == peak) {
-        m_selectedPeaks.first.clear();
-        m_selectedPeaks.second.clear();
-        m_selectedMarkers.first = QPointF();
-        m_selectedMarkers.second = QPointF();
+      if (!peak)
+        continue;
+
+      if ((!m_selectedPeaks.first.empty() &&
+           m_selectedPeaks.first.front() == peak) ||
+          (!m_selectedPeaks.second.empty() &&
+           m_selectedPeaks.second.front() == peak)) {
+        clearComparisonPeaks();
+      }
+
+      // check if erased peak matches one of our alignment peaks
+      auto result = std::find_if(m_selectedAlignmentPlane.cbegin(),
+                                 m_selectedAlignmentPlane.cend(),
+                                 [peak](const std::pair<V3D, QPointF> &item) {
+                                   return item.first == peak->getQSampleFrame();
+                                 });
+
+      if (result != m_selectedAlignmentPlane.cend()) {
+        clearAlignmentPlane();
       }
     }
 
@@ -858,6 +929,55 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
   }
 }
 
+void ProjectionSurface::alignPeaks(const QRect &rect) {
+  using Mantid::Geometry::IPeak;
+  PeakMarker2D *marker = nullptr;
+  IPeak *peak = nullptr;
+  QPointF origin;
+
+  for (auto po : m_peakShapes) {
+    po->selectIn(rect);
+    const auto markers = po->getSelectedPeakMarkers();
+    if (markers.length() > 0) {
+      marker = markers.first();
+      origin = marker->origin();
+      peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
+      break;
+    }
+  }
+
+  // check we found a peak
+  if (!marker || !peak)
+    return;
+
+  if (m_selectedAlignmentPlane.size() < 2) {
+    // check Q value is not already in the plane list
+    // We only want unique vectors to define the plane
+    const auto result = std::find_if(
+        m_selectedAlignmentPlane.cbegin(), m_selectedAlignmentPlane.cend(),
+        [peak](const std::pair<V3D, QPointF> &item) {
+          return item.first == peak->getQSampleFrame();
+        });
+
+    if (result == m_selectedAlignmentPlane.cend()) {
+      m_selectedAlignmentPlane.push_back(
+          std::make_pair(peak->getQSampleFrame(), origin));
+    }
+  } else {
+    m_selectedAlignmentPeak = std::make_pair(peak, origin);
+  }
+
+  if (m_selectedAlignmentPlane.size() >= 2 && m_selectedAlignmentPeak.first) {
+    // create vector V3Ds for the plane
+    std::vector<Mantid::Kernel::V3D> qValues;
+    std::transform(
+        m_selectedAlignmentPlane.begin(), m_selectedAlignmentPlane.end(),
+        std::back_inserter(qValues),
+        [](const std::pair<V3D, QPointF> &item) { return item.first; });
+    emit alignPeaks(qValues, m_selectedAlignmentPeak.first);
+  }
+}
+
 /**
 * Enable or disable lighting in non-picking mode
 * @param on :: True for enabling, false for disabling.
@@ -890,6 +1010,32 @@ void ProjectionSurface::loadFromProject(const std::string &lines) {
     tsv >> shapesLines;
     m_maskShapes.loadFromProject(shapesLines);
   }
+
+  // read alignment info
+  if (tsv.selectSection("AlignmentInfo")) {
+    std::string alignmentLines;
+    tsv >> alignmentLines;
+
+    API::TSVSerialiser alignmentInfo(alignmentLines);
+
+    auto parseV3D = [](API::TSVSerialiser &parser) {
+      double x, y, z;
+      parser >> x >> y >> z;
+      return Mantid::Kernel::V3D(x, y, z);
+    };
+
+    std::vector<QPointF> alignmentPoints;
+    std::vector<Mantid::Kernel::V3D> qValues;
+    alignmentInfo.parseLines("Marker", alignmentPoints);
+    alignmentInfo.parseLines("Qlab", qValues, parseV3D);
+
+    // make vector of pairs <V3D, QPointF>
+    std::transform(qValues.begin(), qValues.end(), alignmentPoints.begin(),
+                   std::back_inserter(m_selectedAlignmentPlane),
+                   [](Mantid::Kernel::V3D qValue, QPointF origin) {
+                     return std::make_pair(qValue, origin);
+                   });
+  }
 }
 
 /** Save the state of the projection surface to a Mantid project file
@@ -899,6 +1045,15 @@ std::string ProjectionSurface::saveToProject() const {
   API::TSVSerialiser tsv;
   tsv.writeLine("BackgroundColor") << m_backgroundColor;
   tsv.writeSection("shapes", m_maskShapes.saveToProject());
+
+  API::TSVSerialiser alignmentInfo;
+  for (const auto &item : m_selectedAlignmentPlane) {
+    const auto qLab = item.first;
+    alignmentInfo.writeLine("Qlab") << qLab.X() << qLab.Y() << qLab.Z();
+    alignmentInfo.writeLine("Marker") << item.second;
+  }
+
+  tsv.writeSection("AlignmentInfo", alignmentInfo.outputLines());
   return tsv.outputLines();
 }
 
