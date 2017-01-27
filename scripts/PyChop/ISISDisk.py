@@ -170,7 +170,8 @@ class ISISDisk:
         Ei = self.Ei if Ei_in is None else Ei_in
         instpars = [self.dist, self.nslot, self.slot_width, self.guide_width, self.radius, self.numDisk,
                     self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind]
-        Eis, _, chop_times, lastChopDist, _ = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
+        Eis, _, chop_times, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
+        Eis, _ = self._removeLowIntensityReps(Eis, lines, Ei)
         res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_samp, self.samp_det)
         if single_mode:
             #ie_list = [ii for ii,ee in enumerate(Eis) if np.abs((ee-Ei)/Ei)<0.05]
@@ -324,7 +325,8 @@ class ISISDisk:
             raise ValueError('Focused incident energy has not been specified')
         instpars = [self.dist, self.nslot, self.slot_width, self.guide_width, self.radius, self.numDisk,
                     self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind]
-        Eis, _, _, _, _ = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
+        Eis, _, _, _, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
+        Eis, _ = self._removeLowIntensityReps(Eis, lines, Ei)
         return Eis
 
     def getMultiRepResolution(self, Etrans=None, Ei_in=None, frequency=None):
@@ -399,15 +401,7 @@ class ISISDisk:
         instpars = [self.dist, self.nslot, self.slot_width, self.guide_width, self.radius, self.numDisk,
                     self.samp_det, self.chop_samp, self.source_rep, self.tmod, self.frac_ei, self.ph_ind]
         Eis, chop_times, _, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
-        # Removes reps with Ei where there are no neutrons (E<7 meV for Merlin, E>40 meV for LET)
-        if 'MERLIN' in self.instname:
-            idx = Eis > 7            # Keep reps above 7meV
-        elif 'LET' in self.instname:
-            idx = Eis < 30           # Keep reps below 30meV
-        else:
-            idx = len(Eis) * [True]  # Keep all reps
-        Eis = [Eis[i] for i in range(len(Eis)) if idx[i]]
-        lines = [lines[i] for i in range(len(Eis)) if idx[i]]
+        Eis, lines = self._removeLowIntensityReps(Eis, lines, Ei)
         if frequency:
             self.setFrequency(oldfreq)
         dist, samDist, DetDist, fracEi = tuple([self.dist, self.chop_samp, self.samp_det, self.frac_ei])
@@ -441,3 +435,20 @@ class ISISDisk:
             plt.set_xlim(0, xmax)
             plt.set_xlabel(r'TOF ($\mu$sec)')
             plt.set_ylabel(r'Distance (m)')
+
+    def _removeLowIntensityReps(self, Eis, lines, Ei=None):
+        # Removes reps with Ei where there are no neutrons (E<7 meV for Merlin, E>40 meV for LET)
+        Eis = np.array(Eis)
+        if 'MERLIN' in self.instname:
+            idx = Eis > 7            # Keep reps above 7meV
+        elif 'LET' in self.instname:
+            idx = Eis < 30           # Keep reps below 30meV
+        else:
+            idx = np.array(len(Eis) * [True])  # Keep all reps
+        # Always keeps desired rep even if outside of range
+        if Ei:
+            idx1 = (np.abs(Eis - Ei) / np.abs(Eis)) < 0.1
+            idx += idx1
+        Eis = np.array([Eis[i] for i in range(len(Eis)) if idx[i]])
+        lines = np.array([lines[i] for i in range(len(Eis)) if idx[i]])
+        return Eis, lines
