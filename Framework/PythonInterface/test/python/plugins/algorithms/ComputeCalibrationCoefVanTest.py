@@ -60,7 +60,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
 
         DeleteWorkspace(wsoutput)
 
-    def test_dwf(self):
+    def test_dwf_using_default_temperature(self):
         outputWorkspaceName = "output_ws"
 
         # change theta to make dwf != 1
@@ -73,15 +73,40 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(outputWorkspaceName)
 
-        # check dwf calculation
-        y_sum = sum(self._input_ws.readY(1)[27:75])
-        e_sum = np.sqrt(sum(np.square(self._input_ws.readE(1)[27:75])))
-        mvan = 0.001*50.942/N_A
-        Bcoef = 4.736767162094296*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
-        dwf = np.exp(
-            -1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
-        self.assertAlmostEqual(y_sum*dwf, wsoutput.readY(1)[0])
-        self.assertAlmostEqual(e_sum*dwf, wsoutput.readE(1)[0])
+        self._checkDWF(wsoutput, 293.0)
+
+        DeleteWorkspace(wsoutput)
+
+    def test_temperature_from_sample_log(self):
+        self._input_ws.mutableRun().addProperty('temperature', 0.0, True)
+        outputWorkspaceName = "output_ws"
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
+                               Azimuthal="0,0", DetectorIDs="1,2")
+        alg_test = run_algorithm("ComputeCalibrationCoefVan",
+                                 VanadiumWorkspace=self._input_ws,
+                                 EPPTable=self._table,
+                                 OutputWorkspace=outputWorkspaceName)
+        self.assertTrue(alg_test.isExecuted())
+        wsoutput = AnalysisDataService.retrieve(outputWorkspaceName)
+
+        self._checkDWF(wsoutput, 0.0)
+
+        DeleteWorkspace(wsoutput)
+
+    def test_temperature_input_overrides_sample_log(self):
+        self._input_ws.mutableRun().addProperty('temperature', 567.0, True)
+        outputWorkspaceName = "output_ws"
+        EditInstrumentGeometry(self._input_ws, L2="4,8", Polar="0,15",
+                               Azimuthal="0,0", DetectorIDs="1,2")
+        alg_test = run_algorithm("ComputeCalibrationCoefVan",
+                                 VanadiumWorkspace=self._input_ws,
+                                 EPPTable=self._table,
+                                 OutputWorkspace=outputWorkspaceName,
+                                 Temperature=0.0)
+        self.assertTrue(alg_test.isExecuted())
+        wsoutput = AnalysisDataService.retrieve(outputWorkspaceName)
+
+        self._checkDWF(wsoutput, 0.0)
 
         DeleteWorkspace(wsoutput)
 
@@ -103,6 +128,24 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
 
         if AnalysisDataService.doesExist(self._table.name()):
             DeleteWorkspace(self._table)
+
+    def _checkDWF(self, wsoutput, temperature):
+        if temperature == 0.0:
+            integral = 0.5
+        elif temperature == 293.0:
+            integral = 4.736767162094296 / 3.0
+        else:
+            raise RuntimeError("Unsupported temperature supplied to " +
+                               "_checkDWF(). Use 0K or 293K only.")
+        y_sum = sum(self._input_ws.readY(1)[27:75])
+        e_sum = np.sqrt(sum(np.square(self._input_ws.readE(1)[27:75])))
+        mvan = 0.001*50.942/N_A
+        Bcoef = 3.0*integral*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
+        dwf = np.exp(
+            -1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
+        self.assertAlmostEqual(y_sum*dwf, wsoutput.readY(1)[0])
+        self.assertAlmostEqual(e_sum*dwf, wsoutput.readE(1)[0])
+
 
 if __name__ == "__main__":
     unittest.main()

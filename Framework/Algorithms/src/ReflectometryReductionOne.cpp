@@ -1,8 +1,6 @@
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ListValidator.h"
@@ -10,7 +8,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Unit.h"
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -291,8 +288,8 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
                                            const bool isPointDetector) {
   g_log.debug("Correcting position using theta.");
 
-  auto correctPosAlg =
-      this->createChildAlgorithm("SpecularReflectionPositionCorrect");
+  auto correctPosAlg = this->createChildAlgorithm(
+      "SpecularReflectionPositionCorrect", -1, -1, true, 1);
   correctPosAlg->initialize();
   correctPosAlg->setProperty("InputWorkspace", toCorrect);
 
@@ -635,8 +632,7 @@ void ReflectometryReductionOne::exec() {
     // if the DQQ is not given for this run.
     // we will use CalculateResoltion to produce this value
     // for us.
-    IAlgorithm_sptr calcResAlg =
-        AlgorithmManager::Instance().create("CalculateResolution");
+    IAlgorithm_sptr calcResAlg = createChildAlgorithm("CalculateResolution");
     calcResAlg->setProperty("Workspace", runWS);
     calcResAlg->setProperty("TwoTheta", theta.get());
     calcResAlg->execute();
@@ -745,7 +741,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     }
 
     // Make the transmission run.
-    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace", -1, -1,
+                                          true, 1);
     alg->initialize();
     alg->setProperty("FirstTransmissionRun", firstTransmissionRun);
     if (secondTransmissionRun.is_initialized()) {

@@ -74,7 +74,7 @@ public:
         .WillOnce(Return("2"));
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
-        .WillOnce(Return("\"3,4\""));
+        .WillOnce(Return("3,4"));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
@@ -113,7 +113,7 @@ public:
         .WillOnce(Return("0.54,0.33,1.81"));
     EXPECT_CALL(mockView, getDirectBeam())
         .Times(Exactly(1))
-        .WillOnce(Return("\"0,3\""));
+        .WillOnce(Return("0,3"));
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(Exactly(1))
         .WillOnce(Return("PNR"));
@@ -149,7 +149,7 @@ public:
         .WillOnce(Return("-0.02"));
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
-        .WillOnce(Return("\"3,4\""));
+        .WillOnce(Return("3,4"));
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(Exactly(1))
         .WillOnce(Return("INTER00013463,INTER00013464"));
@@ -223,7 +223,7 @@ public:
         "1.006831,-0.011467,0.002244,-0.000095",
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0", "1"};
+        "0.972762,0.001828,-0.000261,0.0"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);

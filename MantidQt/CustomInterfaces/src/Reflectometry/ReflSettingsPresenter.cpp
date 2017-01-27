@@ -7,7 +7,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
-#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -106,8 +105,10 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
 
   // Add detector limits
   auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty())
+  if (!procInst.empty()) {
+    wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
+  }
 
   return boost::algorithm::join(options, ",");
 }
@@ -154,8 +155,10 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 
   // Add direct beam
   auto dbnr = m_view->getDirectBeam();
-  if (!dbnr.empty())
+  if (!dbnr.empty()) {
+    wrapWithQuotes(dbnr);
     options.push_back("RegionOfDirectBeam=" + dbnr);
+  }
 
   // Add polarisation corrections
   auto polCorr = m_view->getPolarisationCorrections();
@@ -215,8 +218,10 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 
   // Add detector limits
   auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty())
+  if (!procInst.empty()) {
+    wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
+  }
 
   // Add transmission runs
   auto transRuns = this->getTransmissionRuns();
@@ -294,7 +299,7 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values and set them in view
-  std::vector<std::string> defaults(7);
+  std::vector<std::string> defaults(6);
   defaults[0] = alg->getPropertyValue("AnalysisMode");
   defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
 
@@ -313,8 +318,6 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
     defaults[5] = cPp[0];
-
-  defaults[6] = alg->getPropertyValue("ScaleFactor");
 
   m_view->setExpDefaults(defaults);
 }
@@ -351,13 +354,16 @@ void ReflSettingsPresenter::getInstDefaults() {
   m_view->setInstDefaults(defaults);
 }
 
-/** Generates and returns an instance of the ReflectometryReductionOne algorithm
+/** Generates and returns an instance of the ReflectometryReductionOneAuto
+* algorithm
+* @return :: ReflectometryReductionOneAuto algorithm
 */
 IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
   return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 }
 
 /** Creates and returns an example empty instrument given an instrument name
+* @return :: Empty instrument of a name
 */
 Instrument_const_sptr
 ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {

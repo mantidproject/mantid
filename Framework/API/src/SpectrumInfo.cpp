@@ -59,7 +59,8 @@ double SpectrumInfo::l2(const size_t index) const {
   return l2 / static_cast<double>(dets.size());
 }
 
-/** Returns the scattering angle 2 theta (angle w.r.t. to beam direction).
+/** Returns the scattering angle 2 theta in radians (angle w.r.t. to beam
+ *direction).
  *
  * Throws an exception if the spectrum is a monitor.
  */
@@ -78,7 +79,7 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   return twoTheta / static_cast<double>(dets.size());
 }
 
-/** Returns the signed scattering angle 2 theta (angle w.r.t. to beam
+/** Returns the signed scattering angle 2 theta in radians (angle w.r.t. to beam
  * direction).
  *
  * Throws an exception if the spectrum is a monitor.
