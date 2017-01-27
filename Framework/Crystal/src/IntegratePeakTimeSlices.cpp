@@ -1573,7 +1573,7 @@ void IntegratePeakTimeSlices::SetUpData1(
     size_t workspaceIndex;
     try {
       workspaceIndex = detectorInfo.indexOf(DetID);
-    } catch (std::out_of_range &){
+    } catch (std::out_of_range &) {
       throw std::runtime_error("No workspaceIndex for detID=" +
                                std::to_string(DetID));
     }

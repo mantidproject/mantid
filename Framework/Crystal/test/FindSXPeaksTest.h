@@ -48,8 +48,7 @@ public:
     double intensity = -1; // Negative intensity.
     std::vector<int> spectra(1, 1);
     TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
-                      SXPeak(0.001, 0.02, intensity, spectra,
-                             0, spectrumInfo),
+                      SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
                       std::invalid_argument);
   }
 
@@ -62,8 +61,7 @@ public:
     std::vector<int> spectra; // Zero size spectra list
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, intensity, spectra, 0,
-               spectrumInfo),
+        SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
         std::invalid_argument);
   }
 
@@ -84,8 +82,7 @@ public:
     std::vector<int> spectra(1, 1);
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with spectrum having multiple detectors",
-        SXPeak(0.001, 0.02, intensity, spectra, 0,
-               spectrumInfo),
+        SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
         std::invalid_argument);
   }
 
@@ -95,8 +92,7 @@ public:
     const auto &spectrumInfo = workspace->spectrumInfo();
     double intensity = 1;
     std::vector<int> spectra(1, 1);
-    SXPeak peak(0.001, 0.02, intensity, spectra, 1,
-                spectrumInfo);
+    SXPeak peak(0.001, 0.02, intensity, spectra, 1, spectrumInfo);
 
     TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1,
                       peak.getIntensity());

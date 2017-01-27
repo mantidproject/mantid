@@ -165,8 +165,7 @@ void FindSXPeaks::exec() {
 
     std::vector<int> specs(1, i);
 
-    SXPeak peak(tof, phi, *maxY, specs, i,
-                spectrumInfo);
+    SXPeak peak(tof, phi, *maxY, specs, i, spectrumInfo);
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
     progress.report();
     PARALLEL_END_INTERUPT_REGION

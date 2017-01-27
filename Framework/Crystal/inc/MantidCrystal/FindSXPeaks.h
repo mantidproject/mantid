@@ -9,7 +9,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-
 namespace Mantid {
 namespace Crystal {
 
@@ -26,8 +25,7 @@ public:
   @param spectrumInfo: spectrum info of the original ws.
   */
   SXPeak(double t, double phi, double intensity,
-         const std::vector<int> &spectral,
-         const size_t wsIndex,
+         const std::vector<int> &spectral, const size_t wsIndex,
          const API::SpectrumInfo &spectrumInfo)
       : _t(t), _phi(phi), _intensity(intensity), _spectral(spectral),
         _wsIndex(wsIndex) {
@@ -40,8 +38,9 @@ public:
           "SXPeak: Cannot have zero sized spectral list");
     }
     if (!spectrumInfo.hasUniqueDetector(_wsIndex)) {
-      throw std::invalid_argument(
-            "SXPeak: Spectrum at ws index " + std::to_string(wsIndex) + " has more than a single detector");
+      throw std::invalid_argument("SXPeak: Spectrum at ws index " +
+                                  std::to_string(wsIndex) +
+                                  " has more than a single detector");
     }
     _th2 = spectrumInfo.twoTheta(_wsIndex);
     _Ltot = spectrumInfo.l1() + spectrumInfo.l2(_wsIndex);
