@@ -41,9 +41,9 @@ case "$TYPE" in
 	# Find all changed files and grep for required type. -v inverts match so grep=0 means
 	# there are other changes besides this
 	if git diff --name-only ${BRANCH_TIP} ${BRANCH_BASE} -- | grep -q -E -v '^docs/|^MantidQt/|^MantidPlot/'; then
-	    exit $NOTFOUND
-	else
 	    exit $FOUND
+	else
+	    exit $NOTFOUND
 	fi
     ;;
     *)
