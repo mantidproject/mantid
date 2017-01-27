@@ -9,14 +9,14 @@
  */
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/DetectorInfo.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+
 #include "MantidHistogramData/BinEdges.h"
 
 #include <boost/math/special_functions/round.hpp>
@@ -259,14 +259,18 @@ void IntegratePeakTimeSlices::exec() {
   double Col0 = lastCol;
   string spec_idList;
 
-  const auto &detectorInfo = inpWkSpace->detectorInfo();
+  // For quickly looking up workspace index from det id
+  m_wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
 
   TableWorkspace_sptr TabWS = boost::make_shared<TableWorkspace>(0);
 
   //----------------------------- get Peak extents
   //------------------------------
   try {
-    const size_t wsIndx = detectorInfo.indexOf(detID);
+
+    // Find the workspace index for this detector ID
+    detid2index_map::const_iterator it = m_wi_to_detid_map.find(detID);
+    size_t wsIndx = (it->second);
 
     double R = CalculatePositionSpan(peak, dQ) / 2;
 
@@ -1566,14 +1570,13 @@ void IntegratePeakTimeSlices::SetUpData1(
   int jj = 0;
 
   std::vector<double> xRef;
-  const auto &detectorInfo = inpWkSpace->detectorInfo();
   for (int i = 2; i < m_NeighborIDs[1]; i++) {
     int DetID = m_NeighborIDs[i];
 
     size_t workspaceIndex;
-    try {
-      workspaceIndex = detectorInfo.indexOf(DetID);
-    } catch (std::out_of_range &) {
+    if (m_wi_to_detid_map.count(DetID) > 0)
+      workspaceIndex = m_wi_to_detid_map.find(DetID)->second;
+    else {
       throw std::runtime_error("No workspaceIndex for detID=" +
                                std::to_string(DetID));
     }

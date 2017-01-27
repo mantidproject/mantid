@@ -262,6 +262,8 @@ private:
   boost::shared_ptr<DataModeHandler> m_AttributeValues;
   std::array<double, 7> m_ParameterValues;
 
+  Mantid::detid2index_map m_wi_to_detid_map;
+
   int *m_NeighborIDs; // Stores IDs of nearest neighbors
   double m_R0;        ///<for Weak Peaks, these can be set using info from close
 
