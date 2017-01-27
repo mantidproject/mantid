@@ -51,6 +51,8 @@ _NORM_METHOD_TIME = 'Acquisition Time'
 
 _PROP_BEAM_HEIGHT = 'BeamHeight'
 _PROP_BEAM_WIDTH = 'BeamWidth'
+_PROP_BINNING_MODE_Q = 'QBinningMode'
+_PROP_BINNING_PARAMS_Q = 'QBinningParams'
 _PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgDiagnosticsHighThreshold'
 _PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgDiagnosticsLowThreshold'
 _PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgDiagnosticsErrorThreshold'
@@ -93,9 +95,7 @@ _PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakDiagnosticsHighThreshold'
 _PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakDiagnosticsLowThreshold'
 _PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST = \
     'ElasticPeakDiagnosticsErrorThreshold'
-_PROP_REBINNING_MODE_Q = 'QRebinningMode'
 _PROP_REBINNING_MODE_W = 'EnergyRebinningMode'
-_PROP_REBINNING_PARAMS_Q = 'QRebinningParams'
 _PROP_REBINNING_PARAMS_W = 'EnergyRebinningParams'
 _PROP_REDUCTION_TYPE = 'ReductionType'
 _PROP_REFERENCE_TOF_AXIS_WS = 'ReferenceTOFAxisWorkspace'
@@ -111,6 +111,7 @@ _PROP_SELF_SHIELDING_CORRECTION_WS = 'SelfShieldingCorrectionWorkspace'
 _PROP_SELF_SHIELDING_NUMBER_WAVELENGTHS = 'SelfShieldingNumberWavelengths'
 _PROP_SELF_SHIELDING_STEP_SIZE = 'SelfShieldingStepSize'
 _PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
+_PROP_TEMPERATURE = 'Temperature'
 _PROP_TRANSPOSE_SAMPLE_OUTPUT = 'Transposing'
 _PROP_USER_MASK = 'MaskedDetectors'
 _PROP_USER_MASK_COMPONENTS = 'MaskedComponents'
@@ -130,8 +131,8 @@ _PROPGROUP_TOF_AXIS_CORRECTION = 'TOF Axis Correction for Elastic Channel'
 
 _REBIN_AUTO_ELASTIC_PEAK = 'Rebin to Bin Width at Elastic Peak'
 _REBIN_AUTO_MEDIAN_BIN_WIDTH = 'Rebin to Median Bin Width'
-_REBIN_AUTO_Q = 'Rebin to Median 2Theta'
-_REBIN_MANUAL_Q = 'Manual q Rebinning'
+_REBIN_AUTO_Q = 'Bin to Median 2Theta'
+_REBIN_MANUAL_Q = 'Manual q Binning'
 _REBIN_MANUAL_W = 'Manual Energy Rebinning'
 
 _REDUCTION_TYPE_EC = 'Empty Container'
@@ -992,15 +993,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
             # would be incorrect.
             for i in range(mainWS.getNumberHistograms()):
                 numpy.copyto(mainWS.dataX(i), vanaXs)
-            outWS = self.getPropertyValue(_PROP_OUTPUT_WS)
-            # TODO For the time being, we may just want to integrate
-            # the vanadium data as `ComputeCalibrationCoef` does not do
-            # the best possible Debye-Waller correction.
             mainWS = \
-                ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
-                                          EPPTable=detEPPWS,
-                                          OutputWorkspace=outWS,
-                                          EnableLogging=subalgLogging)
+                self._createVanaCalibrationCoefficients(mainWS, detEPPWS,
+                                                        wsCleanup,
+                                                        subalgLogging)
             self._finalize(mainWS, wsCleanup, report)
             return
 
@@ -1145,6 +1141,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
                              doc='Index of the main monitor.')
+        self.declareProperty(name=_PROP_TEMPERATURE,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Experimental temperature (Vanadium ' +
+                                 'reduction type only), in Kelvins.')
+        self._enabledByVanadiumReduction(_PROP_TEMPERATURE)
         self.declareProperty(name=_PROP_INCIDENT_ENERGY_CALIBRATION,
                              defaultValue=_INCIDENT_ENERGY_CALIBRATION_YES,
                              validator=StringListValidator([
@@ -1475,19 +1478,19 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              doc='Manual energy rebinning parameters.')
         self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_W)
         self.setPropertyGroup(_PROP_REBINNING_PARAMS_W, _PROPGROUP_REBINNING)
-        self.declareProperty(name=_PROP_REBINNING_MODE_Q,
+        self.declareProperty(name=_PROP_BINNING_MODE_Q,
                              defaultValue=_REBIN_AUTO_Q,
                              validator=StringListValidator([
                                  _REBIN_AUTO_Q,
                                  _REBIN_MANUAL_Q]),
                              direction=Direction.Input,
                              doc='q rebinning mode.')
-        self._enabledBySampleReduction(_PROP_REBINNING_MODE_Q)
-        self.setPropertyGroup(_PROP_REBINNING_MODE_Q, _PROPGROUP_REBINNING)
-        self.declareProperty(FloatArrayProperty(name=_PROP_REBINNING_PARAMS_Q),
+        self._enabledBySampleReduction(_PROP_BINNING_MODE_Q)
+        self.setPropertyGroup(_PROP_BINNING_MODE_Q, _PROPGROUP_REBINNING)
+        self.declareProperty(FloatArrayProperty(name=_PROP_BINNING_PARAMS_Q),
                              doc='Manual q rebinning parameters.')
-        self._enabledBySampleReduction(_PROP_REBINNING_PARAMS_Q)
-        self.setPropertyGroup(_PROP_REBINNING_PARAMS_Q, _PROPGROUP_REBINNING)
+        self._enabledBySampleReduction(_PROP_BINNING_PARAMS_Q)
+        self.setPropertyGroup(_PROP_BINNING_PARAMS_Q, _PROPGROUP_REBINNING)
         # Rest of the output properties.
         self.declareProperty(ITableWorkspaceProperty(
             name=_PROP_OUTPUT_DET_EPP_WS,
@@ -1581,10 +1584,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 issues[_PROP_REBINNING_PARAMS_W] = \
                     'Energy rebinning parameters must be given in manual ' + \
                     'rebinning mode'
-            if (self.getProperty(_PROP_REBINNING_MODE_Q).value ==
+            if (self.getProperty(_PROP_BINNING_MODE_Q).value ==
                     _REBIN_MANUAL_Q and
-                    self.getProperty(_PROP_REBINNING_PARAMS_Q).isDefault):
-                issues[_PROP_REBINNING_PARAMS_Q] = \
+                    self.getProperty(_PROP_BINNING_PARAMS_Q).isDefault):
+                issues[_PROP_BINNING_PARAMS_Q] = \
                     'q rebinning parameters must be given in manual ' + \
                     'rebinning mode.'
         selfShielding = \
@@ -1838,6 +1841,31 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              monEPPWS)
         return monEPPWS
 
+    def _createVanaCalibrationCoefficients(self, mainWS, eppWS, wsCleanup,
+                                           subalgLogging):
+        """Create vanadium calibration workspace."""
+        if not self.getProperty(_PROP_TEMPERATURE).isDefault:
+            temperature = self.getProperty(_PROP_TEMPERATURE).value
+        else:
+            temperature = 293.0
+            MLZ_TEMPERATURE_ENTRY = 'temperature'
+            ILL_TEMPERATURE_ENTRY = 'sample.temperature'
+            if mainWS.run().hasProperty(MLZ_TEMPERATURE_ENTRY):
+                temperature = \
+                    mainWS.run().getProperty(MLZ_TEMPERATURE_ENTRY).value
+            elif mainWS.run().hasProperty(ILL_TEMPERATURE_ENTRY):
+                temperature = \
+                    mainWS.run().getProperty(ILL_TEMPERATURE_ENTRY).value
+        calibrationWS = self.getPropertyValue(_PROP_OUTPUT_WS)
+        calibrationWS = \
+            ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
+                                      EPPTable=eppWS,
+                                      OutputWorkspace=calibrationWS,
+                                      Temperature=temperature,
+                                      EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return calibrationWS
+
     def _detDiagnostics(self, mainWS, bkgWS, detEPPWS, wsNames, wsCleanup,
                         report, subalgLogging):
         """Perform and apply detector diagnostics."""
@@ -1921,6 +1949,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      _PROP_REDUCTION_TYPE,
                                      PropertyCriterion.IsEqualTo,
                                      _REDUCTION_TYPE_SAMPLE))
+
+    def _enabledByVanadiumReduction(self, prop):
+        """Enable a property if reduction type is Vanadium."""
+        self.setPropertySettings(prop,
+                                 EnabledWhenProperty(
+                                     _PROP_REDUCTION_TYPE,
+                                     PropertyCriterion.IsEqualTo,
+                                     _REDUCTION_TYPE_VANA))
 
     def _enabledBySelfShieldingCorrection(self, prop):
         """Enable a property if self-shielding corrections are enabled."""
@@ -2260,13 +2296,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _sOfQW(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Run the SofQWNormalisedPolygon algorithm."""
         sOfQWWSName = wsNames.withSuffix('sofqw')
-        qRebinningMode = self.getProperty(_PROP_REBINNING_MODE_Q).value
+        qRebinningMode = self.getProperty(_PROP_BINNING_MODE_Q).value
         if qRebinningMode == _REBIN_AUTO_Q:
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
             qBinning = '{0}, {1}, {2}'.format(qMin, dq, qMax)
         else:
-            qBinning = self.getProperty(_PROP_REBINNING_PARAMS_Q).value
+            qBinning = self.getProperty(_PROP_BINNING_PARAMS_Q).value
         Ei = mainWS.run().getLogData('Ei').value
         sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
                                          OutputWorkspace=sOfQWWSName,

@@ -364,7 +364,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'EnergyRebinningParams': '{0}, {1}, {2}'.format(rebinningBegin,
                                                             binWidth,
                                                             rebinningEnd),
-            'QRebinningMode': 'Rebin to Median 2Theta',
+            'QBinningMode': 'Bin to Median 2Theta',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -389,7 +389,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Manual Energy Rebinning',
-            'QRebinningMode': 'Rebin to Median 2Theta',
+            'QBinningMode': 'Bin to Median 2Theta',
             'child': True,
             'rethrow': True
         }
@@ -409,7 +409,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
-            'QRebinningMode': 'Rebin to Median 2Theta',
+            'QBinningMode': 'Bin to Median 2Theta',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -436,7 +436,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'DetectorsAtL2': '12, 38',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Median Bin Width',
-            'QRebinningMode': 'Rebin to Median 2Theta',
+            'QBinningMode': 'Bin to Median 2Theta',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -461,7 +461,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
             'Diagnostics': 'No Detector Diagnostics',
-            'QRebinningMode': 'Rebin to Median 2Theta',
+            'QBinningMode': 'Bin to Median 2Theta',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -508,7 +508,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
-            'QRebinningMode': 'Rebin to Median 2Theta',
+            'QBinningMode': 'Bin to Median 2Theta',
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -536,8 +536,8 @@ class DirectILLReductionTest(unittest.TestCase):
             'IncidentEnergyCalibration': 'No Incident Energy Calibration',
             'Diagnostics': 'No Detector Diagnostics',
             'EnergyRebinningMode': 'Rebin to Bin Width at Elastic Peak',
-            'QRebinningMode': 'Manual q Rebinning',
-            'QRebinningParams': '{0}, {1}, {2}'.format(qMin, qStep, qMax),
+            'QBinningMode': 'Manual q Binning',
+            'QBinningParams': '{0}, {1}, {2}'.format(qMin, qStep, qMax),
             'rethrow': True
         }
         run_algorithm('DirectILLReduction', **algProperties)
@@ -580,7 +580,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'IndexType': 'Workspace Index',
             'DetectorsAtL2': '12, 38',
             'Diagnostics': 'No Detector Diagnostics',
-            'QRebinningMode': 'Rebin to Median 2Theta',
+            'QBinningMode': 'Bin to Median 2Theta',
             'OutputSofThetaEnergyWorkspace': thetaEnergyWSName,
             'rethrow': True
         }
@@ -643,7 +643,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(self._checkAlgorithmsInHistory(outWS,
                         'ComputeCalibrationCoefVan'))
         for i in range(outWS.getNumberHistograms()):
-            self.assertAlmostEqual(outWS.readY(i)[0], 0.000497, 5)
+            self.assertAlmostEqual(outWS.readY(i)[0], 0.000765, 5)
         DeleteWorkspace(outWSName)
 
     def _checkAlgorithmsInHistory(self, ws, *args):
