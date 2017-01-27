@@ -1230,28 +1230,10 @@ class CWSCDReductionControl(object):
         :param pt_dict:
         :return:
         """
-        import numpy
-        import scipy
-        from scipy.optimize import curve_fit
 
-        def gaussian_linear_background(x, *p):
-            # gaussian + linear background
-            A, mu, sigma, b = p
-            return A * numpy.exp(-(x - mu) ** 2 / (2. * sigma ** 2)) + b
 
         # TODO/NOW/ISSUE/ - Implement & Test!
         assert isinstance(pt_dict, dict), 'Input must be a dictionary but not {0}'.format(type(pt_dict))
-
-        # TODO/ISSUE/NOW - Estimate p0 by 'observatoin
-        p0 = [4.5, 10., 5., 1.5]
-
-        vec_x = numpy.array(sorted(pt_dict.keys())) * 1.
-
-        coeff, var_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y, p0=p0)
-
-
-
-
 
         # convert to vector
 
