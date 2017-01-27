@@ -106,8 +106,8 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
-                                                               3.3, 20, 1, false);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+            SplineFunc(), 1, 3.3, 20, 1, false);
 
     SplineInterpolation alg;
     alg.initialize();
