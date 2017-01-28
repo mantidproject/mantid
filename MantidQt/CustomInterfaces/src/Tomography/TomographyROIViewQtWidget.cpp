@@ -13,6 +13,7 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 #include <QCloseEvent>
+#include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPainter>
@@ -341,22 +342,8 @@ void TomographyROIViewQtWidget::enableActions(bool enable) {
   m_ui.groupBox_norm->setEnabled(enable);
 }
 
-std::string TomographyROIViewQtWidget::askImgOrStackPath() {
-  // get path
-  QString prevPath =
-      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  QString path(QFileDialog::getExistingDirectory(
-      this, tr("Open a stack of images (directory containing sample, dark and "
-               "flat images, or a directory containing images)"),
-      prevPath));
-  if (!path.isEmpty()) {
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  }
-
-  return path.toStdString();
-}
-
-std::string TomographyROIViewQtWidget::askSingleImagePath() {
+std::string TomographyROIViewQtWidget::askImagePath(
+    const std::string &windowTitle = "Open image") {
   // only FITS is supported right now
   QString fitsStr = QString("Supported formats: FITS"
                             "(*.fits *.fit);;"
@@ -364,8 +351,8 @@ std::string TomographyROIViewQtWidget::askSingleImagePath() {
                             "(*.fits *.fit);;");
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  QString filepath(
-      QFileDialog::getOpenFileName(this, tr("Open image"), prevPath, fitsStr));
+  QString filepath(QFileDialog::getOpenFileName(this, tr(windowTitle.c_str()),
+                                                prevPath, fitsStr));
   if (!filepath.isEmpty()) {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
         filepath);
@@ -1313,12 +1300,6 @@ void TomographyROIViewQtWidget::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-void TomographyROIViewQtWidget::findCORClicked() {
-  // this should run a --find-cor, empty executable path string signifies that
-  // the default external interpretor will be used
-  emit(findCORClicked("", {"--find-cor"}));
-}
-
 void TomographyROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
   if (str.isEmpty()) {
     // the process string is empty, it is likely the process crashed or was
@@ -1371,5 +1352,15 @@ void TomographyROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
   refreshImage();
 }
 
+// TomographyROIViewQtWidget Signals
+void TomographyROIViewQtWidget::findCORClicked() {
+  // this will run a --find-cor, empty executable path string signifies that
+  // the default external interpretor will be used
+  emit(findCORClickedSignal("", {"--find-cor"}));
+}
+
+void TomographyROIViewQtWidget::imageOrStackLoaded(const std::string &path) {
+  emit(imageOrStackLoadedSignal(path));
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

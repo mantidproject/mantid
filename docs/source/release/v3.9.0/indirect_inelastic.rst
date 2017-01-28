@@ -53,6 +53,7 @@ Absorption
 ~~~~~~~~~~
 
 - Option to calculate number density from mass density
+- Absorption geometry has been updated to use the :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` method
 
 Tools
 #####

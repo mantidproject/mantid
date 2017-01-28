@@ -40,11 +40,10 @@ void calculate(double *out, const double *xValues, const size_t nData,
     // Calculates the diagonal of the magnetic moment operator <wf|mu|wf>
     DoubleFortranVector moment;
     calculateMagneticMoment(ev, Hmag, nre, moment);
-    double expfact;
     double Z = 0.;
     double M = 0.;
     for (auto iE = 1; iE <= nlevels; iE++) {
-      expfact = exp(-beta * en(iE));
+      double expfact = exp(-beta * en(iE));
       Z += expfact;
       M += moment(iE) * expfact;
     }
@@ -79,7 +78,8 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 DECLARE_FUNCTION(CrystalFieldMagnetisation)
 
 CrystalFieldMagnetisation::CrystalFieldMagnetisation()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), m_setDirect(false) {
+    : CrystalFieldPeaksBase(), API::IFunction1D(), m_nre(0),
+      m_setDirect(false) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Temperature", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"

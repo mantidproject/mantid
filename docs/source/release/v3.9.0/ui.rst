@@ -13,6 +13,7 @@ Instrument View
 ###############
 
 - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
+- New tool for computing in-plane and out-of-plane angles in Qlab space for crystal alignment.
 - Added the ability to drag and drop mask workspaces onto the instrument view. This will apply the store workspace to the view.
 - Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views. 
 
