@@ -23,7 +23,7 @@ def execute(config, cmd_line):
     saver.make_dirs_if_needed()
 
     from recon.data.readme import Readme
-    readme = Readme(config, saver)
+    readme = Readme(config, saver, h)
     readme.begin(cmd_line, config)
 
     h.set_readme(readme)
@@ -37,7 +37,7 @@ def execute(config, cmd_line):
     sample = pre_processing(config, sample, flat, dark)
 
     # Save pre-proc images, print inside
-    saver.save_preproc_images(sample)
+    saver.save_preproc_images(sample, flat, dark)
     if config.func.only_preproc is True:
         h.tomo_print_note("Only pre-processing run, exiting.")
         readme.end()
@@ -45,7 +45,7 @@ def execute(config, cmd_line):
 
     # ----------------------------------------------------------------
     # Reconstruction
-    sample = tool.run_reconstruct(sample, config)
+    sample = tool.run_reconstruct(sample, config, h)
 
     sample = post_processing(sample, config)
 
@@ -181,13 +181,13 @@ def post_processing(recon_data, config):
             recon_data, config, out_path_append='../post_processed/2outliers', image_append='_outliers')
 
     recon_data = gaussian.execute(recon_data, config.post.gaussian_size, config.post.gaussian_mode,
-                                  config.post.gaussian_order, h)
+                                  config.post.gaussian_order, config.func.cores, config.func.chunksize, h)
     if debug and config.post.gaussian_size is not None:
         _debug_save_out_data(
             recon_data, config, out_path_append='../post_processed/3gaussian', image_append='_gaussian')
 
     recon_data = median_filter.execute(
-        recon_data, config.post.median_size, config.post.median_mode, h)
+        recon_data, config.post.median_size, config.post.median_mode, config.func.cores, config.func.chunksize, h)
 
     if debug and config.post.median_size is not None:
         _debug_save_out_data(

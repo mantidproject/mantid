@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import sys
+
 """
 Class for commonly used functions across the modules
 
@@ -25,8 +26,7 @@ class Helper(object):
         """
 
         # If a config is provided make sure it's the proper class
-        if config is not None:
-            self.check_config_integrity(config)
+        self.check_config_class(config)
 
         self._whole_exec_timer = None
         self._timer_running = False
@@ -56,8 +56,10 @@ class Helper(object):
     def get_verbosity(self):
         return self._verbosity
 
-    @staticmethod
-    def check_config_integrity(config):
+    def check_config_class(self, config):
+        assert isinstance(config, ReconstructionConfig), "The provided config is invalid and cannot be used."
+
+    def check_config_integrity(self, config):
         if not config or not isinstance(config, ReconstructionConfig):
             raise ValueError(
                 "The provided config is not of the correct type ReconstructionConfig!")
@@ -66,9 +68,13 @@ class Helper(object):
             raise ValueError(
                 "Cannot run a reconstruction without setting the input path")
 
-        if not config.func.output_path:
+        if config.func.save_preproc and not config.func.output_path:
             raise ValueError(
-                "Cannot run a reconstruction without setting the output path")
+                "Save preproc images was specified with -s/--save-preproc, but no output directory was given!")
+
+        if not config.func.output_path:
+            self.tomo_print_warning("No output path specified, no output will be produced!")
+
 
     @staticmethod
     def empty_init():
@@ -85,12 +91,12 @@ class Helper(object):
         if not isinstance(data, numpy.ndarray):
             raise ValueError(
                 "Invalid stack of images data. It is not a numpy array: {0}".
-                format(data))
+                    format(data))
 
         if 3 != len(data.shape):
             raise ValueError(
                 "Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
-                format(data.shape))
+                    format(data.shape))
 
     @staticmethod
     def debug_print_memory_usage_linux(message=""):
@@ -190,7 +196,8 @@ class Helper(object):
         # will be printed if the message verbosity is lower or equal
         # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
         if verbosity <= self._verbosity:
-            self._readme.append(message)
+            if self._readme is not None:
+                self._readme.append(message)
             print(message)
 
     def tomo_print_note(self, message, verbosity=2):
@@ -264,9 +271,8 @@ class Helper(object):
             self._whole_exec_timer = str(time.time() - self._whole_exec_timer)
             message += self._whole_exec_timer + " sec"
             if self._readme is not None:
-                self._readme += message
+                self._readme.append(message)
             print(message)
-
 
     def prog_init(self, total, desc="Progress", ascii=False, unit='images'):
         """

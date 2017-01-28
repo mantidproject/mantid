@@ -131,25 +131,3 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     h.prog_close()
 
     return shared_data
-
-
-def create_shared_array(shape, dtype=np.float32):
-    import ctypes
-
-    ctype = ctypes.c_float  # default to numpy float32 / C type float
-    if isinstance(dtype, np.uint16) or dtype == 'uint16':
-        ctype = ctypes.c_int16
-        dtype = np.uint16
-    elif isinstance(dtype, np.float32) or dtype == 'float32':
-        ctype = ctypes.c_float
-        dtype = np.float32
-    elif isinstance(dtype, np.float64) or dtype == 'float64':
-        ctype = ctypes.c_double
-        dtype = np.float64
-
-    shared_array_base = multiprocessing.Array(
-        ctype, shape[0] * shape[1] * shape[2])
-
-    # create a numpy array from shared array
-    data = np.frombuffer(shared_array_base.get_obj(), dtype=dtype)
-    return data.reshape(shape)

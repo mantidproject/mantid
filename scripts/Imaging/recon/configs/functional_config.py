@@ -137,7 +137,7 @@ class FunctionalConfig(object):
         grp_func.add_argument(
             "-o",
             "--output-path",
-            required=True,
+            required=False,
             default=self.output_path,
             type=str,
             help="Where to write the output slice images (reconstructed volume).")

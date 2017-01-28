@@ -3,9 +3,6 @@ import os
 
 
 def write_fits(data, filename, overwrite=False):
-    # save out in fits
-    # TODO save out and read the flat and dark images too ?
-
     from recon.data.loader import import_pyfits
     fits = import_pyfits()
     hdu = fits.PrimaryHDU(data)
@@ -19,17 +16,26 @@ def write_nxs(data, filename, flat=None, dark=None, projection_angles=None, over
     import numpy as np
     import h5py
     nxs = h5py.File(filename, 'w')
-    if flat is not None:
-        data = np.append(data, flat, axis=0)  # [-2]
-    if dark is not None:
-        data = np.append(data, dark, axis=0)  # [-1]
+    assert flat is not None and dark is not None, \
+        "When saving out NEXUS file, Flat and Dark images must be provided with -F and -D."
+
+    data = np.append(data, np.swapaxes(np.atleast_3d(flat), 0, 2), axis=0)  # [-2]
+    data = np.append(data, np.swapaxes(np.atleast_3d(dark), 0, 2), axis=0)  # [-1]
 
     dset = nxs.create_dataset(
-        "entry1/tomo_entry/instrument/detector/data", data=data)
+        "entry1/tomo_entry/instrument/detector/data", data=data[:])
+    dset[...] = data[:]
 
     if projection_angles is not None:
         rangle = nxs.create_dataset(
             "entry1/tomo_entry/sample/rotation_angle", data=projection_angles)
+        rangle[...] = projection_angles
+
+
+def write_img(data, filename, overwrite=False):
+    from recon.data.loader import import_skimage_io
+    skio = import_skimage_io()
+    skio.imsave(filename, data)
 
 
 class Saver(object):
@@ -57,8 +63,10 @@ class Saver(object):
         from recon.helper import Helper
         self._h = Helper(config) if h is None else h
 
-        self._output_path = os.path.abspath(
-            os.path.expanduser(config.func.output_path))
+        self._output_path = config.func.output_path
+        if self._output_path is not None:
+            self._output_path = os.path.abspath(
+                os.path.expanduser(self._output_path))
 
         self._img_format = config.func.out_format
 
@@ -88,6 +96,10 @@ class Saver(object):
         :param image_index: image index to be appended
         """
 
+        if self._output_path is None:
+            self._h.tomo_print_note("Not saving a single image, because no output path is specified.")
+            return
+
         # using the config's output dir
         preproc_dir = os.path.join(self._output_path, self._preproc_dir)
 
@@ -101,7 +113,7 @@ class Saver(object):
 
         self.make_dirs_if_needed(preproc_dir)
 
-        self.save_image_data(
+        self._save_image_data(
             data, preproc_dir, image_name + str(image_index).zfill(6))
 
         self._h.pstop("Finished saving single image.")
@@ -114,13 +126,16 @@ class Saver(object):
         :param config :: configuration of the reconstruction, including output paths and formats
         slices saved by default. Useful for testing some tools
         """
+        if self._output_path is None:
+            self._h.tomo_print_note("Not saving reconstruction output, because no output path is specified.")
+            return
 
         out_recon_dir = os.path.join(self._output_path, 'reconstructed')
 
         self._h.pstart(
             "Starting saving slices of the reconstructed volume in: {0}...".format(out_recon_dir))
 
-        self.save_image_data(data, out_recon_dir, self._out_slices_prefix)
+        self._save_image_data(data, out_recon_dir, self._out_slices_prefix)
 
         # Sideways slices:
         if self._save_horiz_slices:
@@ -133,33 +148,35 @@ class Saver(object):
 
             import numpy as np
             # save out the horizontal slices by flippding the axes
-            self.save_image_data(
+            self._save_image_data(
                 np.swapaxes(data, 0, 1), out_horiz_dir, self._out_horiz_slices_prefix)
 
         self._h.pstop(
             "Finished saving slices of the reconstructed volume in: {0}".
-            format(out_recon_dir))
+                format(out_recon_dir))
 
     def save_preproc_images(self, data, flat=None, dark=None):
         """
         Save (pre-processed) images from a data array to image files.
 
-        :param data :: The pre-processed data that will be saved
+        :param data: The pre-processed data that will be saved
+        :param flat: The averaged flat image
+        :param dark: The averaged dark image
         :param config :: The full reconstruction config
         """
 
-        if self._save_preproc:
+        if self._save_preproc and self._output_path is not None:
             preproc_dir = os.path.join(self._output_path, self._preproc_dir)
 
             self._h.pstart(
                 "Saving all pre-processed images into {0} dtype: {1}".format(preproc_dir, data.dtype))
 
-            self.save_image_data(
+            self._save_image_data(
                 data, preproc_dir, 'out_preproc_image', flat, dark)
 
             self._h.pstop("Saving pre-processed images finished.")
 
-    def save_image_data(self, data, output_dir, name_prefix, flat=None, dark=None):
+    def _save_image_data(self, data, output_dir, name_prefix, flat=None, dark=None):
         """
         Save reconstructed volume (3d) into a series of slices along the Z axis (outermost numpy dimension)
         :param data :: data as images/slices stores in numpy array
@@ -202,7 +219,6 @@ class Saver(object):
         :param flat:
         :param dark:
         :param projection_angles:
-        :param control_data:
         :return:
         """
 
@@ -224,6 +240,9 @@ class Saver(object):
         """
         if dirname is None:
             path = self._output_path
+            if path is None:
+                return
+
         else:
             path = os.path.abspath(os.path.expanduser(dirname))
 
