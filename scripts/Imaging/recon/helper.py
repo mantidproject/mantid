@@ -280,19 +280,20 @@ class Helper(object):
 
         Otherwise does nothing, and Helper's progress update function will also do nothing.
         """
-        try:
-            from tqdm import tqdm
-            if self._progress_bar is not None:
-                raise ValueError(
-                    "Timer was not closed previously. Please do prog_close()!")
-            self._progress_bar = tqdm(
-                total=total, desc=desc, ascii=ascii, unit=unit)
-        except ImportError:
+        if self._verbosity > 0:
             try:
-                from recon.custom_timer import CustomTimer
-                self._progress_bar = CustomTimer(total, desc)
+                from tqdm import tqdm
+                if self._progress_bar is not None:
+                    raise ValueError(
+                        "Timer was not closed previously. Please do prog_close()!")
+                self._progress_bar = tqdm(
+                    total=total, desc=desc, ascii=ascii, unit=unit)
             except ImportError:
-                self._progress_bar = None
+                try:
+                    from recon.custom_timer import CustomTimer
+                    self._progress_bar = CustomTimer(total, desc)
+                except ImportError:
+                    self._progress_bar = None
 
     def prog_update(self, value=1):
         """
