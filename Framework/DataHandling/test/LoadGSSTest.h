@@ -89,11 +89,9 @@ public:
     const auto &spectrumInfo = ws->spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.l1(), 40., 1e-4);
     TS_ASSERT_DELTA(spectrumInfo.l2(0), 2.2222, 1e-4);
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0)*180. / M_PI,
-                    58.308, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0) * 180. / M_PI, 58.308, 1e-4);
     TS_ASSERT_DELTA(spectrumInfo.l1(), 2.060, 1e-4);
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(1) * 180. / M_PI,
-                    154.257, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(1) * 180. / M_PI, 154.257, 1e-4);
   }
 
   void test_load_gss_ExtendedHeader_gsa() {

@@ -153,7 +153,7 @@ public:
     TS_ASSERT(source != NULL);
     if (source != NULL) {
       TS_ASSERT_EQUALS(source->getName(), "source");
-      TS_ASSERT_DELTA(detectorInfo.sourcePosition()  .Y(), 0.0, 0.01);
+      TS_ASSERT_DELTA(detectorInfo.sourcePosition().Y(), 0.0, 0.01);
 
       boost::shared_ptr<const IComponent> samplepos = i->getSample();
       TS_ASSERT_EQUALS(samplepos->getName(), "some-surface-holder");
