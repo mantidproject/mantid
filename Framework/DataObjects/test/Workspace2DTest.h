@@ -202,7 +202,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,
                                                                      200);
 
-    const auto& spectrumInfo = ws->spectrumInfo();
+    const auto &spectrumInfo = ws->spectrumInfo();
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpixels; i++) {
       const auto det = spectrumInfo.detector(i);

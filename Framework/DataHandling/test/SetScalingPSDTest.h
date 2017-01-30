@@ -103,7 +103,7 @@ public:
     V3D expectedValues[3] = {V3D(-0.08982175, -1.03708771, 3.88495351),
                              V3D(-0.09233499, -1.06610575, 3.87703178),
                              V3D(-0.09484302, -1.09506369, 3.86889169)};
-    const auto& spectrumInfo = testWS->spectrumInfo();
+    const auto &spectrumInfo = testWS->spectrumInfo();
     for (int i = 0; i < 3; ++i) {
       const auto pos = spectrumInfo.position(testIndices[i]);
       V3D expectedPos = expectedValues[i];
@@ -127,16 +127,16 @@ private:
     writer << ndets << "\t" << -1 << "\n";
     writer << "det no.  offset    l2     code     theta        phi"
            << "         w_x         w_y         w_z         f_x         f_y\n";
-    const auto& spectrumInfo = testWS->spectrumInfo();
+    const auto &spectrumInfo = testWS->spectrumInfo();
     for (int i = 0; i < ndets; ++i) {
       auto oldPos = spectrumInfo.position(i);
       // Move in Y only
       oldPos.setY(oldPos.Y() - m_y_offset * (i + 1));
       double l2, theta, phi;
       oldPos.getSpherical(l2, theta, phi);
-      const auto& detector = spectrumInfo.detector(i);
-      writer << detector.getID() << "\t" << -1 << "\t" << l2 << "\t" << -1 << "\t"
-             << theta << "\t" << phi << "\n";
+      const auto &detector = spectrumInfo.detector(i);
+      writer << detector.getID() << "\t" << -1 << "\t" << l2 << "\t" << -1
+             << "\t" << theta << "\t" << phi << "\n";
     }
 
     writer.close();

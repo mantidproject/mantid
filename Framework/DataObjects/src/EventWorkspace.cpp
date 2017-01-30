@@ -241,7 +241,7 @@ void EventWorkspace::getPulseTimeMinMax(
  @return minimum time at sample as a DateAndTime.
  */
 DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
-  const auto& spectrumInfo = spectrumInfo();
+  const auto &spectrumInfo = spectrumInfo();
   const auto L1 = spectrumInfo.l1();
 
   // set to crazy values to start
@@ -268,7 +268,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
  @return maximum time at sample as a DateAndTime.
  */
 DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
-  const auto& spectrumInfo = spectrumInfo();
+  const auto &spectrumInfo = spectrumInfo();
   const auto L1 = spectrumInfo.l1();
 
   // set to crazy values to start

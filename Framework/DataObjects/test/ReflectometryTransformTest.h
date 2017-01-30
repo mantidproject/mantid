@@ -36,7 +36,7 @@ public:
     // Reset the instrument on the ws
     reflWS->setInstrument(inst);
 
-    const auto& spectrumInfo = reflWS->spectrumInfo();
+    const auto &spectrumInfo = reflWS->spectrumInfo();
     const auto l2 = spectrumInfo.l2(0);
 
     DetectorAngularCache cache = initAngularCaches(reflWS.get());
