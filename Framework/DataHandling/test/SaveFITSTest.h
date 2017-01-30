@@ -14,7 +14,6 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-
 using Mantid::DataHandling::SaveFITS;
 
 // This algorithm just saves a file. This test just saves a toy

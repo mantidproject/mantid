@@ -1,5 +1,5 @@
-#ifndef SAVEFOCUSSEDXYETEST_H_
-#define SAVEFOCUSSEDXYETEST_H_
+#ifndef SAVEFOCUSEDXYETEST_H_
+#define SAVEFOCUSEDXYETEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveFocusedXYE.h"
@@ -20,14 +20,12 @@
 
 #include <cmath>
 
-class SaveFocussedXYETest : public CxxTest::TestSuite {
+class SaveFocusedXYETest : public CxxTest::TestSuite {
 public:
-  static SaveFocussedXYETest *createSuite() {
-    return new SaveFocussedXYETest();
-  }
-  static void destroySuite(SaveFocussedXYETest *suite) { delete suite; }
+  static SaveFocusedXYETest *createSuite() { return new SaveFocusedXYETest(); }
+  static void destroySuite(SaveFocusedXYETest *suite) { delete suite; }
 
-  SaveFocussedXYETest() : m_tol(1e-08) {}
+  SaveFocusedXYETest() : m_tol(1e-08) {}
 
   //
   void testHistogram() {
@@ -456,4 +454,4 @@ private:
   const double m_tol;
 };
 
-#endif // SAVEFOCUSSEDXYETEST_H_
+#endif // SAVEFOCUSEDXYETEST_H_
