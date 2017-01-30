@@ -1,6 +1,4 @@
 #include "MantidDataHandling/LoadNXSPE.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DeltaEMode.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -9,10 +7,12 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "MantidNexus/NexusClasses.h"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -302,13 +302,13 @@ void LoadNXSPE::exec() {
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
-    outputWS->dataX(i) = energies;
+    outputWS->mutableX(i) = energies;
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
       spectrumInfo.setMasked(i, true);
     } else {
-      outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
-      outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);
+      outputWS->mutableY(i).assign(itdata, itdataend);
+      outputWS->mutableE(i).assign(iterror, iterrorend);
     }
     itdata = (itdataend);
     iterror = (iterrorend);
