@@ -21,6 +21,7 @@ namespace Beamline {
 class SpectrumDefinition;
 
 namespace Indexing {
+class SpectrumIndexSet;
 class SpectrumNumberTranslator;
 
 /** IndexInfo is an object for holding information about spectrum numbers and
@@ -83,6 +84,9 @@ public:
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
   spectrumDefinitions() const;
+
+  SpectrumIndexSet
+  makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
 
 private:
   void makeSpectrumNumberTranslator();
