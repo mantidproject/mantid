@@ -113,9 +113,7 @@ def load(input_path=None, input_path_flat=None, input_path_dark=None,
     h = Helper.empty_init() if h is None else h
 
     if img_format in ['fits', 'fit']:
-        sample, flat, dark = _do_fits_load(
-            input_path, input_path_flat, input_path_dark, img_format, data_dtype, cores, chunksize, parallel_load, h)
-
+        sample, flat, dark = _do_img_load(fitsread, input_path, input_path_flat, input_path_dark, img_format, data_dtype, cores, chunksize, parallel_load, h)
     elif img_format in ['nxs']:
         sample, flat, dark = _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_load, h)
     else:
@@ -127,6 +125,20 @@ def load(input_path=None, input_path_flat=None, input_path_dark=None,
 
 
 def _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_load, h):
+    """
+    Do loading from NEXUS .nxs file, this requires special handling of the data, because flat and dark images are
+    appended to the array.
+
+    :param input_path: Path for the input data folder
+    :param img_format: format for the input images
+    :param data_dtype: Default:np.float32, data type for the input images
+    :param cores: Default:1, cores to be used if parallel_load is True
+    :param chunksize: chunk of work per worker
+    :param parallel_load: Default: False, if set to true the loading of the data will be done in parallel.
+            This could be faster depending on the IO system. For local HDD runs the recommended setting is False
+    :param h: Optional helper class. If not provided an empty one will be initialised.
+    :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
+    """
     data_file = get_file_names(input_path, img_format)
 
     sample = nxsread(data_file[0])
@@ -140,59 +152,6 @@ def _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_
         data = _do_stack_load_seq(data, nxsread, data_file[0], img_shape, "NXS Load", h)
 
     return data[:-2, :, :], data[-2, :, :], data[-1, :, :]
-
-
-def _do_fits_load(input_path=None, input_path_flat=None, input_path_dark=None,
-                  img_format='fits', argument_data_dtype=np.float32, cores=1,
-                  chunksize=None, parallel_load=False, h=None):
-    """
-    Reads a stack of images into memory, assuming dark and flat images
-    are in separate directories.
-
-    If several files are found in the same directory (for example you
-    give image0001.fits and there's also image0002.fits,
-    image0003.fits) these will also be loaded as the usual convention
-    in ImageJ and related imaging tools, using the last digits to sort
-    the images in the stack.
-
-    Usual type in fits is 16-bit pixel depth, data type is denoted with:
-        '>i2' - uint16
-        '>f2' - float16
-        '>f4' - float32
-
-    :param input_path :: path to sample images. Can be a file or directory
-    :param input_path_flat :: (optional) path to open beam / flat image(s). Can be a file or directory
-    :param input_path_dark :: (optional) path to dark field image(s). Can be a file or directory
-    :param img_format :: file extension (typically 'tiff', 'tif', 'fits', or 'fit' (not including the dot)
-    :param argument_data_dtype: the type in which the data will be loaded, could be float16, float32, float64, uint16
-    :param cores: Cores to be used for parallel loading
-    :param chunksize: Chunk of work that each worker will receive
-    :param h: instance of the helper class
-
-    :return :: 3 numpy arrays: input data volume (3D), average of flatt images (2D),
-               average of dark images(2D)
-    """
-
-    sample_file_names = get_file_names(input_path, img_format)
-
-    # Assumed that all images have the same size and properties as the first.
-    first_sample_img = fitsread(sample_file_names[0])
-
-    # force provided data type on all images
-    data_dtype = argument_data_dtype
-
-    # get the shape of all images
-    img_shape = first_sample_img.shape
-
-    sample_data = _load_sample_data(fitsread, sample_file_names, img_shape, data_dtype, cores, chunksize,
-                                    parallel_load, h)
-
-    # this removes the image number dimension, if we loaded a stack of images
-    img_shape = img_shape[1:] if len(img_shape) > 2 else img_shape
-    flat_avg = _load_and_avg_data(fitsread, input_path_flat, img_shape, img_format, data_dtype, "Flat", h)
-    dark_avg = _load_and_avg_data(fitsread, input_path_dark, img_shape, img_format, data_dtype, "Dark", h)
-
-    return sample_data, flat_avg, dark_avg
 
 
 def _load_and_avg_data(load_func, file_path, img_shape, img_format, data_dtype, prog_prefix=None, h=None):
@@ -355,7 +314,7 @@ def fitsread(filename):
     # get the image data
     return image[0].data
 
-3
+
 def nxsread(filename):
     import h5py
     nexus = h5py.File(filename, 'r')

@@ -288,7 +288,6 @@ class Helper(object):
         if self._verbosity > 0:
             try:
                 from tqdm import tqdm
-                raise ImportError
                 if self._progress_bar is not None:
                     raise ValueError(
                         "Timer was not closed previously. Please do prog_close()!")
