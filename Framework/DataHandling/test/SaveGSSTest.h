@@ -350,4 +350,88 @@ private:
   }
 };
 
+class SaveGSSTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    // Create a workspace for writing out
+    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
+    AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
+
+    // Set properties
+    m_alg.initialize();
+    m_alg.setRethrows(true);
+
+    m_alg.setPropertyValue("InputWorkspace", "Test2BankWS");
+    m_alg.setProperty("Filename", m_outFileName);
+    m_alg.setProperty("Format", "SLOG");
+    m_alg.setProperty("SplitFiles", false);
+    m_alg.setProperty("MultiplyByBinWidth", false);
+    m_alg.setProperty("Append", false);
+  }
+
+  void testSaveGSSPerformance() {
+    // Execute
+    m_alg.execute();
+    TS_ASSERT(m_alg.isExecuted());
+  }
+
+  void tearDown() override {
+    // Clean
+    std::string outfilepath = m_alg.getPropertyValue("Filename");
+
+    Poco::File gsasfile(outfilepath);
+    AnalysisDataService::Instance().remove("Test2BankWS");
+
+    if (gsasfile.exists()) {
+      gsasfile.remove();
+    }
+  }
+
+private:
+  DataHandling::SaveGSS m_alg;
+
+  const int m_numberOfBinsToSave =
+      100000; // Controls the speed of the performance test
+  const std::string m_outFileName = "test1.gsas";
+
+  API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
+    // Create workspace
+    auto dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            2, m_numberOfBinsToSave, false, false, true, "TestFake"));
+
+    dataws->getAxis(0)->setUnit("TOF");
+
+    // Set data with logarithm bin
+    const double t0 = 5000.;
+    const double dt = 0.01;
+    const size_t numhist = dataws->getNumberHistograms();
+    for (size_t iws = 0; iws < numhist; ++iws) {
+      auto &mutableXVals = dataws->mutableX(iws);
+      mutableXVals[0] = t0;
+      for (size_t i = 1; i < mutableXVals.size(); ++i)
+        mutableXVals[i] = (1 + dt) * mutableXVals[i - 1];
+    }
+
+    // Set y and e
+    for (size_t iws = 0; iws < numhist; ++iws) {
+      const auto &xVals = dataws->x(iws);
+      auto &mutableYVals = dataws->mutableY(iws);
+      auto &mutableEVals = dataws->mutableE(iws);
+      double factor = (static_cast<double>(iws) + 1) * 1000.;
+      for (size_t i = 0; i < mutableYVals.size(); ++i) {
+        mutableYVals[i] = factor * std::exp(-(xVals[i] - 7000. - factor) *
+                                            (xVals[i] - 7000. - factor) /
+                                            (0.01 * factor * factor));
+        if (mutableYVals[i] < 0.01)
+          mutableYVals[i] = 0.1;
+        else
+          mutableYVals[i] = std::sqrt(mutableYVals[i]);
+      }
+    }
+
+    return dataws;
+  }
+};
+
 #endif // SAVEGSSTEST_H_
