@@ -2,23 +2,24 @@
 #define SAVEFOCUSEDXYETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveFocusedXYE.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/Axis.h"
-#include "MantidDataHandling/SaveGSS.h"
-
-#include <Poco/File.h>
-#include <string>
-#include <fstream>
-#include <sstream>
 
 #include <cmath>
+#include <fstream>
+#include <Poco/File.h>
+#include <sstream>
+#include <string>
+
+#include "MantidDataHandling/SaveFocusedXYE.h"
+
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/SaveGSS.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 
 class SaveFocusedXYETest : public CxxTest::TestSuite {
 public:
@@ -27,7 +28,6 @@ public:
 
   SaveFocusedXYETest() : m_tol(1e-08) {}
 
-  //
   void testHistogram() {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
