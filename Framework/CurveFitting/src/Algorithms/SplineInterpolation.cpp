@@ -343,7 +343,8 @@ void SplineInterpolation::calculateSpline(
 
 /** Check if the supplied x value falls within the interpolation range.
  * Y values larger or smaller than the interpolation range will be set
- * to the first or last y value of the WorkspaceToInterpolate
+ * to the first or last y value of the WorkspaceToInterpolate.
+ * Both workspaces must have the same number of spectra
  *
  * @param inputWorkspace :: The input workspace
  * @param interpolationWorkspace :: The interpolation workspace
@@ -353,38 +354,37 @@ void SplineInterpolation::setXRange(
     MatrixWorkspace_const_sptr interpolationWorkspace) const {
   // setup input parameters
   size_t histNo = inputWorkspace->getNumberHistograms();
+  size_t histNoInterp = interpolationWorkspace->getNumberHistograms();
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
-
   const size_t nintegData = interpolationWorkspace->y(0).size();
   const double *xintegValues = &(interpolationWorkspace->x(0)[0]);
 
-  for (size_t n = 0; n < histNo; ++n) {
-    int nOutsideLeft = 0, nOutsideRight = 0;
-
-    for (size_t i = 0; i < nData; ++i) {
-
-      // determine number of values smaller than the integration range
-      if (xValues[i] < xintegValues[0])
-        nOutsideLeft++;
-      else if (xValues[i] > xintegValues[nintegData - 1])
-        nOutsideRight++;
+  if (histNo == histNoInterp) {
+    for (size_t n = 0; n < histNo; ++n) {
+      int nOutsideLeft = 0, nOutsideRight = 0;
+      for (size_t i = 0; i < nData; ++i) {
+        // determine number of values outside of the integration range
+        if (xValues[i] < xintegValues[0])
+          nOutsideLeft++;
+        else if (xValues[i] > xintegValues[nintegData - 1])
+          nOutsideRight++;
+      }
+      const auto &yRef = interpolationWorkspace->y(n);
+      if (nOutsideLeft > 0) {
+        double *yValues = &(inputWorkspace->mutableY(n)[0]);
+        std::fill_n(yValues, nOutsideLeft, yRef[0]);
+        g_log.warning() << nOutsideLeft << " x value(s) smaller than integration "
+                                           "range, will not be calculated.\n";
+      }
+      if (nOutsideRight > 0) {
+        double *yValuesEnd = &(inputWorkspace->mutableY(n)[nData - nOutsideRight]);
+        std::fill_n(yValuesEnd, nOutsideRight, yRef[nintegData - 1]);
+        g_log.warning() << nOutsideRight << " x value(s) larger than "
+                                            "integration range, will not be "
+                                            "calculated.\n";
+      }
     }
-    double *yValues = &(inputWorkspace->mutableY(n)[0]);
-    const auto &yRef = interpolationWorkspace->y(n);
-    if (nOutsideRight > 0) {
-      nOutsideRight += 1;
-      g_log.warning() << nOutsideRight - 1 << " x value(s) larger than "
-                                              "integration range, will not be "
-                                              "calculated.\n";
-    }
-    if (nOutsideLeft > 0) {
-      std::fill_n(yValues, nOutsideLeft, yRef[0]);
-      g_log.warning() << nOutsideLeft << " x value(s) smaller than integration "
-                                         "range, will not be calculated.\n";
-    }
-    for (size_t k = nData - nOutsideRight; k < nData; ++k)
-      yValues[k] = yRef[nintegData - 1];
   }
 }
 
