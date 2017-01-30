@@ -172,17 +172,17 @@ public:
     TS_ASSERT(outws->getInstrument());
 
     // get source and sample positions
-    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
 
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
     size_t center_ws_index = (center_row - 1) + (center_col - 1) * 256;
+
     const auto &spectrumInfo = outws->spectrumInfo();
     const auto det_center = spectrumInfo.position(center_ws_index);
+
     // distance to sample
-    double dist_r = det_center.distance(sample);
-    TS_ASSERT_DELTA(dist_r, 0.3750, 0.0001);
+    TS_ASSERT_DELTA(spectrumInfo.l2(center_ws_index), 0.3750, 0.0001);
     // center of the detector must be at zero
     TS_ASSERT_DELTA(det_center.X(), 0.0, 0.0000001);
     TS_ASSERT_DELTA(det_center.Y(), 0.0, 0.0000001);
@@ -335,17 +335,17 @@ public:
     TS_ASSERT_EQUALS(twotheta_raw, twotheta_log);
 
     // check the center of the detector
-    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
-    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
+    const auto &spectrumInfo = outws->spectrumInfo();
+    const auto source = spectrumInfo.sourcePosition();
+    const auto sample = spectrumInfo.samplePosition();
 
     // check the center position
     size_t center_row = 115 - 1;
     size_t center_col = 128 - 1;
     size_t center_ws_index = 256 * center_col + center_row;
-    const auto &spectrumInfo = outws->spectrumInfo();
     const auto center_det_pos = spectrumInfo.position(center_ws_index);
     TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);
-    double sample_center_distance = sample.distance(center_det_pos);
+    double sample_center_distance = spectrumInfo.l2(center_ws_index);
     // TS_ASSERT_DELTA(center_det_pos.X(), )
     TS_ASSERT_DELTA(sample_center_distance, 0.3750, 0.0000001);
     double sample_center_angle =
@@ -354,12 +354,12 @@ public:
 
     size_t ll_ws_index = 0;
     const auto ll_det_pos = spectrumInfo.position(ll_ws_index);
-    double ll_sample_r = sample.distance(ll_det_pos);
+    double ll_sample_r = spectrumInfo.l2(ll_ws_index);
     TS_ASSERT_DELTA(ll_sample_r, 0.37597, 0.001);
 
     size_t lu_ws_index = 255; // row = 255, col = 1
     const auto lu_det_pos = spectrumInfo.position(lu_ws_index);
-    double lu_sample_r = sample.distance(lu_det_pos);
+    double lu_sample_r = spectrumInfo.l2(lu_ws_index);
     TS_ASSERT_DELTA(lu_sample_r, 0.37689, 0.001);
 
     TS_ASSERT_DELTA(ll_det_pos.X(), lu_det_pos.X(), 0.000001);
@@ -417,17 +417,18 @@ public:
     TS_ASSERT(outws->getInstrument());
 
     // get source and sample positions
-    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
-    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
+    const auto &spectrumInfo = outws->spectrumInfo();
+
+    const auto sample = spectrumInfo.samplePosition();
+    const auto source = spectrumInfo.sourcePosition();
 
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
     size_t center_ws_index = (center_row - 1) + (center_col - 1) * 256;
-    const auto &spectrumInfo = outws->spectrumInfo();
     const auto center_det_pos = spectrumInfo.position(center_ws_index);
     // distance to sample
-    double dist_r = center_det_pos.distance(sample);
+    double dist_r = spectrumInfo.l2(center_ws_index);
     TS_ASSERT_DELTA(dist_r, 0.3750 + 0.1, 0.0001);
     // center of the detector at 15 degree
     double sample_center_angle =
@@ -441,29 +442,25 @@ public:
     size_t row_ll = 0;
     size_t col_ll = 2;
     size_t ws_index_ll = row_ll + col_ll * 256;
-    const auto det_ll_pos = spectrumInfo.position(ws_index_ll);
 
     size_t row_lr = 0;
     size_t col_lr = 2 * 127 - 2;
     size_t ws_index_lr = row_lr + col_lr * 256;
-    const auto det_lr_pos = spectrumInfo.position(ws_index_lr);
 
     size_t row_ul = 114 * 2;
     size_t col_ul = 2;
     size_t ws_index_ul = row_ul + col_ul * 256;
-    const auto det_ul_pos = spectrumInfo.position(ws_index_ul);
 
     size_t row_ur = 114 * 2;
     size_t col_ur = 2 * 127 - 2;
     size_t ws_index_ur = row_ur + col_ur * 256;
-    const auto det_ur_pos = spectrumInfo.position(ws_index_ur);
 
     // Check symmetry
-    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_lr_pos),
+    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_lr),
                     0.0000001);
-    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ul_pos),
+    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_ul),
                     0.0000001);
-    TS_ASSERT_DELTA(sample.distance(det_ll_pos), sample.distance(det_ur_pos),
+    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_ur),
                     0.0000001);
 
     // Clean
@@ -542,19 +539,19 @@ public:
     TS_ASSERT_EQUALS(twotheta_raw, twotheta_log);
 
     // check the center of the detector
-    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
-    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
+    const auto &spectrumInfo = outws->spectrumInfo();
+    const auto source = spectrumInfo.sourcePosition();
+    const auto sample = spectrumInfo.samplePosition();
 
     // check the center position
     size_t center_row = 127 - 1;
     size_t center_col = 137 - 1;
     size_t center_ws_index = 256 * center_col + center_row;
     // y should be 0. in the Z-Y plane
-    const auto &spectrumInfo = outws->spectrumInfo();
     const auto center_det_pos = spectrumInfo.position(center_ws_index);
 
     TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);
-    double sample_center_distance = sample.distance(center_det_pos);
+    double sample_center_distance = spectrumInfo.l2(center_ws_index);
     // distance
     std::cout << "Sample center distance: " << sample_center_distance << "\n";
     TS_ASSERT_DELTA(sample_center_distance, 0.3750, 0.0000001);
@@ -569,30 +566,26 @@ public:
 
     size_t ll_ws_index =
         (center_row - ws_d_row) + (center_col - ws_d_col) * 256;
-    const auto ll_det_pos = spectrumInfo.position(ll_ws_index);
 
-    double ll_sample_r = sample.distance(ll_det_pos);
+    double ll_sample_r = spectrumInfo.l2(ll_ws_index);
 
     size_t lr_ws_index =
         (center_row + ws_d_row) + (center_col - ws_d_col) * 256;
-    const auto lr_det_pos = spectrumInfo.position(lr_ws_index);
 
-    double lr_sample_r = sample.distance(lr_det_pos);
+    double lr_sample_r = spectrumInfo.l2(lr_ws_index);
 
     TS_ASSERT_DELTA(ll_sample_r, lr_sample_r, 0.0000001);
 
     size_t ur_ws_index =
         (center_row + ws_d_row) + (center_col + ws_d_col) * 256;
-    const auto ur_det_pos = spectrumInfo.position(ur_ws_index);
 
-    double ur_sample_r = sample.distance(ur_det_pos);
+    double ur_sample_r = spectrumInfo.l2(ur_ws_index);
 
     TS_ASSERT_DELTA(ll_sample_r, ur_sample_r, 0.0000001);
 
     size_t ul_ws_index =
         (center_row - ws_d_row) + (center_col + ws_d_col) * 256;
-    const auto ul_det_pos = spectrumInfo.position(ul_ws_index);
-    double ul_sample_r = sample.distance(ul_det_pos);
+    double ul_sample_r = spectrumInfo.l2(ul_ws_index);
 
     TS_ASSERT_DELTA(ul_sample_r, ur_sample_r, 0.0000001);
 
