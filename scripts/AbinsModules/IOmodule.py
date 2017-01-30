@@ -418,23 +418,18 @@ class IOmodule(object):
         :param filename: name of a file to calculate hash (full path to the file)
         :return: string representation of hash
         """
-
         # first try ascii encoding
         try:
-
-            open_file = functools.partial(codecs.open, encoding='ascii')
-            str_hash = self._calculate_hash_core(filename=filename, fun_obj=open_file)
+            str_hash = self._calculate_hash_core(filename=filename, coding="ascii")
 
         # if ascii encoding fails set utf8 encoding so that it can create hash for output files from DFT programs which
         # include special letters  (like for example German letters)
         except UnicodeDecodeError:
-
-            open_file = functools.partial(codecs.open, encoding='utf-8')
-            str_hash = self._calculate_hash_core(filename=filename, fun_obj=open_file)
+            str_hash = self._calculate_hash_core(filename=filename, coding='utf-8')
 
         return str_hash
 
-    def _calculate_hash_core(self, filename=None, fun_obj=None):
+    def _calculate_hash_core(self, filename=None, coding=None):
         """
         Helper function for calculating hash.
         :param filename: name of a file to calculate hash
@@ -442,13 +437,14 @@ class IOmodule(object):
         :return: string representation of hash
         """
         hash_calculator = hashlib.sha512()
+        open_file = functools.partial(codecs.open, encoding=coding, errors='strict')
         buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
-        with fun_obj(filename, 'rU') as f:
+        with open_file(filename, 'rU') as f:
             while True:
                 data = f.read(buf)
                 if not data:
                     break
-                hash_calculator.update(data.encode('utf-8'))
+                hash_calculator.update(data.encode(coding))
 
         return hash_calculator.hexdigest()
 
