@@ -241,18 +241,17 @@ void EventWorkspace::getPulseTimeMinMax(
  @return minimum time at sample as a DateAndTime.
  */
 DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
-  auto instrument = this->getInstrument();
-  auto sample = instrument->getSample();
-  auto source = instrument->getSource();
-  const double L1 = sample->getDistance(*source);
+  const auto& spectrumInfo = spectrumInfo();
+  const auto L1 = spectrumInfo.l1();
 
   // set to crazy values to start
   Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
+
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const double L2 = this->getDetector(workspaceIndex)->getDistance(*sample);
+    const auto L2 = spectrumInfo.l2(workspaceIndex);
     const double tofFactor = L1 / (L1 + L2);
 
     const EventList &evList = this->getSpectrum(workspaceIndex);
@@ -269,10 +268,8 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
  @return maximum time at sample as a DateAndTime.
  */
 DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
-  auto instrument = this->getInstrument();
-  auto sample = instrument->getSample();
-  auto source = instrument->getSource();
-  const double L1 = sample->getDistance(*source);
+  const auto& spectrumInfo = spectrumInfo();
+  const auto L1 = spectrumInfo.l1();
 
   // set to crazy values to start
   Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
@@ -280,7 +277,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const double L2 = this->getDetector(workspaceIndex)->getDistance(*sample);
+    const auto L2 = spectrumInfo.l2(workspaceIndex);
     const double tofFactor = L1 / (L1 + L2);
 
     const EventList &evList = this->getSpectrum(workspaceIndex);
