@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as s_api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
                        PropertyMode, MatrixWorkspace, Progress
-from mantid.kernel import Direction, logger, StringListValidator
+from mantid.kernel import Direction, logger
 
 
 class ApplyPaalmanPingsCorrection(PythonAlgorithm):
@@ -52,12 +52,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
+
         self.declareProperty(name='RebinCanToSample',
-                             defaultValue = 'Rebin Can',
-                             validator=StringListValidator(['Rebin Can',
-                             'Do Not Rebin Can']),
-                             doc=('Enable or disable RebinToWorkspace on ' +
-                                  'CanWorkspace.'))
+                             defaultValue=True,
+                             doc=('Enable or disable RebinToWorkspace on CanWorkspace.'))
 
     #pylint: disable=too-many-branches
     def PyExec(self):
@@ -258,10 +256,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._can_shift_factor = self.getProperty('CanShiftFactor').value
         self._shift_can = self._can_shift_factor != 0.0
 
-        if self.getProperty('RebinCanToSample').value == 'Rebin Can':
-            self._rebin_container_ws = True
-        else:
-            self._rebin_container_ws = False
+        self._rebin_container_ws = self.getProperty('RebinCanToSample').value
 
         # This temporary WS is needed because ConvertUnits does not like named WS in a Group
         self._corrections = '__converted_corrections'

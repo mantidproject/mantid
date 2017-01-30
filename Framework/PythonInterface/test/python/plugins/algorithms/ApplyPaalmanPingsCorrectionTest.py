@@ -163,7 +163,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
                                       UnitX='Wavelength')
         corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1,
                                                 CanWorkspace=container_1,
-                                                RebinCanToSample='Rebin Can')
+                                                RebinCanToSample=True)
         self.assertTrue(numpy.all(sample_1.extractY() > corrected.extractY()))
         DeleteWorkspace(sample_1)
         DeleteWorkspace(container_1)
@@ -183,7 +183,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
             'SampleWorkspace': sample_1,
             'CanWorkspace': container_1,
             'OutputWorkspaced': corrected_ws_name,
-            'RebinCanToSample': 'Do Not Rebin Can'
+            'RebinCanToSample': False
         }
         # The Minus algorithm will fail due to different bins in sample and
         # container.
