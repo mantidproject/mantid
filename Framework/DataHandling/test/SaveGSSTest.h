@@ -1,13 +1,13 @@
 #ifndef SAVEGSSTEST_H_
 #define SAVEGSSTEST_H_
 
-#include "cxxtest/TestSuite.h"
-#include "MantidDataHandling/SaveGSS.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataHandling/SaveGSS.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "cxxtest/TestSuite.h"
 
 #include <Poco/File.h>
 #include <fstream>
@@ -18,6 +18,49 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::DataHandling::SaveGSS;
+
+namespace {
+//----------------------------------------------------------------------------------------------
+/** Generate a matrix workspace for writing to gsas file
+*/
+API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
+  // Create workspace
+  MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+          2, 100, false, false, true, "TestFake"));
+  dataws->getAxis(0)->setUnit("TOF");
+
+  // Set data with logarithm bin
+  double t0 = 5000.;
+  double dt = 0.01;
+  size_t numhist = dataws->getNumberHistograms();
+  for (size_t iws = 0; iws < numhist; ++iws) {
+    MantidVec &dataX = dataws->dataX(iws);
+    dataX[0] = t0;
+    for (size_t i = 1; i < dataX.size(); ++i)
+      dataX[i] = (1 + dt) * dataX[i - 1];
+  }
+
+  // Set y and e
+  for (size_t iws = 0; iws < numhist; ++iws) {
+    const MantidVec &vecX = dataws->readX(iws);
+    MantidVec &dataY = dataws->dataY(iws);
+    MantidVec &dataE = dataws->dataE(iws);
+    double factor = (static_cast<double>(iws) + 1) * 1000.;
+    for (size_t i = 0; i < dataY.size(); ++i) {
+      dataY[i] = factor * std::exp(-(vecX[i] - 7000. - factor) *
+                                   (vecX[i] - 7000. - factor) /
+                                   (0.01 * factor * factor));
+      if (dataY[i] < 0.01)
+        dataE[i] = 0.1;
+      else
+        dataE[i] = std::sqrt(dataY[i]);
+    }
+  }
+
+  return dataws;
+}
+}
 
 class SaveGSSTest : public CxxTest::TestSuite {
 public:
@@ -307,46 +350,52 @@ private:
 
     return dataws;
   }
+};
 
-  //----------------------------------------------------------------------------------------------
-  /** Generate a matrix workspace for writing to gsas file
-    */
-  API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
-    // Create workspace
-    MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            2, 100, false, false, true, "TestFake"));
-    dataws->getAxis(0)->setUnit("TOF");
+class SaveGSSTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    // Create a workspace for writing out
+    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
+    AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
-    // Set data with logarithm bin
-    double t0 = 5000.;
-    double dt = 0.01;
-    size_t numhist = dataws->getNumberHistograms();
-    for (size_t iws = 0; iws < numhist; ++iws) {
-      MantidVec &dataX = dataws->dataX(iws);
-      dataX[0] = t0;
-      for (size_t i = 1; i < dataX.size(); ++i)
-        dataX[i] = (1 + dt) * dataX[i - 1];
+    for (int i = 0; i < numberOfIterations; ++i) {
+      saveAlgPtrs.emplace_back(setupAlg());
     }
+  }
 
-    // Set y and e
-    for (size_t iws = 0; iws < numhist; ++iws) {
-      const MantidVec &vecX = dataws->readX(iws);
-      MantidVec &dataY = dataws->dataY(iws);
-      MantidVec &dataE = dataws->dataE(iws);
-      double factor = (static_cast<double>(iws) + 1) * 1000.;
-      for (size_t i = 0; i < dataY.size(); ++i) {
-        dataY[i] = factor * std::exp(-(vecX[i] - 7000. - factor) *
-                                     (vecX[i] - 7000. - factor) /
-                                     (0.01 * factor * factor));
-        if (dataY[i] < 0.01)
-          dataE[i] = 0.1;
-        else
-          dataE[i] = std::sqrt(dataY[i]);
-      }
+  void testSaveGSSPerformance() {
+    for (auto alg : saveAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
     }
+  }
 
-    return dataws;
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete saveAlgPtrs[i];
+      saveAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(wsName);
+    Poco::File gsasfile(filename);
+    if (gsasfile.exists())
+      gsasfile.remove();
+  }
+
+private:
+  std::vector<SaveGSS *> saveAlgPtrs;
+
+  const int numberOfIterations = 5;
+
+  const std::string wsName = "Test2BankWS";
+  const std::string filename = "test_performance.gsa";
+
+  SaveGSS *setupAlg() {
+    SaveGSS *saver = new SaveGSS;
+    saver->initialize();
+    saver->setPropertyValue("InputWorkspace", wsName);
+    saver->setProperty("Filename", filename);
+    saver->setRethrows(true);
+    return saver;
   }
 };
 

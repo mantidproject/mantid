@@ -90,41 +90,6 @@ void SaveGSS::init() {
       "otherwise, the continous bank IDs are applied. ");
 }
 
-/** Determine the focused position for the supplied spectrum. The position
- * (l1, l2, tth) is returned via the references passed in.
- */
-void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
-                   double &l1, double &l2, double &tth, double &difc) {
-  Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  Geometry::IComponent_const_sptr source = instrument->getSource();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == nullptr || sample == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  l1 = source->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
-  if (!det) {
-    std::stringstream errss;
-    errss << "Workspace " << wksp->getName()
-          << " does not have detector with spectrum " << spectrum;
-    throw std::runtime_error(errss.str());
-  }
-  l2 = det->getDistance(*sample);
-  tth = wksp->detectorTwoTheta(*det);
-
-  difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
-          (PhysicalConstants::h * 1.e4));
-}
-
 /** Execute the algorithm
   */
 void SaveGSS::exec() {
@@ -225,10 +190,17 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
 
     // Obtain detector information
     double l1, l2, tth, difc;
-    if (has_instrument)
-      getFocusedPos(inputWS, iws, l1, l2, tth, difc);
-    else
+    if (has_instrument) {
+      l1 = spectrumInfo.l1();
+      l2 = spectrumInfo.l2(iws);
+      tth = spectrumInfo.twoTheta(iws);
+      difc =
+          ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
+           (PhysicalConstants::h * 1.e4));
+
+    } else {
       l1 = l2 = tth = difc = 0;
+    }
     g_log.debug() << "Spectrum " << iws << ": L1 = " << l1 << "  L2 = " << l2
                   << "  2theta = " << tth << "\n";
 
