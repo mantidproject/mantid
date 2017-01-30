@@ -1702,17 +1702,18 @@ void SANSRunWindow::setGeometryDetails() {
     return;
   }
 
-  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
-  if (dets.empty())
+  const auto &monitorDetectorIDs = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
+  if (monitorDetectorIDs.empty())
     return;
 
   double dist_mm(0.0);
   QString colour("black");
+
   try {
     Mantid::Geometry::IDetector_const_sptr detector =
-        instr->getDetector(*dets.begin());
+        instr->getDetector(*monitorDetectorIDs.begin());
 
-    double unit_conv(1000.);
+    const double unit_conv(1000.);
     dist_mm = detector->getDistance(*source) * unit_conv;
   } catch (std::runtime_error &) {
     colour = "red";
