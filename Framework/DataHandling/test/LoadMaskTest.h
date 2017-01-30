@@ -195,7 +195,7 @@ public:
 
     // modify spectra-detector map on the sample workspace to check masking
     const auto &detectorInfo = source->detectorInfo();
-    const std::vector<detid_t> &detIDs = detectorInfo.detectorIDs();
+    std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
     size_t index = 0;
     auto it = --detIDs.end();
     for (; it > detIDs.begin(); --it) {
