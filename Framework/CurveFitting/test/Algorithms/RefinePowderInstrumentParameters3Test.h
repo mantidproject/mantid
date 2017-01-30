@@ -306,10 +306,9 @@ public:
   static RefinePowderInstParams3TestPerformance *createSuite() {
     return new RefinePowderInstParams3TestPerformance();
   }
-  
+
   static void destroySuite(RefinePowderInstParams3TestPerformance *suite) {
     delete suite;
-
   }
 
   void setUp() override {
