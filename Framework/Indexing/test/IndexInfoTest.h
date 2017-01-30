@@ -43,6 +43,10 @@ public:
     TS_ASSERT_EQUALS(info.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
   }
 
+  void test_vector_constructor_size_mismatch() {
+    TS_ASSERT_THROWS(IndexInfo({3, 2, 1}, {{}, {10}}), std::runtime_error);
+  }
+
   void test_size() { TS_ASSERT_EQUALS(IndexInfo(3).size(), 3); }
 
   void test_setSpectrumNumbers_size_mismatch() {
