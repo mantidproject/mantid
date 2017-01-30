@@ -341,10 +341,8 @@ void loadData2D(H5::Group &dataGroup,
   //-----------------------------------------
   // Load the I value.
   auto iDataSet = dataGroup.openDataSet(sasDataI);
-  auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws,
-                       size_t index) -> HistogramY & {
-    return ws->mutableY(index);
-  };
+  auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index)
+                        -> HistogramY &{ return ws->mutableY(index); };
   auto iDataType = Mantid::DataHandling::H5Util::getType<double>();
   read2DWorkspace(iDataSet, workspace, iExtractor, iDataType);
   auto yUnit = getUnit(iDataSet);
@@ -353,19 +351,15 @@ void loadData2D(H5::Group &dataGroup,
   //-----------------------------------------
   // Load the Idev value
   auto eDataSet = dataGroup.openDataSet(sasDataIdev);
-  auto &eExtractor = [](Mantid::API::MatrixWorkspace_sptr ws,
-                        size_t index) -> HistogramE & {
-    return ws->mutableE(index);
-  };
+  auto &eExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index)
+                         -> HistogramE &{ return ws->mutableE(index); };
   read2DWorkspace(eDataSet, workspace, eExtractor, iDataType);
 
   //-----------------------------------------
   // Load the Qx value + units
   auto qxDataSet = dataGroup.openDataSet(sasDataQx);
-  auto qxExtractor = [](Mantid::API::MatrixWorkspace_sptr ws,
-                        size_t index) -> HistogramX & {
-    return ws->mutableX(index);
-  };
+  auto qxExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index)
+                         -> HistogramX &{ return ws->mutableX(index); };
   auto qxDataType = Mantid::DataHandling::H5Util::getType<double>();
   read2DWorkspace(qxDataSet, workspace, qxExtractor, qxDataType);
   workspace->getAxis(0)->setUnit("MomentumTransfer");

@@ -315,9 +315,9 @@ void LoadPDFgetNFile::checkSameSize(const std::vector<size_t> &numptsvec,
   size_t set = 1;
   bool samesize = std::all_of(
       numptsvec.begin() + 1, numptsvec.end(), [=](size_t val) mutable {
-        g_log.information()
-            << "Set " << set << ":  Number of Points = " << numptsvec[set]
-            << '\n';
+        g_log.information() << "Set " << set
+                            << ":  Number of Points = " << numptsvec[set]
+                            << '\n';
         ++set;
         return val == numptsvec[0];
       });
