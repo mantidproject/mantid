@@ -15,6 +15,7 @@ from fourcircle_utility import *
 from peakprocesshelper import PeakProcessRecord
 import fputility
 import project_manager
+import peak_integration_utility
 
 import mantid
 import mantid.simpleapi as mantidsimple
@@ -1224,14 +1225,13 @@ class CWSCDReductionControl(object):
 
         return True, pt_dict
 
-    def gauss_correction_peak_intensity(self, pt_dict):
+    @staticmethod
+    def gauss_correction_peak_intensity(pt_dict):
         """
         fit a peak along Pt. with Gaussian and thus calculate background automatically
         :param pt_dict:
         :return: peak intensity
         """
-        import peak_integration_utility
-
         # check
         assert isinstance(pt_dict, dict), 'Input must be a dictionary but not {0}'.format(type(pt_dict))
 
@@ -1260,7 +1260,7 @@ class CWSCDReductionControl(object):
         # calculate the peak intensity
         peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
 
-        return peak_integration_utility
+        return peak_intensity, gauss_bkgd
 
 
     @staticmethod

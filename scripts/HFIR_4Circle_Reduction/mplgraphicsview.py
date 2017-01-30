@@ -443,12 +443,12 @@ class MplGraphicsView(QtGui.QWidget):
         :param line_style:
         :param line_width:
         :param show_legend:
-        :return:
+        :return: line ID (key to the line)
         """
-        line_key = self._myCanvas.add_plot_1d(vec_x, vec_y, y_err, color, label, x_label, y_label, marker, line_style,
-                                              line_width, show_legend)
+        line_id = self._myCanvas.add_plot_1d(vec_x, vec_y, y_err, color, label, x_label, y_label, marker, line_style,
+                                             line_width, show_legend)
 
-        return line_key
+        return line_id
 
     def add_plot_1d_right(self, vec_x, vec_y, color=None, label='', marker=None, line_style=None, line_width=1):
         """
@@ -1151,7 +1151,7 @@ class Qt4MplCanvas(FigureCanvas):
 
         # set/update legend
         if show_legend:
-            self._setupLegend()
+            self._setup_legend()
 
         # Register
         line_key = self._lineIndex

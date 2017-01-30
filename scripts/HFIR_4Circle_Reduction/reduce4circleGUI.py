@@ -11,8 +11,6 @@ import time
 import datetime
 import random
 import numpy
-from scipy.optimize import curve_fit
-
 
 from PyQt4 import QtCore, QtGui
 try:
@@ -35,6 +33,7 @@ import plot3dwindow
 from multi_threads_helpers import *
 import optimizelatticewindow as ol_window
 import viewspicedialog
+import peak_integration_utility
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
@@ -219,13 +218,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_per_pt)
+                     self.do_integrate_per_pt)  # integrate single peak
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_plot_pt_peak)
+                     self.do_plot_pt_peak)  # calculate the normalized data again
         self.connect(self.ui.pushButton_fitGaussian, QtCore.SIGNAL('clicked()'),
                      self.do_correct_peak_intensity)
-        self.connect(self.ui.pushButton_calBkgd, QtCore.SIGNAL('clicked()'),
-                     self.do_cal_background)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -824,29 +821,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_cal_background(self):
-        """
-        calculate background
-        algorithm 1: average the selected pt's intensity.
-        :return:
-        """
-        # get the selected rows in table
-        background_rows = self.ui.tableWidget_peakIntegration.get_selected_rows(True)
-
-        # loop through the selected rows and do the average
-        intensity_sum = 0.
-        for i_row in background_rows:
-            tmp_intensity = self.ui.tableWidget_peakIntegration.get_cell_value(i_row, 2)
-            intensity_sum += tmp_intensity
-
-        # calculate background value
-        background = intensity_sum / float(len(background_rows))
-
-        # set the value
-        self.ui.lineEdit_background.setText('%.7f' % background)
-
-        return
-
     def do_cal_ub_matrix(self):
         """ Calculate UB matrix by 2 or 3 reflections
         """
@@ -1112,25 +1086,16 @@ class MainWindow(QtGui.QMainWindow):
         The assumption is that for each scan, from Pt 1 to last Pt, it measures a complete peak
         :return:
         """
-        import peak_integration_utility
-
         # get the data from UI
-        plot_tup_list = self.ui.graphicsView_integratedPeakView.get_current_plots()
-        if len(plot_tup_list) != 1:
-            # return if it is not correct
-            self.pop_one_button_dialog('One and only one figure is allowed on the figure for correcting peak intensity.'
-                                       ' Current on canvas is {0}'.format(plot_tup_list))
+        try:
+            vec_x, vec_y = self.ui.graphicsView_integratedPeakView.get_raw_data()
+        except RuntimeError as run_error:
+            self.pop_one_button_dialog('{0}'.format(run_error))
             return
-
-        # get data from plot
-        plot_id = plot_tup_list[0][0]
-        data_set = self.ui.graphicsView_integratedPeakView.canvas().get_data(plot_id)
-        vec_x = data_set[0]
-        vec_y = data_set[1]
-        vec_e = data_set[2]
 
         # list of 2-tuple: integer (plot ID) and string (label)
         # fit the Gaussian and calculate the peak intensity
+        vec_e = numpy.sqrt(vec_y)
         fit_param, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
         x0, gauss_sigma, gauss_a, background = fit_param
 
@@ -1141,6 +1106,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # set the value
         self.ui.lineEdit_gaussianPeakIntensity.setText(str(peak_intensity))
+
 
         return
 
@@ -1331,6 +1297,7 @@ class MainWindow(QtGui.QMainWindow):
         # Append new lines
         pt_list = sorted(pt_dict.keys())
         intensity_list = list()
+        # FIXME/TODO/NOW - Do calculate the unmasked
         for pt in pt_list:
             pt_intensity = pt_dict[pt]
             intensity_list.append(pt_intensity)
@@ -1338,17 +1305,20 @@ class MainWindow(QtGui.QMainWindow):
             if not status:
                 error_msg = '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
                 self.pop_one_button_dialog(error_msg)
+        # END-FOR: pt
 
         # Set up the experiment information to table
         self.ui.tableWidget_peakIntegration.set_exp_info(exp_number, scan_number)
 
+        # TODO/FIXME/NOW : calculate the peak intensity (sum of all value) to lineEdit_rawSinglePeakIntensity
+
+        # TODO/FIXME/NOW: edit label_ingreateInformation including masking and normalization!
+
         # Clear previous line and plot the Pt.
-        self.ui.graphicsView_integratedPeakView.clear_all_lines()
+        self.ui.graphicsView_integratedPeakView.reset()
         x_array = numpy.array(pt_list)
         y_array = numpy.array(intensity_list)
-        self.ui.graphicsView_integratedPeakView.add_plot_1d(x_array, y_array,
-                                                            color='blue')
-        self.ui.graphicsView_integratedPeakView.set_smart_y_limit(y_array)
+        self.ui.graphicsView_integratedPeakView.plot_raw_data(x_array, y_array)
 
         return
 
@@ -1570,6 +1540,7 @@ class MainWindow(QtGui.QMainWindow):
         and then plot pt vs. integrated intensity on
         :return:
         """
+        # FIXME/TODO/ISSUE/NOW - Rename and change the way: look at do_integrate_per_pt()
         # Find out the current condition including (1) absolute (2) normalized by time
         # (3) normalized by monitor counts
         be_norm_str = str(self.ui.comboBox_ptCountType.currentText())

@@ -64,6 +64,9 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     assert isinstance(vec_y, numpy.ndarray), 'Input vec_y must be a numpy.ndarray but not a {0}.'.format(vec_y)
     assert isinstance(vec_e, numpy.ndarray), 'Input vec_e must be a numpy.ndarray but not a {0}.'.format(vec_e)
 
+    # TODO/FIXME/NOW - Add the output information for debugging including vector X, vector Y, starting values and
+    #                  etc.
+
     # starting value
     if isinstance(start_value_list, list):
         assert len(start_value_list) == 4, 'If specified, there must be 4 values: a, x0, sigma and b but not {0}.' \
