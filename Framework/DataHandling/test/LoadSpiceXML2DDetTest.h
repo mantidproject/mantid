@@ -171,8 +171,6 @@ public:
     // Instrument
     TS_ASSERT(outws->getInstrument());
 
-    // get source and sample positions
-
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
@@ -336,8 +334,6 @@ public:
 
     // check the center of the detector
     const auto &spectrumInfo = outws->spectrumInfo();
-    const auto source = spectrumInfo.sourcePosition();
-    const auto sample = spectrumInfo.samplePosition();
 
     // check the center position
     size_t center_row = 115 - 1;
@@ -418,14 +414,10 @@ public:
     // get source and sample positions
     const auto &spectrumInfo = outws->spectrumInfo();
 
-    const auto sample = spectrumInfo.samplePosition();
-    const auto source = spectrumInfo.sourcePosition();
-
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
     size_t center_ws_index = (center_row - 1) + (center_col - 1) * 256;
-    const auto center_det_pos = spectrumInfo.position(center_ws_index);
     // distance to sample
     double dist_r = spectrumInfo.l2(center_ws_index);
     TS_ASSERT_DELTA(dist_r, 0.3750 + 0.1, 0.0001);
@@ -538,8 +530,6 @@ public:
 
     // check the center of the detector
     const auto &spectrumInfo = outws->spectrumInfo();
-    const auto source = spectrumInfo.sourcePosition();
-    const auto sample = spectrumInfo.samplePosition();
 
     // check the center position
     size_t center_row = 127 - 1;
