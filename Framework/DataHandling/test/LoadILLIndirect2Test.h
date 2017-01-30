@@ -97,4 +97,46 @@ private:
   std::string m_dataFile2015;
 };
 
+class LoadILLIndirect2TestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadILLIndirectPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outWSName);
+  }
+
+private:
+  std::vector<LoadILLIndirect2 *> loadAlgPtrs;
+
+  const int numberOfIterations = 5;
+
+  const std::string inFileName = "ILLIN16B_127500.nxs";
+  const std::string outWSName = "LoadILLWsOut";
+
+  LoadILLIndirect2 *setupAlg() {
+    LoadILLIndirect2 *loader = new LoadILLIndirect2;
+    loader->initialize();
+    loader->isInitialized();
+    loader->setPropertyValue("Filename", inFileName);
+    loader->setPropertyValue("OutputWorkspace", outWSName);
+
+    loader->setRethrows(true);
+    return loader;
+  }
+};
+
 #endif /* MANTID_DATAHANDLING_LOADILLINDIRECT2TEST_H_ */

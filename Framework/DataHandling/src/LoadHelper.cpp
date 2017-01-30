@@ -5,6 +5,7 @@
 #include "MantidDataHandling/LoadHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -105,22 +106,14 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
 }
 
 double LoadHelper::getL1(const API::MatrixWorkspace_sptr &workspace) {
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  double l1 = instrument->getSource()->getDistance(*sample);
-  return l1;
+  const auto &spectrumInfo = workspace->spectrumInfo();
+  return spectrumInfo.l1();
 }
 
 double LoadHelper::getL2(const API::MatrixWorkspace_sptr &workspace,
                          int detId) {
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  // Get the sample-detector distance for this detector (in metres)
-  double l2 =
-      workspace->getDetector(detId)->getPos().distance(sample->getPos());
-  return l2;
+  const auto &spectrumInfo = workspace->spectrumInfo();
+  return spectrumInfo.l2(detId);
 }
 
 /*
