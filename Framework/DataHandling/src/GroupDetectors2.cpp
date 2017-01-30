@@ -608,7 +608,7 @@ void GroupDetectors2::processGroupingWorkspace(
           const Geometry::DetectorGroup &detGroup =
               dynamic_cast<const Geometry::DetectorGroup &>(det);
           det_ids = detGroup.getDetectorIDs();
-        } catch (const std::bad_cast &e) {
+        } catch (const std::bad_cast &) {
           det_ids.push_back(det.getID());
         }
 
