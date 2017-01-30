@@ -58,11 +58,8 @@ void NormaliseVanadium::exec() {
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If sample not at origin, shift cached positions.
-  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
-  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
-  double L1 = pos.norm();
-
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -85,12 +82,10 @@ void NormaliseVanadium::exec() {
       continue;
 
     // This is the scattered beam direction
-    Instrument_const_sptr inst = m_inputWS->getInstrument();
-    V3D dir = spectrumInfo.position(i) - samplePos;
-    double L2 = dir.norm();
+    double L2 = spectrumInfo.l2(i);
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
+    double scattering = spectrumInfo.twoTheta(i);
 
     Mantid::Kernel::Units::Wavelength wl;
     auto timeflight = inSpec.points();

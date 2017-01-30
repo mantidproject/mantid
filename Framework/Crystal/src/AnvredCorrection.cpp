@@ -162,11 +162,8 @@ void AnvredCorrection::exec() {
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
   // If sample not at origin, shift cached positions.
-  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
-  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
-  double L1 = pos.norm();
-
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -180,11 +177,10 @@ void AnvredCorrection::exec() {
 
     // This is the scattered beam direction
     Instrument_const_sptr inst = m_inputWS->getInstrument();
-    V3D dir = spectrumInfo.position(i) - samplePos;
-    double L2 = dir.norm();
+    double L2 = spectrumInfo.l2(i);
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
+    double scattering = spectrumInfo.twoTheta(i);
 
     double depth = 0.2;
 
@@ -266,10 +262,9 @@ void AnvredCorrection::execEvent() {
   Instrument_const_sptr inst = m_inputWS->getInstrument();
 
   const V3D samplePos = inst->getSample()->getPos();
-  const V3D pos = inst->getSource()->getPos() - samplePos;
-  double L1 = pos.norm();
 
   const auto &spectrumInfo = eventW->spectrumInfo();
+  double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -285,11 +280,10 @@ void AnvredCorrection::execEvent() {
       continue;
 
     // This is the scattered beam direction
-    V3D dir = spectrumInfo.position(i) - samplePos;
-    double L2 = dir.norm();
+    double L2 = spectrumInfo.l2(i);
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
+    double scattering = spectrumInfo.twoTheta(i);
 
     EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
