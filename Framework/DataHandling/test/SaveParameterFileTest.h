@@ -5,7 +5,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -33,18 +32,16 @@ public:
     // First we want to load a workspace to work with.
     prepareWorkspace();
 
-    const auto &detectorInfo = m_ws->detectorInfo();
-
     // Now let's set some parameters
     setParam("nickel-holder", "testDouble1", 1.23);
     setParam("nickel-holder", "testDouble2", 1.00);
     setParam("nickel-holder", "testString1", "hello world");
     setParam("nickel-holder", "testString2", "unchanged");
-    setParamByDetID(1301, "testDouble", 2.17, detectorInfo);
+    setParamByDetID(1301, "testDouble", 2.17);
     setFitParam("nickel-holder", "A", ", BackToBackExponential , S ,  ,  ,  ,  "
-                                      ", "
-                                      "sqrt(188.149*centre^4+6520.945*centre^2)"
-                                      " , dSpacing , TOF , linear ; TOF ; TOF");
+      ", "
+      "sqrt(188.149*centre^4+6520.945*centre^2)"
+      " , dSpacing , TOF , linear ; TOF ; TOF");
 
     // Create a temporary blank file for us to test with
     ScopedFileHelper::ScopedFile paramFile("", "__params.xml");
@@ -55,7 +52,7 @@ public:
     // Change some parameters - these changes should not have an effect
     setParam("nickel-holder", "testDouble1", 3.14);
     setParam("nickel-holder", "testString1", "broken");
-    setParamByDetID(1301, "testDouble", 7.89, detectorInfo);
+    setParamByDetID(1301, "testDouble", 7.89);
     setFitParam("nickel-holder", "B", "someString");
 
     // Load the saved parameters back in
@@ -66,11 +63,11 @@ public:
     checkParam("nickel-holder", "testDouble2", 1.00);
     checkParam("nickel-holder", "testString1", "hello world");
     checkParam("nickel-holder", "testString2", "unchanged");
-    checkParamByDetID(1301, "testDouble", 2.17, detectorInfo);
+    checkParamByDetID(1301, "testDouble", 2.17);
     checkFitParam("nickel-holder", "A",
-                  ", BackToBackExponential , S ,  ,  ,  ,  , "
-                  "sqrt(188.149*centre^4+6520.945*centre^2) , dSpacing , TOF , "
-                  "linear ; TOF ; TOF");
+      ", BackToBackExponential , S ,  ,  ,  ,  , "
+      "sqrt(188.149*centre^4+6520.945*centre^2) , dSpacing , TOF , "
+      "linear ; TOF ; TOF");
   }
 
   void setParam(std::string cName, std::string pName, std::string value) {
@@ -87,11 +84,13 @@ public:
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
-  void setParamByDetID(int id, std::string pName, double value,
-                       const DetectorInfo &detectorInfo) {
+  void setParamByDetID(int id, std::string pName, double value) {
+    Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
-    paramMap.addDouble(detector.getComponentID(), pName, value);
+    IDetector_const_sptr det = inst->getDetector(id);
+    IComponent_const_sptr comp =
+      boost::dynamic_pointer_cast<const IComponent>(det);
+    paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
   void setFitParam(std::string cName, std::string pName, std::string value) {
@@ -119,11 +118,13 @@ public:
     TS_ASSERT_DELTA(value, values.front(), 0.0001);
   }
 
-  void checkParamByDetID(int id, std::string pName, double value,
-                         const DetectorInfo &detectorInfo) {
+  void checkParamByDetID(int id, std::string pName, double value) {
+    Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
-    Parameter_sptr param = paramMap.get(&detector, pName);
+    IDetector_const_sptr det = inst->getDetector(id);
+    IComponent_const_sptr comp =
+      boost::dynamic_pointer_cast<const IComponent>(det);
+    Parameter_sptr param = paramMap.get(comp.get(), pName);
     double pValue = param->value<double>();
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
@@ -134,7 +135,7 @@ public:
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     auto param = paramMap.get(comp.get(), pName, "fitting");
     const Mantid::Geometry::FitParameter &fitParam =
-        param->value<FitParameter>();
+      param->value<FitParameter>();
 
     // Info about fitting parameter is in string value, see FitParameter class
     typedef Mantid::Kernel::StringTokenizer tokenizer;
@@ -170,16 +171,16 @@ public:
 
     std::string wsName = "SaveParameterFileTestIDF2";
     Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     loaderIDF2.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+      "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
     loaderIDF2.setProperty("RewriteSpectraMap",
-                           Mantid::Kernel::OptionalBool(true));
+      Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 
