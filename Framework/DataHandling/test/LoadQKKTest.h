@@ -53,7 +53,7 @@ public:
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 192 * 192);
     const auto &spectrumInfo = data->spectrumInfo();
     for (size_t i = 0; i < data->getNumberHistograms(); ++i) {
-      TS_ASSERT_THROWS_NOTHING(const auto &det = spectrumInfo.detector(i));
+      TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(i));
     }
   }
 };
