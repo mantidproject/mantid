@@ -122,7 +122,8 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
         h.prog_init(img_num, name + " " + str(cores) +
                     "c " + str(chunksize) + "chs")
 
-    indices_list = [i for i in range(img_num)]
+    from parallel import utility as pu
+    indices_list = pu.generate_indices(img_num)
     for _ in enumerate(pool.imap(partial_func, indices_list, chunksize=chunksize)):
         h.prog_update()
 

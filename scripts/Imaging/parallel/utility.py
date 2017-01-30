@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import multiprocessing
 import numpy as np
 
@@ -30,3 +32,7 @@ def multiprocessing_available():
         return True
     except ImportError:
         return False
+
+
+def generate_indices(num_images):
+    return xrange(num_images)

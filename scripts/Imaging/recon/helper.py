@@ -278,11 +278,17 @@ class Helper(object):
         """
         Initialises and returns the progress bar if the tqdm library is available.
 
-        Otherwise does nothing, and Helper's progress update function will also do nothing.
+        Otherwise does nothing, and Helper's progress update and close function will also do nothing.
+
+        :param total: the total number of iterations of the progress bar
+        :param desc: the label in front of the progress bar
+        :param ascii: to use ascii # (True) or utf-8 blocks (False)
+        :param unit: the unit for loading. Default is 'images'
         """
         if self._verbosity > 0:
             try:
                 from tqdm import tqdm
+                raise ImportError
                 if self._progress_bar is not None:
                     raise ValueError(
                         "Timer was not closed previously. Please do prog_close()!")

@@ -25,10 +25,9 @@ class CustomTimer(object):
         filled_len = int(
             round(self._bar_len * self._iter / float(self._total)))
         # what percentage is done
-        percent = round(100.0 * self._iter / float(self._total), 1)
         bar = self._prefix + '[' + '=' * filled_len + \
             '-' * (self._bar_len - filled_len) + \
-            "]" + str(percent) + ' / ' + str(self._total)
+            "]" + str(self._iter) + ' / ' + str(self._total)
 
         print(bar, end='\r')
         sys.stdout.flush()

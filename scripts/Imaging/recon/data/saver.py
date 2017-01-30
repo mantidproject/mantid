@@ -13,18 +13,23 @@ def write_fits(data, filename, overwrite=False):
 def write_nxs(data, filename, flat=None, dark=None, projection_angles=None, overwrite=False):
     # Adapted code from Nagella, Srikanth (STFC,RAL,SC)
     # <srikanth.nagella@stfc.ac.uk>
-    import numpy as np
-    import h5py
-    nxs = h5py.File(filename, 'w')
     assert flat is not None and dark is not None, \
         "When saving out NEXUS file, Flat and Dark images must be provided with -F and -D."
 
-    data = np.append(data, np.swapaxes(np.atleast_3d(flat), 0, 2), axis=0)  # [-2]
-    data = np.append(data, np.swapaxes(np.atleast_3d(dark), 0, 2), axis=0)  # [-1]
+    import numpy as np
+    import h5py
+    nxs = h5py.File(filename, 'w')
 
-    dset = nxs.create_dataset(
-        "entry1/tomo_entry/instrument/detector/data", data=data[:])
-    dset[...] = data[:]
+    flat = np.atleast_3d(flat).reshape(1, data.shape[1], data.shape[2])
+    dark = np.atleast_3d(dark).reshape(1, data.shape[1], data.shape[2])
+
+    # new shape to account for appending flat and dark images
+    correct_shape = (data.shape[0]+2, data.shape[1], data.shape[2])
+
+    dset = nxs.create_dataset("entry1/tomo_entry/instrument/detector/data", correct_shape)
+    dset[:data.shape[0]] = data[:]
+    dset[-2] = flat[:]
+    dset[-1] = dark[:]
 
     if projection_angles is not None:
         rangle = nxs.create_dataset(
@@ -202,13 +207,22 @@ class Saver(object):
             self._save_out_stack(data, output_dir, name_prefix, flat, dark)
 
     def _save_out_individual_files(self, data, output_dir, name_prefix):
-        if self._img_format not in ['fits', 'fit']:
-            self._h.tomo_print_error(
-                "Cannot save out individual NXS files. Saving out FITS instead.")
 
-        for idx in range(0, data.shape[0]):
-            write_fits(data[idx, :, :], os.path.join(
-                output_dir, name_prefix + str(idx).zfill(6) + '.fits'), self._overwrite_all)
+        if self._img_format in ['fits', 'fit', 'nxs']:
+            if self._img_format in ['nxs']:
+                self._h.tomo_print_error(
+                    "Cannot save out individual NXS files. Saving out FITS instead.")
+            elif self._img_format in ['tif', 'tiff']:
+                self._h.tomo_print_error(
+                    "Cannot save out tiff files yet. Saving out FITS instead.")
+
+            for idx in range(0, data.shape[0]):
+                write_fits(data[idx, :, :], os.path.join(
+                    output_dir, name_prefix + str(idx).zfill(6) + '.fits'), self._overwrite_all)
+        # elif self._img_format in ['tif', 'tiff']:
+        #     for idx in range(0, data.shape[0]):
+        #         write_img(data[idx, :, :], os.path.join(
+        #             output_dir, name_prefix + str(idx).zfill(6) + '.fits'), self._overwrite_all)
 
     def _save_out_stack(self, data, output_dir, name_prefix, flat=None, dark=None, projection_angles=None):
         """

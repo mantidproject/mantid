@@ -33,6 +33,48 @@
     - [--crop-before-normalise](#--crop-before-normalise)
 - [Testing the Big Data](#testing-the-big-data)
 - [SCARF Chamber Tomo Find COR](#scarf-chamber-tomo-find-cor)
+- [Type Conversion](#type-conversion)
+    - [FITS > FITS](#fits--fits)
+        - [Single > Stack, c1s](#single--stack-c1s)
+        - [Stack > Single, c1](#stack--single-c1)
+    - [FITS > NXS, this requires also dark and flat images](#fits--nxs-this-requires-also-dark-and-flat-images)
+        - [AssertionError: Fail because no flat/dark, c2f](#assertionerror-fail-because-no-flatdark-c2f)
+        - [Single > Stack, c2s](#single--stack-c2s)
+        - [Stack > Stack, c2s2](#stack--stack-c2s2)
+    - [NXS > FITS](#nxs--fits)
+        - [Stack > Single, c3](#stack--single-c3)
+        - [Stack > Stack, c3s](#stack--stack-c3s)
+    - [TIFF > FITS](#tiff--fits)
+        - [Single > Single, c4](#single--single-c4)
+        - [Single > Stack, c4s](#single--stack-c4s)
+        - [Stack > Single, c42](#stack--single-c42)
+        - [Stack > Stack, c4s2](#stack--stack-c4s2)
+    - [FITS > TIFF](#fits--tiff)
+        - [Single > Single, c5](#single--single-c5)
+        - [Single > Stack, c5s](#single--stack-c5s)
+        - [Stack > Single, c52](#stack--single-c52)
+        - [Stack > Stack, c5s2](#stack--stack-c5s2)
+    - [TIFF > NXS](#tiff--nxs)
+        - [Single > Stack, c6s](#single--stack-c6s)
+        - [Stack > Stack](#stack--stack)
+    - [NXS > TIFF](#nxs--tiff)
+- [Pre-processing Data Flow with Dark/Flat and Median size 3](#pre-processing-data-flow-with-darkflat-and-median-size-3)
+    - [FITS](#fits)
+        - [Single > Single, p1](#single--single-p1)
+        - [Single > Stack, p2](#single--stack-p2)
+        - [Stack > Single, p3](#stack--single-p3)
+        - [Stack > Stack, p4](#stack--stack-p4)
+    - [NXS > FITS](#nxs--fits-1)
+        - [Stack > Single, p5](#stack--single-p5)
+        - [Stack > Stack, p5s](#stack--stack-p5s)
+    - [FITS > NXS](#fits--nxs)
+        - [Single > Stack, p6s](#single--stack-p6s)
+    - [TIFF > FITS](#tiff--fits-1)
+        - [Single > Single, p7](#single--single-p7)
+        - [Single > Stack, p7s](#single--stack-p7s)
+    - [TIFF > NXS](#tiff--nxs-1)
+        - [Single > Stack](#single--stack)
+        - [Stack > Stack](#stack--stack-1)
 
 <!-- /TOC -->
  
@@ -513,3 +555,88 @@ bsub -I python /work/imat/imat_recon/scripts/main.py
 ```
 
 >python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/1000/pre_processed -o /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/processed/temp/1000_processed -g '[384.0, 0.0, 1550.0, 1932.0]' -f
+
+# Type Conversion
+
+## FITS > FITS
+### Single > Stack, c1s
+`python main.py -i ~/win_img/larmor/data/ -o ~/temp/c1s -s --convert --data-as-stack`
+### Stack > Single, c1
+`python main.py -i ~/win_img/larmor/data/ -o ~/temp/c1 -s --convert`
+
+## FITS > NXS, this requires also dark and flat images
+### AssertionError: Fail because no flat/dark, c2f
+`python main.py -i ~/win_img/larmor/data/ -o ~/temp/c2f -s --convert --data-as-stack --out-format nxs`
+### Single > Stack, c2s
+`python main.py -i ~/win_img/larmor/data/ -o ~/temp/c2s -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --convert --out-format nxs --data-as-stack`
+### Stack > Stack, c2s2
+`python main.py -i ~/temp/c1s/pre_processed/ -o ~/temp/c2s2 -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --convert --out-format nxs --data-as-stack`
+
+## NXS > FITS
+### Stack > Single, c3
+`python main.py -i ~/temp/c2s/pre_processed/ -o ~/temp/c3 -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --convert --in-format nxs`
+### Stack > Stack, c3s
+`python main.py -i ~/temp/c2s/pre_processed/ -o ~/temp/c3s -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --convert --in-format nxs --data-as-stack`
+
+## TIFF > FITS
+### Single > Single, c4
+`python main.py -i ~/win_img/777cannon/data/ -o ~/temp/c4 -s --convert --in-format tiff`
+### Single > Stack, c4s
+`python main.py -i ~/win_img/777cannon/data/ -o ~/temp/c4 -s --convert --data-as-stack --in-format tiff`
+### Stack > Single, c42
+`TODO currently we cannot save out TIFF files`
+### Stack > Stack, c4s2
+`TODO currently we cannot save out TIFF files`
+
+## FITS > TIFF
+### Single > Single, c5
+`TODO currently fails with ValueError: Images of type float must be between -1 and 1.`
+### Single > Stack, c5s
+`TODO currently fails with ValueError: Images of type float must be between -1 and 1.`
+### Stack > Single, c52
+`TODO currently fails with ValueError: Images of type float must be between -1 and 1.`
+### Stack > Stack, c5s2
+`TODO currently fails with ValueError: Images of type float must be between -1 and 1.`
+
+## TIFF > NXS
+### Single > Stack, c6s
+
+### Stack > Stack
+`TODO currently we cannot save out TIFF files`
+
+## NXS > TIFF
+`TODO currently we cannot save out TIFF files`
+
+# Pre-processing Data Flow with Dark/Flat and Median size 3
+## FITS
+### Single > Single, p1
+`python main.py -i ~/win_img/larmor/data/ -o ~/temp/p1 -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --pre-median-size 3 --only-preproc`
+### Single > Stack, p2
+`python main.py -i ~/win_img/larmor/data/ -o ~/temp/p2 -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --pre-median-size 3 --only-preproc --data-as-stack`
+### Stack > Single, p3
+`python main.py -i ~/temp/c1/pre_processed/ -o ~/temp/p3 -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --pre-median-size 3 --only-preproc`
+### Stack > Stack, p4
+`python main.py -i ~/temp/c1/pre_processed/ -o ~/temp/p4 -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --pre-median-size 3 --only-preproc --data-as-stack`
+
+## NXS > FITS
+### Stack > Single, p5
+`python main.py -i ~/temp/c6s_new/pre_processed/ --only-preproc -o ~/temp/p4/ --in-format nxs --pre-median-size 3 -s`
+
+### Stack > Stack, p5s
+`python main.py -i ~/temp/c6s_new/pre_processed/ --only-preproc -o ~/temp/p4/ --in-format nxs --pre-median-size 3 -s --data-as-stack`
+
+## FITS > NXS
+### Single > Stack, p6s
+`python main.py -i ~/win_img/larmor/data/ -o ~/temp/c2s -D ~/win_img/larmor/dark/ -F ~/win_img/larmor/flat/ -s --only-preproc --out-format nxs --data-as-stack --pre-median-size 3`
+
+## TIFF > FITS
+### Single > Single, p7
+`python main.py -i ~/win_img/777cannon/data/ -o ~/temp/p7 -D ~/win_img/777cannon/dark_cannon/ -F ~/win_img/777cannon/flat_cannon/ -s --only-preproc --in-format tif --pre-median-size 3`
+
+### Single > Stack, p7s
+`python main.py -i ~/win_img/777cannon/data/ -o ~/temp/p7s -D ~/win_img/777cannon/dark_cannon/ -F ~/win_img/777cannon/flat_cannon/ -s --only-preproc --in-format tif --pre-median-size 3 --data-as-stack`
+
+## TIFF > NXS
+### Single > Stack
+### Stack > Stack
+

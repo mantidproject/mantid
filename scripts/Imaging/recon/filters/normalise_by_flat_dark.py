@@ -64,17 +64,21 @@ def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_
 
     from parallel import utility as pu
     norm_divide = pu.create_shared_array((1, data.shape[1], data.shape[2]))
-    norm_divide[:] = np.subtract(norm_flat_img[:], norm_dark_img)
+    norm_divide[:] = norm_divide.reshape(data.shape[1], data.shape[2])
+    norm_divide[:] = np.subtract(norm_flat_img, norm_dark_img)
     # prevent divide-by-zero issues
     norm_divide[norm_divide == 0] = 1e-6
 
-    data[:] = np.subtract(data[:], norm_dark_img)
+    np.subtract(data[:], norm_dark_img, out=data[:])
 
     from parallel import two_shared_mem as ptsm
     f = ptsm.create_partial(_apply_normalise_inplace, fwd_function=ptsm.inplace_fwd_func_second_2d,
                             clip_min=clip_min, clip_max=clip_max)
 
-    data, norm_divide = ptsm.execute(data, norm_divide[0], f, cores, chunksize, "Norm by Flat/Dark", h=h)
+    Helper.debug_print_memory_usage_linux("Before execution")
+
+    data, norm_divide = ptsm.execute(data, norm_divide, f, cores, chunksize, "Norm by Flat/Dark", h=h)
+    Helper.debug_print_memory_usage_linux("after execution")
     h.pstop(
         "Finished PARALLEL normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
 

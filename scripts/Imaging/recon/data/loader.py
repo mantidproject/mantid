@@ -392,6 +392,7 @@ def import_skimage_io():
     """
     try:
         from skimage import io as skio
+        skio.use_plugin('freeimage')
     except ImportError as exc:
         raise ImportError("Could not find the package skimage, its subpackage "
                           "io and the pluging freeimage which are required to support "
