@@ -195,30 +195,19 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
     // Get the detector (might be a detectorGroup for multiple detectors)
     // or might return an exception if the detector is not in the instrument
     // definition
-    if (!specInfo.hasDetector(workspaceIndex)) {
-      //this->failedDetectorLookupCount++;
-      //return;
-    }
-    IDetector_const_sptr det;
-    try {
-      det = m_inWS->getDetector(workspaceIndex);
-    } catch (Exception::NotFoundError &) {
+    if (!specInfo.hasDetectors(workspaceIndex)) {
       this->failedDetectorLookupCount++;
       return;
     }
 
-    // Vector between the sample and the detector
-    V3D detPos = det->getPos() - samplePos;
-
     // Neutron's total travelled distance
-    double distance = detPos.norm() + l1;
-    double distance2 = specInfo.l2(workspaceIndex);
+    double distance = l1 + specInfo.l2(workspaceIndex);
 
-    std::cout << "dist 1 = " << distance << "\n";
-    std::cout << "dist 2 = " << distance2 << "\n";
+    // Vector between the sample and the detector
+    const V3D detPos = specInfo.position(workspaceIndex);
 
     // Detector direction normalized to 1
-    V3D detDir = detPos / detPos.norm();
+    const V3D detDir = detPos / detPos.norm();
 
     // The direction of momentum transfer in the inelastic convention ki-kf
     //  = input beam direction (normalized to 1) - output beam direction
@@ -234,7 +223,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
     // Multiply by the rotation matrix to convert to Q in the sample frame (take
     // out goniometer rotation)
     // (or to HKL, if that's what the matrix is)
-    V3D Q_dir = mat * Q_dir_lab_frame;
+    const V3D Q_dir = mat * Q_dir_lab_frame;
 
     // For speed we extract the components.
     coord_t Q_dir_x = coord_t(Q_dir.X());
@@ -248,26 +237,17 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
       // the detector (scattering) direction
       // The formula for Lorentz Correction is sin(theta), i.e. sin(half the
       // scattering angle)
-      double theta = detDir.angle(beamDir) / 2.0;
+      double theta = specInfo.twoTheta(workspaceIndex) / 2.0;
       sin_theta_squared = sin(theta);
       sin_theta_squared = sin_theta_squared * sin_theta_squared; // square it
     }
 
-    /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
-     * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) /
-     * ((tof (in usec) * 1e-6) * PhysicalConstants::h_bar) * 1e-10; */
+    // Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
+    // Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) /
+    // ((tof (in usec) * 1e-6) * PhysicalConstants::h_bar) * 1e-10;
     const double wavenumber_in_angstrom_times_tof_in_microsec =
         (PhysicalConstants::NeutronMass * distance * 1e-10) /
         (1e-6 * PhysicalConstants::h_bar);
-
-    // PARALLEL_CRITICAL( convert_tester_output ) { std::cout << "Spectrum " <<
-    // el.getSpectrumNo() << " beamDir = " << beamDir << " detDir = " << detDir
-    // << " Q_dir = " << Q_dir << " conversion factor " <<
-    // wavenumber_in_angstrom_times_tof_in_microsec << '\n';  }
-
-    // g_log.information() << wi << " : " << el.getNumberEvents() << " events.
-    // Pos is " << detPos << '\n';
-    // g_log.information() << Q_dir.norm() << " Qdir norm\n";
 
     // This little dance makes the getting vector of events more general (since
     // you can't overload by return type).
