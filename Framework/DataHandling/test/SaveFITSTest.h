@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_SAVEFITSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
 
 #include "MantidDataHandling/SaveFITS.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -13,7 +14,6 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <Poco/File.h>
 
 using Mantid::DataHandling::SaveFITS;
 
