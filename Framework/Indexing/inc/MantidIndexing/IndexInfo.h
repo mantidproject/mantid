@@ -21,6 +21,7 @@ namespace Beamline {
 class SpectrumDefinition;
 
 namespace Indexing {
+class GlobalSpectrumIndex;
 class SpectrumIndexSet;
 class SpectrumNumberTranslator;
 
@@ -85,8 +86,14 @@ public:
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
   spectrumDefinitions() const;
 
+  SpectrumIndexSet makeIndexSet() const;
+  SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
+  SpectrumIndexSet makeIndexSet(GlobalSpectrumIndex min,
+                                GlobalSpectrumIndex max) const;
   SpectrumIndexSet
   makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
+  SpectrumIndexSet
+  makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
 private:
   void makeSpectrumNumberTranslator();

@@ -121,9 +121,28 @@ IndexInfo::spectrumDefinitions() const {
   return m_spectrumDefinitions;
 }
 
+SpectrumIndexSet IndexInfo::makeIndexSet() const {
+  return m_spectrumNumberTranslator->makeIndexSet();
+}
+
+SpectrumIndexSet IndexInfo::makeIndexSet(SpectrumNumber min,
+                                         SpectrumNumber max) const {
+  return m_spectrumNumberTranslator->makeIndexSet(min, max);
+}
+
+SpectrumIndexSet IndexInfo::makeIndexSet(GlobalSpectrumIndex min,
+                                         GlobalSpectrumIndex max) const {
+  return m_spectrumNumberTranslator->makeIndexSet(min, max);
+}
+
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<SpectrumNumber> &spectrumNumbers) const {
   return m_spectrumNumberTranslator->makeIndexSet(spectrumNumbers);
+}
+
+SpectrumIndexSet IndexInfo::makeIndexSet(
+    const std::vector<GlobalSpectrumIndex> &globalIndices) const {
+  return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
 }
 
 void IndexInfo::makeSpectrumNumberTranslator() {
