@@ -5,6 +5,8 @@ import six
 import subprocess
 import shutil
 import hashlib
+import codecs
+import functools
 import AbinsModules
 import os
 
@@ -413,8 +415,11 @@ class IOmodule(object):
     def _calculate_hash(self, filename=None):
         buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
         sha = hashlib.sha512()
+        # set utf8 encoding so that it can  create hash for output files from DFT programs which include special German
+        # letters
+        open_file = functools.partial(codecs.open, encoding='utf-8')
 
-        with open(filename, 'rU') as f:
+        with open_file(filename, 'rU') as f:
             while True:
                 data = f.read(buf)
                 if not data:
