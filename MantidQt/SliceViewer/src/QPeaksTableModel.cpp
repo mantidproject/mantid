@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ConfigService.h"
@@ -309,14 +310,14 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
     if (numToCheck > 20) // arbitrary cutoff
       numToCheck = 20;
     const std::string RECT_DET("RectangularDetector");
+    const auto& detectorInfo = m_peaksWS->detectorInfo();
     for (size_t i = 0; i < numToCheck; ++i) {
-      boost::shared_ptr<const Mantid::Geometry::IComponent> component =
-          instr->getDetector(ids[i]);
-      if (component->type().compare(RECT_DET) == 0) {
+      const auto& component = detectorInfo.detector(detectorInfo.indexOf(ids[i]));
+      if (component.type().compare(RECT_DET) == 0) {
         break;
       } else {
-        component = component->getParent();
-        if (component->type().compare(RECT_DET) == 0) {
+        const auto parent = component.getParent();
+        if (parent->type().compare(RECT_DET) == 0) {
           break;
         }
       }
