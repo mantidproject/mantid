@@ -143,8 +143,8 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         Bcoef = 3.0*integral*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
         dwf = np.exp(
             -1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
-        self.assertAlmostEqual(y_sum*dwf, wsoutput.readY(1)[0])
-        self.assertAlmostEqual(e_sum*dwf, wsoutput.readE(1)[0])
+        self.assertAlmostEqual(y_sum/dwf, wsoutput.readY(1)[0])
+        self.assertAlmostEqual(e_sum/dwf, wsoutput.readE(1)[0])
 
 
 if __name__ == "__main__":
