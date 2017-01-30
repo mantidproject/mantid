@@ -171,6 +171,8 @@ void FunctionBrowser::createBrowser() {
           SLOT(attributeChanged(QtProperty *)));
   connect(m_attributeVectorDoubleManager, SIGNAL(propertyChanged(QtProperty *)),
           this, SLOT(attributeVectorDoubleChanged(QtProperty *)));
+  connect(m_attributeSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(attributeVectorSizeChanged(QtProperty *)));
   connect(m_tieManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(tieChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)),
@@ -506,11 +508,13 @@ protected:
         m_browser->m_attributeVectorManager->addProperty(m_attName);
     FunctionBrowser::AProperty aprop = m_browser->addProperty(m_parent, prop);
 
+    m_browser->m_attributeSizeManager->blockSignals(true);
     QtProperty *sizeProp =
         m_browser->m_attributeSizeManager->addProperty("Size");
     m_browser->m_attributeSizeManager->setValue(sizeProp,
                                                 static_cast<int>(v.size()));
     m_browser->addProperty(prop, sizeProp);
+    m_browser->m_attributeSizeManager->blockSignals(false);
     sizeProp->setEnabled(false);
 
     m_browser->m_attributeVectorDoubleManager->blockSignals(true);
@@ -1849,6 +1853,40 @@ void FunctionBrowser::attributeChanged(QtProperty *prop) {
   setFunction(funProp, fun);
   updateFunctionIndices();
   emit functionStructureChanged();
+}
+
+/** Called when the size of a vector attribute is changed
+ * @param prop :: A property that was changed.
+ */
+void FunctionBrowser::attributeVectorSizeChanged(QtProperty *prop) {
+  QtProperty *vectorProp = m_properties[prop].parent;
+  if (!vectorProp)
+    throw std::logic_error("FunctionBrowser: inconsistency in vector "
+                           "properties.\nAttribute property not found.");
+  auto funProp = m_properties[vectorProp].parent;
+  if (!funProp)
+    throw std::logic_error("FunctionBrowser: inconsistency in vector "
+                           "properties.\nFunction property not found.");
+  auto fun = getFunction(funProp, true);
+  if (!fun)
+    throw std::logic_error("FunctionBrowser: inconsistency in vector "
+                           "properties.\nFunction undefined.");
+  auto attName = vectorProp->propertyName().toStdString();
+  auto attribute = fun->getAttribute(attName).asVector();
+  auto newSize = m_attributeSizeManager->value(prop);
+  if (newSize < 0)
+    newSize = 0;
+  if (attribute.size() != static_cast<size_t>(newSize)) {
+    if (newSize == 0) {
+      attribute.clear();
+    } else {
+      attribute.resize(newSize);
+    }
+    fun->setAttributeValue(attName, attribute);
+    setFunction(funProp, fun);
+    updateFunctionIndices();
+    emit functionStructureChanged();
+  }
 }
 
 /**

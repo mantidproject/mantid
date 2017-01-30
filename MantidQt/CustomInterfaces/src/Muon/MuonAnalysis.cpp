@@ -645,19 +645,20 @@ void MuonAnalysis::runClearGroupingButton() { clearTablesAndCombo(); }
 
 /**
  * Load current (slot)
+ * N.B. This method will only work if
+ * - using Windows
+ * - connected to the ISIS network
  */
 void MuonAnalysis::runLoadCurrent() {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
   if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
       instname == "CHRONUS" || instname == "ARGUS") {
-    QString instDirectory = instname;
-    if (instname == "CHRONUS")
-      instDirectory = "NDW1030";
+    const QString instDirectory = instname == "CHRONUS" ? "NDW1030" : instname;
     std::string autosavePointsTo = "";
-    std::string autosaveFile =
+    const std::string autosaveFile =
         "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
-    Poco::File pathAutosave(autosaveFile);
+    const Poco::File pathAutosave(autosaveFile);
 
     try // check if exists
     {
@@ -665,7 +666,7 @@ void MuonAnalysis::runLoadCurrent() {
         std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in);
         autofileIn >> autosavePointsTo;
       }
-    } catch (Poco::Exception &) {
+    } catch (const Poco::Exception &) {
       QString message("Can't read from the selected directory, either the "
                       "computer you are trying"
                       "\nto access is down or your computer is not "
@@ -675,6 +676,12 @@ void MuonAnalysis::runLoadCurrent() {
       return;
     }
 
+    // If this directory is not in Mantid's data search list, add it now
+    // Must use forward slash format for this list, even on Windows
+    const std::string autosaveDir =
+        "//" + instDirectory.toStdString() + "/data";
+    Mantid::Kernel::ConfigService::Instance().appendDataSearchDir(autosaveDir);
+
     QString psudoDAE;
     if (autosavePointsTo.empty())
       psudoDAE =
@@ -682,7 +689,7 @@ void MuonAnalysis::runLoadCurrent() {
     else
       psudoDAE = "\\\\" + instDirectory + "\\data\\" + autosavePointsTo.c_str();
 
-    Poco::File l_path(psudoDAE.toStdString());
+    const Poco::File l_path(psudoDAE.toStdString());
     try {
       if (!l_path.exists()) {
         QMessageBox::warning(this, "Mantid - MuonAnalysis",
@@ -691,7 +698,7 @@ void MuonAnalysis::runLoadCurrent() {
                                  QString("does not seem to exist"));
         return;
       }
-    } catch (Poco::Exception &) {
+    } catch (const Poco::Exception &) {
       QMessageBox::warning(this, "Mantid - MuonAnalysis",
                            QString("Can't load ") + "Current data since\n" +
                                psudoDAE + QString("\n") +
@@ -1792,8 +1799,12 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 /**
  * Enable PP tool for the plot of the given WS.
  * @param wsName Name of the WS which plot PP tool will be attached to.
+ * @param filePath :: [input] Optional path to file that is actually used. This
+ * is for "load current run" where the data file has a temporary name like
+ * MUSRauto_E.tmp
  */
-void MuonAnalysis::selectMultiPeak(const QString &wsName) {
+void MuonAnalysis::selectMultiPeak(const QString &wsName,
+                                   const boost::optional<QString> &filePath) {
   disableAllTools();
 
   if (!plotExists(wsName)) {
@@ -1815,7 +1826,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
     m_dataSelector->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
-    m_fitDataPresenter->setAssignedFirstRun(wsName);
+    m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
   }
 
   QString code;
@@ -2381,8 +2392,10 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // - Show connected plot and attach PP tool to it (if has been assigned)
     // - Set input of data selector to selected workspace
     if (m_currentDataName != NOT_AVAILABLE) {
-      m_fitDataPresenter->setSelectedWorkspace(m_currentDataName);
-      selectMultiPeak(m_currentDataName);
+      const boost::optional<QString> filePath =
+          m_uiForm.mwRunFiles->getUserInput().toString();
+      m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
+      selectMultiPeak(m_currentDataName, filePath);
     }
 
     // In future, when workspace gets changed, show its plot and attach PP tool

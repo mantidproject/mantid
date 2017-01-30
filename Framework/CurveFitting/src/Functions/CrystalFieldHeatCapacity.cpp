@@ -25,14 +25,13 @@ void calculate(double *out, const double *xValues, const size_t nData,
   const double convfact = PhysicalConstants::N_A * PhysicalConstants::meV;
   int nlevels = en.len();
   for (size_t iT = 0; iT < nData; iT++) {
-    double expfact;
     double Z = 0.;
     double U = 0.;
     double U2 = 0.;
     const double beta = 1 / (k_B * xValues[iT]);
     // Using fortran indexing...
     for (auto iE = 1; iE <= nlevels; iE++) {
-      expfact = exp(-beta * en(iE));
+      double expfact = exp(-beta * en(iE));
       Z += expfact;
       U += en(iE) * expfact;
       U2 += en(iE) * en(iE) * expfact;

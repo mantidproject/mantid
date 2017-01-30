@@ -155,7 +155,8 @@ public:
       const std::string &runnable, const std::vector<std::string> &args,
       const std::string &allOpts,
       MantidQt::CustomInterfaces::TomographyThread &thread,
-      MantidQt::CustomInterfaces::TomographyProcess &worker);
+      MantidQt::CustomInterfaces::TomographyProcess &worker,
+      const std::string &workerName = "Mantid_Local");
 
   void doRemoteRunReconstructionJob(const std::string &compRes,
                                     const std::string &runnable,
@@ -166,7 +167,8 @@ public:
                     const std::vector<std::string> &id);
 
   void addJobToStatus(const qint64 pid, const std::string &runnable,
-                      const std::string &allOpts);
+                      const std::string &allOpts,
+                      const std::string &workerName);
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 

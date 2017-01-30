@@ -20,6 +20,8 @@ Improvements
 
 - A new input property *Temperature* has been added to :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`.
 
+- :ref:`PyChop` has been updated to reflect physical changes to LET's choppers. It will now also not output zero flux Ei reps for LET and Merlin in multi-rep mode. An additional tab is created if the "Instrument Scientist Mode" option is selected which shows the time widths at the detector due to the moderator and choppers for each calculation.
+
 New features
 ------------
 

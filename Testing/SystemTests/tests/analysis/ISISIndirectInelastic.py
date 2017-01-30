@@ -1072,7 +1072,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result']
 
     def get_reference_files(self):
-        self.tolerance = 0.015
+        self.tolerance = 0.3
         return ['II.OSIRISConvFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
@@ -1100,7 +1100,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
 
     def get_reference_files(self):
-        self.tolerance = 0.13
+        self.tolerance = 0.2
         return ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================

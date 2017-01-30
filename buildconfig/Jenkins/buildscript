@@ -38,6 +38,12 @@ else
   BUILD_CONFIG="Release"
 fi
 
+# BUILD_PACKAGE can be provided as a job parameter on the pull requests
+# except RHEL7 as we always need to it to do the system tests
+if [[ ${JOB_NAME} == *pull_requests* ]] && [[ -n ${BUILD_PACKAGE} ]]; then
+  BUILDPKG=${BUILD_PACKAGE}
+fi
+
 ###############################################################################
 # Setup the build directory
 # For a clean build the entire thing is removed to guarantee it is clean. All
@@ -273,4 +279,4 @@ fi
 ###############################################################################
 if [[ "${ON_RHEL7}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
   $SCRIPT_DIR/systemtests
-	fi
+fi
