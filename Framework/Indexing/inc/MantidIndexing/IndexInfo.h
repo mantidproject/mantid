@@ -64,11 +64,10 @@ public:
   SpectrumNumber spectrumNumber(const size_t index) const;
   const std::vector<DetectorID> &detectorIDs(const size_t index) const;
 
-  void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers) & ;
-  void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max) &
-      ;
-  void setDetectorIDs(const std::vector<DetectorID> &detectorIDs) & ;
-  void setDetectorIDs(std::vector<std::vector<DetectorID>> &&detectorIDs) & ;
+  void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
+  void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);
+  void setDetectorIDs(const std::vector<DetectorID> &detectorIDs);
+  void setDetectorIDs(std::vector<std::vector<DetectorID>> &&detectorIDs);
 
   void setSpectrumDefinitions(
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);

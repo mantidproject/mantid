@@ -57,7 +57,7 @@ IndexInfo::detectorIDs(const size_t index) const {
 
 /// Set a spectrum number for each index.
 void IndexInfo::setSpectrumNumbers(
-    std::vector<SpectrumNumber> &&spectrumNumbers) & {
+    std::vector<SpectrumNumber> &&spectrumNumbers) {
   if (size() != spectrumNumbers.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
@@ -66,7 +66,7 @@ void IndexInfo::setSpectrumNumbers(
 }
 
 void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
-                                   const SpectrumNumber max) & {
+                                   const SpectrumNumber max) {
   if (static_cast<int64_t>(size()) !=
       static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1)
     throw std::runtime_error(
@@ -77,7 +77,7 @@ void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
 }
 
 /// Set a single detector ID for each index.
-void IndexInfo::setDetectorIDs(const std::vector<DetectorID> &detectorIDs) & {
+void IndexInfo::setDetectorIDs(const std::vector<DetectorID> &detectorIDs) {
   if (size() != detectorIDs.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new detector IDs");
@@ -92,7 +92,7 @@ void IndexInfo::setDetectorIDs(const std::vector<DetectorID> &detectorIDs) & {
 
 /// Set a vector of detector IDs for each index.
 void IndexInfo::setDetectorIDs(
-    std::vector<std::vector<DetectorID>> &&detectorIDs) & {
+    std::vector<std::vector<DetectorID>> &&detectorIDs) {
   if (size() != detectorIDs.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new detector IDs");
