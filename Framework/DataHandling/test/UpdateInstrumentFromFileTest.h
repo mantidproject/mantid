@@ -59,7 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
-    const auto& spectrumInfo2 = output->spectrumInfo();
+    const auto &spectrumInfo2 = output->spectrumInfo();
     auto det0Pos = spectrumInfo2.position(0);
     TS_ASSERT_DELTA(det0Pos.X(), 0.0, 1e-4);
     TS_ASSERT_DELTA(det0Pos.Y(), 0.0, 1e-4);
@@ -181,8 +181,7 @@ public:
         TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
         TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
       }
-    }
-    catch (const std::bad_cast&) {
+    } catch (const std::bad_cast &) {
       canCastToGroup = false;
     }
     TS_ASSERT(canCastToGroup);
