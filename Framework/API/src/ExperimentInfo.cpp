@@ -217,8 +217,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
   // changed.
-  std::fill(m_spectrumDefinitionNeedsUpdate.begin(),
-            m_spectrumDefinitionNeedsUpdate.end(), 1);
+  invalidateAllSpectrumDefinitions();
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -1135,8 +1134,7 @@ void ExperimentInfo::setSpectrumDefinitions(Kernel::cow_ptr<
   } else {
     // Keep the old m_spectrumInfo which should have the correct size, but
     // invalidate all definitions.
-    std::fill(m_spectrumDefinitionNeedsUpdate.begin(),
-              m_spectrumDefinitionNeedsUpdate.end(), 1);
+    invalidateAllSpectrumDefinitions();
   }
   m_spectrumInfoWrapper = nullptr;
 }
@@ -1196,6 +1194,13 @@ size_t ExperimentInfo::groupOfDetectorID(const detid_t detID) const {
         "ExperimentInfo::groupOfDetectorID - Unable to find ID " +
         std::to_string(detID) + " in lookup");
   }
+}
+
+/// Sets flags for all spectrum definitions indicating that they need to be
+/// updated.
+void ExperimentInfo::invalidateAllSpectrumDefinitions() {
+  std::fill(m_spectrumDefinitionNeedsUpdate.begin(),
+            m_spectrumDefinitionNeedsUpdate.end(), 1);
 }
 
 /** Save the object to an open NeXus file.
