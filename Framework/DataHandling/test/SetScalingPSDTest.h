@@ -59,7 +59,7 @@ public:
     double expectedYScale[3] = {0.995002, 0.995001, 0.995000};
 
     const auto &pmap = testWS->constInstrumentParameters();
-    const auto& spectrumIndexNew = testWS->spectrumInfo();
+    const auto &spectrumIndexNew = testWS->spectrumInfo();
     for (int i = 0; i < ndets; ++i) {
       V3D newPos = spectrumIndexNew.position(i);
       V3D oldPos = originalPositions[i];
@@ -71,8 +71,10 @@ public:
         TS_ASSERT_EQUALS(pmap.contains(&spectrumIndexNew.detector(i), "sca"),
                          false);
       } else {
-        TS_ASSERT_EQUALS(pmap.contains(&spectrumIndexNew.detector(i), "sca"), true);
-        Parameter_sptr scaleParam = pmap.get(&spectrumIndexNew.detector(i), "sca");
+        TS_ASSERT_EQUALS(pmap.contains(&spectrumIndexNew.detector(i), "sca"),
+                         true);
+        Parameter_sptr scaleParam =
+            pmap.get(&spectrumIndexNew.detector(i), "sca");
         const V3D scaleFactor = scaleParam->value<V3D>();
         TS_ASSERT_EQUALS(scaleFactor.X(), 1.0);
         TS_ASSERT_EQUALS(scaleFactor.Z(), 1.0);
