@@ -310,9 +310,10 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
     if (numToCheck > 20) // arbitrary cutoff
       numToCheck = 20;
     const std::string RECT_DET("RectangularDetector");
-    const auto& detectorInfo = m_peaksWS->detectorInfo();
+    const auto &detectorInfo = m_peaksWS->detectorInfo();
     for (size_t i = 0; i < numToCheck; ++i) {
-      const auto& component = detectorInfo.detector(detectorInfo.indexOf(ids[i]));
+      const auto &component =
+          detectorInfo.detector(detectorInfo.indexOf(ids[i]));
       if (component.type().compare(RECT_DET) == 0) {
         break;
       } else {
