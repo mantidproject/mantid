@@ -55,12 +55,11 @@ void calculate(double *out, const double *xValues, const size_t nData,
   mu *= convfact;
   mu2 *= convfact;
   for (size_t iT = 0; iT < nData; iT++) {
-    double expfact;
     double Z = 0.;
     double U = 0.;
     const double beta = 1 / (k_B * xValues[iT]);
     for (auto i = 1; i <= nlevels; i++) {
-      expfact = exp(-beta * en(i));
+      double expfact = exp(-beta * en(i));
       Z += expfact;
       U += ((mu(i) * beta) - (2 * mu2(i))) * expfact;
     }
