@@ -15,6 +15,7 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
+#include "MantidBeamline/SpectrumDefinition.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -169,6 +170,22 @@ public:
     TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), (std::vector<detid_t>{0, 7}));
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
     TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
+  }
+
+  void test_IndexInfo_spectrumDefinition() {
+    // This test is for a method of IndexInfo, but cannot be tested there since
+    // SpectrumDefinition is part of Beamline and the Indexing module does not
+    // depend on Beamline.
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    indices.setDetectorIDs({{0}, {1}, {2, 3}});
+
+    auto defs = Kernel::make_cow<std::vector<Beamline::SpectrumDefinition>>(3);
+    TS_ASSERT_THROWS_NOTHING(indices.setSpectrumDefinitions(defs));
+    TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
+    TS_ASSERT_EQUALS(ws.indexInfo().spectrumDefinitions().get(), defs.get());
   }
 
   void test_toString_Produces_Expected_Contents() {
