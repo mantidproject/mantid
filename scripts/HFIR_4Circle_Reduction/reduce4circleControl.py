@@ -1226,16 +1226,42 @@ class CWSCDReductionControl(object):
 
     def gauss_correction_peak_intensity(self, pt_dict):
         """
-        fit the peak with Gaussian, get rid of
+        fit a peak along Pt. with Gaussian and thus calculate background automatically
         :param pt_dict:
-        :return:
+        :return: peak intensity
         """
+        import peak_integration_utility
 
-
-        # TODO/NOW/ISSUE/ - Implement & Test!
+        # check
         assert isinstance(pt_dict, dict), 'Input must be a dictionary but not {0}'.format(type(pt_dict))
 
         # convert to vector
+        tup_list = list()
+        for pt in pt_dict.keys():
+            tup_list.append((pt, pt_dict[pt]))
+        tup_list.sort()
+        list_x = list()
+        list_y = list()
+        for tup in tup_list:
+            list_x.append(float(tup[0]))
+            list_y.append(float(tup[1]))
+        vec_x = numpy.array(list_x)
+        vec_y = numpy.array(list_y)
+        vec_e = numpy.sqrt(vec_y)
+
+        # do fit
+        gauss_params, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+        x0, gauss_sigma, gauss_a, gauss_bkgd = gauss_params
+        if not (0 < x0 < vec_x[-1]):
+            raise RuntimeError('Fitted center of the peak {0} is out of range, which is not correct'.format(x0))
+        if gauss_a <= 0.:
+            raise RuntimeError('Fitted peak height {0} is negative!'.format(gauss_a))
+
+        # calculate the peak intensity
+        peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
+
+        return peak_integration_utility
+
 
     @staticmethod
     def load_scan_survey_file(csv_file_name):

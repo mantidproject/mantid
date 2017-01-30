@@ -1112,43 +1112,35 @@ class MainWindow(QtGui.QMainWindow):
         The assumption is that for each scan, from Pt 1 to last Pt, it measures a complete peak
         :return:
         """
-        import peakprocesshelper
+        import peak_integration_utility
 
-        # get data from the canvas
-        vec_x, vec_y, vec_e = self.ui.graphicsView_integratedPeakView.get_xye()
+        # get the data from UI
+        plot_tup_list = self.ui.graphicsView_integratedPeakView.get_current_plots()
+        if len(plot_tup_list) != 1:
+            # return if it is not correct
+            self.pop_one_button_dialog('One and only one figure is allowed on the figure for correcting peak intensity.'
+                                       ' Current on canvas is {0}'.format(plot_tup_list))
+            return
 
-        # # call controller to fit
-        # peakprocesshelper.
-        #
-        # self._myControl.integrate_peak_gaussian()
-        #
-        #
-        # def gauss(x, a, b, c):
-        #     return c*numpy.exp(-(x-a)**2/b)
-        #
-        # def gauss4(x, a, b, c, d):
-        #     return c*numpy.exp(-(x-a)**2/b)+d
-        #
-        # # get the curve
-        #
-        #
-        # # fit Gaussian for starting value of a, b and c
-        # fit_result1 = curve_fit(gauss, vec_x, vec_y)
-        # popt = fit_result1[0]  # popt, pcov
-        # # gauss_fit = gauss(vec_x, popt[0], popt[1], popt[2])
-        #
-        # # fit Gaussian again including background
-        # p0 = [popt[0], popt[1], popt[2], 0.]
-        # fit_result2 = curve_fit(gauss4, vec_x, vec_y, sigma=vec_e,  p0=p0)
-        # popt2 = fit_result2[0]  # popt2, pcov2
-        # gauss_fit4 = gauss4(vec_x, popt2[0], popt2[1], popt2[2], popt2[3])
-        #
-        # # plot the result
-        # self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, gauss_fit4, color='red', marker='-')
+        # get data from plot
+        plot_id = plot_tup_list[0][0]
+        data_set = self.ui.graphicsView_integratedPeakView.canvas().get_data(plot_id)
+        vec_x = data_set[0]
+        vec_y = data_set[1]
+        vec_e = data_set[2]
 
-        # write out the result
-        background_value = popt2[3]
-        self.ui.lineEdit_background.setText('%.7f' % background_value)
+        # list of 2-tuple: integer (plot ID) and string (label)
+        # fit the Gaussian and calculate the peak intensity
+        fit_param, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+        x0, gauss_sigma, gauss_a, background = fit_param
+
+        peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
+
+        # plot the data
+        self.ui.graphicsView_integratedPeakView.plot_model(vec_x, model_vec_y)
+
+        # set the value
+        self.ui.lineEdit_gaussianPeakIntensity.setText(str(peak_intensity))
 
         return
 

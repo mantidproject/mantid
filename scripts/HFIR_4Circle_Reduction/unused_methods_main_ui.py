@@ -68,3 +68,41 @@ def do_manual_bkgd(self):
                                str(self.ui.pushButton_handPickBkgd.text()))
 
         return
+
+def fit_background():
+        pass
+        # get data from the canvas
+        vec_x, vec_y, vec_e = self.ui.graphicsView_integratedPeakView.get_xye()
+
+        # # call controller to fit
+        # peakprocesshelper.
+        #
+        # self._myControl.integrate_peak_gaussian()
+        #
+        #
+        # def gauss(x, a, b, c):
+        #     return c*numpy.exp(-(x-a)**2/b)
+        #
+        # def gauss4(x, a, b, c, d):
+        #     return c*numpy.exp(-(x-a)**2/b)+d
+        #
+        # # get the curve
+        #
+        #
+        # # fit Gaussian for starting value of a, b and c
+        # fit_result1 = curve_fit(gauss, vec_x, vec_y)
+        # popt = fit_result1[0]  # popt, pcov
+        # # gauss_fit = gauss(vec_x, popt[0], popt[1], popt[2])
+        #
+        # # fit Gaussian again including background
+        # p0 = [popt[0], popt[1], popt[2], 0.]
+        # fit_result2 = curve_fit(gauss4, vec_x, vec_y, sigma=vec_e,  p0=p0)
+        # popt2 = fit_result2[0]  # popt2, pcov2
+        # gauss_fit4 = gauss4(vec_x, popt2[0], popt2[1], popt2[2], popt2[3])
+        #
+        # # plot the result
+        # self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, gauss_fit4, color='red', marker='-')
+
+        # write out the result
+        background_value = popt2[3]
+        self.ui.lineEdit_background.setText('%.7f' % background_value)

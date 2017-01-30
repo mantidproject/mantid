@@ -3,6 +3,21 @@ import numpy
 import scipy
 from scipy.optimize import curve_fit
 
+
+def calculate_peak_intensity_gauss(gauss_a, gauss_sigma):
+    """
+    calcukalte the peak intensity, which is the area under the peak
+    if sigma == 1, then the integral is sqrt(pi);
+    then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
+    :param gauss_a:
+    :param gauss_sigma:
+    :return:
+    """
+    integral = gauss_a * numpy.sqrt(numpy.pi) * numpy.exp(1./(2.*gauss_sigma ** 2))
+
+    return integral
+
+
 def gaussian_linear_background(x, x0, sigma, a, b):
     # gaussian + linear background
     return a * numpy.exp(-(x - x0) ** 2 / (2. * sigma ** 2)) + b
@@ -27,7 +42,11 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
 
     x0 = vec_x[max_y_index]
     max_y = vec_y[max_y_index]
-    background =
+    est_background = 0.5 * (vec_y[0] + vec_y[-1])
+    est_sigma = len(vec_x) * 0.5
+    est_a = max(1.0, max_y - est_background)
+
+    return [x0, est_a, est_sigma, est_background]
 
 
 def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, find_start_value_by_fit=False):
@@ -52,8 +71,9 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     elif find_start_value_by_fit:
         # find out the starting value by fit a Gaussian without background
         fit1_coeff, fit1_cov_matrix = curve_fit(gaussian, vec_x, vec_y)
+        start_x0, start_sigma, start_a = fit1_coeff
         # get result
-        start_value_list = [fit1_coeff[0], fit1_coeff[1], fit1_coeff[2], 0.]
+        start_value_list = [start_x0, start_sigma, start_a, 0.0]
 
     else:
         # guess starting value via observation
@@ -62,7 +82,8 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     # END-IF-ELSE
 
     # do second round fit
-    fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y, sigma=vec_e,  p0=start_value_list)
+    assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'
+    fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y, sigma=vec_e, p0=start_value_list)
 
     # calculate the model
     x0, sigma, a, b = fit2_coeff
