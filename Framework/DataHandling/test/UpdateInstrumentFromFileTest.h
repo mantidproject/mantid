@@ -59,7 +59,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
-    auto det0Pos = spectrumInfo.position(0);
+    const auto& spectrumInfo2 = output->spectrumInfo();
+    auto det0Pos = spectrumInfo2.position(0);
     TS_ASSERT_DELTA(det0Pos.X(), 0.0, 1e-4);
     TS_ASSERT_DELTA(det0Pos.Y(), 0.0, 1e-4);
     TS_ASSERT_DELTA(det0Pos.Z(), 0.355, 1e-4);
@@ -163,21 +164,28 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     const auto &spectrumInfo = output->spectrumInfo();
     const auto &detector = spectrumInfo.detector(0);
-    const auto &group = dynamic_cast<const DetectorGroup &>(detector);
-    TSM_ASSERT("Expected a DetectorGroup", group);
-    double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(1.4320);
-    const auto dets = group.getDetectors();
-    for (const auto &comp : dets) {
-      double r(-1.0), theta(-1.0), phi(-1.0);
-      comp->getPos().getSpherical(r, theta, phi);
-      TS_ASSERT_DELTA(expectedR, r, 1e-4);
-      TS_ASSERT_DELTA(expectedTheta, theta, 1e-4);
-      TS_ASSERT_DELTA(expectedPhi, phi, 1e-4);
 
-      std::vector<double> par = comp->getNumberParameter("t0");
-      TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
-      TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
+    auto canCastToGroup(true);
+    try {
+      const auto &group = dynamic_cast<const DetectorGroup &>(detector);
+      double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(1.4320);
+      const auto dets = group.getDetectors();
+      for (const auto &comp : dets) {
+        double r(-1.0), theta(-1.0), phi(-1.0);
+        comp->getPos().getSpherical(r, theta, phi);
+        TS_ASSERT_DELTA(expectedR, r, 1e-4);
+        TS_ASSERT_DELTA(expectedTheta, theta, 1e-4);
+        TS_ASSERT_DELTA(expectedPhi, phi, 1e-4);
+
+        std::vector<double> par = comp->getNumberParameter("t0");
+        TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
+        TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
+      }
     }
+    catch (const std::bad_cast&) {
+      canCastToGroup = false;
+    }
+    TS_ASSERT(canCastToGroup);
 
     AnalysisDataService::Instance().remove(wsName);
   }
