@@ -18,8 +18,19 @@ except ImportError:
     from matplotlib.backends.qt4_compat import QtCore
     from matplotlib.backends.qt4_compat import QtGui as QtWidgets
 
-# Import everyting from the *real* matplotlib backend
+# Import everything from the *real* matplotlib backend
 from matplotlib.backends.backend_qt4agg import *
+
+# Remove the implementations of new_figure_manager_*. We replace them below
+del new_figure_manager
+try:
+    # v<1.2 didn't have this method and had a different
+    # implementation of new_figure_manager. Use the absence
+    # this to detect old versions
+    del new_figure_manager_given_figure
+    MPL_HAVE_GIVEN_FIG_METHOD = True
+except NameError:
+    MPL_HAVE_GIVEN_FIG_METHOD = False
 
 
 class QAppThreadCall(QtCore.QObject):
@@ -28,15 +39,15 @@ class QAppThreadCall(QtCore.QObject):
     on the same thread as the QtGui.qApp object.
     """
 
-    def __init__(self, callable_obj):
+    def __init__(self, callee):
         QtCore.QObject.__init__(self)
         self.moveToThread(QtWidgets.qApp.thread())
-        self.callable_obj = callable_obj
+        self.callee = callee
         # Help should then give the correct doc
-        self.__call__.__func__.__doc__ = callable_obj.__doc__
+        self.__call__.__func__.__doc__ = callee.__doc__
         self._args = None
         self._kwargs = None
-        self._retvalue = None
+        self._result = None
         self._exc = None
 
     def __call__(self, *args, **kwargs):
@@ -47,15 +58,14 @@ class QAppThreadCall(QtCore.QObject):
         BlockingQueuedConnection.
         """
         if QtCore.QThread.currentThread() == QtWidgets.qApp.thread():
-            return self.callable_obj(*args, **kwargs)
+            return self.callee(*args, **kwargs)
         else:
-            self._clear_func_props()
-            self._store_func_props(*args, **kwargs)
+            self._store_function_args(*args, **kwargs)
             QtCore.QMetaObject.invokeMethod(self, "on_call",
                                             QtCore.Qt.BlockingQueuedConnection)
             if self._exc is not None:
                 raise self._exc #pylint: disable=raising-bad-type
-            return self._retvalue
+            return self._result
 
     @QtCore.pyqtSlot()
     def on_call(self):
@@ -63,26 +73,64 @@ class QAppThreadCall(QtCore.QObject):
         thread and return the result
         """
         try:
-            self._retvalue = \
-                self.callable_obj(*self._args, **self._kwargs)
+            self._result = \
+                self.callee(*self._args, **self._kwargs)
         except Exception as exc: #pylint: disable=broad-except
             self._exc = exc
 
-    def _clear_func_props(self):
-        self._args = None
-        self._kwargs = None
-        self._retvalue = None
-        self._exc = None
-
-    def _store_func_props(self, *args, **kwargs):
+    def _store_function_args(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
+        # Reset return value and exception
+        self._result = None
+        self._exc = None
 
+
+class ThreadAwareFigureManagerQT(FigureManagerQT):
+    """Our own FigureManager that ensures the destroy method
+    is invoked on the main Qt thread"""
+
+    def __init__(self, canvas, num):
+        super(ThreadAwareFigureManagerQT, self).__init__(canvas, num)
+        self._destroy_orig = self.destroy
+        self.destroy = QAppThreadCall(self._destroy_orig)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Wrap the required functions
 show = QAppThreadCall(show)
-new_figure_manager = QAppThreadCall(new_figure_manager)
-try:
-    # New in v1.5 but we need to work with older versions still
-    new_figure_manager_given_figure = QAppThreadCall(new_figure_manager_given_figure)
-except AttributeError:
-    pass
+# Use our figure manager
+FigureManager = ThreadAwareFigureManagerQT
+
+if MPL_HAVE_GIVEN_FIG_METHOD:
+    def _new_figure_manager_impl(num, *args, **kwargs):
+        """
+        Create a new figure manager instance
+        """
+        figure_class = kwargs.pop('FigureClass', Figure)
+        this_fig = figure_class(*args, **kwargs)
+        return new_figure_manager_given_figure(num, this_fig)
+
+
+    def _new_figure_manager_given_figure_impl(num, figure):
+        """
+        Create a new figure manager instance for the given figure.
+        """
+        canvas = FigureCanvasQT(figure)
+        manager = ThreadAwareFigureManagerQT(canvas, num)
+        return manager
+
+
+    new_figure_manager_given_figure = QAppThreadCall(_new_figure_manager_given_figure_impl)
+else:
+    def _new_figure_manager_impl(num, *args, **kwargs):
+        """
+        Create a new figure manager instance
+        """
+        figure_class = kwargs.pop('FigureClass', Figure)
+        this_fig = figure_class(*args, **kwargs)
+        canvas = FigureCanvasQTAgg(this_fig)
+        return ThreadAwareFigureManagerQT(canvas, num)
+# endif
+
+new_figure_manager = QAppThreadCall(_new_figure_manager_impl)
