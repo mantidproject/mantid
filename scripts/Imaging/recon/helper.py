@@ -75,13 +75,8 @@ class Helper(object):
         if not config.func.output_path:
             self.tomo_print_warning("No output path specified, no output will be produced!")
 
-
     @staticmethod
     def empty_init():
-        return Helper()
-
-    @staticmethod
-    def empty_init_conf():
         return Helper(ReconstructionConfig.empty_init())
 
     @staticmethod

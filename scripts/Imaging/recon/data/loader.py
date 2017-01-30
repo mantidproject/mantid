@@ -38,9 +38,43 @@ def supported_formats():
     return avail_list
 
 
+def load(input_path=None, input_path_flat=None, input_path_dark=None,
+         img_format='fits', data_dtype=np.float32, cores=1, chunksize=None, parallel_load=False, h=None):
+    """
+    Loads a stack, including sample, white and dark images.
+
+
+    :param input_path: Path for the input data folder
+    :param input_path_flat: Optional: Path for the input Flat images folder
+    :param input_path_dark: Optional: Path for the input Dark images folder
+    :param img_format: Default:'fits', format for the input images
+    :param data_dtype: Default:np.float32, data type for the input images
+    :param cores: Default:1, cores to be used if parallel_load is True
+    :param chunksize: chunk of work per worker
+    :param parallel_load: Default: False, if set to true the loading of the data will be done in parallel.
+            This could be faster depending on the IO system. For local HDD runs the recommended setting is False
+    :param h: Optional helper class. If not provided an empty one will be initialised.
+    :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
+    """
+
+    h = Helper.empty_init() if h is None else h
+
+    if img_format in ['fits', 'fit']:
+        sample, flat, dark = _do_img_load(fitsread, input_path, input_path_flat, input_path_dark, img_format,
+                                          data_dtype, cores, chunksize, parallel_load, h)
+    elif img_format in ['nxs']:
+        sample, flat, dark = _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_load, h)
+    else:
+        sample, flat, dark = _do_img_load(imread, input_path, input_path_flat, input_path_dark, img_format, data_dtype,
+                                          cores, chunksize, parallel_load, h)
+
+    Helper.check_data_stack(sample)
+
+    return sample, flat, dark
+
+
 def _do_img_load(load_func, input_path, input_path_flat, input_path_dark, img_format,
                  data_dtype, cores, chunksize, parallel_load, h):
-
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -75,8 +109,6 @@ def _do_img_load(load_func, input_path, input_path_flat, input_path_dark, img_fo
     # Assumed that all images have the same size and properties as the first.
     first_sample_img = load_func(sample_file_names[0])
 
-    # force provided data type on all images
-
     # get the shape of all images
     img_shape = first_sample_img.shape
 
@@ -85,43 +117,14 @@ def _do_img_load(load_func, input_path, input_path_flat, input_path_dark, img_fo
 
     # this removes the image number dimension, if we loaded a stack of images
     img_shape = img_shape[1:] if len(img_shape) > 2 else img_shape
-    flat_avg = _load_and_avg_data(load_func, input_path_flat, img_shape, img_format, data_dtype, "Flat", h)
-    dark_avg = _load_and_avg_data(load_func, input_path_dark, img_shape, img_format, data_dtype, "Dark", h)
+
+    flat_avg = _load_and_avg_data(load_func, input_path_flat, img_shape, img_format, data_dtype, "Flat", cores,
+                                  chunksize, parallel_load, h)
+
+    dark_avg = _load_and_avg_data(load_func, input_path_dark, img_shape, img_format, data_dtype, "Dark", cores,
+                                  chunksize, parallel_load, h)
 
     return sample_data, flat_avg, dark_avg
-
-
-def load(input_path=None, input_path_flat=None, input_path_dark=None,
-         img_format='fits', data_dtype=np.float32, cores=1, chunksize=None, parallel_load=False, h=None):
-    """
-    Loads a stack, including sample, white and dark images.
-
-
-    :param input_path: Path for the input data folder
-    :param input_path_flat: Optional: Path for the input Flat images folder
-    :param input_path_dark: Optional: Path for the input Dark images folder
-    :param img_format: Default:'fits', format for the input images
-    :param data_dtype: Default:np.float32, data type for the input images
-    :param cores: Default:1, cores to be used if parallel_load is True
-    :param chunksize: chunk of work per worker
-    :param parallel_load: Default: False, if set to true the loading of the data will be done in parallel.
-            This could be faster depending on the IO system. For local HDD runs the recommended setting is False
-    :param h: Optional helper class. If not provided an empty one will be initialised.
-    :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
-    """
-
-    h = Helper.empty_init() if h is None else h
-
-    if img_format in ['fits', 'fit']:
-        sample, flat, dark = _do_img_load(fitsread, input_path, input_path_flat, input_path_dark, img_format, data_dtype, cores, chunksize, parallel_load, h)
-    elif img_format in ['nxs']:
-        sample, flat, dark = _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_load, h)
-    else:
-        sample, flat, dark = _do_img_load(imread, input_path, input_path_flat, input_path_dark, img_format, data_dtype, cores, chunksize, parallel_load, h)
-
-    Helper.check_data_stack(sample)
-
-    return sample, flat, dark
 
 
 def _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_load, h):
@@ -154,11 +157,15 @@ def _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_
     return data[:-2, :, :], data[-2, :, :], data[-1, :, :]
 
 
-def _load_and_avg_data(load_func, file_path, img_shape, img_format, data_dtype, prog_prefix=None, h=None):
+def _load_and_avg_data(load_func, file_path, img_shape, img_format, data_dtype, prog_prefix=None, cores=1,
+                       chunksize=None,
+                       parallel_load=False, h=None):
     if file_path is not None:
         file_names = get_file_names(file_path, img_format)
 
-        data = _load_files(load_func, file_names, img_shape, data_dtype, prog_prefix, h)
+        data = _load_files(load_func, file_names, img_shape, data_dtype, prog_prefix, cores, chunksize,
+                           parallel_load, h)
+
         return get_data_average(data)
 
 
@@ -166,7 +173,8 @@ def _load_sample_data(load_func, sample_file_names, img_shape, data_dtype, cores
                       h=None):
     # determine what the loaded data was
     if len(img_shape) == 2:  # the loaded file was a single image
-        sample_data = _load_files(load_func, sample_file_names, img_shape, data_dtype, "Sample", h)
+        sample_data = _load_files(load_func, sample_file_names, img_shape, data_dtype, "Sample", cores, chunksize,
+                                  parallel_load, h)
     elif len(img_shape) == 3:  # the loaded file was a stack of fits images
         sample_data = _load_stack(load_func, sample_file_names[0], img_shape, data_dtype, "Sample", cores, chunksize,
                                   parallel_load, h)
@@ -176,7 +184,36 @@ def _load_sample_data(load_func, sample_file_names, img_shape, data_dtype, cores
     return sample_data
 
 
-def _load_files(load_func, files, img_shape, dtype, name=None, h=None):
+def _do_files_load_seq(data, load_func, files, img_shape, name, h):
+    h.prog_init(len(files), desc=name)
+    for idx, in_file in enumerate(files):
+        try:
+            data[idx, :, :] = load_func(in_file)[:]
+            h.prog_update(1)
+        except ValueError as exc:
+            raise ValueError(
+                "An image has different width and/or height dimensions! All images must have the same dimensions. "
+                "Expected dimensions: {0} Error message: {1}".format(img_shape, exc))
+        except IOError as exc:
+            raise RuntimeError(
+                "Could not load file {0}. Error details: {1}".format(in_file, exc))
+    h.prog_close()
+
+    return data
+
+
+def _par_inplace_load_fwd_func(data, file, load_func=None):
+    data[:] = load_func(file)
+
+
+def _do_files_load_par(data, load_func, files, cores, chunksize, name, h):
+    from parallel import two_shared_mem as ptsm
+    f = ptsm.create_partial(_par_inplace_load_fwd_func, ptsm.inplace_fwd_func, load_func=load_func)
+    ptsm.execute(data, files, f, cores, chunksize, name, h)
+    return data
+
+
+def _load_files(load_func, files, img_shape, dtype, name=None, cores=1, chunksize=None, parallel_load=False, h=None):
     """
     Reads image files in a row into a 3d numpy array. Useful when reading all the sample
     images, or all the flat or dark images.
@@ -206,20 +243,10 @@ def _load_files(load_func, files, img_shape, dtype, name=None, h=None):
     data = pu.create_shared_array(
         (len(files), img_shape[0], img_shape[1]), dtype=dtype)
 
-    h.prog_init(len(files), desc=name)
-    for idx, in_file in enumerate(files):
-        try:
-            data[idx, :, :] = load_func(in_file)[:]
-            h.prog_update(1)
-        except ValueError as exc:
-            raise ValueError(
-                "An image has different width and/or height dimensions! All images must have the same dimensions. "
-                "Expected dimensions: {0} Error message: {1}".format(img_shape, exc))
-        except IOError as exc:
-            raise RuntimeError(
-                "Could not load file {0}. Error details: {1}".format(in_file, exc))
-    h.prog_close()
-    return data
+    if parallel_load:
+        return _do_files_load_par(data, load_func, files, cores, chunksize, name, h)
+    else:
+        return _do_files_load_seq(data, load_func, files, img_shape, name, h)
 
 
 def _move_data(input_data, output_data):
@@ -269,11 +296,11 @@ def _do_stack_load_seq(data, load_func, file_name, img_shape, name, h):
     This performs faster locally, but parallel performs faster on SCARF
 
     :param data: shared array of data
-    :param file_name: the name of the stack file
-    :param h:
     :param load_func:
+    :param file_name: the name of the stack file
     :param img_shape:
     :param name:
+    :param h:
     :return:
     """
     # this will open the file but not read all of it in
