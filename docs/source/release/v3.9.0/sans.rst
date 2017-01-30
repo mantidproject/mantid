@@ -10,7 +10,7 @@ Features
 
 - Make added multi-period event files available for the ISIS SANS reduction.
 - Added NXcanSAS as an output format of the ISIS SANS Gui.
-- Added MASK/LINE for LOQ
+- Added MASK/LINE for LOQ. This allows for masking of the beam stop arm.
 
 Bug Fixes
 ---------
