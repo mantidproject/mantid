@@ -30,13 +30,17 @@ public:
     start_str = "2011-07-14T12:00Z"; // Noon on Bastille day 2011.
   }
 
-  void testCopyHist() { this->verify("ShiftLogTime_in", "ShiftLogTime_out",5); }
+  void testCopyHist() {
+    this->verify("ShiftLogTime_in", "ShiftLogTime_out", 5);
+  }
 
-  void testInplace() { this->verify("ShiftLogTime", "ShiftLogTime",5); }
+  void testInplace() { this->verify("ShiftLogTime", "ShiftLogTime", 5); }
 
-  void testCopyHistNeg() { this->verify("ShiftLogTime_in", "ShiftLogTime_out",-5); }
+  void testCopyHistNeg() {
+    this->verify("ShiftLogTime_in", "ShiftLogTime_out", -5);
+  }
 
-  void testInplaceNeg() { this->verify("ShiftLogTime", "ShiftLogTime",-5); }
+  void testInplaceNeg() { this->verify("ShiftLogTime", "ShiftLogTime", -5); }
 
 private:
   /// Name of the log to create/modify.
@@ -52,7 +56,8 @@ private:
    * @param in_name Name of the input workspace.
    * @param out_name Name of the output workspace.
    */
-  void verify(const std::string in_name, const std::string out_name, const int shift) {
+  void verify(const std::string in_name, const std::string out_name,
+              const int shift) {
     DateAndTime start(start_str);
 
     // create a workspace to mess with
@@ -95,16 +100,18 @@ private:
     TS_ASSERT(newlog);
     TS_ASSERT(!newlog->units().empty());
     TS_ASSERT_EQUALS(length - std::abs(shift), newlog->size());
-    if (shift>0) {
+    if (shift > 0) {
       TS_ASSERT_EQUALS(start + static_cast<double>(shift), newlog->firstTime());
       TS_ASSERT_EQUALS(0., newlog->firstValue());
-      TS_ASSERT_EQUALS(start+static_cast<double>(length-1),newlog->lastTime());
-      TS_ASSERT_EQUALS(static_cast<double>(shift-1), newlog->lastValue());
+      TS_ASSERT_EQUALS(start + static_cast<double>(length - 1),
+                       newlog->lastTime());
+      TS_ASSERT_EQUALS(static_cast<double>(shift - 1), newlog->lastValue());
     }
-    if (shift<0) {
+    if (shift < 0) {
       TS_ASSERT_EQUALS(start, newlog->firstTime());
       TS_ASSERT_EQUALS(static_cast<double>(-shift), newlog->firstValue());
-      TS_ASSERT_EQUALS(start+static_cast<double>(-shift-1),newlog->lastTime());
+      TS_ASSERT_EQUALS(start + static_cast<double>(-shift - 1),
+                       newlog->lastTime());
       TS_ASSERT_EQUALS(9., newlog->lastValue());
     }
 
