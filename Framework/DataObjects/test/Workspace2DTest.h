@@ -9,6 +9,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/CPUTimer.h"
 #include "PropertyManagerHelper.h"
 
@@ -205,8 +206,7 @@ public:
     const auto &spectrumInfo = ws->spectrumInfo();
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpixels; i++) {
-      const auto det = spectrumInfo.detector(i);
-      TS_ASSERT(det);
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
     }
   }
 

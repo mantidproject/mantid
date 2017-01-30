@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
