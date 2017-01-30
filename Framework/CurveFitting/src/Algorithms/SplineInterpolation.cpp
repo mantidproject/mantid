@@ -374,11 +374,13 @@ void SplineInterpolation::setXRange(
       if (nOutsideLeft > 0) {
         double *yValues = &(inputWorkspace->mutableY(n)[0]);
         std::fill_n(yValues, nOutsideLeft, yRef[0]);
-        g_log.warning() << nOutsideLeft << " x value(s) smaller than integration "
-                                           "range, will not be calculated.\n";
+        g_log.warning() << nOutsideLeft
+                        << " x value(s) smaller than integration "
+                           "range, will not be calculated.\n";
       }
       if (nOutsideRight > 0) {
-        double *yValuesEnd = &(inputWorkspace->mutableY(n)[nData - nOutsideRight]);
+        double *yValuesEnd =
+            &(inputWorkspace->mutableY(n)[nData - nOutsideRight]);
         std::fill_n(yValuesEnd, nOutsideRight, yRef[nintegData - 1]);
         g_log.warning() << nOutsideRight << " x value(s) larger than "
                                             "integration range, will not be "
