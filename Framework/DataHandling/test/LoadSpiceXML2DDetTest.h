@@ -348,8 +348,7 @@ public:
     double sample_center_distance = spectrumInfo.l2(center_ws_index);
     // TS_ASSERT_DELTA(center_det_pos.X(), )
     TS_ASSERT_DELTA(sample_center_distance, 0.3750, 0.0000001);
-    double sample_center_angle =
-        (sample - source).angle(center_det_pos - sample);
+    double sample_center_angle = spectrumInfo.twoTheta(center_ws_index);
     TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, twotheta_log, 0.0001);
 
     size_t ll_ws_index = 0;
@@ -431,8 +430,7 @@ public:
     double dist_r = spectrumInfo.l2(center_ws_index);
     TS_ASSERT_DELTA(dist_r, 0.3750 + 0.1, 0.0001);
     // center of the detector at 15 degree
-    double sample_center_angle =
-        (sample - source).angle(center_det_pos - sample);
+    const auto sample_center_angle = spectrumInfo.twoTheta(center_ws_index);
     TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, 15., 0.0001);
 
     // test the detectors with symmetric to each other
@@ -555,9 +553,7 @@ public:
     // distance
     std::cout << "Sample center distance: " << sample_center_distance << "\n";
     TS_ASSERT_DELTA(sample_center_distance, 0.3750, 0.0000001);
-    // 2-theta angle
-    double sample_center_angle =
-        (sample - source).angle(center_det_pos - sample);
+    const auto sample_center_angle = spectrumInfo.twoTheta(center_ws_index);
     TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, twotheta_log, 0.0001);
 
     // symmetry from now on!

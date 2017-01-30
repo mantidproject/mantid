@@ -173,11 +173,8 @@ public:
         TS_ASSERT_EQUALS(detector103.getName(), "linear-detector-pixel");
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 12.403, 0.01);
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Y(), 0.1164, 0.01);
-        double d =
-            detectorInfo.position(detectorIndex).distance(samplepos->getPos());
+        const auto d = detectorInfo.l2(detectorIndex);
         TS_ASSERT_DELTA(d, 2.1561, 0.0001);
-        double cmpDistance = detector103.getDistance(*samplepos);
-        TS_ASSERT_DELTA(cmpDistance, 2.1561, 0.0001);
       }
     }
 
