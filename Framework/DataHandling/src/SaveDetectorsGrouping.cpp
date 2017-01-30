@@ -2,32 +2,19 @@
 #include <fstream>
 #include <sstream>
 
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/XML/XMLWriter.h>
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidKernel/System.h"
 
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Text.h>
-
-#ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from
-// std::basic_istream
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
-#include <Poco/XML/XMLWriter.h>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
