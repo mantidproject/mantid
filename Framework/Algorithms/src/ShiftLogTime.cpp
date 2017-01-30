@@ -84,7 +84,7 @@ void ShiftLogTime::exec() {
     times.erase(times.begin(), times.begin() + indexshift);
   } else // indexshift < 0
   { 
-    //indexshift<0, so -indexshift>0
+    // indexshift<0, so -indexshift>0
     values.erase(values.begin(), values.begin() - indexshift);
     times.erase(times.end() + indexshift, times.end());
   }
