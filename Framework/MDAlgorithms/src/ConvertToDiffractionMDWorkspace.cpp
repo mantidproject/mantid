@@ -5,6 +5,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -129,11 +130,13 @@ typedef DataObjects::MDLeanEvent<3> MDE;
  * Depending on options, it uses the histogram view or the
  * pure event view.
  * Then another method converts to 3D q-space and adds it to the
- *MDEventWorkspace
+ * MDEventWorkspace
  *
+ * @param specInfo :: input workspace spectrum info
  * @param workspaceIndex :: index into the workspace
  */
-void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
+void ConvertToDiffractionMDWorkspace::convertSpectrum(
+    const API::SpectrumInfo &specInfo, int workspaceIndex) {
   if (m_inEventWS && !OneEventPerBin) {
     // ---------- Convert events directly -------------------------
     EventList &el = m_inEventWS->getSpectrum(workspaceIndex);
@@ -141,13 +144,13 @@ void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
     // Call the right templated function
     switch (el.getEventType()) {
     case TOF:
-      this->convertEventList<TofEvent>(workspaceIndex, el);
+      this->convertEventList<TofEvent>(workspaceIndex, specInfo, el);
       break;
     case WEIGHTED:
-      this->convertEventList<WeightedEvent>(workspaceIndex, el);
+      this->convertEventList<WeightedEvent>(workspaceIndex, specInfo, el);
       break;
     case WEIGHTED_NOTIME:
-      this->convertEventList<WeightedEventNoTime>(workspaceIndex, el);
+      this->convertEventList<WeightedEventNoTime>(workspaceIndex, specInfo, el);
       break;
     default:
       throw std::runtime_error("EventList had an unexpected data type!");
@@ -168,7 +171,7 @@ void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
         (OneEventPerBin ? 1 : 10) /* Max of this many events per bin */);
 
     // Perform the conversion on this temporary event list
-    this->convertEventList<WeightedEventNoTime>(workspaceIndex, el);
+    this->convertEventList<WeightedEventNoTime>(workspaceIndex, specInfo, el);
   }
 }
 
@@ -181,8 +184,8 @@ void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
  * @param el :: reference to the event list
  */
 template <class T>
-void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
-                                                       EventList &el) {
+void ConvertToDiffractionMDWorkspace::convertEventList(
+    int workspaceIndex, const API::SpectrumInfo &specInfo, EventList &el) {
   size_t numEvents = el.getNumberEvents();
   DataObjects::MDBoxBase<DataObjects::MDLeanEvent<3>, 3> *box = ws->getBox();
 
@@ -192,6 +195,10 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     // Get the detector (might be a detectorGroup for multiple detectors)
     // or might return an exception if the detector is not in the instrument
     // definition
+    if (!specInfo.hasDetector(workspaceIndex)) {
+      //this->failedDetectorLookupCount++;
+      //return;
+    }
     IDetector_const_sptr det;
     try {
       det = m_inWS->getDetector(workspaceIndex);
@@ -205,6 +212,10 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
 
     // Neutron's total travelled distance
     double distance = detPos.norm() + l1;
+    double distance2 = specInfo.l2(workspaceIndex);
+
+    std::cout << "dist 1 = " << distance << "\n";
+    std::cout << "dist 2 = " << distance2 << "\n";
 
     // Detector direction normalized to 1
     V3D detDir = detPos / detPos.norm();
@@ -303,9 +314,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     }
 
     // Clear out the EventList to save memory
-    if (ClearInputWorkspace) {
+    if (ClearInputWorkspace)
       el.clear();
-    }
   }
   prog->reportIncrement(numEvents, "Adding Events");
 }
@@ -518,6 +528,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     g_log.information() << cputim << ": initial setup. There are "
                         << lastNumBoxes << " MDBoxes.\n";
 
+  const auto &specInfo = m_inWS->spectrumInfo();
   for (size_t wi = 0; wi < m_inWS->getNumberHistograms();) {
     // 1. Determine next chunk of spectra to process
     int start = static_cast<int>(wi);
@@ -539,7 +550,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_inWS))
     for (int i = start; i < static_cast<int>(wi); ++i) {
       PARALLEL_START_INTERUPT_REGION
-      this->convertSpectrum(static_cast<int>(i));
+      this->convertSpectrum(specInfo, static_cast<int>(i));
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
