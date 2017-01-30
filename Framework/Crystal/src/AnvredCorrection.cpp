@@ -261,8 +261,6 @@ void AnvredCorrection::execEvent() {
   // If sample not at origin, shift cached positions.
   Instrument_const_sptr inst = m_inputWS->getInstrument();
 
-  const V3D samplePos = inst->getSample()->getPos();
-
   const auto &spectrumInfo = eventW->spectrumInfo();
   double L1 = spectrumInfo.l1();
 
