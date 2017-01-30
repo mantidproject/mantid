@@ -352,11 +352,12 @@ void LoadVulcanCalFile::processOffsets(
     std::map<detid_t, double> map_detoffset) {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
+  const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
+
   // Map from Mantid instrument to VULCAN offset
   map<detid_t, size_t> map_det2index;
   for (size_t i = 0; i < numspec; ++i) {
-    Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(i);
-    detid_t tmpid = det->getID();
+    detid_t tmpid = spectrumInfo.detector(i).getID();
 
     // Map between detector ID and workspace index
     map_det2index.emplace(tmpid, i);
@@ -374,8 +375,8 @@ void LoadVulcanCalFile::processOffsets(
     } else {
       size_t wsindex = fiter->second;
       // Get bank ID from instrument tree
-      Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(wsindex);
-      Geometry::IComponent_const_sptr parent = det->getParent();
+      const auto &det = spectrumInfo.detector(wsindex);
+      Geometry::IComponent_const_sptr parent = det.getParent();
       string pname = parent->getName();
 
       vector<string> terms;
@@ -456,7 +457,7 @@ void LoadVulcanCalFile::processOffsets(
   map<detid_t, double>::iterator offsetiter;
   map<int, double>::iterator bankcorriter;
   for (size_t iws = 0; iws < numspec; ++iws) {
-    detid_t detid = m_tofOffsetsWS->getDetector(iws)->getID();
+    detid_t detid = spectrumInfo.detector(iws).getID();
     offsetiter = map_detoffset.find(detid);
     if (offsetiter == map_detoffset.end())
       throw runtime_error("It cannot happen!");
@@ -536,18 +537,17 @@ void LoadVulcanCalFile::convertOffsets() {
         "The simple version to calcualte detector's 2theta fails on this "
         "situation.");
 
+  const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
   map<int, pair<double, double>>::iterator mfiter;
   for (size_t iws = 0; iws < numspec; ++iws) {
     // Get detector's information including bank belonged to and geometry
     // parameters
-    Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(iws);
-    V3D detPos = det->getPos();
 
-    detid_t detid = det->getID();
+    detid_t detid = spectrumInfo.detector(iws).getID();
     int bankid = detid / static_cast<int>(NUMBERRESERVEDPERMODULE);
 
     double l2, twotheta, phi;
-    detPos.getSpherical(l2, twotheta, phi);
+	spectrumInfo.position(iws).getSpherical(l2, twotheta, phi);
 
     // Get effective
     mfiter = m_effLTheta.find(bankid);
