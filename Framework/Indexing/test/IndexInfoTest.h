@@ -49,6 +49,32 @@ public:
 
   void test_size() { TS_ASSERT_EQUALS(IndexInfo(3).size(), 3); }
 
+  void test_copy() {
+    const IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    auto copy(info);
+    TS_ASSERT_EQUALS(info.size(), 3);
+    TS_ASSERT_EQUALS(copy.size(), 3);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(0), 3);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(2), 1);
+    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<DetectorID>{}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(1), (std::vector<DetectorID>{10}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
+  }
+
+  void test_move() {
+    IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    auto moved(std::move(info));
+    TS_ASSERT_EQUALS(info.size(), 0);
+    TS_ASSERT_EQUALS(moved.size(), 3);
+    TS_ASSERT_EQUALS(moved.spectrumNumber(0), 3);
+    TS_ASSERT_EQUALS(moved.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(moved.spectrumNumber(2), 1);
+    TS_ASSERT_EQUALS(moved.detectorIDs(0), (std::vector<DetectorID>{}));
+    TS_ASSERT_EQUALS(moved.detectorIDs(1), (std::vector<DetectorID>{10}));
+    TS_ASSERT_EQUALS(moved.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
+  }
+
   void test_setSpectrumNumbers_size_mismatch() {
     IndexInfo t(3);
     TS_ASSERT_THROWS(t.setSpectrumNumbers({1, 2}), std::runtime_error);

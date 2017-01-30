@@ -14,8 +14,7 @@ namespace Indexing {
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no detector IDs.
 IndexInfo::IndexInfo(const size_t globalSize)
-    : m_size(globalSize),
-      m_spectrumNumbers(
+    : m_spectrumNumbers(
           Kernel::make_cow<std::vector<SpectrumNumber>>(globalSize)),
       m_detectorIDs(
           Kernel::make_cow<std::vector<std::vector<DetectorID>>>(globalSize)) {
@@ -28,8 +27,7 @@ IndexInfo::IndexInfo(const size_t globalSize)
 /// Construct with given spectrum number and vector of detector IDs for each
 /// index.
 IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
-                     std::vector<std::vector<DetectorID>> &&detectorIDs)
-    : m_size(spectrumNumbers.size()) {
+                     std::vector<std::vector<DetectorID>> &&detectorIDs) {
   if (spectrumNumbers.size() != detectorIDs.size())
     throw std::runtime_error("IndexInfo: Size mismatch between spectrum number "
                              "and detector ID vectors");
@@ -38,11 +36,12 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
   makeSpectrumNumberTranslator();
 }
 
-// Defined as default in source for forward declaration with std::unique_ptr.
-IndexInfo::~IndexInfo() = default;
-
 /// The *local* size, i.e., the number of spectra in this partition.
-size_t IndexInfo::size() const { return m_size; }
+size_t IndexInfo::size() const {
+  if (!m_spectrumNumbers)
+    return 0;
+  return m_spectrumNumbers->size();
+}
 
 /// Returns the spectrum number for given index.
 SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {

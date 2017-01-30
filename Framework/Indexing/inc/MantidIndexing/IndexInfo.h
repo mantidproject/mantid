@@ -57,7 +57,6 @@ public:
   explicit IndexInfo(const size_t globalSize);
   IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
             std::vector<std::vector<DetectorID>> &&detectorIDs);
-  ~IndexInfo();
 
   size_t size() const;
 
@@ -85,7 +84,6 @@ public:
 
 private:
   void makeSpectrumNumberTranslator();
-  size_t m_size;
   Kernel::cow_ptr<std::vector<SpectrumNumber>> m_spectrumNumbers;
   Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
   Kernel::cow_ptr<std::vector<SpectrumDefinition>>
