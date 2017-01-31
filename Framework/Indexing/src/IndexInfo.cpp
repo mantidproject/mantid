@@ -1,5 +1,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/make_cow.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
 #include <functional>
@@ -126,6 +127,9 @@ void IndexInfo::setDetectorIDs(
 
 void IndexInfo::setSpectrumDefinitions(
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
+  if (!spectrumDefinitions || (size() != spectrumDefinitions->size()))
+    throw std::runtime_error(
+        "IndexInfo: Size mismatch when setting new spectrum definitions");
   m_spectrumDefinitions = spectrumDefinitions;
 }
 

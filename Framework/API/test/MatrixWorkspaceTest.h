@@ -172,10 +172,7 @@ public:
     TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
   }
 
-  void test_IndexInfo_spectrumDefinition() {
-    // This test is for a method of IndexInfo, but cannot be tested there since
-    // SpectrumDefinition is part of Beamline and the Indexing module does not
-    // depend on Beamline.
+  void test_setIndexInfo_shares_spectrumDefinition() {
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
     IndexInfo indices(3);
