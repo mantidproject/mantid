@@ -34,7 +34,7 @@ class GaussianTest(unittest.TestCase):
         size = None
         mode = None
         order = None
-        result = self.alg.execute(images, size, mode, order, self.h)
+        result = self.alg.execute(images, size, mode, order, h=self.h)
         npt.assert_equal(
             result, control, err_msg=err_msg.format(size, mode, order))
 
@@ -46,7 +46,7 @@ class GaussianTest(unittest.TestCase):
         size = 3
         mode = 'reflect'
         order = 1
-        result = self.alg.execute(images, size, mode, order, self.h)
+        result = self.alg.execute(images, size, mode, order, h=self.h)
         npt.assert_raises(AssertionError, npt.assert_equal, result, control)
 
     def test_executed_no_helper(self):

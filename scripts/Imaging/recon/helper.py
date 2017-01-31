@@ -44,9 +44,6 @@ class Helper(object):
         # for timer
         self._progress_bar = None
 
-        if config is None:
-            self.tomo_print_warning("Helper class initialised without config!")
-
         # sneaky copy of the config
         self._config = config
 
@@ -57,7 +54,9 @@ class Helper(object):
 
     @staticmethod
     def check_config_class(config):
-        assert isinstance(config, ReconstructionConfig), "The provided config is invalid and cannot be used."
+        assert isinstance(config, ReconstructionConfig), "The provided config is invalid and cannot be used. " \
+                                                         "You can create a Helper instantiation with an empty " \
+                                                         "ReconstructionConfig using Helper.empty_init()"
 
     def check_config_integrity(self, config):
         if not config or not isinstance(config, ReconstructionConfig):

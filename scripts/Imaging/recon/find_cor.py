@@ -74,7 +74,7 @@ def execute(config):
     h.prog_init(len(slice_indices), "Center of Rotation", unit='calculations')
     for slice_idx in slice_indices:
         cor = tool.find_center(
-            tomo=sample, theta=projection_angles, ind=slice_idx, emission=False)
+            tomo=sample, theta=projection_angles, ind=slice_idx)
 
         print_proper_message(cor, h, pixels_from_left_side, slice_idx)
         h.prog_update()
