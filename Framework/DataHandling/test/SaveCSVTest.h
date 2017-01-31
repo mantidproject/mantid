@@ -3,12 +3,11 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -41,9 +40,9 @@ public:
 
     double d = 0.0;
     for (int i = 0; i < 10; ++i, d += 0.1) {
-      localWorkspace2D_onePixel->dataX(0)[i] = d;
-      localWorkspace2D_onePixel->dataY(0)[i] = d + 1.0;
-      localWorkspace2D_onePixel->dataE(0)[i] = d + 2.0;
+      localWorkspace2D_onePixel->mutableX(0)[i] = d;
+      localWorkspace2D_onePixel->mutableY(0)[i] = d + 1.0;
+      localWorkspace2D_onePixel->mutableE(0)[i] = d + 2.0;
     }
 
     AnalysisDataService::Instance().add("SAVECSVTEST-testSpace",
@@ -130,11 +129,12 @@ private:
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
                                                   nBins + 1, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
+      auto &X = ws->mutableX(j);
       for (size_t k = 0; k < nBins + 1; ++k) {
-        ws->dataX(j)[k] = double(k);
+        X[k] = double(k);
       }
-      ws->dataY(j).assign(nBins, double(j));
-      ws->dataE(j).assign(nBins, sqrt(double(j)));
+      ws->mutableY(j).assign(nBins, double(j));
+      ws->mutableE(j).assign(nBins, sqrt(double(j)));
       ws->setPointStandardDeviations(j, nBins, sqrt(double(j)));
     }
     return ws;
