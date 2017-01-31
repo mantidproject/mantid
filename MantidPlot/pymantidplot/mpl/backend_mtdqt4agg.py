@@ -17,9 +17,9 @@ except ImportError:
     # whereas older has qt4_compat with no QtWidgets
     from matplotlib.backends.qt4_compat import QtCore
     from matplotlib.backends.qt4_compat import QtGui as QtWidgets
-
 # Import everything from the *real* matplotlib backend
 from matplotlib.backends.backend_qt4agg import *
+import six
 
 # Remove the implementations of new_figure_manager_*. We replace them below
 del new_figure_manager
@@ -64,7 +64,7 @@ class QAppThreadCall(QtCore.QObject):
             QtCore.QMetaObject.invokeMethod(self, "on_call",
                                             QtCore.Qt.BlockingQueuedConnection)
             if self._exc_info is not None:
-                raise self._exc_info[1], None, self._exc_info[2]
+                six.reraise(*self._exc_info)
             return self._result
 
     @QtCore.pyqtSlot()
@@ -76,8 +76,6 @@ class QAppThreadCall(QtCore.QObject):
             self._result = \
                 self.callee(*self._args, **self._kwargs)
         except Exception as exc: #pylint: disable=broad-except
-            # Store exception info to get better traceback when rethrown
-            # http://nedbatchelder.com/blog/200711/rethrowing_exceptions_in_python.html
             import sys
             self._exc_info = sys.exc_info()
 
