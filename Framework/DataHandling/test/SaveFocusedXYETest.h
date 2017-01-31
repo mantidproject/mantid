@@ -1,14 +1,6 @@
 #ifndef SAVEFOCUSEDXYETEST_H_
 #define SAVEFOCUSEDXYETEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include <cmath>
-#include <fstream>
-#include <Poco/File.h>
-#include <sstream>
-#include <string>
-
 #include "MantidDataHandling/SaveFocusedXYE.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -20,6 +12,13 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
+
+#include <cmath>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 class SaveFocusedXYETest : public CxxTest::TestSuite {
 public:

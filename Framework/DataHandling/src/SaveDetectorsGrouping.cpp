@@ -1,6 +1,9 @@
-#include <algorithm>
-#include <fstream>
-#include <sstream>
+#include "MantidDataHandling/SaveDetectorsGrouping.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Run.h"
+#include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -9,11 +12,9 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/Run.h"
-#include "MantidDataHandling/SaveDetectorsGrouping.h"
-#include "MantidKernel/System.h"
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

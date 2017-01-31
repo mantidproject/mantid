@@ -1,10 +1,5 @@
 #include "MantidDataHandling/SaveGSS.h"
 
-#include <cmath>
-#include <fstream>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
@@ -16,6 +11,12 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidHistogramData/Histogram.h"
+
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
+#include <cmath>
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
