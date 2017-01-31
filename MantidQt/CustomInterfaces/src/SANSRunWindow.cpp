@@ -1024,9 +1024,9 @@ bool SANSRunWindow::loadUserFile() {
   // Set the beam finder specific settings
   setBeamFinderDetails();
   // get the scale factor1 for the beam centre to scale it correctly
-  dbl_param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton().get_beam_center('rear')[0])").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().get_beam_center('rear')[0])")
+                  .toDouble();
   double dbl_paramsf =
       runReduceScriptFunction(
           "print(i.ReductionSingleton().get_beam_center_scale_factor1())")
@@ -1037,9 +1037,9 @@ bool SANSRunWindow::loadUserFile() {
       runReduceScriptFunction(
           "print(i.ReductionSingleton().get_beam_center_scale_factor2())")
           .toDouble();
-  dbl_param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton().get_beam_center('rear')[1])").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().get_beam_center('rear')[1])")
+                  .toDouble();
   m_uiForm.rear_beam_y->setText(QString::number(dbl_param * dbl_paramsf));
   // front
   dbl_param = runReduceScriptFunction(
@@ -1052,8 +1052,8 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
   // Gravity switch
   QString param =
-      runReduceScriptFunction("print(i.ReductionSingleton().to_Q.get_gravity())")
-          .trimmed();
+      runReduceScriptFunction(
+          "print(i.ReductionSingleton().to_Q.get_gravity())").trimmed();
   if (param == "True") {
     m_uiForm.gravity_check->setChecked(true);
   } else {
@@ -1240,12 +1240,12 @@ void SANSRunWindow::updateMaskTable() {
 
   // Now add information from the mask file
   // Spectrum mask, "Rear" det
-  QString mask_string =
-      runReduceScriptFunction("print (i.ReductionSingleton().mask.spec_mask_r)");
+  QString mask_string = runReduceScriptFunction(
+      "print (i.ReductionSingleton().mask.spec_mask_r)");
   addSpectrumMasksToTable(mask_string, reardet_name);
   //"Front" det
-  mask_string =
-      runReduceScriptFunction("print (i.ReductionSingleton().mask.spec_mask_f)");
+  mask_string = runReduceScriptFunction(
+      "print (i.ReductionSingleton().mask.spec_mask_f)");
   addSpectrumMasksToTable(mask_string, frontdet_name);
 
   // Time masks
@@ -3328,14 +3328,14 @@ void SANSRunWindow::updateTransInfo(int state) {
 
   if (state == Qt::Checked) {
     _min->setEnabled(true);
-    _min->setText(
-        runReduceScriptFunction(
-            "print(i.ReductionSingleton().instrument.WAV_RANGE_MIN)").trimmed());
+    _min->setText(runReduceScriptFunction(
+                      "print(i.ReductionSingleton().instrument.WAV_RANGE_MIN)")
+                      .trimmed());
 
     _max->setEnabled(true);
-    _max->setText(
-        runReduceScriptFunction(
-            "print(i.ReductionSingleton().instrument.WAV_RANGE_MAX)").trimmed());
+    _max->setText(runReduceScriptFunction(
+                      "print(i.ReductionSingleton().instrument.WAV_RANGE_MAX)")
+                      .trimmed());
 
   } else {
     _min->setEnabled(false);
@@ -3429,7 +3429,11 @@ bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
   assignCom.append(")");
   // assign the workspace name to a Python variable and read back some details
   QString pythonC = "t1, t2 = " + assignCom + ";print('" + PYTHON_SEP +
-                    "' + " " + t1 + " " + '" + PYTHON_SEP + "' + " " + t2";
+                    "' + "
+                    " + t1 + "
+                    " + '" +
+                    PYTHON_SEP + "' + "
+                                 " + t2";
   QString ws_names = runReduceScriptFunction(pythonC);
   if (ws_names.startsWith("error", Qt::CaseInsensitive)) {
     throw std::runtime_error("Couldn't load a transmission file");
@@ -4371,8 +4375,9 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(
     auto roi = m_uiForm.trans_roi_files_line_edit->text();
     if (m_uiForm.trans_roi_files_checkbox->isChecked() && !roi.isEmpty()) {
       roi = "'" + roi.simplified() + "'";
-      roi = runPythonCode(
-          "\nprint(i.ConvertToPythonStringList(to_convert=" + roi + "))", false);
+      roi = runPythonCode("\nprint(i.ConvertToPythonStringList(to_convert=" +
+                              roi + "))",
+                          false);
       pythonCode += "i.SetTransmissionROI(trans_roi_files=" + roi + ")\n";
     }
     // Handle Mask
@@ -4546,7 +4551,8 @@ void SANSRunWindow::updateBeamCenterCoordinates() {
   // from the ticket #5942 both detectors have center coordinates
   double dbl_param =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().get_beam_center('rear')[0])").toDouble();
+          "print(i.ReductionSingleton().get_beam_center('rear')[0])")
+          .toDouble();
   // get the scale factor1 for the beam centre to scale it correctly
   double dbl_paramsf =
       runReduceScriptFunction(
@@ -4558,9 +4564,9 @@ void SANSRunWindow::updateBeamCenterCoordinates() {
       runReduceScriptFunction(
           "print(i.ReductionSingleton().get_beam_center_scale_factor2())")
           .toDouble();
-  dbl_param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton().get_beam_center('rear')[1])").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().get_beam_center('rear')[1])")
+                  .toDouble();
   m_uiForm.rear_beam_y->setText(QString::number(dbl_param * dbl_paramsf));
   // front
   dbl_param = runReduceScriptFunction(
