@@ -64,8 +64,6 @@ def create_geometry(file_name=None, tube_width=TUBE_WIDTH, tube_length=TUBE_SIZE
     for i in range(0, NUM_BANKS/2):
         i_low_bank = i
         i_high_bank = i+NUM_BANKS/2
-        low_bank = "bank"+str(i_low_bank+1)
-        high_bank = "bank"+str(i_high_bank+1)
 
         # FRONT plane
         for j in range(NUM_TUBES_PER_BANK):

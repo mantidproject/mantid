@@ -558,7 +558,8 @@ class StitcherWidget(BaseWidget):
 
         else: #REF_M
             for item in AnalysisDataService.getObjectNames():
-                if item.startswith("reflectivity") and not item.endswith("scaled") and item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
+                if item.startswith("reflectivity") and not item.endswith("scaled") and \
+                   item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
                     self._add_entry(item)
 
         if len(self._workspace_list)>0:

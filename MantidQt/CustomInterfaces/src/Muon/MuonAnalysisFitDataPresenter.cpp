@@ -6,12 +6,14 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
+using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
@@ -107,10 +109,19 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
     const Muon::PlotType &plotType, double timeZero,
     const RebinOptions &rebinArgs)
-    : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
-      m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs),
-      m_grouping(grouping), m_plotType(plotType),
-      m_fitRawData(fitBrowser->rawData()), m_overwrite(false) {
+    : m_fitBrowser(fitBrowser), m_fitModel(nullptr),
+      m_dataSelector(dataSelector), m_dataLoader(dataLoader),
+      m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping),
+      m_plotType(plotType), m_fitRawData(fitBrowser->rawData()),
+      m_overwrite(false) {
+  // Make sure the FitPropertyBrowser passed in implements the required
+  // interfaces
+  m_fitModel = dynamic_cast<IMuonFitDataModel *>(m_fitBrowser);
+  if (!m_fitModel) {
+    throw std::invalid_argument(
+        "Fit property browser does not implement required interface");
+  }
+
   // Ensure this is set correctly at the start
   handleSimultaneousFitLabelChanged();
   doConnect();
@@ -129,8 +140,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(handleXRangeChangedGraphically(double, double)));
     connect(fitBrowser, SIGNAL(sequentialFitRequested()), this,
             SLOT(openSequentialFitDialog()));
-    connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
-            SLOT(checkAndUpdateFitLabel(bool)));
+    connect(fitBrowser, SIGNAL(preFitChecksRequested(bool)), this,
+            SLOT(doPreFitChecks(bool)));
     connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this,
             SLOT(handleFitRawData(bool)));
   }
@@ -149,9 +160,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
  * Updates WS index, startX, endX
  */
 void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
-  // update workspace index
-  const unsigned int wsIndex = m_dataSelector->getWorkspaceIndex();
-  m_fitBrowser->setWorkspaceIndex(static_cast<int>(wsIndex));
+  // update workspace index: always 0
+  m_fitBrowser->setWorkspaceIndex(0);
 
   // update start and end times
   const double start = m_dataSelector->getStartTime();
@@ -189,16 +199,19 @@ void MuonAnalysisFitDataPresenter::handleXRangeChangedGraphically(double start,
 /**
  * Called by selectMultiPeak: fit browser has been reassigned to a new
  * workspace.
- * Sets run number, instrument and workspace index in the data selector.
+ * Sets run number and instrument in the data selector.
  * If multiple runs selected, disable sequential fit option.
  * @param wsName :: [input] Name of new workspace
+ * @param filePath :: [input] Optional path to workspace in case of load current
+ * run, when it has a temporary name like MUSRauto_E.tmp
  */
-void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
+void MuonAnalysisFitDataPresenter::setAssignedFirstRun(
+    const QString &wsName, const boost::optional<QString> &filePath) {
   if (wsName == m_PPAssignedFirstRun)
     return;
 
   m_PPAssignedFirstRun = wsName;
-  setUpDataSelector(wsName);
+  setUpDataSelector(wsName, filePath);
 }
 
 /**
@@ -237,7 +250,7 @@ void MuonAnalysisFitDataPresenter::updateWorkspaceNames(
   std::transform(
       names.begin(), names.end(), std::back_inserter(qNames),
       [](const std::string &s) { return QString::fromStdString(s); });
-  m_fitBrowser->setWorkspaceNames(qNames);
+  m_fitModel->setWorkspaceNames(qNames);
   m_dataSelector->setDatasetNames(qNames);
 
   // Quietly update the workspace name set in the fit property browser
@@ -364,9 +377,14 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
   // load original data - need to get filename(s) of individual run(s)
   QStringList filenames;
   for (const int run : params.runs) {
-    filenames.append(
-        QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                   params.instrument, {run})).append(".nxs"));
+    // Check if this run is the "current run"
+    if (m_currentRun && m_currentRun->run == run) {
+      filenames.append(m_currentRun->filePath);
+    } else {
+      filenames.append(
+          QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                     params.instrument, {run})).append(".nxs"));
+    }
   }
   try {
     // This will sum multiple runs together
@@ -454,7 +472,7 @@ std::string MuonAnalysisFitDataPresenter::getRebinParams(
  */
 void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
   const QString label = m_dataSelector->getSimultaneousFitLabel();
-  m_fitBrowser->setSimultaneousLabel(label.toStdString());
+  m_fitModel->setSimultaneousLabel(label.toStdString());
 }
 
 /**
@@ -474,8 +492,14 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
     const auto groupName =
         MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
         label.toStdString();
-    handleFittedWorkspaces(groupName);
-    extractFittedWorkspaces(groupName);
+    try {
+      handleFittedWorkspaces(groupName);
+      extractFittedWorkspaces(groupName);
+    } catch (const Mantid::Kernel::Exception::NotFoundError &notFound) {
+      g_log.error()
+          << "Failed to process fitted workspaces as they could not be found ("
+          << groupName << ").\n" << notFound.what();
+    }
   }
 }
 
@@ -485,6 +509,8 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
  * @param baseName :: [input] Base name for workspaces
  * @param groupName :: [input] Name of group that workspaces belong to. Leave
  * empty to be the same as baseName (usual case).
+ * @throws Mantid::Kernel::Exception::NotFoundError if _Workspaces or
+ * _Parameters are not in the ADS
  */
 void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
     const std::string &baseName, const std::string &groupName) const {
@@ -496,7 +522,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
   if (resultsGroup && paramsTable) {
     const size_t offset = paramsTable->rowCount() - resultsGroup->size();
     for (size_t i = 0; i < resultsGroup->size(); i++) {
-      const std::string oldName = resultsGroup->getItem(i)->name();
+      const std::string oldName = resultsGroup->getItem(i)->getName();
       auto wsName = paramsTable->cell<std::string>(offset + i, 0);
       wsName = wsName.substr(wsName.find_first_of('=') + 1); // strip the "f0="
       const auto wsDetails = MuonAnalysisHelper::parseWorkspaceName(wsName);
@@ -533,6 +559,8 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
  * @param baseName :: [input] Base name for workspaces
  * @param groupName :: [input] Name of upper group e.g. "MuonSimulFit_Label". If
  * empty, use same as baseName.
+ * @throws Mantid::Kernel::Exception::NotFoundError if _Workspaces is not in the
+ * ADS
  */
 void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
     const std::string &baseName, const std::string &groupName) const {
@@ -559,6 +587,7 @@ void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
  * - "period": period string
  * @param wsName :: [input] Name of workspace to add logs to
  * @param wsParams :: [input] Parameters to get log values from
+ * @throws Mantid::Kernel::Exception::NotFoundError if wsName not in ADS
  */
 void MuonAnalysisFitDataPresenter::addSpecialLogs(
     const std::string &wsName, const Muon::DatasetParams &wsParams) const {
@@ -630,7 +659,7 @@ MuonAnalysisFitDataPresenter::generateParametersTable(
  * @param index :: [input] Selected dataset index
  */
 void MuonAnalysisFitDataPresenter::handleDatasetIndexChanged(int index) {
-  m_fitBrowser->userChangedDataset(index);
+  m_fitModel->userChangedDataset(index);
 }
 
 /**
@@ -704,7 +733,7 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
     }
 
     m_dataSelector->setSimultaneousFitLabel(QString::fromStdString(uniqueName));
-    m_fitBrowser->setSimultaneousLabel(uniqueName);
+    m_fitModel->setSimultaneousLabel(uniqueName);
   }
 }
 
@@ -729,17 +758,25 @@ bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
  * Resets the input of the data selector to the workspace that's selected on the
  * Home tab.
  * @param wsName :: [input] Current workspace name
+ * @param filePath :: [input] Path to the data file - this is important in the
+ * case of "load current run" when the file may have a special name like
+ * MUSRauto_E.tmp
  */
-void MuonAnalysisFitDataPresenter::setSelectedWorkspace(const QString &wsName) {
+void MuonAnalysisFitDataPresenter::setSelectedWorkspace(
+    const QString &wsName, const boost::optional<QString> &filePath) {
   updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
-  setUpDataSelector(wsName);
+  setUpDataSelector(wsName, filePath);
 }
 
 /**
  * Based on the given workspace name, set UI of data selector
  * @param wsName :: [input] Workspace name
+ * @param filePath :: [input] (optional) Path to the data file - this is
+ * important in the case of "load current run" when the file may have a special
+ * name like MUSRauto_E.tmp.
  */
-void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
+void MuonAnalysisFitDataPresenter::setUpDataSelector(
+    const QString &wsName, const boost::optional<QString> &filePath) {
   // Parse workspace name here for run number and instrument name
   const auto wsParams =
       MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
@@ -747,8 +784,7 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   const int firstZero = instRun.indexOf("0");
   const QString numberString = instRun.right(instRun.size() - firstZero);
   m_dataSelector->setWorkspaceDetails(
-      numberString, QString::fromStdString(wsParams.instrument));
-  m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
+      numberString, QString::fromStdString(wsParams.instrument), filePath);
 
   // Set selected groups/pairs and periods here too
   // (unless extra groups/periods are already selected, in which case don't
@@ -762,6 +798,13 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   }
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
     m_dataSelector->setChosenPeriod(periodToSet);
+  }
+
+  // If given an optional file path to "current run", cache it for later use
+  if (filePath && !wsParams.runs.empty()) {
+    m_currentRun = Muon::CurrentRun(wsParams.runs.front(), filePath.get());
+  } else {
+    m_currentRun = boost::none;
   }
 }
 
@@ -806,8 +849,35 @@ void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
     // replace with current run string
     const auto &runString = m_dataSelector->getRuns();
     m_dataSelector->setSimultaneousFitLabel(runString);
-    m_fitBrowser->setSimultaneousLabel(runString.toStdString());
+    m_fitModel->setSimultaneousLabel(runString.toStdString());
   }
+}
+
+/**
+ * Perform pre-fit checks and, if OK, tell the model it can go ahead with the
+ * fit.
+ * Checks are:
+ * - Has the fit label already been used? If so, ask user whether to overwrite.
+ * - Is the input run string valid?
+ * @param sequential :: [input] Whether fit is sequential or not
+ */
+void MuonAnalysisFitDataPresenter::doPreFitChecks(bool sequential) {
+  checkAndUpdateFitLabel(sequential);
+  if (isRunStringValid()) {
+    m_fitModel->continueAfterChecks(sequential);
+  } else {
+    g_log.error("Pre-fit checks failed: run string is not valid.\nCheck that "
+                "the data files are in Mantid's data search path.");
+  }
+}
+
+/**
+ * Check if the user has input a valid range of runs, i.e. that the red star is
+ * not shown on the interface
+ * @returns :: whether the runs are valid or not
+ */
+bool MuonAnalysisFitDataPresenter::isRunStringValid() {
+  return !m_dataSelector->getRuns().isEmpty();
 }
 
 } // namespace CustomInterfaces

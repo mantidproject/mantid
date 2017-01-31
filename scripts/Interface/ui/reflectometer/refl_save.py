@@ -13,7 +13,8 @@ from isis_reflectometry.settings import Settings
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 
 class Ui_SaveWindow(object):
@@ -282,12 +283,12 @@ class Ui_SaveWindow(object):
 
             self.listWidget.setCurrentItem(self.listWidget.item(0))
             # try to get correct user directory
-            currentInstrument=config['default.instrument']
             if self.SavePath!='':
                 self.lineEdit.setText(self.SavePath)
             else:
                 if self.__has_mount_point:
                     try:
+                        print "mountpoint = ", self.__mountpoint
                         base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
                         print "Loading journal from", base_path
                         main_journal_path = os.path.join(base_path, 'journal_main.xml')
@@ -305,7 +306,7 @@ class Ui_SaveWindow(object):
                                 user=root[i][1].text[0:root[i][1].text.find(',')]
                             else:
                                 user=root[i][1].text[0:root[i][1].text.find(' ')]
-                            SavePath = os.path.join('U:', user)
+                            SavePath = os.path.join('U:/', user)
                             self.lineEdit.setText(SavePath)
                         except LookupError:
                             print "Couldn't find user name in archives!"
@@ -314,15 +315,13 @@ class Ui_SaveWindow(object):
 
 #--------- If "Save" button pressed, selcted workspaces are saved -------------
     def buttonClickHandler1(self):
-        names = mtd.getObjectNames()
-        dataToSave=[]
         prefix = str(self.lineEdit2.text())
         if not (self.lineEdit.text() and os.path.exists(self.lineEdit.text())):
             logger.notice("Directory specified doesn't exist or was invalid for your operating system")
-            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',"Directory specified doesn't exist or was invalid for your operating system")
+            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',
+                                       "Directory specified doesn't exist or was invalid for your operating system")
             return
         for idx in self.listWidget.selectedItems():
-            runlist=parseRunList(str(self.spectraEdit.text()))
             fname=os.path.join(self.lineEdit.text(),prefix + idx.text())
             if self.comboBox.currentIndex() == 0:
                 print "Custom Ascii format"

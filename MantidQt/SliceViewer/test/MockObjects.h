@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
@@ -240,7 +241,7 @@ public:
   MOCK_CONST_METHOD0(getUnits, const Mantid::Kernel::UnitLabel());
   MOCK_CONST_METHOD0(getMDFrame, const Mantid::Geometry::MDFrame &());
   MOCK_CONST_METHOD0(getMDUnits, const Mantid::Kernel::MDUnit &());
-  MOCK_CONST_METHOD0(getDimensionId, std::string());
+  MOCK_CONST_METHOD0(getDimensionId, const std::string &());
   MOCK_CONST_METHOD0(getMaximum, coord_t());
   MOCK_CONST_METHOD0(getMinimum, coord_t());
   MOCK_CONST_METHOD0(getNBins, size_t());

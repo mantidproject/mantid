@@ -6,6 +6,7 @@ import DimensionSelectorWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
+import mantidqtpython as mqt
 from ValidateOL import ValidateOL
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -137,12 +138,12 @@ class DGSPlannerGUI(QtGui.QWidget):
             helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
             helpapp += 'assistant'
             args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
-            if os.path.isfile(helpapp):
+            if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
                 self.assistantProcess.close()
                 self.assistantProcess.waitForFinished()
                 self.assistantProcess.start(helpapp, args)
             else:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+                mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
 
     def closeEvent(self,event):
         self.assistantProcess.close()

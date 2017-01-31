@@ -184,10 +184,8 @@ class ISISFermi:
             raise ValueError('Incident energy has not be specified')
         chop_par = self.__chopperParameters[self.instname][self.choppername]['par']
         pslit = chop_par[0] / 1000.00
-        dslat = (chop_par[0] + chop_par[1]) / 1000.00
         radius = chop_par[2] / 1000.00
         rho = chop_par[3] / 1000.00
-        tjit = chop_par[5] * 1.0e-6
         return Chop.tchop(self.freq, Ei, pslit, radius, rho)
 
     def getModWidth(self, Ei_in=None):
@@ -276,6 +274,19 @@ class ISISFermi:
         tchp = np.sqrt((1+(x1+(r*x2))/x0)**2 * tsqchp)
         return v_van, tmod, tchp
 
+    def getWidths(self, Ei_in=None, frequency=None):
+        """
+        Calculates the time widths contributing to the calculated energy resolution
+        """
+        Ei = self.Ei if Ei_in is None else Ei_in
+        if not Ei:
+            raise ValueError('Incident energy has not been specified')
+        v_van, tmod, tchp = self.getVanVar(Ei, frequency, 0.)
+        x2 = self.__Instruments[self.instname][3]
+        tbin = self.__Instruments[self.instname][9]
+        res_el = np.real(2.35482 * 8.747832e-4 * np.sqrt(Ei**3) * (np.sqrt(v_van[0] + (tbin**2/12.00)) * 1.0e6) / x2)
+        return {"Moderator":tmod*1.e6, "Chopper":tchp*1.e6, "Energy":res_el}
+
     def __van_calc(self, v_mod, v_ch, v_jit, v_x, v_y, v_xy, v_dd, Ei, eps, phi, omega):
         """
         Calculates the 'vanadium' time widths due to the moderator and Fermi chopper
@@ -298,19 +309,15 @@ class ISISFermi:
         gg2 = g2 / (omega*(xa+x1))
         ff1 = f1 / (omega*(xa+x1))
         ff2 = f2 / (omega*(xa+x1))
-        aa = ((np.cos(gam)/veli) - (np.cos(gam-phi)/velf)) - (ff2*np.sin(gam))
         bb = ((-np.sin(gam)/veli) + (np.sin(gam-phi)/velf)) - (ff2*np.cos(gam))
         aya = ff1 + ((rat*x2/x0)*gg1)
-        ax = aa - ((rat*x2/x0)*gg2*np.sin(gam))
         ay = bb - ((rat*x2/x0)*gg2*np.cos(gam))
         a_dd = 1.00/velf
         v_van_m = am**2  * v_mod
         v_van_ch = ach**2 * v_ch
         v_van_jit = ach**2 * v_jit
         v_van_ya = aya**2 * (wa**2/12.00)
-        v_van_x = ax**2  * v_x
         v_van_y = ay**2  * v_y
-        v_van_xy = ax*ay  * v_xy
         v_van_dd = a_dd**2* v_dd
         # Old version:
         #v_van = (v_van_m + v_van_ch + v_van_jit + v_van_ya)

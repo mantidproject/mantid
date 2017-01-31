@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -119,12 +120,13 @@ public:
     TS_ASSERT_THROWS(i->getDetector(16735), Exception::NotFoundError);
 
     // Check the monitors are correctly marked
-    TS_ASSERT(i->getDetector(1)->isMonitor())
-    TS_ASSERT(i->getDetector(2)->isMonitor())
+    const auto &detInfo = output->detectorInfo();
+    TS_ASSERT(detInfo.isMonitor(0))
+    TS_ASSERT(detInfo.isMonitor(1))
     // ...and that a normal detector isn't
-    TS_ASSERT(!i->getDetector(3)->isMonitor())
-    TS_ASSERT(!i->getDetector(300)->isMonitor())
-    TS_ASSERT(!i->getDetector(16500)->isMonitor())
+    TS_ASSERT(!detInfo.isMonitor(2))
+    TS_ASSERT(!detInfo.isMonitor(299))
+    TS_ASSERT(!detInfo.isMonitor(16499))
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -164,7 +166,7 @@ public:
             wsName));
 
     // We now check the parameter that is different in the embedded parameters
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "LAB");
@@ -207,7 +209,7 @@ public:
             wsName));
 
     // We now check a parameter
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "main-detector-bank");
@@ -289,7 +291,7 @@ public:
             wsName));
 
     // We now check a parameter that has been changed by this
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB App");
@@ -379,7 +381,7 @@ public:
             wsName));
 
     // We now check a parameter that has been changed by this
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB Rep");

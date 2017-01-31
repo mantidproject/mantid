@@ -177,7 +177,8 @@ This is still there, but only the bottom section ("Settings") and the three butt
 The "Function" and "Data" sections are hidden.
 In their place are two new widgets - this is achieved by inserting an extra ``Layout`` into the muon fit property browser and adding the widgets to this layout.
 
-Since the ``MuonFitPropertyBrowser`` is all still there underneath, this is how "Compatibility mode" works - an option on the Settings tab that hides the new widgets and shows the previously hidden sections of the fit browser.
+The above assumes that the "Enable multiple fitting" option is selected on the Settings tab.
+Since the ``MuonFitPropertyBrowser`` is all still there underneath, deselecting this option will hide the new widgets and show the previously hidden sections of the fit browser - note that, at present this option is *deselected* by default (i.e. the interface has the old UI).
 
 This tab can be thought of as something like an MVP (model-view-presenter) architecture.
 Of course, it's not *properly* MVP, as that would have required a rewrite - the focus was on reusing as much existing code as possible!
@@ -245,6 +246,16 @@ The presenter therefore updates the view's selected group/period in this case.
 When a fit is finished, the data presenter is notified so that it can process the results.
 This is only relevant in the case of a simultaneous fit, because the :ref:`algm-Fit` algorithm produces output in a very different form to its regular output format.
 The presenter reorganises the output workspaces so that they are in the same format as they would have been for a regular fit - and then they can be easily read by the "Results table" tab.
+
+Sequence of events when "Fit" clicked
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The "Fit" button is part of the *MuonFitPropertyBrowser*, i.e. the model. This doesn't fit with the MVP pattern but is this way for historical reasons, as the button was always part of this widget.
+
+When the user clicks "Fit", the model emits a signal ``preFitChecksRequested``. This is caught by the data presenter, which performs some checks that the data is valid before the fit starts. Extra checks could be easily added at this point. 
+
+If everything is OK, the data presenter tells the model to continue, and the model emits ``functionUpdateAndFitRequested``.
+This signal is caught by the function presenter, which updates the fit function in the model from that in the view, to ensure they are in sync before the fit. It then tells the model to start the fit.
 
 Sequential fit dialog
 ^^^^^^^^^^^^^^^^^^^^^
@@ -353,3 +364,4 @@ Future work
 Open muon issues can be found on Github with the `Component: Muon <https://github.com/mantidproject/mantid/issues?q=is%3Aopen+is%3Aissue+label%3A%22Component%3A+Muon%22>`_ label.
 Those marked ``Misc: Roadmap`` are the most important.
 
+.. categories:: Interfaces Muon

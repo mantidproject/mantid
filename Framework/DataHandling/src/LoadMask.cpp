@@ -164,7 +164,7 @@ void parseISISStringToVector(const std::string &ins,
       temps.insert(temps.begin() + 1, "-");
       splitstrings.erase(splitstrings.begin() + index);
       for (size_t ic = 0; ic < 3; ic++) {
-        if (temps[ic].size() > 0) {
+        if (!temps[ic].empty()) {
           splitstrings.insert(splitstrings.begin() + index, temps[ic]);
           index++;
         }
@@ -416,10 +416,7 @@ void LoadMask::processMaskOnDetectors(
     it = indexmap.find(detid);
     if (it != indexmap.end()) {
       size_t index = it->second;
-      if (tomask)
-        m_maskWS->dataY(index)[0] = 1;
-      else
-        m_maskWS->dataY(index)[0] = 0;
+      m_maskWS->mutableY(index)[0] = (tomask) ? 1 : 0;
     } else {
       g_log.warning() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
     }
@@ -580,10 +577,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                       << m_maskWS->getNumberHistograms() << '\n';
       } else {
         // Finally set the masking;
-        if (mask)
-          m_maskWS->dataY(wsindex)[0] = 1.0;
-        else
-          m_maskWS->dataY(wsindex)[0] = 0.0;
+        m_maskWS->mutableY(wsindex)[0] = (mask) ? 1.0 : 0.0;
       } // IF-ELSE: ws index out of range
     }   // IF-ELSE: spectrum No has an entry
 

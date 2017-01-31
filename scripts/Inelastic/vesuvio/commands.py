@@ -451,7 +451,6 @@ def _create_user_defined_ties_str(masses):
     for index, mass in enumerate(masses):
         if 'ties' in mass:
             ties = mass['ties'].split(',')
-            function_dependant_ties= []
             function_indentifier = 'f' + str(index) + '.'
             for t in ties:
                 tie_str = function_indentifier + t

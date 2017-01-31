@@ -3,6 +3,8 @@ Test one can import paraview.simple in MantidPlot
 """
 import mantidplottests
 from mantidplottests import *
+from paraview.simple import *
+
 
 class MantidPlotPVPythonTest(unittest.TestCase):
 
@@ -13,9 +15,7 @@ class MantidPlotPVPythonTest(unittest.TestCase):
         pass
 
     def test_PVPython(self):
-        from paraview.simple import *
-        self.assertEquals(str(GetParaViewVersion()),'5.1')
+        self.assertEqual(GetParaViewVersion().major, 5)
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotPVPythonTest)
-

@@ -3,6 +3,8 @@
 ##
 
 set ( TEST_PY_FILES
+  AbinsBasicTest.py
+  AbinsAdvancedParametersTest.py
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
@@ -10,6 +12,7 @@ set ( TEST_PY_FILES
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
+  BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -27,6 +30,7 @@ set ( TEST_PY_FILES
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
   DSFinterpTest.py
+  EnergyWindowScanTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
   EnggFitDIFCFromPeaksTest.py
@@ -39,17 +43,24 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
+  GetQsInQENSDataTest.py
   GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
+  ILLIN16BCalibrationTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
+  IndirectAnnulusAbsorption2Test.py
+  IndirectCylinderAbsorption2Test.py
+  IndirectFlatPlateAbsorption2Test.py
+  IndirectILLEnergyTransferTest.py
   IndirectILLReductionTest.py
+  IndirectILLReductionFWSTest.py
+  IndirectILLReductionQENSTest.py
   IndirectResolutionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
-  ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
@@ -68,14 +79,17 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   MatchPeaksTest.py
   MeanTest.py
+  MedianBinWidthTest.py
   MergeCalFilesTest.py
   MolDynTest.py
   MSDFitTest.py
   MuscatSofQWTest.py
+  NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
+  SANSStitchTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SaveNexusPDTest.py
@@ -87,6 +101,7 @@ set ( TEST_PY_FILES
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
+  SofQWMomentsScanTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py

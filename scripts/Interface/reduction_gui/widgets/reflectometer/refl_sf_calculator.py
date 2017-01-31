@@ -284,7 +284,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
     def _add_data(self):
         state = self.get_editing_state()
 #        state = self.get_state()
-        in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         if run_numbers == '':
@@ -294,7 +293,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
 
         if len(list_items)>0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
-            in_list = True
 
             #loop over all the already defined states and give all of them the
             #same tof_min, tof_max and incident_medium list and index selected...

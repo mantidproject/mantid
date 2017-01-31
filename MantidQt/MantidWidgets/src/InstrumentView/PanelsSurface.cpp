@@ -5,6 +5,8 @@
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Tolerance.h"
@@ -426,6 +428,7 @@ void PanelsSurface::addCompAssembly(ComponentID bankId) {
   Mantid::Kernel::V3D pos0;
   bool normalFound = false;
   QList<ComponentID> detectors;
+  const auto &detectorInfo = m_instrActor->getWorkspace()->detectorInfo();
   for (size_t i = 0; i < nelem; ++i) {
     auto elem = assembly->getChild((int)i);
     Mantid::Geometry::IDetector_const_sptr det =
@@ -433,9 +436,10 @@ void PanelsSurface::addCompAssembly(ComponentID bankId) {
     if (!det) {
       return;
     }
-    if (det->isMonitor())
+    size_t detIndex = detectorInfo.indexOf(det->getID());
+    if (detectorInfo.isMonitor(detIndex))
       continue;
-    Mantid::Kernel::V3D pos = det->getPos();
+    Mantid::Kernel::V3D pos = detectorInfo.position(detIndex);
     if (i == 0) {
       pos0 = pos;
     } else if (i == 1) {

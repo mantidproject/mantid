@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,13 +62,8 @@ private:
   ///
   void retrieveInstrumentParameters();
 
-  /// Create output workspace
-  void createOutputWorkspace();
-
   /// Calculate detector resolution
   void estimateDetectorResolution();
-
-  //------------------------------------------------------
 
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;
@@ -79,9 +73,6 @@ private:
 
   /// Centre neutron velocity
   double m_centreVelocity = 0.0;
-
-  /// L1, source to sample
-  double m_L1 = 0.0;
 
   /// Delta T
   double m_deltaT = 0.0;

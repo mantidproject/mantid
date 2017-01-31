@@ -1,8 +1,5 @@
 // NexusFileIO
 // @author Ronald Fowler
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <vector>
 #include <sstream>
 
@@ -19,6 +16,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -671,6 +669,11 @@ int NexusFileIO::writeNexusTableWorkspace(
       for (int ii = 0; ii < nRows; ii++) {
         if (col->cell<std::string>(ii).size() > maxStr)
           maxStr = col->cell<std::string>(ii).size();
+      }
+      // If the column is empty fill the data with spaces.
+      // Strings containing spaces only will be read back in as empty strings.
+      if (maxStr == 0) {
+        maxStr = 1;
       }
       int dims_array[2] = {nRows, static_cast<int>(maxStr)};
       int asize[2] = {1, dims_array[1]};

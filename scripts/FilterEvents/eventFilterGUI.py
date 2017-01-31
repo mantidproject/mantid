@@ -635,7 +635,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Open a file dialog to get file
         """
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog',
-                                                     self._defaultdir, "Data (*.nxs *.dat);;All files (*.*)")
+                                                     self._defaultdir, "Data (*.nxs *.dat);;All files (*)")
 
         self.ui.lineEdit.setText(str(filename))
 

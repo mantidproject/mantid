@@ -16,6 +16,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Objects/Object.h"
@@ -281,7 +282,7 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const {
 * Apply mask stored in the helper mask workspace to the data workspace.
 */
 void InstrumentActor::applyMaskWorkspace() {
-  auto wsName = getWorkspace()->name();
+  auto wsName = getWorkspace()->getName();
   if (m_maskWorkspace) {
     // Mask detectors
     try {
@@ -634,11 +635,10 @@ void InstrumentActor::resetColors() {
   m_colors.resize(m_specIntegrs.size());
 
   auto sharedWorkspace = getWorkspace();
+  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
 
-  Instrument_const_sptr inst = getInstrument();
   IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
 
-  // PARALLEL_FOR1(m_workspace)
   for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
     size_t wi = size_t(iwi);
     double integratedValue = m_specIntegrs[wi];
@@ -650,7 +650,7 @@ void InstrumentActor::resetColors() {
       if (mask) {
         masked = mask->isMasked(dets);
       } else {
-        masked = inst->isDetectorMasked(dets);
+        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
       }
 
       if (masked) {
@@ -868,7 +868,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
   Mantid::API::IAlgorithm *alg =
       Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",
                                                                 -1);
-  alg->setPropertyValue("InputWorkspace", getWorkspace()->name());
+  alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
   alg->execute();
 

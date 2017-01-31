@@ -22,7 +22,8 @@ import os
 import copy
 
 
-def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, outputWorkspace, workspaceIndexList, xUnit='Pixel', showPlot=False):
+def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, outputWorkspace, workspaceIndexList,
+                                                         xUnit='Pixel', showPlot=False):
     """
        Creates workspace with integrated data for one tube against distance along tube
        The tube is specified by a list of workspace indices of its spectra
@@ -230,8 +231,9 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
             fitt_x_values.append(copy.copy(ws.dataX(1)))
 
     if showPlot:
-        FittedData = CreateWorkspace(numpy.hstack(fitt_x_values),
-                                     numpy.hstack(fitt_y_values))
+        CreateWorkspace(OutputWorkspace='FittedData',
+                        DataX=numpy.hstack(fitt_x_values),
+                        DataY=numpy.hstack(fitt_y_values))
     return results
 
 
@@ -414,7 +416,6 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     # Move the pixel detectors (might not work for sloping tubes)
     for i in range(nDets):
         deti = ws.getDetector( whichTube[i])
-        det_pos = deti.getPos()
         pNew = pixels[i]
         # again, the opeartion float * v3d is not defined, but v3d * float is,
         # so, I wrote the new pos as center + unit_vector * (float)
@@ -477,11 +478,14 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
 
     :param ws: Integrated Workspace with tubes to be calibrated
     :param tubeSet: Specification of Set of tubes to be calibrated ( :class:`~tube_spec.TubeSpec` object)
-    :param calibTable: Empty calibration table into which the calibration results are placed. It is composed by 'Detector ID' and a V3D column 'Detector Position'. It will be filled with the IDs and calibrated positions of the detectors.
+    :param calibTable: Empty calibration table into which the calibration results are placed. It is composed by 'Detector ID'
+        and a V3D column 'Detector Position'. It will be filled with the IDs and calibrated positions of the detectors.
     :param fitPar: A :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
-    :param iTube: The :class:`~ideal_tube.IdealTube` which contains the positions in metres of the shadows of the slits, bars or edges used for calibration.
+    :param iTube: The :class:`~ideal_tube.IdealTube` which contains the positions in metres of the shadows of the slits,
+        bars or edges used for calibration.
     :param peaksTable: Peaks table into wich the peaks positions will be put
-    :param overridePeak: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be fitted for one tube
+    :param overridePeak: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be
+        fitted for one tube
     :param exludeShortTubes: Exlude tubes shorter than specified length from calibration
     :param plotTube: List of tube indexes that will be ploted
     :param rangelist: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet

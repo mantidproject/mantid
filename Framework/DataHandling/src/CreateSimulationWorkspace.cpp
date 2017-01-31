@@ -21,6 +21,8 @@
 
 #include <Poco/File.h>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace {
 
 struct StartAndEndTime {
@@ -184,7 +186,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
 
   m_progress = boost::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
 
-  PARALLEL_FOR1(m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
     m_outputWS->setBinEdges(i, binBoundaries);
     m_outputWS->mutableY(i) = 1.0;
@@ -367,7 +369,7 @@ void CreateSimulationWorkspace::applyDetectorMapping() {
  */
 void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
   // If requested update the instrument to positions in the raw file
-  const Geometry::ParameterMap &pmap = m_outputWS->instrumentParameters();
+  const auto &pmap = m_outputWS->constInstrumentParameters();
   Geometry::Instrument_const_sptr instrument = m_outputWS->getInstrument();
   boost::shared_ptr<Geometry::Parameter> updateDets =
       pmap.get(instrument->getComponentID(), "det-pos-source");

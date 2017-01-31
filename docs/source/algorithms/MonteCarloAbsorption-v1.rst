@@ -54,17 +54,16 @@ The algorithm proceeds as follows. For each spectrum:
      - generate a random point on the beam face defined by the input height & width. If the point is outside of the
        area defined by the face of the sample then it is pulled to the boundary of this area
 
-     - assume the neutron travels in the direction defined by the `samplePos - srcPos` and define a `Track`
+     - generate a random point within the sample or container objects as the scatter point and create a `Track`
+       from the selected position on the beam face to the scatter point
 
-     - test for intersections of the track & sample + container objects, giving the number of subsections
+     - test for intersections of the track & sample/container objects, giving the number of subsections
        and corresponding distances within the object for each section, call them :math:`l_{1i}`
-
-     - choose a random section and depth for the scatter point
 
      - form a second `Track` with the scatter position as the starting point and the direction defined by
        `detPos - scatterPos`
 
-     - test for intersections of the track & sample + container objects, giving the number of subsections
+     - test for intersections of the track & sample/container objects, giving the number of subsections
        and corresponding distances within the object for each section, call them :math:`l_{2i}`
 
      - compute the self-attenuation factor for all intersections as
@@ -77,7 +76,13 @@ The algorithm proceeds as follows. For each spectrum:
    * average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
      this :math:`\lambda_{step}`.
 
-#. finally, perform an interpolation through the unsimulated wavelength points
+#. finally, interpolate through the unsimulated wavelength points using the selected method
+
+Interpolation
+#############
+
+The default linear interpolation method will produce an absorption curve that is not smooth. CSpline interpolation
+will produce a smoother result by using a 3rd-order polynomial to approximate the original points. 
 
 Usage
 -----
@@ -95,6 +100,22 @@ Usage
    # Simulating every data point can be slow. Use a smaller set and interpolate
    abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50)
    corrected = data/abscor
+
+**Example: A cylindrical sample with no container, interpolating with a CSpline**
+
+.. testcode:: ExCylinderSampleOnlyAndSpline
+
+   data = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=1)
+   data = ConvertUnits(data, Target="Wavelength")
+   # Default up axis is Y
+   SetSample(data, Geometry={'Shape': 'Cylinder', 'Height': 5.0, 'Radius': 1.0,
+                     'Center': [0.0,0.0,0.0]},
+                   Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
+   # Simulating every data point can be slow. Use a smaller set and interpolate
+   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50,
+                                 Interpolation='CSpline')
+   corrected = data/abscor
+
 
 **Example: A cylindrical sample setting a beam size**
 

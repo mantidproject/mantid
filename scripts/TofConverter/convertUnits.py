@@ -15,7 +15,7 @@ def input2energy(inputval, inOption, theta, flightpath):
     e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
     e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
     e2v = 0.0000052276 # using v = h/(m*lambda)
-    e2k = 2.717 #using k = 2*pi/(lambda) k:momentum
+    e2k = 2.0717 #using k = 2*pi/(lambda) k:momentum
     e2t = 0.086165 #using t = (m*v^2)/(2kb) kb: Boltzmann const
     e2cm = 0.123975 #cm = 8.06554465*E E:energy
     iv2 = inputval ** 2
@@ -70,7 +70,7 @@ def energy2output(Energy, outOption, theta, flightpath):
     e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
     e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
     e2v = 0.0000052276 # using v = h/(m*lambda)
-    e2k = 2.717 #using k = 2*pi/(lambda) k:momentum
+    e2k = 2.0717 #using k = 2*pi/(lambda) k:momentum
     e2t = 0.086165 #using t = (m*v^2)/(2kb) kb: Boltzmann const
     e2cm = 0.123975 #cm = 8.06554465*E E:energy
 

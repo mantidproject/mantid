@@ -2,25 +2,28 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
 
-#include <Poco/File.h>
-#include <sstream>
-#include <iostream>
+#include <algorithm>
+#include <boost/algorithm/string/trim.hpp>
 #include <fstream>
+#include <iostream>
 #include <numeric>
-#include <cmath>
+#include <sstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -36,18 +39,19 @@ using namespace DataObjects;
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
+  const auto exts = std::vector<std::string>({".DetCal"});
   declareProperty(
-      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
-                                     ".DetCal"),
-      "The input filename of the ISAW DetCal file (East banks for SNAP) ");
+      Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
+      "The input filename of the ISAW DetCal file (Two files "
+      "allowed for SNAP) ");
 
   declareProperty(
-      make_unique<API::FileProperty>(
+      Kernel::make_unique<API::FileProperty>(
           "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
       "The input filename of the second ISAW DetCal file (West "
       "banks for SNAP) ");
@@ -58,13 +62,50 @@ void LoadIsawDetCal::init() {
 namespace {
 const constexpr double DegreesPerRadian = 180.0 / M_PI;
 
-std::string getBankName(const std::string &bankPart, int idnum) {
+std::string getBankName(const std::string &bankPart, const int idnum) {
   if (bankPart == "WISHpanel" && idnum < 10) {
     return bankPart + "0" + std::to_string(idnum);
   } else {
     return bankPart + std::to_string(idnum);
   }
 }
+
+std::string getInstName(API::Workspace_const_sptr wksp) {
+  MatrixWorkspace_const_sptr matrixWksp =
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
+  if (matrixWksp) {
+    return matrixWksp->getInstrument()->getName();
+  }
+
+  PeaksWorkspace_const_sptr peaksWksp =
+      boost::dynamic_pointer_cast<const PeaksWorkspace>(wksp);
+  if (peaksWksp) {
+    return peaksWksp->getInstrument()->getName();
+  }
+
+  throw std::runtime_error("Failed to determine instrument name");
+}
+}
+
+std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // two detcal files is only valid for snap
+  std::vector<std::string> filenames = getFilenames();
+  if (filenames.size() == 0) {
+    result["Filename"] = "Must supply .detcal file";
+  } else if (filenames.size() == 2) {
+    Workspace_const_sptr wksp = getProperty("InputWorkspace");
+    const auto instname = getInstName(wksp);
+
+    if (instname.compare("SNAP") != 0) {
+      result["Filename"] = "Two files is only valid for SNAP";
+    }
+  } else if (filenames.size() > 2) {
+    result["Filename"] = "Supply at most two .detcal files";
+  }
+
+  return result;
 }
 
 /** Executes the algorithm
@@ -82,16 +123,13 @@ void LoadIsawDetCal::exec() {
 
   std::string instname = inst->getName();
 
-  // set-up minimizer
-
-  std::string filename = getProperty("Filename");
-  std::string filename2 = getProperty("Filename2");
+  const auto filenames = getFilenames();
 
   // Output summary to log file
   int count, id, nrows, ncols;
   double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x,
       up_y, up_z;
-  std::ifstream input(filename.c_str(), std::ios_base::in);
+  std::ifstream input(filenames[0].c_str(), std::ios_base::in);
   std::string line;
   std::string detname;
   // Build a list of Rectangular Detectors
@@ -200,9 +238,9 @@ void LoadIsawDetCal::exec() {
     std::stringstream(line) >> count >> id >> nrows >> ncols >> width >>
         height >> depth >> detd >> x >> y >> z >> base_x >> base_y >> base_z >>
         up_x >> up_y >> up_z;
-    if (id == 10 && instname == "SNAP" && filename2 != "") {
+    if (id == 10 && filenames.size() == 2 && instname.compare("SNAP") == 0) {
       input.close();
-      input.open(filename2.c_str());
+      input.open(filenames[1].c_str());
       while (std::getline(input, line)) {
         if (line[0] != '5')
           continue;
@@ -241,21 +279,20 @@ void LoadIsawDetCal::exec() {
       center(x, y, z, detname, ws);
 
       // These are the ISAW axes
-      V3D rX = V3D(base_x, base_y, base_z);
+      V3D rX(base_x, base_y, base_z);
       rX.normalize();
-      V3D rY = V3D(up_x, up_y, up_z);
+      V3D rY(up_x, up_y, up_z);
       rY.normalize();
       // V3D rZ=rX.cross_prod(rY);
 
       // These are the original axes
-      V3D oX = V3D(1., 0., 0.);
-      V3D oY = V3D(0., 1., 0.);
+      const V3D oX(1., 0., 0.);
+      const V3D oY(0., 1., 0.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
-      double angle1 = oX.angle(rX);
-      angle1 *= DegreesPerRadian;
+      const double angle1 = oX.angle(rX) * DegreesPerRadian;
       // Create the first quaternion
       Quat Q1(angle1, ax1);
 
@@ -264,23 +301,21 @@ void LoadIsawDetCal::exec() {
       Q1.rotate(roY);
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
-      double angle2 = roY.angle(rY);
-      angle2 *= DegreesPerRadian;
+      const double angle2 = roY.angle(rY) * DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
       Quat Rot = Q2 * Q1;
 
       // Then find the corresponding relative position
-      boost::shared_ptr<const IComponent> comp =
-          inst->getComponentByName(detname);
-      boost::shared_ptr<const IComponent> parent = comp->getParent();
+      const auto comp = inst->getComponentByName(detname);
+      const auto parent = comp->getParent();
       if (parent) {
         Quat rot0 = parent->getRelativeRot();
         rot0.inverse();
         Rot *= rot0;
       }
-      boost::shared_ptr<const IComponent> grandparent = parent->getParent();
+      const auto grandparent = parent->getParent();
       if (grandparent) {
         Quat rot0 = grandparent->getRelativeRot();
         rot0.inverse();
@@ -304,11 +339,9 @@ void LoadIsawDetCal::exec() {
 
     bankName = getBankName(bankPart, idnum);
     // Retrieve it
-    boost::shared_ptr<const IComponent> comp =
-        inst->getComponentByName(bankName);
-    if (instname.compare("CORELLI") ==
-        0) // for Corelli with sixteenpack under bank
-    {
+    auto comp = inst->getComponentByName(bankName);
+    // for Corelli with sixteenpack under bank
+    if (instname.compare("CORELLI") == 0) {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
           boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
@@ -327,21 +360,20 @@ void LoadIsawDetCal::exec() {
       center(x, y, z, detname, ws);
 
       // These are the ISAW axes
-      V3D rX = V3D(base_x, base_y, base_z);
+      V3D rX(base_x, base_y, base_z);
       rX.normalize();
-      V3D rY = V3D(up_x, up_y, up_z);
+      V3D rY(up_x, up_y, up_z);
       rY.normalize();
       // V3D rZ=rX.cross_prod(rY);
 
       // These are the original axes
-      V3D oX = V3D(1., 0., 0.);
-      V3D oY = V3D(0., 1., 0.);
+      const V3D oX(1., 0., 0.);
+      const V3D oY(0., 1., 0.);
 
       // Axis that rotates X
       V3D ax1 = oX.cross_prod(rX);
       // Rotation angle from oX to rX
-      double angle1 = oX.angle(rX);
-      angle1 *= DegreesPerRadian;
+      double angle1 = oX.angle(rX) * DegreesPerRadian;
       // TODO: find out why this is needed for WISH
       if (instname == "WISH")
         angle1 += 180.0;
@@ -353,20 +385,19 @@ void LoadIsawDetCal::exec() {
       Q1.rotate(roY);
       // Find the axis that rotates oYr onto rY
       V3D ax2 = roY.cross_prod(rY);
-      double angle2 = roY.angle(rY);
-      angle2 *= DegreesPerRadian;
+      const double angle2 = roY.angle(rY) * DegreesPerRadian;
       Quat Q2(angle2, ax2);
 
       // Final = those two rotations in succession; Q1 is done first.
       Quat Rot = Q2 * Q1;
 
-      boost::shared_ptr<const IComponent> parent = comp->getParent();
+      const auto parent = comp->getParent();
       if (parent) {
         Quat rot0 = parent->getRelativeRot();
         rot0.inverse();
         Rot = Rot * rot0;
       }
-      boost::shared_ptr<const IComponent> grandparent = parent->getParent();
+      const auto grandparent = parent->getParent();
       if (grandparent) {
         Quat rot0 = grandparent->getRelativeRot();
         rot0.inverse();
@@ -398,7 +429,7 @@ void LoadIsawDetCal::exec() {
  * @param ws :: The workspace
  */
 
-void LoadIsawDetCal::center(double x, double y, double z,
+void LoadIsawDetCal::center(const double x, const double y, const double z,
                             const std::string &detname,
                             API::Workspace_sptr ws) {
 
@@ -412,19 +443,21 @@ void LoadIsawDetCal::center(double x, double y, double z,
     throw std::runtime_error(mess.str());
   }
 
-  // Do the move
   using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
+  const TransformType positionType = Absolute;
+  const V3D position(x, y, z);
+
+  // Do the move
   MatrixWorkspace_sptr inputW =
       boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
   if (inputW) {
     Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
                                              positionType);
   } else if (inputP) {
     Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
                                              positionType);
   }
 }
@@ -456,14 +489,30 @@ Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
   } else {
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "workspace which does not seem to be valid as "
-                               "input (must be either MatrixWorkspace or "
-                               "PeaksWorkspace");
+    throw std::runtime_error("Could not get a valid instrument from the "
+                             "workspace which does not seem to be valid as "
+                             "input (must be either MatrixWorkspace or "
+                             "PeaksWorkspace");
   }
 
   return inst;
+}
+
+std::vector<std::string> LoadIsawDetCal::getFilenames() {
+  std::vector<std::string> filenamesFromPropertyUnraveld;
+  std::vector<std::vector<std::string>> filenamesFromProperty =
+      this->getProperty("Filename");
+  for (const auto &outer : filenamesFromProperty) {
+    std::copy(outer.begin(), outer.end(),
+              std::back_inserter(filenamesFromPropertyUnraveld));
+  }
+
+  // shouldn't be used except for legacy cases
+  const std::string filename2 = this->getProperty("Filename2");
+  if (!filename2.empty())
+    filenamesFromPropertyUnraveld.push_back(filename2);
+
+  return filenamesFromPropertyUnraveld;
 }
 
 } // namespace Algorithm

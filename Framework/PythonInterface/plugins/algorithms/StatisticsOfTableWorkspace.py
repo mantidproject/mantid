@@ -42,7 +42,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
         in_ws = mtd[self.getPropertyValue('InputWorkspace')]
         out_ws_name = self.getPropertyValue('OutputWorkspace')
 
-        out_ws = ms.CreateEmptyTableWorkspace(OutputWOrkspace=out_ws_name)
+        out_ws = ms.CreateEmptyTableWorkspace(OutputWorkspace=out_ws_name)
 
         out_ws.addColumn('str', 'statistic')
 
@@ -68,7 +68,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
             stat1['statistic'] = name
             out_ws.addRow(stat1)
 
-        self.setProperty('OutputWorkspace', out_ws_name)
+        self.setProperty('OutputWorkspace', out_ws)
 
 
 # Register algorithm with Mantid

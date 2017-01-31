@@ -226,7 +226,7 @@ public:
                    int StartWorkspaceIndex, int EndWorkspaceIndex) {
     int numPixels = 100;
     int numBins = 50;
-    EventWorkspace_sptr inWS = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr inWS = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, numBins, numBins, 0.0, 1.0, 2);
     AnalysisDataService::Instance().addOrReplace(inName, inWS);
 
@@ -292,7 +292,7 @@ public:
                       const bool IncludePartialBins, const int expectedNumHists,
                       const double expectedVals[]) {
     RebinnedOutput_sptr inWS =
-        WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = inWS->getName();
     AnalysisDataService::Instance().addOrReplace(inName, inWS);
     std::string outName = "rebinInt";

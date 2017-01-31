@@ -212,7 +212,8 @@ class DataSetsWidget(BaseWidget):
             # things will look weird.
             if len(popup_warning)==0:
                 popup_warning = "Turn on debug mode to see all options:\n\n"
-            popup_warning += "The background transmission for the loaded reduction was set in debug mode to %-6.1g\n" % state.background.bck_transmission
+            popup_warning += "The background transmission for the loaded reduction was set in debug mode to %-6.1g\n" % \
+                             state.background.bck_transmission
 
         self._content.bck_theta_dep_chk.setChecked(state.background.theta_dependent)
         self._content.bck_fit_together_check.setChecked(state.background.combine_transmission_frames)

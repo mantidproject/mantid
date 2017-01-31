@@ -1,8 +1,10 @@
 #include "MantidAPI/Run.h"
-#include "MantidKernel/LogFilter.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/LogFilter.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,7 +44,7 @@ double NormaliseByCurrent::extractCharge(
   int nPeriods = 0;
   try {
     Property *nPeriodsProperty = run.getLogData("nperiods");
-    Kernel::toValue<int>(nPeriodsProperty->value(), nPeriods);
+    nPeriods = boost::lexical_cast<int>(nPeriodsProperty->value());
   } catch (Exception::NotFoundError &) {
     g_log.information() << "No nperiods property. If this is multi-period "
                            "data, then you will be normalising against the "
@@ -50,7 +52,6 @@ double NormaliseByCurrent::extractCharge(
   }
   // Handle multiperiod data.
   // The number of periods is set above by reference
-  // cppcheck-suppress knownConditionTrueFalse
   if (nPeriods > 1) {
     // Fetch the period property
     Property *currentPeriodNumberProperty = run.getLogData("current_period");

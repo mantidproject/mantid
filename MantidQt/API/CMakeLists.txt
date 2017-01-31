@@ -5,14 +5,17 @@
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
+	src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
+	src/FlowLayout.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
 	src/ListPropertyWidget.cpp
 	src/ManageUserDirectories.cpp
 	src/MantidColorMap.cpp
+	src/MantidDesktopServices.cpp
 	src/MantidDialog.cpp
 	src/MantidHelpInterface.cpp
 	src/MantidQwtIMDWorkspaceData.cpp
@@ -22,16 +25,20 @@
 	src/MdPlottingCmapsProvider.cpp
 	src/MdSettings.cpp
 	src/Message.cpp
+	src/NonOrthogonal.cpp
+	src/MWRunFiles.cpp
 	src/OptionsPropertyWidget.cpp
+	src/pixmaps.cpp
 	src/PlotAxis.cpp
 	src/PowerScaleEngine.cpp
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
 	src/PythonThreading.cpp
-        src/QScienceSpinBox.cpp
+	src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
-        src/QwtRasterDataMD.cpp
+	src/QwtRasterDataMD.cpp
+	src/QwtRasterDataMDNonOrthogonal.cpp
 	src/QwtWorkspaceBinData.cpp
 	src/QwtWorkspaceSpectrumData.cpp
 	src/RepoModel.cpp
@@ -42,11 +49,13 @@
 	src/SignalRange.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
-  src/TSVSerialiser.cpp
+	src/TSVSerialiser.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
-        src/WidgetScrollbarDecorator.cpp
+	src/WidgetScrollbarDecorator.cpp
+  src/WindowIcons.cpp
 	src/WorkspaceObserver.cpp
+	src/WorkspaceIcons.cpp
 )
 
 set ( MOC_FILES
@@ -62,6 +71,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidWidget.h
+  inc/MantidQtAPI/MWRunFiles.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
@@ -86,47 +96,62 @@ set ( INC_FILES
 	inc/MantidQtAPI/BatchAlgorithmRunner.h
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
+	inc/MantidQtAPI/FlowLayout.h
 	inc/MantidQtAPI/GraphOptions.h
-        inc/MantidQtAPI/DistributionOptions.h
+	inc/MantidQtAPI/DistributionOptions.h
 	inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
-  inc/MantidQtAPI/IProjectSerialisable.h
+	inc/MantidQtAPI/IProjectSerialisable.h
 	inc/MantidQtAPI/MantidColorMap.h
+	inc/MantidQtAPI/MantidDesktopServices.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
 	inc/MantidQtAPI/MantidAlgorithmMetatype.h
 	inc/MantidQtAPI/MdConstants.h
 	inc/MantidQtAPI/MdPlottingCmapsProvider.h
 	inc/MantidQtAPI/MdSettings.h
+	inc/MantidQtAPI/NonOrthogonal.h
+	inc/MantidQtAPI/pixmaps.h
 	inc/MantidQtAPI/PlotAxis.h
 	inc/MantidQtAPI/PowerScaleEngine.h
 	inc/MantidQtAPI/PropertyWidgetFactory.h
 	inc/MantidQtAPI/PythonSystemHeader.h
 	inc/MantidQtAPI/PythonThreading.h
-        inc/MantidQtAPI/QScienceSpinBox.h
-        inc/MantidQtAPI/QwtRasterDataMD.h
-        inc/MantidQtAPI/QwtWorkspaceBinData.h
+	inc/MantidQtAPI/QScienceSpinBox.h
+	inc/MantidQtAPI/QwtRasterDataMD.h
+	inc/MantidQtAPI/QwtRasterDataMDNonOrthogonal.h
+	inc/MantidQtAPI/QwtWorkspaceBinData.h
 	inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
 	inc/MantidQtAPI/ScaleEngine.h
 	inc/MantidQtAPI/ScriptRepositoryView.h
 	inc/MantidQtAPI/SelectionNotificationService.h
 	inc/MantidQtAPI/SignalBlocker.h
 	inc/MantidQtAPI/SignalRange.h
-  inc/MantidQtAPI/TSVSerialiser.h
+	inc/MantidQtAPI/TSVSerialiser.h
 	inc/MantidQtAPI/qwt_compat.h
-        inc/MantidQtAPI/WidgetScrollbarDecorator.h
+	inc/MantidQtAPI/WidgetScrollbarDecorator.h
+	inc/MantidQtAPI/WindowIcons.h
+	inc/MantidQtAPI/WorkspaceIcons.h
 )
 
 set ( UI_FILES
   inc/MantidQtAPI/ManageUserDirectories.ui
+  inc/MantidQtAPI/MWRunFiles.ui
   inc/MantidQtAPI/ScriptRepositoryView.ui
+)
+
+# Python unit tests
+set ( TEST_PY_FILES
+  test/MWRunFilesTest.py
 )
 
 set( TEST_FILES
    BatchAlgorithmRunnerTest.h
+   FileDialogHandlerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
+   NonOrthogonalTest.h
    PlotAxisTest.h
    QwtWorkspaceBinDataTest.h
    QwtWorkspaceSpectrumDataTest.h
@@ -191,6 +216,7 @@ endif()
 ###########################################################################
 
 add_subdirectory ( test )
+
 
 ###########################################################################
 # Installation settings

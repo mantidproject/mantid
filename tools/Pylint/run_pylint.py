@@ -353,7 +353,6 @@ def get_proc_results(processes, wait=False):
       (Updated processes, results)
     """
     results = Results()
-    nprocs = len(processes)
     running = []
     for index, proc_info in enumerate(processes):
         if wait:

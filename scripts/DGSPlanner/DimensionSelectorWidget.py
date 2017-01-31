@@ -24,12 +24,12 @@ class EmptyOrDoubleValidator(QtGui.QValidator):
             return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
         else:
             try:
-                dummy=float(str(teststring))
+                float(str(teststring))
                 return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
             except ValueError:
                 try:
                     #this is the case when you start typing - or 1e or 1e- and putting 1 at the end would make it a float
-                    dummy=float(str(teststring)+'1')
+                    float(str(teststring)+'1')
                     return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
                 except ValueError:
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)
@@ -45,15 +45,15 @@ class V3DValidator(QtGui.QValidator):
             return returnValid(QtGui.QValidator.Invalid,teststring,pos)
         if len(parts)==3:
             try:
-                dummy_0=float(parts[0])
-                dummy_1=float(parts[1])
-                dummy_2=float(parts[2])
+                float(parts[0])
+                float(parts[1])
+                float(parts[2])
                 return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
             except ValueError:
                 try:
-                    dummy_0=float(parts[0]+'1')
-                    dummy_1=float(parts[1]+'1')
-                    dummy_2=float(parts[2]+'1')
+                    float(parts[0]+'1')
+                    float(parts[1]+'1')
+                    float(parts[2]+'1')
                     return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
                 except ValueError:
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)

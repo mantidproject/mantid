@@ -1,15 +1,18 @@
 """Test suite for the crystal field calculations in the Inelastic/CrystalField package
 """
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
+from scipy.constants import physical_constants
 
 # Import mantid to setup the python paths to the bundled scripts
 import mantid
 from CrystalField.energies import energies
-from mantid.simpleapi import CalculateChiSquared
+from mantid.simpleapi import CalculateChiSquared, EvaluateFunction, mtd
 from mantid.kernel import ConfigService
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
+
 
 class BackgroundTest(unittest.TestCase):
 
@@ -23,22 +26,22 @@ class BackgroundTest(unittest.TestCase):
         from CrystalField import Background, Function
         b = Background(peak=Function('PseudoVoigt', Height=10, FWHM=1, Mixing=0.5),
                        background=Function('LinearBackground', A0=1.0, A1=0.1)) * 3
-        self.assertEquals(len(b), 3)
+        self.assertEqual(len(b), 3)
         self.assertTrue(isinstance(b[0], Background))
         self.assertTrue(isinstance(b[1], Background))
         self.assertTrue(isinstance(b[2], Background))
         b[0].peak.param['Height'] = 31
         b[1].peak.param['Height'] = 41
         b[2].peak.param['Height'] = 51
-        self.assertEquals(b[0].peak.param['Height'], 31)
-        self.assertEquals(b[1].peak.param['Height'], 41)
-        self.assertEquals(b[2].peak.param['Height'], 51)
+        self.assertEqual(b[0].peak.param['Height'], 31)
+        self.assertEqual(b[1].peak.param['Height'], 41)
+        self.assertEqual(b[2].peak.param['Height'], 51)
         b[0].background.param['A1'] = 3
         b[1].background.param['A1'] = 4
         b[2].background.param['A1'] = 5
-        self.assertEquals(b[0].background.param['A1'], 3)
-        self.assertEquals(b[1].background.param['A1'], 4)
-        self.assertEquals(b[2].background.param['A1'], 5)
+        self.assertEqual(b[0].background.param['A1'], 3)
+        self.assertEqual(b[1].background.param['A1'], 4)
+        self.assertEqual(b[2].background.param['A1'], 5)
 
 
 class CrystalFieldTests(unittest.TestCase):
@@ -93,14 +96,14 @@ class CrystalFieldTests(unittest.TestCase):
         for i in range(9):
             self.assertAlmostEqual(expectedEigenvalues[i], en[i], 1)
         # Now test the eigenvectors by computing the dipole transition matrix elements. Use the magnetic field
-        #   terms but divide by gJ*uB (gJ=0.8 for U4+/Pr3+ and uB=0.6715)
+        #   terms but divide by gJ*uB (gJ=0.8 for U4+/Pr3+ and uB=0.05788 meV/T)
         _, _, hx = energies(2, BextX=1.0)
         _, _, hy = energies(2, BextY=1.0)
         _, _, hz = energies(2, BextZ=1.0)
         ix = np.dot(np.conj(np.transpose(wf)), np.dot(hx, wf))
         iy = np.dot(np.conj(np.transpose(wf)), np.dot(hy, wf))
         iz = np.dot(np.conj(np.transpose(wf)), np.dot(hz, wf))
-        gJuB = 0.53716
+        gJuB = 0.8 * physical_constants['Bohr magneton in eV/T'][0] * 1000.
         trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
         # For some reason, in the paper I also divided the matrix elements by a factor of 4. (not sure why)
         trans = trans / (gJuB ** 2) / 4
@@ -137,7 +140,7 @@ class CrystalFieldTests(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                           Temperature=44.0)
         pl = cf.getPeakList()
-        self.assertEquals(pl.shape, (2, 7))
+        self.assertEqual(pl.shape, (2, 7))
         self.assertAlmostEqual(pl[0, 0], 0.0, 10)
         self.assertAlmostEqual(pl[1, 0], 1.99118947*c_mbsr, 6)
         self.assertAlmostEqual(pl[0, 1], 3.85696607, 8)
@@ -150,7 +153,7 @@ class CrystalFieldTests(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                           Temperature=[44.0, 50.0])
         pl1 = cf.getPeakList()
-        self.assertEquals(pl1.shape, (2, 7))
+        self.assertEqual(pl1.shape, (2, 7))
         self.assertAlmostEqual(pl1[0, 0], 0.0, 10)
         self.assertAlmostEqual(pl1[1, 0], 1.99118947*c_mbsr, 6)
         self.assertAlmostEqual(pl1[0, 1], 3.85696607, 8)
@@ -159,7 +162,7 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(pl1[1, 2], 0.37963778*c_mbsr, 6)
 
         pl2 = cf.getPeakList(1)
-        self.assertEquals(pl2.shape, (2, 7))
+        self.assertEqual(pl2.shape, (2, 7))
         self.assertAlmostEqual(pl2[0, 0], 0.0, 10)
         self.assertAlmostEqual(pl2[1, 0], 1.97812511*c_mbsr, 6)
         self.assertAlmostEqual(pl2[0, 1], 3.85696607, 8)
@@ -174,8 +177,8 @@ class CrystalFieldTests(unittest.TestCase):
         pf.attr[0]['SomeAttr'] = 'Hello'
         pf.param[1]['Sigma'] = 2.1
         pf.param[1]['Height'] = 100
-        self.assertEquals(pf.paramString(), 'f0.SomeAttr=Hello,f0.Sigma=1.1,f1.Sigma=2.1,f1.Height=100')
-        self.assertEquals(pf.toString(), 'name=Gaussian,SomeAttr=Hello,Sigma=1.1;name=Gaussian,Sigma=2.1,Height=100')
+        self.assertEqual(pf.paramString(), 'f0.SomeAttr=Hello,f0.Sigma=1.1,f1.Height=100,f1.Sigma=2.1')
+        self.assertEqual(pf.toString(), 'name=Gaussian,SomeAttr=Hello,Sigma=1.1;name=Gaussian,Height=100,Sigma=2.1')
 
     def test_api_CrystalField_spectrum(self):
         from CrystalField import CrystalField
@@ -341,7 +344,7 @@ class CrystalFieldTests(unittest.TestCase):
 
         x0, y0 = cf.getSpectrum()
         x1, y1 = cf.getSpectrum(1)
-        # Original test was for FOCUS convention - intensity in barn. 
+        # Original test was for FOCUS convention - intensity in barn.
         # Now use ISIS convention with intensity in milibarn/steradian
         y0 = y0 / c_mbsr
         y1 = y1 / c_mbsr
@@ -354,8 +357,80 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y1[139], 2.1635845058245273, 8)
         self.assertAlmostEqual(y1[150], 2.1826462206185795, 8)
 
+    def test_api_CrystalField_single_multi_check(self):
+        from CrystalField import CrystalField
+        cf = CrystalField('Ce', 'C2v', B20=0.035, Temperature=[10.0, 10.0], FWHM=1.0)
+        self.assertEqual(cf.check_consistency(), 2)
+        cf = CrystalField('Ce', 'C2v', B20=0.035, Temperature=[5, 10], FWHM=[0.5,1,2])
+        self.assertRaises(ValueError, cf.check_consistency)
+        cf = CrystalField('Ce', 'C2v', B20=0.035, Temperature=[5, 10], FWHM=[0.5,1])
+        cf.IntensityScaling = [1,2,3,4]
+        self.assertRaises(ValueError, cf.check_consistency)
+        cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
+                          Temperature=[4.0], FWHM=0.1, ToleranceIntensity=0.001*c_mbsr)
+        cf.IntensityScaling = [1]
+        self.assertEqual(cf.check_consistency(), 1)
+        x, y = cf.getSpectrum()
+        y = y / c_mbsr
+        self.assertAlmostEqual(y[60], 5.52333486, 8)
+
+    def test_api_CrystalField_physical_properties(self):
+        from CrystalField import CrystalField
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+        # Test Heat capacity calculations
+        TCv, Cv = cf.getHeatCapacity()
+        self.assertAlmostEqual(TCv[150], 151, 4)
+        self.assertAlmostEqual(Cv[100], 4.2264, 3)
+        self.assertAlmostEqual(Cv[150], 5.9218, 3)
+        self.assertAlmostEqual(Cv[200], 5.4599, 3)
+
+        # Test susceptibility calculations
+        Tchi_powder, chi_powder = cf.getSusceptibility(np.linspace(1,300,50), Hdir='powder')
+        self.assertAlmostEqual(Tchi_powder[10], 62.02, 2)
+        self.assertAlmostEqual(chi_powder[5], 1.92026e-2, 6)
+        self.assertAlmostEqual(chi_powder[10], 1.03471e-2, 6)
+        self.assertAlmostEqual(chi_powder[15], 0.73004e-2, 6)
+
+        # Test M(T) calculations
+        Tmt_powder, mt_powder = cf.getMagneticMoment(1., Temperature=np.linspace(1,300,50), Hdir='powder', Unit='cgs')
+        self.assertAlmostEqual(chi_powder[5], mt_powder[5], 6)
+        self.assertAlmostEqual(chi_powder[10], mt_powder[10], 6)
+        self.assertAlmostEqual(chi_powder[15], mt_powder[15], 6)
+        _, invmt_powder_SI = cf.getMagneticMoment(1., Temperature=np.linspace(1,300,50), Hdir='powder', Unit='SI', Inverse=True)
+        self.assertAlmostEqual(chi_powder[5] * 10, 1 / invmt_powder_SI[5], 2)
+        self.assertAlmostEqual(chi_powder[10] * 10, 1 / invmt_powder_SI[10], 2)
+        self.assertAlmostEqual(chi_powder[15] * 10, 1 / invmt_powder_SI[15], 2)
+
+        # Test M(H) calculations
+        Hmag_SI, mag_SI = cf.getMagneticMoment(np.linspace(0,30,15), Temperature=10, Hdir=[0,1,-1], Unit='SI')
+        self.assertAlmostEqual(mag_SI[1], 1.8139, 3)
+        self.assertAlmostEqual(mag_SI[5], 6.7859, 3)
+        self.assertAlmostEqual(mag_SI[9], 8.2705, 3)
+        _, mag_bohr = cf.getMagneticMoment(np.linspace(0,30,15), Temperature=10, Hdir=[0,1,-1], Unit='bohr')
+        self.assertAlmostEqual(mag_SI[1] / 5.5849, mag_bohr[1], 3)
+        self.assertAlmostEqual(mag_SI[5] / 5.5849, mag_bohr[5], 3)
+        self.assertAlmostEqual(mag_SI[9] / 5.5849, mag_bohr[9], 3)
+
 
 class CrystalFieldFitTest(unittest.TestCase):
+
+    def _makeMultiWorkspaces(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=[44.0, 50], FWHM=[1.1, 0.9])
+        origin.setPeaks('Lorentzian')
+        origin.peaks[0].param[0]['FWHM'] = 1.11
+        origin.peaks[1].param[1]['FWHM'] = 1.12
+        origin.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                             background=Function('FlatBackground', A0=1.0))
+        origin.background[1].peak.param['Sigma'] = 0.8
+        origin.background[1].background.param['A0'] = 1.1
+
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
+        return ws0, ws1
 
     def test_CrystalFieldFit(self):
         from CrystalField.fitting import makeWorkspace
@@ -380,39 +455,39 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(cf.background.peak.param['Height'], 9.99999983559*c_mbsr, 4)
         self.assertAlmostEqual(cf.background.background.param['A1'], 0.0100000014282, 4)
         self.assertAlmostEqual(cf.background.background.param['A0'], 0.999999976941, 4)
-        self.assertEqual(cf.param['IB63'], 0.0)
-        self.assertEqual(cf.param['IB62'], 0.0)
-        self.assertEqual(cf.param['IB61'], 0.0)
-        self.assertEqual(cf.param['IB66'], 0.0)
-        self.assertEqual(cf.param['IB65'], 0.0)
-        self.assertEqual(cf.param['IB64'], 0.0)
-        self.assertEqual(cf.param['IB41'], 0.0)
-        self.assertEqual(cf.param['IB43'], 0.0)
-        self.assertEqual(cf.param['IB42'], 0.0)
-        self.assertEqual(cf.param['IB44'], 0.0)
-        self.assertEqual(cf.param['B21'], 0.0)
-        self.assertEqual(cf.param['IB22'], 0.0)
-        self.assertEqual(cf.param['IB21'], 0.0)
-        self.assertEqual(cf.param['BextX'], 0.0)
-        self.assertEqual(cf.param['BextY'], 0.0)
-        self.assertEqual(cf.param['BextZ'], 0.0)
-        self.assertEqual(cf.param['BmolY'], 0.0)
-        self.assertEqual(cf.param['BmolX'], 0.0)
-        self.assertEqual(cf.param['BmolZ'], 0.0)
-        self.assertEqual(cf.param['B66'], 0.0)
-        self.assertEqual(cf.param['B63'], 0.0)
-        self.assertEqual(cf.param['B65'], 0.0)
-        self.assertEqual(cf.param['B62'], 0.0)
-        self.assertEqual(cf.param['B61'], 0.0)
-        self.assertEqual(cf.param['B60'], 0.0)
-        self.assertEqual(cf.param['B41'], 0.0)
-        self.assertEqual(cf.param['B43'], 0.0)
-        self.assertEqual(cf.param['B64'], 0.0)
-        self.assertAlmostEqual(cf.param['B20'], 0.37737, 4)
-        self.assertAlmostEqual(cf.param['B22'], 3.97700087765, 4)
-        self.assertAlmostEqual(cf.param['B40'], -0.0317867635188, 4)
-        self.assertAlmostEqual(cf.param['B42'], -0.116110640723, 4)
-        self.assertAlmostEqual(cf.param['B44'], -0.125439939584, 4)
+        self.assertEqual(cf['IB63'], 0.0)
+        self.assertEqual(cf['IB62'], 0.0)
+        self.assertEqual(cf['IB61'], 0.0)
+        self.assertEqual(cf['IB66'], 0.0)
+        self.assertEqual(cf['IB65'], 0.0)
+        self.assertEqual(cf['IB64'], 0.0)
+        self.assertEqual(cf['IB41'], 0.0)
+        self.assertEqual(cf['IB43'], 0.0)
+        self.assertEqual(cf['IB42'], 0.0)
+        self.assertEqual(cf['IB44'], 0.0)
+        self.assertEqual(cf['B21'], 0.0)
+        self.assertEqual(cf['IB22'], 0.0)
+        self.assertEqual(cf['IB21'], 0.0)
+        self.assertEqual(cf['BextX'], 0.0)
+        self.assertEqual(cf['BextY'], 0.0)
+        self.assertEqual(cf['BextZ'], 0.0)
+        self.assertEqual(cf['BmolY'], 0.0)
+        self.assertEqual(cf['BmolX'], 0.0)
+        self.assertEqual(cf['BmolZ'], 0.0)
+        self.assertEqual(cf['B66'], 0.0)
+        self.assertEqual(cf['B63'], 0.0)
+        self.assertEqual(cf['B65'], 0.0)
+        self.assertEqual(cf['B62'], 0.0)
+        self.assertEqual(cf['B61'], 0.0)
+        self.assertEqual(cf['B60'], 0.0)
+        self.assertEqual(cf['B41'], 0.0)
+        self.assertEqual(cf['B43'], 0.0)
+        self.assertEqual(cf['B64'], 0.0)
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
         self.assertAlmostEqual(cf.peaks.param[0]['PeakCentre'], 0.0, 8)
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.10000009456, 4)
         self.assertAlmostEqual(cf.peaks.param[0]['Amplitude'], 2.74936658109*c_mbsr, 2)
@@ -422,7 +497,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(cf.peaks.param[2]['PeakCentre'], 44.341248146, 4)
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.10000812804, 4)
         self.assertAlmostEqual(cf.peaks.param[2]['Amplitude'], 0.429808829601*c_mbsr, 2)
-
 
     def test_CrystalFieldFit_multi_spectrum(self):
         from CrystalField.fitting import makeWorkspace
@@ -440,18 +514,18 @@ class CrystalFieldFitTest(unittest.TestCase):
         s = origin.makeMultiSpectrumFunction()
         fun = FunctionFactory.createInitialized(s)
 
-        self.assertEquals(fun.getParameterValue('f0.f0.f0.Sigma'), 0.3)
-        self.assertEquals(fun.getParameterValue('f0.f0.f1.A0'), 1.0)
-        self.assertEquals(fun.getParameterValue('f1.f0.f0.Sigma'), 0.8)
-        self.assertEquals(fun.getParameterValue('f1.f0.f1.A0'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f0.f0.Sigma'), 0.3)
+        self.assertEqual(fun.getParameterValue('f0.f0.f1.A0'), 1.0)
+        self.assertEqual(fun.getParameterValue('f1.f0.f0.Sigma'), 0.8)
+        self.assertEqual(fun.getParameterValue('f1.f0.f1.A0'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f0.f1.FWHM'), 1.11)
-        self.assertEquals(fun.getParameterValue('f0.f2.FWHM'), 1.1)
-        self.assertEquals(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f1.f1.FWHM'), 0.9)
-        self.assertEquals(fun.getParameterValue('f1.f2.FWHM'), 1.12)
-        self.assertEquals(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                           Temperature=[44.0, 50], FWHM=[1.1, 0.9])
@@ -466,7 +540,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws0 = makeWorkspace(*origin.getSpectrum(0))
         ws1 = makeWorkspace(*origin.getSpectrum(1))
 
-        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0,  InputWorkspace_1=ws1)[1]
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0, InputWorkspace_1=ws1)[1]
 
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
@@ -510,7 +584,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertNotEqual(cf.peaks[1].param[3]['FWHM'], 0.0)
         self.assertNotEqual(cf.peaks[1].param[3]['Amplitude'], 0.0)
 
-
     def test_CrystalFieldFit_multi_spectrum_simple_background(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -525,15 +598,15 @@ class CrystalFieldFitTest(unittest.TestCase):
         s = origin.makeMultiSpectrumFunction()
         fun = FunctionFactory.createInitialized(s)
 
-        self.assertEquals(fun.getParameterValue('f1.f0.A0'), 1.2)
+        self.assertEqual(fun.getParameterValue('f1.f0.A0'), 1.2)
 
-        self.assertEquals(fun.getParameterValue('f0.f1.FWHM'), 1.11)
-        self.assertEquals(fun.getParameterValue('f0.f2.FWHM'), 1.1)
-        self.assertEquals(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f1.f1.FWHM'), 0.9)
-        self.assertEquals(fun.getParameterValue('f1.f2.FWHM'), 1.12)
-        self.assertEquals(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                           Temperature=[44.0, 50], FWHM=[1.1, 0.9])
@@ -566,16 +639,16 @@ class CrystalFieldFitTest(unittest.TestCase):
         s = origin.makeMultiSpectrumFunction()
         fun = FunctionFactory.createInitialized(s)
 
-        self.assertEquals(fun.getParameterValue('f0.f0.Sigma'), 0.3)
-        self.assertEquals(fun.getParameterValue('f1.f0.Sigma'), 0.8)
+        self.assertEqual(fun.getParameterValue('f0.f0.Sigma'), 0.3)
+        self.assertEqual(fun.getParameterValue('f1.f0.Sigma'), 0.8)
 
-        self.assertEquals(fun.getParameterValue('f0.f1.FWHM'), 1.11)
-        self.assertEquals(fun.getParameterValue('f0.f2.FWHM'), 1.1)
-        self.assertEquals(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f1.f1.FWHM'), 0.9)
-        self.assertEquals(fun.getParameterValue('f1.f2.FWHM'), 1.12)
-        self.assertEquals(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                           Temperature=[44.0, 50], FWHM=[1.1, 0.9])
@@ -588,7 +661,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws0 = makeWorkspace(*origin.getSpectrum(0))
         ws1 = makeWorkspace(*origin.getSpectrum(1))
 
-        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0,  InputWorkspace_1=ws1)[1]
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0, InputWorkspace_1=ws1)[1]
 
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
@@ -606,87 +679,107 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertNotEqual(cf.background[1].peak.param['Sigma'], 0.0)
         self.assertNotEqual(cf.background[1].peak.param['Height'], 0.0)
 
+    def test_fit_single_multi_check(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit
+        cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5, 10], FWHM=[0.5, 1])
+        x, y = cf.getSpectrum()
+        ws = makeWorkspace(x, y)
+        cf.IntensityScaling = [1, 2]
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws], MaxIterations=200)
+        self.assertRaises(ValueError, fit.fit)
+        cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5], FWHM=0.5, IntensityScaling=[1])
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=1)
+        self.assertEquals(fit.check_consistency(), None)
+        cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5], FWHM=0.5, IntensityScaling = 1)
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws], MaxIterations=1)
+        self.assertEquals(fit.check_consistency(), None)
+
     def test_multi_ion_single_spectrum(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit
         from mantid.simpleapi import FunctionFactory
-        params = {'B20':0.37737, 'B22':3.9770, 'B40':-0.031787, 'B42':-0.11611, 'B44':-0.12544,
-                              'Temperature':44.0, 'FWHM':1.1}
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
         x, y = cf.getSpectrum()
         ws = makeWorkspace(x, y)
 
-        params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-                  'Temperature': 44.0, 'FWHM': 1.1}
-        cf1 = CrystalField('Ce', 'C2v', **params)
-        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf1 = CrystalField('Ce', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=44.0, FWHM=1.1)
+        cf1.ties(B20=0.37737, B22=3.977)
+        cf2 = CrystalField('Pr', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=44.0, FWHM=1.1,
+                           ToleranceIntensity=6.0, ToleranceEnergy=1.0)
+        cf2.ties(B20=0.37737, B22=3.977)
         cf = cf1 + cf2
 
         chi2 = CalculateChiSquared(cf.makeSpectrumFunction(), InputWorkspace=ws)[1]
 
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
         fit.fit()
 
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
         # how to get the parameters.
-        self.assertNotEqual(cf[0].param['B20'], 0.0)
-        self.assertNotEqual(cf[0].param['B22'], 0.0)
-        self.assertNotEqual(cf[0].param['B40'], 0.0)
-        self.assertNotEqual(cf[0].param['B42'], 0.0)
-        self.assertNotEqual(cf[0].param['B44'], 0.0)
+        self.assertNotEqual(cf[0]['B20'], 0.0)
+        self.assertNotEqual(cf[0]['B22'], 0.0)
+        self.assertNotEqual(cf[0]['B40'], 0.0)
+        self.assertNotEqual(cf[0]['B42'], 0.0)
+        self.assertNotEqual(cf[0]['B44'], 0.0)
 
-        self.assertNotEqual(cf[1].param['B20'], 0.0)
-        self.assertNotEqual(cf[1].param['B22'], 0.0)
-        self.assertNotEqual(cf[1].param['B40'], 0.0)
-        self.assertNotEqual(cf[1].param['B42'], 0.0)
-        self.assertNotEqual(cf[1].param['B44'], 0.0)
+        self.assertNotEqual(cf[1]['B20'], 0.0)
+        self.assertNotEqual(cf[1]['B22'], 0.0)
+        self.assertNotEqual(cf[1]['B40'], 0.0)
+        self.assertNotEqual(cf[1]['B42'], 0.0)
+        self.assertNotEqual(cf[1]['B44'], 0.0)
 
     def test_multi_ion_multi_spectrum(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit
         from mantid.simpleapi import FunctionFactory
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
-                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+                  'Temperature': [44.0, 50.0], 'FWHM': [1.1, 0.9]}
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
         ws1 = makeWorkspace(*cf.getSpectrum(0))
         ws2 = makeWorkspace(*cf.getSpectrum(1))
 
-        params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
-        cf1 = CrystalField('Ce', 'C2v', **params)
-        cf1.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
-        cf2 = CrystalField('Pr', 'C2v', **params)
-        cf2.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf1 = CrystalField('Ce', 'C2v', B40=-0.02, B42=-0.11, B44=-0.12, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
+        cf1.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf1.FixAllPeaks = True
+        cf2 = CrystalField('Pr', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0],
+                           ToleranceIntensity=6.0, ToleranceEnergy=1.0)
+        cf2.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf2.FixAllPeaks = True
         cf = cf1 + cf2
 
-        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws1,  InputWorkspace_1=ws2)[1]
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws1, InputWorkspace_1=ws2)[1]
 
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
         fit.fit()
 
+        self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
         # how to get the parameters.
-        self.assertNotEqual(cf[0].param['B20'], 0.0)
-        self.assertNotEqual(cf[0].param['B22'], 0.0)
-        self.assertNotEqual(cf[0].param['B40'], 0.0)
-        self.assertNotEqual(cf[0].param['B42'], 0.0)
-        self.assertNotEqual(cf[0].param['B44'], 0.0)
+        self.assertNotEqual(cf[0]['B20'], 0.0)
+        self.assertNotEqual(cf[0]['B22'], 0.0)
+        self.assertNotEqual(cf[0]['B40'], 0.0)
+        self.assertNotEqual(cf[0]['B42'], 0.0)
+        self.assertNotEqual(cf[0]['B44'], 0.0)
 
-        self.assertNotEqual(cf[1].param['B20'], 0.0)
-        self.assertNotEqual(cf[1].param['B22'], 0.0)
-        self.assertNotEqual(cf[1].param['B40'], 0.0)
-        self.assertNotEqual(cf[1].param['B42'], 0.0)
-        self.assertNotEqual(cf[1].param['B44'], 0.0)
+        self.assertNotEqual(cf[1]['B20'], 0.0)
+        self.assertNotEqual(cf[1]['B22'], 0.0)
+        self.assertNotEqual(cf[1]['B40'], 0.0)
+        self.assertNotEqual(cf[1]['B42'], 0.0)
+        self.assertNotEqual(cf[1]['B44'], 0.0)
 
     def test_constraints_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -982,6 +1075,567 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks.param[1]["FWHM"] = 'aaa'
         s = cf.makeSpectrumFunction()
         self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
+
+    def test_resolution_single_spectrum(self):
+        from CrystalField import CrystalField
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]))
+        sp = cf.getSpectrum()
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
+
+    def test_resolution_single_spectrum_fit(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from CrystalField.fitting import makeWorkspace
+        origin = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0)
+        origin.peaks.param[0]['FWHM'] = 1.01
+        origin.peaks.param[1]['FWHM'] = 1.4
+        origin.peaks.param[2]['FWHM'] = 1.8
+
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]))
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+        fit.fit()
+
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0112, 4)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.5811, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.794, 2)
+
+    def test_resolution_single_spectrum_fit_variation(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from CrystalField.fitting import makeWorkspace
+        origin = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0)
+        origin.peaks.param[0]['FWHM'] = 1.01
+        origin.peaks.param[1]['FWHM'] = 1.4
+        origin.peaks.param[2]['FWHM'] = 1.8
+
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]), FWHMVariation=0.3)
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+        fit.fit()
+
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.01, 4)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.4, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.8, 4)
+
+    def test_ResolutionModel_func_single(self):
+        from CrystalField import ResolutionModel
+
+        def func(x):
+            return np.sin(x)
+        rm = ResolutionModel(func, 0, np.pi)
+        self.assertEquals(len(rm.model[0]), 129)
+        self.assertEquals(len(rm.model[1]), 129)
+        self.assertTrue(np.all(func(rm.model[0]) == rm.model[1]))
+
+    def test_ResolutionModel_func_multi(self):
+        from CrystalField import ResolutionModel
+        def func0(x):
+            return np.sin(x)
+
+        class CalcWidth:
+            def __call__(self, x):
+                return np.cos(x / 2)
+
+            def model(self, x):
+                return np.tan(x / 2)
+        func1 = CalcWidth()
+        func2 = func1.model
+        rm = ResolutionModel([func0, func1, func2], -np.pi/2, np.pi/2, accuracy = 0.01)
+
+        self.assertEquals(len(rm.model), 3)
+        self.assertEquals(len(rm.model[0][0]), 17)
+        self.assertEquals(len(rm.model[0][1]), 17)
+        self.assertEquals(len(rm.model[1][0]), 9)
+        self.assertEquals(len(rm.model[1][1]), 9)
+        self.assertEquals(len(rm.model[2][0]), 17)
+        self.assertEquals(len(rm.model[2][1]), 17)
+        self.assertTrue(np.all(func0(rm.model[0][0]) == rm.model[0][1]))
+        self.assertTrue(np.all(func1(rm.model[1][0]) == rm.model[1][1]))
+        self.assertTrue(np.all(func2(rm.model[2][0]) == rm.model[2][1]))
+
+    def test_ResolutionModel_array_single(self):
+        from CrystalField import ResolutionModel
+
+        x = [1, 2, 3]
+        y = [3, 2, 1]
+        rm = ResolutionModel((x, y))
+        self.assertEquals(rm.model[0], x)
+        self.assertEquals(rm.model[1], y)
+
+    def test_ResolutionModel_array_multi(self):
+        from CrystalField import ResolutionModel
+
+        x0 = [1, 2, 3]
+        y0 = [3, 2, 1]
+        x1 = [4, 5, 6]
+        y1 = [6, 5, 4]
+        rm = ResolutionModel([(x0, y0), (x1, y1)])
+
+        self.assertEquals(len(rm.model), 2)
+        self.assertEquals(rm.model[0][0], x0)
+        self.assertEquals(rm.model[0][1], y0)
+        self.assertEquals(rm.model[1][0], x1)
+        self.assertEquals(rm.model[1][1], y1)
+
+    def test_ResolutionModel_set_single(self):
+        from CrystalField import ResolutionModel, CrystalField
+
+        x = [0, 50]
+        y = [1, 2]
+        rm = ResolutionModel((x, y))
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=rm)
+        sp = cf.getSpectrum()
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
+
+    def test_ResolutionModel_set_single_variation(self):
+        from CrystalField import ResolutionModel, CrystalField
+
+        x = [0, 50]
+        y = [1, 2]
+        rm = ResolutionModel((x, y))
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.3)
+        sp = cf.getSpectrum()
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
+
+    def test_ResolutionModel_set_multi(self):
+        from CrystalField import ResolutionModel, CrystalField, CrystalFieldFit
+        from mantid.simpleapi import FunctionFactory
+
+        x0 = [0, 50]
+        y0 = [1, 2]
+        x1 = [0, 50]
+        y1 = [3, 4]
+        rm = ResolutionModel([(x0, y0), (x1, y1)])
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=[44.0, 50], ResolutionModel=rm)
+
+        sp = cf.makeSpectrumFunction(0)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(1, 2)' in sp)
+
+        sp = cf.makeSpectrumFunction(1)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(3, 4)' in sp)
+
+    def test_ResolutionModel_set_multi_variation(self):
+        from CrystalField import ResolutionModel, CrystalField, CrystalFieldFit
+        from mantid.simpleapi import FunctionFactory
+
+        x0 = [0, 50]
+        y0 = [1, 2]
+        x1 = [0, 50]
+        y1 = [3, 4]
+        rm = ResolutionModel([(x0, y0), (x1, y1)])
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=[44.0, 50], ResolutionModel=rm,FWHMVariation=0.1)
+
+        sp = cf.makeSpectrumFunction(0)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(1, 2)' in sp)
+        self.assertTrue('FWHMVariation=0.1' in sp)
+
+        sp = cf.makeSpectrumFunction(1)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(3, 4)' in sp)
+        self.assertTrue('FWHMVariation=0.1' in sp)
+
+        sp = cf.makeMultiSpectrumFunction()
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('FWHMX0=(0, 50),FWHMY0=(1, 2)' in sp)
+        self.assertTrue('FWHMX1=(0, 50),FWHMY1=(3, 4)' in sp)
+        self.assertTrue('FWHMVariation=0.1' in sp)
+
+    def test_peak_width_update(self):
+        from CrystalField import ResolutionModel, CrystalField
+
+        x = [0, 50]
+        y = [0.1, 2]
+        rm = ResolutionModel((x, y))
+
+        cf1 = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.01)
+        sp1 = cf1.getSpectrum()
+
+        cf2 = CrystalField('Ce', 'C2v', B20=0.57, B22=2.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.01)
+        sp2 = cf2.getSpectrum()
+
+        cf1['B20'] = 0.57
+        cf1['B22'] = 2.97
+        sp1 = cf1.getSpectrum()
+        self.assertEqual(cf1.peaks.param[1]['Amplitude'], cf2.peaks.param[1]['Amplitude'],)
+        self.assertEqual(cf1.peaks.param[1]['FWHM'], cf2.peaks.param[1]['FWHM'],)
+
+    def test_monte_carlo_single_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.monte_carlo(NSamples=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', Seed=123)
+        # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 > 0.0)
+        self.assertTrue(cf.chi2 < 100.0)
+
+    def test_monte_carlo_multi_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function, ResolutionModel
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
+        ws1 = makeWorkspace(*origin.getSpectrum(0))
+        ws2 = makeWorkspace(*origin.getSpectrum(1))
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=11,
+                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=[ws1, ws2])
+        fit.monte_carlo(NSamples=1000, Constraints='20<f0.f1.PeakCentre<45,20<f0.f2.PeakCentre<45', Seed=123)
+        # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 > 0.0)
+        self.assertTrue(cf.chi2 < 200.0)
+
+    def test_multi_ion_intensity_scaling(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from mantid.simpleapi import FunctionFactory
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f1.IntensityScaling=1.0*f0.IntensityScaling' in s)
+
+        cf = 2*cf1 + cf2*8
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling=0.25*f1.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f1.IntensityScaling=0.5*f0.IntensityScaling' in s)
+
+        cf3 = CrystalField('Tb', 'C2v', **params)
+        cf = 2 * cf1 + cf2 * 8 + cf3
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling=0.25*f1.IntensityScaling' in s)
+        self.assertTrue('f2.IntensityScaling=0.125*f1.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2 * 8 + 10 * cf3
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling=0.2*f2.IntensityScaling' in s)
+        self.assertTrue('f1.IntensityScaling=0.8*f2.IntensityScaling' in s)
+
+        cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling=0.2*f2.IntensityScaling' in s)
+        self.assertTrue('f1.IntensityScaling=0.8*f2.IntensityScaling' in s)
+
+        cf = cf1 + (cf2 * 8 + 10 * cf3)
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling=0.1*f2.IntensityScaling' in s)
+        self.assertTrue('f1.IntensityScaling=0.8*f2.IntensityScaling' in s)
+
+        cf4 = CrystalField('Yb', 'C2v', **params)
+        cf = (2 * cf1 + cf2 * 8) + (10 * cf3 + cf4)
+        fun = FunctionFactory.createInitialized(cf.makeSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling=0.2*f2.IntensityScaling' in s)
+        self.assertTrue('f1.IntensityScaling=0.8*f2.IntensityScaling' in s)
+        self.assertTrue('f3.IntensityScaling=0.1*f2.IntensityScaling' in s)
+
+    def test_multi_ion_intensity_scaling_multi_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from mantid.simpleapi import FunctionFactory
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': [44.0, 50.0], 'FWHM': [1.1, 1.6]}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f1.IntensityScaling0=1.0*f0.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=1.0*f0.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + cf2 * 8
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.25*f1.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.25*f1.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + cf2
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f1.IntensityScaling0=0.5*f0.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.5*f0.IntensityScaling1' in s)
+
+        cf3 = CrystalField('Tb', 'C2v', **params)
+        cf = 2 * cf1 + cf2 * 8 + cf3
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.25*f1.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.25*f1.IntensityScaling1' in s)
+        self.assertTrue('f2.IntensityScaling0=0.125*f1.IntensityScaling0' in s)
+        self.assertTrue('f2.IntensityScaling1=0.125*f1.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + cf2 * 8 + 10 * cf3
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.2*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.2*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+
+        cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.2*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.2*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+
+        cf = cf1 + (cf2 * 8 + 10 * cf3)
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.1*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.1*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+
+        cf4 = CrystalField('Yb', 'C2v', **params)
+        cf = (2 * cf1 + cf2 * 8) + (10 * cf3 + cf4)
+        fun = FunctionFactory.createInitialized(cf.makeMultiSpectrumFunction())
+        s = str(fun)
+        self.assertTrue('f0.IntensityScaling0=0.2*f2.IntensityScaling0' in s)
+        self.assertTrue('f0.IntensityScaling1=0.2*f2.IntensityScaling1' in s)
+        self.assertTrue('f1.IntensityScaling0=0.8*f2.IntensityScaling0' in s)
+        self.assertTrue('f1.IntensityScaling1=0.8*f2.IntensityScaling1' in s)
+        self.assertTrue('f3.IntensityScaling0=0.1*f2.IntensityScaling0' in s)
+        self.assertTrue('f3.IntensityScaling1=0.1*f2.IntensityScaling1' in s)
+
+    def test_normalisation(self):
+        from CrystalField.normalisation import split2range
+        ranges = split2range(Ion='Pr', EnergySplitting=10,
+                             Parameters=['B20', 'B22', 'B40', 'B42', 'B44', 'B60', 'B62', 'B64', 'B66'])
+        self.assertAlmostEqual(ranges['B44'], 0.013099063718959822, 7)
+        self.assertAlmostEqual(ranges['B60'], 0.00010601965319487525, 7)
+        self.assertAlmostEqual(ranges['B40'], 0.0022141458870077678, 7)
+        self.assertAlmostEqual(ranges['B42'], 0.009901961430901874, 7)
+        self.assertAlmostEqual(ranges['B64'], 0.00084150490931686321, 7)
+        self.assertAlmostEqual(ranges['B22'], 0.19554806997215959, 7)
+        self.assertAlmostEqual(ranges['B20'], 0.11289973083793813, 7)
+        self.assertAlmostEqual(ranges['B66'], 0.0011394030334966495, 7)
+        self.assertAlmostEqual(ranges['B62'], 0.00076818536847364201, 7)
+
+    def test_estimate_parameters_cross_entropy(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
+                                constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45',
+                                Type='Cross Entropy', NSamples=100)
+        # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
+
+    def test_estimate_parameters_multiple_results(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
+                                constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', NSamples=1000)
+        self.assertEqual(fit.get_number_estimates(), 10)
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
+
+    def test_intensity_scaling_single_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=44.0, FWHM=1.0)
+        _, y0 = cf.getSpectrum()
+
+        cf.IntensityScaling = 2.5
+        _, y1 = cf.getSpectrum()
+
+        self.assertTrue(np.all(y1 / y0 > 2.49999999999))
+        self.assertTrue(np.all(y1 / y0 < 2.50000000001))
+
+    def test_intensity_scaling_single_spectrum_1(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', IntensityScaling=2.5, B20=0.37737, B22=3.9770, B40=-0.031787,
+                          B42=-0.11611, B44=-0.12544, Temperature=44.0, FWHM=1.0)
+        _, y0 = cf.getSpectrum()
+
+        cf.IntensityScaling = 1.0
+        _, y1 = cf.getSpectrum()
+
+        self.assertTrue(np.all(y0 / y1 > 2.49999999999))
+        self.assertTrue(np.all(y0 / y1 < 2.50000000001))
+
+    def test_intensity_scaling_multi_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.2])
+        x, y0 = cf.getSpectrum(0)
+        ws0 = makeWorkspace(x, y0)
+        x, y1 = cf.getSpectrum(1)
+        ws1 = makeWorkspace(x, y1)
+
+        cf.IntensityScaling = [2.5, 1.5]
+
+        EvaluateFunction(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0, InputWorkspace_1=ws1,
+                         OutputWorkspace='out')
+        out = mtd['out']
+        out0 = out[0].readY(1)
+        out1 = out[1].readY(1)
+
+        self.assertTrue(np.all(out0 / y0 > 2.49999999999))
+        self.assertTrue(np.all(out0 / y0 < 2.50000000001))
+
+        self.assertTrue(np.all(out1 / y1 > 1.49999999999))
+        self.assertTrue(np.all(out1 / y1 < 1.50000000001))
+
+    def test_CrystalFieldFit_physical_properties(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=[10, 100], FWHM=[1.1, 1.2])
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
+        wscv = makeWorkspace(*origin.getHeatCapacity())
+        wschi = makeWorkspace(*origin.getSusceptibility(Hdir='powder'))
+        wsmag = makeWorkspace(*origin.getMagneticMoment(Hdir=[0,1,0]))
+        wsmom = makeWorkspace(*origin.getMagneticMoment(H=100, T=np.linspace(1,300,300), Unit='cgs'))
+
+        # Fits single physical properties dataset
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
+        cf.PhysicalProperty = PhysicalProperties('susc', Hdir='powder')
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=wschi, MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
+        # Fits multiple physical properties
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12)
+        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[wschi, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
+        # Fits one INS spectrum and one physical property
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12, Temperature=10, FWHM=1.1)
+        cf.PhysicalProperty = PhysicalProperties('M(H)',Hdir=[0,1,0])
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
+        # Fits multiple INS spectra and multiple physical properties
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                          Temperature=[10, 100], FWHM=[1.1, 1.2])
+        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, ws1, wschi, wsmag], MaxIterations=100)
+        fit.fit()
+        self.assertAlmostEqual(cf['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf['B44'], -0.125439939584, 4)
+
 
 if __name__ == "__main__":
     unittest.main()

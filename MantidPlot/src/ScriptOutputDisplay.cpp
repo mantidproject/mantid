@@ -1,15 +1,16 @@
 #include "ScriptOutputDisplay.h"
 #include "TextFileIO.h"
 
-#include "pixmaps.h"
+#include <MantidQtAPI/pixmaps.h>
 
 #include <QDateTime>
-#include <QMenu>
-#include <QFileDialog>
 #include <QKeyEvent>
-#include <QPrinter>
+#include <QMenu>
 #include <QPrintDialog>
+#include <QPrinter>
 #include <QWheelEvent>
+
+using namespace MantidQt::API;
 
 /**
  * Constructor

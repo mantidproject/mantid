@@ -287,7 +287,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     Timer tim1;
     int ypixels = static_cast<int>(det->ypixels());
 
-    PARALLEL_FOR1(inputWorkspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace))
     for (int y = 0; y < ypixels; y++) {
       PARALLEL_START_INTERUPT_REGION
       // Get the workspace index for the detector ID at this spot
@@ -647,7 +647,7 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
 int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   (void)is_definition;
 
-  int status, i, attrLen, attrType;
+  int status, attrLen, attrType;
 #ifndef NEXUS43
   int rank;
   int dims[4];
@@ -655,7 +655,6 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   NXname attrName;
   void *attrBuffer;
 
-  i = 0;
   do {
 #ifdef NEXUS43
     status = NXgetnextattr(inId, attrName, &attrLen, &attrType);
@@ -684,7 +683,6 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
         if (NXfree(&attrBuffer) != NX_OK)
           return NX_ERROR;
       }
-      i++;
     }
   } while (status != NX_EOD);
   return NX_OK;

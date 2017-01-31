@@ -24,8 +24,7 @@ def default_ceria_expected_peaks():
                              0.901900955, 0.855618487, 0.825231622, 0.815800156,
                              0.781069134, 0.757748432, 0.750426918, 0.723129589,
                              0.704504971, 0.676425777, 0.66110842, 0.656229382,
-                             0.637740216, 0.624855346, 0.620730846, 0.605013529
-                            ]
+                             0.637740216, 0.624855346, 0.620730846, 0.605013529]
 
     return _CERIA_EXPECTED_PEAKS
 
@@ -280,7 +279,7 @@ def convertToDSpacing(parent, ws):
     """
     # A check to catch possible errors in an understandable way
     expectedDim = 'Time-of-flight'
-    dimType = ws.getXDimension().getName()
+    dimType = ws.getXDimension().name
     if expectedDim != dimType:
         raise ValueError("This function expects a workspace with %s X dimension, but "
                          "the X dimension of the input workspace is: '%s'. This is an internal logic "
@@ -344,6 +343,7 @@ def sumSpectra(parent, ws):
     """
     alg = parent.createChildAlgorithm('SumSpectra')
     alg.setProperty('InputWorkspace', ws)
+    alg.setProperty('RemoveSpecialValues', True)
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value
@@ -416,7 +416,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None,
         patterns = ["INS  %d ICONS"%(b_idx + 1), # bank calibration parameters: DIFC, DIFA, TZERO
                     "INS    CALIB", # calibration run numbers (Vanadium and Ceria)
                     "INS    INCBM"  # A his file for open genie (with ceria run number in the name)
-                   ]
+                    ]
         difa = 0.0
         # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
         replacements = [ ("INS  {0} ICONS  {1:.2f}    {2:.2f}    {3:.2f}".

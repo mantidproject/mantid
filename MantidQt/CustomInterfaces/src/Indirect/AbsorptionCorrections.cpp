@@ -47,14 +47,26 @@ void AbsorptionCorrections::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
-  double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
-  absCorAlgo->setProperty("SampleNumberDensity", sampleNumberDensity);
+  absCorAlgo->setProperty(
+      "SampleDensityType",
+      m_uiForm.cbSampleDensity->currentText().toStdString());
+  absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
   absCorAlgo->setProperty("SampleChemicalFormula",
                           sampleChemicalFormula.toStdString());
 
   addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
+
+  // General details
+
+  absCorAlgo->setProperty("DefaultBeamSize", m_uiForm.ckBeamSize->isChecked());
+  absCorAlgo->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
+  absCorAlgo->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
+  long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
+  absCorAlgo->setProperty("NumberWavelengths", wave);
+  long events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  absCorAlgo->setProperty("Events", events);
 
   // Can details
   bool useCan = m_uiForm.ckUseCan->isChecked();
@@ -94,8 +106,10 @@ void AbsorptionCorrections::run() {
     absCorAlgo->setProperty("UseCanCorrections", useCanCorrections);
 
     if (useCanCorrections) {
-      double canNumberDensity = m_uiForm.spCanNumberDensity->value();
-      absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
+
+      absCorAlgo->setProperty(
+          "CanDensityType", m_uiForm.cbCanDensity->currentText().toStdString());
+      absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
       QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
       absCorAlgo->setProperty("CanChemicalFormula",
@@ -151,8 +165,9 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     double sampleThickness = m_uiForm.spFlatSampleThickness->value();
     alg->setProperty("SampleThickness", sampleThickness);
 
-    double elementSize = m_uiForm.spFlatElementSize->value();
-    alg->setProperty("ElementSize", elementSize);
+    double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+    alg->setProperty("SampleAngle", sampleAngle);
+
   } else if (shape == "Annulus") {
     double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     alg->setProperty("SampleInnerRadius", sampleInnerRadius);
@@ -166,14 +181,12 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);
 
-    long events = static_cast<long>(m_uiForm.spAnnEvents->value());
-    alg->setProperty("Events", events);
   } else if (shape == "Cylinder") {
     double sampleRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("SampleRadius", sampleRadius);
 
-    long events = static_cast<long>(m_uiForm.spCylEvents->value());
-    alg->setProperty("Events", events);
+    double sampleHeight = m_uiForm.spCylSampleHeight->value();
+    alg->setProperty("SampleHeight", sampleHeight);
   }
 }
 
@@ -206,7 +219,7 @@ bool AbsorptionCorrections::validate() {
 
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                m_uiForm.leSampleChemicalFormula))
-    uiv.checkFieldIsValid("Sample Chamical Formula",
+    uiv.checkFieldIsValid("Sample Chemical Formula",
                           m_uiForm.leSampleChemicalFormula);
   const auto sampleChem =
       m_uiForm.leSampleChemicalFormula->text().toStdString();
@@ -231,9 +244,9 @@ bool AbsorptionCorrections::validate() {
 
     bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
     if (useCanCorrections) {
-      if (uiv.checkFieldIsNotEmpty("Container Chamical Formula",
+      if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
                                    m_uiForm.leCanChemicalFormula))
-        uiv.checkFieldIsValid("Container Chamical Formula",
+        uiv.checkFieldIsValid("Container Chemical Formula",
                               m_uiForm.leCanChemicalFormula);
     }
   }

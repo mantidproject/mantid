@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -61,8 +62,8 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
-    : FitPropertyBrowser(parent, mantidui), m_additionalLayout(nullptr),
-      m_widgetSplitter(nullptr) {}
+    : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
+      m_mainSplitter(nullptr) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -156,20 +157,28 @@ void MuonFitPropertyBrowser::init() {
   // Initialise the layout.
   initLayout(w);
 
-  // Create an empty layout that can hold extra widgets
-  // and add it after the buttons but before the browser
-  m_additionalLayout = new QVBoxLayout();
-  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
-  if (parentLayout) {
-    const int index = parentLayout->count() - 2;
-    constexpr int stretchFactor = 10; // so these widgets get any extra space
-    parentLayout->insertLayout(index, m_additionalLayout, stretchFactor);
-  }
-  m_widgetSplitter = new QSplitter(w);
-  m_widgetSplitter->setOrientation(Qt::Vertical);
+  // Create an empty splitter that can hold extra widgets
+  m_widgetSplitter = new QSplitter(Qt::Vertical, w);
   m_widgetSplitter->setSizePolicy(QSizePolicy::Policy::Expanding,
                                   QSizePolicy::Policy::Expanding);
-  m_additionalLayout->addWidget(m_widgetSplitter);
+
+  // This splitter separates the "extra widgets" region from the browser
+  m_mainSplitter = new QSplitter(Qt::Vertical, w);
+  m_mainSplitter->insertWidget(0, m_widgetSplitter);
+  m_mainSplitter->insertWidget(1, m_browser);
+  m_mainSplitter->setStretchFactor(0, 1);
+  m_mainSplitter->setStretchFactor(1, 0);
+
+  // Insert after the buttons
+  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
+  if (parentLayout) {
+    const int index = parentLayout->count() - 1;
+    constexpr int stretchFactor = 10; // so these widgets get any extra space
+    parentLayout->insertWidget(index, m_mainSplitter, stretchFactor);
+    parentLayout->setSpacing(0);
+    parentLayout->setMargin(0);
+    parentLayout->setContentsMargins(0, 0, 0, 0);
+  }
 }
 
 /**
@@ -282,11 +291,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
 }
 
 /**
- * Updates function prior to running a fit
+ * Requests checks and updates prior to running a fit
  */
-void MuonFitPropertyBrowser::fit() {
-  emit functionUpdateAndFitRequested(false);
-}
+void MuonFitPropertyBrowser::fit() { emit preFitChecksRequested(false); }
 
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
@@ -376,10 +383,10 @@ void MuonFitPropertyBrowser::runSequentialFit() {
 }
 
 /**
- * Update function prior to running a sequential fit
+ * Requests checks and updates prior to running a sequential fit
  */
 void MuonFitPropertyBrowser::sequentialFit() {
-  emit functionUpdateAndFitRequested(true);
+  emit preFitChecksRequested(true);
 }
 
 /**
@@ -396,7 +403,7 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   * @param ws :: The workspace
   */
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
-  QString workspaceName(QString::fromStdString(ws->name()));
+  QString workspaceName(QString::fromStdString(ws->getName()));
 
   if ((workspaceName.contains("_Raw")) ||
       (workspaceName.contains("MuonAnalysis")))
@@ -503,7 +510,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
   widget->setSizePolicy(QSizePolicy::Policy::Expanding,
                         QSizePolicy::Policy::Expanding);
-  if (m_additionalLayout && m_widgetSplitter) {
+  if (m_widgetSplitter) {
     m_widgetSplitter->addWidget(widget);
   }
 }
@@ -521,9 +528,6 @@ void MuonFitPropertyBrowser::setFunction(const IFunction_sptr func) {
  * @param wsNames :: [input] List of workspace names to fit
  */
 void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
-  // Extend base class behaviour
-  IWorkspaceFitControl::setWorkspaceNames(wsNames);
-
   m_workspacesToFit.clear();
   std::transform(wsNames.begin(), wsNames.end(),
                  std::back_inserter(m_workspacesToFit),
@@ -549,22 +553,50 @@ std::string MuonFitPropertyBrowser::outputName() const {
 }
 
 /**
- * Set "compatibility mode" (i.e. the behaviour pre-Mantid 3.8) on or off.
- * In this mode, all parts of the fit property browser are shown and all extra
+ * Set multiple fitting mode on or off.
+ * If turned off, all parts of the fit property browser are shown and all extra
  * widgets (like the function browser or data selector) are hidden, so it looks
- * just like it used to before the changes.
+ * just like it used to before the changes in Mantid 3.8.
+ * If turned on, the "Function" and "Data" sections of the fit property browser
+ * are hidden and the extra widgets are shown.
  * @param enabled :: [input] Whether to turn this mode on or off
  */
-void MuonFitPropertyBrowser::setCompatibilityMode(bool enabled) {
+void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
+  // First, clear whatever model is currently set
+  this->clear();
+
   // Show or hide "Function" and "Data" sections
-  m_browser->setItemVisible(m_functionsGroup, enabled);
-  m_browser->setItemVisible(m_settingsGroup, enabled);
+  m_browser->setItemVisible(m_functionsGroup, !enabled);
+  m_browser->setItemVisible(m_settingsGroup, !enabled);
 
   // Show or hide additional widgets
-  for (int i = 0; i < m_additionalLayout->count(); ++i) {
-    if (auto *widget = m_additionalLayout->itemAt(i)->widget()) {
-      widget->setVisible(!enabled);
+  for (int i = 0; i < m_widgetSplitter->count(); ++i) {
+    if (auto *widget = m_widgetSplitter->widget(i)) {
+      widget->setVisible(enabled);
     }
+  }
+}
+
+/**
+ * The pre-fit checks have been successfully completed. Continue by emitting a
+ * signal to update the function and request the fit.
+ * @param sequential :: [input] Whether fit is sequential or not
+ */
+void MuonFitPropertyBrowser::continueAfterChecks(bool sequential) {
+  emit functionUpdateAndFitRequested(sequential);
+}
+
+/**
+ * Returns whether or not a guess is plotted
+ * @returns :: True if a plot guess is plotted, false if not.
+ */
+bool MuonFitPropertyBrowser::hasGuess() const {
+  auto *handler = getHandler();
+  if (handler) {
+    const bool hasPlot = handler->hasPlot(); // don't allow caller to modify
+    return hasPlot;
+  } else {
+    return false;
   }
 }
 

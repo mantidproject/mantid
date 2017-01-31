@@ -57,7 +57,7 @@ namespace Strings {
  */
 template <typename ITERATOR_TYPE>
 DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                           const std::string separator) {
+                           const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -101,7 +101,11 @@ MANTID_KERNEL_DLL int isEmpty(const std::string &A);
 /// Determines if a string starts with a #
 MANTID_KERNEL_DLL bool skipLine(const std::string &line);
 /// Get a line and strip comments
-MANTID_KERNEL_DLL std::string getLine(std::istream &fh, const int spc = 256);
+/// Use only for a single call
+MANTID_KERNEL_DLL std::string getLine(std::istream &fh);
+/// Get a line and strip comments
+/// Use within a loop
+MANTID_KERNEL_DLL void getLine(std::istream &fh, std::string &Line);
 /// Peek at a line without extracting it from the stream
 MANTID_KERNEL_DLL std::string peekLine(std::istream &fh);
 /// get a part of a long line
@@ -144,7 +148,7 @@ template <typename T> int sectionMCNPX(std::string &A, T &out);
 MANTID_KERNEL_DLL void writeMCNPX(const std::string &Line, std::ostream &OX);
 
 /// Split tring into spc deliminated components
-MANTID_KERNEL_DLL std::vector<std::string> StrParts(std::string Ln);
+MANTID_KERNEL_DLL std::vector<std::string> StrParts(const std::string &Ln);
 
 /// Splits a string into key value pairs
 MANTID_KERNEL_DLL std::map<std::string, std::string>

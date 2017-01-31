@@ -59,7 +59,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflRunsTabPresenter
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
-                       DataProcessorPresenter *tablePresenter,
+                       std::vector<DataProcessorPresenter *> tablePresenter,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
   ~ReflRunsTabPresenter() override;
@@ -77,6 +77,7 @@ public:
   std::map<std::string, std::string> getPreprocessingOptions() const override;
   std::string getProcessingOptions() const override;
   std::string getPostprocessingOptions() const override;
+  std::string getTimeSlicingOptions() const override;
 
 protected:
   /// The search model
@@ -85,8 +86,8 @@ protected:
   IReflRunsTabView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
-  /// The data processor presenter
-  DataProcessorPresenter *m_tablePresenter;
+  /// The data processor presenters stored in a vector
+  std::vector<DataProcessorPresenter *> m_tablePresenters;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
@@ -98,6 +99,8 @@ protected:
   void pushCommands();
 
 private:
+  std::string m_currentTransferMethod;
+
   static const std::string LegacyTransferMethod;
   static const std::string MeasureTransferMethod;
 

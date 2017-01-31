@@ -60,7 +60,7 @@ class EQSANSDataSet(DataSet):
         else:
             # Check whether we simply have a run number
             try:
-                run = int(file_path)
+                int(file_path)
                 return file_path
             except:
                 return None

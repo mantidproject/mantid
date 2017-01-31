@@ -1,8 +1,6 @@
 #pylint: disable=invalid-name
 #!/usr/bin/env python
 
-VERSION = "1.0"
-
 import optparse
 import sys
 try:
@@ -13,6 +11,8 @@ try:
 except ImportError, e:
     print "*****To use this you must 'easy_install periodictable'"
     sys.exit(-1)
+
+VERSION = "1.0"
 
 # elements not to put in the output file
 BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',

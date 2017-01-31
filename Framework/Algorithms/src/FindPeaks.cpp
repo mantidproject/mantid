@@ -983,7 +983,7 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
   std::string errmsg = estimatePeakParameters(
       vecX, vecY, i_min, i_max, vecbkgdparvalue, i_obscentre, est_height,
       est_fwhm, est_leftfwhm, est_rightfwhm);
-  if (errmsg.size() > 0) {
+  if (!errmsg.empty()) {
     // Unable to estimate peak
     i_obscentre = i_centre;
     est_fwhm = 1.;

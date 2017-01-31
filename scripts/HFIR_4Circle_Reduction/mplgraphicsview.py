@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302,W0231
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302,W0231
 import os
 import numpy as np
 
@@ -197,8 +197,6 @@ class IndicatorManager(object):
 
         for line_key in self._lineManager.keys():
 
-            print '[MplGraph DB] Exam indicator key %s' % str(self._lineManager[line_key])
-
             if x is not None and y is not None:
                 # 2 way
                 raise NotImplementedError('ASAP')
@@ -222,7 +220,6 @@ class IndicatorManager(object):
         :return:
         """
         if line_id is not None:
-            print '[DB] Get line style. ID = %s' % str(line_id)
             style = '--'
         else:
             style = '--'
@@ -306,8 +303,6 @@ class IndicatorManager(object):
         :param dy:
         :return:
         """
-        # print self._lineManager[my_id][0]
-
         if self._indicatorTypeDict[my_id] == 0:
             # horizontal
             self._lineManager[my_id][1] += dy
@@ -797,7 +792,6 @@ class MplGraphicsView(QtGui.QWidget):
         # process marker if it has information
         if marker.count(' (') > 0:
             marker = marker.split(' (')[0]
-        # print "[DB] Print line %d: marker = %s, color = %s" % (self._myLineMarkerColorIndex, marker, color)
 
         # update the index
         self._myLineMarkerColorIndex += 1
@@ -973,7 +967,6 @@ class Qt4MplCanvas(FigureCanvas):
         """
         if self.axes2 is None:
             self.axes2 = self.axes.twinx()
-            # print self.par1, type(self.par1)
 
         # Hold previous data
         self.axes2.hold(True)
@@ -1303,9 +1296,6 @@ class Qt4MplCanvas(FigureCanvas):
 
         handles, labels = self.axes.get_legend_handles_labels()
         self.axes.legend(handles, labels, loc=location)
-        # print handles
-        # print labels
-        #self.axes.legend(self._myLegendHandlers, self._myLegentLabels)
 
         return
 

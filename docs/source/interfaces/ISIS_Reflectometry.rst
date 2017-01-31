@@ -11,7 +11,7 @@ Purpose
 -------
 This user interface allows for batch processing of data reduction for
 reflectometry data. The actual data reduction is performed with
-:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`.
+:ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`.
 Wherever possible, this interface attempts to use reasonable defaults,
 either loaded from the instruments' parameter files, or calculated from
 the provided data, to minimise the amount of user input required.
@@ -21,7 +21,7 @@ data is being processed, and easy to adjust any of the options used.
 Integration with data archives is also provided, allowing for data to
 be located and prepared for reduction automatically.
 
-IPython notebooks which document the processing steps and output 
+IPython notebooks which document the processing steps and output
 relevant plots can also be produced from the interface.
 
 Information on how to resolve common problems can be found in the
@@ -53,17 +53,15 @@ dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable
 as the output workspace.
 
 A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis Data Service <Analysis Data Service>`).
-To open the table workspace go to **Reflectometry -> Open Table -> MyTable**.
-The processing table (shown below) should now contain four rows (13460, 13462, 13469, 13470).
+In addition the table workspace should be opened as well and the processing table
+(shown below) should now contain four rows (13460, 13462, 13469, 13470).
 
-.. figure:: /images/ISISReflectometryPolref_INTER_table.JPG
+.. figure:: /images/ISISReflectometryPolref_INTER_table.png
   :align: center
 
 Let's process the first group, which consists of the first two rows of the
 table (13460 and 13462). The simplest way to do this is simply to select the
-two rows we want to process, and then click on **Process**. Note that for the reduction
-to be successful, at least the bin size must be specified to :ref:`Stitch1DMany <algm-Stitch1DMany>`,
-as shown above.
+group we want to process, and then click on **Process**.
 
 .. tip::
   If you receive an error, consult the `Troubleshooting`_ section of this document for guidance on fixing it.
@@ -80,16 +78,16 @@ TRANS_13463_13464
   on ``TOF_13463`` and ``TOF_13464``. The X axis is wavelength in Å.
 
 IvsQ_13460
-  This is the output workspace of :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`. The X
+  This is the output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`. The X
   axis is momentum transfer in Å\ :sup:`-1`\ .
 
 IvsLam_13460
-  This is the wavelength output workspace of :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`.
+  This is the wavelength output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`.
   The X axis is wavelength in Å.
 
 IvsQ_13460_13462
   This workspace is the result of stitching ``IvsQ_13460`` and ``IvsQ_13462`` together using
-  :ref:`Stitch1D <algm-Stitch1D>`. The X axis is momentum transfer in Å\ :sup:`-1`\ .
+  :ref:`Stitch1DMany <algm-Stitch1DMany>`. The X axis is momentum transfer in Å\ :sup:`-1`\ .
 
 Layout
 ------
@@ -167,10 +165,10 @@ processing that is in progress. And at the bottom, near the **Process**
 button is the processing instrument selector. The processing instrument is
 used to help identify the correct data to load when processing runs.
 
-Next to the **Process** button there is a checkbox which allows enabling and 
-disabling output to an ipython notebook. If the checkbox is enabled, a dialog 
-window will ask for a save location for the notebook after processing is 
-complete. A generated notebook contains python code to repeat the processing 
+Next to the **Process** button there is a checkbox which allows enabling and
+disabling output to an ipython notebook. If the checkbox is enabled, a dialog
+window will ask for a save location for the notebook after processing is
+complete. A generated notebook contains python code to repeat the processing
 steps and output relevant plots.
 
 Tool Bar
@@ -207,13 +205,6 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 | Insert Group     | Adds a new group after the first selected group, or at   |
 |                  | the end of the table if no groups were selected.         |
 +------------------+----------------------------------------------------------+
-| Delete Row       | Deletes any selected rows. If no rows are selected,      |
-|                  | nothing happens. If the single row of a group is selected|
-|                  | for deletion, the group will also be deleted.            |
-+------------------+----------------------------------------------------------+
-| Delete Group     | Deletes any selected Groups. If no groups are selected,  |
-|                  | nothing happens.                                         |
-+------------------+----------------------------------------------------------+
 | Group Rows       | Takes all the selected rows and places them in a group   |
 |                  | together, separate from any other group.                 |
 +------------------+----------------------------------------------------------+
@@ -229,7 +220,12 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 | Clear Rows       | Resets the cells in any selected rows to their initial   |
 |                  | value, in other words, blank.                            |
 +------------------+----------------------------------------------------------+
-| Help             | Opens this documentation for viewing.                    |
+| Delete Row       | Deletes any selected rows. If no rows are selected,      |
+|                  | nothing happens. If the single row of a group is selected|
+|                  | for deletion, the group will also be deleted.            |
++------------------+----------------------------------------------------------+
+| Delete Group     | Deletes any selected Groups. If no groups are selected,  |
+|                  | nothing happens.                                         |
 +------------------+----------------------------------------------------------+
 | What's This      | Provides guidance on what various parts of the interface |
 |                  | are for.                                                 |
@@ -252,7 +248,7 @@ Columns
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | Angle               | No        | Contains the angle used during the run, in                                      |
 |                     |           | degrees. If left blank,                                                         |
-|                     |           | :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`               |
+|                     |           | :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`       |
 |                     |           | will calculate theta using                                                      |
 |                     |           | :ref:`SpecularReflectionCalculateTheta <algm-SpecularReflectionCalculateTheta>`.|
 |                     |           |                                                                                 |
@@ -310,9 +306,8 @@ Columns
 |                     |           | Options are specified in ``key=value`` pairs,                                   |
 |                     |           | separated by commas. Values containing commas                                   |
 |                     |           | must be quoted. Options specified via this                                      |
-|                     |           | column will prevail over global options                                         |
-|                     |           | specified in the                                                                |
-|                     |           | **ReflectometryReductionOneAuto** text box.                                     |
+|                     |           | column will prevail over options specified                                      |
+|                     |           | in the **Settings** tab.                                                        |
 |                     |           |                                                                                 |
 |                     |           | Example: ``StrictSpectrumChecking=0,``                                          |
 |                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``                                    |
@@ -361,14 +356,14 @@ Measure Based Search Transfer
 
 Measure based search transfer uses the log-values within nexus files from the experiment to assemble the batch. Since the files themselves are required, not just the overview metadata, the files must be accessible by mantid. One way of doing this is to mount the archive and set the user property ``icatDownload.mountPoint`` to your mount point. It may end up looking something like this ``icatDownload.mountPoint=/Volumes/inst$``. Alternately, you can download the files to your local disk and simply add that directory to the managed search directories in ``Manage User Directories``.
 
-- Any runs with the measurement_id log, will be
+- Any runs with the ``measurement_id`` log, will be
   placed into the same group.
-- Any runs with the ``same measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``. 
+- Any runs with the same ``measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``.
 
 Failed transfers
 ================
 When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, if a Measure-based run has an invalid measurement id.
-In the image below we select two runs from the Search table that we wish to transfer to the processing table.
+In the image below we select three runs from the Search table that we wish to transfer to the processing table.
 
 .. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.JPG
    :alt: Selecting runs from search table to transfer to processing table
@@ -376,34 +371,140 @@ In the image below we select two runs from the Search table that we wish to tran
 Attempting to transfer an invalid run will result in that run not being transferred to the processing table. If the transfer was not successful then that specific
 run will be highlighted in the Search table.
 
-.. figure:: /images/ISISReflectometryPolref_failed_transfer_run.JPG
+.. figure:: /images/ISISReflectometryPolref_failed_transfer_run.png
    :alt: Failed transfer will be highlighted in orange, successful transfer is put into processing table
-   
+
 Hovering over the highlighted run with your cursor will allow you to see why the run was invalid.
 
 .. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
    :alt: Showing tooltip from failed transfer.
 
 
+Event Handling tab
+~~~~~~~~~~~~~~~~~~
+
+The *Event Handling* tab can be used to analyze event workspaces. Currently, it contains a text box where
+a custom python list can be specified to indicate the time slices to analyze. When this text box is empty,
+no event analysis will be performed, runs will be loaded using :ref:`LoadISISNexus <algm-LoadISISNexus>` and
+analyzed as histogram workspaces. When this text box is not empty, runs will be loaded using
+:ref:`LoadEventNexus <algm-LoadEventNexus>` and the interface will try to parse the user
+input to obtain a set of start times and stop times. These define different time slices that will be
+passed on to :ref:`FilterByTime <algm-FilterByTime>`. Each time slice will be normalized by the total
+proton charge and reduced as described in the previous section. Note that, if any of the runs in a group could
+not be loaded as an event workspace, the interface will load the runs within that group as histogram workspaces
+and no event analysis will be performed for that group. A warning message will be shown when the reduction is complete
+indicating that some groups could not be processed as event data.
+
+Time slices must be indicated as a list of comma-separated numbers. There are different possibilities:
+
+- If a single number is provided, e.g. ``100``, the interface will extract a single slice starting at the start of the
+  run, and ending at ``100`` seconds.
+- If two numbers are provided, e.g. ``100, 200``, the interface will extract a single slice starting ``100`` seconds
+  after the start of the run and stopping at 200 seconds after the start of the run.
+- If more than two numbers are provided, e.g. ``100, 200, 300``, the interface will extract two slices, the
+  first one starting at ``100`` seconds after the start of the run and ending at ``200`` seconds after the
+  start of the run, and the second one starting at ``200`` seconds and ending at ``300`` seconds.
+
+Workspaces will be named according to the slice, e.g ``IvsQ_13460_0_100``, ``IvsLam_13460_0_100``, etc.
+
 Settings tab
 ~~~~~~~~~~~~
 
-The *Settings* tab can be used to specify global options for the reduction and post-processing. It shows the algorithms used
-by the interface to reduce the data, together with a text box allowing the specification of pre-processing,
-processing and post-processing options. Pre-processing options refer to the algorithms :ref:`Plus <algm-Plus>` (applied
-to the **Run(s)** column when multiple runs are specified) and :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
-(applied to **Transmission Run(s)**). Options to the main reduction algorithm,
-:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, can also be
-supplied using the corresponding text box. Note that when conflicting options are specified
-for the reduction, i.e. different values for the same property are specified via this
-text box and the **Options** column in the *Runs* tab, the latter will prevail. Therefore,
-the **ReflectometryReductionOneAuto** text box should be used to specify global options that will be
-applied to all the rows in the table, whereas the **Options** column will only be applicable
-to the specific row for which those options are defined. Finally, post-processing instructions,
-i.e. instructions to :ref:`Stitch1DMany <algm-Stitch1DMany>`, can also be supplied similarly (note
-that at least a bin width must be specified for this algorithm to run successfully, for instance *Params="-0.03"*). Pre-processing,
-processing and post-processing options are specified in ``key=value`` pairs separated by commas.
-Values containing commas must be quoted.
+.. figure:: /images/ISISReflectometryPolref_settings_tab.png
+   :alt: Showing view of the settings tab.
+
+The *Settings* tab can be used to specify options for the reduction and post-processing.
+These options are used by the interface to provide argument values for the pre-processing,
+processing and post-processing algorithms. Each of these respectively refer to the
+following algorithms:
+
+- :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
+  (applied to **Transmission Run(s)**).
+- :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`, main reduction algorithm.
+- :ref:`Stitch1DMany <algm-Stitch1DMany>` (note that at least a bin width must be
+  specified for this algorithm to run successfully, for instance *Params="-0.03"*).
+
+Note that when conflicting options are specified for the reduction, i.e. different
+values for the same property are specified via the *Settings* tab and the **Options**
+column in the *Runs* tab, the latter will prevail. Therefore, the **ReflectometryReductionOneAuto**
+settings should be used to specify global options that will be applied to all the
+rows in the table, whereas the **Options** column will only be applicable to the
+specific row for which those options are defined.
+
+The *Settings* tab is split into two sections, **Experiment settings** and **Instrument
+settings**. The former refers to variables set mostly by the user, while the latter
+refers to variables set by the instrument used to perform the reduction. Both have
+a **Get Defaults** button that fills some of the variables with default values.
+For experiment settings, these are pulled from the **ReflectometryReductionOneAuto**
+algorithm whereas for instrument settings, they are pulled from the current instrument
+being used in the run.
+
+Save ASCII tab
+~~~~~~~~~~~~~~
+
+.. figure:: /images/ISISReflectometryPolref_save_tab.png
+   :alt: Showing view of the save ASCII tab.
+
+The *Save ASCII* tab allows for processed workspaces to be saved in specific
+ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
+
++-------------------------------+------------------------------------------------------+
+| Name                          | Description                                          |
++===============================+======================================================+
+| Save path                     | At present this dialog doesn't have a standard       |
+|                               | file dialog so that path must be filled in manually. |
+|                               | The path must already exist as this dialog doesn't   |
+|                               | have the ability to create directories. As the       |
+|                               | naming of files is automatic, the path must also     |
+|                               | point to a directory rather than a file.             |
++-------------------------------+------------------------------------------------------+
+| Prefix                        | The prefix is what is added to the beginning of      |
+|                               | the workspace name to create the file name. No       |
+|                               | underscore or space is added between them so they    |
+|                               | must be manually added.                              |
++-------------------------------+------------------------------------------------------+
+| Filter                        | This can be specified to filter out workspaces       |
+|                               | in the workspace list whose name does not match      |
+|                               | that of the filter text.                             |
++-------------------------------+------------------------------------------------------+
+| Regex                         | Checking this option allows a regular expression     |
+|                               | to be used for filtering workspace names.            |
++-------------------------------+------------------------------------------------------+
+| List Of Workspaces            | The left listbox will contain any workspaces loaded  |
+|                               | into mantid. Double clicking on one will fill        |
+|                               | the right list box with the parameters it contains.  |
+|                               | This listbox supports multi-select in order to       |
+|                               | allow for multiple workspaces to be saved out        |
+|                               | at the same time with the same settings.             |
++-------------------------------+------------------------------------------------------+
+| List Of Logged Parameters     | The right listbox starts out empty, but will fill    |
+|                               | with parameter names when a workspace in the left    |
+|                               | listbox is double clicked. This listbox supports     |
+|                               | multi-select in order to allow for the save output   |
+|                               | to contain multiple parameter notes.                 |
++-------------------------------+------------------------------------------------------+
+| File format                   | This dialog can save to ANSTO, ILL cosmos, 3-column, |
+|                               | and a customisable format. It doesn't save from      |
+|                               | the main interface's table, but from workspaces      |
+|                               | loaded into mantid. All algorithms are also          |
+|                               | available as save algorithms from mantid itself.     |
++-------------------------------+------------------------------------------------------+
+| Custom Format Options         | When saving in 'Custom' this section allows you      |
+|                               | to specify if you want a Title and/or Q Resolution   |
+|                               | column as well as specifying the delimiter.          |
++-------------------------------+------------------------------------------------------+
+
+Groups
+------
+
+Tabs **Runs**, **Event Handling** and **Settings** contain a tool box with two different groups. These groups
+are useful when users need to apply different options to runs measured during the same experiment. For instance,
+if some runs need to be analyzed with a wavelength range of ``LambdaMin=1, LambdaMax=17`` but others need a
+wavelength range of ``LambdaMin=1.5, LambdaMax=15``, users may want to transfer the first set to the processing
+table in the first group and the second set to the processing table in the second group. The interface will
+use the settings in the first group to reduce runs in the first processing table, and the settings in the
+second group to reduce runs in the second processing table. The process is analogous for time slicing options
+specified in the **Event Handling** tab.
 
 .. _ISIS_Reflectomety-Options:
 
@@ -462,10 +563,12 @@ When I try to process I get an error: "Error encountered while stitching group .
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This occurs when Mantid is unable to stitch a group. Please check that at you have
-specified at least the bin width in the *Stitch1DMany* text box. To specify the bin width please
-use the *Params* input property like this: ``Params="-0.03"``  (you may want to replace
-``0.03`` with a bin size suitable for your reduction). Note that the "-" sign will produce
-a logarithmic binning in the stitched workspace. For linear binning, use ``Params="0.03"``.
+specified at least the bin width. This can be done either by setting a value in column
+**dQ/Q** before processing the data, or by using the *Stitch1DMany* text
+box in the **Settings** tab to provide the *Params* input property like this:
+``Params="-0.03"`` (you may want to replace ``0.03`` with a bin size suitable for
+your reduction). Note that the "-" sign in this case will produce a logarithmic binning in the
+stitched workspace. For linear binning, use ``Params="0.03"``.
 
 When I try to process I get an error: "Invalid key value pair, '...'"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

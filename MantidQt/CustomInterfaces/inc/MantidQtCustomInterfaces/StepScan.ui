@@ -18,7 +18,7 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mWRunFiles">
+      <widget class="MantidQt::API::MWRunFiles" name="mWRunFiles">
        <property name="label" stdset="0">
         <string>Data source</string>
        </property>
@@ -29,7 +29,7 @@
         <bool>true</bool>
        </property>
        <property name="buttonOpt" stdset="0">
-        <enum>MantidQt::MantidWidgets::MWRunFiles::Text</enum>
+        <enum>MantidQt::API::MWRunFiles::Text</enum>
        </property>
        <property name="fileExtensions">
         <stringlist>
@@ -37,7 +37,7 @@
         </stringlist>
        </property>
        <property name="liveButton" stdset="0">
-        <enum>MantidQt::MantidWidgets::MWRunFiles::AlwaysShow</enum>
+        <enum>MantidQt::API::MWRunFiles::Show</enum>
        </property>
       </widget>
      </item>
@@ -356,9 +356,9 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::WorkspaceSelector</class>

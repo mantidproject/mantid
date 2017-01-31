@@ -9,6 +9,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
@@ -29,7 +30,7 @@ Logger g_log("InstrumentInfo");
 */
 InstrumentInfo::InstrumentInfo(const FacilityInfo *f,
                                const Poco::XML::Element *elem)
-    : m_facility(f), m_liveListener(), m_liveDataAddress() {
+    : m_facility(f) {
 
   m_name = elem->getAttribute("name");
   if (m_name.empty()) {
@@ -121,16 +122,64 @@ std::string InstrumentInfo::filePrefix(unsigned int runNumber) const {
 }
 
 /// Returns the name of the live listener
-const std::string &InstrumentInfo::liveListener() const {
-  return m_liveListener;
+std::string InstrumentInfo::liveListener(const std::string &name) const {
+  if (!hasLiveListenerInfo())
+    return "";
+
+  return liveListenerInfo(name).listener();
 }
 
 /** Returns the host & port to connect to for a live data stream
  *  No guarantees are given that the provided string is well-formed and valid
  *    - the caller should check this themselves
  */
-const std::string &InstrumentInfo::liveDataAddress() const {
-  return m_liveDataAddress;
+std::string InstrumentInfo::liveDataAddress(const std::string &name) const {
+  if (!hasLiveListenerInfo())
+    return "";
+
+  return liveListenerInfo(name).address();
+}
+
+/**
+ * Get LiveListenerInfo for specified connection (or default).
+ *
+ * @param name Name attribute of connection to return info on
+ * @return Reference to LiveListenerInfo for specified connection
+ * @throw std::runtime_error When no listeners, or name not found
+ */
+const LiveListenerInfo &
+InstrumentInfo::liveListenerInfo(std::string name) const {
+  if (!hasLiveListenerInfo())
+    throw std::runtime_error("Attempted to access live listener for " + m_name +
+                             " instrument, which has no listeners.");
+
+  // Default to specified default connection
+  if (name.empty())
+    name = m_defaultListener;
+
+  // If no default connection specified, fallback to first connection
+  if (name.empty())
+    return m_listeners.front();
+
+  // Name specified, find requested connection
+  for (auto &listener : m_listeners) {
+    // Names are compared case insensitively
+    if (boost::iequals(listener.name(), name))
+      return listener;
+  }
+
+  // The provided name was not valid / did not match any listeners
+  throw std::runtime_error("Could not find connection " + name +
+                           " for instrument " + m_name);
+}
+
+bool InstrumentInfo::hasLiveListenerInfo() const {
+  return !m_listeners.empty();
+}
+
+const std::vector<LiveListenerInfo> &
+InstrumentInfo::liveListenerInfoList() const {
+  return m_listeners;
 }
 
 /// Return list of techniques
@@ -205,7 +254,7 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
     if (pNL->length() > 0) {
       Poco::XML::Text *txt = dynamic_cast<Poco::XML::Text *>(pNL->item(0));
       if (txt) {
-        std::string tech = txt->getData();
+        const std::string &tech = txt->getData();
         if (!tech.empty()) {
           m_technique.insert(tech);
         }
@@ -221,31 +270,27 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
 
 /// Called from constructor to fill live listener name
 void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
-  // Get the first livedata element (will be NULL if there's none)
+  // See if we have a <livedata> element (will be NULL if there's none)
   Poco::XML::Element *live = elem->getChildElement("livedata");
-  if (live) {
-    // Get the name of the listener - empty string will be returned if missing
-    m_liveListener = live->getAttribute("listener");
-    // Get the host+port. Would have liked to put straight into a
-    // Poco::Net::SocketAddress
-    // but that tries to contact the given address on construction, which won't
-    // always be possible (or scalable)
-    m_liveDataAddress = live->getAttribute("address");
-    // Warn rather than throw if there are problems with the address
-    if (m_liveDataAddress.empty()) {
-      g_log.warning()
-          << "No connection details specified for live data listener of "
-          << m_name << "\n";
+  if (!live)
+    return;
+
+  // Load default connection name attribute
+  m_defaultListener = live->getAttribute("default");
+
+  // Get connections under <livedata>
+  Poco::AutoPtr<Poco::XML::NodeList> connections =
+      elem->getElementsByTagName("connection");
+
+  // Load connection info for each child element
+  for (unsigned long i = 0; i < connections->length(); ++i) {
+    auto *conn = dynamic_cast<Poco::XML::Element *>(connections->item(i));
+    try {
+      m_listeners.emplace_back(this, conn);
+    } catch (...) {
+      g_log.error() << "Exception occurred while loading livedata for "
+                    << m_name << " instrument. Skipping faulty connection.\n";
     }
-    // Check for a colon, which would suggest that a host & port are present
-    else if (m_liveDataAddress.find(':') == std::string::npos) {
-      g_log.warning() << "Live data address for " << m_name
-                      << " appears not to have both host and port specified.\n";
-    }
-  }
-  // Apply the facility default listener if none specified for this instrument
-  if (m_liveListener.empty()) {
-    m_liveListener = m_facility->liveListener();
   }
 }
 

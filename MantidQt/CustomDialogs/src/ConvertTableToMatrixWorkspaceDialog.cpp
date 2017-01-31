@@ -1,18 +1,15 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidQtCustomDialogs/ConvertTableToMatrixWorkspaceDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
 #include <QUrl>
-#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QFileInfo>
 
 // Mantid
 #include "MantidKernel/Property.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -22,18 +19,10 @@ namespace CustomDialogs {
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(ConvertTableToMatrixWorkspaceDialog)
 
-//--------------------------------------------------------------------------
-// Public methods
-//---------------------------------------------------------------------------
-
 /// Default constructor
 ConvertTableToMatrixWorkspaceDialog::ConvertTableToMatrixWorkspaceDialog(
     QWidget *parent)
     : API::AlgorithmDialog(parent), m_form() {}
-
-//--------------------------------------------------------------------------
-// Private methods (slot)
-//---------------------------------------------------------------------------
 
 /**
 * When the input workspace changes the column name comboboxes have to

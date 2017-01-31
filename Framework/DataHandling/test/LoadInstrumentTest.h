@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -129,8 +130,8 @@ public:
     TS_ASSERT_DELTA(cmpDistance, 2.512, 0.0001);
 
     // test if detector with det_id=603 has been marked as a monitor
-    boost::shared_ptr<const IDetector> ptrMonitor = i->getDetector(601);
-    TS_ASSERT(ptrMonitor->isMonitor());
+    TS_ASSERT(
+        output->detectorInfo().isMonitor(output->detectorInfo().indexOf(601)));
 
     // Spectra mapping has been updated
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(0), 1);
@@ -228,8 +229,7 @@ public:
     boost::shared_ptr<const IDetector> ptrDet = i->getDetector(101);
     TS_ASSERT_EQUALS(ptrDet->getID(), 101);
 
-    boost::shared_ptr<const IDetector> ptrMonitor = i->getDetector(1);
-    TS_ASSERT(ptrMonitor->isMonitor());
+    TS_ASSERT(output->detectorInfo().isMonitor(0));
 
     boost::shared_ptr<const IDetector> ptrDetShape = i->getDetector(102);
     TS_ASSERT(ptrDetShape->isValid(V3D(0.0, 0.0, 0.0) + ptrDetShape->getPos()));
@@ -619,7 +619,7 @@ private:
         i->getComponentByName("bank_90degnew");
     TS_ASSERT_EQUALS(comp->getName(), "bank_90degnew");
 
-    ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
 
     // It's "X0" in parameter file
     // IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
@@ -646,7 +646,7 @@ public:
   MatrixWorkspace_sptr ws;
 
   void setUp() override {
-    ws = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
+    ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
   }
 
   void doTest(std::string filename, size_t numTimes = 1) {

@@ -1,24 +1,27 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
-#ifndef Q_MOC_RUN
-#include <boost/scoped_ptr.hpp>
-#endif
+#include <mutex>
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid {
-//----------------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------------
+
+namespace Indexing {
+class IndexInfo;
+}
+
+namespace Kernel {
+class DateAndTime;
+}
+
 namespace Geometry {
 class ParameterMap;
-class INearestNeighbours;
-class INearestNeighboursFactory;
 }
 
 namespace API {
@@ -32,9 +35,6 @@ typedef std::vector<std::vector<double>> MantidImage;
 typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
 /// shared pointer to const MantidImage
 typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
-
-/// Helper for MatrixWorkspace::spectrumInfo()
-enum class ThreadedContextCheck { Check, Skip };
 
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
@@ -74,9 +74,12 @@ public:
   // axes.
   friend class WorkspaceFactoryImpl;
 
-  /// Initialize
   void initialize(const std::size_t &NVectors, const std::size_t &XLength,
                   const std::size_t &YLength);
+  void initialize(const std::size_t &NVectors,
+                  const HistogramData::Histogram &histogram);
+  void initialize(const Indexing::IndexInfo &indexInfo,
+                  const HistogramData::Histogram &histogram);
 
   MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
   /// Delete
@@ -85,12 +88,20 @@ public:
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
+  /// Returns a default-initialized clone of the workspace
+  MatrixWorkspace_uptr cloneEmpty() const {
+    return MatrixWorkspace_uptr(doCloneEmpty());
+  }
+
+  const Indexing::IndexInfo &indexInfo() const;
+  void setIndexInfo(const Indexing::IndexInfo &indexInfo);
+
   using IMDWorkspace::toString;
   /// String description of state
   const std::string toString() const override;
 
-  const SpectrumInfo &spectrumInfo(
-      ThreadedContextCheck contextCheck = ThreadedContextCheck::Check) const;
+  const SpectrumInfo &spectrumInfo() const;
+  SpectrumInfo &mutableSpectrumInfo();
 
   /**@name Instrument queries */
   //@{
@@ -98,29 +109,6 @@ public:
   double detectorTwoTheta(const Geometry::IDetector &det) const;
   double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
-  //@}
-
-  void populateInstrumentParameters() override;
-
-  /** @name Nearest neighbours */
-  /// Build and populate the NearestNeighbours object
-  void buildNearestNeighbours(const bool ignoreMaskedDetectors = false) const;
-  /// Causes the nearest neighbours map to be rebuilt
-  void rebuildNearestNeighbours();
-  /// Query the NearestNeighbours object for a detector
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
-                const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum number using a
-  /// search radius
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighbours(specnum_t spec, const double radius,
-                const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum number using the
-  /// direct number of nearest neighbours
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighboursExact(specnum_t spec, const int nNeighbours,
-                     const bool ignoreMaskedDetectors = false) const;
   //@}
 
   virtual void updateSpectraUsing(const SpectrumDetectorMapping &map);
@@ -451,9 +439,6 @@ public:
   bool isDistribution() const;
   void setDistribution(bool newValue);
 
-  /// Mask a given workspace index, setting the data and error values to zero
-  void maskWorkspaceIndex(const std::size_t index);
-
   // Methods to set and access masked bins
   void maskBin(const size_t &workspaceIndex, const size_t &binIndex,
                const double &weight = 1.0);
@@ -558,27 +543,35 @@ public:
   // End image methods
   //=====================================================================================
 
+  size_t numberOfDetectorGroups() const override;
+  const std::set<detid_t> &
+  detectorIDsInGroup(const size_t index) const override;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
-  MatrixWorkspace(
-      Mantid::Geometry::INearestNeighboursFactory *nnFactory = nullptr);
+  MatrixWorkspace();
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength) = 0;
+  virtual void init(const std::size_t &NVectors,
+                    const HistogramData::Histogram &histogram) = 0;
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
   void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
+
+  void invalidateInstrumentReferences() const override;
 
   /// A vector of pointers to the axes for this workspace
   std::vector<Axis *> m_axes;
 
 private:
   MatrixWorkspace *doClone() const override = 0;
+  virtual MatrixWorkspace *doCloneEmpty() const = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr
@@ -589,8 +582,15 @@ private:
   void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t),
                 const MantidImage &image, size_t start, bool parallelExecution);
 
+  // Helper functions for IndexInfo, as a workaround while spectrum numbers and
+  // detector IDs are still stored in ISpectrum.
+  specnum_t spectrumNumber(const size_t index) const;
+  const std::set<detid_t> &detectorIDs(const size_t index) const;
+
+  std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
+
   /// Has this workspace been initialised?
-  bool m_isInitialized;
+  bool m_isInitialized{false};
 
   /// The unit for the data values (e.g. Counts)
   std::string m_YUnit;
@@ -599,9 +599,9 @@ private:
 
   /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
   /// default
-  mutable bool m_isCommonBinsFlagSet;
+  mutable bool m_isCommonBinsFlagSet{false};
   /// Flag indicating whether the data has common bins. False by default
-  mutable bool m_isCommonBinsFlag;
+  mutable bool m_isCommonBinsFlag{false};
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
@@ -611,16 +611,9 @@ private:
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
 
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
+  mutable std::mutex m_spectrumInfoMutex;
 
 protected:
-  /// Scoped pointer to NearestNeighbours factory
-  boost::scoped_ptr<Mantid::Geometry::INearestNeighboursFactory>
-      m_nearestNeighboursFactory;
-
-  /// Shared pointer to NearestNeighbours object
-  mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours>
-      m_nearestNeighbours;
-
   /// Getter for the dimension id based on the axis.
   std::string getDimensionIdFromAxis(const int &axisIndex) const;
 };

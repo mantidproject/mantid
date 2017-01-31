@@ -1,12 +1,13 @@
 #ifndef MANTID_ALGORITHMS_RADIUSSUMTEST_H_
 #define MANTID_ALGORITHMS_RADIUSSUMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <boost/shared_ptr.hpp>
-#include "MantidAlgorithms/RadiusSum.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAlgorithms/RadiusSum.h"
+#include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "RingProfileTest.h"
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 using Mantid::Algorithms::RadiusSum;
 using namespace Mantid::API;
 
@@ -67,7 +68,7 @@ public:
       // centre must be inside the limits of the workspace
       std::vector<double> twoInputs(2, 0);
       // set the centre outside the matrix workspace
-      twoInputs[0] = goodWS->readX(0)[0] - 3.5;
+      twoInputs[0] = goodWS->x(0)[0] - 3.5;
       twoInputs[1] = goodWS->getAxis(1)->getMin() - 4.5;
       // it is a valid input because it has just two inputs
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("Centre", twoInputs));
@@ -91,9 +92,9 @@ public:
 
     MatrixWorkspace_sptr outws =
         RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
-    TS_ASSERT_DELTA(outws->readY(0)[0], 0, 0.1);
-    TS_ASSERT_DELTA(outws->readY(0)[1], 1 + 2 + 3 + 4, 0.1);
-    TS_ASSERT_DELTA(outws->readY(0)[2], 4 + 1 + 1 + 2 + 2 + 3 + 3 + 4, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[0], 0, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[1], 1 + 2 + 3 + 4, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[2], 4 + 1 + 1 + 2 + 2 + 3 + 3 + 4, 0.1);
   }
 
   void test_radiussum_center_of_numeric_image_normalized() {
@@ -112,9 +113,9 @@ public:
 
     MatrixWorkspace_sptr outws =
         RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
-    TS_ASSERT_DELTA(outws->readY(0)[0], 0, 0.1);
-    TS_ASSERT_DELTA(outws->readY(0)[1], (1 + 2 + 3 + 4) / 0.15, 0.1);
-    TS_ASSERT_DELTA(outws->readY(0)[2], (4 + 1 + 1 + 2 + 2 + 3 + 3 + 4) / 0.25,
+    TS_ASSERT_DELTA(outws->y(0)[0], 0, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[1], (1 + 2 + 3 + 4) / 0.15, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[2], (4 + 1 + 1 + 2 + 2 + 3 + 3 + 4) / 0.25,
                     0.1);
   }
 
@@ -139,8 +140,9 @@ public:
 
     double output[] = {0, 8, 11, 6, 5};
 
+    const auto &y = outws->y(0);
     for (size_t i = 0; i < 5; i++) {
-      TS_ASSERT_DELTA(outws->readY(0)[i], output[i], 0.1);
+      TS_ASSERT_DELTA(y[i], output[i], 0.1);
     }
   }
 
@@ -165,9 +167,9 @@ public:
     MatrixWorkspace_sptr outws =
         RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins);
 
-    TS_ASSERT_DELTA(outws->readY(0)[0], 0, 0.1);
-    TS_ASSERT_DELTA(outws->readY(0)[1], 1 + 2 + 3 + 4, 0.1);
-    TS_ASSERT_DELTA(outws->readY(0)[2], 4 + 1 + 1 + 2 + 2 + 3 + 3 + 4, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[0], 0, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[1], 1 + 2 + 3 + 4, 0.1);
+    TS_ASSERT_DELTA(outws->y(0)[2], 4 + 1 + 1 + 2 + 2 + 3 + 3 + 4, 0.1);
   }
 
   void test_radiussum_horizontal_left_vertical_center_instrument() {
@@ -195,11 +197,13 @@ public:
 
     double output[] = {1 + 2 + 2, 0, 11, 7, 7};
 
+    const auto &x = outws->x(0);
     for (int i = 0; i < numbins + 1; i++)
-      TS_ASSERT_DELTA(outws->readX(0)[i], maxradius / numbins * i, 0.001);
+      TS_ASSERT_DELTA(x[i], maxradius / numbins * i, 0.001);
 
+    const auto &y = outws->y(0);
     for (int i = 0; i < numbins; i++)
-      TS_ASSERT_DELTA(outws->readY(0)[i], output[i], 0.1);
+      TS_ASSERT_DELTA(y[i], output[i], 0.1);
 
     // check the units of the instrument
     TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->caption(), "Radius");

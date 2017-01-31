@@ -27,13 +27,13 @@
  *                                                                         *
  ***************************************************************************/
 #include "DataPickerTool.h"
+#include "ApplicationWindow.h"
+#include "FunctionCurve.h"
 #include "Graph.h"
 #include "Plot.h"
-#include "pixmaps.h"
-#include "FunctionCurve.h"
 #include "PlotCurve.h"
 #include "QwtErrorPlotCurve.h"
-#include "ApplicationWindow.h"
+#include <MantidQtAPI/pixmaps.h>
 
 #include <QApplication>
 #include <QClipboard>
@@ -45,6 +45,8 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_picker.h>
 #include <qwt_symbol.h>
+
+using namespace MantidQt::API;
 
 DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
                                const QObject *status_target,
@@ -139,7 +141,7 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index) {
       QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
              plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
 
-  if (plotCurve && plotCurve->type() == Graph::Function) {
+  if (plotCurve && plotCurve->type() == GraphOptions::Function) {
     QLocale locale = d_app->locale();
     emit statusText(
         QString("%1[%2]: x=%3; y=%4")

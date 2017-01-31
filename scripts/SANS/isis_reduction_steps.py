@@ -1,4 +1,4 @@
-﻿# pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
+# pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
 # pylint: disable=too-few-public-methods,too-few-public-methods, too-many-arguments, too-many-instance-attributes
 """
     This file defines what happens in each step in the data reduction, it's
@@ -8,6 +8,7 @@
     Most of this code is a copy-paste from SANSReduction.py, organized to be used with
     ReductionStep objects. The guts needs refactoring.
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import math
@@ -44,7 +45,7 @@ def _issueWarning(msg):
         Prints a message to the log marked as warning
         @param msg: message to be issued
     """
-    print msg
+    print(msg)
     sanslog.warning(msg)
 
 
@@ -53,8 +54,19 @@ def _issueInfo(msg):
         Prints a message to the log
         @param msg: message to be issued
     """
-    print msg
+    print(msg)
     sanslog.notice(msg)
+
+
+def is_prompt_peak_instrument(reducer):
+    if reducer.instrument.name() == 'LOQ' or reducer.instrument.name() == 'LARMOR':
+        return True
+    else:
+        return False
+
+
+def get_wavelength_min_and_max(reducer):
+    return reducer.to_wavelen.wav_low, reducer.to_wavelen.wav_high
 
 
 class LoadRun(object):
@@ -155,8 +167,6 @@ class LoadRun(object):
         """
         if extra_options is None:
             extra_options = dict()
-        _inst = inst
-        _is_can = is_can
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
             if not can_load_as_event_workspace(self._data_file):
@@ -186,7 +196,7 @@ class LoadRun(object):
             if isinstance(outWs, IEventWorkspace):
                 try:
                     LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
-                except ValueError, details:
+                except ValueError as details:
                     sanslog.warning('The file does not contain monitors. \n' +
                                     'The normalization might behave differently than you expect.\n'
                                     ' Further details: ' + str(details) + '\n')
@@ -196,7 +206,9 @@ class LoadRun(object):
 
         # Handle Multi-period Event data
         if not added_event_data_flag:
-            if isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and isinstance(outWs[0], IEventWorkspace):
+            if isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
+                pass
+            elif isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and isinstance(outWs[0], IEventWorkspace):
                 load_monitors_for_multiperiod_event_data(workspace=outWs, data_file=self._data_file,
                                                          monitor_appendix=appendix)
 
@@ -204,7 +216,7 @@ class LoadRun(object):
         try:
             last_algorithm = outWs.getHistory().lastAlgorithm()
             loader_name = last_algorithm.getProperty('LoaderName').value
-        except RuntimeError, details:
+        except RuntimeError as details:
             sanslog.warning(
                 'Tried to get a loader name. But it seems that there is no loader name. Further info: ' + str(details))
 
@@ -256,7 +268,6 @@ class LoadRun(object):
         If reload is True, it will try to get all the information necessary to reload this
         workspace from the data file.
         """
-        _reducer = reducer
         assert isinstance(self._data_file, Workspace)
         ws_pointer = self._data_file
 
@@ -328,7 +339,7 @@ class LoadRun(object):
             else:
                 # the spectrum_limits is not the default only for transmission data
                 self._load(reducer.instrument, extra_options=spectrum_limits)
-        except RuntimeError, details:
+        except RuntimeError as details:
             sanslog.warning(str(details))
             self._wksp_name = ''
             return
@@ -395,7 +406,7 @@ class LoadRun(object):
         return numPeriods
 
     def _getHistory(self, wk_name):
-        _ws = getWorkspaceReference(wk_name)
+        getWorkspaceReference(wk_name)
 
         if isinstance(wk_name, Workspace):
             ws_h = wk_name.getHistory()
@@ -463,7 +474,6 @@ class LoadTransmissions(object):
         self._period_d = period
 
     def execute(self, reducer, workspace):
-        _workspace = workspace
         if self._trans_name not in [None, '']:
             self.trans = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
             self.trans._assignHelper(reducer)
@@ -519,7 +529,7 @@ class CanSubtraction(ReductionStep):
 
         # clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
-            _rem_nans = StripEndNans()
+            StripEndNans()
 
         self._keep_partial_results(tmp_smp, tmp_can)
 
@@ -565,7 +575,6 @@ class Mask_ISIS(ReductionStep):
 
     def __init__(self, timemask='', timemask_r='', timemask_f='',
                  specmask='', specmask_r='', specmask_f=''):
-        _specmask = specmask
         self._xml = []
 
         # these spectra will be masked by the algorithm MaskDetectors
@@ -630,10 +639,6 @@ class Mask_ISIS(ReductionStep):
             @param complement: mask in the direction of the normal or away
             @return the xml string
         """
-        if complement:
-            _addition = '#'
-        else:
-            _addition = ''
         return '<infinite-plane id="' + str(id) + '">' + \
                '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + \
                str(plane_pt[2]) + '" />' + \
@@ -867,7 +872,7 @@ class Mask_ISIS(ReductionStep):
                     ydim = abs(upp2 - low2) + 1
                     speclist += detector.spectrum_block(low2, low, ydim, xdim) + ','
                 else:
-                    print "error in mask, ignored:  " + x
+                    print("error in mask, ignored:  " + x)
             elif '>' in x:  # Commands: MASK Ssp1>Ssp2, MASK Hn1>Hn2 and MASK Vn1>Vn2
                 pieces = x.split('>')
                 low = int(pieces[0].lstrip('hvs'))
@@ -1190,7 +1195,7 @@ class LoadSample(LoadRun):
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
         if self.periods_in_file > 1:
-            self.entries = range(0, self.periods_in_file)
+            self.entries = list(range(0, self.periods_in_file))
 
         # applies on_load_sample for all the workspaces (single or groupworkspace)
         num = 0
@@ -1762,15 +1767,18 @@ class DarkRunSubtraction(object):
             run_number.append(setting.run_number)
 
         # Get the indices with settings which correspond to the individual settings
-        get_indices = lambda time_flag, mon_flag : [i for i, val in enumerate(use_time)
-                                                    if use_time[i] == time_flag and use_mon[i] == mon_flag]
+        def get_indices(time_flag, mon_flag):
+            return [i for i, use_time_i in enumerate(use_time) if use_time_i == time_flag and use_mon[i] == mon_flag]
+
         indices_time_detector = get_indices(True, False)
         indices_time_monitor = get_indices(True, True)
         indices_uamp_detector = get_indices(False, False)
         indices_uamp_monitor = get_indices(False, True)
 
         # Check that for each of these settings we only have one run number specified, else raise an error
-        has_max_one_run_number = lambda indices : len(set([run_number[index] for index in indices])) < 2
+        def has_max_one_run_number(indices):
+            return len(set([run_number[index] for index in indices])) < 2
+
         if not has_max_one_run_number(indices_time_detector) or \
            not has_max_one_run_number(indices_time_monitor) or \
            not has_max_one_run_number(indices_uamp_detector) or \
@@ -1852,9 +1860,8 @@ class DarkRunSubtraction(object):
                     monitor_mon_numbers.append(mon_numbers[index])
 
         # Check if the mean value is identical for all entries
-        are_all_same = lambda a_list : all([a_list[0] == a_list[i] for i in range(0, len(a_list))])
         if len(monitor_mean) > 0:
-            if not are_all_same(monitor_mean):
+            if len(set(monitor_mean)) != 1:
                 raise RuntimeError("DarkRunSubtraction: If several monitors are specified for a certain type "
                                    "of subtraction, it is required to use either all MEAN or all TOF.")
 
@@ -1939,16 +1946,25 @@ class NormalizeToMonitor(ReductionStep):
 
         self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
         mon = reducer.get_sample().get_monitor(normalization_spectrum - 1)
+
+        # Unwrap the monitors of the scatter workspace
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            temp_mon = UnwrapMonitorsInTOF(InputWorkspace=mon, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+            DeleteWorkspace(mon)
+            mon = temp_mon
+
         if reducer.event2hist.scale != 1:
             mon *= reducer.event2hist.scale
 
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
 
-        if reducer.instrument.name() == 'LOQ':
+        if (is_prompt_peak_instrument(reducer) and reducer.transmission_calculator.removePromptPeakMin is not None
+            and reducer.transmission_calculator.removePromptPeakMax is not None):  # noqa
             RemoveBins(InputWorkspace=self.output_wksp, OutputWorkspace=self.output_wksp,
-                       XMin=reducer.transmission_calculator.loq_removePromptPeakMin, XMax=
-                       reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
+                       XMin=reducer.transmission_calculator.removePromptPeakMin, XMax=
+                       reducer.transmission_calculator.removePromptPeakMax, Interpolation="Linear")
 
         # Remove flat background
         TOF_start, TOF_end = reducer.inst.get_TOFs(normalization_spectrum)
@@ -1996,7 +2012,6 @@ class TransmissionCalc(ReductionStep):
     YUNITLABEL_TRANSMISSION_RATIO = "Transmission"
 
     def __init__(self, loader=None):
-        _loader = loader
         super(TransmissionCalc, self).__init__()
         # set these variables to None, which means they haven't been set and defaults will be set further down
         self.fit_props = ['lambda_min', 'lambda_max', 'fit_method', 'order']
@@ -2024,9 +2039,9 @@ class TransmissionCalc(ReductionStep):
         self.calculated_can = None
         # the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
-        # Use for removing LOQ prompt peak from monitors. Units of micro-seconds
-        self.loq_removePromptPeakMin = 19000.0
-        self.loq_removePromptPeakMax = 20500.0
+        # Use for removing LOQ/LARMOR prompt peak from monitors. Units of micro-seconds
+        self.removePromptPeakMin = None
+        self.removePromptPeakMax = None
 
     def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
@@ -2121,12 +2136,19 @@ class TransmissionCalc(ReductionStep):
         # problems if we don't.
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
+        # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            UnwrapMonitorsInTOF(InputWorkspace=tmpWS, OutputWorkspace=tmpWS,
+                                WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+
         # Perform the a dark run background correction if one was specified
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
 
-        if inst.name() == 'LOQ':
-            RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.loq_removePromptPeakMin,
-                       XMax=self.loq_removePromptPeakMax,
+        if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and \
+                        self.removePromptPeakMax is not None:  # noqa
+            RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.removePromptPeakMin,
+                       XMax=self.removePromptPeakMax,
                        Interpolation='Linear')
 
         tmp = mtd[tmpWS]
@@ -2227,7 +2249,9 @@ class TransmissionCalc(ReductionStep):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
-        _workspace = workspace
+        # Set the prompt peak default values
+        self.set_prompt_parameter_if_not_set(reducer)
+
         self.output_wksp = None
 
         # look for run files that contain transmission data
@@ -2431,6 +2455,17 @@ class TransmissionCalc(ReductionStep):
             trans_ws = mtd[workspace_name]
             trans_ws = reducer.dark_run_subtraction.execute_transmission(trans_ws, trans_det_ids)
             mtd.addOrReplace(workspace_name, trans_ws)
+
+    def set_prompt_parameter_if_not_set(self, reducer):
+        """
+        This method sets default prompt peak values in case the user has not provided some. Currently
+        we only use default values for LOQ.
+        """
+        is_prompt_peak_not_set = self.removePromptPeakMin is None and self.removePromptPeakMax is None
+        if is_prompt_peak_not_set:
+            if reducer.instrument.name() == "LOQ":
+                self.removePromptPeakMin = 19000.0 # Units of micro-seconds
+                self.removePromptPeakMax = 20500.0 # Units of micro-seconds
 
 
 class AbsoluteUnitsISIS(ReductionStep):
@@ -2674,7 +2709,7 @@ class ConvertToQISIS(ReductionStep):
         else:
             msg = "User file can't override previous gravity setting, do gravity correction remains " + str(
                 self._use_gravity)
-            print msg
+            print(msg)
             sanslog.warning(msg)
 
     def get_extra_length(self):
@@ -2695,7 +2730,7 @@ class ConvertToQISIS(ReductionStep):
         else:
             msg = ("User file can't override previous extra length setting for" +
                    " gravity correction; extra length remains " + str(self._grav_extra_length))
-            print msg
+            print(msg)
             sanslog.warning(msg)
 
     def execute(self, reducer, workspace):
@@ -2802,7 +2837,7 @@ class ConvertToQISIS(ReductionStep):
         # Run a consistency check
         try:
             self.run_consistency_check()
-        except RuntimeError, details:
+        except RuntimeError as details:
             sanslog.warning("ConverToQISIS: There was something wrong with the Q Resolution"
                             " settings. Running the reduction without the Q Resolution"
                             " Setting. See details %s" % str(details))
@@ -2876,7 +2911,6 @@ class ConvertToQISIS(ReductionStep):
         '''
         # Here we need to check if the binning has changed, ie if the
         # existing
-        _dummy_ws = det_bank_workspace
         raise RuntimeError("The QResolution optimization has not been implemented yet")
 
     def set_q_resolution_moderator(self, file_name):
@@ -3035,7 +3069,6 @@ class UnitsConvert(ReductionStep):
             @param workspace: the name of the workspace to convert
             @param workspace: the name of the workspace to convert
         """
-        _reducer = reducer
         ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target=self._units)
 
         low_wav = self.wav_low
@@ -3167,8 +3200,6 @@ class BaseBeamFinder(ReductionStep):
         return [self._beam_center_x, self._beam_center_y]
 
     def execute(self, reducer, workspace=None):
-        _reducer = reducer
-        _workspace = workspace
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
 
     def update_beam_center(self, beam_center_x, beam_center_y):
@@ -3202,7 +3233,8 @@ class UserFile(ReductionStep):
             'MON/': self._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
             'MASKFILE': self._read_maskfile_line,
-            'QRESOL/': self._read_q_resolution_line}
+            'QRESOL/': self._read_q_resolution_line,
+            'UNWRAP': self._read_unwrap_monitors_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested
@@ -3216,12 +3248,12 @@ class UserFile(ReductionStep):
             'MON/': fresh._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
             'MASKFILE': self._read_maskfile_line,
-            'QRESOL/': self._read_q_resolution_line
+            'QRESOL/': self._read_q_resolution_line,
+            'UNWRAP': self._read_unwrap_monitors_line
         }
         return fresh
 
     def execute(self, reducer, workspace=None):
-        _workspace = workspace
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
@@ -3309,7 +3341,7 @@ class UserFile(ReductionStep):
                 y_pos = float(values[1]) / YSF
             elif hab_str_pos > 0:
                 values = upper_line[hab_str_pos + 4:].split()  # remove the SET CENTRE/HAB
-                print ' convert values ', values
+                print(' convert values ', values)
                 x_pos = float(values[0]) / XSF
                 y_pos = float(values[1]) / YSF
             else:
@@ -3317,7 +3349,7 @@ class UserFile(ReductionStep):
                 x_pos = float(values[2]) / XSF
                 y_pos = float(values[3]) / YSF
             if hab_str_pos > 0:
-                print 'Front values = ', x_pos, y_pos
+                print('Front values = ', x_pos, y_pos)
                 reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos), 'front')
             else:
                 reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
@@ -3393,9 +3425,9 @@ class UserFile(ReductionStep):
         elif upper_line.startswith('FIT/MONITOR'):
             params = upper_line.split()
             nparams = len(params)
-            if nparams == 3 and reducer.instrument.name() == 'LOQ':
-                reducer.transmission_calculator.loq_removePromptPeakMin = float(params[1])
-                reducer.transmission_calculator.loq_removePromptPeakMax = float(params[2])
+            if nparams == 3 and is_prompt_peak_instrument(reducer):
+                reducer.transmission_calculator.removePromptPeakMin = float(params[1])
+                reducer.transmission_calculator.removePromptPeakMax = float(params[2])
             else:
                 if reducer.instrument.name() == 'LOQ':
                     _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
@@ -3763,7 +3795,7 @@ class UserFile(ReductionStep):
             # parse the words after 'TIME' as first the start time and then the end
             reducer.inst.set_TOFs(int(times[0]), int(times[1]), monitor)
             return ''
-        except Exception, reason:
+        except Exception as reason:
             # return a description of any problems and then continue to read the next line
             return str(reason) + ' on line: '
 
@@ -3798,7 +3830,7 @@ class UserFile(ReductionStep):
                 reducer.inst.set_TOFs_for_ROI(int(times[0]), int(times[1]))
                 return ''
             raise ValueError('Expected two times for BACK/TRANS')
-        except ValueError, reason:
+        except ValueError as reason:
             # return a description of any problems and then continue to read the next line
             return str(reason) + ' on line: '
 
@@ -3933,7 +3965,7 @@ class UserFile(ReductionStep):
     def _read_q_resolution_line_on_off(self, arguments, reducer):
         '''
         Handles the ON/OFF setting for QResolution
-        @param arguements: the line arguments
+        @param arguments: the line arguments
         @param reducer: a reducer object
         '''
         # Remove white space
@@ -3993,6 +4025,28 @@ class UserFile(ReductionStep):
 
         reducer.settings["MaskFiles"] = value
 
+    def _read_unwrap_monitors_line(self, arguments, reducer):
+        """
+        Checks if the montiors should be unwrapped. The arguments can be either ON or OFF. We don't care here about
+        any preceeding slash
+        Args:
+            arguments: the arguments string
+            reducer: a handle to the reducer (is not used)
+        """
+        # Remove the slash if
+        if arguments.find('/') == -1:
+            arguments.replace('/', "")
+        # Remove white space
+        on_off = "".join(arguments.split())
+        if on_off == "ON":
+            reducer.unwrap_monitors = True
+        elif on_off == "OFF":
+            reducer.unwrap_monitors = False
+        else:
+            reducer.unwrap_monitors = False
+            return 'Unknown setting {0} UNWRAP command in line: '.format(on_off)
+        return ''
+
 
 class GetOutputName(ReductionStep):
     def __init__(self):
@@ -4009,7 +4063,6 @@ class GetOutputName(ReductionStep):
             @param reducer the reducer object that called this step
             @param workspace un-used
         """
-        _workspace = workspace
         reducer.output_wksp = reducer.get_out_ws_name()
 
 
@@ -4019,7 +4072,6 @@ class ReplaceErrors(ReductionStep):
         self.name = None
 
     def execute(self, reducer, workspace):
-        _reducer = reducer
         ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
 
 
@@ -4069,7 +4121,6 @@ class StripEndNans(ReductionStep):
             @param reducer: unused
             @param workspace: the workspace to convert
         """
-        _reducer = reducer
         result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
             # Strip zeros is only possible on 1D workspaces
@@ -4231,7 +4282,7 @@ class GetSampleGeom(ReductionStep):
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
         """
-        _reducer = reducer
+        _ = reducer  # noqa
         wksp = mtd[workspace]
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]

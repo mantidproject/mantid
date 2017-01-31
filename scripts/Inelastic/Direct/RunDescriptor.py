@@ -1,8 +1,9 @@
-﻿#pylint: disable=too-many-lines
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylint: disable=attribute-defined-outside-init
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from Direct.PropertiesDescriptors import *
 import re
@@ -1227,7 +1228,7 @@ class RunDescriptor(PropDescriptor):
         bins = [x_param[0],dx_min,x_param[-1]]
         ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
         Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
-        mon_ws_name = mon_ws.getName()
+        mon_ws_name = mon_ws.name()
         if not homo_binning:
             Rebin(InputWorkspace=mon_ws_name,OutputWorkspace=mon_ws_name,Params=bins,PreserveEvents='0')
         ConjoinWorkspaces(InputWorkspace1=mon_ws_name,InputWorkspace2='tmp_mon')
@@ -1339,7 +1340,7 @@ class RunDescriptor(PropDescriptor):
 # Hell knows how to redefine these warnings or if they are valid or not
 #pylint: disable=W0141
 #pylint: disable=W0110
-            self._ws_cname = part_ind + filter(lambda c: not c.isdigit(), name)
+            self._ws_cname = part_ind + ''.join(re.findall('\D+', name))
         else:
 #pylint: disable=attribute-defined-outside-init
             self._ws_cname = part_ind + name

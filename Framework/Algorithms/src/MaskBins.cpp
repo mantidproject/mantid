@@ -114,7 +114,7 @@ void MaskBins::exec() {
 
     // If the binning is the same throughout, we only need to find the index
     // limits once
-    const bool commonBins = WorkspaceHelpers::commonBoundaries(inputWS);
+    const bool commonBins = WorkspaceHelpers::commonBoundaries(*inputWS);
     if (commonBins) {
       auto X = inputWS->binEdges(0);
       this->findIndices(X, startBin, endBin);
@@ -172,7 +172,7 @@ void MaskBins::execEvent() {
   // Go through all histograms
   if (!this->spectra_list.empty()) {
     // Specific spectra were specified
-    PARALLEL_FOR1(outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int i = 0; i < static_cast<int>(this->spectra_list.size()); // NOLINT
          ++i) {
       PARALLEL_START_INTERUPT_REGION
@@ -183,7 +183,7 @@ void MaskBins::execEvent() {
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
     // Do all spectra!
-    PARALLEL_FOR1(outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int64_t i = 0; i < int64_t(numHists); ++i) {
       PARALLEL_START_INTERUPT_REGION
       outputWS->getSpectrum(i).maskTof(m_startX, m_endX);

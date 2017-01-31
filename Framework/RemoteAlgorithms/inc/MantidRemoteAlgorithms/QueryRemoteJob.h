@@ -2,12 +2,17 @@
 #define QUERYREMOTEJOB_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport QueryRemoteJob : public Mantid::API::Algorithm {
+class DLLExport QueryRemoteJob : public Mantid::API::Algorithm,
+                                 public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  QueryRemoteJob() { this->useAlgorithm("QueryRemoteJob", 2); }
+
   /// Algorithm's name
   const std::string name() const override { return "QueryRemoteJob"; }
   /// Summary of algorithms purpose

@@ -1,16 +1,17 @@
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidQtAPI/PythonRunner.h"
-// #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
@@ -182,14 +183,12 @@ void EnggDiffractionPresenter::notify(
 void EnggDiffractionPresenter::processStart() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   m_view->showStatus("Ready");
-
-  updateNewCalib(m_view->currentCalibFile());
 }
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
 
-  std::string fname = m_view->askExistingCalibFilename();
+  const std::string fname = m_view->askExistingCalibFilename();
   if (fname.empty()) {
     return;
   }
@@ -1825,28 +1824,17 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
 
   std::string outWSName;
-  std::string specNumsOpenGenie;
   if (!dgFile.empty()) {
     // doing focus "texture"
     outWSName = "engggui_focusing_output_ws_texture_bank_" +
                 boost::lexical_cast<std::string>(bank);
-    specNumsOpenGenie = specNos;
   } else if (specNos.empty()) {
     // doing focus "normal" / by banks
     outWSName = "engggui_focusing_output_ws_bank_" +
                 boost::lexical_cast<std::string>(bank);
-
-    // specnum for opengenie according to bank number
-    if (boost::lexical_cast<std::string>(bank) == "1") {
-      specNumsOpenGenie = "1 - 1200";
-    } else if (boost::lexical_cast<std::string>(bank) == "2") {
-      specNumsOpenGenie = "1201 - 1400";
-    }
-
   } else {
     // doing focus "cropped"
     outWSName = "engggui_focusing_output_ws_cropped";
-    specNumsOpenGenie = specNos;
   }
   try {
     auto alg =
@@ -1870,7 +1858,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+        "Could not run the algorithm EnggCalibrate successfully for bank " +
             boost::lexical_cast<std::string>(bank) + ". Error description: " +
             re.what() + " Please check also the log messages for details.";
     throw;
@@ -1888,7 +1876,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+        "Could not run the algorithm EnggCalibrate successfully for bank " +
             boost::lexical_cast<std::string>(bank) + ". Error description: " +
             re.what() + " Please check also the log messages for details.";
     throw;
@@ -1903,8 +1891,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     try {
       saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank), runNo);
       saveGSS(outWSName, boost::lexical_cast<std::string>(bank), runNo);
-      saveOpenGenie(outWSName, specNumsOpenGenie,
-                    boost::lexical_cast<std::string>(bank), runNo);
+      saveOpenGenie(outWSName, boost::lexical_cast<std::string>(bank), runNo);
     } catch (std::runtime_error &re) {
       g_log.error() << "Error saving focused data. ",
           "There was an error while saving focused data. "
@@ -2098,18 +2085,16 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   // algCurves->getProperty("OutputWorkspace");
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 
-  const std::string specNosBank1 = "1-2000";
-  const std::string specNosBank2 = "1201-2400";
   const std::string northBank = "North";
   const std::string southBank = "South";
 
   if (specNos != "") {
     if (specNos == northBank) {
       // when north bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, specNosBank1, northBank, vanNo);
+      saveOpenGenie(curvesWSName, northBank, vanNo);
     } else if (specNos == southBank) {
       // when south bank is selected while cropped calib
-      saveOpenGenie(curvesWSName, specNosBank2, southBank, vanNo);
+      saveOpenGenie(curvesWSName, southBank, vanNo);
     } else {
 
       // when SpectrumNos are provided
@@ -2119,12 +2104,12 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
       if (CustomisedBankName.empty())
         CustomisedBankName = "cropped";
 
-      saveOpenGenie(curvesWSName, specNos, CustomisedBankName, vanNo);
+      saveOpenGenie(curvesWSName, CustomisedBankName, vanNo);
     }
   } else {
     // when full calibration is carried; saves both banks
-    saveOpenGenie(curvesWSName, specNosBank1, northBank, vanNo);
-    saveOpenGenie(curvesWSName, specNosBank2, southBank, vanNo);
+    saveOpenGenie(curvesWSName, northBank, vanNo);
+    saveOpenGenie(curvesWSName, southBank, vanNo);
   }
 }
 
@@ -2235,7 +2220,7 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
     auto alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(rebinName);
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inWS->name());
+    alg->setPropertyValue("InputWorkspace", inWS->getName());
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setProperty("Params", boost::lexical_cast<std::string>(bin));
 
@@ -2338,7 +2323,7 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
     auto alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(rebinName);
     alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inWS->name());
+    alg->setPropertyValue("InputWorkspace", inWS->getName());
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setProperty("Params", boost::lexical_cast<std::string>(timeStep));
 
@@ -2576,12 +2561,10 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
 * OpenGenie format
 *
 * @param inputWorkspace title of the focused workspace
-* @param specNums number of spectrum to display
 * @param bank the number of the bank as a string
 * @param runNo the run number as a string
 */
 void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
-                                             std::string specNums,
                                              std::string bank,
                                              std::string runNo) {
 
@@ -2614,7 +2597,7 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
     alg->setProperty("InputWorkspace", inputWorkspace);
     std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
-    alg->setPropertyValue("SpecNumberField", specNums);
+    alg->setPropertyValue("OpenGenieFormat", "ENGIN-X Format");
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in saving OpenGenie format file. ",

@@ -78,7 +78,7 @@ void IntegrateByComponent::exec() {
       prog.report();
       std::vector<double> averageYInput, averageEInput;
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
@@ -115,7 +115,7 @@ void IntegrateByComponent::exec() {
             gsl_stats_mean(&averageEInput[0], 1, averageYInput.size()));
       }
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
         if (spectrumInfo.isMonitor(hists[i]))

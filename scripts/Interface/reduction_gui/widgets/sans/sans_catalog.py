@@ -54,7 +54,8 @@ class SANSCatalogWidget(BaseWidget):
         self.connect(self._content.browse_button, QtCore.SIGNAL("clicked()"), self._browse_directory)
         self.connect(self._content.directory_edit, QtCore.SIGNAL("returnPressed()"), self._update_content)
         self._content.directory_edit.setText(self._settings.catalog_data_path)
-        self._content.directory_edit.setToolTip("Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: /SNS/EQSANS/IPTS-1234/data")
+        self._content.directory_edit.setToolTip("Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: "
+                                                "/SNS/EQSANS/IPTS-1234/data")
         self._update_content(False)
 
     def tableWidgetContext(self, point):

@@ -21,6 +21,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <map>
+#include <boost/optional/optional.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -200,7 +201,8 @@ private slots:
   bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS
-  void selectMultiPeak(const QString &wsName);
+  void selectMultiPeak(const QString &wsName,
+                       const boost::optional<QString> &filePath);
 
   /// Disable tools for all the graphs within MantidPlot
   void disableAllTools();
@@ -241,8 +243,8 @@ private slots:
   /// Called when selected workspace/groups/periods to fit changes
   void dataToFitChanged();
 
-  /// Called when compatibility mode is turned on/off
-  void compatibilityModeChanged(int state);
+  /// Called when "enable multi fit" checkbox is turned on/off
+  void multiFitCheckboxChanged(int state);
 
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
@@ -549,6 +551,9 @@ private:
 
   /// Check if next/previous run should be appended
   void checkAppendingRun(const int direction);
+
+  /// Set the Grouping and Data Analysis tabs enabled/disabled
+  void setAnalysisTabsEnabled(const bool enabled);
 };
 }
 }

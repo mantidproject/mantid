@@ -12,11 +12,11 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Object.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -410,7 +410,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
     // Fix the Mass parameter
     profile->fix(0);
 
-    profile->cacheYSpaceValues(tseconds.rawData(), false, detpar, respar);
+    profile->cacheYSpaceValues(m_backgroundWS->points(wsIndex), detpar, respar);
 
     profile->massProfile(tmpWork.data(), tmpWork.size());
     // Add to final result
@@ -546,9 +546,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng0.first;
     descr.thetaMax = thetaRng0.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "sigma_gauss");
     m_foils0[i] = descr; // copy
 
     const auto &foil1 = foils1[i];
@@ -557,9 +557,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng1.first;
     descr.thetaMax = thetaRng1.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "sigma_gauss");
     m_foils1[i] = descr; // copy
   }
 

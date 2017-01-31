@@ -119,10 +119,10 @@ void PythonScripting::redirectStdOut(bool on) {
     setQObject(this, "stdout", m_sys);
     setQObject(this, "stderr", m_sys);
   } else {
-    PyDict_SetItemString(m_sys, "stdout",
-                         PyDict_GetItemString(m_sys, "__stdout__"));
-    PyDict_SetItemString(m_sys, "stderr",
-                         PyDict_GetItemString(m_sys, "__stderr__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stdout"),
+                   PyDict_GetItemString(m_sys, "__stdout__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stderr"),
+                   PyDict_GetItemString(m_sys, "__stderr__"));
   }
 }
 
@@ -348,10 +348,10 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   if (!sipAPI__qti->api_find_class) {
     throw std::runtime_error("sipAPI_qti->api_find_class is undefined");
   }
-  sipWrapperType *klass = sipFindClass(val->metaObject()->className());
+  const sipTypeDef *klass = sipFindType(val->metaObject()->className());
   if (!klass)
     return false;
-  pyobj = sipConvertFromInstance(val, klass, NULL);
+  pyobj = sipConvertFromType(val, klass, NULL);
 
   if (!pyobj)
     return false;

@@ -20,6 +20,7 @@
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -535,7 +536,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     }
 
     // 2. Process next chunk of spectra (threaded)
-    PARALLEL_FOR1(m_inWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_inWS))
     for (int i = start; i < static_cast<int>(wi); ++i) {
       PARALLEL_START_INTERUPT_REGION
       this->convertSpectrum(static_cast<int>(i));

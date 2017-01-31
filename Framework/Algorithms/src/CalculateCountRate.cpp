@@ -4,6 +4,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"
@@ -150,7 +151,7 @@ void CalculateCountRate::exec() {
   DataObjects::EventWorkspace_sptr sourceWS = getProperty("Workspace");
   API::EventType et = sourceWS->getEventType();
   if (et == API::EventType::WEIGHTED_NOTIME) {
-    throw std::runtime_error("Event workspace " + sourceWS->name() +
+    throw std::runtime_error("Event workspace " + sourceWS->getName() +
                              " contains events without necessary frame "
                              "information. Can not process counting rate");
   }
@@ -212,14 +213,13 @@ void CalculateCountRate::calcRateLog(
   double dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
   double dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
   std::vector<MantidVec> Buff;
-  int nThreads;
 
 #pragma omp parallel
   {
+    int nThreads = PARALLEL_NUMBER_OF_THREADS;
 #pragma omp single
     {
       // initialize thread's histogram buffer
-      nThreads = PARALLEL_NUMBER_OF_THREADS;
       Buff.resize(nThreads);
     }
     auto nThread = PARALLEL_THREAD_NUMBER;
@@ -510,7 +510,7 @@ void CalculateCountRate::setSourceWSandXRanges(
   API::MatrixWorkspace_sptr wst;
   if (unit->unitID() != RangeUnits) {
     auto conv = createChildAlgorithm("ConvertUnits", 0, 1);
-    std::string wsName = InputWorkspace->name();
+    std::string wsName = InputWorkspace->getName();
     if (wsName.empty()) {
       wsName = "_CountRate_UnitsConverted";
     } else {

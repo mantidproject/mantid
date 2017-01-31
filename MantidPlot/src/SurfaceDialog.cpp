@@ -506,9 +506,7 @@ void SurfaceDialog::acceptFunction() {
     parser.SetExpr(formula.toAscii().constData());
 
     parser.Eval();
-    // cppcheck-suppress unreadVariable
     x = toX;
-    // cppcheck-suppress unreadVariable
     y = toY;
     parser.Eval();
   } catch (mu::ParserError &e) {

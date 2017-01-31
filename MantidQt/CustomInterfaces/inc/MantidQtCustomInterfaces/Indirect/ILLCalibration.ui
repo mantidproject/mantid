@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>326</height>
+    <height>344</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,6 +20,16 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_10">
+   <item alignment="Qt::AlignTop">
+    <widget class="QLabel" name="label">
+     <property name="styleSheet">
+      <string notr="true">background:rgb(255, 251, 125)</string>
+     </property>
+     <property name="text">
+      <string>This tab is deprecated. Use CalibrationRun in Energy Transfer tab.</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QGroupBox" name="gbInput">
      <property name="title">
@@ -27,7 +37,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfRunFile" native="true">
+       <widget class="MantidQt::API::MWRunFiles" name="rfRunFile" native="true">
         <property name="label" stdset="0">
          <string>Run File</string>
         </property>
@@ -64,13 +74,22 @@
         <widget class="QWidget" name="pgCGDefault"/>
         <widget class="QWidget" name="pgCGMapFile">
          <layout class="QVBoxLayout" name="verticalLayout">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="rfMapFile" native="true">
             <property name="label" stdset="0">
-             <string></string>
+             <string/>
             </property>
             <property name="fileExtensions" stdset="0">
              <stringlist>
@@ -88,6 +107,12 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbCalibration">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Calibration</string>
      </property>
@@ -230,9 +255,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

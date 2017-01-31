@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -56,20 +57,21 @@ public:
     double expectedYPos[5] = {-0.0005, 0.0990, 0.1985, -0.002042, -0.0025133};
     double expectedYScale[3] = {0.995002, 0.995001, 0.995000};
 
-    const ParameterMap &pmap = testWS->instrumentParameters();
+    const auto &pmap = testWS->constInstrumentParameters();
+    const auto &spectrumInfo = testWS->spectrumInfo();
     for (int i = 0; i < ndets; ++i) {
-      IDetector_const_sptr det = testWS->getDetector(i);
-      V3D newPos = det->getPos();
+      V3D newPos = spectrumInfo.position(i);
       V3D oldPos = originalPositions[i];
       TS_ASSERT_DELTA(newPos.Y(), expectedYPos[i], 1e-6);
       TS_ASSERT_DELTA(fabs(oldPos.X() - newPos.X()), 0.0, 1e-05);
       TS_ASSERT_DELTA(fabs(oldPos.Z() - newPos.Z()), 0.0, 1e-05);
 
-      if (det->isMonitor()) {
-        TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), false);
+      if (spectrumInfo.isMonitor(i)) {
+        TS_ASSERT_EQUALS(pmap.contains(&spectrumInfo.detector(i), "sca"),
+                         false);
       } else {
-        TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), true);
-        Parameter_sptr scaleParam = pmap.get(det.get(), "sca");
+        TS_ASSERT_EQUALS(pmap.contains(&spectrumInfo.detector(i), "sca"), true);
+        Parameter_sptr scaleParam = pmap.get(&spectrumInfo.detector(i), "sca");
         const V3D scaleFactor = scaleParam->value<V3D>();
         TS_ASSERT_EQUALS(scaleFactor.X(), 1.0);
         TS_ASSERT_EQUALS(scaleFactor.Z(), 1.0);

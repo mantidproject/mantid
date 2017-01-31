@@ -1,6 +1,7 @@
 #ifndef VATES_KNOWLEDGE_SERIALIZER_H
 #define VATES_KNOWLEDGE_SERIALIZER_H
 
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -70,14 +71,13 @@ public:
       boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
 
   /// Set the workspace name to apply.
-  void
-  setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace);
+  void setWorkspace(const Mantid::API::IMDWorkspace &workspace);
 
   /// Set the workspace name to apply.
-  void setWorkspaceName(std::string wsName);
+  void setWorkspaceName(const std::string &wsName);
 
   /// Set the geometry xml to apply.
-  void setGeometryXML(std::string geomXML);
+  void setGeometryXML(const std::string &geomXML);
 
   /// Create the xml string correponding to the set values.
   std::string createXMLString() const;

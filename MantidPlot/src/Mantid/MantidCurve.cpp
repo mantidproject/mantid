@@ -6,8 +6,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
-#include "../Graph.h"
 #include "../ApplicationWindow.h"
+#include "../Graph.h"
 #include "../MultiLayer.h"
 #include "ErrorBarSettings.h"
 #include "MantidKernel/CPUTimer.h"
@@ -39,11 +39,11 @@ Helper method to apply a chosen style.
 @param ml : pointer to multilayer object
 @param lineWidth: ref to linewidth, which may be internally adjusted
 */
-void MantidCurve::applyStyleChoice(Graph::CurveType style, MultiLayer *ml,
-                                   int &lineWidth) {
+void MantidCurve::applyStyleChoice(GraphOptions::CurveType style,
+                                   MultiLayer *ml, int &lineWidth) {
 
-  if (style == Graph::Unspecified)
-    style = static_cast<Graph::CurveType>(
+  if (style == GraphOptions::Unspecified)
+    style = static_cast<GraphOptions::CurveType>(
         ml->applicationWindow()->defaultCurveStyle);
 
   QwtPlotCurve::CurveStyle qwtStyle;
@@ -51,20 +51,20 @@ void MantidCurve::applyStyleChoice(Graph::CurveType style, MultiLayer *ml,
   const QwtSymbol symbol(QwtSymbol::Ellipse, QBrush(Qt::black), QPen(),
                          QSize(symbolSize, symbolSize));
   switch (style) {
-  case Graph::Line:
+  case GraphOptions::Line:
     qwtStyle = QwtPlotCurve::Lines;
     break;
-  case Graph::Scatter:
+  case GraphOptions::Scatter:
     qwtStyle = QwtPlotCurve::NoCurve;
     this->setSymbol(symbol);
     break;
-  case Graph::LineSymbols:
+  case GraphOptions::LineSymbols:
     qwtStyle = QwtPlotCurve::Lines;
     this->setSymbol(symbol);
     break;
   case 15:
     qwtStyle = QwtPlotCurve::Steps;
-    break; // should be Graph::HorizontalSteps but it doesn't work
+    break; // should be GraphOptions::HorizontalSteps but it doesn't work
   default:
     qwtStyle = QwtPlotCurve::Lines;
     break;

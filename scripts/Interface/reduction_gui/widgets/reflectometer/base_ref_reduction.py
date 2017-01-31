@@ -506,13 +506,11 @@ class BaseRefWidget(BaseWidget):
         for ws in scaled_ws_list:
             # print 'file_number: ' , file_number
             data_y = mtd[ws].dataY(0)
-            _data_e = mtd[ws].dataE(0)
 
             # cleanup data 0-> NAN
             for y_val in data_y:
                 # print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
                 if y_val < 1e-12:
-                    _y_val = np.nan
                     _y_val = np.nan
 
             _file_number += 1
@@ -712,7 +710,6 @@ class BaseRefWidget(BaseWidget):
     def _edit_event(self, text=None, ctrl=None):
         if text is None:
             text = ""
-            _text = text
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl, True)
 
@@ -1004,7 +1001,6 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        _is_peak = is_peak
 #        run_number = self._summary.data_run_number_edit.text()
 #        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 #

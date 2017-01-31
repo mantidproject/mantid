@@ -88,7 +88,7 @@ class BuildSQWTest(stresstesting.MantidStressTest):
 
         # Do the final merge
         sqw_file = os.path.join(config["defaultsave.directory"],"BuildSQWTestCurrent.nxs")
-        dummy_finalSQW = MergeMDFiles(",".join(self._created_files),OutputFilename=sqw_file,Parallel='0')
+        MergeMDFiles(",".join(self._created_files),OutputFilename=sqw_file,Parallel='0',OutputWorkspace='dummy_finalSQW')
         self._created_files.append(sqw_file)
 
     def validate(self):
@@ -117,7 +117,7 @@ class LoadSQW_FileBasedTest(BuildSQWTest):
         MDws_file = os.path.join(config["defaultsave.directory"],"LoadSQWTestFileBased.nxs")
         sqw_file = os.path.join(self._input_location,self._input_data[0])
 
-        dummy_wsMD=LoadSQW(Filename=sqw_file, OutputFilename=MDws_file)
+        LoadSQW(Filename=sqw_file, OutputFilename=MDws_file, OutputWorkspace='dummy_wsMD')
 
         self._created_files=MDws_file
 
@@ -143,7 +143,7 @@ class LoadSQW_MemBasedTest(BuildSQWTest):
 
         sqw_file = os.path.join(self._input_location,self._input_data[0])
 
-        dummy_wsMD=LoadSQW(Filename=sqw_file)
+        LoadSQW(Filename=sqw_file, OutputWorkspace='dummy_wsMD')
 
         self._created_files=[]
 

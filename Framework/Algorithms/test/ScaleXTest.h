@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/ScaleX.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
@@ -34,7 +35,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
 
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10, 10);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspace123(10, 10);
     double factor = 2.5;
     auto result = runScaleX(inputWS, "Multiply", factor);
     checkScaleFactorApplied(inputWS, result, factor, true); // multiply=true
@@ -44,7 +45,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
 
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10, 10);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspace123(10, 10);
     double factor = 2.5;
     auto result = runScaleX(inputWS, "Add", factor);
     checkScaleFactorApplied(inputWS, result, factor, false); // multiply=false
@@ -57,7 +58,7 @@ public:
     Mantid::Algorithms::ScaleX scale;
     scale.initialize();
 
-    auto inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(10, 10);
+    auto inputWS = WorkspaceCreationHelper::createEventWorkspace2(10, 10);
     double factor(2.5);
     auto result = runScaleX(inputWS, "Multiply", factor);
     TS_ASSERT_EQUALS("EventWorkspace", result->id());
@@ -71,7 +72,7 @@ public:
     Mantid::Algorithms::ScaleX scale;
     scale.initialize();
 
-    auto inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(10, 10);
+    auto inputWS = WorkspaceCreationHelper::createEventWorkspace2(10, 10);
     double factor(2.5);
     auto result = runScaleX(inputWS, "Add", factor);
     TS_ASSERT_EQUALS("EventWorkspace", result->id());
@@ -88,13 +89,14 @@ public:
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
-    auto det1 = inputWS->getDetector(0);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    const auto &det1 = spectrumInfo.detector(0);
     const double det1Factor(5);
-    pmap.addDouble(det1->getComponentID(), parname, det1Factor);
+    pmap.addDouble(det1.getComponentID(), parname, det1Factor);
 
-    auto det2 = inputWS->getDetector(1);
+    const auto &det2 = spectrumInfo.detector(1);
     const double det2Factor(-10);
-    pmap.addDouble(det2->getComponentID(), parname, det2Factor);
+    pmap.addDouble(det2.getComponentID(), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();
@@ -136,13 +138,14 @@ public:
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
-    auto det1 = inputWS->getDetector(0);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    const auto &det1 = spectrumInfo.detector(0);
     const double det1Factor(5);
-    pmap.addDouble(det1->getComponentID(), parname, det1Factor);
+    pmap.addDouble(det1.getComponentID(), parname, det1Factor);
 
-    auto det2 = inputWS->getDetector(1);
+    const auto &det2 = spectrumInfo.detector(1);
     const double det2Factor(-10);
-    pmap.addDouble(det2->getComponentID(), parname, det2Factor);
+    pmap.addDouble(det2.getComponentID(), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();
@@ -393,9 +396,9 @@ public:
   static void destroySuite(ScaleXTestPerformance *suite) { delete suite; }
 
   void setUp() override {
-    inputMatrix = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
+    inputMatrix = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 1000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
+        WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
   }
 
   void tearDown() override {

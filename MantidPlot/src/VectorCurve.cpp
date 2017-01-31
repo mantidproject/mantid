@@ -29,9 +29,9 @@
  ***************************************************************************/
 #include "VectorCurve.h"
 
-#include <qwt_painter.h>
-#include <qwt_double_rect.h>
 #include <QPainter>
+#include <qwt_double_rect.h>
+#include <qwt_painter.h>
 
 VectorCurve::VectorCurve(VectorStyle style, Table *t, const QString &xColName,
                          const char *name, const QString &endCol1,
@@ -41,9 +41,9 @@ VectorCurve::VectorCurve(VectorStyle style, Table *t, const QString &xColName,
       d_headLength(4), d_headAngle(45), d_position(Tail), d_end_x_a(endCol1),
       d_end_y_m(endCol2) {
   if (style == XYXY)
-    setType(Graph::VectXYXY);
+    setType(GraphOptions::VectXYXY);
   else if (style == XYAM)
-    setType(Graph::VectXYAM);
+    setType(GraphOptions::VectXYAM);
 }
 
 void VectorCurve::copy(const VectorCurve *vc) {

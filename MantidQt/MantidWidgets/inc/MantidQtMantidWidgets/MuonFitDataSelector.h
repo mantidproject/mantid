@@ -54,8 +54,6 @@ public:
   // --- IMuonFitDataSelector methods
   /// Get selected filenames
   QStringList getFilenames() const override;
-  /// Get selected workspace index
-  unsigned int getWorkspaceIndex() const override;
   /// Get selected start time
   double getStartTime() const override;
   /// Get selected end time
@@ -90,13 +88,11 @@ public:
 public slots:
   /// Set number of periods in data
   void setNumPeriods(size_t numPeriods) override;
-  /// Set starting run number and instrument
-  void setWorkspaceDetails(const QString &runNumbers,
-                           const QString &instName) override;
+  /// Set starting run number, instrument and (optionally) file path
+  void setWorkspaceDetails(const QString &runNumbers, const QString &instName,
+                           const boost::optional<QString> &filePath) override;
   /// Set names of available groups
   void setAvailableGroups(const QStringList &groupNames) override;
-  /// Set selected workspace index
-  void setWorkspaceIndex(unsigned int index) override;
   /// Set start time for fit
   void setStartTime(double start) override;
   /// Set end time for fit
@@ -115,7 +111,7 @@ public slots:
   void checkForMultiGroupPeriodSelection();
 
 signals:
-  /// Edited the ws index, start or end fields
+  /// Edited the start or end fields
   void dataPropertiesChanged();
   /// Changed the groups selection
   void selectedGroupsChanged();

@@ -3,13 +3,14 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward decs
 class IReflMainWindowPresenter;
-class IReflSettingsTabView;
+class IReflSettingsPresenter;
 
 /** @class ReflSettingsTabPresenter
 
@@ -41,31 +42,22 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsTabPresenter
     : public IReflSettingsTabPresenter {
 public:
   /// Constructor
-  ReflSettingsTabPresenter(IReflSettingsTabView *view);
+  ReflSettingsTabPresenter(std::vector<IReflSettingsPresenter *> presenters);
   /// Destructor
   ~ReflSettingsTabPresenter() override;
-  /// Accept a main presenter
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  /// Set the instrument name
+  void setInstrumentName(const std::string &instName) override;
 
-  /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
+  std::string getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
+  std::string getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const override;
+  std::string getStitchOptions(int group) const override;
 
 private:
-  void createPlusHints();
-  void createTransmissionHints();
-  void createReductionHints();
-  void createStitchHints();
-
-  /// The view we are managing
-  IReflSettingsTabView *m_view;
-  /// The main presenter
-  IReflMainWindowPresenter *m_mainPresenter;
+  /// The presenters for each group as a vector
+  std::vector<IReflSettingsPresenter *> m_settingsPresenters;
 };
 }
 }

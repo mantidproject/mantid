@@ -2,7 +2,8 @@
 #define MUONFITPROPERTYBROWSER_H_
 
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
+#include "MantidQtMantidWidgets/IMuonFitDataModel.h"
+#include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 /* Forward declarations */
 
@@ -32,7 +33,8 @@ class PropertyHandler;
 
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser
     : public MantidQt::MantidWidgets::FitPropertyBrowser,
-      public MantidQt::MantidWidgets::IMuonFitFunctionControl {
+      public MantidQt::MantidWidgets::IMuonFitFunctionModel,
+      public IMuonFitDataModel {
   Q_OBJECT
 
 public:
@@ -74,8 +76,16 @@ public:
   void userChangedDataset(int index) override {
     emit userChangedDatasetIndex(index);
   }
-  /// Set "compatibility mode" on or off
-  void setCompatibilityMode(bool enabled) override;
+  /// Set multiple fitting mode on or off
+  void setMultiFittingMode(bool enabled) override;
+  /// After fit checks done, continue
+  void continueAfterChecks(bool sequential) override;
+  /// Remove a plotted guess
+  void doRemoveGuess() override { emit removeGuess(); }
+  /// Plot a guess function
+  void doPlotGuess() override { emit plotGuess(); }
+  /// Whether a guess is plotted or not
+  bool hasGuess() const override;
 
 public slots:
   /// Perform the fit algorithm
@@ -96,6 +106,8 @@ signals:
   void userChangedDatasetIndex(int index) override;
   /// Emitted when "fit to raw data" is changed
   void fitRawDataClicked(bool enabled) override;
+  /// Emitted when fit is about to be run
+  void preFitChecksRequested(bool sequential) override;
 
 protected:
   void showEvent(QShowEvent *e) override;
@@ -113,10 +125,8 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
-  /// Layout for extra widgets
-  QVBoxLayout *m_additionalLayout;
-  /// Splitter for additional widgets
-  QSplitter *m_widgetSplitter;
+  /// Splitter for additional widgets and splitter between this and browser
+  QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits

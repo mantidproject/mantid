@@ -27,7 +27,8 @@ class ReflectometryInstrumentSignedThetaTest(stresstesting.MantidStressTest):
         # Retrieve point detector from IDF (after translation)
         detector = theta_spectrum_axis.getInstrument().getComponentByName(detector_name)
         # Compare det-position * detector two theta with signed 2 theta (they should always be equal)
-        self.assertTrue(detector_vertical_position * theta_spectrum_axis.detectorTwoTheta(detector) == theta_spectrum_axis.detectorSignedTwoTheta(detector))
+        self.assertTrue(detector_vertical_position * theta_spectrum_axis.detectorTwoTheta(detector)
+                        == theta_spectrum_axis.detectorSignedTwoTheta(detector))
 
         return True
 

@@ -102,12 +102,12 @@ public:
   }
 
   void testGetMin() {
-    boost::scoped_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
+    std::unique_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
     TS_ASSERT_THROWS(newRefAxis->getMin(), std::runtime_error)
   }
 
   void testGetMax() {
-    boost::scoped_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
+    std::unique_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
     TS_ASSERT_THROWS(newRefAxis->getMax(), std::runtime_error)
   }
 

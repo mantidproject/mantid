@@ -31,7 +31,6 @@
 
 #include "ExtensibleFileDialog.h"
 #include <QGridLayout>
-#include <QDesktopServices>
 #include <QUrl>
 #include <QComboBox>
 

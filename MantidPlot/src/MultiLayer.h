@@ -43,11 +43,16 @@ class QLabel;
 class LayerButton;
 class SelectionMoveResizer;
 class LegendWidget;
-class MantidTreeWidget;
 class MantidMDCurve;
 class MantidMatrixCurve;
 class QSize;
 class WaterfallFillDialog;
+
+namespace MantidQt {
+namespace MantidWidgets {
+class MantidTreeWidget;
+}
+}
 
 /**
  * \brief An MDI window (MdiSubWindow) managing one or more Graph objects.
@@ -108,6 +113,7 @@ public:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  std::vector<std::string> getWorkspaceNames() override;
 
   void setCommonAxisScales();
 
@@ -222,10 +228,10 @@ signals:
 private:
   /// Handle dropping of additional curves onto a MantidMDCurve.
   void dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
-                       MantidTreeWidget *tree);
+                       MantidQt::MantidWidgets::MantidTreeWidget *tree);
   /// Handle dropping of additional curves onto a MantidMatrixCurve
   void dropOntoMatrixCurve(Graph *g, MantidMatrixCurve *originalCurve,
-                           MantidTreeWidget *tree);
+                           MantidQt::MantidWidgets::MantidTreeWidget *tree);
 
   //! \name Event Handlers
   //@{

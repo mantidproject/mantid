@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name, no-init
+from __future__ import (absolute_import, division, print_function)
 import os
 from mantid import config
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, mtd, FileProperty, FileAction
@@ -27,11 +28,12 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
     else:
         pws = ws
 
-    ws_name=pws.getName()
+    ws_name=pws.name()
     nhist = pws.getNumberHistograms()
 
     no_detectors = 0
     masks = []
+    specInfo = pws.spectrumInfo()
     for i in range(nhist):
         # set provisional spectra ID
         ms = i+1
@@ -45,14 +47,13 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
             masks.append(ms)
             continue
         try:
-            det = pws.getDetector(i)
+            if specInfo.isMasked(i):
+                masks.append(ms)
 #pylint: disable=W0703
         except Exception:
             no_detectors = no_detectors +1
             masks.append(ms)
             continue
-        if det.isMasked():
-            masks.append(ms)
 
     filename=''
     if len(fileName)==0 :

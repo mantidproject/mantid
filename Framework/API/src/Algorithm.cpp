@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
@@ -1123,7 +1124,7 @@ bool Algorithm::checkGroups() {
             AnalysisDataService::Instance().retrieve(name);
         if (!memberWS)
           throw std::invalid_argument("One of the members of " +
-                                      wsGroup->name() + ", " + name +
+                                      wsGroup->getName() + ", " + name +
                                       " was not found!.");
         thisGroup.push_back(memberWS);
       }
@@ -1287,12 +1288,12 @@ bool Algorithm::processGroups() {
         // Append the names together
         if (!outputBaseName.empty())
           outputBaseName += "_";
-        outputBaseName += ws->name();
+        outputBaseName += ws->getName();
 
         // Set the property using the name of that workspace
         if (Property *prop =
                 dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
-          alg->setPropertyValue(prop->name(), ws->name());
+          alg->setPropertyValue(prop->name(), ws->getName());
         } else {
           throw std::logic_error("Found a Workspace property which doesn't "
                                  "inherit from Property.");
@@ -1325,7 +1326,7 @@ bool Algorithm::processGroups() {
           const auto &inputGroup =
               m_groups[inputProp - m_inputWorkspaceProps.begin()];
           if (!inputGroup.empty())
-            outName = inputGroup[entry]->name();
+            outName = inputGroup[entry]->getName();
         }
         // Except if all inputs had similar names, then the name is "out_1"
 

@@ -136,8 +136,7 @@ public:
 protected:
   /// Create string property
   QtProperty *apply(const std::string &str) const override {
-    QtProperty *prop = NULL;
-    prop = m_browser->addStringProperty(m_name);
+    QtProperty *prop = m_browser->addStringProperty(m_name);
     m_browser->setStringPropertyValue(prop, QString::fromStdString(str));
     return prop;
   }
@@ -168,7 +167,8 @@ protected:
     m_browser->m_vectorSizeManager->setValue(sizeProp,
                                              static_cast<int>(b.size()));
     prop->addSubProperty(sizeProp);
-    sizeProp->setEnabled(false);
+    m_handler->m_vectorSizes << sizeProp;
+    // sizeProp->setEnabled(false);
     m_browser->m_vectorSizeManager->blockSignals(false);
     m_browser->m_vectorDoubleManager->blockSignals(true);
     QString dpName = "value[%1]";
@@ -575,6 +575,8 @@ PropertyHandler *PropertyHandler::findHandler(QtProperty *prop) {
     return this;
   if (m_vectorMembers.contains(prop))
     return this;
+  if (m_vectorSizes.contains(prop))
+    return this;
   if (!m_ties.key(prop, "").isEmpty())
     return this;
   QMap<QString, std::pair<QtProperty *, QtProperty *>>::iterator it =
@@ -675,12 +677,17 @@ protected:
   /// Create vector property
   void apply(std::vector<double> &v) const override {
     QList<QtProperty *> members = m_prop->subProperties();
-    if (members.size() <= 1) {
+    if (members.size() < 1) {
       v.clear();
       return;
     }
-    v.resize(members.size() - 1);
-    for (int i = 1; i < members.size(); ++i) {
+    int newSize = m_browser->m_vectorSizeManager->value(members[0]);
+    v.resize(newSize);
+    int vectorSize = members.size() - 1;
+    if (vectorSize > newSize) {
+      vectorSize = newSize;
+    }
+    for (int i = 1; i < vectorSize + 1; ++i) {
       v[i - 1] = m_browser->m_vectorDoubleManager->value(members[i]);
     }
   }
@@ -741,10 +748,12 @@ private:
 
 /**
 * Set function attribute value read from a QtProperty
-* @param prop :: The (string) property with the new attribute value
+* @param prop :: The property with the new attribute value
+* @param resetProperties :: Flag to reset all properties of the handled
+* function.
 * @return true if successfull
 */
-bool PropertyHandler::setAttribute(QtProperty *prop) {
+bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   if (m_attributes.contains(prop)) {
     QString attName = prop->propertyName();
     try {
@@ -754,8 +763,10 @@ bool PropertyHandler::setAttribute(QtProperty *prop) {
       att.apply(tmp);
       m_fun->setAttribute(attName.toStdString(), att);
       m_browser->compositeFunction()->checkFunction();
-      initAttributes();
-      initParameters();
+      if (resetProperties) {
+        initAttributes();
+        initParameters();
+      }
       if (this == m_browser->m_autoBackground) {
         fit();
       }
@@ -769,7 +780,7 @@ bool PropertyHandler::setAttribute(QtProperty *prop) {
   }
   if (m_cf) {
     for (size_t i = 0; i < m_cf->nFunctions(); i++) {
-      bool res = getHandler(i)->setAttribute(prop);
+      bool res = getHandler(i)->setAttribute(prop, resetProperties);
       if (res)
         return true;
     }
@@ -832,7 +843,8 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop) {
   foreach (QtProperty *att, m_attributes) {
     QList<QtProperty *> subProps = att->subProperties();
     if (subProps.contains(prop)) {
-      setAttribute(att);
+      bool resetProperties = m_vectorSizes.contains(prop);
+      setAttribute(att, resetProperties);
       return;
     }
   }
@@ -1016,12 +1028,10 @@ void PropertyHandler::addTie(const QString &tieStr) {
   std::string name = parts[0].trimmed().toStdString();
   std::string expr = parts[1].trimmed().toStdString();
   try {
-    Mantid::API::ParameterTie *tie =
-        m_browser->compositeFunction()->tie(name, expr);
-    if (tie == NULL)
-      return;
+    auto &cfun = *m_browser->compositeFunction();
+    cfun.tie(name, expr);
     QString parName = QString::fromStdString(
-        tie->getFunction()->parameterName(static_cast<int>(tie->getIndex())));
+        cfun.parameterLocalName(cfun.parameterIndex(name)));
     foreach (QtProperty *parProp, m_parameters) {
       if (parProp->propertyName() == parName) {
         m_browser->m_changeSlotsEnabled = false;
@@ -1319,10 +1329,10 @@ void PropertyHandler::addConstraint(QtProperty *parProp, bool lo, bool up,
 
   m_constraints.insert(parProp->propertyName(), cnew);
 
-  Mantid::API::IConstraint *c =
+  auto c = std::unique_ptr<Mantid::API::IConstraint>(
       Mantid::API::ConstraintFactory::Instance().createInitialized(m_fun.get(),
-                                                                   ostr.str());
-  m_fun->addConstraint(c);
+                                                                   ostr.str()));
+  m_fun->addConstraint(std::move(c));
   m_browser->m_changeSlotsEnabled = true;
 }
 

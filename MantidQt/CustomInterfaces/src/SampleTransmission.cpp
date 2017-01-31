@@ -83,9 +83,8 @@ bool SampleTransmission::validate(bool silent) {
                            m_uiForm.valChemicalFormula);
 
   // Ensure number density is not zero
-  uiv.setErrorLabel(
-      m_uiForm.valNumberDensity,
-      uiv.checkNotEqual("Number Density", m_uiForm.spNumberDensity->value()));
+  uiv.setErrorLabel(m_uiForm.valDensity,
+                    uiv.checkNotEqual("Density", m_uiForm.spDensity->value()));
 
   // Ensure thickness is not zero
   uiv.setErrorLabel(
@@ -117,11 +116,13 @@ void SampleTransmission::calculate() {
   switch (wavelengthBinning) {
   // Single
   case 0: {
-    QStringList params;
-    params << m_uiForm.spSingleLow->text() << m_uiForm.spSingleWidth->text()
-           << m_uiForm.spSingleHigh->text();
-    QString binString = params.join(",");
-    transCalcAlg->setProperty("WavelengthRange", binString.toStdString());
+    // Convert values to binning params using the 'C' locale.
+    std::ostringstream binning;
+    binning.imbue(std::locale::classic());
+    binning << m_uiForm.spSingleLow->value() << ','
+            << m_uiForm.spSingleWidth->value() << ','
+            << m_uiForm.spSingleHigh->value();
+    transCalcAlg->setProperty("WavelengthRange", binning.str());
     break;
   }
 
@@ -135,7 +136,11 @@ void SampleTransmission::calculate() {
   // Set sample material properties
   transCalcAlg->setProperty("ChemicalFormula",
                             m_uiForm.leChemicalFormula->text().toStdString());
-  transCalcAlg->setProperty("NumberDensity", m_uiForm.spNumberDensity->value());
+
+  transCalcAlg->setProperty("DensityType",
+                            m_uiForm.cbDensity->currentText().toStdString());
+  transCalcAlg->setProperty("Density", m_uiForm.spDensity->value());
+
   transCalcAlg->setProperty("Thickness", m_uiForm.spThickness->value());
 
   transCalcAlg->setProperty("OutputWorkspace", "CalculatedSampleTransmission");

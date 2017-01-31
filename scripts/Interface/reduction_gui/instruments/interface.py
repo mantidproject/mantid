@@ -206,7 +206,7 @@ class InstrumentInterface(object):
                 # Otherwise take the 'normal' path
                 self.scripter.apply()
             self.set_running(False)
-        except RuntimeError, e:
+        except RuntimeError:
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:

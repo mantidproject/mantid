@@ -7,6 +7,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -347,7 +348,7 @@ public:
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     Workspace_sptr wsi = gws->getItem(0);
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-    Mantid::Geometry::ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
         ws->getInstrument();
 
@@ -457,19 +458,19 @@ public:
     // 1st Workspace - bank 2
     Workspace_sptr wsi = gws->getItem(0);
     auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-    Mantid::Geometry::ParameterMap &paramMap1 = ws1->instrumentParameters();
+    const auto &paramMap1 = ws1->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr1 =
         ws1->getInstrument();
     // 2nd Workspace - bank 3
     wsi = gws->getItem(1);
     auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-    Mantid::Geometry::ParameterMap &paramMap2 = ws2->instrumentParameters();
+    const auto &paramMap2 = ws2->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr2 =
         ws2->getInstrument();
     // 3rd Workspace - bank 4
     wsi = gws->getItem(2);
     auto ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-    Mantid::Geometry::ParameterMap &paramMap3 = ws3->instrumentParameters();
+    const auto &paramMap3 = ws3->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr3 =
         ws3->getInstrument();
 
@@ -521,13 +522,13 @@ public:
     // 1st Workspace - bank 4
     wsi = gws->getItem(0);
     auto ws01 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-    Mantid::Geometry::ParameterMap &paramMap01 = ws01->instrumentParameters();
+    const auto &paramMap01 = ws01->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr01 =
         ws01->getInstrument();
     // 3rd Workspace - bank 2
     wsi = gws->getItem(2);
     auto ws03 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-    Mantid::Geometry::ParameterMap &paramMap03 = ws03->instrumentParameters();
+    const auto &paramMap03 = ws03->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr03 =
         ws03->getInstrument();
 
@@ -588,7 +589,7 @@ public:
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     Workspace_sptr wsi = gws->getItem(0);
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-    Mantid::Geometry::ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
         ws->getInstrument();
 

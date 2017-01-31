@@ -71,7 +71,7 @@ public:
    * A dimension can be usually found by its ID and various
    * various method exist to manipulate set of dimensions by their names.
    */
-  std::string getDimensionId() const override { return m_dimensionId; }
+  const std::string &getDimensionId() const override { return m_dimensionId; }
 
   /// Returns the maximum extent of this dimension
   coord_t getMaximum() const override { return m_max; }
