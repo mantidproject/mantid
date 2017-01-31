@@ -5,9 +5,9 @@ import math
 import numpy as np
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
+                        WorkspaceGroupProperty, InstrumentValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, CompositeValidator, MaterialBuilder)
+                           FloatBoundedValidator, Direction, logger, MaterialBuilder)
 
 
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):
@@ -38,6 +38,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     _angles = list()
     _waves = list()
     _elastic = 0.0
+    _fixed = 0.0
     _sig_s = None
     _sig_a = None
     _density = None
@@ -58,7 +59,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def PyInit(self):
-        ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
+        ws_validator = InstrumentValidator()
 
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
                                                      validator=ws_validator,
@@ -124,11 +125,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              doc='Number of wavelengths for calculation')
 
         self.declareProperty(name='Emode', defaultValue='Elastic',
-                             validator=StringListValidator(['Elastic', 'Indirect', 'Direct']),
-                             doc='Energy transfer mode')
+                             validator=StringListValidator(['Elastic', 'Indirect', 'Direct', 'Efixed']),
+                             doc='Energy transfer mode.')
 
-        self.declareProperty(name='Efixed', defaultValue=1.0,
-                             doc='Analyser energy')
+        self.declareProperty(name='Efixed', defaultValue=0.,
+                             doc='Analyser energy (mev). By default will be read from the instrument parameters. '
+                                 'Specify manually to override. This is used in energy transfer modes other than Elastic.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -138,6 +140,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     def validateInputs(self):
         self._setup()
         issues = dict()
+
+        sample_ws_name = self.getPropertyValue('SampleWorkspace')
+        can_ws_name = self.getPropertyValue('CanWorkspace')
 
         # Ensure that a can chemical formula is given when using a can workspace
         if self._use_can:
@@ -149,6 +154,14 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
         if number_steps < 20:
             issues['StepSize'] = 'Number of steps (%d) should be >= 20' % number_steps
+
+        if self._emode != 'Efixed':
+            # require both sample and can ws have wavelenght as x-axis
+            if mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+                issues['SampleWorkspace'] = 'Workspace must have units of wavelenght.'
+
+            if self._use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+                issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
 
         return issues
 
@@ -236,7 +249,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         sample_logs = [('sample_shape', 'cylinder'),
                        ('sample_filename', self._sample_ws_name),
                        ('sample_inner', self._sample_inner_radius),
-                       ('sample_outer', self._sample_outer_radius)]
+                       ('sample_outer', self._sample_outer_radius),
+                       ('emode', self._emode),
+                       ('efixed', self._efixed)]
 
         if self._use_can:
             sample_logs.append(('can_filename', self._can_ws_name))
@@ -313,6 +328,24 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
+
+        if self._efixed == 0. and self._emode != 'Elastic':
+            # In all the modes other than elastic, efixed is needed.
+            # So try to get from instrument if the input is not set.
+            try:
+                self._efixed = self._getEfixed()
+                logger.information('Found Efixed = {0}'.format(self._efixed))
+            except ValueError:
+                raise RuntimeError('Could not find the Efixed parameter in the instrument. '
+                                   'Please specify manually.')
+
+        if self._emode == 'Efixed':
+            logger.information('No interpolation is possible in Efixed mode.')
+            self._interpolate = False
+
+        # purge the lists
+        self._angles = list()
+        self._waves = list()
 
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
@@ -400,29 +433,52 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def _wave_range(self):
-        wave_range = '__wave_range'
-        ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=wave_range, WorkspaceIndex=0)
 
-        Xin = mtd[wave_range].readX(0)
-        wave_min = mtd[wave_range].readX(0)[0]
-        wave_max = mtd[wave_range].readX(0)[len(Xin) - 1]
-        number_waves = self._number_wavelengths
-        wave_bin = (wave_max - wave_min) / (number_waves-1)
+        if self._emode != 'Elastic':
+            self._fixed = math.sqrt(81.787 / self._efixed)
 
-        self._waves = list()
-        wave_prog = Progress(self, start=0.07, end = 0.10, nreports=number_waves)
-        for idx in range(0, number_waves):
-            wave_prog.report('Appending wave data: %i' % idx)
-            self._waves.append(wave_min + idx * wave_bin)
-        DeleteWorkspace(wave_range, EnableLogging = False)
-
-        if self._emode == 'Elastic':
-            self._elastic = self._waves[int(len(self._waves) / 2)]
+        if self._emode == 'Efixed':
+            self._waves.append(self._fixed)
+            logger.information('Efixed mode, setting lambda_fixed to {0}'.format(self._fixed))
         else:
-            self._elastic = math.sqrt(81.787/self._efixed) # elastic wavelength
+            wave_range = '__wave_range'
+            ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=wave_range, WorkspaceIndex=0)
 
-        logger.information('Elastic lambda : %f' % self._elastic)
-        logger.information('Lambda : %i values from %f to %f' % (len(self._waves), self._waves[0], self._waves[-1]))
+            Xin = mtd[wave_range].readX(0)
+            wave_min = mtd[wave_range].readX(0)[0]
+            wave_max = mtd[wave_range].readX(0)[len(Xin) - 1]
+            number_waves = self._number_wavelengths
+            wave_bin = (wave_max - wave_min) / (number_waves-1)
+
+            self._waves = list()
+            wave_prog = Progress(self, start=0.07, end = 0.10, nreports=number_waves)
+            for idx in range(0, number_waves):
+                wave_prog.report('Appending wave data: %i' % idx)
+                self._waves.append(wave_min + idx * wave_bin)
+            DeleteWorkspace(wave_range, EnableLogging = False)
+
+            if self._emode == 'Elastic':
+                self._elastic = self._waves[int(len(self._waves) / 2)]
+                logger.information('Elastic lambda : %f' % self._elastic)
+
+            logger.information('Lambda : %i values from %f to %f' % (len(self._waves), self._waves[0], self._waves[-1]))
+
+#------------------------------------------------------------------------------
+
+    def _getEfixed(self):
+        inst = mtd[self._sample_ws_name].getInstrument()
+
+        if inst.hasParameter('Efixed'):
+            return inst.getNumberParameter('EFixed')[0]
+
+        if inst.hasParameter('analyser'):
+            analyser_name = inst.getStringParameter('analyser')[0]
+            analyser_comp = inst.getComponentByName(analyser_name)
+
+            if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
+                return analyser_comp.getNumberParameter('EFixed')[0]
+
+        raise ValueError('No Efixed parameter found')
 
 #------------------------------------------------------------------------------
 
@@ -485,12 +541,15 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             if self._emode == 'Elastic':
                 amu_tot_i = amu_scat + sig_abs*self._elastic/1.7979
                 amu_tot_s = amu_scat + sig_abs*self._elastic/1.7979
-            if self._emode == 'Direct':
-                amu_tot_i = amu_scat + sig_abs*self._elastic/1.7979
+            elif self._emode == 'Direct':
+                amu_tot_i = amu_scat + sig_abs*self._fixed/1.7979
                 amu_tot_s = amu_scat + sig_abs*wave/1.7979
-            if self._emode == 'Indirect':
+            elif self._emode == 'Indirect':
                 amu_tot_i = amu_scat + sig_abs*wave/1.7979
-                amu_tot_s = amu_scat + sig_abs*self._elastic/1.7979
+                amu_tot_s = amu_scat + sig_abs*self._fixed/1.7979
+            elif self._emode == 'Efixed':
+                amu_tot_i = amu_scat + sig_abs*self._fixed/1.7979
+                amu_tot_s = amu_scat + sig_abs*self._fixed/1.7979
             (Ass, Assc, Acsc, Acc) = self._acyl(theta, amu_scat, amu_tot_i, amu_tot_s)
             A1.append(Ass)
             A2.append(Assc)
