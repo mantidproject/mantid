@@ -8,7 +8,6 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
-
 namespace Mantid {
 
 namespace HistogramData {
