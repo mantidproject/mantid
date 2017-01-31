@@ -12,6 +12,7 @@ DECLARE_WORKSPACE(WorkspaceSingleValue)
 /// Constructor
 WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
     : API::HistoWorkspace() {
+  initialize(1, 1, 1);
   // Set the "histogram" to the single value
   data.dataX().resize(1, 0.0);
   data.setCounts(1, value);
