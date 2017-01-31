@@ -1,8 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
 import unittest
-from mantid import mtd
-from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, ConvertToPointData, \
+from mantid import mtd, config
+from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, ConvertToPointData, GroupDetectors, \
                              LoadParameterFile, LoadEmptyInstrument, FlatPlatePaalmanPingsCorrection
 
 
@@ -11,6 +12,8 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         """
         Create sample workspaces.
         """
+        grouping_file = os.path.join(config['instrumentDefinition.directory'], "Grouping")
+        grouping_file = os.path.join(grouping_file, "IN16B_Grouping.xml")
 
         # Create some test data
         sample = CreateSampleWorkspace(NumBanks=1,
@@ -26,6 +29,8 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
 
         # Create empty test data not in wavelength
         sample_empty_unit = LoadEmptyInstrument(InstrumentName='IN16B')
+
+        sample_empty_unit = GroupDetectors(InputWorkspace=sample_empty_unit, MapFile=grouping_file)
 
         LoadParameterFile(Workspace=sample_empty_unit, Filename='IN16B_silicon_111_Parameters.xml')
 

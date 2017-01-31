@@ -111,7 +111,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Energy transfer mode. Only Efixed behaves differently. '
                                  'Others are equivalent for this algorithm, and are left only for legacy access.')
 
-        self.declareProperty(name='Efixed', defaultValue=1.0,
+        self.declareProperty(name='Efixed', defaultValue=0.,
                              doc='Analyser energy (mev). By default will be read from the instrument parameters. '
                                  'Specify manually to override. This is used only in Efixed energy transfer mode.')
 
@@ -293,7 +293,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
 
-        if self._emode == 'Efixed' and self._efixed == 1.:
+        if self._emode == 'Efixed' and self._efixed == 0.:
             # Efixed mode requested with default efixed, try to read from Instrument Parameters
             try:
                 self._efixed = self._getEfixed()
