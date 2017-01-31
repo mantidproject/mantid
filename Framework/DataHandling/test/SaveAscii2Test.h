@@ -91,48 +91,29 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void testExec_DXNoData() {
-   
- Mantid::DataObjects::Workspace2D_sptr wsToSave =
+void testExec_DXNoData() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave =
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       std::vector<double> &X = wsToSave->dataX(i);
       std::vector<double> &Y = wsToSave->dataY(i);
       std::vector<double> &E = wsToSave->dataE(i);
-      wsToSave->setPointStandardDeviations(i, 3);
-      auto &DX = wsToSave->mutableDx(i);
       for (int j = 0; j < 3; j++) {
         X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);
         E[j] = 1.;
-        DX[j] = i + 1;
       }
     }
-
     AnalysisDataService::Instance().add(m_name, wsToSave);
-
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
-    TS_ASSERT_THROWS_NOTHING(save.execute());
-
-
-
-/*
-    SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
-   // TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("WriteXError", "1"));
-   // TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
-   // TS_ASSERT_THROWS_NOTHING(save.execute());
-   // TS_ASSERT_THROWS_ANYTHING(save.execute());
-  
-    Poco::File(filename).remove();
+    TS_ASSERT_THROWS_ANYTHING(save.execute());
     AnalysisDataService::Instance().remove(m_name);
-*/
 }
-
-  void testExec_DX() {
+  
+void testExec_DX() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
