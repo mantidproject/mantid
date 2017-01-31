@@ -57,6 +57,7 @@ public:
   bool selectAtXY(int x, int y, bool edit = true);
   bool selectAtXY(const QPointF &point, bool edit = true);
   void deselectAtXY(int x, int y);
+  void deselectAtXY(const QPointF &point);
   bool selectIn(const QRect &rect);
   void removeCurrentShape();
   bool isEmpty() const { return m_shapes.isEmpty(); }

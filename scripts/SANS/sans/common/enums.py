@@ -2,8 +2,10 @@
 
 # pylint: disable=too-few-public-methods, invalid-name
 
+from __future__ import (absolute_import, division, print_function)
 from inspect import isclass
 from functools import partial
+from six import PY3
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -54,6 +56,8 @@ def string_convertible(cls):
         raise RuntimeError("Could not convert {0} to string. Unknown value.".format(convert_to_string))
 
     def from_string(elements, convert_from_string):
+        if PY3 and isinstance(convert_from_string, bytes):
+            convert_from_string = convert_from_string.decode()
         for key, value in elements.items():
             if convert_from_string == key:
                 return value

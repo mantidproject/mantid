@@ -3,17 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include <Poco/File.h>
-#include <fstream>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -102,6 +99,8 @@ public:
     const int numFailed = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed, 11);
 
+    const auto &spectrumInfo = work_out->spectrumInfo();
+
     const double liveValue(0.0);
     const double maskValue(1.0);
     for (int i = 0; i < sizey; i++) {
@@ -109,7 +108,7 @@ public:
       double valExpected = liveValue;
       // Check masking
       IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
+      TS_ASSERT_EQUALS(spectrumInfo.hasDetectors(i), true);
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
       if (i % 2 == 0 || i == 19) {
         valExpected = maskValue;
@@ -132,13 +131,15 @@ public:
     const int numFailed2 = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed2, 10);
 
+    const auto &spectrumInfo2 = work_out->spectrumInfo();
+
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
       const double val = work_out->y(i)[0];
       double valExpected = liveValue;
       // Check masking
       IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
+      TS_ASSERT_EQUALS(spectrumInfo2.hasDetectors(i), true);
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
       if (i % 2 == 0) {
         valExpected = maskValue;

@@ -3,6 +3,8 @@
 ##
 
 set ( TEST_PY_FILES
+  AbinsBasicTest.py
+  AbinsAdvancedParametersTest.py
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
@@ -49,6 +51,9 @@ set ( TEST_PY_FILES
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
+  IndirectAnnulusAbsorption2Test.py
+  IndirectCylinderAbsorption2Test.py
+  IndirectFlatPlateAbsorption2Test.py
   IndirectILLEnergyTransferTest.py
   IndirectILLReductionTest.py
   IndirectILLReductionFWSTest.py
@@ -96,6 +101,7 @@ set ( TEST_PY_FILES
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
+  SofQWMomentsScanTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
