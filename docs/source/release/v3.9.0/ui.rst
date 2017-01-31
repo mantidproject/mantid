@@ -14,10 +14,10 @@ Windows
 
 .. figure:: ../../images/close_all_windows.png
    :class: screenshot
-   :width: 550px
+   :width: 209px
    :align: right
 
-   Close All Windows image
+   Close All Graph Windows
 
 - If you have lots of windows that you want to close, there is now an option to close all of the windows of a certain type in one go in the window menu.
   The type of window is based on the selected window, so to close all graph windows, just click on a graph window and go to ``Windows->Close All Graph Windows``. The option will only appear if you have more than one of that type of window.
@@ -41,7 +41,7 @@ Plotting Improvements
    :width: 550px
    :align: right
 
-   plotSubplots image
+   plotSubplots 
 
 Algorithm Toolbox
 #################

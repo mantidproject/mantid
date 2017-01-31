@@ -9074,14 +9074,15 @@ void ApplicationWindow::closeSimilarWindows() {
   std::string windowType = activeWindow()->getWindowType();
 
   QMessageBox::StandardButton pressed = QMessageBox::question(
-    this, "MantidPlot",
-    QString::fromStdString("All " + windowType + " windows will be removed. Are you sure?"),
-    QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+      this, "MantidPlot",
+      QString::fromStdString("All " + windowType +
+                             " windows will be removed. Are you sure?"),
+      QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
 
   if (pressed != QMessageBox::Ok)
     return;
-  
-  QList<MdiSubWindow *> windows = currentFolder()->windowsList(); 
+
+  QList<MdiSubWindow *> windows = currentFolder()->windowsList();
   for (auto win : windows) {
     if (win->getWindowType() == windowType) {
       win->close();
@@ -9489,24 +9490,26 @@ void ApplicationWindow::windowsMenuAboutToShow() {
                          SLOT(closeActiveWindow()));
 #endif
 
-  //Add an option to close all windows of a similar type
+  // Add an option to close all windows of a similar type
   std::string windowType = activeWin->getWindowType();
-  //count the number of similar windows
+  // count the number of similar windows
   int winTypeCount = 0;
-  for (auto win : windows)
-  {
-    if (win->getWindowType() == windowType)
-    {
+  for (auto win : windows) {
+    if (win->getWindowType() == windowType) {
       winTypeCount++;
     }
   }
   if (winTypeCount > 1) {
 #ifdef _WIN32
-    windowsMenu->addAction(getQPixmap("close_xpm"), QString::fromStdString("Close All " + windowType + " Windows"), this,
-      SLOT(closeSimilarWindows()), Qt::CTRL + Qt::SHIFT + Qt::Key_W);
+    windowsMenu->addAction(
+        getQPixmap("close_xpm"),
+        QString::fromStdString("Close All " + windowType + " Windows"), this,
+        SLOT(closeSimilarWindows()), Qt::CTRL + Qt::SHIFT + Qt::Key_W);
 #else
-    windowsMenu->addAction(getQPixmap("close_xpm"), QString::fromStdString("Close All " + windowType + " Windows"), this,
-      SLOT(closeSimilarWindows()));
+    windowsMenu->addAction(
+        getQPixmap("close_xpm"),
+        QString::fromStdString("Close All " + windowType + " Windows"), this,
+        SLOT(closeSimilarWindows()));
 #endif
   }
 
