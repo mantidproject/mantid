@@ -116,7 +116,7 @@ if MPL_HAVE_GIVEN_FIG_METHOD:
         """
         Create a new figure manager instance for the given figure.
         """
-        canvas = FigureCanvasQT(figure)
+        canvas = FigureCanvasQTAgg(figure)
         manager = ThreadAwareFigureManagerQT(canvas, num)
         return manager
 
