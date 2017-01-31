@@ -111,8 +111,10 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         """
         # check requirements
         assert isinstance(pt_number, int)
-        assert isinstance(raw_signal, int) or isinstance(raw_signal, float)
-        assert isinstance(masked_signal, float)
+        assert isinstance(raw_signal, int) or isinstance(raw_signal, float) or isinstance(raw_signal, None),\
+            'Error 920A'
+        assert isinstance(masked_signal, float) or isinstance(masked_signal, int) or isinstance(masked_signal, None),\
+            'Error 920B'
 
         # form a new row and append
         status, msg = self.append_row([pt_number, raw_signal, masked_signal, False])

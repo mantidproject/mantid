@@ -1263,45 +1263,68 @@ class MainWindow(QtGui.QMainWindow):
         except ValueError:
             intensity_scale_factor = 1.
 
-        # get masked workspace
-        mask_name = str(self.ui.comboBox_maskNames2.currentText())
-        if mask_name.startswith('No Mask'):
-            mask_name = None
-        # mask workspace?
-        mask_detectors = mask_name is not None
-
+        # calculate the raw/unmasked
         status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
                                                                scan=scan_number,
                                                                peak_radius=1.0,
                                                                peak_centre=this_peak_centre,
                                                                merge_peaks=False,
-                                                               use_mask=mask_detectors,
-                                                               mask_ws_name=mask_name,
+                                                               use_mask=False,
                                                                normalization=norm_type,
                                                                scale_factor=intensity_scale_factor)
-
         # result due to error
         if status is False:
             error_message = ret_obj
             self.pop_one_button_dialog(error_message)
             return
+        else:
+            # unmasked process result
+            raw_pt_dict = ret_obj
+            assert isinstance(raw_pt_dict, dict), 'Returned Pt dict must be a dictionary'
+        # END-IF-ELSE
 
-        # process result
-        pt_dict = ret_obj
-        assert isinstance(pt_dict, dict)
+        # get masked workspace
+        mask_name = str(self.ui.comboBox_maskNames2.currentText())
+        if not mask_name.startswith('No Mask'):
+            status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
+                                                                   scan=scan_number,
+                                                                   peak_radius=1.0,
+                                                                   peak_centre=this_peak_centre,
+                                                                   merge_peaks=False,
+                                                                   use_mask=True,
+                                                                   mask_ws_name=mask_name,
+                                                                   normalization=norm_type,
+                                                                   scale_factor=intensity_scale_factor)
+
+            # result due to error
+            if status is False:
+                error_message = ret_obj
+                self.pop_one_button_dialog(error_message)
+                return
+            else:
+                # process result
+                masked_pt_dict = ret_obj
+                assert isinstance(masked_pt_dict, dict), 'Returned masked Pt dict must be a dictionary'
+        else:
+            masked_pt_dict = None
 
         # clear table
         if self.ui.tableWidget_peakIntegration.rowCount() > 0:
             self.ui.tableWidget_peakIntegration.remove_all_rows()
 
         # Append new lines
-        pt_list = sorted(pt_dict.keys())
+        pt_list = sorted(raw_pt_dict.keys())
         intensity_list = list()
-        # FIXME/TODO/NOW - Do calculate the unmasked
         for pt in pt_list:
-            pt_intensity = pt_dict[pt]
-            intensity_list.append(pt_intensity)
-            status, msg = self.ui.tableWidget_peakIntegration.append_pt(pt, -1, pt_intensity)
+            raw_pt_intensity = raw_pt_dict[pt]
+            if masked_pt_dict is not None:
+                masked_pt_intensity = masked_pt_dict[pt]
+            else:
+                masked_pt_intensity = None
+            # END-IF
+
+            intensity_list.append((raw_pt_intensity, masked_pt_intensity))
+            status, msg = self.ui.tableWidget_peakIntegration.append_pt(pt, raw_pt_intensity, masked_pt_intensity)
             if not status:
                 error_msg = '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
                 self.pop_one_button_dialog(error_msg)
@@ -1310,9 +1333,18 @@ class MainWindow(QtGui.QMainWindow):
         # Set up the experiment information to table
         self.ui.tableWidget_peakIntegration.set_exp_info(exp_number, scan_number)
 
-        # TODO/FIXME/NOW : calculate the peak intensity (sum of all value) to lineEdit_rawSinglePeakIntensity
+        # calculate the intensity with masked or raw (if mask is not defined)
+        info_text = ''
+        if masked_pt_dict is None:
+            simple_peak_intensity = self.ui.tableWidget_peakIntegration.sum_raw_intensity()
+            info_text += 'Simple summation of raw counts'
+        else:
+            simple_peak_intensity = self.ui.tableWidget_peakIntegration.sum_masked_intensity()
+            info_text += 'Simple summation of counts masked by {0}'.format(mask_name)
+        self.ui.lineEdit_rawSinglePeakIntensity.setText(str(simple_peak_intensity))
 
-        # TODO/FIXME/NOW: edit label_ingreateInformation including masking and normalization!
+        info_text += '; Normalized by {0}'.format(norm_type)
+        self.ui.label_ingreateInformation(info_text)
 
         # Clear previous line and plot the Pt.
         self.ui.graphicsView_integratedPeakView.reset()

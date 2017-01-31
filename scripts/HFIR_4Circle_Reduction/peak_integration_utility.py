@@ -64,8 +64,13 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     assert isinstance(vec_y, numpy.ndarray), 'Input vec_y must be a numpy.ndarray but not a {0}.'.format(vec_y)
     assert isinstance(vec_e, numpy.ndarray), 'Input vec_e must be a numpy.ndarray but not a {0}.'.format(vec_e)
 
-    # TODO/FIXME/NOW - Add the output information for debugging including vector X, vector Y, starting values and
-    #                  etc.
+    print '[DB] Vec X: ', vec_x
+    print '[DB] Vec Y: ', vec_y
+    print '[DB] Vec e: ', vec_e
+    print '[DB] Start values: ', start_value_list
+    print '[DB] Find start value by fit: ', find_start_value_by_fit
+
+    # TODO/DEBUG/NOW/ - FROM HERE!
 
     # starting value
     if isinstance(start_value_list, list):
@@ -78,9 +83,13 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
         # get result
         start_value_list = [start_x0, start_sigma, start_a, 0.0]
 
+        print '[DB] Start value by fit: ', start_value_list
+
     else:
         # guess starting value via observation
         start_value_list = find_gaussian_start_values_by_observation(vec_x, vec_y)
+
+        print '[DB] Start value by observation: ', start_value_list
 
     # END-IF-ELSE
 
