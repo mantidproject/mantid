@@ -24,8 +24,10 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 
-namespace He3TubeEffeciencyHelper {
-void createWorkspace2DInADS(const std::string inputWS) {
+namespace He3TubeEffeciencyHelper
+{
+void createWorkspace2DInADS(const std::string inputWS)
+{
   const int nspecs(4);
   const int nbins(5);
 
@@ -36,7 +38,8 @@ void createWorkspace2DInADS(const std::string inputWS) {
   Counts y(nbins, 10.0);
   CountStandardDeviations e(nbins, sqrt(5.0));
 
-  for (int i = 0; i < nspecs; i++) {
+  for (int i = 0; i < nspecs; i++)
+  {
     space2D->setBinEdges(i, x);
     space2D->setCounts(i, y);
     space2D->setCountStandardDeviations(i, e);
@@ -54,9 +57,10 @@ void createWorkspace2DInADS(const std::string inputWS) {
   loader.execute();
 }
 
-void createEventWorkspaceInADS(const std::string inputEvWS) {
+void createEventWorkspaceInADS(const std::string inputEvWS)
+{
   EventWorkspace_sptr event =
-      WorkspaceCreationHelper::CreateEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
+      WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
   event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   AnalysisDataService::Instance().add(inputEvWS, event);
 
@@ -69,18 +73,21 @@ void createEventWorkspaceInADS(const std::string inputEvWS) {
   loader.execute();
 }
 }
-class He3TubeEfficiencyTest : public CxxTest::TestSuite {
+class He3TubeEfficiencyTest : public CxxTest::TestSuite
+{
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static He3TubeEfficiencyTest *createSuite() {
+  static He3TubeEfficiencyTest *createSuite()
+  {
     return new He3TubeEfficiencyTest();
   }
   static void destroySuite(He3TubeEfficiencyTest *suite) { delete suite; }
 
   He3TubeEfficiencyTest() : inputWS("testInput"), inputEvWS("testEvInput") {}
 
-  void testCorrection() {
+  void testCorrection()
+  {
     He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -105,7 +112,8 @@ public:
     AnalysisDataService::Instance().remove(inputWS);
   }
 
-  void testEventCorrection() {
+  void testEventCorrection()
+  {
     He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -135,7 +143,8 @@ public:
     AnalysisDataService::Instance().remove(inputEvWS);
   }
 
-  void testBadOverrideParameters() {
+  void testBadOverrideParameters()
+  {
     He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     alg.initialize();
@@ -150,7 +159,8 @@ public:
     AnalysisDataService::Instance().remove(inputWS);
   }
 
-  void testBadTubeThickness() {
+  void testBadTubeThickness()
+  {
     He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -176,7 +186,8 @@ public:
     AnalysisDataService::Instance().remove(inputWS);
   }
 
-  void testBadTubeThicknessEvents() {
+  void testBadTubeThicknessEvents()
+  {
     He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

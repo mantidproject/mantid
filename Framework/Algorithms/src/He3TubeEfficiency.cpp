@@ -27,8 +27,10 @@ const double EXP_SCALAR_CONST = 2175.486863864;
 // Tolerance for diameter/thickness comparison
 const double TOL = 1.0e-8;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid
+{
+namespace Algorithms
+{
 
 using namespace HistogramData;
 // Register the class into the algorithm factory
@@ -37,13 +39,16 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency()
     : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr),
-      m_shapeCache(), m_samplePos(), m_spectraSkipped(), m_progress(nullptr) {
+      m_shapeCache(), m_samplePos(), m_spectraSkipped(), m_progress(nullptr)
+{
   m_shapeCache.clear();
 }
 
 /// Destructor
-He3TubeEfficiency::~He3TubeEfficiency() {
-  if (m_progress) {
+He3TubeEfficiency::~He3TubeEfficiency()
+{
+  if (m_progress)
+  {
     delete m_progress;
   }
 }
@@ -51,7 +56,8 @@ He3TubeEfficiency::~He3TubeEfficiency() {
 /**
 * Declare algorithm properties
 */
-void He3TubeEfficiency::init() {
+void He3TubeEfficiency::init()
+{
   using namespace Mantid::Kernel;
 
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -95,17 +101,19 @@ void He3TubeEfficiency::init() {
 /**
 * Executes the algorithm
 */
-void He3TubeEfficiency::exec() {
+void He3TubeEfficiency::exec()
+{
   // Get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
   m_outputWS = this->getProperty("OutputWorkspace");
 
-  if (m_outputWS != m_inputWS) {
+  if (m_outputWS != m_inputWS)
+  {
     m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
   }
 
   // Get the detector parameters
-  this->paraMap = &(this->inputWS->constInstrumentParameters());
+  m_paraMap = &(m_inputWS->constInstrumentParameters());
 
   // Store some information about the instrument setup that will not change
   m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
@@ -113,27 +121,33 @@ void He3TubeEfficiency::exec() {
   // Check if it is an event workspace
   DataObjects::EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_inputWS);
-  if (eventW != nullptr) {
+  if (eventW != nullptr)
+  {
     this->execEvent();
     return;
   }
 
-  std::size_t numHists = this->inputWS->getNumberHistograms();
+  std::size_t numHists = m_inputWS->getNumberHistograms();
   m_progress = new API::Progress(this, 0.0, 1.0, numHists);
-  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int i = 0; i < static_cast<int>(numHists); ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
+  for (int i = 0; i < static_cast<int>(numHists); ++i)
+  {
     PARALLEL_START_INTERUPT_REGION
 
     m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
-    try {
+    try
+    {
       this->correctForEfficiency(i, spectrumInfo);
-    } catch (std::out_of_range &) {
+    }
+    catch (std::out_of_range &)
+    {
       // if we don't have all the data there will be spectra we can't correct,
       // avoid leaving the workspace part corrected
       m_outputWS->mutableY(i) = 0;
-      PARALLEL_CRITICAL(deteff_invalid) {
+      PARALLEL_CRITICAL(deteff_invalid)
+      {
         m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
       }
     }
@@ -141,7 +155,8 @@ void He3TubeEfficiency::exec() {
     // make regular progress reports
     m_progress->report();
     // check for canceling the algorithm
-    if (i % 1000 == 0) {
+    if (i % 1000 == 0)
+    {
       interruption_point();
     }
 
@@ -165,9 +180,11 @@ void He3TubeEfficiency::exec() {
  *  were not found
  */
 void He3TubeEfficiency::correctForEfficiency(
-    std::size_t spectraIndex, const API::SpectrumInfo &spectrumInfo) {
+    std::size_t spectraIndex, const API::SpectrumInfo &spectrumInfo)
+{
   if (spectrumInfo.isMonitor(spectraIndex) ||
-      spectrumInfo.isMasked(spectraIndex)) {
+      spectrumInfo.isMasked(spectraIndex))
+  {
     return;
   }
 
@@ -208,7 +225,8 @@ void He3TubeEfficiency::correctForEfficiency(
 */
 double
 He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
-                                        const Geometry::IDetector &idet) {
+                                        const Geometry::IDetector &idet)
+{
   // Get the parameters for the current associated tube
   double pressure =
       this->getParameter("TubePressure", spectraIndex, "tube_pressure", idet);
@@ -226,7 +244,7 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
   // now get the sin of the angle, it's the magnitude of the cross product of
   // unit vector along the detector tube axis and a unit vector directed from
   // the sample to the detector center
-  Kernel::V3D vectorFromSample = idet.getPos() - this->samplePos;
+  Kernel::V3D vectorFromSample = idet.getPos() - m_samplePos;
   vectorFromSample.normalize();
   Kernel::Quat rot = idet.getRotation();
   // rotate the original cylinder object axis to get the detector axis in the
@@ -238,7 +256,8 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
   double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
   const double straight_path = detDiameter - twiceTubeThickness;
-  if (std::fabs(straight_path - 0.0) < TOL) {
+  if (std::fabs(straight_path - 0.0) < TOL)
+  {
     throw std::out_of_range("Twice tube thickness cannot be greater than "
                             "or equal to the tube diameter");
   }
@@ -255,9 +274,11 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
 */
 void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
                                             double &detRadius,
-                                            Kernel::V3D &detAxis) {
+                                            Kernel::V3D &detAxis)
+{
   boost::shared_ptr<const Geometry::Object> shape_sptr = det.shape();
-  if (!shape_sptr) {
+  if (!shape_sptr)
+  {
     throw std::runtime_error(
         "Detector geometry error: detector with id: " +
         std::to_string(det.getID()) +
@@ -268,42 +289,51 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
   // std::map<const Geometry::Object *, std::pair<double,
   // Kernel::V3D>>::const_iterator
   auto it = m_shapeCache.find(shape_sptr.get());
-  if (it == m_shapeCache.end()) {
+  if (it == m_shapeCache.end())
+  {
     double xDist = distToSurface(Kernel::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0),
                                  shape_sptr.get());
     double zDist = distToSurface(Kernel::V3D(0, 0, DIST_TO_UNIVERSE_EDGE),
                                  shape_sptr.get());
-    if (std::abs(zDist - xDist) < 1e-8) {
+    if (std::abs(zDist - xDist) < 1e-8)
+    {
       detRadius = zDist / 2.0;
       detAxis = Kernel::V3D(0, 1, 0);
       // assume radii in z and x and the axis is in the y
-      PARALLEL_CRITICAL(deteff_shapecachea) {
+      PARALLEL_CRITICAL(deteff_shapecachea)
+      {
         m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}});
       }
       return;
     }
     double yDist = distToSurface(Kernel::V3D(0, DIST_TO_UNIVERSE_EDGE, 0),
                                  shape_sptr.get());
-    if (std::abs(yDist - zDist) < 1e-8) {
+    if (std::abs(yDist - zDist) < 1e-8)
+    {
       detRadius = yDist / 2.0;
       detAxis = Kernel::V3D(1, 0, 0);
       // assume that y and z are radii of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
-      PARALLEL_CRITICAL(deteff_shapecacheb) {
+      PARALLEL_CRITICAL(deteff_shapecacheb)
+      {
         m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}});
       }
       return;
     }
 
-    if (std::abs(xDist - yDist) < 1e-8) {
+    if (std::abs(xDist - yDist) < 1e-8)
+    {
       detRadius = xDist / 2.0;
       detAxis = Kernel::V3D(0, 0, 1);
-      PARALLEL_CRITICAL(deteff_shapecachec) {
+      PARALLEL_CRITICAL(deteff_shapecachec)
+      {
         m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}});
       }
       return;
     }
-  } else {
+  }
+  else
+  {
     std::pair<double, Kernel::V3D> geometry = it->second;
     detRadius = geometry.first;
     detAxis = geometry.second;
@@ -322,7 +352,8 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
 * @returns The distance to the surface in metres
 */
 double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
-                                        const Geometry::Object *shape) const {
+                                        const Geometry::Object *shape) const
+{
   // get a vector from the point that was passed to the origin
   Kernel::V3D direction = Kernel::V3D(0.0, 0.0, 0.0) - start;
   // it needs to be a unit vector
@@ -334,7 +365,8 @@ double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
   // part that is outside
   shape->interceptSurface(track);
 
-  if (track.count() != 1) {
+  if (track.count() != 1)
+  {
     // the track missed the shape, probably the shape is not centered on
     // the origin
     throw std::invalid_argument(
@@ -353,20 +385,24 @@ double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
 * @return the calculated efficiency
 */
 double He3TubeEfficiency::detectorEfficiency(const double alpha,
-                                             const double scale_factor) const {
+                                             const double scale_factor) const
+{
   return (scale_factor / (1.0 - std::exp(-alpha)));
 }
 
 /**
 * Logs if there were any problems locating spectra.
 */
-void He3TubeEfficiency::logErrors() const {
+void He3TubeEfficiency::logErrors() const
+{
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
-  if (nspecs > 0) {
+  if (nspecs > 0)
+  {
     this->g_log.warning() << "There were " << nspecs
                           << " spectra that could not be corrected. ";
     this->g_log.debug() << "Unaffected spectra numbers: ";
-    for (size_t i = 0; i < nspecs; ++i) {
+    for (size_t i = 0; i < nspecs; ++i)
+    {
       this->g_log.debug() << m_spectraSkipped[i] << " ";
     }
     this->g_log.debug() << '\n';
@@ -385,15 +421,22 @@ void He3TubeEfficiency::logErrors() const {
 double He3TubeEfficiency::getParameter(std::string wsPropName,
                                        std::size_t currentIndex,
                                        std::string detPropName,
-                                       const Geometry::IDetector &idet) {
+                                       const Geometry::IDetector &idet)
+{
   std::vector<double> wsProp = this->getProperty(wsPropName);
 
-  if (wsProp.empty()) {
+  if (wsProp.empty())
+  {
     return idet.getNumberParameter(detPropName).at(0);
-  } else {
-    if (wsProp.size() == 1) {
+  }
+  else
+  {
+    if (wsProp.size() == 1)
+    {
       return wsProp.at(0);
-    } else {
+    }
+    else
+    {
       return wsProp.at(currentIndex);
     }
   }
@@ -402,7 +445,8 @@ double He3TubeEfficiency::getParameter(std::string wsPropName,
 /**
 * Execute for events
 */
-void He3TubeEfficiency::execEvent() {
+void He3TubeEfficiency::execEvent()
+{
   this->g_log.information("Processing event workspace");
 
   const API::MatrixWorkspace_const_sptr matrixInputWS =
@@ -410,41 +454,49 @@ void He3TubeEfficiency::execEvent() {
 
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
-  if (matrixOutputWS != matrixInputWS) {
+  if (matrixOutputWS != matrixInputWS)
+  {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  auto outputWS =
+  auto m_outputWS =
       boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
 
-  std::size_t numHistograms = outputWS->getNumberHistograms();
-  auto &spectrumInfo = outputWS->mutableSpectrumInfo();
+  std::size_t numHistograms = m_outputWS->getNumberHistograms();
+  auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
   m_progress = new API::Progress(this, 0.0, 1.0, numHistograms);
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
-  for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
+  for (int i = 0; i < static_cast<int>(numHistograms); ++i)
+  {
     PARALLEL_START_INTERUPT_REGION
 
     const auto &det = spectrumInfo.detector(i);
-    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
+    {
       continue;
     }
 
     double exp_constant = 0.0;
-    try {
+    try
+    {
       exp_constant = this->calculateExponential(i, det);
-    } catch (std::out_of_range &) {
+    }
+    catch (std::out_of_range &)
+    {
       // Parameters are bad so skip correction
-      PARALLEL_CRITICAL(deteff_invalid) {
-        m_spectraSkipped.push_back(outputWS->getAxis(1)->spectraNo(i));
-        outputWS->getSpectrum(i).clearData();
+      PARALLEL_CRITICAL(deteff_invalid)
+      {
+        m_spectraSkipped.push_back(m_outputWS->getAxis(1)->spectraNo(i));
+        m_outputWS->getSpectrum(i).clearData();
         spectrumInfo.setMasked(i, true);
       }
     }
 
     // Do the correction
-    auto &evlist = outputWS->getSpectrum(i);
-    switch (evlist.getEventType()) {
+    auto &evlist = m_outputWS->getSpectrum(i);
+    switch (evlist.getEventType())
+    {
     case API::TOF:
       // Switch to weights if needed.
       evlist.switchTo(API::WEIGHTED);
@@ -460,7 +512,8 @@ void He3TubeEfficiency::execEvent() {
     m_progress->report();
 
     // check for canceling the algorithm
-    if (i % 1000 == 0) {
+    if (i % 1000 == 0)
+    {
       interruption_point();
     }
 
@@ -468,7 +521,7 @@ void He3TubeEfficiency::execEvent() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  outputWS->clearMRU();
+  m_outputWS->clearMRU();
 
   this->logErrors();
 }
@@ -482,7 +535,8 @@ void He3TubeEfficiency::execEvent() {
 */
 void He3TubeEfficiency::computeEfficiencyCorrection(
     std::vector<double> &effCorrection, const Points &xes,
-    const double expConstant, const double scale) const {
+    const double expConstant, const double scale) const
+{
 
   std::transform(xes.cbegin(), xes.cend(), effCorrection.begin(),
                  [&](double wavelen) {
@@ -496,10 +550,12 @@ void He3TubeEfficiency::computeEfficiencyCorrection(
 * @param expval :: the value of the exponent for the detector efficiency
 */
 template <class T>
-void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval) {
+void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval)
+{
   const double scale = this->getProperty("ScaleFactor");
 
-  for (auto it = events.begin(); it != events.end(); ++it) {
+  for (auto it = events.begin(); it != events.end(); ++it)
+  {
     float de =
         static_cast<float>(this->detectorEfficiency(expval * it->tof(), scale));
     it->m_weight *= de;
