@@ -112,7 +112,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                  'Others are equivalent for this algorithm, and are left only for legacy access.')
 
         self.declareProperty(name='Efixed', defaultValue=1.0,
-                             doc='Analyser energy (mev). By default will be read from the instrument parameters.'
+                             doc='Analyser energy (mev). By default will be read from the instrument parameters. '
                                  'Specify manually to override. This is used only in Efixed energy transfer mode.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
