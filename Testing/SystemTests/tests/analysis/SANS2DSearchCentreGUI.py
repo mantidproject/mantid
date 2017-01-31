@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name
 
 from __future__ import (absolute_import, division, print_function)
-import mantid
+import mantid  # noqa
 import ISISCommandInterface as i
 import isis_reducer
 import isis_instrument
