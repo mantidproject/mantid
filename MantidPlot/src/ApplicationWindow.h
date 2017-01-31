@@ -601,6 +601,7 @@ public slots:
 
   bool hidden(QWidget *window);
   void closeActiveWindow();
+  void closeSimilarWindows();
   void closeWindow(MdiSubWindow *window);
   void prepareToCloseMantid();
 
