@@ -2,17 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveAscii.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
-#include <set>
-#include <fstream>
 #include <boost/tokenizer.hpp>
+#include <fstream>
+#include <set>
 
 namespace Mantid {
 namespace DataHandling {
@@ -54,12 +54,9 @@ void SaveAscii::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -204,25 +201,25 @@ void SaveAscii::exec() {
   for (int bin = 0; bin < nBins; bin++) {
     if (isHistogram) // bin centres
     {
-      file << (ws->readX(0)[bin] + ws->readX(0)[bin + 1]) / 2;
+      file << (ws->x(0)[bin] + ws->x(0)[bin + 1]) / 2;
     } else // data points
     {
-      file << ws->readX(0)[bin];
+      file << ws->x(0)[bin];
     }
 
     if (idx.empty())
       for (int spec = 0; spec < nSpectra; spec++) {
         file << sep;
-        file << ws->readY(spec)[bin];
+        file << ws->y(spec)[bin];
         file << sep;
-        file << ws->readE(spec)[bin];
+        file << ws->e(spec)[bin];
       }
     else
       for (auto spec : idx) {
         file << sep;
-        file << ws->readY(spec)[bin];
+        file << ws->y(spec)[bin];
         file << sep;
-        file << ws->readE(spec)[bin];
+        file << ws->e(spec)[bin];
       }
 
     if (write_dx) {

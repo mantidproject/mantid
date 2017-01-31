@@ -1,10 +1,10 @@
-#include <set>
 #include <fstream>
+#include <set>
 
-#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -14,8 +14,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -69,12 +69,9 @@ void SaveAscii2::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -297,24 +294,22 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
   for (int bin = 0; bin < m_nBins; bin++) {
     if (!m_isCommonBins) // checking for ragged workspace
     {
-      file << (m_ws->readX(*spectraItr)[bin] +
-               m_ws->readX(*spectraItr)[bin + 1]) /
-                  2;
+      file << (m_ws->x(*spectraItr)[bin] + m_ws->x(*spectraItr)[bin + 1]) / 2;
     }
 
     else if (m_isHistogram & m_isCommonBins) // bin centres,
     {
-      file << (m_ws->readX(0)[bin] + m_ws->readX(0)[bin + 1]) / 2;
+      file << (m_ws->x(0)[bin] + m_ws->x(0)[bin + 1]) / 2;
     }
 
     else {
-      file << m_ws->readX(0)[bin];
+      file << m_ws->x(0)[bin];
     }
     file << m_sep;
-    file << m_ws->readY(*spectraItr)[bin];
+    file << m_ws->y(*spectraItr)[bin];
 
     file << m_sep;
-    file << m_ws->readE(*spectraItr)[bin];
+    file << m_ws->e(*spectraItr)[bin];
     if (m_writeDX) {
       file << m_sep;
       file << pointDeltas[bin];
@@ -343,21 +338,19 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isHistogram & m_isCommonBins) // bin centres,
     {
-      file << (m_ws->readX(0)[bin] + m_ws->readX(0)[bin + 1]) / 2;
+      file << (m_ws->x(0)[bin] + m_ws->x(0)[bin + 1]) / 2;
     } else if (!m_isCommonBins) // checking for ragged workspace
     {
-      file << (m_ws->readX(spectraIndex)[bin] +
-               m_ws->readX(spectraIndex)[bin + 1]) /
-                  2;
+      file << (m_ws->x(spectraIndex)[bin] + m_ws->x(spectraIndex)[bin + 1]) / 2;
     } else // data points
     {
-      file << m_ws->readX(0)[bin];
+      file << m_ws->x(0)[bin];
     }
     file << m_sep;
-    file << m_ws->readY(spectraIndex)[bin];
+    file << m_ws->y(spectraIndex)[bin];
 
     file << m_sep;
-    file << m_ws->readE(spectraIndex)[bin];
+    file << m_ws->e(spectraIndex)[bin];
     if (m_writeDX) {
       file << m_sep;
       file << pointDeltas[bin];

@@ -1,16 +1,16 @@
 #ifndef SAVEASCIITEST_H_
 #define SAVEASCIITEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveAscii2.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/SaveAscii2.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <fstream>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -96,9 +96,9 @@ public:
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
-      std::vector<double> &X = wsToSave->dataX(i);
-      std::vector<double> &Y = wsToSave->dataY(i);
-      std::vector<double> &E = wsToSave->dataE(i);
+      auto &X = wsToSave->mutableX(i);
+      auto &Y = wsToSave->mutableY(i);
+      auto &E = wsToSave->mutableE(i);
       wsToSave->setPointStandardDeviations(i, 3);
       auto &DX = wsToSave->mutableDx(i);
       for (int j = 0; j < 3; j++) {
@@ -744,9 +744,9 @@ private:
     wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
-      std::vector<double> &X = wsToSave->dataX(i);
-      std::vector<double> &Y = wsToSave->dataY(i);
-      std::vector<double> &E = wsToSave->dataE(i);
+      auto &X = wsToSave->mutableX(i);
+      auto &Y = wsToSave->mutableY(i);
+      auto &E = wsToSave->mutableE(i);
       for (int j = 0; j < 3; j++) {
         X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);
