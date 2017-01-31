@@ -144,15 +144,15 @@ def _do_nxs_load(input_path, img_format, data_dtype, cores, chunksize, parallel_
     """
     data_file = get_file_names(input_path, img_format)
 
-    sample = nxsread(data_file[0])
-    img_shape = sample.shape
+    new_data = nxsread(data_file[0])
+    img_shape = new_data.shape
 
     from parallel import utility as pu
     data = pu.create_shared_array(img_shape, dtype=data_dtype)
     if parallel_load:
-        data = _do_stack_load_par(data, nxsread, data_file[0], cores, chunksize, "NXS Load", h)
+        data = _do_stack_load_par(data, new_data, nxsread, data_file[0], cores, chunksize, "NXS Load", h)
     else:
-        data = _do_stack_load_seq(data, nxsread, data_file[0], img_shape, "NXS Load", h)
+        data = _do_stack_load_seq(data, new_data, nxsread, data_file[0], img_shape, "NXS Load", h)
 
     return data[:-2, :, :], data[-2, :, :], data[-1, :, :]
 
@@ -290,7 +290,7 @@ def _load_stack(load_func, file_name, img_shape, dtype, name, cores=1, chunksize
         return _do_stack_load_seq(data, load_func, file_name, img_shape, name, h)
 
 
-def _do_stack_load_seq(data, load_func, file_name, img_shape, name, h):
+def _do_stack_load_seq(data, new_data, load_func, file_name, img_shape, name, h):
     """
     Sequential version of loading the data.
     This performs faster locally, but parallel performs faster on SCARF
@@ -304,7 +304,6 @@ def _do_stack_load_seq(data, load_func, file_name, img_shape, name, h):
     :return:
     """
     # this will open the file but not read all of it in
-    new_data = load_func(file_name)
     h.prog_init(img_shape[0], name)
     for i in range(img_shape[0]):
         data[i] = new_data[i]
@@ -313,12 +312,10 @@ def _do_stack_load_seq(data, load_func, file_name, img_shape, name, h):
     return data
 
 
-def _do_stack_load_par(data, load_func, file_name, cores, chunksize, name, h):
+def _do_stack_load_par(data, new_data, load_func, file_name, cores, chunksize, name, h):
     # this runs faster on SCARF
     from parallel import two_shared_mem as ptsm
     f = ptsm.create_partial(_move_data, fwd_function=ptsm.inplace_fwd_func)
-    # this will open the file but not read all of it in!
-    new_data = load_func(file_name)
     # move the data in parallel, this causes 8 processes to try and read the
     # IO at once, thus the slowdown
     ptsm.execute(new_data, data, f, cores, chunksize, name, h=h)

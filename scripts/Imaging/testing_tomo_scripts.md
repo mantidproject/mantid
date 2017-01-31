@@ -18,8 +18,7 @@
 - [load single images](#load-single-images-3)
 - [load single images](#load-single-images-4)
 
-<!-- /TOC -->
- 
+<!-- /TOC --> 
 
 # Utility
 ## Merge pre-processing images into a stack. This will not apply any filters as pre-processing, it will just pack all of the images into a stack
