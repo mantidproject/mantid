@@ -8,7 +8,6 @@
 #include <typeinfo>
 #include <vector>
 
-
 namespace Poco {
 namespace XML {
 class Attributes;

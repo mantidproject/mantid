@@ -18,7 +18,6 @@
 #include <boost/bind.hpp>
 #include <fstream>
 
-
 //-----------------------------------------------------------------------------
 using namespace Mantid;
 using namespace Mantid::API;
