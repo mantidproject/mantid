@@ -212,15 +212,16 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   Progress p(this, 0.0, 1.0, nHist);
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  for (int spectrumIndex = 0; spectrumIndex < nHist; spectrumIndex++) {
+  // Loop over each histogram within the workspace
+  for (int histoIndex = 0; histoIndex < nHist; histoIndex++) {
     // Determine whether to skip the spectrum due to being masked
     if (has_instrument) {
-      if (!spectrumInfo.hasDetectors(spectrumIndex)) {
+      if (!spectrumInfo.hasDetectors(histoIndex)) {
         has_instrument = false;
         g_log.warning() << "There is no detector associated with spectrum "
-                        << spectrumIndex
+                        << histoIndex
                         << ". Workspace is treated as NO-INSTRUMENT case. \n";
-      } else if (spectrumInfo.isMasked(spectrumIndex)) {
+      } else if (spectrumInfo.isMasked(histoIndex)) {
         continue;
       }
     }
@@ -228,10 +229,10 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     // Obtain detector information
     double l1, l2, tth, difc;
     if (has_instrument)
-      getFocusedPos(inputWS, spectrumIndex, l1, l2, tth, difc);
+      getFocusedPos(inputWS, histoIndex, l1, l2, tth, difc);
     else
       l1 = l2 = tth = difc = 0;
-    g_log.debug() << "Spectrum " << spectrumIndex << ": L1 = " << l1
+    g_log.debug() << "Spectrum " << histoIndex << ": L1 = " << l1
                   << "  L2 = " << l2 << "  2theta = " << tth << "\n";
 
     std::stringstream tmpbuffer;
@@ -243,12 +244,12 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
 
     bool writeheader = false;
     std::string splitfilename;
-    if (!split && spectrumIndex == 0 && !append) {
+    if (!split && histoIndex == 0 && !append) {
       // Non-split mode and first spectrum and in non-append mode
       writeheader = true;
     } else if (split) {
       std::stringstream number;
-      number << "-" << spectrumIndex;
+      number << "-" << histoIndex;
 
       Poco::Path path(outfilename);
       std::string basename = path.getBaseName(); // Filename minus extension
@@ -276,24 +277,24 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
       tmpbuffer << "# Total flight path " << (l1 + l2) << "m, tth "
                 << (tth * 180. / M_PI) << "deg, DIFC " << difc << "\n";
     }
-    tmpbuffer << "# Data for spectrum :" << spectrumIndex << "\n";
+    tmpbuffer << "# Data for spectrum :" << histoIndex << "\n";
 
     // Determine bank number into GSAS file
     int bankid;
     if (m_useSpecAsBank) {
       bankid =
-          static_cast<int>(inputWS->getSpectrum(spectrumIndex).getSpectrumNo());
+          static_cast<int>(inputWS->getSpectrum(histoIndex).getSpectrumNo());
     } else {
-      bankid = basebanknumber + spectrumIndex;
+      bankid = basebanknumber + histoIndex;
     }
 
     // Write data
     if (RALF.compare(outputFormat) == 0) {
       this->writeRALFdata(bankid, multiplybybinwidth, tmpbuffer,
-                          inputWS->histogram(spectrumIndex));
+                          inputWS->histogram(histoIndex));
     } else if (SLOG.compare(outputFormat) == 0) {
       this->writeSLOGdata(bankid, multiplybybinwidth, tmpbuffer,
-                          inputWS->histogram(spectrumIndex));
+                          inputWS->histogram(histoIndex));
     } else {
       throw std::runtime_error("Cannot write to the unknown " + outputFormat +
                                "output format");
@@ -312,7 +313,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
 
     p.report();
 
-  } // ENDFOR (spectrumIndex)
+  } // ENDFOR (histoIndex)
 
   // Write file
   if (!split) {
