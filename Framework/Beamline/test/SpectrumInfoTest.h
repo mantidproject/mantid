@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidBeamline/SpectrumInfo.h"
-#include "MantidBeamline/SpectrumDefinition.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
-using namespace Mantid::Beamline;
+using namespace Mantid;
+using namespace Beamline;
 
 class SpectrumInfoTest : public CxxTest::TestSuite {
 public:

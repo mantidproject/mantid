@@ -1,6 +1,6 @@
-#include "MantidBeamline/SpectrumDefinition.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidKernel/make_cow.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Beamline {

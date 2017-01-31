@@ -14,12 +14,12 @@
 #include <mutex>
 
 namespace Mantid {
+class SpectrumDefinition;
 namespace Kernel {
 class Property;
 }
 namespace Beamline {
 class DetectorInfo;
-class SpectrumDefinition;
 class SpectrumInfo;
 }
 namespace Geometry {
@@ -174,8 +174,8 @@ protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 
-  void setSpectrumDefinitions(Kernel::cow_ptr<
-      std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions);
+  void setSpectrumDefinitions(
+      Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
 
   virtual void updateCachedDetectorGrouping(const size_t index) const;
   /// Description of the source object

@@ -15,7 +15,7 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
-#include "MantidBeamline/SpectrumDefinition.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -182,7 +182,7 @@ public:
     indices.setSpectrumNumbers({2, 4, 6});
     indices.setDetectorIDs({{0}, {1}, {2, 3}});
 
-    auto defs = Kernel::make_cow<std::vector<Beamline::SpectrumDefinition>>(3);
+    auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(3);
     TS_ASSERT_THROWS_NOTHING(indices.setSpectrumDefinitions(defs));
     TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
     TS_ASSERT_EQUALS(ws.indexInfo().spectrumDefinitions().get(), defs.get());

@@ -11,8 +11,8 @@
 
 namespace Mantid {
 using detid_t = int32_t;
-namespace Beamline {
 class SpectrumDefinition;
+namespace Beamline {
 class SpectrumInfo;
 }
 namespace Geometry {
@@ -74,9 +74,8 @@ public:
 
   size_t size() const;
 
-  const Beamline::SpectrumDefinition &
-  spectrumDefinition(const size_t index) const;
-  const Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>> &
+  const SpectrumDefinition &spectrumDefinition(const size_t index) const;
+  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
   sharedSpectrumDefinitions() const;
 
   bool isMonitor(const size_t index) const;

@@ -1,11 +1,11 @@
-#ifndef MANTID_BEAMLINE_SPECTRUMDEFINITIONTEST_H_
-#define MANTID_BEAMLINE_SPECTRUMDEFINITIONTEST_H_
+#ifndef MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_
+#define MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidBeamline/SpectrumDefinition.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
-using Mantid::Beamline::SpectrumDefinition;
+using Mantid::SpectrumDefinition;
 
 class SpectrumDefinitionTest : public CxxTest::TestSuite {
 public:
@@ -85,4 +85,4 @@ public:
   }
 };
 
-#endif /* MANTID_BEAMLINE_SPECTRUMDEFINITIONTEST_H_ */
+#endif /* MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_ */

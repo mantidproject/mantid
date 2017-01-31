@@ -7,8 +7,8 @@
 #include <vector>
 
 namespace Mantid {
-namespace Beamline {
 class SpectrumDefinition;
+namespace Beamline {
 
 /** Beamline::SpectrumInfo provides easy access to commonly used parameters of
   individual spectra (which may correspond to one or more detectors) in a

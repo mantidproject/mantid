@@ -102,7 +102,7 @@ void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
     detIDs[i] = {detectorIDs[i]};
   // Setting new detector ID grouping makes definitions outdated.
   m_spectrumDefinitions =
-      Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>>(nullptr);
+      Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
 }
 
 /// Set a vector of detector IDs for each index.
@@ -121,15 +121,15 @@ void IndexInfo::setDetectorIDs(
   }
   // Setting new detector ID grouping makes definitions outdated.
   m_spectrumDefinitions =
-      Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>>(nullptr);
+      Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
 }
 
-void IndexInfo::setSpectrumDefinitions(Kernel::cow_ptr<
-    std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions) {
+void IndexInfo::setSpectrumDefinitions(
+    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
   m_spectrumDefinitions = spectrumDefinitions;
 }
 
-const Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>> &
+const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
 IndexInfo::spectrumDefinitions() const {
   return m_spectrumDefinitions;
 }

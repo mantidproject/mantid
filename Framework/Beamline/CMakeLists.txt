@@ -1,18 +1,15 @@
 set ( SRC_FILES
 	src/DetectorInfo.cpp
-	src/SpectrumDefinition.cpp
 	src/SpectrumInfo.cpp
 )
 
 set ( INC_FILES
 	inc/MantidBeamline/DetectorInfo.h
-	inc/MantidBeamline/SpectrumDefinition.h
 	inc/MantidBeamline/SpectrumInfo.h
 )
 
 set ( TEST_FILES
 	DetectorInfoTest.h
-	SpectrumDefinitionTest.h
 	SpectrumInfoTest.h
 )
 

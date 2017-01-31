@@ -17,7 +17,6 @@
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidBeamline/SpectrumDefinition.h"
 #include "MantidBeamline/SpectrumInfo.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -27,6 +26,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/make_unique.h"
+
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -461,7 +462,7 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
-  Beamline::SpectrumDefinition specDef;
+  SpectrumDefinition specDef;
   for (const auto detID : detIDs) {
     try {
       const size_t detIndex = detectorInfo().indexOf(detID);
@@ -1124,8 +1125,8 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
 }
 
 /// Sets the SpectrumDefinition for all spectra.
-void ExperimentInfo::setSpectrumDefinitions(Kernel::cow_ptr<
-    std::vector<Beamline::SpectrumDefinition>> spectrumDefinitions) {
+void ExperimentInfo::setSpectrumDefinitions(
+    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
   if (spectrumDefinitions) {
     m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(
         std::move(spectrumDefinitions));
@@ -1170,7 +1171,7 @@ void ExperimentInfo::cacheDefaultDetectorGrouping() const {
   for (const auto detID : detIDs) {
     m_det2group[detID] = specIndex;
     const size_t detIndex = detectorInfo().indexOf(detID);
-    Beamline::SpectrumDefinition specDef;
+    SpectrumDefinition specDef;
     specDef.add(detIndex);
     m_spectrumInfo->setSpectrumDefinition(specIndex, std::move(specDef));
     m_spectrumDefinitionNeedsUpdate.at(specIndex) = 0;

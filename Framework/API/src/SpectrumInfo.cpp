@@ -2,10 +2,10 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidBeamline/SpectrumDefinition.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/make_shared.hpp>
 #include <algorithm>
@@ -35,13 +35,13 @@ SpectrumInfo::~SpectrumInfo() = default;
 size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
 
 /// Returns a const reference to the SpectrumDefinition of the spectrum.
-const Beamline::SpectrumDefinition &
+const SpectrumDefinition &
 SpectrumInfo::spectrumDefinition(const size_t index) const {
   m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
   return m_spectrumInfo.spectrumDefinition(index);
 }
 
-const Kernel::cow_ptr<std::vector<Beamline::SpectrumDefinition>> &
+const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
 SpectrumInfo::sharedSpectrumDefinitions() const {
   for (size_t i = 0; i < size(); ++i)
     m_experimentInfo.updateSpectrumDefinitionIfNecessary(i);
