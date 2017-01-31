@@ -48,7 +48,7 @@ public:
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
                     std::vector<V3D> hkls, int convention = 1,
-                    std::string pointGroup = "-1 (Triclinic)") {
+                    std::string pointGroup = "") {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 

@@ -10,8 +10,7 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidCrystal/SortHKL.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -79,10 +78,11 @@ void PredictPeaks::init() {
 
   // Build up a list of point groups to use
   std::vector<std::string> prop2Options;
+  prop2Options.push_back("");
   for (auto &pg : m_pointGroups) {
     prop2Options.push_back(pg->getName());
   }
-  declareProperty("PointGroup", "-1 (Triclinic)",
+  declareProperty("PointGroup", "",
                   boost::make_shared<StringListValidator>(prop2Options),
                   "Which point group applies to this crystal, "
                   "reducing the number of expected HKL peaks?");
@@ -268,14 +268,52 @@ void PredictPeaks::exec() {
 
     size_t allowedPeakCount = 0;
 
-    for (auto &possibleHKL : possibleHKLs) {
-      if (lambdaFilter.isAllowed(possibleHKL)) {
-        ++allowedPeakCount;
-        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
-      }
-      prog.report();
-    }
+    // --- Point group ----
+    // Get it from the property
+    std::string pointGroupName = getPropertyValue("PointGroup");
 
+    if (pointGroupName.empty()) {
+      for (auto &possibleHKL : possibleHKLs) {
+        if (lambdaFilter.isAllowed(possibleHKL)) {
+          ++allowedPeakCount;
+          calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
+        }
+      }
+    } else {
+      // --- Point group ----
+      // Use triclinic by default
+      PointGroup_sptr pointGroup =
+          PointGroupFactory::Instance().createPointGroup("-1");
+      for (const auto &m_pointGroup : m_pointGroups)
+        if (m_pointGroup->getName() == pointGroupName)
+          pointGroup = m_pointGroup;
+      // Generate map of UniqueReflection-objects with reflection family as
+      // key.
+      std::map<V3D, std::vector<V3D> > uniqueHKLs;
+      for (const auto &hkl : possibleHKLs) {
+        V3D hklFamily = pointGroup->getReflectionFamily(hkl);
+        std::vector<V3D> hklAll = pointGroup->getEquivalents(hkl);
+        uniqueHKLs.emplace(hklFamily, hklAll);
+      }
+
+      for (auto &unique : uniqueHKLs) {
+        /* Since all possible unique reflections are explored
+         * there may be 0 observations for some of them.
+         * In that case, nothing can be done.*/
+        bool allowed = false;
+        for (auto &possibleHKL : unique.second) {
+          if (lambdaFilter.isAllowed(possibleHKL)) {
+            allowed = true;
+            if (calculateQAndAddToOutput(possibleHKL, orientedUB,
+                                         goniometerMatrix))
+              break;
+          }
+          prog.report();
+        }
+        if (allowed)
+          ++allowedPeakCount;
+      }
+    }
     g_log.notice() << "Out of " << allowedPeakCount
                    << " allowed peaks within parameters, "
                    << m_pw->getNumberPeaks()
@@ -285,7 +323,8 @@ void PredictPeaks::exec() {
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
-/// Tries to set the internally stored instrument from an ExperimentInfo-object.
+/// Tries to set the internally stored instrument from an
+/// ExperimentInfo-object.
 void
 PredictPeaks::setInstrumentFromInputWorkspace(const ExperimentInfo_sptr &inWS) {
   // Check that there is an input workspace that has a sample.
@@ -296,7 +335,8 @@ PredictPeaks::setInstrumentFromInputWorkspace(const ExperimentInfo_sptr &inWS) {
   m_inst = inWS->getInstrument();
 }
 
-/// Sets the run number from the supplied ExperimentInfo or throws an exception.
+/// Sets the run number from the supplied ExperimentInfo or throws an
+/// exception.
 void
 PredictPeaks::setRunNumberFromInputWorkspace(const ExperimentInfo_sptr &inWS) {
   if (!inWS) {
@@ -338,47 +378,11 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
     if (m_refCond->getName() == refCondName)
       refCond = m_refCond;
 
-  // --- Point group ----
-  // Use triclinic by default
-  PointGroup_sptr pointGroup =
-      PointGroupFactory::Instance().createPointGroup("-1");
-  // Get it from the property
-  std::string pointGroupName = getPropertyValue("PointGroup");
-  for (const auto &m_pointGroup : m_pointGroups)
-    if (m_pointGroup->getName() == pointGroupName)
-      pointGroup = m_pointGroup;
-
   HKLGenerator gen(orientedLattice, dMin);
 
   auto filter =
       boost::make_shared<HKLFilterCentering>(refCond) &
       boost::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax);
-  if (pointGroup->getSymbol() != "-1") {
-    // Combine reflection condition and point group
-    std::string symbolSG;
-    std::vector<std::string> possibleSpaceGroupSymbols =
-        SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols(pointGroup);
-    for (auto it = possibleSpaceGroupSymbols.begin();
-         it != possibleSpaceGroupSymbols.end(); ++it) {
-      std::string spaceGroup = *it;
-      std::string rc = refCond->getSymbol();
-      if (spaceGroup.compare(0, 1, rc) == 0) {
-        symbolSG = *it;
-        break;
-      }
-    }
-    if (symbolSG.empty()) {
-      throw std::runtime_error(
-          "Wrong ReflectionCondition for PointGroup input: " +
-          pointGroup->getName() + " ReflectionCondition: " +
-          refCond->getName());
-    }
-    g_log.information() << "SpaceGroup used " << symbolSG << "\n";
-    SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup(symbolSG);
-    filter = boost::make_shared<HKLFilterSpaceGroup>(sg) &
-             boost::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax);
-  }
 
   V3D hklMin = *(gen.begin());
 
@@ -430,7 +434,8 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
 /**
  * @brief Assigns a StructureFactorCalculator if available in sample.
  *
- * This method constructs a StructureFactorCalculator using the CrystalStructure
+ * This method constructs a StructureFactorCalculator using the
+ *CrystalStructure
  * stored in sample if available. For consistency it sets the OrientedLattice
  * in the sample as the unit cell of the crystal structure.
  *
@@ -459,16 +464,18 @@ PredictPeaks::setStructureFactorCalculatorFromSample(const Sample &sample) {
  * This method takes HKL and uses the oriented UB matrix (UB multiplied by the
  * goniometer matrix) to calculate Q. It then creates a Peak-object using
  * that Q-vector and the internally stored instrument. If the corresponding
- * diffracted beam intersects with a detector, the peak is added to the output-
+ * diffracted beam intersects with a detector, the peak is added to the
+ *output-
  * workspace.
  *
  * @param hkl
  * @param orientedUB
  * @param goniometerMatrix
  */
-void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
+bool PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
                                             const DblMatrix &orientedUB,
                                             const DblMatrix &goniometerMatrix) {
+  bool found = false;
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
@@ -477,7 +484,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Create the peak using the Q in the lab framewith all its info:
   Peak p(m_inst, q);
 
-  /* The constructor calls setQLabFrame, which already calls findDetector, which
+  /* The constructor calls setQLabFrame, which already calls findDetector,
+     which
      is expensive. It's not necessary to call it again, instead it's enough to
      check whether a detector has already been set. */
   if (p.getDetector()) {
@@ -493,7 +501,9 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
     // Add it to the workspace
     m_pw->addPeak(p);
+    found = true;
   } // Detector was found
+  return found;
 }
 
 } // namespace Mantid
