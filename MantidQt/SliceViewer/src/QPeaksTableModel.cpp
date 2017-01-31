@@ -302,29 +302,8 @@ Qt::ItemFlags QPeaksTableModel::flags(const QModelIndex &index) const {
 std::vector<int> QPeaksTableModel::defaultHideCols() {
   std::vector<int> result;
 
-  // figure out if there are any rectangular detectors
-  Mantid::Geometry::Instrument_const_sptr instr = m_peaksWS->getInstrument();
-  { // shrink variable scope
-    std::vector<Mantid::detid_t> ids = instr->getDetectorIDs(true);
-    size_t numToCheck(ids.size());
-    if (numToCheck > 20) // arbitrary cutoff
-      numToCheck = 20;
-    const std::string RECT_DET("RectangularDetector");
-    const auto& detectorInfo = m_peaksWS->detectorInfo();
-    for (size_t i = 0; i < numToCheck; ++i) {
-      const auto& component = detectorInfo.detector(detectorInfo.indexOf(ids[i]));
-      if (component.type().compare(RECT_DET) == 0) {
-        break;
-      } else {
-        const auto parent = component.getParent();
-        if (parent->type().compare(RECT_DET) == 0) {
-          break;
-        }
-      }
-    }
-  }
-
   // only show bank name for SNS instruments
+  Mantid::Geometry::Instrument_const_sptr instr = m_peaksWS->getInstrument();
   std::string instrName = instr->getName();
   try {
     Mantid::Kernel::InstrumentInfo instrInfo =
