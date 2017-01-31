@@ -110,10 +110,10 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         :return: 2-tuple as boolean and error message
         """
         # check requirements
-        assert isinstance(pt_number, int)
-        assert isinstance(raw_signal, int) or isinstance(raw_signal, float) or isinstance(raw_signal, None),\
+        assert isinstance(pt_number, int), 'Error 920X'
+        assert isinstance(raw_signal, int) or isinstance(raw_signal, float) or raw_signal is None,\
             'Error 920A'
-        assert isinstance(masked_signal, float) or isinstance(masked_signal, int) or isinstance(masked_signal, None),\
+        assert isinstance(masked_signal, float) or isinstance(masked_signal, int) or masked_signal is None,\
             'Error 920B'
 
         # form a new row and append
@@ -129,6 +129,24 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         :return:
         """
         return self._expNumber, self._scanNumber
+
+    def sum_raw_intensity(self):
+        """
+        sum raw intensities of all Pts.
+        :return:
+        """
+        # TODO/NOW - Implement!
+
+        return 12345.789
+
+    def sum_masked_intensity(self):
+        """
+        sum masked intensities of all Pts.
+        :return:
+        """
+        # TODO/NOW - Implement!
+
+        return 987.65
 
     def setup(self):
         """

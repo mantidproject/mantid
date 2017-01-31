@@ -20,6 +20,8 @@ def calculate_peak_intensity_gauss(gauss_a, gauss_sigma):
 
 def gaussian_linear_background(x, x0, sigma, a, b):
     # gaussian + linear background
+    # TODO/NOW/CONTINUE!
+    print '[DB] x0 = blabla'
     return a * numpy.exp(-(x - x0) ** 2 / (2. * sigma ** 2)) + b
 
 
@@ -36,6 +38,8 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     :return:
     """
     # assume that it is a quasi-ideal Gaussian
+
+    # TODO/NOW/ Need a lot of debug output
 
     # find out the maximum Y with x
     max_y_index = vec_x.argmax()
@@ -92,6 +96,12 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
         print '[DB] Start value by observation: ', start_value_list
 
     # END-IF-ELSE
+
+    """
+    [DB] Start values:  None
+    [DB] Find start value by fit:  False
+    [DB] Start value by observation:  [21, 19.0, 10.5, 100.0]: should be
+    """
 
     # do second round fit
     assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'

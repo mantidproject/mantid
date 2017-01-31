@@ -1093,6 +1093,8 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('{0}'.format(run_error))
             return
 
+        print '[DB...BAT] vec_x: ', vec_x, ', vec_y: ', vec_y
+
         # list of 2-tuple: integer (plot ID) and string (label)
         # fit the Gaussian and calculate the peak intensity
         vec_e = numpy.sqrt(vec_y)
@@ -1323,7 +1325,12 @@ class MainWindow(QtGui.QMainWindow):
                 masked_pt_intensity = None
             # END-IF
 
-            intensity_list.append((raw_pt_intensity, masked_pt_intensity))
+            # plot masked intensity if it is defined
+            if masked_pt_intensity is None:
+                intensity_list.append(raw_pt_intensity)
+            else:
+                intensity_list.append(masked_pt_intensity)
+            # intensity_list.append((raw_pt_intensity, masked_pt_intensity))
             status, msg = self.ui.tableWidget_peakIntegration.append_pt(pt, raw_pt_intensity, masked_pt_intensity)
             if not status:
                 error_msg = '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
@@ -1344,7 +1351,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_rawSinglePeakIntensity.setText(str(simple_peak_intensity))
 
         info_text += '; Normalized by {0}'.format(norm_type)
-        self.ui.label_ingreateInformation(info_text)
+        self.ui.label_ingreateInformation.setText(info_text)
 
         # Clear previous line and plot the Pt.
         self.ui.graphicsView_integratedPeakView.reset()
@@ -1606,6 +1613,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # integrate and/or plot
         if has_integrated:
+            # FIXME/TODO/NOW - This does not work!!! - CHECK _myControl.has_integrated_peak()
             self.plot_pt_intensity()
         else:
             # VZ-FUTURE: implement this new method!

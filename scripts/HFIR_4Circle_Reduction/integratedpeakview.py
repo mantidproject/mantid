@@ -1,10 +1,12 @@
 #pylint: disable=W0403,R0904,R0903
+import numpy
 import mplgraphicsview
 
 
 class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
     """ Extended graphic view for integrated peaks
     """
+    # TODO/NOW - remove unnecessary output print
     class MousePress(object):
         RELEASED = 0
         LEFT = 1
@@ -130,11 +132,17 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         :return:
         """
         # check
-        assert len(vec_y) > 0
+        assert isinstance(vec_y, numpy.ndarray) and len(vec_y) > 0, 'Vector Y must be a numpy array and not empty.'
 
         # find y's minimum and maximum
-        min_y = min(vec_y)
-        max_y = max(vec_y)
+        try:
+            min_y = numpy.min(vec_y)
+            max_y = numpy.max(vec_y)
+
+            print 'min_y = ', min_y, 'max_y = ', max_y, 'vector y = ', vec_y
+        except ValueError as value_err:
+            print '[ERROR] Vec Y: {0}'.format(vec_y)
+            raise RuntimeError(str(value_err))
 
         d_y = max_y - min_y
 

@@ -1155,14 +1155,20 @@ class Qt4MplCanvas(FigureCanvas):
 
         # Register
         line_key = self._lineIndex
-        if len(r) == 1:
-            self._lineDict[line_key] = r[0]
-            self._lineIndex += 1
-        else:
-            msg = 'Return from plot is a %d-tuple: %s.. \n' % (len(r), r)
+        if plot_error:
+            msg = 'Return from plot is a {0}-tuple: {1} with plot error is {2}\n'.format(len(r), r, plot_error)
             for i_r in range(len(r)):
                 msg += 'r[%d] = %s\n' % (i_r, str(r[i_r]))
             raise NotImplementedError(msg)
+        else:
+            assert len(r) > 0, 'There must be at least 1 figure returned'
+            self._lineDict[line_key] = r[0]
+            self._lineIndex += 1
+
+            for i_r in range(1, len(r)):
+                # remove the un-defined extra lines
+                self.axes.lines.remove(r[i_r])
+        # END-IF-ELSE
 
         # Flush/commit
         self.draw()
