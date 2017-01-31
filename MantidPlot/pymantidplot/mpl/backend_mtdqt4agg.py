@@ -48,7 +48,7 @@ class QAppThreadCall(QtCore.QObject):
         self._args = None
         self._kwargs = None
         self._result = None
-        self._exc = None
+        self._exc_info = None
 
     def __call__(self, *args, **kwargs):
         """
@@ -63,8 +63,8 @@ class QAppThreadCall(QtCore.QObject):
             self._store_function_args(*args, **kwargs)
             QtCore.QMetaObject.invokeMethod(self, "on_call",
                                             QtCore.Qt.BlockingQueuedConnection)
-            if self._exc is not None:
-                raise self._exc #pylint: disable=raising-bad-type
+            if self._exc_info is not None:
+                raise self._exc_info[1], None, self._exc_info[2]
             return self._result
 
     @QtCore.pyqtSlot()
@@ -76,14 +76,17 @@ class QAppThreadCall(QtCore.QObject):
             self._result = \
                 self.callee(*self._args, **self._kwargs)
         except Exception as exc: #pylint: disable=broad-except
-            self._exc = exc
+            # Store exception info to get better traceback when rethrown
+            # http://nedbatchelder.com/blog/200711/rethrowing_exceptions_in_python.html
+            import sys
+            self._exc_info = sys.exc_info()
 
     def _store_function_args(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
         # Reset return value and exception
         self._result = None
-        self._exc = None
+        self._exc_info = None
 
 
 class ThreadAwareFigureManagerQT(FigureManagerQT):
