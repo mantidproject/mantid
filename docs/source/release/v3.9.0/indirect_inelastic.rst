@@ -83,7 +83,7 @@ Bugfixes
 
 - Clicking 'Save' without creating a res file in *ISISCalibration* no longer causes an error
 - Fixed issue when trying to plot multiple spectra
-- *I(Q,t)Fit* now has correct plot options
+- The plot options for *I(Q,t)Fit* had 'beta' displayed twice and the options did not plot the respective parameter
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
