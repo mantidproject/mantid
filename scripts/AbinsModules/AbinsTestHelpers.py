@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import re
 import platform
 import os
+import sys
 import AbinsModules
 
 
@@ -51,6 +52,10 @@ def find_file(filename=None):
     """
     from mantid.api import FileFinder
     return FileFinder.Instance().getFullPath(filename)
+
+
+def is_64_bits():
+    return sys.maxsize > 2**32
 
 
 def remove_output_files(list_of_names=None):

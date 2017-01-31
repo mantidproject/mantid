@@ -49,8 +49,10 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
-
-    _gamma_sum = "squaricn_sum_LoadCASTEP"
+    if AbinsTestHelpers.is_64_bits():
+        _gamma_sum = "squaricn_sum_LoadCASTEP"
+    else:
+        _gamma_sum = "squaricn_sum_32bits_LoadCASTEP"
 
     def test_gamma_sum_correction(self):
         self._check(name=self._gamma_sum)
@@ -58,8 +60,10 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
     # ===================================================================================
-
-    _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
+    if AbinsTestHelpers.is_64_bits():
+        _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
+    else:
+        _gamma_no_sum = "squaricn_no_sum_32bits_LoadCASTEP"
 
     def test_gamma_no_sum_correction(self):
         self._check(name=self._gamma_no_sum)
@@ -68,7 +72,10 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
     # | Use case: more than one k-point and sum correction       |
     # ===================================================================================
-    _many_k_sum = "Si2-phonon_LoadCASTEP"
+    if AbinsTestHelpers.is_64_bits():
+        _many_k_sum = "Si2-phonon_LoadCASTEP"
+    else:
+        _many_k_sum = "Si2-phonon_32bits_LoadCASTEP"
 
     def test_sum_correction_single_crystal(self):
         self._check(name=self._many_k_sum)
@@ -77,7 +84,10 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
     # |   Use case: more than one k-point without sum correction                        |
     # ===================================================================================
     #
-    _many_k_no_sum = "Si2-sc_LoadCASTEP"
+    if AbinsTestHelpers.is_64_bits():
+        _many_k_no_sum = "Si2-sc_LoadCASTEP"
+    else:
+        _many_k_no_sum = "Si2-sc_32bits_LoadCASTEP"
 
     def test_no_sum_correction_single_crystal(self):
         self._check(name=self._many_k_no_sum)
