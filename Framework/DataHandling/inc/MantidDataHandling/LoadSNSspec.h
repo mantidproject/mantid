@@ -67,7 +67,6 @@ private:
   void init() override;
   void exec() override;
 
-
   /// Allowed values for the cache property
   std::vector<std::string> m_seperator_options;
   std::map<std::string, const char *> m_separatormap; ///<a map of seperators

@@ -174,7 +174,8 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j));
-      m_localWorkspace->mutableY(spec).assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(spec)
+          .assign(data_p, data_p + m_numberOfChannels);
       // Assign Error
       auto &E = m_localWorkspace->mutableE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),

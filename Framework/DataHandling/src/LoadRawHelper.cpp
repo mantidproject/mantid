@@ -382,7 +382,7 @@ void LoadRawHelper::setWorkspaceData(
     int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
     return;
- 
+
   // But note that the last (overflow) bin is kept
   auto &Y = newWorkspace->mutableY(wsIndex);
   Y.assign(isisRaw->dat1 + binStart, isisRaw->dat1 + lengthIn);

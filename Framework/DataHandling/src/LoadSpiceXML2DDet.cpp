@@ -525,20 +525,21 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
 
           if (loadinstrument) {
             // the detector ID and ws index are set up in column-major too!
-            rowIndex  = i_col * numpixelx + j_row;
+            rowIndex = i_col * numpixelx + j_row;
             columnIndex = 0;
           } else {
             rowIndex = j_row;
             columnIndex = i_col;
           }
 
-          outws->mutableX(rowIndex)[columnIndex] = static_cast<double>(columnIndex);
+          outws->mutableX(rowIndex)[columnIndex] =
+              static_cast<double>(columnIndex);
           outws->mutableY(rowIndex)[columnIndex] = counts;
 
           if (counts > 0)
-              outws->mutableE(rowIndex)[columnIndex] = sqrt(counts);
+            outws->mutableE(rowIndex)[columnIndex] = sqrt(counts);
           else
-              outws->mutableE(rowIndex)[columnIndex] = 1.0;
+            outws->mutableE(rowIndex)[columnIndex] = 1.0;
 
           // record max count
           if (counts > max_counts) {
