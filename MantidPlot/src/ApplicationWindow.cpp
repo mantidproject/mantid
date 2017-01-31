@@ -9070,6 +9070,25 @@ void ApplicationWindow::closeActiveWindow() {
     w->close();
 }
 
+void ApplicationWindow::closeSimilarWindows() {
+  std::string windowType = activeWindow()->getWindowType();
+
+  QMessageBox::StandardButton pressed = QMessageBox::question(
+    this, "MantidPlot",
+    QString::fromStdString("All " + windowType + " windows will be removed. Are you sure?"),
+    QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+
+  if (pressed != QMessageBox::Ok)
+    return;
+  
+  QList<MdiSubWindow *> windows = currentFolder()->windowsList(); 
+  for (auto win : windows) {
+    if (win->getWindowType() == windowType) {
+      win->close();
+    }
+  }
+}
+
 void ApplicationWindow::removeWindowFromLists(MdiSubWindow *w) {
   if (!w)
     return;
@@ -9459,7 +9478,7 @@ void ApplicationWindow::windowsMenuAboutToShow() {
   }
   windowsMenu->addAction(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
 
-// Having the shorcut set here is neccessary on Windows, but
+// Having the shortcut set here is necessary on Windows, but
 // leads to an error message elsewhere. Don't know why and don't
 // have a better solution than this right now.
 #ifdef _WIN32
@@ -9469,6 +9488,27 @@ void ApplicationWindow::windowsMenuAboutToShow() {
   windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
                          SLOT(closeActiveWindow()));
 #endif
+
+  //Add an option to close all windows of a similar type
+  std::string windowType = activeWin->getWindowType();
+  //count the number of similar windows
+  int winTypeCount = 0;
+  for (auto win : windows)
+  {
+    if (win->getWindowType() == windowType)
+    {
+      winTypeCount++;
+    }
+  }
+  if (winTypeCount > 1) {
+#ifdef _WIN32
+    windowsMenu->addAction(getQPixmap("close_xpm"), QString::fromStdString("Close All " + windowType + " Windows"), this,
+      SLOT(closeSimilarWindows()), Qt::CTRL + Qt::SHIFT + Qt::Key_W);
+#else
+    windowsMenu->addAction(getQPixmap("close_xpm"), QString::fromStdString("Close All " + windowType + " Windows"), this,
+      SLOT(closeSimilarWindows()));
+#endif
+  }
 
   if (n > 0 && n < 10) {
     windowsMenu->addSeparator();
