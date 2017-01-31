@@ -5,8 +5,7 @@ import six
 import subprocess
 import shutil
 import hashlib
-import codecs
-import functools
+import io
 import AbinsModules
 import os
 
@@ -437,9 +436,8 @@ class IOmodule(object):
         :return: string representation of hash
         """
         hash_calculator = hashlib.sha512()
-        open_file = functools.partial(codecs.open, encoding=coding, errors='strict')
         buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
-        with open_file(filename, 'r') as f:
+        with io.open(file=filename, mode="rt", encoding=coding, buffering=buf, newline=None) as f:
             while True:
                 data = f.read(buf)
                 if not data:

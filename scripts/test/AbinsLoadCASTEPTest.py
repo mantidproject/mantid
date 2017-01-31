@@ -49,10 +49,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
-    if AbinsTestHelpers.is_windows():
-        _gamma_sum = "squaricn_sum_win_LoadCASTEP"
-    else:
-        _gamma_sum = "squaricn_sum_LoadCASTEP"
+    _gamma_sum = "squaricn_sum_LoadCASTEP"
 
     def test_gamma_sum_correction(self):
         self._check(name=self._gamma_sum)
@@ -60,10 +57,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
     # ===================================================================================
-    if AbinsTestHelpers.is_windows():
-        _gamma_no_sum = "squaricn_no_sum_win_LoadCASTEP"
-    else:
-        _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
+    _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
 
     def test_gamma_no_sum_correction(self):
         self._check(name=self._gamma_no_sum)
@@ -72,10 +66,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
     # | Use case: more than one k-point and sum correction       |
     # ===================================================================================
-    if AbinsTestHelpers.is_windows():
-        _many_k_sum = "Si2-phonon_win_LoadCASTEP"
-    else:
-        _many_k_sum = "Si2-phonon_LoadCASTEP"
+    _many_k_sum = "Si2-phonon_LoadCASTEP"
 
     def test_sum_correction_single_crystal(self):
         self._check(name=self._many_k_sum)
@@ -84,10 +75,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
     # |   Use case: more than one k-point without sum correction                        |
     # ===================================================================================
     #
-    if AbinsTestHelpers.is_windows():
-        _many_k_no_sum = "Si2-sc_win_LoadCASTEP"
-    else:
-        _many_k_no_sum = "Si2-sc_LoadCASTEP"
+    _many_k_no_sum = "Si2-sc_LoadCASTEP"
 
     def test_no_sum_correction_single_crystal(self):
         self._check(name=self._many_k_no_sum)
