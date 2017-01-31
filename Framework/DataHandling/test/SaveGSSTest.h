@@ -397,9 +397,9 @@ private:
                                             (xVals[i] - 7000. - factor) /
                                             (0.01 * factor * factor));
         if (mutableYVals[i] < 0.01)
-          mutableYVals[i] = 0.1;
+          mutableEVals[i] = 0.1;
         else
-          mutableYVals[i] = std::sqrt(mutableYVals[i]);
+          mutableEVals[i] = std::sqrt(mutableYVals[i]);
       }
     }
 
