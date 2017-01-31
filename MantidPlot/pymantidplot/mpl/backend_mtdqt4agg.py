@@ -91,7 +91,7 @@ class ThreadAwareFigureManagerQT(FigureManagerQT):
     is invoked on the main Qt thread"""
 
     def __init__(self, canvas, num):
-        super(ThreadAwareFigureManagerQT, self).__init__(canvas, num)
+        FigureManagerQT.__init__(self, canvas, num)
         self._destroy_orig = self.destroy
         self.destroy = QAppThreadCall(self._destroy_orig)
 
