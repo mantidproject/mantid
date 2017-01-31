@@ -439,7 +439,7 @@ class IOmodule(object):
         hash_calculator = hashlib.sha512()
         open_file = functools.partial(codecs.open, encoding=coding, errors='strict')
         buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
-        with open_file(filename, 'rU') as f:
+        with open_file(filename, 'r') as f:
             while True:
                 data = f.read(buf)
                 if not data:
