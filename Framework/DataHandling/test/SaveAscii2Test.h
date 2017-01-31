@@ -1,16 +1,16 @@
 #ifndef SAVEASCIITEST_H_
 #define SAVEASCIITEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveAscii2.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/SaveAscii2.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <fstream>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -789,4 +789,61 @@ private:
   std::string m_name;
 };
 
+class SaveAscii2TestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    createInelasticWS();
+    for (int i = 0; i < numberOfIterations; ++i) {
+      saveAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testSaveAscii2Performance() {
+    for (auto alg : saveAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete saveAlgPtrs[i];
+      saveAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(m_name);
+    Poco::File gsasfile(m_filename);
+    if (gsasfile.exists())
+      gsasfile.remove();
+  }
+
+private:
+  std::vector<SaveAscii2 *> saveAlgPtrs;
+
+  const int numberOfIterations = 5;
+
+  const std::string m_filename = "performance_filename";
+  const std::string m_name = "performance_ws";
+
+  SaveAscii2 *setupAlg() {
+    SaveAscii2 *saver = new SaveAscii2;
+    saver->initialize();
+    saver->isInitialized();
+    saver->initialize();
+    saver->isInitialized();
+    saver->setPropertyValue("Filename", m_filename);
+    saver->setPropertyValue("InputWorkspace", m_name);
+    saver->setRethrows(true);
+    return saver;
+  }
+
+  void createInelasticWS() {
+    const std::vector<double> l2{1, 2, 3, 4, 5};
+    const std::vector<double> polar{1, 2, 3, 4, 5};
+    const std::vector<double> azimutal{1, 2, 3, 4, 5};
+    const int nBins = 3;
+
+    auto wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(
+        l2, polar, azimutal, nBins);
+    AnalysisDataService::Instance().add(m_name, wsToSave);
+  }
+};
 #endif /*SAVEASCIITEST_H_*/

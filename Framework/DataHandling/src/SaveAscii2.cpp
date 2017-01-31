@@ -443,11 +443,11 @@ void SaveAscii2::populateSpectrumNumberMetaData() {
 void SaveAscii2::populateAngleMetaData() {
   std::vector<std::string> angles;
   const size_t nHist = m_ws->getNumberHistograms();
+  const auto &spectrumInfo = m_ws->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
     const auto specNo = m_ws->getSpectrum(i).getSpectrumNo();
     const auto workspaceIndex = m_specToIndexMap[specNo];
-    auto det = m_ws->getDetector(workspaceIndex);
-    const auto two_theta = m_ws->detectorTwoTheta(*det);
+    const auto two_theta = spectrumInfo.twoTheta(workspaceIndex);
     constexpr double rad2deg = 180. / M_PI;
     const auto angleInDeg = two_theta * rad2deg;
     const auto angleInDegStr = boost::lexical_cast<std::string>(angleInDeg);
