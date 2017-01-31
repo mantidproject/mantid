@@ -458,7 +458,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Case where tsec is close to 90 degrees.
         # CALCULATION IS UNRELIABLE
         # Default to 1 for everything
-        if abs(abs(tsec) - 90.0) < 1.0:
+        if abs(abs(tsec) - 90.0) < 0.1:
             return ass, assc, acsc, acc
 
         sample = mtd[self._sample_ws_name].sample()
