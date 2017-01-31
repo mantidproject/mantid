@@ -410,39 +410,22 @@ class IOmodule(object):
 
         return results
 
-    # noinspection PyMethodMayBeStatic
     def _calculate_hash(self, filename=None):
         """
         Calculates hash  of a file defined by filename according to sha512 algorithm.
         :param filename: name of a file to calculate hash (full path to the file)
         :return: string representation of hash
         """
-        # first try ascii encoding
-        try:
-            str_hash = self._calculate_hash_core(filename=filename, coding="ascii")
-
-        # if ascii encoding fails set utf8 encoding so that it can create hash for output files from DFT programs which
-        # include special letters  (like for example German letters)
-        except UnicodeDecodeError:
-            str_hash = self._calculate_hash_core(filename=filename, coding='utf-8')
-
-        return str_hash
-
-    def _calculate_hash_core(self, filename=None, coding=None):
-        """
-        Helper function for calculating hash.
-        :param filename: name of a file to calculate hash
-        :param fun_obj: object function to open file
-        :return: string representation of hash
-        """
         hash_calculator = hashlib.sha512()
         buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
-        with io.open(file=filename, mode="rt", encoding=coding, buffering=buf, newline='\n') as f:
+
+        # Read ASCII and ignore errors if non-ASCII characters (like for example German letters)
+        with io.open(file=filename, mode="rt", encoding="ascii", buffering=buf, errors="ignore") as f:
             while True:
                 data = f.read(buf)
                 if not data:
                     break
-                hash_calculator.update(data.encode(coding))
+                hash_calculator.update(data)
 
         return hash_calculator.hexdigest()
 
