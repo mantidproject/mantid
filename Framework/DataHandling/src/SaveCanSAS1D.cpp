@@ -4,17 +4,17 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MantidVersion.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace {
 void encode(std::string &data) {
@@ -68,11 +68,17 @@ void SaveCanSAS1D::init() {
                       "Filename", "", API::FileProperty::Save, ".xml"),
                   "The name of the xml file to save");
 
-  std::vector<std::string> radiation_source{
-      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
-      "Reactor Neutron Source", "Synchrotron X-ray Source",
-      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
-      "neutron", "x-ray", "muon", "electron"};
+  std::vector<std::string> radiation_source{"Spallation Neutron Source",
+                                            "Pulsed Reactor Neutron Source",
+                                            "Reactor Neutron Source",
+                                            "Synchrotron X-ray Source",
+                                            "Pulsed Muon Source",
+                                            "Rotating Anode X-ray",
+                                            "Fixed Tube X-ray",
+                                            "neutron",
+                                            "x-ray",
+                                            "muon",
+                                            "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),
@@ -439,8 +445,8 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
     if (!intensityDeltas)
       intensityDeltas =
           HistogramData::PointStandardDeviations(intensities.size(), 0.0);
-    const MantidVec &ydata = m_workspace->readY(i);
-    const MantidVec &edata = m_workspace->readE(i);
+    auto &ydata = m_workspace->y(i);
+    auto &edata = m_workspace->e(i);
     for (size_t j = 0; j < m_workspace->blocksize(); ++j) {
       // x data is the QData in xml.If histogramdata take the mean
       std::stringstream x;
