@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name
+
+from __future__ import (absolute_import, division, print_function)
 import mantid
 import ISISCommandInterface as i
 import isis_reducer
