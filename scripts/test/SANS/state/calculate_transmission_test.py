@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -15,7 +16,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
     @staticmethod
     def _set_fit(state, default_settings, custom_settings, fit_key):
         fit = state.fit[fit_key]
-        for key, value in default_settings.items():
+        for key, value in list(default_settings.items()):
             if key in custom_settings:
                 value = custom_settings[key]
             if value is not None:  # If the value is None, then don't set it
@@ -39,7 +40,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                           "background_TOF_monitor_stop": {"1": 234, "2": 2323}, "background_TOF_roi_start": 12.,
                           "background_TOF_roi_stop": 123.}
 
-        for key, value in trans_settings.items():
+        for key, value in list(trans_settings.items()):
             if key in trans_entries:
                 value = trans_entries[key]
             if value is not None:  # If the value is None, then don't set it

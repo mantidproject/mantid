@@ -51,7 +51,7 @@ class StateFunctionsTest(unittest.TestCase):
             AnalysisDataService.addOrReplace(workspace_name, workspace)
 
         if tagged_workspace_names is not None:
-            for key, value in tagged_workspace_names.items():
+            for key, value in list(tagged_workspace_names.items()):
                 create_alg.execute()
                 workspace = create_alg.getProperty("OutputWorkspace").value
                 AnalysisDataService.addOrReplace(value, workspace)
