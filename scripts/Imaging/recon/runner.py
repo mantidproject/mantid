@@ -100,9 +100,8 @@ def pre_processing(config, sample, flat, dark):
                              "3norm_by_flat_dark", "_normalised_by_flat_dark")
 
     # removes the contrast difference between the stack of images
-    sample = normalise_by_air_region.execute(sample, config.pre.normalise_air_region,
-                                             config.pre.region_of_interest,
-                                             config.pre.crop_before_normalise, h)
+    sample = normalise_by_air_region.execute(sample, config.pre.normalise_air_region, config.pre.region_of_interest,
+                                             config.pre.crop_before_normalise, cores=cores, chunksize=chunksize, h=h)
     if debug and save_preproc and config.pre.normalise_air_region is not None:
         _debug_save_out_data(sample, config, flat, dark,
                              "4norm_by_air", "_normalised_by_air")

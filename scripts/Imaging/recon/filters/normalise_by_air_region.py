@@ -4,13 +4,26 @@ from recon.filters.crop_coords import _crop_coords_sanity_checks
 import numpy as np
 
 
-def execute(data, air_region, region_of_interest, crop_before_normalise, h=None):
-    # TODO
-    return _execute_par(data, air_region, region_of_interest, crop_before_normalise, 8, None, h)
+def execute(data, air_region, region_of_interest, crop_before_normalise, cores=1, chunksize=None, h=None):
+    h = Helper.empty_init() if h is None else h
+    h.check_data_stack(data)
+
+    if air_region is not None and region_of_interest is not None:
+        from parallel import utility as pu
+        if pu.multiprocessing_available():
+            data = _execute_par(data, air_region, region_of_interest, crop_before_normalise, cores, chunksize, h)
+        else:
+            data = _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h)
+
+    else:
+        h.tomo_print_note("NOT applying normalisation by Air Region.")
+
+    h.check_data_stack(data)
+    return data
 
 
 def _calc_air_sum(data, air_sums, air_right=None, air_top=None, air_left=None, air_bottom=None):
-    return data.sum()
+    return data[air_top:air_bottom, air_left:air_right].sum()
 
 
 def _divide_by_air_sum(data=None, air_sums=None):
@@ -57,12 +70,9 @@ def _execute_par(data, air_region, region_of_interest, crop_before_normalise, co
         # turn into a 1D array, from 3D that is returned
         air_sums = air_sums.reshape(img_num)
 
-        # TODO need to use exclusive memory to have a differently shaped output array!!
         f = ptsm.create_partial(_calc_air_sum, fwd_function=ptsm.fwd_func_return_to_second, air_right=air_right,
                                 air_top=air_top, air_left=air_left, air_bottom=air_bottom)
 
-        # TODO might have to remove two shared memory
-        # TODO try passing data[:, air_top:air_bottom, air_left:air_right]
         data, air_sums = ptsm.execute(data, air_sums, f, cores, chunksize,
                                       "Calculating air sums", h)
 
@@ -144,7 +154,7 @@ def _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h=
 
         h.pstop(
             "Finished normalization by air region. Average: {0}, max ratio: {1}, min ratio: {2}.".
-                format(avg, max_avg, min_avg))
+            format(avg, max_avg, min_avg))
 
     else:
         h.tomo_print_note(
@@ -168,7 +178,6 @@ def translate_coords_onto_cropped_picture(crop_coords, air_region, crop_before_n
     crop_left = crop_coords[0]
     crop_bottom = crop_coords[3]
 
-    _crop_coords_sanity_checks(region_of_interest, data)
     _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
                                 crop_bottom, crop_left, crop_right, crop_top)
     # Translate the air region coordinates to the crop.

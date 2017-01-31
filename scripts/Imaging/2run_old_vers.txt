@@ -1,0 +1,46 @@
+matt@matt-OptiPlex-7010:~/Documents/mantid/scripts/Imaging((HEAD detached at 65a8969a9d))$ python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/500_s_fits/pre_processed/ -o /home/matt/temp/test1 -w --only-preproc --data-as-stack --rebin 0.5 --pre-median-size 3
+ > Note: Running reconstruction on 8 cores.
+ --- Generating reconstruction script beginning... Memory usage before execution:  29384 KB, 28.6953125 MB
+ --- Finished generating script beginning. Elapsed time: 0.000754117965698 sec. Memory usage after execution:  29424 KB, 28.734375 MB. Memory change: 0.0390625 MB
+ --- Importing tool tomopy Memory usage before execution:  29424 KB, 28.734375 MB
+WARNING:tomopy.io.writer:dxtomo module not found
+ --- Tool loaded. Elapsed time: 0.448730945587 sec. Memory usage after execution:  86504 KB, 84.4765625 MB. Memory change: 55.7421875 MB
+ --- Loading data... Memory usage before execution:  86504 KB, 84.4765625 MB
+ --- Data loaded. Shape of raw data: (500, 2048, 2048), dtype: >f4. Elapsed time: 0.00232887268066 sec. Memory usage after execution:  86504 KB, 84.4765625 MB. Memory change: 0.0 MB
+ > Note: NOT rotating the input images, because no valid -r/--rotation was specified.
+ > Note: Cannot apply normalization by flat/dark images because no valid flat image has been provided with -l/--input-path-flat and -k/--input-path-dark.
+ > Note: NOT normalizing by air region, because no --air-region coordinates were given.
+ > Note: NOT applying cropping to region of interest on data volume, because no --region-of-interest coordinates were given.
+ > Note: NOT applying outliers, because no --pre-outliers, --pre-outliers-mode, --post-outliers or --post-outliers-mode was specified.
+ --- Starting PARALLEL image resizing to rebin 0.5 with interpolation mode bilinear Memory usage before execution:  86504 KB, 84.4765625 MB
+Rebinning 8c 1chs: 100%|███████████████████████████████████████| 500/500 [01:08<00:00,  7.29images/s]
+ --- Finished PARALLEL image resizing. New shape: (500, 1024, 1024) Elapsed time: 68.6933469772 sec. Memory usage after execution:  8329608 KB, 8134.3828125 MB. Memory change: 8049.90625 MB
+ --- Starting PARALLEL median filter, with pixel data type: float32, filter size/width: 3. Memory usage before execution:  8329608 KB, 8134.3828125 MB
+Median Filter 8c 1chs: 100%|███████████████████████████████████| 500/500 [00:06<00:00, 82.51images/s]
+ --- Finished PARALLEL median filter, with pixel data type: float32, filter size/width: 3. Elapsed time: 6.08217310905 sec. Memory usage after execution:  8329608 KB, 8134.3828125 MB. Memory change: 0.0 MB
+ > Note: NOT applying gaussian filter.
+Total execution time was 75.3921380043 sec
+matt@matt-OptiPlex-7010:~/Documents/mantid/scripts/Imaging((HEAD detached at 65a8969a9d))$ drop_caches 
+3
+matt@matt-OptiPlex-7010:~/Documents/mantid/scripts/Imaging((HEAD detached at 65a8969a9d))$ python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/500_s_fits/pre_processed/ -o /home/matt/temp/test1 -w --only-preproc --data-as-stack --rebin 0.5 --pre-median-size 3
+ > Note: Running reconstruction on 8 cores.
+ --- Generating reconstruction script beginning... Memory usage before execution:  29396 KB, 28.70703125 MB
+ --- Finished generating script beginning. Elapsed time: 0.0306570529938 sec. Memory usage after execution:  29432 KB, 28.7421875 MB. Memory change: 0.03515625 MB
+ --- Importing tool tomopy Memory usage before execution:  29432 KB, 28.7421875 MB
+WARNING:tomopy.io.writer:dxtomo module not found
+ --- Tool loaded. Elapsed time: 6.40625596046 sec. Memory usage after execution:  86512 KB, 84.484375 MB. Memory change: 55.7421875 MB
+ --- Loading data... Memory usage before execution:  86512 KB, 84.484375 MB
+ --- Data loaded. Shape of raw data: (500, 2048, 2048), dtype: >f4. Elapsed time: 0.0886318683624 sec. Memory usage after execution:  86512 KB, 84.484375 MB. Memory change: 0.0 MB
+ > Note: NOT rotating the input images, because no valid -r/--rotation was specified.
+ > Note: Cannot apply normalization by flat/dark images because no valid flat image has been provided with -l/--input-path-flat and -k/--input-path-dark.
+ > Note: NOT normalizing by air region, because no --air-region coordinates were given.
+ > Note: NOT applying cropping to region of interest on data volume, because no --region-of-interest coordinates were given.
+ > Note: NOT applying outliers, because no --pre-outliers, --pre-outliers-mode, --post-outliers or --post-outliers-mode was specified.
+ --- Starting PARALLEL image resizing to rebin 0.5 with interpolation mode bilinear Memory usage before execution:  86512 KB, 84.484375 MB
+Rebinning 8c 1chs: 100%|███████████████████████████████████████| 500/500 [01:08<00:00,  7.28images/s]
+ --- Finished PARALLEL image resizing. New shape: (500, 1024, 1024) Elapsed time: 68.723747015 sec. Memory usage after execution:  10370604 KB, 10127.5429688 MB. Memory change: 10043.0585938 MB
+ --- Starting PARALLEL median filter, with pixel data type: float32, filter size/width: 3. Memory usage before execution:  10370604 KB, 10127.5429688 MB
+Median Filter 8c 1chs: 100%|███████████████████████████████████| 500/500 [00:07<00:00, 69.78images/s]
+ --- Finished PARALLEL median filter, with pixel data type: float32, filter size/width: 3. Elapsed time: 7.18628191948 sec. Memory usage after execution:  10378232 KB, 10134.9921875 MB. Memory change: 7.44921875 MB
+ > Note: NOT applying gaussian filter.
+Total execution time was 82.8145589828 sec

@@ -36,3 +36,8 @@ def multiprocessing_available():
 
 def generate_indices(num_images):
     return xrange(num_images)
+
+
+def calculate_chunksize(cores):
+    # TODO possible proper calculation of chunksize, although best performance has been with 1
+    return 1

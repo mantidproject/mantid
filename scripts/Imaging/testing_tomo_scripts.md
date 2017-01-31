@@ -11,70 +11,12 @@
 - [Run Reconstruction](#run-reconstruction)
     - [Single Image <br>](#single-image-br)
     - [Full `RB000888 test stack larmor summed 201510`, bolts crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-bolts-crop-good-air-region)
-    - [Full `RB000888 test stack larmor summed 201510`, spheres crop, good air region](#full-rb000888-test-stack-larmor-summed-201510-spheres-crop-good-air-region)
-    - [Full `RB000888_test_stack_larmor_summed_201510` dataset, bolts crop, **BAD** air region](#full-rb000888_test_stack_larmor_summed_201510-dataset-bolts-crop-bad-air-region)
-- [ImageJ `GetSelectionCoordinates` Macro](#imagej-getselectioncoordinates-macro)
-- [Python local tests](#python-local-tests)
-    - [Pyfits load image stack](#pyfits-load-image-stack)
-    - [Test loading single images and image stack](#test-loading-single-images-and-image-stack)
-- [Plot Circular Mask](#plot-circular-mask)
-- [Normalise by background comparison](#normalise-by-background-comparison)
-- [Astra Reconstructions](#astra-reconstructions)
-- [Wrong tool/algorithm tests](#wrong-toolalgorithm-tests)
-- [SciPy ndimage zoom](#scipy-ndimage-zoom)
-- [SciPy misc imresize](#scipy-misc-imresize)
-- [SciPy timeit misc.imresize vs ndimage.zoom](#scipy-timeit-miscimresize-vs-ndimagezoom)
-    - [Bigger data test](#bigger-data-test)
-- [`Helper` class initialisation test](#helper-class-initialisation-test)
-- [Tomo Test runs with as most args as possible](#tomo-test-runs-with-as-most-args-as-possible)
-    - [--only-preproc](#--only-preproc)
-    - [--reuse-preproc](#--reuse-preproc)
-    - [--find-cor](#--find-cor)
-    - [--crop-before-normalise](#--crop-before-normalise)
-- [Testing the Big Data](#testing-the-big-data)
-- [SCARF Chamber Tomo Find COR](#scarf-chamber-tomo-find-cor)
-- [Type Conversion](#type-conversion)
-    - [FITS > FITS](#fits--fits)
-        - [Single > Stack, c1s](#single--stack-c1s)
-        - [Stack > Single, c1](#stack--single-c1)
-    - [FITS > NXS, this requires also dark and flat images](#fits--nxs-this-requires-also-dark-and-flat-images)
-        - [AssertionError: Fail because no flat/dark, c2f](#assertionerror-fail-because-no-flatdark-c2f)
-        - [Single > Stack, c2s](#single--stack-c2s)
-        - [Stack > Stack, c2s2](#stack--stack-c2s2)
-    - [NXS > FITS](#nxs--fits)
-        - [Stack > Single, c3](#stack--single-c3)
-        - [Stack > Stack, c3s](#stack--stack-c3s)
-    - [TIFF > FITS](#tiff--fits)
-        - [Single > Single, c4](#single--single-c4)
-        - [Single > Stack, c4s](#single--stack-c4s)
-        - [Stack > Single, c42](#stack--single-c42)
-        - [Stack > Stack, c4s2](#stack--stack-c4s2)
-    - [FITS > TIFF](#fits--tiff)
-        - [Single > Single, c5](#single--single-c5)
-        - [Single > Stack, c5s](#single--stack-c5s)
-        - [Stack > Single, c52](#stack--single-c52)
-        - [Stack > Stack, c5s2](#stack--stack-c5s2)
-    - [TIFF > NXS](#tiff--nxs)
-        - [Single > Stack, c6s](#single--stack-c6s)
-        - [Stack > Stack](#stack--stack)
-    - [NXS > TIFF](#nxs--tiff)
-- [Pre-processing Data Flow with Dark/Flat and Median size 3](#pre-processing-data-flow-with-darkflat-and-median-size-3)
-    - [FITS](#fits)
-        - [Single > Single, p1](#single--single-p1)
-        - [Single > Stack, p2](#single--stack-p2)
-        - [Stack > Single, p3](#stack--single-p3)
-        - [Stack > Stack, p4](#stack--stack-p4)
-    - [NXS > FITS](#nxs--fits-1)
-        - [Stack > Single, p5](#stack--single-p5)
-        - [Stack > Stack, p5s](#stack--stack-p5s)
-    - [FITS > NXS](#fits--nxs)
-        - [Single > Stack, p6s](#single--stack-p6s)
-    - [TIFF > FITS](#tiff--fits-1)
-        - [Single > Single, p7](#single--single-p7)
-        - [Single > Stack, p7s](#single--stack-p7s)
-    - [TIFF > NXS](#tiff--nxs-1)
-        - [Single > Stack](#single--stack)
-        - [Stack > Stack](#stack--stack-1)
+- [load single images](#load-single-images)
+- [load a stack of images](#load-a-stack-of-images)
+- [load single images](#load-single-images-1)
+- [load single images](#load-single-images-2)
+- [load single images](#load-single-images-3)
+- [load single images](#load-single-images-4)
 
 <!-- /TOC -->
  
@@ -101,7 +43,7 @@ python main.py
 --input-path=~/Documents/img/000888/data_single  
 --input-path-flat=~/Documents/img/000888/flat  
 --input-path-dark=~/Documents/img/000888/dark  
---region-of-interest='[0.000000, 0.000000, 511.000000, 511.000000]'  
+--region-of-interest=0 0 511 511  
 --rotation=1  
 --max-angle=360.000000  
 --find-cor  
@@ -110,7 +52,7 @@ python main.py
 ```
 
 For Copy/Paste to terminal:
->python main.py --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[0.000000, 0.000000, 511.000000, 511.000000]' --rotation=1 --max-angle=360.000000 --find-cor --output=~/Documents/img/000888/processed/temp/1 --tool=tomopy 
+>python main.py --num-iter=5 --input-path=~/Documents/img/000888/data_single --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest=0 0 511 511 --rotation=1 --max-angle=360.000000 --find-cor --output=~/Documents/img/000888/processed/temp/1 --tool=tomopy 
 
 EXPECTED RESULTS:
 > COR: 265.0
@@ -172,25 +114,7 @@ For Copy/Paste to terminal:
 - ### Better results/Air Region if run wihout `--crop-before-normalise`
 
 ```python
-python main.py 
---tool=tomopy
---algorithm=gridrec
---num-iter=5
---input-path=~/Documents/img/000888/data_full
---input-path-flat=~/Documents/img/000888/flat
---input-path-dark=~/Documents/img/000888/dark
--R 41 0 233 228
---output=~/Documents/img/000888/processed/temp/1
---pre-median-size=3
---cor=104.000000
---rotation=1
---max-angle=360.000000
--A 360 111 388 144
--R 41 0 233 228
--data-as-stack
-```
-For Copy/Paste to terminal:
->python main.py --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark --region-of-interest='[41.0, 0.0, 230.0, 228.0]' --output=~/Documents/img/000888/processed/temp/1 --pre-median-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 --air-region='[360.0, 111.0, 388.0, 144.0]' --data-as-stack
+> python main.py  --tool=tomopy --algorithm=gridrec --num-iter=5 --input-path=~/Documents/img/000888/data_full --input-path-flat=~/Documents/img/000888/flat --input-path-dark=~/Documents/img/000888/dark -R 41 0 233 228 --output=~/Documents/img/000888/processed/temp/1 --pre-median-size=3 --cor=104.000000 --rotation=1 --max-angle=360.000000 -A 360 111 388 144 -R 41 0 233 228 -data-as-stack 
 
 ---
 

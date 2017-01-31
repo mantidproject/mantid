@@ -102,13 +102,15 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     :param cores: number of cores that the processing will use
     :param chunksize: chunk of work per process(worker)
     :param name: the string that will be appended in front of the progress bar
+    :param show_timer: if False no timer will be shown
     :param h: the helper class
     :return:
     """
     h = Helper.empty_init() if h is None else h
+    from parallel import utility as pu
 
     if chunksize is None:
-        chunksize = 1  # TODO use proper calculation
+        chunksize = pu.calculate_chunksize(cores)
 
     global shared_data
     # get reference to output data
@@ -122,7 +124,6 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
         h.prog_init(img_num, name + " " + str(cores) +
                     "c " + str(chunksize) + "chs")
 
-    from parallel import utility as pu
     indices_list = pu.generate_indices(img_num)
     for _ in enumerate(pool.imap(partial_func, indices_list, chunksize=chunksize)):
         h.prog_update()

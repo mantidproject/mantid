@@ -172,8 +172,9 @@ def execute(data=None, second_data=None, partial_func=None, cores=1, chunksize=N
     """
     h = Helper.empty_init() if h is None else h
 
+    from parallel import utility as pu
     if chunksize is None:
-        chunksize = 1  # TODO use proper calculation
+        chunksize = pu.calculate_chunksize(cores)
 
     global shared_data
     # get reference to output data
@@ -191,7 +192,6 @@ def execute(data=None, second_data=None, partial_func=None, cores=1, chunksize=N
         h.prog_init(img_num, name + " " + str(cores) +
                     "c " + str(chunksize) + "chs")
 
-    from parallel import utility as pu
     indices_list = pu.generate_indices(img_num)
     for _ in enumerate(pool.imap(partial_func, indices_list, chunksize=chunksize)):
         h.prog_update()

@@ -21,7 +21,6 @@ class PostProcConfig(object):
             mode is equal to 'constant'.
         """
         self.median_mode = 'reflect'
-        self.median_filter3d_size = 0  # TODO unused
 
     def __str__(self):
         return "Circular mask: {0}\n".format(self.circular_mask) \
@@ -123,4 +122,3 @@ class PostProcConfig(object):
 
         self.median_size = args.post_median_size
         self.median_mode = args.post_median_mode
-        # self.median_filter3d_size = args.median_filter3d_size

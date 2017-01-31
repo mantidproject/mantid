@@ -34,7 +34,6 @@ class Helper(object):
         self._timer_print_prefix = " ---"
 
         self._verbosity = 2 if config is None else config.func.verbosity
-        self._no_crash_on_failed_import = False if config is None else config.func.no_crash_on_failed_import
 
         self._cache_last_memory = None
 
@@ -56,7 +55,8 @@ class Helper(object):
     def get_verbosity(self):
         return self._verbosity
 
-    def check_config_class(self, config):
+    @staticmethod
+    def check_config_class(config):
         assert isinstance(config, ReconstructionConfig), "The provided config is invalid and cannot be used."
 
     def check_config_integrity(self, config):

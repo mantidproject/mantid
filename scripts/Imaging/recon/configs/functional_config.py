@@ -34,7 +34,7 @@ class FunctionalConfig(object):
         self.out_slices_prefix = 'recon_slice'
         self.out_horiz_slices_prefix = 'recon_horiz'
         self.out_horiz_slices_subdir = 'horiz_slices'
-        self.save_horiz_slices = False  # TODO activate for testing only
+        self.save_horiz_slices = False
 
         self.save_preproc = True
         self.only_preproc = False
@@ -45,7 +45,6 @@ class FunctionalConfig(object):
 
         import numpy as np
 
-        # TODO more tests with float16/float64/uint16
         self.data_dtype = np.float32
 
         self.cor = None
@@ -53,9 +52,6 @@ class FunctionalConfig(object):
 
         self.verbosity = 3
 
-        # TODO unused (add exception handling funcitons in helper.py)
-        # default True
-        self.no_crash_on_failed_import = False
         self.overwrite_all = False
 
         # Reconstruction options
@@ -92,7 +88,6 @@ class FunctionalConfig(object):
                + "Argument COR: {0}\n".format(str(self.cor)) \
                + "Find COR Run: {0}\n".format(str(self.find_cor)) \
                + "Verbosity: {0}\n".format(str(self.verbosity)) \
-               + "Crash on failed import: {0}\n".format(str(self.no_crash_on_failed_import)) \
                + "Tool: {0}\n".format(str(self.tool)) \
                + "Algorithm: {0}\n".format(str(self.algorithm)) \
                + "Number of iterations: {0}\n".format(str(self.num_iter)) \
@@ -101,9 +96,9 @@ class FunctionalConfig(object):
 
     def setup_parser(self, parser):
         """
-                Setup the functional arguments for the script
-                :param parser: The parser which is set up
-                """
+        Setup the functional arguments for the script
+        :param parser: The parser which is set up
+        """
         grp_func = parser.add_argument_group('Functionality options')
 
         grp_func.add_argument(
@@ -242,13 +237,6 @@ class FunctionalConfig(object):
                  "2 - Normal verbosity, will output step name and execution time\n"
                  "3 - High verbosity, will output step name, execution time and memory usage before and after each step\n"
             "Default: 2 - Normal verbosity.")
-
-        grp_func.add_argument(
-            "--no-crash-on-failed-import",
-            required=False,
-            action='store_true',
-            help="The script will NOT stop execution if an import fails and a step cannot be executed.\n"
-            "WARNING this means some filters will not be applied and the result might not be as expeced.")
 
         grp_func.add_argument(
             "-w",
@@ -392,7 +380,6 @@ class FunctionalConfig(object):
         self.find_cor = args.find_cor
 
         self.verbosity = args.verbosity
-        self.no_crash_on_failed_import = args.no_crash_on_failed_import
         self.overwrite_all = args.overwrite_all
 
         # grab tools options

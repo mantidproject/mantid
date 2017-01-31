@@ -1,0 +1,43 @@
+BEFORE SHARED MEMORY
+
+python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/100_s_fits/pre_processed/ -o /home/matt/temp/100_med_notshared_control -w --only-preproc --pre-median-size 3 -s --data-as-stack -R 384 0 1550 1932 -A 384 686 476 804 -D /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/fits/dark_fits/ -F /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/fits/flat_fits/
+ > Note: Running reconstruction on 8 cores.
+ --- Generating reconstruction script beginning... Memory usage before execution:  29384 KB, 28.6953125 MB
+ --- Finished generating script beginning. Elapsed time: 0.000831842422485 sec. Memory usage after execution:  29432 KB, 28.7421875 MB. Memory change: 0.046875 MB
+ --- Importing tool tomopy Memory usage before execution:  29432 KB, 28.7421875 MB
+WARNING:tomopy.io.writer:dxtomo module not found
+ --- Tool loaded. Elapsed time: 0.42328619957 sec. Memory usage after execution:  86408 KB, 84.3828125 MB. Memory change: 55.640625 MB
+ --- Loading data... Memory usage before execution:  86408 KB, 84.3828125 MB
+Flat: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 124/124 [00:14<00:00, 10.60images/s]
+Dark: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 19/19 [00:03<00:00,  6.30images/s]
+ --- Data loaded. Shape of raw data: (100, 2048, 2048), dtype: >f4. Elapsed time: 18.4922881126 sec. Memory usage after execution:  2141140 KB, 2090.95703125 MB. Memory change: 2006.57421875 MB
+ > Note: NOT rotating the input images, because no valid -r/--rotation was specified.
+ --- Starting PARALLEL normalization by flat/dark images, pixel data type: >f4... Memory usage before execution:  2141140 KB, 2090.95703125 MB
+Norm by Flat/Dark 8c 1chs: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:07<00:00, 13.76images/s]
+ --- Finished PARALLEL normalization by flat/dark images, pixel data type: >f4. Elapsed time: 7.88322305679 sec. Memory usage after execution:  2141140 KB, 2090.95703125 MB. Memory change: 0.0 MB
+ --- Starting normalization by air region... Memory usage before execution:  2141140 KB, 2090.95703125 MB
+Calculating air sums: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 25194.04images/s]
+Norm by Air Sums: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 83.39images/s]
+ --- Finished normalization by air region. Average: 0.992947459221, max ratio: 1.00710260868, min ratio: 0.76342433691. Elapsed time: 1.20434212685 sec. Memory usage after execution:  2141140 KB, 2090.95703125 MB. Memory change: 0.0 MB
+ --- Starting image cropping with coordinates: [384, 0, 1550, 1932]. ... Memory usage before execution:  2141140 KB, 2090.95703125 MB
+ --- Finished image cropping with pixel data type: >f4, resulting shape: (100, 1932, 1166). Elapsed time: 3.50475311279e-05 sec. Memory usage after execution:  2141140 KB, 2090.95703125 MB. Memory change: 0.0 MB
+ > Note: NOT applying outliers, because no --pre-outliers, --pre-outliers-mode, --post-outliers or --post-outliers-mode was specified.
+ > Note: Not applying any rebinning.
+ --- Starting PARALLEL median filter, with pixel data type: >f4, filter size/width: 3. Memory usage before execution:  2141140 KB, 2090.95703125 MB
+Median Filter 8c 1chs: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:05<00:00, 17.68images/s]
+ --- Finished PARALLEL median filter, with pixel data type: >f4, filter size/width: 3. Elapsed time: 5.74936890602 sec. Memory usage after execution:  2141140 KB, 2090.95703125 MB. Memory change: 0.0 MB
+ > Note: NOT applying gaussian filter.
+ --- Saving all pre-processed images into /home/matt/temp/100_med_notshared_control/pre_processed dtype: >f4 Memory usage before execution:  2141140 KB, 2090.95703125 MB
+/home/matt/anaconda2/lib/python2.7/site-packages/pyfits/file.py:372: UserWarning: Overwriting existing file '/home/matt/temp/100_med_notshared_control/pre_processed/out_preproc_image_stack.fits'.
+  warnings.warn("Overwriting existing file %r." % self.name)
+ --- Saving pre-processed images finished. Elapsed time: 6.21408891678 sec. Memory usage after execution:  2141140 KB, 2090.95703125 MB. Memory change: 0.0 MB
+Total execution time was 40.0449631214 sec
+14
+
+
+---------------------------------------------------------------------
+AFTER SHARED MEMORY
+
+
+
+

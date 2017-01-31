@@ -52,8 +52,9 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     """
     h = Helper.empty_init() if h is None else h
 
+    from parallel import utility as pu
     if chunksize is None:
-        chunksize = 1  # TODO use proper calculation
+        chunksize = pu.calculate_chunksize(cores)
 
     # handle the edge case of having a different output that input i.e. rebin, crop, etc
     if output_data is None:
