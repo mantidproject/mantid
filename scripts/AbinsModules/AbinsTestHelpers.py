@@ -54,8 +54,8 @@ def find_file(filename=None):
     return FileFinder.Instance().getFullPath(filename)
 
 
-def is_64_bits():
-    return sys.maxsize > 2**32
+def is_windows():
+    return platform.system() == "Windows"
 
 
 def remove_output_files(list_of_names=None):

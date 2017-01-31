@@ -48,12 +48,12 @@ class AbinsLoadCRYSTALTest(unittest.TestCase):
     # ===================================================================================
     # | Use case: Gamma point calculation for CRYSTAL                                    |
     # ===================================================================================
-    if AbinsTestHelpers.is_64_bits():
+    if AbinsTestHelpers.is_windows():
+        _gamma_crystal = "crystalB3LYP_win_LoadCRYSTAL"
+        _set_crystal = "crystal_set_key_win_LoadCRYSTAL"
+    else:
         _gamma_crystal = "crystalB3LYP_LoadCRYSTAL"
         _set_crystal = "crystal_set_key_LoadCRYSTAL"
-    else:
-        _gamma_crystal = "crystalB3LYP_32bits_LoadCRYSTAL"
-        _set_crystal = "crystal_set_key_32bits_LoadCRYSTAL"
 
     def test_gamma_crystal(self):
         self._check(name=self._gamma_crystal)
