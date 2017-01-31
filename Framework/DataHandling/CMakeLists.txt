@@ -438,6 +438,7 @@ set ( TEST_FILES
 	LoadTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
+        LoadSpecTest.h
 	LoadSPETest.h
         LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h

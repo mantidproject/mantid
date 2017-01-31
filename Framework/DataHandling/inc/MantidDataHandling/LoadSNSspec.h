@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,7 +46,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor>,
+                              API::DeprecatedAlgorithm {
 public:
   LoadSNSspec();
   const std::string name() const override { return "LoadSNSspec"; }
@@ -66,12 +67,6 @@ private:
   void init() override;
   void exec() override;
 
-  size_t readNumberOfSpectra(std::ifstream &file) const;
-  /// Helper method for reading a line from the file
-  void readLine(const std::string &line, std::vector<double> &buffer) const;
-  /// Helper method for reading a single histogram
-  void readHistogram(const std::vector<double> &input,
-                     HistogramData::Histogram &histogram) const;
 
   /// Allowed values for the cache property
   std::vector<std::string> m_seperator_options;
