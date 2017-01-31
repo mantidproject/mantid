@@ -67,6 +67,7 @@ public:
     PickTubeMode,
     AddPeakMode,
     ComparePeakMode,
+    AlignPeakMode,
     DrawRegularMode,
     DrawFreeMode,
     ErasePeakMode,
@@ -241,6 +242,8 @@ public:
   QStringList getPeaksWorkspaceNames() const;
   void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
+  void clearAlignmentPlane();
+  void clearComparisonPeaks();
   bool hasPeakOverlays() const { return !m_peakShapes.isEmpty(); }
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const { return m_peakLabelPrecision; }
@@ -276,8 +279,10 @@ signals:
   // peaks
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
-  void comparePeaks(
-      const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
+                  const Mantid::Geometry::IPeak *);
+  void comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                    std::vector<Mantid::Geometry::IPeak *>> &);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -294,6 +299,7 @@ protected slots:
   void touchComponentAt(int x, int y);
   void erasePeaks(const QRect &rect);
   void comparePeaks(const QRect &rect);
+  void alignPeaks(const QRect &rect);
 
   void colorMapChanged();
 
@@ -342,10 +348,13 @@ protected:
   mutable bool m_showPeakLabels;    ///< flag to show peak hkl labels
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
+
+  std::vector<std::pair<Mantid::Kernel::V3D, QPointF>> m_selectedAlignmentPlane;
+  std::pair<Mantid::Geometry::IPeak *, QPointF> m_selectedAlignmentPeak;
+
+  std::pair<std::vector<Mantid::Geometry::IPeak *>,
+            std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
   std::pair<QPointF, QPointF> m_selectedMarkers;
-  std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
-      m_selectedPeaks;
-  /// use with a new PeakOverlay.
 
 private:
   /// Draw a line between two peak markers
@@ -356,6 +365,10 @@ private:
   void drawMaskShapes(QPainter &painter) const;
   /// Draw the selection rectangle to the surface
   void drawSelectionRect(QPainter &painter) const;
+  /// Draw the alignment markers on the surface
+  void drawPeakAlignmentMarkers(QPainter &painter) const;
+  /// Check if a peak is visible at a given point
+  bool peakVisibleAtPoint(const QPointF &point) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 

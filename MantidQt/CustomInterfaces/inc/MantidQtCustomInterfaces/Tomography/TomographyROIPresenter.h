@@ -7,7 +7,6 @@
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
 #include <memory>
-
 #include <boost/scoped_ptr.hpp>
 
 #include <QObject>
@@ -101,8 +100,6 @@ protected:
 
 private slots:
   void finishedLoadStack(bool error);
-  void readWorkerStdOut(const QString &s);
-  void readWorkerStdErr(const QString &s);
 
 private:
   inline std::string trimFileNameFromPath(const std::string &path) {

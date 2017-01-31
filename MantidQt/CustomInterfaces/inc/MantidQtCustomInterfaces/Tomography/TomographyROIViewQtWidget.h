@@ -142,11 +142,19 @@ protected:
 
   /// update coordinates from mouse event
   void mouseUpdateCoR(const int x, const int y);
+
+  // get the coordinates on the first click of selection
   void mouseUpdateROICornersStartSelection(const int x, const int y);
+  // update the coordinates while dragging the mouse
   void mouseUpdateROICornerContinuedSelection(const int x, const int y);
+  // notify the presenter that the user has stopped selection
   void mouseFinishROI(const int x, const int y);
+
+  // get the coordinates on the first click of selection
   void mouseUpdateNormAreaCornersStartSelection(const int x, const int y);
+  // update the coordinates while dragging the mouse
   void mouseUpdateNormAreaCornerContinuedSelection(const int x, const int y);
+  // notify the presenter that the user has stopped selection
   void mouseFinishNormArea(const int x, const int y);
 
 private slots:

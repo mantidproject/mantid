@@ -58,7 +58,6 @@ public:
     ColorRangeUpdated,     ///< The uses changes the values or options of the
                            ///< color range
     SelectCoR,             ///< Start picking of the center of rotation
-    FindCoR,               ///< Run calculate CoR
     SelectROI,             ///< Start selection of the region of interest
     SelectNormalization,   ///< Start selection of the normalization region
     FinishedCoR,           ///< A CoR has been picked

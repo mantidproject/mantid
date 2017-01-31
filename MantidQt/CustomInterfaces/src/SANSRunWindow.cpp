@@ -474,11 +474,9 @@ void SANSRunWindow::setupSaveBox() {
           SLOT(setUserFname()));
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(m_uiForm.saveNex_check, "SaveNexus");
   m_savFormats.insert(m_uiForm.saveNIST_Qxy_check, "SaveNISTDAT");
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
-  m_savFormats.insert(m_uiForm.saveCSV_check, "SaveCSV");
   m_savFormats.insert(m_uiForm.saveNXcanSAS_check, "SaveNXcanSAS");
 
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
@@ -733,13 +731,11 @@ void SANSRunWindow::readSettings() {
 */
 void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
-  m_uiForm.saveNex_check->setChecked(valueStore.value("nexus", false).toBool());
   m_uiForm.saveCan_check->setChecked(
       valueStore.value("canSAS", false).toBool());
   m_uiForm.saveNIST_Qxy_check->setChecked(
       valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
-  m_uiForm.saveCSV_check->setChecked(valueStore.value("CSV", false).toBool());
   m_uiForm.saveNXcanSAS_check->setChecked(
       valueStore.value("NXcanSAS", false).toBool());
 }
@@ -779,11 +775,9 @@ void SANSRunWindow::saveSettings() {
 */
 void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
-  valueStore.setValue("nexus", m_uiForm.saveNex_check->isChecked());
   valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
   valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
-  valueStore.setValue("CSV", m_uiForm.saveCSV_check->isChecked());
   valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
 }
 /**
@@ -1671,12 +1665,12 @@ void SANSRunWindow::setGeometryDetails() {
 
   if (boost::dynamic_pointer_cast<const IEventWorkspace>(ws)) {
     // EventWorkspaces have their monitors loaded into a separate workspace.
-    const std::string monitorWsName = ws->name() + "_monitors";
+    const std::string monitorWsName = ws->getName() + "_monitors";
 
     if (!ADS.doesExist(monitorWsName)) {
       g_log.error() << "Expected a sister monitor workspace called \""
                     << monitorWsName << "\" "
-                    << "for the EventWorkspace \"" << ws->name()
+                    << "for the EventWorkspace \"" << ws->getName()
                     << "\", but could not find one "
                     << "so unable to set geometry details.\n";
       return;
@@ -1703,7 +1697,7 @@ void SANSRunWindow::setGeometryDetails() {
     g_log.error() << "The reported incident monitor spectrum number \""
                   << monitorSpectrum
                   << "\" does not have a corresponding workspace index in \""
-                  << monitorWs->name()
+                  << monitorWs->getName()
                   << "\", so unable to set geometry details.\n";
     return;
   }
@@ -1847,7 +1841,7 @@ void SANSRunWindow::setSANS2DGeometry(
   QString code_to_run =
       QString("print ','.join([str(a) for a in "
               "i.ReductionSingleton().instrument.getDetValues('%1')])")
-          .arg(QString::fromStdString(workspace->name()));
+          .arg(QString::fromStdString(workspace->getName()));
 
   QStringList logvalues = runReduceScriptFunction(code_to_run).split(",");
 

@@ -344,16 +344,6 @@ void TomographyROIViewQtWidget::enableActions(bool enable) {
 
 std::string TomographyROIViewQtWidget::askImagePath(
     const std::string &windowTitle = "Open image") {
-  // get path
-  // QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
-  //                           "(*.fits *.fit *.tiff *.tif *.png);;"
-  //                           "FITS, Flexible Image Transport System images "
-  //                           "(*.fits *.fit);;"
-  //                           "TIFF, Tagged Image File Format "
-  //                           "(*.tif *.tiff);;"
-  //                           "PNG, Portable Network Graphics "
-  //                           "(*.png);;"
-  //                           "Other extensions/all files (*)");
   // only FITS is supported right now
   QString fitsStr = QString("Supported formats: FITS"
                             "(*.fits *.fit);;"
@@ -1317,27 +1307,35 @@ void TomographyROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
     return;
   }
 
-  std::string output = str.toStdString();
+  // The COR will be printed on the last line of the output, and will be the
+  // only
+  // output on the line, the way we read it here, is to just the last line,
+  // starting from the back and going until the first new line.
+  // Cropping that out will be the COR that the script found.
+  // ........ other strings above ........
+  // 145
+  const std::string output = str.toStdString();
 
   // -- to not be on the null character
   auto back_iterator = --(output.cend());
   std::string cor_number;
-  for (; back_iterator != output.begin(); --back_iterator) {
+  for (; back_iterator != output.cbegin(); --back_iterator) {
     if (*back_iterator == '\n') {
       // found the last new line
       cor_number = std::string(back_iterator + 1, output.cend());
       break;
     }
   }
-  int cor = 0;
+  int centreOfRotationValue = 0;
   try {
-    cor = std::stoi(cor_number);
+    centreOfRotationValue = std::stoi(cor_number);
   } catch (std::invalid_argument &) {
-    // output COR cannot be converted, do not change anything and just return
+    // output centreOfRotationValue cannot be converted, do not change anything
+    // and just return
     // silently
     return;
   }
-  m_ui.spinBox_cor_x->setValue(cor);
+  m_ui.spinBox_cor_x->setValue(centreOfRotationValue);
   // middle of image is ((bottom - top) / 2)
   // center is (top location + middle)
   int imageCentre =

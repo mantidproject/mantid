@@ -272,7 +272,7 @@ void PlotPeakByLogValue::exec() {
           setWorkspaceIndexAttribute(ifun, j);
         }
 
-        g_log.debug() << "Fitting " << data.ws->name() << " index " << j
+        g_log.debug() << "Fitting " << data.ws->getName() << " index " << j
                       << " with \n";
         g_log.debug() << ifun->asString() << '\n';
 
@@ -312,7 +312,7 @@ void PlotPeakByLogValue::exec() {
 
         if (!fit->isExecuted()) {
           throw std::runtime_error("Fit child algorithm failed: " +
-                                   data.ws->name());
+                                   data.ws->getName());
         }
 
         ifun = fit->getProperty("Function");

@@ -220,6 +220,8 @@
   </instrument>
 
   <instrument name="VESUVIO" shortname="EVS">
+    <zeropadding size="5" startRunNumber="1" prefix="EVS"/>
+    <zeropadding size="8" startRunNumber="25989" prefix="VESUVIO"/>
     <technique>Neutron Compton Scattering</technique>
     <technique>TOF Indirect Geometry Diffraction</technique>
     <livedata>

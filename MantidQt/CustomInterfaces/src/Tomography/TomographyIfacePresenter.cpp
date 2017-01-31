@@ -22,31 +22,6 @@
 #include <QThread>
 #include <QTimer>
 
-//#define _DEBUG__CUSTOM
-#ifdef _DEBUG__CUSTOM
-#ifdef _WIN32
-#ifndef DBREAK
-#include <intrin.h>
-#define DBREAK __debugbreak();
-#define MDBREAK(msg)                                                           \
-  std::cout << msg << '\n';                                                    \
-  DBREAK
-#endif // DBREAK
-#else  // if GNU
-#ifndef DBREAK
-#define DBREAK __builtin_trap();
-#define MDBREAK(msg)                                                           \
-  std::cout << msg << '\n';                                                    \
-  DBREAK
-#endif // DBREAK
-#endif // _WIN32
-#else  // if not debug, define empty
-#ifndef DBREAK
-#define DBREAK
-#define MDBREAK(msg)
-#endif // DBREAK
-#endif // _DEBUG__CUSTOM
-
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
@@ -184,15 +159,16 @@ void TomographyIfacePresenter::processRunExternalProcess() {
   const bool local = true;
   prepareSubmissionArguments(local, runnable, args, allOpts);
 
+  // if custom external is provided, overwrite the default one
+  runnable = !cachedExec.empty() ? cachedExec : runnable;
+
   // append the additional args for now
   for (const auto &arg : cachedArgs) {
     args.emplace_back(arg);
     allOpts += arg;
   }
 
-  // if no external provided, use the default one from settings
-  setupAndRunLocalExternalProcess(!cachedExec.empty() ? cachedExec : runnable,
-                                  args, allOpts);
+  setupAndRunLocalExternalProcess(runnable, args, allOpts);
 }
 
 void TomographyIfacePresenter::setupAndRunLocalExternalProcess(

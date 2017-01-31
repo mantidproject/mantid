@@ -74,7 +74,7 @@ public:
         .WillOnce(Return("2"));
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
-        .WillOnce(Return("\"3,4\""));
+        .WillOnce(Return("3,4"));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
@@ -99,15 +99,21 @@ public:
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
-    EXPECT_CALL(mockView, getCRho()).Times(Exactly(1)).WillOnce(Return("2.5"));
+    EXPECT_CALL(mockView, getCRho())
+        .Times(Exactly(1))
+        .WillOnce(Return("2.5,0.4,1.1"));
     EXPECT_CALL(mockView, getCAlpha())
         .Times(Exactly(1))
-        .WillOnce(Return("0.6"));
-    EXPECT_CALL(mockView, getCAp()).Times(Exactly(1)).WillOnce(Return("100.0"));
-    EXPECT_CALL(mockView, getCPp()).Times(Exactly(1)).WillOnce(Return("0.54"));
+        .WillOnce(Return("0.6,0.9,1.2"));
+    EXPECT_CALL(mockView, getCAp())
+        .Times(Exactly(1))
+        .WillOnce(Return("100.0,17.0,44.0"));
+    EXPECT_CALL(mockView, getCPp())
+        .Times(Exactly(1))
+        .WillOnce(Return("0.54,0.33,1.81"));
     EXPECT_CALL(mockView, getDirectBeam())
         .Times(Exactly(1))
-        .WillOnce(Return("\"0,3\""));
+        .WillOnce(Return("0,3"));
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(Exactly(1))
         .WillOnce(Return("PNR"));
@@ -143,7 +149,7 @@ public:
         .WillOnce(Return("-0.02"));
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
-        .WillOnce(Return("\"3,4\""));
+        .WillOnce(Return("3,4"));
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(Exactly(1))
         .WillOnce(Return("INTER00013463,INTER00013464"));
@@ -152,10 +158,10 @@ public:
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "CRho=2.5");
-    TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=0.6");
-    TS_ASSERT_EQUALS(optionsVec[3], "CAp=100.0");
-    TS_ASSERT_EQUALS(optionsVec[4], "CPp=0.54");
+    TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
+    TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
+    TS_ASSERT_EQUALS(optionsVec[3], "CAp=\"100.0,17.0,44.0\"");
+    TS_ASSERT_EQUALS(optionsVec[4], "CPp=\"0.54,0.33,1.81\"");
     TS_ASSERT_EQUALS(optionsVec[5], "RegionOfDirectBeam=\"0,3\"");
     TS_ASSERT_EQUALS(optionsVec[6], "PolarizationAnalysis=PNR");
     TS_ASSERT_EQUALS(optionsVec[7], "NormalizeByIntegratedMonitors=True");
@@ -217,7 +223,7 @@ public:
         "1.006831,-0.011467,0.002244,-0.000095",
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0", "1"};
+        "0.972762,0.001828,-0.000261,0.0"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);

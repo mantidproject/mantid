@@ -605,6 +605,12 @@ General
 |       |                             | - **Create new window**. When plotting a new run, it is             |
 |       |                             |   plotted in a new window each time.                                |
 |       |                             |                                                                     |
+|       |                             |   NOTE: This can can cause speed and stability problems once the    |
+|       |                             |   number of graphs managed by Mantidplot passes a few hundred       |
+|       |                             |   which can hapen if you run Mantid for a few days on an            |
+|       |                             |   experiment. For long term stability we suggest you select         |
+|       |                             |   **Use previous window**.                                          |
+|       |                             |                                                                     |
 +-------+-----------------------------+---------------------------------------------------------------------+
 | **3** | **Hide Toolbars**           | If enabled, opening the interface up hides the MantidPlot           |
 |       |                             | toolbars. This is useful on smaller screens.                        |

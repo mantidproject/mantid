@@ -38,13 +38,29 @@ boost::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
 }
 }
 
+//--------------------------------------------------------------------------------------
+// Deprecated function
+//--------------------------------------------------------------------------------------
+/**
+ * @param self Reference to the calling object
+ * @return name of the dimension.
+ */
+std::string getName(IMDDimension &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             ".getName() is deprecated. Use .name instead.");
+  return self.getName();
+}
+
 void export_IMDDimension() {
   register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 
   class_<IMDDimension, boost::noncopyable>("IMDDimension", no_init)
-      .def("getName", &IMDDimension::getName, arg("self"),
-           "Return the name of the dimension as can be displayed "
-           "along the axis")
+      .def("getName", &getName, arg("self"), "Return the name of the dimension "
+                                             "as can be displayed along the "
+                                             "axis")
+      .add_property("name", &IMDDimension::getName,
+                    "Return the name of the dimension as can be displayed "
+                    "along the axis")
       .def("getMaximum", &IMDDimension::getMaximum, arg("self"),
            "Return the maximum extent of this dimension")
       .def("getMinimum", &IMDDimension::getMinimum, arg("self"),
