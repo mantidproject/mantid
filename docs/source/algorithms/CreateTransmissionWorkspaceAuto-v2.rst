@@ -72,19 +72,19 @@ Output:
     trans = Load(Filename='INTER00013463.nxs')
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print "%.4f" % (transWS.readY(0)[26])
-    print "%.4f" % (transWS.readY(0)[27])
-    print "%.4f" % (transWS.readY(0)[28])
-    print "%.4f" % (transWS.readY(0)[29])
+    print "%.3f" % (transWS.readY(0)[26])
+    print "%.3f" % (transWS.readY(0)[27])
+    print "%.3f" % (transWS.readY(0)[28])
+    print "%.3f" % (transWS.readY(0)[29])
 
 Output:
 
 .. testoutput:: ExCreateTransWSAutoOverload
 
-    0.0560
-    0.0573
-    0.0577
-    0.0588
+    0.056
+    0.057
+    0.058
+    0.059
 
     
 **Example - Create a transmission run from two runs**
