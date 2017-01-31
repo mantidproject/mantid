@@ -163,7 +163,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
 
   auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
   if (!integratedMonitors)
-	  detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
+    detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
 
   return divide(detectorWS, monitorWS);
 }

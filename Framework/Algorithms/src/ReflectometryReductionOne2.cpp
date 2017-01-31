@@ -211,7 +211,8 @@ void ReflectometryReductionOne2::exec() {
   setProperty("OutputWorkspace", IvsQ);
 }
 
-/** Creates a direct beam workspace in wavelength from an input workspace in TOF. This
+/** Creates a direct beam workspace in wavelength from an input workspace in
+*TOF. This
 * method should only be called if RegionOfDirectBeam is provided.
 *
 * @param inputWS :: the input workspace in TOF
