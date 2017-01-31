@@ -109,17 +109,64 @@ void LoadSNSspec::exec() {
   file.seekg(0, std::ios::beg);
 
   std::string str;
-
-  std::vector<DataObjects::Histogram1D> spectra;
-
-  int nBins = 0; // number of rows
-
-  // bool numeric = true;
   std::vector<double> input;
 
+  const size_t nSpectra = readNumberOfSpectra(file);
+  auto localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 2, 1));
+
+  localWorkspace->getAxis(0)->unit() =
+      UnitFactory::Instance().create(getProperty("Unit"));
+
+  file.clear(); // end of file has been reached so we need to clear file state
+  file.seekg(0, std::ios::beg); // go back to beginning of file
+
+  int specNum = -1; // spectrum number
+  while (getline(file, str)) {
+    progress.report(static_cast<int>(file.tellg()));
+
+    // line with data, need to be parsed by white spaces
+    readLine(str, input);
+
+    if (str.empty() && specNum != -1) {
+      auto histogram = localWorkspace->histogram(specNum);
+      readHistogram(input, histogram);
+      localWorkspace->setHistogram(specNum, histogram);
+    }
+
+    if (str.empty()) {
+      specNum++;
+      input.clear();
+    }
+
+  } // end of read file
+
+  try {
+    if (nSpectra == 0)
+      throw "Undefined number of spectra";
+
+    if (static_cast<size_t>(specNum) == (nSpectra - 1)) {
+      auto histogram = localWorkspace->histogram(specNum);
+      readHistogram(input, histogram);
+      localWorkspace->setHistogram(specNum, histogram);
+    }
+  } catch (...) {
+  }
+
+  setProperty("OutputWorkspace", localWorkspace);
+}
+
+/**
+ * Read the total number of specrta contained in the file
+ *
+ * @param file :: file stream to read from
+ * @return a size_t representing the number of spectra
+ */
+size_t LoadSNSspec::readNumberOfSpectra(std::ifstream &file) const {
   // determine the number of lines starting by #L
   // as there is one per set of data
-  int spectra_nbr = 0;
+  size_t spectra_nbr = 0;
+  std::string str;
   while (getline(file, str)) {
     if (str.empty())
       continue;
@@ -127,86 +174,52 @@ void LoadSNSspec::exec() {
       spectra_nbr++;
     }
   }
+  return spectra_nbr;
+}
 
-  spectra.resize(spectra_nbr, DataObjects::Histogram1D(
-                                  HistogramData::Histogram::XMode::BinEdges,
-                                  HistogramData::Histogram::YMode::Counts));
-  file.clear(); // end of file has been reached so we need to clear file state
-  file.seekg(0, std::ios::beg); // go back to beginning of file
-
-  int working_with_spectrum_nbr = -1; // spectrum number
-  while (getline(file, str)) {
-    progress.report(static_cast<int>(file.tellg()));
-
-    // line with data, need to be parsed by white spaces
-    if (!str.empty() && str[0] != '#') {
-      typedef Mantid::Kernel::StringTokenizer tokenizer;
-      const std::string sep = " ";
-      tokenizer tok(str, sep,
-                    Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-      for (const auto &beg : tok) {
-        input.push_back(std::stod(beg));
-      }
+/**
+ * Read a single line from the file into the data buffer
+ *
+ * @param line :: the current line in the file to process
+ * @param buffer :: the buffer to store loaded data in
+ */
+void LoadSNSspec::readLine(const std::string &line,
+                           std::vector<double> &buffer) const {
+  if (!line.empty() && line[0] != '#') {
+    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    const std::string sep = " ";
+    tokenizer tok(line, sep, Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    for (const auto &beg : tok) {
+      buffer.push_back(std::stod(beg));
     }
-
-    if (str.empty()) {
-      if (working_with_spectrum_nbr != -1) {
-        for (int j = 0; j < static_cast<int>(input.size() - 1); j++) {
-          spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
-          j++;
-          spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
-          j++;
-          spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
-          nBins = j / 3;
-        }
-        spectra[working_with_spectrum_nbr].dataX().push_back(input.back());
-      }
-      working_with_spectrum_nbr++;
-      input.clear();
-    }
-
-  } // end of read file
-
-  try {
-    if (spectra_nbr == 0)
-      throw "Undefined number of spectra";
-
-    if (working_with_spectrum_nbr == (spectra_nbr - 1)) {
-      for (int j = 0; j < static_cast<int>(input.size() - 1); j++) {
-        spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
-        j++;
-        spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
-        j++;
-        spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
-        nBins = j / 3;
-      }
-      spectra[working_with_spectrum_nbr].dataX().push_back(input.back());
-    }
-  } catch (...) {
-  }
-
-  try {
-    int nSpectra = spectra_nbr;
-    MatrixWorkspace_sptr localWorkspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
-                                                nBins + 1, nBins));
-
-    localWorkspace->getAxis(0)->unit() =
-        UnitFactory::Instance().create(getProperty("Unit"));
-
-    for (int i = 0; i < nSpectra; i++) {
-      localWorkspace->dataX(i) = spectra[i].dataX();
-      localWorkspace->dataY(i) = spectra[i].dataY();
-      localWorkspace->dataE(i) = spectra[i].dataE();
-      // Just have spectrum number start at 1 and count up
-      localWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
-    }
-
-    setProperty("OutputWorkspace", localWorkspace);
-  } catch (Exception::NotFoundError &) {
-    // Asked for dimensionless workspace (obviously not in unit factory)
   }
 }
+
+/**
+ * Convert the data from the input buffer to a histogram object
+ *
+ * @param input :: the input buffer containing the raw data
+ * @param histogram :: the histogram object to fill with values
+ * */
+void LoadSNSspec::readHistogram(const std::vector<double> &input,
+                                HistogramData::Histogram &histogram) const {
+  std::vector<double> x, y, e;
+
+  for (int j = 0; j < static_cast<int>(input.size() - 1); j++) {
+    x.push_back(input[j]);
+    j++;
+    y.push_back(input[j]);
+    j++;
+    e.push_back(input[j]);
+  }
+
+  x.push_back(input.back()); // last value is final x bin
+
+  histogram.resize(y.size());
+  histogram.setBinEdges(x);
+  histogram.setCounts(y);
+  histogram.setCountStandardDeviations(e);
+}
+
 } // namespace DataHandling
 } // namespace Mantid
