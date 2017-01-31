@@ -221,4 +221,42 @@ public:
   }
 };
 
+class ConvertToDiffractionMDWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  static ConvertToDiffractionMDWorkspaceTestPerformance *createSuite() {
+    return new ConvertToDiffractionMDWorkspaceTestPerformance();
+  }
+  static void destroySuite(ConvertToDiffractionMDWorkspaceTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    in_ws = MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,
+                                                                numPixels);
+
+    // Rebin the workspace to have a manageable number bins
+    AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
+    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS",
+                                      "OutputWorkspace", "inputWS", "Params",
+                                      "0, 500, 16e3", "PreserveEvents", "1");
+
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "inputWS");
+    alg.setProperty("OneEventPerBin", false);
+    alg.setPropertyValue("OutputWorkspace", "test_md3");
+  }
+  
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void testConvertToDiffractionMDWorkspaceTestPerformance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+private:
+  ConvertToDiffractionMDWorkspace alg;
+  EventWorkspace_sptr in_ws;
+  int numEventsPer = 100;
+  int numPixels = 400;
+};
+
 #endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_ */
