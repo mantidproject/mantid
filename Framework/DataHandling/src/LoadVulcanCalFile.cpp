@@ -705,11 +705,11 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
         << " errors (invalid Detector ID's) found when reading .cal file '"
         << calFileName << "'.\n";
   if (doGroup && (!hasGrouped))
-    Logger("LoadVulcanCalFile").warning()
-        << "'" << calFileName << "' has no spectra grouped\n";
+    Logger("LoadVulcanCalFile").warning() << "'" << calFileName
+                                          << "' has no spectra grouped\n";
   if (doMask && (!hasUnmasked))
-    Logger("LoadVulcanCalFile").warning()
-        << "'" << calFileName << "' masks all spectra\n";
+    Logger("LoadVulcanCalFile").warning() << "'" << calFileName
+                                          << "' masks all spectra\n";
 }
 
 } // namespace Mantid

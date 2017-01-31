@@ -422,15 +422,16 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     auto &spec = WS->getSpectrum(wi);
     spec.setSpectrumNo(specnum_t(wi + 1));
     spec.setDetectorID(pixel_id[i - iPart]);
-	auto from = data.begin() + i * m_numBins;
-	auto to = from + m_numBins;
+    auto from = data.begin() + i * m_numBins;
+    auto to = from + m_numBins;
 
     if (hasErrors) {
-		auto eFrom = errors.begin() + i * m_numBins;
-		auto eTo = eFrom + m_numBins;
-		spec.setHistogram(X, Counts(from, to), CountStandardDeviations(eFrom, eTo));
+      auto eFrom = errors.begin() + i * m_numBins;
+      auto eTo = eFrom + m_numBins;
+      spec.setHistogram(X, Counts(from, to),
+                        CountStandardDeviations(eFrom, eTo));
     } else {
-		spec.setHistogram(X, Counts(from, to));
+      spec.setHistogram(X, Counts(from, to));
     }
   }
 
