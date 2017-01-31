@@ -8,10 +8,6 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
-namespace HistogramData {
-class HistogramY;
-}
-
 namespace Kernel {
 namespace Units {
 class Label;
@@ -85,8 +81,6 @@ private:
   void init() override;
   void exec() override;
 
-  inline void subtractBackgroundValue(HistogramData::HistogramY &Y,
-                                      const double value);
   inline API::MatrixWorkspace_sptr
   subtractBackgroundWS(API::MatrixWorkspace_sptr ws,
                        API::MatrixWorkspace_sptr background);

@@ -12,6 +12,7 @@ namespace HistogramData {
 class HistogramE;
 class Histogram;
 class BinEdges;
+class Points;
 }
 namespace Algorithms {
 /**Uses cubic splines to interpolate the mean rate of change of the integral
@@ -103,7 +104,7 @@ protected:
   noInterpolation(const HistogramData::Histogram &oldHistogram,
                   const HistogramData::BinEdges &xNew) const;
 
-  double estimateError(const std::vector<double> &xsOld,
+  double estimateError(const HistogramData::Points &xsOld,
                        const HistogramData::HistogramE &esOld,
                        const double xNew) const;
 };

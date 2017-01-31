@@ -120,12 +120,10 @@ void IQTransform::exec() {
   outputWS->setSharedY(0, tmpWS->sharedY(0));
   outputWS->setSharedE(0, tmpWS->sharedE(0));
 
-  auto &Y = outputWS->mutableY(0);
-
   // Subtract a constant background if requested
   const double background = getProperty("BackgroundValue");
   if (background > 0.0)
-    subtractBackgroundValue(Y, background);
+    outputWS->mutableY(0) -= background;
 
   // Select the desired transformation function and call it
   TransformFunc f = m_transforms.find(getProperty("TransformType"))->second;
@@ -136,18 +134,6 @@ void IQTransform::exec() {
   if (!m_label->caption().empty())
     outputWS->getAxis(0)->unit() = m_label;
   setProperty("OutputWorkspace", outputWS);
-}
-
-/** Subtracts a constant from the data values in the given workspace
- *  @param Y :: The vector from which to subtract
- *  @param value :: The value to subtract from each data point
- */
-void IQTransform::subtractBackgroundValue(HistogramData::HistogramY &Y,
-                                          const double value) {
-  g_log.debug() << "Subtracting the background value " << value
-                << " from the input workspace.\n";
-  std::transform(Y.cbegin(), Y.cend(), Y.begin(),
-                 std::bind2nd(std::minus<double>(), value));
 }
 
 /** Uses the Minus algorithm to subtract the background workspace from the given
