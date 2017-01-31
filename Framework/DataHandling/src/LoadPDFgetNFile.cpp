@@ -373,24 +373,21 @@ void LoadPDFgetNFile::generateDataWorkspace() {
   // 3. Set number
   size_t numspec = outWS->getNumberHistograms();
   for (size_t i = 0; i < numspec; ++i) {
-    auto baseindex = i * size;
+    auto &X = outWS->mutableX(i);
+    auto &Y = outWS->mutableY(i);
+    auto &E = outWS->mutableE(i);
 
-    // Forward and reverse directions evaluated
-    auto startX = mData[0].cbegin() + baseindex;
-    auto startXR = mData[0].rend() - mData[0].size() - baseindex;
-    auto startY = mData[1].begin() + baseindex;
-    auto startYR = mData[1].rend() - mData[0].size() - baseindex;
-    auto startE = mData[2].begin() + baseindex;
-    auto startER = mData[2].rend() - mData[0].size() - baseindex;
+    size_t baseindex = i * size;
+    for (size_t j = 0; j < size; ++j) {
+      size_t index;
+      if (xascend)
+        index = j;
+      else
+        index = (size - 1) - j;
 
-    if (xascend) {
-      outWS->mutableX(i).assign(startX, startX + size);
-      outWS->mutableY(i).assign(startY, startY + size);
-      outWS->mutableE(i).assign(startE, startE + size);
-    } else {
-      outWS->mutableX(i).assign(startXR, startXR + size);
-      outWS->mutableY(i).assign(startYR, startYR + size);
-      outWS->mutableE(i).assign(startER, startER + size);
+      X[index] = mData[0][baseindex + j];
+      Y[index] = mData[1][baseindex + j];
+      E[index] = mData[2][baseindex + j];
     }
   }
 }
