@@ -312,16 +312,16 @@ size_t calcVecSize(const std::vector<double> &data0,
 
 void LoadPDFgetNFile::checkSameSize(const std::vector<size_t> &numptsvec,
                                     size_t numsets) {
-  size_t set = 1;
-  bool samesize = std::all_of(
-      numptsvec.begin() + 1, numptsvec.end(), [=](size_t val) mutable {
-        g_log.information() << "Set " << set
-                            << ":  Number of Points = " << numptsvec[set]
-                            << '\n';
-        ++set;
-        return val == numptsvec[0];
-      });
-
+  bool samesize = true;
+  for (size_t i = 0; i < numsets; ++i) {
+    if (i > 0) {
+      if (numptsvec[i] != numptsvec[i - 1]) {
+        samesize = false;
+      }
+    }
+    g_log.information() << "Set " << i
+                        << ":  Number of Points = " << numptsvec[i] << '\n';
+  }
   if (!samesize) {
     stringstream errmsg;
     errmsg << "Multiple bank (number of banks = " << numsets
