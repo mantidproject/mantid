@@ -91,7 +91,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-void testExec_DXNoData() {
+  void testExec_DXNoData() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
@@ -111,9 +111,9 @@ void testExec_DXNoData() {
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
     AnalysisDataService::Instance().remove(m_name);
-}
-  
-void testExec_DX() {
+  }
+
+  void testExec_DX() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
