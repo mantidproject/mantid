@@ -57,6 +57,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadRKH)
  * @param y :: histogram data counts to fill
  * @param ye :: histogram data count standard deviations to fill
  * @param xe :: histogram data point standard deviations to fill
+ * @param prog :: handle to progress bar
  * @param readXError :: whether to read x errors (optional, default: false)
  */
 void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
