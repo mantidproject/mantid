@@ -281,7 +281,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
       WorkspaceFactory::Instance().create("Workspace2D", ny, nx + 1, nx);
 
   // set the x-values
-  Mantid::MantidVec &X = outputWorkspace->mutableX(0);
+  auto &X = outputWorkspace->mutableX(0);
   double dx = xDim->getBinWidth();
   double x = xDim->getMinimum();
   for (auto ix = X.begin(); ix != X.end(); ++ix, x += dx) {

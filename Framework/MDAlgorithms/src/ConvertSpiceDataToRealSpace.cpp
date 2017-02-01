@@ -341,14 +341,14 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
     pos[0] = tmpdet->getPos().X();
     pos[1] = tmpdet->getPos().Y();
     pos[2] = tmpdet->getPos().Z();
-    tempws->dataX(i)[0] = pos[0];
-    tempws->dataX(i)[0] = pos[0] + 0.01;
+    tempws->mutableX(i)[0] = pos[0];
+    tempws->mutableX(i)[0] = pos[0] + 0.01;
     double yvalue = tablews->cell<double>(irow, anodelist[i].second);
-    tempws->dataY(i)[0] = yvalue;
+    tempws->mutableY(i)[0] = yvalue;
     if (yvalue >= 1)
-      tempws->dataE(i)[0] = sqrt(yvalue);
+      tempws->mutableE(i)[0] = sqrt(yvalue);
     else
-      tempws->dataE(i)[0] = 1;
+      tempws->mutableE(i)[0] = 1;
     // update X-range, Y-range and Z-range
     for (size_t d = 0; d < 3; ++d) {
       if (pos[d] < m_extentMins[d])
@@ -619,8 +619,8 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
     for (std::size_t i = 0; i < nHist; ++i) {
       // For each spectrum/detector
       Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
-      const MantidVec &vecsignal = thisWorkspace->readY(i);
-      const MantidVec &vecerror = thisWorkspace->readE(i);
+      const auto &vecsignal = thisWorkspace->y(i);
+      const auto &vecerror = thisWorkspace->e(i);
       float signal = static_cast<float>(vecsignal[0]);
       float error = static_cast<float>(vecerror[0]);
       detid_t detid = det->getID() + detindex;
@@ -767,7 +767,7 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
       detid_t detid = ws->getDetector(iws)->getID();
       detiter = detEffMap.find(detid);
       if (detiter != detEffMap.end())
-        ws->dataY(iws)[0] /= detiter->second;
+        ws->mutableY(iws)[0] /= detiter->second;
     }
   }
 }

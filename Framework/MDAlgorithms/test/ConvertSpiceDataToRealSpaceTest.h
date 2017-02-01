@@ -442,4 +442,34 @@ public:
   }
 };
 
+class ConvertSpiceDataToRealSpaceTestPerformance : public CxxTest::TestSuite {
+public:
+	static ConvertSpiceDataToRealSpaceTestPerformance *createSuite(){
+	return new ConvertSpiceDataToRealSpaceTestPerformance;
+}
+	static void destroySuite(ConvertSpiceDataToRealSpaceTestPerformance *suite){delete suite;}
+	  
+	ConvertSpiceDataToRealSpaceTestPerformance(){
+
+	}
+
+	void test_ConvertMDhistoToMatrixWorkspace(){
+	  MatrixWorkspace_sptr dataws =
+        WorkspaceFactory::Instance().create("Workspace2D", 44, 2, 1);
+    AnalysisDataService::Instance().addOrReplace("EmptyWS", dataws);
+
+    LoadInstrument loader;
+    loader.initialize();
+
+    loader.setProperty("InstrumentName", "HB2A");
+    loader.setProperty("Workspace", dataws);
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+
+}
+private:
+};
 #endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_ */
