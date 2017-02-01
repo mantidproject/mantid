@@ -1627,7 +1627,8 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
   return directoryName;
 }
 /**
- * Fills the internal cache of instrument definition directories
+ * Fills the internal cache of instrument definition directories and creates
+ * The %appdata%/mantidproject/mantid or $home/.mantid directory.
  *
  * This will normally contain from Index 0
  * - The download directory (win %appdata%/mantidproject/mantid/instrument)
@@ -1638,21 +1639,21 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_InstrumentDirs.clear();
 
+  Poco::Path path(getAppDataDir());
+  path.makeDirectory(); // making this directory is a necessary side effect
+  path.pushDirectory("instrument");
+
   // only use downloaded instruments if configured to download
   const std::string updateInstrStr =
       this->getString("UpdateInstrumentDefinitions.OnStartup");
   if (updateInstrStr.compare("1") == 0 || updateInstrStr.compare("on") == 0 ||
       updateInstrStr.compare("On") == 0) {
-    Poco::Path path(getAppDataDir());
-    path.makeDirectory();
-    path.pushDirectory("instrument");
-    std::string appdatadir = path.toString();
+    const std::string appdatadir = path.toString();
     addDirectoryifExists(appdatadir, m_InstrumentDirs);
   }
 
 #ifndef _WIN32
-  std::string etcdatadir = "/etc/mantid/instrument";
-  addDirectoryifExists(etcdatadir, m_InstrumentDirs);
+  addDirectoryifExists("/etc/mantid/instrument", m_InstrumentDirs);
 #endif
 
   // Determine the search directory for XML instrument definition files (IDFs)
