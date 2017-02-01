@@ -93,24 +93,15 @@ def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
 
 
 def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
-    index = 0
-    output_workspaces = []
+    output_workspaces = list(workspaces_to_mask)
 
-    for bank_mask_list in mask_list:
-        if not bank_mask_list:
-            continue
-
-        output_name = "masked_vanadium-" + str(index + 1)
-        out_workspace = None
+    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
+        output_name = "masked_vanadium-" + str(ws_index + 1)
         for mask_params in bank_mask_list:
-            out_workspace = mantid.MaskBins(InputWorkspace=workspaces_to_mask[index], OutputWorkspace=output_name,
-                                            XMin=mask_params[0], XMax=mask_params[1])
-        if out_workspace:
-            output_workspaces.append(out_workspace)
-
-        index += 1
-
-    return output_workspaces
+            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
+                                                          OutputWorkspace=output_name,
+                                                          XMin=mask_params[0], XMax=mask_params[1])
+    return workspaces_to_mask
 
 
 def _generate_splined_van_name(chopper_on, vanadium_run_string):
@@ -131,9 +122,11 @@ def _read_masking_file(masking_file_path):
         for line in mask_file:
             if line.startswith(ignore_line_prefixes):
                 # Push back onto new bank
-                all_banks_masking_list.append(bank_masking_list)
+                if bank_masking_list:
+                    all_banks_masking_list.append(bank_masking_list)
                 bank_masking_list = []
             else:
+                # Parse and store in current list
                 line.rstrip()
                 bank_masking_list.append(line.split())
 
