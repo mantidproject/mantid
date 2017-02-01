@@ -2,11 +2,12 @@
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -59,6 +60,10 @@ private:
   void checkOverlap(int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse,
                     double radius);
+
+  /// Set the spectrum on the workspace from a signal array
+  void setSpectrum(Mantid::DataObjects::Workspace2D_sptr ws, size_t index,
+                   const std::vector<double> &signal) const;
 };
 
 } // namespace Mantid

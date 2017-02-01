@@ -411,28 +411,20 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                       static_cast<coord_t>(PeakRadius),
                                       static_cast<coord_t>(cylinderLength),
                                       signal, errorSquared, signal_fit);
-      for (size_t j = 0; j < numSteps; j++) {
-        wsProfile2D->dataX(i)[j] = static_cast<double>(j);
-        wsProfile2D->dataY(i)[j] = signal_fit[j];
-        wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
-      }
 
       // Integrate around the background radius
       if (BackgroundOuterRadius > PeakRadius) {
         // Get the total signal inside "BackgroundOuterRadius"
 
         signal_fit.clear();
-        for (size_t j = 0; j < numSteps; j++)
-          signal_fit.push_back(0.0);
+        std::fill(signal_fit.begin(), signal_fit.end(), 0.0);
+
         ws->getBox()->integrateCylinder(
             cylinder, static_cast<coord_t>(BackgroundOuterRadius),
             static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared,
             signal_fit);
-        for (size_t j = 0; j < numSteps; j++) {
-          wsProfile2D->dataX(i)[j] = static_cast<double>(j);
-          wsProfile2D->dataY(i)[j] = signal_fit[j];
-          wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
-        }
+
+        setSpectrum(wsProfile2D, i, signal_fit);
 
         // Evaluate the signal inside "BackgroundInnerRadius"
         signal_t interiorSignal = 0;
@@ -471,20 +463,16 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       } else {
-        for (size_t j = 0; j < numSteps; j++) {
-          wsProfile2D->dataX(i)[j] = static_cast<double>(j);
-          wsProfile2D->dataY(i)[j] = signal_fit[j];
-          wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
-        }
+        setSpectrum(wsProfile2D, i, signal_fit);
       }
 
       if (profileFunction.compare("NoFit") == 0) {
         signal = 0.;
         for (size_t j = 0; j < numSteps; j++) {
           if (j < peakMin || j > peakMax)
-            background_total = background_total + wsProfile2D->dataY(i)[j];
+            background_total = background_total + wsProfile2D->mutableY(i)[j];
           else
-            signal = signal + wsProfile2D->dataY(i)[j];
+            signal = signal + wsProfile2D->mutableY(i)[j];
         }
         errorSquared = std::fabs(signal);
       } else {
@@ -555,18 +543,21 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             FunctionFactory::Instance().createInitialized(fun_str.str());
         boost::shared_ptr<const CompositeFunction> fun =
             boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
-        const Mantid::MantidVec &x = wsProfile2D->readX(i);
-        wsFit2D->dataX(i) = x;
-        wsDiff2D->dataX(i) = x;
-        FunctionDomain1DVector domain(x);
+        const auto &x = wsProfile2D->x(i);
+        wsFit2D->mutableX(i) = x;
+        wsDiff2D->mutableX(i) = x;
+        FunctionDomain1DVector domain(x.rawData());
         FunctionValues yy(domain);
         fun->function(domain, yy);
-        const Mantid::MantidVec &yValues = wsProfile2D->readY(i);
-        for (size_t j = 0; j < numSteps; j++) {
-          wsFit2D->dataY(i)[j] = yy[j];
-          wsDiff2D->dataY(i)[j] = yValues[j] - yy[j];
-        }
 
+        const auto &yValues = wsProfile2D->y(i);
+        auto &fit2DY = wsFit2D->mutableY(i);
+        auto &diff2DY = wsDiff2D->mutableY(i);
+        auto funcValues = yy.toVector();
+        fit2DY = funcValues;
+        std::transform(yValues.begin(), yValues.end(), funcValues.begin(),
+                       diff2DY.begin(), std::minus<double>());
+        //
         // Calculate intensity
         signal = 0.0;
         if (integrationOption.compare("Sum") == 0) {
@@ -667,6 +658,28 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   }
   // Save the output
   setProperty("OutputWorkspace", peakWS);
+}
+
+/**
+ * Set the values on a single spectrum in the given workspace
+ *
+ * This will set the x values to be the range 0 to n where n is the number of
+ * points. y will be set to the signal values. e will be set to sqrt(y).
+ *
+ * @param ws :: the workspace to set the spectrum on
+ * @param index :: the workspace index to set the values on
+ * @param signal :: the signal array to set on the y values to
+ */
+void IntegratePeaksMD2::setSpectrum(Workspace2D_sptr ws, size_t index,
+                                    const std::vector<double> &signal) const {
+  auto &x = ws->mutableX(index);
+  auto &y = ws->mutableY(index);
+  auto &e = ws->mutableE(index);
+
+  std::iota(x.begin(), x.end(), 0);
+  y = signal;
+  std::transform(y.begin(), y.end(), e.begin(),
+                 [](double value) { return std::sqrt(value); });
 }
 
 /*
