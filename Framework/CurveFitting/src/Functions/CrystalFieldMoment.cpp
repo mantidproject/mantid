@@ -36,12 +36,11 @@ void calculate(double *out, const double *xValues, const size_t nData,
   int nlevels = ham.len1();
   // x-data is the temperature.
   for (size_t iT = 0; iT < nData; iT++) {
-    double expfact;
     double Z = 0.;
     double M = 0.;
     const double beta = 1 / (k_B * xValues[iT]);
     for (auto iE = 1; iE <= nlevels; iE++) {
-      expfact = exp(-beta * en(iE));
+      double expfact = exp(-beta * en(iE));
       Z += expfact;
       M += moment(iE) * expfact;
     }

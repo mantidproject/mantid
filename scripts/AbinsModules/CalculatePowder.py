@@ -65,6 +65,10 @@ class CalculatePowder(object):
             first_frequency = AbinsModules.AbinsConstants.FIRST_MOLECULAR_VIBRATION
         frequencies = k_data["frequencies"][first_frequency:]
 
+        if min(frequencies) <= AbinsModules.AbinsParameters.acoustic_phonon_threshold:
+            raise ValueError("Frequencies which correspond to soft phonons found. Your structure is unstable or you "
+                             "need to perform DFT phonon calculation with higher accuracy.")
+
         powder = AbinsModules.PowderData(num_atoms=num_atoms)
 
         # Notation for  indices:

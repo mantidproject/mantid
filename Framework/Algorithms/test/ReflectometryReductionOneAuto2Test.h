@@ -464,9 +464,6 @@ public:
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
 
-    for (size_t i = 0; i < outQ->blocksize(); i++)
-      std::cout << outLam->x(0)[i] << "\n";
-
     TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outQ->blocksize(), 8);
     // X range in outLam

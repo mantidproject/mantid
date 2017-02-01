@@ -61,6 +61,7 @@ public:
     AddPeak,
     ErasePeak,
     ComparePeak,
+    AlignPeak,
     SingleDetectorSelection,
     Tube,
     Draw
@@ -72,6 +73,7 @@ public:
     PeakSelect,
     PeakErase,
     PeakCompare,
+    PeakAlign,
     DrawEllipse,
     DrawRectangle,
     DrawFree,
@@ -105,6 +107,8 @@ private slots:
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                  const Mantid::Geometry::IPeak *peak);
   void
   comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
                                std::vector<Mantid::Geometry::IPeak *>> &peaks);
@@ -126,6 +130,7 @@ private:
   QPushButton *m_peak; ///< Button switching on peak creation mode
   QPushButton *m_peakSelect;  ///< Button switching on peak selection mode
   QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
+  QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
   QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
   /// selection region
   QPushButton *
@@ -189,6 +194,8 @@ public slots:
   void displayComparePeaksInfo(
       const std::pair<std::vector<Mantid::Geometry::IPeak *>,
                       std::vector<Mantid::Geometry::IPeak *>> &peaks);
+  void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                             const Mantid::Geometry::IPeak *peak);
   void clear();
 
 private:

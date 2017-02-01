@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/cow_ptr.h"
@@ -76,7 +77,8 @@ private:
    *
    * @param length the size of a given axis
    */
-  void getAxisLength(int &length);
+  void getAxisLength(size_t &length);
+
   /**
    * Function to parse and store the actual axis values. Again, read order
    * determines the axis.
@@ -84,14 +86,42 @@ private:
    * @param axis the array to store the axis values
    * @param length the size of the axis
    */
-  void getAxisValues(MantidVec *axis, const std::size_t length);
+  void getAxisValues(std::vector<double> &axis, const std::size_t length);
+
   /**
    * Function to parse and store the signal and errors from the data file.
    *
-   * @param data the array to store the signal values
-   * @param errs the array to store the error values
+   * @param workspace handle to the workspace to to load data into
    */
-  void getData(std::vector<MantidVec *> &data, std::vector<MantidVec *> &errs);
+  void getData(API::MatrixWorkspace_sptr workspace);
+
+  /**
+   * Function to setup the workspace ready for data to be loaded into it
+   *
+   * @return a new handle to the workspace
+   */
+  API::MatrixWorkspace_sptr setupWorkspace() const;
+
+  /**
+   * Function to set the workspace axes
+   *
+   * @param workspace handle to the workspace to set axes on
+   * @param xAxis the x axis data
+   * @param yAxis the y axis data
+   */
+  void setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
+                        const std::vector<double> &xAxis,
+                        const std::vector<double> &yAxis) const;
+
+  /**
+   * Convert a workspace to a histogram
+   *
+   * @param workspace handle to the distribution workspace to convert to a
+   * histogram
+   */
+  API::MatrixWorkspace_sptr
+  convertWorkspaceToHistogram(API::MatrixWorkspace_sptr workspace);
+
   /**
    * Function to read a line from the data file. Makes handling comment lines
    * easy.
@@ -103,9 +133,9 @@ private:
   /// Placeholder for file lines
   std::string line;
   /// The number of groups present in the data file
-  int nGroups;
+  std::size_t nGroups;
   /// The size of the x-axis in the data file
-  int xLength;
+  std::size_t xLength;
 };
 
 } // namespace DataHandling

@@ -60,6 +60,7 @@ Bug Fixes
 - If a run is aborted and restarted, the ``running`` log in the workspace will correctly reflect this. (``running`` will be false at all times before the abort.)
 - Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.
 - Issues with :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` with  **Return Background** option returning fake values has been fixed.
+- :ref:`ShiftLogTime <algm-ShiftLogTime>` now correctly handles shift in the negative direction
 
 Deprecated
 ##########

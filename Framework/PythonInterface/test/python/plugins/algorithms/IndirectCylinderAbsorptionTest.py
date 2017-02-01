@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import LoadNexusProcessed, IndirectCylinderAbsorption
 from mantid.api import *
 
 
@@ -44,7 +44,8 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
 
         corrected, fact = IndirectCylinderAbsorption(SampleWorkspace=self._red_ws,
                                                      SampleChemicalFormula='H2-O',
-                                                     Events=500)
+                                                     Events=500,
+                                                     Version = 1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -58,7 +59,8 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
                                                      CanWorkspace=self._can_ws,
                                                      SampleChemicalFormula='H2-O',
                                                      UseCanCorrections=False,
-                                                     Events=500)
+                                                     Events=500,
+                                                     Version = 1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -74,7 +76,8 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
                                                      CanScaleFactor=0.8,
                                                      SampleChemicalFormula='H2-O',
                                                      UseCanCorrections=False,
-                                                     Events=500)
+                                                     Events=500,
+                                                     Version = 1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -89,7 +92,8 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
                                                      SampleChemicalFormula='H2-O',
                                                      CanChemicalFormula='V',
                                                      UseCanCorrections=True,
-                                                     Events=500)
+                                                     Events=500,
+                                                     Version = 1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -108,7 +112,8 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
                                                      CanDensityType='Number Density',
                                                      CanDensity=0.5,
                                                      Events=200,
-                                                     UseCanCorrections=True)
+                                                     UseCanCorrections=True,
+                                                     Version = 1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -127,7 +132,8 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
                                                      CanDensityType='Mass Density',
                                                      CanDensity=0.5,
                                                      Events=200,
-                                                     UseCanCorrections=True)
+                                                     UseCanCorrections=True,
+                                                     Version = 1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
