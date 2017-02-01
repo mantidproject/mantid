@@ -62,7 +62,7 @@ endif ()
 ###########################################################################
 
 add_custom_target ( FrameworkTests ) # target for all framework tests
-add_dependencies ( check FrameworkTests )
+add_dependencies ( mantid-check FrameworkTests )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)

@@ -1,7 +1,7 @@
 include( ExternalProject )
 ExternalProject_Add(eigen
   HG_REPOSITORY     https://bitbucket.org/eigen/eigen/
-  HG_TAG            "3.3.2"
+  HG_TAG            "3.2.10"
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/eigen-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/eigen-build"
   CONFIGURE_COMMAND ""
