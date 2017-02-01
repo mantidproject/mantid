@@ -178,8 +178,6 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   if (m_lastIndex[thread] == index)
     return *m_lastDetector[thread];
 
-  m_lastIndex[thread] = index;
-
   // Note: This function body has big overlap with the method
   // MatrixWorkspace::getDetector(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
@@ -204,7 +202,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
-
+  m_lastIndex[thread] = index;
   return *m_lastDetector[thread];
 }
 
