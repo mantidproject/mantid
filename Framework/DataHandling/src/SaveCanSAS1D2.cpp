@@ -163,7 +163,7 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans,
   if (lambda_unit.empty() || lambda_unit == "Angstrom")
     lambda_unit = "A";
 
-  auto &xdata = m_ws->points(0);
+  auto xdata = m_ws->points(0);
   auto &ydata = m_ws->y(0);
   auto &edata = m_ws->e(0);
   for (size_t j = 0; j < m_ws->blocksize(); ++j) {
