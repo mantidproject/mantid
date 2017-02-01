@@ -1,17 +1,17 @@
 #include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidAPI/ExperimentInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/MDBoxBase.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -290,8 +290,8 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     int scanid = m_expDataTableWS->cell<int>(ir, m_iColScan);
     g_log.notice() << "[DB] Scan = " << scanid << "\n";
     int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
-    g_log.notice() << "Pt = " << runid << "\n" << m_iTime
-                   << "-th for time/duration"
+    g_log.notice() << "Pt = " << runid << "\n"
+                   << m_iTime << "-th for time/duration"
                    << "\n";
     double time(0.);
     try {
@@ -404,10 +404,10 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   // number, i.e., one 2D XML file
   Kernel::V3D sourcePos = dataws->getInstrument()->getSource()->getPos();
   Kernel::V3D samplePos = dataws->getInstrument()->getSample()->getPos();
-  if (dataws->readX(0).size() != 2)
+  if (dataws->x(0).size() != 2)
     throw std::runtime_error(
         "Input matrix workspace has wrong dimension in X-axis.");
-  double momentum = 0.5 * (dataws->readX(0)[0] + dataws->readX(0)[1]);
+  double momentum = 0.5 * (dataws->x(0)[0] + dataws->x(0)[1]);
   Kernel::V3D ki = (samplePos - sourcePos) * (momentum / sourcePos.norm());
 
   g_log.debug() << "Source at " << sourcePos.toString()
@@ -421,7 +421,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   size_t nummdevents = 0;
   for (size_t iws = 0; iws < numspec; ++iws) {
     // Get detector positions and signal
-    double signal = dataws->readY(iws)[0];
+    double signal = dataws->y(iws)[0];
     // Skip event with 0 signal
     if (fabs(signal) < 0.001)
       continue;
@@ -696,10 +696,10 @@ void ConvertCWSDExpToMomentum::removeBackground(
 
   size_t numhist = dataws->getNumberHistograms();
   for (size_t i = 0; i < numhist; ++i) {
-    double bkgd_y = m_backgroundWS->readY(i)[0];
+    double bkgd_y = m_backgroundWS->y(i)[0];
     if (fabs(bkgd_y) > 1.E-2) {
-      dataws->dataY(i)[0] -= bkgd_y;
-      dataws->dataE(i)[0] = std::sqrt(dataws->readY(i)[0]);
+      dataws->mutableY(i)[0] -= bkgd_y;
+      dataws->mutableE(i)[0] = std::sqrt(dataws->y(i)[0]);
     }
   }
 }
