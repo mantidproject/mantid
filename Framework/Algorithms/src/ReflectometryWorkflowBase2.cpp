@@ -317,8 +317,8 @@ ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
   return outputWS;
 }
 
-/** Process an input workspace in TOF according to specified processing commands to get
-* a detector workspace in wavelength.
+/** Process an input workspace in TOF according to specified processing commands
+* to get a detector workspace in wavelength.
 * @param inputWS :: the input workspace in TOF
 * @return :: the detector workspace in wavelength
 */
