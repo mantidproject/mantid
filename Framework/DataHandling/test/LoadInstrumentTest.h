@@ -1,7 +1,6 @@
 #ifndef LOADINSTRUMENTTEST_H_
 #define LOADINSTRUMENTTEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DetectorInfo.h"
@@ -11,8 +10,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -107,7 +107,7 @@ public:
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDet103 = detectorInfo.detector(103);
+    const auto &ptrDet103 = detectorInfo.detector(102);
     TS_ASSERT_EQUALS(ptrDet103.getID(), 103);
     TS_ASSERT_EQUALS(ptrDet103.getName(), "pixel");
     TS_ASSERT_DELTA(ptrDet103.getPos().X(), 0.4013, 0.01);
@@ -128,7 +128,7 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 258);
 
     auto ids_from_map = output->getSpectrum(257).getDetectorIDs();
-	const auto &spectrumInfo = output->spectrumInfo();
+    const auto &spectrumInfo = output->spectrumInfo();
     const auto &det_from_ws = spectrumInfo.detector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);
@@ -136,10 +136,12 @@ public:
 
     // also a few tests on the last detector and a test for the one beyond the
     // last
-    const auto &ptrDetLast = detectorInfo.detector(413256);
+    const auto &ptrDetLast =
+        detectorInfo.detector(detectorInfo.indexOf(413256));
     TS_ASSERT_EQUALS(ptrDetLast.getID(), 413256);
     TS_ASSERT_EQUALS(ptrDetLast.getName(), "pixel");
-    //TS_ASSERT_THROWS_ANYTHING(detectorInfo.detector(413257));
+    TS_ASSERT_THROWS_ANYTHING(
+        detectorInfo.detector(detectorInfo.indexOf(413257)));
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst =
@@ -215,13 +217,13 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
-	const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(101);
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(101));
     TS_ASSERT_EQUALS(ptrDet.getID(), 101);
 
     TS_ASSERT(output->detectorInfo().isMonitor(0));
 
-    const auto &ptrDetShape = detectorInfo.detector(102);
+    const auto &ptrDetShape = detectorInfo.detector(detectorInfo.indexOf(102));
     TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.0) + ptrDetShape.getPos()));
     TS_ASSERT(
         ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
@@ -275,7 +277,7 @@ public:
             wsName));
 
     const auto &detectorInfo = output->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(20201001);
+    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20201001));
     TS_ASSERT_EQUALS(ptrDet.getName(), "det 1");
     TS_ASSERT_EQUALS(ptrDet.getID(), 20201001);
     TS_ASSERT_DELTA(ptrDet.getPos().X(), -0.0909, 0.0001);
@@ -379,12 +381,24 @@ public:
 
     // Check the positions of the 6 detectors in the physical instrument
     const auto &physicalDetectorInfo = ws->detectorInfo();
-    TS_ASSERT_EQUALS(physicalDetectorInfo.position(1000), V3D(0, 0, 0));
-    TS_ASSERT_EQUALS(physicalDetectorInfo.position(1001), V3D(0, 1, 0));
-    TS_ASSERT_EQUALS(physicalDetectorInfo.position(1002), V3D(1, 0, 0));
-    TS_ASSERT_EQUALS(physicalDetectorInfo.position(1003), V3D(1, 1, 0));
-    TS_ASSERT_EQUALS(physicalDetectorInfo.position(1004), V3D(2, 0, 0));
-    TS_ASSERT_EQUALS(physicalDetectorInfo.position(1005), V3D(2, 1, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1000)),
+        V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1001)),
+        V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1002)),
+        V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1003)),
+        V3D(1, 1, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1004)),
+        V3D(2, 0, 0));
+    TS_ASSERT_EQUALS(
+        physicalDetectorInfo.position(physicalDetectorInfo.indexOf(1005)),
+        V3D(2, 1, 0));
 
     // Check the right instrument ended up on the workspace
     TS_ASSERT_EQUALS(neutronicInst.get(),
@@ -394,7 +408,8 @@ public:
     TS_ASSERT_EQUALS(neutronicInst->getDetector(1001)->getPos(), V3D(2, 3, 0));
     TS_ASSERT_EQUALS(neutronicInst->getDetector(1002)->getPos(), V3D(3, 2, 0));
     TS_ASSERT_EQUALS(neutronicInst->getDetector(1003)->getPos(), V3D(3, 3, 0));
-    // Note that one of the physical pixels doesn't exist in the neutronic space
+    // Note that one of the physical pixels doesn't exist in the neutronic
+    // space
     TS_ASSERT_THROWS(neutronicInst->getDetector(1004),
                      Exception::NotFoundError);
     TS_ASSERT_EQUALS(neutronicInst->getDetector(1005)->getPos(), V3D(4, 3, 0));
@@ -406,7 +421,8 @@ public:
     // ...but not in the neutronic instrument
     TS_ASSERT_DIFFERS(neutronicInst->getDetector(1000)->shape(),
                       neutronicInst->getDetector(1001)->shape())
-    // Also, the same shape is shared between the corresponding '1000' detectors
+    // Also, the same shape is shared between the corresponding '1000'
+    // detectors
     TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
                      neutronicInst->getDetector(1000)->shape())
 
@@ -456,8 +472,9 @@ public:
     instLoader.setRethrows(true);
     instLoader.initialize();
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty(
+        "Workspace",
+        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXML);
     instLoader.setProperty(
         "InstrumentName",
@@ -471,8 +488,9 @@ public:
   void test_failure_if_InstrumentXML_property_set_but_not_InstrumentName() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty(
+        "Workspace",
+        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", "<doesn't matter what>");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     TS_ASSERT(!instLoader.execute())
@@ -481,8 +499,9 @@ public:
   void test_failure_if_InstrumentXML_is_malformed() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty(
+        "Workspace",
+        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", "<instrument>");
     instLoader.setProperty("InstrumentName", "Nonsense");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -527,8 +546,9 @@ public:
     LoadInstrument instLoader;
     instLoader.setRethrows(true);
     instLoader.initialize();
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty(
+        "Workspace",
+        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXML);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     instLoader.setProperty(
@@ -548,8 +568,9 @@ public:
         instrumentXML, "<!-- view -->",
         "<default-view view=\"cylindrical_y\"/>");
 
-    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
-                                            "EventWorkspace", 1, 1, 1));
+    instLoader.setProperty(
+        "Workspace",
+        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXMLwithView);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     instLoader.setProperty(
