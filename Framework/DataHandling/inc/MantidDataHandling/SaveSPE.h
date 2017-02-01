@@ -100,8 +100,10 @@ private:
 
   // method verifies if a spectra contains any NaN or Inf values and replaces
   // these values with SPE-specified constants
-  void check_and_copy_spectra(const std::vector<double> &inSignal, const std::vector<double> &inErr,
-                              std::vector<double> &Signal, std::vector<double> &Error) const;
+  void check_and_copy_spectra(const std::vector<double> &inSignal,
+                              const std::vector<double> &inErr,
+                              std::vector<double> &Signal,
+                              std::vector<double> &Error) const;
 };
 
 } // namespace DataHandling

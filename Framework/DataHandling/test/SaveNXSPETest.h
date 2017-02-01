@@ -163,8 +163,8 @@ private:
   }
 
   typedef boost::tuple<boost::shared_array<hsize_t>,
-                       boost::shared_array<double>, boost::shared_array<double>>
-      DataHolder;
+                       boost::shared_array<double>,
+                       boost::shared_array<double>> DataHolder;
 
   DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr inputWS) {
     SaveNXSPE saver;

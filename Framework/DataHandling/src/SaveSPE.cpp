@@ -260,7 +260,8 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
 
 */
 void SaveSPE::check_and_copy_spectra(const std::vector<double> &inSignal,
-                                     const std::vector<double> &inErr, std::vector<double> &Signal,
+                                     const std::vector<double> &inErr,
+                                     std::vector<double> &Signal,
                                      std::vector<double> &Error) const {
   if (Signal.size() != inSignal.size()) {
     Signal.resize(inSignal.size());
@@ -284,7 +285,8 @@ void SaveSPE::check_and_copy_spectra(const std::vector<double> &inSignal,
 */
 void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
                         FILE *const outFile, const int wsIn) const {
-  check_and_copy_spectra(WS->y(wsIn).rawData(), WS->e(wsIn).rawData(), m_tSignal, m_tError);
+  check_and_copy_spectra(WS->y(wsIn).rawData(), WS->e(wsIn).rawData(),
+                         m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeBins(m_tSignal, outFile);
 
@@ -305,7 +307,8 @@ void SaveSPE::writeMaskFlags(FILE *const outFile) const {
 *  @param Vs :: the array of values to write (must have length given by m_nbins)
 *  @param outFile :: the file object to write to
 */
-void SaveSPE::writeBins(const std::vector<double> &Vs, FILE *const outFile) const {
+void SaveSPE::writeBins(const std::vector<double> &Vs,
+                        FILE *const outFile) const {
 
   for (size_t j = NUM_PER_LINE - 1; j < m_nBins;
        j += NUM_PER_LINE) { // output a whole line of numbers at once
