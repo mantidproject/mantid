@@ -1,14 +1,14 @@
+#include "MantidQtCustomInterfaces/Indirect/JumpFit.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidQtCustomInterfaces/Indirect/JumpFit.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
-#include <string>
 #include <boost/lexical_cast.hpp>
+#include <string>
 
 using namespace Mantid::API;
 
@@ -223,15 +223,16 @@ void JumpFit::loadSettings(const QSettings &settings) {
  */
 void JumpFit::handleSampleInputReady(const QString &filename) {
   // Scale to convert to HWHM
+  QString sample = filename + "_HWHM";
   IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
   scaleAlg->initialize();
   scaleAlg->setProperty("InputWorkspace", filename.toStdString());
-  scaleAlg->setProperty("OutputWorkspace", filename.toStdString() + "_HWHM");
+  scaleAlg->setProperty("OutputWorkspace", sample.toStdString());
   scaleAlg->setProperty("Factor", 0.5);
   scaleAlg->execute();
 
   auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
-      filename.toStdString() + "_HWHM");
+      sample.toStdString());
   auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
   findAllWidths(mws);
@@ -240,9 +241,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
-
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-    QString sample = filename + "_HWHM";
     m_uiForm.ppPlot->clear();
     m_uiForm.ppPlot->addSpectrum("Sample", sample, m_spectraList[currentWidth]);
 
@@ -419,11 +418,10 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
 void JumpFit::clearPlot() {
   m_uiForm.ppPlot->clear();
   const std::string sampleName =
-      (m_uiForm.dsSample->getCurrentDataName().toStdString());
+      (m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM");
   if (sampleName.compare("") != 0) {
     MatrixWorkspace_sptr sample =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName +
-                                                                    "_HWHM");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName);
     if (sample && m_spectraList.size() > 0) {
       m_uiForm.cbWidth->setEnabled(true);
 
