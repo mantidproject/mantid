@@ -191,8 +191,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, line.x.size(), line.y.size());
-  outputWorkspace->dataY(0).assign(line.y.begin(), line.y.end());
-  outputWorkspace->dataE(0).assign(line.e.begin(), line.e.end());
+  outputWorkspace->mutableY(0).assign(line.y.begin(), line.y.end());
+  outputWorkspace->mutableE(0).assign(line.e.begin(), line.e.end());
 
   const size_t numberTransformsToOriginal =
       inputWorkspace->getNumberTransformsToOriginal();
@@ -206,7 +206,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
         NullDeleter());
   }
 
-  assert(line.x.size() == outputWorkspace->dataX(0).size());
+  assert(line.x.size() == outputWorkspace->mutableX(0).size());
 
   std::string xAxisLabel = inputWorkspace->getDimension(id)->getName();
   const bool autoFind = this->getProperty("FindXAxis");
@@ -222,7 +222,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
     VMD wsCoord = start + dir * line.x[i];
 
     VMD inTargetCoord = transform->applyVMD(wsCoord);
-    outputWorkspace->dataX(0)[i] = inTargetCoord[id];
+    outputWorkspace->mutableX(0)[i] = inTargetCoord[id];
   }
 
   boost::shared_ptr<Kernel::Units::Label> labelX =
@@ -281,7 +281,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
       WorkspaceFactory::Instance().create("Workspace2D", ny, nx + 1, nx);
 
   // set the x-values
-  Mantid::MantidVec &X = outputWorkspace->dataX(0);
+  Mantid::MantidVec &X = outputWorkspace->mutableX(0);
   double dx = xDim->getBinWidth();
   double x = xDim->getMinimum();
   for (auto ix = X.begin(); ix != X.end(); ++ix, x += dx) {
@@ -293,8 +293,8 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   for (size_t i = 0; i < ny; ++i) {
     if (i > 0)
       outputWorkspace->setX(i, ptrX);
-    auto &Y = outputWorkspace->dataY(i);
-    auto &E = outputWorkspace->dataE(i);
+    auto &Y = outputWorkspace->mutableY(i);
+    auto &E = outputWorkspace->mutableE(i);
 
     size_t yOffset = i * yStride;
     for (size_t j = 0; j < nx; ++j) {
