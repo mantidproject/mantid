@@ -28,8 +28,7 @@ const signal_t THRESHOLD_SIGNAL = 0;
 IntegratePeaksCWSD::IntegratePeaksCWSD()
     : m_haveMultipleRun(false), m_useSinglePeakCenterFmUser(false),
       m_peakRadius(), m_doMergePeak(false), m_normalizeByMonitor(false),
-      m_normalizeByTime(false), m_scaleFactor(0), m_maskDets(false),
-      m_haveInputPeakWS(false) {}
+      m_normalizeByTime(false), m_scaleFactor(0), m_haveInputPeakWS(false) {}
 
 /** Initialize the algorithm's properties.
  */
@@ -181,10 +180,8 @@ void IntegratePeaksCWSD::processInputs() {
 
   // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
-  m_maskDets = false;
   if (!maskwsname.empty()) {
     // process mask workspace
-    m_maskDets = true;
     m_maskWS = getProperty("MaskWorkspace");
     vecMaskedDetID = processMaskWorkspace(m_maskWS);
   }
