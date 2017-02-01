@@ -629,7 +629,7 @@ class Abins(PythonAlgorithm):
         """
 
         unitx = mtd[wrk].getAxis(0).setUnit("Label")
-        unitx.setLabel("Energy Loss", 'cm^-1')
+        unitx.setLabel("Energy Loss", 'cm<sup>-1</sup>')
 
         mtd[wrk].setYUnitLabel("S /Arbitrary Units")
         mtd[wrk].setYUnit("Arbitrary Units")

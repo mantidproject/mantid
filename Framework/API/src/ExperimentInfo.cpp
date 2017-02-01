@@ -1331,17 +1331,21 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       paramValue += ";" + tokens[4];
 
     if (tokens[2].compare("masked") == 0) {
-      // Do not add masking to ParameterMap, it is stored in DetectorInfo
-      const auto det = dynamic_cast<const Detector *const>(comp);
-      if (!det)
-        throw std::runtime_error(
-            "Found masking for a non-detector component. This is not possible");
       const auto &type = tokens[1];
       const std::string name = "dummy";
       auto param = ParameterFactory::create(type, name);
       param->fromString(paramValue);
       bool value = param->value<bool>();
-      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), value);
+      if (value) {
+        // Do not add masking to ParameterMap, it is stored in DetectorInfo
+        const auto det = dynamic_cast<const Detector *const>(comp);
+        if (!det) {
+          throw std::runtime_error("Found masking for a non-detector "
+                                   "component. This is not possible");
+        } else
+          m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
+                                    value);
+      }
     } else {
       pmap.add(tokens[1], comp, tokens[2], paramValue);
     }
@@ -1370,12 +1374,17 @@ void ExperimentInfo::populateWithParameter(
 
   // Some names are special. Values should be convertible to double
   if (name.compare("masked") == 0) {
-    // Do not add masking to ParameterMap, it is stored in DetectorInfo
-    const auto det = dynamic_cast<const Detector *const>(paramInfo.m_component);
-    if (!det)
-      throw std::runtime_error(
-          "Found masking for a non-detector component. This is not possible");
-    m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()), paramValue);
+    bool value(paramValue);
+    if (value) {
+      // Do not add masking to ParameterMap, it is stored in DetectorInfo
+      const auto det =
+          dynamic_cast<const Detector *const>(paramInfo.m_component);
+      if (!det)
+        throw std::runtime_error(
+            "Found masking for a non-detector component. This is not possible");
+      m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
+                                paramValue);
+    }
   } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
              name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);

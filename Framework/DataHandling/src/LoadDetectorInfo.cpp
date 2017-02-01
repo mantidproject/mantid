@@ -132,7 +132,6 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
     std::istringstream is(line);
     detid_t detID(0);
     int code(0);
-    float droppedFloat(0.0f);
     float delta(0.0f), l2(0.0f), theta(0.0f), phi(0.0f);
     is >> detID >> delta >> l2 >> code >> theta >> phi;
     // offset value is be subtracted so store negative
@@ -144,8 +143,10 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
         continue;
 
       // drop 10 float columns
-      for (int i = 0; i < 10; ++i)
+      for (int i = 0; i < 10; ++i) {
+        float droppedFloat(0.0f);
         is >> droppedFloat;
+      }
 
       // pressure, wall thickness
       float pressure(0.0), thickness(0.0);
