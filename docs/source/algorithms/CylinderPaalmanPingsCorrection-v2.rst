@@ -40,6 +40,7 @@ where :math:`\lambda_{fixed}` is computed from the `Efixed` value corresponding 
 Therefore, in all the modes except **Efixed**, the input workspaces must have the x-axis unit of `Wavelength`.
 In all the modes except **Elastic**, `Efixed` value is needed. By default it will be attempted to be read
 from the instrument parameters, but can be overridden by the homonym property.
+In the **Efixed** mode the `NumberWavelengths` and `Interpolate` options will be ignored.
 
 Usage
 -----
