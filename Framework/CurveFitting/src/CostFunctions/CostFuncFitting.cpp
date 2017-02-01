@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidKernel/Exception.h"
 
 #include <gsl/gsl_multifit_nlin.h>
 #include <limits>
@@ -236,11 +237,11 @@ void CostFuncFitting::reset() const {
  * @param params :: A vector to copy the parameters from
  */
 void CostFuncFitting::setParameters(const GSLVector &params) {
-  if (nParams() != params.size()) {
-    throw std::runtime_error(
-        "Parameter vector has wrong size in CostFuncLeastSquares.");
+  auto np = nParams();
+  if (np != params.size()) {
+    throw Kernel::Exception::FitSizeWarning(params.size(), np);
   }
-  for (size_t i = 0; i < nParams(); ++i) {
+  for (size_t i = 0; i < np; ++i) {
     setParameter(i, params.get(i));
   }
   m_function->applyTies();
@@ -251,10 +252,11 @@ void CostFuncFitting::setParameters(const GSLVector &params) {
  * @param params :: A vector to copy the parameters to
  */
 void CostFuncFitting::getParameters(GSLVector &params) const {
-  if (params.size() != nParams()) {
-    params.resize(nParams());
+  auto np = nParams();
+  if (params.size() != np) {
+    params.resize(np);
   }
-  for (size_t i = 0; i < nParams(); ++i) {
+  for (size_t i = 0; i < np; ++i) {
     params.set(i, getParameter(i));
   }
 }

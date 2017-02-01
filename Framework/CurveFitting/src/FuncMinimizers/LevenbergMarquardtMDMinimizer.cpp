@@ -177,11 +177,13 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
   // save previous state
   m_leastSquares->push();
   // Update the parameters of the cost function.
-  for (size_t i = 0; i < n; ++i) {
-    double d = m_leastSquares->getParameter(i) + dx.get(i);
-    m_leastSquares->setParameter(i, d);
-    if (debug) {
-      g_log.warning() << "Parameter(" << i << ")=" << d << '\n';
+  GSLVector parameters(n);
+  m_leastSquares->getParameters(parameters);
+  parameters += dx;
+  m_leastSquares->setParameters(parameters);
+  if (debug) {
+    for (size_t i = 0; i < n; ++i) {
+      g_log.warning() << "Parameter(" << i << ")=" << parameters[i] << '\n';
     }
   }
   m_leastSquares->getFittingFunction()->applyTies();

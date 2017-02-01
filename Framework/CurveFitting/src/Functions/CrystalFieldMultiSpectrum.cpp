@@ -79,6 +79,7 @@ size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
 
 std::vector<IFunction_sptr>
 CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
+  checkTargetFunction();
   std::vector<IFunction_sptr> funs;
   auto &composite = dynamic_cast<CompositeFunction &>(*m_target);
   for (size_t i = 0; i < composite.nFunctions(); ++i) {

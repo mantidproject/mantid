@@ -105,14 +105,19 @@ public:
   const std::string summary() const override {
     return "Fits a function to data in a Workspace";
   }
-
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
 
-protected:
+private:
   void initConcrete() override;
   void execConcrete() override;
+  void initializeMinimizer(size_t maxIterations);
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
+  void createOutput();
+  /// The cost function
+  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
+  /// The minimizer
+  boost::shared_ptr<API::IFuncMinimizer> m_minimizer;
 };
 
 } // namespace Algorithms
