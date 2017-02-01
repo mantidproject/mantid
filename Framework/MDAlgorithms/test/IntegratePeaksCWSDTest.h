@@ -466,7 +466,7 @@ public:
     inputws =
         createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
-    
+
     runnumberlist.push_back(vec_runnumbers.front());
     runnumberlist.push_back(vec_runnumbers.back());
     Mantid::Kernel::V3D peakcenter(3, 3, 3);

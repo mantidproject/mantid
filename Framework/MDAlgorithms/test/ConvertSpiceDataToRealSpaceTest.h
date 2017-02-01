@@ -456,7 +456,8 @@ public:
     spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat");
     spcloader.setProperty("OutputWorkspace", "DataTable");
     spcloader.setProperty("RunInfoWorkspace", "LogParentWS");
-    spcloader.setPropertyValue("DateAndTimeLog", "date,MM/DD/YYYY,time,HH:MM:SS AM");
+    spcloader.setPropertyValue("DateAndTimeLog",
+                               "date,MM/DD/YYYY,time,HH:MM:SS AM");
     spcloader.setProperty("IgnoreUnlistedLogs", false);
     spcloader.execute();
 

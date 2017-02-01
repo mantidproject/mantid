@@ -152,11 +152,11 @@ void ConvertToMDMinMaxGlobal::exec() {
           wstemp);
       if (evWS)
         qmax = evWS->getTofMax() *
-          2; // assumes maximum scattering angle 180 degrees
+               2; // assumes maximum scattering angle 180 degrees
       else
         qmax = wstemp->getXMax() *
                2.; // assumes maximum scattering angle 180 degrees
-    } else // inelastic
+    } else         // inelastic
     {
       conv->setProperty("Target", "DeltaE");
       conv->setProperty("Emode", GeometryMode);

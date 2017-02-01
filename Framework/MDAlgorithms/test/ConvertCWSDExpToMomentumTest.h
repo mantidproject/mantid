@@ -28,7 +28,7 @@ std::vector<double> m_pixelDimension;
 void generateTestInputs() {
   // Create data table
   DataObjects::TableWorkspace_sptr datatable =
-    boost::make_shared<DataObjects::TableWorkspace>();
+      boost::make_shared<DataObjects::TableWorkspace>();
   datatable->addColumn("int", "Scan No");
   datatable->addColumn("int", "Pt. No");
   datatable->addColumn("str", "File Name");
@@ -37,13 +37,13 @@ void generateTestInputs() {
   datatable->addColumn("double", "Time");
   TableRow row0 = datatable->appendRow();
   row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256 << 1000
-    << 1.1;
+       << 1.1;
   m_dataTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(datatable);
   TS_ASSERT(m_dataTableWS);
 
   // Create detector table
   DataObjects::TableWorkspace_sptr dettable =
-    boost::make_shared<DataObjects::TableWorkspace>();
+      boost::make_shared<DataObjects::TableWorkspace>();
   dettable->addColumn("int", "DetID");
   dettable->addColumn("double", "X");
   dettable->addColumn("double", "Y");
@@ -61,10 +61,9 @@ void generateTestInputs() {
   m_detectorTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(dettable);
   TS_ASSERT(m_detectorTableWS);
 
-  AnalysisDataService::Instance().addOrReplace("DataFileTable",
-    m_dataTableWS);
+  AnalysisDataService::Instance().addOrReplace("DataFileTable", m_dataTableWS);
   AnalysisDataService::Instance().addOrReplace("DetectorTable",
-    m_detectorTableWS);
+                                               m_detectorTableWS);
 
   // Source and sample position
   m_sourcePos.resize(3, 0.0);
@@ -190,8 +189,8 @@ private:
     }
 
     Geometry::Instrument_sptr virtualInstrument =
-      Geometry::ComponentHelper::createVirtualInstrument(sourcePos, samplePos,
-        vec_detpos, vec_detid);
+        Geometry::ComponentHelper::createVirtualInstrument(
+            sourcePos, samplePos, vec_detpos, vec_detid);
     TS_ASSERT(virtualInstrument);
 
     return virtualInstrument;
@@ -207,7 +206,7 @@ public:
     delete suite;
   }
 
-  void setUp() override { 
+  void setUp() override {
     generateTestInputs();
     alg.initialize();
     alg.setProperty("InputWorkspace", "DataFileTable");
@@ -230,7 +229,5 @@ public:
 private:
   ConvertCWSDExpToMomentum alg;
 };
-  
-
 
 #endif /* MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUMTEST_H_ */

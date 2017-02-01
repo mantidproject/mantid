@@ -57,9 +57,9 @@ void EQSANSMonitorTOF::exec() {
   const auto &specInfo = inputWS->spectrumInfo();
   if (!specInfo.hasDetectors(monitor_list[0])) {
     g_log.error() << "Spectrum number " << monitor_list[0]
-      << " has no detector assigned to it - discarding\n";
+                  << " has no detector assigned to it - discarding\n";
     return;
-  } 
+  }
 
   // Get the source to monitor distance in mm
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();

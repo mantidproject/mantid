@@ -291,7 +291,7 @@ void EQSANSLoad::getSourceSlitSize() {
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0)
     m_output_message += "   Could not determine source aperture diameter\n";
-    return;
+  return;
 
   // Default slit size
   double S1 = 20.0;

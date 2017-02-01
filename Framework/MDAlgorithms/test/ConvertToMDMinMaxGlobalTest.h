@@ -50,13 +50,13 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
   // Detectors
   for (int i = 0; i < nHist; i++) {
     Mantid::Geometry::Detector *physicalPixel =
-        new Mantid::Geometry::Detector("pixel", i+1, testInst.get());
+        new Mantid::Geometry::Detector("pixel", i + 1, testInst.get());
     physicalPixel->setPos(0.5, 0, 5.0);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
     ws->getSpectrum(i).addDetectorID(physicalPixel->getID());
-    //auto &pmap = ws->instrumentParameters();
-    //if (Ef > 0)
+    // auto &pmap = ws->instrumentParameters();
+    // if (Ef > 0)
     //  pmap.addDouble(physicalPixel, "Efixed", Ef);
   }
 
@@ -267,7 +267,7 @@ public:
   void setUp() override {
     Mantid::API::FrameworkManager::Instance();
     Mantid::API::MatrixWorkspace_sptr ws =
-      MakeWorkspace(-2.5, 0.05, true, 0, 5, 10000, 100);
+        MakeWorkspace(-2.5, 0.05, true, 0, 5, 10000, 100);
     WorkspaceCreationHelper::storeWS(WSName, ws);
 
     alg.initialize();

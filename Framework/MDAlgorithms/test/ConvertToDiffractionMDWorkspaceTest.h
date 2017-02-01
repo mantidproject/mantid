@@ -221,12 +221,14 @@ public:
   }
 };
 
-class ConvertToDiffractionMDWorkspaceTestPerformance : public CxxTest::TestSuite {
+class ConvertToDiffractionMDWorkspaceTestPerformance
+    : public CxxTest::TestSuite {
 public:
   static ConvertToDiffractionMDWorkspaceTestPerformance *createSuite() {
     return new ConvertToDiffractionMDWorkspaceTestPerformance();
   }
-  static void destroySuite(ConvertToDiffractionMDWorkspaceTestPerformance *suite) {
+  static void
+  destroySuite(ConvertToDiffractionMDWorkspaceTestPerformance *suite) {
     delete suite;
   }
 
@@ -245,7 +247,7 @@ public:
     alg.setProperty("OneEventPerBin", false);
     alg.setPropertyValue("OutputWorkspace", "test_md3");
   }
-  
+
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testConvertToDiffractionMDWorkspaceTestPerformance() {
