@@ -29,4 +29,4 @@ The following psuedocode demonstrates how the benchmarking scripts work:
 
 > > Return a nested list of results per group
 
-> An entire list of groups (or individual results within, alternatively) can be passed into a chosen `results_output.py` function to be printed out and optionally saved to file
+> An entire list of groups (or an individual group) can be passed into a chosen `results_output.py` function to be printed out and optionally saved to file
