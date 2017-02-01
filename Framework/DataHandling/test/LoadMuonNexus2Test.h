@@ -4,18 +4,18 @@
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 
-#include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
@@ -481,13 +481,13 @@ public:
 
 class LoadMuonNexus2TestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006475.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
   }
 
-  void tearDown() { AnalysisDataService::Instance().remove("ws"); }
+  void tearDown() override { AnalysisDataService::Instance().remove("ws"); }
 
   void testDefaultLoad() { loader.execute(); }
 

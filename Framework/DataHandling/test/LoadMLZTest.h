@@ -69,13 +69,13 @@ class LoadMLZTestPerformance : public CxxTest::TestSuite {
 public:
   LoadMLZTestPerformance() : m_dataFile("TOFTOFTestdata.nxs") {}
 
-  void setUp() {
+  void setUp() override {
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
     loader.setPropertyValue("OutputWorkspace", "ws");
   }
 
-  void tearDown() { AnalysisDataService::Instance().remove("ws"); }
+  void tearDown() override { AnalysisDataService::Instance().remove("ws"); }
 
   void testDefaultLoad() { loader.execute(); }
 

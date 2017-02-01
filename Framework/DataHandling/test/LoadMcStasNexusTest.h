@@ -84,7 +84,7 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     if (!loadMcStasNexusAlg.isInitialized())
       loadMcStasNexusAlg.initialize();
 
@@ -95,7 +95,7 @@ public:
     loadMcStasNexusAlg.setPropertyValue("Filename", inputFile);
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove("LoadMcStasNexusTest_1");
     AnalysisDataService::Instance().remove("LoadMcStasNexusTest_2");
   }

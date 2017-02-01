@@ -242,12 +242,12 @@ public:
 
 class LoadNexusMonitorsTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     ld.initialize();
     ld2.initialize();
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove("cncs");
     AnalysisDataService::Instance().remove("hyspec");
   }
