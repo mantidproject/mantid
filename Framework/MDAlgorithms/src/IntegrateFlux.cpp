@@ -113,13 +113,13 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
   double xMin = inputWS.getXMin();
   double xMax = inputWS.getXMax();
   double dx = (xMax - xMin) / static_cast<double>(nX - 1);
-  auto &X = ws->dataX(0);
-  auto ix = X.begin();
-  // x-values are equally spaced between the min and max tof in the first flux
-  // spectrum
-  for (double x = xMin; ix != X.end(); ++ix, x += dx) {
-    *ix = x;
-  }
+  auto &X = ws->mutableX(0);
+
+  std::vector<double> xValues(X.size(), xMin);
+  std::partial_sum(xValues.begin(), xValues.end(), X.begin(), [dx](double sum, double value) {
+      UNUSED_ARG(value);
+      return sum + dx;
+  });
 
   // share the xs for all spectra
   auto xRef = ws->refX(0);
@@ -174,12 +174,13 @@ void IntegrateFlux::integrateSpectraEvents(
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
-  auto &X = integrWS.readX(0);
+  auto &X = integrWS.x(0);
   // loop overr the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
     const std::vector<EventType> *el;
     DataObjects::getEventsFrom(inputWS.getSpectrum(sp), el);
-    auto &outY = integrWS.dataY(sp);
+    auto &outY = integrWS.mutableY(sp);
+
     double sum = 0;
     auto x = X.begin() + 1;
     size_t i = 1;
@@ -229,12 +230,12 @@ void IntegrateFlux::integrateSpectraHistograms(
 
   bool isDistribution = inputWS.isDistribution();
 
-  auto &X = integrWS.readX(0);
+  auto &X = integrWS.x(0);
 
   // loop overr the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
-    auto &inX = inputWS.dataX(sp);
-    auto inY = inputWS.dataY(sp); // make a copy
+    auto &inX = inputWS.x(sp);
+    auto inY = inputWS.y(sp); // make a copy
 
     // if it's a distribution y's must be multiplied by the bin widths
     if (isDistribution) {
@@ -245,7 +246,7 @@ void IntegrateFlux::integrateSpectraHistograms(
     }
 
     // integral at the first point is always 0
-    auto outY = integrWS.dataY(sp).begin();
+    auto outY = integrWS.mutableY(sp).begin();
     *outY = 0.0;
     ++outY;
     // initialize summation
@@ -354,15 +355,15 @@ void IntegrateFlux::integrateSpectraPointData(
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
-  auto &X = integrWS.dataX(0);
+  auto &X = integrWS.x(0);
 
   // loop overr the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
-    auto &inX = inputWS.readX(sp);
-    auto &inY = inputWS.readY(sp);
+    auto &inX = inputWS.x(sp);
+    auto &inY = inputWS.y(sp);
 
     // integral at the first point is always 0
-    auto outY = integrWS.dataY(sp).begin();
+    auto outY = integrWS.mutableY(sp).begin();
     *outY = 0.0;
     ++outY;
     // initialize summation
