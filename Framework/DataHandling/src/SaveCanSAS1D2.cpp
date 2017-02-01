@@ -166,7 +166,6 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans,
   auto &xdata = m_ws->points(0);
   auto &ydata = m_ws->y(0);
   auto &edata = m_ws->e(0);
-  const bool isHistogram = m_ws->isHistogramData();
   for (size_t j = 0; j < m_ws->blocksize(); ++j) {
     // x data is the Lambda in xml. If histogramdata take the mean
     double lambda = xdata[j];
