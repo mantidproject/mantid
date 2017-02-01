@@ -234,12 +234,8 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
 
   for (const auto &row : group) {
 
-    // Vector containing data for this row
-    auto data = row.second;
-    // The run number
-    std::string runNo = row.second.at(0);
     // Reduce this row
-    auto newData = reduceRow(data);
+    auto newData = reduceRow(row.second);
     // Update the tree
     m_manager->update(groupID, row.first, newData);
   }

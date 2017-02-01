@@ -274,6 +274,19 @@ class ISISFermi:
         tchp = np.sqrt((1+(x1+(r*x2))/x0)**2 * tsqchp)
         return v_van, tmod, tchp
 
+    def getWidths(self, Ei_in=None, frequency=None):
+        """
+        Calculates the time widths contributing to the calculated energy resolution
+        """
+        Ei = self.Ei if Ei_in is None else Ei_in
+        if not Ei:
+            raise ValueError('Incident energy has not been specified')
+        v_van, tmod, tchp = self.getVanVar(Ei, frequency, 0.)
+        x2 = self.__Instruments[self.instname][3]
+        tbin = self.__Instruments[self.instname][9]
+        res_el = np.real(2.35482 * 8.747832e-4 * np.sqrt(Ei**3) * (np.sqrt(v_van[0] + (tbin**2/12.00)) * 1.0e6) / x2)
+        return {"Moderator":tmod*1.e6, "Chopper":tchp*1.e6, "Energy":res_el}
+
     def __van_calc(self, v_mod, v_ch, v_jit, v_x, v_y, v_xy, v_dd, Ei, eps, phi, omega):
         """
         Calculates the 'vanadium' time widths due to the moderator and Fermi chopper

@@ -61,6 +61,13 @@ class AbinsCalculatePowderTest(unittest.TestCase):
         bad_data = good_data.extract()["atoms_data"]
         self.assertRaises(ValueError, CalculatePowder, filename=full_path_filename, abins_data=bad_data)
 
+        # soft phonons (negative frequencies for phonons different than acoustic phonons)
+        full_path_filename = AbinsTestHelpers.find_file(filename="Si2-sc_negative_freq_CalculatePowder.phonon")
+        castep_reader = LoadCASTEP(input_dft_filename=full_path_filename)
+        negative_freq = castep_reader.read_phonon_file()
+        negative_freq_powder = CalculatePowder(filename=full_path_filename, abins_data=negative_freq)
+        self.assertRaises(ValueError, negative_freq_powder._calculate_powder)
+
     #       main test
     def test_good_case(self):
         self._good_case(name=self._c6h6)
