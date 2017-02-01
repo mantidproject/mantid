@@ -508,9 +508,8 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
   dataX = vecX;
   dataY = vecY;
 
-  std::transform(vecY.begin(), vecY.end(), dataE.begin(), [](double value) {
-      return (value > 1.) ? sqrt(value) : 1.;
-  });
+  std::transform(vecY.begin(), vecY.end(), dataE.begin(),
+                 [](double value) { return (value > 1.) ? sqrt(value) : 1.; });
 
   // Set label
   outws->setYUnitLabel(ylabel);

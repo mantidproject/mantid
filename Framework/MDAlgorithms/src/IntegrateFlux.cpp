@@ -116,10 +116,11 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
   auto &X = ws->mutableX(0);
 
   std::vector<double> xValues(X.size(), xMin);
-  std::partial_sum(xValues.begin(), xValues.end(), X.begin(), [dx](double sum, double value) {
-      UNUSED_ARG(value);
-      return sum + dx;
-  });
+  std::partial_sum(xValues.begin(), xValues.end(), X.begin(),
+                   [dx](double sum, double value) {
+                     UNUSED_ARG(value);
+                     return sum + dx;
+                   });
 
   // share the xs for all spectra
   auto xRef = ws->refX(0);

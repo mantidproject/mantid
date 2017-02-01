@@ -487,8 +487,9 @@ void IntegrateEllipsoids::exec() {
     Workspace2D_sptr wsProfile2D =
         boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-    
-    setOutputWorkspaceData(wsProfile2D, {{principalaxis1, principalaxis2, principalaxis3}});
+
+    setOutputWorkspaceData(wsProfile2D,
+                           {{principalaxis1, principalaxis2, principalaxis3}});
 
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
@@ -551,7 +552,8 @@ void IntegrateEllipsoids::exec() {
             boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
-        setOutputWorkspaceData(wsProfile2D, {{principalaxis1, principalaxis2, principalaxis3}});
+        setOutputWorkspaceData(
+            wsProfile2D, {{principalaxis1, principalaxis2, principalaxis3}});
       }
     }
   }
@@ -569,23 +571,22 @@ void IntegrateEllipsoids::exec() {
   setProperty("OutputWorkspace", peak_ws);
 }
 
-void IntegrateEllipsoids::setOutputWorkspaceData(Workspace2D_sptr ws, const PrincipleAxes &axes) const {
+void IntegrateEllipsoids::setOutputWorkspaceData(
+    Workspace2D_sptr ws, const PrincipleAxes &axes) const {
 
-    size_t index = 0;
-    for (auto & axis : axes) {
-        auto &x = ws->mutableX(index);
-        auto &y = ws->mutableY(index);
-        auto &e = ws->mutableE(index);
-        
-        std::iota(x.begin(), x.end(), axis.size());
-        y = axis;
-        std::transform(y.begin(), y.end(), e.begin(), [](double value) {
-            return std::sqrt(value);
-        });
+  size_t index = 0;
+  for (auto &axis : axes) {
+    auto &x = ws->mutableX(index);
+    auto &y = ws->mutableY(index);
+    auto &e = ws->mutableE(index);
 
-        ++index;
-    }
+    std::iota(x.begin(), x.end(), axis.size());
+    y = axis;
+    std::transform(y.begin(), y.end(), e.begin(),
+                   [](double value) { return std::sqrt(value); });
 
+    ++index;
+  }
 }
 
 /**
