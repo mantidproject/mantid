@@ -1,10 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
-import os
 import unittest
 from mantid import mtd, config
-from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, ConvertToPointData, GroupDetectors, \
-                             LoadParameterFile, LoadEmptyInstrument, FlatPlatePaalmanPingsCorrection
+from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, ConvertToPointData, \
+                             SetInstrumentParameter, FlatPlatePaalmanPingsCorrection
 
 
 class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
@@ -12,8 +11,6 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         """
         Create sample workspaces.
         """
-        grouping_file = os.path.join(config['instrumentDefinition.directory'], "Grouping")
-        grouping_file = os.path.join(grouping_file, "IN16B_Grouping.xml")
 
         # Create some test data
         sample = CreateSampleWorkspace(NumBanks=1,
@@ -28,11 +25,17 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         self._can_ws = can
 
         # Create empty test data not in wavelength
-        sample_empty_unit = LoadEmptyInstrument(InstrumentName='IN16B')
+        sample_empty_unit = CreateSampleWorkspace(NumBanks=1,
+                                                  BankPixelWidth=1,
+                                                  XUnit='Empty',
+                                                  XMin=6.8,
+                                                  XMax=7.9,
+                                                  BinWidth=0.1)
 
-        sample_empty_unit = GroupDetectors(InputWorkspace=sample_empty_unit, MapFile=grouping_file)
-
-        LoadParameterFile(Workspace=sample_empty_unit, Filename='IN16B_silicon_111_Parameters.xml')
+        SetInstrumentParameter(Workspace=sample_empty_unit,
+                               ParameterName='Efixed',
+                               ParameterType='Number',
+                               Value='5.')
 
         self._sample_empty_unit = sample_empty_unit
 
@@ -247,7 +250,7 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
             self.assertEqual(workspace.blocksize(), 1)
             run = workspace.getRun()
             self.assertEqual(run.getLogData('emode').value,'Efixed')
-            self.assertAlmostEqual(run.getLogData('efixed').value, 2.082)
+            self.assertAlmostEqual(run.getLogData('efixed').value, 5.)
 
     def test_efixed_override(self):
         """
