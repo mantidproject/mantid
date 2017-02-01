@@ -139,9 +139,9 @@ void SaveRKH::write1D() {
   const size_t nbins = m_workspace->blocksize();
 
   for (size_t i = 0; i < nhist; ++i) {
-    const auto &xdata = m_workspace->readX(i);
-    const auto &ydata = m_workspace->readY(i);
-    const auto &edata = m_workspace->readE(i);
+    const auto &xdata = m_workspace->x(i);
+    const auto &ydata = m_workspace->y(i);
+    const auto &edata = m_workspace->e(i);
 
     specnum_t specid(0);
     try {
@@ -209,7 +209,7 @@ void SaveRKH::write2D() {
   bool requireNewLine = false;
   int itemCount(0);
   for (size_t i = 0; i < ySize; ++i) {
-    const auto &ydata = m_workspace->readY(i);
+    const auto &ydata = m_workspace->y(i);
     for (size_t j = 0; j < xSize; ++j) {
       m_outRKH << std::setw(12) << std::scientific << std::setprecision(4)
                << ydata[j];
@@ -229,7 +229,7 @@ void SaveRKH::write2D() {
   // Then all the error values
   itemCount = 0;
   for (size_t i = 0; i < ySize; ++i) {
-    const auto &edata = m_workspace->readE(i);
+    const auto &edata = m_workspace->e(i);
     for (size_t j = 0; j < xSize; ++j) {
       m_outRKH << std::setw(12) << std::scientific << std::setprecision(4)
                << edata[j];
