@@ -16,7 +16,6 @@ Paalman & Pings absorption factors:
 :math:`A_{c,sc}` (scattering in container and absorption in sample and container)
 and  :math:`A_{c,c}` (scattering and absorption in container).
 
-Multiple scattering is not taken into account.
 Details of the analytical method used to calculate the correction factors is
 available in `RAL Technical Report 74-103
 <http://purl.org/net/epubs/work/64111>`__.
@@ -30,7 +29,7 @@ Restrictions on the input workspace
 Efixed mode
 ###########
 
-- In **Efixed** mode, the correction will be computed for a single wavelength number derived from the analyser energy,
+- In **Efixed** mode, the correction will be computed for a single wavelength number derived from the analyser or monochromator energy,
 which by default will be attempted to be read from the instrument parameters (named **Efixed**), but can also be overridden in the **Efixed** input property.
 In this case, the `NumberWavelengths` and `Interpolate` options will be ignored.
 
