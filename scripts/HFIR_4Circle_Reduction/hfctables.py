@@ -97,7 +97,8 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self._expNumber = -1
         self._scanNumber = -1
 
-        self._intensityColIndex = None
+        self._rawIntensityColIndex = None
+        self._maskedIntensityColIndex = None
 
         return
 
@@ -135,18 +136,30 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         sum raw intensities of all Pts.
         :return:
         """
-        # TODO/NOW - Implement!
+        num_rows = self.rowCount()
 
-        return 12345.789
+        count_sum = 0.
+        for i_row in range(len(num_rows)):
+            pt_count = self.get_cell_value(i_row, self._rawIntensityColIndex)
+            count_sum += pt_count
+        # END-FOR
+
+        return count_sum
 
     def sum_masked_intensity(self):
         """
         sum masked intensities of all Pts.
         :return:
         """
-        # TODO/NOW - Implement!
+        num_rows = self.rowCount()
 
-        return 987.65
+        count_sum = 0.
+        for i_row in range(len(num_rows)):
+            pt_count = self.get_cell_value(i_row, self._maskedIntensityColIndex)
+            count_sum += pt_count
+        # END-FOR
+
+        return count_sum
 
     def setup(self):
         """
@@ -164,7 +177,8 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self.setColumnWidth(3, 90)
 
         # Set others...
-        self._intensityColIndex = self._myColumnNameList.index('Masked')
+        self._rawIntensityColIndex = self._myColumnNameList.index('Raw')
+        self._maskedIntensityColIndex = self._myColumnNameList.index('Masked')
 
         return
 
@@ -238,7 +252,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         # Integrate
         sum_intensity = 0.
         for i_row in range(self.rowCount()):
-            intensity_i = self.get_cell_value(i_row, self._intensityColIndex)
+            intensity_i = self.get_cell_value(i_row, self._maskedIntensityColIndex)
             sum_intensity += intensity_i - background
 
         return sum_intensity

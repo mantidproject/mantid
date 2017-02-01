@@ -6,7 +6,6 @@ import mplgraphicsview
 class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
     """ Extended graphic view for integrated peaks
     """
-    # TODO/NOW - remove unnecessary output print
     class MousePress(object):
         RELEASED = 0
         LEFT = 1
@@ -93,13 +92,11 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         """
         self._mousePressed = self.MousePress.RELEASED
 
-        print event.y, event.ydata
-
         return
 
     def plot_raw_data(self, vec_x, vec_y):
         """
-        TODO: blabla
+        plot raw data, which will be recorded by _rawDataID
         :param vec_x:
         :param vec_y:
         :return:
@@ -107,6 +104,38 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         # plot data
         self._rawDataID = self.add_plot_1d(vec_x, vec_y,  color='blue')
         self.set_smart_y_limit(vec_y)
+
+        return
+
+    def plot_model(self, vec_x, model_vec_y, title=None):
+        """
+        plot model data which will be recorded by
+        :param vec_x:
+        :param model_vec_y:
+        :param title:
+        :return:
+        """
+        # plot data
+        self._modelDataID = self.add_plot_1d(vec_x, model_vec_y)
+        if title is not None:
+            self.set_title(title)
+        self.set_smart_y_limit(model_vec_y)
+
+        return
+
+    def remove_model(self):
+        """
+        remove the plot for model
+        :return:
+        """
+        if self._modelDataID is None:
+            raise RuntimeError('There is no model plot on canvas')
+
+        # reset title
+        self.set_title('')
+        self.remove_line(self._modelDataID)
+
+        self._modelDataID = None
 
         return
 
@@ -121,6 +150,9 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         # reset handlers
         self._rawDataID = None
         self._modelDataID = None
+
+        # reset title
+        self.set_title('')
 
         return
 
@@ -138,10 +170,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         try:
             min_y = numpy.min(vec_y)
             max_y = numpy.max(vec_y)
-
-            print 'min_y = ', min_y, 'max_y = ', max_y, 'vector y = ', vec_y
         except ValueError as value_err:
-            print '[ERROR] Vec Y: {0}'.format(vec_y)
             raise RuntimeError(str(value_err))
 
         d_y = max_y - min_y

@@ -1230,7 +1230,7 @@ class CWSCDReductionControl(object):
         """
         fit a peak along Pt. with Gaussian and thus calculate background automatically
         :param pt_dict:
-        :return: peak intensity
+        :return: 3-tuple (intensity, background and information string)
         """
         # check
         assert isinstance(pt_dict, dict), 'Input must be a dictionary but not {0}'.format(type(pt_dict))
@@ -1250,7 +1250,7 @@ class CWSCDReductionControl(object):
         vec_e = numpy.sqrt(vec_y)
 
         # do fit
-        gauss_params, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+        error, gauss_params, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
         x0, gauss_sigma, gauss_a, gauss_bkgd = gauss_params
         if not (0 < x0 < vec_x[-1]):
             raise RuntimeError('Fitted center of the peak {0} is out of range, which is not correct'.format(x0))
@@ -1260,7 +1260,11 @@ class CWSCDReductionControl(object):
         # calculate the peak intensity
         peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
 
-        return peak_intensity, gauss_bkgd
+        # information
+        info_str = 'Fit error = {0}: a = {1}, x0 = {2}, sigma = {3}, b = {4}'.format(error, gauss_a, x0, gauss_sigma,
+                                                                                     gauss_bkgd)
+
+        return peak_intensity, gauss_bkgd, info_str
 
 
     @staticmethod

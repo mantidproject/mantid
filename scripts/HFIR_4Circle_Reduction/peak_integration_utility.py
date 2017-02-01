@@ -19,9 +19,18 @@ def calculate_peak_intensity_gauss(gauss_a, gauss_sigma):
 
 
 def gaussian_linear_background(x, x0, sigma, a, b):
+    """
+    Gaussian + linear background: y = a * exp( -(x-x0)**2/2*sigma**2 ) + b
+    :param x:
+    :param x0:
+    :param sigma:
+    :param a: maximum value
+    :param b: linear background
+    :return:
+    """
     # gaussian + linear background
-    # TODO/NOW/CONTINUE!
-    print '[DB] x0 = blabla'
+
+    print '[DB] Input x0 = ', x0, ', sigma = ', sigma, ', a = ', a, ', b = ', b
     return a * numpy.exp(-(x - x0) ** 2 / (2. * sigma ** 2)) + b
 
 
@@ -38,11 +47,11 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     :return:
     """
     # assume that it is a quasi-ideal Gaussian
-
-    # TODO/NOW/ Need a lot of debug output
+    print '[DB] Observation: vec x = ', vec_x, '; vec y = ', vec_y
 
     # find out the maximum Y with x
-    max_y_index = vec_x.argmax()
+    max_y_index = vec_y.argmax()
+    print '[DB] max Y index = ', max_y_index
 
     x0 = vec_x[max_y_index]
     max_y = vec_y[max_y_index]
@@ -55,13 +64,17 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
 
 def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, find_start_value_by_fit=False):
     """
-
+    Fit a curve with Gaussian + linear background
+    The starting value can be
+    1. specified by caller
+    2. guessed by fitting a pure gaussian to the data
+    3. guessed by observing the data
     :param vec_x:
     :param vec_y:
     :param vec_e:
     :param start_value_list: if not None, then it must have 4 elements:  x0, sigma, A, and b (for background)
     :param find_start_value_by_fit: if it is True, then fit the curve with a Gaussian without background
-    :return: 2-tuple,
+    :return: 3-tuple (1) float as error, (2) list/tuple as x0, sigma, a, b , (3) 1-D array as model Y
     """
     # check input
     assert isinstance(vec_x, numpy.ndarray), 'Input vec_x must be a numpy.ndarray but not a {0}.'.format(vec_x)
@@ -111,6 +124,11 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     x0, sigma, a, b = fit2_coeff
     model_vec_y = gaussian_linear_background(vec_x, x0, sigma, a, b)
 
-    return fit2_coeff, model_vec_y
+    # calculate error as (model Y - obs Y)**2/wi
+    diff_y = model_vec_y - vec_y
+    diff_y2 = numpy.ndarray(shape=(len(diff_y),), dtype='float')
+    error = numpy.power(diff_y, 2, out=diff_y2)/len(diff_y)
+
+    return error, fit2_coeff, model_vec_y
 
 

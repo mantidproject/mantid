@@ -220,7 +220,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_per_pt)  # integrate single peak
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_plot_pt_peak)  # calculate the normalized data again
+                     self.evt_change_normalization)  # calculate the normalized data again
         self.connect(self.ui.pushButton_fitGaussian, QtCore.SIGNAL('clicked()'),
                      self.do_correct_peak_intensity)
 
@@ -1098,13 +1098,17 @@ class MainWindow(QtGui.QMainWindow):
         # list of 2-tuple: integer (plot ID) and string (label)
         # fit the Gaussian and calculate the peak intensity
         vec_e = numpy.sqrt(vec_y)
-        fit_param, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+        error, fit_param, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
         x0, gauss_sigma, gauss_a, background = fit_param
 
         peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
 
+        # information
+        info_str = 'Fit error = {0}: a = {1}, x0 = {2}, sigma = {3}, b = {4}'.format(error, gauss_a, x0, gauss_sigma,
+                                                                                     background)
+
         # plot the data
-        self.ui.graphicsView_integratedPeakView.plot_model(vec_x, model_vec_y)
+        self.ui.graphicsView_integratedPeakView.plot_model(vec_x, model_vec_y, title=info_str)
 
         # set the value
         self.ui.lineEdit_gaussianPeakIntensity.setText(str(peak_intensity))
@@ -1573,51 +1577,14 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_plot_pt_peak(self):
+    def evt_change_normalization(self):
         """
         Integrate Pt. vs integrated intensity of detectors of that Pt. if it is not calculated before
         and then plot pt vs. integrated intensity on
         :return:
         """
-        # FIXME/TODO/ISSUE/NOW - Rename and change the way: look at do_integrate_per_pt()
-        # Find out the current condition including (1) absolute (2) normalized by time
-        # (3) normalized by monitor counts
-        be_norm_str = str(self.ui.comboBox_ptCountType.currentText())
-
-        norm_by_time = False
-        norm_by_monitor = False
-
-        if be_norm_str.startswith('Absolute'):
-            # no normalization
-            pass
-        elif be_norm_str.count('Time') > 0:
-            # norm by time
-            norm_by_time = True
-        elif be_norm_str.count('Monitor') > 0:
-            # norm by monitor counts
-            norm_by_monitor = True
-        else:
-            # exception!
-            raise RuntimeError('Normalization mode %s is not supported.' % be_norm_str)
-
-        # Integrate peak if the integrated peak workspace does not exist
-        # get experiment number and scan number from the table
-        exp_number, scan_number = self.ui.tableWidget_peakIntegration.get_exp_info()
-
-        mask_name = str(self.ui.comboBox_maskNames2.currentText())
-        masked = not mask_name.startswith('No Mask')
-        has_integrated = self._myControl.has_integrated_peak(exp_number, scan_number, pt_list=None,
-                                                             normalized_by_monitor=norm_by_monitor,
-                                                             normalized_by_time=norm_by_time,
-                                                             masked=masked)
-
-        # integrate and/or plot
-        if has_integrated:
-            # FIXME/TODO/NOW - This does not work!!! - CHECK _myControl.has_integrated_peak()
-            self.plot_pt_intensity()
-        else:
-            # VZ-FUTURE: implement this new method!
-            self.do_integrate_per_pt()
+        # integrate any how
+        self.do_integrate_per_pt()
 
         return
 
