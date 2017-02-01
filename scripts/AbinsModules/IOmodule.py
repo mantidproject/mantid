@@ -410,22 +410,30 @@ class IOmodule(object):
 
         return results
 
+    # noinspection PyMethodMayBeStatic
     def _calculate_hash(self, filename=None):
         """
         Calculates hash  of a file defined by filename according to sha512 algorithm.
         :param filename: name of a file to calculate hash (full path to the file)
         :return: string representation of hash
         """
+        return self._calculate_hash_core(filename=filename, coding='utf-8')
+
+    def _calculate_hash_core(self, filename=None, coding=None):
+        """
+        Helper function for calculating hash.
+        :param filename: name of a file to calculate hash
+        :param fun_obj: object function to open file
+        :return: string representation of hash
+        """
         hash_calculator = hashlib.sha512()
         buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
-
-        # Read ASCII and ignore errors if non-ASCII characters (like for example German letters)
-        with io.open(file=filename, mode="rt", encoding="ascii", buffering=buf, errors="ignore") as f:
+        with io.open(file=filename, mode="rt", encoding=coding, buffering=buf, newline=None) as f:
             while True:
                 data = f.read(buf)
                 if not data:
                     break
-                hash_calculator.update(data)
+                hash_calculator.update(data.encode(coding))
 
         return hash_calculator.hexdigest()
 
@@ -435,7 +443,9 @@ class IOmodule(object):
         Returns: string representation of hash for  file  with advanced parameters
                  which contains only hexadecimal digits
         """
-        return self._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
+        h = self._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
+        return h
+
 
     def get_input_filename(self):
         return self._input_filename
