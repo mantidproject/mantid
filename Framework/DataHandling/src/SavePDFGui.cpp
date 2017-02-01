@@ -29,7 +29,7 @@ const std::string SavePDFGui::category() const { return "DataHandling\\Text"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SavePDFGui::summary() const {
-  return "Save files able by PDFGui";
+  return "Save files readable by PDFGui";
 }
 
 /** Initialize the algorithm's properties.
