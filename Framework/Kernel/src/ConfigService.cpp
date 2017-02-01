@@ -1637,11 +1637,18 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
  */
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_InstrumentDirs.clear();
-  Poco::Path path(getAppDataDir());
-  path.makeDirectory();
-  path.pushDirectory("instrument");
-  std::string appdatadir = path.toString();
-  addDirectoryifExists(appdatadir, m_InstrumentDirs);
+
+  // only use downloaded instruments if configured to download
+  const std::string updateInstrStr =
+      this->getString("UpdateInstrumentDefinitions.OnStartup");
+  if (updateInstrStr.compare("1") == 0 || updateInstrStr.compare("on") == 0 ||
+      updateInstrStr.compare("On") == 0) {
+    Poco::Path path(getAppDataDir());
+    path.makeDirectory();
+    path.pushDirectory("instrument");
+    std::string appdatadir = path.toString();
+    addDirectoryifExists(appdatadir, m_InstrumentDirs);
+  }
 
 #ifndef _WIN32
   std::string etcdatadir = "/etc/mantid/instrument";
