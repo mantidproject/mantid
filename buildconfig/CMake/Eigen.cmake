@@ -19,9 +19,7 @@ else()
   execute_process(COMMAND ${CMAKE_COMMAND} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
   execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
 
-  # Add Eigen directly to our build.
-  add_subdirectory(${CMAKE_BINARY_DIR}/eigen-src ${CMAKE_BINARY_DIR}/eigen-build)
-
   ## Include the source directory.
   include_directories("${CMAKE_BINARY_DIR}/eigen-src" "${CMAKE_BINARY_DIR}/eigen-src")
+
 endif()
