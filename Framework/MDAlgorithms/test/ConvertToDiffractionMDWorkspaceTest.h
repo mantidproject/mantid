@@ -21,6 +21,13 @@ using namespace Mantid::MDAlgorithms;
 
 class ConvertToDiffractionMDWorkspaceTest : public CxxTest::TestSuite {
 public:
+  static ConvertToDiffractionMDWorkspaceTest *createSuite() {
+    return new ConvertToDiffractionMDWorkspaceTest();
+  }
+  static void destroySuite(ConvertToDiffractionMDWorkspaceTest *suite) {
+    delete suite;
+  }
+
   void test_Init() {
     ConvertToDiffractionMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
