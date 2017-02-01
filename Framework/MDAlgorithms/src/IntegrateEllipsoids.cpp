@@ -145,8 +145,8 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 
     std::vector<double> buffer(DIMS);
     // get tof and counts
-    const Mantid::MantidVec &xVals = wksp->readX(i);
-    const Mantid::MantidVec &yVals = wksp->readY(i);
+    const auto &xVals = wksp->x(i);
+    const auto &yVals = wksp->y(i);
 
     // update which pixel is being converted
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
@@ -487,17 +487,9 @@ void IntegrateEllipsoids::exec() {
     Workspace2D_sptr wsProfile2D =
         boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-    for (size_t j = 0; j < principalaxis1.size(); j++) {
-      wsProfile2D->dataX(0)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(0)[j] = principalaxis1[j];
-      wsProfile2D->dataE(0)[j] = std::sqrt(principalaxis1[j]);
-      wsProfile2D->dataX(1)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(1)[j] = principalaxis2[j];
-      wsProfile2D->dataE(1)[j] = std::sqrt(principalaxis2[j]);
-      wsProfile2D->dataX(2)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(2)[j] = principalaxis3[j];
-      wsProfile2D->dataE(2)[j] = std::sqrt(principalaxis3[j]);
-    }
+    
+    setOutputWorkspaceData(wsProfile2D, {{principalaxis1, principalaxis2, principalaxis3}});
+
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
                    << " mean " << stats1.mean << " standard_deviation "
@@ -559,17 +551,7 @@ void IntegrateEllipsoids::exec() {
             boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
-        for (size_t j = 0; j < principalaxis1.size(); j++) {
-          wsProfile2D2->dataX(0)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(0)[j] = principalaxis1[j];
-          wsProfile2D2->dataE(0)[j] = std::sqrt(principalaxis1[j]);
-          wsProfile2D2->dataX(1)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(1)[j] = principalaxis2[j];
-          wsProfile2D2->dataE(1)[j] = std::sqrt(principalaxis2[j]);
-          wsProfile2D2->dataX(2)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(2)[j] = principalaxis3[j];
-          wsProfile2D2->dataE(2)[j] = std::sqrt(principalaxis3[j]);
-        }
+        setOutputWorkspaceData(wsProfile2D, {{principalaxis1, principalaxis2, principalaxis3}});
       }
     }
   }
@@ -585,6 +567,25 @@ void IntegrateEllipsoids::exec() {
                                     BackgroundOuterRadiusVector, true);
 
   setProperty("OutputWorkspace", peak_ws);
+}
+
+void IntegrateEllipsoids::setOutputWorkspaceData(Workspace2D_sptr ws, const PrincipleAxes &axes) const {
+
+    size_t index = 0;
+    for (auto & axis : axes) {
+        auto &x = ws->mutableX(index);
+        auto &y = ws->mutableY(index);
+        auto &e = ws->mutableE(index);
+        
+        std::iota(x.begin(), x.end(), axis.size());
+        y = axis;
+        std::transform(y.begin(), y.end(), e.begin(), [](double value) {
+            return std::sqrt(value);
+        });
+
+        ++index;
+    }
+
 }
 
 /**
