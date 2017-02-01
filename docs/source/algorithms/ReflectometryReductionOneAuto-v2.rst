@@ -141,8 +141,8 @@ Usage
     print "%.5f" % (IvsLam.readY(0)[176])
     print "%.5f" % (IvsQ_unbinned.readY(0)[106])
     print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[106])
-    print "%.5f" % (IvsQ.readY(0)[107])
+    print "%.5f" % (IvsQ.readY(0)[13])
+    print "%.5f" % (IvsQ.readY(0)[14])
 
 Output:
 
@@ -152,8 +152,8 @@ Output:
     0.00331
     3.19458
     1.00769
-    0.00027
-    0.00028
+    0.50160
+    0.26028
 
 **Example - Basic reduction with a transmission run**
 
@@ -167,8 +167,8 @@ Output:
     print "%.5f" % (IvsLam.readY(0)[164])
     print "%.5f" % (IvsQ_unbinned.readY(0)[96])
     print "%.5f" % (IvsQ_unbinned.readY(0)[97])
-    print "%.5f" % (IvsQ.readY(0)[96])
-    print "%.5f" % (IvsQ.readY(0)[97])
+    print "%.5f" % (IvsQ.readY(0)[5])
+    print "%.5f" % (IvsQ.readY(0)[6])
 
 Output:
 
@@ -178,8 +178,8 @@ Output:
     0.00230
     1.17014
     0.89341
-    0.00074
-    0.00070
+    1.45989
+    1.41389
 
 **Example - Reduction overriding some default values**
 
@@ -192,8 +192,8 @@ Output:
     print "%.5f" % (IvsLam.readY(0)[176])
     print "%.5f" % (IvsQ_unbinned.readY(0)[106])
     print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[106])
-    print "%.5f" % (IvsQ.readY(0)[107])
+    print "%.5f" % (IvsQ.readY(0)[5])
+    print "%.5f" % (IvsQ.readY(0)[6])
 
 Output:
 
@@ -203,8 +203,8 @@ Output:
     0.00329
     0.64231
     0.41456
-    0.00027
-    0.00028
+    0.51028
+    0.52242
 
 .. categories::
 

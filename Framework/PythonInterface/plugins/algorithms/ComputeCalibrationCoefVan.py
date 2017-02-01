@@ -150,9 +150,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 fwhm = sigma[idx]*2.*np.sqrt(2.*np.log(2.))
                 idxmin = (np.fabs(dataX-peak_centre[idx]+3.*fwhm)).argmin()
                 idxmax = (np.fabs(dataX-peak_centre[idx]-3.*fwhm)).argmin()
-                coefY[idx] = dwf[idx]*sum(dataY[idxmin:idxmax+1])
-                coefE[idx] = dwf[idx]*np.sqrt(sum(
-                    np.square(dataE[idxmin:idxmax+1])))
+                coefY[idx] = sum(dataY[idxmin:idxmax+1])/dwf[idx]
+                coefE[idx] = np.sqrt(sum(
+                    np.square(dataE[idxmin:idxmax+1])))/dwf[idx]
 
         # create X array, X data are the same for all detectors, so
         coefX = np.zeros(nhist)
