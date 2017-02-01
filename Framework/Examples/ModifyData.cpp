@@ -1,7 +1,7 @@
 #include "ModifyData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
- 
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -49,12 +49,12 @@ void ModifyData::exec() {
   // Loop over spectra
   for (size_t i = 0; i < histogramCount; ++i) {
     // Retrieve the data into a vector
-    auto  &newX = outputW->mutableX(i);
-    auto  &newY = outputW->mutableY(i);
-    auto  &newE = outputW->mutableE(i);
-    const auto  &XValues = inputW->x(i);
-    const auto  &YValues = inputW->y(i);
-    const auto  &EValues = inputW->e(i);
+    auto &newX = outputW->mutableX(i);
+    auto &newY = outputW->mutableY(i);
+    auto &newE = outputW->mutableE(i);
+    const auto &XValues = inputW->x(i);
+    const auto &YValues = inputW->y(i);
+    const auto &EValues = inputW->e(i);
 
     // Iterate over i-th spectrum and modify the data
     for (size_t j = 0; j < inputW->blocksize(); j++) {
