@@ -1,3 +1,4 @@
+cmake_minimum_required ( VERSION 3.5 )
 include( ExternalProject )
 ExternalProject_Add(eigen
   HG_REPOSITORY     https://bitbucket.org/eigen/eigen/
