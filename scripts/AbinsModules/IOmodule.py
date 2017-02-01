@@ -446,7 +446,6 @@ class IOmodule(object):
         h = self._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
         return h
 
-
     def get_input_filename(self):
         return self._input_filename
 
