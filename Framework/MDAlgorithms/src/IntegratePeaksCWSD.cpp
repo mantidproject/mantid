@@ -377,7 +377,7 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
   size_t numspec = maskws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
     Geometry::IDetector_const_sptr detector = maskws->getDetector(iws);
-    const MantidVec &vecY = maskws->readY(iws);
+    const auto &vecY = maskws->y(iws);
     if (vecY[0] > 0.1) {
       // vecY[] > 0 is masked.  det->isMasked() may not be reliable.
       detid_t detid = detector->getID();
