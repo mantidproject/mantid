@@ -290,8 +290,8 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     int scanid = m_expDataTableWS->cell<int>(ir, m_iColScan);
     g_log.notice() << "[DB] Scan = " << scanid << "\n";
     int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
-    g_log.notice() << "Pt = " << runid << "\n"
-                   << m_iTime << "-th for time/duration"
+    g_log.notice() << "Pt = " << runid << "\n" << m_iTime
+                   << "-th for time/duration"
                    << "\n";
     double time(0.);
     try {

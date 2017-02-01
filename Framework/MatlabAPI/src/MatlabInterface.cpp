@@ -230,7 +230,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   }
   for (i = 0;
        i < static_cast<int>(sizeof(mex_functions) / sizeof(mexfunc_s_t)) &&
-       !func_called;
+           !func_called;
        i++) {
     if ((mex_functions[i].name != NULL) &&
         !compare_nocase(funcname, mex_functions[i].name)) {
@@ -689,8 +689,7 @@ void CreateSimpleAPIHelper(const std::string &algName,
   // The function definition
   mfile << "if nargin < " << (orderedProperties.size() - iOpt) << "\n"
         << "\tfprintf('All mandatory arguments have not been supplied, type "
-           "\"help "
-        << algName << "\" for more information\\n');\n"
+           "\"help " << algName << "\" for more information\\n');\n"
         << "\treturn\n"
         << "end\n";
 

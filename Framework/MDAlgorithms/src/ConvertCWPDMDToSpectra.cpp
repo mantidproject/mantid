@@ -134,9 +134,8 @@ void ConvertCWPDMDToSpectra::exec() {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit
               << ", either NeutronWaveLength "
-                 " is to be specified or property "
-              << wavelengthpropertyname << " must exist for run " << runid
-              << ".";
+                 " is to be specified or property " << wavelengthpropertyname
+              << " must exist for run " << runid << ".";
         throw std::runtime_error(errss.str());
       }
       map_runWavelength.emplace(runid, thislambda);
