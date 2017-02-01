@@ -10,6 +10,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -499,17 +501,16 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  MantidVec &dataX = outws->dataX(0);
-  MantidVec &dataY = outws->dataY(0);
-  MantidVec &dataE = outws->dataE(0);
-  for (size_t i = 0; i < sizex; ++i) {
-    dataX[i] = vecX[i];
-    dataY[i] = vecY[i];
-    if (dataY[i] > 1.)
-      dataE[i] = sqrt(dataY[i]);
-    else
-      dataE[i] = 1.;
-  }
+  auto &dataX = outws->mutableX(0);
+  auto &dataY = outws->mutableY(0);
+  auto &dataE = outws->mutableE(0);
+
+  dataX = vecX;
+  dataY = vecY;
+
+  std::transform(vecY.begin(), vecY.end(), dataE.begin(), [](double value) {
+      return (value > 1.) ? sqrt(value) : 1.;
+  });
 
   // Set label
   outws->setYUnitLabel(ylabel);
