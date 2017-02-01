@@ -137,20 +137,20 @@ Usage
                                             MonitorIntegrationWavelengthMin=4.0,
                                             MonitorIntegrationWavelengthMax=10.0)
 
-   print "%.4f" % (IvsLam.readY(0)[173])
-   print "%.4f" % (IvsLam.readY(0)[174])
-   print "%.4f" % (IvsQ.readY(0)[2])
-   print "%.4f" % (IvsQ.readY(0)[3])
+   print "%.4f" % (IvsLam.readY(0)[533])
+   print "%.4f" % (IvsLam.readY(0)[534])
+   print "%.4f" % (IvsQ.readY(0)[327])
+   print "%.4f" % (IvsQ.readY(0)[328])
 
 
 Output:
 
 .. testoutput:: ExReflRedOneSimple
 
-   0.0014
-   0.0014
-   0.0001
-   0.0001
+   0.0003
+   0.0003
+   0.0003
+   0.0003
 
 
 **Example - Reduce a run and normalize by transmission workspace**
@@ -173,8 +173,8 @@ Output:
 					    FirstTransmissionRun=trans1,
 					    SecondTransmissionRun=trans2)
 
-   print "%.4f" % (IvsLam.readY(0)[170])
-   print "%.4f" % (IvsLam.readY(0)[171])
+   print "%.4f" % (IvsLam.readY(0)[480])
+   print "%.4f" % (IvsLam.readY(0)[481])
    print "%.4f" % (IvsQ.readY(0)[107])
    print "%.4f" % (IvsQ.readY(0)[108])
 
@@ -183,10 +183,10 @@ Output:
 
 .. testoutput:: ExReflRedOneTrans
 
-   0.4897
-   0.5468
-   0.6144
-   0.5943
+   0.4588
+   0.4655
+   0.7336
+   1.0156
 
 .. categories::
 
