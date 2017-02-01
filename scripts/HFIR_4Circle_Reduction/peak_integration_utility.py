@@ -4,7 +4,7 @@ import scipy
 from scipy.optimize import curve_fit
 
 
-def calculate_peak_intensity_gauss(gauss_a, gauss_sigma):
+def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None, error_q_sigma=None):
     """
     calcukalte the peak intensity, which is the area under the peak
     if sigma == 1, then the integral is sqrt(pi);
@@ -13,9 +13,16 @@ def calculate_peak_intensity_gauss(gauss_a, gauss_sigma):
     :param gauss_sigma:
     :return:
     """
-    integral = gauss_a * numpy.sqrt(numpy.pi) * numpy.exp(1./(2.*gauss_sigma ** 2))
+    integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
 
-    return integral
+    if error_a_sq is not None:
+        # TODO/ISSUE/NOW - Implement error to return
+        pass
+
+    else:
+        error = numpy.sqrt(integral)
+
+    return integral, error
 
 
 def gaussian_linear_background(x, x0, sigma, a, b):
@@ -44,7 +51,7 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     find out the starting values of a gaussian + linear background with observation
     :param vec_x:
     :param vec_y:
-    :return:
+    :return: must be the same order as gaussian linear background function as x0, sigma, a, b
     """
     # assume that it is a quasi-ideal Gaussian
     print '[DB] Observation: vec x = ', vec_x, '; vec y = ', vec_y
@@ -59,7 +66,7 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     est_sigma = len(vec_x) * 0.5
     est_a = max(1.0, max_y - est_background)
 
-    return [x0, est_a, est_sigma, est_background]
+    return [x0, est_sigma, est_a, est_background]
 
 
 def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, find_start_value_by_fit=False):
@@ -118,11 +125,15 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
     # do second round fit
     assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'
-    fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y, sigma=vec_e, p0=start_value_list)
+    fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y, p0=start_value_list)
+    # take sigma=vec_e,  out as it increases unstable
 
     # calculate the model
     x0, sigma, a, b = fit2_coeff
+    # TODO/ISSUE/NOW - make modelX and modelY for more fine grids
     model_vec_y = gaussian_linear_background(vec_x, x0, sigma, a, b)
+
+    print 'Covariance matrix: ', fit2_cov_matrix
 
     # calculate error as (model Y - obs Y)**2/wi
     diff_y = model_vec_y - vec_y

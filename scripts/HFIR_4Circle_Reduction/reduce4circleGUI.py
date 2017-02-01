@@ -1104,6 +1104,7 @@ class MainWindow(QtGui.QMainWindow):
         peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
 
         # information
+        # TODO/ISSUE/NOW - title is clumsy!
         info_str = 'Fit error = {0}: a = {1}, x0 = {2}, sigma = {3}, b = {4}'.format(error, gauss_a, x0, gauss_sigma,
                                                                                      background)
 
@@ -1113,6 +1114,13 @@ class MainWindow(QtGui.QMainWindow):
         # set the value
         self.ui.lineEdit_gaussianPeakIntensity.setText(str(peak_intensity))
 
+        # TODO/ISSUE/NOW - set up more information
+        self.ui.lineEdit_guassX0
+        self.ui.lineEdit_gaussA
+        self.ui.lineEdit_gaussB
+        self.ui.lineEdit_gaussSigma
+
+        self.ui.tableWidget_covariance
 
         return
 
@@ -3105,7 +3113,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Merge scan
         save_dict['lineEdit_listScansSliceView'] = str(self.ui.lineEdit_listScansSliceView.text())
-        save_dict['lineEdit_baseMergeMDName'] = str(self.ui.lineEdit_baseMergeMDName.text())
 
         # Save to csv file
         if filename is None:

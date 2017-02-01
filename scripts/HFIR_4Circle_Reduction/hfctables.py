@@ -77,6 +77,20 @@ class KShiftTableWidget(tableBase.NTableWidget):
         return
 
 
+class MatrixTable(tableBase.NTableWidget):
+    """
+
+    """
+    def __init__(self, parent):
+        """
+
+        :param parent:
+        """
+        super(MatrixTable, self).__init__(parent)
+
+        return
+
+
 class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """
     Extended table widget for studying peak integration of scan on various Pts.
@@ -139,7 +153,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         num_rows = self.rowCount()
 
         count_sum = 0.
-        for i_row in range(len(num_rows)):
+        for i_row in range(num_rows):
             pt_count = self.get_cell_value(i_row, self._rawIntensityColIndex)
             count_sum += pt_count
         # END-FOR
@@ -154,7 +168,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         num_rows = self.rowCount()
 
         count_sum = 0.
-        for i_row in range(len(num_rows)):
+        for i_row in range(num_rows):
             pt_count = self.get_cell_value(i_row, self._maskedIntensityColIndex)
             count_sum += pt_count
         # END-FOR
@@ -582,6 +596,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     """
     Extended table for peaks used to calculate UB matrix
     """
+    # TODO/NOW/ISSUE - Remove Index From and add mask, integration type (gaussian/simple)
     TableSetup = [('Scan', 'int'),
                   ('Intensity', 'float'),
                   ('Corrected', 'float'),
