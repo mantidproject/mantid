@@ -418,10 +418,11 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
 void JumpFit::clearPlot() {
   m_uiForm.ppPlot->clear();
   const std::string sampleName =
-      (m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM");
+      (m_uiForm.dsSample->getCurrentDataName().toStdString());
   if (sampleName.compare("") != 0) {
     MatrixWorkspace_sptr sample =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName +
+                                                                    "_HWHM");
     if (sample && m_spectraList.size() > 0) {
       m_uiForm.cbWidth->setEnabled(true);
 
