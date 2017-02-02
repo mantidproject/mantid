@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -1708,10 +1709,10 @@ void SANSRunWindow::setGeometryDetails() {
   double dist_mm(0.0);
   QString colour("black");
 
-  const auto &spectrumInfo = sampleWs->spectrumInfo();
+  const auto &detectorInfo = sampleWs->detectorInfo();
 
   try {
-    const auto &detector = spectrumInfo.detector(*monitorDetectorIDs.begin());
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(*monitorDetectorIDs.begin()));
     const double unit_conv(1000.);
     const auto &source = sampleWs->getInstrument()->getSource();
     dist_mm = detector.getDistance(*source) * unit_conv;
@@ -1818,12 +1819,8 @@ void SANSRunWindow::setGeometryDetails() {
 void SANSRunWindow::setSANS2DGeometry(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
     int wscode) {
-  double unitconv = 1000.;
-
-  Instrument_const_sptr instr = workspace->getInstrument();
-  const auto &sample = instr->getSample();
-  const auto &source = instr->getSource();
-  const double distance = source->getDistance(*sample) * unitconv;
+  const double unitconv = 1000.;
+  const double distance = workspace->spectrumInfo().l1();
 
   // Moderator-sample
   QLabel *dist_label(NULL);

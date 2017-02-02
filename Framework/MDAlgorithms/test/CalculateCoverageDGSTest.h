@@ -100,8 +100,9 @@ public:
     DblMatrix inverserubw(3, 3, true);
     inverserubw /= M_PI;
     const auto &detectorInfo = inputWorkspace->detectorInfo();
-    const double phi = detectorInfo.detector(0).getPhi();
-    const double twoTheta = detectorInfo.twoTheta(0);
+	const auto detectorIndex = detectorInfo.indexOf(0);
+    const double phi = detectorInfo.detector(detectorIndex).getPhi();
+    const double twoTheta = detectorInfo.twoTheta(detectorIndex);
     for (dE = -0.99; dE < 0.99; dE += 0.05) {
       ki = std::sqrt(energyToK * Ei);
       kf = std::sqrt(energyToK * (Ei - dE));
