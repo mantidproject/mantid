@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -143,8 +144,6 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
                                              const std::string &targetUnit,
                                              API::MatrixWorkspace_sptr &inputWS,
                                              size_t nHist) {
-  IComponent_const_sptr source = inputWS->getInstrument()->getSource();
-  IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
 
   const std::string emodeStr = getProperty("EMode");
   int emode = 0;
@@ -153,13 +152,17 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
   else if (emodeStr == "Indirect")
     emode = 2;
 
-  auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &detectorInfo = inputWS->detectorInfo();
   for (size_t i = 0; i < nHist; i++) {
     double theta(0.0), efixed(0.0);
     if (!spectrumInfo.isMonitor(i)) {
       theta = 0.5 * spectrumInfo.twoTheta(i);
-      efixed =
-          getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
+      const auto &detector =
+          spectrumInfo.detector(i); // A better way to get the detector index
+                                    // relies on SpectrumDefinition. TODO.
+      efixed = getEfixed(detector.index(), detectorInfo, *inputWS,
+                         emode); // get efixed
     } else {
       theta = 0.0;
       efixed = DBL_MIN;
@@ -232,39 +235,40 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   return outputWorkspace;
 }
 
-double
-ConvertSpectrumAxis2::getEfixed(const Mantid::Geometry::IDetector &detector,
-                                MatrixWorkspace_const_sptr inputWS,
-                                int emode) const {
+double ConvertSpectrumAxis2::getEfixed(
+    const size_t detectorIndex, const API::DetectorInfo &detectorInfo,
+    const Mantid::API::MatrixWorkspace &inputWS, const int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
+  Mantid::detid_t detectorID = detectorInfo.detectorIDs()[detectorIndex];
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
-    g_log.debug() << "Detector: " << detector.getID() << " Efixed: " << efixed
+    g_log.debug() << "Detector: " << detectorID << " Efixed: " << efixed
                   << "\n";
   } else {
     if (emode == 1) {
-      if (inputWS->run().hasProperty("Ei")) {
-        efixed = inputWS->run().getLogAsSingleValue("Ei");
+      if (inputWS.run().hasProperty("Ei")) {
+        efixed = inputWS.run().getLogAsSingleValue("Ei");
       } else {
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "workspace. Please provide a value.");
       }
     } else if (emode == 2) {
-      std::vector<double> efixedVec = detector.getNumberParameter("Efixed");
+
+        const auto& detectorSingle =
+            detectorInfo.detector(detectorIndex);
+ 
+      std::vector<double> efixedVec = detectorSingle.getNumberParameter("Efixed");
       if (efixedVec.empty()) {
-        int detid = detector.getID();
-        IDetector_const_sptr detectorSingle =
-            inputWS->getInstrument()->getDetector(detid);
-        efixedVec = detectorSingle->getNumberParameter("Efixed");
+       efixedVec = detectorSingle.getNumberParameter("Efixed");
       }
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
-        g_log.debug() << "Detector: " << detector.getID()
-                      << " EFixed: " << efixed << "\n";
+        g_log.debug() << "Detector: " << detectorID << " EFixed: " << efixed
+                      << "\n";
       } else {
         g_log.warning() << "Efixed could not be found for detector "
-                        << detector.getID() << ", please provide a value\n";
+                        << detectorID << ", please provide a value\n";
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "detector. Please provide a value.");
       }
