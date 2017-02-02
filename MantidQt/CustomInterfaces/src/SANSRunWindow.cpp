@@ -1821,7 +1821,7 @@ void SANSRunWindow::setSANS2DGeometry(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
     int wscode) {
   const double unitconv = 1000.;
-  const double distance = workspace->spectrumInfo().l1();
+  const double distance = workspace->spectrumInfo().l1() * unitconv;
 
   // Moderator-sample
   QLabel *dist_label(NULL);
