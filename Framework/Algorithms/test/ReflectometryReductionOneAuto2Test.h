@@ -465,13 +465,13 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
 
     TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->blocksize(), 8);
+    TS_ASSERT_EQUALS(outQ->blocksize(), 14);
     // X range in outLam
-    TS_ASSERT_DELTA(outLam->x(0)[0], 2.8257, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 12.7158, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 8.0658, 0.0001);
     // X range in outQ
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3403, 0.0001);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 1.1345, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
   }
 };
 

@@ -148,12 +148,12 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoSimple
 
-    0.56682
-    0.59735
-    0.57476
-    0.54633
-    0.50034
-    0.26112
+    0.00324
+    0.00331
+    3.19458
+    1.00769
+    0.50160
+    0.26028
 
 **Example - Basic reduction with a transmission run**
 
@@ -174,12 +174,12 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoTrans
 
-    0.36906
-    0.36906
-    1.05389
-    1.02234
-    1.30087
-    1.32781
+    0.00230
+    0.00230
+    1.17014
+    0.89341
+    1.45989
+    1.41389
 
 **Example - Reduction overriding some default values**
 
@@ -199,12 +199,12 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoOverload
 
-    0.50401
-    0.52599
-    0.51160
-    0.48843
-    0.51819
-    0.52754
+    0.00322
+    0.00329
+    0.64231
+    0.41456
+    0.51028
+    0.52242
 
 .. categories::
 
