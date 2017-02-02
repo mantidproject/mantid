@@ -149,8 +149,10 @@ size_t EventWorkspace::getNumberHistograms() const { return this->data.size(); }
 /// Return const reference to EventList at the given workspace index.
 EventList &EventWorkspace::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
-  return const_cast<EventList &>(
+  auto &spec = const_cast<EventList &>(
       static_cast<const EventWorkspace &>(*this).getSpectrum(index));
+  spec.setExperimentInfo(this, index);
+  return spec;
 }
 
 /// Return const reference to EventList at the given workspace index.

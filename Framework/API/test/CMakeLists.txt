@@ -17,6 +17,7 @@ if ( CXXTEST_FOUND )
             Geometry
             HistogramData
             Indexing
+            Beamline
             Kernel
             Nexus
             ${JSONCPP_LIBRARIES}
