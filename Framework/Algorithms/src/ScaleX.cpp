@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ScaleX.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -228,34 +229,34 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   if (m_parname.empty())
     return m_algFactor;
 
-  // Try and get factor from component. If we see a DetectorGroup use this will
+  // Try and get factor from component. If we see a DetectorGroup this will
   // use the first component
-  Geometry::IDetector_const_sptr det;
-  auto inst = inputWS->getInstrument();
-
   const auto &ids = inputWS->getSpectrum(index).getDetectorIDs();
-  const size_t ndets(ids.size());
-  if (ndets > 0) {
-    try {
-      det = inst->getDetector(*ids.begin());
-    } catch (Exception::NotFoundError &) {
-      return 0.0;
-    }
-  } else
+  if (ids.size() < 1) {
     return 0.0;
+  }
 
-  const auto &pmap = inputWS->constInstrumentParameters();
-  auto par = pmap.getRecursive(det->getComponentID(), m_parname);
-  if (par) {
-    if (!m_combine)
-      return par->value<double>();
-    else
-      return m_binOp(m_algFactor, par->value<double>());
-  } else {
-    std::ostringstream os;
-    os << "Spectrum at index '" << index << "' has no parameter named '"
-       << m_parname << "'\n";
-    throw std::runtime_error(os.str());
+  try {
+    const auto &detectorInfo = inputWS->detectorInfo();
+    const auto detIndex = detectorInfo.indexOf(*ids.begin());
+    const auto &det = detectorInfo.detector(index);
+    const auto &pmap = inputWS->constInstrumentParameters();
+    auto par = pmap.getRecursive(det.getComponentID(), m_parname);
+    if (par) {
+      if (!m_combine)
+        return par->value<double>();
+      else
+        return m_binOp(m_algFactor, par->value<double>());
+    } else {
+      std::ostringstream os;
+      os << "Spectrum at index '" << index << "' has no parameter named '"
+         << m_parname << "'\n";
+      throw std::runtime_error(os.str());
+    }
+  } catch (std::out_of_range &) {
+    return 0.0;
+  } catch (Exception::NotFoundError &) {
+    return 0.0;
   }
 }
 
