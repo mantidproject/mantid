@@ -715,7 +715,7 @@ public:
     // workspace with 100 points on interval -10 <= x <= 10
     boost::shared_ptr<WorkspaceTester> data =
         boost::make_shared<WorkspaceTester>();
-    data->init(1, 100, 100);
+    data->initialize(1, 100, 100);
 
     auto &xData = data->mutableX(0);
     for (size_t i = 0; i < data->blocksize(); i++) {

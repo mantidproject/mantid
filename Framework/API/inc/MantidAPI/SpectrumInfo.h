@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -10,6 +11,10 @@
 
 namespace Mantid {
 using detid_t = int32_t;
+class SpectrumDefinition;
+namespace Beamline {
+class SpectrumInfo;
+}
 namespace Geometry {
 class IDetector;
 class Instrument;
@@ -61,9 +66,17 @@ class ExperimentInfo;
 */
 class MANTID_API_DLL SpectrumInfo {
 public:
-  SpectrumInfo(const ExperimentInfo &experimentInfo);
-  SpectrumInfo(ExperimentInfo &experimentInfo);
+  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
+               const ExperimentInfo &experimentInfo);
+  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
+               ExperimentInfo &experimentInfo);
   ~SpectrumInfo();
+
+  size_t size() const;
+
+  const SpectrumDefinition &spectrumDefinition(const size_t index) const;
+  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
+  sharedSpectrumDefinitions() const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
@@ -87,6 +100,8 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
+  friend class ExperimentInfo;
+
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
@@ -96,6 +111,7 @@ private:
   const ExperimentInfo &m_experimentInfo;
   DetectorInfo *m_mutableDetectorInfo{nullptr};
   const DetectorInfo &m_detectorInfo;
+  const Beamline::SpectrumInfo &m_spectrumInfo;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;

@@ -153,6 +153,11 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   connect(m_clearPeakOverlays, SIGNAL(triggered()), this,
           SLOT(clearPeakOverlays()));
 
+  // Clear alignment plane action
+  m_clearAlignment = new QAction("Clear alignment plane", this);
+  connect(m_clearAlignment, SIGNAL(triggered()), this,
+          SLOT(clearAlignmentPlane()));
+
   // confirmClose(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -921,6 +926,7 @@ bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
     if (getSurface()->hasPeakOverlays()) {
       context.addSeparator();
       context.addAction(m_clearPeakOverlays);
+      context.addAction(m_clearAlignment);
     }
     if (!context.isEmpty()) {
       context.exec(QCursor::pos());
@@ -979,6 +985,11 @@ bool InstrumentWidget::overlay(const QString &wsName) {
 */
 void InstrumentWidget::clearPeakOverlays() {
   getSurface()->clearPeakOverlays();
+  updateInstrumentView();
+}
+
+void InstrumentWidget::clearAlignmentPlane() {
+  getSurface()->clearAlignmentPlane();
   updateInstrumentView();
 }
 
