@@ -74,7 +74,7 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     x0 = vec_x[max_y_index]
     max_y = vec_y[max_y_index]
     est_background = 0.5 * (vec_y[0] + vec_y[-1])
-    est_sigma = len(vec_x) * 0.5
+    est_sigma = (vec_x[-1] - vec_x[0]) * 0.1
     est_a = max(1.0, max_y - est_background)
 
     return [x0, est_sigma, est_a, est_background]
@@ -136,7 +136,7 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
     # do second round fit
     assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'
-    fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y, p0=start_value_list)
+    fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y,  sigma=vec_e, p0=start_value_list)
     # take sigma=vec_e,  out as it increases unstable
 
     # calculate the model
@@ -169,7 +169,7 @@ def get_finer_grid(vec_x, factor):
     for i in range(orig_size-1):
         d_x = vec_x[i+1] - vec_x[i]
         for j in range(factor):
-            temp_x = vec_x[i] + d_x * float(j)
+            temp_x = vec_x[i] + d_x * float(j) / float(factor)
             new_list.append(temp_x)
         # END-FOR
     # END-FOR

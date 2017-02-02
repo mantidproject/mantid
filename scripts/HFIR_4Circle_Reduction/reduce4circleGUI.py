@@ -184,7 +184,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_saveUB, QtCore.SIGNAL('clicked()'),
                      self.do_save_ub)
 
-        # Tab 'Merge'
+        # Tab 'Scans Processing'
         self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
                      self.do_add_scans_merge)
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
@@ -214,6 +214,10 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_convertMerged2HKL, QtCore.SIGNAL('clicked()'),
                      self.do_convert_merged_to_hkl)
         self.connect(self.ui.pushButton_showScanWSInfo, QtCore.SIGNAL('clicked()'),
+                     self.do_show_workspaces)
+
+        # TODO/ISSUE/NOW - implement a real method to pop out a table with detailed information
+        self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
                      self.do_show_workspaces)
 
         # Tab 'Integrate (single) Peaks'
@@ -1111,15 +1115,16 @@ class MainWindow(QtGui.QMainWindow):
         model_x = peak_integration_utility.get_finer_grid(vec_x, 10)
         model_y = peak_integration_utility.gaussian_linear_background(model_x, x0, gauss_sigma, gauss_a, background)
 
-        self.ui.graphicsView_integratedPeakView.plot_model(vec_x, model_vec_y, title=info_str)
+        # plot the model
+        self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
 
         # set the value
         self.ui.lineEdit_gaussianPeakIntensity.setText(str(peak_intensity))
 
-        self.ui.lineEdit_guassX0.setText('{0.7f}'.format(x0))
-        self.ui.lineEdit_gaussA.setText('{0.7f}'.format(gauss_a))
-        self.ui.lineEdit_gaussB.setText('{0.7f}'.format(background))
-        self.ui.lineEdit_gaussSigma.setText('{0.7f}'.format(gauss_sigma))
+        self.ui.lineEdit_guassX0.setText('{0:.7f}'.format(x0))
+        self.ui.lineEdit_gaussA.setText('{0:.7f}'.format(gauss_a))
+        self.ui.lineEdit_gaussB.setText('{0:.7f}'.format(background))
+        self.ui.lineEdit_gaussSigma.setText('{0:.7f}'.format(gauss_sigma))
 
         self.ui.tableWidget_covariance.set_matrix(cov_matrix)
 

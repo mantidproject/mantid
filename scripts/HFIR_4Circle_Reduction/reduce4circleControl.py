@@ -2372,7 +2372,7 @@ class CWSCDReductionControl(object):
         error_message = ''
 
         # Download and
-        for scan_number in xrange(start_scan, end_scan):
+        for scan_number in range(start_scan, end_scan+1):
             # check whether file exists
             if self.does_file_exist(exp_number, scan_number) is False:
                 # SPICE file does not exist in data directory. Download!
