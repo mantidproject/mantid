@@ -673,6 +673,7 @@ void GroupDetectors2::processMatrixWorkspace(
       const auto &det = spectrumInfo.detector(i);
 
       try {
+        // TODO: Use SpectrumDefinition here when available
         const Geometry::DetectorGroup &detGroup =
             dynamic_cast<const Geometry::DetectorGroup &>(det);
 

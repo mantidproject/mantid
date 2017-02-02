@@ -79,6 +79,8 @@ createTestWorkspace(const bool detShape = true,
       // Add another detector in the same position as the first
       auto shape = ShapeFactory().createShape(shapeXML);
       Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
+      // Setting detectors should normally go via DetectorInfo, but here we need
+      // to set a position as we are adding a new detector.
       det2->setPos(pos);
       instrument->add(det2);
       instrument->markAsDetector(det2);
@@ -194,82 +196,74 @@ public:
 #endif
   }
 
-  // ------------------------ Failure Cases
-  // -----------------------------------------
+  //   ------------------------ Failure Cases
+  //   -----------------------------------------
 
-  //  void test_setting_input_workspace_not_in_tof_throws_invalid_argument() {
-  //    VesuvioCalculateMS alg;
-  //    alg.initialize();
-  //
-  //    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-  //    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
-  //                     std::invalid_argument);
-  //  }
-  //
-  //  void test_setting_workspace_with_no_sample_shape_throws_invalid_argument()
-  //  {
-  //    VesuvioCalculateMS alg;
-  //    alg.initialize();
-  //
-  //    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-  //    testWS->getAxis(0)->setUnit("TOF");
-  //    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
-  //                     std::invalid_argument);
-  //  }
-  //
-  //  void test_setting_nmasses_zero_or_negative_throws_invalid_argument() {
-  //    VesuvioCalculateMS alg;
-  //    alg.initialize();
-  //
-  //    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1),
-  //    std::invalid_argument);
-  //    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0),
-  //    std::invalid_argument);
-  //  }
-  //
-  //  void test_setting_sampledensity_zero_or_negative_throws_invalid_argument()
-  //  {
-  //    VesuvioCalculateMS alg;
-  //    alg.initialize();
-  //
-  //    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", -1),
-  //                     std::invalid_argument);
-  //    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", 0),
-  //                     std::invalid_argument);
-  //  }
-  //
-  //  void
-  //  test_setting_atomic_properties_not_length_three_times_nmasses_throws_invalid_argument_on_execute()
-  //  {
-  //    auto alg = createTestAlgorithm(createFlatPlateSampleWS());
-  //
-  //    alg->setProperty("NoOfMasses", 2);
-  //    const double sampleProps[5] = {1.007900, 0.9272392, 5.003738, 16.00000,
-  //                                   3.2587662E-02};
-  //    alg->setProperty("AtomicProperties",
-  //                     std::vector<double>(sampleProps, sampleProps + 5));
-  //
-  //    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  //  }
-  //
-  //  void
-  //  test_setting_zero_or_negative_beam_radius_values_throws_invalid_argument()
-  //  {
-  //    VesuvioCalculateMS alg;
-  //    alg.initialize();
-  //
-  //    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5),
-  //                     std::invalid_argument);
-  //    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0),
-  //    std::invalid_argument);
-  //  }
-  //
-  //  void
-  //  test_input_workspace_with_detector_that_has_no_shape_throws_exception() {
-  //    auto alg = createTestAlgorithm(createFlatPlateSampleWS(false));
-  //
-  //    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  //  }
+  void test_setting_input_workspace_not_in_tof_throws_invalid_argument() {
+    VesuvioCalculateMS alg;
+    alg.initialize();
+
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
+                     std::invalid_argument);
+  }
+
+  void test_setting_workspace_with_no_sample_shape_throws_invalid_argument() {
+    VesuvioCalculateMS alg;
+    alg.initialize();
+
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    testWS->getAxis(0)->setUnit("TOF");
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
+                     std::invalid_argument);
+  }
+
+  void test_setting_nmasses_zero_or_negative_throws_invalid_argument() {
+    VesuvioCalculateMS alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0), std::invalid_argument);
+  }
+
+  void test_setting_sampledensity_zero_or_negative_throws_invalid_argument() {
+    VesuvioCalculateMS alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", -1),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", 0),
+                     std::invalid_argument);
+  }
+
+  void
+  test_setting_atomic_properties_not_length_three_times_nmasses_throws_invalid_argument_on_execute() {
+    auto alg = createTestAlgorithm(createFlatPlateSampleWS());
+
+    alg->setProperty("NoOfMasses", 2);
+    const double sampleProps[5] = {1.007900, 0.9272392, 5.003738, 16.00000,
+                                   3.2587662E-02};
+    alg->setProperty("AtomicProperties",
+                     std::vector<double>(sampleProps, sampleProps + 5));
+
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
+  void
+  test_setting_zero_or_negative_beam_radius_values_throws_invalid_argument() {
+    VesuvioCalculateMS alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0), std::invalid_argument);
+  }
+
+  void test_input_workspace_with_detector_that_has_no_shape_throws_exception() {
+    auto alg = createTestAlgorithm(createFlatPlateSampleWS(false));
+
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
 };
 class VesuvioCalculateMSTestPerformance : public CxxTest::TestSuite {
 public:

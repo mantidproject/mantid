@@ -76,8 +76,8 @@ void GenerateGroupingPowder::exec() {
   MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
   // Check if workspace has detectors. If not, throw an exception.
   const auto &detectorInfo = input_ws->detectorInfo();
-  auto dets = detectorInfo.detectorIDs();
-  if (dets.empty())
+  const auto &detectorIDs = detectorInfo.detectorIDs();
+  if (detectorIDs.empty())
     throw std::invalid_argument("Workspace contains no detectors.");
 
   double step = getProperty("AngleStep");
@@ -86,14 +86,14 @@ void GenerateGroupingPowder::exec() {
   std::vector<std::vector<detid_t>> groups(numSteps);
   std::vector<double> twoThetaAverage(numSteps, 0.), rAverage(numSteps, 0.);
 
-  for (size_t i = 0; i < dets.size(); ++i) {
+  for (size_t i = 0; i < detectorIDs.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue;
 
     double tt = detectorInfo.twoTheta(i) * Geometry::rad2deg;
     double r = detectorInfo.l2(i);
     size_t where = static_cast<size_t>(tt / step);
-    groups.at(where).push_back(dets[i]);
+    groups.at(where).push_back(detectorIDs[i]);
     twoThetaAverage.at(where) += tt;
     rAverage.at(where) += r;
   }

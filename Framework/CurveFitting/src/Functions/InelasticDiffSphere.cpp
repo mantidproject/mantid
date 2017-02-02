@@ -266,11 +266,11 @@ void InelasticDiffSphere::setWorkspace(
       break;
     }
 
-    const auto &det = spectrumInfo.detector(idx);
+    const auto detID = spectrumInfo.detector(idx).getID();
 
     try {
-      double efixed = workspace->getEFixed(det.getID());
-      double usingTheta = 0.5 * workspace->detectorTwoTheta(det);
+      double efixed = workspace->getEFixed(detID);
+      double usingTheta = 0.5 * spectrumInfo.twoTheta(idx);
 
       double q = Mantid::Kernel::UnitConversion::run(usingTheta, efixed);
 
