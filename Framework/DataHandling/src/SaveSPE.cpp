@@ -5,16 +5,18 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Unit.h"
 
 #include "Poco/File.h"
 #include <cmath>
 
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
 #include <stdexcept>
 
 namespace Mantid {
@@ -259,8 +261,8 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
   values in place of NaN-s and Inf-S of the correspondent signal
 
 */
-void SaveSPE::check_and_copy_spectra(const std::vector<double> &inSignal,
-                                     const std::vector<double> &inErr,
+void SaveSPE::check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
+                                     const HistogramData::HistogramE &inErr,
                                      std::vector<double> &Signal,
                                      std::vector<double> &Error) const {
   if (Signal.size() != inSignal.size()) {
@@ -285,8 +287,7 @@ void SaveSPE::check_and_copy_spectra(const std::vector<double> &inSignal,
 */
 void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
                         FILE *const outFile, const int wsIn) const {
-  check_and_copy_spectra(WS->y(wsIn).rawData(), WS->e(wsIn).rawData(),
-                         m_tSignal, m_tError);
+  check_and_copy_spectra(WS->y(wsIn), WS->e(wsIn), m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeBins(m_tSignal, outFile);
 

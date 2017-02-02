@@ -382,7 +382,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
   //-----------------------------------------
   // Add Q with units  + uncertainty definition
-  const auto qValue = workspace->x(0);
+  const auto &qValue = workspace->x(0);
   std::map<std::string, std::string> qAttributes;
   auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
   qUnit = getMomentumTransferLabel(qUnit);
@@ -403,7 +403,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
   //-----------------------------------------
   // Add I with units + uncertainty definition
-  const auto intensity = workspace->y(0);
+  const auto &intensity = workspace->y(0);
   std::map<std::string, std::string> iAttributes;
   auto iUnit = getIntensityUnit(workspace);
   iUnit = getIntensityUnitLabel(iUnit);
@@ -415,7 +415,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
   //-----------------------------------------
   // Add Idev with units
-  const auto intensityUncertainty = workspace->e(0);
+  const auto &intensityUncertainty = workspace->e(0);
   std::map<std::string, std::string> eAttributes;
   eAttributes.insert(
       std::make_pair(sasUnitAttr, iUnit)); // same units as intensity
@@ -713,11 +713,17 @@ void SaveNXcanSAS::init() {
                       "Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
-  std::vector<std::string> radiation_source{
-      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
-      "Reactor Neutron Source", "Synchrotron X-ray Source",
-      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
-      "neutron", "x-ray", "muon", "electron"};
+  std::vector<std::string> radiation_source{"Spallation Neutron Source",
+                                            "Pulsed Reactor Neutron Source",
+                                            "Reactor Neutron Source",
+                                            "Synchrotron X-ray Source",
+                                            "Pulsed Muon Source",
+                                            "Rotating Anode X-ray",
+                                            "Fixed Tube X-ray",
+                                            "neutron",
+                                            "x-ray",
+                                            "muon",
+                                            "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),

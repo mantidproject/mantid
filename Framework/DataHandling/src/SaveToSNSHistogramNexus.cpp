@@ -3,21 +3,21 @@
 // @author Ronald Fowler, STFC eScience. Modified to fit with
 // SaveToSNSHistogramNexusProcessed
 #include "MantidDataHandling/SaveToSNSHistogramNexus.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Progress.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/Memory.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/Timer.h"
 
+#include <Poco/File.h>
+#include <boost/scoped_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <numeric>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_array.hpp>
-#include <Poco/File.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -574,11 +574,12 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             // 1 dimension, with that number of bin boundaries
             dataDimensions[0] = static_cast<int>(X.size());
             // The output TOF axis will be whatever size in the workspace.
-            boost::scoped_array<float> tof_data(new float[dataDimensions[0]]);
+            // boost::scoped_array<float> tof_data(new
+            // float[dataDimensions[0]]);
+            std::vector<float> tof_data(dataDimensions[0]);
 
             // And fill it with the X data
-            for (size_t i = 0; i < X.size(); i++)
-              tof_data[i] = float(X[i]);
+            std::copy(X.cbegin(), X.cend(), tof_data.begin());
 
             if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions,
                                NX_COMP_LZW, dataDimensions) != NX_OK)
@@ -587,7 +588,7 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
               return NX_ERROR;
             if (WriteAttributes(is_definition) != NX_OK)
               return NX_ERROR;
-            if (NXputdata(outId, tof_data.get()) != NX_OK)
+            if (NXputdata(outId, tof_data.data()) != NX_OK)
               return NX_ERROR;
             if (NXclosedata(outId) != NX_OK)
               return NX_ERROR;

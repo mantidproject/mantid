@@ -345,7 +345,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   auto dataArr = new double[m_spectraCount];
 
   // images can be as one-spectrum-per-pixel, or one-spectrum-per-row
-  bool spectrumPerPixel = (1 == workspace->mutableY(0).size());
+  bool spectrumPerPixel = (1 == workspace->y(0).size());
   for (int64_t i = 0; i < m_dimensions[1]; ++i) {
     const auto &Y = workspace->y(i);
     for (int64_t j = 0; j < m_dimensions[2]; ++j) {

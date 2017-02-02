@@ -237,10 +237,10 @@ void SaveNXSPE::exec() {
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // a detector but not a monitor
       if (!spectrumInfo.isMasked(i)) {
-        const auto &inY = inputWS->y(i);
-        std::copy(inY.begin(), inY.end(), signalBufferStart);
-        const auto &inE = inputWS->e(i);
-        std::copy(inE.begin(), inE.end(), errorBufferStart);
+        std::copy(inputWS->y(i).cbegin(), inputWS->y(i).cend(),
+                  signalBufferStart);
+        std::copy(inputWS->e(i).cbegin(), inputWS->e(i).cend(),
+                  errorBufferStart);
       } else {
         std::fill_n(signalBufferStart, nBins, MASK_FLAG);
         std::fill_n(errorBufferStart, nBins, MASK_ERROR);

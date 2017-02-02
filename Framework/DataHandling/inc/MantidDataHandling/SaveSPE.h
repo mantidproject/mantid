@@ -9,6 +9,10 @@
 #include <vector>
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramY;
+class HistogramE;
+}
 namespace DataHandling {
 /**
      Saves a workspace into an ASCII SPE file.
@@ -100,8 +104,8 @@ private:
 
   // method verifies if a spectra contains any NaN or Inf values and replaces
   // these values with SPE-specified constants
-  void check_and_copy_spectra(const std::vector<double> &inSignal,
-                              const std::vector<double> &inErr,
+  void check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
+                              const HistogramData::HistogramE &inErr,
                               std::vector<double> &Signal,
                               std::vector<double> &Error) const;
 };
