@@ -97,15 +97,13 @@ double getOffset(OffsetsWorkspace_const_sptr offsetsWS, const detid_t detid) {
 /**
  * @param offsetsWS
  * @param index
+ * @param spectrumInfo
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS,
-                     const size_t index) {
-  Instrument_const_sptr instrument = offsetsWS->getInstrument();
-
+double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS, const size_t index,
+                     const Mantid::API::SpectrumInfo &spectrumInfo) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
-  const Mantid::API::SpectrumInfo &spectrumInfo = offsetsWS->spectrumInfo();
   double l1 = spectrumInfo.l1();
   Kernel::V3D samplePos = spectrumInfo.samplePosition();
   Kernel::V3D sourcePos = spectrumInfo.sourcePosition();
@@ -137,10 +135,11 @@ void ConvertDiffCal::exec() {
   const size_t numberOfSpectra = offsetsWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
+  const Mantid::API::SpectrumInfo &spectrumInfo = offsetsWS->spectrumInfo();
   for (size_t i = 0; i < numberOfSpectra; ++i) {
     API::TableRow newrow = configWksp->appendRow();
     newrow << static_cast<int>(getDetID(offsetsWS, i));
-    newrow << calculateDIFC(offsetsWS, i);
+    newrow << calculateDIFC(offsetsWS, i, spectrumInfo);
     newrow << 0.; // difa
     newrow << 0.; // tzero
 
