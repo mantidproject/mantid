@@ -3,15 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include "MantidKernel/Matrix.h"
 
 #include "MantidSINQ/PoldiFitPeaks2D.h"
-#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <numeric>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
@@ -60,10 +61,8 @@ public:
 
   void testSetDeltaTFromWorkspace() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    for (size_t i = 0; i <= 10; ++i) {
-      ws->dataX(0)[i] = static_cast<double>(i);
-    }
-
+    auto &X = ws->mutableX(0);
+    std::iota(X.begin(), X.end(), 0);
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.setDeltaTFromWorkspace(ws);
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 1.0);
