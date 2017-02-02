@@ -366,19 +366,12 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
   scale->setProperty("OutputWorkspace", "__" + monName + "_temp");
   scale->execute();
 
-  IAlgorithm_sptr rebinMon = AlgorithmManager::Instance().create("Rebin");
-  rebinMon->initialize();
-  rebinMon->setProperty("InputWorkspace", monName);
-  rebinMon->setProperty("OutputWorkspace", "__" + monName + "_temp");
-  rebinMon->setProperty("Params", "0, 100, 100000");
-  rebinMon->setProperty("PreserveEvents", false);
-  rebinMon->execute();
-
-  IAlgorithm_sptr rebinDet = AlgorithmManager::Instance().create("Rebin");
+  IAlgorithm_sptr rebinDet =
+      AlgorithmManager::Instance().create("RebinToWorkspace");
   rebinDet->initialize();
-  rebinDet->setProperty("InputWorkspace", sliceName);
+  rebinDet->setProperty("WorkspaceToRebin", sliceName);
+  rebinDet->setProperty("WorkspaceToMatch", "__" + monName + "_temp");
   rebinDet->setProperty("OutputWorkspace", sliceName);
-  rebinDet->setProperty("Params", "0, 100, 100000");
   rebinDet->setProperty("PreserveEvents", false);
   rebinDet->execute();
 
