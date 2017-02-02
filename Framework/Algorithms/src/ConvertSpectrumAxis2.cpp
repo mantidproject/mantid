@@ -5,6 +5,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
