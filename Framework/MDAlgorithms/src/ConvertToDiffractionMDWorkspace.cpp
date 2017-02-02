@@ -193,9 +193,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
   // Get the position of the detector there.
   const auto &detectors = el.getDetectorIDs();
   if (!detectors.empty()) {
-    // Get the detector (might be a detectorGroup for multiple detectors)
-    // or might return an exception if the detector is not in the instrument
-    // definition
+    // Check if a detector is located at this workspace index, returns
+    // immediately if one is not found.
     if (!specInfo.hasDetectors(workspaceIndex)) {
       this->failedDetectorLookupCount++;
       return;

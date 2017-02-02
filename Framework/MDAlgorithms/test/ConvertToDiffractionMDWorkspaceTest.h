@@ -4,13 +4,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -21,13 +22,6 @@ using namespace Mantid::MDAlgorithms;
 
 class ConvertToDiffractionMDWorkspaceTest : public CxxTest::TestSuite {
 public:
-  static ConvertToDiffractionMDWorkspaceTest *createSuite() {
-    return new ConvertToDiffractionMDWorkspaceTest();
-  }
-  static void destroySuite(ConvertToDiffractionMDWorkspaceTest *suite) {
-    delete suite;
-  }
-
   void test_Init() {
     ConvertToDiffractionMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -228,14 +222,12 @@ public:
   }
 };
 
-class ConvertToDiffractionMDWorkspaceTestPerformance
-    : public CxxTest::TestSuite {
+class CTDMDWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
-  static ConvertToDiffractionMDWorkspaceTestPerformance *createSuite() {
-    return new ConvertToDiffractionMDWorkspaceTestPerformance();
+  static CTDMDWorkspaceTestPerformance *createSuite() {
+    return new CTDMDWorkspaceTestPerformance();
   }
-  static void
-  destroySuite(ConvertToDiffractionMDWorkspaceTestPerformance *suite) {
+  static void destroySuite(CTDMDWorkspaceTestPerformance *suite) {
     delete suite;
   }
 
@@ -257,15 +249,15 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void testConvertToDiffractionMDWorkspaceTestPerformance() {
+  void testConvertToDiffractionMDWorkspacePerformance() {
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 
 private:
   ConvertToDiffractionMDWorkspace alg;
   EventWorkspace_sptr in_ws;
-  int numEventsPer = 100;
-  int numPixels = 400;
+  int numEventsPer = 500;
+  int numPixels = 2000;
 };
 
 #endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_ */

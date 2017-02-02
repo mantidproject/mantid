@@ -333,12 +333,12 @@ void EQSANSLoad::moveToBeamCenter() {
   int ny_pixels = static_cast<int>(
       dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
   const auto &detInfo = dataWS->detectorInfo();
-  const V3D pixel_first = detInfo.position(0);
+  const V3D pixel_first = detInfo.position(detInfo.indexOf(0));
   int detIDx = EQSANSInstrument::getDetectorFromPixel(nx_pixels - 1, 0, dataWS);
   int detIDy = EQSANSInstrument::getDetectorFromPixel(0, ny_pixels - 1, dataWS);
 
-  const V3D pixel_last_x = detInfo.position(detIDx);
-  const V3D pixel_last_y = detInfo.position(detIDy);
+  const V3D pixel_last_x = detInfo.position(detInfo.indexOf(detIDx));
+  const V3D pixel_last_y = detInfo.position(detInfo.indexOf(detIDy));
   double x_offset = (pixel_first.X() + pixel_last_x.X()) / 2.0;
   double y_offset = (pixel_first.Y() + pixel_last_y.Y()) / 2.0;
   double beam_ctr_x = 0.0;

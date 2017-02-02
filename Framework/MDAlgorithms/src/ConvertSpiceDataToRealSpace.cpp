@@ -332,7 +332,7 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
     tempws->mutableX(i)[0] = pos[0] + 0.01;
     double yvalue = tablews->cell<double>(irow, anodelist[i].second);
     tempws->mutableY(i)[0] = yvalue;
-    tempws->mutableE(i)[0] = (yvalue >= 1) ? sqrt(yvalue) : 1;
+    tempws->mutableE(i)[0] = std::max(sqrt(yvalue), 1.0);
     // update X-range, Y-range and Z-range
     for (size_t d = 0; d < 3; ++d) {
       if (pos[d] < m_extentMins[d])
@@ -607,12 +607,11 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       float error = static_cast<float>(vecerror[0]);
       detid_t detid = specInfo.detector(i).getID() + detindex;
       const auto &detPos = specInfo.position(i);
-      std::vector<Mantid::coord_t> data(3);
+      Mantid::coord_t data[3];
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
       data[2] = static_cast<float>(detPos.Z());
-      inserter.insertMDEvent(signal, error * error, runnumber, detid,
-                             data.data());
+      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 
@@ -685,12 +684,11 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
       // For each spectrum/detector
       detid_t detid = specInfo.detector(i).getID() + detindex;
       const auto &detPos = specInfo.position(i);
-      std::vector<Mantid::coord_t> data(3);
+      Mantid::coord_t data[3];
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
       data[2] = static_cast<float>(detPos.Z());
-      inserter.insertMDEvent(signal, error * error, runnumber, detid,
-                             data.data());
+      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 

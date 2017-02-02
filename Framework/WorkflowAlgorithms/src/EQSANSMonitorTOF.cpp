@@ -1,6 +1,6 @@
 #include "MantidWorkflowAlgorithms/EQSANSMonitorTOF.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -54,16 +54,17 @@ void EQSANSMonitorTOF::exec() {
     g_log.error() << "EQSANS workspace does not have exactly ones monitor! "
                      "This should not happen\n";
 
-  const auto &specInfo = inputWS->spectrumInfo();
-  if (!specInfo.hasDetectors(monitor_list[0])) {
-    g_log.error() << "Spectrum number " << monitor_list[0]
+  const auto &detInfo = inputWS->detectorInfo();
+  const size_t monIndex0 = detInfo.indexOf(0);
+  if (!detInfo.isMonitor(monIndex0)) {
+    g_log.error() << "Spectrum number " << monIndex0
                   << " has no detector assigned to it - discarding\n";
     return;
   }
 
   // Get the source to monitor distance in mm
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
-  double monitor_z = specInfo.position(monitor_list[0]).Z();
+  double monitor_z = detInfo.position(monIndex0).Z();
   double source_to_monitor = (monitor_z - source_z) * 1000.0;
 
   // Calculate the frame width

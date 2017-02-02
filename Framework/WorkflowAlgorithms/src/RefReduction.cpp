@@ -522,7 +522,8 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       // Move the detector to the right position
       if (instrument.compare("REF_M") == 0) {
         const auto &detInfo = rawWS->detectorInfo();
-        double det_distance = detInfo.position(0).Z();
+        const size_t detIndex0 = detInfo.indexOf(0);
+        double det_distance = detInfo.position(detIndex0).Z();
         auto dp = rawWS->run().getTimeSeriesProperty<double>("SampleDetDis");
         double sdd = dp->getStatistics().mean / 1000.0;
         IAlgorithm_sptr mvAlg =
