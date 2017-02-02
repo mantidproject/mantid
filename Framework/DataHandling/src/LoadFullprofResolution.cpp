@@ -418,11 +418,11 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["tof-min"] = tempdb;
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["step"] = tempdb;
-        tempdb = std::stod(terms[3].c_str());
+        tempdb = atof(terms[3].c_str());
         parammap["tof-max"] = tempdb;
       }
     } else if (boost::starts_with(line, "D2TOF")) {
@@ -437,12 +437,12 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Dtt1"] = tempdb;
         if (terms.size() == 4) {
-          tempdb = std::stod(terms[2].c_str());
+          tempdb = atof(terms[2].c_str());
           parammap["Dtt2"] = tempdb;
-          tempdb = std::stod(terms[3].c_str());
+          tempdb = atof(terms[3].c_str());
           parammap["Zero"] = tempdb;
         } else {
           parammap["Dtt2"] = 0.0;
@@ -461,9 +461,9 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Zero"] = tempdb;
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["Dtt1"] = tempdb;
         parammap["Dtt2"] = 0;
       }
@@ -479,15 +479,15 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Dtt1t"] = tempdb;
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["Dtt2t"] = tempdb;
-        tempdb = std::stod(terms[3].c_str());
+        tempdb = atof(terms[3].c_str());
         parammap["Tcross"] = tempdb;
-        tempdb = std::stod(terms[4].c_str());
+        tempdb = atof(terms[4].c_str());
         parammap["Width"] = tempdb;
-        tempdb = std::stod(terms[5].c_str());
+        tempdb = atof(terms[5].c_str());
         parammap["Zerot"] = tempdb;
       }
     } // "D2TOT"
@@ -502,15 +502,15 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Zerot"] = tempdb;
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["Dtt1t"] = tempdb;
-        tempdb = std::stod(terms[3].c_str());
+        tempdb = atof(terms[3].c_str());
         parammap["Dtt2t"] = tempdb;
-        tempdb = std::stod(terms[4].c_str());
+        tempdb = atof(terms[4].c_str());
         parammap["Tcross"] = tempdb;
-        tempdb = std::stod(terms[5].c_str());
+        tempdb = atof(terms[5].c_str());
         parammap["Width"] = tempdb;
       }
     } // "ZD2TOT"
@@ -525,7 +525,7 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["twotheta"] = tempdb;
       }
     } // "TWOTH"
@@ -540,11 +540,11 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Sig2"] = sqrt(tempdb);
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["Sig1"] = sqrt(tempdb);
-        tempdb = std::stod(terms[3].c_str());
+        tempdb = atof(terms[3].c_str());
         parammap["Sig0"] = sqrt(tempdb);
       }
     } // "SIGMA"
@@ -559,11 +559,11 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Gam2"] = tempdb;
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["Gam1"] = tempdb;
-        tempdb = std::stod(terms[3].c_str());
+        tempdb = atof(terms[3].c_str());
         parammap["Gam0"] = tempdb;
       }
     } // "GAMMA"
@@ -579,13 +579,13 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Alph0"] = tempdb;
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["Beta0"] = tempdb;
-        tempdb = std::stod(terms[3].c_str());
+        tempdb = atof(terms[3].c_str());
         parammap["Alph1"] = tempdb;
-        tempdb = std::stod(terms[4].c_str());
+        tempdb = atof(terms[4].c_str());
         parammap["Beta1"] = tempdb;
       }
     } // "ALFBE"
@@ -600,13 +600,13 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = std::stod(terms[1].c_str());
+        tempdb = atof(terms[1].c_str());
         parammap["Alph0t"] = tempdb;
-        tempdb = std::stod(terms[2].c_str());
+        tempdb = atof(terms[2].c_str());
         parammap["Beta0t"] = tempdb;
-        tempdb = std::stod(terms[3].c_str());
+        tempdb = atof(terms[3].c_str());
         parammap["Alph1t"] = tempdb;
-        tempdb = std::stod(terms[4].c_str());
+        tempdb = atof(terms[4].c_str());
         parammap["Beta1t"] = tempdb;
       }
     } // "ALFBT"
