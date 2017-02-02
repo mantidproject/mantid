@@ -76,14 +76,13 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     }
     it = groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
-      g_log.error() << "Impossible situation! \n";
       throw std::invalid_argument(
           "Could not find group ID the after creating it in the map.");
     }
 
     // c) Convert workspace ID to detector ID
     const auto &mspec = mGroupWS->getSpectrum(iws);
-    auto detids = mspec.getDetectorIDs();
+    auto &detids = mspec.getDetectorIDs();
     if (detids.size() != 1) {
       g_log.error() << "Spectrum " << mspec.getSpectrumNo() << " has "
                     << detids.size() << " detectors.  Not allowed situation!\n";
