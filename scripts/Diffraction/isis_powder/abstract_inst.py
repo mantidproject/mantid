@@ -12,6 +12,10 @@ from isis_powder.routines import calibrate, focus
 # if they want to define the behaviour of the hook. Otherwise it
 # returns the object passed in without manipulating it as a default
 
+# Anything we don't expect the user to call is prepended with an underscore
+# '_'. This way they are hidden in the ipython window (or at least go to the bottom)
+# to denote internal methods to abstract_inst we will use '_abs_' to denote it as a
+# private method for the scripts
 
 @add_metaclass(ABCMeta)
 class AbstractInst(object):
@@ -66,7 +70,7 @@ class AbstractInst(object):
     # Mandatory overrides
 
     @abstractmethod
-    def get_run_details(self, run_number_string):
+    def _get_run_details(self, run_number_string):
         """
         Returns a RunDetails object with various properties related to the current run set
         :param run_number_string: The run number to look up the properties of
@@ -76,7 +80,7 @@ class AbstractInst(object):
 
     @staticmethod
     @abstractmethod
-    def generate_input_file_name(run_number):
+    def _generate_input_file_name(run_number):
         """
         Generates a name which Mantid uses within Load to find the file.
         :param run_number: The run number to convert into a valid format for Mantid
@@ -85,7 +89,7 @@ class AbstractInst(object):
         pass
 
     @abstractmethod
-    def generate_output_file_name(self, run_number_string):
+    def _generate_output_file_name(self, run_number_string):
         """
         Generates the filename which is used to uniquely identify and save the workspace. This should include any
         distinguishing properties such as if absorption corrections were performed.
@@ -95,7 +99,7 @@ class AbstractInst(object):
         raise NotImplementedError("Output names not implemented")
 
     @abstractmethod
-    def spline_vanadium_ws(self, focused_vanadium_banks):
+    def _spline_vanadium_ws(self, focused_vanadium_banks):
         """
         Takes a background spline of the list of processed vanadium banks
         :param focused_vanadium_banks: The list processed (and cropped) vanadium banks to take a spline of
@@ -105,7 +109,7 @@ class AbstractInst(object):
 
     # Optional overrides
     @abstractmethod
-    def apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
         """
         Generates vanadium absorption corrections to compensate for the container
         :param van_ws: A reference vanadium workspace to match the binning of or correct
@@ -113,7 +117,7 @@ class AbstractInst(object):
         """
         raise NotImplementedError("Not implemented for this instrument yet")
 
-    def attenuate_workspace(self, input_workspace):
+    def _attenuate_workspace(self, input_workspace):
         """
         Applies an attenuation correction to the workspace
         :param input_workspace: The workspace to correct
@@ -122,7 +126,7 @@ class AbstractInst(object):
         return input_workspace
 
     @staticmethod
-    def can_auto_gen_vanadium_cal():
+    def _can_auto_gen_vanadium_cal():
         """
         Can be overridden and returned true by instruments who can automatically run generate vanadium calculation
         if the splines cannot be found during the focus routine
@@ -130,7 +134,7 @@ class AbstractInst(object):
         """
         return False
 
-    def crop_banks_to_user_tof(self, focused_banks):
+    def _crop_banks_to_user_tof(self, focused_banks):
         """
         Crops to a user specified TOF range on a bank-by-bank basis. This is called after focusing a sample and
         performing the various corrections required
@@ -139,7 +143,7 @@ class AbstractInst(object):
         """
         return focused_banks
 
-    def crop_raw_to_expected_tof_range(self, ws_to_crop):
+    def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         """
         Crops the raw data to a sensible TOF range before processing. This is so that instruments (e.g. PEARL)
         who capture double the data only process one 'window' of data at a time.
@@ -148,7 +152,7 @@ class AbstractInst(object):
         """
         return ws_to_crop
 
-    def crop_van_to_expected_tof_range(self, van_ws_to_crop):
+    def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         """
         Crops the vanadium workspace to a user specified TOF, this is to prevent the b-spline being affected by
         values after diffraction which are set to 0 as there was no data for that TOF.
@@ -157,7 +161,7 @@ class AbstractInst(object):
         """
         return van_ws_to_crop
 
-    def generate_auto_vanadium_calibration(self, run_details):
+    def _generate_auto_vanadium_calibration(self, run_details):
         """
         Used by focus if a vanadium spline was not found to automatically generate said spline if the instrument
         has indicated support by overriding can_auto_gen_vanadium_cal
@@ -168,7 +172,7 @@ class AbstractInst(object):
         # automatic calibration
         raise NotImplementedError("Automatic vanadium corrections have not been implemented for this instrument.")
 
-    def get_monitor_spectra_index(self, run_number):
+    def _get_monitor_spectra_index(self, run_number):
         """
         Returns the spectra number a monitor is located at
         :param run_number: The run number to locate the monitor spectra of
@@ -176,7 +180,7 @@ class AbstractInst(object):
         """
         return str()
 
-    def normalise_ws_current(self, ws_to_correct, run_details=None):
+    def _normalise_ws_current(self, ws_to_correct, run_details=None):
         """
         Normalises the workspace by the beam current at the time it was taken
         :param ws_to_correct: The workspace to normalise the current of
@@ -185,7 +189,7 @@ class AbstractInst(object):
         """
         return None
 
-    def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
+    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         """
         Takes a list of focused workspace banks and saves them out in an instrument appropriate format.
         :param processed_spectra: The list of workspace banks to save out
@@ -197,7 +201,7 @@ class AbstractInst(object):
 
     # Steps applicable to all instruments
 
-    def generate_out_file_paths(self, run_details, output_directory=None):
+    def _generate_out_file_paths(self, run_details, output_directory=None):
         """
         Generates the various output paths and file names to be used during saving or as workspace names
         :param run_details: The run details associated with this run
@@ -206,7 +210,7 @@ class AbstractInst(object):
         """
         if not output_directory:
             output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
-        file_name = str(self.generate_output_file_name(run_number_string=run_details.run_number))
+        file_name = str(self._generate_output_file_name(run_number_string=run_details.run_number))
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))

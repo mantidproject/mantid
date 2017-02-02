@@ -34,7 +34,7 @@ class Pearl(AbstractInst):
         kwargs["perform_attenuation"] = False
         self._inst_settings.update_attributes(kwargs=kwargs)
 
-        run_details = self.get_run_details(run_number_string=run_in_range)
+        run_details = self._get_run_details(run_number_string=run_in_range)
         run_details.run_number = run_details.vanadium_run_numbers
 
         return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
@@ -43,7 +43,7 @@ class Pearl(AbstractInst):
 
     # Params #
 
-    def get_run_details(self, run_number_string):
+    def _get_run_details(self, run_number_string):
         input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
         first_run = input_run_number_list[0]
         if self._cached_run_details_number == first_run:
@@ -56,10 +56,10 @@ class Pearl(AbstractInst):
         return run_details
 
     @staticmethod
-    def generate_input_file_name(run_number):
+    def _generate_input_file_name(run_number):
         return _generate_file_name(run_number=run_number)
 
-    def generate_output_file_name(self, run_number_string):
+    def _generate_output_file_name(self, run_number_string):
 
         output_name = "PRL" + str(run_number_string)
         # Append each mode of operation
@@ -68,11 +68,11 @@ class Pearl(AbstractInst):
         output_name += "_long" if self._inst_settings.long_mode else ""
         return output_name
 
-    def attenuate_workspace(self, input_workspace):
+    def _attenuate_workspace(self, input_workspace):
         attenuation_path = self._attenuation_full_path
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
-    def normalise_ws_current(self, ws_to_correct, run_details=None):
+    def _normalise_ws_current(self, ws_to_correct, run_details=None):
         monitor_ws = common.get_monitor_ws(ws_to_process=ws_to_correct, run_number_string=run_details.run_number,
                                            instrument=self)
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
@@ -82,17 +82,17 @@ class Pearl(AbstractInst):
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
-    def get_monitor_spectra_index(self, run_number):
+    def _get_monitor_spectra_index(self, run_number):
         return self._inst_settings.monitor_spec_no
 
-    def spline_vanadium_ws(self, focused_vanadium_spectra):
+    def _spline_vanadium_ws(self, focused_vanadium_spectra):
         return common.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
                                                    num_splines=self._inst_settings.spline_coefficient)
 
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
 
-    def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
+    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
             output_mode = self._inst_settings.focus_mode
         output_spectra = \
@@ -103,20 +103,20 @@ class Pearl(AbstractInst):
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
 
-    def crop_banks_to_user_tof(self, focused_banks):
+    def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)
 
-    def crop_raw_to_expected_tof_range(self, ws_to_crop):
+    def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_vals[0],
                                     x_max=self._inst_settings.raw_data_crop_vals[-1])
         return out_ws
 
-    def crop_van_to_expected_tof_range(self, van_ws_to_crop):
+    def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         cropped_ws = common.crop_in_tof(ws_to_crop=van_ws_to_crop, x_min=self._inst_settings.van_tof_cropping[0],
                                         x_max=self._inst_settings.van_tof_cropping[-1])
         return cropped_ws
 
-    def apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
         if gen_absorb:
             pearl_algs.generate_vanadium_absorb_corrections(van_ws=van_ws)
 

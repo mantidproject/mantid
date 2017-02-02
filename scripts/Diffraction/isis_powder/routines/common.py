@@ -58,7 +58,7 @@ def extract_ws_spectra(ws_to_split):
 
 def extract_and_crop_spectra(focused_ws, instrument):
     ws_spectra = extract_ws_spectra(ws_to_split=focused_ws)
-    ws_spectra = instrument.crop_banks_to_user_tof(ws_spectra)
+    ws_spectra = instrument._crop_banks_to_user_tof(ws_spectra)
     return ws_spectra
 
 
@@ -76,13 +76,13 @@ def generate_run_numbers(run_number_string):
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
     number_list = generate_run_numbers(run_number_string)
-    monitor_spectra = instrument.get_monitor_spectra_index(number_list[0])
+    monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
     load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
 
 
 def load_current_normalised_ws_list(run_number_string, instrument, input_batching):
-    run_information = instrument.get_run_details(run_number_string=run_number_string)
+    run_information = instrument._get_run_details(run_number_string=run_number_string)
     raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
     if input_batching.lower() == InputBatchingEnum.Summed.lower() and len(raw_ws_list) > 1:
@@ -143,7 +143,7 @@ def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
 def _normalise_workspaces(ws_list, instrument, run_information):
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument.normalise_ws_current(ws_to_correct=ws, run_details=run_information))
+        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws, run_details=run_information))
 
     return output_list
 
@@ -176,7 +176,7 @@ def _load_list_of_files(run_numbers_list, instrument):
     _check_load_range(list_of_runs_to_load=run_numbers_list)
 
     for run_number in run_numbers_list:
-        file_name = instrument.generate_input_file_name(run_number=run_number)
+        file_name = instrument._generate_input_file_name(run_number=run_number)
         read_ws = mantid.Load(Filename=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
