@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
@@ -186,11 +187,13 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     return makeInstrumentMap(countsWS);
   }
 
+  const auto &detectorInfo = countsWS->detectorInfo();
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
     detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
     try {
+      const auto detIdx = detectorInfo.indexOf(d);
       std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
-          instrument->getDetector(d)->getAncestors();
+          detectorInfo.detector(detIdx).getAncestors();
 
       if (anc.size() < static_cast<size_t>(parents)) {
         g_log.warning("Too many levels up. Will ignore LevelsUp");
@@ -198,6 +201,9 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
         return makeInstrumentMap(countsWS);
       }
       mymap.emplace(anc[parents - 1]->getComponentID(), i);
+    } catch (std::out_of_range &e) {
+      // do nothing
+      g_log.debug(e.what());
     } catch (Mantid::Kernel::Exception::NotFoundError &e) {
       // do nothing
       g_log.debug(e.what());
