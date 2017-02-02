@@ -74,18 +74,6 @@ def generate_run_numbers(run_number_string):
     return run_list
 
 
-def generate_unique_workspace_name(original_name):
-    number_to_append = 1
-    unique_name = original_name
-    if mantid.mtd.doesExist(unique_name):
-        while mantid.mtd.doesExist(original_name + '_' + str(number_to_append)):
-            number_to_append += 1
-        # Found a unique combination
-        unique_name = original_name + '_' + str(number_to_append)
-
-    return unique_name
-
-
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
     number_list = generate_run_numbers(run_number_string)
     monitor_spectra = instrument.get_monitor_spectra_index(number_list[0])
@@ -190,8 +178,7 @@ def _load_list_of_files(run_numbers_list, instrument):
     for run_number in run_numbers_list:
         file_name = instrument.generate_input_file_name(run_number=run_number)
         read_ws = mantid.Load(Filename=file_name)
-        ws_name = generate_unique_workspace_name(original_name=file_name)
-        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=ws_name))
+        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
     return read_ws_list
 
