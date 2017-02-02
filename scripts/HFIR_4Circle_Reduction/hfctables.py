@@ -90,6 +90,38 @@ class MatrixTable(tableBase.NTableWidget):
 
         return
 
+    def setup(self, num_rows, num_cols):
+        """
+        set up a table for matrix
+        :param num_rows:
+        :param num_cols:
+        :return:
+        """
+        # check inputs
+        assert isinstance(num_rows, int) and num_rows > 0, 'Number of rows larger than 0.'
+        assert isinstance(num_cols, int) and num_cols > 0, 'Number of columns larger than 0.'
+
+        # think of reset
+        if self.rowCount() != num_rows or self.columnCount() != num_cols:
+            raise RuntimeError('ASAP')
+
+        return
+
+    def set_matrix(self, matrix):
+        """
+
+        :param matrix:
+        :return:
+        """
+        # check inputs
+        assert isinstance(matrix, numpy.ndarray) and matrix.shape == (4, 4), 'Matrix {0} must be ndarray with {1}.' \
+                                                                             ''.format(matrix, matrix.shape)
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                self.set_value_cell(i, j, matrix[i, j])
+
+        return
+
 
 class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """
@@ -598,12 +630,14 @@ class ProcessTableWidget(tableBase.NTableWidget):
     """
     # TODO/NOW/ISSUE - Remove Index From and add mask, integration type (gaussian/simple)
     TableSetup = [('Scan', 'int'),
-                  ('Intensity', 'float'),
-                  ('Corrected', 'float'),
                   ('Status', 'str'),
+                  ('Intensity', 'float'),
+                  ('Corrected', 'float'),  # Lorenzian corrected
+                  ('Mask', 'str'),  # '' for no mask
+                  ('Int Type', 'str'),  # integration type, Gaussian fit / simple summation
                   ('Peak', 'str'),  # peak center can be either HKL or Q depending on the unit
                   ('HKL', 'str'),
-                  ('Index From', 'str'),  # source of HKL index, either SPICE or calculation
+                  # ('Index From', 'str'),  # source of HKL index, either SPICE or calculation
                   ('Motor', 'str'),
                   ('Motor Step', 'str'),
                   ('Wavelength', 'float'),
@@ -623,10 +657,12 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexScan = None
         self._colIndexIntensity = None
         self._colIndexCorrInt = None
+        self._colIndexMask = None
+        self._colIndexIntType = None
         self._colIndexHKL = None
         self._colIndexStatus = None
         self._colIndexPeak = None
-        self._colIndexIndexFrom = None
+        # self._colIndexIndexFrom = None
         self._colIndexMotor = None
         self._colIndexMotorStep = None
         self._colIndexWaveLength = None
@@ -650,14 +686,15 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         intensity = None
         corr_int = None
+        mask = ''
+        integrate_type = 'sum'
         motor_name = None
         motor_step = None
         wave_length = 0
         peak_center = ''
         hkl = ''
-        hkl_from = ''
 
-        new_row = [scan_number, intensity, corr_int, status, peak_center, hkl, hkl_from,
+        new_row = [scan_number, status, intensity, corr_int, mask, integrate_type, peak_center, hkl,
                    motor_name, motor_step, wave_length, ws_name, 0, False]
 
         return new_row
@@ -671,9 +708,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(ws_name, str)
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(ws_name, str), 'Workspace name {0} must be a string but not a {1}.'.format(ws_name, str(ws_name))
 
         # construct a row
         new_row = self._generate_empty_row(scan_number, ws_name=ws_name)
@@ -957,22 +996,27 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_peak_intensity(self, row_number, peak_intensity, lorentz_corrected=False):
+    def set_peak_intensity(self, row_number, peak_intensity, lorentz_corrected, integrate_method):
         """ Set peak intensity to a row or scan
         Requirement: Either row number or scan number must be given
         Guarantees: peak intensity is set
         :param row_number:
         :param peak_intensity:
         :param lorentz_corrected:
+        :param integrate_method: must be '', sum or gaussian for simple counts summation or Gaussian fit, respectively
         :return:
         """
         # check requirements
         assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
+        assert integrate_method in ['', 'sum', 'gaussian'], 'Peak integration method must be in ' \
+                                                            '[Not defined, simple sum, gaussian fit]'
 
         if lorentz_corrected:
             col_index = self._colIndexCorrInt
         else:
             col_index = self._colIndexIntensity
+
+        self.update_cell_value(row_number, self._colIndexIntType, integrate_method)
 
         return self.update_cell_value(row_number, col_index, peak_intensity)
 
@@ -1030,10 +1074,12 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexScan = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
         self._colIndexIntensity = self.TableSetup.index(('Intensity', 'float'))
         self._colIndexCorrInt = self.TableSetup.index(('Corrected', 'float'))
+        self._colIndexMask = self.TableSetup.index(('Mask', 'str'))
+        self._colIndexIntType = self.TableSetup.index(('Int Type', 'str'))
         self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
         self._colIndexHKL = ProcessTableWidget.TableSetup.index(('HKL', 'str'))
         self._colIndexPeak = self.TableSetup.index(('Peak', 'str'))
-        self._colIndexIndexFrom = self.TableSetup.index(('Index From', 'str'))
+        # self._colIndexIndexFrom = self.TableSetup.index(('Index From', 'str'))
         self._colIndexMotor = ProcessTableWidget.TableSetup.index(('Motor', 'str'))
         self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))
         self._colIndexWaveLength = self.TableSetup.index(('Wavelength', 'float'))

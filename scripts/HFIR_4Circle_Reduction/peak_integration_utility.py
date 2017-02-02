@@ -4,21 +4,32 @@ import scipy
 from scipy.optimize import curve_fit
 
 
-def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None, error_q_sigma=None):
+def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
+                                   error_a_sigma=None):
     """
-    calcukalte the peak intensity, which is the area under the peak
+    calculate the peak intensity, which is the area under the peak
     if sigma == 1, then the integral is sqrt(pi);
     then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
     :param gauss_a:
     :param gauss_sigma:
+    :param error_a_sq: error(a)**2
+    :param error_sigma_sq: error(sigma)**2
+    :param error_a_sigma: correlated error for a and sigma
     :return:
     """
     integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
 
     if error_a_sq is not None:
-        # TODO/ISSUE/NOW - Implement error to return
-        pass
-
+        # calculate integral intensity error by propagation
+        # check
+        assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
+        assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
+                                                  ''.format(type(error_sigma_sq))
+        assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
+                                                 ''.format(type(error_a_sigma))
+        # calculate
+        error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sq
+        error = numpy.sqrt(error2)
     else:
         error = numpy.sqrt(integral)
 
@@ -81,7 +92,7 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     :param vec_e:
     :param start_value_list: if not None, then it must have 4 elements:  x0, sigma, A, and b (for background)
     :param find_start_value_by_fit: if it is True, then fit the curve with a Gaussian without background
-    :return: 3-tuple (1) float as error, (2) list/tuple as x0, sigma, a, b , (3) 1-D array as model Y
+    :return: 3-tuple (1) float as error, (2) list/tuple as x0, sigma, a, b , (3) 4 x 4 covariance matrix
     """
     # check input
     assert isinstance(vec_x, numpy.ndarray), 'Input vec_x must be a numpy.ndarray but not a {0}.'.format(vec_x)
@@ -130,16 +141,42 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
     # calculate the model
     x0, sigma, a, b = fit2_coeff
-    # TODO/ISSUE/NOW - make modelX and modelY for more fine grids
     model_vec_y = gaussian_linear_background(vec_x, x0, sigma, a, b)
 
     print 'Covariance matrix: ', fit2_cov_matrix
 
     # calculate error as (model Y - obs Y)**2/wi
+    # this is a bad way to calculate error!
+    # TODO/FIXME/NOW - Need a correct way to calculate the error AND/OR penalty!
     diff_y = model_vec_y - vec_y
     diff_y2 = numpy.ndarray(shape=(len(diff_y),), dtype='float')
     error = numpy.power(diff_y, 2, out=diff_y2)/len(diff_y)
 
-    return error, fit2_coeff, model_vec_y
+    return error, fit2_coeff, fit2_cov_matrix
 
 
+def get_finer_grid(vec_x, factor):
+    """
+    insert values to a vector (grid) to make it finer
+    :param vec_x:
+    :param factor:
+    :return:
+    """
+    assert isinstance(factor, int), 'Insertion factor {0} must be an integer but not a {1}'.format(factor, type(factor))
+
+    orig_size = len(vec_x)
+    new_list = list()
+    for i in range(orig_size-1):
+        d_x = vec_x[i+1] - vec_x[i]
+        for j in range(factor):
+            temp_x = vec_x[i] + d_x * float(j)
+            new_list.append(temp_x)
+        # END-FOR
+    # END-FOR
+
+    # don't forget the last
+    new_list.append(vec_x[-1])
+
+    new_vector = numpy.array(new_list)
+
+    return new_vector

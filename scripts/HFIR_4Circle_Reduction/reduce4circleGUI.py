@@ -1098,29 +1098,30 @@ class MainWindow(QtGui.QMainWindow):
         # list of 2-tuple: integer (plot ID) and string (label)
         # fit the Gaussian and calculate the peak intensity
         vec_e = numpy.sqrt(vec_y)
-        error, fit_param, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+        error, fit_param, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
         x0, gauss_sigma, gauss_a, background = fit_param
 
         peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
 
         # information
-        # TODO/ISSUE/NOW - title is clumsy!
-        info_str = 'Fit error = {0}: a = {1}, x0 = {2}, sigma = {3}, b = {4}'.format(error, gauss_a, x0, gauss_sigma,
-                                                                                     background)
+        info_str = 'Intensity along Pt. is fit by Gaussian'
 
         # plot the data
+        # make modelX and modelY for more fine grids
+        model_x = peak_integration_utility.get_finer_grid(vec_x, 10)
+        model_y = peak_integration_utility.gaussian_linear_background(model_x, x0, gauss_sigma, gauss_a, background)
+
         self.ui.graphicsView_integratedPeakView.plot_model(vec_x, model_vec_y, title=info_str)
 
         # set the value
         self.ui.lineEdit_gaussianPeakIntensity.setText(str(peak_intensity))
 
-        # TODO/ISSUE/NOW - set up more information
-        self.ui.lineEdit_guassX0
-        self.ui.lineEdit_gaussA
-        self.ui.lineEdit_gaussB
-        self.ui.lineEdit_gaussSigma
+        self.ui.lineEdit_guassX0.setText('{0.7f}'.format(x0))
+        self.ui.lineEdit_gaussA.setText('{0.7f}'.format(gauss_a))
+        self.ui.lineEdit_gaussB.setText('{0.7f}'.format(background))
+        self.ui.lineEdit_gaussSigma.setText('{0.7f}'.format(gauss_sigma))
 
-        self.ui.tableWidget_covariance
+        self.ui.tableWidget_covariance.set_matrix(cov_matrix)
 
         return
 
@@ -1429,7 +1430,8 @@ class MainWindow(QtGui.QMainWindow):
                 error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (exp_number, scan_number,
                                                                                        str(pt_number_list))
                 self.controller.set_peak_intensity(exp_number, scan_number, 0.)
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False,
+                                                                  integrate_method='')
                 self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
 
@@ -3055,7 +3057,8 @@ class MainWindow(QtGui.QMainWindow):
             # apply the Lorentz correction to the intensity
             corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
 
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True,
+                                                              integrate_method='sum')
             self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
         # END-FOR (row_number)
 
@@ -3429,7 +3432,8 @@ class MainWindow(QtGui.QMainWindow):
                 # set the value to table
                 self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
                                                                   peak_intensity=intensity,
-                                                                  lorentz_corrected=False)
+                                                                  lorentz_corrected=False,
+                                                                  integrate_method='sum')
                 self.ui.tableWidget_mergeScans.set_peak_centre(row_number=row_number,
                                                                peak_centre=peak_centre)
                 if is_error:
@@ -3500,7 +3504,7 @@ class MainWindow(QtGui.QMainWindow):
         if mode == 0:
             # error message
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number, peak_intensity=0.,
-                                                              lorentz_corrected=False)
+                                                              lorentz_corrected=False, integrate_method='sum')
             self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=message)
 
             # set peak value
