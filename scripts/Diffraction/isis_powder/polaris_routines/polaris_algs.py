@@ -101,7 +101,7 @@ def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
             output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
                                                           OutputWorkspace=output_name,
                                                           XMin=mask_params[0], XMax=mask_params[1])
-    return workspaces_to_mask
+    return output_workspaces
 
 
 def _generate_splined_van_name(chopper_on, vanadium_run_string):
