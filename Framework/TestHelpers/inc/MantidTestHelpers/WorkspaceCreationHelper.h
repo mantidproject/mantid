@@ -331,11 +331,17 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
 /// Function to create a fixed RebinnedOutput workspace
 Mantid::DataObjects::RebinnedOutput_sptr createRebinnedOutputWorkspace();
 
+/// Populates a mutable reference from initializer list starting at user
+/// specified index
+template <typename T>
+void populateWsWithInitList(T &destination, size_t startingIndex,
+                            std::initializer_list<double> values);
+
 /// Create a simple peaks workspace containing the given number of peaks
 boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
 createPeaksWorkspace(const int numPeaks = 2,
                      const bool createOrientedLattice = false);
-/**Build table workspace with preprocessed detectors for existign worksapce with
+/**Build table workspace with preprocessed detectors for existing workspace with
  * instrument */
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
 buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws);

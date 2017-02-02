@@ -75,32 +75,34 @@ void removeWS(const std::string &name) {
 }
 
 Workspace2D_sptr create1DWorkspaceRand(int size) {
-  MantidVec y1(size);
-  MantidVec e1(size);
 
   MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
                             std::numeric_limits<int>::max());
-  auto randFunc = [&randomGen] { return randomGen.nextValue(); };
 
-  std::generate(y1.begin(), y1.end(), randFunc);
-  std::generate(e1.begin(), e1.end(), randFunc);
+  auto randFunc = [&randomGen] { return randomGen.nextValue(); };
+  HistogramData::BinEdges xVals(size);
+  HistogramData::Counts counts(size, randFunc);
+  HistogramData::CountStandardDeviations errorVals(size, randFunc);
+
+  HistogramData::Histogram generatedHisto(std::move(xVals), std::move(counts),
+                                          std::move(errorVals));
+
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
-  retVal->dataY(0) = y1;
-  retVal->dataE(0) = e1;
+  retVal->setHistogram(0, std::move(generatedHisto));
   return retVal;
 }
 
 Workspace2D_sptr create1DWorkspaceConstant(int size, double value,
                                            double error) {
-  MantidVec y1(size, value);
-  MantidVec e1(size, error);
+  HistogramData::BinEdges xVals(size);
+  HistogramData::Counts yVals(size, value);
+  HistogramData::CountStandardDeviations errVals(size, error);
+
+  HistogramData::Histogram generatedHisto(std::move(xVals), std::move(yVals),
+                                          std::move(errVals));
+
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
-  retVal->dataY(0) = y1;
-  retVal->dataE(0) = e1;
+  retVal->setHistogram(0, std::move(generatedHisto));
   return retVal;
 }
 
@@ -114,14 +116,15 @@ Workspace2D_sptr create1DWorkspaceConstantWithXerror(int size, double value,
 }
 
 Workspace2D_sptr create1DWorkspaceFib(int size) {
-  MantidVec y1(size);
-  MantidVec e1(size);
-  std::generate(y1.begin(), y1.end(), FibSeries<double>());
+  HistogramData::BinEdges xVals(size);
+  HistogramData::Counts yVals(size, FibSeries<double>());
+  HistogramData::CountStandardDeviations errVals(size);
+
+  HistogramData::Histogram generatedHisto(std::move(xVals), std::move(yVals),
+                                          std::move(errVals));
+
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
-  retVal->dataY(0) = y1;
-  retVal->dataE(0) = e1;
+  retVal->setHistogram(0, std::move(generatedHisto));
   return retVal;
 }
 
@@ -138,9 +141,13 @@ Workspace2D_sptr create2DWorkspace(int nhist, int numBoundaries) {
 Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
                                                          int numBoundaries) {
   Workspace2D_sptr out = create2DWorkspaceBinned(nhist, numBoundaries);
-  for (int wi = 0; wi < nhist; wi++)
-    for (int x = 0; x < numBoundaries; x++)
-      out->dataY(wi)[x] = wi * 1.0;
+  for (int workspaceIndex = 0; workspaceIndex < nhist; workspaceIndex++) {
+    auto &yVals = out->mutableY(workspaceIndex);
+    for (int i = 0; i < numBoundaries; i++) {
+      yVals[i] = workspaceIndex * 1.0;
+    }
+  }
+
   return out;
 }
 
@@ -303,11 +310,11 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
   const size_t seed(12345);
   MersenneTwister randGen(seed, lower, upper);
   for (size_t iSpec = 0; iSpec < ws->getNumberHistograms(); iSpec++) {
-    Mantid::MantidVec &Y = ws->dataY(iSpec);
-    Mantid::MantidVec &E = ws->dataE(iSpec);
-    for (size_t i = 0; i < Y.size(); i++) {
-      Y[i] += noise * randGen.nextValue();
-      E[i] += noise;
+    auto &mutableY = ws->mutableY(iSpec);
+    auto &mutableE = ws->mutableE(iSpec);
+    for (size_t i = 0; i < mutableY.size(); i++) {
+      mutableY[i] += noise * randGen.nextValue();
+      mutableE[i] += noise;
     }
   }
 }
@@ -396,11 +403,12 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   ws->setInstrument(inst);
 
   // Set the X axes
-  MantidVec x = ws->readX(0);
-  auto ax0 = new NumericAxis(x.size());
+  const auto &xVals = ws->x(0);
+  const size_t xSize = xVals.size();
+  auto ax0 = new NumericAxis(xSize);
   ax0->setUnit("dSpacing");
-  for (size_t i = 0; i < x.size(); i++) {
-    ax0->setValue(i, x[i]);
+  for (size_t i = 0; i < xSize; i++) {
+    ax0->setValue(i, xVals[i]);
   }
   ws->replaceAxis(0, ax0);
 
@@ -804,41 +812,44 @@ createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
   return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 }
 
-// not strictly creating a workspace, but really helpfull to see what one
+// not strictly creating a workspace, but really helpful to see what one
 // contains
 void displayDataY(const MatrixWorkspace_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
+    const auto &y = ws->y(i);
     for (size_t j = 0; j < ws->blocksize(); ++j) {
-      std::cout << ws->readY(i)[j] << " ";
+      std::cout << y[j] << " ";
     }
     std::cout << '\n';
   }
 }
 void displayData(const MatrixWorkspace_sptr ws) { displayDataX(ws); }
 
-// not strictly creating a workspace, but really helpfull to see what one
+// not strictly creating a workspace, but really helpful to see what one
 // contains
 void displayDataX(const MatrixWorkspace_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
+    const auto &x = ws->x(i);
     for (size_t j = 0; j < ws->blocksize(); ++j) {
-      std::cout << ws->readX(i)[j] << " ";
+      std::cout << x[j] << " ";
     }
     std::cout << '\n';
   }
 }
 
-// not strictly creating a workspace, but really helpfull to see what one
+// not strictly creating a workspace, but really helpful to see what one
 // contains
 void displayDataE(const MatrixWorkspace_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
+    const auto &e = ws->e(i);
     for (size_t j = 0; j < ws->blocksize(); ++j) {
-      std::cout << ws->readE(i)[j] << " ";
+      std::cout << e[j] << " ";
     }
     std::cout << '\n';
   }
@@ -966,18 +977,21 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     //   spec->setSpectrumNo(g+1); // Match detector ID and spec NO
   }
 
-  double dE = (Emax - Emin) / double(numBins);
+  const double dE = (Emax - Emin) / double(numBins);
   for (size_t j = 0; j < numPixels; j++) {
 
-    MantidVec &E_transfer = ws->dataX(j);
+    std::vector<double> E_transfer;
+    E_transfer.reserve(numBins);
     for (size_t i = 0; i <= numBins; i++) {
-      double E = Emin + static_cast<double>(i) * dE;
-      E_transfer[i] = E;
+      E_transfer.push_back(Emin + static_cast<double>(i) * dE);
     }
+    BinEdges xVals(E_transfer);
+    ws->setHistogram(j, std::move(xVals));
   }
+
   // set axis, correspondent to the X-values
   auto pAxis0 = new NumericAxis(numBins);
-  MantidVec &E_transfer = ws->dataX(0);
+  const auto &E_transfer = ws->x(0);
   for (size_t i = 0; i < numBins; i++) {
     double E = 0.5 * (E_transfer[i] + E_transfer[i + 1]);
     pAxis0->setValue(i, E);
@@ -1085,11 +1099,8 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   Mantid::API::AnalysisDataService::Instance().add("rebinTest", outputWS);
 
   // Set Q ('y') axis binning
-  MantidVec qbins;
-  qbins.push_back(0.0);
-  qbins.push_back(1.0);
-  qbins.push_back(4.0);
-  MantidVec qaxis;
+  std::vector<double> qbins{0.0, 1.0, 4.0};
+  std::vector<double> qaxis;
   const int numY =
       static_cast<int>(VectorHelper::createAxisFromRebinParams(qbins, qaxis));
 
@@ -1103,7 +1114,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   outputWS->setYUnit("Counts");
   outputWS->setTitle("Empty_Title");
 
-  // Create the x-axis for histogramming.
+  // Create the i-axis for histogramming.
   HistogramData::BinEdges x1{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
 
   // Create a numeric axis to replace the default vertical one
@@ -1127,76 +1138,63 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
 
   // Now, setup the data
   // Q bin #1
-  outputWS->dataY(0)[1] = 2.0;
-  outputWS->dataY(0)[2] = 3.0;
-  outputWS->dataY(0)[3] = 3.0;
-  outputWS->dataY(0)[4] = 2.0;
-  outputWS->dataE(0)[1] = 2.0;
-  outputWS->dataE(0)[2] = 3.0;
-  outputWS->dataE(0)[3] = 3.0;
-  outputWS->dataE(0)[4] = 2.0;
-  outputWS->dataF(0)[1] = 2.0;
-  outputWS->dataF(0)[2] = 3.0;
-  outputWS->dataF(0)[3] = 3.0;
-  outputWS->dataF(0)[4] = 1.0;
+
+  // Populates destination starting at index 1 with the following data
+  // e.g. y(0)[1] = 2.0, y(0)[2] = 3.0 ..etc. as the starting index is 1
+  // if you change the values in the line below please update this comment!
+  populateWsWithInitList(outputWS->mutableY(0), 1, {2.0, 3.0, 3.0, 2.0});
+  populateWsWithInitList(outputWS->mutableE(0), 1, {2.0, 3.0, 3.0, 2.0});
+  populateWsWithInitList(outputWS->dataF(0), 1, {2.0, 3.0, 3.0, 1.0});
+
   // Q bin #2
-  outputWS->dataY(1)[1] = 1.0;
-  outputWS->dataY(1)[2] = 3.0;
-  outputWS->dataY(1)[3] = 3.0;
-  outputWS->dataY(1)[4] = 2.0;
-  outputWS->dataY(1)[5] = 2.0;
-  outputWS->dataE(1)[1] = 1.0;
-  outputWS->dataE(1)[2] = 3.0;
-  outputWS->dataE(1)[3] = 3.0;
-  outputWS->dataE(1)[4] = 2.0;
-  outputWS->dataE(1)[5] = 2.0;
-  outputWS->dataF(1)[1] = 1.0;
-  outputWS->dataF(1)[2] = 3.0;
-  outputWS->dataF(1)[3] = 3.0;
-  outputWS->dataF(1)[4] = 1.0;
-  outputWS->dataF(1)[5] = 2.0;
+  populateWsWithInitList(outputWS->mutableY(1), 1, {1.0, 3.0, 3.0, 2.0, 2.0});
+  populateWsWithInitList(outputWS->mutableE(1), 1, {1.0, 3.0, 3.0, 2.0, 2.0});
+  populateWsWithInitList(outputWS->dataF(1), 1, {1.0, 3.0, 3.0, 1.0, 2.0});
+
   // Q bin #3
-  outputWS->dataY(2)[1] = 1.0;
-  outputWS->dataY(2)[2] = 2.0;
-  outputWS->dataY(2)[3] = 3.0;
-  outputWS->dataY(2)[4] = 1.0;
-  outputWS->dataE(2)[1] = 1.0;
-  outputWS->dataE(2)[2] = 2.0;
-  outputWS->dataE(2)[3] = 3.0;
-  outputWS->dataE(2)[4] = 1.0;
-  outputWS->dataF(2)[1] = 1.0;
-  outputWS->dataF(2)[2] = 2.0;
-  outputWS->dataF(2)[3] = 2.0;
-  outputWS->dataF(2)[4] = 1.0;
+  populateWsWithInitList(outputWS->mutableY(2), 1, {1.0, 2.0, 3.0, 1.0});
+  populateWsWithInitList(outputWS->mutableE(2), 1, {1.0, 2.0, 3.0, 1.0});
+  populateWsWithInitList(outputWS->dataF(2), 1, {1.0, 2.0, 2.0, 1.0});
+
   // Q bin #4
-  outputWS->dataY(3)[0] = 1.0;
-  outputWS->dataY(3)[1] = 2.0;
-  outputWS->dataY(3)[2] = 3.0;
-  outputWS->dataY(3)[3] = 2.0;
-  outputWS->dataY(3)[4] = 1.0;
-  outputWS->dataE(3)[0] = 1.0;
-  outputWS->dataE(3)[1] = 2.0;
-  outputWS->dataE(3)[2] = 3.0;
-  outputWS->dataE(3)[3] = 2.0;
-  outputWS->dataE(3)[4] = 1.0;
-  outputWS->dataF(3)[0] = 1.0;
-  outputWS->dataF(3)[1] = 2.0;
-  outputWS->dataF(3)[2] = 3.0;
-  outputWS->dataF(3)[3] = 2.0;
-  outputWS->dataF(3)[4] = 1.0;
-  outputWS->dataF(3)[5] = 1.0;
+  populateWsWithInitList(outputWS->mutableY(3), 0, {1.0, 2.0, 3.0, 2.0, 1.0});
+  populateWsWithInitList(outputWS->mutableE(3), 0, {1.0, 2.0, 3.0, 2.0, 1.0});
+  populateWsWithInitList(outputWS->dataF(3), 0, {1.0, 2.0, 3.0, 2.0, 1.0, 1.0});
 
   // Set representation
   outputWS->finalize();
 
   // Make errors squared rooted
   for (int i = 0; i < numHist; ++i) {
+    auto &mutableE = outputWS->mutableE(i);
     for (int j = 0; j < numX - 1; ++j) {
-      outputWS->dataE(i)[j] = std::sqrt(outputWS->dataE(i)[j]);
+      mutableE[j] = std::sqrt(mutableE[j]);
     }
   }
 
   return outputWS;
+}
+
+/**
+  * Populates the destination array (usually a mutable histogram)
+  * starting at the index specified with the doubles provided in an
+  * initializer list. Note the caller is responsible for ensuring
+  * the destination has capacity for startingIndex + size(initializer list)
+  * number of values
+  *
+  * @param:: destination The array to populate with data
+  * @param:: startingIndex The index to start populating data at
+  * @param:: values The initializer list to populate the array with
+  * starting at the index specified
+  */
+template <typename T>
+void populateWsWithInitList(T &destination, size_t startingIndex,
+                            std::initializer_list<double> values) {
+  size_t index = 0;
+  for (const double val : values) {
+    destination[startingIndex + index] = val;
+    index++;
+  }
 }
 
 Mantid::DataObjects::PeaksWorkspace_sptr
