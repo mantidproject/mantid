@@ -11,6 +11,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/regex.hpp>
@@ -669,30 +670,25 @@ void GroupDetectors2::processMatrixWorkspace(
 
     // translate to detectors
     std::vector<detid_t> det_ids;
-    if (spectrumInfo.hasDetectors(i)) {
+
+    // If the detector was not found or was not in a group, then ignore it.
+    if (spectrumInfo.spectrumDefinition(i).size() > 1) {
       const auto &det = spectrumInfo.detector(i);
 
-      try {
-        // TODO: Use SpectrumDefinition here when available
-        const Geometry::DetectorGroup &detGroup =
-            dynamic_cast<const Geometry::DetectorGroup &>(det);
+      const Geometry::DetectorGroup &detGroup =
+          dynamic_cast<const Geometry::DetectorGroup &>(det);
 
-        det_ids = detGroup.getDetectorIDs();
+      det_ids = detGroup.getDetectorIDs();
 
-        for (auto det_id : det_ids) {
-          // translate detectors to target det ws indexes
-          size_t targetWSIndex = detIdToWiMap[det_id];
-          targetWSIndexSet.insert(targetWSIndex);
-          // mark as used
-          if (unUsedSpec[targetWSIndex] != (USED)) {
-            unUsedSpec[targetWSIndex] = (USED);
-          }
+      for (auto det_id : det_ids) {
+        // translate detectors to target det ws indexes
+        size_t targetWSIndex = detIdToWiMap[det_id];
+        targetWSIndexSet.insert(targetWSIndex);
+        // mark as used
+        if (unUsedSpec[targetWSIndex] != (USED)) {
+          unUsedSpec[targetWSIndex] = (USED);
         }
-      } catch (const std::bad_cast &) {
-        // Ignore detectors that are not in groups.
       }
-    } else {
-      // the detector was not found - don't add it
     }
   }
 
