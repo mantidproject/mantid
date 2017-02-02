@@ -1712,7 +1712,8 @@ void SANSRunWindow::setGeometryDetails() {
   const auto &detectorInfo = sampleWs->detectorInfo();
 
   try {
-    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(*monitorDetectorIDs.begin()));
+    const auto &detector = detectorInfo.detector(
+        detectorInfo.indexOf(*monitorDetectorIDs.begin()));
     const double unit_conv(1000.);
     const auto &source = sampleWs->getInstrument()->getSource();
     dist_mm = detector.getDistance(*source) * unit_conv;

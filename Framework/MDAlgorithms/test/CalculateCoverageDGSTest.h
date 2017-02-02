@@ -100,7 +100,7 @@ public:
     DblMatrix inverserubw(3, 3, true);
     inverserubw /= M_PI;
     const auto &detectorInfo = inputWorkspace->detectorInfo();
-	const auto detectorIndex = detectorInfo.indexOf(0);
+    const auto detectorIndex = detectorInfo.indexOf(0);
     const double phi = detectorInfo.detector(detectorIndex).getPhi();
     const double twoTheta = detectorInfo.twoTheta(detectorIndex);
     for (dE = -0.99; dE < 0.99; dE += 0.05) {
