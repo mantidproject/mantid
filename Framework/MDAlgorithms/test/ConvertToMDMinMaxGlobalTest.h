@@ -90,7 +90,7 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
 
   return ws;
 }
-};
+}
 
 class ConvertToMDMinMaxGlobalTest : public CxxTest::TestSuite {
 public:
